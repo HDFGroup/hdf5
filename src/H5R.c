@@ -671,7 +671,7 @@ H5R_get_object_type(H5D_t *dset, void *_ref)
     uint8_t *p;                 /* Pointer to OID to store */
     intn ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5R_get_object_type, FAIL);
+    FUNC_ENTER(H5R_get_object_type, H5G_UNKNOWN);
 
     assert(ref);
     assert(dset);
@@ -719,16 +719,18 @@ int
 H5Rget_object_type(hid_t dataset, void *_ref)
 {
     H5D_t *dset = NULL;     /* dataset object */
-    hid_t ret_value = FAIL;
+    hid_t ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5Rget_object_type, FAIL);
+    FUNC_ENTER(H5Rget_object_type, H5G_UNKNOWN);
     H5TRACE2("Is","ix",dataset,_ref);
 
     /* Check args */
-    if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (H5I_DATASET != H5I_get_type(dataset) ||
+	NULL == (dset = H5I_object(dataset)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a dataset");
     if(_ref==NULL)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN,
+		     "invalid reference pointer");
 
     /* Get the object information */
     ret_value=H5R_get_object_type(dset,_ref);

@@ -1448,10 +1448,10 @@ list (hid_t group, const char *name, void *_iter)
     fullname = fix_name(iter->container, name);
     if (fullname_g) {
 	n = display_string(stdout, fullname, TRUE);
-	printf("%*s", MAX(0, 25-n), "");
+	printf("%*s ", MAX(0, 24-n), "");
     } else {
 	n = display_string(stdout, name, TRUE);
-	printf("%*s", MAX(0, 25-n), "");
+	printf("%*s ", MAX(0, 24-n), "");
     }
 
     /* Get object information */

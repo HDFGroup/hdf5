@@ -32,33 +32,33 @@ CLEAN=*.h5
 # for building automatic dependencies.
 PROG_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 	 h5_read.c h5_write.c h5_select.c h5_attribute.c
-PROG_OBJ=$(PROG_SRC:.c=.o)
+PROG_OBJ=$(PROG_SRC:.c=.lo)
 
 
 # How to build the programs... they all depend on the hdf5 library
 $(PROGS): $(LIBHDF5)
-h5_chunk_read: h5_chunk_read.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_chunk_read: h5_chunk_read.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_compound: h5_compound.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_compound.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_compound: h5_compound.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_compound.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_extend_write: h5_extend_write.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_extend_write.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_extend_write: h5_extend_write.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_extend_write.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_group: h5_group.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_group.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_group: h5_group.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_group.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_write: h5_write.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_write.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_write: h5_write.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_write.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_read: h5_read.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_read.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_read: h5_read.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_read.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_select: h5_select.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_select.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_select: h5_select.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_select.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5_attribute: h5_attribute.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_attribute.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5_attribute: h5_attribute.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_attribute.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

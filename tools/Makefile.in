@@ -21,24 +21,24 @@ TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 # These are our main targets: library and tools. We link this library
 # statically because some systems can only link executables to a single
 # shared library and libhdf5 is much bigger than libh5tools.
-LT_LINK_LIB=$(LT) --mode=link $(CC) -static
-LIB=libh5tools.a
+LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
+LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
 PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
 
 # Source and object files for the library; do not install
 LIB_SRC=h5tools.c h5findshd.c
-LIB_OBJ=$(LIB_SRC:.c=.o)
+LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
 # Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c h5toh4.c
-PROG_OBJ=$(PROG_SRC:.c=.o)
+PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h
 
 # Source and object files for the tests
 TEST_SRC=
-TEST_OBJ=$(TEST_SRC:.c=.o)
+TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 # Programs have to be built before they can be tested!
 check test _test: $(PROGS)
@@ -47,22 +47,22 @@ check test _test: $(PROGS)
 # the tools library compiled in this directory.
 $(PROGS): $(LIB) ../src/libhdf5.la
 
-h5debug: h5debug.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5debug: h5debug.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5import: h5import.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5import: h5import.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5ls: h5ls.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5ls: h5ls.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5repart: h5repart.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5repart: h5repart.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5dump: h5dump.o h5dumputil.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5dump: h5dump.lo h5dumputil.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo h5dumputil.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5toh4: h5toh4.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5toh4: h5toh4.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

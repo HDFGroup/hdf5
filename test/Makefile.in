@@ -25,11 +25,11 @@ TIMINGS=iopipe chunk ragged overhead
 # The libh5test.a library provides common support code for the tests. We link
 # this library statically because some systems can only link executables to
 # a single shared library and libhdf5 is much bigger than libh5test.
-LT_LINK_LIB=$(LT) --mode=link $(CC) -static
+LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIBHDF5=../src/libhdf5.la
-LIB=libh5test.a
+LIB=libh5test.la
 LIB_SRC=h5test.c
-LIB_OBJ=$(LIB_SRC:.c=.o)
+LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
 # Temporary files.  These files are the ones created by setting the
@@ -58,7 +58,7 @@ TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
          iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
 	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c tmeta.c trefer.c  \
 	 tselect.c unlink.c enum.c
-TEST_OBJ=$(TEST_SRC:.c=.o)
+TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
@@ -75,83 +75,83 @@ timings _timings: $(TIMINGS)
 
 # How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
-TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o tmeta.o trefer.o tselect.o th5s.o
+TESTHDF5_OBJ=testhdf5.lo tattr.lo tfile.lo tmeta.lo trefer.lo tselect.lo th5s.lo
 testhdf5: $(TESTHDF5_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-lheap: lheap.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ lheap.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+lheap: lheap.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ lheap.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-ohdr: ohdr.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ohdr.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+ohdr: ohdr.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ohdr.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-stab: stab.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ stab.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+stab: stab.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ stab.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-gheap: gheap.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gheap.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+gheap: gheap.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gheap.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-dsets: dsets.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+dsets: dsets.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-bittests: bittests.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ bittests.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+bittests: bittests.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ bittests.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-dtypes: dtypes.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dtypes.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+dtypes: dtypes.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dtypes.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-hyperslab: hyperslab.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hyperslab.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+hyperslab: hyperslab.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hyperslab.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-istore: istore.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ istore.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+istore: istore.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ istore.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-cmpd_dset: cmpd_dset.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ cmpd_dset.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+cmpd_dset: cmpd_dset.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ cmpd_dset.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-extend: extend.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ extend.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+extend: extend.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ extend.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-external: external.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ external.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+external: external.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ external.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-iopipe: iopipe.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ iopipe.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+iopipe: iopipe.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ iopipe.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-big: big.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ big.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+big: big.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ big.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-links: links.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ links.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+links: links.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ links.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-chunk: chunk.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ chunk.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+chunk: chunk.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ chunk.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-mtime: mtime.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mtime.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+mtime: mtime.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mtime.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-ragged: ragged.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ragged.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+ragged: ragged.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ragged.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-unlink: unlink.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ unlink.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+unlink: unlink.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ unlink.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-overhead: overhead.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ overhead.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+overhead: overhead.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ overhead.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-fillval: fillval.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ fillval.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+fillval: fillval.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ fillval.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-mount: mount.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mount.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+mount: mount.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mount.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-flush1: flush1.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush1.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+flush1: flush1.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush1.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-flush2: flush2.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush2.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+flush2: flush2.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ flush2.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-enum: enum.o
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ enum.o $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+enum: enum.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ enum.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

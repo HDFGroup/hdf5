@@ -27,7 +27,7 @@ DISTCLEAN=go
 
 # Test source files
 TEST_SRC=testphdf5.c t_dset.c t_file.c t_mpi.c
-TEST_OBJ=$(TEST_SRC:.c=.o)
+TEST_OBJ=$(TEST_SRC:.c=.lo)
 PRIVATE_HDR=testphdf5.h
 
 # How to build the tests... They all depend on the hdf5 library

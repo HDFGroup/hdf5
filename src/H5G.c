@@ -1991,7 +1991,7 @@ H5G_get_type(H5G_entry_t *ent)
 
     for (i=H5G_ntypes_g; i>0; --i) {
 	if ((isa=(H5G_type_g[i-1].isa)(ent))<0) {
-	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN,
 			  "unable to determine object type");
 	} else if (isa) {
 	    HRETURN(H5G_type_g[i-1].type);
@@ -1999,7 +1999,7 @@ H5G_get_type(H5G_entry_t *ent)
     }
 
     if (0==i) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN,
 		      "unable to determine object type");
     }
     FUNC_LEAVE(H5G_UNKNOWN);
