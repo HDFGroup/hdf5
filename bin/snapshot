@@ -52,6 +52,10 @@ while [ $# -gt 0 ] ; do
 	    cmdcheckout="checkout"
 	    cmd=""
 	    ;;
+	diff)
+	    cmddiff="diff"
+	    cmd=""
+	    ;;
 	test)
 	    cmdtest="test"
 	    cmd=""
@@ -134,6 +138,8 @@ Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
     all:      Run all commands (checkout, test & release)
               [Default is all]
     checkout: Run cvs checkout
+    diff:     Run diff on current and previous versions.  Exit 0 if
+              no significant differences are found.  Otherwise, non-zero.
     test:     Run test
     release:  Run release
     clean:    Run make clean
@@ -223,7 +229,7 @@ fi # Do CVS checkout
 #=============================
 # Run Test the HDF5 library
 #=============================
-if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
+if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
     # setup if srcdir is used.
     if [ -z "$srcdir" ]; then
 	TESTDIR=${CURRENT}
@@ -264,10 +270,19 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 		    :	#continue
 		else
 		    snapshot=yes
-		    # Don't break because we want to see all the diffs.
 		    break
 		fi
 	    done
+	fi
+    fi
+
+    # if diff is choosen, exit 0 if no significant differences are found.
+    # otherwise, exit 1.  This includes cases of other failures.
+    if [ -n "$cmddiff" ]; then
+	if [ $snapshot = no ]; then
+	    exit 0
+	else
+	    exit 1
 	fi
     fi
 
