@@ -104,6 +104,7 @@ static herr_t H5FL_arr_gc(void);
 static herr_t H5FL_arr_gc_list(H5FL_arr_head_t *head);
 static herr_t H5FL_blk_gc(void);
 static herr_t H5FL_blk_gc_list(H5FL_blk_head_t *head);
+static herr_t H5FL_blk_unlink(H5FL_blk_head_t *pq);
 
 /* Declare a free list to manage the H5FL_fac_head_t struct */
 H5FL_DEFINE(H5FL_fac_head_t);
@@ -1003,6 +1004,67 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FL_blk_realloc() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5FL_blk_unlink
+ PURPOSE
+    Remove a block free list from the global list of initialized block free
+	lists.
+ USAGE
+    void H5FL_blk_unlink(H5FL_blk_head_t *pq)
+	H5FL_blk_head_t *pq;		IN: Block free list to remove from global list
+ RETURNS
+    Success:	Non-negative
+   	Failure:	Negative
+ DESCRIPTION
+    Search through the global list of initialized block free lists and remove
+ 	a particular free list.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5FL_blk_unlink(H5FL_blk_head_t *pq)
+{
+    H5FL_blk_gc_node_t *last;   /* Pointer to the last garbage collection node examined */
+    H5FL_blk_gc_node_t *tmp;    /* Temporary pointer to a garbage collection node */
+    herr_t ret_value=SUCCEED;	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FL_blk_unlink)
+    
+    /* Find the node to remove from the global list */
+    last=NULL;
+    tmp=H5FL_blk_gc_head.first;
+    while(tmp!=NULL) {
+        /* Check if the list has allocations outstanding */
+        if(tmp->pq==pq) {
+            /* Unlink node from linked list */
+            if(last==NULL)
+                H5FL_blk_gc_head.first=H5FL_blk_gc_head.first->next;
+            else
+                last->next=tmp->next;
+
+            /* Free the block node */
+            H5MM_xfree(tmp);
+
+            /* Leave now */
+            break;
+        } /* end if */
+
+        /* Advance to next node in list */
+        last=tmp;
+        tmp=tmp->next;
+    } /* end while */
+
+    if(tmp==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't release block free list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* end H5FL_blk_unlink() */
 
 
 /*-------------------------------------------------------------------------
@@ -1953,6 +2015,9 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
     /* Verify that all the blocks have been freed */
     if(factory->queue.allocated>0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "factory still has objects allocated")
+
+    /* Unlink block free list for factory from global free list */
+    H5FL_blk_unlink(&(factory->queue));
 
     /* Free factory info */
     H5FL_FREE(H5FL_fac_head_t,factory);
