@@ -58,8 +58,8 @@ $(bindir):
 $(DOCDIR):
 	mkdir $@ && chmod 755 $@
 
-## Install the library, the public header files, and programs.
-install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
+## Install the library, the public header files, and public programs.
+install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
@@ -78,7 +78,7 @@ install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
 	      fi;							      \
 	   fi;								      \
 	done
-	@for f in X $(PROGS); do					      \
+	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
 	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
 	   fi;							              \
@@ -110,7 +110,7 @@ uninstall:
 	@if test "X$(PUB_HDR)" != X; then				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
-	@for f in X $(PROGS); do					      \
+	@for f in X $(PUB_PROGS); do					      \
 	    if test $$f != X; then					      \
 	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
 	    fi;								      \
