@@ -956,9 +956,9 @@ H5F_istore_flush_entry(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t res
             if (NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
             if(H5P_get(plist,H5D_XFER_EDC_NAME,&edc)<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get edc information");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get edc information");
             if(H5P_get(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get filter callback struct");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get filter callback struct");
             if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask), edc, 
                              cb_struct, &(udata.key.nbytes), &alloc, &buf)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
