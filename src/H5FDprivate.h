@@ -11,6 +11,10 @@
 #include <H5FDpublic.h>
 
 intn H5FD_term_interface(void);
+hsize_t H5FD_sb_size(H5FD_t *file);
+herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
+herr_t H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf);
+void *H5FD_fapl_get(H5FD_t *file);
 void *H5FD_fapl_copy(hid_t driver_id, const void *fapl);
 herr_t H5FD_fapl_free(hid_t driver_id, void *fapl);
 void *H5FD_dxpl_copy(hid_t driver_id, const void *dxpl);

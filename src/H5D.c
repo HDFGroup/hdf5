@@ -2475,7 +2475,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	 * If the dataset is accessed via parallel I/O, allocate file space
 	 * for all chunks now and initialize each chunk with the fill value.
 	 */
-	if (H5FD_MPIO==dset->ent.file->shared->fapl->driver_id) {
+	if (H5FD_MPIO==dset->ent.file->shared->driver_id) {
 	    /* We only handle simple data spaces so far */
 	    if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0) {
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,

@@ -247,6 +247,151 @@ H5FDunregister(hid_t driver_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_sb_size
+ *
+ * Purpose:	Obtains the number of bytes required to store the driver file
+ *		access data in the HDF5 superblock.
+ *
+ * Return:	Success:	Number of bytes required.
+ *
+ *		Failure:	0 if an error occurs or if the driver has no
+ *				data to store in the superblock.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 16, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5FD_sb_size(H5FD_t *file)
+{
+    hsize_t	ret_value=0;
+    
+    FUNC_ENTER(H5FD_sb_size, 0);
+
+    assert(file && file->cls);
+    if (file->cls->sb_size) {
+	ret_value = (file->cls->sb_size)(file);
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_sb_encode
+ *
+ * Purpose:	Encode driver-specific data into the output arguments. The
+ *		NAME is a nine-byte buffer which should get an
+ *		eight-character driver name and/or version followed by a null
+ *		terminator. The BUF argument is a buffer to receive the
+ *		encoded driver-specific data. The size of the BUF array is
+ *		the size returned by the H5FD_sb_size() call.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 16, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
+{
+    FUNC_ENTER(H5FD_sb_encode, FAIL);
+
+    assert(file && file->cls);
+    if (file->cls->sb_encode &&
+	(file->cls->sb_encode)(file, name/*out*/, buf/*out*/)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver sb_encode request failed");
+    }
+    
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_sb_decode
+ *
+ * Purpose:	Decodes the driver information block.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 16, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
+{
+    FUNC_ENTER(H5FD_sb_decode, FAIL);
+
+    assert(file && file->cls);
+    if (file->cls->sb_decode &&
+	(file->cls->sb_decode)(file, name, buf)<0) {
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+		      "driver sb_decode request failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fapl_get
+ *
+ * Purpose:	Gets the file access property list associated with a file.
+ *		Usually the file will copy what it needs from the original
+ *		file access property list when the file is created. The
+ *		purpose of this function is to create a new file access
+ *		property list based on the settings in the file, which may
+ *		have been modified from the original file access property
+ *		list.
+ *
+ * Return:	Success:	Pointer to a new file access property list
+ *				with all members copied.  If the file is
+ *				closed then this property list lives on, and
+ *				vice versa.
+ *
+ *		Failure:	NULL, including when the file has no
+ *				properties.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 13, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FD_fapl_get(H5FD_t *file)
+{
+    void	*ret_value=NULL;
+    
+    FUNC_ENTER(H5FD_fapl_get, NULL);
+    assert(file);
+
+    if (file->cls->fapl_get) {
+	ret_value = (file->cls->fapl_get)(file);
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_fapl_copy
  *
  * Purpose:	Copies the driver-specific part of the file access property

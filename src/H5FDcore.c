@@ -67,6 +67,7 @@ typedef struct H5FD_core_fapl_t {
 				 (size_t)((A)+(Z))<(size_t)(A))
 
 /* Prototypes */
+static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_core_close(H5FD_t *_file);
@@ -82,7 +83,11 @@ static herr_t H5FD_core_write(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
 static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
     MAXADDR,					/*maxaddr		*/
+    NULL,					/*sb_size		*/
+    NULL,					/*sb_encode		*/
+    NULL,					/*sb_decode		*/
     sizeof(H5FD_core_fapl_t),			/*fapl_size		*/
+    H5FD_core_fapl_get,				/*fapl_get		*/
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
     0,						/*dxpl_size		*/
@@ -185,6 +190,33 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/)
     if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;
     if (increment) *increment = fa->increment;
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_core_fapl_get
+ *
+ * Purpose:	Returns a copy of the file access properties.
+ *
+ * Return:	Success:	Ptr to new file access properties.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 13, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_core_fapl_get(H5FD_t *_file)
+{
+    H5FD_core_t		*file = (H5FD_core_t*)_file;
+    H5FD_core_fapl_t	*fa = calloc(1, sizeof(H5FD_core_fapl_t));
+
+    fa->increment = file->increment;
+    return fa;
 }
 
 
@@ -426,7 +458,7 @@ H5FD_core_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
 	memcpy(buf, file->mem+addr, nbytes);
 	size -= nbytes;
 	addr += nbytes;
-	(char*)buf += nbytes;
+	buf = (char*)buf + nbytes;
     }
 
     /* Read zeros for the part which is after the EOF markers */

@@ -834,9 +834,10 @@ main(void)
 #endif
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			H5P_DEFAULT, fapl))<0) goto error;
-
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
+    
     /* Cause the library to emit initial messages */
     if ((grp = H5Gcreate (file, "emit diagnostics", 0))<0) goto error;
     if (H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted")<0)

@@ -94,6 +94,7 @@ hid_t H5T_NATIVE_B16_g			= FAIL;
 hid_t H5T_NATIVE_B32_g			= FAIL;
 hid_t H5T_NATIVE_B64_g			= FAIL;
 hid_t H5T_NATIVE_OPAQUE_g		= FAIL;
+hid_t H5T_NATIVE_HADDR_g		= FAIL;
 hid_t H5T_NATIVE_HSIZE_g		= FAIL;
 hid_t H5T_NATIVE_HSSIZE_g		= FAIL;
 hid_t H5T_NATIVE_HERR_g			= FAIL;
@@ -470,6 +471,13 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to initialize H5T layer");
     }
+
+    /* haddr_t */
+    dt = H5I_object(H5T_NATIVE_HADDR_g=H5Tcopy(H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = sizeof(haddr_t);
+    dt->u.atomic.prec = 8*dt->size;
+    dt->u.atomic.offset = 0;
 
     /* hsize_t */
     dt = H5I_object (H5T_NATIVE_HSIZE_g = H5Tcopy (H5T_NATIVE_UINT_g));

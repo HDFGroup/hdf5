@@ -266,7 +266,7 @@ each high-level object.
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Reserved Address</td>
+	  <td colspan=4>Driver Information Block Address</td>
 	</tr>
 
 	<tr align=center>
@@ -480,12 +480,14 @@ each high-level object.
 	    used.</td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Reserved Address</td>
-	  <td>This address field is present for alignment purposes and 
-	    is always set to the undefined address value (all bits
-	    set).</td>
-	</tr>
+        <tr valign=top>
+          <td>Driver Information Block Address</td>
+          <td>This is the relative file address of the file driver
+            information block which contains driver-specific
+            information needed to reopen the file. If there is no
+            driver information block then this entry should be the
+            undefined address (all bits set).</td>
+        </tr>
 
 	<tr valign=top>
 	  <td>Root Group Symbol Table Entry</td>
@@ -496,6 +498,91 @@ each high-level object.
 	</tr>
       </table>
     </center>
+
+    <p>The file driver information block is an optional region of the
+      file which contains information needed by the file driver in
+      order to reopen a file.  The format of the driver information
+      block is:
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <B>Driver Information Block</B>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>  
+
+        <tr align=center>
+          <td>Version</td>
+          <td colspan=3>Reserved (zero)</td>
+        </tr>
+
+        <tr align=center>
+          <td colspan=4>Driver Information Size (4 bytes)</td>
+        </tr>
+
+        <tr align=center>
+          <td colspan=4><br>Driver Identification (8 bytes)<br><br></td>
+        </tr>
+
+        <tr align=center>
+          <td colspan=4><br><br>Driver Information<br><br><br></td>
+        </tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+          <td>Version</td>
+          <td>The version number of the driver information block. The
+            file format documented here is version zero.</td>
+        </tr>
+
+        <tr valign=top>
+          <td>Driver Information Size</td>
+          <td>The size in bytes of the Driver Information part of this 
+            structure.</td>
+        </tr>
+
+        <tr valign=top>
+          <td>Driver Identification</td>
+          <td>This is an eight-byte ASCII string without null
+            termination which identifies the driver and version number 
+            of the Driver Information block. The predefined drivers
+            supplied with the HDF5 library are identified by the
+            letters "NCSA" followed by the first four characters of
+            the driver name. If the Driver Information block is not
+            the original version then the last letter(s) of the
+            identification will be replaced by a version number in
+            ASCII.  For example, the various versions of the "family"
+            driver will be identified by "NCSAfami", "NCSAfam0",
+            NCSAfam1", etc. Identification for user-defined drivers is 
+            arbitrary but should be unique.</td>
+        </tr>
+
+        <tr valign=top>
+          <td>Driver Information</td>
+          <td>Driver information is stored in a format defined by the
+            file driver and encoded/decoded by the driver callbacks
+            invoked from the <code>H5FD_sb_encode</code> and
+            <code>H5FD_sb_decode</code> functions.</td>
+        </tr>
+      </table>
+    </center>
+
 
     <h3><a name="Btrees">Disk Format: Level 1A - B-link Trees</a></h3>
 
@@ -3584,7 +3671,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Fri Jun 11 14:11:57 EDT 1999
+Last modified: Tue Aug 17 10:57:50 EDT 1999
 <!-- hhmts end -->
 </body>
 </html>

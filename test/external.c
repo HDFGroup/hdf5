@@ -606,8 +606,9 @@ test_2 (hid_t fapl)
      * output looks like.
      */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			H5P_DEFAULT, fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
     if (H5Gclose(grp)<0) goto error;
 
@@ -710,8 +711,9 @@ test_3 (hid_t fapl)
 
     /* Create another file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
-			fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
 
     /* Create the external file list */
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
@@ -814,8 +816,9 @@ main (void)
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
-			fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
     if (H5Gclose (grp)<0) goto error;
 

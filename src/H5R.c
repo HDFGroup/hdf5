@@ -177,7 +177,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
             /* Set up information for dataset region */
 
             /* Return any previous heap block to the free list if we are garbage collecting */
-            if(loc->file->shared->fapl->gc_ref) {
+            if(loc->file->shared->gc_ref) {
                 /* Check for an existing heap ID in the reference */
                 for(u=0, heapid_found=0; u<H5R_DSET_REG_REF_BUF_SIZE; u++)
                     if(ref->heapid[u]!=0) {

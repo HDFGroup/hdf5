@@ -148,9 +148,10 @@ main (int argc, char *argv[])
     /* Create the file */
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
-    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			   H5P_DEFAULT, fapl))<0) goto error;
-
+    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
+    
     /* Create the data space */
     if ((space = H5Screate_simple (2, dim, NULL))<0) goto error;
 

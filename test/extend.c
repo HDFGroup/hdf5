@@ -64,9 +64,10 @@ main (void)
 
     /* Create the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			   H5P_DEFAULT, fapl))<0) goto error;
-
+    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
+    
     /* Create the dataset which is originally NX by NY */
     if ((cparms = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (cparms, 2, chunk_dims)<0) goto error;

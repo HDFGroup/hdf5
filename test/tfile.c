@@ -31,7 +31,7 @@ static char		RcsId[] = "$Revision$";
 #include <H5Pprivate.h>
 
 #define F1_USERBLOCK_SIZE  (hsize_t)0
-#define F1_OFFSET_SIZE	   sizeof(hsize_t)
+#define F1_OFFSET_SIZE	   sizeof(haddr_t)
 #define F1_LENGTH_SIZE	   sizeof(hsize_t)
 #define F1_SYM_LEAF_K	   4
 #define F1_SYM_INTERN_K	   16

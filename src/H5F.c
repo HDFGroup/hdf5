@@ -57,7 +57,7 @@ const H5F_create_t	H5F_create_dflt = {
 	0,			/* unused				   */
 	0,			/* unused				   */
     },
-    sizeof(hsize_t),		/* Default offset size 			   */
+    sizeof(haddr_t),		/* Default offset size 			   */
     sizeof(hsize_t),		/* Default length size 			   */
     HDF5_BOOTBLOCK_VERSION,	/* Current Boot-Block version #		   */
     HDF5_FREESPACE_VERSION,	/* Current Free-Space info version #	   */
@@ -453,7 +453,7 @@ hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5F_access_t	*plist = NULL;
+    H5F_access_t	*fapl=NULL, _fapl;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER(H5Fget_access_plist, FAIL);
@@ -464,15 +464,30 @@ H5Fget_access_plist(hid_t file_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
 
-    /* Create the property list object to return */
-    if (NULL==(plist=H5P_copy(H5P_FILE_ACCESS, f->shared->fapl))) {
+    /* Initialize the property list */
+    HDmemset(&_fapl, 0, sizeof _fapl);
+    _fapl.mdc_nelmts = f->shared->mdc_nelmts;
+    _fapl.rdcc_nelmts = f->shared->rdcc_nelmts;
+    _fapl.rdcc_nbytes = f->shared->rdcc_nbytes;
+    _fapl.rdcc_w0 = f->shared->rdcc_w0;
+    _fapl.threshold = f->shared->threshold;
+    _fapl.alignment = f->shared->alignment;
+    _fapl.gc_ref = f->shared->gc_ref;
+    _fapl.driver_id = f->shared->driver_id;
+    _fapl.driver_info = NULL; /*just for now */
+
+    /* Copy properties */
+    if (NULL==(fapl=H5P_copy(H5P_FILE_ACCESS, &_fapl))) {
 	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		      "unable to copy file access properties");
     }
 
+    /* Get the properties for the file driver */
+    fapl->driver_info = H5FD_fapl_get(f->shared->lf);
+
     /* Create an atom */
-    if ((ret_value = H5P_create(H5P_FILE_ACCESS, plist))<0) {
-	H5P_close(H5P_FILE_ACCESS, plist);
+    if ((ret_value = H5P_create(H5P_FILE_ACCESS, fapl))<0) {
+	H5P_close(H5P_FILE_ACCESS, fapl);
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register property list");
     }
@@ -675,9 +690,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->boot_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
+	f->shared->driver_addr = HADDR_UNDEF;
     
 	/*
-	 * Deep-copy the file creation and file access property lists into the
+	 * Copy the file creation and file access property lists into the
 	 * new file handle.  We do this early because some values might need
 	 * to change as the file is being opened.
 	 */
@@ -688,10 +704,14 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	}
 
 	fapl = (H5P_DEFAULT==fapl_id)? &H5F_access_dflt : H5I_object(fapl_id);
-	if (NULL==(f->shared->fapl=H5P_copy(H5P_FILE_ACCESS, fapl))) {
-	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-			  "unable to copy file access property list");
-	}
+	f->shared->mdc_nelmts = fapl->mdc_nelmts;
+	f->shared->rdcc_nelmts = fapl->rdcc_nelmts;
+	f->shared->rdcc_nbytes = fapl->rdcc_nbytes;
+	f->shared->rdcc_w0 = fapl->rdcc_w0;
+	f->shared->threshold = fapl->threshold;
+	f->shared->alignment = fapl->alignment;
+	f->shared->gc_ref = fapl->gc_ref;
+	f->shared->driver_id = H5I_inc_ref(fapl->driver_id);
 
 #ifdef HAVE_PARALLEL
 	/*
@@ -710,11 +730,11 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if ((n=H5AC_create(f, f->shared->fapl->mdc_nelmts))<0) {
+	if ((n=H5AC_create(f, f->shared->mdc_nelmts))<0) {
 	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
 			  "unable to create meta data cache");
 	}
-	f->shared->fapl->mdc_nelmts = n;
+	f->shared->mdc_nelmts = n;
 	
 	/* Create the chunk cache */
 	H5F_istore_init(f);
@@ -784,9 +804,20 @@ H5F_dest(H5F_t *f)
 		ret_value = FAIL; /*but keep going*/
 	    }
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
+
+	    /* Destroy file creation properties */
 	    H5P_close(H5P_FILE_CREATE, f->shared->fcpl);
-	    H5P_close(H5P_FILE_ACCESS, f->shared->fapl);
+
+	    /* Destroy file access properties (most don't need destruction) */
+	    H5I_dec_ref(f->shared->driver_id);
+
+	    /* Destroy shared file struct */
+	    if (H5FD_close(f->shared->lf)<0) {
+		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
+		ret_value = FAIL; /*but keep going*/
+	    }
 	    f->shared = H5MM_xfree(f->shared);
+	    
 	} else if (f->shared->nrefs>0) {
 	    /*
 	     * There are other references to the shared part of the file.
@@ -869,6 +900,11 @@ H5F_dest(H5F_t *f)
  *
  * 		Robb Matzke, 1999-08-02
  *		Rewritten to use the virtual file layer.
+ *
+ * 		Robb Matzke, 1999-08-16
+ *		Added decoding of file driver information block, which uses a
+ *		formerly reserved address slot in the boot block in order to
+ *		be compatible with previous versions of the file format.
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -882,11 +918,12 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     const uint8_t	*p;		/*ptr into temp I/O buffer	*/
     size_t		fixed_size=24;	/*fixed sizeof superblock	*/
     size_t		variable_size;	/*variable sizeof superblock	*/
+    size_t		driver_size;	/*size of driver info block	*/
     H5G_entry_t		root_ent;	/*root symbol table entry	*/
     haddr_t		eof;		/*end of file address		*/
-    haddr_t		reserved_addr;	/*unused			*/
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
     uintn		tent_flags;	/*tentative flags		*/
+    char		driver_name[9];	/*file driver name/version	*/
     
     FUNC_ENTER(H5F_open, NULL);
 
@@ -1102,11 +1139,51 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	H5F_addr_decode(file, &p, &(shared->base_addr)/*out*/);
 	H5F_addr_decode(file, &p, &(shared->freespace_addr)/*out*/);
 	H5F_addr_decode(file, &p, &stored_eoa/*out*/);
-	H5F_addr_decode(file, &p, &reserved_addr/*out*/);
+	H5F_addr_decode(file, &p, &(shared->driver_addr)/*out*/);
 	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"unable to read root symbol entry");
 	}
+
+	/* Decode the optional driver information block */
+	if (H5F_addr_defined(shared->driver_addr)) {
+	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
+	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
+		H5FD_read(lf, H5P_DEFAULT, drv_addr, 16, buf)<0) {
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			    "unable to read driver information block");
+	    }
+	    p = buf;
+
+	    /* Version number */
+	    if (HDF5_DRIVERINFO_VERSION!=*p++) {
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			    "bad driver information block version number");
+	    }
+
+	    /* Reserved */
+	    p += 3;
+
+	    /* Driver info size */
+	    UINT32DECODE(p, driver_size);
+
+	    /* Driver name and/or version */
+	    strncpy(driver_name, p, 8);
+	    driver_name[8] = '\0';
+
+	    /* Read driver information and decode */
+	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
+		H5FD_read(lf, H5P_DEFAULT, drv_addr+16, driver_size, buf)<0) {
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			    "unable to read file driver information");
+	    }
+	    if (H5FD_sb_decode(lf, driver_name, buf)<0) {
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			    "unable to decode driver information");
+	    }
+	}
+	
+	/* Make sure we can open the root group */
 	if (H5G_mkroot(file, &root_ent)<0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"unable to read root group");
@@ -1117,7 +1194,6 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	 * address.
 	 */
 	shared->fcpl->userblock_size = shared->base_addr;
-
 
 	/*
 	 * Make sure that the data is not truncated. One case where this is
@@ -1472,18 +1548,24 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
  *		H5F_SCOPE_DOWN means flush the specified file and all
  *		children.
  *
- * 		Robb Matzke, 1998-08-02
+ * 		Robb Matzke, 1999-08-02
  *		If ALLOC_ONLY is non-zero then all this function does is
  *		allocate space for the userblock and superblock. Also
  *		rewritten to use the virtual file layer.
+ *
+ * 		Robb Matzke, 1999-08-16
+ *		The driver information block is encoded and either allocated
+ *		or written to disk.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	  hbool_t alloc_only)
 {
-    uint8_t		buf[2048], *p = buf;
+    uint8_t		sbuf[2048], dbuf[2048], *p=NULL;
     uintn		nerrors=0, i;
+    hsize_t		superblock_size, driver_size;
+    char		driver_name[9];
     
     FUNC_ENTER(H5F_flush, FAIL);
 	
@@ -1523,6 +1605,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     }
 
     /* encode the file boot block */
+    p = sbuf;
     HDmemcpy(p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
     p += H5F_SIGNATURE_LEN;
     *p++ = f->shared->fcpl->bootblock_ver;
@@ -1541,30 +1624,90 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     H5F_addr_encode(f, &p, f->shared->base_addr);
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
     H5F_addr_encode(f, &p, H5FD_get_eoa(f->shared->lf));
-    H5F_addr_encode(f, &p, HADDR_UNDEF);
+    H5F_addr_encode(f, &p, f->shared->driver_addr);
     H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
+    superblock_size = p-sbuf;
 
     /*
-     * Allocate space for the userblock and superblock if that hasn't been
-     * done yet, which is the case just after a new file is created.
-     * Otherwise write the superblock at the specified address. Since these
-     * addresses are absolute we must use the virtual file layer directly.
+     * Encode the driver information block.
      */
+    if ((driver_size=H5FD_sb_size(f->shared->lf))) {
+	driver_size += 16; /*driver block header */
+	assert(driver_size<=sizeof dbuf);
+	p = dbuf;
+
+	/* Version */
+	*p++ = HDF5_DRIVERINFO_VERSION;
+
+	/* Reserved*/
+	p += 3;
+
+	/* Driver info size, excluding header */
+	UINT32ENCODE(p, driver_size-16);
+
+	/* Encode driver-specific data */
+	if (H5FD_sb_encode(f->shared->lf, driver_name, dbuf+16)<0) {
+	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+			  "unable to encode driver information");
+	}
+
+	/* Driver name */
+	HDmemcpy(dbuf+8, driver_name, 8);
+    }
+
     if (alloc_only) {
-	assert(0==H5FD_get_eoa(f->shared->lf));
-	if (H5FD_set_eoa(f->shared->lf, f->shared->boot_addr+(p-buf))<0) {
+	/*
+	 * Allocate space for the userblock, superblock, and driver info
+	 * block. We do it with one allocation request because the userblock
+	 * and superblock need to be at the beginning of the file and only
+	 * the first allocation request is required to return memory at
+	 * format address zero.
+	 */
+	haddr_t addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER,
+				  (f->shared->base_addr +
+				   superblock_size +
+				   driver_size));
+	if (HADDR_UNDEF==addr) {
 	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
 			  "unable to allocate file space for userblock "
 			  "and/or superblock");
 	}
+	if (0!=addr) {
+	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+			  "file driver failed to allocate userblock "
+			  "and/or superblock at address zero");
+	}
+	
+	/*
+	 * The file driver information block begins immediately after the
+	 * superblock.
+	 */
+	if (driver_size>0) {
+	    f->shared->driver_addr = superblock_size;
+	}
+	
     } else {
+	/* Write superblock */
 #ifdef HAVE_PARALLEL
         H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	if (H5FD_write(f->shared->lf, H5P_DEFAULT, f->shared->boot_addr,
-		      p-buf, buf)<0) {
+		       superblock_size, sbuf)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			  "unable to write superblock");
+	}
+
+	/* Write driver information block */
+	if (HADDR_UNDEF!=f->shared->driver_addr) {
+#ifdef HAVE_PARALLLEL
+	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+#endif
+	    if (H5FD_write(f->shared->lf, H5P_DEFAULT,
+			   f->shared->base_addr+superblock_size, driver_size,
+			   dbuf)<0) {
+		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			      "unable to write driver information block");
+	    }
 	}
     }
 
@@ -1692,9 +1835,6 @@ H5F_close(H5F_t *f)
 	/* Dump debugging info */
 	H5AC_debug(f);
 	H5F_istore_stats(f, FALSE);
-
-	/* Close files and release resources */
-	H5FD_close(f->shared->lf);
     } else {
 	/*
 	 * Flush all caches but do not destroy. As long as all handles for
@@ -2493,6 +2633,8 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, intn indent,
 	      "Base address:", f->shared->base_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
 	      "Free list address:", f->shared->freespace_addr);
+    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+	      "Driver information block:", f->shared->driver_addr);
     HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	      "Size of user block:",
 	      (unsigned long) (f->shared->fcpl->userblock_size));

@@ -187,9 +187,10 @@ writer (hid_t fapl, int wrt_n)
      * which is a family of files.  Each member of the family will be 1GB
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
-			fapl))<0) goto error;
-
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
+    
     /* Create simple data spaces according to the size specified above. */
     if ((space1 = H5Screate_simple (4, size1, size1))<0 ||
 	(space2 = H5Screate_simple (1, size2, size2))<0) {
@@ -277,9 +278,7 @@ reader (hid_t fapl)
 
     /* Open HDF5 file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_DEBUG, fapl))<0) {
-	goto error;
-    }
+    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
 
     /* Open the dataset */
     if ((d2 = H5Dopen (file, "d2"))<0) goto error;
@@ -387,19 +386,23 @@ main (void)
     if (sizeof(long_long)<8 || 0==GB8LL) {
 	puts("Test skipped because sizeof(long_long) is too small. This");
 	puts("hardware apparently doesn't support 64-bit integer types.");
+	H5Pclose(fapl);
 	exit(0);
     }
     if (!is_sparse()) {
 	puts("Test skipped because file system does not support holes.");
+	H5Pclose(fapl);
 	exit(0);
     }
     if (!enough_room(fapl)) {
 	puts("Test skipped because of quota (file size or num open files).");
+	H5Pclose(fapl);
 	exit(0);
     }
     if (sizeof(hsize_t)<=4) {
 	puts("Test skipped because the hdf5 library was configured with the");
 	puts("--disable-hsizet flag in order to work around a compiler bug.");
+	H5Pclose(fapl);
 	exit(0);
     }
     
@@ -411,6 +414,7 @@ main (void)
     return 0;
 
  error:
+    if (fapl>=0) H5Pclose(fapl);
     puts("*** TEST FAILED ***");
     return 1;
 }

@@ -305,9 +305,17 @@ typedef struct H5F_file_t {
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
+    haddr_t	driver_addr;	/* File driver information block address*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t *fcpl;		/* File-creation property list		*/
-    H5F_access_t *fapl;		/* File-access property list		*/
+    intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
+    size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
+    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    hsize_t	threshold;	/* Threshold for alignment		*/
+    hsize_t	alignment;	/* Alignment				*/
+    uintn	gc_ref;		/* Garbage-collect references?		*/
+    hid_t	driver_id;	/* File driver ID			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

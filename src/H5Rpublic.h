@@ -45,14 +45,14 @@ typedef struct {
  * to be defined at run-time, so we have to go with the worst case sizes for
  * them.  -QAK
  */
-#define H5R_OBJ_REF_BUF_SIZE    sizeof(hsize_t)
+#define H5R_OBJ_REF_BUF_SIZE    sizeof(haddr_t)
 /* Object reference structure for user's code */
 typedef struct {
     unsigned char oid[H5R_OBJ_REF_BUF_SIZE];    /* Buffer to store OID of object referenced */
                                 /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) */
 } hobj_ref_t;
 
-#define H5R_DSET_REG_REF_BUF_SIZE    (sizeof(hsize_t)+sizeof(int))
+#define H5R_DSET_REG_REF_BUF_SIZE    (sizeof(haddr_t)+sizeof(int))
 /* Dataset Region reference structure for user's code */
 typedef struct {
     unsigned char heapid[H5R_DSET_REG_REF_BUF_SIZE];    /* Buffer to store heap ID and index */

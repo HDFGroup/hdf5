@@ -15,8 +15,6 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_SUPER,
     H5FD_MEM_BTREE,
     H5FD_MEM_DRAW,
-    H5FD_MEM_META,
-    H5FD_MEM_GROUP,
     H5FD_MEM_GHEAP,
     H5FD_MEM_LHEAP,
     H5FD_MEM_OHDR,
@@ -35,8 +33,6 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_SUPER,			/*super*/			      \
     H5FD_MEM_SUPER,			/*btree*/			      \
     H5FD_MEM_SUPER,			/*draw*/			      \
-    H5FD_MEM_SUPER,			/*meta*/			      \
-    H5FD_MEM_SUPER,			/*group*/			      \
     H5FD_MEM_SUPER,			/*gheap*/			      \
     H5FD_MEM_SUPER,			/*lheap*/			      \
     H5FD_MEM_SUPER			/*ohdr*/			      \
@@ -47,15 +43,13 @@ typedef enum H5FD_mem_t {
  * pools.
  */
 #define H5FD_FLMAP_DICHOTOMY {						      \
-    H5FD_MEM_META,			/*default*/			      \
-    H5FD_MEM_META,			/*super*/			      \
-    H5FD_MEM_META,			/*btree*/			      \
+    H5FD_MEM_SUPER,			/*default*/			      \
+    H5FD_MEM_SUPER,			/*super*/			      \
+    H5FD_MEM_SUPER,			/*btree*/			      \
     H5FD_MEM_DRAW,			/*draw*/			      \
-    H5FD_MEM_META,			/*meta*/			      \
-    H5FD_MEM_META,			/*group*/			      \
-    H5FD_MEM_META,			/*gheap*/			      \
-    H5FD_MEM_META,			/*lheap*/			      \
-    H5FD_MEM_META			/*ohdr*/			      \
+    H5FD_MEM_SUPER,			/*gheap*/			      \
+    H5FD_MEM_SUPER,			/*lheap*/			      \
+    H5FD_MEM_SUPER			/*ohdr*/			      \
 }
 
 /*
@@ -67,8 +61,6 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_DEFAULT,			/*super*/			      \
     H5FD_MEM_DEFAULT,			/*btree*/			      \
     H5FD_MEM_DEFAULT,			/*draw*/			      \
-    H5FD_MEM_DEFAULT,			/*meta*/			      \
-    H5FD_MEM_DEFAULT,			/*group*/			      \
     H5FD_MEM_DEFAULT,			/*gheap*/			      \
     H5FD_MEM_DEFAULT,			/*lheap*/			      \
     H5FD_MEM_DEFAULT			/*ohdr*/			      \
@@ -83,7 +75,12 @@ typedef struct H5FD_t H5FD_t;
 typedef struct H5FD_class_t {
     const char *name;
     haddr_t maxaddr;
+    hsize_t (*sb_size)(H5FD_t *file);
+    herr_t (*sb_encode)(H5FD_t *file, char *name/*out*/,
+			unsigned char *p/*out*/);
+    herr_t (*sb_decode)(H5FD_t *f, const char *name, const unsigned char *p);
     size_t fapl_size;
+    void *(*fapl_get)(H5FD_t *file);
     void *(*fapl_copy)(const void *fapl);
     herr_t (*fapl_free)(void *fapl);
     size_t dxpl_size;

@@ -67,6 +67,7 @@ static haddr_t MPIOff_to_haddr(MPI_Offset mpi_off);
 static herr_t haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
 
 /* Callbacks */
+static void *H5FD_mpio_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpio_close(H5FD_t *_file);
@@ -89,7 +90,11 @@ typedef struct H5FD_mpio_fapl_t {
 static const H5FD_class_t H5FD_mpio_g = {
     "mpio",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
+    NULL,					/*sb_size		*/
+    NULL,					/*sb_encode		*/
+    NULL,					/*sb_decode		*/
     sizeof(H5FD_mpio_fapl_t),			/*fapl_size		*/
+    H5FD_mpio_fapl_get,				/*fapl_get		*/
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
     sizeof(H5FD_mpio_dxpl_t),			/*dxpl_size		*/
@@ -560,6 +565,37 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 	if (MPI_SUCCESS!=mpi_err) return -1;
     }
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_fapl_get
+ *
+ * Purpose:	Returns a file access property list which could be used to
+ *		create another file the same as this one.
+ *
+ * Return:	Success:	Ptr to new file access property list with all
+ *				fields copied from the file pointer.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 13, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_mpio_fapl_get(H5FD_t *_file)
+{
+    H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
+    H5FD_mpio_fapl_t	*fa = calloc(1, sizeof(H5FD_mpio_fapl_t));
+
+    /* These should both be copied. --rpm, 1999-08-13 */
+    fa->comm = file->comm;
+    fa->info = file->info;
+    return fa;
 }
 
 

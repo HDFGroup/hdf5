@@ -1871,12 +1871,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5FD_MEM_DRAW:
 			fprintf(out, "H5FD_MEM_DRAW");
 			break;
-		    case H5FD_MEM_META:
-			fprintf(out, "H5FD_MEM_META");
-			break;
-		    case H5FD_MEM_GROUP:
-			fprintf(out, "H5FD_MEM_GROUP");
-			break;
 		    case H5FD_MEM_GHEAP:
 			fprintf(out, "H5FD_MEM_GHEAP");
 			break;

@@ -32,6 +32,19 @@
  *
  */
 
+/*
+ * These are the letters that are appended to the file name when generating
+ * names for the split and multi drivers. They are:
+ *
+ * 	m: All meta data when using the split driver.
+ *	s: The userblock, superblock, and driver info block
+ *	b: B-tree nodes
+ *	r: Dataset raw data
+ *	g: Global heap
+ *	l: local heap (object names)
+ *	o: object headers
+ */
+static const char *multi_letters = "msbrglo";
 
 
 /*-------------------------------------------------------------------------
@@ -100,22 +113,17 @@ h5_cleanup(hid_t fapl)
 		}
 	    } else if (H5FD_CORE==driver) {
 		/*void*/
+	    } else if (H5FD_MULTI==driver) {
+		H5FD_mem_t mt;
+		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
+		for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
+		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
+			       filename, multi_letters[mt]);
+		    remove(temp); /*don't care if it fails*/
+		}
 	    } else {
 		remove(filename);
 	    }
-	    
-	    
-#ifndef ROBB_VFL
-#warning "H5F_LOW_SPLIT not implemented"
-#else
-	    switch (H5Pget_driver(fapl)) {
-	    case H5F_LOW_SPLIT:
-		HDsnprintf(temp, sizeof temp, "%s.raw", filename);
-		remove(temp);
-		HDsnprintf(temp, sizeof temp, "%s.meta", filename);
-		remove(temp);
-		break;
-#endif
 	}
 	retval=1;
     }
@@ -217,20 +225,12 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     if ((driver=H5Pget_driver(fapl))<0) return NULL;
     if (H5FD_FAMILY==driver) {
 	suffix = "%05d.h5";
-    } else if (H5FD_CORE==driver) {
+    } else if (H5FD_CORE==driver || H5FD_MULTI==driver) {
 	suffix = NULL;
     } else {
 	suffix = ".h5";
     }
     
-#ifndef RPM_VFL
-#warning "H5FD_SPLIT not implemented"
-#else
-    if (H5FD_SPLIT==driver) {
-	suffix = NULL;
-    }
-#endif
-
     if (suffix) {
 	if (strlen(fullname)+strlen(suffix)>=size) return NULL;
 	strcat(fullname, suffix);
@@ -266,6 +266,7 @@ h5_fileaccess(void)
     char	s[1024];
     hid_t	fapl = -1;
     hsize_t	fam_size = 100*1024*1024; /*100 MB*/
+    H5FD_mem_t	mt;
     
     /* First use the environment variable, then the constant */
     val = getenv("HDF5_DRIVER");
@@ -283,24 +284,40 @@ h5_fileaccess(void)
     if (!strcmp(name, "sec2")) {
 	/* Unix read() and write() system calls */
 	if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } else if (!strcmp(name, "stdio")) {
-	/* C standard I/O library */
-#ifndef RPM_VFL
-#warning "H5FD_STDIO not implemented"
-#else
-	if (H5Pset_stdio(fapl)<0) return -1;
-#endif
     } else if (!strcmp(name, "core")) {
 	/* In-core temporary file with 1MB increment */
 	if (H5Pset_fapl_core(fapl, 1024*1024)<0) return -1;
     } else if (!strcmp(name, "split")) {
 	/* Split meta data and raw data each using default driver */
-#ifndef RPM_VFL
-#warning "H5FD_SPLIT not implemented"
-#else
-	if (H5Pset_split(fapl, NULL, H5P_DEFAULT, NULL, H5P_DEFAULT)<0)
+	if (H5Pset_fapl_split(fapl,
+			      "-m.h5", H5P_DEFAULT,
+			      "-r.h5", H5P_DEFAULT)<0)
 	    return -1;
-#endif
+    } else if (!strcmp(name, "multi")) {
+	/* Multi-file driver, general case of the split driver */
+	H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
+	hid_t memb_fapl[H5FD_MEM_NTYPES];
+	const char *memb_name[H5FD_MEM_NTYPES];
+	char sv[H5FD_MEM_NTYPES][1024];
+	haddr_t memb_addr[H5FD_MEM_NTYPES];
+
+	memset(memb_map, 0, sizeof memb_map);
+	memset(memb_fapl, 0, sizeof memb_fapl);
+	memset(memb_name, 0, sizeof memb_name);
+	memset(memb_addr, 0, sizeof memb_addr);
+
+	assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
+	for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
+	    memb_fapl[mt] = H5P_DEFAULT;
+	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+	    memb_name[mt] = sv[mt];
+	    memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
+	}
+
+	if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+			      memb_addr)<0) {
+	    return -1;
+	}
     } else if (!strcmp(name, "family")) {
 	/* Family of files, each 1MB and using the default driver */
 	if ((val=strtok(NULL, " \t\n\r"))) {

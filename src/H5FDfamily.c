@@ -58,6 +58,7 @@ typedef struct H5FD_family_dxpl_t {
 } H5FD_family_dxpl_t;
 
 /* Callback prototypes */
+static void *H5FD_family_fapl_get(H5FD_t *_file);
 static void *H5FD_family_fapl_copy(const void *_old_fa);
 static herr_t H5FD_family_fapl_free(void *_fa);
 static void *H5FD_family_dxpl_copy(const void *_old_dx);
@@ -79,7 +80,11 @@ static herr_t H5FD_family_flush(H5FD_t *_file);
 static const H5FD_class_t H5FD_family_g = {
     "family",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
+    NULL,					/*sb_size		*/
+    NULL,					/*sb_encode		*/
+    NULL,					/*sb_decode		*/
     sizeof(H5FD_family_fapl_t),			/*fapl_size		*/
+    H5FD_family_fapl_get,			/*fapl_get		*/
     H5FD_family_fapl_copy,			/*fapl_copy		*/
     H5FD_family_fapl_free,			/*fapl_free		*/
     sizeof(H5FD_family_dxpl_t),			/*dxpl_size		*/
@@ -159,7 +164,10 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     if (H5P_DEFAULT!=memb_fapl_id &&
 	H5P_FILE_ACCESS!=H5Pget_class(memb_fapl_id)) return -1;
 
-    /* Initialize driver specific information */
+    /*
+     * Initialize driver specific information. No need to copy it into the FA
+     * struct since all members will be copied by H5Pset_driver().
+     */
     fa.memb_size = memb_size;
     fa.memb_fapl_id = memb_fapl_id;
     return H5Pset_driver(fapl_id, H5FD_FAMILY, &fa);
@@ -197,6 +205,35 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     if (memb_size) *memb_size = fa->memb_size;
     if (memb_fapl_id) *memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_fapl_get
+ *
+ * Purpose:	Gets a file access property list which could be used to
+ *		create an identical file.
+ *
+ * Return:	Success:	Ptr to new file access property list.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 13, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5FD_family_fapl_get(H5FD_t *_file)
+{
+    H5FD_family_t	*file = (H5FD_family_t*)_file;
+    H5FD_family_fapl_t	*fa = calloc(1, sizeof(H5FD_family_fapl_t*));
+
+    fa->memb_size = file->memb_size;
+    fa->memb_fapl_id = H5Pcopy(file->memb_fapl_id);
+    return fa;
 }
 
 
@@ -348,7 +385,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 	file->memb_size = 1024*1024*1024; /*1GB*/
     } else {
 	H5FD_family_fapl_t *fa = H5Pget_driver_info(fapl_id);
-	file->memb_fapl_id = fa->memb_fapl_id;
+	file->memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
 	file->memb_size = fa->memb_size;
     }
     file->name = malloc(strlen(name)+1);
@@ -408,6 +445,9 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 	for (i=0; i<file->nmembs; i++) {
 	    if (file->memb[i]) H5FDclose(file->memb[i]);
 	}
+	if (file->memb) free(file->memb);
+	H5Pclose(file->memb_fapl_id);
+	if (file->name) free(file->name);
 	free(file);
     }
     return NULL;

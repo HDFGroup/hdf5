@@ -806,9 +806,8 @@ H5F_istore_init (H5F_t *f)
     FUNC_ENTER (H5F_istore_init, FAIL);
 
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
-    if (f->shared->fapl->rdcc_nbytes>0 &&
-	f->shared->fapl->rdcc_nelmts>0) {
-	rdcc->nslots = f->shared->fapl->rdcc_nelmts;
+    if (f->shared->rdcc_nbytes>0 && f->shared->rdcc_nelmts>0) {
+	rdcc->nslots = f->shared->rdcc_nelmts;
 	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t*));
 	if (NULL==rdcc->slot) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1111,7 +1110,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
 {
     intn		i, j, nerrors=0;
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    size_t		total = f->shared->fapl->rdcc_nbytes;
+    size_t		total = f->shared->rdcc_nbytes;
     const int		nmeth=2;	/*number of methods		*/
     intn		w[1];		/*weighting as an interval	*/
     H5F_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
@@ -1129,7 +1128,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
-    w[0] = rdcc->nused * f->shared->fapl->rdcc_w0;
+    w[0] = rdcc->nused * f->shared->rdcc_w0;
     p[0] = rdcc->head;
     p[1] = NULL;
 
@@ -1353,8 +1352,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
     assert (found || chunk_size>0);
     
-    if (!found && rdcc->nslots>0 &&
-	chunk_size<=f->shared->fapl->rdcc_nbytes &&
+    if (!found && rdcc->nslots>0 && chunk_size<=f->shared->rdcc_nbytes &&
 	(!ent || !ent->locked)) {
 	/*
 	 * Add the chunk to the cache only if the slot is not already locked.

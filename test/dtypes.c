@@ -778,8 +778,9 @@ test_transient (hid_t fapl)
     TESTING("transient data types");
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			 H5P_DEFAULT, fapl))<0) goto error;
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
 
     /* Predefined types cannot be modified or closed */
@@ -906,8 +907,9 @@ test_named (hid_t fapl)
     TESTING("named data types");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			 H5P_DEFAULT, fapl))<0) goto error;
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
 
     /* Predefined types cannot be committed */

@@ -133,7 +133,11 @@ static herr_t H5FD_sec2_flush(H5FD_t *_file);
 static const H5FD_class_t H5FD_sec2_g = {
     "sec2",					/*name			*/
     MAXADDR,					/*maxaddr		*/
+    NULL,					/*sb_size		*/
+    NULL,					/*sb_encode		*/
+    NULL,					/*sb_decode		*/
     0, 						/*fapl_size		*/
+    NULL,					/*fapl_get		*/
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
     0,						/*dxpl_size		*/

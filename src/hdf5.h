@@ -44,5 +44,6 @@
 #include <H5FDfamily.h>		/* File families 			*/
 #include <H5FDmpio.h>		/* Parallel files using MPI-2 I/O	*/
 #include <H5FDsec2.h>		/* POSIX unbuffered file I/O		*/
+#include <H5FDmulti.h>		/* Usage-partitioned file family	*/
 
 #endif
