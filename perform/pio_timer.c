@@ -19,11 +19,16 @@
 
 #include <mpi.h>
 
+#include "pio_perf.h"
+
 /*
  * The number to divide the tv_usec field with to get a nice decimal to add to
  * the number of seconds.
  */
-#define MILLISECOND     1000000.0
+#define MICROSECOND     1000000.0
+
+/* global variables */
+pio_time   *timer_g;            /* timer: global for stub functions     */
 
 /*
  * Function:    pio_time_new
@@ -41,6 +46,8 @@ pio_time_new(unsigned int type)
     pio_time *pt = (pio_time *)calloc(1, sizeof(struct pio_time_));
     register int i;
 
+    /* set global timer variable */
+    timer_g = pt;
     for (i = 0; i < NUM_TIMERS; ++i)
         pt->total_time[i] = 0.0;
 
@@ -61,6 +68,8 @@ void
 pio_time_destroy(pio_time *pt)
 {
     free(pt);
+    /* reset the global timer pointer too. */
+    timer_g = NULL;
 }
 
 /*
@@ -115,13 +124,54 @@ set_time(pio_time *pt, timer_type t, int start_stop)
                 struct timeval sys_t;
 
                 gettimeofday(&sys_t, NULL);
-                pt->total_time[t] =
+                pt->total_time[t] +=
                     ((double)sys_t.tv_sec +
-                                ((double)sys_t.tv_usec) / MILLISECOND) -
+                                ((double)sys_t.tv_usec) / MICROSECOND) -
                     ((double)pt->sys_timer[t].tv_sec +
-                            ((double)pt->sys_timer[t].tv_usec) / MILLISECOND);
+                            ((double)pt->sys_timer[t].tv_usec) / MICROSECOND);
             }
         }
+    }
+
+    if (pio_debug_level >= 4) {
+        char *msg;
+        int myrank;
+
+        MPI_Comm_rank(pio_comm_g, &myrank);
+
+        switch (t) {
+        case HDF5_FILE_OPENCLOSE:
+            msg = "File Open/Close";
+            break;
+        case HDF5_DATASET_CREATE:
+            msg = "Dataset Create";
+            break;
+        case HDF5_MPI_WRITE:
+            msg = "MPI Write";
+            break;
+        case HDF5_MPI_READ:
+            msg = "MPI Read";
+            break;
+        case HDF5_FINE_WRITE_FIXED_DIMS:
+            msg = "Fine Write";
+            break;
+        case HDF5_FINE_READ_FIXED_DIMS:
+            msg = "Fine Read";
+            break;
+        case HDF5_GROSS_WRITE_FIXED_DIMS:
+            msg = "Gross Write";
+            break;
+        case HDF5_GROSS_READ_FIXED_DIMS:
+            msg = "Gross Read";
+            break;
+        default:
+            msg = "Unknown Timer";
+            break;
+        }
+
+        fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
+                (start_stop == START ? "Start" : "Stop"),
+                pt->total_time[t]);
     }
 
     return pt;

@@ -145,7 +145,7 @@ static void do_cleanupfile(iotype iot, char *fname);
  * Modifications:
  */
 results
-do_pio(FILE *output, parameters param)
+do_pio(parameters param)
 {
     /* return codes */
     herr_t      ret_code = 0;   /*return code                           */
@@ -164,10 +164,6 @@ do_pio(FILE *output, parameters param)
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
 
-    int         myrank;
-
-    MPI_Comm_rank(pio_comm_g, &myrank);
-
     /* Sanity check parameters */
 
     /* IO type */
@@ -180,11 +176,11 @@ do_pio(FILE *output, parameters param)
         break;
     case RAWIO:
         fd.rawfd = -1;
-        res.timers = pio_time_new(SYS_TIMER);
+        res.timers = pio_time_new(MPI_TIMER);
         break;
     case PHDF5:
         fd.h5fd = -1;
-        res.timers = pio_time_new(SYS_TIMER);
+        res.timers = pio_time_new(MPI_TIMER);
         break;
     default:
         /* unknown request */
@@ -232,8 +228,8 @@ do_pio(FILE *output, parameters param)
         GOTOERROR(FAIL);
     }
 
-#if AKCDEBUG
-/* DEBUG*/
+#if akcdebug
+/* debug*/
 fprintf(stderr, "nfiles=%d\n", nfiles);
 fprintf(stderr, "ndsets=%ld\n", ndsets);
 fprintf(stderr, "nelmts=%ld\n", nelmts);
@@ -256,10 +252,15 @@ buf_size=MIN(1024*1024, buf_size);
         GOTOERROR(FAIL);
     }
 
-    if (pio_debug_level >= 4)
+    if (pio_debug_level >= 4) {
+        int myrank;
+
+        MPI_Comm_rank(pio_comm_g, &myrank);
+
         /* output all of the times for all iterations */
         if (myrank == 0)
             fprintf(output, "Timer details:\n");
+    }
 
     for (nf = 1; nf <= nfiles; nf++) {
 	/*
@@ -277,30 +278,13 @@ fprintf(stderr, "filename=%s\n", fname);
 #endif
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Gross Write Start: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS));
-
         hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Fine Write Start: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS));
-
         hrc = do_write(&fd, iot, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Fine Write Stop: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS));
 
         VRFY((hrc == SUCCESS), "do_write failed");
 
@@ -308,12 +292,6 @@ fprintf(stderr, "filename=%s\n", fname);
         hrc = do_fclose(iot, &fd);
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Gross Write Stop: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS));
-
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
         MPI_Barrier(pio_comm_g);
@@ -323,43 +301,19 @@ fprintf(stderr, "filename=%s\n", fname);
 	 */
         /* Open file for read */
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Gross Read Start: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS));
-
         hrc = do_fopen(iot, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Fine Read Start: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS));
-
         hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Fine Read Stop: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS));
-
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
-
-        if (pio_debug_level >= 4)
-            /* output all of the times for all iterations */
-            fprintf(output, "    Proc %d: Gross Read Stop: %.2f\n",
-                    myrank, get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS));
-
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
         MPI_Barrier(pio_comm_g);
@@ -1147,4 +1101,55 @@ do_cleanupfile(iotype iot, char *fname)
         }
     }
 }
+
+
+#ifndef TIME_MPI
+#define TIME_MPI
+#endif
+#ifdef TIME_MPI
+/* instrument the MPI_File_wrirte_xxx and read_xxx calls to measure
+ * pure time spent in MPI_File code.
+ */
+int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
+	  int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_READ, START);
+    err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_READ, STOP);
+    return err;
+}
+
+
+int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
+	int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_READ, START);
+    err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_READ, STOP);
+    return err;
+}
+
+int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
+      int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_WRITE, START);
+    err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    return err;
+}
+
+int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
+    int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_WRITE, START);
+    err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    return err;
+}
+
+#endif	/* TIME_MPI */
 #endif /* H5_HAVE_PARALLEL */
