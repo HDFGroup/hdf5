@@ -19,6 +19,10 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
+
+#define H5T_PACKAGE
+#include "H5Tpkg.h"		/*to turn off hardware conversions*/
+
 #include "h5test.h"
 
 const char *FILENAME[] = {

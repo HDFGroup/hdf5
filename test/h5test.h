@@ -21,6 +21,8 @@
 #ifndef _H5TEST_H
 #define _H5TEST_H
 
+#include <stdarg.h>
+
 #undef NDEBUG
 #include "hdf5.h"
 #include "H5private.h"
@@ -28,9 +30,6 @@
 #ifdef H5_STDC_HEADERS
 #   include <signal.h>
 #endif
-
-#define H5T_PACKAGE
-#include "H5Tpkg.h"		/*to turn off hardware conversions*/
 
 /*
  * This contains the filename prefix specificied as command line option for
@@ -62,26 +61,11 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 
-/*
- * Definitions for the InitTest().
- */
-#define MAXNUMOFTESTS 30
-extern int Index;
-typedef struct TestStruct {
-	int    NumErrors;
-	char   Description[64];
-	int    SkipFlag;
-	char   Name[16];
-	void (*Call)(void);
-	void (*Cleanup)(void);
-} TestStruct;
-extern TestStruct Test[];
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Generally useful testing routines */
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
@@ -89,13 +73,13 @@ H5TEST_DLL hid_t h5_fileaccess(void);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
-H5TEST_DLL void InitTest(const char *TheName, void (*TheCall) (void),
-		     void (*Cleanup) (void), const char *TheDescr);
-#ifdef H5_HAVE_PARALLEL
-int h5_set_info_object(void);
-void h5_dump_info_object(MPI_Info info);
-#endif
 H5TEST_DLL off_t h5_get_file_size(const char *filename);
+H5TEST_DLL int print_func(const char *format, ...);
+
+#ifdef H5_HAVE_PARALLEL
+H5TEST_DLL int h5_set_info_object(void);
+H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+#endif
 
 #ifdef __cplusplus
 }

@@ -47,10 +47,6 @@
 /* Internal Variables */
 static int      Index = 0;
 
-/* Global variables */
-int             num_errs = 0;
-int             Verbosity;
-
 // Use C version of the header file testhdf5.h instead of re-coding it
 #include "testhdf5.h"
 
