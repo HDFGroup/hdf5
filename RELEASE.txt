@@ -368,11 +368,9 @@ Bug Fixes since HDF5-1.4.0-beta2
 Platforms Tested
 ================
 
- Note: Due to the nature of the bug fixes, only static versions of the
-       library and tools were tested.
 
 
-  AIX 4.3.2 (IBM SP)            mpcc_r 3.6.6
+  AIX 4.3.3.0 (IBM SP powerpc)  mpcc_r 3.6.6
   Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
@@ -398,12 +396,17 @@ Platforms Tested
   (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
                                        2.0 Patch 107356-04
                                 Workshop Compilers 5.0 98/12/15 C++ 5.0
-  TFLOPS 3.3                    mpich-1.2.0 with local changes
+  TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
 
 Known Problems
 ==============
+
+* The stream-vfd test uses ip port 10007 for testing.  If another application
+  is already using that port address, the test will hang indefinitely and
+  has to be terminated by the kill command.  To try the test again, change
+  the port address in test/stream_test.c to one not being used in the host.
 
 * The --enable-static-exec configure flag fails to compile for Solaris
   platforms. This is due to the fact that not all of the system
@@ -411,6 +414,10 @@ Known Problems
 
   The --enable-static-exec configure flag also fails to correctly compile
   on Linux platforms using the gcc-2.95.2 compiler.
+  
+  The --enable-static-exec configure flag also fails to correctly compile
+  on IBM SP2 platform for the serial mode.  The parallel mode works fine
+  with this option.
   
   It is suggested that you don't use this option on these platforms
   during configuration.
