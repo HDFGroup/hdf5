@@ -1,10 +1,40 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+including all routines that are useful for other files.
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
+
 #include "h4toh5util.h"
 
 
 /* Function h4toh5_ZeroMemory
-* Purpose: Zero out memory
-* return:  None
-* In: size_t n(DWORD in windows)
+   Purpose: Zero out memory
+   return:  None
+   In: size_t n(DWORD in windows)
       void* s(PVOID in windows)
 */
 void h4toh5_ZeroMemory(void*s,size_t n) {
@@ -19,17 +49,17 @@ void h4toh5_ZeroMemory(void*s,size_t n) {
  * Function:	h5string_to_int
  *
  * Purpose:	This function will convert H5T_STRING into integer.
-                This is for cases the user define the numerical datatype int8
-		as DFNT_CHAR8 and DFNT_UCHAR8
+                This is a correction routine when the user define the 
+		numerical datatype int8 as DFNT_CHAR8 and DFNT_UCHAR8
 
- * Errors:      will return error message to the interface.
- * Return:	FAIL if failed, SUCCEED if success.
+ * Errors:      will return error message to the interface
+ * Return:	FAIL if failed, SUCCEED if success
   *
- * In :	        h4type: HDF4 datatype.
-                h4memsize: the real memory size of h4type.
+ * In :	        h4type: HDF4 datatype
+                h4memsize: the real memory size of h4type
 
  * Out:         h5memtype: pointer of which value should be h5memtype(the real
-                           data type stored at the memory).
+                           data type stored at the memory)
                 h5type:    pointer of which value should be h5type(the hdf5 
 		           type stored at the disk).
  *
@@ -53,6 +83,7 @@ int h5string_to_int(const int32 h4type, hid_t* h5memtype,
        else if(h4memsize == H5Tget_size(H5T_NATIVE_LONG))
 	  *h5memtype = H5T_NATIVE_LONG;
        else return FAIL;
+       break;
 
     case DFNT_UCHAR8:
      
@@ -66,6 +97,7 @@ int h5string_to_int(const int32 h4type, hid_t* h5memtype,
        else if(h4memsize == H5Tget_size(H5T_NATIVE_LONG))
 	  *h5memtype = H5T_NATIVE_ULONG;
        else return FAIL;
+       break;
   }
   return SUCCEED;
 }
@@ -149,7 +181,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NINT8:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 1;
        *h5type = H5T_NATIVE_SCHAR;
        *h4memsize = sizeof(int8);
@@ -166,7 +198,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NUINT8:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 1;
        *h5type = H5T_NATIVE_UCHAR;
        *h4memsize = sizeof(int8);
@@ -243,7 +275,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NINT16:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 2;
        *h5type = H5T_NATIVE_SHORT;
        *h4memsize = sizeof(int16);
@@ -260,7 +292,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NUINT16:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 2;
        *h5type = H5T_NATIVE_USHORT;
        *h4memsize = sizeof(int16);
@@ -337,7 +369,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NINT32:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 4;
        *h5type = H5T_NATIVE_INT;
        *h4memsize = sizeof(int32);
@@ -436,7 +468,7 @@ int  h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 
      case DFNT_NFLOAT64:
        printf("warning, Native HDF datatype is encountered");
-       printf(" the converting results may not be correct.\n");
+       printf(" the converting result may not be correct.\n");
        *h4size = 8;
         *h5type = H5T_NATIVE_DOUBLE;
        *h4memsize = sizeof(float64);
@@ -494,58 +526,13 @@ int conv_int_str(uint16 num, char* str_num) {
 
   /* the maximum reference number is 65536. */
 
-  int d0,d1,d2,d3,d4;
-  int i;
-  
   if(str_num == NULL) {
     printf(" memory for str_num should be allocated.\n");
     return FAIL;
   }
 
-  for (i=0;i<5;i++)
-    str_num[i] = '\0';
+  sprintf(str_num,"%d",num);
 
-  if((num/10000)!=0) {
-    d4 = num/10000;
-    str_num[4]= (char)(d4+48);
-    d3 = (num-d4*10000)/1000;
-    str_num[3]= (char)(d3+48);
-    d2 =(num-d4*10000-d3*1000)/100;
-    str_num[2]= (char)(d2+48);
-    d1 =(num-d4*10000-d3*1000-d2*100)/10;
-    str_num[1] =(char)(d1+48);
-    d0= num-d4*10000-d3*1000-d2*100-d1*10;
-    str_num[0] =(char)(d0+48);
-  }    
-
-  else if ((num/1000)!=0){
-
-    d3 = num/1000;
-    str_num[3] =(char)(d3+48);
-    d2 =(num-d3*1000)/100;
-    str_num[2]=(char)(d2+48);
-    d1 =(num-d3*1000-d2*100)/10;
-    str_num[1]=(char)(d1+48);
-    d0 =num-d3*1000-d2*100-d1*10;
-    str_num[0] =(char)(d0+48);
-  }
-  else if ((num/100)!=0){
-
-    d2 =num/100;
-    str_num[2]=(char)(d2+48);
-    d1 =(num-d2*100)/10;
-    str_num[1]=(char)(d1+48);
-    d0 =num-d2*100-d1*10;
-    str_num[0] =(char)(d0+48);
-  }
-  else if((num/10)!=0) {
-    d1= num/10;
-    str_num[1]=(char)(d1+48);
-    d0 = num%10;
-    str_num[0]=(char)(d0+48);
-  }
-  else 
-    str_num[0] =(char)(num+48);
   return SUCCEED;
 }
 
@@ -784,6 +771,10 @@ int lookup_name(char* name, int size,struct name_table *nametab) {
     return -1;
   }
 
+  if(nametab == NULL) {
+    printf("no name_table for this category of objects.\n");
+    return -1;
+  }
   np = nametab+hash_fun(name,size);
 
   temptr->name = malloc(strlen(name)+1);
@@ -1037,7 +1028,7 @@ int h4_transpredattrs(hid_t h5g,const char *attrname,char*data){
 
    h5str_size = strlen(data);
 
-   if ((h5str_type = mkstr(h5str_size,H5T_STR_NULLTERM))<0) {
+   if ((h5str_type = mkstr(h5str_size,H5T_STR_SPACEPAD))<0) {
       printf("error in making string for predefined ATTR. \n");
       return FAIL;
    }
@@ -1150,7 +1141,7 @@ int vg_transattrs(int32 h4vg,hid_t h5g) {
 
      /* now do attribute-transferring.
        1. deal with string data type
-       2. set attribute space.
+       2. set attribute space
        3. get attribute name, set property list. */
            
      if (sh5_atype ==  H5T_STRING ) {
@@ -1164,15 +1155,15 @@ int vg_transattrs(int32 h4vg,hid_t h5g) {
 	   return FAIL;
 	}
 
-	if ((sh5str_type = mkstr(count_vgattr*sh4_size,H5T_STR_NULLTERM))<0) {
+	if ((sh5str_type = mkstr(count_vgattr*sh4_size,H5T_STR_SPACEPAD))<0) {
            fprintf(stderr,"error in making string for VGROUP ATTR. \n");
 	   free(vg_adata);
 	   return FAIL;
 	}
 
-        /* check this line later. */
+        
        	if ((sh5str_memtype = mkstr(count_vgattr*sh4_amemsize,
-				    H5T_STR_NULLTERM))<0){
+				    H5T_STR_SPACEPAD))<0){
 	  fprintf(stderr,"error in making memory string for VGROUP ATTR. \n");
 	  free(vg_adata);
 	  return FAIL;
@@ -1322,9 +1313,11 @@ char* get_obj_aboname(char* obj_name,char* refstr,char* path_name,
   int check_name;
   char check_char;
 
+   
   /* sometimes although the object name is not NULL, but it is empty. 
      We will use make_objname_no under this situation. */
   if(obj_name != NULL) check_char = *obj_name;
+
   /* obtain the absolute name of the object. */
   if (obj_name == NULL || check_char == '\0')
     abo_objname = make_objname_no(refstr,path_name,objstr);
@@ -1336,7 +1329,7 @@ char* get_obj_aboname(char* obj_name,char* refstr,char* path_name,
   check_name = lookup_name(abo_objname,num_objects,name_hashtab);
 
   if(check_name == 1) {
-
+    /* name_clashing is found. */
     if(objstr != NULL && refstr != NULL){
       free(abo_objname);
 
@@ -1370,6 +1363,7 @@ char* get_obj_aboname(char* obj_name,char* refstr,char* path_name,
      }
     }
   }
+ 
   return abo_objname;
 }
 
@@ -1405,7 +1399,7 @@ char* make_objname_no(char* refstr,char* path_name,const char*objstr) {
       
       new_objname= malloc(strlen(objstr)+strlen(refstr)+3);
       if(new_objname == NULL) {
-	  printf("error in allocating memory. \n");
+	  printf("error in allocating memory for object name. \n");
 	  return NULL;
       }
       h4toh5_ZeroMemory(new_objname,strlen(objstr)+strlen(refstr)+3);
@@ -1495,11 +1489,14 @@ char* trans_obj_name(int32 obj_tag,int32 index) {
   char* obj_name;
   char indstr[5];
 
+  /* the reason why we allocate memory with strlen(HDF4_PALETTE) is 
+     HDF4_PALETTE is the longest string among HDF4_??? */
   obj_name = malloc(strlen(HDF4_PALETTE)+strlen(ATTR)+8);
   if(obj_name == NULL) {
     printf("cannot allocate memory for object name. \n");
     return NULL;
   }
+
   h4toh5_ZeroMemory(obj_name,strlen(HDF4_PALETTE)+strlen(ATTR)+8);
 
   if(conv_int_str(index,indstr)== FAIL) {
@@ -1563,20 +1560,20 @@ char* trans_obj_name(int32 obj_tag,int32 index) {
 
 void freehashmemory(void){
 
-  if(estnum_vg != 0) freetable(estnum_vg,vg_hashtab);
-  if(estnum_vd != 0) freetable(estnum_vd,vd_hashtab);
+  if(estnum_vg > 0) freetable(estnum_vg,vg_hashtab);
+  if(estnum_vd > 0) freetable(estnum_vd,vd_hashtab);
 
-  if(num_sds !=0) {
+  if(num_sds > 0) {
     freetable(2*num_sds,sds_hashtab);
     freenametable(DIM_HASHSIZE,dim_hashtab);
   }
 
-  if(num_images !=0) {
+  if(num_images > 0) {
     freetable(2*num_images,gr_hashtab);
     freetable(PAL_HASHSIZE,pal_hashtab);
   }
 
-  if(num_objects !=0) freenametable(num_objects,name_hashtab);
+  if(num_objects > 0) freenametable(num_objects,name_hashtab);
 
 }
 

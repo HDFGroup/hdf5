@@ -1,4 +1,35 @@
-/*** This file is the main program of converter. ***/
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+This file describes the main driver of hdf to hdf5 converter. It checks
+the inputting parameters, initializes the global tables, sets up the root level
+hdf5 structure and also check the special case fof vgroup loops at HDF file.
+
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
 
 #include "h4toh5main.h"
 
@@ -37,14 +68,13 @@ int main(int argc, char ** argv) {
 	char *h5_extension;
 	int status = 0;
 
-
 	argc--;
 	argv++;
 
 	if (argc == 0) {
 		fprintf(stderr,"\nError: Invalid Arguments\n");
 		PrintOptions_h4toh5();
-		return -1;
+		return FAIL;
 	}
 
 	/* take care -h (help) option first */
@@ -52,7 +82,7 @@ int main(int argc, char ** argv) {
 	    for (i=0; i < argc; i++)
 		if ( HDstrcmp(argv[i],"-h") == 0 ) {
 			PrintOptions_h4toh5();
-			return 0;
+			return SUCCEED;
 		}
 	}
 
@@ -79,6 +109,14 @@ int main(int argc, char ** argv) {
 		   break;
 		}
 
+		/*0. check whether this file is an hdf file. */
+
+		if(!Hishdf(h4_filename)){
+		  printf("error: not an hdf file. \n");
+		  printf("the file will not be converted. \n");
+		  status = -1;
+		  break;
+		}
 		h5_extension = HDstrdup("h5");
 		h5_filename = BuildFilename(h4_filename,h5_extension);
 		if (h5_filename == NULL) {
@@ -94,15 +132,6 @@ int main(int argc, char ** argv) {
 		  break;
 		}
 
-		/*0. check whether this file is a hdf file. */
-
-		if(!Hishdf(h4_filename)){
-		  printf("error: not an hdf file. \n");
-		  printf("the file will not be converted. \n");
-		  return FAIL;
-		}
-
-
 		status = h4toh5(h4_filename, h5_filename);
 
 		if ( status == FAIL ) {
@@ -115,7 +144,8 @@ int main(int argc, char ** argv) {
 
 		break;
 	
-	case 2:	/* h5toh4 file_in file_out */
+	case 2:	/* h4toh5 file_in file_out */
+
 		h4_filename = argv[0];
 		h5_filename = argv[1];
 
@@ -132,23 +162,25 @@ int main(int argc, char ** argv) {
 		   break;
 		}
 
-		if (test_file(h5_filename,O_CREAT|O_RDWR,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
-		  printf("permission of hdf5 file is not set properly.\n");
-		  status = -1;
-		  break;
-		}
-		if (test_dir(h4_filename) != 0 ) {
-		  fprintf(stderr,"%s: Is a directory\n",h4_filename);
-		  status = -1;
-		  break;
-		}
-
 		/*0. check whether this file is a hdf file. */
 
 		if(!Hishdf(h4_filename)){
 		  printf("error: not an hdf file. \n");
 		  printf("the file will not be converted. \n");
-		  return FAIL;
+		  status = -1;
+		  break;
+		}
+
+		if (test_file(h5_filename,O_CREAT|O_RDWR,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
+		  printf("permission of hdf5 file is not set properly.\n");
+		  status = -1;
+		  break;
+		}
+
+		if (test_dir(h4_filename) != 0 ) {
+		  fprintf(stderr,"%s: Is a directory\n",h4_filename);
+		  status = -1;
+		  break;
 		}
 
 		status = h4toh5(h4_filename, h5_filename);
@@ -190,9 +222,6 @@ int h4toh5(char*filename4, char*filename5) {
   
   hid_t  h5_dimg;/* hdf5 dimensional scale group identifier. */
   hid_t  h5_palg;/* hdf5 palette group identifier. */
-
-
-  
 
   /*1. open the current hdf4 file. */
 
@@ -381,7 +410,8 @@ int h4toh5(char*filename4, char*filename5) {
   /*** deal with untouched sds objects.convert them into hdf5 datasets under root group.***/
 
   if(h4toh5unvisitedsds(file_id,sd_id,h5_root,h5_dimg) == FAIL) {
-    printf("error in converting unvisited sds objects into hdf5 file.\n");         SDend(sd_id);
+    printf("error in converting unvisited sds objects into hdf5 file.\n");  
+    SDend(sd_id);
     GRend(gr_id);
     Vend(file_id);
     Hclose(file_id);
@@ -462,7 +492,6 @@ int get_numof_hdf4obj(char*filename,int32 file_id) {
     return FAIL;
   }
   
-    
   /* obtain number of images and number of global image attributes.*/
 
   gr_id = GRstart(file_id);
@@ -575,7 +604,7 @@ int set_helpgroups(hid_t h5root,hid_t* h5dimgptr,hid_t* h5palgptr){
  */	
 int set_hashtables(void) {
  
-  if(num_sds != 0) {
+  if(num_sds > 0) {
     sds_hashtab = malloc(sizeof(struct table)*2*num_sds);
     if(init_tab(2*num_sds,sds_hashtab)== FAIL){
       printf("cannot initialize sds hashing table. \n");
@@ -583,7 +612,7 @@ int set_hashtables(void) {
     }
   }
 
-  if(num_images != 0) {
+  if(num_images > 0) {
     gr_hashtab = malloc(sizeof(struct table)*2*num_images);
     if(init_tab(2*num_images,gr_hashtab) == FAIL){
       printf("cannot initialize image hashing table. \n");
@@ -593,7 +622,7 @@ int set_hashtables(void) {
 
   /*hashtable is made to be fixed for dimensional scale and palette.*/
 
-  if(num_sds != 0) {
+  if(num_sds > 0) {
     dim_hashtab = malloc(sizeof(struct name_table)*DIM_HASHSIZE);
     if(init_nametab(DIM_HASHSIZE,dim_hashtab) == FAIL) {
       printf("can not initialize dimension hashing table.\n");
@@ -602,7 +631,7 @@ int set_hashtables(void) {
   }
 
   /* initialize the palette table */
-  if(num_images != 0){
+  if(num_images > 0){
     pal_hashtab = malloc(sizeof(struct table)*PAL_HASHSIZE);
     if(init_tab(PAL_HASHSIZE,pal_hashtab) == FAIL) {
       printf("can not initialize palette hashing table.\n");
@@ -699,6 +728,10 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 
   /* obtain object reference array. */
 
+  /* if no lone vgroup, quit from this function. */
+  if(num_lonevg == 0) 
+    return SUCCEED;
+
   ref_array = (int32 *)malloc(sizeof(int32) *num_lonevg);
 
   if(ref_array == NULL) {
@@ -783,7 +816,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
        return FAIL;
      }
     
-     /*     printf("h5cgroup_name %s\n",h5cgroup_name);*/
+     /* free memory of corrected name. */
      free(cor_vgroupname);
 
      /* updating lookup table for vgroups.*/
@@ -803,7 +836,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
        }
      }
 
-     /* this line is for debugging. */
+     /* this line should never fail, if failed, something is wrong with converter or hdf library. */
 
      if(check_vgroup == 1){
        fprintf(stderr,"this vgroup should not be touched. \n");
@@ -993,7 +1026,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
       
       Vdetach(vgroup_id);
       free(h5cgroup_name);
-     }
+    }
     ref_num = Vgetid(file_id,ref_num); 
   }
   return SUCCEED;
@@ -1044,6 +1077,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
      ref_vdata_array = (int32 *)malloc(sizeof(int32) *(num_lonevd));
 
      num_lonevd = VSlone(file_id,ref_vdata_array,num_lonevd);
+
      if(num_lonevd == FAIL) {
        printf("error in obtaining lone vdata number the second time.\n");
        free(ref_vdata_array);
@@ -1124,6 +1158,8 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	   free(cor_vdataname);
 	   check_vdata = lookup(ref_vdata_array[lone_vd_number],estnum_vd,
 				vd_hashtab);
+
+           /* check_vdata should be 1, if it is 1, either converter or hdf lib has bugs. */
 	   if(check_vdata == 1){
 	     printf("lone vdata should not be checked before.\n");
 	     free(h5cvdata_name);
@@ -1210,7 +1246,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
  	 return FAIL;
      }
        
-     /* if this sds is dimensional scale, the converting should be ignored. */
+     /* if this sds is dimensional scale, the converting should be ignored. dimensional scale will be converted separately. */
      if(SDiscoordvar(sds_id)) continue;
 
      /* obtain sds information. */
@@ -1246,7 +1282,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
      if(check_sds == 0) {
      /* since different hdf sds may hold the same name and it is also 
 	legal that sds may not have a name; but for hdf5 dataset, 
-	it must hold a name, so we will use get_obj_aboname to guarrtte 
+	it must hold a name, so we will use get_obj_aboname to assure 
 	that each new hdf5 dataset converted from
 	sds objects will have a disabiguous name. */
 
@@ -1257,6 +1293,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
 	 SDendaccess(sds_id);
 	 return FAIL;
        }
+
        h5csds_name = get_obj_aboname(cor_sdsname,refstr,NULL,HDF4_SDS);
        if(h5csds_name == NULL) {
 	  printf("error in obtaining sds name.\n");
@@ -1281,8 +1318,10 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
 	  return FAIL;
        }
        free(h5csds_name);
+
      }
      SDendaccess(sds_id);
+
   }
   return SUCCEED;
 }
@@ -1305,6 +1344,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
    Modification:         
  *-------------------------------------------------------------------------
  */	
+
 int h4toh5unvisitedimages(int32 file_id,hid_t h5_root,hid_t h5_palg) {
 
   int     i;
@@ -1443,12 +1483,7 @@ void free_allhashmemory(){
 
 }
 
-void PrintOptions_h4toh5(void)
-{
-		fprintf(stderr,"\nh4toh5 -h (gives this print-out)\n");
-		fprintf(stderr,"h4toh5 file.hdf file.h5\n");
-		fprintf(stderr,"h4toh5 file.hdf\n");
-}
+
 
 /********The following routines are adapted from h5toh4 converter. *******/
 /*****************************************************************************
@@ -1551,5 +1586,29 @@ char *BuildFilename(char *filename, char *ext)
 
 	return filename_out;
 }
+
+
+/*****************************************************************************
+
+  Routine: PrintOptions_h4toh5()
+ 
+  Description: This routine prints the acceptable argument formats out to stderr.
+           
+  Input: None
+ 
+  Output: output to stderr
+
+*****************************************************************************/
+
+void PrintOptions_h4toh5(void)
+{
+		fprintf(stderr,"\nUsage: ");
+		fprintf(stderr,"\n  h4toh5 -h (gives this print-out)\n");
+		fprintf(stderr,"  h4toh5 input.hdf output.h5\n");
+		fprintf(stderr,"  h4toh5 input.hdf\n");
+}
+
+
+
 
 

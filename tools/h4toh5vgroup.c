@@ -1,4 +1,33 @@
-/*** This file is the main program of converter. ***/
+
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+converting an hdf4 vgroup object into a hdf5 group.
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
 
 #include "h4toh5main.h"
 
@@ -156,8 +185,6 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
 	  H5Gclose(h5_pgroup);
 	  return FAIL;
 	}
-
-	
 
       }
       /* the object is independent vdata. */
@@ -390,7 +417,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
-  if(istat); /*ignore, attributes can be retrieved later.*/
+  if(istat); /*ignore, dependent vdata(attributes, etc.)can be retrieved later.*/
 
   else { /* independent vdata, read in */
 
@@ -455,7 +482,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
 	VSdetach(vdata_id);
 	return FAIL;
       }
-      /*... ADD in the code. create HL, 
+      /*create HL, 
 	for the time being, we will use absolute path. */
 
       h5lvdata_name = get_obj_aboname(cor_cvdataname,refstr,h5pgroup_name,
@@ -527,6 +554,11 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
+  if(conv_int_str(obj_ref,refstr)== FAIL) {
+    printf("error in converting reference number into string type.\n");
+    return FAIL;
+  }
+
   sds_id = SDselect(sd_id,sd_index);
 
   if(sds_id == FAIL){
@@ -550,6 +582,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
     SDendaccess(sds_id);
     return FAIL;
   }
+
   if(check_sds == 0) {
 
     /* obtain the absolute name of sds object, deal with the name clashing by
@@ -563,6 +596,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
       return FAIL;
     }
     free(cor_sdsname);
+
     /* put the absolute path of sds into "hashing table".*/
     if(set_name(obj_ref,2*num_sds,sds_hashtab,h5csds_name)==FAIL) {
       printf("error in setting object name.\n");
@@ -767,3 +801,8 @@ int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
 
     return SUCCEED;
 }
+
+
+
+
+

@@ -1,3 +1,31 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+converting an hdf4 image object into an hdf5 dataset, for three component image, this object will be converted into an hdf5 dataset with compound data type.
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
 
 #include "h4toh5main.h"
 
@@ -120,7 +148,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
     return FAIL;
   }
   
-   /* obtaining absolute path of image name.*/
+  /* obtaining absolute path of image name.*/
 
   check_imagename = -10;
   h5cimage_name = get_name(gr_ref,2*num_images,gr_hashtab,&check_imagename);
@@ -222,8 +250,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        H5Pclose(create_plist);
        return FAIL;
      }
-
-     /*     if(h4size != h4memsize) printf("h4size/h4memsize %d\n",h4size/h4memsize);*/
+    
 
      fielddim[0] = ncomp;
 
@@ -634,14 +661,14 @@ int gr_tranattrs(int32 sri_id, hid_t sh5_dset,int snum_grattrs,
 	   return FAIL;
 	}
 
-	if ((sh5str_type = mkstr(count_sgradata*sh4_asize,H5T_STR_NULLTERM))<0){
+	if ((sh5str_type = mkstr(count_sgradata*sh4_asize,H5T_STR_SPACEPAD))<0){
            printf("error in making string for image attribute \n");
 	   return FAIL;
 	}
 
         /* check this line later. */
        	if ((sh5str_memtype = mkstr(count_sgradata*sh4_amemsize,
-				    H5T_STR_NULLTERM))<0){
+				    H5T_STR_SPACEPAD))<0){
 	  printf("error in making memory string. \n");
 	  return FAIL;
 	}

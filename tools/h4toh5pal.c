@@ -1,3 +1,31 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+Converting an hdf4 palette object into a hdf5 dataset.
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
 #include "h4toh5main.h"
 
 
@@ -62,7 +90,7 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
      uint8. */
 
   if (h5type == H5T_STRING) {
-    if(h5string_to_int(DFNT_UCHAR8,&h5memtype,h4memsize,&h5type)==FAIL) {
+    if(h5string_to_int(pal_type,&h5memtype,h4memsize,&h5type)==FAIL) {
       fprintf(stderr,"failed to translate H5T_STRING to int8.");
       return FAIL;
     }

@@ -1,3 +1,31 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+Converting an hdf4 independent vdata object into an hdf5 dataset of compound dataset.
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
 
 #include "h4toh5main.h"
 
@@ -161,11 +189,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
      vdatamem_size +=fieldorder*h4memsize[i];
      
   }
-
-  
-    
-  /*  printf("vdatamem_size %d\n",vdatamem_size);
-      printf("vdata_size %d\n",vdata_size);*/
+ 
   vd_data = malloc(vdatamem_size*n_records);   
 
   istat   = VSsetfields(vdata_id,field_name_list); 
@@ -195,7 +219,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
   for (i=0;i<nfields;i++) {
     /* obtain field order.*/
      fieldorder = VFfieldorder(vdata_id,i);  
-     /*     printf("%d again fieldorder %d\n",i,fieldorder);*/
+
      if(fieldorder == FAIL){
        printf("error in obtaining field order. \n");
        free(h5memtype);
@@ -515,14 +539,14 @@ int  vdata_transattrs(int32 vdata_id,hid_t h5dset,int snum_vdattrs,
    if (sh5_atype == H5T_STRING) {
 
       if ((sh5str_type = mkstr(count_svdadata,
-			       H5T_STR_NULLTERM))<0) {
+			       H5T_STR_SPACEPAD))<0) {
          printf("error in making string for vdata attribute. \n");
 	 free(svd_adata);
          return FAIL;
       }
 
       if ((sh5str_memtype = mkstr(count_svdadata*sh4_amemsize,
-				    H5T_STR_NULLTERM))<0) {
+				    H5T_STR_SPACEPAD))<0) {
 	  printf("error in making memory string for vdata attribute. \n");
 	  free(svd_adata);
 	  return FAIL;
@@ -645,8 +669,6 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 		  hid_t* sh5type,hid_t* sh5memtype,
 		  hid_t h5_ctype,hid_t h5_cmemtype) {
 
-  /*char    fieldname[MAX_NC_NAME];
-    char*   temp_fieldname;*/
   char* fieldname;
   int32   fieldorder;
   int32   fieldsize;
@@ -669,30 +691,17 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
    
    fieldname = NULL;
    fieldorder = VFfieldorder(vdata_id,i);
-   /*  printf(" %d fieldorder%d\n",i,fieldorder);*/
    
    if(fieldorder == FAIL){
      printf("error in obtaining fieldorder.\n");
      return FAIL;
    }
 
-   /* temp_fieldname = VFfieldname(vdata_id,i);
-   if(temp_fieldname== NULL) {
-     printf("fail to obtain Vdata field name. \n");
-     return FAIL;
-   }
-
-   strncpy(fieldname,temp_fieldname,strlen(temp_fieldname));
-   
-
-   free(temp_fieldname);*/
-
    fieldname = VFfieldname(vdata_id,i);
    if(fieldname == NULL){
      printf("fail to obtain Vdata field name. \n");
      return FAIL;
    }
-
    
    fieldsize  = VFfieldesize(vdata_id,i);
    if(fieldsize == FAIL) {
@@ -704,10 +713,8 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
       array as one hdf5 type string. */
 
    if(sh5type[i] == H5T_STRING) {
-     /*            printf("sh4size in the string %d\n",sh4size[i]);
-		   printf("fieldsize in the string %d\n",fieldsize);*/
-	    /*     if ((h5str_type = mkstr(sh4size[i],H5T_STR_NULLTERM))<0) {*/
-    if ((h5str_type = mkstr(sh4size[i]*fieldorder,H5T_STR_NULLTERM))<0) {
+
+    if ((h5str_type = mkstr(sh4size[i]*fieldorder,H5T_STR_SPACEPAD))<0) {
        printf("error in making string of hdf5 string. \n");
        return FAIL;
      }
@@ -717,8 +724,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
    if (sh5memtype[i] == H5T_STRING) {
 
-     /*if((h5str_type = mkstr(sh4memsize[i],H5T_STR_NULLTERM))<0){ */
-     if((h5str_type = mkstr(sh4memsize[i]*fieldorder,H5T_STR_NULLTERM))<0){ 
+     if((h5str_type = mkstr(sh4memsize[i]*fieldorder,H5T_STR_SPACEPAD))<0){ 
        printf("error in making string for VDATA in memory. \n");
        return FAIL;
      }
@@ -728,22 +734,18 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
    fielddim[0] = fieldorder;
         
-     /* if field type is an array, use H5Tinsert_array.*/
+     /* if field type is an array, use H5Tinsert_array. 
+      When the data type is H5T_STRING, 
+      we will treat the the vdata  as a HDF5 scalar type.*/
 
    if (fielddim[0] == 1 || check_ifstr == 1) {
 
-     /*         printf("i%d,sh5type[i] %d\n",i,sh5type[i]);
-     printf("i%d,fieldname%s\n",i,fieldname);
-     printf("i%d,fil_offset%d\n",i,fil_offset);*/
      if(H5Tinsert(h5_ctype,fieldname,fil_offset,sh5type[i])<0) {
        printf("error inserting hdf5 compound datatype while ");
        printf("converting vdata.\n");
        return FAIL;
      }
-     
-     /*      printf("i%d,sh5memtype[i] %d\n",i,sh5memtype[i]);
-     printf("i%d,fieldname%s\n",i,fieldname);
-     printf("i%d,mem_offset%d\n",i,mem_offset);*/
+
      if(H5Tinsert(h5_cmemtype,fieldname,mem_offset,sh5memtype[i])<0){
        printf("error inserting hdf5 compound datatype of memory");
        printf(" while converting vdata.\n");
@@ -758,10 +760,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
        printf("error inserting array into hdf5 compound datatype. \n");
        return FAIL;
      }
-     /*  printf("i%d,sh5memtype[i] %d\n",i,sh5memtype[i]);
-     printf("i%d,fielddim[0]%d\n",i,fielddim[0]);
-     printf("i%d,fieldname%s\n",i,fieldname);
-     printf("i%d,mem_offset%d\n",i,mem_offset);*/
+
      if(H5Tinsert_array(h5_cmemtype,fieldname,mem_offset,1,fielddim,
 			NULL,sh5memtype[i])<0) {
        printf("error inserting array into hdf5 compound datatype for memory. \n");
@@ -771,13 +770,9 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
      
    }
 
-   /*   fieldsizef = (size_t)fieldsize;
-   fil_offset = fil_offset + fieldsizef;
-   mem_offset = mem_offset + sh4memsize[i];*/
-
    if( check_ifstr == 1) {
-     fil_offset = fil_offset + sh4size[i];
-     mem_offset = mem_offset + sh4memsize[i];
+     fil_offset = fil_offset + sh4size[i]*fieldorder;
+     mem_offset = mem_offset + sh4memsize[i]*fieldorder;
      check_ifstr = 0;
    }
    else { 
@@ -785,7 +780,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
      fil_offset = fil_offset + sh4size[i]*fieldorder;
      mem_offset = mem_offset + sh4memsize[i]*fieldorder;
    }
-   /*   free(fieldname);*/
+
  }
 
  return SUCCEED;

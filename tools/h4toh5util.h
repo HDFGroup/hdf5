@@ -1,3 +1,34 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+Including declarations of global variables,global hashtables,constant
+and utility subroutines of h4toh5util.c
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
+
 #ifndef UTILITY_H
 #define UTILITY_H
 #include "hdf5.h"
@@ -11,7 +42,7 @@ converter.*/
 /*********************************************/
 
 /* 0. if "/" is found in hdf4 object name, we will use another
-   character "_" to replace it. */
+   character "_" to replace it, since "/" is a reserved symbol for hdf5. */
 
 #define ORI_SLASH '/'
 #define CHA_SLASH '_'
@@ -47,7 +78,8 @@ converter.*/
 
 #define DIMSCALE            "DIMSCALE"
 
-/* 5. define affix GLOBAL for dealing sds and image file attributes. */
+/* 5. define affix GLO for sds and image file attributes. these file attributes
+ will be put under root group. */
 #define GLOSDS "GLOSDS"
 #define GLOIMAGE  "GLOIMAGE"
 
@@ -60,7 +92,7 @@ converter.*/
 #define RAST24LABEL "raster24"
 #define PALABEL     "palette"
 
-/* 7. define HDF object class. */
+/* 7. define "IMAGE" CLASS required by image spec. */
 #define IM_CLASS    "IMAGE"
 
 /* 8. reserved group name for HDF4 dimensional scale and palette. */
@@ -112,9 +144,9 @@ extern int32 num_glgrattrs;
   functions used in h4-h5 converter.*/
 /*********************************************/
 /*define two kinds of hashtables. 
-  1. struct table will use object reference as the key to handle whether this
+  1. struct table uses object reference as the key to handle whether this
   object is visited or not.
-  2. struct name_table will use name as the key to handle name clashings and
+  2. struct name_table uses object name as the key to handle name clashings and
   dimensional scale dataset.
 */
   
@@ -139,6 +171,7 @@ extern struct name_table* dim_hashtab;
 
 /* routine for zeroing out the memory. */
 void h4toh5_ZeroMemory(void*s,size_t n);
+
 /* look-up table, object reference is the key.*/
 int lookup(int,int,struct table*);
 
@@ -165,7 +198,7 @@ void  freehashmemory(void);
   functions used in h4-h5 converter.*/
 /*********************************************/
 
-/* this routine defines the convertion of data type from h4 to h5. */
+/* this routine defines the conversion of data type from h4 to h5. */
 herr_t h4type_to_h5type(const int32 h4type, hid_t* h5memtype, 
 			size_t* h4memsize, size_t* h4size, hid_t *h5type);
 
@@ -179,6 +212,7 @@ hid_t mkstr(int size, H5T_str_t pad);
 herr_t h5string_to_int(const int32, hid_t*,const size_t,hid_t* );
 int conv_int_str(uint16, char*);
 
+/* these routines were utility functions for other routines at h4toh5util.c */
 char* trans_obj_name(int32,int32);
 char* get_obj_aboname(char*,char*,char*,const char*);
 char* make_objname_no(char*,char*,const char*);

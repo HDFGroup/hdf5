@@ -1,3 +1,33 @@
+/*-------------------------------------------------------------------------
+ *
+ * Copyright (C) 2000   National Center for Supercomputing Applications.
+ *                      All rights reserved.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/******************************************************************************
+
+  Description: 
+
+1. converter
+
+See HDF4 to HDF5 mapping specification at
+(http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5) for the default mapping 
+from HDF4 object to HDF5 object.
+ 
+The whole converter includes 10 files, h4toh5util.h, h4toh5main.h, h4toh5util.c, h4toh5main.c, h4toh5sds.c, h4toh5image.c,h4toh5vdata.c,h4toh5vgroup.c,h4toh5pal.c and h4toh5anno.c.
+
+2. this file 
+
+converting an hdf4 annotation into an hdf5 attribute of the corresponding object.
+
+
+Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
+ 
+
+*****************************************************************************/
+
 #include "h4toh5main.h"
 
 
@@ -101,7 +131,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
        return FAIL;
     }
 
-    if ((sh5str_type = mkstr(ann_length+1,H5T_STR_NULLTERM))<0) {
+    if ((sh5str_type = mkstr(ann_length+1,H5T_STR_SPACEPAD))<0) {
        printf("error in making string at FILE lABEL ANNO. \n");
        ANend(file_id);
        ANendaccess(ann_id);
@@ -188,7 +218,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
       return FAIL;
     }
 
-    if ((sh5str1_type = mkstr(ann_length+1,H5T_STR_NULLTERM))<0) {
+    if ((sh5str1_type = mkstr(ann_length+1,H5T_STR_SPACEPAD))<0) {
        printf("error in making string at FILE DESC. \n");
        ANend(an_id);
        ANendaccess(ann_id);
@@ -331,7 +361,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
     return FAIL;
   }
   
-  if(num_lab_anno != 0) {
+  if(num_lab_anno > 0) {
 
     for(i=0; i<num_lab_anno;i++) {
       ann_id = ANselect(an_id,i,AN_DATA_LABEL);
@@ -366,7 +396,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	free(ann_buf);
 	return FAIL;
       }
-      /*     printf("ann_buf %s\n",ann_buf);*/
+
       status = ANendaccess(ann_id);
 
       h5_sid     = H5Screate(H5S_SCALAR);
@@ -380,7 +410,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	return FAIL;
       }
 
-      if ((sh5str_type = mkstr(ann_length+1,H5T_STR_NULLTERM))<0) {
+      if ((sh5str_type = mkstr(ann_length+1,H5T_STR_SPACEPAD))<0) {
 	printf("error in making string at OBJ LABEL. \n");
 	ANend(an_id);
 	free(lab_anno_list);
@@ -438,7 +468,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
     }
   }
 
-  if(num_des_anno != 0) {
+  if(num_des_anno > 0) {
 
 
     for (i = 0; i< num_des_anno;i++) {
@@ -469,7 +499,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
       h4toh5_ZeroMemory(ann_buf,(ann_length+1)*sizeof(char));
       ANreadann(ann_id,ann_buf,ann_length+1);
 
-      if ((sh5str_type = mkstr(ann_length+1,H5T_STR_NULLTERM))<0) {
+      if ((sh5str_type = mkstr(ann_length+1,H5T_STR_SPACEPAD))<0) {
 	printf("error in making string at OBJECT DESC. \n");
 	ANend(an_id);
 	free(des_anno_list);
@@ -536,7 +566,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
       ret   = H5Sclose(h5_sid);
       ret   = H5Aclose(h5_aid);
       free(ann_obj_name);
-      /*      printf("ann_buf %s\n",ann_buf);*/
+
       free(ann_buf);
     }
 
