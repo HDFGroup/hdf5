@@ -61,6 +61,7 @@
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/powerpc-ibm-aix4.x
+./config/powerpc-ibm-aix5.x
 ./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
 ./config/sv1-cray
