@@ -215,6 +215,7 @@ test_compound_dtype_2(hid_t file)
 {
     typedef struct s2 {
         short           c2;
+        long            l2;
     } s2;
     typedef struct s1 {
         char            c;
@@ -226,17 +227,25 @@ test_compound_dtype_2(hid_t file)
     hid_t               dtype, native_type, tid, tid2, tid_m, tid_m2;
     int			i, j, n;
     hsize_t		dims[2];
-    s1	                points[100][200], check[100][200];
+    s1                 *temp_point, *temp_check;
+    s1 	               *points=NULL, *check=NULL;
 
-    TESTING("compound_2 datatype");
+    TESTING("nested compound datatype");
+
+    /* Allocate space for the points & check arrays */
+    if((points=malloc(sizeof(s1)*100*200))==NULL)
+        goto error;
+    if((check=calloc(sizeof(s1),100*200))==NULL)
+        goto error;
 
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    (points[i][j]).c = 't';
-	    (points[i][j]).i = n++;
-	    (points[i][j]).st.c2 = i+j;
-	    (points[i][j]).l = (i*10+j*100)*n;
+    for (i = n = 0, temp_point=points; i < 100; i++) {
+	for (j = 0; j < 200; j++,temp_point++) {
+	    points->c = 't';
+	    points->i = n++;
+	    points->st.c2 = i+j;
+	    points->st.l2 = (i*5+j*50)*n;
+	    points->l = (i*10+j*100)*n;
 	}
     }
 
@@ -246,16 +255,17 @@ test_compound_dtype_2(hid_t file)
     if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
 
     /* Create compound datatype for disk storage */
-    if((tid2=H5Tcreate(H5T_COMPOUND, 2))<0) goto error;
-    if((tid=H5Tcreate(H5T_COMPOUND, 15))<0) goto error;
+    if((tid2=H5Tcreate(H5T_COMPOUND, 6))<0) goto error;
+    if((tid=H5Tcreate(H5T_COMPOUND, 19))<0) goto error;
 
     /* Insert and pack members */
     if(H5Tinsert(tid2, "c2", 0, H5T_STD_I16BE)<0) goto error;
+    if(H5Tinsert(tid2, "l2", 2, H5T_STD_I32LE)<0) goto error;
 
     if(H5Tinsert(tid, "c", 0, H5T_NATIVE_CHAR)<0) goto error;
     if(H5Tinsert(tid, "i", 1, H5T_STD_I32LE)<0) goto error;
     if(H5Tinsert(tid, "st", 5, tid2)<0) goto error;
-    if(H5Tinsert(tid, "l", 7, H5T_STD_U64BE)<0) goto error;
+    if(H5Tinsert(tid, "l", 11, H5T_STD_U64BE)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_2, tid, space,
@@ -267,6 +277,7 @@ test_compound_dtype_2(hid_t file)
 
     /* Insert members */
     if(H5Tinsert(tid_m2, "c2", HOFFSET(s2, c2), H5T_NATIVE_SHORT)<0) goto error;
+    if(H5Tinsert(tid_m2, "l2", HOFFSET(s2, l2), H5T_NATIVE_LONG)<0) goto error;
     if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_CHAR)<0) goto error;
     if(H5Tinsert(tid_m, "i", HOFFSET(s1, i), H5T_NATIVE_INT)<0) goto error;
     if(H5Tinsert(tid_m, "st", HOFFSET(s1, st), tid_m2)<0) goto error;
@@ -296,6 +307,8 @@ test_compound_dtype_2(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         goto error;
         
+    if(sizeof(s1)!=H5Tget_size(native_type))
+        goto error;
     if(!H5Tequal(native_type, tid_m)) 
         goto error;
         
@@ -304,12 +317,13 @@ test_compound_dtype_2(hid_t file)
 	goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    if ((points[i][j]).c != (check[i][j]).c ||
-	        (points[i][j]).i != (check[i][j]).i ||
-	        (points[i][j]).st.c2 != (check[i][j]).st.c2 ||
-	        (points[i][j]).l != (check[i][j]).l ) {
+    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
+	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+	    if (temp_point->c != temp_check->c ||
+	        temp_point->i != temp_check->i ||
+	        temp_point->st.c2 != temp_check->st.c2 ||
+	        temp_point->st.l2 != temp_check->st.l2 ||
+	        temp_point->l != temp_check->l ) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
@@ -318,14 +332,24 @@ test_compound_dtype_2(hid_t file)
 	}
     }
 
+    /* Close HDF5 objects */
     H5Dclose(dataset);
     H5Tclose(dtype);
     H5Tclose(native_type);
     H5Tclose(tid_m);
+
+    /* Free memory for test data */
+    free(points);
+    free(check);
+
     PASSED();
     return 0;
 
-  error:
+error:
+    if(points!=NULL)
+        free(points);
+    if(check!=NULL)
+        free(check);
     return -1;
 }
 
@@ -416,6 +440,8 @@ test_compound_dtype(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         goto error;
     
+    if(sizeof(s1)!=H5Tget_size(native_type))
+        goto error;
     if(!H5Tequal(native_type, tid2)) 
         goto error;
         
@@ -610,7 +636,7 @@ test_array_dtype(hid_t file)
     /* Initialize the dataset */
     for(i = n = 0, temp_point=points; i < 100; i++)
 	for(j = 0; j < 200; j++)
-            for(k = 0; k < 5; k++) {
+            for(k = 0; k < 5; k++,temp_point++) {
                 temp_point->c= 't';
                 temp_point->i= n++;
                 temp_point->l= (i*10+j*100)*n;
@@ -676,7 +702,7 @@ test_array_dtype(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
-            for (k = 0; k < 5; k++) {
+            for (k = 0; k < 5; k++, temp_point++,temp_check++) {
                 if (temp_point->c != temp_check->c ||
 	            temp_point->i != temp_check->i ||
 	            temp_point->l != temp_check->l ) {
