@@ -1541,6 +1541,7 @@
 ./tools/testfiles/test1.h5
 ./tools/testfiles/test3.h5
 ./tools/testfiles/test4.h5
+./tools/testfiles/test5.h5
 ./tools/testfiles/h5repack_info.txt
 
 
