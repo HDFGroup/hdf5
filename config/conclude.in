@@ -32,9 +32,11 @@ TAGS: $(LIB_SRC)
 ## Runs each test in order, passing $(TEST_FLAGS) to the program.
 ## Since tests are done in a shell loop, "make -i" does apply inside it.
 ## Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
+## The timestamps give a rough idea how much time the tests use.
 ##
 tests: $(TEST_PROGS) $(TEST_PROGS_PARA) $(TEST_SCRIPTS) $(LIB)
 check test _test: tests
+	@echo "===Tests begin `date`==="
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
@@ -85,6 +87,7 @@ check test _test: tests
 	   fi;								      \
 	done;								      \
 	test $$test = dummy || false
+	@echo "===Tests ended `date`==="
 	@for d in X $(SUBDIRS); do                                      \
 	    if test $$d != X; then                                      \
 	        (set -x; cd $$d && $(MAKE) tests) || exit 1;            \
