@@ -13,6 +13,14 @@
 #ifndef _H5private_H
 #define _H5private_H
 #include <H5public.h>		/* Include Public Definitions		*/
+/*
+ * Since H5config.h is a generated header file, it is messy to try
+ * to put a #ifndef _H5config_H ... #endif guard in it.
+ * HDF5 has set an internal rule that it is being included here.
+ * Source files should NOT include H5config.h directly but include
+ * it via H5private.h.  The #ifndef _H5private_H guard above would
+ * prevent repeated include.
+ */
 #include <H5config.h>		/* Include all configuration info	*/
 
 /* include the pthread library */

@@ -20,6 +20,14 @@
 #define _H5public_H
 
 /* Include files for public use... */
+/*
+ * Since H5pubconf.h is a generated header file, it is messy to try
+ * to put a #ifndef _H5pubconf_H ... #endif guard in it.
+ * HDF5 has set an internal rule that it is being included here.
+ * Source files should NOT include H5pubconf.h directly but include
+ * it via H5public.h.  The #ifndef _H5public_H guard above would
+ * prevent repeated include.
+ */
 #include <H5pubconf.h>		/*from configure                             */
 #include <sys/types.h>
 #ifdef H5_STDC_HEADERS
