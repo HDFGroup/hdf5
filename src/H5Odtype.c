@@ -160,8 +160,11 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         dt->u.compnd.nmembs = flags & 0xffff;
         assert(dt->u.compnd.nmembs > 0);
         dt->u.compnd.nalloc = dt->u.compnd.nmembs;
-        dt->u.compnd.memb = H5MM_xcalloc(dt->u.compnd.nalloc,
-					 sizeof(H5T_member_t));
+        dt->u.compnd.memb = H5MM_calloc(dt->u.compnd.nalloc*sizeof(H5T_member_t));
+	if (NULL==dt->u.compnd.memb) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
             dt->u.compnd.memb[i].name = H5MM_xstrdup((const char *)*pp);
             *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;         /*multiple of 8 w/ null terminator */
@@ -177,7 +180,11 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
             dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
             dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
             dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
-	    dt->u.compnd.memb[i].type = H5MM_xcalloc (1, sizeof(H5T_t));
+	    dt->u.compnd.memb[i].type = H5MM_calloc (sizeof(H5T_t));
+	    if (NULL==dt->u.compnd.memb[i].type) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			       "memory allocation failed");
+	    }
 	    H5F_addr_undef (&(dt->u.compnd.memb[i].type->ent.header));
             if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type) < 0 ||
                 H5T_COMPOUND == dt->u.compnd.memb[i].type->type) {
@@ -451,7 +458,10 @@ H5O_dtype_decode(H5F_t __unused__ *f, const uint8 *p,
     /* check args */
     assert(p);
 
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     H5F_addr_undef (&(dt->ent.header));
 
     if (H5O_dtype_decode_helper(&p, dt) < 0) {
@@ -618,7 +628,10 @@ H5O_dtype_reset(void *_mesg)
     FUNC_ENTER(H5O_dtype_reset, FAIL);
 
     if (dt) {
-        tmp = H5MM_xmalloc(sizeof(H5T_t));
+        if (NULL==(tmp = H5MM_malloc(sizeof(H5T_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
         *tmp = *dt;
         H5T_close(tmp);
         HDmemset(dt, 0, sizeof(H5T_t));

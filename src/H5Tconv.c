@@ -215,12 +215,22 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	 *	   `src' because we're only interested in the members of the
 	 * 	   source type that are also in the destination type.
 	 */
-	cdata->priv = priv = H5MM_xcalloc (1, sizeof(H5T_conv_struct_t));
-	priv->src2dst = H5MM_xmalloc (src->u.compnd.nmembs * sizeof(intn));
-	priv->src_memb_id = H5MM_xmalloc (/*!*/dst->u.compnd.nmembs *
-					  sizeof(hid_t));
-	priv->dst_memb_id = H5MM_xmalloc (dst->u.compnd.nmembs *
-					  sizeof(hid_t));
+	cdata->priv = priv = H5MM_calloc (sizeof(H5T_conv_struct_t));
+	if (NULL==priv) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	priv->src2dst = H5MM_malloc (src->u.compnd.nmembs * sizeof(intn));
+	priv->src_memb_id = H5MM_malloc (/*!*/dst->u.compnd.nmembs *
+					 sizeof(hid_t));
+	priv->dst_memb_id = H5MM_malloc (dst->u.compnd.nmembs *
+					 sizeof(hid_t));
+	if (NULL==priv->src2dst ||
+	    NULL==priv->src_memb_id ||
+	    NULL==priv->dst_memb_id) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 
 	/*
 	 * Insure that members are sorted.
@@ -265,10 +275,14 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      */
     priv->memb_conv = H5MM_xfree (priv->memb_conv);
     priv->memb_cdata = H5MM_xfree (priv->memb_cdata);
-    priv->memb_conv = H5MM_xmalloc (dst->u.compnd.nmembs *
-				    sizeof(H5T_conv_t));
-    priv->memb_cdata = H5MM_xcalloc (dst->u.compnd.nmembs,
+    priv->memb_conv = H5MM_malloc (dst->u.compnd.nmembs *
+				   sizeof(H5T_conv_t));
+    priv->memb_cdata = H5MM_calloc (dst->u.compnd.nmembs *
 				     sizeof(H5T_cdata_t*));
+    if (NULL==priv->memb_conv || NULL==priv->memb_cdata) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     src2dst = priv->src2dst;
 
     for (i=0; i<src->u.compnd.nmembs; i++) {

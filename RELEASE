@@ -1,58 +1,107 @@
 Release information for hdf5-1.0.0a
-----------------------------------
-
-This release is an beta release for functionality necessary for the
-ASCI vector bundle project in a serial environment.  Some parallel
-support is also available.  Other features should be considered alpha
-quality.
+-----------------------------------
 
 The following functions are implemented. Errors are returned if an
 attempt is made to use some feature which is not implemented and
 printing the error stack will show `not implemented yet'.
 
 Library
-   H5dont_atexit	- don't call library close on exit
-   H5init		- initialize library (happens automatically)
+   H5check		- check that lib version matches header version
+   H5open		- initialize library (happens automatically)
+   H5close		- shut down the library (happens automatically)
+   H5dont_atexit	- don't call H5close on exit
    H5version		- retrieve library version info
+   H5version_check	- check for specific library version
 
-Templates
-   H5Cclose		- release template resources
-   H5Ccopy		- copy a template
-   H5Ccreate		- create a new template
-   H5Cget_chunk		- get chunked storage parameters
-   H5Cget_class		- get template class
-   H5Cget_istore_k	- get chunked storage parameters
-   H5Cget_layout	- get raw data layout class
-   H5Cget_sizes		- get address and size sizes
-   H5Cget_sym_k		- get symbol table storage parameters
-   H5Cget_userblock	- get user-block size
-   H5Cget_version	- get file version numbers
-   H5Cset_chunk		- set chunked storage parameters
-   H5Cset_istore_k	- set chunked storage parameters
-   H5Cset_layout	- set raw data layout class
-   H5Cset_sizes		- set address and size sizes
-   H5Cset_sym_k		- set symbol table storage parameters
-   H5Cset_userblock	- set user-block size
+Property Lists
+   H5Pclose		- release template resources
+   H5Pcopy		- copy a template
+   H5Pcreate		- create a new template
+   H5Pget_chunk		- get chunked storage properties
+   H5Pset_chunk		- set chunked storage properties
+   H5Pget_class		- get template class
+   H5Pget_istore_k	- get chunked storage properties
+   H5Pset_istore_k	- set chunked storage properties
+   H5Pget_layout	- get raw data layout class
+   H5Pset_layout	- set raw data layout class
+   H5Pget_sizes		- get address and size sizes
+   H5Pset_sizes		- set address and size sizes
+   H5Pget_sym_k		- get symbol table storage properties
+   H5Pset_sym_k		- set symbol table storage properties
+   H5Pget_userblock	- get user-block size
+   H5Pset_userblock	- set user-block size
+   H5Pget_version	- get file version numbers
+   H5Pget_alignment	- get data alignment properties
+   H5Pset_alignment	- set data alignment properties
+   H5Pget_external_count- get count of external data files
+   H5Pget_external	- get information about an external data file
+   H5Pset_external	- add a new external data file to the list
+   H5Pget_driver	- get low-level file driver class
+   H5Pget_stdio		- get properties for stdio low-level driver
+   H5Pset_stdio		- set properties for stdio low-level driver
+   H5Pget_sec2		- get properties for sec2 low-level driver
+   H5Pset_sec2		- set properties for sec2 low-level driver
+   H5Pget_core		- get properties for core low-level driver
+   H5Pset_core		- set properties for core low-level driver
+   H5Pget_split		- get properties for split low-level driver
+   H5Pset_split		- set properties for split low-level driver
+   H5P_get_family	- get properties for family low-level driver
+   H5P_set_family	- set properties for family low-level driver
+   H5Pget_cache		- get meta- and raw-data caching properties
+   H5Pset_cache		- set meta- and raw-data caching properties
+   H5Pget_buffer	- get raw-data I/O pipe buffer properties
+   H5Pset_buffer	- set raw-data I/O pipe buffer properties
+   H5Pget_preserve	- get type conversion preservation properties
+   H5Pset_preserve	- set type conversion preservation properties
+   H5Pget_compression	- get raw data compression properties
+   H5Pset_compression	- set raw data compression properties
+   H5Pget_deflate	- get deflate compression properties
+   H5Pset_deflate	- set deflate compression properties
+   H5Pget_mpi		- get MPI-IO properties
+   H5Pset_mpi		- set MPI-IO properties
+   H5Pget_xfer		- get data transfer properties
+   H5Pset_xfer		- set data transfer properties
 
 Datasets
    H5Dclose		- release dataset resources
    H5Dcreate		- create a new dataset
    H5Dget_space		- get data space
+   H5Dget_type		- get data type
+   H5Dget_create_plist	- get dataset creation properties
    H5Dopen		- open an existing dataset
    H5Dread		- read raw data
    H5Dwrite		- write raw data
+   H5Dextend		- extend a dataset
+
+Attributes
+   H5Acreate		- create a new attribute
+   H5Aopen_name		- open an attribute by name
+   H5Aopen_idx		- open an attribute by number
+   H5Awrite		- write values into an attribute
+   H5Aread		- read values from an attribute
+   H5Aget_space		- get attribute data space
+   H5Aget_type		- get attribute data type
+   H5Aget_name		- get attribute name
+   H5Anum_attrs		- return the number of attributes for an object
+   H5Aiterate		- iterate over an object's attributes
+   H5Adelete		- delete an attribute
+   H5Aclose		- close an attribute
 
 Errors
    H5Eclear		- clear the error stack
-   H5Eclose		- release an error stack
-   H5Ecreate		- create a new error stack
    H5Eprint		- print an error stack
-   H5Epush		- push an error onto a stack
+   H5Eget_auto		- get automatic error reporting settings
+   H5Eset_auto		- set automatic error reporting
+   H5Ewalk		- iterate over the error stack
+   H5Ewalk_cb		- the default error stack iterator function
+   H5Eget_major		- get the message for the major error number
+   H5Eget_minor		- get the message for the minor error number
 
 Files
    H5Fclose		- close a file and release resources
    H5Fcreate		- create a new file
-   H5Fget_create_template - get file creation template
+   H5Fget_create_template- get file creation property list
+   H5Fget_access_template- get file access property list
    H5Fis_hdf5		- determine if a file is an hdf5 file
    H5Fopen		- open an existing file
 
@@ -63,24 +112,35 @@ Groups
    H5Gpop		- pop a group from the cwg stack
    H5Gpush		- push a group onto the cwg stack
    H5Gset		- set the current working group (cwg)
+   H5Giterate		- iterate over the contents of a group
+   H5Gmove		- change the name of some object
+   H5Glink		- create a hard or soft link to an object
+   H5Gunlink		- break the link between a name and an object
+   H5Gstat		- get information about a group entry
+   H5Gget_linkval	- get the value of a soft link
 
 Data spaces
-   H5Pclose		- release data space resources
-   H5Pcreate_simple	- create a new simple data space
-   H5Pget_dims		- get data space size
-   H5Pget_hyperslab	- get data space selection
-   H5Pget_ndims		- get data space dimensionality
-   H5Pget_npoints	- get number of selected points
-   H5Pis_simple		- determine if data space is simple
-   H5Pset_hyperslab	- select data points
-   H5Pset_space		- reset data space dimensionality and size
+   H5Sclose		- release data space resources
+   H5Screate_simple	- create a new simple data space
+   H5Sget_dims		- get data space size
+   H5Sget_hyperslab	- get data space selection
+   H5Sset_hyperslab	- select data points
+   H5Sget_ndims		- get data space dimensionality
+   H5Sget_npoints	- get number of selected points
+   H5Sis_simple		- determine if data space is simple
+   H5Sset_space		- reset data space dimensionality and size
+   H5Scopy		- copy a data space
 
 Data types
    H5Tclose		- release data type resources
+   H5Topen		- open a named data type
+   H5Tcommit		- name a data type
+   H5Tcommitted		- determine if a type is named
    H5Tcopy		- copy a data type
    H5Tcreate		- create a new data type
    H5Tequal		- compare two data types
    H5Tfind		- find a data type conversion function
+   H5Tconvert		- convert data from one type to another
    H5Tget_class		- get data type class
    H5Tget_cset		- get character set
    H5Tget_ebias		- get exponent bias
@@ -117,6 +177,9 @@ Data types
    H5Tset_size		- set size in bytes
    H5Tset_strpad	- set string padding
    H5Tunregister	- remove a type conversion function
+
+Compression
+   H5Tregister		- register a new compression method
 
 This release has been tested on UNIX platforms only; specifically:
 Linux, FreedBSD, IRIX, Solaris & Dec UNIX.

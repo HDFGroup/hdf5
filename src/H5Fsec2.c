@@ -90,7 +90,10 @@ H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
     if ((fd = open(name, oflags, 0666)) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
     }
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     lf->u.sec2.fd = fd;
     lf->u.sec2.op = H5F_OP_SEEK;
     lf->u.sec2.cur = 0;

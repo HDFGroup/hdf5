@@ -253,9 +253,9 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     assert(space);
 
     /* Build the attribute information */
-    if((attr = H5MM_xcalloc(1, sizeof(H5A_t)))==NULL)
+    if((attr = H5MM_calloc(sizeof(H5A_t)))==NULL)
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		      "unable to allocate space for attribute info");
+		      "memory allocation failed for attribute info");
     attr->name=HDstrdup(name);
     attr->dt=H5T_copy(type, H5T_COPY_ALL);
     attr->ds=H5S_copy(space);
@@ -680,7 +680,10 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
 
     /* Get the maximum buffer size needed and allocate it */
     buf_size = nelmts*MAX(src_type_size,dst_type_size);
-    tconv_buf = H5MM_xmalloc (buf_size);
+    if (NULL==(tconv_buf = H5MM_malloc (buf_size))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
 
     /* Copy the user's data into the buffer for conversion */
     HDmemcpy(tconv_buf,buf,src_type_size*nelmts);
@@ -847,7 +850,10 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
 
     /* Get the maximum buffer size needed and allocate it */
     buf_size = nelmts*MAX(src_type_size,dst_type_size);
-    tconv_buf = H5MM_xmalloc (buf_size);
+    if (NULL==(tconv_buf = H5MM_malloc (buf_size))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
 
     /* Copy the attribute data into the buffer for conversion */
     HDmemcpy(tconv_buf,attr->data,src_type_size*nelmts);
@@ -1396,7 +1402,10 @@ H5A_copy(const H5A_t *old_attr)
     assert(old_attr);
 
     /* get space */
-    new_attr = H5MM_xcalloc(1, sizeof(H5A_t));
+    if (NULL==(new_attr = H5MM_calloc(sizeof(H5A_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 
     /* Copy the top level of the attribute */
     *new_attr = *old_attr;
@@ -1409,7 +1418,10 @@ H5A_copy(const H5A_t *old_attr)
     new_attr->dt=H5T_copy(old_attr->dt, H5T_COPY_ALL);
     new_attr->ds=H5S_copy(old_attr->ds);
     if(old_attr->data) {
-        new_attr->data=H5MM_xmalloc(old_attr->data_size);
+        if (NULL==(new_attr->data=H5MM_malloc(old_attr->data_size))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
         HDmemcpy(new_attr->data,old_attr->data,old_attr->data_size);
     } /* end if */
 
@@ -1446,11 +1458,10 @@ H5A_close(H5A_t *attr)
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
     if(attr->ent_opened && !attr->initialized) {
-        uint8 *tmp_buf=H5MM_xcalloc(1,attr->data_size);
-
+        uint8 *tmp_buf=H5MM_calloc(attr->data_size);
         if (NULL == tmp_buf) {
             HRETURN_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL,
-			  "unable to allocate attribute fill-value");
+			  "memory allocation failed for attribute fill-value");
         }
 
         /* Go write the fill data to the attribute */

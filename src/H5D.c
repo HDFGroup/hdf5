@@ -783,7 +783,10 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     }
 
     /* Initialize the dataset object */
-    new_dset = H5MM_xcalloc(1, sizeof(H5D_t));
+    if (NULL==(new_dset = H5MM_calloc(sizeof(H5D_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     H5F_addr_undef(&(new_dset->ent.header));
     new_dset->type = H5T_copy(type, H5T_COPY_ALL);
     new_dset->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
@@ -978,7 +981,10 @@ H5D_open(H5G_t *loc, const char *name)
     assert (name && *name);
     
     f = H5G_fileof (loc);
-    dataset = H5MM_xcalloc(1, sizeof(H5D_t));
+    if (NULL==(dataset = H5MM_calloc(sizeof(H5D_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     dataset->create_parms = H5P_copy (H5P_DATASET_CREATE, &H5D_create_dflt);
     H5F_addr_undef(&(dataset->ent.header));
 
@@ -1316,10 +1322,16 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
-	tconv_buf = H5MM_xmalloc (target_size);
+	if (NULL==(tconv_buf = H5MM_malloc (target_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed for type conversion");
+	}
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
-	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
+	if (NULL==(bkg_buf = H5MM_malloc (smine_nelmts * dst_type_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed for background buffer");
+	}
     }
 
 #ifdef H5D_DEBUG
@@ -1604,10 +1616,16 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
-	tconv_buf = H5MM_xmalloc (target_size);
+	if (NULL==(tconv_buf = H5MM_malloc (target_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed for type conversion");
+	}
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
-	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
+	if (NULL==(bkg_buf = H5MM_malloc (smine_nelmts * dst_type_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed for background buffer");
+	}
     }
 
 #ifdef H5D_DEBUG

@@ -496,25 +496,29 @@ H5Fis_hdf5 (const char *filename)
 static H5F_t *
 H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 {
-    H5F_t		*f = NULL;
+    H5F_t		*f=NULL, *ret_value=NULL;
     intn		n;
     
     FUNC_ENTER(H5F_new, NULL);
 
-    f = H5MM_xcalloc(1, sizeof(H5F_t));
-    f->shared = shared;
+    if (NULL==(f = H5MM_calloc(sizeof(H5F_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
 
-    if (!f->shared) {
-	f->shared = H5MM_xcalloc(1, sizeof(H5F_file_t));
+    if (shared) {
+	f->shared = shared;
+    } else {
+	f->shared = H5MM_calloc(sizeof(H5F_file_t));
 	H5F_addr_undef(&(f->shared->boot_addr));
 	H5F_addr_undef(&(f->shared->base_addr));
 	H5F_addr_undef(&(f->shared->freespace_addr));
 	H5F_addr_undef(&(f->shared->hdf5_eof));
-
+    
 	/*
-	 * Deep-copy the file creation and file access property lists into
-	 * the new file handle.  We do this early because some values might
-	 * need to change as the file is being opened.
+	 * Deep-copy the file creation and file access property lists into the
+	 * new file handle.  We do this early because some values might need
+	 * to change as the file is being opened.
 	 */
 	if (NULL==(f->shared->create_parms=H5P_copy(H5P_FILE_CREATE, fcpl))) {
 	    HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
@@ -540,8 +544,15 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 	H5F_istore_init (f);
     }
     f->shared->nrefs++;
+    ret_value = f;
 
-    FUNC_LEAVE(f);
+ done:
+    if (!ret_value && f) {
+	if (!shared) H5MM_xfree (f->shared);
+	H5MM_xfree (f);
+    }
+    
+    FUNC_LEAVE(ret_value);
 }
 
 

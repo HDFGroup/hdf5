@@ -117,7 +117,10 @@ H5F_core_open(const char __unused__ *name,
 		      "must creat file with write access");
     }
     
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     lf->u.core.mem = NULL;
     lf->u.core.alloc = 0;
     lf->u.core.size = 0;
@@ -240,9 +243,9 @@ H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	       const H5D_transfer_t __unused__ xfer_mode,
 	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
-    size_t		need_more;
+    size_t		need_more, na;
     size_t		increment = 1;
-    
+    uint8		*x = NULL;
 
     FUNC_ENTER(H5F_core_write, FAIL);
 
@@ -261,8 +264,13 @@ H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	need_more = addr->offset+size - lf->u.core.alloc;
 	need_more = increment*((need_more+increment-1)/increment);
 
-	lf->u.core.alloc = lf->u.core.alloc + need_more;
-	lf->u.core.mem = H5MM_xrealloc(lf->u.core.mem, lf->u.core.alloc);
+	na = lf->u.core.alloc + need_more;
+	if (NULL==(x = H5MM_realloc (lf->u.core.mem, na))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	lf->u.core.alloc = na;
+	lf->u.core.mem = x;
     }
     
     /* Move the physical EOF marker */

@@ -151,11 +151,14 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     ent->file = f;
     if (H5MF_alloc(f, H5MF_META, (hsize_t)size, &(ent->header)/*out*/) < 0) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		      "unable to allocate file space for object header hdr");
+		      "file allocation failed for object header header");
     }
     
     /* allocate the object header and fill in header fields */
-    oh = H5MM_xcalloc(1, sizeof(H5O_t));
+    if (NULL==(oh = H5MM_calloc(sizeof(H5O_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     oh->dirty = TRUE;
     oh->version = H5O_VERSION;
     oh->nlink = 0;
@@ -163,20 +166,27 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the chunk list and initialize the first chunk */
     oh->nchunks = 1;
     oh->alloc_nchunks = H5O_NCHUNKS;
-    oh->chunk = H5MM_xmalloc(oh->alloc_nchunks * sizeof(H5O_chunk_t));
-
+    if (NULL==(oh->chunk=H5MM_malloc(oh->alloc_nchunks*sizeof(H5O_chunk_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     tmp_addr = ent->header;
     H5F_addr_inc(&tmp_addr, (hsize_t)H5O_SIZEOF_HDR(f));
     oh->chunk[0].dirty = TRUE;
     oh->chunk[0].addr = tmp_addr;
     oh->chunk[0].size = size_hint;
-    oh->chunk[0].image = H5MM_xcalloc(1, size_hint);
-
+    if (NULL==(oh->chunk[0].image = H5MM_calloc(size_hint))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
+    
     /* create the message list and initialize the first message */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
-    oh->mesg = H5MM_xcalloc(oh->alloc_nmesgs, sizeof(H5O_mesg_t));
-
+    if (NULL==(oh->mesg=H5MM_calloc(oh->alloc_nmesgs*sizeof(H5O_mesg_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     oh->mesg[0].type = H5O_NULL;
     oh->mesg[0].dirty = TRUE;
     oh->mesg[0].native = NULL;
@@ -331,7 +341,10 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
     assert(!_udata2);
 
     /* allocate ohdr and init chunk list */
-    oh = H5MM_xcalloc(1, sizeof(H5O_t));
+    if (NULL==(oh = H5MM_calloc(sizeof(H5O_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
@@ -364,16 +377,24 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 
     /* build the message array */
     oh->alloc_nmesgs = MAX(H5O_NMESGS, nmesgs);
-    oh->mesg = H5MM_xcalloc(oh->alloc_nmesgs, sizeof(H5O_mesg_t));
+    if (NULL==(oh->mesg=H5MM_calloc(oh->alloc_nmesgs*sizeof(H5O_mesg_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
 
     /* read each chunk from disk */
     while (H5F_addr_defined(&chunk_addr)) {
 
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
-	    oh->alloc_nchunks += H5O_NCHUNKS;
-	    oh->chunk = H5MM_xrealloc(oh->chunk,
-				   oh->alloc_nchunks * sizeof(H5O_chunk_t));
+	    size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
+	    H5O_chunk_t *x = H5MM_realloc (oh->chunk, na*sizeof(H5O_chunk_t));
+	    if (!x) {
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			     "memory allocation failed");
+	    }
+	    oh->alloc_nchunks = na;
+	    oh->chunk = x;
 	}
 	
 	/* read the chunk raw data */
@@ -381,7 +402,10 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 	oh->chunk[chunkno].dirty = FALSE;
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
-	oh->chunk[chunkno].image = H5MM_xmalloc(chunk_size);
+	if (NULL==(oh->chunk[chunkno].image = H5MM_malloc(chunk_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed");
+	}
 	if (H5F_block_read(f, &chunk_addr, (hsize_t)chunk_size, H5D_XFER_DFLT,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
@@ -1140,7 +1164,10 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL,
 			     "message class is not sharable");
 	    }
-	    sh_mesg = H5MM_xcalloc (1, sizeof *sh_mesg);
+	    if (NULL==(sh_mesg = H5MM_calloc (sizeof *sh_mesg))) {
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			     "memory allocation failed");
+	    }
 	    if ((type->get_share)(ent->file, mesg, sh_mesg/*out*/)<0) {
 		/*
 		 * If the message isn't shared then turn off the shared bit
@@ -1396,9 +1423,13 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 	    old_addr = oh->chunk[chunkno].image;
 
 	    /* Be careful not to indroduce garbage */
-	    oh->chunk[chunkno].image = H5MM_xrealloc(old_addr,
-						     (oh->chunk[chunkno].size +
-						      delta));
+	    oh->chunk[chunkno].image = H5MM_realloc(old_addr,
+						    (oh->chunk[chunkno].size +
+						     delta));
+	    if (NULL==oh->chunk[chunkno].image) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			       "memory allocation failed");
+	    }
 	    HDmemset(oh->chunk[chunkno].image + oh->chunk[chunkno].size,
 		     0, delta);
 	    oh->chunk[chunkno].size += delta;
@@ -1418,9 +1449,14 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
-	oh->alloc_nmesgs += H5O_NMESGS;
-	oh->mesg = H5MM_xrealloc(oh->mesg,
-				 oh->alloc_nmesgs * sizeof(H5O_mesg_t));
+	size_t na = oh->alloc_nmesgs + H5O_NMESGS;
+	H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	if (NULL==x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	oh->alloc_nmesgs = na;
+	oh->mesg = x;
     }
     delta = MAX(H5O_MIN_SIZE, size+H5O_SIZEOF_MSGHDR(f));
     delta = H5O_ALIGN(delta);
@@ -1436,9 +1472,13 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 
     old_addr = oh->chunk[chunkno].image;
     oh->chunk[chunkno].size += delta;
-    oh->chunk[chunkno].image = H5MM_xrealloc(old_addr,
-					     oh->chunk[chunkno].size);
-
+    oh->chunk[chunkno].image = H5MM_realloc(old_addr,
+					    oh->chunk[chunkno].size);
+    if (NULL==oh->chunk[chunkno].image) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
+    
     /* adjust raw addresses for messages of this chunk */
     if (old_addr != oh->chunk[chunkno].image) {
 	for (i = 0; i < oh->nmesgs; i++) {
@@ -1543,26 +1583,39 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      * Create the new chunk without giving it a file address.
      */
     if (oh->nchunks >= oh->alloc_nchunks) {
-	oh->alloc_nchunks += H5O_NCHUNKS;
-	oh->chunk = H5MM_xrealloc(oh->chunk,
-				  oh->alloc_nchunks * sizeof(H5O_chunk_t));
+	size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
+	H5O_chunk_t *x = H5MM_realloc (oh->chunk, na*sizeof(H5O_chunk_t));
+	if (!x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	oh->alloc_nchunks = na;
+	oh->chunk = x;
     }
     chunkno = oh->nchunks++;
     oh->chunk[chunkno].dirty = TRUE;
     H5F_addr_undef(&(oh->chunk[chunkno].addr));
     oh->chunk[chunkno].size = size;
-    oh->chunk[chunkno].image = p = H5MM_xcalloc(1, size);
-
+    if (NULL==(oh->chunk[chunkno].image = p = H5MM_calloc(size))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
+    
     /*
      * Make sure we have enough space for all possible new messages
      * that could be generated below.
      */
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
         int old_alloc=oh->alloc_nmesgs;
+	size_t na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
+	H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	if (!x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+        oh->alloc_nmesgs = na;
+        oh->mesg = x;
 
-        oh->alloc_nmesgs += MAX(H5O_NMESGS, 3);
-        oh->mesg = H5MM_xrealloc(oh->mesg,
-				 oh->alloc_nmesgs * sizeof(H5O_mesg_t));
         /* Set new object header info to zeros */
         HDmemset(&oh->mesg[old_alloc], 0,
 		 (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
@@ -1620,7 +1673,10 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     oh->mesg[found_null].type = H5O_CONT;
     oh->mesg[found_null].dirty = TRUE;
-    cont = H5MM_xcalloc(1, sizeof(H5O_cont_t));
+    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     H5F_addr_undef(&(cont->addr));
     cont->size = 0;
     cont->chunkno = chunkno;
@@ -1707,11 +1763,16 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	assert(oh->mesg[idx].raw_size - size >= H5O_SIZEOF_MSGHDR(f));
 
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
-        int old_alloc=oh->alloc_nmesgs;
+	    int old_alloc=oh->alloc_nmesgs;
+	    size_t na = oh->alloc_nmesgs + H5O_NMESGS;
+	    H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	    if (!x) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			       "memory allocation failed");
+	    }
+	    oh->alloc_nmesgs = na;
+	    oh->mesg = x;
 
-	    oh->alloc_nmesgs += H5O_NMESGS;
-	    oh->mesg = H5MM_xrealloc(oh->mesg,
-				     oh->alloc_nmesgs * sizeof(H5O_mesg_t));
 	    /* Set new object header info to zeros */
 	    HDmemset(&oh->mesg[old_alloc],0,
 		     (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
@@ -1773,7 +1834,10 @@ H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
 
     /* Encode the message put it in the global heap */
     if ((size = (type->raw_size)(f, mesg))>0) {
-	buf = H5MM_xmalloc (size);
+	if (NULL==(buf = H5MM_malloc (size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed");
+	}
 	if ((type->encode)(f, buf, mesg)<0) {
 	    HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL,
 			 "unable to encode message");
@@ -1879,7 +1943,10 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
     }
 
     /* debug each message */
-    sequence = H5MM_xcalloc(NELMTS(message_type_g), sizeof(int));
+    if (NULL==(sequence = H5MM_calloc(NELMTS(message_type_g)*sizeof(int)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
     for (i=0, mesg_total=0; i<oh->nmesgs; i++) {
 	mesg_total += H5O_SIZEOF_MSGHDR(f) + oh->mesg[i].raw_size;
 	fprintf(stream, "%*sMessage %d...\n", indent, "", i);

@@ -1099,7 +1099,10 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      * don't count the root group as an open object.  The root group will
      * never be closed.
      */
-    f->shared->root_grp = H5MM_xcalloc (1, sizeof(H5G_t));
+    if (NULL==(f->shared->root_grp = H5MM_calloc (sizeof(H5G_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     f->shared->root_grp->ent = *ent;
     f->shared->root_grp->nref = 1;
     assert (1==f->nopen);
@@ -1171,7 +1174,10 @@ H5G_create(H5G_t *loc, const char *name, size_t size_hint)
     }
     
     /* create an open group */
-    grp = H5MM_xcalloc(1, sizeof(H5G_t));
+    if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     if (H5G_stab_create(grp_ent.file, size_hint, &(grp->ent)/*out*/) < 0) {
 	grp = H5MM_xfree(grp);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
@@ -1218,7 +1224,10 @@ H5G_open(H5G_t *loc, const char *name)
     assert(name && *name);
 
     /* Open the object, making sure it's a group */
-    grp = H5MM_xcalloc(1, sizeof(H5G_t));
+    if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     if (H5G_find(loc, name, NULL, &(grp->ent)/*out*/) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
     }
@@ -1354,7 +1363,10 @@ H5G_set (H5G_t *grp)
      * working group.
      */
     if (!f->cwg_stack) {
-	f->cwg_stack = H5MM_xcalloc(1, sizeof(H5G_cwgstk_t));
+	if (NULL==(f->cwg_stack = H5MM_calloc(sizeof(H5G_cwgstk_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
     } else if (H5G_close(f->cwg_stack->grp) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CWG, FAIL,
 		      "couldn't close previous current working group");
@@ -1435,7 +1447,10 @@ H5G_push (H5G_t *grp)
     /*
      * Push a new entry onto the stack.
      */
-    stack = H5MM_xcalloc(1, sizeof(H5G_cwgstk_t));
+    if (NULL==(stack = H5MM_calloc(sizeof(H5G_cwgstk_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     stack->grp = H5G_reopen(grp);
     stack->next = H5G_fileof(grp)->cwg_stack;
     H5G_fileof(grp)->cwg_stack = stack;

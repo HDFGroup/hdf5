@@ -73,7 +73,10 @@ H5O_layout_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert (!sh);
 
     /* decode */
-    mesg = H5MM_xcalloc(1, sizeof(H5O_layout_t));
+    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_layout_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     H5F_addr_decode(f, &p, &(mesg->addr));
     mesg->ndims = *p++;
 
@@ -170,8 +173,11 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest) dest = H5MM_xcalloc(1, sizeof(H5O_layout_t));
-
+    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_layout_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+    
     /* copy */
     *dest = *mesg;
 

@@ -22,12 +22,15 @@
 /* Private headers needed by this file */
 #include <H5private.h>
 
+#define H5MM_malloc(Z)	HDmalloc(Z)
+#define H5MM_calloc(Z)	HDcalloc(1,Z)
+
 /*
  * Library prototypes...
  */
-void *H5MM_xmalloc (size_t size);
-void *H5MM_xcalloc (intn n, size_t size);
-void *H5MM_xrealloc (void *mem, size_t size);
+void *H5MM_realloc (void *mem, size_t size);
 char *H5MM_xstrdup (const char *s);
+char *H5MM_strdup (const char *s);
 void *H5MM_xfree (void *mem);
+
 #endif

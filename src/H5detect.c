@@ -362,7 +362,10 @@ H5T_init (void)\n\
 
         /* The part common to fixed and floating types */
         printf("\
-   dt = H5MM_xcalloc (1, sizeof(H5T_t));\n\
+   if (NULL==(dt = H5MM_calloc (sizeof(H5T_t)))) {\n\
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\n\
+                     \"memory allocation failed\");\n\
+   }\n\
    dt->state = H5T_STATE_IMMUTABLE;\n\
    H5F_addr_undef (&(dt->ent.header));\n\
    dt->type = H5T_%s;\n\

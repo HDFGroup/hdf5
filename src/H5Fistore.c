@@ -645,7 +645,11 @@ H5F_istore_init (H5F_t *f)
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
     if (f->shared->access_parms->rdcc_nbytes>0) {
 	rdcc->nslots = 25; /*some initial number of slots*/
-	rdcc->slot = H5MM_xcalloc (rdcc->nslots, sizeof(H5F_rdcc_ent_t));
+	rdcc->slot = H5MM_calloc (rdcc->nslots*sizeof(H5F_rdcc_ent_t));
+	if (NULL==rdcc->slot) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -685,7 +689,10 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent)
 
     /* Should the chunk be compressed before writing it to disk? */
     if (ent->comp && H5Z_NONE!=ent->comp->method) {
-	c_buf = H5MM_xmalloc (ent->chunk_size);
+	if (NULL==(c_buf = H5MM_malloc (ent->chunk_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed for data compression");
+	}
 	nbytes = H5Z_compress (ent->comp, ent->chunk_size, ent->chunk, c_buf);
 	if (nbytes && nbytes<ent->chunk_size) {
 	    out_ptr = c_buf;
@@ -1004,7 +1011,10 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	for (i=0, chunk_size=1; i<layout->ndims; i++) {
 	    chunk_size *= layout->dim[i];
 	}
-	chunk = H5MM_xmalloc (chunk_size);
+	if (NULL==(chunk=H5MM_malloc (chunk_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed for raw data chunk");
+	}
 	
     } else {
 	/*
@@ -1018,7 +1028,11 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	udata.mesg = *layout;
 	H5F_addr_undef (&(udata.addr));
 	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
-	chunk = H5MM_xmalloc (chunk_size);
+	H5E_clear ();
+	if (NULL==(chunk = H5MM_malloc (chunk_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed for raw data chunk");
+	}
 	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
 	    /*
 	     * The chunk exists on disk but might be compressed.  Instead of
@@ -1032,7 +1046,10 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 			     "unable to read raw data chunk");
 	    }
 	    if (udata.key.nbytes<chunk_size) {
-		temp = H5MM_xmalloc (chunk_size);
+		if (NULL==(temp = H5MM_malloc (chunk_size))) {
+		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+				 "memory allocation failed for uncompress");
+		}
 		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
 						chunk, chunk_size, temp)) {
 		    HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
@@ -1062,10 +1079,15 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	    H5E_clear ();
 	}
 	if (rdcc->nused>=rdcc->nslots) {
-	    rdcc->nslots = MAX (25, 2*rdcc->nslots);
-	    rdcc->slot = H5MM_xrealloc (rdcc->slot,
-					(rdcc->nslots*
-					 sizeof(H5F_rdcc_ent_t)));
+	    size_t na = MAX (25, 2*rdcc->nslots);
+	    H5F_rdcc_ent_t *x = H5MM_realloc (rdcc->slot,
+					      na*sizeof(H5F_rdcc_ent_t));
+	    if (NULL==x) {
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			     "memory allocation failed");
+	    }
+	    rdcc->nslots = na;
+	    rdcc->slot = x;
 	}
 	HDmemmove (rdcc->slot+1, rdcc->slot,
 		   rdcc->nused*sizeof(H5F_rdcc_ent_t));
@@ -1182,8 +1204,9 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	    x.dirty = TRUE;
 	    x.layout = H5O_copy (H5O_LAYOUT, layout);
 	    x.comp = H5O_copy (H5O_COMPRESS, comp);
-	    for (i=0; i<layout->ndims; i++) {
+	    for (i=0, x.chunk_size=1; i<layout->ndims; i++) {
 		x.offset[i] = offset[i];
+		x.chunk_size *= layout->dim[i];
 	    }
 	    x.chunk = chunk;
 	    H5F_istore_flush_entry (f, &x);

@@ -140,20 +140,22 @@ H5_init_library(void)
 herr_t
 H5_add_exit(void        (*func) (void))
 {
-    herr_t                  ret_value = SUCCEED;
     H5_exit_t              *new_exit;
 
     FUNC_ENTER_INIT(H5_add_exit, NULL, FAIL);
 
     assert(func);
 
-    new_exit = H5MM_xcalloc(1, sizeof(H5_exit_t));
+    if (NULL==(new_exit = H5MM_calloc(sizeof(H5_exit_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
 
     new_exit->func = func;
     new_exit->next = lib_exit_head;
     lib_exit_head = new_exit;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }                               /* end H5_add_exit() */
 
 /*--------------------------------------------------------------------------

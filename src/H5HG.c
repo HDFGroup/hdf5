@@ -108,13 +108,22 @@ H5HG_create (H5F_t *f, size_t size)
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, NULL,
 		     "unable to allocate file space for global heap");
     }
-    heap = H5MM_xcalloc (1, sizeof(H5HG_heap_t));
+    if (NULL==(heap = H5MM_calloc (sizeof(H5HG_heap_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     heap->addr = addr;
     heap->size = size;
     heap->dirty = TRUE;
-    heap->chunk = H5MM_xmalloc (size);
+    if (NULL==(heap->chunk = H5MM_malloc (size))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     heap->nalloc = H5HG_NOBJS (f, size);
-    heap->obj = H5MM_xcalloc (heap->nalloc, sizeof(H5HG_obj_t));
+    if (NULL==(heap->obj = H5MM_calloc (heap->nalloc*sizeof(H5HG_obj_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
 
     /* Initialize the header */
     HDmemcpy (heap->chunk, H5HG_MAGIC, H5HG_SIZEOF_MAGIC);
@@ -141,7 +150,11 @@ H5HG_create (H5F_t *f, size_t size)
 
     /* Add this heap to the beginning of the CWFS list */
     if (NULL==f->shared->cwfs) {
-	f->shared->cwfs = H5MM_xmalloc (H5HG_NCWFS * sizeof(H5HG_heap_t*));
+	f->shared->cwfs = H5MM_malloc (H5HG_NCWFS * sizeof(H5HG_heap_t*));
+	if (NULL==(f->shared->cwfs)) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed");
+	}
 	f->shared->cwfs[0] = heap;
 	f->shared->ncwfs = 1;
     } else {
@@ -187,6 +200,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     H5HG_heap_t	*ret_value = NULL;
     uint8	*p = NULL;
     intn	i;
+    size_t	nalloc;
     
     FUNC_ENTER (H5HG_load, NULL);
 
@@ -197,9 +211,15 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     assert (!udata2);
 
     /* Read the initial 4k page */
-    heap = H5MM_xcalloc (1, sizeof(H5HG_heap_t));
+    if (NULL==(heap = H5MM_calloc (sizeof(H5HG_heap_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     heap->addr = *addr;
-    heap->chunk = H5MM_xmalloc (H5HG_MINSIZE);
+    if (NULL==(heap->chunk = H5MM_malloc (H5HG_MINSIZE))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     if (H5F_block_read (f, addr, (hsize_t)H5HG_MINSIZE,
 			H5D_XFER_DFLT, heap->chunk)<0) {
 	HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
@@ -233,7 +253,10 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     if (heap->size > H5HG_MINSIZE) {
 	haddr_t next_addr = *addr;
 	H5F_addr_inc (&next_addr, (hsize_t)H5HG_MINSIZE);
-	heap->chunk = H5MM_xrealloc (heap->chunk, heap->size);
+	if (NULL==(heap->chunk = H5MM_realloc (heap->chunk, heap->size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed");
+	}
 	if (H5F_block_read (f, &next_addr, (hsize_t)(heap->size-H5HG_MINSIZE),
 			    H5D_XFER_DFLT, heap->chunk+H5HG_MINSIZE)<0) {
 	    HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
@@ -243,8 +266,12 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
-    heap->nalloc = H5HG_NOBJS (f, heap->size);
-    heap->obj = H5MM_xcalloc (heap->nalloc, sizeof(H5HG_obj_t));
+    nalloc = H5HG_NOBJS (f, heap->size);
+    if (NULL==(heap->obj = H5MM_calloc (nalloc*sizeof(H5HG_obj_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
+    heap->nalloc = nalloc;
     while (p<heap->chunk+heap->size) {
 	if (p+H5HG_SIZEOF_OBJHDR(f)>heap->chunk+heap->size) {
 	    /*
@@ -276,7 +303,11 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
      */
     if (heap->obj[0].size>0) {
 	if (!f->shared->cwfs) {
-	    f->shared->cwfs = H5MM_xmalloc (H5HG_NCWFS*sizeof(H5HG_heap_t*));
+	    f->shared->cwfs = H5MM_malloc (H5HG_NCWFS*sizeof(H5HG_heap_t*));
+	    if (NULL==f->shared->cwfs) {
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			     "memory allocation failed");
+	    }
 	    f->shared->ncwfs = 1;
 	    f->shared->cwfs[0] = heap;
 	} else if (H5HG_NCWFS==f->shared->ncwfs) {
@@ -647,7 +678,10 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
     assert (heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size - H5HG_SIZEOF_OBJHDR (f);
     p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
-    if (!object) object = H5MM_xmalloc (size);
+    if (!object && NULL==(object = H5MM_malloc (size))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDmemcpy (object, p, size);
 
     /*
@@ -799,7 +833,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 	 * to the file free list.
 	 */
 	heap->dirty = FALSE;
-	H5MF_free (f, &(heap->addr), (hsize_t)(heap->size));
+	H5MF_xfree (f, &(heap->addr), (hsize_t)(heap->size));
 	H5AC_flush (f, H5AC_GHEAP, &(heap->addr), TRUE);
 	heap = NULL;
     } else {

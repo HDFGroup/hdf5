@@ -1,4 +1,4 @@
-This is the hdf5-1.0.0a prototype release of the HDF5 library.
+This is the hdf5-1.0.0a alpha release of the HDF5 library.
 
 This release is almost fully functional for the entire API defined in the
 documentation, see the RELEASE file in this directory for information
@@ -27,12 +27,5 @@ To subscribe to a list, send mail to "<list>-request@ncsa.uiuc.edu",
 address> in the _body_ of the message.  Messages to be sent to
 the list should be sent to "<list>@ncsa.uiuc.edu".
 
-Bugs should be reported to:
+Bugs should be reported to hdf5dev@ncsa.uiuc.edu.
 
-  Robb Matzke <matzke@llnl.gov>		 All types of bugs
-  Quincey Koziol <koziol@ncsa.uiuc.edu>  All types of bugs
-  Albert Cheng <acheng@ncsa.uiuc.edu>	 Parallel bugs
-  Kim Yates <rkyates@llnl.gov>		 Parallel bugs
-  Paul Harten <pharten@ncsa.uiuc.edu>	 Bugs specific to ASCI Red
-
-or to the hdf5dev mailing list.

@@ -246,7 +246,10 @@ H5G_node_create(H5F_t *f, H5B_ins_t __unused__ op, void *_lt_key,
     assert(f);
     assert(H5B_INS_FIRST == op);
 
-    sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
+    if (NULL==(sym = H5MM_calloc(sizeof(H5G_node_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     size = H5G_node_size(f);
     if (H5MF_alloc(f, H5MF_META, size, addr/*out*/) < 0) {
 	H5MM_xfree(sym);
@@ -254,7 +257,12 @@ H5G_node_create(H5F_t *f, H5B_ins_t __unused__ op, void *_lt_key,
 		      "unable to allocate file space");
     }
     sym->dirty = TRUE;
-    sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
+    sym->entry = H5MM_calloc(2*H5G_NODE_K(f)*sizeof(H5G_entry_t));
+    if (NULL==sym->entry) {
+	H5MM_xfree (sym);
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     if (H5AC_set(f, H5AC_SNODE, addr, sym) < 0) {
 	H5MM_xfree(sym->entry);
 	H5MM_xfree(sym);
@@ -321,7 +329,10 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
      */
     if (sym->dirty) {
 	size = H5G_node_size(f);
-	buf = p = H5MM_xmalloc(size);
+	if (NULL==(buf = p = H5MM_malloc(size))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 
 	/* magic number */
 	HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
@@ -400,10 +411,15 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
      * Initialize variables.
      */
     size = H5G_node_size(f);
-    p = buf = H5MM_xmalloc(size);
-    sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
-    sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
-
+    if (NULL==(p = buf = H5MM_malloc(size))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed for symbol table node");
+    }
+    if (NULL==(sym = H5MM_calloc(sizeof(H5G_node_t))) ||
+	NULL==(sym->entry=H5MM_calloc(2*H5G_NODE_K(f)*sizeof(H5G_entry_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
 		    "unabel to read symbol table node");
@@ -885,7 +901,10 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 		    "unable to load symbol table node");
     }
     nsyms = sn->nsyms;
-    name_off = H5MM_xmalloc (nsyms*sizeof(name_off[0]));
+    if (NULL==(name_off = H5MM_malloc (nsyms*sizeof(name_off[0])))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
     for (i=0; i<nsyms; i++) name_off[i] = sn->entry[i].name_off;
     sn = NULL;
 
@@ -900,7 +919,14 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 			     name_off[i]);
 	    assert (name);
 	    n = strlen (name);
-	    s = n+1>sizeof(buf) ? H5MM_xmalloc (n+1) : buf;
+	    if (n+1>sizeof(buf)) {
+		if (NULL==(s = H5MM_malloc (n+1))) {
+		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+				 "memory allocation failed");
+		}
+	    } else {
+		s = buf;
+	    }
 	    strcpy (s, name);
 	    ret_value = (bt_udata->op)(bt_udata->group_id, s,
 				       bt_udata->op_data);

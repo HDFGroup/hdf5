@@ -107,7 +107,10 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "fopen failed");
 
     /* Build the return value */
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     lf->u.stdio.f = f;
     lf->u.stdio.op = H5F_OP_SEEK;
     lf->u.stdio.cur = 0;

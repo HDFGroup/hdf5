@@ -167,7 +167,10 @@ H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
 
     if (id_group_list[grp] == NULL) {
 	/* Allocate the group information */
-	grp_ptr = H5MM_xcalloc(1, sizeof(H5I_id_group_t));
+	if (NULL==(grp_ptr = H5MM_calloc(sizeof(H5I_id_group_t)))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed");
+	}
 	id_group_list[grp] = grp_ptr;
     } else {
 	/* Get the pointer to the existing group */
@@ -182,8 +185,11 @@ H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
 	grp_ptr->ids = 0;
 	grp_ptr->nextid = reserved;
 	grp_ptr->free_func = free_func;
-	grp_ptr->id_list = H5MM_xcalloc((intn)hash_size,
-					sizeof(H5I_id_info_t *));
+	grp_ptr->id_list = H5MM_calloc(hash_size*sizeof(H5I_id_info_t *));
+	if (NULL==grp_ptr->id_list) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed");
+	}
     }
     
     /* Increment the count of the times this group has been initialized */
@@ -773,8 +779,9 @@ H5I_get_id_node(void)
     if (id_free_list != NULL) {
 	ret_value = id_free_list;
 	id_free_list = id_free_list->next;
-    } else {
-	ret_value = H5MM_xmalloc(sizeof(H5I_id_info_t));
+    } else if (NULL==(ret_value = H5MM_malloc(sizeof(H5I_id_info_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
     }
 
     FUNC_LEAVE(ret_value);

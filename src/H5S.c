@@ -136,7 +136,10 @@ H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
     }
 
     /* Create a new data space */
-    ds = H5MM_xcalloc(1, sizeof(H5S_t));
+    if (NULL==(ds = H5MM_calloc(sizeof(H5S_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     if(rank>0)	/* for creating simple dataspace */
       {
         ds->type = H5S_SIMPLE;
@@ -145,11 +148,17 @@ H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
         /* Initialize rank and dimensions */
         ds->u.simple.rank = rank;
 
-        ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+        if (NULL==(ds->u.simple.size = H5MM_calloc(1*rank*sizeof(hsize_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
         HDmemcpy(ds->u.simple.size, dims, rank*sizeof(hsize_t));
 
         if (maxdims) {
-            ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+            if (NULL==(ds->u.simple.max=H5MM_calloc(rank*sizeof(hsize_t)))) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			       "memory allocation failed");
+	    }
             HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(hsize_t));
         }
       } /* end if */
@@ -361,7 +370,10 @@ H5S_copy(const H5S_t *src)
 
     FUNC_ENTER(H5S_copy, NULL);
 
-    dst = H5MM_xmalloc(sizeof(H5S_t));
+    if (NULL==(dst = H5MM_malloc(sizeof(H5S_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     *dst = *src;
 
     switch (dst->type) {
@@ -371,22 +383,34 @@ H5S_copy(const H5S_t *src)
 
     case H5S_SIMPLE:
 	if (dst->u.simple.size) {
-	    dst->u.simple.size = H5MM_xmalloc(dst->u.simple.rank *
-					      sizeof(dst->u.simple.size[0]));
+	    dst->u.simple.size = H5MM_malloc(dst->u.simple.rank *
+					     sizeof(dst->u.simple.size[0]));
+	    if (NULL==dst->u.simple.size) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
 	    for (i = 0; i < dst->u.simple.rank; i++) {
 		dst->u.simple.size[i] = src->u.simple.size[i];
 	    }
 	}
 	if (dst->u.simple.max) {
-	    dst->u.simple.max = H5MM_xmalloc(dst->u.simple.rank *
-					     sizeof(dst->u.simple.max[0]));
+	    dst->u.simple.max = H5MM_malloc(dst->u.simple.rank *
+					    sizeof(dst->u.simple.max[0]));
+	    if (NULL==dst->u.simple.max) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
 	    for (i = 0; i < dst->u.simple.rank; i++) {
 		dst->u.simple.max[i] = src->u.simple.max[i];
 	    }
 	}
 	if (dst->u.simple.perm) {
-	    dst->u.simple.perm = H5MM_xmalloc(dst->u.simple.rank *
-					      sizeof(dst->u.simple.perm[0]));
+	    dst->u.simple.perm = H5MM_malloc(dst->u.simple.rank *
+					     sizeof(dst->u.simple.perm[0]));
+	    if (NULL==dst->u.simple.perm) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
 	    for (i = 0; i < dst->u.simple.rank; i++) {
 		dst->u.simple.perm[i] = src->u.simple.perm[i];
 	    }
@@ -835,8 +859,11 @@ H5S_read(H5G_entry_t *ent)
     /* check args */
     assert(ent);
 
-    ds = H5MM_xcalloc(1, sizeof(H5S_t));
-
+    if (NULL==(ds = H5MM_calloc(sizeof(H5S_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+    
     if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->u.simple))) {
 	ds->type = H5S_SIMPLE;
 
@@ -1097,7 +1124,10 @@ H5Sset_space (hid_t sid, int rank, const hsize_t *dims)
     } else {
 	/* Set the rank and copy the dims */
 	space->u.simple.rank = rank;
-	space->u.simple.size = H5MM_xcalloc(rank, sizeof(hsize_t));
+	if (NULL==(space->u.simple.size=H5MM_calloc(rank*sizeof(hsize_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	HDmemcpy(space->u.simple.size, dims, sizeof(hsize_t) * rank);
     }
     FUNC_LEAVE(ret_value);
@@ -1153,7 +1183,11 @@ H5Sset_hyperslab (hid_t sid, const hssize_t *start, const hsize_t *count,
     }
 
     /* Set up stride values for later use */
-    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(tmp_stride[0]));
+    tmp_stride=H5MM_malloc(space->u.simple.rank*sizeof(tmp_stride[0]));
+    if (NULL==tmp_stride) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
     for (u=0; u<space->u.simple.rank; u++) {
 	tmp_stride[u] = stride ? stride[u] : 1;
     }
@@ -1173,9 +1207,15 @@ H5Sset_hyperslab (hid_t sid, const hssize_t *start, const hsize_t *count,
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {
-	space->h.start= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
-	space->h.count= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
-	space->h.stride= H5MM_xcalloc(space->u.simple.rank, sizeof(hsize_t));
+	space->h.start=H5MM_calloc(space->u.simple.rank*sizeof(hsize_t));
+	space->h.count=H5MM_calloc(space->u.simple.rank*sizeof(hsize_t));
+	space->h.stride=H5MM_calloc(space->u.simple.rank*sizeof(hsize_t));
+	if (NULL==space->h.start ||
+	    NULL==space->h.count ||
+	    NULL==space->h.stride) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed");
+	}
     }
 
     /* Build hyperslab */

@@ -80,7 +80,10 @@ H5O_stab_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert (!sh);
 
     /* decode */
-    stab = H5MM_xcalloc(1, sizeof(H5O_stab_t));
+    if (NULL==(stab = H5MM_calloc(sizeof(H5O_stab_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     H5F_addr_decode(f, &p, &(stab->btree_addr));
     H5F_addr_decode(f, &p, &(stab->heap_addr));
 
@@ -154,8 +157,12 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
     assert(type);
 
     if (H5O_STAB == type) {
-        if (_mesg) stab = (H5O_stab_t *) _mesg;
-        else stab = H5MM_xcalloc(1, sizeof(H5O_stab_t));
+        if (_mesg) {
+	    stab = (H5O_stab_t *) _mesg;
+        } else if (NULL==(stab = H5MM_calloc(sizeof(H5O_stab_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
         stab->btree_addr = cache->stab.btree_addr;
         stab->heap_addr = cache->stab.heap_addr;
     }
@@ -190,9 +197,11 @@ H5O_stab_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(stab);
-    if (!dest)
-        dest = H5MM_xcalloc(1, sizeof(H5O_stab_t));
-
+    if (!dest && NULL==(dest = H5MM_calloc(sizeof(H5O_stab_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+    
     /* copy */
     *dest = *stab;
 

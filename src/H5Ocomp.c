@@ -64,6 +64,7 @@ H5O_comp_decode(H5F_t __unused__ *f, const uint8 *p,
 		H5O_shared_t __unused__ *sh)
 {
     H5O_compress_t	*comp = NULL;
+    void		*ret_value = NULL;
 
     FUNC_ENTER(H5O_comp_decode, NULL);
 
@@ -71,17 +72,29 @@ H5O_comp_decode(H5F_t __unused__ *f, const uint8 *p,
     assert(p);
 
     /* Decode */
-    comp = H5MM_xcalloc(1, sizeof *comp);
+    if (NULL==(comp = H5MM_calloc(sizeof *comp))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     comp->method = *p++;
     comp->flags = *p++;
     UINT16DECODE (p, comp->cd_size);
 
     if (comp->cd_size>0) {
-	comp->client_data = H5MM_xmalloc (comp->cd_size);
+	if (NULL==(comp->client_data = H5MM_malloc (comp->cd_size))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed");
+	}
 	HDmemcpy (comp->client_data, p, comp->cd_size);
     }
-    
-    FUNC_LEAVE(comp);
+    ret_value = comp;
+
+ done:
+    if (NULL==ret_value && comp) {
+	H5MM_xfree (comp->client_data);
+	H5MM_xfree (comp);
+    }
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -149,10 +162,16 @@ H5O_comp_copy (const void *_src, void *_dst/*out*/)
     
     FUNC_ENTER (H5O_comp_copy, NULL);
 
-    if (!dst) dst = H5MM_xmalloc (sizeof *dst);
+    if (!dst && NULL==(dst = H5MM_malloc (sizeof *dst))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     *dst = *src;
     if (src->cd_size>0) {
-	dst->client_data = H5MM_xmalloc (src->cd_size);
+	if (NULL==(dst->client_data = H5MM_malloc (src->cd_size))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
 	HDmemcpy (dst->client_data, src->client_data, src->cd_size);
     }
 

@@ -63,6 +63,12 @@ Information for HDF5 maintainers:
   GNU systems and inserted into the Makefile's by running
   config.status (which happens near the end of configure).
 
+* If you use GNU make along with gcc then the Perl script `trace' is
+  run just before dependencies are calculated to update any H5TRACE()
+  calls that might appear in the file.  Otherwise, after changing the
+  type of a function (return type or argument types) one should run
+  `trace' manually on those source files (e.g., ../bin/trace *.c).
+
 * Object files stay in the directory and are added to the library as a
   final step instead of placing the file in the library immediately
   and removing it from the directory.  The reason is three-fold:
@@ -90,4 +96,4 @@ Information for HDF5 maintainers:
 	$ make -j2
 
   which limits the number of children to two (this doesn't work at the
-  top level because the `-j2' is not passed to recursive makes.
+  top level because the `-j2' is not passed to recursive makes).

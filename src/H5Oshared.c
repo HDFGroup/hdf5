@@ -73,7 +73,10 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
     assert (!sh);
 
     /* Decode */
-    mesg = H5MM_xcalloc (1, sizeof *mesg);
+    if (NULL==(mesg = H5MM_calloc (sizeof *mesg))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     UINT32DECODE (buf, mesg->in_gh);
     if (mesg->in_gh) {
 	H5F_addr_decode (f, &buf, &(mesg->u.gh.addr));

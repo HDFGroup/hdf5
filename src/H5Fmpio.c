@@ -333,7 +333,10 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     }
 
     /* Build the return value */
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     lf->u.mpio.f = fh;
     H5F_addr_reset(&(lf->eof));
     mpierr = MPI_File_get_size( fh, &size );

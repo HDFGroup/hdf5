@@ -167,7 +167,10 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 64;
     
     /* Opaque data */
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_OPAQUE;
@@ -514,7 +517,10 @@ H5T_init_interface(void)
      */
 
     /* One-byte character string */
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_STRING;
@@ -537,7 +543,10 @@ H5T_init_interface(void)
      */
 
     /* One-byte character string */
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_STRING;
@@ -2864,9 +2873,14 @@ H5Tregister_soft (const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 
     /* Add function to end of master list */
     if (H5T_nsoft_g >= H5T_asoft_g) {
-	H5T_asoft_g = MAX(32, 2 * H5T_asoft_g);
-	H5T_soft_g = H5MM_xrealloc(H5T_soft_g,
-				   H5T_asoft_g * sizeof(H5T_soft_t));
+	size_t na = MAX (32, 2*H5T_asoft_g);
+	H5T_soft_t *x = H5MM_realloc (H5T_soft_g, na*sizeof(H5T_soft_t));
+	if (!x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	H5T_asoft_g = na;
+	H5T_soft_g = x;
     }
     HDstrncpy (H5T_soft_g[H5T_nsoft_g].name, name, H5T_NAMELEN);
     H5T_soft_g[H5T_nsoft_g].name[H5T_NAMELEN-1] = '\0';
@@ -2901,7 +2915,10 @@ H5Tregister_soft (const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 
 	HDmemset (&cdata, 0, sizeof cdata);
 	cdata.command = H5T_CONV_INIT;
-	cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+	if (NULL==(cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	if ((func) (src_id, dst_id, &cdata, 0, NULL, NULL) >= 0) {
 	    /*
 	     * Free resources used by the previous conversion function. We
@@ -3025,7 +3042,11 @@ H5Tunregister (H5T_conv_t func)
 		}
 
 		path->cdata.command = H5T_CONV_INIT;
-		path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+		path->cdata.stats = H5MM_calloc (sizeof(H5T_stats_t));
+		if (NULL==path->cdata.stats) {
+		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+				   "memory allocation failed");
+		}
 		if ((H5T_soft_g[j].func)(src_id, dst_id, &(path->cdata),
 					 0, NULL, NULL) >= 0) {
 		    HDstrcpy (path->name, H5T_soft_g[j].name);
@@ -3202,7 +3223,10 @@ H5T_create(H5T_class_t type, size_t size)
 		      "type class is not appropriate - use H5Tcopy()");
 
     case H5T_COMPOUND:
-	dt = H5MM_xcalloc(1, sizeof(H5T_t));
+	if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
 	dt->type = type;
 	break;
 
@@ -3308,7 +3332,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     assert(old_dt);
 
     /* copy */
-    new_dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    if (NULL==(new_dt = H5MM_calloc(sizeof(H5T_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     *new_dt = *old_dt;
 
     switch (method) {
@@ -3355,8 +3382,12 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	 * name and type fields of each new member with copied values.
 	 * That is, H5T_copy() is a deep copy.
 	 */
-	new_dt->u.compnd.memb = H5MM_xmalloc(new_dt->u.compnd.nmembs *
-					     sizeof(H5T_member_t));
+	new_dt->u.compnd.memb = H5MM_malloc(new_dt->u.compnd.nmembs *
+					    sizeof(H5T_member_t));
+	if (NULL==new_dt->u.compnd.memb) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
 	HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
 		 new_dt->u.compnd.nmembs * sizeof(H5T_member_t));
 	
@@ -3659,10 +3690,15 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Increase member array if necessary */
     if (parent->u.compnd.nmembs >= parent->u.compnd.nalloc) {
-	parent->u.compnd.nalloc += H5T_COMPND_INC;
-	parent->u.compnd.memb = H5MM_xrealloc(parent->u.compnd.memb,
-					      (parent->u.compnd.nalloc *
-					       sizeof(H5T_member_t)));
+	size_t na = parent->u.compnd.nalloc + H5T_COMPND_INC;
+	H5T_member_t *x = H5MM_realloc (parent->u.compnd.memb,
+					na * sizeof(H5T_member_t));
+	if (!x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	parent->u.compnd.nalloc = na;
+	parent->u.compnd.memb = x;
     }
 
     /* Add member to end of member array */
@@ -3831,8 +3867,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	if (dt1->u.compnd.nmembs > dt2->u.compnd.nmembs) HGOTO_DONE(1);
 
 	/* Build an index for each type so the names are sorted */
-	idx1 = H5MM_xmalloc(dt1->u.compnd.nmembs * sizeof(intn));
-	idx2 = H5MM_xmalloc(dt1->u.compnd.nmembs * sizeof(intn));
+	if (NULL==(idx1 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(intn))) ||
+	    NULL==(idx2 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(intn)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0,
+			   "memory allocation failed");
+	}
 	for (i=0; i<dt1->u.compnd.nmembs; i++) idx1[i] = idx2[i] = i;
 	for (i=dt1->u.compnd.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
 	    for (j=0, swapped=FALSE; j<i; j++) {
@@ -4063,8 +4102,10 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 
     FUNC_ENTER(H5T_find, NULL);
 
-    if (!noop_cdata.stats) {
-	noop_cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+    if (!noop_cdata.stats &&
+	NULL==(noop_cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
     }
 
     /* No-op case */
@@ -4149,9 +4190,15 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
     /* Insert */
     if (create) {
 	if (H5T_npath_g >= H5T_apath_g) {
-	    H5T_apath_g = MAX(64, 2 * H5T_apath_g);
-	    H5T_path_g = H5MM_xrealloc(H5T_path_g,
-				       H5T_apath_g * sizeof(H5T_path_t*));
+	    size_t na = MAX(64, 2 * H5T_apath_g);
+	    H5T_path_t **x = H5MM_realloc (H5T_path_g,
+					   na*sizeof(H5T_path_t*));
+	    if (!x) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
+	    H5T_apath_g = na;
+	    H5T_path_g = x;
 	}
 	if (cmp > 0) md++;
 
@@ -4161,7 +4208,10 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	H5T_npath_g++;
 
 	/* insert */
-	path = H5T_path_g[md] = H5MM_xcalloc (1, sizeof(H5T_path_t));
+	if (NULL==(path=H5T_path_g[md]=H5MM_calloc (sizeof(H5T_path_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
 	path->src = H5T_copy(src, H5T_COPY_ALL);
 	path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
@@ -4172,7 +4222,10 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	    path->func = func;
 	    path->is_hard = TRUE;
 	    path->cdata.command = H5T_CONV_INIT;
-	    path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+	    if (NULL==(path->cdata.stats=H5MM_calloc(sizeof(H5T_stats_t)))) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
 	    if ((src_id=H5I_register(H5_DATATYPE,
 				     H5T_copy(path->src, H5T_COPY_ALL))) < 0 ||
 		(dst_id=H5I_register(H5_DATATYPE,
@@ -4206,7 +4259,11 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 				  "unable to register conv types for query");
 		}
 		path->cdata.command = H5T_CONV_INIT;
-		path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+		path->cdata.stats = H5MM_calloc (sizeof(H5T_stats_t));
+		if (NULL==path->cdata.stats) {
+		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+				   "memory allocation failed");
+		}
 		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
 					  H5T_CONV_INIT, NULL, NULL) < 0) {
 		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));

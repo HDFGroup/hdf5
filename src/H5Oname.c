@@ -82,8 +82,12 @@ H5O_name_decode(H5F_t __unused__ *f, const uint8 *p,
     assert (!sh);
 
     /* decode */
-    mesg = H5MM_xcalloc(1, sizeof(H5O_name_t));
-    mesg->s = H5MM_xmalloc (strlen ((const char*)p)+1);
+    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_name_t))) ||
+	NULL==(mesg->s = H5MM_malloc (strlen ((const char*)p)+1))) {
+	H5MM_xfree (mesg);
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     strcpy (mesg->s, (const char*)p);
 
     FUNC_LEAVE(mesg);
@@ -141,7 +145,7 @@ H5O_name_encode(H5F_t __unused__ *f, uint8 *p, const void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-static void            *
+static void *
 H5O_name_copy(const void *_mesg, void *_dest)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
@@ -151,9 +155,11 @@ H5O_name_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest)
-        dest = H5MM_xcalloc(1, sizeof(H5O_name_t));
-
+    if (!dest && NULL==(dest = H5MM_calloc(sizeof(H5O_name_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+    
     /* copy */
     *dest = *mesg;
     dest->s = H5MM_xstrdup(mesg->s);

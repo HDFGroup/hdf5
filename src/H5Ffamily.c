@@ -124,8 +124,11 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
     }
 
     /* Create the file descriptor */
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
-    lf->u.fam.name = H5MM_xstrdup(name);
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t))) ||
+	NULL==(lf->u.fam.name = H5MM_strdup(name))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     lf->u.fam.flags = (flags & ~H5F_ACC_CREAT);
 
     /* Open all existing members */
@@ -151,9 +154,15 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 
 	/* Add the member to the family */
 	if (lf->u.fam.nmemb >= lf->u.fam.nalloc) {
-	    lf->u.fam.nalloc = MAX(100, 2 * lf->u.fam.nalloc);
-	    lf->u.fam.memb = H5MM_xrealloc(lf->u.fam.memb,
-				       lf->u.fam.nalloc * sizeof(H5F_low_t *));
+	    size_t na = MAX (100, 2*lf->u.fam.nalloc);
+	    H5F_low_t **x = H5MM_realloc (lf->u.fam.memb,
+					  na*sizeof(H5F_low_t*));
+	    if (NULL==x) {
+		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			     "memory allocation failed");
+	    }
+	    lf->u.fam.nalloc = na;
+	    lf->u.fam.memb = x;
 	}
 	lf->u.fam.memb[lf->u.fam.nmemb++] = member;
 	member = NULL;
@@ -409,10 +418,15 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	     * new family member(s)
 	     */
 	    if (membno >= lf->u.fam.nalloc) {
-		lf->u.fam.nalloc = (membno+1)*2;
-		lf->u.fam.memb = H5MM_xrealloc(lf->u.fam.memb,
-					       (lf->u.fam.nalloc *
-						sizeof(H5F_low_t *)));
+		size_t na = (membno+1)*2;
+		H5F_low_t **x = H5MM_realloc (lf->u.fam.memb,
+					      na*sizeof(H5F_low_t*));
+		if (NULL==x) {
+		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+				   "memory allocation failed");
+		}
+		lf->u.fam.nalloc = na;
+		lf->u.fam.memb = x;
 	    }
 	    for (i = lf->u.fam.nmemb; i <= membno; i++) {
 		sprintf(member_name, lf->u.fam.name, i);

@@ -72,9 +72,17 @@ H5AC_create(H5F_t *f, intn size_hint)
     assert(NULL == f->shared->cache);
     if (size_hint < 1) size_hint = H5AC_NSLOTS;
 
-    f->shared->cache = cache = H5MM_xcalloc(1, sizeof(H5AC_t));
+    if (NULL==(f->shared->cache = cache = H5MM_calloc(sizeof(H5AC_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     cache->nslots = size_hint;
-    cache->slot = H5MM_xcalloc((intn)(cache->nslots), sizeof(H5AC_slot_t));
+    cache->slot = H5MM_calloc(cache->nslots*sizeof(H5AC_slot_t));
+    if (NULL==cache->slot) {
+	f->shared->cache = H5MM_xfree (f->shared->cache);
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
 
     FUNC_LEAVE(size_hint);
 }
@@ -360,7 +368,10 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
          * Sort the cache entries by address since flushing them in
          * ascending order by address may be much more efficient.
          */
-        map = H5MM_xmalloc(cache->nslots * sizeof(intn));
+        if (NULL==(map=H5MM_malloc(cache->nslots * sizeof(intn)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
         for (i = nslots = 0; i < cache->nslots; i++) {
             if (cache->slot[i].type)
                 map[nslots++] = i;
@@ -427,7 +438,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
                               cache->slot[i].thing);
             if (status < 0) {
                 HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                              "can't flush object");
+                              "unable to flush object");
             }
             cache->diagnostics[cache->slot[i].type->id].nflushes++;
             if (destroy)
@@ -496,7 +507,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr, void *thing)
         status = (flush) (f, TRUE, &(slot->addr), slot->thing);
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                          "can't flush object");
+                          "unable to flush object");
         }
         cache->diagnostics[slot->type->id].nflushes++;
     }
@@ -587,7 +598,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type,
                           cache->slot[new_idx].thing);
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                          "can't flush object");
+                          "unable to flush object");
         }
         cache->diagnostics[cache->slot[new_idx].type->id].nflushes++;
     }
@@ -694,7 +705,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
         cache->diagnostics[type->id].nmisses++;
         if (NULL == (thing = (type->load) (f, addr, udata1, udata2))) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL,
-                          "can't load object");
+                          "unable to load object");
         }
     }
 
@@ -704,9 +715,15 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
      * cache.
      */
     if (slot->nprots >= slot->aprots) {
-        slot->aprots += 10;
-        slot->prot = H5MM_xrealloc(slot->prot,
-                                   slot->aprots * sizeof(H5AC_prot_t));
+	size_t na = slot->aprots + 10;
+        H5AC_prot_t *x = H5MM_realloc(slot->prot,
+				      na * sizeof(H5AC_prot_t));
+	if (NULL==x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
+        slot->aprots = na;
+	slot->prot = x;
     }
     slot->prot[slot->nprots].type = type;
     slot->prot[slot->nprots].addr = *addr;
@@ -776,7 +793,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
         status = (flush) (f, TRUE, &(slot->addr), slot->thing);
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                          "can't flush object");
+                          "unable to flush object");
         }
         cache->diagnostics[slot->type->id].nflushes++;
     }

@@ -96,6 +96,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr/*out*/)
 {
     H5HL_t	*heap = NULL;
     size_t	total_size;		/*total heap size on disk	*/
+    herr_t	ret_value = FAIL;
 
     FUNC_ENTER(H5HL_create, FAIL);
 
@@ -111,21 +112,31 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr/*out*/)
     /* allocate file version */
     total_size = H5HL_SIZEOF_HDR(f) + size_hint;
     if (H5MF_alloc(f, H5MF_META, (hsize_t)total_size, addr/*out*/) < 0) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+	H5F_addr_undef (addr);
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate file memory");
     }
 
     /* allocate memory version */
-    heap = H5MM_xcalloc(1, sizeof(H5HL_t));
+    if (NULL==(heap = H5MM_calloc(sizeof(H5HL_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
     heap->addr = *addr;
     H5F_addr_inc(&(heap->addr), (hsize_t)H5HL_SIZEOF_HDR(f));
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
-    heap->chunk = H5MM_xcalloc(1, H5HL_SIZEOF_HDR(f) + size_hint);
+    if (NULL==(heap->chunk = H5MM_calloc(H5HL_SIZEOF_HDR(f) + size_hint))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "memory allocation failed");
+    }
 
     /* free list */
     if (size_hint) {
-	heap->freelist = H5MM_xmalloc(sizeof(H5HL_free_t));
+	if (NULL==(heap->freelist = H5MM_malloc(sizeof(H5HL_free_t)))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			 "memory allocation failed");
+	}
 	heap->freelist->offset = 0;
 	heap->freelist->size = size_hint;
 	heap->freelist->prev = heap->freelist->next = NULL;
@@ -136,12 +147,23 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr/*out*/)
     /* add to cache */
     heap->dirty = 1;
     if (H5AC_set(f, H5AC_LHEAP, addr, heap) < 0) {
-	heap->chunk = H5MM_xfree(heap->chunk);
-	heap->freelist = H5MM_xfree(heap->freelist);
-	HRETURN_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
-		      "unable to cache heap");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
+		    "unable to cache heap");
     }
-    FUNC_LEAVE(SUCCEED);
+    ret_value = SUCCEED;
+
+ done:
+    if (ret_value<0) {
+	if (H5F_addr_defined (addr)) {
+	    H5MF_xfree (f, addr, total_size);
+	}
+	if (heap) {
+	    H5MM_xfree (heap->chunk);
+	    H5MM_xfree (heap->freelist);
+	    H5MM_xfree (heap);
+	}
+    }
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -187,8 +209,11 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 		      "unable to read heap header");
     }
     p = hdr;
-    heap = H5MM_xcalloc(1, sizeof(H5HL_t));
-
+    if (NULL==(heap = H5MM_calloc(sizeof(H5HL_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
+    
     /* magic number */
     if (HDmemcmp(hdr, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
@@ -212,7 +237,11 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    heap->chunk = H5MM_xcalloc(1, H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
+    heap->chunk = H5MM_calloc(H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
+    if (NULL==heap->chunk) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     if (heap->disk_alloc &&
 	H5F_block_read(f, &(heap->addr), (hsize_t)(heap->disk_alloc),
 		       H5D_XFER_DFLT, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
@@ -226,7 +255,10 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 			"bad heap free list");
 	}
-	fl = H5MM_xmalloc(sizeof(H5HL_free_t));
+	if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			 "memory allocation failed");
+	}
 	fl->offset = free_block;
 	fl->prev = tail;
 	fl->next = NULL;
@@ -304,7 +336,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HL_t *heap)
 			      "unable to allocate file space for heap");
 	    }
 	    heap->addr = new_addr;
-	    H5MF_free(f, &old_addr, (hsize_t)(heap->disk_alloc));
+	    H5MF_xfree(f, &old_addr, (hsize_t)(heap->disk_alloc));
 	    H5E_clear(); /*don't really care if the free failed */
 	    heap->disk_alloc = heap->mem_alloc;
 	}
@@ -426,7 +458,10 @@ H5HL_read(H5F_t *f, const haddr_t *addr, size_t offset, size_t size, void *buf)
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
-    if (!buf) buf = H5MM_xmalloc(size);
+    if (!buf && NULL==(buf = H5MM_malloc(size))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDmemcpy(buf, heap->chunk + H5HL_SIZEOF_HDR(f) + offset, size);
 
     FUNC_LEAVE(buf);
@@ -622,7 +657,10 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 	     */
 	    offset = heap->mem_alloc;
 	    if (need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
-		fl = H5MM_xmalloc(sizeof(H5HL_free_t));
+		if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
+				   "memory allocation failed");
+		}
 		fl->offset = heap->mem_alloc + need_size;
 		fl->size = need_more - need_size;
 		assert (fl->offset==H5HL_ALIGN (fl->offset));
@@ -646,9 +684,13 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 #endif
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
-	heap->chunk = H5MM_xrealloc(heap->chunk,
-				    H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
-
+	heap->chunk = H5MM_realloc(heap->chunk,
+				   H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
+	if (NULL==heap->chunk) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
+			   "memory allocation failed");
+	}
+	
 	/* clear new section so junk doesn't appear in the file */
 	HDmemset(heap->chunk + H5HL_SIZEOF_HDR(f) + old_size, 0, need_more);
     }
@@ -824,7 +866,10 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
     /*
      * Add an entry to the free list.
      */
-    fl = H5MM_xmalloc(sizeof(H5HL_free_t));
+    if (NULL==(fl = H5MM_malloc(sizeof(H5HL_free_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     fl->offset = offset;
     fl->size = size;
     assert (fl->offset==H5HL_ALIGN (fl->offset));
@@ -894,7 +939,10 @@ H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
      * the heap and that no two free blocks point to the same region of
      * the heap.
      */
-    marker = H5MM_xcalloc(1, h->mem_alloc);
+    if (NULL==(marker = H5MM_calloc(h->mem_alloc))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
+    }
     for (freelist = h->freelist; freelist; freelist = freelist->next) {
 	fprintf(stream, "%*s%-*s %8lu, %8lu\n", indent, "", fwidth,
 		"Free Block (offset,size):",

@@ -20,7 +20,8 @@ for the install may be found in the file:  INSTALL.ascired.
 Step 0: Install optional third-party packages.
 
     * GNU zlib compression library, version 1.0.2 or later is used for
-      the `deflate' compression method.
+      the `deflate' compression method. If libz.a cannot be found then
+      this form of compression is not compiled into the library.
 
 Step 1. Unpack the source tree.
 
@@ -28,10 +29,9 @@ Step 1. Unpack the source tree.
       the following commands:
 
 	$ tar xf hdf5-1.0.0a.tar				OR
-	$ gunzip <hdf5-1.0.0a.tar.gz |tar xf -		OR
+	$ gunzip <hdf5-1.0.0a.tar.gz |tar xf -			OR
 	$ bunzip2 <hdf5-1.0.0a.tar.bz2 |tar xf -		OR
-	$ uncompress -c <hdf5-1.0.0a.tar.Z | tar xf -
-
+	$ uncompress -c <hdf5-1.0.0a.tar.Z |tar xf -
 
 Step 2. Configure makefiles.
 
@@ -85,6 +85,13 @@ Step 2. Configure makefiles.
       name of the file is the result of running ./bin/config.guess.
       Use config/BlankForm as a template.
 
+    * The library can print the names, arguments and values, and
+      return value from all API functions.  The code that does this is 
+      enabled with the `--enable-tracing' configuration switch. In
+      order to actually see tracing output one should set the
+      environment variable HDF5_TRACE to a file descriptor number such 
+      as `2'.
+
     * You can see a list of other configuration options by saying
 
 	$ ./configure --help
@@ -100,12 +107,6 @@ Step 3. Compile library, tests, and programs.
       environment variable in the previous step then use that command
       instead. The same applies below.
 
-      Note: If you're re-building the library after changing some
-      files and you're not using GNU make and gcc, then you should say
-      `make clean' from the top directory between each build attempt
-      since the development Makefiles don't have complete dependency
-      information yet.
-
       Note: When using GNU make you can add `-j -l6' to the make
       command to compile in parallel on SMP machines.  Do not give a
       number after the `-j' since GNU make will turn it off for
@@ -117,7 +118,8 @@ Step 4. Run confidence tests.
 
 	$ make test
 
-      The command will fail if any test fails.
+      The command will fail if any test fails, and one will see the
+      word "*FAIL*" in the output.
 
       Note: some old versions of make will report that `test is up to
       date'. If this happens then run `make _test' instead or run

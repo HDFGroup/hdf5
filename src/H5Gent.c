@@ -16,35 +16,7 @@
 #define PABLO_MASK      H5G_ent_mask
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_ent_calloc
- *
- * Purpose:     Returns a pointer to a malloc'd, zeroed symbol table entry.
- *
- * Return:      Success:        Ptr to entry
- *
- *              Failure:        never fails
- *
- * Programmer:  Robb Matzke
- *              Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5G_entry_t            *
-H5G_ent_calloc(H5G_entry_t *init)
-{
-    H5G_entry_t            *ent;
 
-    ent = H5MM_xcalloc(1, sizeof(H5G_entry_t));
-    if (init)
-        *ent = *init;
-    else
-        H5F_addr_undef(&(ent->header));
-    return ent;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_cache

@@ -157,22 +157,34 @@ H5Pcreate (H5P_class_t type)
     /* Allocate a new property list and initialize it with default values */
     switch (type) {
     case H5P_FILE_CREATE:
-	tmpl = H5MM_xmalloc(sizeof(H5F_create_t));
+	if (NULL==(tmpl = H5MM_malloc(sizeof(H5F_create_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	memcpy(tmpl, &H5F_create_dflt, sizeof(H5F_create_t));
 	break;
 
     case H5P_FILE_ACCESS:
-	tmpl = H5MM_xmalloc(sizeof(H5F_access_t));
+	if (NULL==(tmpl = H5MM_malloc(sizeof(H5F_access_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	memcpy(tmpl, &H5F_access_dflt, sizeof(H5F_access_t));
 	break;
 
     case H5P_DATASET_CREATE:
-	tmpl = H5MM_xmalloc(sizeof(H5D_create_t));
+	if (NULL==(tmpl = H5MM_malloc(sizeof(H5D_create_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	memcpy(tmpl, &H5D_create_dflt, sizeof(H5D_create_t));
 	break;
 
     case H5P_DATASET_XFER:
-	tmpl = H5MM_xmalloc(sizeof(H5D_xfer_t));
+	if (NULL==(tmpl = H5MM_malloc(sizeof(H5D_xfer_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	memcpy(tmpl, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
 	break;
 
@@ -1147,10 +1159,15 @@ H5Pset_external (hid_t plist_id, const char *name, off_t offset, hsize_t size)
     
     /* Add to the list */
     if (plist->efl.nused>=plist->efl.nalloc) {
-	plist->efl.nalloc += H5O_EFL_ALLOC;
-	plist->efl.slot = H5MM_xrealloc (plist->efl.slot,
-					 (plist->efl.nalloc *
-					  sizeof(H5O_efl_entry_t)));
+	size_t na = plist->efl.nalloc + H5O_EFL_ALLOC;
+	H5O_efl_entry_t *x = H5MM_realloc (plist->efl.slot,
+					   na*sizeof(H5O_efl_entry_t));
+	if (!x) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
+	plist->efl.nalloc = na;
+	plist->efl.slot = x;
     }
     idx = plist->efl.nused;
     plist->efl.slot[idx].name_offset = 0; /*not entered into heap yet*/
@@ -2139,7 +2156,10 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method, unsigned int flags,
     plist->compress.flags = flags;
     plist->compress.cd_size = cd_size;
     if (cd_size) {
-	plist->compress.client_data = H5MM_xmalloc (cd_size);
+	if (NULL==(plist->compress.client_data = H5MM_malloc (cd_size))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
 	HDmemcpy (plist->compress.client_data, client_data, cd_size);
     }
     FUNC_LEAVE (SUCCEED);
@@ -2641,7 +2661,10 @@ H5P_copy (H5P_class_t type, const void *src)
     }
 
     /* Create the new property list */
-    dst = H5MM_xmalloc(size);
+    if (NULL==(dst = H5MM_malloc(size))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDmemcpy(dst, src, size);
 
     /* Deep-copy pointers */
@@ -2680,8 +2703,12 @@ H5P_copy (H5P_class_t type, const void *src)
 	dc_dst = (H5D_create_t*)dst;
 	
 	if (dc_src->efl.nalloc>0) {
-	    dc_dst->efl.slot = H5MM_xmalloc (dc_dst->efl.nalloc *
-					     sizeof(H5O_efl_entry_t));
+	    dc_dst->efl.slot = H5MM_malloc (dc_dst->efl.nalloc *
+					    sizeof(H5O_efl_entry_t));
+	    if (NULL==dc_dst->efl.slot) {
+		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			       "memory allocation failed");
+	    }
 	    for (i=0; i<dc_src->efl.nused; i++) {
 		char *s = H5MM_xstrdup (dc_src->efl.slot[i].name);
 		dc_dst->efl.slot[i] = dc_src->efl.slot[i];

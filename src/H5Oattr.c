@@ -86,11 +86,17 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert(f);
     assert(p);
 
-    attr = H5MM_xcalloc(1, sizeof(H5A_t));
-
+    if (NULL==(attr = H5MM_calloc(sizeof(H5A_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
+    
     /* Decode and store the name */
     UINT16DECODE(p, name_len);
-    attr->name=H5MM_xmalloc(name_len+1);
+    if (NULL==(attr->name=H5MM_malloc(name_len+1))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDmemcpy(attr->name,p,name_len);
     attr->name[name_len]='\0';
     p+=name_len;    /* advance the memory pointer */
@@ -104,7 +110,10 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     p+=attr->dt_size;
 
     /* decode the attribute dataspace */
-    attr->ds = H5MM_xcalloc(1, sizeof(H5S_t));
+    if (NULL==(attr->ds = H5MM_calloc(sizeof(H5S_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
         attr->ds->type = H5S_SIMPLE;
         HDmemcpy(&(attr->ds->u.simple),simple, sizeof(H5S_simple_t));
@@ -119,7 +128,10 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     attr->data_size=H5S_get_npoints(attr->ds)*H5T_get_size(attr->dt);
 
     /* Go get the data */
-    attr->data = H5MM_xmalloc(attr->data_size);
+    if (NULL==(attr->data = H5MM_malloc(attr->data_size))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDmemcpy(attr->data,p,attr->data_size);
 
     /* Indicate that the fill values aren't to be written out */
@@ -297,7 +309,10 @@ H5O_attr_reset(void *_mesg)
     FUNC_ENTER(H5O_attr_reset, FAIL);
 
     if (attr) {
-        tmp = H5MM_xmalloc(sizeof(H5A_t));
+        if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
+	}
         HDmemcpy(tmp,attr,sizeof(H5A_t));
         H5A_close(tmp);
         HDmemset(attr, 0, sizeof(H5A_t));

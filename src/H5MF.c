@@ -122,7 +122,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	if (H5F_addr_gt (addr, &(blk.addr))) {
 	    /* Free the first part of the free block */
 	    n = addr->offset - blk.addr.offset;
-	    H5MF_free (f, &(blk.addr), n);
+	    H5MF_xfree (f, &(blk.addr), n);
 	    blk.addr = *addr;
 	    blk.size -= n;
 	}
@@ -131,7 +131,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	    /* Free the second part of the free block */
 	    H5F_addr_inc (&(blk.addr), size);
 	    blk.size -= size;
-	    H5MF_free (f, &(blk.addr), blk.size);
+	    H5MF_xfree (f, &(blk.addr), blk.size);
 	}
 	
     } else {
@@ -168,14 +168,14 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	    /* Partial match */
 	    if (H5F_addr_gt (addr, &(blk.addr))) {
 		n = addr->offset - blk.addr.offset;
-		H5MF_free (f, &(blk.addr), n);
+		H5MF_xfree (f, &(blk.addr), n);
 		blk.addr = *addr;
 		blk.size -= n;
 	    }
 	    if (blk.size > size) {
 		H5F_addr_inc (&(blk.addr), size);
 		blk.size -= size;
-		H5MF_free (f, &(blk.addr), blk.size);
+		H5MF_xfree (f, &(blk.addr), blk.size);
 	    }
 	}
     }
@@ -184,7 +184,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_free
+ * Function:    H5MF_xfree
  *
  * Purpose:     Frees part of a file, making that part of the file
  *              available for reuse.
@@ -204,16 +204,17 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free(H5F_t *f, const haddr_t *addr, hsize_t size)
+H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
 {
     int		i;
     
-    FUNC_ENTER(H5MF_free, FAIL);
+    FUNC_ENTER(H5MF_xfree, FAIL);
 
     /* check arguments */
     assert(f);
-    if (!addr || !H5F_addr_defined(addr) || 0 == size)
+    if (!addr || !H5F_addr_defined(addr) || 0 == size) {
         HRETURN(SUCCEED);
+    }
     assert(!H5F_addr_zerop(addr));
 
     /*
@@ -294,7 +295,7 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
     } else if (0==new_size) {
 	/* Degenerate to H5MF_free() */
 	assert (H5F_addr_defined (orig_addr));
-	if (H5MF_free (f, orig_addr, orig_size)<0) {
+	if (H5MF_xfree (f, orig_addr, orig_size)<0) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			   "unable to free old file memory");
 	}
@@ -306,7 +307,7 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			   "unable to allocate new file memory");
 	}
-	if (H5MF_free (f, orig_addr, orig_size)<0) {
+	if (H5MF_xfree (f, orig_addr, orig_size)<0) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			   "unable to free old file memory");
 	}

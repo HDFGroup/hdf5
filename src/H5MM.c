@@ -15,78 +15,23 @@
  *-------------------------------------------------------------------------
  */
 #include <H5private.h>
+#include <H5Eprivate.h>
 #include <H5MMprivate.h>
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5MM_xmalloc
- *
- * Purpose:	Just like malloc(3) except it aborts on an error.
- *
- * Return:	Success:	Ptr to new memory.
- *
- *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_xmalloc(size_t size)
-{
-    void *mem = HDmalloc(size);
-    assert(mem);
-    return mem;
-}
+/* Interface initialization? */
+static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT NULL
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_xcalloc
+ * Function:	H5MM_realloc
  *
- * Purpose:	Just like calloc(3) except it aborts on an error.
+ * Purpose:	Just like the POSIX version of realloc(3). Specifically, the
+ *		following calls are equivalent
  *
- * Return:	Success:	Ptr to memory.
- *
- *		Failure:	abort()
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_xcalloc(intn n, size_t size)
-{
-    void *mem = NULL;
-
-    assert (n>=0);
-
-    if (n>0) {
-	mem = HDcalloc((size_t)n, size);
-	assert(mem);
-    }
-    
-    return mem;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5MM_xrealloc
- *
- * Purpose:	Just like the POSIX version of realloc(3) exept it aborts
- *		on an error.  Specifically, the following calls are
- *		equivalent
- *
- *		H5MM_xrealloc (NULL, size) <==> H5MM_xmalloc (size)
- *		H5MM_xrealloc (ptr, 0)	   <==> H5MM_xfree (ptr)
- *		H5MM_xrealloc (NULL, 0)	   <==> NULL
+ *		H5MM_realloc (NULL, size) <==> H5MM_malloc (size)
+ *		H5MM_realloc (ptr, 0)	  <==> H5MM_xfree (ptr)
+ *		H5MM_realloc (NULL, 0)	  <==> NULL
  *
  * Return:	Success:	Ptr to new memory or NULL if the memory
  *				was freed.
@@ -102,11 +47,11 @@ H5MM_xcalloc(intn n, size_t size)
  *-------------------------------------------------------------------------
  */
 void *
-H5MM_xrealloc(void *mem, size_t size)
+H5MM_realloc(void *mem, size_t size)
 {
     if (!mem) {
 	if (0 == size) return NULL;
-	mem = H5MM_xmalloc(size);
+	mem = H5MM_malloc(size);
 
     } else if (0 == size) {
 	mem = H5MM_xfree(mem);
@@ -116,6 +61,38 @@ H5MM_xrealloc(void *mem, size_t size)
 	assert(mem);
     }
 
+    return mem;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_xstrdup
+ *
+ * Purpose:	Duplicates a string.  If the string to be duplicated is the
+ *		null pointer, then return null.	 If the string to be duplicated
+ *		is the empty string then return a new empty string.
+ *
+ * Return:	Success:	Ptr to a new string (or null if no string).
+ *
+ *		Failure:	abort()
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jul 10 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5MM_xstrdup(const char *s)
+{
+    char	*mem;
+
+    if (!s) return NULL;
+    mem = H5MM_malloc(HDstrlen(s) + 1);
+    assert (mem);
+    HDstrcpy(mem, s);
     return mem;
 }
 
@@ -140,14 +117,23 @@ H5MM_xrealloc(void *mem, size_t size)
  *-------------------------------------------------------------------------
  */
 char *
-H5MM_xstrdup(const char *s)
+H5MM_strdup(const char *s)
 {
     char	*mem;
 
-    if (!s) return NULL;
-    mem = H5MM_xmalloc(HDstrlen(s) + 1);
+    FUNC_ENTER (H5MM_strdup, NULL);
+
+    if (!s) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
+		       "null string");
+    }
+    if (NULL==(mem = H5MM_malloc(HDstrlen(s) + 1))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     HDstrcpy(mem, s);
-    return mem;
+
+    FUNC_LEAVE (mem);
 }
 
 

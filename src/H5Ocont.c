@@ -79,7 +79,10 @@ H5O_cont_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert (!sh);
 
     /* decode */
-    cont = H5MM_xcalloc(1, sizeof(H5O_cont_t));
+    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     H5F_addr_decode(f, &p, &(cont->addr));
     H5F_decode_length(f, p, cont->size);
 

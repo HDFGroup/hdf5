@@ -108,7 +108,10 @@ H5F_split_open(const char *name, const H5F_access_t *access_parms,
     raw_type = H5F_low_class (access_parms->u.split.raw_access->driver);
     
     /* Create the file descriptor */
-    lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
+    if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
     lf->u.split.name = H5MM_xstrdup(name);
     lf->u.split.mask = H5F_SPLIT_MASK;
 

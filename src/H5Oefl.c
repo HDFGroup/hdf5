@@ -74,7 +74,10 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     assert (!sh);
 
     /* Decode the header */
-    mesg = H5MM_xcalloc(1, sizeof(H5O_efl_t));
+    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_efl_t)))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
 #ifndef NDEBUG
     assert (H5F_addr_defined (&(mesg->heap_addr)));
@@ -88,7 +91,12 @@ H5O_efl_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     p += 4; /*reserved*/
 
     /* Decode the file list */
-    mesg->slot = H5MM_xcalloc(mesg->nalloc, sizeof(H5O_efl_entry_t));
+    mesg->slot = H5MM_calloc(mesg->nalloc*sizeof(H5O_efl_entry_t));
+    if (NULL==mesg->slot) {
+	H5MM_xfree (mesg);
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
     for (i=0; i<mesg->nused; i++) {
 	/* Name */
 	H5F_decode_length (f, p, mesg->slot[i].name_offset);
@@ -205,11 +213,20 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     /* check args */
     assert(mesg);
     if (!dest) {
-	dest = H5MM_xcalloc(1, sizeof(H5O_efl_t));
-	dest->slot = H5MM_xmalloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
+	if (NULL==(dest = H5MM_calloc(sizeof(H5O_efl_t))) ||
+	    NULL==(dest->slot=H5MM_malloc(mesg->nalloc*
+					  sizeof(H5O_efl_entry_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
+	
     } else if (NULL==dest->slot || dest->nalloc<mesg->nalloc) {
 	H5MM_xfree(dest->slot);
-	dest->slot = H5MM_xmalloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
+	if (NULL==(dest->slot = H5MM_malloc(mesg->nalloc*
+					    sizeof(H5O_efl_entry_t)))) {
+	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+			   "memory allocation failed");
+	}
     }
     dest->heap_addr = mesg->heap_addr;
     dest->nalloc = mesg->nalloc;

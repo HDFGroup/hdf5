@@ -120,7 +120,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8		   *array;
 
-    array = H5MM_xcalloc((intn)(nx*ny*nz), sizeof(uint8));
+    array = H5MM_calloc(nx*ny*nz*sizeof(uint8));
 
     printf("Reference array:\n");
     init_full(array, nx, ny, nz);
@@ -183,7 +183,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     fflush(stdout);
 
     /* Allocate array */
-    dst = H5MM_xcalloc(1, nx*ny*nz);
+    dst = H5MM_calloc(nx*ny*nz);
     init_full(dst, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -380,8 +380,8 @@ test_copy(int mode,
     /*
      * Allocate arrays
      */
-    src = H5MM_xcalloc(1, nx*ny*nz);
-    dst = H5MM_xcalloc(1, nx*ny*nz);
+    src = H5MM_calloc(nx*ny*nz);
+    dst = H5MM_calloc(nx*ny*nz);
     init_full(src, nx, ny, nz);
 
     for (i = 0; i < nx; i += di) {
@@ -599,8 +599,8 @@ test_multifill(size_t nx)
     fflush(stdout);
 
     /* Initialize the source and destination */
-    src = H5MM_xmalloc(nx * sizeof(*src));
-    dst = H5MM_xmalloc(nx * sizeof(*dst));
+    src = H5MM_malloc(nx * sizeof(*src));
+    dst = H5MM_malloc(nx * sizeof(*dst));
     for (i = 0; i < nx; i++) {
 	src[i].left = 1111111;
 	src[i].mid = 12345.6789;
@@ -707,9 +707,9 @@ test_endian(size_t nx)
     fflush(stdout);
 
     /* Initialize arrays */
-    src = H5MM_xmalloc(nx * 4);
+    src = H5MM_malloc(nx * 4);
     init_full(src, nx, 4, 1);
-    dst = H5MM_xcalloc(4, nx);
+    dst = H5MM_calloc(nx * 4);
 
     /* Initialize strides */
     src_stride[0] = 0;
@@ -789,13 +789,13 @@ test_transpose(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    src = H5MM_xmalloc(nx * ny * sizeof(*src));
+    src = H5MM_malloc(nx * ny * sizeof(*src));
     for (i = 0; i < nx; i++) {
 	for (j = 0; j < ny; j++) {
 	    src[i * ny + j] = (intn)(i * ny + j);
 	}
     }
-    dst = H5MM_xcalloc((intn)(nx*ny), sizeof(*dst));
+    dst = H5MM_calloc(nx*ny*sizeof(*dst));
 
     /* Build stride info */
     size[0] = nx;
@@ -896,10 +896,10 @@ test_sub_super(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    full = H5MM_xmalloc(4 * nx * ny);
+    full = H5MM_malloc(4 * nx * ny);
     init_full(full, 2 * nx, 2 * ny, 1);
-    half = H5MM_xcalloc(1, nx*ny);
-    twice = H5MM_xcalloc(1, 4*nx*ny);
+    half = H5MM_calloc(nx*ny);
+    twice = H5MM_calloc(4*nx*ny);
 
     /* Setup */
     size[0] = nx;

@@ -236,9 +236,9 @@ test_extend(H5F_t *f, const char *prefix,
 
     sprintf(s, "Testing istore extend: %s", dims);
     printf("%-70s", s);
-    buf = H5MM_xmalloc(nx * ny * nz);
-    check = H5MM_xmalloc(nx * ny * nz);
-    whole = H5MM_xcalloc(1, nx*ny*nz);
+    buf = H5MM_malloc(nx * ny * nz);
+    check = H5MM_malloc(nx * ny * nz);
+    whole = H5MM_calloc(nx*ny*nz);
 
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
@@ -460,7 +460,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 
     sprintf(s, "Testing istore sparse: %s", dims);
     printf("%-70s", s);
-    buf = H5MM_xmalloc(nx * ny * nz);
+    buf = H5MM_malloc(nx * ny * nz);
 
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
