@@ -953,10 +953,10 @@ hid_t  type, space;
 	case H5T_REFERENCE:
 		 dump_data(did, DATASET_DATA);
 		 break;
-/*	case H5T_ENUM:
-		 dump_data(did,ENUM_DATA);
+	case H5T_ENUM:
+		 dump_data(did,DATASET_DATA);
 		 break;
-*/
+
     default: break;
     }
 

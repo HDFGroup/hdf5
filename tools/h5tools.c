@@ -862,7 +862,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     } else if (H5T_ENUM==H5Tget_class(type)) {
 	char enum_name[1024];
 	if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name)>=0) {
-	    h5dump_escape(enum_name, sizeof enum_name, TRUE);
+	    h5dump_str_append(str, h5dump_escape(enum_name, sizeof enum_name, TRUE));
 	} else {
 	    h5dump_str_append(str, "0x");
 	    n = H5Tget_size(type);
@@ -1340,6 +1340,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 					  
 /*			display_reference_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
 				      p_nelmts, dim_n_size, elmtno, dset);*/
+		case H5T_ENUM:
+			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
+				      p_nelmts, dim_n_size, elmtno, dset);
 	    default:
 		break;
 	    }
@@ -2601,7 +2604,9 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	case H5T_REFERENCE:
 		display_numeric_data(nelmts, p_type, sm_buf, p_type_nbytes, 
 			nelmts, dim_n_size, 0, oid);
-	
+	case H5T_ENUM:
+		display_numeric_data(nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0, oid);
 /*		display_reference_data(nelmts, p_type, sm_buf, p_type_nbytes, 
 			nelmts, dim_n_size, 0, oid);*/
 		break;
