@@ -90,9 +90,9 @@ H5O_dtype_decode_helper (const uint8 **pp, H5T_t *dt)
    UINT32DECODE (*pp, dt->size);
 
    switch (dt->type) {
-   case H5T_FIXED:
+   case H5T_INTEGER:
       /*
-       * Fixed-point types...
+       * Integer types...
        */
       dt->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
       dt->u.atomic.lo_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
@@ -217,9 +217,9 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
    UINT32ENCODE (*pp, dt->size);
 
    switch (dt->type) {
-   case H5T_FIXED:
+   case H5T_INTEGER:
       /*
-       * Fixed-point data types...
+       * Integer data types...
        */
       switch (dt->u.atomic.order) {
       case H5T_ORDER_LE:
@@ -538,7 +538,7 @@ H5O_dtype_size (H5F_t *f, const void *mesg)
    assert (mesg);
 
    switch (dt->type) {
-   case H5T_FIXED:
+   case H5T_INTEGER:
       ret_value += 4;
       break;
 
@@ -637,13 +637,13 @@ H5O_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
    assert (fwidth>=0);
 
    switch (dt->type) {
-   case H5T_FIXED:
-      s = "fixed-point";
+   case H5T_INTEGER:
+      s = "integer";
       break;
    case H5T_FLOAT:
       s = "floating-point";
       break;
-   case H5T_DATE:
+   case H5T_TIME:
       s = "date and time";
       break;
    case H5T_STRING:
@@ -838,7 +838,7 @@ H5O_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
 		  "Mantissa size:",
 		  (unsigned long)(dt->u.atomic.u.f.msize));
 	 
-      } else if (H5T_FIXED==dt->type) {
+      } else if (H5T_INTEGER==dt->type) {
 	 switch (dt->u.atomic.u.i.sign) {
 	 case H5T_SGN_NONE:
 	    s = "none";

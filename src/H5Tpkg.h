@@ -26,8 +26,8 @@ typedef struct H5T_atomic_t {
    intn			hi_pad;	/*type of msb padding			*/
    union {
       struct {
-	 H5T_sign_t	sign;	/*type of fixed-point sign		*/
-      } i;			/*integer; fixed-point types		*/
+	 H5T_sign_t	sign;	/*type of integer sign			*/
+      } i;			/*integer; integer types		*/
 
       struct {
 	 size_t		sign;	/*bit position of sign bit		*/

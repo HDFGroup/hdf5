@@ -98,13 +98,13 @@ static detected_t Known[] = {
    {"Byte addressable",
     1, 0, LE_1, INTEGER},
 
-   /* Little-endian fixed-point */
+   /* Little-endian integer */
    {"Little-endian",
     2, 0, LE_2, INTEGER},
    {"Little-endian",
     4, 0, LE_4, INTEGER},
 
-   /* Big-endian fixed-point */
+   /* Big-endian integer */
    {"Big-endian",
     2, 0, BE_2, INTEGER},
    {"Big-endian",
@@ -284,7 +284,7 @@ static hbool_t interface_initialize_g = FALSE;\n\
 
    /* Global definitions for each type */
    for (i=0; i<nd; i++) {
-      printf ("hid_t H5T_NATIVE_%s;\n", d[i].varname);
+      printf ("hid_t H5T_NATIVE_%s_g = FAIL;\n", d[i].varname);
    }
    
    /* Function declaration */
@@ -318,7 +318,7 @@ H5T_init (void)\n\
    dt->u.atomic.prec = %d;\n\
    dt->u.atomic.lo_pad = H5T_PAD_ZERO;\n\
    dt->u.atomic.hi_pad = H5T_PAD_ZERO;\n",
-	      d[i].msize?"FLOAT":"FIXED", 		/*class		*/
+	      d[i].msize?"FLOAT":"INTEGER", 		/*class		*/
 	      d[i].size+abs (d[i].padding), 		/*size		*/
 	      d[i].perm[0]?"BE":"LE", 			/*byte order	*/
 	      8*d[i].size); 				/*precision	*/
@@ -350,7 +350,7 @@ H5T_init (void)\n\
 
       /* Atomize the type */
       printf ("\
-   if ((H5T_NATIVE_%s = H5Aregister_atom (H5_DATATYPE, dt))<0) {\n\
+   if ((H5T_NATIVE_%s_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {\n\
       HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\n\
                      \"can't initialize type system (atom registration \"\n\
                      \"failure\");\n\
@@ -829,7 +829,7 @@ true exponent.	The radix point is assumed\n\
 to be before the first `M' bit.	 Any bit\n\
 of a floating-point value not falling into one\n\
 of these categories is printed as a question\n\
-mark.  Bits of fixed-point types are printed as\n\
+mark.  Bits of integer types are printed as\n\
 `I' for 2's complement and `U' for magnitude.\n\
 \n\
 If the most significant bit of the normalized\n\

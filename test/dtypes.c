@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <H5Tprivate.h>
+
 
 #ifndef HAVE_FUNCTION
 #define __FUNCTION__ ""
@@ -18,6 +20,10 @@
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 
+typedef struct complex_t {
+   double	re;
+   double	im;
+} complex_t;
 
 
 /*-------------------------------------------------------------------------
@@ -43,7 +49,7 @@ test_classes (void)
 
    printf ("%-70s", "Testing H5Tget_class()");
 
-   if (H5T_FIXED!=(type_class=H5Tget_class (H5T_NATIVE_INT))) {
+   if (H5T_INTEGER!=(type_class=H5Tget_class (H5T_NATIVE_INT))) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -131,6 +137,82 @@ test_copy (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_compound
+ *
+ * Purpose:	Tests various things about compound data types.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound (void)
+{
+   complex_t	tmp;
+   hid_t 	complex_id;
+   herr_t	status;
+
+   printf ("%-70s", "Testing compound data types");
+
+   /* Create the empty type */
+   complex_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
+   if (complex_id<0) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Cannot create empty compound data type.\n");
+      }
+      goto error;
+   }
+
+   /* Add a coupld fields */
+   status = H5Tinsert (complex_id, "real", HOFFSET (tmp, re),
+		       H5T_NATIVE_DOUBLE);
+   if (status<0) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Cannot insert real component.\n");
+      }
+      goto error;
+   }
+
+   status = H5Tinsert (complex_id, "imaginary", HOFFSET (tmp, im),
+		       H5T_NATIVE_DOUBLE);
+   if (status<0) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Cannot insert imaginary component.\n");
+      }
+      goto error;
+   }
+
+   puts (" PASSED");
+
+   /* Just for debugging... */
+   H5T_debug (H5Aatom_object (complex_id), stdout);
+   printf ("\n");
+   
+   
+   return SUCCEED;
+
+ error:
+   return FAIL;
+}
+
+	 
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the data type interface.
@@ -158,6 +240,9 @@ main (void)
    nerrors += status<0 ? 1 : 0;
 
    status = test_copy ();
+   nerrors += status<0 ? 1 : 0;
+
+   status = test_compound ();
    nerrors += status<0 ? 1 : 0;
    
 
