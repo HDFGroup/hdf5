@@ -270,10 +270,7 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		Added xfer_mode argument
  *
  *		rky 980816
- *		Accommodate fancy MPI compound datatype writes.
- *		Also, parallel writes now abort if writing beyond eof
- *		(rather than just printing an error message
- *		and continuing, as they used to).
+ *		Accommodate fancy MPI derived datatype writes.
  *-------------------------------------------------------------------------
  */
 herr_t
