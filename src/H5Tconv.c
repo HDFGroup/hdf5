@@ -538,9 +538,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	}
 
 	md = src->size / 2;
-        buf_stride = buf_stride ? buf_stride : src->size;
+    buf_stride = buf_stride ? buf_stride : src->size;
 
-        /* Optimize for popular sizes */
+    /* Optimize for popular sizes */
+    if(nelmts>0) {
         switch(md) {
             case 1:     /* Swap 2-byte objects */
 #ifdef NO_DUFFS_DEVICE
@@ -551,10 +552,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     buf[1] = tmp;
                 }
 #else /* NO_DUFFS_DEVICE */
-{
+    {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (nelmts % 8)
+              switch ((long)(nelmts % 8))
                 {
                     case 0:
                         do
@@ -609,7 +610,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                           }
                         while (--duff_count > 0);
                 }
-}
+    }
 #endif /* NO_DUFFS_DEVICE */
                 break;
 
@@ -627,10 +628,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     buf[2] = tmp;
                 }
 #else /* NO_DUFFS_DEVICE */
-{
+    {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (nelmts % 8)
+              switch ((long)(nelmts % 8))
                 {
                     case 0:
                         do
@@ -741,7 +742,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                           }
                         while (--duff_count > 0);
                 }
-}
+    }
 #endif /* NO_DUFFS_DEVICE */
                 break;
 
@@ -769,10 +770,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     buf[4] = tmp;
                 }
 #else /* NO_DUFFS_DEVICE */
-{
+    {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (nelmts % 8)
+              switch ((long)(nelmts % 8))
                 {
                     case 0:
                         do
@@ -963,7 +964,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                           }
                         while (--duff_count > 0);
                 }
-}
+    }
 #endif /* NO_DUFFS_DEVICE */
                 break;
 
@@ -977,10 +978,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     }
                 }
 #else /* NO_DUFFS_DEVICE */
-{
+    {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (nelmts % 8)
+              switch ((long)(nelmts % 8))
                 {
                     case 0:
                         do
@@ -1067,10 +1068,11 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                           }
                         while (--duff_count > 0);
                 }
-}
+    }
 #endif /* NO_DUFFS_DEVICE */
                 break;
         } /* end switch */
+    } /* end if */
 	break;
 
     case H5T_CONV_FREE:
