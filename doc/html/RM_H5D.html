@@ -62,23 +62,29 @@ and set and retrieve their constant or persistent properties.
     <li><a href="#Dataset-Close">H5Dclose</a>
     <li><a href="#Dataset-GetSpace">H5Dget_space</a>
     <li><a href="#Dataset-GetSpaceStatus">H5Dget_space_status</a>
+    
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Dataset-GetType">H5Dget_type</a>
     <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
+    <li><a href="#Dataset-GetOffset">H5Dget_offset</a>
     <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
     <li><a href="#Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
     <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+<!--
+    <li><a href="#Dataset-Debug">H5Ddebug</a>
+       This function is in the distributed source code and is technically 
+       a public function, but it is NOT intended for public  use.  
+       It is used only by certain tools.
+       DO NOT list it in the Reference Manual.
+    -->
     <li><a href="#Dataset-Read">H5Dread</a>
     <li><a href="#Dataset-Write">H5Dwrite</a>
     <li><a href="#Dataset-Iterate">H5Diterate</a>
-<!--
-    <li><a href="#Dataset-Debug">H5Ddebug</a>
--->
     <li><a href="#Dataset-Extend">H5Dextend</a>
     <li><a href="#Dataset-Fill">H5Dfill</a>
 </ul>
@@ -113,6 +119,7 @@ facilitate moving easily between them.</i>
 <ul>
     <li><a href="#Dataset-GetType">h5dget_type_f</a>
     <li><a href="#Dataset-GetCreatePlist">h5dget_create_plist_f</a>
+    <li><a href="#Dataset-GetOffset">h5dget_offset_f</a>
     <li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>
     <li><a href="#Dataset-VLGetBuf">h5dvlen_get_max_len_f</a>
 <!--<li><a href="#Dataset-VLReclaim">h5dvlen_reclaim_f</a>               -->
@@ -382,6 +389,37 @@ facilitate moving easily between them.</i>
     <dd><a href="fortran/h5d_FORTRAN.html#h5dget_create_plist_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetOffset">H5Dget_offset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hsize_t </em><code>H5Dget_offset</code>(<em>hid_t </em><code>dset_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns dataset address in file.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_offset</code> returns the address in the file 
+        of the dataset <code>dset_id</code>.
+	That address is expressed as the offset in bytes from 
+	the beginning of the file.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t </em><code>dset_id</code>
+            <dd>Dataset identifier.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the offset in bytes; 
+        otherwise returns <code>HADDR_UNDEF</code>, a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_offset_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1095,7 +1133,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 8 April 2003
+Last modified: 11 April 2003
  
 </body>
 </html>
