@@ -122,5 +122,11 @@ GROUP "/" {
          29.0016, 29.0017, 29.0018, 29.0019
       }
    }
+   DATASET "dset3" {
+      DATATYPE  H5T_STD_I32BE
+      DATASPACE  NULL
+      DATA {
+      }
+   }
 }
 }

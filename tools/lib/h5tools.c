@@ -1098,6 +1098,7 @@ h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
     hid_t     f_space;
     hid_t     p_type = _p_type;
     hid_t     f_type;
+    H5S_class_t space_type;
     int       status = FAIL;
     h5dump_t  info_dflt;
 
@@ -1127,15 +1128,18 @@ h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
     /* Check the data space */
     f_space = H5Dget_space(dset);
 
+    space_type = H5Sget_simple_extent_type(f_space);
+
     /* Print the data */
-    if (H5Sis_simple(f_space) > 0) {
+    if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
         if (!sset)
             status = h5tools_dump_simple_dset(rawdatastream, info, dset, p_type,
                                               indentlevel);
         else
             status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type,
                                                 sset, indentlevel);
-    }
+    } else /* space is H5S_NULL */
+        status = SUCCEED;
 
     /* Close the dataspace */
     H5Sclose(f_space);

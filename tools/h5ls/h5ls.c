@@ -1320,86 +1320,101 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
     hsize_t     temp_need;
     void *buf;
     h5dump_t info;
+    H5S_class_t space_type;
 
     printf("    Attribute: ");
     n = display_string(stdout, attr_name, TRUE);
     printf("%*s", MAX(0, 9-n), "");
+
     if ((attr = H5Aopen_name(obj, attr_name))) {
- space = H5Aget_space(attr);
- type = H5Aget_type(attr);
+         space = H5Aget_space(attr);
+         type = H5Aget_type(attr);
 
- /* Data space */
- ndims = H5Sget_simple_extent_dims(space, size, NULL);
- if (0==ndims) {
-     puts(" scalar");
- } else {
-     printf(" {");
-     for (i=0; i<ndims; i++) {
-  HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
-  nelmts *= size[i];
-     }
-     puts("}");
- }
+         /* Data space */
+         ndims = H5Sget_simple_extent_dims(space, size, NULL);
+         space_type = H5Sget_simple_extent_type(space);
+         switch (space_type) {
+            case H5S_SCALAR:
+                /* scalar dataspace */
+                puts(" scalar");
+                break;
+            case H5S_SIMPLE:
+                /* simple dataspace */
+                printf(" {");
+                for (i=0; i<ndims; i++) {
+                    HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
+                    nelmts *= size[i];
+                }
+                puts("}");
+                break;
+            case H5S_NULL:
+                /* null dataspace */
+                puts(" null");
+                break;
+         }
 
- /* Data type */
- printf("        Type:      ");
- display_type(type, 15);
- putchar('\n');
+         /* Data type */
+         printf("        Type:      ");
+         display_type(type, 15);
+         putchar('\n');
 
- /* Data */
- memset(&info, 0, sizeof info);
- info.line_multi_new = 1;
- if (nelmts<5) {
-     info.idx_fmt = "";
-     info.line_1st  = "        Data:  ";
-     info.line_pre  = "               ";
-     info.line_cont = "                ";
-     info.str_repeat = 8;
-     
- } else {
-     printf("        Data:\n");
-     info.idx_fmt = "(%s)";
-     info.line_pre  = "            %s ";
-     info.line_cont = "            %s  ";
-     info.str_repeat = 8;
- }
- info.line_ncols = width_g;
- if (label_g) info.cmpd_name = "%s=";
- if (string_g && 1==H5Tget_size(type) &&
-     H5T_INTEGER==H5Tget_class(type)) {
-     info.ascii = TRUE;
-     info.elmt_suf1 = "";
-     info.elmt_suf2 = "";
-     info.idx_fmt  = "(%s)";
-     info.line_pre = "            %s \"";
-     info.line_suf = "\"";
- }
- /* values of type reference */
- info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
- info.obj_hidefileno = 0;
- if (hexdump_g) {
-     p_type = H5Tcopy(type);
- } else {
-     p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
- }
- if (p_type>=0) {
-            temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-            assert(temp_need==(hsize_t)((size_t)temp_need));
-            need = (size_t)temp_need;
-     buf = malloc(need);
-     assert(buf);
-     if (H5Aread(attr, p_type, buf)>=0) {
-  h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
-     }
-     free(buf);
-     H5Tclose(p_type); 
- }
-     
- H5Sclose(space);
- H5Tclose(type);
- H5Aclose(attr);
+         /* Data */
+         memset(&info, 0, sizeof info);
+         info.line_multi_new = 1;
+         if (nelmts<5) {
+             info.idx_fmt = "";
+             info.line_1st  = "        Data:  ";
+             info.line_pre  = "               ";
+             info.line_cont = "                ";
+             info.str_repeat = 8;
+             
+         } else {
+             printf("        Data:\n");
+             info.idx_fmt = "(%s)";
+             info.line_pre  = "            %s ";
+             info.line_cont = "            %s  ";
+             info.str_repeat = 8;
+         }
+         
+         info.line_ncols = width_g;
+         if (label_g) info.cmpd_name = "%s=";
+         if (string_g && 1==H5Tget_size(type) &&
+             H5T_INTEGER==H5Tget_class(type)) {
+             info.ascii = TRUE;
+             info.elmt_suf1 = "";
+             info.elmt_suf2 = "";
+             info.idx_fmt  = "(%s)";
+             info.line_pre = "            %s \"";
+             info.line_suf = "\"";
+         }
+         
+         /* values of type reference */
+         info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
+         info.obj_hidefileno = 0;
+         if (hexdump_g) {
+             p_type = H5Tcopy(type);
+         } else {
+             p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+         }
+         
+         if (p_type>=0) {
+                    temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+                    assert(temp_need==(hsize_t)((size_t)temp_need));
+                    need = (size_t)temp_need;
+             buf = malloc(need);
+             assert(buf);
+             if (H5Aread(attr, p_type, buf)>=0) {
+                h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
+             }
+             free(buf);
+             H5Tclose(p_type); 
+         }
+             
+         H5Sclose(space);
+         H5Tclose(type);
+         H5Aclose(attr);
     } else {
- putchar('\n');
+         putchar('\n');
     }
     
     return 0;
@@ -1430,13 +1445,15 @@ dataset_list1(hid_t dset)
 {
     hsize_t     cur_size[64];   /* current dataset dimensions */
     hsize_t     max_size[64];   /* maximum dataset dimensions */
-    hid_t       space;          /* data space */
-    int         ndims;          /* dimensionality */
+    hid_t       space;          /* data space                 */
+    int         ndims;          /* dimensionality             */
+    H5S_class_t space_type;     /* type of dataspace          */
     int   i;
 
     /* Information that goes on the same row as the name.  The name has
      * already been printed. */
     space = H5Dget_space(dset);
+    space_type = H5Sget_simple_extent_type(space);
     ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     printf (" {");
     for (i=0; i<ndims; i++) {
@@ -1447,7 +1464,8 @@ dataset_list1(hid_t dset)
      HDfprintf(stdout, "/%Hu", max_size[i]);
  }
     }
-    if (0==ndims) printf("SCALAR");
+    if (space_type==H5S_SCALAR) printf("SCALAR");
+    else if (space_type==H5S_NULL) printf("NULL");
     putchar('}');
     H5Sclose (space);
 

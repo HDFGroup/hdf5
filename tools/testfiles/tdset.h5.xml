@@ -3,8 +3,8 @@ Expected output for 'h5dump --xml tdset.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
-   <hdf5:Dataset Name="dset1" OBJ-XID="xid_744" H5Path= "/dset1" Parents="xid_696" H5ParentPaths="/">
+<hdf5:RootGroup OBJ-XID="xid_928" H5Path="/">
+   <hdf5:Dataset Name="dset1" OBJ-XID="xid_976" H5Path= "/dset1" Parents="xid_928" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -39,7 +39,7 @@ Expected output for 'h5dump --xml tdset.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
-   <hdf5:Dataset Name="dset2" OBJ-XID="xid_1984" H5Path= "/dset2" Parents="xid_696" H5ParentPaths="/">
+   <hdf5:Dataset Name="dset2" OBJ-XID="xid_1576" H5Path= "/dset2" Parents="xid_928" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -143,6 +143,27 @@ Expected output for 'h5dump --xml tdset.h5'
          29.0018 29.0019
          </hdf5:DataFromFile>
       </hdf5:Data>
+   </hdf5:Dataset>
+   <hdf5:Dataset Name="dset3" OBJ-XID="xid_8896" H5Path= "/dset3" Parents="xid_928" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:NoFill/>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:NullDataspace />
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+   <hdf5:Data>
+      <hdf5:NoData/>
+   </hdf5:Data>
    </hdf5:Dataset>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>
