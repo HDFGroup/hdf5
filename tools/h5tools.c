@@ -1537,7 +1537,7 @@ h5dump_fixtype(hid_t f_type)
     char	**name = NULL;
     int		nmembs = 0, i, j, *ndims = NULL;
     size_t	size, offset, *dims = NULL, nelmts;
-    H5T_str_t strpad;
+    /* H5T_str_t strpad; */
 
     size = H5Tget_size(f_type);
     switch (H5Tget_class(f_type)) {
@@ -1972,7 +1972,7 @@ search_obj (table_t *table, unsigned long *objno)
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-void
+static void
 add_obj (table_t *table, unsigned long *objno, char *objname)
 {
     int i;

@@ -374,7 +374,7 @@ obj_t *objs;
 typedef struct find_objs_t {
 	int prefix_len; 
 	char *prefix;
-	int threshold; /* should be 0 or 1 */
+	unsigned int threshold; /* should be 0 or 1 */
 	table_t *group_table;
 	table_t *type_table;
 	table_t *dset_table;
