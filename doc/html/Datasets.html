@@ -23,7 +23,7 @@
       <br>
       <a href="Files.html">Files</a>&nbsp;&nbsp;
       Datasets&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
       <br>
@@ -38,9 +38,11 @@
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
       <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
       <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
       <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
 </td></tr>
 </table>
@@ -65,7 +67,7 @@
       <dt>Constant Meta Data
       <dd>Meta data that is created when the dataset is created and
 	exists unchanged for the life of the dataset.  For instance,
-	the data type of stored array elements is defined when the
+	the datatype of stored array elements is defined when the
 	dataset is created and cannot be subsequently changed.
 	
       <dt>Persistent Meta Data
@@ -78,7 +80,7 @@
       <dd>Meta data that exists to describe how raw data is organized
 	in the application's memory space.  For instance, the data
 	type of elements in an application array might not be the same
-	as the data type of those elements as stored in the HDF5 file.
+	as the datatype of those elements as stored in the HDF5 file.
 
       <dt>Transport Meta Data
       <dd>Meta data that is used only during the transfer of raw data
@@ -89,7 +91,7 @@
 
     <p>Each of these classes of meta data is handled differently by
       the library although the same API might be used to create them.
-      For instance, the data type exists as constant meta data and as
+      For instance, the datatype exists as constant meta data and as
       memory meta data; the same API (the <code>H5T</code> API) is
       used to manipulate both pieces of meta data but they're handled
       by the dataset API (the <code>H5D</code> API) in different
@@ -380,28 +382,28 @@ H5Pset_external (plist, "scan3.data", 0, 16);
       through some other library.
 
 
-    <h2>5. Data Type</h2>
+    <h2>5. Datatype</h2>
 
-    <p>Raw data has a constant data type which describes the data type
-      of the raw data stored in the file, and a memory data type that
-      describes the data type stored in application memory.  Both data
+    <p>Raw data has a constant datatype which describes the datatype
+      of the raw data stored in the file, and a memory datatype that
+      describes the datatype stored in application memory.  Both data
       types are manipulated with the <a
       href="Datatypes.html"><code>H5T</code></a> API.
 
-    <p>The constant file data type is associated with the dataset when
+    <p>The constant file datatype is associated with the dataset when
       the dataset is created in a manner described below.  Once
       assigned, the constant datatype can never be changed.
 
-    <p>The memory data type is specified when data is transferred
+    <p>The memory datatype is specified when data is transferred
       to/from application memory.  In the name of data sharability,
-      the memory data type must be specified, but can be the same
-      type identifier as the constant data type.
+      the memory datatype must be specified, but can be the same
+      type identifier as the constant datatype.
 
     <p>During dataset I/O operations, the library translates the raw
-      data from the constant data type to the memory data type or vice
-      versa.  Structured data types include member offsets to allow
+      data from the constant datatype to the memory datatype or vice
+      versa.  Structured datatypes include member offsets to allow
       reordering of struct members and/or selection of a subset of
-      members and array data types include index permutation
+      members and array datatypes include index permutation
       information to allow things like transpose operations (<b>the
       prototype does not support array reordering</b>) Permutations
       are relative to some extrinsic descritpion of the dataset.
@@ -435,7 +437,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 
     <p>Each dataset has a set of constant and persistent properties
       which describe the layout method, pre-compression
-      transformation, compression method, data type, external storage,
+      transformation, compression method, datatype, external storage,
       and data space.  The constant properties are set as described
       above in a dataset creation property list whose identifier is
       passed to <code>H5Dcreate()</code>.
@@ -445,8 +447,8 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 	  *<em>name</em>, hid_t <em>type_id</em>, hid_t
 	  <em>space_id</em>, hid_t <em>create_plist_id</em>)</code>
       <dd>A dataset is created by calling <code>H5Dcreate</code> with
-	a file identifier, a dataset name, a data type, a data space,
-	and constant properties.  The data type and data space are the
+	a file identifier, a dataset name, a datatype, a data space,
+	and constant properties.  The datatype and data space are the
 	type and space of the dataset as it will exist in the file,
 	which may be different than in application memory.  The
 	<em>create_plist_id</em> is a <code>H5P_DATASET_CREATE</code>
@@ -494,7 +496,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
     <dl>
       <dt><code>hid_t H5Dget_type (hid_t <em>dataset_id</em>)</code>
       <dd>Returns an identifier for a copy of the dataset permanent
-	data type or negative for failure.
+	datatype or negative for failure.
 
       <dt><code>hid_t H5Dget_space (hid_t <em>dataset_id</em>)</code>
       <dd>Returns an identifier for a copy of the dataset permanent
@@ -517,7 +519,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
     <p>A dataset also has memory properties which describe memory
       within the application, and transfer properties that control
       various aspects of the I/O operations.  The memory can have a
-      data type different than the permanent file data type (different
+      datatype different than the permanent file datatype (different
       number types, different struct member offsets, different array
       element orderings) and can also be a different size (memory is a
       subset of the permanent dataset elements, or vice versa).  The
@@ -538,7 +540,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
       <dt><code>size_t H5Pget_buffer (hid_t <em>xfer_plist</em>, void
 	  **<em>tconv_buf</em>, void **<em>bkg_buf</em>)</code>
       <dd>Sets or retrieves the maximum size in bytes of the temporary
-	buffer used for data type conversion in the I/O pipeline.  An
+	buffer used for datatype conversion in the I/O pipeline.  An
 	application-defined buffer can also be supplied as the
 	<em>tconv_buf</em> argument, otherwise a buffer will be
 	allocated and freed on demand by the library. A second
@@ -576,7 +578,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 		a dataset transfer property list so that strip mining
 		does not occur.  It takes an (optional) dataset transfer
 		property list, a dataset, a data space that describes
-		what data points are being transfered, and a data type
+		what data points are being transfered, and a datatype
 		for the data points in memory.  It returns a (new)
 		dataset transfer property list with the temporary
 		buffer size set to an appropriate value. The return
@@ -587,7 +589,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
  2 disable_strip_mining (hid_t xfer_plist, hid_t dataset,
  3                       hid_t space, hid_t mem_type)
  4 {
- 5     hid_t file_type;          /* File data type */
+ 5     hid_t file_type;          /* File datatype */
  6     size_t type_size;         /* Sizeof larger type */
  7     size_t size;              /* Temp buffer size */
  8     hid_t xfer_plist;         /* Return value */
@@ -626,10 +628,10 @@ H5Pset_external (plist, "scan3.data", 0, 16);
     <h2>11. Raw Data I/O</h2>
 
     <p>All raw data I/O is accomplished through these functions which
-      take a dataset handle, a memory data type, a memory data space,
+      take a dataset handle, a memory datatype, a memory data space,
       a file data space, transfer properties, and an application
-      memory buffer.  They translate data between the memory data type
-      and space and the file data type and space.  The data spaces can
+      memory buffer.  They translate data between the memory datatype
+      and space and the file datatype and space.  The data spaces can
       be used to describe partial I/O operations.
       
     <dl>
@@ -638,7 +640,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 	  <em>file_space_id</em>, hid_t <em>xfer_plist_id</em>,
 	  void *<em>buf</em>/*out*/)</code>
       <dd>Reads raw data from the specified dataset into <em>buf</em>
-	converting from file data type and space to memory data type
+	converting from file datatype and space to memory datatype
 	and space.
 
 	<br><br>
@@ -647,8 +649,8 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 	  <em>file_space_id</em>, hid_t <em>xfer_plist_id</em>,
 	  const void *<em>buf</em>)</code>
       <dd>Writes raw data from an application buffer <em>buf</em> to
-	the specified dataset converting from memory data type and
-	space to file data type and space.
+	the specified dataset converting from memory datatype and
+	space to file datatype and space.
     </dl>
 
 
@@ -656,7 +658,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
       supplied.  However, it can be the same identifier as was used to
       create the dataset or as was returned by
       <code>H5Dget_type()</code>; the library will not implicitly
-      derive memory data types from constant data types.
+      derive memory datatypes from constant datatypes.
 
     <p>For complete reads of the dataset one may supply
       <code>H5S_ALL</code> as the argument for the file data space.
@@ -718,7 +720,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 29 H5Pset_compression (properties, H5D_COMPRESS_LZ77);
 30 
 31 /*
-32  * Create a new dataset within the file.  The data type
+32  * Create a new dataset within the file.  The datatype
 33  * and data space describe the data on disk, which may
 34  * be different than the format used in the application's
 35  * memory.
@@ -727,7 +729,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 38                      data_space, properties);
 39 
 40 /*
-41  * Write the array to the file.  The data type and data
+41  * Write the array to the file.  The datatype and data
 42  * space describe the format of the data in the `dd'
 43  * buffer.  The raw data is translated to the format
 44  * required on disk defined above.  We use default raw
@@ -848,7 +850,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
  8 dataset = H5Dopen (file, "dataset");
  9 
 10 /*
-11  * Describe the memory data type, a struct with a single
+11  * Describe the memory datatype, a struct with a single
 12  * "delta" member.
 13  */
 14 type = H5Tcreate (H5T_COMPOUND, sizeof(double));
@@ -890,7 +892,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
       <br>
       <a href="Files.html">Files</a>&nbsp;&nbsp;
       Datasets&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
       <br>
@@ -905,9 +907,11 @@ H5Pset_external (plist, "scan3.data", 0, 16);
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
       <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
       <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
       <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
 </td></tr>
 </table>
@@ -922,7 +926,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 
 <!-- Created: Tue Dec  2 09:17:09 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  23 July 1999
+Last modified:  14 October 1999
 <!-- hhmts end -->
 
   </body>

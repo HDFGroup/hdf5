@@ -24,7 +24,7 @@
       <br>
       <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
       <br>
@@ -39,9 +39,11 @@
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
       <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
       <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
       Ragged Arrays&nbsp;&nbsp;
 </td></tr>
 </table>
@@ -79,7 +81,7 @@ Do not create any archives using this interface!</center>
       rows.  The number of rows and the length of each row can be
       changed at any time (the current version does not support
       truncating an array by removing rows). All elements of the
-      ragged array have the same data type and, as with datasets, the
+      ragged array have the same datatype and, as with datasets, the
       data is type-converted between memory buffers and files.
 
     <p>The current implementation works best when most of the rows are 
@@ -120,7 +122,7 @@ Do not create any archives using this interface!</center>
 	independently). The dataset creation property list
 	<em>plist</em> defines the width of the <em>raw</em> dataset;
 	a nominal row is considered to be the width of a chunk.  The
-	<em>type</em> argument defines the data type which will be
+	<em>type</em> argument defines the datatype which will be
 	stored in the file. A negative value is returned if the array
 	cannot be created.
 
@@ -154,7 +156,7 @@ Do not create any archives using this interface!</center>
 	  *<em>buf</em>[])</code>
       <dd>A set of ragged array rows beginning at <em>start_row</em>
 	and continuing for <em>nrows</em> is written to the file,
-	converting the memory data type <em>type</em> to the file data
+	converting the memory datatype <em>type</em> to the file data
 	type which was defined when the array was created.  The number 
 	of elements to write from each row is specified in the
 	<em>size</em> array and the data for each row is pointed to
@@ -169,8 +171,8 @@ Do not create any archives using this interface!</center>
 	  *<em>buf</em>[])</code>
       <dd>A set of ragged array rows beginning at <em>start_row</em>
 	and continuing for <em>nrows</em> is read from the file,
-	converting from the file data type which was defined when the
-	array was created to the memory data type <em>type</em>. The
+	converting from the file datatype which was defined when the
+	array was created to the memory datatype <em>type</em>. The
 	number of elements to read from each row is specified in the
 	<em>size</em> array and the buffers in which to place the
 	results are pointed to by the <em>buf</em> array.  On return,
@@ -203,7 +205,7 @@ Do not create any archives using this interface!</center>
       <br>
       <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
       <br>
@@ -218,9 +220,11 @@ Do not create any archives using this interface!</center>
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
       <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
       <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <br>
       Ragged Arrays&nbsp;&nbsp;
 </td></tr>
 </table>
@@ -235,7 +239,7 @@ Do not create any archives using this interface!</center>
 
 <!-- Created: Wed Aug 26 14:10:32 EDT 1998 -->
 <!-- hhmts start -->
-Last modified: 23 July 1999
+Last modified:  14 October 1999
 <!-- hhmts end -->
                                         
   </body>
