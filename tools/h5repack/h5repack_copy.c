@@ -259,7 +259,6 @@ int do_copy_objects(hid_t fidin,
 #endif /* LATER */
  int       i, j;
  int       wrote=0;
-	int       has_layout;
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -270,7 +269,6 @@ int do_copy_objects(hid_t fidin,
  {
 
   buf=NULL;
-		has_layout=0;
   switch ( travt->objs[i].type )
   {
 /*-------------------------------------------------------------------------
@@ -359,9 +357,6 @@ int do_copy_objects(hid_t fidin,
  */
    if ( (H5T_REFERENCE!=H5Tget_class(mtype_id)))
    {
-    /* the information about the object to be filtered/"layouted" */
-    pack_info_t obj;
-    init_packobject(&obj);
    
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
@@ -379,24 +374,12 @@ int do_copy_objects(hid_t fidin,
      }
      if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
-     
-     /*-------------------------------------------------------------------------
-      * apply the layout; check first if the object is to be modified.
-      *-------------------------------------------------------------------------
-      */
-     if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
-     {
-      obj.chunk.rank=rank;
-      if (apply_layout(dcpl_id,&obj)<0)
-       goto error;
-						has_layout=1;
-     }
-
+    
     /*-------------------------------------------------------------------------
-     * apply the filter; check if the object is to be filtered.
+     * apply the filter
      *-------------------------------------------------------------------------
      */
-     if (apply_filters(travt->objs[i].name,rank,dims,dcpl_id,mtype_id,options,has_layout,&obj)<0)
+     if (apply_filters(travt->objs[i].name,rank,dims,dcpl_id,mtype_id,options)<0)
       goto error;
 
     }/*nelmts*/
