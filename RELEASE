@@ -29,6 +29,7 @@ If you have any questions or comments, please send them to:
 CONTENTS
 
 - New features
+- New h4toh5 utility
 - Bug fixes since HDF5-1.2.0 
 - Platforms Tested
 - Known Problems
@@ -53,7 +54,73 @@ New features
    * Added 'query' function to VFL drivers.  Also added 'type' parameter to
      VFL 'read' & 'write' calls, so they are aware of the type of data being
      accessed in the file.  Updated the VFL document also.
+   * A new h4toh5 uitlity, to convert HDF4 files to analogous 
+     HDF5 files.
 
+Release Notes for h4toh5 beta
+=============================
+
+The h4toh5 utility converts an HDF4 file to an HDF5 file.
+See the document, "Mapping HDF4 Objects to HDF5 Objects",
+http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
+
+Known Limitations of the h4toh5 beta release
+=============================================
+
+1. Error handling
+
+Error reporting is minimal.
+
+2. String datatype
+
+HDF4 has no 'string' type. String valued data are usually defined 
+as an array of 'char' in HDF4. The h4toh5 utility will generally
+map these to HDF5 'String' types rather than array of char, with
+the following additional rules:
+
+   * For the data of HDF4 SDS, image, and palette, if the data is
+     declared 'DFNT_CHAR8' it will be assumed to be integer and
+     will be an H5T_INTEGER type.
+   * For attributes of any HDF4 object, data of type 'DFNT_CHAR8'
+     will be converted to an HDF5 'H5T_STRING' type.
+   * For Vdata of HDF4, it is difficult to determine whether data 
+     of type 'DFNT_CHAR8' is intended to be bytes or charaters.
+     The h4toh5 utility will consider them as C character, and
+     will convert them to an HDF5 'H5T_STRING' type.
+
+
+3. Compression, Chunking and External storage
+
+Chunking is supported, but compression and external storage is 
+not.
+
+An HDF4 object that uses chunking will be converted to an HDF5
+file with analogous chunked storage.
+
+An HDF4 object that uses compression will be converted to an
+uncompressed HDF5 object.  
+
+An HDF4 object that uses external storage will be converted to an
+an HDF5 object without external storage.  
+
+4. Memory use
+
+The beta version of the h4toh5 utility copies data from HDF4
+objects in a single read followed by a single write to the
+HDF5 object.  For large objects, this requires a very large 
+amount of memory, which may be extremely slow or fail on 
+some platforms.
+
+Note that a dataset that has only been partly written will
+be read completely, including uninitialized data, and all the
+data will be written to the HDF5 object.
+
+5. Platforms
+
+The h4toh5 utility requires HDF5.1.4.
+
+The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
+Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, and Windows 2000.
 Bug fixes since HDF5-1.2.0
 ==========================
 
