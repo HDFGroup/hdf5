@@ -21,13 +21,13 @@
 #ifndef H5FDmpi_H
 #define H5FDmpi_H
 
-#ifdef H5_HAVE_PARALLEL
-
 /* Type of I/O for data transfer properties */
 typedef enum H5FD_mpio_xfer_t {
     H5FD_MPIO_INDEPENDENT = 0, 		/*zero is the default*/
     H5FD_MPIO_COLLECTIVE
 } H5FD_mpio_xfer_t;
+
+#ifdef H5_HAVE_PARALLEL
 
 /* Sub-class the H5FD_class_t to add more specific functions for MPI-based VFDs */
 typedef struct H5FD_class_mpi_t {
