@@ -332,7 +332,7 @@ hid_t h5dump_fixtype(hid_t f_type);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,int indentlevel);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 	       void *mem, int indentlevel);
-int copy_atomic_char(char* output, char* input, int numchar, int freespace);
+
 
 /*if we get a new program that needs to use the library add its name here*/
 typedef enum {
