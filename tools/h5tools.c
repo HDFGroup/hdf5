@@ -707,12 +707,12 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 
         for (i = 0; i < n; i++)
             h5dump_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
-    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-        memcpy(&tempdouble, vp, sizeof(double)); 
-        h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
         memcpy(&tempfloat, vp, sizeof(float));	
         h5dump_str_append(str, OPT(info->fmt_float, "%g"), tempfloat);
+    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+        memcpy(&tempdouble, vp, sizeof(double)); 
+        h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
     } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
             H5Tequal(type, H5T_NATIVE_UCHAR))) {
         if (ESCAPE_HTML == info->str_locale) {
