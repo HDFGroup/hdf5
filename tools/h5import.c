@@ -9,7 +9,7 @@
  */
 
 /* See H5private.h for how to include system headers */
-#include <H5config.h>
+#include <hdf5.h>
 #ifdef STDC_HEADERS
 #   include <fcntl.h>
 #   include <string.h>
@@ -26,7 +26,6 @@
 #   include <sys/stat.h>
 #endif
 
-#include <hdf5.h>
 
 
 /*-------------------------------------------------------------------------

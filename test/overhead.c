@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <ctype.h>
@@ -23,8 +23,6 @@
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
-
-#include <hdf5.h>
 
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
@@ -239,7 +237,7 @@ test(fill_t fill_style, const double splits[],
 	if (verbose) {
 	    if (H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
 	    if (fstat(fd, &sb)<0) goto error;
-		/*
+	    /*
 	     * The extra cast in the following statement is a bug workaround
 	     * for the Win32 version 5.0 compiler.
 	     * 1998-11-06 ptl
@@ -283,7 +281,8 @@ test(fill_t fill_style, const double splits[],
 	     * 1998-11-06 ptl
 	     */
 	printf("%-7s %8.3f\n", sname, 
-	       (double)((hssize_t)((sb.st_size-cur_size[0]*sizeof(int))/cur_size[0])));
+	       (double)((hssize_t)((sb.st_size-cur_size[0]*sizeof(int))/
+				   cur_size[0])));
 	
     }
     close(fd);

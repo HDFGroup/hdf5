@@ -8,18 +8,6 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
-
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <ctype.h>
-#   include <fcntl.h>
-#   include <math.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <sys/stat.h>
-#endif
-
 #include <hdf5.h>
 #include <H5private.h> /*needed for HDfprintf() and long_long*/
 

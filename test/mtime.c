@@ -13,34 +13,10 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
-
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <math.h>
-#endif
-
-#if defined(TIME_WITH_SYS_TIME)
-#   include <sys/time.h>
-#   include <time.h>
-#elif defined(HAVE_SYS_TIME_H)
-#   include <sys/time.h>
-#else
-#   include <time.h>
-#endif
-
 #include <hdf5.h>
-#include <H5private.h>	/*for HDdifftime()*/
+#include <H5private.h>	/*for HDdifftime() and __unused__ */
 
 #define FILE_NAME_1	"mtime.h5"
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
-#else
-#   define __unused__ __attribute__((unused))
-#endif
 
 
 /*-------------------------------------------------------------------------

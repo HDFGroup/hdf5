@@ -8,7 +8,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <assert.h>
@@ -39,8 +39,6 @@
 #ifdef HAVE_WINSOCK_H
 #include <Winsock.h>
 #endif
-
-#include <hdf5.h>
 
 #define RAW_FILE_NAME	"iopipe.raw"
 #define HDF5_FILE_NAME	"iopipe.h5"

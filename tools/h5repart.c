@@ -13,7 +13,7 @@
  */
 
 /* See H5private.h for how to include system headers */
-#include <H5config.h>
+#include <hdf5.h>
 #ifdef STDC_HEADERS
 #   include <ctype.h>
 #   include <errno.h>
@@ -32,7 +32,6 @@
 #   include <sys/stat.h>
 #endif
 
-#include <hdf5.h>
 #define FALSE	0
 #define TRUE	1
 #define NAMELEN	4096

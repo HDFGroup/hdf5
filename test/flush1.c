@@ -14,14 +14,17 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <stdio.h>
-#   include <unistd.h>
+#   include <stdlib.h>
 #endif
 
-#include <hdf5.h>
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
 
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__

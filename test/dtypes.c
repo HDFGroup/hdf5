@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <assert.h>
@@ -28,8 +28,6 @@
 #ifdef _POSIX_VERSION
 #   include <sys/wait.h>
 #endif
-
-#include <hdf5.h>
 
 #define H5T_PACKAGE
 #include <H5Tpkg.h>		/*to turn off hardware conversions*/

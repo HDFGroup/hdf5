@@ -8,7 +8,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <assert.h>
@@ -16,8 +16,6 @@
 #   include <stdlib.h>
 #   include <string.h>
 #endif
-
-#include <hdf5.h>
 
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__

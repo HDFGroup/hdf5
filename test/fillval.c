@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <fcntl.h>
@@ -21,8 +21,6 @@
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
-
-#include <hdf5.h>
 
 /*
  * Define NO_FILLING if you want to compare how this test works when there is

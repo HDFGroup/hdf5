@@ -8,18 +8,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
-
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <signal.h>
-#   include <stdlib.h>
-#endif
-
-#include <hdf5.h>
-
 #include <H5private.h>	/*for performance monitoring*/
-
 
 #define NOTIFY_INTERVAL	2 /*seconds*/
 #define TIME_LIMIT	60 /*seconds*/

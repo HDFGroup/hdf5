@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include files */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <assert.h>
@@ -24,8 +24,6 @@
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
-
-#include <hdf5.h>
 
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__

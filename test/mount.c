@@ -10,13 +10,11 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <H5config.h>
+#include <hdf5.h>
 
 #ifdef STDC_HEADERS
 #   include <stdlib.h>
 #endif
-
-#include <hdf5.h>
 
 #define FALSE		0
 #define TRUE		1

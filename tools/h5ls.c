@@ -9,18 +9,11 @@
 
 /*
  * We include the private header file so we can get to the uniform
- * programming environment it declares.
+ * programming environment it declares.  Other than that, h5ls only calls
+ * HDF5 API functions.
  */
 #include <H5private.h>
 #include <h5tools.h>
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
-#else
-#   define __unused__ __attribute__((unused))
-#endif
 
 /* Command-line switches */
 static int verbose_g = 0;		/*lots of extra output		     */
