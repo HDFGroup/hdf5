@@ -295,6 +295,8 @@
 ./test/extend.c
 ./test/external.c
 ./test/fillval.c
+./test/flush1.c
+./test/flush2.c
 ./test/gheap.c
 ./test/hyperslab.c
 ./test/iopipe.c

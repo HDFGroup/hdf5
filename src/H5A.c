@@ -72,7 +72,7 @@ H5A_init_interface(void)
      */
     if ((ret_value = H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE,
 				    H5A_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5A_close)) == FAIL) {
+				    (herr_t (*)(void *)) H5A_close))<0) {
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		      "unable to initialize attribute group");
     }

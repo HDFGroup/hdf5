@@ -441,7 +441,7 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
     assert(fhyper_info);
 
     /* Allocate temporary buffer of proper size */
-    if((node->cinfo.block_id=H5TB_get_buf(node->cinfo.size*fhyper_info->elmt_size,1,(void **)&(node->cinfo.block)))==FAIL)
+    if((node->cinfo.block_id=H5TB_get_buf(node->cinfo.size*fhyper_info->elmt_size,1,(void **)&(node->cinfo.block)))<0)
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
             "can't allocate hyperslab cache block");
 
@@ -683,7 +683,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 
                 /* Read information from the cached block */
                 if(regions[i].node->cinfo.cached) {
-                    if(H5S_hyper_block_read(regions[i].node,fhyper_info,region_size)==FAIL)
+                    if(H5S_hyper_block_read(regions[i].node,fhyper_info,region_size)<0)
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
                 }
                 else {
@@ -955,7 +955,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 
                 /* Read information from the cached block */
                 if(regions[i].node->cinfo.cached) {
-                    if(H5S_hyper_block_write(regions[i].node,fhyper_info,region_size)==FAIL)
+                    if(H5S_hyper_block_write(regions[i].node,fhyper_info,region_size)<0)
                         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                 }
                 else {

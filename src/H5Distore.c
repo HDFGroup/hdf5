@@ -1625,7 +1625,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
 	    H5D_xfer_t		tmp_xfer = *xfer;
-	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
 	    };
@@ -1643,7 +1643,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
 	    if (H5F_arr_read(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
 			     sub_size, size_m, sub_offset_m, offset_wrt_chunk,
-			     buf)==FAIL){
+			     buf)<0){
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			     "unable to read raw data from file");
 	    }
@@ -1802,7 +1802,7 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
 	    H5D_xfer_t		tmp_xfer = *xfer;
-	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 				"unable to locate raw data chunk");
 	    };
@@ -1820,7 +1820,7 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	    tmp_xfer.xfer_mode = H5D_XFER_DFLT;
 	    if (H5F_arr_write(f, &tmp_xfer, &l, pline, fill, NULL/*no efl*/,
 			      sub_size, size_m, sub_offset_m, offset_wrt_chunk,
-			      buf)==FAIL){
+			      buf)<0){
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "unable to write raw data to file");
 	    }
@@ -2140,7 +2140,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	printf(")\n");
 #endif
 #ifdef NO
-	if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)==FAIL){
+	if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){
 #endif
 	    /* No file space assigned yet.  Allocate it. */
 	    /* The following needs improvement like calling the */

@@ -321,7 +321,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         hssize_t fill=1;
 
         /* Allocate temporary buffer */
-        if((stride_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_stride)) ==FAIL)
+        if((stride_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_stride))<0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate stride vector");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
@@ -332,7 +332,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(block==NULL) {
         hssize_t fill=1;
 
-        if((block_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_block))==FAIL)
+        if((block_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_block))<0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate block vector");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);

@@ -426,11 +426,6 @@ H5TB_resize_buf(hid_t tbuf_id, hsize_t size)
         } /* end else */
     } /* end if */
 
-#ifdef LATER
-done:
-#endif
-    if (ret_value == FAIL) {
-    }
     FUNC_LEAVE(ret_value);
 } /* H5TB_resize_buf() */
 
@@ -489,11 +484,6 @@ H5TB_garbage_coll(void)
 
     ret_value=SUCCEED;
 
-#ifdef LATER
-done:
-#endif
-    if (ret_value == FAIL) {
-    }
     FUNC_LEAVE(ret_value);
 }   /* H5TB_garbage_coll() */
 
@@ -532,11 +522,6 @@ H5TB_release_buf(hid_t tbuf_id)
 
     ret_value=SUCCEED;
 
-#ifdef LATER
-done:
-#endif
-    if (ret_value == FAIL) {
-    }
     FUNC_LEAVE(ret_value);
 } /* H5TB_release_buf() */
 

@@ -235,7 +235,7 @@ H5_init_thread(void)
     FUNC_ENTER_INIT(H5_init_thread, NULL, FAIL);
 
     /* Add the "thread termination" routine to the exit chain */
-    if (H5_add_exit(&H5_term_thread) == FAIL)
+    if (H5_add_exit(&H5_term_thread)<0)
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to set thread atexit function");
 

@@ -202,7 +202,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     herr_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rcreate, FAIL);
-    H5TRACE5("e","*risRti",ref,loc_id,name,ref_type,space_id);
+    H5TRACE5("e","xisRti",ref,loc_id,name,ref_type,space_id);
 
     /* Check args */
     if(ref==NULL)
@@ -325,7 +325,7 @@ H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *_ref)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rdereference, FAIL);
-    H5TRACE2("i","i*r",dataset,_ref);
+    H5TRACE3("i","iRtx",dataset,ref_type,_ref);
 
     /* Check args */
     if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))
@@ -407,7 +407,7 @@ H5Rget_space(void *ref)
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rget_space, FAIL);
-    H5TRACE1("i","*r",ref);
+    H5TRACE1("i","x",ref);
 
     /* Check args */
     if(ref==NULL)

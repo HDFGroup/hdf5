@@ -251,7 +251,7 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
     grp_ptr->count++;
 
   done:
-    if (ret_value == FAIL) {
+    if (ret_value<0) {
 	/* Error condition cleanup */
 	if (grp_ptr != NULL) {
 	    H5MM_xfree (grp_ptr->id_list);
@@ -463,11 +463,6 @@ H5I_register(H5I_type_t grp, void *object)
     ret_value = new_id;
 
   done:
-    if (ret_value == FAIL) {
-	/* Error condition cleanup */
-    }
-    
-    /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }
 

@@ -63,7 +63,8 @@
 #   include <sys/time.h>
 #   include <sys/types.h>
 #   include <unistd.h>
-#endif//if defined(WIN32)
+#endif /*if defined(WIN32)*/
+
 #endif
 
 /*

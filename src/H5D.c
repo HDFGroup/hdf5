@@ -1297,7 +1297,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
 done:
     if (space)
         H5S_close (space);
-    if (ret_value==FAIL && dataset) {
+    if (ret_value<0 && dataset) {
         if (H5F_addr_defined(&(dataset->ent.header))) {
             H5O_close(&(dataset->ent));
         }
@@ -1586,16 +1586,15 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(tconv_id = H5TB_get_buf(target_size, 1,
-					   (void **)&tconv_buf))) {
+        if ((tconv_id = H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(bkg_id = H5TB_get_buf(request_nelmts*dst_type_size, 1,
-					 (void **)&bkg_buf))) {
+        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
+				 (void **)&bkg_buf))<0) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
@@ -1960,16 +1959,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(tconv_id = H5TB_get_buf(target_size, 1,
-					   (void **)&tconv_buf))) {
+        if ((tconv_id=H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(bkg_id = H5TB_get_buf(request_nelmts*dst_type_size, 1,
-					 (void **)&bkg_buf))) {
+        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
+				 (void **)&bkg_buf))<0) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }

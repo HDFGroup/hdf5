@@ -47,9 +47,9 @@
 #define RM_CACHE_DELT	5
 #define RM_START	0.50
 #define RM_END	        5.00
-#define RM_DELTA	0.5
-#define RM_W0		1.0
-#define RM_NRDCC	5210
+#define RM_DELTA	0.50
+#define RM_W0		0.0
+#define RM_NRDCC	521
 
 /* Diagonal test */
 #define DIAG_CACHE_STRT	25
@@ -57,7 +57,7 @@
 #define DIAG_CACHE_DELT	5
 #define DIAG_START	0.50
 #define DIAG_END	5.00
-#define DIAG_DELTA	0.5
+#define DIAG_DELTA	0.50
 /* #define DIAG_W0		0.65 */
 /* #define DIAG_NRDCC		521 */
 

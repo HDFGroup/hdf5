@@ -1247,10 +1247,6 @@ H5Sis_simple(hid_t space_id)
     ret_value = H5S_is_simple(space);
 
   done:
-    if (ret_value == FAIL) {   /* Error condition cleanup */
-
-    }				/* end if */
-    /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }
 

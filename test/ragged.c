@@ -200,7 +200,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
     hsize_t		interval_nelmts;	/*elmts/interval timer	*/
 #else
 	hssize_t 	interval_nelmts;	/*elmts/interval timer	*/
-#endif 
+#endif
     hsize_t		*size=NULL;		/*size of each row	*/
     void		**buf=NULL;		/*buffer for each row	*/
     H5_timer_t		timer, timer_total;	/*performance timers	*/
