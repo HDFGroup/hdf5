@@ -1878,6 +1878,99 @@ H5T_get_class(const H5T_t *dt)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tdetect_class
+ *
+ * Purpose:	Check whether a datatype contains (or is) a certain type of
+ *		datatype.
+ *
+ * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Tdetect_class(hid_t type, H5T_class_t cls)
+{
+    H5T_t	*dt = NULL;
+
+    FUNC_ENTER (H5Tdetect_class, FAIL);
+    H5TRACE2("b","iTt",type,cls);
+    
+    /* Check args */
+    if (H5I_DATATYPE != H5I_get_type(type) ||
+            NULL == (dt = H5I_object(type))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
+    }
+    if (!(cls>H5T_NO_CLASS && cls<H5T_NCLASSES)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type class");
+    }
+
+    FUNC_LEAVE(H5T_detect_class(dt,cls));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_detect_class
+ *
+ * Purpose:	Check whether a datatype contains (or is) a certain type of
+ *		datatype.
+ *
+ * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_detect_class (H5T_t *dt, H5T_class_t cls)
+{
+    intn		i;
+
+    FUNC_ENTER (H5T_detect_class, FAIL);
+    
+    assert(dt);
+    assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
+
+    /* Check if this type is the correct type */
+    if(dt->type==cls)
+        HRETURN(TRUE);
+
+    /* check for types that might have the correct type as a component */
+    switch(dt->type) {
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                /* Check if this field's type is the correct type */
+                if(dt->u.compnd.memb[i].type->type==cls)
+                    HRETURN(TRUE);
+
+                /* Recurse if it's VL, compound or array */
+                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY)
+                    HRETURN(H5T_detect_class(dt->u.compnd.memb[i].type,cls));
+            } /* end for */
+            break;
+
+        case H5T_ARRAY:
+        case H5T_VLEN:
+        case H5T_ENUM:
+            HRETURN(H5T_detect_class(dt->parent,cls));
+            break;
+
+        default:
+            break;
+    } /* end if */
+
+    FUNC_LEAVE (FALSE);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tget_size
  *
  * Purpose:	Determines the total size of a data type in bytes.

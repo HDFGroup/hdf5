@@ -106,6 +106,7 @@ __DLL__ herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func);
 __DLL__ herr_t H5T_path_force_reinit(H5T_t *dt);
 __DLL__ H5T_class_t H5T_get_class(const H5T_t *dt);
+__DLL__ htri_t H5T_detect_class (H5T_t *dt, H5T_class_t cls);
 __DLL__ size_t H5T_get_size(const H5T_t *dt);
 __DLL__ intn H5T_cmp(const H5T_t *dt1, const H5T_t *dt2);
 __DLL__ htri_t H5T_is_atomic(const H5T_t *dt);

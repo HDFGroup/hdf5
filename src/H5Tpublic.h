@@ -489,6 +489,7 @@ __DLL__ char *H5Tget_tag(hid_t type);
 /* Querying property values */
 __DLL__ hid_t H5Tget_super(hid_t type);
 __DLL__ H5T_class_t H5Tget_class(hid_t type_id);
+__DLL__ htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
 __DLL__ size_t H5Tget_size(hid_t type_id);
 __DLL__ H5T_order_t H5Tget_order(hid_t type_id);
 __DLL__ size_t H5Tget_precision(hid_t type_id);

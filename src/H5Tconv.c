@@ -776,63 +776,6 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	    
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_detect_type
- *
- * Purpose:	Check whether a datatype contains (or is) a certain type of
- *		datatype.
- *
- * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, November 29, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5T_detect_type (H5T_t *dt, H5T_class_t cls)
-{
-    intn		i;
-
-    FUNC_ENTER (H5T_detect_type, FAIL);
-    
-    assert(dt);
-    assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
-
-    /* Check if this type is the correct type */
-    if(dt->type==cls)
-        HRETURN(TRUE);
-
-    /* check for types that might have the correct type as a component */
-    switch(dt->type) {
-        case H5T_COMPOUND:
-            for (i=0; i<dt->u.compnd.nmembs; i++) {
-                /* Check if this field's type is the correct type */
-                if(dt->u.compnd.memb[i].type->type==cls)
-                    HRETURN(TRUE);
-
-                /* Recurse if it's VL, compound or array */
-                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY)
-                    HRETURN(H5T_detect_type(dt->u.compnd.memb[i].type,cls));
-            } /* end for */
-            break;
-
-        case H5T_ARRAY:
-        case H5T_VLEN:
-        case H5T_ENUM:
-            HRETURN(H5T_detect_type(dt->parent,cls));
-            break;
-
-        default:
-            break;
-    } /* end if */
-
-    FUNC_LEAVE (FALSE);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_conv_need_bkg
  *
  * Purpose:	Check whether the source or destination datatypes require a
@@ -861,7 +804,7 @@ H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     assert(dst);
     assert(cdata);
 
-    if (H5T_detect_type(src,H5T_COMPOUND)==TRUE || H5T_detect_type(dst,H5T_COMPOUND)==TRUE)
+    if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
         cdata->need_bkg = H5T_BKG_TEMP;
 
     FUNC_LEAVE (SUCCEED);
