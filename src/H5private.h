@@ -1030,7 +1030,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
    /* Initialize the library */						      \
-   H5_FIRST_THREAD_INIT                                                       \
+   H5_FIRST_THREAD_INIT;                                                      \
    H5_API_UNSET_CANCEL                                                        \
    H5_API_LOCK_BEGIN                                                          \
                                                                               \
