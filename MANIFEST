@@ -54,6 +54,7 @@
 ./config/powerpc-ibm-aix4.2.1.0
 ./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5
+./config/unicosmk
 
 ./doc/html/Attributes.html
 ./doc/html/Big.html
