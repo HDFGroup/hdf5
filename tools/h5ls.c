@@ -119,7 +119,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     hid_t	(*func)(void*);
     void	*edata;
     int		i;
-    char	buf[512];
+    char	buf[512], comment[50];
     H5G_stat_t	statbuf;
     
     /* Disable error reporting */
@@ -170,6 +170,11 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     } else {
 	printf ("Unknown Type\n");
     }
+
+    /* Display the comment if the object has one */
+    H5Gget_comment(group, name, sizeof(comment), comment);
+    strcpy(comment+sizeof(comment)-4, "...");
+    if (comment[0]) printf("%26s%s\n", "", comment);
 
     /* Restore error reporting */
     H5Eset_auto (func, edata);

@@ -114,6 +114,10 @@ test_create(hid_t file)
     /* Close the dataset */
     if (H5Dclose(dataset) < 0) goto error;
 
+    /* Add a comment to the dataset */
+    status = H5Gset_comment(file, DSET_DEFAULT_NAME, "This is a dataset");
+    if (status<0) goto error;
+
     /*
      * Try creating a dataset that already exists.  This should fail since a
      * dataset can only be created once.  Temporarily turn off error
@@ -788,7 +792,9 @@ main(void)
 
     /* Cause the library to emit initial messages */
     grp = H5Gcreate (file, "emit diagnostics", 0);
+    H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted");
     H5Gclose (grp);
+
     
 
     status = test_create(file);

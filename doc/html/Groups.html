@@ -278,11 +278,37 @@
 	API.</b>
     </dl>
 
+    <h2>6. Comments</h2>
+
+    <p>Objects can have a comment associated with them.  The comment
+      is set and queried with these two functions:
+
+    <dl>
+      <dt><code>herr_t H5Gset_comment (hid_t <em>loc_id</em>, const
+	  char *<em>name</em>, const char *<em>comment</em>)</code>
+      <dd>The previous comment (if any) for the specified object is
+	replace with a new comment.  If the <em>comment</em> argument
+	is the empty string or a null pointer then the comment message 
+	is removed from the object.  Comments should be relatively
+	short, null-terminated, ASCII strings.
+
+	<br><br>
+      <dt><code>herr_t H5Gget_comment (hid_t <em>loc_id</em>, const
+	  char *<em>name</em>, size_t <em>bufsize</em>, char
+	  *<em>comment</em>)</code>
+      <dd>The comment string for an object is returned through the
+	<em>comment</em> buffer.  At most <em>bufsize</em> characters
+	including the null terminator are copied, and the result is
+	not null terminated if the comment is longer than the supplied 
+	buffer.  If an object doesn't have a comment then the empty
+	string is returned.
+    </dl>
+
     <hr>
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
 <!-- hhmts start -->
-Last modified: Tue Mar 24 15:52:14 EST 1998
+Last modified: Mon Jul 20 16:45:40 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

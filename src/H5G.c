@@ -716,6 +716,96 @@ H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
     FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gset_comment
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gset_comment (hid_t loc_id, const char *name, const char *comment)
+{
+    H5G_t	*loc = NULL;
+    
+    FUNC_ENTER(H5Gset_comment, FAIL);
+    H5TRACE3("e","iss",loc_id,name,comment);
+
+    if (NULL==(loc=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    }
+
+    if (H5G_set_comment(loc, name, comment)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to set comment value");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_comment
+ *
+ * Purpose:	Return at most BUFSIZE characters of the comment for the
+ *		specified object.  If BUFSIZE is large enough to hold the
+ *		entire comment then the comment string will be null
+ *		terminated, otherwise it will not.  If the object does not
+ *		have a comment value then the empty string is returned.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_comment (hid_t loc_id, const char *name, size_t bufsize, char *buf)
+{
+    H5G_t	*loc = NULL;
+    
+    FUNC_ENTER(H5Gget_comment, FAIL);
+    H5TRACE4("e","iszs",loc_id,name,bufsize,buf);
+
+    if (NULL==(loc=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    }
+    if (bufsize<1 || !buf) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified");
+    }
+
+    if (H5G_get_comment(loc, name, bufsize, buf)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to set comment value");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
 /*
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
@@ -1988,4 +2078,93 @@ H5G_linkval (H5G_t *loc, const char *name, size_t size, char *buf/*out*/)
     FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_set_comment
+ *
+ * Purpose:	(Re)sets the comment for an object.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
+{
+    H5G_entry_t	obj_ent;
+    H5O_name_t	comment;
+    
+    FUNC_ENTER(H5G_set_comment, FAIL);
+
+    /* Get the symbol table entry for the object */
+    if (H5G_namei(H5G_entof(loc), name, NULL, NULL, &obj_ent/*out*/,
+		  TRUE, NULL)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+    }
+
+    /* Remove the previous comment message if any */
+    if (H5O_remove(&obj_ent, H5O_NAME, 0)<0) H5E_clear();
+
+    /* Add the new message */
+    if (buf && *buf) {
+	comment.s = H5MM_xstrdup(buf);
+	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, &comment)<0) {
+	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+			  "unable to set comment object header message");
+	}
+	H5O_reset(H5O_NAME, &comment);
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_comment
+ *
+ * Purpose:	Get the comment value for an object.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 20, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf)
+{
+    H5O_name_t	comment;
+    H5G_entry_t	obj_ent;
+    
+    FUNC_ENTER(H5G_get_comment, FAIL);
+
+    /* Get the symbol table entry for the object */
+    if (H5G_namei(H5G_entof(loc), name, NULL, NULL, &obj_ent/*out*/,
+		  TRUE, NULL)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+    }
+
+    /* Get the message */
+    comment.s = NULL;
+    if (NULL==H5O_read(&obj_ent, H5O_NAME, 0, &comment)) {
+	buf[0] = '\0';
+    } else {
+	strncpy(buf, comment.s, bufsize);
+	H5O_reset(H5O_NAME, &comment);
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
     

@@ -1386,6 +1386,58 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    }
 	    break;
 
+	case 'S':
+	    switch (type[1]) {
+	    case 'c':
+		if (ptr) {
+		    fprintf(out, "0x%lx", (unsigned long)vp);
+		} else {
+		    H5S_class_t cls = va_arg(ap, H5S_class_t);
+		    switch (cls) {
+		    case H5S_NO_CLASS:
+			fprintf(out, "H5S_NO_CLASS");
+			break;
+		    case H5S_SCALAR:
+			fprintf(out, "H5S_SCALAR");
+			break;
+		    case H5S_SIMPLE:
+			fprintf(out, "H5S_SIMPLE");
+			break;
+		    case H5S_COMPLEX:
+			fprintf(out, "H5S_COMPLEX");
+			break;
+		    default:
+			fprintf(out, "%ld", (long)cls);
+			break;
+		    }
+		}
+		break;
+			
+	    case 's':
+		if (ptr) {
+		    fprintf(out, "0x%lx", (unsigned long)vp);
+		} else {
+		    H5S_seloper_t so = va_arg(ap, H5S_seloper_t);
+		    switch (so) {
+		    case H5S_NOOP:
+			fprintf(out, "H5S_NOOP");
+			break;
+		    case H5S_SELECT_SET:
+			fprintf(out, "H5S_SELECT_SET");
+			break;
+		    default:
+			fprintf(out, "%ld", (long)so);
+			break;
+		    }
+		}
+		break;
+
+	    default:
+		fprintf(out, "BADTYPE(S%c)", type[1]);
+		goto error;
+	    }
+	    break;
+
 	case 's':
 	    if (ptr) {
 		fprintf (out, "0x%lx", (unsigned long)vp);
@@ -1513,58 +1565,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf (out, "%ld", (long)sign);
 			break;
 		    }
-		}
-		break;
-
-	    case 'S':
-		switch (type[1]) {
-		case 'c':
-		    if (ptr) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			H5S_class_t cls = va_arg(ap, H5S_class_t);
-			switch (cls) {
-			case H5S_NO_CLASS:
-			    fprintf(out, "H5S_NO_CLASS");
-			    break;
-			case H5S_SCALAR:
-			    fprintf(out, "H5S_SCALAR");
-			    break;
-			case H5S_SIMPLE:
-			    fprintf(out, "H5S_SIMPLE");
-			    break;
-			case H5S_COMPLEX:
-			    fprintf(out, "H5S_COMPLEX");
-			    break;
-			default:
-			    fprintf(out, "%ld", (long)cls);
-			    break;
-			}
-		    }
-		    break;
-			
-		case 's':
-		    if (ptr) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			H5S_seloper_t so = va_arg(ap, H5S_seloper_t);
-			switch (so) {
-			case H5S_NOOP:
-			    fprintf(out, "H5S_NOOP");
-			    break;
-			case H5S_SELECT_SET:
-			    fprintf(out, "H5S_SELECT_SET");
-			    break;
-			default:
-			    fprintf(out, "%ld", (long)so);
-			    break;
-			}
-		    }
-		    break;
-		    
-		default:
-		    fprintf(out, "BADTYPE(F%c)", type[1]);
-		    goto error;
 		}
 		break;
 
