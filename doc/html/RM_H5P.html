@@ -2224,11 +2224,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_mpiposix_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT) :: comm          ! buffer to return communicator
+  LOGICAL, INTENT(OUT) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+END SUBROUTINE h5pget_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5558,11 +5570,24 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_mpiposix_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: comm           ! MPI communicator to be used for file open
+                                        ! as defined in MPI_FILE_OPEN of MPI-2
+  LOGICAL, INTENT(IN) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+END SUBROUTINE h5pset_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
