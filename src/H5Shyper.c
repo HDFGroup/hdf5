@@ -3231,6 +3231,7 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
 
                     /* Increase size of previous span */
                     tmp2_span->high++;
+                    tmp2_span->nelem++;
 
                     /* Reset the 'tmp_span' for the rest of this block's algorithm */
                     tmp_span=tmp2_span;
@@ -3274,6 +3275,7 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
         /* Does new node adjoin existing node? */
         if(tmp_span->high+1==coords[0]) {
             tmp_span->high++;
+            tmp_span->nelem++;
 
             /* Check if this span tree should now be merged with a level higher in the tree */
             if(prev_span_info!=NULL) {
@@ -3296,6 +3298,7 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
 
                             /* Increase size of previous span */
                             tmp2_span->high++;
+                            tmp2_span->nelem++;
 
                             /* Update pointers */
                             tmp2_span->next=NULL;
