@@ -41,9 +41,8 @@ TESTING() {
 #
 TOOLTEST() {
     # Run test.
-    TESTING $TEST_APP $@
-    echo $TEST_APP_BIN
-    $RUNPARALLEL $TEST_APP_BIN "$@"
+    echo $RUNPARALLEL $TEST_APP_BIN "$@"
+    eval $RUNPARALLEL $TEST_APP_BIN "$@"
 }
 
 ##############################################################################
