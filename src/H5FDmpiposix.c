@@ -41,6 +41,10 @@
 #include "H5MMprivate.h"        /*memory allocation                     */
 #include "H5Pprivate.h"		/*property lists			*/
 
+#ifdef USE_GPFS_HINTS
+#   include <gpfs_fcntl.h>
+#endif
+
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIPOSIX
@@ -603,6 +607,37 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Broadcast the results of the fstat() from process 0 */
     if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&sb, sizeof(h5_stat_t), MPI_BYTE, 0, fa->comm)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
+
+#ifdef USE_GPFS_HINTS
+    /* Prevent GPFS from prefetching byte range (BR) tokens */
+    {
+        struct {
+            gpfsFcntlHeader_t   hdr;
+            gpfsFreeRange_t     fr;
+            gpfsMultipleAccessRange_t mar;
+        } hint;
+        memset(&hint, 0, sizeof hint);
+        hint.hdr.totalLength = sizeof hint;
+        hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+        hint.fr.structLen = sizeof hint.fr;
+        hint.fr.structType = GPFS_FREE_RANGE;
+        hint.fr.start = 0;
+        hint.fr.length = 0;
+        hint.mar.structLen = sizeof hint.mar;
+        hint.mar.structType = GPFS_MULTIPLE_ACCESS_RANGE;
+        hint.mar.accRangeCnt = 1;
+        hint.mar.accRangeArray[0].blockNumber = 1 + mpi_rank;
+        hint.mar.accRangeArray[0].start = 0;
+        hint.mar.accRangeArray[0].length = sb.st_blksize;
+        hint.mar.accRangeArray[0].isWrite = true;
+        
+        if (gpfs_fcntl(f->fd, &hint)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
+
+        if (0==mpi_rank)
+            fprintf(stderr, "HDF5: using GPFS hint mechanism...\n");
+    }
+#endif
 
     /* Build the file struct and initialize it */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpiposix_t))))
