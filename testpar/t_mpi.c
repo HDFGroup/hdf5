@@ -591,6 +591,59 @@ if (special_request & USEFSYNC){
     return nerrs;
 }
 
+/* 
+
+Function: test_mpio_derived_dtype
+
+Test Whether the Displacement of MPI derived datatype 
+(+ File_set_view + MPI_write)works or not on this MPI-IO package 
+and this platform.
+
+1. Details for the test: 
+1) Create two derived datatypes with MPI_Type_hindexed:
+        datatype1: 
+	count = 1, blocklens = 1, offsets = 0, 
+	base type = MPI_BYTE(essentially a char)
+        datatype2: 
+	count = 1, blocklens = 1, offsets = 1(byte), 
+	base type = MPI_BYTE
+        
+2) Using these two derived datatypes,
+   Build another derived datatype with MPI_Type_struct:
+        advtype: derived from datatype1 and datatype2
+        advtype: 
+	count = 2, blocklens[0] = 1, blocklens[1]=1, 
+	offsets[0] = 0, offsets[1] = 1(byte), 
+        bas_type[0]=datatype1, 
+        bas_type[1] = datatype2;
+
+3) Setting MPI file view with advtype
+4) Writing 2 bytes 1 to 2 using MPI_File_write to a file
+5) File content:
+Supposed the file value of the file is 0(most machines indeed do so) 
+and Fill value is embraced with "() in the following output:
+Expected output should be:
+1,0,2
+
+
+
+However, at some platforms, for example, IBM AIX(at March 23rd, 2005):
+the following values were obtained:
+1,2,0 
+
+The problem is that the displacement of the second derived datatype(datatype2) which formed the final derived datatype(advtype)
+ has been put after the basic datatype(MPI_BYTE) of datatype2. This is a bug.
+
+
+2. This test will verify whether the complicated derived datatype is working on
+the current platform. 
+
+If this bug has been fixed in the previous not-working package, this test will issue a printf message to tell the developer to change
+the configuration specific file of HDF5 so that we can change our configurationsetting to support collective IO for irregular selections.
+
+If it turns out that the previous working MPI-IO package no longer works, this test will also issue a message to inform the corresponding failure so that
+we can turn off collective IO support for irregular selections.
+*/
 
 static int test_mpio_derived_dtype(char *filename) {
 
@@ -613,7 +666,6 @@ static int test_mpio_derived_dtype(char *filename) {
     int mpi_rank,mpi_size;
 
     char          buf[2],outbuf[2];
-
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -871,7 +923,9 @@ main(int argc, char **argv)
       if(mpi_rank == 0) {
         printf("Complicated derived datatype is NOT working at this platform\n"); 
         printf("Go back to hdf5/config and find the corresponding\n");  
-        printf("configure-specific file and change ?????\n");
+        printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
+        printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+        printf(" at the end of the file.\n");
         printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
       }
         ret_code = 1;
@@ -881,8 +935,10 @@ main(int argc, char **argv)
       if(mpi_rank == 0) {
         printf(" This is NOT an error, What it really says is\n");
         printf("Complicated derived datatype is WORKING at this platform\n");
-        printf(" Go back to hdf5/config and find the corresponding\n");
-        printf(" configure-specific file and change ?????\n");
+        printf(" Go back to hdf5/config and find the corresponding \n");
+        printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
+        printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+        printf(" at the end of the file.\n");
         printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
       }
       ret_code = 1;
