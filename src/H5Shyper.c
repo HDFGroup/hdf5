@@ -6340,7 +6340,7 @@ done:
 herr_t
 H5S_hyper_release (H5S_t *space)
 {
-    herr_t ret_value=FAIL;
+    herr_t ret_value=SUCCEED;
 
     FUNC_ENTER (H5S_hyper_release, FAIL);
 
@@ -6365,11 +6365,8 @@ H5S_hyper_release (H5S_t *space)
         space->select.sel_info.hslab.span_lst=NULL;
     } /* end if */
 
-    /* Success! */
-    ret_value=SUCCEED;
-
 done:
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_release() */
 
 
