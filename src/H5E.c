@@ -1384,7 +1384,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5E_pop(H5E_t *estack, size_t count)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
@@ -1526,11 +1526,15 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len=HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))
 #ifdef H5_VSNPRINTF_WORKS
-        >
+            >
 #else /* H5_VSNPRINTF_WORKS */
-        >=
+            >=
 #endif /* H5_VSNPRINTF_WORKS */
-        (tmp_len-1)) {
+            (tmp_len-1)
+#ifndef H5_VSNPRINTF_WORKS
+            || desc_len<0
+#endif /* H5_VSNPRINTF_WORKS */
+            ) {
         /* shutdown & restart the va_list */
         va_end(ap);
         va_start(ap, fmt);
@@ -1542,7 +1546,7 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
 #ifdef H5_VSNPRINTF_WORKS
         tmp_len = desc_len+1;
 #else /* H5_VSNPRINTF_WORKS */
-        tmp_len = 2 * desc_len;
+        tmp_len = 2 * tmp_len;
 #endif /* H5_VSNPRINTF_WORKS */
         if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")

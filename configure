@@ -31003,7 +31003,7 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
-             echo "$as_me:$LINENO: checking if vsnprintf returns correct value" >&5
+                                             echo "$as_me:$LINENO: checking if vsnprintf returns correct value" >&5
 echo $ECHO_N "checking if vsnprintf returns correct value... $ECHO_C" >&6
 
     if test "${hdf5_cv_vsnprintf_works+set}" = set; then
@@ -31032,7 +31032,7 @@ int test_vsnprintf(const char *fmt,...)
     ret=vsnprintf(s,16,"%s",ap);
     va_end(ap);
 
-    return(ret==15 ? 1 : 0);
+    return(ret!=42 ? 1 : 0);
 }
 
 int main(void)

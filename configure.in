@@ -1653,7 +1653,15 @@ AC_CHECK_FUNCS(vsnprintf,
 
     dnl Check if vsnprintf() returns correct size for strings that don't fit
     dnl into the size allowed.  If vsnprintf() works correctly on this platform,
-    dnl it should return a value larger than 15 for the test below
+    dnl it should return a value of 42 for the test below
+    dnl
+    dnl Note that vsnprintf fails in two different ways:
+    dnl         - In IRIX64, calls to vnsprintf() with a formatted string that
+    dnl                 is larger than the buffer size allowed incorrectly
+    dnl                 return the size of the buffer minus one.
+    dnl         - In HP/UX, calls to vsnprintf() with a formatted string that
+    dnl                 is larger than the buffer size allowed incorrectly
+    dnl                 return (-1)
     AC_MSG_CHECKING([if vsnprintf returns correct value])
 
     AC_CACHE_VAL([hdf5_cv_vsnprintf_works],
@@ -1672,7 +1680,7 @@ int test_vsnprintf(const char *fmt,...)
     ret=vsnprintf(s,16,"%s",ap);
     va_end(ap);
 
-    return(ret==15 ? 1 : 0);
+    return(ret!=42 ? 1 : 0);
 }
 
 int main(void)
