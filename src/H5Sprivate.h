@@ -343,7 +343,7 @@ __DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ htri_t H5S_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-                H5D_operator_t operator, void *operator_data);
+                H5D_operator_t op, void *operator_data);
 
 /* Point select functions */
 __DLL__ herr_t H5S_point_add(H5S_t *space, size_t num_elemn,
@@ -358,7 +358,7 @@ __DLL__ herr_t H5S_point_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_point_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-            H5D_operator_t operator, void *operator_data);
+            H5D_operator_t op, void *operator_data);
 
 /* "All" select functions */
 __DLL__ herr_t H5S_all_release(H5S_t *space);
@@ -379,7 +379,7 @@ __DLL__ herr_t H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 			     const H5F_xfer_t *xfer_parms, const void *buf,
 			     hbool_t *must_convert/*out*/);
 __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-        H5D_operator_t operator, void *operator_data);
+        H5D_operator_t op, void *operator_data);
 
 /* Hyperslab selection functions */
 __DLL__ herr_t H5S_hyper_add(H5S_t *space, const hssize_t *start,
@@ -403,13 +403,13 @@ __DLL__ herr_t H5S_hyper_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_hyper_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-                H5D_operator_t operator, void *operator_data);
+                H5D_operator_t op, void *operator_data);
 
 /* "None" selection functions */
 __DLL__ herr_t H5S_none_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_none_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-                H5D_operator_t operator, void *operator_data);
+                H5D_operator_t op, void *operator_data);
 
 #ifdef HAVE_PARALLEL
 /* MPI-IO function to read directly from app buffer to file rky980813 */

@@ -2653,7 +2653,7 @@ H5D_get_storage_size(H5D_t *dset)
  *      hid_t type_id;      IN: Datatype ID for the elements stored in BUF.
  *      hid_t space_id;     IN: Dataspace ID for BUF, also contains the
  *                              selection to iterate over.
- *      H5D_operator_t operator; IN: Function pointer to the routine to be
+ *      H5D_operator_t op;  IN: Function pointer to the routine to be
  *                              called for each element in BUF iterated over.
  *      void *operator_data;    IN/OUT: Pointer to any user-defined data
  *                              associated with the operation.
@@ -2695,17 +2695,17 @@ H5D_get_storage_size(H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t operator,
+H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         void *operator_data)
 {
     H5S_t		   *space = NULL;
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Diterate, FAIL);
-    H5TRACE5("e","xiixx",buf,type_id,space_id,operator,operator_data);
+    H5TRACE5("e","xiixx",buf,type_id,space_id,op,operator_data);
 
     /* Check args */
-    if (NULL==operator)
+    if (NULL==op)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
     if (buf==NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
@@ -2715,7 +2715,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t operator,
             NULL == (space = H5I_object(space_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
 
-    ret_value=H5S_select_iterate(buf,type_id,space,operator,operator_data);
+    ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Diterate() */

@@ -106,11 +106,11 @@ done:
         element. (i.e. the user's function is not called because there are
         zero elements selected)
  USAGE
-    herr_t H5S_none_select_iterate(buf, type_id, space, operator, operator_data)
+    herr_t H5S_none_select_iterate(buf, type_id, space, op, operator_data)
         void *buf;      IN/OUT: Buffer containing elements to iterate over
         hid_t type_id;  IN: Datatype ID of BUF array.
         H5S_t *space;   IN: Dataspace object containing selection to iterate over
-        H5D_operator_t operator; IN: Function pointer to the routine to be
+        H5D_operator_t op; IN: Function pointer to the routine to be
                                 called for each element in BUF iterated over.
         void *operator_data;    IN/OUT: Pointer to any user-defined data
                                 associated with the operation.
@@ -123,7 +123,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operator,
+H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void UNUSED *operator_data)
 {
     herr_t ret_value=SUCCEED;      /* return value */
@@ -132,7 +132,7 @@ H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t o
 
     assert(buf);
     assert(space);
-    assert(operator);
+    assert(op);
     assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     FUNC_LEAVE (ret_value);
