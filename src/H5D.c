@@ -70,7 +70,7 @@ static herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset,H5D_time_a
     hbool_t update_time, hbool_t full_overwrite);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating);
-static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type, 
+static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
            const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
 static H5D_t * H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
@@ -207,7 +207,7 @@ H5D_init_interface(void)
     H5P_genclass_t  *crt_pclass;
     H5D_layout_t    layout                   = H5D_CRT_LAYOUT_DEF;
     int             chunk_ndims              = H5D_CRT_CHUNK_DIM_DEF;
-    hsize_t         chunk_size[32]           = H5D_CRT_CHUNK_SIZE_DEF;
+    hsize_t         chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;
     H5O_fill_t      fill                     = H5D_CRT_FILL_VALUE_DEF;
     H5D_alloc_time_t    alloc_time           = H5D_CRT_ALLOC_TIME_DEF;
     H5D_fill_time_t     fill_time            = H5D_CRT_FILL_TIME_DEF;   
@@ -723,7 +723,7 @@ done:
  *		and initial persistent properties including the type of each
  *		datapoint as stored in the file (TYPE_ID), the size of the
  *		dataset (SPACE_ID), and other initial miscellaneous
- *		properties (PLIST_ID).
+ *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
  *		allowed to derive new types, data spaces, and creation
@@ -757,34 +757,33 @@ done:
  */
 hid_t
 H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-	  hid_t plist_id)
+	  hid_t dcpl_id)
 {
-    H5G_entry_t		   *loc = NULL;
-    H5T_t		   *type = NULL;
-    H5S_t		   *space = NULL;
-    H5D_t		   *new_dset = NULL;
-    hid_t		    ret_value;
+    H5G_entry_t	   *loc = NULL;         /* Entry for group to insert dataset into */
+    H5D_t	   *new_dset = NULL;    /* New dataset's info */
+    const H5S_t    *space;              /* Dataspace for dataset */
+    hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Dcreate, FAIL);
-    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
+    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,dcpl_id);
 
     /* Check arguments */
     if (NULL == (loc = H5G_loc(loc_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
     if (!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    if (NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
-    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if(H5P_DEFAULT == plist_id)
-        plist_id = H5P_DATASET_CREATE_DEFAULT;
+    if (H5I_DATATYPE != H5I_get_type(type_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID");
+    if (NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID");
+    if(H5P_DEFAULT == dcpl_id)
+        dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list");
+        if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID");
 
     /* build and open the new dataset */
-    if (NULL == (new_dset = H5D_create(loc, name, type, space, plist_id, H5AC_dxpl_id)))
+    if (NULL == (new_dset = H5D_create(loc, name, type_id, space, dcpl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
 
     /* Register the new dataset to get an ID for it */
@@ -1772,27 +1771,38 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5D_t *
-H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type, 
-           const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id)
+H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space,
+    hid_t dcpl_id, hid_t dxpl_id)
 {
+    const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
-    H5D_t		*ret_value = NULL;
     int		        i, ndims;
     hsize_t 		comp_data_size;
     unsigned		u;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5F_t		*file;
     int                 chunk_ndims = 0;
-    hsize_t             chunk_size[32]={0};
-    H5P_genplist_t 	*dc_plist=NULL;  /* New Property list */
+    hsize_t             chunk_size[H5O_LAYOUT_NDIMS]={0};
+    H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
+    H5D_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL);
 
     /* check args */
     assert (loc);
     assert (name && *name);
-    assert (type);
+    assert (H5I_DATATYPE==H5I_get_type(type_id));
     assert (space);
+    assert (H5I_GENPROP_LST==H5I_get_type(dcpl_id));
+    assert (H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+
+    /* Check if the filters in the DCPL can be applied to this dataset */
+    if(H5Z_can_apply(dcpl_id,type_id)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset");
+
+    /* Get the dataset's datatype */
+    if (NULL == (type = H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
 
     /* Check if the datatype is "sensible" for use in a dataset */
     if(H5T_is_sensible(type)!=TRUE)
@@ -1802,13 +1812,17 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if(NULL == (new_dset = H5D_new(dcpl_id,TRUE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* Copy datatype for dataset */
-    if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype");
+    /* Make the "set local" filter callbacks for this dataset */
+    if(H5Z_set_local(new_dset->dcpl_id,type_id)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters");
 
     /* What file is the dataset being added to? */
     if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point");
+
+    /* Copy datatype for dataset */
+    if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype");
 
     /* Mark any VL datatypes as being on disk now */
     if (H5T_vlen_mark(new_dset->type, file, H5T_VLEN_DISK)<0)
@@ -1874,7 +1888,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 
         /* Chunked datasets are non-default, so retrieve their info here */
         if(H5P_get(dc_plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve chunk dimensions");
     
         /* Get the dataset's external file list information */
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &new_dset->efl) < 0)
@@ -2915,6 +2929,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* check args */
     assert(dataset && dataset->ent.file);
     assert(mem_type);
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(buf);
 
     /* Get the dataset's creation property list */
