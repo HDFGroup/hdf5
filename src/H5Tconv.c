@@ -270,6 +270,7 @@ static intn interface_initialize_g = 0;
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
     size_t      dt_size=sizeof(DT);	/*needed by CI_END macro	*/    \
     H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/    \
+    char	*nonaligned;		/*temporary char pointer        */    \
 									      \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
@@ -305,8 +306,9 @@ static intn interface_initialize_g = 0;
 	if (d_mv) priv->d_aligned += nelmts;				      \
 	for (elmtno=0; elmtno<nelmts; elmtno++, DIR src,  DIR dst) {	      \
 	    if (s_mv) {							      \
-                /*Memmove() instead of memcpy() for solaris' sake*/	      \
-		HDmemmove(&aligned, src, sizeof(ST));			      \
+                /*temporary char pointer for solaris' sake*/		      \
+		nonaligned = (char*)src;				      \
+		HDmemcpy(&aligned, nonaligned, sizeof(ST));		      \
 		s = (ST*)&aligned;					      \
 	    } else {							      \
 		s = src;						      \
