@@ -10,6 +10,10 @@
 if test "X-" =  "X-$CC"; then
     CC='cc'
     CC_BASENAME=cc
+    # use c99 compiler if available.
+    if `c99 -version >/dev/null 2>&1` ; then
+	CC='c99'
+    fi
 fi
 RANLIB=:
 
@@ -63,13 +67,10 @@ case "X-$CC_BASENAME" in
 	    #      85:  duplicate definition preemption (from -lnsl)
 	    #     134:  duplicate weak definition preemption (from -lnsl)
 	    CFLAGS="$CFLAGS -Wl,-woff,47,-woff,84,-woff,85,-woff,134"
-
-            # Always turn on full warnings
-	    CFLAGS="$CFLAGS -fullwarn"
 	fi
 
 	# Extra debugging flags
-	DEBUG_CFLAGS="-g"
+	DEBUG_CFLAGS="-g -fullwarn"
 	DEBUG_CPPFLAGS=
 
 	# Extra production flags
