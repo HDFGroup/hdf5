@@ -595,7 +595,7 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
     hssize_t ret_value=FAIL;        /* return value */
     unsigned u;                    /* Counter */
 
-    FUNC_ENTER (H5S_get_select_hyper_nblocks, FAIL);
+    FUNC_ENTER_NOINIT(H5S_get_select_hyper_nblocks);
 
     assert(space);
 
@@ -674,7 +674,7 @@ H5S_get_select_elem_npoints(H5S_t *space)
 {
     hssize_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5S_get_select_elem_npoints, FAIL);
+    FUNC_ENTER_NOINIT(H5S_get_select_elem_npoints);
 
     assert(space);
 
@@ -770,7 +770,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     int done;          /* Whether we are done with the iteration */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_get_select_hyper_blocklist, FAIL);
+    FUNC_ENTER_NOINIT(H5S_get_select_hyper_blocklist);
 
     assert(space);
     assert(buf);
@@ -962,7 +962,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
     int rank;                  /* Dataspace rank */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_get_select_elem_pointlist, FAIL);
+    FUNC_ENTER_NOINIT(H5S_get_select_elem_pointlist);
 
     assert(space);
     assert(buf);
@@ -1079,7 +1079,7 @@ H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
     int i;                     /* index variable */
     herr_t ret_value=FAIL;   /* return value */
 
-    FUNC_ENTER (H5S_get_select_bounds, FAIL);
+    FUNC_ENTER_NOINIT(H5S_get_select_bounds);
 
     assert(space);
     assert(start);

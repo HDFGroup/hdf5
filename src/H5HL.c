@@ -555,11 +555,14 @@ H5HL_peek(H5F_t *f, haddr_t addr, size_t offset)
 static H5HL_free_t *
 H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 {
+    FUNC_ENTER_NOINIT(H5HL_remove_free);
+
     if (fl->prev) fl->prev->next = fl->next;
     if (fl->next) fl->next->prev = fl->prev;
 
     if (!fl->prev) heap->freelist = fl->next;
-    return H5FL_FREE(H5HL_free_t,fl);
+
+    FUNC_LEAVE(H5FL_FREE(H5HL_free_t,fl));
 }
 
 /*-------------------------------------------------------------------------

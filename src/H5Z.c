@@ -42,7 +42,7 @@ static H5Z_class_t	*H5Z_table_g = NULL;
 static herr_t
 H5Z_init_interface (void)
 {
-    FUNC_ENTER (H5Z_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5Z_init_interface);
 
     H5Z_register (H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate);
 

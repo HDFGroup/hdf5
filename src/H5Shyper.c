@@ -104,7 +104,7 @@ H5S_hyper_print_spans_helper(struct H5S_hyper_span_t *span,unsigned depth)
 {
     struct H5S_hyper_span_t *tmp_span;
 
-    FUNC_ENTER(H5S_hyper_print_spans_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_print_spans_helper);
 
     tmp_span=span;
     while(tmp_span) {
@@ -122,7 +122,7 @@ H5S_hyper_print_spans_helper(struct H5S_hyper_span_t *span,unsigned depth)
 static herr_t
 H5S_hyper_print_spans(const struct H5S_hyper_span_info_t *span_lst)
 {
-    FUNC_ENTER(H5S_hyper_print_spans, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_print_spans);
 
     if(span_lst!=NULL) {
         printf("%s: spans=%p, count=%u, scratch=%p, head=%p\n",FUNC,span_lst,span_lst->count,span_lst->scratch,span_lst->head);
@@ -305,7 +305,7 @@ H5S_hyper_iter_next (const H5S_t *file_space, H5S_sel_iter_t *file_iter)
     unsigned i;        /* Counters */
     unsigned ndims;    /* Number of dimensions of dataset */
 
-    FUNC_ENTER (H5S_hyper_iter_next, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_iter_next);
 
     /* Set some useful rank information */
     fast_dim=file_space->extent.u.simple.rank-1;
@@ -413,7 +413,7 @@ H5S_hyper_fread (H5F_t *f, const struct H5O_layout_t *layout,
     H5P_genplist_t *plist;      /* Property list */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_fread, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_fread);
 
     /* Check args */
     assert(f);
@@ -870,7 +870,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     H5P_genplist_t *plist;      /* Property list */
     hsize_t ret_value=0;        /* Return value */
 
-    FUNC_ENTER (H5S_hyper_fread_opt, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_fread_opt);
 
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -1438,7 +1438,7 @@ H5S_hyper_fwrite (H5F_t *f, const struct H5O_layout_t *layout,
     H5P_genplist_t *plist;      /* Property list */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_fwrite, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_fwrite);
 
     /* Check args */
     assert(f);
@@ -1895,7 +1895,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     H5P_genplist_t *plist;      /* Property list */
     hsize_t ret_value=0;        /* Return value */
 
-    FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_fwrite_opt);
 
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -2450,7 +2450,7 @@ H5S_hyper_mread (const void *_buf, size_t elmt_size, const H5S_t *space,
     int i;             /* Index variable */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_mread, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_mread);
 
     /* Check args */
     assert(src);
@@ -2835,7 +2835,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     size_t duffs_index;     /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
 
-    FUNC_ENTER (H5S_hyper_mread_opt, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_mread_opt);
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -3279,7 +3279,7 @@ H5S_hyper_mwrite (const void *_tconv_buf, size_t elmt_size, const H5S_t *space,
     int i;             /* Index variable */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_mwrite, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_mwrite);
 
     /* Check args */
     assert(src);
@@ -3664,7 +3664,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
 
-    FUNC_ENTER (H5S_hyper_mwrite_opt, 0);
+    FUNC_ENTER_NOINIT(H5S_hyper_mwrite_opt);
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -4123,7 +4123,7 @@ H5S_hyper_new_span (hssize_t low, hssize_t high, H5S_hyper_span_info_t *down, H5
 {
     H5S_hyper_span_t *ret_value=NULL;
 
-    FUNC_ENTER (H5S_hyper_new_span, NULL);
+    FUNC_ENTER_NOINIT(H5S_hyper_new_span);
 
     /* Allocate a new span node */
     if((ret_value = H5FL_ALLOC(H5S_hyper_span_t,0))==NULL)
@@ -4171,7 +4171,7 @@ H5S_hyper_span_precompute_helper (H5S_hyper_span_info_t *spans, size_t elmt_size
     H5S_hyper_span_t *span;     /* Hyperslab span */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_span_precompute, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_span_precompute);
 
     assert(spans);
 
@@ -4232,7 +4232,7 @@ H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_span_precompute, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_span_precompute);
 
     assert(spans);
 
@@ -4275,7 +4275,7 @@ H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value)
     H5S_hyper_span_t *span;     /* Hyperslab span */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_span_scratch, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_span_scratch);
 
     assert(spans);
 
@@ -4332,7 +4332,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_info_t *new_down;    /* New down span tree */
     H5S_hyper_span_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5S_hyper_copy_span_helper, NULL);
+    FUNC_ENTER_NOINIT(H5S_hyper_copy_span_helper);
 
     assert(spans);
 
@@ -4418,7 +4418,7 @@ H5S_hyper_copy_span (H5S_hyper_span_info_t *spans)
 {
     H5S_hyper_span_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5S_hyper_copy_span, NULL);
+    FUNC_ENTER_NOINIT(H5S_hyper_copy_span);
 
     assert(spans);
 
@@ -4461,7 +4461,7 @@ H5S_hyper_cmp_spans (H5S_hyper_span_info_t *span_info1, H5S_hyper_span_info_t *s
     htri_t nest=FAIL;
     htri_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_cmp_spans, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_cmp_spans);
 
     /* Check for redundant comparison */
     if(span_info1==span_info2) 
@@ -4565,7 +4565,7 @@ H5S_hyper_free_span_info (H5S_hyper_span_info_t *span_info)
     H5S_hyper_span_t *span, *next_span;
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER (H5S_hyper_free_span_info, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_free_span_info);
 
     assert(span_info);
 
@@ -4617,7 +4617,7 @@ H5S_hyper_free_span (H5S_hyper_span_t *span)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER (H5S_hyper_free_span, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_free_span);
 
     assert(span);
 
@@ -4740,7 +4740,7 @@ H5S_hyper_select_valid_helper (const H5S_hyper_span_info_t *spans, const hssize_
     htri_t tmp;                 /* temporary return value */
     htri_t ret_value=TRUE;      /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_valid_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_valid_helper);
 
     assert(spans);
     assert(offset);
@@ -4976,7 +4976,7 @@ H5S_hyper_select_serialize_helper (const H5S_hyper_span_info_t *spans, hssize_t 
     hsize_t u;                  /* Index variable */
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_serialize_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_serialize_helper);
 
     /* Sanity checks */
     assert(spans);
@@ -5415,7 +5415,7 @@ H5S_hyper_bounds_helper (const H5S_hyper_span_info_t *spans, const hssize_t *off
     H5S_hyper_span_t *curr;     /* Hyperslab information nodes */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_hyper_bounds_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_bounds_helper);
 
     assert(spans);
     assert(offset);
@@ -5843,7 +5843,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
     unsigned u;            /* Index variable */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_select_iterate_mem_gen, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_iterate_mem_gen);
 
     /* Check args */
     assert(iter_info);
@@ -6060,7 +6060,7 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
     H5T_t *dt;                  /* Datatype structure */
     herr_t user_ret=0;          /* User's return value */
 
-    FUNC_ENTER (H5S_hyper_select_iterate_mem_opt, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_iterate_mem_opt);
 
     /* Set some convienence values */
     ndims=space->extent.u.simple.rank;
@@ -6373,7 +6373,7 @@ H5S_hyper_select_fill_gen(const void *fill, size_t fill_size, const H5S_t *space
     unsigned u;         /* Index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5S_hyper_select_fill_gen, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_fill_gen);
 
     /* Set the rank of the fastest changing dimension */
     ndims=space->extent.u.simple.rank;
@@ -6576,7 +6576,7 @@ H5S_hyper_select_fill_opt(const void *fill, size_t fill_size, const H5S_t *space
     unsigned ndims;             /* Rank of the dataspace */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5S_hyper_select_fill_opt, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_select_fill_opt);
 
     /* Set some convienence values */
     ndims=space->extent.u.simple.rank;
@@ -6749,7 +6749,7 @@ H5S_hyper_recover_span (unsigned *recover, H5S_hyper_span_t **curr_span, H5S_hyp
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_recover_span, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_recover_span);
 
     assert(recover);
     assert(curr_span);
@@ -6801,7 +6801,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
     H5S_hyper_span_t *new_span;
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_append_span, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_append_span);
 
     assert(prev_span);
     assert(span_tree);
@@ -6922,7 +6922,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_clip_spans, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_clip_spans);
 
     /* Check args */
     assert (a_spans);
@@ -7415,7 +7415,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
     H5S_hyper_span_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5S_hyper_merge_spans_helper, NULL);
+    FUNC_ENTER_NOINIT(H5S_hyper_merge_spans_helper);
 
     /* Make certain both 'a' & 'b' spans have down span trees or neither does */
     assert((a_spans!=NULL && b_spans!=NULL) || (a_spans==NULL && b_spans==NULL));
@@ -7720,7 +7720,7 @@ H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_merge_spans, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_merge_spans);
 
     /* Check args */
     assert (space);
@@ -7779,7 +7779,7 @@ H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_t *span;     /* Hyperslab span */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_spans_nelem, FAIL);
+    FUNC_ENTER_NOINIT(H5S_hyper_spans_nelem);
 
     /* Count the number of elements in the span tree */
     if(spans==NULL)
@@ -7844,7 +7844,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
     unsigned u;                    /* Counters */
     H5S_hyper_span_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5S_hyper_make_spans, NULL);
+    FUNC_ENTER_NOINIT(H5S_hyper_make_spans);
 
     /* Check args */
     assert (rank>0);
@@ -7950,7 +7950,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     unsigned u;                    /* Counters */
     herr_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_generate_hyperslab, FAIL);
+    FUNC_ENTER_NOINIT(H5S_generate_hyperslab);
 
     /* Check args */
     assert(space);
@@ -8432,7 +8432,7 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
     hssize_t nelem;             /* Number of elements in hyperslab span tree */
     herr_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5S_operate_hyperslab, NULL);
+    FUNC_ENTER_NOINIT(H5S_operate_hyperslab);
 
     /* Check args */
     assert(result);
@@ -8602,7 +8602,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     unsigned u;                 /* Counters */
     herr_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5S_generate_hyperslab, FAIL);
+    FUNC_ENTER_NOINIT(H5S_generate_hyperslab);
 
     /* Check args */
     assert(space);
@@ -9025,7 +9025,7 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     H5S_t *new_space=NULL;    /* New dataspace generated */
     H5S_t *ret_value=NULL;    /* return value */
 
-    FUNC_ENTER (H5S_combine_select, NULL);
+    FUNC_ENTER_NOINIT(H5S_combine_select);
 
     /* Check args */
     assert(space1);
@@ -9140,7 +9140,7 @@ H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     H5S_hyper_span_info_t *tmp_spans=NULL;   /* Temporary copy of selection */
     herr_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_select_select, FAIL);
+    FUNC_ENTER_NOINIT(H5S_select_select);
 
     /* Check args */
     assert(space1);

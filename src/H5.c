@@ -71,7 +71,7 @@ static int          	interface_initialize_g = 0;
 herr_t 
 H5_init_library(void)
 {
-    FUNC_ENTER_INIT(H5_init_library, NULL, FAIL);
+    FUNC_ENTER(H5_init_library, FAIL);
 
     /*
      * Make sure the package information is updated.
@@ -172,7 +172,7 @@ H5_term_library(void)
 
     /* Don't do anything if the library is already closed */
     if (!(H5_INIT_GLOBAL))
-	return;
+	goto done;
 
     /* Check if we should display error output */
     H5Eget_auto(&func,NULL);
@@ -215,9 +215,11 @@ H5_term_library(void)
     
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;
+done:
 #ifdef H5_HAVE_THREADSAFE
     H5_UNLOCK_API_MUTEX;
 #endif
+    return;
 }
 
 
@@ -249,24 +251,16 @@ H5_term_library(void)
 herr_t 
 H5dont_atexit(void)
 {
-    /* FUNC_ENTER_INIT() should not be called */
+    FUNC_ENTER_NOINIT(H5dont_atexit);
 
-#ifdef H5_HAVE_THREADSAFE
-    /* locking code explicitly since FUNC_ENTER is not called */
-    H5_FIRST_THREAD_INIT;
-    H5_LOCK_API_MUTEX;
-#endif
     H5_trace(FALSE, "H5dont_atexit", "");
 
     if (dont_atexit_g)
-	    return FAIL;
+        HRETURN(FAIL);
 
     dont_atexit_g = TRUE;
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#ifdef H5_HAVE_THREADSAFE
-    H5_UNLOCK_API_MUTEX;
-#endif
-    return(SUCCEED);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -501,7 +495,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;
 
-    /* Don't initialize the library quite yet */
+    FUNC_ENTER_NOINIT(H5check_version);
     
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
 	H5_VERS_RELEASE!=relnum) {
@@ -518,7 +512,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
     if (checked)
-	return SUCCEED;
+	HRETURN(SUCCEED);
     
     checked = 1;
     /*
@@ -544,7 +538,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 		 H5_VERS_SUBRELEASE, H5_VERS_INFO);
     }
 
-    return SUCCEED;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -596,18 +590,11 @@ H5close (void)
      * thing just to release it all right away.  It is safe to call this
      * function for an uninitialized library.
      */
-#ifdef H5_HAVE_THREADSAFE
-    /* Explicitly lock the call since FUNC_ENTER is not called */
-    H5_FIRST_THREAD_INIT;
-    H5_LOCK_API_MUTEX;
-#endif
+    FUNC_ENTER_NOINIT(H5close);
 
     H5_term_library();
 
-#ifdef H5_HAVE_THREADSAFE
-    H5_UNLOCK_API_MUTEX;
-#endif
-    return SUCCEED;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -2609,5 +2596,4 @@ error:
 	fprintf (out, ")");
     }
     HDfflush (out);
-    return;
 }

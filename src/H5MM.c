@@ -50,8 +50,11 @@ static int interface_initialize_g = 0;
 void *
 H5MM_realloc(void *mem, size_t size)
 {
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5MM_realloc);
+
     if (!mem) {
-	if (0 == size) return NULL;
+	if (0 == size) HRETURN(NULL);
 	mem = H5MM_malloc(size);
 
     } else if (0 == size) {
@@ -62,7 +65,7 @@ H5MM_realloc(void *mem, size_t size)
 	assert(mem);
     }
 
-    return mem;
+    FUNC_LEAVE(mem);
 }
 
 
@@ -90,11 +93,15 @@ H5MM_xstrdup(const char *s)
 {
     char	*mem;
 
-    if (!s) return NULL;
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5MM_xstrdup);
+
+    if (!s) HRETURN(NULL);
     mem = H5MM_malloc(HDstrlen(s) + 1);
     assert (mem);
     HDstrcpy(mem, s);
-    return mem;
+
+    FUNC_LEAVE(mem);
 }
 
 
@@ -162,6 +169,10 @@ H5MM_strdup(const char *s)
 void *
 H5MM_xfree(void *mem)
 {
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5MM_xfree);
+
     if (mem) HDfree(mem);
-    return NULL;
+
+    FUNC_LEAVE(NULL);
 }

@@ -55,7 +55,7 @@ DESCRIPTION
 static herr_t
 H5R_init_interface(void)
 {
-    FUNC_ENTER(H5R_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5R_init_interface);
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
@@ -89,6 +89,8 @@ int
 H5R_term_interface(void)
 {
     int	n=0;
+
+    FUNC_ENTER_NOINIT(H5R_term_interface);
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
@@ -100,7 +102,7 @@ H5R_term_interface(void)
 	}
     }
     
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -137,7 +139,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
     H5G_stat_t sb;              /* Stat buffer for retrieving OID */
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5R_create, FAIL);
+    FUNC_ENTER_NOINIT(H5R_create);
 
     assert(_ref);
     assert(loc);
@@ -341,7 +343,7 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
     int oid_type;              /* type of object being dereferenced */
     hid_t ret_value = FAIL;
 
-    FUNC_ENTER(H5R_dereference, FAIL);
+    FUNC_ENTER_NOINIT(H5R_dereference);
 
     assert(_ref);
     assert(ref_type>H5R_BADTYPE || ref_type<H5R_MAXTYPE);
@@ -544,7 +546,7 @@ H5R_get_region(H5F_t *file, H5R_type_t UNUSED ref_type, void *_ref)
     uint8_t *buf;   /* Buffer to store serialized selection in */
     H5S_t *ret_value = NULL;
 
-    FUNC_ENTER(H5R_get_region, NULL);
+    FUNC_ENTER_NOINIT(H5R_get_region);
 
     assert(_ref);
     assert(ref_type==H5R_DATASET_REGION);
@@ -685,7 +687,7 @@ H5R_get_object_type(H5F_t *file, void *_ref)
     uint8_t *p;                 /* Pointer to OID to store */
     int ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5R_get_object_type, H5G_UNKNOWN);
+    FUNC_ENTER_NOINIT(H5R_get_object_type);
 
     assert(ref);
     assert(file);
@@ -791,7 +793,7 @@ H5R_get_obj_type(H5F_t *file, H5R_type_t ref_type, void *_ref)
     uint8_t *p;                 /* Pointer to OID to store */
     int ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5R_get_obj_type, H5G_UNKNOWN);
+    FUNC_ENTER_NOINIT(H5R_get_obj_type);
 
     assert(file);
     assert(_ref);

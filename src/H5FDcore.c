@@ -311,7 +311,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     H5P_genplist_t *plist;      /* Property list pointer */
     int			fd=-1;
 
-    FUNC_ENTER(H5FD_init_interface, NULL);
+    FUNC_ENTER(H5FD_core_open, NULL);
     
     /* Check arguments */
     if (0==maxaddr || HADDR_UNDEF==maxaddr)

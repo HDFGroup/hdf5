@@ -317,9 +317,11 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
     ssize_t	idx, i;
     size_t	iu;
 
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5T_bit_find);
+
     /* Some functions call this with value=TRUE */
     assert (TRUE==1);
-
 
     switch (direction) {
     case H5T_BIT_LSB:
@@ -331,7 +333,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	if (offset) {
 	    for (iu=offset; iu<8 && size>0; iu++, size--) {
 		if (value==(hbool_t)((buf[idx]>>iu) & 0x01)) {
-		    return 8*idx+(ssize_t)iu - base;
+		    HRETURN(8*idx+(ssize_t)iu - base);
 		}
 	    }
 	    offset = 0;
@@ -342,7 +344,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	    if ((value?0x00:0xff)!=buf[idx]) {
 		for (i=0; i<8; i++) {
 		    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
-			return 8*idx+i - base;
+			HRETURN(8*idx+i - base);
 		    }
 		}
 	    }
@@ -352,7 +354,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* End */
 	for (i=0; i<(ssize_t)size; i++) {
 	    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
-		return 8*idx+i - base;
+		HRETURN(8*idx+i - base);
 	    }
 	}
 	break;
@@ -366,7 +368,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	if (size>8-offset && (offset+size)%8) {
 	    for (iu=(offset+size)%8; iu>0; --iu, --size) {
 		if (value==(hbool_t)((buf[idx]>>(iu-1)) & 0x01)) {
-		    return 8*idx+(ssize_t)(iu-1) - base;
+		    HRETURN(8*idx+(ssize_t)(iu-1) - base);
 		}
 	    }
 	    --idx;
@@ -376,7 +378,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	    if ((value?0x00:0xff)!=buf[idx]) {
 		for (i=7; i>=0; --i) {
 		    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
-			return 8*idx+i - base;
+			HRETURN(8*idx+i - base);
 		    }
 		}
 	    }
@@ -387,7 +389,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	if (size>0) {
 	    for (iu=offset+size; iu>offset; --iu) {
 		if (value==(hbool_t)((buf[idx]>>(iu-1)) & 0x01)) {
-		    return 8*idx+(ssize_t)(iu-1) - base;
+		    HRETURN(8*idx+(ssize_t)(iu-1) - base);
 		}
 	    }
 	}
@@ -395,7 +397,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
     }
 
     
-    return -1;
+    FUNC_LEAVE(-1);
 }
 
 
@@ -422,6 +424,9 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
     size_t	idx = start / 8;
     unsigned	carry = 1;
     unsigned	acc, mask;
+
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5T_bit_find);
 
     assert(buf);
     start %= 8;
@@ -460,5 +465,5 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
 	buf[idx] |= acc & mask;
     }
 
-    return carry ? TRUE : FALSE;
+    FUNC_LEAVE(carry ? TRUE : FALSE);
 }

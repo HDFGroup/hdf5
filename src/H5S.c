@@ -73,7 +73,7 @@ DESCRIPTION
 static herr_t
 H5S_init_interface(void)
 {
-    FUNC_ENTER(H5S_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5S_init_interface);
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
@@ -132,6 +132,8 @@ H5S_term_interface(void)
     H5S_conv_t	*path=NULL;
     char	buf[256];
 #endif
+
+    FUNC_ENTER_NOINIT(H5S_term_interface);
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASPACE))) {
@@ -270,7 +272,7 @@ H5S_term_interface(void)
 	}
     }
     
-    return n;
+    FUNC_LEAVE(n);
 }
 
 

@@ -739,7 +739,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 static herr_t
 H5G_init_interface(void)
 {
-    FUNC_ENTER(H5G_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5G_init_interface);
 
     /* Initialize the atom group for the group IDs */
     if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
@@ -784,6 +784,8 @@ H5G_term_interface(void)
 {
     size_t	i;
     int	n=0;
+
+    FUNC_ENTER_NOINIT(H5G_term_interface);
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
@@ -809,7 +811,7 @@ H5G_term_interface(void)
 	}
     }
     
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -916,11 +918,15 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 static const char *
 H5G_component(const char *name, size_t *size_p)
 {
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5G_component);
+
     assert(name);
 
     while ('/' == *name) name++;
     if (size_p) *size_p = HDstrcspn(name, "/");
-    return name;
+
+    FUNC_LEAVE(name);
 }
 
 
@@ -951,7 +957,7 @@ H5G_basename(const char *name, size_t *size_p)
 {
     size_t	i;
     
-    FUNC_ENTER(H5G_basename, NULL);
+    FUNC_ENTER_NOINIT(H5G_basename);
 
     /* Find the end of the base name */
     i = HDstrlen(name);
@@ -1060,13 +1066,13 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     int			_nlinks = H5G_NLINKS;
     const char		*s = NULL;
     
+    FUNC_ENTER_NOINIT(H5G_namei);
+
     if (rest) *rest = name;
     if (!grp_ent) grp_ent = &_grp_ent;
     if (!obj_ent) obj_ent = &_obj_ent;
     if (!nlinks) nlinks = &_nlinks;
     
-    FUNC_ENTER(H5G_namei, FAIL);
-
     /*
      * Where does the searching start?  For absolute names it starts at the
      * root of the file; for relative names it starts at CWG.
@@ -1762,7 +1768,10 @@ H5G_find(H5G_entry_t *loc, const char *name,
 H5G_entry_t *
 H5G_entof (H5G_t *grp)
 {
-    return grp ? &(grp->ent) : NULL;
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5G_entof);
+
+    FUNC_LEAVE(grp ? &(grp->ent) : NULL);
 }
 
 
@@ -1785,8 +1794,12 @@ H5G_entof (H5G_t *grp)
 H5F_t *
 H5G_fileof (H5G_t *grp)
 {
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5G_fileof);
+
     assert (grp);
-    return grp->ent.file;
+
+    FUNC_LEAVE(grp->ent.file);
 }
 
 

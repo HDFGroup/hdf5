@@ -990,16 +990,12 @@ typedef struct H5_api_struct {
 /* Macros for threadsafe HDF-5 Phase I locks */
 #define H5_LOCK_API_MUTEX                                                     \
      H5TS_mutex_lock(&H5_g.init_lock)
-#define H5_API_LOCK_BEGIN                                                     \
-   if (H5_IS_API(FUNC)) {                                                     \
-     H5_LOCK_API_MUTEX;
-#define H5_API_LOCK_END }
+#define H5_API_LOCK                                                           \
+   if (H5_IS_API(FUNC)) { H5_LOCK_API_MUTEX; }
 #define H5_UNLOCK_API_MUTEX                                                   \
      H5TS_mutex_unlock(&H5_g.init_lock)
-#define H5_API_UNLOCK_BEGIN                                                   \
-  if (H5_IS_API(FUNC)) {                                                      \
-    H5_UNLOCK_API_MUTEX;
-#define H5_API_UNLOCK_END }
+#define H5_API_UNLOCK                                                         \
+  if (H5_IS_API(FUNC)) { H5_UNLOCK_API_MUTEX; }
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL                                                   \
@@ -1021,11 +1017,9 @@ extern H5_api_t H5_g;
 
 /* disable locks (sequential version) */
 #define H5_LOCK_API_MUTEX
-#define H5_API_LOCK_BEGIN
-#define H5_API_LOCK_END
+#define H5_API_LOCK
 #define H5_UNLOCK_API_MUTEX
-#define H5_API_UNLOCK_BEGIN
-#define H5_API_UNLOCK_END
+#define H5_API_UNLOCK
 
 /* disable cancelability (sequential version) */
 #define H5_API_UNSET_CANCEL
@@ -1039,45 +1033,71 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
-#define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
-
-#define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
+#define FUNC_ENTER_COMMON(func_name)                               	      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name)  					      \
    H5TRACE_DECL;							      \
 									      \
+   /* Start tracing */                  				      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
-   /* Initialize the library */						      \
+   /* Initialize the thread-safe code */				      \
    H5_FIRST_THREAD_INIT;                                                      \
+									      \
+   /* Grab the mutex for the library */ 				      \
    H5_API_UNSET_CANCEL                                                        \
-   H5_API_LOCK_BEGIN                                                          \
-                                                                              \
+   H5_API_LOCK                                                                 
+
+#define FUNC_ENTER(func_name,err) {                                           \
+    FUNC_ENTER_COMMON(func_name);                                             \
+    FUNC_ENTER_API_INIT(func_name,INTERFACE_INIT,err)
+
+#define FUNC_ENTER_NOAPI(func_name,err) {                                     \
+    FUNC_ENTER_COMMON(func_name);                                             \
+    FUNC_ENTER_NOAPI_INIT(func_name,INTERFACE_INIT,err)
+
+#define FUNC_ENTER_NOINIT(func_name) {                                        \
+    FUNC_ENTER_COMMON(func_name);                                             \
+    {
+
+#define FUNC_ENTER_API_INIT(func_name,interface_init_func,err)       	      \
    /* Initialize the library */           				      \
-   if (!(H5_INIT_GLOBAL)) {                                                   \
+   if (H5_IS_API(FUNC) && !(H5_INIT_GLOBAL)) {                                \
        H5_INIT_GLOBAL = TRUE;                                                 \
        if (H5_init_library()<0) {					      \
-          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "library initialization failed");		                      \
        }								      \
-   }									      \
-   H5_API_LOCK_END                                                            \
+   }								              \
                                                                               \
    /* Initialize this interface or bust */				      \
    if (!interface_initialize_g) {					      \
       interface_initialize_g = 1;					      \
       if (interface_init_func &&					      \
               ((herr_t(*)(void))interface_init_func)()<0) {		      \
-         interface_initialize_g = 0;					      \
-         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+         interface_initialize_g = 0;				              \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "interface initialization failed");		                      \
-      }									      \
-   }									      \
+      }								              \
+   }								              \
                                                                               \
    /* Clear thread error stack entering public functions */		      \
-   if (H5_IS_API(FUNC) && H5E_clearable_g) {				      \
-       H5E_clear ();							      \
-   }									      \
+   if (H5_IS_API(FUNC) && H5E_clearable_g) {			              \
+       H5E_clear ();						              \
+   }								              \
+   {
+
+#define FUNC_ENTER_NOAPI_INIT(func_name,interface_init_func,err)       	      \
+   /* Initialize this interface or bust */				      \
+   if (!interface_initialize_g) {					      \
+      interface_initialize_g = 1;					      \
+      if (interface_init_func &&					      \
+              ((herr_t(*)(void))interface_init_func)()<0) {		      \
+         interface_initialize_g = 0;				              \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
+            "interface initialization failed");		                      \
+      }								              \
+   }								              \
    {
 
 /*-------------------------------------------------------------------------
@@ -1095,14 +1115,17 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
  *
  *-------------------------------------------------------------------------
  */
-#define FUNC_LEAVE(return_value) HRETURN(return_value)}}
+#define FUNC_LEAVE(return_value)                                              \
+        HRETURN(return_value)                                                 \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+} /*end scope from beginning of FUNC_ENTER*/
 
 /*
  * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions
  * through one of these two sets of macros.
  */
 #ifdef H5_HAVE_PABLO
-#  define PABLO_SAVE(func_id)	int pablo_func_id = func_id;
+#  define PABLO_SAVE(func_id)	const int pablo_func_id = func_id;
 #  define PABLO_TRACE_ON(m, f)	TRACE_ON(m,f)
 #  define PABLO_TRACE_OFF(m, f) TRACE_OFF(m,f)
 #else

@@ -279,7 +279,7 @@ H5T_init_interface(void)
     herr_t	status;
     herr_t	ret_value=SUCCEED;
 
-    FUNC_ENTER(H5T_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5T_init_interface);
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
@@ -1930,11 +1930,13 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
-    FUNC_ENTER (H5T_unlock_cb, FAIL);
+    FUNC_ENTER_NOINIT(H5T_unlock_cb);
+
     assert (dt);
     if (H5T_STATE_IMMUTABLE==dt->state) {
 	dt->state = H5T_STATE_RDONLY;
     }
+
     FUNC_LEAVE (0);
 }
 
@@ -1964,6 +1966,8 @@ H5T_term_interface(void)
 {
     int	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
+
+    FUNC_ENTER_NOINIT(H5T_term_interface);
 
     if (interface_initialize_g) {
 	/* Unregister all conversion functions */
@@ -2101,7 +2105,7 @@ H5T_term_interface(void)
 	interface_initialize_g = 0;
 	n = 1; /*H5I*/
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -4709,7 +4713,7 @@ H5T_vlen_create(H5T_t *base)
     H5T_t	*dt = NULL;		/*new VL data type	*/
     H5T_t	*ret_value = NULL;	/*return value			*/
     
-    FUNC_ENTER(H5T_vlen_create, NULL);
+    FUNC_ENTER_NOINIT(H5T_vlen_create);
 
     /* Check args */
     assert(base);
@@ -4901,7 +4905,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	i;			/*counter			*/
     herr_t	ret_value=SUCCEED;		/*return value			*/
 
-    FUNC_ENTER(H5T_register, FAIL);
+    FUNC_ENTER_NOINIT(H5T_register);
 
     /* Check args */
     assert(src);
@@ -8105,7 +8109,7 @@ H5T_print_stats(H5T_path_t * UNUSED path, int * UNUSED nprint/*in,out*/)
     char	bandwidth[32];
 #endif
 
-    FUNC_ENTER(H5T_print_stats, FAIL);
+    FUNC_ENTER_NOINIT(H5T_print_stats);
     
 #ifdef H5T_DEBUG
     if (H5DEBUG(T) && path->stats.ncalls>0) {

@@ -31,16 +31,22 @@
 #define HERROR(maj, min, str) H5E_push(maj, min, FUNC, __FILE__, __LINE__, str)
 
 /*
+ * HCOMMON_ERROR macro, used by HRETURN_ERROR and HGOTO_ERROR
+ * (Shouldn't need to be used outside this header file)
+ */
+#define HCOMMON_ERROR(maj, min, str)  				              \
+   HERROR (maj, min, str);						      \
+   if (H5_IS_API(FUNC) && H5E_auto_g)  					      \
+       (H5E_auto_g)(H5E_auto_data_g)
+
+/*
  * HRETURN_ERROR macro, used to facilitate error reporting between a
  * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
  * the major error number, the minor error number, a return value, and a
  * description of the error.
  */
 #define HRETURN_ERROR(maj, min, ret_val, str) {				      \
-   HERROR (maj, min, str);						      \
-   if (H5_IS_API(FUNC) && H5E_auto_g) {					      \
-       (H5E_auto_g)(H5E_auto_data_g);					      \
-   }									      \
+   HCOMMON_ERROR (maj, min, str);					      \
    HRETURN(ret_val);						              \
 }
 
@@ -52,8 +58,7 @@
 #define HRETURN(ret_val) {						      \
    PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
    H5TRACE_RETURN(ret_val);						      \
-   H5_API_UNLOCK_BEGIN                                                        \
-   H5_API_UNLOCK_END                                                          \
+   H5_API_UNLOCK                                                              \
    H5_API_SET_CANCEL                                                          \
    return (ret_val);							      \
 }
@@ -66,12 +71,8 @@
  * control branches to the `done' label.
  */
 #define HGOTO_ERROR(maj, min, ret_val, str) {				      \
-   HERROR (maj, min,  str);						      \
-   if (H5_IS_API(FUNC) && H5E_auto_g) {					      \
-       (H5E_auto_g)(H5E_auto_data_g);					      \
-   }									      \
-   ret_value = ret_val;							      \
-   goto done;								      \
+   HCOMMON_ERROR (maj, min, str);					      \
+   HGOTO_DONE (ret_val);					              \
 }
 
 /*

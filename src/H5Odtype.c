@@ -93,7 +93,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     int		i, j;
     size_t		z;
 
-    FUNC_ENTER(H5O_dtype_decode_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5O_dtype_decode_helper);
 
     /* check args */
     assert(pp && *pp);
@@ -445,7 +445,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     int		i, j;
     size_t		n, z, aligned;
 
-    FUNC_ENTER(H5O_dtype_encode_helper, FAIL);
+    FUNC_ENTER_NOINIT(H5O_dtype_encode_helper);
 
     /* check args */
     assert(pp && *pp);

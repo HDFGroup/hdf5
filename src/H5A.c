@@ -60,7 +60,7 @@ DESCRIPTION
 static herr_t
 H5A_init_interface(void)
 {
-    FUNC_ENTER(H5A_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5A_init_interface);
 
     /*
      * Create attribute group.
@@ -95,6 +95,8 @@ int
 H5A_term_interface(void)
 {
     int	n=0;
+
+    FUNC_ENTER_NOINIT(H5A_term_interface);
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_ATTR))) {
@@ -105,7 +107,7 @@ H5A_term_interface(void)
 	    n = 1;
 	}
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -220,7 +222,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     int	seq=0;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5A_create, FAIL);
+    FUNC_ENTER_NOINIT(H5A_create);
 
     /* check args */
     assert(ent);
@@ -320,7 +322,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name)
     H5A_t      	found_attr;
     int		ret_value=FAIL, i;
 
-    FUNC_ENTER(H5A_get_index, FAIL);
+    FUNC_ENTER_NOINIT(H5A_get_index);
 
     assert(ent);
     assert(name);
@@ -495,7 +497,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
     H5A_t       *attr = NULL;
     hid_t	    ret_value = FAIL;
 
-    FUNC_ENTER(H5A_open, FAIL);
+    FUNC_ENTER_NOINIT(H5A_open);
 
     /* check args */
     assert(ent);
@@ -613,7 +615,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     int         idx;	      /* index of attribute in object header */
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5A_write, FAIL);
+    FUNC_ENTER_NOINIT(H5A_write);
 
     assert(attr);
     assert(mem_type);
@@ -766,7 +768,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5A_read, FAIL);
+    FUNC_ENTER_NOINIT(H5A_read);
 
     assert(attr);
     assert(mem_type);

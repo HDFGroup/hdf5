@@ -117,7 +117,7 @@ H5FL_EXTERN(time_t);
 static herr_t
 H5O_init_interface(void)
 {
-    FUNC_ENTER(H5O_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5O_init_interface);
 
     /*
      * Initialize functions that decode messages from symbol table entries.
@@ -1148,7 +1148,7 @@ H5O_find_in_ohdr(H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
     unsigned		u;
     const H5O_class_t	*type = NULL;
 
-    FUNC_ENTER(H5O_find_in_ohdr, UFAIL);
+    FUNC_ENTER_NOINIT(H5O_find_in_ohdr);
 
     /* Check args */
     assert(f);
@@ -1411,7 +1411,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     time_t	now = HDtime(NULL);
     size_t	size;
     
-    FUNC_ENTER(H5O_touch_oh, FAIL);
+    FUNC_ENTER_NOINIT(H5O_touch_oh);
     assert(oh);
 
     /* Look for existing message */
@@ -1657,7 +1657,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
     size_t	aligned_size = H5O_ALIGN(size);
     uint8_t	*old_addr;
 
-    FUNC_ENTER(H5O_alloc_extend_chunk, UFAIL);
+    FUNC_ENTER_NOINIT(H5O_alloc_extend_chunk);
 
     /* check args */
     assert(oh);
@@ -1793,7 +1793,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     int	chunkno;
     unsigned	u;
 
-    FUNC_ENTER(H5O_alloc_new_chunk, UFAIL);
+    FUNC_ENTER_NOINIT(H5O_alloc_new_chunk);
 
     /* check args */
     assert (oh);
@@ -1978,7 +1978,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     unsigned	null_idx;
     size_t	aligned_size = H5O_ALIGN(size);
 
-    FUNC_ENTER(H5O_alloc, UFAIL);
+    FUNC_ENTER_NOINIT(H5O_alloc);
 
     /* check args */
     assert (oh);

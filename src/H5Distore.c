@@ -317,6 +317,9 @@ H5F_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
     const H5F_istore_ud1_t *udata = (const H5F_istore_ud1_t *) _udata;
     size_t		    nbytes;
 
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_istore_sizeof_rkey);
+
     assert(udata);
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
@@ -324,7 +327,7 @@ H5F_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
 	     4 +			/*filter mask		*/
 	     udata->mesg.ndims*8;	/*dimension indices	*/
 
-    return nbytes;
+    FUNC_LEAVE(nbytes);
 }
 
 
@@ -863,9 +866,10 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
 
-    FUNC_ENTER(H5F_istore_iterate, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_iterate);
 
     bt_udata->total_storage += lt_key->nbytes;
+
     FUNC_LEAVE(SUCCEED);
 } /* H5F_istore_iter_allocated() */
 
@@ -899,7 +903,7 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned		u;
 
-    FUNC_ENTER(H5F_istore_iterate, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_iterate);
 
     if (bt_udata->stream) {
         if (0==bt_udata->total_storage) {
@@ -985,7 +989,8 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
     
-    FUNC_ENTER(H5F_istore_flush_entry, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_flush_entry);
+
     assert(f);
     assert(ent);
     assert(!ent->locked);
@@ -1103,7 +1108,7 @@ H5F_istore_preempt(H5F_t *f, H5F_rdcc_ent_t * ent, hbool_t flush)
 {
     H5F_rdcc_t             *rdcc = &(f->shared->rdcc);
 
-    FUNC_ENTER(H5F_istore_preempt, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_preempt);
 
     assert(f);
     assert(ent);
@@ -1280,7 +1285,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
     H5F_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
     H5F_rdcc_ent_t	*n[2];		/*list next pointers		*/
 
-    FUNC_ENTER (H5F_istore_prune, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_prune);
 
     /*
      * Preemption is accomplished by having multiple pointers (currently two)
@@ -1415,7 +1420,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     void		*ret_value=NULL;	/*return value		*/
     H5P_genplist_t *plist=NULL;                 /* Property list */
 
-    FUNC_ENTER (H5F_istore_lock, NULL);
+    FUNC_ENTER_NOINIT(H5F_istore_lock);
 
     if (rdcc->nslots>0) {
         /* We don't care about loss of precision in the following statement. */
@@ -1682,7 +1687,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned		u;
     H5P_genplist_t *plist;      /* Property list */
     
-    FUNC_ENTER (H5F_istore_unlock, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_unlock);
 
     if (UINT_MAX==*idx_hint) {
 	/*not in cache*/
@@ -2351,7 +2356,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
     unsigned	u;
     haddr_t	ret_value=HADDR_UNDEF;		/* Return value */
     
-    FUNC_ENTER (H5F_istore_get_addr, HADDR_UNDEF);
+    FUNC_ENTER_NOINIT(H5F_istore_get_addr);
 
     assert(f);
     assert(layout && (layout->ndims > 0));
@@ -2776,7 +2781,7 @@ H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
      * storage that contains the beginning of the logical address space represented by UDATA.
      */
 
-    FUNC_ENTER(H5F_istore_prune_extent, FAIL);
+    FUNC_ENTER_NOINIT(H5F_istore_prune_extent);
 
     /* Figure out what chunks are no longer in use for the specified extent and release them */
     for(u = 0; u < bt_udata->mesg.ndims - 1; u++)
@@ -2832,10 +2837,13 @@ H5F_istore_remove(H5F_t *f, haddr_t addr, void *_lt_key /*in,out */ ,
 {
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
 
+    FUNC_ENTER(H5F_istore_remove,H5B_INS_ERROR);
+
     H5FD_free(f->shared->lf, H5FD_MEM_DRAW, addr, (hsize_t)lt_key->nbytes);
     *lt_key_changed = FALSE;
     *rt_key_changed = FALSE;
-    return H5B_INS_REMOVE;
+
+    FUNC_LEAVE(H5B_INS_REMOVE);
 }
 
 

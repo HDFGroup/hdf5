@@ -82,7 +82,8 @@ static herr_t
 H5I_init_interface(void)
 {
     herr_t		    ret_value = SUCCEED;
-    FUNC_ENTER(H5I_init_interface, FAIL);
+
+    FUNC_ENTER_NOINIT(H5I_init_interface);
 
     /*
      * Make certain the ID types don't overflow the number of bits allocated
@@ -119,6 +120,8 @@ H5I_term_interface(void)
     H5I_type_t		grp;
     int		n=0;
 
+    FUNC_ENTER_NOINIT(H5I_term_interface);
+
     if (interface_initialize_g) {
         /* How many groups are still being used? */
         for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; H5_INC_ENUM(H5I_type_t,grp)) {
@@ -138,7 +141,7 @@ H5I_term_interface(void)
         /* Mark interface closed */
         interface_initialize_g = 0;
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -1014,7 +1017,7 @@ H5I_find_id(hid_t id)
     int		i;
 #endif
 
-    FUNC_ENTER(H5I_find_id, NULL);
+    FUNC_ENTER_NOINIT(H5I_find_id);
 
     /* Check arguments */
     grp = H5I_GROUP(id);

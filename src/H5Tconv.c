@@ -1207,7 +1207,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     H5T_t		*type = NULL;
     hid_t		tid;
     
-    FUNC_ENTER (H5T_conv_struct_init, FAIL);
+    FUNC_ENTER_NOINIT(H5T_conv_struct_init);
     
     if (!priv) {
         /*
@@ -1841,7 +1841,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     herr_t		ret_value=FAIL;	/*return value			*/
     int		i, j;		/*counters			*/
     
-    FUNC_ENTER(H5T_conv_enum_init, FAIL);
+    FUNC_ENTER_NOINIT(H5T_conv_enum_init);
 
     cdata->need_bkg = H5T_BKG_NO;
     if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(*priv)))) {

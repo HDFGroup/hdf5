@@ -207,7 +207,7 @@ H5F_init_interface(void)
     H5P_genclass_t  *mnt_pclass;
     hbool_t 	    local		= H5F_MNT_SYM_LOCAL_DEF;
     
-    FUNC_ENTER(H5F_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5F_init_interface);
 
 #ifdef H5_HAVE_PARALLEL
     {
@@ -438,6 +438,8 @@ H5F_term_interface(void)
 {
     int	n = 0;
 
+    FUNC_ENTER_NOINIT(H5F_term_interface);
+
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))) {
 	    H5F_close_all();
@@ -448,7 +450,7 @@ H5F_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -631,8 +633,12 @@ static int
 H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 {
     hbool_t	invalidate = *((const hbool_t*)_invalidate);
+
+    FUNC_ENTER_NOINIT(H5F_flush_all_cb);
+
     H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE, FALSE);
-    return 0;
+
+    FUNC_LEAVE(0);
 }
 
 
@@ -921,7 +927,8 @@ H5F_get_obj_count(H5F_t *f, unsigned types, unsigned *obj_id_count)
 {
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_get_obj_count, FAIL);
+    FUNC_ENTER_NOINIT(H5F_get_obj_count);
+
     *obj_id_count = 0;
 
     if(H5F_get_objects(f, types, NULL, obj_id_count) < 0)
@@ -987,7 +994,7 @@ H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *oid_list)
 {
     herr_t      ret_value = SUCCEED;
  
-    FUNC_ENTER(H5F_get_obj_ids, FAIL);
+    FUNC_ENTER_NOINIT(H5F_get_obj_ids);
 
     if(H5F_get_objects(f, types, oid_list, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object IDs opened in the file");  
@@ -1019,7 +1026,7 @@ H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list,
     herr_t      ret_value = SUCCEED;
     H5F_olist_t *olist = NULL;
 
-    FUNC_ENTER(H5F_get_object, FAIL);
+    FUNC_ENTER_NOINIT(H5F_get_object);
 
     olist = H5MM_malloc(sizeof(H5F_olist_t));
     olist->obj_id_list  = obj_id_list;
@@ -1090,7 +1097,8 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     H5F_olist_t *olist = key;
     H5G_entry_t *ent = NULL;
  
-    FUNC_ENTER(H5F_get_objects_cb, FAIL);
+    FUNC_ENTER_NOINIT(H5F_get_objects_cb);
+
     assert(obj_ptr);
     assert(olist);
 
@@ -1162,8 +1170,10 @@ H5F_equal(void *_haystack, hid_t UNUSED id, const void *_needle)
     const H5FD_t	*needle = (const H5FD_t*)_needle;
     int		retval;
     
-    FUNC_ENTER(H5F_equal, FAIL);
+    FUNC_ENTER_NOINIT(H5F_equal);
+
     retval = (0==H5FD_cmp(haystack->shared->lf, needle));
+
     FUNC_LEAVE(retval);
 }
 
@@ -1194,7 +1204,7 @@ H5F_locate_signature(H5FD_t *file)
     uint8_t	    buf[H5F_SIGNATURE_LEN];
     unsigned	    n, maxpow;
 
-    FUNC_ENTER(H5F_locate_signature, HADDR_UNDEF);
+    FUNC_ENTER_NOINIT(H5F_locate_signature);
 
     /* Find the least N such that 2^N is larger than the file size */
     if (HADDR_UNDEF==(addr=H5FD_get_eof(file)) ||
@@ -1325,7 +1335,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 #endif /* H5_HAVE_PARALLEL */
     H5P_genplist_t *plist;              /* Property list */
  
-    FUNC_ENTER(H5F_new, NULL);
+    FUNC_ENTER_NOINIT(H5F_new);
 
     if (NULL==(f=H5FL_ALLOC(H5F_t,1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -1451,7 +1461,7 @@ H5F_dest(H5F_t *f)
 {
     herr_t	   ret_value = SUCCEED;
     
-    FUNC_ENTER(H5F_dest, FAIL);
+    FUNC_ENTER_NOINIT(H5F_dest);
 
     if (f && 1==f->nrefs) {
 	if (1==f->shared->nrefs) {
@@ -2287,7 +2297,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     unsigned            sym_leaf_k;
     H5P_genplist_t *plist;              /* Property list */
     
-    FUNC_ENTER(H5F_flush, FAIL);
+    FUNC_ENTER_NOINIT(H5F_flush);
 	
     /*
      * Nothing to do if the file is read only.	This determination is made at
@@ -2719,7 +2729,8 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
     herr_t	ret_value = FAIL;	/*return value			*/
     
-    FUNC_ENTER(H5F_mount, FAIL);
+    FUNC_ENTER_NOINIT(H5F_mount);
+
     assert(loc);
     assert(name && *name);
     assert(child);
@@ -2834,7 +2845,8 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
     unsigned	i;			/*coutners			*/
     int	lt, rt, md=(-1), cmp;	/*binary search indices		*/
     
-    FUNC_ENTER(H5F_unmount, FAIL);
+    FUNC_ENTER_NOINIT(H5F_unmount);
+
     assert(loc);
     assert(name && *name);
 
@@ -3515,6 +3527,9 @@ herr_t
 H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 	      const unsigned long objno[2])
 {
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_addr_pack);
+
     assert(f);
     assert(objno);
     assert(addr_p);
@@ -3524,7 +3539,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
     *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
 #endif
     
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }
 
 

@@ -29,6 +29,7 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Local functions */
+static htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 static herr_t H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info);
 
 
@@ -55,7 +56,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 {
     htri_t ret_value = 0;       /* Indicate that success, but no location change */
 
-    FUNC_ENTER (H5T_vlen_set_loc, FAIL);
+    FUNC_ENTER_NOINIT(H5T_vlen_set_loc);
 
     /* check parameters */
     assert(dt);
@@ -528,7 +529,7 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
     size_t j;   /* local index variable */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_vlen_reclaim_recurse, FAIL);
+    FUNC_ENTER_NOINIT(H5T_vlen_reclaim_recurse);
 
     assert(elem);
     assert(dt);

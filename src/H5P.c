@@ -114,6 +114,9 @@ H5P_xor_name(const char *s)
     unsigned ret=0;
     unsigned char temp;
 
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5P_xor_name);
+
     if(s!=NULL)
         while(*s!='\0') {
             temp=(ret>>24)&0xff;
@@ -122,7 +125,7 @@ H5P_xor_name(const char *s)
             ret ^= *s++;
         }
 
-    return(ret);
+    FUNC_LEAVE(ret);
 }   /* end H5P_xor_name() */
 
 /*--------------------------------------------------------------------------
@@ -140,7 +143,10 @@ DESCRIPTION
 static unsigned
 H5P_hash_name(const char *s, unsigned hashsize)
 {
-    return(H5P_xor_name(s)%hashsize);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5P_hash_name);
+
+    FUNC_LEAVE(H5P_xor_name(s)%hashsize);
 }   /* end H5P_hash_name() */
 
 /*--------------------------------------------------------------------------
@@ -162,7 +168,7 @@ H5P_init_interface(void)
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER(H5P_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5P_init_interface);
 
     /* Make certain IDs are initialized */
     if (ret_value < 0)
@@ -263,6 +269,8 @@ H5P_term_interface(void)
     int	nclass=0;
     int	n=0;
 
+    FUNC_ENTER_NOINIT(H5P_term_interface);
+
     if (interface_initialize_g) {
         /* Destroy HDF5 library property classes & lists */
 
@@ -311,7 +319,7 @@ H5P_term_interface(void)
             interface_initialize_g = 0;
         }
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -335,7 +343,8 @@ H5P_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
+static hid_t
+H5P_copy_pclass(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *new_pclass = NULL;      /* Property list class copied */
     H5P_genprop_t *tmp;         /* Temporary pointer to parent class properties */
@@ -343,7 +352,7 @@ static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
     unsigned u;                    /* Local index variable */
     hid_t ret_value=FAIL;       /* return value */
 
-    FUNC_ENTER (H5P_copy_pclass, FAIL);
+    FUNC_ENTER_NOINIT(H5P_copy_pclass);
 
     assert(pclass);
 
@@ -4515,7 +4524,7 @@ H5P_dup_prop(H5P_genprop_t *oprop)
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value=NULL;   /* Return value */
 
-    FUNC_ENTER (H5P_dup_prop, NULL);
+    FUNC_ENTER_NOINIT(H5P_dup_prop);
 
     assert(oprop);
 
@@ -4608,7 +4617,7 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value=NULL;   /* Return value */
 
-    FUNC_ENTER (H5P_create_prop, NULL);
+    FUNC_ENTER_NOINIT(H5P_create_prop);
 
     assert(name);
     assert((size>0 && (def_value!=NULL || value!=NULL)) || (size==0));
@@ -4698,7 +4707,7 @@ H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
     unsigned loc;                  /* Hash table location */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5P_add_prop, FAIL);
+    FUNC_ENTER_NOINIT(H5P_add_prop);
 
     assert(hash);
     assert(hashsize>0);
@@ -4744,7 +4753,7 @@ H5P_find_prop(H5P_genprop_t *hash[], unsigned hashsize, const char *name)
     unsigned loc;                  /* Hash table location */
     unsigned xor_val;              /* XOR'ed value of the name to look for */
 
-    FUNC_ENTER (H5P_find_prop, NULL);
+    FUNC_ENTER_NOINIT(H5P_find_prop);
 
     assert(hash);
     assert(hashsize>0);
@@ -4794,7 +4803,7 @@ H5P_free_prop(H5P_genprop_t *prop)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5P_free_prop, FAIL);
+    FUNC_ENTER_NOINIT(H5P_free_prop);
 
     assert(prop);
 
@@ -4842,7 +4851,7 @@ H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
     unsigned u;                    /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5P_free_all_prop, FAIL);
+    FUNC_ENTER_NOINIT(H5P_free_all_prop);
 
     assert(hash);
     assert(hashsize>0);
@@ -4899,7 +4908,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5P_access_class, FAIL);
+    FUNC_ENTER_NOINIT(H5P_access_class);
 
     assert(pclass);
     assert(mod>H5P_MOD_ERR && mod<H5P_MOD_MAX);
@@ -4999,7 +5008,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     H5P_genclass_t *pclass;         /* Property list class created */
     H5P_genclass_t *ret_value=NULL;     /* return value */
 
-    FUNC_ENTER (H5P_create_class, NULL);
+    FUNC_ENTER_NOINIT(H5P_create_class);
 
     assert(name);
     /* Allow internal classes to break some rules */
@@ -5170,7 +5179,7 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
     H5P_genprop_t *pcopy;               /* Copy of property to insert into class */
     unsigned u;                            /* Local index variable */
 
-    FUNC_ENTER (H5P_create, NULL);
+    FUNC_ENTER_NOINIT(H5P_create);
 
     assert(pclass);
 
@@ -5852,7 +5861,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
+static herr_t
+H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
     H5P_prp_close_func_t prp_close)
@@ -5860,7 +5870,7 @@ static herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
     herr_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_insert, FAIL);
+    FUNC_ENTER_NOINIT(H5P_insert);
 
     assert(plist);
     assert(name);
@@ -6189,11 +6199,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name)
+static htri_t
+H5P_exist_plist(H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_exist_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_exist_plist);
 
     assert(plist);
     assert(name);
@@ -6229,11 +6240,12 @@ static htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
+static htri_t
+H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
 {
     htri_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_exist_pclass, FAIL);
+    FUNC_ENTER_NOINIT(H5P_exist_pclass);
 
     assert(pclass);
     assert(name);
@@ -6328,12 +6340,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
+static herr_t
+H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER (H5P_get_size_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_get_size_plist);
 
     assert(plist);
     assert(name);
@@ -6373,12 +6386,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
+static herr_t
+H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER (H5P_get_size_pclass, FAIL);
+    FUNC_ENTER_NOINIT(H5P_get_size_pclass);
 
     assert(pclass);
     assert(name);
@@ -6479,11 +6493,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5P_genclass_t *H5P_get_class(H5P_genplist_t *plist)
+static H5P_genclass_t *
+H5P_get_class(H5P_genplist_t *plist)
 {
     H5P_genclass_t *ret_value=NULL;      /* return value */
 
-    FUNC_ENTER (H5P_get_class, NULL);
+    FUNC_ENTER_NOINIT(H5P_get_class);
 
     assert(plist);
 
@@ -6566,11 +6581,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
+static herr_t
+H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
 {
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER (H5P_get_nprops_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_get_nprops_plist);
 
     assert(plist);
     assert(nprops);
@@ -6698,12 +6714,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
+static int
+H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
 {
     int cmp_value;             /* Value from comparison */
     int ret_value=0;         /* return value */
 
-    FUNC_ENTER (H5P_cmp_prop, FAIL);
+    FUNC_ENTER_NOINIT(H5P_cmp_prop);
 
     assert(prop1);
     assert(prop2);
@@ -6789,14 +6806,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
+static int
+H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
     H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
     unsigned u;                    /* Local index variable */
     int cmp_value;             /* Value from comparison */
     int ret_value=0;         /* return value */
 
-    FUNC_ENTER (H5P_cmp_class, FAIL);
+    FUNC_ENTER_NOINIT(H5P_cmp_class);
 
     assert(pclass1);
     assert(pclass2);
@@ -6899,14 +6917,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
+static int
+H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
 {
     H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
     unsigned u;                    /* Local index variable */
     int cmp_value;             /* Value from comparison */
     int ret_value=0;         /* return value */
 
-    FUNC_ENTER (H5P_cmp_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_cmp_plist);
 
     assert(plist1);
     assert(plist2);
@@ -7028,11 +7047,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_isa_class_real(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
+static htri_t
+H5P_isa_class_real(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
     htri_t ret_value=FAIL;
 
-    FUNC_ENTER (H5P_isa_class_real, FAIL);
+    FUNC_ENTER_NOINIT(H5P_isa_class_real);
 
     assert(pclass1);
     assert(pclass2);
@@ -7201,14 +7221,15 @@ iteration, the function's behavior is undefined.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], unsigned hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
+static int
+H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], unsigned hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     unsigned u;                    /* Local index variable */
     int curr_idx=0;             /* Current iteration index */
     int ret_value=0;            /* Return value */
 
-    FUNC_ENTER (H5P_iterate_props, FAIL);
+    FUNC_ENTER_NOINIT(H5P_iterate_props);
 
     assert(hash);
     assert(hashsize>0);
@@ -7292,12 +7313,13 @@ iteration, the function's behavior is undefined.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+static int
+H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     int ret_value=0;            /* Return value */
 
-    FUNC_ENTER (H5P_iterate_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_iterate_plist);
 
     assert(idx);
     assert(iter_func);
@@ -7365,12 +7387,13 @@ iteration, the function's behavior is undefined.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+static int
+H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genclass_t *pclass;     /* Property list pointer */
     int ret_value=0;            /* Return value */
 
-    FUNC_ENTER (H5P_iterate_pclass, FAIL);
+    FUNC_ENTER_NOINIT(H5P_iterate_pclass);
 
     assert(idx);
     assert(iter_func);
@@ -7842,14 +7865,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
+static herr_t
+H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
     unsigned loc;                  /* Hash table location */
     herr_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5P_remove, FAIL);
+    FUNC_ENTER_NOINIT(H5P_remove);
 
     assert(plist);
     assert(name);
@@ -7998,7 +8022,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     H5P_genprop_t *new_prop=NULL;   /* Pointer to new property */
     herr_t ret_value=SUCCEED;       /* return value */
 
-    FUNC_ENTER (H5P_copy_prop_plist, FAIL);
+    FUNC_ENTER_NOINIT(H5P_copy_prop_plist);
 
     assert(name);
 
@@ -8105,7 +8129,7 @@ H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t UNUSED *src_pcla
     H5P_genprop_t *prop;            /* Temporary property pointer */
     herr_t ret_value=SUCCEED;       /* return value */
 
-    FUNC_ENTER (H5P_copy_prop_pclass, FAIL);
+    FUNC_ENTER_NOINIT(H5P_copy_prop_pclass);
 
     assert(dst_pclass);
     assert(src_pclass);
@@ -8227,14 +8251,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
+static herr_t
+H5P_unregister(H5P_genclass_t *pclass, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
     unsigned loc;                  /* Hash table location */
     herr_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_unregister, FAIL);
+    FUNC_ENTER_NOINIT(H5P_unregister);
 
     assert(pclass);
     assert(name);
@@ -8354,12 +8379,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_close(void *_plist)
+static herr_t
+H5P_close(void *_plist)
 {
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
     herr_t ret_value=SUCCEED;     /* return value */
 
-    FUNC_ENTER (H5P_close, FAIL);
+    FUNC_ENTER_NOINIT(H5P_close);
 
     assert(plist);
 
@@ -8526,11 +8552,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5P_genclass_t *H5P_get_class_parent(H5P_genclass_t *pclass)
+static H5P_genclass_t *
+H5P_get_class_parent(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *ret_value=NULL;      /* return value */
 
-    FUNC_ENTER (H5P_get_class_parent, NULL);
+    FUNC_ENTER_NOINIT(H5P_get_class_parent);
 
     assert(pclass);
 
@@ -8609,12 +8636,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_close_class(void *_pclass)
+static herr_t
+H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
     herr_t ret_value = FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_close_class, FAIL);
+    FUNC_ENTER_NOINIT(H5P_close_class);
 
     assert(pclass);
 

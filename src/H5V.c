@@ -344,19 +344,22 @@ H5V_hyper_eq(int n,
     hsize_t	nelmts1 = 1, nelmts2 = 1;
     int	i;
 
-    if (n <= 0) return TRUE;
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5V_hyper_eq);
+
+    if (n <= 0) HRETURN(TRUE);
 
     for (i=0; i<n; i++) {
 	if ((offset1 ? offset1[i] : 0) != (offset2 ? offset2[i] : 0)) {
-	    return FALSE;
+	    HRETURN(FALSE);
 	}
 	if ((size1 ? size1[i] : 0) != (size2 ? size2[i] : 0)) {
-	    return FALSE;
+	    HRETURN(FALSE);
 	}
-	if (0 == (nelmts1 *= (size1 ? size1[i] : 0))) return FALSE;
-	if (0 == (nelmts2 *= (size2 ? size2[i] : 0))) return FALSE;
+	if (0 == (nelmts1 *= (size1 ? size1[i] : 0))) HRETURN(FALSE);
+	if (0 == (nelmts2 *= (size2 ? size2[i] : 0))) HRETURN(FALSE);
     }
-    return TRUE;
+    FUNC_LEAVE(TRUE);
 }
 
 /*-------------------------------------------------------------------------
@@ -384,24 +387,27 @@ H5V_hyper_disjointp(unsigned n,
 {
     unsigned	u;
 
-    if (!n || !size1 || !size2)	return TRUE;
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5V_hyper_disjointp);
+
+    if (!n || !size1 || !size2)	HRETURN(TRUE);
 
     for (u=0; u<n; u++) {
         assert (size1[u]<HSSIZET_MAX);
         assert (size2[u]<HSSIZET_MAX);
 
         if (0==size1[u] || 0==size2[u])
-            return TRUE;
+            HRETURN(TRUE);
         if (((offset1?offset1[u]:0) < (offset2?offset2[u]:0) &&
              ((offset1?offset1[u]:0) + (hssize_t)size1[u] <=
               (offset2?offset2[u]:0))) ||
             ((offset2?offset2[u]:0) < (offset1?offset1[u]:0) &&
              ((offset2?offset2[u]:0) + (hssize_t)size2[u] <=
               (offset1?offset1[u]:0)))) {
-            return TRUE;
+            HRETURN(TRUE);
         }
     }
-    return FALSE;
+    FUNC_LEAVE(FALSE);
 }
 
 /*-------------------------------------------------------------------------

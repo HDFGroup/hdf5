@@ -357,7 +357,8 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
  *
  *-------------------------------------------------------------------------
  */
-static void *H5FD_stream_fapl_get (H5FD_t *_stream)
+static void *
+H5FD_stream_fapl_get (H5FD_t *_stream)
 {
   H5FD_stream_t      *stream = (H5FD_stream_t *) _stream;
   H5FD_stream_fapl_t *fapl;
@@ -377,60 +378,49 @@ static void *H5FD_stream_fapl_get (H5FD_t *_stream)
 
 
 static H5FD_STREAM_SOCKET_TYPE
-H5FDstream_open_socket (const char *filename, int o_flags,
-                        H5FD_stream_fapl_t *fapl,
-                        const char **errormsg,
-                        H5E_major_t *major, H5E_minor_t *minor)
+H5FD_stream_open_socket (const char *filename, int o_flags,
+                        H5FD_stream_fapl_t *fapl)
 {
   struct sockaddr_in server;
   struct hostent *he;
-  H5FD_STREAM_SOCKET_TYPE sock;
-  char *hostname;
+  H5FD_STREAM_SOCKET_TYPE sock=H5FD_STREAM_INVALID_SOCKET;
+  char *hostname=NULL;
   unsigned short int first_port;
   const char *separator, *tmp; 
   int on = 1;
+  H5FD_STREAM_SOCKET_TYPE ret_value=H5FD_STREAM_INVALID_SOCKET;
 
-
-  sock = H5FD_STREAM_INVALID_SOCKET;
-  *errormsg = NULL;
+  FUNC_ENTER_NOINIT(H5FD_stream_open_socket);
 
   /* Parse "hostname:port" from filename argument */
-  for (separator = filename; *separator != ':' && *separator; separator++);
+  for (separator = filename; *separator != ':' && *separator; separator++)
+      ;
   if (separator == filename || !*separator)
   {
-    *errormsg = "invalid host address";
+    HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"invalid host address");
   }
   else
   {
     tmp = separator;
     if (! tmp[1])
     {
-      *errormsg = "no port number";
+        HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"no port number");
     }
-    while (*errormsg == NULL && *++tmp)
+    while (*++tmp)
     {
       if (! isdigit (*tmp))
       {
-        *errormsg = "invalid port number";
+        HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"invalid port number");
       }
     }
   }
   
-  /* Return if parsing the filename failed */
-  if (*errormsg)
-  {
-    *major = H5E_ARGS; *minor = H5E_BADVALUE;
-    return (sock);
-  }
-
   hostname = (char *) H5MM_malloc ((size_t)(separator - filename + 1));
 
   /* Return if out of memory */
   if (hostname == NULL)
   {
-    *major = H5E_RESOURCE; *minor = H5E_NOSPACE;
-    *errormsg = "memory allocation failed";
-    return (sock);
+    HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"memory allocation failed");
   }
 
   HDstrncpy (hostname, filename, (size_t)(separator - filename));
@@ -443,15 +433,13 @@ H5FDstream_open_socket (const char *filename, int o_flags,
 
   if (! (he = gethostbyname (hostname)))
   {
-    *errormsg = "unable to get host address";
+    HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to get host address");
   }
   else if (H5FD_STREAM_ERROR_CHECK (sock = socket (AF_INET, SOCK_STREAM, 0)))
   {
-    *errormsg = "unable to open socket";
+    HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to open socket");
   }
 
-  if (*errormsg == NULL)
-  {
     if (O_RDONLY == o_flags)
     {
       HDmemcpy (&server.sin_addr, he->h_addr, (size_t)he->h_length);
@@ -461,7 +449,7 @@ H5FDstream_open_socket (const char *filename, int o_flags,
 #endif
       if (connect (sock, (struct sockaddr *) &server, sizeof (server)) < 0)
       {
-        *errormsg = "unable to connect";
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to connect");
       }
     }
     else
@@ -469,17 +457,17 @@ H5FDstream_open_socket (const char *filename, int o_flags,
       server.sin_addr.s_addr = INADDR_ANY;
       if (H5FD_STREAM_IOCTL_SOCKET (sock, FIONBIO, &on) < 0)
       {
-        *errormsg = "unable to set non-blocking mode for socket";
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set non-blocking mode for socket");
       }
       else if (setsockopt (sock, IPPROTO_TCP, TCP_NODELAY, (const char *) &on,
                            sizeof(on)) < 0)
       {
-        *errormsg = "unable to set socket option TCP_NODELAY";
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option TCP_NODELAY");
       }
       else if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &on,
                            sizeof(on)) < 0)
       {
-        *errormsg = "unable to set socket option SO_REUSEADDR";
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option SO_REUSEADDR");
       }
       else
       {
@@ -504,44 +492,42 @@ H5FDstream_open_socket (const char *filename, int o_flags,
         if (fapl->port > first_port + fapl->maxhunt)
         {
           fapl->port = 0;
-          *errormsg = "unable to bind socket";
+          HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to bind socket");
         }
         else if (listen (sock, fapl->backlog) < 0)
         {
-          *errormsg = "unable to listen on socket";
+          HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to listen on socket");
         }
       }
     }
-  }
 
-  H5MM_xfree (hostname);
+    /* Set return value for success */
+    ret_value=sock;
 
-  /* Return if opening the socket failed */
-  if (*errormsg)
-  {
-    if (! H5FD_STREAM_ERROR_CHECK (sock))
-    {
-      H5FD_STREAM_CLOSE_SOCKET (sock);
-      sock = H5FD_STREAM_INVALID_SOCKET;
-    }
-    *major = H5E_FILE; *minor = H5E_CANTOPENFILE;
-  }
+done:
+    /* Cleanup variables */
+    if(hostname!=NULL)
+        hostname=H5MM_xfree(hostname);
 
-  return (sock);
+    /* Clean up on error */
+    if(ret_value==H5FD_STREAM_INVALID_SOCKET) {
+        if (!H5FD_STREAM_ERROR_CHECK(sock))
+          H5FD_STREAM_CLOSE_SOCKET(sock);
+    } /* end if */
+    FUNC_LEAVE(ret_value);
 }
 
 
-static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
-                                         const char **errormsg,
-                                         H5E_major_t *major, H5E_minor_t *minor)
+static herr_t
+H5FD_stream_read_from_socket (H5FD_stream_t *stream)
 {
   int size;
   size_t max_size = 0;
-  unsigned char *ptr;
+  unsigned char *ptr=NULL;
+  herr_t ret_value=SUCCEED;
 
+  FUNC_ENTER_NOINIT(H5FD_stream_read_from_socket);
 
-  ptr = NULL;
-  *errormsg = NULL;
   stream->eof = 0;
   stream->mem = NULL;
 
@@ -562,9 +548,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
       ptr = H5MM_realloc (stream->mem, (size_t) (stream->eof + max_size));
       if (! ptr)
       {
-        *major = H5E_RESOURCE; *minor = H5E_NOSPACE;
-        *errormsg = "unable to allocate file space buffer";
-        return;
+        HRETURN_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"unable to allocate file space buffer");
       }
       stream->mem = ptr;
       ptr += stream->eof;
@@ -579,9 +563,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
     }
     if (size < 0)
     {
-      *major = H5E_IO; *minor = H5E_READERROR;
-      *errormsg = "error reading from file from socket";
-      return;
+      HRETURN_ERROR(H5E_IO,H5E_READERROR,FAIL,"error reading from file from socket");
     }
     if (! size)
     {
@@ -600,6 +582,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
   fprintf (stderr, "Stream VFD: read total of %d bytes from socket\n",
            (int) stream->eof);
 #endif
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -620,37 +603,35 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
  *
  *-------------------------------------------------------------------------
  */
-static H5FD_t *H5FD_stream_open (const char *filename,
-                                 unsigned flags,
-                                 hid_t fapl_id,
-                                 haddr_t maxaddr)
+static H5FD_t *
+H5FD_stream_open (const char *filename,
+                     unsigned flags,
+                     hid_t fapl_id,
+                     haddr_t maxaddr)
 {
-  H5FD_stream_t             _stream, *stream;
+  H5FD_stream_t             *stream=NULL;
   const H5FD_stream_fapl_t *fapl;
   int                       o_flags;
-  H5E_major_t               major;
-  H5E_minor_t               minor;
-  const char               *errormsg;
 #ifdef WIN32
   WSADATA wsadata;
 #endif
-  H5P_genplist_t *plist;      /* Property list pointer */
-
+  H5P_genplist_t *plist;        /* Property list pointer */
+  H5FD_t *ret_value=NULL;       /* Function return value */
 
   FUNC_ENTER (H5FD_stream_open, NULL);
 
   /* Check arguments */
   if (filename == NULL|| *filename == '\0')
   {
-    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,"invalid file name");
+    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,"invalid file name");
   }
   if (maxaddr == 0 || HADDR_UNDEF == maxaddr)
   {
-    HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
   }
   if (ADDR_OVERFLOW (maxaddr))
   {
-    HRETURN_ERROR (H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
+    HGOTO_ERROR (H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
   }
 
   /* Build the open flags */
@@ -661,15 +642,13 @@ static H5FD_t *H5FD_stream_open (const char *filename,
 
   if ((O_RDWR & o_flags) && ! (O_CREAT & o_flags))
   {
-    HRETURN_ERROR (H5E_ARGS, H5E_UNSUPPORTED, NULL,
-                   "open stream for read/write not supported");
+    HGOTO_ERROR (H5E_ARGS, H5E_UNSUPPORTED, NULL, "open stream for read/write not supported");
   }
 
 #ifdef WIN32
   if (WSAStartup (MAKEWORD (2, 0), &wsadata))
   {
-    HRETURN_ERROR (H5E_IO, H5E_CANTINIT, NULL,
-                   "Couldn't start Win32 socket layer");
+    HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "Couldn't start Win32 socket layer");
   }
 #endif
 
@@ -677,7 +656,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
   if (H5P_DEFAULT != fapl_id)
   {
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     fapl = H5P_get_driver_info (plist);
   }
   if (fapl == NULL)
@@ -685,11 +664,14 @@ static H5FD_t *H5FD_stream_open (const char *filename,
     fapl = &default_fapl;
   }
 
-  /* zero out file structure and set file access property list */
-  HDmemset (&_stream, 0, sizeof (_stream));
-  _stream.fapl = *fapl;
-
-  errormsg = NULL;
+    /* Create the new file struct */
+    stream = (H5FD_stream_t *) H5MM_calloc (sizeof (H5FD_stream_t));
+    if (stream == NULL)
+    {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
+    }
+    stream->fapl = *fapl;
+    stream->socket = H5FD_STREAM_INVALID_SOCKET;
 
   /* if an external socket is provided with the file access property list
      we use that, otherwise the filename argument is parsed and a socket
@@ -698,102 +680,80 @@ static H5FD_t *H5FD_stream_open (const char *filename,
   {
     if (! H5FD_STREAM_ERROR_CHECK (fapl->socket))
     {
-      _stream.internal_socket = FALSE;
-      _stream.socket = fapl->socket;
+      stream->internal_socket = FALSE;
+      stream->socket = fapl->socket;
     }
     else
     {
-      _stream.internal_socket = TRUE;
-      _stream.socket = H5FDstream_open_socket (filename, o_flags, &_stream.fapl,
-                                               &errormsg, &major, &minor);
-      if (_stream.socket != H5FD_STREAM_INVALID_SOCKET)
+      stream->internal_socket = TRUE;
+      stream->socket = H5FD_stream_open_socket (filename, o_flags, &stream->fapl);
+      if (stream->socket != H5FD_STREAM_INVALID_SOCKET)
       {
         /* update the port ID in the file access property
            so that it can be queried via H5P_get_fapl_stream() later on */
-        H5P_set_driver (plist, H5FD_STREAM, &_stream.fapl);
+        H5P_set_driver (plist, H5FD_STREAM, &stream->fapl);
       }
+      else
+        HGOTO_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "can't open internal socket");
     }
-  }
-  else
-  {
-    _stream.socket = H5FD_STREAM_INVALID_SOCKET;
   }
 
   /* read the data from socket into memory */
   if (O_RDONLY == o_flags)
   {
-    if (errormsg == NULL && fapl->do_socket_io)
+    if (fapl->do_socket_io)
     {
 #ifdef DEBUG
       fprintf (stderr, "Stream VFD: reading file from socket\n");
 #endif
-      H5FDstream_read_from_socket (&_stream, &errormsg, &major, &minor);
+      if(H5FD_stream_read_from_socket (stream)<0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "can't read file from socket");
     }
 
     /* Now call the user's broadcast routine if given */
     if (fapl->broadcast_fn)
     {
-      if ((fapl->broadcast_fn) (&_stream.mem, &_stream.eof,
+      if ((fapl->broadcast_fn) (&stream->mem, &stream->eof,
                                 fapl->broadcast_arg) < 0)
       {
-        /* don't override previous error codes */
-        if (errormsg == NULL)
-        {
-          major = H5E_IO; minor = H5E_READERROR;
-          errormsg = "broadcast error";
-        }
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "broadcast error");
       }
 
       /* check for filesize of zero bytes */
-      if (errormsg == NULL && _stream.eof == 0)
+      if (stream->eof == 0)
       {
-        major = H5E_IO; minor = H5E_READERROR;
-        errormsg = "zero filesize";
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "zero filesize");
       }
     }
 
     /* For files which are read from a socket:
        the opened socket is not needed anymore */
-    if (errormsg == NULL)
-    {
-      if (_stream.internal_socket && ! H5FD_STREAM_ERROR_CHECK (_stream.socket))
+      if (stream->internal_socket && ! H5FD_STREAM_ERROR_CHECK (stream->socket))
       {
-        H5FD_STREAM_CLOSE_SOCKET (_stream.socket);
+        H5FD_STREAM_CLOSE_SOCKET (stream->socket);
       }
-      _stream.socket = H5FD_STREAM_INVALID_SOCKET;
-    }
+      stream->socket = H5FD_STREAM_INVALID_SOCKET;
   }
 
-  /* Create the new file struct */
-  stream = NULL;
-  if (errormsg == NULL)
-  {
-    stream = (H5FD_stream_t *) H5MM_calloc (sizeof (H5FD_stream_t));
-    if (stream == NULL)
-    {
-      major = H5E_RESOURCE; minor = H5E_NOSPACE;
-      errormsg = "unable to allocate file struct";
-    }
-    else
-    {
-      *stream = _stream;
-    }
-  }
+    /* Set return value on success */
+    ret_value=(H5FD_t*)stream;
 
-  if (errormsg)
-  {
-    if (_stream.mem)
-    {
-      H5MM_xfree (_stream.mem);
+done:
+    if(ret_value==NULL) {
+        if(stream!=NULL) {
+            if (stream->mem)
+            {
+              H5MM_xfree (stream->mem);
+            }
+            if (stream->internal_socket && ! H5FD_STREAM_ERROR_CHECK (stream->socket))
+            {
+              H5FD_STREAM_CLOSE_SOCKET (stream->socket);
+            }
+            H5MM_xfree(stream);
+        } /* end if */
     }
-    if (_stream.internal_socket && ! H5FD_STREAM_ERROR_CHECK (_stream.socket))
-    {
-      H5FD_STREAM_CLOSE_SOCKET (_stream.socket);
-    }
-    HRETURN_ERROR (major, minor, NULL, errormsg);
-  }
 
-  FUNC_LEAVE ((H5FD_t *) stream);
+  FUNC_LEAVE (ret_value);
 }
 
 
@@ -813,7 +773,8 @@ static H5FD_t *H5FD_stream_open (const char *filename,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
+static herr_t
+H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t size;
@@ -823,7 +784,6 @@ static herr_t H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
   struct sockaddr from;
   socklen_t fromlen;
   H5FD_STREAM_SOCKET_TYPE sock;
-
 
   FUNC_ENTER (H5FD_stream_flush, FAIL);
 
@@ -890,10 +850,10 @@ static herr_t H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_close (H5FD_t *_stream)
+static herr_t
+H5FD_stream_close (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
-
 
   FUNC_ENTER (H5FD_stream_close, FAIL);
 
@@ -970,10 +930,10 @@ H5FD_stream_query(const H5FD_t * UNUSED _f,
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t H5FD_stream_get_eoa (H5FD_t *_stream)
+static haddr_t
+H5FD_stream_get_eoa (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
-
 
   FUNC_ENTER (H5FD_stream_get_eoa, HADDR_UNDEF);
 
@@ -998,11 +958,10 @@ static haddr_t H5FD_stream_get_eoa (H5FD_t *_stream)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_set_eoa (H5FD_t *_stream,
-                                   haddr_t addr)
+static herr_t
+H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
-
 
   FUNC_ENTER (H5FD_stream_set_eoa, FAIL);
 
@@ -1036,7 +995,8 @@ static herr_t H5FD_stream_set_eoa (H5FD_t *_stream,
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t H5FD_stream_get_eof (H5FD_t *_stream)
+static haddr_t
+H5FD_stream_get_eof (H5FD_t *_stream)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
 
@@ -1065,12 +1025,13 @@ static haddr_t H5FD_stream_get_eof (H5FD_t *_stream)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_read (H5FD_t *_stream,
-                                H5FD_mem_t UNUSED type,
-                                hid_t UNUSED dxpl_id,
-                                haddr_t addr,
-                                size_t size,
-                                void *buf /*out*/)
+static herr_t
+H5FD_stream_read (H5FD_t *_stream,
+                    H5FD_mem_t UNUSED type,
+                    hid_t UNUSED dxpl_id,
+                    haddr_t addr,
+                    size_t size,
+                    void *buf /*out*/)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t        nbytes;
@@ -1131,12 +1092,13 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_write (H5FD_t *_stream,
-                                 H5FD_mem_t UNUSED type,
-                                 hid_t UNUSED dxpl_id,
-                                 haddr_t addr,
-                                 size_t size,
-                                 const void *buf)
+static herr_t
+H5FD_stream_write (H5FD_t *_stream,
+                     H5FD_mem_t UNUSED type,
+                     hid_t UNUSED dxpl_id,
+                     haddr_t addr,
+                     size_t size,
+                     const void *buf)
 {
   H5FD_stream_t                *stream = (H5FD_stream_t *) _stream;
 

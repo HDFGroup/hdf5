@@ -166,7 +166,7 @@ H5FL_reg_init(H5FL_reg_head_t *head)
     H5FL_reg_gc_node_t *new_node;   /* Pointer to the node for the new list to garbage collect */
     herr_t ret_value=SUCCEED;   /* return value*/
 
-    FUNC_ENTER (H5FL_reg_init, FAIL);
+    FUNC_ENTER_NOINIT(H5FL_reg_init);
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_reg_gc_node_t))))
@@ -349,7 +349,7 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     void *tmp;          /* Temporary node pointer */
     size_t total_mem;   /* Total memory used on list */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_reg_gc_list);
 
     /* Calculate the total memory used on this list */
     total_mem=head->onlist*head->size;
@@ -380,7 +380,7 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     /* Decrement global count of free memory on "regular" lists */
     H5FL_reg_gc_head.mem_freed-=total_mem;
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_reg_gc_list() */
 
 
@@ -406,7 +406,7 @@ H5FL_reg_gc(void)
 {
     H5FL_reg_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_reg_gc);
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_reg_gc_head.first;
@@ -421,7 +421,7 @@ H5FL_reg_gc(void)
     /* Double check that all the memory on the free lists is recycled */
     assert(H5FL_reg_gc_head.mem_freed==0);
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_reg_gc() */
 
 
@@ -455,6 +455,8 @@ H5FL_reg_term(void)
 {
     H5FL_reg_gc_node_t *left;   /* pointer to garbage collection lists with work left */
     H5FL_reg_gc_node_t *tmp;    /* Temporary pointer to a garbage collection node */
+
+    FUNC_ENTER_NOINIT(H5FL_reg_term);
 
     if (interface_initialize_g) {
         /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
@@ -491,7 +493,7 @@ H5FL_reg_term(void)
 
     /* Terminating this layer never affects other layers; rather, other layers affect
      * the termination of this layer. */
-    return(0);
+    FUNC_LEAVE(0);
 }   /* end H5FL_reg_term() */
 
 
@@ -520,7 +522,7 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the native list */
     H5FL_blk_node_t *ret_value=NULL;
 
-    FUNC_ENTER(H5FL_blk_find_list, NULL);
+    FUNC_ENTER_NOINIT(H5FL_blk_find_list);
 
     /* Find the correct free list */
     temp=*head;
@@ -574,7 +576,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the list */
     H5FL_blk_node_t *ret_value=NULL;
 
-    FUNC_ENTER(H5FL_blk_create_list, NULL);
+    FUNC_ENTER_NOINIT(H5FL_blk_create_list);
 
     /* Allocate room for the new free list node */
     if(NULL==(temp=H5FL_ALLOC(H5FL_blk_node_t,0)))
@@ -625,7 +627,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
     H5FL_blk_gc_node_t *new_node;   /* Pointer to the node for the new list to garbage collect */
     herr_t ret_value=SUCCEED;       /* return value*/
 
-    FUNC_ENTER (H5FL_blk_init, FAIL);
+    FUNC_ENTER_NOINIT(H5FL_blk_init);
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_blk_gc_node_t))))
@@ -887,7 +889,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     void *next;     /* Temp. ptr to the free list list node */
     void *temp;     /* Temp. ptr to the free list page node */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_blk_gc_list);
 
     /* Loop through all the nodes in the block free list queue */
     while(head->head!=NULL) {
@@ -925,7 +927,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     /* Double check that all the memory on this list is recycled */
     assert(head->list_mem==0);
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_blk_gc_list() */
 
 
@@ -949,7 +951,7 @@ H5FL_blk_gc(void)
 {
     H5FL_blk_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_blk_gc);
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_blk_gc_head.first;
@@ -964,7 +966,7 @@ H5FL_blk_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_blk_gc_head.mem_freed==0);
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_blk_gc() */
 
 
@@ -992,6 +994,8 @@ H5FL_blk_term(void)
 {
     H5FL_blk_gc_node_t *left;   /* pointer to garbage collection lists with work left */
     H5FL_blk_gc_node_t *tmp;    /* Temporary pointer to a garbage collection node */
+
+    FUNC_ENTER_NOINIT(H5FL_blk_term);
     
     /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
     left=NULL;
@@ -1023,7 +1027,7 @@ printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.fi
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_blk_gc_head.first=left;
     
-    return (H5FL_blk_gc_head.first!=NULL ? 1 : 0);
+    FUNC_LEAVE (H5FL_blk_gc_head.first!=NULL ? 1 : 0);
 }   /* end H5FL_blk_term() */
 
 
@@ -1049,7 +1053,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     H5FL_gc_arr_node_t *new_node;   /* Pointer to the node for the new list to garbage collect */
     herr_t ret_value=SUCCEED;       /* return value*/
 
-    FUNC_ENTER (H5FL_arr_init, FAIL);
+    FUNC_ENTER_NOINIT(H5FL_arr_init);
 
     /* Allocate a new garbage collection node */
     if (NULL==(new_node = H5MM_malloc(sizeof(H5FL_gc_arr_node_t))))
@@ -1351,7 +1355,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     int i;         /* Counter for array of free lists */
     size_t total_mem;   /* Total memory used on list */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_arr_gc_list);
 
     /* Check if the array has a fixed maximum number of elements */
     if(head->maxelem>0) {
@@ -1395,7 +1399,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
         H5FL_blk_gc_list(&(head->u.queue));
     } /* end else */
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_arr_gc_list() */
 
 
@@ -1419,7 +1423,7 @@ H5FL_arr_gc(void)
 {
     H5FL_gc_arr_node_t *gc_arr_node;    /* Pointer into the list of things to garbage collect */
     
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_arr_gc);
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_arr_node=H5FL_arr_gc_head.first;
@@ -1434,7 +1438,7 @@ H5FL_arr_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_arr_gc_head.mem_freed==0);
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_arr_gc() */
 
 
@@ -1463,6 +1467,8 @@ H5FL_arr_term(void)
     H5FL_gc_arr_node_t *left;   /* pointer to garbage collection lists with work left */
     H5FL_gc_arr_node_t *tmp;    /* Temporary pointer to a garbage collection node */
     
+    FUNC_ENTER_NOINIT(H5FL_arr_term);
+
     /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
     left=NULL;
     while(H5FL_arr_gc_head.first!=NULL) {
@@ -1521,7 +1527,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_arr_gc_head.first=left;
     
-    return (H5FL_arr_gc_head.first!=NULL ? 1 : 0);
+    FUNC_LEAVE (H5FL_arr_gc_head.first!=NULL ? 1 : 0);
 }   /* end H5FL_arr_term() */
 
 
@@ -1543,7 +1549,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
 herr_t
 H5FL_garbage_coll(void)
 {
-    /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+    FUNC_ENTER_NOINIT(H5FL_garbage_coll);
 
     /* Garbage collect the free lists for array objects */
     H5FL_arr_gc();
@@ -1554,7 +1560,7 @@ H5FL_garbage_coll(void)
     /* Garbage collect the free lists for regular objects */
     H5FL_reg_gc();
 
-    return(SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }   /* end H5FL_garbage_coll() */
 
 
@@ -1637,11 +1643,13 @@ H5FL_term_interface(void)
 {
     int ret_value=0;
     
+    FUNC_ENTER_NOINIT(H5FL_term_interface);
+
     /* Garbage collect any nodes on the free lists */
     H5FL_garbage_coll();
 
     ret_value=H5FL_reg_term()+H5FL_arr_term()+H5FL_blk_term();
 
-    return(ret_value);
+    FUNC_LEAVE(ret_value);
 }
 

@@ -212,17 +212,21 @@ void *H5E_auto_data_g = NULL;
  *
  *-------------------------------------------------------------------------
  */
-H5E_t *H5E_get_stack(void)
+H5E_t *
+H5E_get_stack(void)
 {
-    H5E_t *estack = pthread_getspecific(H5TS_errstk_key_g);
+    H5E_t *estack;
 
+    FUNC_ENTER(H5E_get_stack,NULL);
+
+    estack = pthread_getspecific(H5TS_errstk_key_g);
     if (!estack) {
         /* no associated value with current thread - create one */
         estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
-    return estack;
+    FUNC_LEAVE(estack);
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
@@ -248,9 +252,11 @@ H5E_t *H5E_get_stack(void)
 static herr_t
 H5E_init_interface (void)
 {
-  FUNC_ENTER(H5E_init_interface, FAIL);
-  H5E_auto_data_g = stderr;
-  FUNC_LEAVE(SUCCEED);
+    FUNC_ENTER_NOINIT(H5E_init_interface);
+
+    H5E_auto_data_g = stderr;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -472,6 +478,7 @@ H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
     const char		*min_str = NULL;
     const int		indent = 2;
 
+    FUNC_ENTER_NOINIT(H5Ewalk_cb);
     /*NO TRACE*/
 
     /* Check arguments */
@@ -491,7 +498,7 @@ H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
     fprintf (stream, "%*sminor(%02d): %s\n",
 	     indent*2, "", err_desc->min_num, min_str);
 
-    return SUCCEED;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -524,13 +531,14 @@ H5Eget_major (H5E_major_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
+    FUNC_ENTER_NOINIT(H5Eget_major);
+
     for (i=0; i<NELMTS (H5E_major_mesg_g); i++) {
-	if (H5E_major_mesg_g[i].error_code==n) {
-	    return H5E_major_mesg_g[i].str;
-	}
+	if (H5E_major_mesg_g[i].error_code==n)
+	    HRETURN(H5E_major_mesg_g[i].str);
     }
 
-    return "Invalid major error number";
+    FUNC_LEAVE("Invalid major error number");
 }
 
 
@@ -563,13 +571,14 @@ H5Eget_minor (H5E_minor_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
+    FUNC_ENTER_NOINIT(H5Eget_minor);
+
     for (i=0; i<NELMTS (H5E_minor_mesg_g); i++) {
-	if (H5E_minor_mesg_g[i].error_code==n) {
-	    return H5E_minor_mesg_g[i].str;
-	}
+	if (H5E_minor_mesg_g[i].error_code==n)
+	    HRETURN(H5E_minor_mesg_g[i].str);
     }
 
-    return "Invalid minor error number";
+    FUNC_LEAVE("Invalid minor error number");
 }
 
 

@@ -29,6 +29,7 @@
 #define H5MM_malloc(Z)	HDmalloc(MAX(1,Z))
 #define H5MM_calloc(Z)	HDcalloc(1,MAX(1,Z))
 #endif /* H5_MALLOC_WORKS */
+#define H5MM_free(Z)	HDfree(1,Z)
 
 /*
  * Library prototypes...

@@ -1020,7 +1020,7 @@ H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), int method)
 static herr_t
 H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
 {
-    FUNC_ENTER(H5TB_printNode,FAIL);
+    FUNC_ENTER_NOINIT(H5TB_printNode);
 
     if (node == NULL) {
         printf("ERROR:  null node pointer\n");
@@ -1061,7 +1061,7 @@ static herr_t
 H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
                         int method)
 {
-    FUNC_ENTER(H5TB_dumpNode,FAIL);
+    FUNC_ENTER_NOINIT(H5TB_dumpNode);
 
     if (node == NULL)
         HRETURN(FAIL);
@@ -1118,7 +1118,7 @@ H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
 static H5TB_NODE *
 H5TB_end(H5TB_NODE * root, int side)
 {
-    FUNC_ENTER (H5TB_end, NULL);
+    FUNC_ENTER_NOINIT(H5TB_end);
 
     assert(root);
     assert(side==LEFT || side==RIGHT);
@@ -1133,7 +1133,7 @@ H5TB_end(H5TB_NODE * root, int side)
 static H5TB_NODE *
 H5TB_nbr(H5TB_NODE * ptr, int side)
 {
-    FUNC_ENTER (H5TB_nbr, NULL);
+    FUNC_ENTER_NOINIT(H5TB_nbr);
 
     if (!HasChild(ptr, side))
         HRETURN (ptr->link[side]);
@@ -1157,7 +1157,7 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
     int        cmp = 1;
     H5TB_NODE  *ret_value = NULL;
 
-    FUNC_ENTER (H5TB_ffind, NULL);
+    FUNC_ENTER_NOINIT(H5TB_ffind);
 
     switch(fast_compare) {
         case H5TB_FAST_HADDR_COMPARE:
@@ -1231,7 +1231,7 @@ H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side)
     H5TB_leaf   plcnt, prcnt,   /* current values of the ptr's and kid's leaf count */
                 klcnt, krcnt;
 
-    FUNC_ENTER (H5TB_swapkid, NULL);
+    FUNC_ENTER_NOINIT(H5TB_swapkid);
 
     deep[2] = (deep[1] = 0) + Delta(kid, side);
     deep[0] = Max(0, deep[2]) + 1 - Delta(ptr, side);
@@ -1333,7 +1333,7 @@ H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
     int        odelta;
     int        obal;
 
-    FUNC_ENTER(H5TB_balance,FAIL);
+    FUNC_ENTER_NOINIT(H5TB_balance);
 
     while (NULL != ptr) {
           odelta = Delta(ptr, side);    /* delta before the node was added */

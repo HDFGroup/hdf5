@@ -1709,7 +1709,7 @@ MPIOff_to_haddr(MPI_Offset mpi_off)
 {
     haddr_t ret_value=HADDR_UNDEF;
 
-    FUNC_ENTER(MPIOff_to_haddr, HADDR_UNDEF);
+    FUNC_ENTER_NOINIT(MPIOff_to_haddr);
 
     if (mpi_off != (MPI_Offset)(haddr_t)mpi_off)
         ret_value=HADDR_UNDEF;
@@ -1750,7 +1750,7 @@ haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(haddr_to_MPIOff, FAIL);
+    FUNC_ENTER_NOINIT(haddr_to_MPIOff);
 
     if (mpi_off)
         *mpi_off = (MPI_Offset)addr;

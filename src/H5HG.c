@@ -466,7 +466,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     uint8_t	*p = NULL;
     size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
 
-    FUNC_ENTER (H5HG_alloc, 0);
+    FUNC_ENTER_NOINIT(H5HG_alloc);
 
     /* Check args */
     assert (heap);

@@ -331,34 +331,37 @@ H5AC_compare(const void *_a, const void *_b)
     int                    a = *((const int *) _a);
     int                    b = *((const int *) _b);
 
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5AC_compare);
+
     assert(current_cache_g);
 
     if(NULL==current_cache_g->slot[a] || NULL == current_cache_g->slot[b]) {
         if(NULL==current_cache_g->slot[a]) {
             if (NULL == current_cache_g->slot[b]) {
-                return 0;
+                HRETURN(0);
             } else {
-                return -1;
+                HRETURN(-1);
             }
         }
         else {
-            return 1;
+            HRETURN(1);
         }
     }
     else if (NULL == current_cache_g->slot[a]->type) {
         if (NULL == current_cache_g->slot[b]->type) {
-            return 0;
+            HRETURN(0);
         } else {
-            return -1;
+            HRETURN(-1);
         }
     } else if (NULL == current_cache_g->slot[b]->type) {
-        return 1;
+        HRETURN(1);
     } else if (current_cache_g->slot[a]->addr < current_cache_g->slot[b]->addr) {
-        return -1;
+        HRETURN(-1);
     } else if (current_cache_g->slot[a]->addr > current_cache_g->slot[b]->addr) {
-        return 1;
+        HRETURN(1);
     }
-    return 0;
+    FUNC_LEAVE(0);
 }
 #endif
 

@@ -72,7 +72,7 @@ static unsigned long file_serial_no[2];
 static herr_t
 H5FD_init_interface(void)
 {
-    FUNC_ENTER(H5FD_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5FD_init_interface);
 
     if (H5I_init_group(H5I_VFL, H5I_VFL_HASHSIZE, 0,
 		       (H5I_free_t)H5FD_free_cls)<0) {
@@ -112,6 +112,8 @@ H5FD_term_interface(void)
 {
     int	n = 0;
 
+    FUNC_ENTER_NOINIT(H5_term_interface);
+
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
 	    H5I_clear_group(H5I_VFL, FALSE);
@@ -121,7 +123,7 @@ H5FD_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -146,8 +148,10 @@ H5FD_term_interface(void)
 static herr_t
 H5FD_free_cls(H5FD_class_t *cls)
 {
-    FUNC_ENTER(H5FD_free_cls, FAIL);
+    FUNC_ENTER_NOINIT(H5FD_free_cls);
+
     H5MM_xfree(cls);
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1483,7 +1487,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 {
     haddr_t	ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER(H5FD_real_alloc, HADDR_UNDEF);
+    FUNC_ENTER_NOINIT(H5FD_real_alloc);
 
     /* Check args */
     assert(file && file->cls);

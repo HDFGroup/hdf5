@@ -184,7 +184,7 @@ H5D_init_interface(void)
     size_t          nprops;                 /* Number of properties */
     herr_t          ret_value                = SUCCEED;   /* Return value */
 
-    FUNC_ENTER(H5D_init_interface, FAIL);
+    FUNC_ENTER_NOINIT(H5D_init_interface);
 
     /* Initialize the atom group for the dataset IDs */
     if (H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<0)
@@ -357,6 +357,8 @@ H5D_term_interface(void)
 {
     int		n=0;
 
+    FUNC_ENTER_NOINIT(H5D_term_interface);
+
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASET))) {
 	    H5I_clear_group(H5I_DATASET, FALSE);
@@ -366,7 +368,7 @@ H5D_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    return n;
+    FUNC_LEAVE(n);
 }
 
 
@@ -983,7 +985,7 @@ static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation)
     hsize_t     full_size;          /* The number of bytes in the dataset when fully populated */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER(H5D_get_space_status, FAIL);
+    FUNC_ENTER_NOINIT(H5D_get_space_status);
 
     /* Get the dataset's dataspace */
     if((space=H5D_get_space(dset))==NULL)
@@ -3086,10 +3088,6 @@ done:
     FUNC_LEAVE (ret_value);
 }
 
-
-
-
-    
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_entof
@@ -3110,7 +3108,10 @@ done:
 H5G_entry_t *
 H5D_entof (H5D_t *dataset)
 {
-    return dataset ? &(dataset->ent) : NULL;
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5D_entof);
+
+    FUNC_LEAVE( dataset ? &(dataset->ent) : NULL);
 }
 
 
@@ -3202,7 +3203,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     H5P_genplist_t     *plist;          /* Property list */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER(H5D_init_storage, FAIL);
+    FUNC_ENTER_NOINIT(H5D_init_storage);
     assert(dset);
     assert(space);
 
@@ -3736,7 +3737,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     size_t buf_size;            /* Desired buffer size	*/
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5D_fill, FAIL);
+    FUNC_ENTER_NOINIT(H5D_fill);
 
     /* Check args */
     assert(buf);

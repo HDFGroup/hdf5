@@ -419,7 +419,9 @@ int\n\
 H5TN_term_interface(void)\n\
 {\n\
     interface_initialize_g = 0;\n\
-    return 0;\n\
+    FUNC_ENTER_NOINIT(H5TN_term_interface);\n\
+    \n\
+    FUNC_LEAVE(0);\n\
 }\n");
 
     /* The interface initialization function */

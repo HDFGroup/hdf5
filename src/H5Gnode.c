@@ -126,7 +126,10 @@ H5FL_BLK_DEFINE_STATIC(symbol_node);
 static size_t
 H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
 {
-    return H5F_SIZEOF_SIZE(f);	/*the name offset */
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5G_node_sizeof_rkey);
+
+    FUNC_LEAVE(H5F_SIZEOF_SIZE(f));	/*the name offset */
 }
 
 
@@ -214,8 +217,10 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 static size_t
 H5G_node_size(H5F_t *f)
 {
-    return H5G_NODE_SIZEOF_HDR(f) +
-	(2 * H5G_node_k(f)) * H5G_SIZEOF_ENTRY(f);
+    FUNC_ENTER_NOINIT(H5G_node_size);
+
+    FUNC_LEAVE(H5G_NODE_SIZEOF_HDR(f) +
+	(2 * H5G_node_k(f)) * H5G_SIZEOF_ENTRY(f));
 }
 
 

@@ -81,7 +81,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
 		     /* out: */
 		     MPI_Datatype *new_type,
@@ -91,7 +91,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     hsize_t	total_bytes;
     unsigned		u;
 
-    FUNC_ENTER (H5S_mpio_all_type, FAIL);
+    FUNC_ENTER_NOINIT(H5S_mpio_all_type);
 
     /* Check args */
     assert (space);
@@ -137,7 +137,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 		     /* out: */
 		     MPI_Datatype *new_type,
@@ -162,7 +162,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     MPI_Datatype	inner_type, outer_type, old_type[2];
     MPI_Aint            extent_len, displacement[2];
 
-    FUNC_ENTER (H5S_mpio_hyper_type, FAIL);
+    FUNC_ENTER_NOINIT(H5S_mpio_hyper_type);
 
     /* Check and abbreviate args */
     assert (space);
@@ -459,7 +459,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 		     /* out: */
 		     MPI_Datatype *new_type,
@@ -469,7 +469,7 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
     int		err;
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER (H5S_mpio_space_type, FAIL);
+    FUNC_ENTER_NOINIT(H5S_mpio_space_type);
 
     /* Check args */
     assert (space);
@@ -564,7 +564,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
 		 mft_is_derived=0;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER (H5S_mpio_spaces_xfer, FAIL);
+    FUNC_ENTER_NOINIT(H5S_mpio_spaces_xfer);
 
     /* Check args */
     assert (f);
