@@ -1517,6 +1517,7 @@
 ./tools/testfiles/h5repack_info.txt
 
 # jam utility and tests
+./tools/h5jam/Dependencies
 ./tools/h5jam/h5jam.c
 ./tools/h5jam/h5unjam.c
 ./tools/h5jam/Makefile.in
