@@ -22,6 +22,7 @@ FILE_CONTENTS {
  dataset    /reference
  dataset    /shuffle
  dataset    /string
+ dataset    /szip
  dataset    /vlen
  }
 }
