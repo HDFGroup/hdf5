@@ -2104,7 +2104,7 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-            file = h5tools_fopen(fname, drivername, sizeof drivername);
+            file = h5tools_fopen(fname, NULL, drivername, sizeof drivername);
 
 	    if (file>=0) {
 		if (verbose_g) {

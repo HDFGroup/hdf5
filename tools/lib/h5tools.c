@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 1998-2001 National Center for Supercomputing Applications
- *                         All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2001
+ *     National Center for Supercomputing Applications
+ *     All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 23, 1998
@@ -17,9 +18,6 @@
 #include "h5tools_utils.h"
 #include "hdf5.h"
 #include "H5private.h"
-
-
-
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
@@ -113,6 +111,10 @@ h5tools_close(void)
  *      driver to try out. If the HDF5 library is greater than version 1.2,
  *      then we have the FAMILY, SPLIT, and MULTI drivers to play with (and
  *      the STREAM driver if H5_HAVE_STREAM is defined, that is).
+ *
+ *      If DRIVER is non-NULL, then it will try to open the file with that
+ *      driver first. We assume that the user knows what they are doing so, if
+ *      we fail, then we won't try other file drivers.
  * Return:
  *      On success, returns a file id for the opened file. If DRIVERNAME is
  *      non-null then the first DRIVERNAME_SIZE-1 characters of the driver
@@ -145,69 +147,156 @@ h5tools_close(void)
  *      Bill Wendling, 2001-01-10
  *      Changed macro behavior so that if we have a version other than 1.2.x
  *      (i.e., > 1.2), then we do the drivers check.
+ *
+ *      Bill Wendling, 2001-07-30
+ *      Added DRIVER parameter so that the user can specify "try this driver"
+ *      instead of the default behaviour. If it fails to open the file with
+ *      that driver, this will fail completely (i.e., we won't try the other
+ *      drivers). We're assuming the user knows what they're doing. How UNIX
+ *      of us.
  *-------------------------------------------------------------------------
  */
 hid_t
-h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
+h5tools_fopen(const char *fname, const char *driver, char *drivername,
+              size_t drivername_size)
 {
-    static struct {
+    static struct d_list {
         const char     *name;
         hid_t		fapl;
-    } driver[16];
-    static int          ndrivers = 0;
+    } drivers_list[] = {
+        { "sec2", FAIL },
+        { "family", FAIL },
+        { "split", FAIL },
+        { "multi", FAIL },
+#ifdef H5_HAVE_STREAM
+        { "stream", FAIL },
+#endif	/* H5_HAVE_STREAM */
+    };
+    /* This enum should match the entries in the above drivers_list since they
+     * are indexes into the drivers_list array. */
+    enum {
+        SEC2_IDX = 0,
+        FAMILY_IDX,
+        SPLIT_IDX,
+        MULTI_IDX,
+#ifdef H5_HAVE_STREAM
+        STREAM_IDX,
+#endif	/* H5_HAVE_STREAM */
+    };
+#define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
+
+    static int          initialized = 0;
     register int        drivernum;
-    hid_t               fid = -1;
+    hid_t               fid = FAIL;
 #ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;
 #endif  /* !VERSION12 */
 
-    if (!ndrivers) {
+    if (!initialized) {
         /* Build a list of file access property lists which we should try
          * when opening the file.  Eventually we'd like some way for the
          * user to augment/replace this list interactively. */
-        driver[ndrivers].name = "sec2";
-        driver[ndrivers].fapl = H5P_DEFAULT;
-        ndrivers++;
+        ++initialized;
+
+        /* SEC2 Driver */
+        drivers_list[SEC2_IDX].fapl = H5P_DEFAULT;
         
 #ifndef VERSION12
-        driver[ndrivers].name = "family";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        /* FAMILY Driver */
+        drivers_list[FAMILY_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
-        ndrivers++;
 
-        driver[ndrivers].name = "split";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        /* SPLIT Driver */
+        drivers_list[SPLIT_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-        ndrivers++;
 
-        driver[ndrivers].name = "multi";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        /* MULTI Driver */
+        drivers_list[MULTI_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
-        ndrivers++;
 
 #ifdef H5_HAVE_STREAM
-        driver[ndrivers].name = "stream";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        /* STREAM Driver */
+        drivers_list[STREAM_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_stream(fapl, NULL);
-        ndrivers++;
 #endif	/* H5_HAVE_STREAM */
 #endif	/* !VERSION12 */
     }
 
-    /* Try to open the file using each of the drivers */
-    for (drivernum = 0; drivernum < ndrivers; drivernum++) {
-        H5E_BEGIN_TRY {
-            fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
-        } H5E_END_TRY;
+    if (driver && *driver) {
+        /* Determine which driver the user wants to open the file with. Try
+         * that driver. If it can't open it, then fail. */
+        if (!strcmp(driver, drivers_list[SEC2_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[SEC2_IDX].fapl);
+            } H5E_END_TRY;
 
-        if (fid >= 0)
-	    break;
+            if (fid == FAIL)
+                goto done;
+
+            drivernum = SEC2_IDX;
+        } else if (!strcmp(driver, drivers_list[FAMILY_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[FAMILY_IDX].fapl);
+            } H5E_END_TRY;
+
+            if (fid == FAIL)
+                goto done;
+
+            drivernum = FAMILY_IDX;
+        } else if (!strcmp(driver, drivers_list[SPLIT_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[SPLIT_IDX].fapl);
+            } H5E_END_TRY;
+
+            if (fid == FAIL)
+                goto done;
+
+            drivernum = SPLIT_IDX;
+        } else if (!strcmp(driver, drivers_list[MULTI_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[MULTI_IDX].fapl);
+            } H5E_END_TRY;
+
+            if (fid == FAIL)
+                goto done;
+
+            drivernum = MULTI_IDX;
+#ifdef H5_HAVE_STREAM
+        } else if (!strcmp(driver, drivers_list[STREAM_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[STREAM_IDX].fapl);
+            } H5E_END_TRY;
+
+            if (fid == FAIL)
+                goto done;
+
+            drivernum = STREAM_IDX;
+#endif	/* H5_HAVE_STREAM */
+        } else {
+            goto done;
+        }
+    } else {
+        /* Try to open the file using each of the drivers */
+        for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[drivernum].fapl);
+            } H5E_END_TRY;
+
+            if (fid != FAIL)
+                break;
+        }
     }
 
     /* Save the driver name */
     if (drivername && drivername_size) {
-        if (fid >= 0) {
-            strncpy(drivername, driver[drivernum].name, drivername_size);
+        if (fid != FAIL) {
+            strncpy(drivername, drivers_list[drivernum].name, drivername_size);
             drivername[drivername_size - 1] = '\0';
         } else {
             /*no file opened*/
@@ -215,6 +304,7 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
         }
     }
 
+done:
     return fid;
 }
 

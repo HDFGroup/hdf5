@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 1998-2001 National Center for Supercomputing Applications
- *                         All rights reserved.
+ * Copyright (c) 1998, 1999, 2000, 2001
+ *     National Center for Supercomputing Applications
+ *     All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 23, 1998
@@ -464,7 +465,8 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 /* Definitions of useful routines */
 extern void     h5tools_init(void);
 extern void     h5tools_close(void);
-extern hid_t    h5tools_fopen(const char *fname, char *drivername, size_t drivername_len);
+extern hid_t    h5tools_fopen(const char *fname, const char *driver,
+                              char *drivername, size_t drivername_len);
 extern hid_t    h5tools_fixtype(hid_t f_type);
 extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);

@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 1998-2001 National Center for Supercomputing Applications
- *                         All rights reserved.
+ * Copyright (C) 1998, 1999, 2000, 2001
+ *     National Center for Supercomputing Applications
+ *     All rights reserved.
  *
  */
 #include <stdio.h>
@@ -15,10 +16,11 @@
 static const char  *progname = "h5dump";
 
 static int          d_status = EXIT_SUCCESS;
-static int          unamedtype = 0;    /* shared data type with no name */
+static int          unamedtype = 0;     /* shared data type with no name */
 static int          prefix_len = 1024;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 static char        *prefix;
+static const char  *driver = NULL;      /* The driver to open the file with. */
 
 static const dump_header *dump_header_format;
 
@@ -390,9 +392,9 @@ struct handler_t {
  */
 #if 0
     /* binary: not implemented yet */
-static const char *s_opts = "hbBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
+static const char *s_opts = "hbBHvVa:d:f:g:l:t:w:xD:o:s:S:c:k:";
 #else
-static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
+static const char *s_opts = "hBHvVa:d:f:g:l:t:w:xD:o:s:S:c:k:";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -454,6 +456,11 @@ static struct long_options l_opts[] = {
     { "datatyp", require_arg, 't' },
     { "dataty", require_arg, 't' },
     { "datat", require_arg, 't' },
+    { "family", require_arg, 'f' },
+    { "famil", require_arg, 'f' },
+    { "fami", require_arg, 'f' },
+    { "fam", require_arg, 'f' },
+    { "fa", require_arg, 'f' },
     { "group", require_arg, 'g' },
     { "grou", require_arg, 'g' },
     { "gro", require_arg, 'g' },
@@ -593,6 +600,7 @@ usage: %s [OPTIONS] file\n\
       -V, --version       Print version number and exit\n\
       -a P, --attribute=P Print the specified attribute\n\
       -d P, --dataset=P   Print the specified dataset\n\
+      -f D, --family=D    Specify which driver to open the file with\n\
       -g P, --group=P     Print the specified group and all members\n\
       -l P, --soft-link=P Print the value(s) of the specified soft link\n\
       -o F, --output=F    Output raw data into file F\n\
@@ -613,8 +621,11 @@ usage: %s [OPTIONS] file\n\
       -c L, --count=L     Number of blocks to include in selection\n\
       -k L, --block=L     Size of block in hyperslab\n\
 \n\
-  P - is the full path from the root group to the object.\n\
+  D - is a driver name either: \"sec2\", \"family\", \"split\", \"multi\", or \"stream\".\n\
+        By default, the file will be opened in the same order as specified\n\
+        above until one driver succeeds in opening the file.\n\
   F - is a filename.\n\
+  P - is the full path from the root group to the object.\n\
   N - is an integer greater than 1.\n\
   L - is a list of integers the number of which are equal to the\n\
         number of dimensions in the dataspace being queried\n\
@@ -2456,6 +2467,9 @@ parse_start:
 
             last_was_dset = TRUE;
             break;
+        case 'f':
+            driver = opt_arg;
+            break;
         case 'g':
             display_all = 0;
 
@@ -2715,7 +2729,7 @@ main(int argc, const char *argv[])
     else
 	fname = argv[opt_ind];
 
-    fid = h5tools_fopen(fname, NULL, 0);
+    fid = h5tools_fopen(fname, driver, NULL, 0);
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);
