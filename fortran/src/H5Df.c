@@ -1,5 +1,4 @@
 #include "H5f90.h"
-#define MAX(a,b)            (((a)>(b)) ? (a) : (b))
 
 /*----------------------------------------------------------------------------
  * Name:        h5dcreate_c
@@ -1082,7 +1081,7 @@ nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id
   if(H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf)) goto DONE;
   
   c_len = 0;
-  for (i=0; i < num_elem; i++) c_len = MAX(c_len, c_buf[i].len);  
+  for (i=0; i < num_elem; i++) c_len = H5_MAX(c_len, c_buf[i].len);  
   *len = (size_t_f)c_len;
   ret_value = 0;
   
