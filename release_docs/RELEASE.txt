@@ -225,7 +225,7 @@ Supported Configuration Features Summary
                       parallel       parallel        libraries
                                                      (5)
     Solaris2.7     y  y (1)     y    n         y     y          y     y
-    Solaris2.8 64  y  n         n    n         y     y          y     y
+    Solaris2.8 64  y  n         y    n         y     y          y     y
     Solaris2.8 32  y  n         y    n         y     y          y     y
     IA-64          y  n         n    n         n     n          y     y 
     IRIX6.5        y  y (1)     n    n         n     y          y     y
