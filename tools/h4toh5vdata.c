@@ -95,7 +95,14 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
 
   int       check_vdname;
 
- 
+   /* Zeroing out memory for vdlabel,vdata_class,vdata_name */
+
+    h4toh5_ZeroMemory(vdata_name,MAX_NC_NAME);
+     h4toh5_ZeroMemory(fieldname,MAX_NC_NAME);
+     h4toh5_ZeroMemory(vdata_class,VSNAMELENMAX);
+     h4toh5_ZeroMemory(field_name_list,VSFIELDMAX*FIELDNAMELENMAX);
+    h4toh5_ZeroMemory(vdlabel,10);
+
   /* get absolute path of vdata name. */
 
   vdata_ref =  VSQueryref(vdata_id);
@@ -137,6 +144,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
   }
  
   vdatamem_size = 0;
+  vdata_size = 0;
   nfields = VFnfields(vdata_id);
 
   if (nfields == FAIL) {
@@ -187,6 +195,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
      }
 
      vdatamem_size +=fieldorder*h4memsize[i];
+     vdata_size +=fieldorder*h4size[i];
      
   }
  
@@ -387,7 +396,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
     return FAIL;
   }
 
-  if(vdata_name != NULL) {
+  if(vdata_name[0] != '\0') {
     if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,vdata_name)==FAIL){
       printf("error in transfering vdata attributes.\n");
       free(h5memtype);
@@ -464,6 +473,10 @@ int  vdata_transattrs(int32 vdata_id,hid_t h5dset,int snum_vdattrs,
   void*     svd_adata;
   herr_t    sret;
   int       i;
+
+      /* zeroing out memory for svdattr_name and refstr */                                  
+     h4toh5_ZeroMemory(svdattr_name,2*MAX_NC_NAME); 
+     h4toh5_ZeroMemory(refstr,MAXREF_LENGTH);          
 
   /* separate vdata attribute from vdata field attributes. */
 
@@ -671,10 +684,8 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
   char* fieldname;
   int32   fieldorder;
-  int32   fieldsize;
   size_t  fil_offset;
   size_t  mem_offset;
-  size_t  fieldsizef;
   hsize_t  fielddim[1];
   hid_t   h5str_type;
   int     check_ifstr;/* flag to check if the h5 type is string.*/
@@ -684,7 +695,6 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
   check_ifstr    = 0;
   fil_offset     = 0;
   mem_offset     = 0;
-  fieldsizef     = 0;
   
 
  for (i =0;i< nfields;i++) {
@@ -703,11 +713,6 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
      return FAIL;
    }
    
-   fieldsize  = VFfieldesize(vdata_id,i);
-   if(fieldsize == FAIL) {
-     printf("error in obtaining fieldsize of vdata field.\n");
-     return FAIL;
-   }
 
    /* when vdata is a character array, we will write the whole
       array as one hdf5 type string. */
