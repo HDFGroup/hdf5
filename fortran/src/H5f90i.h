@@ -107,6 +107,20 @@ typedef float             real_f;
 
 #endif /*LINUX*/
 
+/* IA64 LINUX definitions */
+#if defined IA64
+typedef char              *_fcd;
+typedef long              hsize_t_f;
+typedef long              hssize_t_f;
+typedef long              size_t_f;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define FNAME_POST_UNDERSCORE
+#define _fcdtocp(desc) (desc)
+
+#endif /* IA64 LINUX*/
+
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
 
 #ifndef IRIX
