@@ -38,8 +38,29 @@ an application synchroniaed with the HDF5 library or related software.
 
 <h2>Release 1.4.2 (current release) versus Release 1.4.1</h2> 
 <dir>
-    Release 1.4.2 is a "Bugfix Release"; there are no API changes in the 
-    underlying HDF5 library.
+    <h3>C Library</h3>
+    The HDF5 Release 1.4.2 C library is a "Bugfix Release"; 
+    there are no API changes in the underlying HDF5 library.
+
+    <h3>Fortran90 Library</h3>
+    The following functions in the HDF5 Release 1.4.2 Fortran90 library
+    have an additional parameter, <code>dims</code>, that was not present 
+    in Release 1.4.1:
+
+<dir>
+<pre>
+<font color=red>h5aread_f</font>(attr_id, memtype_id,  buf, dims, hdferr)
+<font color=red>h5awrite_f</font>(attr_id, memtype_id,  buf, dims, hdferr)
+<font color=red>h5dread_f</font>(dset_id, mem_type_id, buf, dims, hdferr, mem_space_id, &
+           file_space_id, xfer_prp)
+<font color=red>h5dwrite_f</font>(dset_id, mem_type_id, buf, dims, hdferr, mem_space_id, &
+           file_space_id, xfer_prp)
+</pre>
+</dir>
+
+    The <code>dims</code> parameter enables library portability 
+    between the UNIX and Microsoft Windows platforms.
+
 </dir>
 
 
