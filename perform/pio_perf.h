@@ -36,6 +36,7 @@ typedef struct parameters_ {
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     unsigned 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
     unsigned    h5_no_fill;     /* Disable HDF5 writing fill values     */
+    unsigned    h5_write_only;  /* Perform the write tests only         */
 } parameters;
 
 typedef struct results_ {

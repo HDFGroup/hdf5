@@ -117,8 +117,13 @@ static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
 /* GPFS-specific functions */
+static void access_range(int handle, off_t start, off_t length, int is_write);
+static void free_range(int handle, off_t start, off_t length);
+static void clear_file_cache(int handle);
+static void cancel_hints(int handle);
 static void start_data_shipping(int handle, int num_insts);
 static void stop_data_shipping(int handle);
+static void invalidate_file_cache(const char *filename);
 
 /*
  * Function:    do_pio
@@ -265,30 +270,31 @@ do_pio(parameters param)
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
+        if (!param.h5_write_only) {
+            /*
+             * Read performance measurement
+             */
+            MPI_Barrier(pio_comm_g);
+
+            /* Open file for read */
+            set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
+            hrc = do_fopen(&param, fname, &fd, PIO_READ);
+
+            VRFY((hrc == SUCCESS), "do_fopen failed");
+
+            set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
+            hrc = do_read(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
+            set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
+            VRFY((hrc == SUCCESS), "do_read failed");
+
+            /* Close file for read */
+            hrc = do_fclose(iot, &fd);
+
+            set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
+            VRFY((hrc == SUCCESS), "do_fclose failed");
+        }
+
         MPI_Barrier(pio_comm_g);
-
-	/*
-	 * Read performance measurement
-	 */
-        /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
-        hrc = do_fopen(&param, fname, &fd, PIO_READ);
-
-        VRFY((hrc == SUCCESS), "do_fopen failed");
-
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-        hrc = do_read(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
-        VRFY((hrc == SUCCESS), "do_read failed");
-
-        /* Close file for read */
-        hrc = do_fclose(iot, &fd);
-
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
-        VRFY((hrc == SUCCESS), "do_fclose failed");
-
-        MPI_Barrier(pio_comm_g);
-
         do_cleanupfile(iot, fname);
     }
 
@@ -1374,6 +1380,197 @@ do_cleanupfile(iotype iot, char *fname)
 
 #ifdef H5_HAVE_GPFS
 
+    /* Descriptions here come from the IBM GPFS Manual */
+
+/*
+ * Function:    access_range
+ * Purpose:     Declares an access range within a file for an
+ *              application.
+ *
+ *              The application will access file offsets within the given
+ *              range, and will not access offsets outside the range.
+ *              Violating this hint may produce worse performance than if
+ *              no hint was specified.
+ *
+ *              This hint is useful in situations where a file is
+ *              partitioned coarsely among several nodes. If the ranges
+ *              do not overlap, each node can specify which range of the
+ *              file it will access, with a performance improvement in
+ *              some cases, such as for sequential writing within a
+ *              range.
+ *
+ *              Subsequent GPFS_ACCESS_RANGE hints will replace a hint
+ *              passed earlier.
+ *
+ *                  START  - The start of the access range offset, in
+ *                           bytes, from the beginning of the file.
+ *                  LENGTH - Length of the access range. 0 indicates to
+ *                           the end of the file.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 03. June 2002
+ * Modifications:
+ */
+static void
+access_range(int handle, off_t start, off_t length, int is_write)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsAccessRange_t access;
+    } access_range;
+
+    access_range.hdr.totalLength = sizeof(access_range);
+    access_range.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    access_range.hdr.fcntlReserved = 0;
+    access_range.start.structLen = sizeof(gpfsAccessRange_t);
+    access_range.start.structType = GPFS_ACCESS_RANGE;
+    access_range.start.start = start;
+    access_range.start.length = length;
+    access_range.start.isWrite = is_write;
+
+    if (gpfs_fcntl(handle, &access_range) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl DS start directive failed. errno=%d errorOffset=%d\n",
+                errno, ds_start.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Function:    free_range
+ * Purpose:     Undeclares an access range within a file for an
+ *              application.
+ *
+ *              The application will no longer access file offsets within
+ *              the given range. GPFS flushes the data at the file
+ *              offsets and removes it from the cache.
+ *
+ *              Multi-node applications that have finished one phase of
+ *              their computation may wish to use this hint before the
+ *              file is accessed in a conflicting mode from another node
+ *              in a later phase. The potential performance benefit is
+ *              that GPFS can avoid later synchronous cache consistency
+ *              operations.
+ *
+ *                  START  - The start of the access range offset, in
+ *                           bytes from the beginning of the file.
+ *                  LENGTH - Length of the access range. 0 indicates to
+ *                           the end of the file.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 03. June 2002
+ * Modifications:
+ */
+static void
+free_range(int handle, off_t start, off_t length)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsFreeRange_t range;
+    } free_range;
+
+    /* Issue the invalidate hint */
+    free_range.hdr.totalLength = sizeof(free_range);
+    free_range.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    free_range.hdr.fcntlReserved = 0;
+    free_range.range.structLen = sizeof(gpfsFreeRange_t);
+    free_range.range.structType = GPFS_FREE_RANGE;
+    free_range.range.start = start;
+    free_range.range.length = length;
+
+    if (gpfs_fcntl(handle, &free_range) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl free range failed for range %d:%d. errno=%d errorOffset=%d\n",
+                start, length, errno, free_range.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Function:    clear_file_cache
+ * Purpose:     Indicates file access in the near future is not expected.
+ *
+ *              The application does not expect to make any further
+ *              accesses to the file in the near future, so GPFS removes
+ *              any data or metadata pertaining to the file from its
+ *              cache.
+ *
+ *              Multi-node applications that have finished one phase of
+ *              their computation may wish to use this hint before the
+ *              file is accessed in a conflicting mode from another node
+ *              in a later phase. The potential performance benefit is
+ *              that GPFS can avoid later synchronous cache consistency
+ *              operations.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 03. June 2002
+ * Modifications:
+ */
+static void
+clear_file_cache(int handle)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsClearFileCache_t clear;
+    } clear_cache;
+
+    clear_cache.hdr.totalLength = sizeof(clear_cache);
+    clear_cache.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    clear_cache.hdr.fcntlReserved = 0;
+    clear_cache.start.structLen = sizeof(gpfsClearFileCache_t);
+    clear_cache.start.structType = GPFS_CLEAR_FILE_CACHE;
+
+    if (gpfs_fcntl(handle, &clear_cache) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl clear file cache directive failed. errno=%d errorOffset=%d\n",
+                errno, clear_cache.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Function:    cancel_hints
+ * Purpose:     Indicates to remove any hints against the open file
+ *              handle.
+ *
+ *              GPFS removes any hints that may have been issued against
+ *              this open file handle:
+ *
+ *                  - The hint status of the file is restored ot what it
+ *                    would have been immediately after being opened, but
+ *                    does not affect the contents of the GPFS file
+ *                    cache. Cancelling an earlier hint that resulted in
+ *                    data being removed from the GPFS file cache does
+ *                    not bring that data back int othe cache; data
+ *                    re-enters the cache only pon access by the
+ *                    application or by user-driven or automatic
+ *                    prefetching.
+ *                  - Only the GPFS_MULTIPLE_ACCESS_RANGE hint has a
+ *                    state that might be removed by the
+ *                    GPFS_CANCEL_HINTS directive.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 03. June 2002
+ * Modifications:
+ */
+static void
+cancel_hints(int handle)
+{
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsCancelHints_t cancel;
+    } cancel_hints;
+
+    cancel_hints.hdr.totalLength = sizeof(cancel_hints);
+    cancel_hints.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    cancel_hints.hdr.fcntlReserved = 0;
+    cancel_hints.start.structLen = sizeof(gpfsCancelHints_t);
+    cancel_hints.start.structType = GPFS_CANCEL_HINTS;
+
+    if (gpfs_fcntl(handle, &cancel_hints) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl cancel hints directive failed. errno=%d errorOffset=%d\n",
+                errno, ds_start.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
 /*
  * Function:    start_data_shipping
  * Purpose:     Start up data shipping. The second parameter is the total
@@ -1436,18 +1633,97 @@ stop_data_shipping(int handle)
                 errno, ds_stop.hdr.errorOffset);
 }
 
+/*
+ * Function:    invalidate_file_cache
+ * Purpose:     Invalidate all cached data held on behalf of a file on
+ *              this node.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 03. June 2002
+ * Modifications:
+ */
+static void
+invalidate_file_cache(const char *filename)
+{
+    int handle;
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsClearFileCache_t inv;
+    } inv_cache_hint;
+
+    /* Open the file.  If the open fails, the file cannot be cached. */
+    handle = open(filename, O_RDONLY, 0);
+
+    if (handle == -1)
+        return;
+
+    /* Issue the invalidate hint */
+    inv_cache_hint.hdr.totalLength = sizeof(inv_cache_hint);
+    inv_cache_hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    inv_cache_hint.hdr.fcntlReserved = 0;
+    inv_cache_hint.inv.structLen = sizeof(gpfsClearFileCache_t);
+    inv_cache_hint.inv.structType = GPFS_CLEAR_FILE_CACHE;
+
+    if (gpfs_fcntl(handle, &inv_cache_hint) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl clear cache hint failed for file '%s'.",
+                filename);
+        fprintf(stderr, " errno=%d errorOffset=%d\n",
+                errno, inv_cache_hint.hdr.errorOffset);
+        exit(1);
+    }
+
+    /* Close the file */
+    if (close(handle) == -1) {
+        fprintf(stderr,
+                "could not close file '%s' after flushing file cache,",
+                filename);
+        fprintf(stderr, "errno=%d\n", errno);
+        exit(1);
+    }
+}
+
 #else
 
-/* H5_HAVE_GPFS isn't defined */
+/* H5_HAVE_GPFS isn't defined...stub functions */
 
 static void
-start_data_shipping(int handle, int num_insts)
+access_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length, int UNUSED is_write)
 {
     return;
 }
 
 static void
-stop_data_shipping(int handle)
+free_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length)
+{
+    return;
+}
+
+static void
+clear_file_cache(int UNUSED handle)
+{
+    return;
+}
+
+static void
+cancel_hints(int UNUSED handle)
+{
+    return;
+}
+
+static void
+start_data_shipping(int UNUSED handle, int UNUSED num_insts)
+{
+    return;
+}
+
+static void
+stop_data_shipping(int UNUSED handle)
+{
+    return;
+}
+
+static void
+invalidate_file_cache(const char UNUSED *filename)
 {
     return;
 }
