@@ -397,6 +397,7 @@
 ./doc/html/cpplus/Makefile.in
 
 ./doc/html/ed_libs/Footer.lbi
+./doc/html/ed_libs/Makefile.in
 ./doc/html/ed_libs/NavBar_ADevG.lbi
 ./doc/html/ed_libs/NavBar_Common.lbi
 ./doc/html/ed_libs/NavBar_Intro.lbi
@@ -418,6 +419,7 @@
 ./doc/html/ed_styles/IndexPrint.css
 ./doc/html/ed_styles/IntroElect.css
 ./doc/html/ed_styles/IntroPrint.css
+./doc/html/ed_styles/Makefile.in
 ./doc/html/ed_styles/RMelect.css
 ./doc/html/ed_styles/RMprint.css
 ./doc/html/ed_styles/UGelect.css
