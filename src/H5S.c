@@ -121,7 +121,7 @@ H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "dimensionality cannot be negative");
     }
-    if (!dims) {
+    if (!dims && dims!=0) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "no dimensions specified");
     }
@@ -136,30 +136,26 @@ H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
 
     /* Create a new data space */
     ds = H5MM_xcalloc(1, sizeof(H5S_t));
-#ifdef LATER /* QAK */
     if(rank>0)	/* for creating simple dataspace */
       {
-#endif /* LATER */
-	ds->type = H5S_SIMPLE;
-	ds->hslab_def = FALSE;	  /* no hyperslab defined currently */
+        ds->type = H5S_SIMPLE;
+        ds->hslab_def = FALSE;	  /* no hyperslab defined currently */
 
-	/* Initialize rank and dimensions */
-	ds->u.simple.rank = rank;
+        /* Initialize rank and dimensions */
+        ds->u.simple.rank = rank;
 
-	ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(hsize_t));
-	HDmemcpy(ds->u.simple.size, dims, rank*sizeof(hsize_t));
+        ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+        HDmemcpy(ds->u.simple.size, dims, rank*sizeof(hsize_t));
 
-	if (maxdims) {
-	    ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(hsize_t));
-	    HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(hsize_t));
-	}
-#ifdef LATER /* QAK */
+        if (maxdims) {
+            ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(hsize_t));
+            HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(hsize_t));
+        }
       } /* end if */
     else /* rank==0, for scalar data space */
       {
-	ds->type = H5S_SCALAR;
+        ds->type = H5S_SCALAR;
       } /* end else */
-#endif /* LATER */
     
     /* Register the new data space and get an ID for it */
     if ((ret_value = H5I_register(H5_DATASPACE, ds)) < 0) {
@@ -234,7 +230,7 @@ H5S_close(H5S_t *ds)
 
     switch (ds->type) {
     case H5S_SCALAR:
-	/*void */
+	/*nothing needed */
 	break;
 
     case H5S_SIMPLE:
@@ -366,7 +362,7 @@ H5S_copy(const H5S_t *src)
 
     switch (dst->type) {
     case H5S_SCALAR:
-	/*void */
+	/*nothing needed */
 	break;
 
     case H5S_SIMPLE:
@@ -779,8 +775,10 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 
     switch (ds->type) {
     case H5S_SCALAR:
+#ifdef OLD_WAY
 	HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
 		      "scalar data spaces are not implemented yet");
+#endif
 
     case H5S_SIMPLE:
 	if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->u.simple)) < 0) {
@@ -1074,29 +1072,22 @@ H5Sset_space(hid_t sid, int rank, const hsize_t *dims)
 	space->hslab_def=FALSE;
     }
 
-    if (rank == 0) {		/* scalar variable */
-	space->type = H5S_SCALAR;
-	space->u.simple.rank = 0;	/* set to scalar rank */
-	if (space->u.simple.size != NULL)
-	    space->u.simple.size = H5MM_xfree(space->u.simple.size);
-	if (space->u.simple.max != NULL)
-	    space->u.simple.max = H5MM_xfree(space->u.simple.max);
-	if (space->u.simple.perm != NULL)
-	    space->u.simple.max = H5MM_xfree(space->u.simple.perm);
-    } else {
 	/* Free the old space for now */
 	if (space->u.simple.size != NULL)
 	    space->u.simple.size = H5MM_xfree(space->u.simple.size);
 	if (space->u.simple.max != NULL)
 	    space->u.simple.max = H5MM_xfree(space->u.simple.max);
 	if (space->u.simple.perm != NULL)
-	    space->u.simple.perm = H5MM_xfree(space->u.simple.perm);
+	    space->u.simple.max = H5MM_xfree(space->u.simple.perm);
 
+    if (rank == 0) {		/* scalar variable */
+	space->type = H5S_SCALAR;
+	space->u.simple.rank = 0;	/* set to scalar rank */
+    } else {
 	/* Set the rank and copy the dims */
 	space->u.simple.rank = rank;
 	space->u.simple.size = H5MM_xcalloc(rank, sizeof(hsize_t));
 	HDmemcpy(space->u.simple.size, dims, sizeof(hsize_t) * rank);
-
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1323,8 +1314,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     FUNC_ENTER (H5S_find, NULL);
 
     /* Check args */
-    assert (mem_space && H5S_SIMPLE==mem_space->type);
-    assert (file_space && H5S_SIMPLE==file_space->type);
+    assert (mem_space && (H5S_SIMPLE==mem_space->type || H5S_SCALAR==mem_space->type));
+    assert (file_space && (H5S_SIMPLE==file_space->type || H5S_SCALAR==mem_space->type));
 
     /*
      * We can't do conversion if the source and destination select a
