@@ -2105,6 +2105,7 @@ done:
  * Purpose:	Removes an item from a B-tree.
  *
  * Note:	The current version does not attempt to rebalance the tree.
+ *              (Read the paper Yao & Lehman paper for details on why)
  *
  * Return:	Non-negative on success/Negative on failure (failure includes
  *		not being able to find the object which is to be removed).
