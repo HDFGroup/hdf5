@@ -83,6 +83,8 @@ Library
    * Added bounded garbage collection for the free lists when they run out of
      memory and also added H5set_free_list_limits API call to allow users to
      put an upper limit on the amount of memory used for free lists.
+   * Fixed point selections to work properly with both static and dynamicly
+     allocated memory.
 
 
 Configuration
