@@ -1890,6 +1890,8 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 	oh->mesg[i].chunkno = oh->mesg[found_other].chunkno;
 
 	oh->mesg[found_other].dirty = TRUE;
+        /* Copy the message to the new location */
+        HDmemcpy(p+H5O_SIZEOF_MSGHDR(f),oh->mesg[found_other].raw,oh->mesg[found_other].raw_size);
 	oh->mesg[found_other].raw = p + H5O_SIZEOF_MSGHDR(f);
 	oh->mesg[found_other].chunkno = chunkno;
 	p += H5O_SIZEOF_MSGHDR(f) + oh->mesg[found_other].raw_size;
