@@ -382,13 +382,19 @@ main(int ac, char **av)
 ! The following example demonstrates how to create and close a parallel
 ! file using MPI-IO calls.
 !
+! USE MPI is the proper way to bring in MPI definitions but many
+! MPI Fortran compiler supports the pseudo standard of INCLUDE.
+! So, HDF5 uses the INCLUDE statement instead.
+! 
 
      PROGRAM MPIOEXAMPLE
 
-     USE MPI 
-        
+     ! USE MPI
+
      IMPLICIT NONE
 
+     INCLUDE 'mpif.h'
+        
      CHARACTER(LEN=80), PARAMETER :: filename = "filef.h5" ! File name
      INTEGER     ::   ierror  ! Error flag
      INTEGER     ::   fh      ! File handle
