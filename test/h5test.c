@@ -393,7 +393,11 @@ h5_fileaccess(void)
     char s[1024];
     hid_t fapl = -1;
     hsize_t fam_size = 100*1024*1024; /*100 MB*/
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    long verbosity = 1;
+#else /* H5_WANT_H5_V1_4_COMPAT */
     long log_flags = H5FD_LOG_LOC_IO;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     H5FD_mem_t	mt;
     
     /* First use the environment variable, then the constant */
@@ -456,12 +460,21 @@ h5_fileaccess(void)
 	}
 	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0) return -1;
     } else if (!HDstrcmp(name, "log")) {
+#ifdef H5_WANT_H5_V1_4_COMPAT
+        /* Log file access */
+        if ((val = strtok(NULL, " \t\n\r")))
+            verbosity = strtol(val, NULL, 0);
+
+        if (H5Pset_fapl_log(fapl, NULL, (int)verbosity) < 0)
+	    return -1;
+#else /* H5_WANT_H5_V1_4_COMPAT */
         /* Log file access */
         if ((val = HDstrtok(NULL, " \t\n\r")))
             log_flags = HDstrtol(val, NULL, 0);
 
         if (H5Pset_fapl_log(fapl, NULL, log_flags, 0) < 0)
 	    return -1;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     } else {
 	/* Unknown driver */
 	return -1;

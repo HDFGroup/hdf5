@@ -47,7 +47,11 @@ extern "C" {
 #endif
 
 __DLL__ hid_t H5FD_log_init(void);
+#ifdef H5_WANT_H5_V1_4_COMPAT
+__DLL__ herr_t H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity);
+#else /* H5_WANT_H5_V1_4_COMPAT */
 __DLL__ herr_t H5Pset_fapl_log(hid_t fapl_id, char *logfile, unsigned flags, size_t buf_size);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 #ifdef __cplusplus
 }
