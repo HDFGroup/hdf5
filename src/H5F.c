@@ -264,6 +264,7 @@ H5F_init_interface(void)
     H5F_access_dflt.alignment = 1; /*no alignment*/
     H5F_access_dflt.gc_ref = 0; /*don't garbage-collect references*/
     H5F_access_dflt.meta_block_size = 2048; /* set metadata block allocations to 2KB */
+    H5F_access_dflt.sieve_buf_size = 64*1024; /* set sieve buffer allocation to 64KB */
     H5F_access_dflt.driver_id = H5FD_SEC2; /*default driver*/
     H5F_access_dflt.driver_info = NULL; /*driver file access properties*/
 
@@ -522,6 +523,7 @@ H5Fget_access_plist(hid_t file_id)
     _fapl.alignment = f->shared->alignment;
     _fapl.gc_ref = f->shared->gc_ref;
     _fapl.meta_block_size = f->shared->lf->def_meta_block_size;
+    _fapl.sieve_buf_size = f->shared->sieve_buf_size;
     _fapl.driver_id = f->shared->lf->driver_id;
     _fapl.driver_info = NULL; /*just for now */
 
@@ -761,6 +763,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->threshold = fapl->threshold;
 	f->shared->alignment = fapl->alignment;
 	f->shared->gc_ref = fapl->gc_ref;
+	f->shared->sieve_buf_size = fapl->sieve_buf_size;
 
 #ifdef H5_HAVE_PARALLEL
 	/*
@@ -853,6 +856,12 @@ H5F_dest(H5F_t *f)
 		ret_value = FAIL; /*but keep going*/
 	    }
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
+
+        /* Free the data sieve buffer, if it's been allocated */
+        if(f->shared->sieve_buf) {
+            assert(f->shared->sieve_dirty==0);    /* The buffer had better be flushed... */
+            f->shared->sieve_buf = H5MM_xfree (f->shared->sieve_buf);
+        } /* end if */
 
 	    /* Destroy file creation properties */
 	    H5P_close(f->shared->fcpl);
@@ -1669,6 +1678,18 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	    }
 	}
     }
+
+    /* flush the data sieve buffer, if we have a dirty one */
+    if(!alloc_only && f->shared->sieve_buf && f->shared->sieve_dirty) {
+        /* Write dirty data sieve buffer to file */
+        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DEFAULT, f->shared->sieve_buf)<0) {
+            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+              "block write failed");
+        }
+
+        /* Reset sieve buffer dirty flag */
+        f->shared->sieve_dirty=0;
+    } /* end if */
 
     /* flush the entire raw data cache */
     if (!alloc_only && H5F_istore_flush (f, invalidate)<0) {

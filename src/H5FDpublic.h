@@ -75,7 +75,7 @@ typedef enum H5FD_mem_t {
 
 
 /* Define VFL driver features that can be enabled on a per-driver basis */
-/* These are returned queried with the 'query' function pointer in H5FD_class_t */
+/* These are returned with the 'query' function pointer in H5FD_class_t */
     /*
      * Defining the H5FD_FEAT_AGGREGATE_METADATA for a VFL driver means that
      * the library will attempt to allocate a larger block for metadata and
@@ -89,6 +89,14 @@ typedef enum H5FD_mem_t {
      * 'write' routine.
      */
 #define H5FD_FEAT_ACCUMULATE_METADATA   0x00000002
+    /*
+     * Defining the H5FD_FEAT_DATA_SIEVE for a VFL driver means that
+     * the library will attempt to cache raw data as it is read from/written to
+     * a file in a "data seive" buffer.  See Rajeev Thakur's papers:
+     *  http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
+     *  http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
+     */
+#define H5FD_FEAT_DATA_SIEVE            0x00000004
 	
 
 /* Forward declaration */

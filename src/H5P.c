@@ -2991,6 +2991,90 @@ H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_sieve_buf_size
+ *
+ * Purpose:	Sets the maximum size of the data seive buffer used for file
+ *      drivers which are capable of using data sieving.  The data sieve
+ *      buffer is used when performing I/O on datasets in the file.  Using a
+ *      buffer which is large anough to hold several pieces of the dataset
+ *      being read in for hyperslab selections boosts performance by quite a
+ *      bit.
+ *      
+ *		The default value is set to 64KB, indicating that file I/O for raw data
+ *      reads and writes will occur in at least 64KB blocks.
+ *      Setting the value to 0 with this API function will turn off the
+ *      data sieving, even if the VFL driver attempts to use that strategy.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 21, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_sieve_buf_size(hid_t fapl_id, hsize_t size)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
+    H5TRACE2("e","ih",fapl_id,size);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
+            NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Set values */
+    fapl->sieve_buf_size = size;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5Pset_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_sieve_buf_size
+ *
+ * Purpose:	Returns the current settings for the data sieve buffer size
+ *      property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 21, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/)
+{
+    H5F_access_t	*fapl = NULL;
+
+    FUNC_ENTER (H5Pget_sieve_buf_size, FAIL);
+    H5TRACE2("e","ix",fapl_id,size);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
+            NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Get values */
+    if (size)
+        *size = fapl->sieve_buf_size;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5Pget_sieve_buf_size() */
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5P_copy_prop

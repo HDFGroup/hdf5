@@ -56,6 +56,7 @@ static hid_t H5FD_SRB_g = 0;
 static H5FD_t *H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id,
 	       	             haddr_t maxaddr);
 static herr_t  H5FD_srb_close(H5FD_t *_file);
+static herr_t H5FD_srb_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_srb_get_eoa(H5FD_t *_file);
 static herr_t  H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_srb_get_eof(H5FD_t *_file);
@@ -99,7 +100,7 @@ static const H5FD_class_t H5FD_srb_g = {
     H5FD_srb_open,         	 		/*open			*/
     H5FD_srb_close,		        	/*close			*/
     NULL,				        /*cmp			*/
-    NULL,				    /*query			*/
+    H5FD_srb_query,				/*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_srb_get_eoa,           		/*get_eoa		*/
@@ -359,6 +360,39 @@ H5FD_srb_close(H5FD_t *_file)
 
     H5MM_xfree(file);
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_srb_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *      (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, September 26, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
+{
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER(H5FD_srb_query, FAIL);
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------

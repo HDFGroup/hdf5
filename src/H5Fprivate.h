@@ -254,7 +254,8 @@ typedef struct H5F_access_t {
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
-    size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations */
+    size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations) */
+    hsize_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
     uintn	gc_ref;		/* Garbage-collect references?		*/
     hid_t	driver_id;	/* File driver ID			*/
     void	*driver_info;	/* File driver specific information	*/
@@ -328,6 +329,14 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
+
+    /* Data Sieve Buffering fields */
+    unsigned char *sieve_buf;  /* Buffer to hold data sieve buffer */
+    haddr_t sieve_loc;      /* File location (offset) of the data sieve buffer */
+    hsize_t sieve_size;     /* Size of the data sieve buffer used (in bytes) */
+    hsize_t sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */
+    unsigned sieve_dirty;   /* Flag to indicate that the data sieve buffer is dirty */
+
     H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
 } H5F_file_t;
 

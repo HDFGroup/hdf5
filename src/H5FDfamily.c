@@ -637,6 +637,7 @@ H5FD_family_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
     if(flags) {
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
     } /* end if */
 
     FUNC_LEAVE(ret_value);

@@ -115,6 +115,7 @@ static H5FD_t *H5FD_multi_open(const char *name, unsigned flags,
 			       hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_multi_close(H5FD_t *_file);
 static int H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD_multi_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_multi_get_eoa(H5FD_t *_file);
 static herr_t H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa);
 static haddr_t H5FD_multi_get_eof(H5FD_t *_file);
@@ -144,7 +145,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_open,				/*open			*/
     H5FD_multi_close,				/*close			*/
     H5FD_multi_cmp,				/*cmp			*/
-    NULL,				    /*query			*/
+    H5FD_multi_query,				/*query			*/
     H5FD_multi_alloc,				/*alloc			*/
     H5FD_multi_free,				/*free			*/
     H5FD_multi_get_eoa,				/*get_eoa		*/
@@ -1296,6 +1297,35 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if (mt>=H5FD_MEM_NTYPES) return cmp;
 
     return H5FDcmp(f1->memb[mt], f2->memb[mt]);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *      (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, September 26, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
+{
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+    } /* end if */
+
+    return(0);
 }
 
 
