@@ -2392,8 +2392,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Copy the dataspaces */
     if((fm->file_space = H5S_copy(file_space))==NULL)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file dataspace")
-    if((fm->mem_space = H5S_copy(equiv_mspace))==NULL)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory dataspace")
+    fm->mem_space=equiv_mspace;
 
     /* Get type of selection on disk & in memory */
     if((fsel_type=H5S_get_select_type(file_space))<0)
@@ -2467,13 +2466,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 
     /* Build the memory selection for each chunk */
     if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
-        if(H5S_hyper_convert(fm->mem_space)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
-
-        /* Normalize the hyperslab selections by adjusting them by the offset */
-        if(H5S_hyper_normalize_offset(fm->mem_space)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
-
         /* If the selections are the same shape, use the file chunk information
          * to generate the memory chunk information quickly.
          */
@@ -2554,6 +2546,7 @@ done:
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
+    fm->mem_space=NULL;
     if(equiv_mspace_init && equiv_mspace) {
         if(H5S_close(equiv_mspace)<0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
@@ -2650,11 +2643,6 @@ H5D_destroy_chunk_map(const fm_map *fm)
         if(H5S_close(fm->file_space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace")
 
-    /* Free the memory dataspace */
-    if(fm->mem_space)
-        if(H5S_close(fm->mem_space)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory dataspace")
-
     /* Free the memory chunk dataspace template */
     if(fm->mchunk_tmpl)
         if(H5S_close(fm->mchunk_tmpl)<0)
@@ -2707,7 +2695,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
     if((sel_points=H5S_get_select_npoints(tmp_fspace))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
 
-    /* Get offset of first block in file selection */
+    /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
     if(H5S_get_select_bounds(tmp_fspace, sel_start, sel_end)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
@@ -2864,8 +2852,10 @@ static herr_t
 H5D_create_chunk_mem_map_hyper(const fm_map *fm)
 {
     H5TB_NODE *curr_node;                   /* Current node in TBBT */
-    hsize_t file_off[H5O_LAYOUT_NDIMS*2];   /* Offset of first block in file selection */
-    hsize_t mem_off[H5O_LAYOUT_NDIMS*2];    /* Offset of first block in memory selection */
+    hssize_t    file_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hssize_t    file_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hssize_t    mem_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hssize_t    mem_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hssize_t adjust[H5O_LAYOUT_NDIMS];      /* Adjustment to make to all file chunks */
     hssize_t chunk_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
     unsigned    u;                          /* Local index variable */
@@ -2888,21 +2878,18 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     /* Sanity check */
     assert(fm->f_ndims>0);
 
-    /* Get offset of first block in file selection */
-    if(H5S_get_select_hyper_blocklist(fm->file_space, 1, (hsize_t)0, (hsize_t)1, file_off)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info")
+    /* Get bounding box for selection */
+    if(H5S_get_select_bounds(fm->file_space, file_sel_start, file_sel_end)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
-    /* Get offset of first block in memory selection */
-    if(H5S_get_select_hyper_blocklist(fm->mem_space, 1, (hsize_t)0, (hsize_t)1, mem_off)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info")
+    /* Get bounding box for selection */
+    if(H5S_get_select_bounds(fm->mem_space, mem_sel_start, mem_sel_end)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
     /* Calculate the adjustment for memory selection from file selection */
     assert(fm->m_ndims==fm->f_ndims);
-    for(u=0; u<fm->f_ndims; u++) {
-        H5_CHECK_OVERFLOW(file_off[u],hsize_t,hssize_t);
-        H5_CHECK_OVERFLOW(mem_off[u],hsize_t,hssize_t);
-        adjust[u]=(hssize_t)file_off[u]-(hssize_t)mem_off[u];
-    } /* end for */
+    for(u=0; u<fm->f_ndims; u++)
+        adjust[u]=file_sel_start[u]-mem_sel_start[u];
 #ifdef QAK
 {
     int mpi_rank;
