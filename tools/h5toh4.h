@@ -1,8 +1,8 @@
 #ifndef _H5TOH4_H
 #define _H5TOH4_H
 
-#include <hdf5.h>
 #include <mfhdf.h>
+#include <hdf5.h>
 
 /*
  * Copyright © 1998 NCSA

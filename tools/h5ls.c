@@ -16,6 +16,18 @@
 #include <h5tools.h>
 
 /*
+ * File drivers
+ */
+#if defined VERSION13
+#include <H5FDsec2.h>
+#include <H5FDmulti.h>
+#include <H5FDfamily.h>
+#elif defined VERSION12
+#include <H5Fpublic.h>
+#endif
+
+#define NDRIVERS	10
+/*
  * If defined then include the file name as part of the object name when
  * printing full object names. Otherwise leave the file name off.
  */
@@ -32,6 +44,8 @@ static hbool_t fullname_g = FALSE;	/*print full path names		     */
 static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
 static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
 static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
+static hbool_t show_errors_g = FALSE;	/*print HDF5 error messages	     */
+static hbool_t simple_output_g = FALSE;	/*make output more machine-readable  */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -93,11 +107,13 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       -h, -?, --help   Print a usage message and exit\n\
       -a, --address    Print addresses for raw data\n\
       -d, --data       Print the values of datasets\n\
+      -e, --errors     Show all HDF5 error reporting\n\
       -f, --full       Print full path names instead of base names\n\
       -g, --group      Show information about a group, not its contents\n\
       -l, --label      Label members of compound datasets\n\
       -r, --recursive  List all groups recursively, avoiding cycles\n\
       -s, --string     Print 1-byte integer datasets as ASCII\n\
+      -S, --simple     Use a machine-readable output format\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
@@ -1088,7 +1104,9 @@ display_type(hid_t type, int ind)
  *              Tuesday, July 21, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-09-27
+ *		Understands the simple_output_g switch which causes data to
+ *		be displayed in a more machine-readable format.
  *-------------------------------------------------------------------------
  */
 static void
@@ -1097,21 +1115,53 @@ dump_dataset_values(hid_t dset)
     hid_t		f_type = H5Dget_type(dset);
     size_t		size = H5Tget_size(f_type);
     h5dump_t		info;
-
+    char		string_prefix[64];
+	
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
-    info.idx_fmt = "(%s)";
-    info.line_ncols = width_g;
-    info.line_multi_new = 1;
-    if (label_g) info.cmpd_name = "%s=";
-    
-    /*
-     * If a compound datatype is split across multiple lines then indent
-     * the continuation line.
-     */
-    info.line_pre  = "        %s ";
-    info.line_cont = "        %s  ";
 
+    if (simple_output_g) {
+	info.idx_fmt = "";
+	info.line_ncols = 65535; /*something big*/
+	info.line_per_line = 1;
+	info.line_multi_new = 0;
+	info.line_pre  = "        ";
+	info.line_cont = "         ";
+	
+	info.arr_pre = "";
+	info.arr_suf = "";
+	info.arr_sep = " ";
+
+	info.cmpd_pre = "";
+	info.cmpd_suf = "";
+	info.cmpd_sep = " ";
+
+	if (label_g) info.cmpd_name = "%s=";
+	
+	info.elmt_suf1 = " ";
+	info.str_locale = ESCAPE_HTML;
+	
+    } else {
+	info.idx_fmt = "(%s)";
+	info.line_ncols = width_g;
+	info.line_multi_new = 1;
+	if (label_g) info.cmpd_name = "%s=";
+	info.line_pre  = "        %s ";
+	info.line_cont = "        %s  ";
+	info.str_repeat = 8;
+    }
+
+    info.dset_format =  "DSET-%lu:%lu:%lu:%lu-";
+    info.dset_hidefileno = 0;
+    
+    info.obj_format = "-%lu:%lu:%lu:%lu";
+    info.obj_hidefileno = 0;
+    
+    info.dset_blockformat_pre = "%sBlk%lu: ";
+    info.dset_ptformat_pre = "%sPt%lu: ";
+    
+    info.line_indent = "";
+    
     if (hexdump_g) {
 	/*
 	 * Print all data in hexadecimal format if the `-x' or `--hexdump'
@@ -1126,7 +1176,9 @@ dump_dataset_values(hid_t dset)
 	info.ascii = TRUE;
 	info.elmt_suf1 = "";
 	info.elmt_suf2 = "";
-	info.line_pre ="        %s \"";
+	strcpy(string_prefix, info.line_pre);
+	strcat(string_prefix, "\"");
+	info.line_pre = string_prefix;
 	info.line_suf = "\"";
     }
     
@@ -1134,7 +1186,7 @@ dump_dataset_values(hid_t dset)
      * Print all the values.
      */
     printf("    Data:\n");
-    if (h5dump_dset(stdout, &info, dset, -1)<0) {
+    if (h5dump_dset(stdout, &info, dset, -1, -1)<0) {
 	printf("        Unable to print data.\n");
     }
 
@@ -1201,12 +1253,14 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_1st  = "        Data:  ";
 	    info.line_pre  = "               ";
 	    info.line_cont = "                ";
+	    info.str_repeat = 8;
 	    
 	} else {
 	    printf("        Data:\n");
 	    info.idx_fmt = "(%s)";
 	    info.line_pre  = "            %s ";
 	    info.line_cont = "            %s  ";
+	    info.str_repeat = 8;
 	}
 	info.line_ncols = width_g;
 	if (label_g) info.cmpd_name = "%s=";
@@ -1229,7 +1283,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {
-		h5dump_mem(stdout, &info, p_type, space, buf);
+		h5dump_mem(stdout, &info, p_type, space, buf,-1);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 
@@ -1851,18 +1905,23 @@ get_width(void)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file=-1, plist=-1, root=-1;
+    hid_t	file=-1, root=-1, fapl=-1;
     char	*fname=NULL, *oname=NULL, *x;
     const char	*progname;
     const char	*s = NULL;
     char	*rest, *container=NULL;
-    int		argno;
+    int		argno, dno;
     H5G_stat_t	sb;
     iter_t	iter;
     static char	root_name[] = "/";
 
-    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
-    H5Eset_auto(NULL, NULL);
+    int		ndrivers=0;
+
+    struct {
+	const char	*name;
+	hid_t		fapl;
+    } driver[NDRIVERS];
+
 
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
@@ -1875,9 +1934,6 @@ main (int argc, char *argv[])
 	     NULL, NULL);
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
 	     NULL, ragged_list2);
-
-    /* Init the program type for the tools lib*/
-    programtype = H5LS; /*global*/
 
     /* Name of this program without the path */
     if ((progname=strrchr(argv[0], '/'))) progname++;
@@ -1897,17 +1953,21 @@ main (int argc, char *argv[])
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--address")) {
 	    address_g = TRUE;
-	} else if (!strcmp(argv[argno], "--group")) {
-	    grp_literal_g = TRUE;
 	} else if (!strcmp(argv[argno], "--data")) {
 	    data_g = TRUE;
+	} else if (!strcmp(argv[argno], "--errors")) {
+	    show_errors_g = TRUE;
 	} else if (!strcmp(argv[argno], "--full")) {
 	    fullname_g = TRUE;
+	} else if (!strcmp(argv[argno], "--group")) {
+	    grp_literal_g = TRUE;
 	} else if (!strcmp(argv[argno], "--label")) {
 	    label_g = TRUE;
 	} else if (!strcmp(argv[argno], "--recursive")) {
 	    recursive_g = TRUE;
 	    fullname_g = TRUE;
+	} else if (!strcmp(argv[argno], "--simple")) {
+	    simple_output_g = TRUE;
 	} else if (!strcmp(argv[argno], "--string")) {
 	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
@@ -1963,6 +2023,9 @@ main (int argc, char *argv[])
 		case 'd':	/* --data */
 		    data_g = TRUE;
 		    break;
+		case 'e':	/* --errors */
+		    show_errors_g = TRUE;
+		    break;
 		case 'f':	/* --full */
 		    fullname_g = TRUE;
 		    break;
@@ -1975,6 +2038,9 @@ main (int argc, char *argv[])
 		case 'r':	/* --recursive */
 		    recursive_g = TRUE;
 		    fullname_g = TRUE;
+		    break;
+		case 'S':	/* --simple */
+		    simple_output_g = TRUE;
 		    break;
 		case 's':	/* --string */
 		    string_g = TRUE;
@@ -2007,7 +2073,35 @@ main (int argc, char *argv[])
 	usage(progname);
 	exit(1);
     }
-    
+
+    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
+    if (!show_errors_g) H5Eset_auto(NULL, NULL);
+
+    /*
+     * Build a list of file access property lists which we should try when
+     * opening the file.  Eventually we'd like some way for the user to
+     * augment/replace this list interactively.
+     */
+
+    driver[ndrivers].name = "sec2";
+    driver[ndrivers].fapl = H5P_DEFAULT;
+    ndrivers++;
+#if defined VERSION13   
+    driver[ndrivers].name = "family";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
+    ndrivers++;
+
+    driver[ndrivers].name = "split";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+    ndrivers++;
+
+    driver[ndrivers].name = "multi";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+    ndrivers++;
+#endif
     /*
      * Each remaining argument is an hdf5 file followed by an optional slash
      * and object name.
@@ -2028,19 +2122,20 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-	    /* Choose a file driver*/
-	    plist = H5Pcreate(H5P_FILE_ACCESS);
-	    if (strchr(fname, '%')) {
-		H5Pset_family(plist, 0, H5P_DEFAULT);
+	    for (dno=0; dno<ndrivers; dno++) {
+		H5E_BEGIN_TRY {
+		    file = H5Fopen(fname, H5F_ACC_RDONLY, driver[dno].fapl);
+		} H5E_END_TRY;
+		if (file>=0) break;
 	    }
-
-	    /* Try to open the file */
-	    H5E_BEGIN_TRY {
-		file = H5Fopen(fname, H5F_ACC_RDONLY, plist);
-	    } H5E_END_TRY;
-	    H5Pclose(plist);
-	    if (file>=0) break; /*success*/
-
+	    if (file>=0) {
+		if (verbose_g) {
+		    printf("Opened \"%s\" with %s driver.\n",
+			   fname, driver[dno].name);
+		}
+		break; /*success*/
+	    }
+	    
 	    /* Shorten the file name; lengthen the object name */
 	    x = oname;
 	    oname = strrchr(fname, '/');
@@ -2049,7 +2144,7 @@ main (int argc, char *argv[])
 	    *oname = '\0';
 	}
 	if (file<0) {
-	    fprintf(stderr, "%s: unable to open file\n", fname);
+	    fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
 	}
 	if (oname) oname++;
 	if (!oname || !*oname) oname = root_name;

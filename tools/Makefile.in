@@ -27,7 +27,7 @@ LIBHDF5=../src/libhdf5.la
 PROGS=h5debug h5import h5ls h5repart h5dump h5dumptst @H5TOH4@
 
 # Source and object files for the library; do not install
-LIB_SRC=h5tools.c h5findshd.c
+LIB_SRC=h5tools.c 
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 

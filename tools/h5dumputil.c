@@ -25,8 +25,12 @@
 #define H5DUMP_BUFSIZE	(1024)
 #endif
 
+#ifndef MIN
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
+#endif
+#ifndef NELMTS
 #define NELMTS(X)	(sizeof(X)/sizeof(*X))
+#endif
 #define ALIGN(A,Z)	((((A)+(Z)-1)/(Z))*(Z))
 
 

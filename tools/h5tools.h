@@ -12,6 +12,15 @@
 
 #include <hdf5.h>
 #include <stdio.h>
+#if H5_VERS_MAJOR == 1
+#if H5_VERS_MINOR == 2
+#define VERSION12
+#elif H5_VERS_MINOR == 3
+#define VERSION13
+#endif
+#endif 
+#define ESCAPE_HTML	1
+
 
 /*
  * Information about how to format output.
@@ -77,6 +86,15 @@ typedef struct h5dump_t {
      *		     escape.  If `ascii' is zero then then 1-byte integers are
      *		     printed as numeric values.  The default is zero.
      *
+     *	 str_locale: Determines how strings are printed. If zero then strings
+     *		     are printed like in C except. If set to ESCAPE_HTML then
+     *		     strings are printed using HTML encoding where each
+     *		     character not in the class [a-zA-Z0-9] is substituted
+     *		     with `%XX' where `X' is a hexadecimal digit.
+     *
+     *	 str_repeat: If set to non-zero then any character value repeated N
+     *		     or more times is printed as 'C'*N
+     *
      * Numeric data is also subject to the formats for individual elements.
      */
     hbool_t	raw;
@@ -94,7 +112,8 @@ typedef struct h5dump_t {
     const char	*fmt_double;
     const char	*fmt_float;
     int		ascii;
-
+    int		str_locale;
+    int		str_repeat;
     /*
      * Fields associated with compound array members.
      *
@@ -107,10 +126,14 @@ typedef struct h5dump_t {
      *
      *	 suf:	    A string to print at the end of each array.  The default
      *		    value is a right square bracket `]'.
-     */
+     *
+	 *	 linebreaks: a boolean value to determine if we want to break the line
+	 *               after each row of an array
+	 */
     const char	*arr_pre;
     const char	*arr_sep;
     const char	*arr_suf;
+	int   arr_linebreak;
     
     /*
      * Fields associated with compound data types.
@@ -129,12 +152,16 @@ typedef struct h5dump_t {
      *		    The default is a left curly brace.
      *
      *	 suf:       A string to print at the end of each compound type.  The
-     *		    default is a right curly brace.
+     *		    default is  right curly brace.
+	 *   
+	 *	 end:       a string to print after we reach the last element of 
+	 *          each compound type. prints out before the suf.
      */
     const char	*cmpd_name;
     const char	*cmpd_sep;
     const char	*cmpd_pre;
     const char	*cmpd_suf;
+	const char  *cmpd_end;
 
     /*
      * Fields associated with the individual elements.
@@ -178,7 +205,10 @@ typedef struct h5dump_t {
     /*
      * Fields associated with entire lines.
      *
-     *   ncols:	    Number of columns per line defaults to 80.
+     *	 ncols:	    Number of columns per line defaults to 80.
+     *
+     *	 per_line:  If this field has a positive value then every Nth element
+     *	 	    will be printed at the beginning of a line.
      *
      *	 pre:       Each line of output contains an optional prefix area
      *		    before the data. This area can contain the index for the
@@ -222,22 +252,92 @@ typedef struct h5dump_t {
      *		    should the following element begin on the next line? The
      *		    default is to start the next element on the same line
      *		    unless it wouldn't fit.
+	 *
+	 *   indentlevel: a string that shows how far to indent if extra spacing
+	 *          is needed. dumper uses it.
      */
     int		line_ncols;		/*columns of output		*/
+    size_t	line_per_line;		/*max elements per line		*/
     const char	*line_pre;		/*prefix at front of each line	*/
     const char	*line_1st;		/*alternate pre. on first line	*/
     const char	*line_cont;		/*alternate pre. on continuation*/
     const char	*line_suf;		/*string to append to each line	*/
     const char	*line_sep;		/*separates lines		*/
     int		line_multi_new;		/*split multi-line outputs?	*/
+	const char *line_indent;    /*for extra identation if we need it*/
+
+	int skip_first;				/*used to skip the first set of checks for line length*/
+
+	int obj_hidefileno; /*flag used to hide or show the file number for obj refs*/
+	const char *obj_format; /*string used to format the output for the obje refs*/
+
+	int dset_hidefileno;/*flag used to hide or show the file number for dataset regions*/
+	const char *dset_format; /*string used to format the output for the dataset regions*/
+
+	const char *dset_blockformat_pre;
+	const char *dset_ptformat_pre;
+	const char *dset_ptformat;
+
+
+
 } h5dump_t;
 
 
+typedef struct dump_header{
+	const char *name;
+	const char *filebegin;
+	const char *fileend;
+	const char *bootblockbegin;
+	const char *bootblockend;
+	const char *groupbegin;
+	const char *groupend;
+	const char *datasetbegin;
+	const char *datasetend;
+	const char *attributebegin;
+	const char *attributeend;
+	const char *datatypebegin;
+	const char *datatypeend;
+	const char *dataspacebegin;
+	const char *dataspaceend;
+	const char *databegin;
+	const char *dataend;
+	const char *softlinkbegin;
+	const char *softlinkend;
+
+	const char *fileblockbegin;
+	const char *fileblockend;
+	const char *bootblockblockbegin;
+	const char *bootblockblockend;
+	const char *groupblockbegin;
+	const char *groupblockend;
+	const char *datasetblockbegin;
+	const char *datasetblockend;
+	const char *attributeblockbegin;
+	const char *attributeblockend;
+	const char *datatypeblockbegin;
+	const char *datatypeblockend;
+	const char *dataspaceblockbegin;
+	const char *dataspaceblockend;
+	const char *datablockbegin;
+	const char *datablockend;
+	const char *softlinkblockbegin;
+	const char *softlinkblockend;
+	const char *strblockbegin;
+	const char *strblockend;
+	const char *enumblockbegin;
+	const char *enumblockend;
+
+	const char *dataspacedescriptionbegin;
+	const char *dataspacedescriptionend;
+	const char *dataspacedimbegin;
+	const char *dataspacedimend;
+
+} dump_header;
+
 hid_t h5dump_fixtype(hid_t f_type);
-int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
+int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,int indentlevel);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
-	       void *mem);
-int copy_atomic_char(char* output, char* input, int numchar, int freespace);
+	       void *mem, int indentlevel);
 
 
 /*if we get a new program that needs to use the library add its name here*/
@@ -247,6 +347,43 @@ typedef enum {
     H5DUMP
 } ProgType;
 
+
+
+/*struct taken from the dumper. needed in table struct*/
+typedef struct obj_t{
+unsigned long objno[2];
+char objname[1024];
+int displayed;
+int recorded;
+int objflag;
+} obj_t;
+
+
+/*struct for the tables that the find_objs function uses*/
+
+typedef struct table_t{
+int size;
+int nobjs;
+obj_t *objs;
+} table_t;
+
+
+
+/*this struct stores the information that is passed to the find_objs function*/
+typedef struct find_objs_t {
+	int prefix_len; 
+	char *prefix;
+	int threshold; /* should be 0 or 1 */
+	table_t *group_table;
+	table_t *type_table;
+	table_t *dset_table;
+	int status;
+} find_objs_t;
+
+herr_t find_objs(hid_t group, const char *name, void *op_data);
+int search_obj (table_t *temp, unsigned long *);
+void init_table(table_t **temp);
+void init_prefix(char **temp, int);
 
 /*
 	taken from h5dump.h
@@ -261,13 +398,6 @@ typedef enum {
 extern int indent;
 extern void indentation(int);
 extern int nCols;
-/* 
-	used to determine what action to take in certain cases
-	this variable should be set at the beginning of all programs
-	that use the lib
- */
-extern ProgType programtype; 
-
 
 
 /* taken from h5dump.h*/
@@ -295,11 +425,12 @@ extern ProgType programtype;
 #define CTYPE		"CTYPE"
 #define CONCATENATOR "//"
 #define DATASET "DATASET"
+#define OBJID "OBJECTID"
 #define BEGIN		"{"
 #define END		"}"
 #endif
 
 
 /* Definitions of useful routines */
-void print_version(char *program_name);
+void print_version(const char *program_name);
 
