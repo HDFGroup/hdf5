@@ -1,4 +1,4 @@
-HDF5 version 1.7.39 released on Sun Oct  3 04:01:30 CDT 2004
+HDF5 version 1.7.40 released on Sun Oct 24 05:20:48 CDT 2004
 ================================================================================
 
 
@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+	- Long double is assumed to be a supported C data type.  It is a
+	  stanadard C89 type. AKC - 2004/10/22
 	- The IA64 will use ecc as the C++ compiler by default.
         - Added some initial support for making purify (or similar memory
             checking products) happier by initializing buffers to zero and
@@ -52,8 +54,8 @@ New Features
     --------
         - Compound datatype has been enhanced with a new feature of size 
             adjustment.  The size can be increased and decreased(without
-            cutting the last member).  No API change is involved.  SLU - 
-            2004/10/1
+            cutting the last member) as long as it doesn't go down to zero.  
+            No API change is involved.  SLU - 2004/10/1
         - Put back 6 old error API functions to be backward compatible with
             version 1.6.  They are H5Epush, H5Eprint, H5Ewalk, H5Eclear,
             H5Eset_auto, H5Eget_auto.  Their new equivalent functions are
@@ -124,11 +126,13 @@ New Features
 
     Parallel Library:
     -----------------
+        - Allow compressed, chunked datasets to be read in parallel.
+            QAK - 2004/10/04
         - Add options of using atomicity and file-sync to test_mpio_1wMr.
-          AKC - 2003/11/13
+            AKC - 2003/11/13
         - Added parallel test, test_mpio_1wMr, which tests if the
-          underlaying parallel I/O system is conforming to the POSIX
-          write/read requirement.  AKC - 2003/11/12
+            underlaying parallel I/O system is conforming to the POSIX
+            write/read requirement.  AKC - 2003/11/12
 
     Fortran Library:
     ----------------
@@ -136,18 +140,18 @@ New Features
          - added new functions h5fget_name_f and h5fget_filesize_f 
                                                  EIP 2004/07/08
          - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
-           of the type INTEGER(HSIZE_T).
+            of the type INTEGER(HSIZE_T).
 
     Tools:
     ------
         - h5repack.sh did not report errors encountered during tests.  It does
-          now.  AKC - 2004/04/02
+            now.  AKC - 2004/04/02
         - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
             available for h5dump and h5ls
         - Added option --vfd= to h5ls to allow a VFL driver to be selected
             by a user.
 	- Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
-	  AKC - 2004/01/08
+	    AKC - 2004/01/08
         - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
             respectively if library is built in parallel mode.
             WCW - 2003/11/04
@@ -167,12 +171,12 @@ Support for new platforms, languages and compilers.
         - Absoft compiler f95 v9.0 supported on Linux 2.4
                             EIP - 2004/07/29
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
-          compiler version 8.1. This is a default compiler.
+            compiler version 8.1. This is a default compiler.
         - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
-          version 8.2; set F9X environment varibale to f95, for example
-          setenv F9X f95
-          Use --disable-shared --enable-static configure flags when Absoft
-          compiler is used.
+            version 8.2; set F9X environment varibale to f95, for example
+            setenv F9X f95
+            Use --disable-shared --enable-static configure flags when Absoft
+            compiler is used.
                              EIP - 2004/07/27
         - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
             Compiler version 8.1 Use "--disable-shared --enable-static"
@@ -184,6 +188,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fix segmentation fault when calling H5Fflush with an attribute that
+            hasn't had a value written to it open.  QAK - 2004/10/18
+        - Back up supporting bitfield and time types in H5Tget_native_type.  
+            Leave it to future support.  The function simply returns error 
+            message of "not support" for bitfield and time types.  
+            SLU - 2004/10/5
         - Fixed address check in Core VFL driver to avoid spurious address/size
             overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
 	- Fixed parallel bug in which some processes attempted collective
@@ -378,6 +388,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Tools
     -----
+        - Fixed space utilization reported in h5ls to correct error in formula
+            used.  QAK - 2004/10/22
         - Fixed h5redeploy which sometimes complain too many argument for the
             test command. (The complain did not hinder the h5redploy to
             proceed correctly.) AKC - 2003/11/03
