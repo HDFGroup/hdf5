@@ -14,7 +14,7 @@ hdf5_builddir=$(top_builddir)/src
 ## Add include directory to the C++ preprocessor flags and the hdf5
 ## library to the library list.
 LIB=../src/libhdf5_cpp.la
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(srcdir)/../src @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src -I$(srcdir)/../src @CPPFLAGS@
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
 ## List all source files here. The list of object files will be
