@@ -17,6 +17,9 @@ TRACE=perl $(top_srcdir)/bin/trace
 ## Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
+MFLAG=@F9XMODFLAG@
+FFLAGS=$(MFLAG). @FFLAGS@
+
 ## This is our main target
 LIB=libhdf5_fortran.la
 DISTCLEAN=H5fortran_types.f90
