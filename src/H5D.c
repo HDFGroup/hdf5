@@ -1738,19 +1738,18 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 	
 #ifdef QAK
 	printf("%s: check 6.0\n",FUNC);
-	printf("%s: check 6.5\n",FUNC);
 	{
 	    int i;
-	    uint16_t *b;
+	    int *b;
 
-	    if(qak_debug) {
+	    /* if(qak_debug) { */
 		b=tconv_buf;
 		printf("\ntconv_buf:");
 		for (i=0; i<smine_nelmts; i++,b++) {
-		    printf("(%d)%u ",i,(unsigned)*b);
+		    printf("(%d)%d ",i,(int)*b);
 		}
 		printf("\n");
-	    }
+	    /* } */
 	}
 #endif
 	
