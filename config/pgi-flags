@@ -14,6 +14,7 @@
 if test X = "X$cc_flags_set"; then
     cc_version="`$CC $CFLAGS -V 2>&1 |grep '^pgcc '`"
     if test X != "X$cc_version"; then
+        is_mpi="`$CC $CFLAGS -help 2>&1 |grep 'MPI'`"
         cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
         cc_version=`echo $cc_version |sed 's/pgcc \([-a-z0-9\.\-]*\).*/\1/'`
         echo "compiler '$CC' is PGI $cc_vendor-$cc_version"
@@ -56,7 +57,12 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     CFLAGS="$CFLAGS $arch -Minform,warn"
 
     # Production
-    PROD_CFLAGS="-fast -s -Mnoframe"
+    # Check for MPI wrapper being used and tweak down compiler options
+    if test "X-" == "X-$is_mpi"; then
+        PROD_CFLAGS="-fast -s -Mnoframe"
+    else
+        PROD_CFLAGS="-O2 -s"
+    fi
     PROD_CPPFLAGS=
 
     # Debug
