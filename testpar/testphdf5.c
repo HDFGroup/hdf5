@@ -303,6 +303,8 @@ main(int argc, char **argv)
 	printf("PHDF5 TESTS START\n");
 	printf("===================================\n");
     }
+    h5_show_hostname();
+
     fapl = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
