@@ -2,9 +2,9 @@
 
 I. Overview
 -----------
-This file contains instructions for remote-accessing HDF5.  The SGI IRIX64 6.5 
-has been tested.  If you have difficulties installing the software in your 
-system, please send mail to
+This file contains instructions for remote-accessing HDF5.  The SGI IRIX64
+(IRIX) 6.5 platform have been tested.  If you have difficulties installing the
+software in your system, please send mail to
         hdfhelp@ncsa.uiuc.edu
 In your mail, please enclose the output of "uname -a".  Also attach the
 content of "config.log" if you have run the "configure" command.
