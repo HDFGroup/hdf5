@@ -25,6 +25,9 @@
  *	Robb Matzke, 5 Aug 1997
  *	Added calls to H5E.
  *
+ * 	Robb Matzke, 30 Aug 1997
+ *	Added `Errors:' field to function prologues.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -54,6 +57,8 @@ static intn interface_initialize_g = FALSE;
  *		the size in characters of the component through SIZE_P not
  *		counting leading slashes or the null terminator.
  *
+ * Errors:
+ *
  * Return:	Success:	Ptr into NAME.
  *
  *		Failure:	Ptr to the null terminator of NAME.
@@ -72,7 +77,7 @@ H5G_component (const char *name, size_t *size_p)
    assert (name);
    
    while ('/'==*name) name++;
-   if (size_p) *size_p = strcspn (name, "/");
+   if (size_p) *size_p = HDstrcspn (name, "/");
    return name;
 }
 
@@ -84,6 +89,8 @@ H5G_component (const char *name, size_t *size_p)
  *		component of NAME.  On return, the optional SIZE_P is
  *		initialized to point to the size of the base name not
  *		counting trailing slashes or the null character.
+ *
+ * Errors:
  *
  * Return:	Success:	Ptr to base name within NAME with SIZE_P
  *				pointing to the number of characters in the
@@ -120,7 +127,7 @@ H5G_basename (const char *name, size_t *size_p)
       return s + HDstrlen(s); /*null terminator*/
    }
 
-   if (size_p) *size_p = strcspn (s, "/");
+   if (size_p) *size_p = HDstrcspn (s, "/");
    return s;
 }
 #endif
@@ -165,6 +172,11 @@ H5G_basename (const char *name, size_t *size_p)
  *		`foo' then DIR_ENT is initialized to all zero and BASE_ENT
  * 		is initialized with the contents of the root symbol table
  *		entry.
+ *
+ * Errors:
+ *		DIRECTORY COMPLEN       Component is too long. 
+ *		DIRECTORY NOTFOUND      Component not found. 
+ *		DIRECTORY NOTFOUND      Root not found. 
  *
  * Return:	Success:	SUCCEED if the name can be fully
  *				resolved.
@@ -229,7 +241,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
        * we can pass it down to the other symbol table functions.
        */
       if (nchars+1 > sizeof(comp)) {
-	 /* component name is too long */
+	 /* component is too long */
 	 if (dir_ent) *dir_ent = *dir;
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, -2);
       }
@@ -247,7 +259,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 	 H5O_name_t mesg;
 	 if (!aside && dir->header==f->root_sym->header &&
 	     H5O_read (f, dir->header, dir, H5O_NAME, 0, &mesg)) {
-	    if (!strcmp (mesg.s, comp)) {
+	    if (!HDstrcmp (mesg.s, comp)) {
 	       H5O_reset (H5O_NAME, &mesg);
 	       *base = *dir;
 	       aside = TRUE;
@@ -295,6 +307,12 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
  *		is removed).  If the root object doesn't have a name message
  *		then the name `Root Object' is used.
  *
+ * Errors:
+ *		DIRECTORY CANTINIT      Can't create root. 
+ *		DIRECTORY CANTINIT      Can't insert old root object in
+ *		                        new root directory. 
+ *		DIRECTORY EXISTS        Root directory already exists. 
+ *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
@@ -305,7 +323,8 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
  *
  * Modifications:
  *
- *------------------------------------------------------------------------- */
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5G_mkroot (hdf5_file_t *f, size_t size_hint)
 {
@@ -349,7 +368,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
     */
    if (H5G_stab_new (f, f->root_sym, size_hint)<0) {
       H5O_reset (H5O_NAME, &name);
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't create dir*/
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*can't create root*/
    }
 
    /*
@@ -395,6 +414,14 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
  *		when necessary.  Calling this function with the name "/"
  *		(or any equivalent name) will result in an H5E_EXISTS
  * 		failure.
+ *
+ * Errors:
+ *		DIRECTORY CANTINIT      Can't create dir. 
+ *		DIRECTORY CANTINIT      Can't insert. 
+ *		DIRECTORY CANTINIT      Lookup failed. 
+ *		DIRECTORY COMPLEN       Component is too long. 
+ *		DIRECTORY EXISTS        Already exists. 
+ *		DIRECTORY NOTFOUND      Missing component. 
  *
  * Return:	Success:	SUCCEED, if DIR_ENT is not the null pointer
  *				then it will be initialized with the
@@ -451,7 +478,7 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	 /* missing component */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
       } else if (nchars+1 > sizeof _comp) {
-	 /* component name is too long */
+	 /* component is too long */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
       } else {
 	 /* null terminate */
@@ -492,6 +519,9 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  * 		This function will fail if the root object is
  * 		requested and there is none.
  *
+ * Errors:
+ *		DIRECTORY NOTFOUND      Object not found. 
+ *
  * Return:	Success:	SUCCEED with DIR_ENT and ENT initialized.
  *
  *		Failure:	FAIL
@@ -502,7 +532,8 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *
  * Modifications:
  *
- *------------------------------------------------------------------------- */
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	  const char *name, H5G_entry_t *ent)
@@ -543,6 +574,17 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  * 		Inserting an object entry into the symbol table increments
  *		the link counter for that object.
  *
+ * Errors:
+ *		DIRECTORY CANTINIT      Can't insert. 
+ *		DIRECTORY CANTINIT      Cannot add/change name message. 
+ *		DIRECTORY CANTINIT      Lookup failed. 
+ *		DIRECTORY COMPLEN       Component is too long. 
+ *		DIRECTORY EXISTS        Already exists. 
+ *		DIRECTORY EXISTS        Root exists. 
+ *		DIRECTORY LINK          Bad link count. 
+ *		DIRECTORY LINK          Link inc failure. 
+ *		DIRECTORY NOTFOUND      Component not found. 
+ *
  * Return:	Success:	SUCCEED with optional DIR_ENT initialized with
  *				the symbol table entry for the directory
  *				which contains the new ENT.
@@ -555,7 +597,8 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *
  * Modifications:
  *
- *------------------------------------------------------------------------- */
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	    const char *name, H5G_entry_t *ent)
@@ -623,10 +666,10 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
     */
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
-	 /* name component not found */
+	 /* component not found */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
       } else if (nchars+1 > sizeof _comp) {
-	 /* name component is too long */
+	 /* component is too long */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, FAIL);
       } else {
 	 /* null terminate */
@@ -685,6 +728,10 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  * 		Do not use this function to change the entry for the root
  *		symbol since that's a special case.  This function returns
  *		failure if that is attempted.
+ *
+ * Errors:
+ *		DIRECTORY CANTINIT      Can't modify. 
+ *		DIRECTORY NOTFOUND      Entry not found. 
  *
  * Return:	Success:	SUCCEED with optional DIR_ENT initialized with
  *				the symbol table entry for the directory
@@ -746,6 +793,16 @@ H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *		item in the heap is the empty string, and must appear at
  *		heap offset zero.
  *
+ * Errors:
+ *		INTERNAL  CANTINIT      B-tree's won't work if the first
+ *		                        name isn't at the beginning of the
+ *		                        heap. 
+ *		SYM       CANTINIT      Can't create B-tree. 
+ *		SYM       CANTINIT      Can't create header. 
+ *		SYM       CANTINIT      Can't create heap. 
+ *		SYM       CANTINIT      Can't create message. 
+ *		SYM       CANTINIT      Can't initialize heap. 
+ *
  * Return:	Success:	Address of new symbol table header.  If
  *				the caller supplies a symbol table entry
  *				SELF then it will be initialized to point to
@@ -778,10 +835,10 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
 
    /* Create symbol table private heap */
    if ((stab.heap = H5H_new (f, H5H_LOCAL, init))<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create heap*/
    }
    if ((name = H5H_insert (f, stab.heap, 1, "")<0)) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't initialize heap*/
    }
    if (0!=name) {
       /*
@@ -793,7 +850,7 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
 
    /* Create the B-tree */
    if ((stab.btree = H5B_new (f, H5B_SNODE))<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create B-tree*/
    }
 
    /*
@@ -802,7 +859,7 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
     * incremented if the object is added to the directory hierarchy.
     */
    if ((addr = H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
    }
    
    /* insert the symbol table message */
@@ -812,7 +869,7 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
       self->type = H5G_NOTHING_CACHED;
    }
    if (H5O_modify(f, addr, self, NULL, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create message*/
    }
 
    FUNC_LEAVE (addr);
@@ -825,6 +882,10 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
  * Purpose:	Finds a symbol named NAME in the symbol table whose
  *		description is stored in SELF in file F and returns a
  *		copy of the symbol table entry through the ENT argument.
+ *
+ * Errors:
+ *		SYM       BADMESG       Can't read message. 
+ *		SYM       NOTFOUND      Not found. 
  *
  * Return:	Success:	Address corresponding to the name.
  *
@@ -854,7 +915,7 @@ H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 
    /* set up the udata */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*can't read message*/
    }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
@@ -862,7 +923,7 @@ H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 
    /* search the B-tree */
    if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*not found*/
    }
 
    /* return the result */
@@ -878,6 +939,10 @@ H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
  *		symbol is NAME in the symbol table described by SELF in
  *		file F.  ENT is the new symbol table entry to use for the
  *		symbol.
+ *
+ * Errors:
+ *		SYM       BADMESG       Can't read message. 
+ *		SYM       NOTFOUND      Not found. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -908,7 +973,7 @@ H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 
    /* set up the udata */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*can't read message*/
    }
    udata.operation = H5G_OPER_MODIFY;
    udata.name = name;
@@ -917,7 +982,7 @@ H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 
    /* search and modify the B-tree */
    if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*not found*/
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -930,6 +995,10 @@ H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
  * Purpose:	Insert a new symbol into the table described by SELF in
  *		file F.  The name of the new symbol is NAME and its symbol
  *		table entry is ENT.
+ *
+ * Errors:
+ *		SYM       BADMESG       Can't read message. 
+ *		SYM       CANTINSERT    Can't insert entry. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -960,7 +1029,7 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    
    /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*can't read message*/
    }
    udata.name = name;
    udata.heap = stab.heap;
@@ -968,7 +1037,7 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
 
    /* insert */
    if (H5B_insert (f, H5B_SNODE, stab.btree, &udata)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*can't insert entry*/
    }
 
    /* update the name offset in the entry */
@@ -986,6 +1055,10 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
  *		also allocates an array of symbol table entries which will
  *		be filled in with data from the symbol table.  Each of these
  *		arrays should have at least MAXENTRIES elements.
+ *
+ * Errors:
+ *		SYM       BADMESG       Not a symbol table. 
+ *		SYM       CANTLIST      B-tree list failure. 
  *
  * Return:	Success:	The total number of symbols in the
  *				symbol table.  This may exceed MAXENTRIES,
@@ -1021,7 +1094,7 @@ H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
 
    /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*not a symbol table*/
    }
    udata.entry = entries;
    udata.name = names;
@@ -1035,7 +1108,7 @@ H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);
       }
-      HRETURN_ERROR (H5E_SYM, H5E_CANTLIST, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLIST, FAIL); /*B-tree list failure*/
    }
 
    FUNC_LEAVE (udata.nsyms);
@@ -1047,6 +1120,9 @@ H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
  *
  * Purpose:	Same as H5G_decode() except it does it for an array of
  *		symbol table entries.
+ *
+ * Errors:
+ *		SYM       CANTDECODE    Can't decode. 
  *
  * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the last symbol.
@@ -1077,7 +1153,7 @@ H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
    /* decode entries */
    for (i=0; i<n; i++) {
       if (H5G_decode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL); /*can't decode*/
       }
    }
 
@@ -1089,6 +1165,8 @@ H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  * Function:	H5G_decode
  *
  * Purpose:	Decodes a symbol table entry pointed to by `*pp'.
+ *
+ * Errors:
  *
  * Return:	Success:	SUCCEED with *pp pointing to the first byte
  *				following the symbol table entry.
@@ -1156,6 +1234,9 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
  * Purpose:	Same as H5G_encode() except it does it for an array of
  *		symbol table entries.
  *
+ * Errors:
+ *		SYM       CANTENCODE    Can't encode. 
+ *
  * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the last symbol.
  *
@@ -1185,7 +1266,7 @@ H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
    /* encode entries */
    for (i=0; i<n; i++) {
       if (H5G_encode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL); /*can't encode*/
       }
    }
 
@@ -1198,6 +1279,8 @@ H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *
  * Purpose:	Encodes the specified symbol table entry into the buffer
  *		pointed to by *pp.
+ *
+ * Errors:
  *
  * Return:	Success:	SUCCEED, with *pp pointing to the first byte
  *				after the symbol table entry.
@@ -1270,6 +1353,8 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
  * Function:	H5G_debug
  *
  * Purpose:	Prints debugging information about a symbol table entry.
+ *
+ * Errors:
  *
  * Return:	Success:	SUCCEED
  *

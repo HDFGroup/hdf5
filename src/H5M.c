@@ -233,7 +233,7 @@ hatom_t H5Mcreate(hatom_t owner_id, hobjtype_t type, const char *name)
     i=H5M_find_type(type);
     if(meta_func_arr[i].create==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].create(owner_id,type,name);
+    ret_value=(meta_func_arr[i].create)(owner_id,type,name);
 
 done:
   if(ret_value == FAIL)   
@@ -276,7 +276,7 @@ hatom_t H5Maccess(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].access==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].access(oid);
+    ret_value=(meta_func_arr[i].access)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -319,7 +319,7 @@ hatom_t H5Mcopy(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].copy==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].copy(oid);
+    ret_value=(meta_func_arr[i].copy)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -364,7 +364,7 @@ hatom_t H5Mfind_name(hatom_t owner_id, hobjtype_t type, const char *name)
     i=H5M_find_type(group);
     if(meta_func_arr[i].find_name==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].find_name(owner_id,type,name);
+    ret_value=(meta_func_arr[i].find_name)(owner_id,type,name);
 
 done:
   if(ret_value == FAIL)   
@@ -407,7 +407,7 @@ uint32 H5Mname_len(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].name_len==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].name_len(oid);
+    ret_value=(meta_func_arr[i].name_len)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -451,7 +451,7 @@ herr_t H5Mget_name(hatom_t oid, char *name)
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_name==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].get_name(oid,name);
+    ret_value=(meta_func_arr[i].get_name)(oid,name);
 
 done:
   if(ret_value == FAIL)   
@@ -495,7 +495,7 @@ herr_t H5Mset_name(hatom_t oid, const char *name)
     i=H5M_find_type(group);
     if(meta_func_arr[i].set_name==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].set_name(oid,name);
+    ret_value=(meta_func_arr[i].set_name)(oid,name);
 
 done:
   if(ret_value == FAIL)   
@@ -540,7 +540,7 @@ hatom_t H5Msearch(hatom_t oid, hobjtype_t type, const char *name)
     i=H5M_find_type(group);
     if(meta_func_arr[i].search==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].search(oid,type,name);
+    ret_value=(meta_func_arr[i].search)(oid,type,name);
 
 done:
   if(ret_value == FAIL)   
@@ -585,7 +585,7 @@ hatom_t H5Mindex(hatom_t oid, hobjtype_t type, uint32 idx)
     i=H5M_find_type(group);
     if(meta_func_arr[i].index==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].index(oid,type,idx);
+    ret_value=(meta_func_arr[i].index)(oid,type,idx);
 
 done:
   if(ret_value == FAIL)   
@@ -628,7 +628,7 @@ hatom_t H5Mflush(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].flush==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].flush(oid);
+    ret_value=(meta_func_arr[i].flush)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -672,7 +672,7 @@ herr_t H5Mdelete(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].delete==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].delete(oid);
+    ret_value=(meta_func_arr[i].delete)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -715,7 +715,7 @@ hatom_t H5Mget_parent(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_parent==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].get_parent(oid);
+    ret_value=(meta_func_arr[i].get_parent)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -758,7 +758,7 @@ hatom_t H5Mget_file(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_file==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].get_file(oid);
+    ret_value=(meta_func_arr[i].get_file)(oid);
 
 done:
   if(ret_value == FAIL)   
@@ -801,7 +801,7 @@ herr_t H5Mrelease(hatom_t oid)
     i=H5M_find_type(group);
     if(meta_func_arr[i].release==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
-    ret_value=meta_func_arr[i].release(oid);
+    ret_value=(meta_func_arr[i].release)(oid);
 
 done:
   if(ret_value == FAIL)   

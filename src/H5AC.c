@@ -290,7 +290,7 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
       for (i=0; i<H5AC_NSLOTS; i++) map[i] = i;
       assert (NULL==current_cache_g);
       current_cache_g = f->cache;
-      qsort (map, H5AC_NSLOTS, sizeof(intn), H5AC_compare);
+      HDqsort (map, H5AC_NSLOTS, sizeof(intn), H5AC_compare);
       current_cache_g = NULL;
 #endif
 

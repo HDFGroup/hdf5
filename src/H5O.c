@@ -160,12 +160,16 @@ H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 30 Aug 1997
+ *	Plugged memory leaks that occur during error handling.
+ *
  *-------------------------------------------------------------------------
  */
 static H5O_t *
 H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 {
    H5O_t	*oh = NULL;
+   H5O_t	*ret_value = (void*)SUCCEED; /*kludge for HGOTO_ERROR*/
    uint8	buf[16], *p;
    size_t	hdr_size, mesg_size;
    uintn	id;
@@ -173,7 +177,7 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    haddr_t	chunk_addr;
    size_t	chunk_size;
    H5O_cont_t	*cont=NULL;
-   
+
    FUNC_ENTER (H5O_load, NULL, NULL);
 
    /* check args */
@@ -187,20 +191,20 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    /* read fixed-lenth part of object header */
    hdr_size = H5O_SIZEOF_HDR (f);
    if (H5F_block_read (f, addr, hdr_size, buf)<0) {
-      HRETURN_ERROR (H5E_OHDR, H5E_READERROR, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL);
    }
    p = buf;
 
    /* decode version */
    oh->version = *p++;
    if (H5O_VERSION!=oh->version) {
-      HRETURN_ERROR (H5E_OHDR, H5E_VERSION, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_VERSION, NULL);
    }
 
    /* decode alignment */
    oh->alignment = *p++;
    if (4!=oh->alignment) {
-      HRETURN_ERROR (H5E_OHDR, H5E_ALIGNMENT, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_ALIGNMENT, NULL);
    }
 
    /* decode number of messages */
@@ -235,7 +239,7 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
       oh->chunk[chunkno].image = H5MM_xmalloc (chunk_size);
       if (H5F_block_read (f, chunk_addr, chunk_size,
 			  oh->chunk[chunkno].image)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_READERROR, NULL);
+	 HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL);
       }
       
 
@@ -247,10 +251,10 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 	 UINT16DECODE (p, mesg_size);
       
 	 if (id>=NELMTS(message_type_g) || NULL==message_type_g[id]) {
-	    HRETURN_ERROR (H5E_OHDR, H5E_BADMESG, NULL);
+	    HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, NULL);
 	 }
 	 if (p + mesg_size > oh->chunk[chunkno].image + chunk_size) {
-	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL);
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL);
 	 }
 
 	 if (H5O_NULL_ID==id && oh->nmesgs>0 &&
@@ -261,10 +265,10 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 	    oh->mesg[mesgno].raw_size += 4 + mesg_size;
 	 } else {
 	    /* new message */
-	    mesgno = oh->nmesgs++;
-	    if (mesgno>=nmesgs) {
-	       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+	    if (oh->nmesgs>=nmesgs) {
+	       HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
 	    }
+	    mesgno = oh->nmesgs++;
 	    oh->mesg[mesgno].type = message_type_g[id];
 	    oh->mesg[mesgno].dirty = FALSE;
 	    oh->mesg[mesgno].native = NULL;
@@ -286,6 +290,20 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 	    cont->chunkno = oh->nchunks; /*the next chunk to allocate*/
 	 }
       }
+   }
+
+done:
+   if (!ret_value && oh) {
+      /*
+       * Free resources.
+       */
+      int i;
+      for (i=0; i<oh->nchunks; i++) {
+	 oh->chunk[i].image = H5MM_xfree (oh->chunk[i].image);
+      }
+      oh->chunk = H5MM_xfree (oh->chunk);
+      oh->mesg = H5MM_xfree (oh->mesg);
+      oh = H5MM_xfree (oh);
    }
 
    FUNC_LEAVE (oh);

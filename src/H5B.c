@@ -260,7 +260,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    p = bt->page;
 
    /* magic number */
-   if (memcmp (p, H5B_MAGIC, H5B_SIZEOF_MAGIC)) goto error;
+   if (HDmemcmp (p, H5B_MAGIC, H5B_SIZEOF_MAGIC)) goto error;
    p += 4;
 
    /* node type and level */

@@ -923,7 +923,7 @@ H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	 } else {
 	    fprintf (stream, "   ");
 	 }
-	 if (7==j) fputc (' ', stream);
+	 if (7==j) HDfputc (' ', stream);
       }
 
       for (j=0; j<16; j++) {
@@ -938,7 +938,7 @@ H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	 }
       }
 
-      fputc ('\n', stream);
+      HDfputc ('\n', stream);
    }
       
    H5MM_xfree (marker);

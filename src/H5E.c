@@ -386,7 +386,7 @@ H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_nam
     if((err_stack=H5Aatom_object(thrderrid))==NULL)
         HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL);
 
-    err_stack->push(thrderrid, maj, min, function_name, file_name, line);
+    (err_stack->push)(thrderrid, maj, min, function_name, file_name, line);
 
 done:
   if(ret_value == FAIL)   

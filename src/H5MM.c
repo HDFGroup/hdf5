@@ -166,7 +166,7 @@ H5MM_xstrdup (const char *s)
  *-------------------------------------------------------------------------
  */
 void *
-H5MM_xfree (void *mem)
+H5MM_xfree (const void *mem)
 {
    if (mem) HDfree (mem);
    return NULL;

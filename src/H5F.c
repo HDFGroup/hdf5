@@ -7,6 +7,10 @@
 *                                                                          *
 * For conditions of distribution and use, see the accompanying             *
 * hdf/COPYING file.                                                        *
+*
+* MODIFICATIONS
+* 	Robb Matzke, 30 Aug 1997
+*	Added `ERRORS' fields to function prologues.
 *                                                                          *
 ****************************************************************************/
 
@@ -66,6 +70,8 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
+ERRORS
+
 Modifications:
     Robb Matzke, 4 Aug 1997
     Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
@@ -92,6 +98,9 @@ static herr_t H5F_init_interface(void)
        const hdf5_file_t *f;             IN: pointer to the file record
        uint8 **p;               IN: pointer to buffer pointer to encode length in
        uint8 *l;                IN: pointer to length to encode
+
+ ERRORS
+
  RETURNS
     none
  DESCRIPTION
@@ -130,6 +139,9 @@ done:
        const hdf5_file_t *f;             IN: pointer to the file record
        uint8 **p;               IN: pointer to buffer pointer to encode offset in
        uint8 *o;                IN: pointer to offset to encode
+
+ERRORS
+
  RETURNS
     none
  DESCRIPTION
@@ -168,6 +180,9 @@ done:
        intn HPcompare_filename(obj, key)
        const VOIDP obj;             IN: pointer to the file record
        const VOIDP key;             IN: pointer to the name of file
+
+ ERRORS
+
  RETURNS
        TRUE if the key matches the obj, FALSE otherwise
  DESCRIPTION
@@ -191,13 +206,22 @@ H5F_compare_filename (const VOIDP _obj, const VOIDP _key)
 /*--------------------------------------------------------------------------
  NAME
     H5Fget_create_template
+
  PURPOSE
     Get an atom for a copy of the file-creation template for this file
+
  USAGE
     hatom_t H5Fget_create_template(fid)
         hatom_t fid;    IN: File ID
+
+ ERRORS
+    ATOM      BADATOM       Can't get file struct. 
+    FUNC      CANTCREATE    Can't create template. 
+    FUNC      CANTINIT      Can't init template. 
+
  RETURNS
     Returns template ID on success, FAIL on failure
+
  DESCRIPTION
         This function returns an atom with a copy of the template parameters
     used to create a file.
@@ -214,14 +238,14 @@ hatom_t H5Fget_create_template(hatom_t fid)
 
     /* Get the file structure */
     if((file=H5Aatom_object(fid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
 
     /* Create the template object to return */
     if((ret_value=H5Mcreate(fid,H5_TEMPLATE,NULL))==FAIL)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTCREATE, FAIL);
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTCREATE, FAIL); /*can't create template*/
 
     if(H5C_init(ret_value,&(file->file_create_parms))==FAIL)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL); /*can't init template*/
 
 done:
   if(ret_value == FAIL)   
@@ -237,13 +261,24 @@ done:
 /*--------------------------------------------------------------------------
  NAME
     H5Fis_hdf5
+
  PURPOSE
     Check the file signature to detect an HDF5 file.
+
  USAGE
     hbool_t H5Fis_hdf5(filename)
         const char *filename;   IN: Name of the file to check
+ ERRORS
+    ARGS      BADRANGE      No filename specified. 
+    FILE      BADFILE       Low-level file open failure. 
+    IO        READERROR     Read error. 
+    IO        READERROR     Seek error. 
+    IO        SEEKERROR     Unable to determine length of file due to seek
+                            failure. 
+
  RETURNS
     TRUE/FALSE/FAIL
+
  DESCRIPTION
     This function determines if a file is an HDF5 format file.
 --------------------------------------------------------------------------*/
@@ -260,25 +295,29 @@ hbool_t H5Fis_hdf5(const char *filename)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(filename==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL); /*no filename specified*/
 
     /* Open the file */
     f_handle=H5F_OPEN(filename,0);
-    if(H5F_OPENERR(f_handle))
-        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
+    if(H5F_OPENERR(f_handle)) {
+       /* Low-level file open failure */
+       HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
+    }
 
     /* Get the length of the file */
-    if(H5F_SEEKEND(f_handle)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
+    if(H5F_SEEKEND(f_handle)==FAIL) {
+       /* Unable to determine length of file due to seek failure */
+       HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
+    }
     file_len=H5F_TELL(f_handle);
 
     /* Check the offsets where the file signature is possible */
     while(curr_off<file_len)
       {
         if(H5F_SEEK(f_handle,curr_off)==FAIL)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL); /*seek error*/
         if(H5F_READ(f_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL); /*read error*/
         if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0)
           {
             ret_value=BTRUE;
@@ -313,6 +352,8 @@ done:
  * Purpose:	Creates a new file object and initializes it.  The
  *		H5Fopen and H5Fcreate functions then fill in various
  *		fields.
+ *
+ * Errors:
  *
  * Return:	Success:	Ptr to a new file struct.
  *
@@ -349,6 +390,8 @@ H5F_new (void)
  *		the cache or anything else; it only frees memory associated
  *		with the file struct.
  *
+ * Errors:
+ *
  * Return:	Success:	NULL
  *
  *		Failure:	NULL
@@ -377,16 +420,34 @@ H5F_dest (hdf5_file_t *f)
 /*--------------------------------------------------------------------------
  NAME
     H5Fcreate
+
  PURPOSE
     Create a new HDF5 file.
+
  USAGE
     int32 H5Fcreate(filename, flags, create_temp, access_temp)
         const char *filename;   IN: Name of the file to create
         uintn flags;            IN: Flags to indicate various options.
         hatom_t create_temp;    IN: File-creation template ID
         hatom_t access_temp;    IN: File-access template ID
+
+ ERRORS
+    ARGS      BADVALUE      Invalid file name. 
+    ARGS      BADVALUE      Invalid flags. 
+    ATOM      BADATOM       Can't atomize template. 
+    ATOM      BADATOM       Can't unatomize template. 
+    ATOM      CANTREGISTER  Can't atomize file. 
+    FILE      CANTCREATE    Unable to create the file due to low level create
+                            failure. 
+    FILE      FILEEXISTS    File already exists but overwrite permission
+                            was not given. 
+    FILE      FILEOPEN      File already open. 
+    IO        CANTINIT      Can't write file boot block. 
+    RESOURCE  NOSPACE       H5F_new() failed. 
+
  RETURNS
     Returns file ID on success, FAIL on failure
+
  DESCRIPTION
         This is the primary function for creating HDF5 files . The flags
     parameter determines whether an existing file will be overwritten or not.
@@ -402,16 +463,7 @@ H5F_dest (hdf5_file_t *f)
     values for the appropriate template.  (Documented in the template module).
     [Access templates are currently unused in this routine, although they will
     be implemented in the future]
- ERRORS
-    H5E_ARGS - H5E_BADVALUE     - Argument checking
-    H5E_FILE - H5E_FILEOPEN     - File already open
-             - H5E_FILEEXISTS   - File exists and no overwrite permission is given
-             - H5E_CANTCREATE   - Can't create new file
-    H5E_RESOURCE - H5E_NOSPACE  - Can't allocate space
-    H5E_ATOM - H5E_BADATOM      - Can't get the object for an atom
-             - H5E_CANTREGISTER - Can't register the new file atom
-    H5E_IO   - H5E_SEEKERROR    - Can't seek to correct offset for boot-block
-             - H5E_WRITEERROR   - Can't write data to file
+
  MODIFICATIONS:
     Robb Matzke, 18 Jul 1997
     File struct creation and destruction is through H5F_new() H5F_dest().
@@ -432,14 +484,14 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
-    if(filename==NULL)  /* check for valid filename */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
-    if((flags&~H5ACC_OVERWRITE)!=0)     /* check for valid flags */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
+    if(filename==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid file name*/
+    if((flags&~H5ACC_OVERWRITE)!=0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid flags*/
 
     /* See if this file is already open */
     if(H5Asearch_atom(H5_FILE,H5F_compare_filename,(const VOIDP)filename)!=NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL);
+        HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL); /*file already open*/
 
     /* Check if the file already exists */
     f_handle=H5F_OPEN(filename,0);
@@ -450,18 +502,21 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
         f_handle=H5F_INVALID_FILE;
       } /* end if */
 
-    /* throw an error if the file exists and we aren't allowed to overwrite it */
-    if((flags&H5ACC_OVERWRITE)==0 && file_exists) 
-        HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, FAIL);
+    if((flags&H5ACC_OVERWRITE)==0 && file_exists) {
+       /* File already exists but overwrite permission was not given */
+       HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, FAIL);
+    }
 
     /* OK to create/overwrite the file */
     f_handle=H5F_CREATE(filename);
-    if(H5F_OPENERR(f_handle))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL);
+    if(H5F_OPENERR(f_handle)) {
+       /* Unable to create the file due to low level create failure */
+       HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL);
+    }
 
     /* Create the file node */
     if (NULL==(new_file=H5F_new()))
-       HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+       HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL); /*H5F_new() failed*/
 
     /* Set the non-zero elements of the file structure */
     new_file->dir=HDgetcwd(NULL,0); /* get the directory we just created the file within */
@@ -476,7 +531,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     if(create_temp==0)
         create_temp=H5C_get_default_atom(H5_TEMPLATE);
     if((f_create_parms=H5Aatom_object(create_temp))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't atomize template*/
     HDmemcpy(&new_file->file_create_parms,f_create_parms,sizeof(file_create_temp_t));
 
 #ifdef LATER
@@ -484,7 +539,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     if(access_temp==0)
         access_temp=H5CPget_default_atom(H5_TEMPLATE);
     if((f_access_parms=H5Aatom_object(access_temp))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
     HDmemcpy(&new_file->file_access_parms,f_access_parms,sizeof(file_access_temp_t));
 #endif /* LATER */
 
@@ -495,7 +550,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 
     /* Get an atom for the file */
     if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL); /*can't atomize file*/
 
 done:
   if(ret_value == FAIL)   
@@ -519,15 +574,36 @@ done:
 /*--------------------------------------------------------------------------
  NAME
     H5Fopen
+
  PURPOSE
     Open an existing HDF5 file.
+
  USAGE
     hatom_t H5Fopen(filename, flags, access_temp)
         const char *filename;   IN: Name of the file to create
         uintn flags;            IN: Flags to indicate various options.
         hatom_t access_temp;    IN: File-access template
+
+ ERRORS
+    ARGS      BADRANGE      Invalid file name. 
+    ATOM      BADATOM       Can't atomize template. 
+    ATOM      BADATOM       Can't unatomize template. 
+    ATOM      CANTREGISTER  Can't atomize file. 
+    ATOM      CANTREGISTER  Can't register new_file atom. 
+    FILE      CANTOPEN      File doesn't exist. 
+    FILE      NOTHDF5       Not an HDF5 file. 
+    FILE      NOTHDF5       The file exists but doesn't appear to be an
+                            HDF5 file. 
+    IO        READERROR     Can't decode root symbol table entry. 
+    IO        READERROR     Read boot block failed. 
+    IO        READERROR     Read boot block signature failed. 
+    IO        READERROR     Seek to boot block failed. 
+    IO        SEEKERROR     Seek failed. 
+    RESOURCE  NOSPACE       H5F_new() failed. 
+
  RETURNS
     Returns file ID on success, FAIL on failure
+
  DESCRIPTION
         This is the primary function for accessing existing HDF5 files. The
     flags parameter determines whether writing to an existing file will be allowed
@@ -560,7 +636,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(filename==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);/*invalid file name*/
 
     /* See if this file is already open */
     new_file=H5Asearch_atom(H5_FILE,H5F_compare_filename,(const VOIDP)filename);
@@ -570,8 +646,10 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
       {
         /* Get an atom for the file */
         new_file->ref_count++;  /* increment the reference count for the file */
-        if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+        if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL) {
+	   /* Can't register new_file atom */
+	   HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+	}
         HGOTO_DONE(ret_value);
       } /* end if */
 
@@ -579,17 +657,19 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
      * If the file exists but has different permissions or if it's a new file,
      * start a new file handle for it, etc.
      */
-    if(H5Fis_hdf5(filename)==BFALSE)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
+    if(H5Fis_hdf5(filename)==BFALSE) {
+       /* The file exists but doesn't appear to be an HDF5 file */
+       HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
+    }
 
     /* Check if the file already exists */
     f_handle=H5F_OPEN(filename,flags);
     if(H5F_OPENERR(f_handle))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPEN, FAIL);
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPEN, FAIL);/*file doesn't exist*/
 
     /* Create the file node */
     if (NULL==(new_file=H5F_new()))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);/*H5F_new() failed*/
 
     /* Set the non-zero elements of the file structure */
     new_file->dir=HDgetcwd(NULL,0); /* get the directory we just created the file within */
@@ -599,14 +679,14 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     new_file->ref_count=1;              /* only 1 fid handed out so far */
     create_temp=H5C_get_default_atom(H5_TEMPLATE);
     if((f_create_parms=H5Aatom_object(create_temp))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize template*/
     HDmemcpy(&new_file->file_create_parms,f_create_parms,sizeof(file_create_temp_t));
 
 #ifdef LATER
     if(access_temp<=0)
         access_temp=H5CPget_default_atom(H5_TEMPLATE);
     if((f_access_parms=H5Aatom_object(access_temp))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't atomize template*/
     HDmemcpy(&new_file->file_access_parms,f_access_parms,sizeof(file_access_temp_t));
 #endif /* LATER */
 
@@ -615,16 +695,20 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     /* Seek to the correct offset to read in the file signature & boot-block */
     /* Get the length of the file */
     if(H5F_SEEKEND(new_file->file_handle)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);/*seek failed*/
     file_len=H5F_TELL(new_file->file_handle);
 
     /* Check the offsets where the file signature is possible */
     while(curr_off<file_len)
       {
-        if(H5F_SEEK(new_file->file_handle,curr_off)==FAIL)
+	if(H5F_SEEK(new_file->file_handle,curr_off)==FAIL) {
+	    /*seek to boot block failed*/
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(H5F_READ(new_file->file_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL)
+	}
+        if(H5F_READ(new_file->file_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL) {
+	    /*read boot block signature failed*/
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
+	}
         if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0)
           {
             new_file->file_create_parms.userblock_size=curr_off;
@@ -636,11 +720,11 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
             curr_off*=2;
       } /* end while */
     if(curr_off>file_len)   /* Why didn't H5Fis_hdf5 catch this? */
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL); /*not an HDF5 file*/
     
     /* Read in the fixed-size part of the boot-block */
     if(H5F_READ(new_file->file_handle,temp_buf,16)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL); /*read boot block failed*/
 
     /* Decode fixed-size part of the boot block */
     p=temp_buf;
@@ -662,7 +746,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
 		    H5F_SIZEOF_SIZE(new_file) +		/*logical size of HDF5 file*/
 		    H5G_SIZEOF_ENTRY(new_file);		/*root symbol table entry*/
     if (H5F_READ(new_file->file_handle, temp_buf, variable_size)<0)
-       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
+       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read boot block failed*/
 
     /* Decode the variable-size part of the boot block */
     p = temp_buf;
@@ -672,16 +756,13 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
 
     /* Decode the root symbol table entry */
     if (H5G_decode (new_file, &p, new_file->root_sym)<0) {
+       /*can't decode root symbol table entry */
        HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
     }
-    /* Set the initial type of the root symbol-entry */
-#ifdef QUINCEY
-    new_file->root_type= (new_file->root_sym->header>=0) ? H5F_ROOT_UNKNOWN : H5F_NONE;
-#endif
 
     /* Get an atom for the file */
     if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);/*can't atomize file*/
 
 done:
   if(ret_value == FAIL)   
@@ -703,15 +784,24 @@ done:
 /*--------------------------------------------------------------------------
  NAME
     H5Fflush
+
  PURPOSE
     Flush all cached data to disk and optionally invalidates all cached
     data.
+
  USAGE
     herr_t H5Fclose(fid, invalidate)
         hatom_t fid;      	IN: File ID of file to close.
         hbool_t invalidate;	IN: Invalidate all of the cache?
+
+ ERRORS
+    ARGS      BADTYPE       Not a file atom. 
+    ATOM      BADATOM       Can't get file struct. 
+    CACHE     CANTFLUSH     Flush failed. 
+
  RETURNS
     SUCCEED/FAIL
+
  DESCRIPTION
         This function flushes all cached data to disk and, if INVALIDATE
     is non-zero, removes cached objects from the cache so they must be
@@ -750,6 +840,10 @@ H5Fflush (hatom_t fid, hbool_t invalidate)
  * Purpose:	Flushes (and optionally invalidates) cached data plus the
  *		file boot block.  If the logical file size field is zero
  *		then it is updated to be the length of the boot block.
+ *
+ * Errors:
+ *		CACHE     CANTFLUSH     Can't flush cache. 
+ *		IO        WRITEERROR    Can't write header. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -812,13 +906,22 @@ H5F_flush (hdf5_file_t *f, hbool_t invalidate)
 /*--------------------------------------------------------------------------
  NAME
     H5Fclose
+
  PURPOSE
     Close an open HDF5 file.
+
  USAGE
     int32 H5Fclose(fid)
         int32 fid;      IN: File ID of file to close
+
+ ERRORS
+    ARGS      BADTYPE       Not a file atom. 
+    ATOM      BADATOM       Can't remove atom. 
+    ATOM      BADATOM       Can't unatomize file. 
+
  RETURNS
     SUCCEED/FAIL
+
  DESCRIPTION
         This function terminates access to an HDF5 file.  If this is the last
     file ID open for a file and if access IDs are still in use, this function
@@ -842,11 +945,11 @@ herr_t H5Fclose(hatom_t fid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(H5Aatom_group(fid)!=H5_FILE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
 
     /* Get the file handle to close */
     if((file=H5Aatom_object(fid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
 
     /* Decrement the ref. count and recycle the file structure */
     if((--file->ref_count)==0)
@@ -857,7 +960,7 @@ herr_t H5Fclose(hatom_t fid)
         }
         H5F_dest (file);
         if(H5Aremove_atom(fid)==NULL) {
-           HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+           HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't remove atom*/
         }
       } /* end if */
 
@@ -877,6 +980,10 @@ done:
  *
  * Purpose:	Reads some data from a file/server/etc into a buffer.
  *		The data is contiguous.
+ *
+ * Errors:
+ *		IO        READERROR     Low-level read failure. 
+ *		IO        SEEKERROR     Low-level seek failure. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -899,9 +1006,11 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
    addr += f->file_create_parms.userblock_size;
    
    if (H5F_SEEK (f->file_handle, addr)<0) {
+      /* low-level seek failure */
       HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
    }
    if (H5F_READ (f->file_handle, buf, size)<0) {
+      /* low-level read failure */
       HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
    }
 
@@ -914,6 +1023,10 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
  *
  * Purpose:	Writes some data from memory to a file/server/etc.  The
  *		data is contiguous.
+ *
+ * Errors:
+ *		IO        SEEKERROR     Low-level seek failure. 
+ *		IO        WRITEERROR    Low-level write failure. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -936,9 +1049,11 @@ H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
    addr += f->file_create_parms.userblock_size;
 
    if (H5F_SEEK (f->file_handle, addr)<0) {
+      /* low-level seek failure */
       HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
    }
    if (H5F_WRITE (f->file_handle, buf, size)<0) {
+      /* low-level write failure */
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
    }
 
@@ -952,6 +1067,8 @@ H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
  * Purpose:	Prints a file header to the specified stream.  Each line
  *		is indented and the field name occupies the specified width
  *		number of characters.
+ *
+ * Errors:
  *
  * Return:	Success:	SUCCEED
  *

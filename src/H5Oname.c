@@ -72,6 +72,7 @@ static void *
 H5O_name_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_name_t	*mesg;
+   char		*s;
 
    FUNC_ENTER (H5O_name_decode, NULL, NULL);
 
@@ -81,8 +82,9 @@ H5O_name_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
 
    /* decode */
    mesg = H5MM_xcalloc (1, sizeof(H5O_name_t));
-   mesg->s = H5MM_xmalloc (raw_size);
-   HDmemcpy (mesg->s, p, raw_size);
+   s = H5MM_xmalloc (raw_size);
+   HDmemcpy (s, p, raw_size);
+   mesg->s = s;
 
    FUNC_LEAVE (mesg);
 }
@@ -119,7 +121,7 @@ H5O_name_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    assert (mesg && mesg->s);
 
    /* message size */
-   size = strlen (mesg->s)+1;
+   size = HDstrlen (mesg->s)+1;
    assert (size<=raw_size);
 
    /* encode */

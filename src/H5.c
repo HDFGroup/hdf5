@@ -74,7 +74,7 @@ herr_t H5_init_library(void)
 
     /* Install atexit() library cleanup routine */
     if(install_atexit_g==TRUE)
-        if (atexit(&H5_term_library) != 0)
+        if (HDatexit(&H5_term_library) != 0)
           HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
 
     FUNC_LEAVE (SUCCEED);
