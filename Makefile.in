@@ -23,7 +23,9 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=src test tools @PABLO@ @TESTPARALLEL@ @subdirs@
+# TESTPARALLEL must be after test since it uses libtest.a.  Putting it
+# before tools allows parallel tests to run sooner.
+SUBDIRS=src test @TESTPARALLEL@ tools @PABLO@ @subdirs@
 
 ##############################################################################
 ##		    T A R G E T S
