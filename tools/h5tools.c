@@ -1534,8 +1534,8 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	    return -1;
 
 	/* Print the data */
-	flags = (((elmtno == 0) ? START_OF_DATA : 0) |
-		 (((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0));
+	flags = (elmtno == 0) ? START_OF_DATA : 0;
+	flags |= ((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0;
 	h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
                            p_type, sm_buf);
 
@@ -2035,6 +2035,10 @@ recheck:
 
     /* Create a simple memory space so that we can read in the hvl_t object */
     mem_space = H5Screate_simple(0, NULL, NULL);
+
+    /* Fake dims[0] for ndim==0, FIX! */
+    if(ndims==0)
+        dims[0]=1;
 
     for (i = 0; i < dims[0]; i++) {
         herr_t ret;
