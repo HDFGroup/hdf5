@@ -6162,4 +6162,261 @@
             if(flag .eq. 0) relax = .FALSE. 
             if(present(maxlen_out)) maxlen_out = c_maxlen_out
           END SUBROUTINE h5pget_fapl_multi_f
+!----------------------------------------------------------------------
+! Name:		h5pset_szip_f 
+!
+! Purpose: 	Sets up use of szip compression
+!
+! Inputs:  
+!		prp_id		- dataset creation property list identifier
+!               options_mask
+!               pixels_per_block - szip parameters
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		April 10 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_szip_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
+                                                 ! list identifier 
+            INTEGER, INTENT(IN) :: options_mask
+            INTEGER, INTENT(IN) :: pixels_per_block
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pset_szip_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_szip_c(prp_id, options_mask, pixels_per_block) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SZIP_C'::h5pset_szip_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+              INTEGER, INTENT(IN) :: options_mask
+              INTEGER, INTENT(IN) :: pixels_per_block
+              END FUNCTION h5pset_szip_c
+            END INTERFACE
+            hdferr = h5pset_szip_c(prp_id, options_mask, pixels_per_block) 
+
+          END SUBROUTINE h5pset_szip_f
+
+!----------------------------------------------------------------------
+! Name:		h5pall_filters_avail_f 
+!
+! Purpose: 	Checks if all filters set in the dataset creation
+!               property list are available
+!
+! Inputs:  
+!		prp_id		- data creation property list identifier
+! Outputs:  
+!               flag            - .TRUE. if all filters are available
+!                                 .FALSE. otherwise
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		April 10 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pall_filters_avail_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
+                                                 ! list identifier 
+            LOGICAL, INTENT(OUT) :: flag
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+            INTEGER :: status
+
+!            INTEGER, EXTERNAL :: h5pall_filters_avail_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pall_filters_avail_c(prp_id, status) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PALL_FILTERS_AVAIL_C'::h5ppall_filters_avail_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+              INTEGER, INTENT(OUT) :: status
+              END FUNCTION h5pall_filters_avail_c
+            END INTERFACE
+            flag = .TRUE.
+            hdferr = h5pall_filters_avail_c(prp_id, status) 
+            if (status .eq. 0 ) flag = .FALSE.
+
+          END SUBROUTINE h5pall_filters_avail_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_filter_by_id_f 
+!
+! Purpose: 	Returns information about a filter in a pipeline
+!
+! Inputs:  
+!		prp_id		- data creation or transfer property list 
+!				  identifier
+! Outputs:  
+!		filter_id	- filter identifier
+!		flags		- bit vector specifying certain general
+!				  properties of the filter
+!		cd_nelmts	- number of elements in cd_values
+!		cd_values	- auxiliary data for the filter
+!		namelen		- number of characters in the name buffer
+!		name		- buffer to retrieve filter name
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		April 10 2003
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_filter_by_id_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+
+            INTEGER, INTENT(IN) :: filter_id  ! Filter identifier
+            INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts  !Number of elements in cd_values.
+            INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  !Auxiliary data for the filter.
+            INTEGER, INTENT(OUT) :: flags  !Bit vector specifying certain general
+                                          !properties of the filter.
+            INTEGER(SIZE_T), INTENT(IN) :: namelen !Anticipated number of characters in name.
+            CHARACTER(LEN=*), INTENT(OUT) :: name !Name of the filter
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+
+!            INTEGER, EXTERNAL :: h5pget_filter_by_id_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pget_filter_by_id_c(prp_id, filter_id, flags, cd_nelmts,  &
+                                              cd_values, namelen, name)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FILTER_BY_ID_C'::h5pget_filter_by_id_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER, INTENT(IN) :: filter_id 
+              INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values
+              INTEGER, INTENT(OUT) :: flags 
+              INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts
+              INTEGER(SIZE_T), INTENT(IN) :: namelen
+              CHARACTER(LEN=*), INTENT(OUT) :: name
+              END FUNCTION h5pget_filter_by_id_c
+            END INTERFACE
+
+            hdferr = h5pget_filter_by_id_c(prp_id, filter_id, flags, cd_nelmts,  & 
+                                     cd_values, namelen, name)
+          END SUBROUTINE h5pget_filter_by_id_f
+
+!----------------------------------------------------------------------
+! Name:		h5pmodify_filter_f 
+!
+! Purpose: 	Adds a filter to the filter pipeline. 
+!
+! Inputs:  
+!		prp_id		- data creation or transfer property list 
+!				  identifier
+!		filter		- filter to be modified
+!		flags		- bit vector specifying certain general
+!				  properties of the filter
+!		cd_nelmts	- number of elements in cd_values
+!		cd_values	- auxiliary data for the filter
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		April 10 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pmodify_filter_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: filter  !Filter to be modified
+            INTEGER, INTENT(IN) :: flags  !Bit vector specifying certain general
+                                          !properties of the filter.
+            INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts  !Number of elements in cd_values.
+            INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  !Auxiliary data for the filter.
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+!            INTEGER, EXTERNAL :: h5pmodify_filter_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PMODIFY_FILTER_C'::h5pmodify_filter_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id 
+              INTEGER, INTENT(IN) :: filter 
+              INTEGER, INTENT(IN) :: flags 
+              INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts 
+              INTEGER, DIMENSION(*), INTENT(IN) :: cd_values 
+              END FUNCTION h5pmodify_filter_c
+            END INTERFACE
+
+            hdferr = h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values )
+          END SUBROUTINE h5pmodify_filter_f
+
      END MODULE H5P

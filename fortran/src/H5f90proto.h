@@ -713,8 +713,10 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_layout_c         FNAME(H5PSET_LAYOUT_C)
 #   define nh5pget_layout_c         FNAME(H5PGET_LAYOUT_C)
 #   define nh5pset_filter_c         FNAME(H5PSET_FILTER_C)
+#   define nh5pmodify_filter_c         FNAME(H5PMODIFY_FILTER_C)
 #   define nh5pget_nfilters_c         FNAME(H5PGET_NFILTERS_C)
 #   define nh5pget_filter_c         FNAME(H5PGET_FILTER_C)
+#   define nh5pget_filter_by_id_c         FNAME(H5PGET_FILTER_BY_ID_C)
 #   define nh5pset_external_c         FNAME(H5PSET_EXTERNAL_C)
 #   define nh5pget_external_count_c         FNAME(H5PGET_EXTERNAL_COUNT_C)
 #   define nh5pget_external_c         FNAME(H5PGET_EXTERNAL_C)
@@ -771,6 +773,8 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pget_fapl_multi_c          FNAME(H5PGET_FAPL_MULTI_C)
 #   define nh5pset_fapl_multi_c          FNAME(H5PSET_FAPL_MULTI_C)
 #   define nh5pset_fapl_multi_sc          FNAME(H5PSET_FAPL_MULTI_SC)
+#   define nh5pset_szip_c                 FNAME(H5PSET_SZIP_C)
+#   define nh5pall_filters_avail_c        FNAME(H5PALL_FILTERS_AVAIL_C)
 
 #else
 #   define nh5pcreate_c       FNAME(h5pcreate_c)
@@ -816,8 +820,10 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_layout_c         FNAME(h5pset_layout_c)
 #   define nh5pget_layout_c         FNAME(h5pget_layout_c)
 #   define nh5pset_filter_c         FNAME(h5pset_filter_c)
+#   define nh5pmodify_filter_c         FNAME(h5pmodify_filter_c)
 #   define nh5pget_nfilters_c         FNAME(h5pget_nfilters_c)
 #   define nh5pget_filter_c         FNAME(h5pget_filter_c)
+#   define nh5pget_filter_by_id_c         FNAME(h5pget_filter_by_id_c)
 #   define nh5pset_external_c         FNAME(h5pset_external_c)
 #   define nh5pget_external_count_c         FNAME(h5pget_external_count_c)
 #   define nh5pget_external_c         FNAME(h5pget_external_c)
@@ -874,6 +880,8 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pget_fapl_multi_c          FNAME(h5pget_fapl_multi_c)
 #   define nh5pset_fapl_multi_c          FNAME(h5pset_fapl_multi_c)
 #   define nh5pset_fapl_multi_sc          FNAME(h5pset_fapl_multi_sc)
+#   define nh5pset_szip_c                 FNAME(h5pset_szip_c)
+#   define nh5pall_filters_avail_c        FNAME(h5pall_filters_avail_c)
 
 
 #endif
@@ -971,9 +979,13 @@ nh5pget_layout_c (hid_t_f *prp_id, int_f* layout);
 H5_DLL int_f
 nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values );
 H5_DLL int_f
+nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values );
+H5_DLL int_f
 nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters);
 H5_DLL int_f
 nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id);
+H5_DLL int_f 
+nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name);
 H5_DLL int_f
 nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, hsize_t_f*bytes);
 H5_DLL int_f
@@ -1062,6 +1074,8 @@ H5_DLL int_f nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset);
 H5_DLL int_f nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *mem_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag, int_f *maxlen_out);
 H5_DLL int_f nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *mem_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag);
 H5_DLL int_f nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag);
+H5_DLL int_f nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block);
+H5_DLL int_f nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status); 
 
 /*
  * Functions frome H5Rf.c 
@@ -1186,7 +1200,7 @@ H5_DLL int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_fla
                               int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
                               int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                               int_f *h5t_flags, int_f *h5z_flags); 
-/*H5_DLL int_f nh5init1_flags_c(haddr_t_f *h5lib_flags); */
+H5_DLL int_f nh5init1_flags_c(int_f *h5lib_flags); 
 
 H5_DLL int_f nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
 

@@ -34,7 +34,7 @@
 
         IMPLICIT NONE
         INTEGER, INTENT(OUT) :: error
-        INTEGER :: error_0, error_1, error_2
+        INTEGER :: error_0, error_1, error_2, error_3
 !        INTEGER, EXTERNAL :: h5init_types_c
 !        INTEGER, EXTERNAL :: h5init_flags_c
 !        INTEGER, EXTERNAL :: h5init1_flags_c
@@ -90,15 +90,15 @@
           !DEC$ ENDIF
           END FUNCTION h5init_flags_c
         END INTERFACE
-!        INTERFACE
-!          INTEGER FUNCTION h5init1_flags_c( i_H5LIB_flags )
-!          USE H5GLOBAL
-!          INTEGER(HADDR_T) i_H5LIB_flags(H5LIB_FLAGS_LEN)
-!          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!          !MS$ATTRIBUTES C,reference,alias:'_H5INIT1_FLAGS_C'::h5init1_flags_c
-!          !DEC$ ENDIF
-!          END FUNCTION h5init1_flags_c
-!        END INTERFACE
+        INTERFACE
+          INTEGER FUNCTION h5init1_flags_c( i_H5LIB_flags )
+          USE H5GLOBAL
+          INTEGER i_H5LIB_flags(H5LIB_FLAGS_LEN)
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+          !MS$ATTRIBUTES C,reference,alias:'_H5INIT1_FLAGS_C'::h5init1_flags_c
+          !DEC$ ENDIF
+          END FUNCTION h5init1_flags_c
+        END INTERFACE
         error_0 = h5open_c()
         error_1 = h5init_types_c(predef_types, floating_types, integer_types)
         error_2 = h5init_flags_c(H5D_flags, &
@@ -112,8 +112,8 @@
                                 H5S_flags, &
                                 H5T_flags, &
                                 H5Z_flags)
-!        error_3 = h5init1_flags_c(H5LIB_flags )
-        error = error_0 + error_1 + error_2 
+        error_3 = h5init1_flags_c(H5LIB_flags )
+        error = error_0 + error_1 + error_2 + error_3
       END SUBROUTINE h5open_f
 
 !----------------------------------------------------------------------

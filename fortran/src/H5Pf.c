@@ -1487,17 +1487,18 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      int c_filter_number;
      unsigned int  c_flags;
      size_t c_cd_nelmts, c_namelen;
+     size_t c_cd_nelmts_in;
      H5Z_filter_t c_filter;
      unsigned int * c_cd_values;
      char* c_name;
      int i;
 
-     c_cd_nelmts = (size_t)*cd_nelmts;
+     c_cd_nelmts_in = (size_t)*cd_nelmts;
      c_namelen = (size_t)*namelen;
      c_name = (char*)malloc(sizeof(char)*c_namelen);
      if (!c_name) return ret_value;
 
-     c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts));
+     c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts_in));
      if (!c_cd_values) {HDfree(c_name);
                         return ret_value;
                        }
@@ -1517,7 +1518,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      *flags = (int_f)c_flags;
      HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
  
-     for (i = 0; i < c_cd_nelmts; i++)
+     for (i = 0; i < c_cd_nelmts_in; i++)
           cd_values[i] = (int_f)c_cd_values[i];
     
      ret_value = 0;
@@ -3116,3 +3117,181 @@ HD5packFstring(tmp, _fcdtocp(memb_name), c_lenmax*H5FD_MEM_NTYPES);
   for (i=0; i < H5FD_MEM_NTYPES; i++) free(c_memb_name[i]);
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_szip_c
+ * Purpose:     Call H5Pset_szip to set szip compression
+ * Inputs:      prp_id - dataset creation property list identifier 
+ *              options_mask
+ *              pixels_per_block -szip compression parameters
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              April 8 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  unsigned   c_options_mask;
+  unsigned  c_pixels_per_block;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_options_mask = (unsigned)*options_mask;
+  c_pixels_per_block = (unsigned)*pixels_per_block;
+/*
+ * Call  H5Pset_szip function
+ */
+
+  status = H5Pset_szip(c_prp_id, c_options_mask, c_pixels_per_block);
+  if ( status < 0  ) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5pall_filters_avail_c
+ * Purpose:     Call H5Pall_filters_avail
+ * Inputs:      prp_id - dataset creation property list identifier 
+ * Outputs:     status - logical flag
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              April 10 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  htri_t c_status;
+  
+
+  c_prp_id = (hid_t)*prp_id;
+/*
+ * Call  H5Pall_filters_avail function
+ */
+
+  c_status = H5Pall_filters_avail(c_prp_id);
+  if ( c_status < 0  ) return ret_value;
+  *status = 0;
+  if (c_status == 1) *status = 1;
+  ret_value = 0;
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_filter_by_id_c
+ * Purpose:     Call H5Pget_filter_by_id to get information about a filter 
+ *              in a pipeline
+ * Inputs:      prp_id - property list identifier
+ *              filter_id - filter id
+ *              namelen - Anticipated number of characters in name.
+ *Outputs:      flags - Bit vector specifying certain general 
+ *                      properties of the filter.
+ *              cd_nelmts - Number of elements in cd_value
+ *              cd_values - Auxiliary data for the filter. 
+ *              name - Name of the filter
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena POurmal
+ *              April 10, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name)
+{
+     int ret_value = -1;
+     hid_t c_prp_id;
+     H5Z_filter_t c_filter_id;
+     unsigned int  c_flags;
+     size_t c_cd_nelmts, c_namelen;
+     size_t c_cd_nelmts_in;
+     unsigned int * c_cd_values;
+     char* c_name;
+     int i;
+     herr_t status;
+     c_cd_nelmts_in = (size_t)*cd_nelmts;
+     c_cd_nelmts = (size_t)*cd_nelmts;
+     c_namelen = (size_t)*namelen;
+     c_name = (char*)malloc(sizeof(char)*c_namelen+1);
+     if (!c_name) return ret_value;
+
+     c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts_in));
+     if (!c_cd_values) {HDfree(c_name);
+                        return ret_value;
+                       }
+                        
+ 
+     /*
+      * Call H5Pget_filter function.
+      */
+     c_prp_id = (hid_t)*prp_id;
+     c_filter_id = (H5Z_filter_t)*filter_id;
+     status = H5Pget_filter_by_id(c_prp_id, c_filter_id, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name);
+     if (status < 0) goto DONE;
+
+     *cd_nelmts = (size_t_f)c_cd_nelmts;
+     *flags = (int_f)c_flags;
+     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+ 
+     for (i = 0; i < c_cd_nelmts_in; i++)
+          cd_values[i] = (int_f)c_cd_values[i];
+    
+     ret_value = 0;
+
+DONE:
+     HDfree(c_name);
+     HDfree(c_cd_values);
+     return ret_value;
+} 
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pmodify_filter_c
+ * Purpose:     Call H5Pmodify_filter to modify a filter
+ * Inputs:      prp_id - property list identifier 
+ *              filter - Filter to be modified
+ *              flags - Bit vector specifying certain general
+ *                      properties of the filter.
+ *              cd_nelmts - Number of elements in cd_values.
+ *              cd_values - Auxiliary data for the filter.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              April 10 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
+{
+     int ret_value = -1;
+     hid_t c_prp_id;
+     herr_t ret;
+     size_t c_cd_nelmts;
+     unsigned int c_flags;
+     H5Z_filter_t c_filter;
+     unsigned int * c_cd_values;
+     int i;
+     
+     c_filter = (H5Z_filter_t)*filter;
+     c_flags = (unsigned)*flags;
+     c_cd_nelmts = (size_t)*cd_nelmts;
+     c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts));
+     if (!c_cd_values) return ret_value;
+     for (i = 0; i < c_cd_nelmts; i++)
+          c_cd_values[i] = (unsigned int)cd_values[i];
+
+     /*
+      * Call H5Pmodify_filter function.
+      */
+     c_prp_id = (hid_t)*prp_id;
+     ret = H5Pmodify_filter(c_prp_id, c_filter, c_flags, c_cd_nelmts,c_cd_values );
+
+     if (ret < 0) goto DONE;
+     ret_value = 0;
+
+DONE:
+     HDfree(c_cd_values);
+     return ret_value;
+}
+
