@@ -967,7 +967,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 		continue;/*filter excluded*/
 	    }
 	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
-		failed |= (unsigned)1 << idx;
 		HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter is not registered");
 	    }
             fclass=&H5Z_table_g[fclass_idx];
@@ -988,15 +987,15 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 
             if(0==new_nbytes) {
                 if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *buf_size, cb_struct.op_data)))
-                    || !cb_struct.func) {                  
-		      failed |= (unsigned)1 << idx;
+                    || !cb_struct.func)
 		      HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
-                } else {
-                    H5E_clear();
-                    *nbytes = *buf_size;
-                }
-            } else 
+
+                *nbytes = *buf_size;
+                failed |= (unsigned)1 << idx;
+                H5E_clear();
+            } else {
                 *nbytes = new_nbytes;
+            }
 	}
     } else if (pline) { /* Write */
 	for (idx=0; idx<pline->nfilters; idx++) {
@@ -1005,13 +1004,14 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 		continue; /*filter excluded*/
 	    }
 	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
+                /* Check if filter is optional -- If it isn't, then error */
+		if ((pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
+		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
+                                "required filter is not registered");
+
 		failed |= (unsigned)1 << idx;
-		if (pline->filter[idx].flags & H5Z_FLAG_OPTIONAL) {
-		    H5E_clear();
-		    continue;
-		} else {
-		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered");
-		}
+                H5E_clear();
+		continue; /*filter excluded*/
 	    }
             fclass=&H5Z_table_g[fclass_idx];
 #ifdef H5Z_DEBUG
@@ -1028,16 +1028,14 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             if(0==new_nbytes) {
                 if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
                     if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *nbytes, cb_struct.op_data)))
-                            || !cb_struct.func) {                  
-                        failed |= (unsigned)1 << idx;
+                            || !cb_struct.func)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
-                    } else {
-                        H5E_clear();
-                        *nbytes = *buf_size;
-                    }
-                } else {
-                    H5E_clear();
+
+                    *nbytes = *buf_size;
                 }
+
+                failed |= (unsigned)1 << idx;
+                H5E_clear();
             } else {
                 *nbytes = new_nbytes;
             }
