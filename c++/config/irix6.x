@@ -20,7 +20,9 @@ if test -z "$cxx_flags_set"; then
 
 # libCio is a default library, since libtool before 1.5 doesn't fully 
 # support C++ yet, default libraries must be explicitly specified.
-    LIBS="$LIBS -lCio"
+# A new macro is used for this temporary and specific task so it 
+# won't polute the existing configuration 
+    DEFAULT_LIBS="-lCio"
 
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
