@@ -88,7 +88,7 @@ static void
 usage (const char *progname)
 {
     fprintf(stderr, "\
-usage: %s [OPTIONS] FILE [OBJECTS...]\n\
+usage: %s [OPTIONS] [OBJECTS...]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
       -a, --address    Print addresses for raw data\n\
@@ -102,14 +102,13 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
       -x, --hexdump    Show raw data in hexadecimal format\n\
-   FILE\n\
-      The file name may include a printf(3C) integer format such as\n\
-      \"%%05d\" to open a file family.\n\
+\n\
    OBJECTS\n\
-      The names of zero or more objects about which information should be\n\
-      displayed.  If a group is mentioned then information about each of its\n\
-      members is displayed.  If no object names are specified then\n\
-      information about all of the objects in the root group is displayed.\n",
+      Each object consists of an HDF5 file name optionally followed by a\n\
+      slash and an object name within the file (if no object is specified\n\
+      within the file then the contents of the root group are dispalyed).\n\
+      The file name may include a printf(3C) integer format such as\n\
+      \"%%05d\" to open a file family.\n",
 	    progname);
 }
 
