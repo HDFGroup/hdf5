@@ -304,10 +304,10 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	     provide a chunking size. currently it is set to h5dim[i].*/
 
 	  if(ncomp == 1) {
-	    chunk_dims[0] = (hsize_t)(h5dims[0]);
-            chunk_dims[1] =(hsize_t)(h5dims[1]);
+	    chunk_dims[0] = h5dims[0];
+            chunk_dims[1] = h5dims[1];
 	  
-	    if(H5Pset_chunk(create_plist, 2, chunk_dims)<0) {
+	    if(H5Pset_chunk(create_plist, 2, (hsize_t *)chunk_dims)<0) {
 	      printf("failed to set up chunking information for ");
 	      printf("property list.\n");
 	      free(image_data);
@@ -342,7 +342,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	      chunk_dims24[1] = edges[0]-start[0];
 	      chunk_dims24[2] = 3;
 	    }
-	    if(H5Pset_chunk(create_plist, 3, chunk_dims24)<0) {
+	    if(H5Pset_chunk(create_plist, 3, (hsize_t *)chunk_dims24)<0) {
 	      printf("failed to set up chunking information for ");
 	      printf("property list.\n");
 	      free(image_data);
