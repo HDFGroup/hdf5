@@ -509,5 +509,6 @@ extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid
 
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
+extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 #endif	/* H5TOOLS_H__ */
