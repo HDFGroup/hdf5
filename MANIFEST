@@ -680,6 +680,7 @@
 ./c++/config/depend3.in
 ./c++/config/depend4.in
 ./c++/config/dependN.in
+./c++/config/freebsd
 ./c++/config/hpux11.00
 ./c++/config/ia64-linux-gnu
 ./c++/config/irix6.x
