@@ -114,7 +114,7 @@ esac
 
 # Host-specific flags
 case "`hostname`" in
-    hawkwind.ncsa.uiuc.edu)
+    sleipnir.ncsa.uiuc.edu)
         ARCH="$ARCH -pipe"
         ;;
 esac
@@ -123,7 +123,7 @@ esac
 case "$cc_vendor-$cc_version" in
     gcc*|egcs*|pgcc*)
 	# General
-	CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wchar-subscripts -Wall -W -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wpointer-arith -Wconversion -Wredundant-decls"
+	CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long"
 
 	# Production
 	PROD_CFLAGS="-O2 $NOFP -finline-functions"
@@ -160,17 +160,7 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
-    gcc-2.95.[3456789])
-        # Start using the C99 Standard's extensions (long long, etc.)
-        # (Not quite yet... -QAK)
-        # General
-        #CFLAGS="$CFLAGS -std=c9x"
-
-	# Flags are set
-	cc_flags_set=yes
-	;;
-
-    gcc-2.95.[12])
+    gcc-2.95.*)
         # No changes from default GCC flags...
 
 	# Flags are set
@@ -178,7 +168,11 @@ case "$cc_vendor-$cc_version" in
 	;;
 
     gcc-3.*)
+        # Replace -ansi flag with -std=c99 flag
 	CFLAGS="`echo $CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+        # Append some extra warning flags that only gcc3+ know about
+	CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
 
 	# Flags are set
 	cc_flags_set=yes
