@@ -1,7 +1,8 @@
 ## HDF5 Library Performance Makefile(.in)
 ##
-## Copyright (C) 2001 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2001, 2002
+##     National Center for Supercomputing Applications.
+##     All rights reserved.
 ##
 top_srcdir=@top_srcdir@
 top_builddir=..
@@ -10,13 +11,15 @@ srcdir=@srcdir@
 
 ## Add include directory to the C preprocessor flags and the hdf5 library
 ## to the library list.
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 LIBH5TEST=../test/libh5test.la
+LIBTOOLS=../tools/lib/libh5tools.la
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-TEST_PROGS_PARA=mpi-perf perf
+##Temporary disable the compiling of pio_perf codes while I fix it.
+TEST_PROGS_PARA=mpi-perf perf pio_perf
 TEST_PROGS=iopipe chunk overhead
 
 ## These are the files that `make clean' (and derivatives) will remove from
@@ -26,13 +29,20 @@ CLEAN=*.h5 *.raw *.dat x-gnuplot
 ## List all source files here.  The list of object files will be
 ## created by replacing the `.c' with a `.o'.  This list is necessary
 ## for building automatic dependencies.
-TEST_SRC_PARA=mpi-perf.c perf.c
-TEST_SRC=iopipe.c chunk.c overhead.c \
-	 $(TEST_SRC_PARA)
+PIO_PERF_SRC=pio_perf.c pio_engine.c pio_timer.c
+PIO_PERF_OBJ=$(PIO_PERF_SRC:.c=.lo)
+
+TEST_SRC_PARA=mpi-perf.c perf.c $(PIO_PERF_SRC)
+
+TEST_SRC=iopipe.c chunk.c overhead.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
+
+pio_perf: $(PIO_PERF_OBJ)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(PIO_PERF_OBJ) $(LIBH5TEST) \
+	$(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 perf: perf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) \
