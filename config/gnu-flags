@@ -131,7 +131,14 @@ case "$cc_vendor-$cc_version" in
 	CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
 
 	# Production
-	PROD_CFLAGS="-O3 $NOFP"
+        case "$cc_vendor-$cc_version" in
+            gcc-2.95.3|gcc-2.95.4|gcc-3*)
+                PROD_CFLAGS="-O3 $NOFP"
+                ;;
+            *)
+                PROD_CFLAGS="-O2 $NOFP -finline-functions"
+                ;;
+        esac
 	PROD_CPPFLAGS=
 
 	# Debug
