@@ -35,6 +35,11 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed VL memory leak when data is overwritten.  The heap objects holding
+      old data are freed.  If the fill value writting time is set to 
+      H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
+      The library free all the heap objects storing VL type if there is nested 
+      VL type(a VL type contains another VL type).  SLU 2002/07/10 
     * Fixed bug in parallel I/O routines where a collective I/O which used
       MPI derived types, followed by an independent I/O would cause the library
       to hang.  QAK 2002/06/24
