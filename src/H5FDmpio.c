@@ -340,7 +340,8 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
     /* Check arguments */
-    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id))
+    if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
+            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO_INDEPENDENT!=xfer_mode &&
             H5FD_MPIO_COLLECTIVE!=xfer_mode)
@@ -383,7 +384,8 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     FUNC_ENTER(H5Pget_dxpl_mpio, FAIL);
     H5TRACE2("e","ix",dxpl_id,xfer_mode);
 
-    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id)) 
+    if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
+            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO!=H5P_get_driver(dxpl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -1082,6 +1084,9 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
@@ -1097,7 +1102,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
+    if (H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {
@@ -1312,7 +1317,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
@@ -1335,6 +1340,9 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off)<0)
@@ -1352,7 +1360,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
+    if (H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {

@@ -162,7 +162,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     OutCount = 0;
     BitOffset = 0;
     
-    DataMask = (WORD)((1L << ((GifHead->PackedField & 0x07) +1)) -1);
+    DataMask = (1L << ((GifHead->PackedField & 0x07) +1)) -1;
     Raster = GifImageDesc->GIFImage;
 
     /* Check for image seperator */

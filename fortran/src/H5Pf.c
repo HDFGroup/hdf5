@@ -50,7 +50,10 @@ nh5pcreate_c ( int_f *classtype, hid_t_f *prp_id )
        return ret_value;
  }
 */
-   c_prp_id = H5Pcreate(c_classtype); 
+   if (H5I_GENPROP_CLS == H5Iget_type((hid_t)*classtype))
+       c_prp_id = H5Pcreate_list((hid_t)*classtype); 
+   else
+       c_prp_id = H5Pcreate(c_classtype); 
 
   if ( c_prp_id  < 0  ) ret_value = -1;
   *prp_id = (hid_t_f)c_prp_id;
@@ -71,10 +74,13 @@ int_f
 nh5pclose_c ( hid_t_f *prp_id )
 {
   int ret_value = 0;
-  hid_t c_prp_id;
+  hid_t c_prp_id=(*prp_id);
 
-  c_prp_id = *prp_id;
-  if ( H5Pclose(c_prp_id) < 0  ) ret_value = -1;
+   if (H5I_GENPROP_LST == H5Iget_type(c_prp_id)) {
+      if ( H5Pclose_list(c_prp_id) < 0  ) ret_value = -1;
+   } else {
+      if ( H5Pclose(c_prp_id) < 0  ) ret_value = -1;
+   }
   return ret_value;
 }
 
@@ -1133,7 +1139,8 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
-     int c_mdc_nelmts, c_rdcc_nelmts; 
+     int c_mdc_nelmts;
+     size_t c_rdcc_nelmts; 
      size_t c_rdcc_nbytes;
      hid_t c_memb_plist;
      double c_rdcc_w0; 
