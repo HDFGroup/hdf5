@@ -760,7 +760,7 @@ H5E_create_msg(hid_t cls_id, H5E_type_t msg_type, const char *msg)
     H5E_msg_t   *msg_ptr;
     
     FUNC_ENTER_NOAPI(H5E_create_msg, FAIL);
-    
+   
     /* Check arguments */
     assert(msg);
 
@@ -991,6 +991,101 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Eset_current_stack
+ *
+ * Purpose:     Replaces current stack with specified stack.	
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eset_current_stack(hid_t err_stack_id)
+{
+    herr_t         ret_value = SUCCEED;   /* Return value */
+    H5E_t_new      *estack;
+    
+    FUNC_ENTER_API(H5Eset_current_stack, FAIL);
+    H5TRACE1("e","i",err_stack_id);
+    
+    /* Need to check for errors */
+    if(err_stack_id == H5E_DEFAULT)
+        goto done; /*HGOTO_DONE(SUCCEED);*/
+    else
+        estack = H5I_object_verify(err_stack_id, H5I_ERROR_STACK);
+
+    /* Add HGOTO_ERROR later */
+    ret_value=H5E_set_current_stack(estack);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_set_current_stack
+ *
+ * Purpose:	Private function to replace an error stack.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_set_current_stack(H5E_t_new *estack)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_t_new	*current_stack = H5E_get_my_stack_new();
+    H5E_error_t_new     *current_error, *new_error;
+    int         i;
+    
+    FUNC_ENTER_NOAPI(H5E_get_current_stack, FAIL);
+
+    /* Empty current error stack */ 
+    for(i=0; i<current_stack->nused; i++) {
+        current_error = &(current_stack->slot[i]);
+        if(current_error->func_name)
+            H5MM_xfree(current_error->func_name);
+        if(current_error->file_name)
+            H5MM_xfree(current_error->file_name);
+        if(current_error->desc)
+            H5MM_xfree(current_error->desc);
+    }
+    HDmemset(current_stack->slot, 0, sizeof(H5E_error_t_new)*current_stack->nused);
+    current_stack->nused = 0;
+
+    /* Copy new stack to current error stack */
+    current_stack->nused = estack->nused; 
+    for(i=0; i<current_stack->nused; i++) {
+        current_error = &(current_stack->slot[i]);
+        new_error = &(estack->slot[i]);
+       
+        /* Should we make copies of these IDs? */ 
+        current_error->cls_id = new_error->cls_id;
+        current_error->maj_id = new_error->maj_id;
+        current_error->min_id = new_error->min_id;
+        current_error->func_name = HDstrdup(new_error->func_name);       
+        current_error->file_name = HDstrdup(new_error->file_name);       
+        current_error->line = new_error->line;
+        current_error->desc = HDstrdup(new_error->desc);       
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Eclose_stack
  *
  * Purpose:	Closes an error stack.
@@ -1072,6 +1167,207 @@ H5E_close_stack(H5E_t_new *err_stack)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eget_num
+ *
+ * Purpose:	Retrieves the number of error message.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Eget_num(hid_t error_stack_id)
+{
+    int       ret_value;   /* Return value */
+    H5E_t_new *estack;
+
+    FUNC_ENTER_API(H5Eget_num, FAIL);
+    H5TRACE1("Is","i",error_stack_id);
+   
+    /* Need to check for errors */
+    if(error_stack_id == H5E_DEFAULT)
+    	estack = H5E_get_my_stack_new();
+    else
+        estack = H5I_object_verify(error_stack_id, H5I_ERROR_STACK);
+
+    /* Add HGOTO_ERROR later */
+    ret_value=H5E_get_num(estack);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_num
+ *
+ * Purpose:	Private function to retrieve number of errors in error stack.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5E_get_num(H5E_t_new *err_stack)
+{
+    int      ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_get_num, FAIL);
+    
+    ret_value = err_stack->nused;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Epush_new
+ *
+ * Purpose:	Pushes a new error record onto error stack for the current
+ *		thread.  The error has major and minor IDs MAJ_ID and
+ *		MIN_ID, the name of a function where the error was detected,
+ *		the name of the file where the error was detected, the
+ *		line within that file, and an error description string.  The
+ *		function name, file name, and error description strings must
+ *		be statically allocated.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 18, 1999
+ *
+ * Notes: 	Basically a public API wrapper around the H5E_push function.
+ *
+ * Modifications:
+ *              Raymond Lu
+ *              Tuesday, July 15, 2003
+
+ *              Added the ID of the error stack to which the error is pushed
+ *              on.  The error message can be appended more message in the
+ *              same control format as printf and fprintf.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Epush_new(hid_t err_stack, const char *file, const char *func, unsigned line, 
+        hid_t maj_id, hid_t min_id, const char *fmt, ...)
+{
+    herr_t	ret_value;
+    H5E_t_new   *estack_ptr;
+    H5E_msg_t   *maj_ptr, *min_ptr;
+    va_list     ap;
+    hid_t       cls_id;
+    char        tmp[128];
+
+    FUNC_ENTER_API(H5Epush_new, FAIL);
+    H5TRACE7("e","issIuiis",err_stack,file,func,line,maj_id,min_id,fmt);
+    
+    /* Need to check for errors */
+    if(err_stack == H5E_DEFAULT)
+    	estack_ptr = H5E_get_my_stack_new();
+    else
+        estack_ptr = H5I_object_verify(err_stack, H5I_ERROR_STACK);
+    
+    maj_ptr = H5I_object_verify(maj_id, H5I_ERROR_MSG);
+    min_ptr = H5I_object_verify(min_id, H5I_ERROR_MSG);
+    /* Error check later */
+    if(maj_ptr->cls != min_ptr->cls)
+        ;
+    cls_id = H5I_register(H5I_ERROR_CLASS, maj_ptr->cls);
+
+    va_start(ap, fmt);
+    vsnprintf(tmp, 128, fmt, ap);
+    va_end(ap);
+
+    /* Should we make copies of maj_idm and min_id? */
+    ret_value = H5E_push_new(estack_ptr, file, func, line, cls_id, maj_id, min_id, tmp);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_push_new
+ *
+ * Purpose:	Pushes a new error record onto error stack for the current
+ *		thread.  The error has major and minor IDs MAJ_ID and
+ *		MIN_ID, the name of a function where the error was detected,
+ *		the name of the file where the error was detected, the
+ *		line within that file, and an error description string.  The
+ *		function name, file name, and error description strings must
+ *		be statically allocated (the FUNC_ENTER() macro takes care of
+ *		the function name and file name automatically, but the
+ *		programmer is responsible for the description string).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, December 12, 1997
+ *
+ * Modifications: 
+ *              Raymond Lu
+ *              Tuesday, July 15, 2003
+ *               
+ *              Added the ID of the error stack to which the error is pushed
+ *              on.  The error message can be appended more message in the
+ *              same control format as printf and fprintf.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_push_new(H5E_t_new *estack, const char *file, const char *func, unsigned line, 
+        hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
+{
+    /*
+     * WARNING: We cannot call HERROR() from within this function or else we
+     *		could enter infinite recursion.  Furthermore, we also cannot
+     *		call any other HDF5 macro or function which might call
+     *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
+     *		be called by FUNC_ENTER().
+     */
+    FUNC_ENTER_NOINIT(H5E_push_new);
+
+    /*
+     * Don't fail if arguments are bad.  Instead, substitute some default
+     * value.
+     */
+    if (!func) func = "Unknown_Function";
+    if (!file) file = "Unknown_File";
+    if (!desc) desc = "No description given";
+
+    /*
+     * Push the error if there's room.  Otherwise just forget it.
+     */
+    assert (estack);
+    if (estack->nused<H5E_NSLOTS) {
+	estack->slot[estack->nused].cls_id = cls_id;
+	estack->slot[estack->nused].maj_id = maj_id;
+	estack->slot[estack->nused].min_id = min_id;
+	estack->slot[estack->nused].func_name = func;
+	estack->slot[estack->nused].file_name = file;
+	estack->slot[estack->nused].line = line;
+	estack->slot[estack->nused].desc = desc;
+	estack->nused++;
+    }
+    
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
 
 #endif /* NEW_ERR */
 

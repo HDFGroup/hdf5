@@ -451,7 +451,12 @@ H5_DLL hid_t  H5Eget_current_stack(void);
 H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class(hid_t class_id, char *name, size_t size);
 H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size);
+H5_DLL int     H5Eget_num(hid_t error_stack_id);
+H5_DLL herr_t  H5Eset_current_stack(hid_t err_stack_id);
+H5_DLL herr_t  H5Epush_new(hid_t err_stack, const char *file, const char *func, unsigned line, 
+                           hid_t maj_id, hid_t min_id, const char *msg, ...);
 
+ 
 #ifdef __cplusplus
 }
 #endif

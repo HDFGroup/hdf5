@@ -32,17 +32,22 @@ const char *FILENAME[] = {
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 hid_t   ERR_CLS;
+
 hid_t   ERR_MAJ_TEST;
+hid_t   ERR_MAJ_IO;
+
 hid_t   ERR_MIN_SUBROUTINE;
-hid_t   ERR_STACK;
+hid_t   ERR_MIN_CREATE;
 
 #define DSET_NAME               "a_dataset"
 
 #define ERR_CLS_NAME            "Error Test"
 #define PROG_NAME               "Error Program"
 #define PROG_VERS               "1.0"
-#define ERR_MAJ_MSG             "Error in test"
-#define ERR_MIN_MSG             "Error in subroutine"
+#define ERR_MAJ_TEST_MSG             "Error in test"
+#define ERR_MAJ_IO_MSG               "Error in IO"
+#define ERR_MIN_SUBROUTINE_MSG       "Error in subroutine"
+#define ERR_MIN_CREATE_MSG           "Error in H5Dcreate"
 
 #define SPACE1_DIM1             4
 #define SPACE1_RANK             1
@@ -76,7 +81,8 @@ test_error(hid_t file)
     int			i, j, n;
     hsize_t		dims[2];
     void                *tmp;
-
+    char                *FUNC_test_error="test_error()";
+    
     TESTING("error API based on atomic datatype");
 
     /* Initialize the dataset */
@@ -94,7 +100,14 @@ test_error(hid_t file)
     /*------------------- Test data values ------------------------*/
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
-			     H5P_DEFAULT))<0) TEST_ERROR;
+			     H5P_DEFAULT))<0) {
+#ifndef NEW_ERR
+        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_CREATE, 
+                "H5Dcreate failed");
+#endif /* NEW_ERR */        
+
+        TEST_ERROR;
+    }
 
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0)
@@ -181,8 +194,8 @@ init_error(void)
 {
     size_t cls_size = strlen(ERR_CLS_NAME)+1;
     char *cls_name = malloc(strlen(ERR_CLS_NAME)+1);
-    size_t msg_size = strlen(ERR_MIN_MSG) + 1;
-    char *msg = malloc(strlen(ERR_MIN_MSG)+1);
+    size_t msg_size = strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    char *msg = malloc(strlen(ERR_MIN_SUBROUTINE_MSG)+1);
     H5E_type_t *msg_type= malloc(sizeof(H5E_type_t));
     
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
@@ -193,16 +206,21 @@ init_error(void)
     if(strcmp(ERR_CLS_NAME, cls_name)) 
         TEST_ERROR;
    
-    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_MSG))<0)
+    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_TEST_MSG))<0)
         TEST_ERROR;
-    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_MSG))<0)
+    if((ERR_MAJ_IO = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_IO_MSG))<0)
+        TEST_ERROR;
+
+    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_SUBROUTINE_MSG))<0)
+        TEST_ERROR;
+    if((ERR_MIN_CREATE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_CREATE_MSG))<0)
         TEST_ERROR;
 
     if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, msg_size) + 1)
         TEST_ERROR;
     if(*msg_type != H5E_MINOR_new)
         TEST_ERROR;
-    if(strcmp(msg, ERR_MIN_MSG))
+    if(strcmp(msg, ERR_MIN_SUBROUTINE_MSG))
         TEST_ERROR;
 
     free(cls_name);
@@ -237,10 +255,23 @@ init_error(void)
 static herr_t 
 error_stack(void)
 {
-    if((ERR_STACK = H5Eget_current_stack())<0)
+    hid_t err_stack;
+    int err_num;
+    
+    if((err_num = H5Eget_num(H5E_DEFAULT))<0)
+        TEST_ERROR;
+    if(err_num)
+        TEST_ERROR;
+    
+    if((err_stack = H5Eget_current_stack())<0)
         TEST_ERROR;
 
-    if(H5Eclose_stack(ERR_STACK)<0)
+    if((err_num = H5Eget_num(err_stack))<0)
+        TEST_ERROR;
+    if(err_num)
+        TEST_ERROR;
+
+    if(H5Eclose_stack(err_stack)<0)
         TEST_ERROR;
     
     PASSED();
@@ -309,8 +340,8 @@ main(void)
 {
     hid_t		file, fapl;
     char		filename[1024];
-    const char          *FUNC="main()";
-    
+    const char          *FUNC_main="main()";
+
     h5_reset();
 #ifndef NEW_ERR 
     if(init_error()<0)
@@ -328,12 +359,13 @@ main(void)
         TEST_ERROR ;
 #endif /* NEW_ERR */
 
-    /*if(test_error(file)<0) {*/
+    if(test_error(file)<0) {
 #ifndef NEW_ERR
-        /*H5Epush(H5E_DEFAULT, __FILE__, FUNC, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "Error test failed");*/
+        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
+                "Error test failed because %s", "it's wrong");
 #endif /* NEW_ERR */        
-    /*    TEST_ERROR ;
-    }*/
+        TEST_ERROR ;
+    }
     
     if (H5Fclose(file)<0) TEST_ERROR ;
     h5_cleanup(FILENAME, fapl);

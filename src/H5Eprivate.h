@@ -290,6 +290,10 @@ H5_DLL hid_t  H5E_get_current_stack(void);
 H5_DLL herr_t H5E_close_stack(H5E_t_new *err_stack);
 H5_DLL ssize_t H5E_get_class(H5E_cls_t *cls, char *name, size_t size);
 H5_DLL ssize_t H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
+H5_DLL int     H5E_get_num(H5E_t_new *err_stack);
+H5_DLL herr_t  H5E_set_current_stack(H5E_t_new *estack);
+H5_DLL herr_t  H5E_push_new(H5E_t_new *estack, const char *file, const char *func, unsigned line, 
+                            hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
 
 #endif /* NEW_ERR */
 
