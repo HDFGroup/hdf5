@@ -414,15 +414,19 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 static char *
 H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t size)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
-    int	cmp=(-1);		/*comparison result		*/
-    char *ret_value;            /* Return value */
+    int	cmp=(-1);		        /*comparison result		*/
+    H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
+    char *ret_value;                    /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL)
 
@@ -436,15 +440,19 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
     if (dt->shared->u.enumer.nmembs == 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "datatype has no members")
 
-    /* Do a binary search over the values to find the correct one */
-    if(H5T_sort_value(dt, NULL)<0)
+    /* Do a binary search over the values to find the correct one.  Do sorting
+     * and search on the copied datatype to protect the original order. */
+    if (NULL==(copied_dt=H5T_copy(dt, H5T_COPY_ALL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy data type");
+    if(H5T_sort_value(copied_dt, NULL)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, NULL, "value sort failed")
+
     lt = 0;
-    rt = dt->shared->u.enumer.nmembs;
+    rt = copied_dt->shared->u.enumer.nmembs;
 
     while (lt<rt) {
 	md = (lt+rt)/2;
-	cmp = HDmemcmp(value, dt->shared->u.enumer.value+md*dt->shared->size, dt->shared->size);
+	cmp = HDmemcmp(value, copied_dt->shared->u.enumer.value+md*copied_dt->shared->size, copied_dt->shared->size);
 	if (cmp<0) {
 	    rt = md;
 	} else if (cmp>0) {
@@ -458,14 +466,17 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "value is currently not defined")
 
     /* Save result name */
-    if (!name && NULL==(name=H5MM_malloc(HDstrlen(dt->shared->u.enumer.name[md])+1)))
+    if (!name && NULL==(name=H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md])+1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    HDstrncpy(name, dt->shared->u.enumer.name[md], size);
-    if (HDstrlen(dt->shared->u.enumer.name[md])>=size)
+    HDstrncpy(name, copied_dt->shared->u.enumer.name[md], size);
+    if (HDstrlen(copied_dt->shared->u.enumer.name[md])>=size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL, "name has been truncated")
 
     /* Set return value */
     ret_value=name;
+
+    if (H5T_close(copied_dt)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close data type");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -488,7 +499,10 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -534,15 +548,19 @@ done:
  *              Monday, January  4, 1999
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              Wednesday, Febuary 9, 2005
+ *              Made a copy of original datatype and do sorting and search
+ *              on that copy, to protect the original order of members.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
 {
     unsigned	lt, md=0, rt;		/*indices for binary search	*/
-    int	cmp=(-1);		/*comparison result		*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    int	cmp=(-1);		        /*comparison result		*/
+    H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_valueof, FAIL)
 
@@ -555,15 +573,19 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     if (dt->shared->u.enumer.nmembs == 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "datatype has no members")
 
-    /* Do a binary search over the names to find the correct one */
-    if(H5T_sort_name(dt, NULL)<0)
+    /* Do a binary search over the names to find the correct one.  Do sorting
+     * and search on the copied datatype to protect the original order. */
+    if (NULL==(copied_dt=H5T_copy(dt, H5T_COPY_ALL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
+    if(H5T_sort_name(copied_dt, NULL)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
+
     lt = 0;
-    rt = dt->shared->u.enumer.nmembs;
+    rt = copied_dt->shared->u.enumer.nmembs;
 
     while (lt<rt) {
 	md = (lt+rt)/2;
-	cmp = HDstrcmp(name, dt->shared->u.enumer.name[md]);
+	cmp = HDstrcmp(name, copied_dt->shared->u.enumer.name[md]);
 	if (cmp<0) {
 	    rt = md;
 	} else if (cmp>0) {
@@ -576,7 +598,10 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     if (cmp!=0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "string doesn't exist in the enumeration type")
 
-    HDmemcpy(value, dt->shared->u.enumer.value+md*dt->shared->size, dt->shared->size);
+    HDmemcpy(value, copied_dt->shared->u.enumer.value+md*copied_dt->shared->size, copied_dt->shared->size);
+
+    if (H5T_close(copied_dt)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close data type");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

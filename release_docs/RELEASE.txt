@@ -201,6 +201,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - H5Tget_member_value calls for enum datatype didn't return correct 
+            value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
+            2005/02/08
         - For variable-length string, H5Tget_class returned H5T_STRING as its
             class.  But H5Tdetect_class and H5Tget_member_class considered it
             as H5T_VLEN.  This is fixed to let all these 3 functions treat it

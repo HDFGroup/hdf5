@@ -3410,7 +3410,7 @@ H5T_free(H5T_t *dt)
 
     /* Close the parent */
     if (dt->shared->parent && H5T_close(dt->shared->parent)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close parent data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type");
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
