@@ -896,9 +896,10 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
 /*-------------------------------------------------------------------------
  * Function:	H5P_find
  *
- * Purpose:	Given source and destination data spaces (SRC and DST) this
+ * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
  *		function locates the data space conversion functions and
- *		initializes CONV to point to them.
+ *		initializes CONV to point to them.  The CONV contains
+ *		function pointers for converting in either direction.
  *
  * Return:	Success:	Pointer to a data space conversion callback
  *				list.
@@ -913,7 +914,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
  *-------------------------------------------------------------------------
  */
 const H5P_conv_t *
-H5P_find (const H5P_t *src, const H5P_t *dst)
+H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
 {
     static H5P_conv_t		_conv;
     static const H5P_conv_t 	*conv = NULL;
@@ -921,16 +922,16 @@ H5P_find (const H5P_t *src, const H5P_t *dst)
     FUNC_ENTER (H5P_find, NULL);
 
     /* Check args */
-    assert (src && H5P_SIMPLE==src->type);
-    assert (dst && H5P_SIMPLE==dst->type);
+    assert (mem_space && H5P_SIMPLE==mem_space->type);
+    assert (file_space && H5P_SIMPLE==file_space->type);
 
     /*
      * We can't do conversion if the source and destination select a
      * different number of data points.
      */
-    if (H5P_get_npoints (src) != H5P_get_npoints (dst)) {
+    if (H5P_get_npoints (mem_space) != H5P_get_npoints (file_space)) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
-		       "src and dest data spaces are different sizes");
+		       "memory and file data spaces are different sizes");
     }
 
     /*

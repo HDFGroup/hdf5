@@ -235,9 +235,9 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
 hid_t
 H5Dopen(hid_t file_id, const char *name)
 {
-    H5F_t		   *file = NULL;	/*file holding the dataset	*/
-    H5D_t		   *dataset = NULL;	/*the dataset			*/
-    hid_t		    ret_value = FAIL;
+    H5F_t	*file = NULL;		/*file holding the dataset	*/
+    H5D_t	*dataset = NULL;	/*the dataset			*/
+    hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Dopen, FAIL);
     H5ECLEAR;
@@ -250,10 +250,12 @@ H5Dopen(hid_t file_id, const char *name)
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
+    
     /* Find the dataset */
     if (NULL == (dataset = H5D_open(file, name))) {
 	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "dataset not found");
     }
+    
     /* Create an atom for the dataset */
     if ((ret_value = H5Aregister_atom(H5_DATASET, dataset)) < 0) {
 	H5D_close(dataset);
@@ -262,7 +264,7 @@ H5Dopen(hid_t file_id, const char *name)
     }
     FUNC_LEAVE(ret_value);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Dclose
  *
@@ -395,14 +397,15 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     if (!buf) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
     }
+
     /* read raw data */
     if (H5D_read(dataset, mem_type, mem_space, file_space, xfer_parms,
-		 buf /*out */ ) < 0) {
+		 buf/*out*/) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     }
     FUNC_LEAVE(SUCCEED);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Dwrite
  *
@@ -484,6 +487,7 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     if (!buf) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
     }
+
     /* write raw data */
     if (H5D_write(dataset, mem_type, mem_space, file_space, xfer_parms,
 		  buf) < 0) {
@@ -491,7 +495,7 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
     FUNC_LEAVE(SUCCEED);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_find_name
  *
@@ -517,7 +521,7 @@ H5D_find_name(hid_t file_id, group_t UNUSED, const char *name)
 {
     return H5Dopen(file_id, name);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_create
  *
@@ -544,7 +548,7 @@ H5D_find_name(hid_t file_id, group_t UNUSED, const char *name)
  *
  *-------------------------------------------------------------------------
  */
-H5D_t		       *
+H5D_t *
 H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	   const H5D_create_t *create_parms)
 {
@@ -582,6 +586,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "can't update type or space header messages");
     }
+
     /* Total raw data size */
     nbytes = H5T_get_size(type) * H5P_get_npoints(space);
     new_dset->layout.type = new_dset->create_parms.layout;
@@ -620,10 +625,12 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to initialize storage");
     }
+
     /* Give the dataset a name */
     if (H5G_insert(name, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
     }
+
     /* Success */
     ret_value = new_dset;
 
@@ -641,7 +648,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
     }
     FUNC_LEAVE(ret_value);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_open
  *
@@ -664,9 +671,9 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 H5D_t		       *
 H5D_open(H5F_t *f, const char *name)
 {
-    H5D_t		   *dataset = NULL;	/*the dataset which was found	*/
-    H5D_t		   *ret_value = NULL;	/*return value			*/
-    intn		    i;
+    H5D_t	*dataset = NULL;	/*the dataset which was found	*/
+    H5D_t	*ret_value = NULL;	/*return value			*/
+    intn	i;
 
     FUNC_ENTER(H5D_open, NULL);
 
@@ -686,10 +693,10 @@ H5D_open(H5F_t *f, const char *name)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
     }
     /* Get the type and space */
-    if (NULL == (dataset->type = H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL)) ||
-	NULL == (dataset->space = H5P_read(f, &(dataset->ent)))) {
+    if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL)) ||
+	NULL==(dataset->space=H5P_read(f, &(dataset->ent)))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		    "can't load type of space info from dataset header");
+		    "unable to load type or space info from dataset header");
     }
     /*
      * Get the raw data layout info.  It's actually stored in two locations:
@@ -697,7 +704,7 @@ H5D_open(H5F_t *f, const char *name)
      * values are copied to the dataset create template so the user can query
      * them.
      */
-    if (H5O_read(&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout)) < 0) {
+    if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to read data layout message");
     }
@@ -741,7 +748,7 @@ H5D_open(H5F_t *f, const char *name)
     }
     FUNC_LEAVE(ret_value);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_close
  *
@@ -774,15 +781,15 @@ H5D_close(H5D_t *dataset)
     /* check args */
     assert(dataset && dataset->ent.file);
 
-    /* Close the dataset object */
-    H5O_close(&(dataset->ent));
-
     /*
      * Release dataset type and space - there isn't much we can do if one of
      * these fails, so we just continue.
      */
     free_failed = (H5T_close(dataset->type) < 0 ||
 		   H5P_close(dataset->space) < 0);
+
+    /* Close the dataset object */
+    H5O_close(&(dataset->ent));
 
     /*
      * Free memory.  Before freeing the memory set the file pointer to NULL.
@@ -823,13 +830,13 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	 const H5P_t *file_space, const H5D_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
-    size_t		nelmts, src_size, dst_size;
-    herr_t		ret_value = FAIL;
+    size_t		nelmts	;		/*number of elements	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     const H5P_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
     H5P_number_t	numbering;		/*element numbering info*/
+    herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -840,6 +847,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     assert(buf);
     if (!file_space) file_space = dataset->space;
     if (!mem_space) mem_space = file_space;
+    assert (H5P_get_npoints (mem_space)==H5P_get_npoints (file_space));
     
     /*
      * Convert data types to atoms because the conversion functions are
@@ -852,16 +860,16 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     }
 
     /*
-     * Locate the type conversion function, data space conversion, and set up
-     * the element numbering information.
+     * Locate the type conversion function and data space conversion
+     * functions, and set up the element numbering information.
      */
     if (NULL == (tconv_func = H5T_find(dataset->type, mem_type))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
-    if (NULL==(sconv_func=H5P_find (file_space, mem_space))) {
+    if (NULL==(sconv_func=H5P_find (mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "unable to convert between src and dest data spaces");
+		     "unable to convert from file to memory data space");
     }
     if (sconv_func->init &&
 	(sconv_func->init)(&(dataset->layout), mem_space, file_space,
@@ -875,15 +883,17 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Compute the size of the request and allocate scratch buffers.
      */
+    nelmts = H5P_get_npoints(mem_space);
 #ifndef LATER
     /*
      * Note: this prototype version allocates a buffer large enough to
      *	     satisfy the entire request; strip mining is not implemented.
      */
-    nelmts = H5P_get_npoints(dataset->space);
-    src_size = nelmts * H5T_get_size(dataset->type);
-    dst_size = nelmts * H5T_get_size(mem_type);
-    tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+    {
+	size_t src_size = nelmts * H5T_get_size(dataset->type);
+	size_t dst_size = nelmts * H5T_get_size(mem_type);
+	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+    }
 #endif
 
     /*
@@ -892,7 +902,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
 			    H5T_get_size (dataset->type), file_space,
 			    &numbering, 0, nelmts,
-			    tconv_buf/*out*/)<0) {
+			    tconv_buf/*out*/)!=nelmts) {
 	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "gather failed");
     }
 
@@ -942,15 +952,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	  const H5P_t *file_space, const H5D_xfer_t *xfer_parms,
 	  const void *buf)
 {
-    size_t	nelmts, src_size, dst_size;
-    size_t	offset[H5O_LAYOUT_NDIMS];
-    size_t	size[H5O_LAYOUT_NDIMS];
-    size_t	zero[H5O_LAYOUT_NDIMS];
-    intn	i;
-    herr_t	ret_value = FAIL;
-    uint8	*tconv_buf = NULL;	/*data type conversion buffer	*/
-    H5T_conv_t	tconv_func = NULL;	/*data type conversion function */
-    hid_t	src_id = -1, dst_id = -1; /*temporary type atoms	*/
+    size_t		nelmts;
+    uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
+    H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
+    hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
+    const H5P_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
+    H5P_number_t	numbering;		/*element numbering info*/
+    herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -959,17 +967,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
-
-    if (H5D_CONTIGUOUS != dataset->create_parms.layout) {
-	HRETURN_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		      "layout is not supported yet");
-    }
-    if ((mem_space && H5P_cmp(mem_space, dataset->space)) ||
-	(file_space && H5P_cmp(file_space, dataset->space))) {
-	HRETURN_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		      "space conversion not supported yet");
-    }
-    assert (!mem_space || H5P_SIMPLE==mem_space->type);
+    if (!file_space) file_space = dataset->space;
+    if (!mem_space) mem_space = file_space;
+    assert (H5P_get_npoints (mem_space)==H5P_get_npoints (file_space));
 
     /*
      * Convert data types to atoms because the conversion functions are
@@ -982,31 +982,50 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     }
     
     /*
-     * Compute the size of the request and allocate scratch buffers.
-     */
-#ifndef LATER
-    /*
-     * Note: This prototype version allocates a buffer large enough to
-     *	     satisfy the entire request; strip mining is not implemented.
-     */
-    nelmts = H5P_get_npoints(dataset->space);
-    src_size = nelmts * H5T_get_size(mem_type);
-    dst_size = nelmts * H5T_get_size(dataset->type);
-    tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
-#endif
-
-    /*
-     * Locate the type conversion function.
+     * Locate the type conversion function and data space conversion
+     * functions, and set up the element numbering information.
      */
     if (NULL == (tconv_func = H5T_find(mem_type, dataset->type))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
+    if (NULL==(sconv_func=H5P_find (mem_space, file_space))) {
+	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "unable to convert from memory to file data space");
+    }
+    if (sconv_func->init &&
+	(sconv_func->init)(&(dataset->layout), mem_space, file_space,
+			   &numbering/*out*/)<=0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize element numbering information");
+    } else {
+	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    
+    /*
+     * Compute the size of the request and allocate scratch buffers.
+     */
+    nelmts = H5P_get_npoints(dataset->space);
+#ifndef LATER
+    /*
+     * Note: This prototype version allocates a buffer large enough to
+     *	     satisfy the entire request; strip mining is not implemented.
+     */
+    {
+	size_t src_size = nelmts * H5T_get_size(mem_type);
+	size_t dst_size = nelmts * H5T_get_size(dataset->type);
+	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+    }
+#endif
+
 
     /*
      * Gather data into the data type conversion buffer.
      */
-    HDmemcpy(tconv_buf, buf, src_size);
+    if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
+			    &numbering, 0, nelmts, tconv_buf/*out*/)!=nelmts) {
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "gather failed");
+    }
 
     /*
      * Perform data type conversion.
@@ -1019,23 +1038,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Scatter the data out to the file.
      */
-#ifndef LATER
-    /*
-     * Note:  We only support complete writes currently. That si, the
-     *	      hyperslab must begin at zero in memory and on disk and the size
-     *	      of the hyperslab must be the same as the array on disk.
-     */
-    for (i = 0; i < dataset->layout.ndims; i++) {
-	zero[i] = 0;
-	offset[i] = 0;
-    }
-    i = H5P_get_dims (dataset->space, size);
-    assert (i+1==dataset->layout.ndims);
-    size[i] = H5T_get_size (dataset->type);
-#endif
-    if (H5F_arr_write(dataset->ent.file, &(dataset->layout), size, offset,
-		      zero, size, tconv_buf) < 0) {
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
+    if ((sconv_func->fscat)(dataset->ent.file, &(dataset->layout),
+			    H5T_get_size (dataset->type), file_space,
+			    &numbering, 0, nelmts, tconv_buf)<0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
     }
     ret_value = SUCCEED;
     

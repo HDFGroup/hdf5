@@ -72,10 +72,15 @@ typedef struct H5P_tconv_t {
 		    intn start, intn nelmts, void *buf/*out*/);
 
     /* Gather elements from app buffer to type conversion buffer */
-    size_t (*mgath)(void /*fill out later*/);
+    size_t (*mgath)(const void *buf, size_t elmt_size,
+		    const H5P_t *mem_space, const H5P_number_t *numbering,
+		    intn start, intn nelmts, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
-    herr_t (*fscat)(void /*fill out later*/);
+    herr_t (*fscat)(H5F_t *f, const struct H5O_layout_t *layout,
+		    size_t elmt_size, const H5P_t *file_space,
+		    const H5P_number_t *numbering, intn start, intn nelmts,
+		    const void *tconv_buf);
 } H5P_conv_t;
 
 H5P_t *H5P_copy (const H5P_t *src);
@@ -88,7 +93,7 @@ H5P_t *H5P_read (H5F_t *f, H5G_entry_t *ent);
 intn H5P_cmp (const H5P_t *ds1, const H5P_t *ds2);
 hbool_t H5P_is_simple (const H5P_t *sdim);
 uintn H5P_nelem (const H5P_t *space);
-const H5P_conv_t *H5P_find (const H5P_t *src, const H5P_t *dst);
+const H5P_conv_t *H5P_find (const H5P_t *mem_space, const H5P_t *file_space);
 
 /* Conversion functions for simple data spaces */
 size_t H5P_simp_init (const struct H5O_layout_t *layout,
@@ -101,7 +106,12 @@ size_t H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 herr_t H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 		       const H5P_t *mem_space, const H5P_number_t *numbering,
 		       intn start, intn nelmts, void *buf/*out*/);
-size_t H5P_simp_mgath (void);
-herr_t H5P_simp_fscat (void);
+size_t H5P_simp_mgath (const void *buf, size_t elmt_size,
+		       const H5P_t *mem_space, const H5P_number_t *numbering,
+		       intn start, intn nelmts, void *tconv_buf/*out*/);
+herr_t H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+		       size_t elmt_size, const H5P_t *file_space,
+		       const H5P_number_t *numbering, intn start, intn nelmts,
+		       const void *tconv_buf);
 
 #endif

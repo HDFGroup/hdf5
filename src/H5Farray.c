@@ -112,13 +112,13 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  */
 herr_t
 H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
-	      const size_t _hslab_size[], const size_t file_offset[],
-	      const size_t mem_offset[], const size_t mem_size[],
+	      const size_t _hslab_size[], const size_t mem_size[],
+	      const size_t mem_offset[], const size_t file_offset[],
 	      void *_buf/*out*/)
 {
     uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
-    size_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    size_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    intn	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    intn	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/
@@ -247,13 +247,13 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
-	       const size_t _hslab_size[], const size_t file_offset[],
-	       const size_t mem_offset[], const size_t mem_size[],
+	       const size_t _hslab_size[], const size_t mem_size[],
+	       const size_t mem_offset[], const size_t file_offset[],
 	       const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
-    size_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
-    size_t	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
+    intn	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
+    intn	mem_stride[H5O_LAYOUT_NDIMS];	/*strides through memory*/
     size_t	hslab_size[H5O_LAYOUT_NDIMS];	/*hyperslab size	*/
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/

@@ -40,7 +40,7 @@ static hbool_t		interface_initialize_g = TRUE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_optimize1(size_t *np, size_t *elmt_size, size_t *size,
+H5V_stride_optimize1(intn *np, size_t *elmt_size, size_t *size,
 		     intn *stride1)
 {
     FUNC_ENTER(H5V_stride_optimize1, FAIL);
@@ -87,7 +87,7 @@ H5V_stride_optimize1(size_t *np, size_t *elmt_size, size_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_optimize2(size_t *np, size_t *elmt_size, size_t *size,
+H5V_stride_optimize2(intn *np, size_t *elmt_size, size_t *size,
 		     intn *stride1, intn *stride2)
 {
     FUNC_ENTER(H5V_stride_optimize2, FAIL);
@@ -143,7 +143,7 @@ H5V_stride_optimize2(size_t *np, size_t *elmt_size, size_t *size,
  *-------------------------------------------------------------------------
  */
 size_t
-H5V_hyper_stride(size_t n, const size_t *size,
+H5V_hyper_stride(intn n, const size_t *size,
 		 const size_t *total_size, const size_t *offset,
 		 intn *stride/*out*/)
 {
@@ -196,7 +196,7 @@ H5V_hyper_stride(size_t n, const size_t *size,
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5V_hyper_eq(size_t n,
+H5V_hyper_eq(intn n,
 	     const size_t *offset1, const size_t *size1,
 	     const size_t *offset2, const size_t *size2)
 {
@@ -238,7 +238,7 @@ H5V_hyper_eq(size_t n,
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5V_hyper_disjointp(size_t n,
+H5V_hyper_disjointp(intn n,
 		    const size_t *offset1, const size_t *size1,
 		    const size_t *offset2, const size_t *size2)
 {
@@ -282,7 +282,7 @@ H5V_hyper_disjointp(size_t n,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_fill(size_t n, const size_t *_size,
+H5V_hyper_fill(intn n, const size_t *_size,
 	       const size_t *total_size, const size_t *offset, void *_dst,
 	       uint8 fill_value)
 {
@@ -358,7 +358,7 @@ H5V_hyper_fill(size_t n, const size_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_hyper_copy(size_t n, const size_t *_size,
+H5V_hyper_copy(intn n, const size_t *_size,
 
 	       /*destination*/
 	       const size_t *dst_size, const size_t *dst_offset,
@@ -433,7 +433,7 @@ H5V_hyper_copy(size_t n, const size_t *_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_fill(size_t n, size_t elmt_size, const size_t *size,
+H5V_stride_fill(intn n, size_t elmt_size, const size_t *size,
 		const intn *stride, void *_dst, uint8 fill_value)
 {
     uint8	*dst = (uint8 *) _dst; 	/*cast for ptr arithmetic	*/
@@ -489,7 +489,7 @@ H5V_stride_fill(size_t n, size_t elmt_size, const size_t *size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_stride_copy(size_t n, size_t elmt_size, const size_t *size,
+H5V_stride_copy(intn n, size_t elmt_size, const size_t *size,
 		const intn *dst_stride, void *_dst,
 		const intn *src_stride, const void *_src)
 {
@@ -545,11 +545,11 @@ herr_t
 H5V_stride_copy2(size_t nelmts, size_t elmt_size,
 
 		 /* destination */
-		 size_t dst_n, const size_t *dst_size, const intn *dst_stride,
+		 intn dst_n, const size_t *dst_size, const intn *dst_stride,
 		 void *_dst,
 
 		 /* source */
-		 size_t src_n, const size_t *src_size, const intn *src_stride,
+		 intn src_n, const size_t *src_size, const intn *src_stride,
 		 const void *_src)
 {
     uint8	*dst = (uint8 *) _dst;

@@ -408,12 +408,12 @@ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 /* Functions that operate on array storage */
 herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out */ );
 herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
-		     const size_t _hslab_size[], const size_t file_offset[],
-		     const size_t mem_offset[], const size_t mem_size[],
+		     const size_t _hslab_size[], const size_t mem_size[],
+		     const size_t mem_offset[], const size_t file_offset[],
 		     void *_buf/*out*/);
 herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
-		      const size_t _hslab_size[], const size_t file_offset[],
-		      const size_t mem_offset[], const size_t mem_size[],
+		      const size_t _hslab_size[], const size_t mem_size[],
+		      const size_t mem_offset[], const size_t file_offset[],
 		      const void *_buf);
 
 /* Functions that operate on indexed storage */

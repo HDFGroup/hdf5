@@ -124,7 +124,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, layout, size, offset, offset, size, buf/*out*/)<0) {
+    if (H5F_arr_read (f, layout, size, size, offset, offset, buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -175,7 +175,8 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 
     /*
      * Quincey, this is where we look at the hyperslab spec of MEM_SPACE to
-     * figure out how to scatter.  For now we just assume that data points
+     * figure out how to scatter.  You'll probably end up calling
+     * H5V_hyper_copy(), but for now we just assume that data points
      * are copied directly from TCONV_BUF to BUF.
      */
     HDmemcpy (buf, tconv_buf, nelmts*elmt_size);
@@ -186,9 +187,14 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 /*-------------------------------------------------------------------------
  * Function:	H5P_simp_mgath
  *
- * Purpose:	Gathers dataset elements from application memory and copies
- *		them into the data type conversion buffer.  NOT IMPLEMENTED
- *		YET.
+ * Purpose:	Gathers dataset elements from application memory BUF and
+ *		copies them into the data type conversion buffer TCONV_BUF.
+ *		Each element is ELMT_SIZE bytes and arranged in application
+ *		memory according to MEM_SPACE.  The elements selected from
+ *		BUF by MEM_SPACE are numbered according to NUMBERING and the
+ *		caller is requesting that at most NELMTS be gathered
+ *		beginning with number START.  The elements are packed into
+ *		TCONV_BUF in order of their NUMBERING.
  *
  * Return:	Success:	Number of elements copied.
  *
@@ -202,21 +208,47 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 size_t
-H5P_simp_mgath (void)
+H5P_simp_mgath (const void *buf, size_t elmt_size,
+		const H5P_t *mem_space, const H5P_number_t *numbering,
+		intn start, intn nelmts, void *tconv_buf/*out*/)
 {
     FUNC_ENTER (H5P_simp_mgath, 0);
 
-    HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0,
-		   "not implemented yet");
+    /* Check args */
+    assert (buf);
+    assert (elmt_size>0);
+    assert (mem_space && H5P_SIMPLE==mem_space->type);
+    assert (numbering);
+    assert (nelmts>0);
+    assert (tconv_buf);
 
-    FUNC_LEAVE (0);
+    /*
+     * The prototype doesn't support strip mining.
+     */
+    assert (0==start);
+    assert (nelmts==H5P_get_npoints (mem_space));
+
+    /*
+     * Quincey, this is where we look at the hyperslab spec of MEM_SPACE to
+     * figure out how to gather.  You'll probably end up calling
+     * H5V_hyper_copy(), but for now we just assume that data points are
+     * copied directly from BUF to TCONV_BUF.
+     */
+    HDmemcpy (tconv_buf, buf, nelmts*elmt_size);
+
+    FUNC_LEAVE (nelmts);
 }
 
 /*-------------------------------------------------------------------------
  * Function:	H5P_simp_fscat
  *
- * Purpose:	Scatters dataset elements from the type conversion buffer to
- *		the file. NOT IMPLEMENTED YET.
+ * Purpose:	Scatters dataset elements from the type conversion buffer BUF
+ *		to the file F where the data points are arranged according to
+ *		the file data space FILE_SPACE and stored according to
+ *		LAYOUT. Each element is ELMT_SIZE bytes and has a unique
+ *		number according to NUMBERING.  The caller is requesting that
+ *		NELMTS elements are coppied beginning with element number
+ *		START.
  *
  * Return:	Success:	SUCCEED
  *
@@ -230,12 +262,50 @@ H5P_simp_mgath (void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_simp_fscat (void)
+H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+		size_t elmt_size, const H5P_t *file_space,
+		const H5P_number_t *numbering, intn start, intn nelmts,
+		const void *buf)
 {
+    size_t	offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
+    size_t	size[H5O_LAYOUT_NDIMS];		/*size of hyperslab	*/
+    intn	i;				/*counters		*/
+
     FUNC_ENTER (H5P_simp_fscat, FAIL);
 
-    HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-		   "not implemented yet");
+    /* Check args */
+    assert (f);
+    assert (layout);
+    assert (elmt_size>0);
+    assert (file_space);
+    assert (numbering);
+    assert (nelmts>0);
+    assert (buf);
 
-    FUNC_LEAVE (FAIL);
+    /*
+     * The prototype doesn't support strip mining.
+     */
+    assert (0==start);
+    assert (nelmts==H5P_get_npoints (file_space));
+    
+    /*
+     * Quincey, this is where we look at FILE_SPACE to decide what the
+     * hyperslab is to read from disk.  For now, since the H5P interface
+     * doesn't support hyperslabs, we'll assume the caller is asking for the
+     * entire array.  --RPM
+     */
+    assert (nelmts == H5P_get_npoints (file_space));
+    for (i=0; i<layout->ndims; i++) offset[i] = 0;
+    i = H5P_get_dims (file_space, size);
+    assert (i+1 == layout->ndims);
+    size[i] = elmt_size;
+
+    /*
+     * Scatter to file.
+     */
+    if (H5F_arr_write (f, layout, size, size, offset, offset, buf/*out*/)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }
