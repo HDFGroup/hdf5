@@ -67,9 +67,17 @@ coll_chunk3(){
 
 }
 
+
+void
+coll_chunk4(){
+
+  char *filename;
+  filename = (char *) GetTestParameters();
+  coll_chunktest(filename,4,BYROW_DISCONT);
+
+}
 void
 coll_chunktest(char* filename,int chunk_factor,int select_factor) {
-
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
@@ -80,9 +88,9 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
   herr_t   status;
   hssize_t start[RANK];
   hsize_t  count[RANK],stride[RANK],block[RANK];
+  int      prop_value;
 
   /*  char * filename;*/
-
   int mpi_size,mpi_rank;
 
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -166,22 +174,37 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
+    prop_value = 1;
+    status = H5Pinsert(xfer_plist,PROP_NAME,sizeof(int),&prop_value,
+                       NULL,NULL,NULL,NULL,NULL);
+    VRFY((status >= 0),"testing property list inserted succeeded");
 
     /* write data collectively */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
 	    xfer_plist, data_array1);
     VRFY((status >= 0),"dataset write succeeded");
 
+    status = H5Pget(xfer_plist,PROP_NAME,&prop_value);
+    VRFY((status >= 0),"testing property list get succeeded");
+    if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
+      if(prop_value == 1) 
+        printf("H5Dwrite shouldn't use MPI Collective IO call, something is wrong \n");
+    }
+    else {
+       if(prop_value == 0) 
+        printf("H5Dwrite doesn't use MPI Collective IO call, something is wrong \n");
+    }
     status = H5Dclose(dataset);
      VRFY((status >= 0),""); 
 
     /* check whether using collective IO */
     /* Should use H5Pget and H5Pinsert to handle this test. */
 
-/*    status = H5Pclose(xfer_plist);
-    VRFY((status >= 0),""); 
+    status = H5Premove(xfer_plist,PROP_NAME);
+    VRFY((status >= 0),"property list removed");
+    status = H5Pclose(xfer_plist);
+    VRFY((status >= 0),"property list closed"); 
 
-*/
     status = H5Sclose(file_dataspace);
     VRFY((status >= 0),""); 
 
@@ -228,31 +251,41 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 
     /* fill dataset with test data */
     ccdataset_fill(start, stride,count,block, data_origin1);
-    /* read data collectively */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);              
+    VRFY((xfer_plist >= 0),"");          
+    status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((status>= 0),"MPIO collective transfer property succeeded");
+    prop_value = 1;
+    status = H5Pinsert(xfer_plist,PROP_NAME,sizeof(int),&prop_value,
+                       NULL,NULL,NULL,NULL,NULL);
+    VRFY((status >= 0),"testing property list inserted succeeded");
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
-	    xfer_plist, data_array1);
-    VRFY((status >= 0), "");
-/*    printf("mpi rank %d\n",mpi_rank); 
-   if(mpi_rank == 2) {
-    for (i = 0; i < SPACE_DIM1; i++) {
-	for (j = 0; j < SPACE_DIM2;j++) {
-	  printf("i, j, data, %d, %d, %d \n",i,j,*(data_array1));
-          data_array1++;
-        }
+                      xfer_plist, data_array1);
+    VRFY((status >=0),"dataset read succeeded");
+    status = H5Pget(xfer_plist,PROP_NAME,&prop_value);
+    VRFY((status >= 0),"testing property list get succeeded");
+    if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
+      if(prop_value == 1) 
+        printf("H5Dread shouldn't use MPI Collective IO call, something is wrong \n");
     }
-    }*/
+    else {
+       if(prop_value == 0) 
+        printf("H5Dread doesn't use MPI Collective IO call, something is wrong \n");
+    }
+
     /* verify the read data with original expected data */
 
     status = ccdataset_vrfy(start, count, stride, block, data_array1, data_origin1);
     if (status) nerrors++;
 
+     status = H5Premove(xfer_plist,PROP_NAME);            
+     VRFY((status >= 0),"property list removed");     
 
+     status = H5Pclose(xfer_plist);
+     VRFY((status >= 0),"property list closed");
     /* close dataset collectively */
     status=H5Dclose(dataset);
     VRFY((status >= 0), "");
-
-    status=H5Pclose(xfer_plist);
-    VRFY((status >= 0),"");
 
     /* release all IDs created */
     H5Sclose(file_dataspace);

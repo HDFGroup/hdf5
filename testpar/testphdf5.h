@@ -129,6 +129,7 @@
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
+#define PROP_NAME    "__test__ccfoo___"
 /* type definitions */
 typedef struct H5Ptest_param_t  /* holds extra test parameters */
 {
@@ -173,6 +174,7 @@ void dataset_fillvalue(void);
 void coll_chunk1();
 void coll_chunk2();
 void coll_chunk3();
+void coll_chunk4();
 /* some commonly used routines for collective chunk IO tests*/
 void ccslab_set(int mpi_rank,int mpi_size,hssize_t start[],hsize_t count[],
 		hsize_t stride[],hsize_t block[],int mode);
