@@ -151,7 +151,8 @@ chunk.lo: \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDgass.h
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDmulti.h
 cmpd_dset.lo: \
    $(srcdir)/cmpd_dset.c \
    $(srcdir)/h5test.h \
@@ -842,7 +843,8 @@ overhead.lo: \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDgass.h
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDmulti.h
 ragged.lo: \
    $(srcdir)/ragged.c \
    $(top_srcdir)/src/hdf5.h \

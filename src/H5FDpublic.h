@@ -9,6 +9,7 @@
 #define _H5FDpublic_H
 
 #include <H5public.h>
+#define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 
 /*
  * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
