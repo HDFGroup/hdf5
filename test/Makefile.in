@@ -48,7 +48,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
             tattr.h5 tselect.h5 mtime.h5 ragged.h5 unlink.h5 overhead.h5     \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 ttime.h5 trefer[12].h5 \
             tvltypes.h5 tvlstr.h5 flush.h5 enum1.h5 titerate.h5 ttsafe.h5 \
-            tarray1.h5
+            tarray1.h5 tgenprop.h5
 CLEAN=$(TIMINGS)
 
 ## Source and object files for programs...  The TEST_SRC list contains all the
@@ -59,9 +59,9 @@ CLEAN=$(TIMINGS)
 TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
 	 external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
 	 iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
-	 ragged.c stab.c tarray.c tattr.c testhdf5.c tfile.c th5s.c titerate.c \
-     tmeta.c trefer.c tselect.c ttime.c ttbbt.c tvltypes.c tvlstr.c unlink.c \
-     enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c \
+	 ragged.c stab.c tarray.c tattr.c testhdf5.c tfile.c tgenprop.c th5s.c \
+     titerate.c tmeta.c trefer.c tselect.c ttime.c ttbbt.c tvltypes.c tvlstr.c \
+     unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c \
      ttsafe_acreate.c gass_write.c gass_read.c gass_append.c dpss_read.c \
      dpss_write.c srb_read.c srb_write.c srb_append.c stream_test.c
 
@@ -83,8 +83,9 @@ timings _timings: $(TIMINGS)
 ## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
-TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tfile.lo titerate.lo tmeta.lo \
-        ttime.lo trefer.lo tselect.lo ttbbt.lo tvltypes.lo tvlstr.lo th5s.lo
+TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tfile.lo tgenprop.lo th5s.lo \
+    titerate.lo tmeta.lo ttime.lo trefer.lo tselect.lo ttbbt.lo tvltypes.lo \
+    tvlstr.lo 
 
 TTS_OBJ=ttsafe.lo ttsafe_dcreate.lo ttsafe_error.lo ttsafe_cancel.lo \
         ttsafe_acreate.lo
