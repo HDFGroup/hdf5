@@ -100,7 +100,7 @@ $(EXAMPLEDIR):
 
 ## Install the library, the public header files, and public programs.
 ##
-install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
+install: $(AUX_LIB) $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
