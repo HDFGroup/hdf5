@@ -305,6 +305,7 @@
 ./src/H5Tpkg.h
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
+./src/H5Tvlen.c
 ./src/H5TB.c
 ./src/H5TBprivate.h
 ./src/H5V.c
