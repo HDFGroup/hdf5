@@ -56,10 +56,10 @@ static int interface_initialize_g = 0;
  * appropriate H5FP_file_info structure.
  */
 typedef struct {
-    hobj_ref_t      oid;        /* Buffer to store OID of object            */
-    unsigned        owned_rank; /* rank which has the lock                  */
+    hobj_ref_t      oid;        /* buffer to store OID of object            */
+    unsigned char  *num_locks;  /* number of times a rank has a lock        */
+    unsigned        num_procs;  /* number of processes that have the lock   */
     H5FP_obj_t      obj_type;   /* type of object being locked              */
-    unsigned        ref_count;  /* number of times lock was aquired by proc */
     H5FP_lock_t     rw_lock;    /* indicates if it's a read or write lock   */
 } H5FP_object_lock;
 
@@ -334,17 +334,26 @@ static H5FP_object_lock *
 H5FP_new_object_lock(hobj_ref_t oid, unsigned rank, H5FP_obj_t obj_type,
                      H5FP_lock_t rw_lock)
 {
-    H5FP_object_lock *ret_value = NULL;
+    int                 comm_size;
+    H5FP_object_lock   *ret_value = NULL;
     
     FUNC_ENTER_NOINIT(H5FP_new_object_lock);
+
+    if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Comm_size failed");
 
     if ((ret_value = (H5FP_object_lock *)HDmalloc(sizeof(H5FP_object_lock))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
+    if ((ret_value->num_locks = (unsigned char *)HDcalloc(comm_size, 1)) == NULL) {
+        HDfree(ret_value);
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
+    }
+
     ret_value->oid = oid;
-    ret_value->owned_rank = rank;
+    ret_value->num_locks[rank] = TRUE;
     ret_value->obj_type = obj_type;
-    ret_value->ref_count = 1;
+    ret_value->num_procs = 1;
     ret_value->rw_lock = rw_lock;
 
 done:
@@ -362,7 +371,12 @@ static herr_t
 H5FP_free_object_lock(H5FP_object_lock *ol)
 {
     FUNC_ENTER_NOINIT(H5FP_free_object_lock);
-    HDfree(ol);
+
+    if (ol) {
+        HDfree(ol->num_locks);
+        HDfree(ol);
+    }
+
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
@@ -1011,7 +1025,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
                         oids[j].lock->rw_lock == H5FP_LOCK_READ) ||
                  (oids[j].rw_lock == H5FP_LOCK_WRITE &&
                         oids[j].lock->rw_lock == H5FP_LOCK_WRITE &&
-                        oids[j].lock->owned_rank == req->proc_rank))) {
+                        oids[j].lock->num_locks[req->proc_rank]))) {
             /* FAILURE */
             exit_state = H5FP_STATUS_LOCK_FAILED;
             HGOTO_DONE(FAIL);
@@ -1041,14 +1055,18 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
                     oids[j].lock->rw_lock == H5FP_LOCK_READ) ||
                 (oids[j].rw_lock == H5FP_LOCK_WRITE &&
                     oids[j].lock->rw_lock == H5FP_LOCK_WRITE &&
-                    oids[j].lock->owned_rank == req->proc_rank)) {
+                    oids[j].lock->num_locks[req->proc_rank])) {
                 /*
                  * The requesting process may already have this lock. Might
                  * be a request from some call-back function of some sort.
-                 * Increase the reference count (which is decreased when
-                 * released) to help to prevent deadlocks.
+                 * Increase the reference count if this process hasn't
+                 * gotten a lock on this before and then increment that
+                 * process's num_locks reference count.
                  */
-                ++oids[j].lock->ref_count;
+                if (!oids[j].lock->num_locks[req->proc_rank])
+                    ++oids[j].lock->num_procs;
+
+                ++oids[j].lock->num_locks[req->proc_rank];
                 oids[j].locked = TRUE;
             } else {
                 /* FIXME: reply saying object locked? */
@@ -1093,10 +1111,10 @@ rollback:
     for (j = 0; j <= i; ++j) {
         if (oids[j].locked) {
             if (oids[j].lock) {
-                if (oids[j].lock->owned_rank == req->proc_rank) {
-                    if (--oids[j].lock->ref_count == 0) {
-                        H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
-                    }
+                if (oids[j].lock->num_locks[req->proc_rank]) {
+                    if (--oids[j].lock->num_locks[req->proc_rank] == 0)
+                        if (--oids[j].lock->num_procs == 0)
+                            H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
                 } else {
                     /* CATASTROPHIC FAILURE!!! */
                     /* LOCK WAS NOT CLEARED */
@@ -1193,7 +1211,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request_t *req)
 
         oids[j].lock = H5FP_find_object_lock(oids[j].info, oids[j].oid);
 
-        if (!oids[j].lock || oids[j].lock->owned_rank != req->proc_rank) {
+        if (!oids[j].lock || !oids[j].lock->num_locks[req->proc_rank]) {
             exit_state = H5FP_STATUS_BAD_LOCK;
             HGOTO_DONE(FAIL);
         }
@@ -1206,9 +1224,10 @@ H5FP_sap_handle_release_lock_request(H5FP_request_t *req)
      */
     for (j = 0; j <= i; ++j) {
         if (oids[j].lock) {
-            if (oids[j].lock->owned_rank == req->proc_rank) {
-                if (--oids[j].lock->ref_count == 0)
-                    H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
+            if (oids[j].lock->num_locks[req->proc_rank]) {
+                if (--oids[j].lock->num_locks[req->proc_rank] == 0)
+                    if (--oids[j].lock->num_procs == 0)
+                        H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
             } else {
                 /* AAAIIIIEEE!!! */
                 exit_state = H5FP_STATUS_CATASTROPHIC;
@@ -1286,7 +1305,7 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
                 r.md_size = fm->md_size - (req->addr - fm->addr);
                 r.addr = req->addr;
                 r.status = H5FP_STATUS_OK;
-                metadata = fm->metadata + (req->addr - fm->addr);   /* Sent out in a separate message */
+                metadata = fm->metadata + (req->addr - fm->addr);   /* Sent out separately */
             } else {
 HDfprintf(stderr, "Panic!!!!\n");
 assert(0);
@@ -1316,9 +1335,7 @@ done:
  *              file.
  *
  *              N.B: We assume that the client has the lock on the
- *              requesting object before getting here. Why? Because it's
- *              hard to pass the OID for that object down to the
- *              low-level I/O routines...*sigh*
+ *              requesting object before getting here.
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 06. August, 2002
@@ -1334,10 +1351,6 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
     FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
-#if 0
-        H5FP_object_lock *lock;
-#endif  /* 0 */
-
         if (info->num_mods >= H5FP_MDATA_CACHE_HIGHWATER_MARK) {
             /*
              * If there are any modifications not written out yet, dump
@@ -1362,26 +1375,6 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
             exit_state = H5FP_STATUS_FILE_CLOSING;
             HGOTO_DONE(FAIL);
         }
-
-#if 0
-        /*
-         * We're assuming that the client has the correct lock at this
-         * point...
-         */
-
-        /* handle the change request */
-        lock = H5FP_find_object_lock(info, req->oid);
-
-        if (!lock || lock->owned_rank != req->proc_rank
-                || lock->rw_lock != H5FP_LOCK_WRITE) {
-            /*
-             * There isn't a write lock or we don't own the write
-             * lock on this OID
-             */
-            exit_state = H5FP_STATUS_NO_LOCK;
-            HGOTO_DONE(FAIL);
-        }
-#endif  /* 0 */
 
         if (H5FP_add_file_mod_to_list(info, req->mem_type, (haddr_t)req->addr,
                                       req->proc_rank, md_size, mdata) != SUCCEED) {
