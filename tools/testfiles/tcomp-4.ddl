@@ -25,80 +25,80 @@ GROUP "/" {
       }
       DATASPACE  SIMPLE { ( 6 ) / ( 6 ) }
       DATA {
-         {
+        (0) {
             0,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 0, 1, 2, 3, 4, 5,
-               1, 2, 3, 4, 5, 6,
-               2, 3, 4, 5, 6, 7,
-               3, 4, 5, 6, 7, 8,
-               4, 5, 6, 7, 8, 9 ],
+        %s       1, 2, 3, 4, 5, 6,
+        %s       2, 3, 4, 5, 6, 7,
+        %s       3, 4, 5, 6, 7, 8,
+        %s       4, 5, 6, 7, 8, 9 ],
             0,
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
             109
          },
-         {
+        (1) {
             1,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 1, 2, 3, 4, 5, 6,
-               2, 3, 4, 5, 6, 7,
-               3, 4, 5, 6, 7, 8,
-               4, 5, 6, 7, 8, 9,
-               5, 6, 7, 8, 9, 10 ],
+        %s       2, 3, 4, 5, 6, 7,
+        %s       3, 4, 5, 6, 7, 8,
+        %s       4, 5, 6, 7, 8, 9,
+        %s       5, 6, 7, 8, 9, 10 ],
             0.96,
             [ 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96, 1024.96 ],
             109
          },
-         {
+        (2) {
             2,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 2, 3, 4, 5, 6, 7,
-               3, 4, 5, 6, 7, 8,
-               4, 5, 6, 7, 8, 9,
-               5, 6, 7, 8, 9, 10,
-               6, 7, 8, 9, 10, 11 ],
+        %s       3, 4, 5, 6, 7, 8,
+        %s       4, 5, 6, 7, 8, 9,
+        %s       5, 6, 7, 8, 9, 10,
+        %s       6, 7, 8, 9, 10, 11 ],
             1.92,
             [ 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93, 2049.93 ],
             109
          },
-         {
+        (3) {
             3,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 3, 4, 5, 6, 7, 8,
-               4, 5, 6, 7, 8, 9,
-               5, 6, 7, 8, 9, 10,
-               6, 7, 8, 9, 10, 11,
-               7, 8, 9, 10, 11, 12 ],
+        %s       4, 5, 6, 7, 8, 9,
+        %s       5, 6, 7, 8, 9, 10,
+        %s       6, 7, 8, 9, 10, 11,
+        %s       7, 8, 9, 10, 11, 12 ],
             2.88,
             [ 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89, 3074.89 ],
             109
          },
-         {
+        (4) {
             4,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 4, 5, 6, 7, 8, 9,
-               5, 6, 7, 8, 9, 10,
-               6, 7, 8, 9, 10, 11,
-               7, 8, 9, 10, 11, 12,
-               8, 9, 10, 11, 12, 13 ],
+        %s       5, 6, 7, 8, 9, 10,
+        %s       6, 7, 8, 9, 10, 11,
+        %s       7, 8, 9, 10, 11, 12,
+        %s       8, 9, 10, 11, 12, 13 ],
             3.84,
             [ 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85, 4099.85 ],
             109
          },
-         {
+        (5) {
             5,
             [ "A fight is a contract that takes two people to honor.", "A combative stance means that you've accepted the contract.", "In which case, you deserve what you get.", "  --  Professor Cheng Man-ch'ing" ],
             "Hello!",
             [ 5, 6, 7, 8, 9, 10,
-               6, 7, 8, 9, 10, 11,
-               7, 8, 9, 10, 11, 12,
-               8, 9, 10, 11, 12, 13,
-               9, 10, 11, 12, 13, 14 ],
+        %s       6, 7, 8, 9, 10, 11,
+        %s       7, 8, 9, 10, 11, 12,
+        %s       8, 9, 10, 11, 12, 13,
+        %s       9, 10, 11, 12, 13, 14 ],
             4.8,
             [ 5124.82, 5124.82, 5124.82, 5124.82, 5124.82, 5124.82, 5124.82, 5124.82, 5124.82, 5124.82 ],
             109

@@ -13,16 +13,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_NULLTERM of",
-            "This is row 1 of type H5T_STR_NULLTERM of",
-            "This is row 2 of type H5T_STR_NULLTERM of",
-            "This is row 3 of type H5T_STR_NULLTERM of",
-            "This is row 4 of type H5T_STR_NULLTERM of",
-            "This is row 5 of type H5T_STR_NULLTERM of",
-            "This is row 6 of type H5T_STR_NULLTERM of",
-            "This is row 7 of type H5T_STR_NULLTERM of",
-            "This is row 8 of type H5T_STR_NULLTERM of",
-            "This is row 9 of type H5T_STR_NULLTERM of"
+        (0) "This is row 0 of type H5T_STR_NULLTERM of",
+        (1) "This is row 1 of type H5T_STR_NULLTERM of",
+        (2) "This is row 2 of type H5T_STR_NULLTERM of",
+        (3) "This is row 3 of type H5T_STR_NULLTERM of",
+        (4) "This is row 4 of type H5T_STR_NULLTERM of",
+        (5) "This is row 5 of type H5T_STR_NULLTERM of",
+        (6) "This is row 6 of type H5T_STR_NULLTERM of",
+        (7) "This is row 7 of type H5T_STR_NULLTERM of",
+        (8) "This is row 8 of type H5T_STR_NULLTERM of",
+        (9) "This is row 9 of type H5T_STR_NULLTERM of"
          }
          ATTRIBUTE "attr1" {
             DATATYPE  H5T_STRING {
@@ -33,7 +33,7 @@ GROUP "/" {
                }
             DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
             DATA {
-               "0123456789", "abcdefghij", "ABCDEFGHIJ"
+        (0)                "0123456789", "abcdefghij", "ABCDEFGHIJ"
             }
          }
       }
@@ -48,16 +48,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_NULLTERM of string ",
-            "This is row 1 of type H5T_STR_NULLTERM of string ",
-            "This is row 2 of type H5T_STR_NULLTERM of string ",
-            "This is row 3 of type H5T_STR_NULLTERM of string ",
-            "This is row 4 of type H5T_STR_NULLTERM of string ",
-            "This is row 5 of type H5T_STR_NULLTERM of string ",
-            "This is row 6 of type H5T_STR_NULLTERM of string ",
-            "This is row 7 of type H5T_STR_NULLTERM of string ",
-            "This is row 8 of type H5T_STR_NULLTERM of string ",
-            "This is row 9 of type H5T_STR_NULLTERM of string "
+        (0) "This is row 0 of type H5T_STR_NULLTERM of string ",
+        (1) "This is row 1 of type H5T_STR_NULLTERM of string ",
+        (2) "This is row 2 of type H5T_STR_NULLTERM of string ",
+        (3) "This is row 3 of type H5T_STR_NULLTERM of string ",
+        (4) "This is row 4 of type H5T_STR_NULLTERM of string ",
+        (5) "This is row 5 of type H5T_STR_NULLTERM of string ",
+        (6) "This is row 6 of type H5T_STR_NULLTERM of string ",
+        (7) "This is row 7 of type H5T_STR_NULLTERM of string ",
+        (8) "This is row 8 of type H5T_STR_NULLTERM of string ",
+        (9) "This is row 9 of type H5T_STR_NULLTERM of string "
          }
       }
    }
@@ -71,16 +71,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 1 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 2 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 3 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 4 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 5 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 6 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 7 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 8 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
-            "This is row 9 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000"
+        (0) "This is row 0 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (1) "This is row 1 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (2) "This is row 2 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (3) "This is row 3 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (4) "This is row 4 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (5) "This is row 5 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (6) "This is row 6 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (7) "This is row 7 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (8) "This is row 8 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
+        (9) "This is row 9 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000"
          }
       }
    }
@@ -94,16 +94,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_NULLPAD of string ar",
-            "This is row 1 of type H5T_STR_NULLPAD of string ar",
-            "This is row 2 of type H5T_STR_NULLPAD of string ar",
-            "This is row 3 of type H5T_STR_NULLPAD of string ar",
-            "This is row 4 of type H5T_STR_NULLPAD of string ar",
-            "This is row 5 of type H5T_STR_NULLPAD of string ar",
-            "This is row 6 of type H5T_STR_NULLPAD of string ar",
-            "This is row 7 of type H5T_STR_NULLPAD of string ar",
-            "This is row 8 of type H5T_STR_NULLPAD of string ar",
-            "This is row 9 of type H5T_STR_NULLPAD of string ar"
+        (0) "This is row 0 of type H5T_STR_NULLPAD of string ar",
+        (1) "This is row 1 of type H5T_STR_NULLPAD of string ar",
+        (2) "This is row 2 of type H5T_STR_NULLPAD of string ar",
+        (3) "This is row 3 of type H5T_STR_NULLPAD of string ar",
+        (4) "This is row 4 of type H5T_STR_NULLPAD of string ar",
+        (5) "This is row 5 of type H5T_STR_NULLPAD of string ar",
+        (6) "This is row 6 of type H5T_STR_NULLPAD of string ar",
+        (7) "This is row 7 of type H5T_STR_NULLPAD of string ar",
+        (8) "This is row 8 of type H5T_STR_NULLPAD of string ar",
+        (9) "This is row 9 of type H5T_STR_NULLPAD of string ar"
          }
       }
    }
@@ -117,16 +117,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_SPACEPAD of         ",
-            "This is row 1 of type H5T_STR_SPACEPAD of         ",
-            "This is row 2 of type H5T_STR_SPACEPAD of         ",
-            "This is row 3 of type H5T_STR_SPACEPAD of         ",
-            "This is row 4 of type H5T_STR_SPACEPAD of         ",
-            "This is row 5 of type H5T_STR_SPACEPAD of         ",
-            "This is row 6 of type H5T_STR_SPACEPAD of         ",
-            "This is row 7 of type H5T_STR_SPACEPAD of         ",
-            "This is row 8 of type H5T_STR_SPACEPAD of         ",
-            "This is row 9 of type H5T_STR_SPACEPAD of         "
+        (0) "This is row 0 of type H5T_STR_SPACEPAD of         ",
+        (1) "This is row 1 of type H5T_STR_SPACEPAD of         ",
+        (2) "This is row 2 of type H5T_STR_SPACEPAD of         ",
+        (3) "This is row 3 of type H5T_STR_SPACEPAD of         ",
+        (4) "This is row 4 of type H5T_STR_SPACEPAD of         ",
+        (5) "This is row 5 of type H5T_STR_SPACEPAD of         ",
+        (6) "This is row 6 of type H5T_STR_SPACEPAD of         ",
+        (7) "This is row 7 of type H5T_STR_SPACEPAD of         ",
+        (8) "This is row 8 of type H5T_STR_SPACEPAD of         ",
+        (9) "This is row 9 of type H5T_STR_SPACEPAD of         "
          }
       }
    }
@@ -140,16 +140,16 @@ GROUP "/" {
             }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
-            "This is row 0 of type H5T_STR_SPACEPAD of string a",
-            "This is row 1 of type H5T_STR_SPACEPAD of string a",
-            "This is row 2 of type H5T_STR_SPACEPAD of string a",
-            "This is row 3 of type H5T_STR_SPACEPAD of string a",
-            "This is row 4 of type H5T_STR_SPACEPAD of string a",
-            "This is row 5 of type H5T_STR_SPACEPAD of string a",
-            "This is row 6 of type H5T_STR_SPACEPAD of string a",
-            "This is row 7 of type H5T_STR_SPACEPAD of string a",
-            "This is row 8 of type H5T_STR_SPACEPAD of string a",
-            "This is row 9 of type H5T_STR_SPACEPAD of string a"
+        (0) "This is row 0 of type H5T_STR_SPACEPAD of string a",
+        (1) "This is row 1 of type H5T_STR_SPACEPAD of string a",
+        (2) "This is row 2 of type H5T_STR_SPACEPAD of string a",
+        (3) "This is row 3 of type H5T_STR_SPACEPAD of string a",
+        (4) "This is row 4 of type H5T_STR_SPACEPAD of string a",
+        (5) "This is row 5 of type H5T_STR_SPACEPAD of string a",
+        (6) "This is row 6 of type H5T_STR_SPACEPAD of string a",
+        (7) "This is row 7 of type H5T_STR_SPACEPAD of string a",
+        (8) "This is row 8 of type H5T_STR_SPACEPAD of string a",
+        (9) "This is row 9 of type H5T_STR_SPACEPAD of string a"
          }
       }
    }
