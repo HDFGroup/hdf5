@@ -119,9 +119,6 @@ H5S_all_favail (const H5S_t * UNUSED space, const H5S_sel_iter_t *sel_iter, hsiz
     assert (space && H5S_SEL_ALL==space->select.type);
     assert (sel_iter);
 
-#ifdef QAK
-    printf("%s: sel_iter->all.elmt_left=%u, max=%u\n",FUNC,(unsigned)sel_iter->all.elmt_left,(unsigned)max);
-#endif /* QAK */
     FUNC_LEAVE (MIN(sel_iter->all.elmt_left,max));
 }   /* H5S_all_favail() */
 
@@ -454,9 +451,6 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
 
     FUNC_ENTER(H5S_all_read, FAIL);
 
-#ifdef QAK
-printf("%s: check 1.0\n",FUNC);
-#endif /* QAK */
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
         switch(mem_space->select.type) {
@@ -525,17 +519,6 @@ printf("%s: check 1.0\n",FUNC);
     file_offset[u] = 0;
     mem_offset[u] = 0;
 
-#ifdef QAK
-printf("%s: check 2.0\n",FUNC);
-for (u=0; u<mem_space->extent.u.simple.rank; u++)
-    printf("size[%u]=%lu\n",u,(unsigned long)size[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("mem_size[%u]=%lu\n",u,(unsigned long)mem_size[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("mem_offset[%u]=%lu\n",u,(unsigned long)mem_offset[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("file_offset[%u]=%lu\n",u,(unsigned long)file_offset[u]);
-#endif /* QAK */
     /* Read data from the file */
     if (H5F_arr_read(f, dxpl_id, layout, dc_plist, size,
             mem_size, mem_offset, file_offset, buf/*out*/)<0)
@@ -588,10 +571,6 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout, H5P_genplist_t *dc_pl
     
     FUNC_ENTER(H5S_all_write, FAIL);
 
-#ifdef QAK
-printf("%s: check 1.0\n",FUNC);
-#endif /* QAK */
-
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
         switch(mem_space->select.type) {
@@ -660,17 +639,6 @@ printf("%s: check 1.0\n",FUNC);
     file_offset[u] = 0;
     mem_offset[u] = 0;
 
-#ifdef QAK
-printf("%s: check 2.0\n",FUNC);
-for (u=0; u<mem_space->extent.u.simple.rank; u++)
-    printf("size[%u]=%lu\n",u,(unsigned long)size[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("mem_size[%u]=%lu\n",u,(unsigned long)mem_size[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("mem_offset[%u]=%lu\n",u,(unsigned long)mem_offset[u]);
-for (u=0; u<=mem_space->extent.u.simple.rank; u++)
-    printf("file_offset[%u]=%lu\n",u,(unsigned long)file_offset[u]);
-#endif /* QAK */
     /* Write data to the file */
     if (H5F_arr_write(f, dxpl_id, layout, dc_plist, size,
             mem_size, mem_offset, file_offset, buf)<0)

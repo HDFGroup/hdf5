@@ -1565,7 +1565,7 @@ H5S_select_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *buf)
+H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *buf)
 {
     void *fill=_fill;           /* Alias for fill-value buffer */
     herr_t ret_value=FAIL;      /* return value */

@@ -121,9 +121,6 @@ H5HG_create (H5F_t *f, size_t size)
     if (size<H5HG_MINSIZE)
         size = H5HG_MINSIZE;
     size = H5HG_ALIGN(size);
-#ifdef QAK
-printf("%s: size=%d\n",FUNC,(int)size);
-#endif /* QAK */
 
     /* Create it */
     if (HADDR_UNDEF==(addr=H5MF_alloc(f, H5FD_MEM_GHEAP, (hsize_t)size))) {
@@ -167,9 +164,6 @@ printf("%s: size=%d\n",FUNC,(int)size);
 
     /* The freespace object */
     heap->obj[0].size = size - H5HG_SIZEOF_HDR(f);
-#ifdef QAK
-printf("%s: heap->obj[0].size=%d, size=%d\n",FUNC,(int)heap->obj[0].size,(int)size);
-#endif /* QAK */
     assert(H5HG_ISALIGNED(heap->obj[0].size));
     heap->obj[0].begin = p;
     UINT16ENCODE(p, 0);	/*object ID*/
@@ -614,9 +608,6 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
 	}
 	assert (f->shared->ncwfs>0);
 	assert (f->shared->cwfs[0]==heap);
-#ifdef QAK
-printf("%s: f->shared->cwfs[0]->obj[0].size=%d, size=%d, need=%d, H5HG_SIZEOF_HDR(f)=%d\n",FUNC,(int)f->shared->cwfs[0]->obj[0].size,(int)size,(int)need,(int)H5HG_SIZEOF_HDR(f));
-#endif /* QAK */
 #ifdef OLD_WAY
 	assert (f->shared->cwfs[0]->obj[0].size >= need+H5HG_SIZEOF_HDR(f));
 #else /* OLD_WAY */

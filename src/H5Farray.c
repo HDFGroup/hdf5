@@ -202,18 +202,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
 	HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif
-#ifdef QAK
-{
-    extern int qak_debug;
-
-    if(qak_debug) {
-        printf("%s: layout->ndims=%d\n",FUNC,(int)layout->ndims);
-        for(u=0; u<layout->ndims; u++)
-            printf("%s: %u: hslab_size=%d, mem_size=%d, mem_offset=%d, file_offset=%d\n",FUNC,u,(int)_hslab_size[u],(int)mem_size[u],(int)mem_offset[u],(int)file_offset[u]);
-        printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,(int)*(const uint16_t *)buf,(int)*((const uint16 *)buf+1));
-    }
-}
-#endif /* QAK */
 
     /* Get necessary properties from property list */
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
@@ -291,11 +279,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             }
 #endif
 
-#ifdef QAK
-        printf("%s: nelmts=%d, addr=%lu, elmt_size=%lu\n",FUNC,(int)nelmts,(unsigned long)addr,(unsigned long)elmt_size);
-        printf("%s: sieve_buf=%p, sieve_loc=%lu, sieve_size=%lu, sieve_buf_size=%lu, sieve_dirty=%u\n",FUNC,f->shared->sieve_buf,(unsigned long)f->shared->sieve_loc,(unsigned long)f->shared->sieve_size,(unsigned long)f->shared->sieve_buf_size,(unsigned)f->shared->sieve_dirty);
-        printf("%s: feature_flags=%lx\n",FUNC,(unsigned long)f->shared->lf->feature_flags);
-#endif /* QAK */
 #ifdef COALESCE_READS
             for (z=0, gather_reads = nelmts - 1; z<nelmts; z++, gather_reads--) {
                 /* Track the number of reads to gather */
@@ -469,22 +452,6 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif
     
-#ifdef QAK
-    {
-	extern int qak_debug;
-
-	printf("%s: layout->ndims=%d\n",FUNC,(int)layout->ndims);
-	for(i=0; i<layout->ndims; i++)
-	    printf("%s: %d: hslab_size=%d, mem_size=%d, mem_offset=%d, "
-		   "file_offset=%d\n", FUNC, i, (int)_hslab_size[i],
-		   (int)mem_size[i],(int)mem_offset[i],(int)file_offset[i]);
-	if(qak_debug) {
-	    printf("%s: *buf=%d, *(buf+1)=%d\n", FUNC,
-		   (int)*(const uint16_t *)buf, (int)*((const uint16_t *)buf+1));
-	}
-    }
-#endif /* QAK */
-
     /* Get necessary properties from property list */
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get EFL value");

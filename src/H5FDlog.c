@@ -809,9 +809,6 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
 
     file->eoa = addr+size;
 
-#ifdef QAK
-printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
-#endif /* QAK */
     /* Retain the (first) flavor of the information written to the file */
     if(file->fa.flags!=0) {
         if(file->fa.flags&H5FD_LOG_FLAVOR) {

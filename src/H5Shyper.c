@@ -98,7 +98,7 @@ H5FL_ARR_DEFINE_STATIC(hsize_t,-1);
 /* Declare a free list to manage arrays of H5S_hyper_dim_t */
 H5FL_ARR_DEFINE_STATIC(H5S_hyper_dim_t,H5S_MAX_RANK);
 
-#ifdef QAK
+#ifdef H5S_HYPER_DEBUG
 static herr_t
 H5S_hyper_print_spans_helper(struct H5S_hyper_span_t *span,unsigned depth)
 {
@@ -131,7 +131,7 @@ H5S_hyper_print_spans(const struct H5S_hyper_span_info_t *span_lst)
 
     FUNC_LEAVE(SUCCEED);
 }
-#endif /* QAK */
+#endif /* H5S_HYPER_DEBUG */
 
 
 /*-------------------------------------------------------------------------
@@ -274,9 +274,6 @@ H5S_hyper_favail (const H5S_t * UNUSED space,
     assert (space && H5S_SEL_HYPERSLABS==space->select.type);
     assert (sel_iter);
 
-#ifdef QAK
-    printf("%s: sel_iter->hyp.elmt_left=%u, max=%u\n",FUNC,(unsigned)sel_iter->hyp.elmt_left,(unsigned)max);
-#endif /* QAK */
     FUNC_LEAVE (MIN(sel_iter->hyp.elmt_left,max));
 }   /* H5S_hyper_favail() */
 
@@ -419,9 +416,6 @@ H5S_hyper_fread (H5F_t *f, const struct H5O_layout_t *layout,
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_fread, 0);
-#ifdef QAK
-printf("%s: Called!\n",FUNC);
-#endif /* QAK */
 
     /* Check args */
     assert(f);
@@ -880,19 +874,11 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_hyper_fread_opt, 0);
 
-#ifdef QAK
-printf("%s: Called!\n",FUNC);
-#endif /* QAK */
     /* Check if this is the first element read in from the hyperslab */
     if(file_iter->hyp.pos[0]==(-1)) {
         for(u=0; u<file_space->extent.u.simple.rank; u++)
             file_iter->hyp.pos[u]=file_space->select.sel_info.hslab.diminfo[u].start;
     } /* end if */
-
-#ifdef QAK
-for(i=0; i<file_space->extent.u.simple.rank; i++)
-    printf("%s: file_file->hyp.pos[%d]=%d\n",FUNC,(int)i,(int)file_iter->hyp.pos[i]);
-#endif /* QAK */
 
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -919,19 +905,11 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     /* Set the number of elements left for I/O */
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
-#ifdef QAK
-    printf("%s: fast_dim=%d\n",FUNC,(int)fast_dim);
-    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].start=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].start);
-    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].stride=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
-#endif /* QAK */
     /* Check if we stopped in the middle of a sequence of elements */
     if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
         ((file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         hsize_t leftover;  /* The number of elements left over from the last sequence */
 
-#ifdef QAK
-printf("%s: Check 1.0\n",FUNC);
-#endif /* QAK */
         /* Calculate the number of elements left in the sequence */
         if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
@@ -949,17 +927,10 @@ printf("%s: Check 1.0\n",FUNC);
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
             offset[i] += file_space->select.offset[i];
-#ifdef QAK
-for(i=0; i<ndims+1; i++)
-    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
-#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
             buf_off+=offset[i]*slab[i];
-#ifdef QAK
-printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_read,(int)actual_bytes);
-#endif /* QAK */
 
         /* Read in the rest of the sequence */
         if (H5F_seq_read(f, dxpl_id, layout, dc_plist, file_space,
@@ -993,17 +964,10 @@ printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(
      * until the buffer fills up.
      */
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
-#ifdef QAK
-printf("%s: Check 2.0, ndims=%d, io_left=%d, nelmts=%d\n",FUNC,(int)ndims,(int)io_left,(int)nelmts);
-#endif /* QAK */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
         HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
-#ifdef QAK
-for(i=0; i<ndims+1; i++)
-    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
-#endif /* QAK */
 
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
@@ -1014,12 +978,6 @@ for(i=0; i<ndims+1; i++)
             tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
             tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
-#ifdef QAK
-for(i=0; i<ndims; i++) {
-    printf("%s: tmp_count[%d]=%d, tmp_block[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)tmp_block[i]);
-    printf("%s: slab[%d]=%d\n",FUNC,(int)i,(int)slab[i]);
-}
-#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
@@ -1030,18 +988,6 @@ for(i=0; i<ndims; i++) {
 
         /* Set the number of actual bytes */
         actual_bytes=actual_read*elmt_size;
-#ifdef QAK
-printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_read,(int)actual_bytes);
-#endif /* QAK */
-
-#ifdef QAK
-for(i=0; i<file_space->extent.u.simple.rank; i++)
-    printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].start,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].stride,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].block,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].count);
-#endif /* QAK */
 
         /* Set the local copy of the diminfo pointer */
         tdiminfo=file_space->select.sel_info.hslab.diminfo;
@@ -1500,9 +1446,6 @@ H5S_hyper_fwrite (H5F_t *f, const struct H5O_layout_t *layout,
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_fwrite, 0);
-#ifdef QAK
-printf("%s: Called!\n",FUNC);
-#endif /* QAK */
 
     /* Check args */
     assert(f);
@@ -1961,19 +1904,11 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
 
-#ifdef QAK
-printf("%s: Called!, file_iter->hyp.pos[0]==%d\n",FUNC,(int)file_iter->hyp.pos[0]);
-#endif /* QAK */
     /* Check if this is the first element written from the hyperslab */
     if(file_iter->hyp.pos[0]==(-1)) {
         for(u=0; u<file_space->extent.u.simple.rank; u++)
             file_iter->hyp.pos[u]=file_space->select.sel_info.hslab.diminfo[u].start;
     } /* end if */
-
-#ifdef QAK
-for(i=0; i<file_space->extent.u.simple.rank; i++)
-    printf("%s: file_file->hyp.pos[%d]=%d\n",FUNC,(int)i,(int)file_iter->hyp.pos[i]);
-#endif /* QAK */
 
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -2000,19 +1935,11 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     /* Set the number of elements left for I/O */
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
-#ifdef QAK
-    printf("%s: fast_dim=%d\n",FUNC,(int)fast_dim);
-    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].start=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].start);
-    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].stride=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
-#endif /* QAK */
     /* Check if we stopped in the middle of a sequence of elements */
     if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
         ((file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         hsize_t leftover;  /* The number of elements left over from the last sequence */
 
-#ifdef QAK
-printf("%s: Check 1.0\n",FUNC);
-#endif /* QAK */
         /* Calculate the number of elements left in the sequence */
         if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
@@ -2030,17 +1957,10 @@ printf("%s: Check 1.0\n",FUNC);
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
             offset[i] += file_space->select.offset[i];
-#ifdef QAK
-for(i=0; i<ndims+1; i++)
-    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
-#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
             buf_off+=offset[i]*slab[i];
-#ifdef QAK
-printf("%s: buf_off=%ld, actual_write=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_write,(int)actual_bytes);
-#endif /* QAK */
 
         /* Write out the rest of the sequence */
         if (H5F_seq_write(f, dxpl_id, layout, dc_plist, file_space,
@@ -2074,17 +1994,10 @@ printf("%s: buf_off=%ld, actual_write=%d, actual_bytes=%d\n",FUNC,(long)buf_off,
      * until the buffer runs dry.
      */
     if(io_left>0) { /* Just in case the "remainder" above emptied the buffer */
-#ifdef QAK
-printf("%s: Check 2.0, ndims=%d, io_left=%d, nelmts=%d\n",FUNC,(int)ndims,(int)io_left,(int)nelmts);
-#endif /* QAK */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
         HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
-#ifdef QAK
-for(i=0; i<ndims+1; i++)
-    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
-#endif /* QAK */
 
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
@@ -2095,12 +2008,6 @@ for(i=0; i<ndims+1; i++)
             tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
             tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
-#ifdef QAK
-for(i=0; i<ndims; i++) {
-    printf("%s: tmp_count[%d]=%d, tmp_block[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)tmp_block[i]);
-    printf("%s: slab[%d]=%d\n",FUNC,(int)i,(int)slab[i]);
-}
-#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
@@ -2111,18 +2018,6 @@ for(i=0; i<ndims; i++) {
 
         /* Set the number of actual bytes */
         actual_bytes=actual_write*elmt_size;
-#ifdef QAK
-printf("%s: buf_off=%ld, actual_write=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_write,(int)actual_bytes);
-#endif /* QAK */
-
-#ifdef QAK
-for(i=0; i<file_space->extent.u.simple.rank; i++)
-    printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].start,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].stride,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].block,
-        (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].count);
-#endif /* QAK */
 
         /* Set the local copy of the diminfo pointer */
         tdiminfo=file_space->select.sel_info.hslab.diminfo;
@@ -2568,9 +2463,6 @@ H5S_hyper_mread (const void *_buf, size_t elmt_size, const H5S_t *space,
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_mread, FAIL);
-#ifdef QAK
-printf("%s: Called!\n",FUNC);
-#endif /* QAK */
 
     /* Check args */
     assert(src);
@@ -2958,19 +2850,11 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
 
     FUNC_ENTER (H5S_hyper_mread_opt, 0);
 
-#ifdef QAK
-printf("%s: Called!, nelmts=%lu, elmt_size=%d\n",FUNC,(unsigned long)nelmts,(int)elmt_size);
-#endif /* QAK */
     /* Check if this is the first element read in from the hyperslab */
     if(mem_iter->hyp.pos[0]==(-1)) {
         for(u=0; u<mem_space->extent.u.simple.rank; u++)
             mem_iter->hyp.pos[u]=mem_space->select.sel_info.hslab.diminfo[u].start;
     } /* end if */
-
-#ifdef QAK
-for(u=0; u<mem_space->extent.u.simple.rank; u++)
-    printf("%s: mem_file->hyp.pos[%u]=%d\n",FUNC,(unsigned)u,(int)mem_iter->hyp.pos[u]);
-#endif /* QAK */
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -2985,10 +2869,6 @@ for(u=0; u<mem_space->extent.u.simple.rank; u++)
         slab[i]=acc*elmt_size;
         acc*=mem_size[i];
     } /* end for */
-#ifdef QAK
-for(i=0; i<ndims; i++)
-    printf("%s: mem_size[%d]=%d, slab[%d]=%d\n",FUNC,(int)i,(int)mem_size[i],(int)i,(int)slab[i]);
-#endif /* QAK */
 
     /* Set the number of elements left for I/O */
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
@@ -2998,9 +2878,6 @@ for(i=0; i<ndims; i++)
             ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
-#ifdef QAK
-printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
-#endif /* QAK */
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
             leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
@@ -3053,9 +2930,6 @@ printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
      * until the buffer fills up.
      */
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
-#ifdef QAK
-printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
-#endif /* QAK */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
         HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
@@ -3080,19 +2954,6 @@ printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_read*elmt_size;
-#ifdef QAK
-printf("%s: src=%p, actual_bytes=%u\n",FUNC,src,(int)actual_bytes);
-#endif /* QAK */
-
-#ifdef QAK
-printf("%s: actual_read=%d\n",FUNC,(int)actual_read);
-for(i=0; i<ndims; i++)
-    printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].start,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].stride,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].block,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].count);
-#endif /* QAK */
 
         /* Set the local copy of the diminfo pointer */
         tdiminfo=mem_space->select.sel_info.hslab.diminfo;
@@ -3143,10 +3004,6 @@ for(i=0; i<ndims; i++)
                 } /* end while */
 #else /* NO_DUFFS_DEVICE */
                 duffs_index = (fast_dim_count + 7) / 8;
-                /* The following size_t cast is required on HPUX 10.20 in
-                 * order to make the system compuiler happy.  It can be
-                 * removed when we are no longer supporting that platform. -QAK
-                 */
                 switch (fast_dim_count % 8) {
                     case 0:
                         do
@@ -3441,9 +3298,6 @@ H5S_hyper_mwrite (const void *_tconv_buf, size_t elmt_size, const H5S_t *space,
     hssize_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_mwrite, FAIL);
-#ifdef QAK
-printf("%s: Called!\n",FUNC);
-#endif /* QAK */
 
     /* Check args */
     assert(src);
@@ -3831,19 +3685,11 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
 
     FUNC_ENTER (H5S_hyper_mwrite_opt, 0);
 
-#ifdef QAK
-printf("%s: Called!, nelmts=%lu, elmt_size=%d\n",FUNC,(unsigned long)nelmts,(int)elmt_size);
-#endif /* QAK */
     /* Check if this is the first element read in from the hyperslab */
     if(mem_iter->hyp.pos[0]==(-1)) {
         for(u=0; u<mem_space->extent.u.simple.rank; u++)
             mem_iter->hyp.pos[u]=mem_space->select.sel_info.hslab.diminfo[u].start;
     } /* end if */
-
-#ifdef QAK
-for(u=0; u<mem_space->extent.u.simple.rank; u++)
-    printf("%s: mem_file->hyp.pos[%u]=%d\n",FUNC,(unsigned)u,(int)mem_iter->hyp.pos[u]);
-#endif /* QAK */
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -3858,10 +3704,6 @@ for(u=0; u<mem_space->extent.u.simple.rank; u++)
         slab[i]=acc*elmt_size;
         acc*=mem_size[i];
     } /* end for */
-#ifdef QAK
-for(i=0; i<ndims; i++)
-    printf("%s: mem_size[%d]=%d, slab[%d]=%d\n",FUNC,(int)i,(int)mem_size[i],(int)i,(int)slab[i]);
-#endif /* QAK */
 
     /* Set the number of elements left for I/O */
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
@@ -3871,9 +3713,6 @@ for(i=0; i<ndims; i++)
             ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
-#ifdef QAK
-printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
-#endif /* QAK */
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
             leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
@@ -3926,9 +3765,6 @@ printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
      * until the buffer fills up.
      */
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
-#ifdef QAK
-printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
-#endif /* QAK */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
         HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
@@ -3953,19 +3789,6 @@ printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_write*elmt_size;
-#ifdef QAK
-printf("%s: dst=%p, actual_bytes=%u\n",FUNC,dst,(int)actual_bytes);
-#endif /* QAK */
-
-#ifdef QAK
-printf("%s: actual_write=%d\n",FUNC,(int)actual_write);
-for(i=0; i<ndims; i++)
-    printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].start,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].stride,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].block,
-        (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].count);
-#endif /* QAK */
 
         /* Set the local copy of the diminfo pointer */
         tdiminfo=mem_space->select.sel_info.hslab.diminfo;
@@ -4016,10 +3839,6 @@ for(i=0; i<ndims; i++)
                 } /* end while */
 #else /* NO_DUFFS_DEVICE */
                 duffs_index = (fast_dim_count + 7) / 8;
-                /* The following size_t cast is required on HPUX 10.20 in
-                 * order to make the system compuiler happy.  It can be
-                 * removed when we are no longer supporting that platform. -QAK
-                 */
                 switch (fast_dim_count % 8) {
                     case 0:
                         do
@@ -7128,23 +6947,14 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
     assert (a_and_b);
     assert (b_not_a);
 
-#ifdef QAK
-printf("%s: a_spans=%p, b_spans=%p\n",FUNC,a_spans,b_spans);
-#endif /* QAK */
     /* Check if both span trees are not defined */
     if(a_spans==NULL && b_spans==NULL) {
-#ifdef QAK
-printf("%s: check 1.0\n",FUNC);
-#endif /* QAK */
         *a_not_b=NULL;
         *a_and_b=NULL;
         *b_not_a=NULL;
     } /* end if */
     /* If span 'a' is not defined, but 'b' is, copy 'b' and set the other return span trees to empty */
     else if(a_spans==NULL) {
-#ifdef QAK
-printf("%s: check 2.0\n",FUNC);
-#endif /* QAK */
         *a_not_b=NULL;
         *a_and_b=NULL;
         if((*b_not_a=H5S_hyper_copy_span(b_spans))==NULL)
@@ -7152,9 +6962,6 @@ printf("%s: check 2.0\n",FUNC);
     } /* end if */
     /* If span 'b' is not defined, but 'a' is, copy 'a' and set the other return span trees to empty */
     else if(b_spans==NULL) {
-#ifdef QAK
-printf("%s: check 3.0\n",FUNC);
-#endif /* QAK */
         if((*a_not_b=H5S_hyper_copy_span(a_spans))==NULL)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, FAIL, "can't copy hyperslab span tree");
         *a_and_b=NULL;
@@ -7162,23 +6969,14 @@ printf("%s: check 3.0\n",FUNC);
     } /* end if */
     /* If span 'a' and 'b' are both defined, calculate the proper span trees */
     else {
-#ifdef QAK
-printf("%s: check 4.0\n",FUNC);
-#endif /* QAK */
         /* Check if both span trees completely overlap */
         if(H5S_hyper_cmp_spans(a_spans,b_spans)==TRUE) {
-#ifdef QAK
-printf("%s: check 4.1\n",FUNC);
-#endif /* QAK */
             *a_not_b=NULL;
             if((*a_and_b=H5S_hyper_copy_span(a_spans))==NULL)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, FAIL, "can't copy hyperslab span tree");
             *b_not_a=NULL;
         } /* end if */
         else {
-#ifdef QAK
-printf("%s: check 4.2\n",FUNC);
-#endif /* QAK */
             /* Get the pointers to the new and old span lists */
             span_a=a_spans->head;
             span_b=b_spans->head;
@@ -7193,17 +6991,11 @@ printf("%s: check 4.2\n",FUNC);
 
             /* Work through the list of spans in the new list */
             while(span_a!=NULL && span_b!=NULL) {
-#ifdef QAK
-printf("%s: check 4.3, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
                 /* Check if span 'a' is completely before span 'b' */
                 /*    AAAAAAA                            */
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 if(span_a->high<span_b->low) {
-#ifdef QAK
-printf("%s: check 4.3.1, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Copy span 'a' and add to a_not_b list */
 
                     /* Merge/add span 'a' with/to a_not_b list */
@@ -7219,9 +7011,6 @@ printf("%s: check 4.3.1, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 else if(span_a->low<span_b->low && (span_a->high>=span_b->low && span_a->high<=span_b->high)) {
-#ifdef QAK
-printf("%s: check 4.3.2, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Split span 'a' into two parts at the low bound of span 'b' */
 
                     /* Merge/add lower part of span 'a' with/to a_not_b list */
@@ -7309,9 +7098,6 @@ printf("%s: check 4.3.2, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 else if(span_a->low<span_b->low && span_a->high>span_b->high) {
-#ifdef QAK
-printf("%s: check 4.3.3, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Split off lower part of span 'a' at lower span of span 'b' */
 
                     /* Merge/add lower part of span 'a' with/to a_not_b list */
@@ -7389,9 +7175,6 @@ printf("%s: check 4.3.3, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 else if(span_a->low>=span_b->low && span_a->high<=span_b->high) {
-#ifdef QAK
-printf("%s: check 4.3.4, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Split off lower part of span 'b' at lower span of span 'a' */
 
                     /* Check if there is actually a lower part of span 'b' to split off */
@@ -7484,9 +7267,6 @@ printf("%s: check 4.3.4, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 else if((span_a->low>=span_b->low && span_a->low<=span_b->high) && span_a->high>span_b->high) {
-#ifdef QAK
-printf("%s: check 4.3.5, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Check if there is actually a lower part of span 'b' to split off */
                     if(span_a->low>span_b->low) {
                         /* Split off lower part of span 'b' at lower span of span 'a' */
@@ -7570,9 +7350,6 @@ printf("%s: check 4.3.5, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                 /* <-----------------------------------> */
                 /*             BBBBBBBBBB                */
                 else {
-#ifdef QAK
-printf("%s: check 4.3.6, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                     /* Copy span 'b' and add to b_not_a list */
 
                     /* Merge/add span 'b' with/to b_not_a list */
@@ -7583,15 +7360,9 @@ printf("%s: check 4.3.6, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%l
                     H5S_hyper_recover_span(&recover_b,&span_b,span_b->next);
                 } /* end else */
             } /* end while */
-#ifdef QAK
-printf("%s: check 5.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
 
             /* Clean up 'a' spans which haven't been covered yet */
             if(span_a!=NULL && span_b==NULL) {
-#ifdef QAK
-printf("%s: check 6.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
                 while(span_a!=NULL) {
                     /* Copy span 'a' and add to a_not_b list */
 
@@ -7605,9 +7376,6 @@ printf("%s: check 6.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
             } /* end if */
             /* Clean up 'b' spans which haven't been covered yet */
             else if(span_a==NULL && span_b!=NULL) {
-#ifdef QAK
-printf("%s: check 7.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
                 while(span_b!=NULL) {
                     /* Copy span 'b' and add to b_not_a list */
 
@@ -7665,18 +7433,11 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
 
     FUNC_ENTER (H5S_hyper_merge_spans_helper, NULL);
 
-#ifdef QAK
-printf("%s: a_spans=%p, b_spans=%p\n",FUNC,a_spans,b_spans);
-#endif /* QAK */
-
     /* Make certain both 'a' & 'b' spans have down span trees or neither does */
     assert((a_spans!=NULL && b_spans!=NULL) || (a_spans==NULL && b_spans==NULL));
 
     /* Check if the span trees for the 'a' span and the 'b' span are the same */
     if(H5S_hyper_cmp_spans(a_spans,b_spans)==TRUE) {
-#ifdef QAK
-printf("%s: check 0.5\n",FUNC);
-#endif /* QAK */
         if(a_spans==NULL)
             merged_spans=NULL;
         else {
@@ -7686,9 +7447,6 @@ printf("%s: check 0.5\n",FUNC);
         } /* end else */
     } /* end if */
     else {
-#ifdef QAK
-printf("%s: check 1.0\n",FUNC);
-#endif /* QAK */
         /* Get the pointers to the 'a' and 'b' span lists */
         span_a=a_spans->head;
         span_b=b_spans->head;
@@ -7701,17 +7459,11 @@ printf("%s: check 1.0\n",FUNC);
 
         /* Work through the list of spans in the new list */
         while(span_a!=NULL && span_b!=NULL) {
-#ifdef QAK
-printf("%s: check 3.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
             /* Check if the 'a' span is completely before 'b' span */
             /*    AAAAAAA                            */
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             if(span_a->high<span_b->low) {
-#ifdef QAK
-printf("%s: check 3.1, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Merge/add span 'a' with/to the merged spans */
                 if(H5S_hyper_append_span(&prev_span_merge,&merged_spans,span_a->low,span_a->high,span_a->down,NULL)==FAIL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
@@ -7725,9 +7477,6 @@ printf("%s: check 3.1, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             else if(span_a->low<span_b->low && (span_a->high>=span_b->low && span_a->high<=span_b->high)) {
-#ifdef QAK
-printf("%s: check 3.2, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Check if span 'a' and span 'b' down spans are equal */
                 if(H5S_hyper_cmp_spans(span_a->down,span_b->down)==TRUE) {
                     /* Merge/add copy of span 'a' with/to merged spans */
@@ -7777,9 +7526,6 @@ printf("%s: check 3.2, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             else if(span_a->low<span_b->low && span_a->high>span_b->high) {
-#ifdef QAK
-printf("%s: check 3.3, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Check if span 'a' and span 'b' down spans are equal */
                 if(H5S_hyper_cmp_spans(span_a->down,span_b->down)==TRUE) {
                     /* Merge/add copy of lower & middle parts of span 'a' to merged spans */
@@ -7820,9 +7566,6 @@ printf("%s: check 3.3, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             else if(span_a->low>=span_b->low && span_a->high<=span_b->high) {
-#ifdef QAK
-printf("%s: check 3.4, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Check if span 'a' and span 'b' down spans are equal */
                 if(H5S_hyper_cmp_spans(span_a->down,span_b->down)==TRUE) {
                     /* Merge/add copy of lower & middle parts of span 'b' to merged spans */
@@ -7878,9 +7621,6 @@ printf("%s: check 3.4, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             else if((span_a->low>=span_b->low && span_a->low<=span_b->high) && span_a->high>span_b->high) {
-#ifdef QAK
-printf("%s: check 3.5, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Check if span 'a' and span 'b' down spans are equal */
                 if(H5S_hyper_cmp_spans(span_a->down,span_b->down)==TRUE) {
                     /* Merge/add copy of span 'b' to merged spans if so */
@@ -7927,9 +7667,6 @@ printf("%s: check 3.5, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
             /* <-----------------------------------> */
             /*             BBBBBBBBBB                */
             else {
-#ifdef QAK
-printf("%s: check 3.6, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Merge/add span 'b' with the merged spans */
                 if(H5S_hyper_append_span(&prev_span_merge,&merged_spans,span_b->low,span_b->high,span_b->down,NULL)==FAIL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
@@ -7938,16 +7675,10 @@ printf("%s: check 3.6, span_a->(low, high)=(%ld, %ld), span_b->(low, high)=(%ld,
                 H5S_hyper_recover_span(&recover_b,&span_b,span_b->next);
             } /* end else */
         } /* end while */
-#ifdef QAK
-printf("%s: check 4.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
 
         /* Clean up 'a' spans which haven't been added to the list of merged spans */
         if(span_a!=NULL && span_b==NULL) {
             while(span_a!=NULL) {
-#ifdef QAK
-printf("%s: check 5.0, span_a->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,(long)span_a->high);
-#endif /* QAK */
                 /* Merge/add all 'a' spans into the merged spans */
                 if(H5S_hyper_append_span(&prev_span_merge,&merged_spans,span_a->low,span_a->high,span_a->down,NULL)==FAIL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
@@ -7960,9 +7691,6 @@ printf("%s: check 5.0, span_a->(low, high)=(%ld, %ld)\n",FUNC,(long)span_a->low,
         /* Clean up 'b' spans which haven't been added to the list of merged spans */
         if(span_a==NULL && span_b!=NULL) {
             while(span_b!=NULL) {
-#ifdef QAK
-printf("%s: check 6.0, span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_b->low,(long)span_b->high);
-#endif /* QAK */
                 /* Merge/add all 'b' spans into the merged spans */
                 if(H5S_hyper_append_span(&prev_span_merge,&merged_spans,span_b->low,span_b->high,span_b->down,NULL)==FAIL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
@@ -7971,9 +7699,6 @@ printf("%s: check 6.0, span_b->(low, high)=(%ld, %ld)\n",FUNC,(long)span_b->low,
                 H5S_hyper_recover_span(&recover_b,&span_b,span_b->next);
             } /* end while */
         } /* end if */
-#ifdef QAK
-printf("%s: check 7.0, span_a=%p, span_b=%p\n",FUNC,span_a,span_b);
-#endif /* QAK */
     } /* end else */
 
     /* Success!  */
@@ -8017,9 +7742,6 @@ H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
     assert (space);
     assert (new_spans);
 
-#ifdef QAK
-printf("%s: space->select.sel_info.hslab.span_lst=%p, new_spans=%p\n",FUNC,space->select.sel_info.hslab.span_lst,new_spans);
-#endif /* QAK */
     /* If this is the first span tree in the hyperslab selection, just use it */
     if(space->select.sel_info.hslab.span_lst==NULL) {
         space->select.sel_info.hslab.span_lst=H5S_hyper_copy_span(new_spans);
@@ -8254,9 +7976,6 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(_count);
     assert(_block);
     
-#ifdef QAK
-printf("%s: space=%p\n",FUNC,space);
-#endif /* QAK */
     /* Optimize hyperslab selection to merge contiguous blocks */
     for(u=0; u<space->extent.u.simple.rank; u++) {
         /* contiguous hyperslabs have the block size equal to the stride */
@@ -8275,9 +7994,6 @@ printf("%s: space=%p\n",FUNC,space);
     /* Generate span tree for new hyperslab information */
     if((new_spans=H5S_hyper_make_spans(space->extent.u.simple.rank,start,stride,count,block))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't create hyperslab information");
-#ifdef QAK
-printf("%s: new_spans=%p\n",FUNC,new_spans);
-#endif /* QAK */
 
     /* Generate list of blocks to add/remove based on selection operation */
     if(op==H5S_SELECT_SET) {
@@ -8405,9 +8121,6 @@ printf("%s: new_spans=%p\n",FUNC,new_spans);
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
         } /* end switch */
-#ifdef QAK
-printf("%s: a_not_b=%p, a_and_b=%p, b_not_a=%p\n",FUNC,a_not_b,a_and_b,b_not_a);
-#endif /* QAK */
         /* Free the hyperslab trees generated from the clipping algorithm */
         if(a_not_b)
             H5S_hyper_free_span_info(a_not_b);
