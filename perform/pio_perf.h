@@ -9,6 +9,7 @@
 
 #include "pio_timer.h"
 #include "H5private.h"
+#include "h5test.h"
 
 /* setup the dataset no fill option if this is v1.5 or more */
 #if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
@@ -53,7 +54,6 @@ extern FILE     *output;            /* output file                          */
 extern pio_time *timer_g;           /* timer: global for stub functions     */
 extern int      comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 extern int      comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
-extern MPI_Info pio_info_g;         /* MPI INFO object to run the PIO       */
 extern MPI_Comm pio_comm_g;         /* Communicator to run the PIO          */
 extern int      pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 extern int      pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
