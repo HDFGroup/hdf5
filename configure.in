@@ -623,26 +623,39 @@ case "X-$enable_production" in
       CXXFLAGS=$CXXFLAGS_temp
     fi
 
+    FFLAGS_temp=""
+    if test -n "$FFLAGS"; then
+      for d in $FFLAGS ; do
+        if test "X$d" != "X-g"; then
+          FFLAGS_temp="$FFLAGS_temp $d"
+        fi
+      done
+      FFLAGS=$FFLAGS_temp
+    fi
+
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
+    CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
+    FFLAGS="$FFLAGS $PROD_FFLAGS"
     ;;
   X-|X-no)
     enable_production="no"
     AC_MSG_RESULT([development])
     CONFIG_MODE=development
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
+    CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
+    FFLAGS="$FFLAGS $DEBUG_FFLAGS"
     ;;
   X-pg|X-profile)
     enable_production="profile"
     AC_MSG_RESULT([profile])
     CONFIG_MODE=profile
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
+    CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
+    FFLAGS="$FFLAGS $PROFILE_FFLAGS"
     ;;
   *)
     enable_production="user-defined"
