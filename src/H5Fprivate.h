@@ -269,8 +269,15 @@ typedef struct H5F_access_t {
 #ifdef HAVE_PARALLEL
 	/* Properties for parallel I/O */
 	struct {
-	    MPI_Comm    comm;   /* communicator for file access         */
-	    MPI_Info    info;   /* optional info for MPI-IO             */
+	    MPI_Comm     comm;  /* communicator for file access         */
+	    MPI_Info     info;  /* optional info for MPI-IO             */
+	    MPI_Datatype btype;	/* buffer type for xfers		*/
+	    MPI_Datatype ftype;	/* file type for xfers			*/
+	    haddr_t	 disp;	/* displacement for set_view in xfers	*/
+	    int		 use_types; /* if !0, use btype, ftype, disp.	*/
+				    /* otherwise do simple byteblk xfer	*/
+	    int	     old_use_types; /* remember value of use_types	*/
+				    /* from last xfer			*/
 	} mpio;
 #endif
 	
@@ -303,6 +310,8 @@ typedef struct H5MF_free_t {
 /*
  * Define the low-level file interface.
  */
+/* rky 980816 Removed const modifier from access params for read and write,
+ * because H5F_mpio_read and H5F_mpio_write alter some fields therein. */
 typedef struct H5F_low_class_t {
     hbool_t	(*access)(const char *name, const H5F_access_t *access_parms,
 			  int mode, H5F_search_t *key/*out*/);

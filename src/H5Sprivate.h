@@ -90,13 +90,31 @@ typedef struct {
     H5S_hyper_node_t *node; /* Boundary's node */
 } H5S_hyper_bound_t;
 
-/* Information about hyperslab selection */
+/* Information about hyperslab list */
 typedef struct {
     size_t count;               /* Number of nodes in list */
     H5S_hyper_node_t *head;     /* Pointer to head of hyperslab list */
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
     H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
 } H5S_hyper_list_t;
+
+/* Information about one dimension in a hyperslab selection */
+typedef struct {
+    hssize_t start;
+    hsize_t  stride;
+    hsize_t  count;
+    hsize_t  block;
+} H5S_hyper_dim_t;
+
+/* Information about hyperslab selection */
+typedef struct {
+    H5S_hyper_dim_t *diminfo;    /* ->[rank] of per-dim selection info */
+	/* diminfo only points to one array, which holds the information
+	 * for one hyperslab selection. Perhaps this might need to be
+	 * expanded into a list of arrays when the H5Sselect_hyperslab's
+	 * restriction to H5S_SELECT_SET is removed. */
+    H5S_hyper_list_t *hyper_lst; /* List of selected hyperslabs (order is not important) */
+} H5S_hyper_sel_t;
 
 /* Selection information container */
 typedef struct {
@@ -105,8 +123,8 @@ typedef struct {
     hsize_t *order;     /* Selection order.  (NULL means a specific ordering of points) */
     hsize_t num_elem;   /* Number of elements in selection */
     union {
-        H5S_pnt_list_t *pnt_lst;    /* List of selected points (order is important) */
-        H5S_hyper_list_t *hyper_lst;    /* List of selected hyperslabs (order is not important) */
+        H5S_pnt_list_t *pnt_lst; /* List of selected points (order is important) */
+        H5S_hyper_sel_t hyper;   /* Info about hyperslab selections */
     } sel_info;
 } H5S_select_t;
 
@@ -306,5 +324,21 @@ int H5S_hyper_compare_regions (const void *r1, const void *r2);
 int H5S_hyper_compare_bounds (const void *r1, const void *r2);
 herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
 hbool_t H5S_hyper_select_valid (const H5S_t *space);
+
+#ifdef HAVE_PARALLEL
+    /* MPI-IO function to read directly from app buffer to file rky980813 */
+    herr_t H5S_mpio_spaces_read (H5F_t *f, const struct H5O_layout_t *layout,
+		   const struct H5O_pline_t *pline,
+		   const struct H5O_efl_t *efl, size_t elmt_size,
+		   const H5S_t *file_space, const H5S_t *mem_space,
+		   const H5D_transfer_t xfer_mode, void *buf/*out*/);
+
+    /* MPI-IO function to write directly from app buffer to file rky980813 */
+    herr_t H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
+		    const struct H5O_pline_t *pline,
+		    const struct H5O_efl_t *efl, size_t elmt_size,
+		    const H5S_t *file_space, const H5S_t *mem_space,
+		    const H5D_transfer_t xfer_mode, const void *buf);
+#endif
 
 #endif
