@@ -387,24 +387,28 @@ AC_ARG_ENABLE(production,
 
 case "X-$enable_production" in
   X-|X-yes)
+    enable_production="yes"
     AC_MSG_RESULT("production")
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
   X-no)
+    enable_production="no"
     AC_MSG_RESULT("development")
     CONFIG_MODE=development
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
     ;;
   X-pg|X-profile)
+    enable_production="profile"
     AC_MSG_RESULT("profile")
     CONFIG_MODE=profile
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
     ;;
   *)
+    enable_production="user-defined"
     AC_MSG_RESULT("user-defined")
     CONFIG_MODE="$X-enableval"
     ;;
@@ -1235,7 +1239,7 @@ case "X-$DEBUG_PKG" in
     AC_MSG_RESULT(default ($DEBUG_PKG))
     ;;
   X-all)
-    DEBUG_PKG=$all_packages
+    DEBUG_PKG="$all_packages"
     CPPFLAGS="$CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT(all ($DEBUG_PKG))
     ;;
@@ -1803,19 +1807,21 @@ PRINT "Compiling Options:"
 
 PRINT_N "               Compilation Mode"
 case "X-$enable_production" in
-  X-yes)           PRINT "Production" ;;
-  X-|X-no)         PRINT "Development" ;;
-  X-pg|X-profile)  PRINT "Profile" ;;
-  *)               PRINT "$enable_production" ;;
+  X-yes)        PRINT "Production" ;;
+  X-no)         PRINT "Development" ;;
+  X-profile)    PRINT "Profile" ;;
+  *)            PRINT "$enable_production" ;;
 esac
 
 PRINT_N "                     Debug Mode"
-case "X-$DEBUG_PKG" in
-  X-|X-yes)     PRINT "Default" ;;
-  X-all)        PRINT "All" ;;
-  X-no|X-none)  PRINT "None" ;;
-  *)            PRINT "$DEBUG_PKG" ;;
-esac
+
+if test "X$DEBUG_PKG" = "X$all_packages"; then
+  PRINT "All"
+elif test -z $DEBUG_PKG; then
+  PRINT "None"
+else
+  PRINT $DEBUG_PKG
+fi
 
 PRINT_N "               Shared Libraries"
 IF_YES_NO "$enable_shared"
