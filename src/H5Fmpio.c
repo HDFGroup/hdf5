@@ -106,11 +106,11 @@ static H5F_low_t *H5F_mpio_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
-			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    const H5D_transfer_t xfer_mode, const haddr_t *addr,
 			    size_t size, uint8_t *buf/*out*/);
 htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 static herr_t H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
-			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     const H5D_transfer_t xfer_mode, const haddr_t *addr,
 			     size_t size, const uint8_t *buf);
 static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr/*out*/);
@@ -496,14 +496,11 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
  *	The guts of H5F_mpio_read and H5F_mpio_write
  *	should be replaced by a single dual-purpose routine.
  *
- * 	Robb Matzke, 19990421
- *	Changed xfer_mode to xfer_parms for all H5F_*_read() callbacks.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
-	      const H5F_xfer_t *xfer_parms,
+	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
 {
     MPI_Offset  mpi_off, mpi_disp;
@@ -579,7 +576,7 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
     access_parms->u.mpio.use_types = 0;
 
     /* Read the data.  */
-    switch (xfer_parms->xfer_mode){
+    switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
     case H5D_XFER_DFLT:
 	mpierr = MPI_File_read_at     ( lf->u.mpio.f, mpi_off, (void*) buf,
@@ -747,14 +744,11 @@ H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
  * 	rky, 980828
  *	Added allsame parameter to make all but proc 0 skip the actual write.
  *
- * 	Robb Matzke, 19990421
- *	Changed xfer_mode to xfer_parms for all H5F_*_write() callbacks.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
-	       const H5F_xfer_t *xfer_parms,
+	       const H5D_transfer_t xfer_mode,
 	       const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     MPI_Offset  mpi_off, mpi_disp;
@@ -852,7 +846,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
     access_parms->u.mpio.use_types = 0;
 
     /* Write the data.  */
-    switch (xfer_parms->xfer_mode){
+    switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
     case H5D_XFER_DFLT:
 	mpierr = MPI_File_write_at    ( lf->u.mpio.f, mpi_off, (void*) buf,
