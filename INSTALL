@@ -296,7 +296,8 @@
 
 	HDF5 uses the zlib library for two purposes: it provides
 	support for the HDF5 deflate data compression filter, and it
-	is used by the h5toh4 converter in support of HDF4. Configure
+	is used by the h5toh4 converter and  the h4toh5 converter
+	in support of HDF4. Configure
 	searches the standard places (plus those specified above with
 	CPPFLAGS and LDFLAGS variables) for the zlib headers and
 	library. The search can be disabled by specifying
@@ -310,7 +311,8 @@
 	      LDFLAGS=-L/usr/unsup/lib \
 	      ./configure
 
-        The HDF5-to-HDF4 conversion tool requires the HDF4 library and 
+        The HDF5-to-HDF4 and HDF4-to-HDF5 conversion tool requires the HDF4 
+	library and 
         header files which are detected the same way as zlib. The
         switch to give to configure is `--with-hdf4'.  Note that HDF5
         requires a newer version of zlib than the one shipped with
@@ -454,7 +456,7 @@
 	    ./tools/h5toh4	(hdf5 to hdf4 file converter)
 	    ./tools/h5debug	(low-level file debugging)
 	    ./tools/h5import	(a demo)
-
+            ./tools/h4toh5      (hdf4 to hdf5 file converter)
 6. Using the Library
 	Please see the User Manual in the doc/html directory.
 
