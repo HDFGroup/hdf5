@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include "h5private.h"
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -26,7 +26,12 @@
 #undef MAX
 #endif /* MAX */
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
+#ifndef F_OK
+#define F_OK 00
+#define W_OK 02
+#define R_OK 04
 
+#endif
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_STDIO_g = 0;
 
@@ -545,7 +550,7 @@ H5FD_stdio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     /* Check easy cases */
     if (0 == size)
         return(0);
-    if ((uint64_t)addr >= file->eof) {
+	if ((haddr_t)addr >= file->eof) {
         memset(buf, 0, size);
         return(0);
     }
