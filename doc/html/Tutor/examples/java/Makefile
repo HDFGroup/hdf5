@@ -1,3 +1,4 @@
+# Generated automatically from Makefile.in by configure.
 # /*=======================================================================
 # UNIVERSITY OF ILLINOIS (UI), NATIONAL CENTER FOR SUPERCOMPUTING
 # APPLICATIONS (NCSA), Software Distribution Policy for Public Domain
@@ -30,10 +31,10 @@
 # 
 
 
-JAVAC           = @JAVAC@
-FIND            = @FIND@
+JAVAC           = /usr/java1.2/bin/javac
+FIND            = /bin/find
 
-CLASSPATH=@CLASSPATH@                                                         
+CLASSPATH=/usr/java1.2/jre/lib/rt.jar:/afs/ncsa.uiuc.edu/projects/hdf/java/java2/mcgrath/arabica/java-hdf5                                                         
 
 
 .SUFFIXES: .java .class
