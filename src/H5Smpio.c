@@ -105,17 +105,22 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
 		     hbool_t *is_derived_type )
 {
     hsize_t	total_bytes;
+    hssize_t	snelmts;                /*total number of elmts	(signed) */
+    hsize_t	nelmts;                 /*total number of elmts	*/
     unsigned		u;
+    herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_all_type);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_all_type);
 
     /* Check args */
     assert (space);
 
     /* Just treat the entire extent as a block of bytes */
-    total_bytes = (hsize_t)elmt_size;
-    for (u=0; u<space->extent.u.simple.rank; ++u)
-        total_bytes *= space->extent.u.simple.size[u];
+    if((snelmts = H5S_get_simple_extent_npoints(space))<0)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+
+    total_bytes = (hsize_t)elmt_size*nelmts;
 
     /* fill in the return values */
     *new_type = MPI_BYTE;
@@ -123,7 +128,8 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     *extra_offset = 0;
     *is_derived_type = 0;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_all_type() */
 
 
@@ -740,7 +746,8 @@ done:
  */
 herr_t
 H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+    size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
     hid_t dxpl_id, void *buf/*out*/)
 {
@@ -778,7 +785,8 @@ done:
  */
 herr_t
 H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+    size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
     hid_t dxpl_id, const void *buf)
 {

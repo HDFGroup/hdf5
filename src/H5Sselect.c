@@ -1805,8 +1805,9 @@ done:
  */
 herr_t
 H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
-    const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5D_storage_t *store, size_t nelmts, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space,
+    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -1821,7 +1822,6 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
     size_t *mem_len=NULL;       /* Pointer to sequence lengths in memory */
     size_t _file_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence lengths in the file */
     size_t *file_len=NULL;      /* Pointer to sequence lengths in the file */
-    size_t maxelem;             /* Number of elements in selection */
     size_t mem_nseq;            /* Number of sequences generated in the file */
     size_t file_nseq;           /* Number of sequences generated in memory */
     size_t mem_nelem;           /* Number of elements used in memory sequences */
@@ -1867,26 +1867,16 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
         file_off=_file_off;
     } /* end else */
 
-    /* Get number of bytes in selection */
-#ifndef NDEBUG
-    {
-        hsize_t tmp_maxelem=H5S_get_select_npoints(file_space);
-        H5_ASSIGN_OVERFLOW(maxelem,tmp_maxelem,hsize_t,size_t);
-    }
-#else /* NDEBUG */
-    maxelem=(size_t)H5S_get_select_npoints(file_space);
-#endif /* NDEBUG */
-
     /* Initialize sequence counts */
     curr_mem_seq=curr_file_seq=0;
     mem_nseq=file_nseq=0;
 
     /* Loop, until all bytes are processed */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Check if more file sequences are needed */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,maxelem,&file_nseq,&file_nelem,file_off,file_len)<0)
+            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -1896,7 +1886,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,dxpl_cache->vec_size,maxelem,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
+            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -1918,7 +1908,7 @@ HDfprintf(stderr,"%s: mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,curr_mem_seq,me
 
         /* Decrement number of elements left to process */
         assert((tmp_file_len%elmt_size)==0);
-        maxelem-=(tmp_file_len/elmt_size);
+        nelmts-=(tmp_file_len/elmt_size);
     } /* end while */
 
 done:
@@ -1965,8 +1955,9 @@ done:
  */
 herr_t
 H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
-    const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5D_storage_t *store, size_t nelmts, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space,
+    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -1981,7 +1972,6 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
     size_t *mem_len=NULL;       /* Pointer to sequence lengths in memory */
     size_t _file_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence lengths in the file */
     size_t *file_len=NULL;      /* Pointer to sequence lengths in the file */
-    size_t maxelem;             /* Number of elements in selection */
     size_t mem_nseq;            /* Number of sequences generated in the file */
     size_t file_nseq;           /* Number of sequences generated in memory */
     size_t mem_nelem;           /* Number of elements used in memory sequences */
@@ -2036,22 +2026,12 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
     
-    /* Get number of bytes in selection */
-#ifndef NDEBUG
-    {
-        hsize_t tmp_maxelem=H5S_get_select_npoints(file_space);
-        H5_ASSIGN_OVERFLOW(maxelem,tmp_maxelem,hsize_t,size_t);
-    }
-#else /* NDEBUG */
-    maxelem=(size_t)H5S_get_select_npoints(file_space);
-#endif /* NDEBUG */
-
     /* Initialize sequence counts */
     curr_mem_seq=curr_file_seq=0;
     mem_nseq=file_nseq=0;
 
     /* Loop, until all bytes are processed */
-    while(maxelem>0) {
+    while(nelmts>0) {
         /* Check if more file sequences are needed */
 #ifdef QAK
 {
@@ -2064,7 +2044,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
 #endif /* QAK */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,maxelem,&file_nseq,&file_nelem,file_off,file_len)<0)
+            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -2083,7 +2063,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,dxpl_cache->vec_size,maxelem,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
+            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -2120,7 +2100,7 @@ for(u=curr_mem_seq; u<mem_nseq; u++)
 
         /* Decrement number of elements left to process */
         assert((tmp_file_len%elmt_size)==0);
-        maxelem-=(tmp_file_len/elmt_size);
+        nelmts-=(tmp_file_len/elmt_size);
     } /* end while */
 
 done:
