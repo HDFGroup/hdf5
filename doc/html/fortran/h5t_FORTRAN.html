@@ -1,7 +1,9 @@
 <html>
 <head><title>
 FORTRAN Datatype API -- h5t
-</title></head>
+</title>
+
+<!-- #BeginLibraryItem "/ed_libs/styles_RM.lbi" --><link href="../ed_styles/RMelect.css" rel="stylesheet" type="text/css"><!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
 
@@ -1253,6 +1255,25 @@ FORTRAN Datatype API -- h5t
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_super_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_super_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! Base datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+          END SUBROUTINE h5tget_super_f
+</pre>
 
 
 
@@ -1268,14 +1289,13 @@ FORTRAN Datatype API -- h5t
 <hr>
 
 
-
-<address>
+<!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
-</address>
-
-Last modified:  23 October, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
+</address><!-- #EndLibraryItem -->
+
+Last modified:  14 March 2003
 
 </body>
 </html>
