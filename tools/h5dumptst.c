@@ -61,8 +61,8 @@ void test_enum(void);
 void test_objref(void);
 void test_datareg(void);
 void test_nestcomp(void);
-
-
+void test_opaque(void);
+void test_bitfields(void);
 
 static void test_group(void) {
 hid_t fid, group;
@@ -1683,7 +1683,7 @@ void test_nestcomp(void){
 
 }
 
-void test_opaque(){
+void test_opaque(void) {
 	hid_t file, type, dataset, space;
 	char test[100][2];
 	int x;
@@ -1724,7 +1724,7 @@ void test_opaque(){
 		
 }
 
-void test_bitfields(){
+void test_bitfields(void) {
     hid_t		file, grp=-1, type=-1, space=-1, dset=-1;
     size_t		i;
     hsize_t		nelmts;
