@@ -40,10 +40,9 @@
 #ifdef H5_HAVE_PARALLEL
 
 static herr_t
-H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
+H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     hid_t dxpl_id, void *buf/*out*/, 
-		     const H5D_storage_t *store,
+                     void *buf/*out*/, 
 		     hbool_t do_write);
 
 
@@ -91,11 +90,9 @@ H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
+H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-    hid_t dxpl_id, void *_buf /*out*/,
-    const H5D_storage_t *store,
-    hbool_t do_write )
+    void *_buf /*out*/, hbool_t do_write )
 {
     haddr_t	 addr;                  /* Address of dataset (or selection) within file */
     size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
@@ -111,14 +108,14 @@ H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
     FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_spaces_xfer);
 
     /* Check args */
-    assert (f);
-    assert (dset);
+    assert (io_info);
+    assert (io_info->dset);
     assert (file_space);
     assert (mem_space);
     assert (buf);
-    assert (IS_H5FD_MPIO(f));
+    assert (IS_H5FD_MPIO(io_info->dset->ent.file));
     /* Make certain we have the correct type of property list */
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
 
     /* create the MPI buffer type */
     if (H5S_mpio_space_type( mem_space, elmt_size,
@@ -139,21 +136,21 @@ H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
     /* Get the base address of the contiguous dataset or the chunk */
-    if(dset->shared->layout.type == H5D_CONTIGUOUS)
-       addr = H5D_contig_get_addr(dset) + mpi_file_offset;
+    if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
+       addr = H5D_contig_get_addr(io_info->dset) + mpi_file_offset;
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
 
-        assert(dset->shared->layout.type == H5D_CHUNKED); 
-        chunk_addr=H5D_istore_get_addr(f,dxpl_id,&(dset->shared->layout),store->chunk.offset,NULL);
-        addr = H5F_BASE_ADDR(f) + chunk_addr + mpi_file_offset;
+        assert(io_info->dset->shared->layout.type == H5D_CHUNKED); 
+        chunk_addr=H5D_istore_get_addr(io_info,NULL);
+        addr = H5F_BASE_ADDR(io_info->dset->ent.file) + chunk_addr + mpi_file_offset;
     }
 
     /*
      * Pass buf type, file type to the file driver. Request an MPI type
      * transfer (instead of an elementary byteblock transfer).
      */
-    if(H5FD_mpi_setup_collective(dxpl_id, mpi_buf_type, mpi_file_type)<0)
+    if(H5FD_mpi_setup_collective(io_info->dxpl_id, mpi_buf_type, mpi_file_type)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
     plist_is_setup=1;
 
@@ -162,17 +159,17 @@ H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
 
     /* transfer the data */
     if (do_write) {
-    	if (H5F_block_write(f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
+    	if (H5F_block_write(io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
     } else {
-    	if (H5F_block_read (f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
+    	if (H5F_block_read (io_info->dset->ent.file, H5FD_MEM_DRAW, addr, mpi_buf_count, io_info->dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
     }
 
 done:
     /* Reset the dxpl settings */
     if(plist_is_setup) {
-        if(H5FD_mpi_teardown_collective(dxpl_id)<0)
+        if(H5FD_mpi_teardown_collective(io_info->dxpl_id)<0)
     	    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
     } /* end if */
 
@@ -211,8 +208,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t  *store,
+H5D_mpio_spaces_read(H5D_io_info_t *io_info,
+    H5O_layout_readvv_func_t UNUSED op,
     size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     void *buf/*out*/)
@@ -221,8 +218,8 @@ H5D_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t 
 
     FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_read);
 
-    ret_value = H5D_mpio_spaces_xfer(f, dset, elmt_size, file_space,
-        mem_space, dxpl_id, buf, store, 0/*read*/);
+    ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
+        mem_space, buf, 0/*read*/);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_spaces_read() */
@@ -249,8 +246,8 @@ H5D_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t 
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t  *store,
+H5D_mpio_spaces_write(H5D_io_info_t *io_info,
+    H5O_layout_writevv_func_t UNUSED op,
     size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     const void *buf)
@@ -260,8 +257,8 @@ H5D_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t
     FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_write);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-    ret_value = H5D_mpio_spaces_xfer(f, dset, elmt_size, file_space,
-        mem_space, dxpl_id, (void*)buf, store, 1/*write*/);
+    ret_value = H5D_mpio_spaces_xfer(io_info, elmt_size, file_space,
+        mem_space, (void*)buf, 1/*write*/);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_spaces_write() */

@@ -1119,9 +1119,22 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
+    H5D_storage_t store;                /*union of storage info for dataset */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
+
+    /* Initialize storage info for this dataset */
+    if (dataset->shared->efl.nused>0)
+        HDmemcpy(&store.efl,&(dataset->shared->efl),sizeof(H5O_efl_t));
+    else {
+        store.contig.dset_addr=dataset->shared->layout.u.contig.addr;
+        store.contig.dset_size=dataset->shared->layout.u.contig.size;
+    } /* end if */
+
+    /* Construct dataset I/O info */
+    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
 
     /*
      * If there is no type conversion then read directly into the
@@ -1137,8 +1150,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
                 || dataset->shared->efl.nused>0 || 0 == nelmts
                 || dataset->shared->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+        status = (sconv->read)(&io_info, dataset->shared->layout.readvv,
             (size_t)nelmts, H5T_get_size(dataset->shared->type), 
             file_space, mem_space,
             buf/*out*/);
@@ -1240,12 +1252,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
 	/* Sanity check that space is allocated, then read data from it */ 
-        assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
-                || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
-                || dataset->shared->efl.nused>0 || 0 == nelmts
-                || dataset->shared->layout.type==H5D_COMPACT);
-        n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+        n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
             file_space, &file_iter, smine_nelmts,
             tconv_buf/*out*/);
 
@@ -1370,9 +1377,22 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
+    H5D_storage_t store;                /*union of storage info for dataset */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
+
+    /* Initialize storage info for this dataset */
+    if (dataset->shared->efl.nused>0)
+        HDmemcpy(&store.efl,&(dataset->shared->efl),sizeof(H5O_efl_t));
+    else {
+        store.contig.dset_addr=dataset->shared->layout.u.contig.addr;
+        store.contig.dset_size=dataset->shared->layout.u.contig.size;
+    } /* end if */
+
+    /* Construct dataset I/O info */
+    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
 
     /*
      * If there is no type conversion then write directly from the
@@ -1383,8 +1403,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+        status = (sconv->write)(&io_info, dataset->shared->layout.writevv,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
             file_space, mem_space,
             buf);
@@ -1503,8 +1522,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, (H5D_storage_t *)&(dataset->shared->efl),
+            n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
                 file_space, &bkg_iter, smine_nelmts,
                 bkg_buf/*out*/); 
 
@@ -1534,8 +1552,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-	status = H5S_select_fscat(dataset->ent.file, dxpl_cache, dxpl_id,
-            dataset, (H5D_storage_t *)&(dataset->shared->efl),
+	status = H5S_select_fscat(&io_info, dataset->shared->layout.writevv,
             file_space, &file_iter, smine_nelmts,
             tconv_buf);
 #ifdef H5S_DEBUG
@@ -1619,6 +1636,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1626,6 +1644,9 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
+
+    /* Construct dataset I/O info */
+    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
 
     /*
      * If there is no type conversion then read directly into the
@@ -1656,8 +1677,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual read operation */
-            status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, &store,
+            status = (sconv->read)(&io_info,dataset->shared->layout.readvv,
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
@@ -1782,8 +1802,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                     || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
                 || dataset->shared->efl.nused>0 || dataset->shared->layout.type==H5D_COMPACT);
-            n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, &store,
+            n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
                 chunk_info->fspace, &file_iter, smine_nelmts,
                 tconv_buf/*out*/);
 
@@ -1936,32 +1955,18 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
     
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - After creating chunk map, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
    
+    /* Construct dataset I/O info */
+    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
+
     /*
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
@@ -1970,15 +1975,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Performing optimized I/O, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
         /* Get first node in chunk tree */
         chunk_node=H5TB_first(fm.fsel->root);
 
@@ -1994,8 +1990,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual write operation */
-            status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, &store,
+            status = (sconv->write)(&io_info, dataset->shared->layout.writevv,
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
@@ -2007,15 +2002,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
             /* Get the next chunk node in the tree */
             chunk_node=H5TB_next(chunk_node);
         } /* end while */
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Done performing optimized I/O, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
         
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].write_timer), &timer);
@@ -2026,13 +2012,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 	/* direct xfer accomplished successfully */
 	HGOTO_DONE(SUCCEED)
     } /* end if */
-#ifdef QAK
-{
-    int mpi_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    HDfprintf(stderr,"%s: rank=%d - Performing NON-optimized I/O\n",FUNC,mpi_rank);
-}
-#endif /* QAK */
    
     /*
      * This is the general case (type conversion, usually).
@@ -2151,8 +2130,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
-                    dataset, &store,
+                n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
                     chunk_info->fspace, &bkg_iter, smine_nelmts,
                     bkg_buf/*out*/); 
 
@@ -2183,8 +2161,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_fscat(dataset->ent.file, dxpl_cache, dxpl_id,
-                dataset, &store,
+            status = H5S_select_fscat(&io_info, dataset->shared->layout.writevv,
                 chunk_info->fspace, &file_iter, smine_nelmts,
                 tconv_buf);
 
@@ -2377,15 +2354,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     herr_t ret_value = SUCCEED;	/* Return value		*/
      
     FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_map)
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
 
     /* Get layout for dataset */
     fm->layout = &(dataset->shared->layout);
@@ -2468,28 +2436,9 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         fm->last_chunk_info=NULL;
     } /* end if */
     else {
-#ifdef QAK
-    {
-        int mpi_rank;
-        double time;
-        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-        time = MPI_Wtime();
-        HDfprintf(stderr,"%s: rank=%d - Before creating chunk selections, time=%f\n",FUNC,mpi_rank,time);
-    }
-#endif /* QAK */
         /* Build the file selection for each chunk */
         if(H5D_create_chunk_file_map_hyper(fm)<0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
-#ifdef QAK
-    {
-        int mpi_rank;
-        double time;
-        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-        time = MPI_Wtime();
-        HDfprintf(stderr,"%s: rank=%d - After creating file chunk selections, time=%f\n",FUNC,mpi_rank,time);
-        HDfprintf(stderr,"%s: rank=%d - H5S_select_shape_same=%d\n",FUNC,mpi_rank,H5S_select_shape_same(file_space,equiv_mspace));
-    }
-#endif /* QAK */
 
         /* Clean file chunks' hyperslab span "scratch" information */
         curr_node=H5TB_first(fm->fsel->root);
@@ -2572,16 +2521,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         } /* end if */
     } /* end else */
 
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - After creating chunk selections, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
-
 done:
     /* Release the [potentially partially built] chunk mapping information if an error occurs */
     if(ret_value<0) {
@@ -2611,15 +2550,6 @@ done:
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     } /* end if */
    
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Leaving, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_create_chunk_map() */
 
@@ -2905,18 +2835,6 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     herr_t	ret_value = SUCCEED;        /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_mem_map_hyper)
-#ifdef QAK
-{
-    hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
-
-    if(H5S_get_simple_extent_dims(fm->mem_space, mem_dims, NULL)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
-
-    HDfprintf(stderr,"%s: mem_dims={",FUNC);
-    for(u=0; u<fm->m_ndims; u++)
-        HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
-}
-#endif /* QAK */
 
     /* Sanity check */
     assert(fm->f_ndims>0);
@@ -2960,22 +2878,6 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         assert(fm->m_ndims==fm->f_ndims);
         for(u=0; u<fm->f_ndims; u++)
             adjust[u]=file_sel_start[u]-mem_sel_start[u];
-#ifdef QAK
-    {
-        int mpi_rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-        if(mpi_rank==1) {
-            HDfprintf(stderr,"%s: rank=%d - adjust={",FUNC,mpi_rank);
-            for(u=0; u<fm->f_ndims; u++)
-                HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-        } /* end if */
-    }
-#endif /* QAK */
-#ifdef QAK
-    HDfprintf(stderr,"%s: adjust={",FUNC);
-    for(u=0; u<fm->f_ndims; u++)
-        HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-#endif /* QAK */
 
         /* Iterate over each chunk in the chunk list */
         curr_node=H5TB_first(fm->fsel->root);
@@ -3003,49 +2905,11 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
             /* Compensate for the chunk offset */
             for(u=0; u<fm->f_ndims; u++)
                 chunk_adjust[u]=adjust[u]-chunk_info->coords[u]; /*lint !e771 The adjust array will always be initialized */
-#ifdef QAK
-    {
-        int mpi_rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-        if(mpi_rank==1) {
-            HDfprintf(stderr,"%s: rank=%d - Before adjusting memory selection\n",FUNC,mpi_rank);
-            HDfprintf(stderr,"%s: rank=%d - chunk_adjust={",FUNC,mpi_rank);
-            for(u=0; u<fm->f_ndims; u++)
-                HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-        } /* end if */
-    }
-#endif /* QAK */
-#ifdef QAK
-    HDfprintf(stderr,"%s: Before adjusting memory selection\n",FUNC);
-    HDfprintf(stderr,"%s: chunk_adjust={",FUNC);
-    for(u=0; u<fm->f_ndims; u++)
-        HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-#endif /* QAK */
+
             /* Adjust the selection */
             if(H5S_hyper_adjust(chunk_info->mspace,chunk_adjust)<0) /*lint !e772 The chunk_adjust array will always be initialized */
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
-#ifdef QAK
-    {
-        int mpi_rank;
-        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-        if(mpi_rank==1)
-            HDfprintf(stderr,"%s: rank=%d - After adjusting memory selection\n",FUNC,mpi_rank);
-    }
-#endif /* QAK */
-#ifdef QAK
-    HDfprintf(stderr,"%s: After adjusting memory selection\n",FUNC);
 
-    {
-        hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
-
-        if(H5S_get_simple_extent_dims(chunk_info->mspace, mem_dims, NULL)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
-
-        HDfprintf(stderr,"%s: mem_dims={",FUNC);
-        for(u=0; u<fm->m_ndims; u++)
-            HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
-    }
-#endif /* QAK */
             /* Get the next chunk node in the TBBT */
             curr_node=H5TB_next(curr_node);
         } /* end while */

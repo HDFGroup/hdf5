@@ -24,13 +24,14 @@
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK      H5S_select_mask
 
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Dprivate.h"         /* Datasets (for their properties) */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5FLprivate.h"	/* Free Lists	  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
-#include "H5Vprivate.h"         /* Vector functions */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Spkg.h"		/* Dataspaces 				*/
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* Local functions */
 #ifdef LATER
@@ -1279,9 +1280,6 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     htri_t ret_value=TRUE;  /* return value */
 
     FUNC_ENTER_NOAPI(H5S_select_shape_same, FAIL);
-#ifdef QAK
-HDfprintf(stderr,"%s: Entering\n",FUNC);
-#endif /* QAK */
 
     /* Check args */
     assert(space1);
@@ -1291,28 +1289,15 @@ HDfprintf(stderr,"%s: Entering\n",FUNC);
     if (space1->extent.rank!=space2->extent.rank)
         HGOTO_DONE(FALSE);
 
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 0.5\n",FUNC);
-HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space1));
-HDfprintf(stderr,"%s: space1->select.num_elem=%Hd\n",FUNC,space1->select.num_elem);
-HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space2));
-HDfprintf(stderr,"%s: space2->select.num_elem=%Hd\n",FUNC,space2->select.num_elem);
-#endif /* QAK */
     /* Check for different number of elements selected */
     if(H5S_GET_SELECT_NPOINTS(space1)!=H5S_GET_SELECT_NPOINTS(space2))
         HGOTO_DONE(FALSE);
 
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 1.0\n",FUNC);
-#endif /* QAK */
     /* Check for "easy" cases before getting into generalized block iteration code */
     if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_ALL && H5S_GET_SELECT_TYPE(space2)==H5S_SEL_ALL) {
         hsize_t dims1[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #1 */
         hsize_t dims2[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #2 */
 
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 2.0\n",FUNC);
-#endif /* QAK */
         if(H5S_get_simple_extent_dims(space1, dims1, NULL)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
         if(H5S_get_simple_extent_dims(space2, dims2, NULL)<0)
@@ -1324,17 +1309,11 @@ HDfprintf(stderr,"%s: Check 2.0\n",FUNC);
                 HGOTO_DONE(FALSE);
     } /* end if */
     else if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_NONE || H5S_GET_SELECT_TYPE(space2)==H5S_SEL_NONE) {
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 3.0\n",FUNC);
-#endif /* QAK */
         HGOTO_DONE(TRUE);
     } /* end if */
     else if((H5S_GET_SELECT_TYPE(space1)==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab->diminfo_valid)
             && (H5S_GET_SELECT_TYPE(space2)==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab->diminfo_valid)) {
 
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 4.0\n",FUNC);
-#endif /* QAK */
         /* Check that the shapes are the same */
         for (u=0; u<space1->extent.rank; u++) {
             if(space1->select.sel_info.hslab->opt_diminfo[u].stride!=space2->select.sel_info.hslab->opt_diminfo[u].stride)
@@ -1355,27 +1334,6 @@ HDfprintf(stderr,"%s: Check 4.0\n",FUNC);
         hssize_t off2[H5O_LAYOUT_NDIMS];        /* Offset of selection #2 blocks */
         htri_t status1,status2;         /* Status from next block checks */
         unsigned first_block=1;         /* Flag to indicate the first block */
-#ifdef QAK
-HDfprintf(stderr,"%s: Check 10.0\n",FUNC);
-HDfprintf(stderr,"%s: space1 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space1));
-if(space1->select.sel_info.hslab.span_lst) {
-    HDfprintf(stderr,"%s: Dumping space1 span list\n",FUNC);
-    H5S_hyper_print_spans(stderr,space1->select.sel_info.hslab.span_lst);
-} /* end if */
-else {
-    HDfprintf(stderr,"%s: Dumping space1 diminfo\n",FUNC);
-    H5S_hyper_print_diminfo(stderr,space1);
-} /* end else */
-HDfprintf(stderr,"%s: space2 selection type=%d\n",FUNC,(int)H5S_GET_SELECT_TYPE(space2));
-if(space2->select.sel_info.hslab.span_lst) {
-    HDfprintf(stderr,"%s: Dumping space2 span list\n",FUNC);
-    H5S_hyper_print_spans(stderr,space2->select.sel_info.hslab.span_lst);
-} /* end if */
-else {
-    HDfprintf(stderr,"%s: Dumping space2 diminfo\n",FUNC);
-    H5S_hyper_print_diminfo(stderr,space2);
-} /* end else */
-#endif /* QAK */
 
         /* Initialize iterator for each dataspace selection
          * Use '0' for element size instead of actual element size to indicate
@@ -1394,28 +1352,8 @@ else {
             /* Get the current block for each selection iterator */
             if(H5S_SELECT_ITER_BLOCK(&iter1,start1,end1)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
-#ifdef QAK
-{
-    HDfprintf(stderr,"%s: iter1 start={",FUNC);
-    for(u=0; u<space1->extent.rank; u++)
-        HDfprintf(stderr,"%Hd%s",start1[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
-    HDfprintf(stderr,"%s: iter1 end={",FUNC);
-    for(u=0; u<space1->extent.rank; u++)
-        HDfprintf(stderr,"%Hd%s",end1[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
-}
-#endif /* QAK */
             if(H5S_SELECT_ITER_BLOCK(&iter2,start2,end2)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
-#ifdef QAK
-{
-    HDfprintf(stderr,"%s: iter2 start={",FUNC);
-    for(u=0; u<space1->extent.rank; u++)
-        HDfprintf(stderr,"%Hd%s",start2[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
-    HDfprintf(stderr,"%s: iter2 end={",FUNC);
-    for(u=0; u<space1->extent.rank; u++)
-        HDfprintf(stderr,"%Hd%s",end2[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
-}
-#endif /* QAK */
 
             /* The first block only compares the sizes and sets the relative offsets for later blocks */
             if(first_block) {
@@ -1450,9 +1388,6 @@ else {
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
             if((status2=H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter2))<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
-#ifdef QAK
-HDfprintf(stderr,"%s: status1=%d, status2=%d\n",FUNC,(int)status1,(int)status2);
-#endif /* QAK */
 
             /* Did we run out of blocks at the same time? */
             if(status1==FALSE && status2==FALSE)
@@ -1479,9 +1414,7 @@ done:
         if (H5S_SELECT_ITER_RELEASE(&iter2)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
-#ifdef QAK
-HDfprintf(stderr,"%s: Leaving, ret_value=%d\n",FUNC,ret_value);
-#endif /* QAK */
+
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_shape_same() */
 
@@ -1605,8 +1538,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t *store, 
+H5S_select_fscat (H5D_io_info_t *io_info,
+    H5O_layout_writevv_func_t op,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const void *_buf)
 {
@@ -1626,20 +1559,19 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     FUNC_ENTER_NOAPI(H5S_select_fscat, FAIL);
 
     /* Check args */
-    assert (f);
-    assert (dset);
-    assert (store);
+    assert (io_info);
+    assert (op);
     assert (space);
     assert (iter);
     assert (nelmts>0);
     assert (_buf);
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
 
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
-        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
     } /* end if */
     else {
@@ -1650,7 +1582,7 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /* Loop until all elements are written */
     while(nelmts>0) {
         /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
+        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,io_info->dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1659,7 +1591,7 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         mem_off=0;
 
         /* Write sequence list out */
-        if (H5D_seq_writevv(f, dxpl_cache, dxpl_id, dset, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if ((*op)(io_info, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -1670,7 +1602,7 @@ H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     } /* end while */
 
 done:
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
         if(len!=NULL)
             H5FL_SEQ_FREE(size_t,len);
         if(off!=NULL)
@@ -1704,8 +1636,8 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t *store, 
+H5S_select_fgath (H5D_io_info_t *io_info,
+    H5O_layout_readvv_func_t op,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     void *_buf/*out*/)
 {
@@ -1725,19 +1657,19 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     FUNC_ENTER_NOAPI(H5S_select_fgath, 0);
 
     /* Check args */
-    assert (f);
-    assert (dset);
-    assert (store);
+    assert (io_info);
+    assert (io_info->dset);
+    assert (io_info->store);
     assert (space);
     assert (iter);
     assert (nelmts>0);
     assert (_buf);
 
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
-        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
-        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
     } /* end if */
     else {
@@ -1745,10 +1677,10 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         off=_off;
     } /* end else */
 
-    /* Loop until all elements are written */
+    /* Loop until all elements are read */
     while(nelmts>0) {
-        /* Get list of sequences for selection to write */
-        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
+        /* Get list of sequences for selection to read */
+        if(H5S_SELECT_GET_SEQ_LIST(space,H5S_GET_SEQ_LIST_SORTED,iter,io_info->dxpl_cache->vec_size,nelmts,&nseq,&nelem,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1757,7 +1689,7 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         mem_off=0;
 
         /* Read sequence list in */
-        if (H5D_seq_readvv(f, dxpl_cache, dxpl_id, dset, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if ((*op)(io_info, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
@@ -1768,7 +1700,7 @@ H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     } /* end while */
 
 done:
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
         if(len!=NULL)
             H5FL_SEQ_FREE(size_t,len);
         if(off!=NULL)
@@ -1969,8 +1901,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t *store,
+H5S_select_read(H5D_io_info_t *io_info,
+    H5O_layout_readvv_func_t op,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     void *buf/*out*/)
@@ -1999,10 +1931,12 @@ H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     FUNC_ENTER_NOAPI(H5S_select_read, FAIL);
 
     /* Check args */
-    assert(f);
-    assert(store);
+    assert(io_info);
+    assert(io_info->dset);
+    assert(io_info->dxpl_cache);
+    assert(io_info->store);
     assert(buf);
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
     
     /* Initialize file iterator */
     if (H5S_select_iter_init(&file_iter, file_space, elmt_size)<0)
@@ -2015,14 +1949,14 @@ H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
-        if((mem_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((mem_len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-        if((file_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+        if((file_len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-        if((file_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((file_off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
     } /* end if */
     else {
@@ -2041,7 +1975,7 @@ H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         /* Check if more file sequences are needed */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if(H5S_SELECT_GET_SEQ_LIST(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
+            if(H5S_SELECT_GET_SEQ_LIST(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,io_info->dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -2051,21 +1985,15 @@ H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if(H5S_SELECT_GET_SEQ_LIST(mem_space,0,&mem_iter,dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
+            if(H5S_SELECT_GET_SEQ_LIST(mem_space,0,&mem_iter,io_info->dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
             curr_mem_seq=0;
         } /* end if */
 
-#ifdef QAK
-HDfprintf(stderr,"%s: curr_file_seq=%Zu, file_nseq=%Zu\n",FUNC,curr_file_seq,file_nseq);
-HDfprintf(stderr,"%s: curr_mem_seq=%Zu, mem_nseq=%Zu\n",FUNC,curr_mem_seq,mem_nseq);
-HDfprintf(stderr,"%s: file_off[%Zu]=%Hu, file_len[%Zu]=%Zu\n",FUNC,curr_file_seq,file_off[curr_file_seq],curr_file_seq,file_len[curr_file_seq]);
-HDfprintf(stderr,"%s: mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,curr_mem_seq,mem_off[curr_mem_seq],curr_mem_seq,mem_len[curr_mem_seq]);
-#endif /* QAK */
         /* Read file sequences into current memory sequence */
-        if ((tmp_file_len=H5D_seq_readvv(f, dxpl_cache, dxpl_id, dset, store,
+        if ((tmp_file_len=(*op)(io_info,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)
@@ -2090,7 +2018,7 @@ done:
     } /* end if */
 
     /* Free vector arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
         if(file_len!=NULL)
             H5FL_SEQ_FREE(size_t,file_len);
         if(file_off!=NULL)
@@ -2119,8 +2047,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t *store,
+H5S_select_write(H5D_io_info_t *io_info,
+    H5O_layout_writevv_func_t op,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     const void *buf/*out*/)
@@ -2147,31 +2075,23 @@ H5S_select_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_write, FAIL);
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
 
     /* Check args */
-    assert(f);
-    assert(store);
+    assert(io_info);
+    assert(io_info->dset);
+    assert(io_info->store);
+    assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
     assert(buf);
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     
     /* Allocate the vector I/O arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
-        if((mem_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((mem_len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-        if((file_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+        if((file_len = H5FL_SEQ_MALLOC(size_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-        if((file_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+        if((file_off = H5FL_SEQ_MALLOC(hsize_t,io_info->dxpl_cache->vec_size))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
     } /* end if */
     else {
@@ -2198,66 +2118,27 @@ H5S_select_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /* Loop, until all bytes are processed */
     while(nelmts>0) {
         /* Check if more file sequences are needed */
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Before file sequence time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if(H5S_SELECT_GET_SEQ_LIST(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
+            if(H5S_SELECT_GET_SEQ_LIST(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,io_info->dxpl_cache->vec_size,nelmts,&file_nseq,&file_nelem,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
             curr_file_seq=0;
         } /* end if */
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - After file sequence time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
 
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if(H5S_SELECT_GET_SEQ_LIST(mem_space,0,&mem_iter,dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
+            if(H5S_SELECT_GET_SEQ_LIST(mem_space,0,&mem_iter,io_info->dxpl_cache->vec_size,nelmts,&mem_nseq,&mem_nelem,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
             curr_mem_seq=0;
         } /* end if */
 
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - After memory sequence time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
-#ifdef QAK
-{
-    unsigned u;
-
-HDfprintf(stderr,"%s: curr_file_seq=%Zu, file_nseq=%Zu\n",FUNC,curr_file_seq,file_nseq);
-HDfprintf(stderr,"%s: curr_mem_seq=%Zu, mem_nseq=%Zu\n",FUNC,curr_mem_seq,mem_nseq);
-for(u=curr_file_seq; u<file_nseq; u++)
-    HDfprintf(stderr,"%s: file_off[%u]=%Hu, file_len[%u]=%Zu\n",FUNC,u,file_off[u],u,file_len[u]);
-for(u=curr_mem_seq; u<mem_nseq; u++)
-    HDfprintf(stderr,"%s: mem_off[%u]=%Hu, mem_len[%u]=%Zu\n",FUNC,u,mem_off[u],u,mem_len[u]);
-}
-#endif /* QAK */
         /* Write memory sequences into file sequences */
-        if ((tmp_file_len=H5D_seq_writevv(f, dxpl_cache, dxpl_id, dset, store,
+        if ((tmp_file_len=(*op)(io_info,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)
@@ -2282,7 +2163,7 @@ done:
     } /* end if */
 
     /* Free vector arrays */
-    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+    if(io_info->dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
         if(file_len!=NULL)
             H5FL_SEQ_FREE(size_t,file_len);
         if(file_off!=NULL)
@@ -2292,15 +2173,7 @@ done:
         if(mem_off!=NULL)
             H5FL_SEQ_FREE(hsize_t,mem_off);
     } /* end if */
-#ifdef QAK
-{
-    int mpi_rank;
-    double time;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    time = MPI_Wtime();
-    HDfprintf(stderr,"%s: rank=%d - Leaving, time=%f\n",FUNC,mpi_rank,time);
-}
-#endif /* QAK */
+
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_write() */
 

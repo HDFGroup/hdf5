@@ -2929,8 +2929,8 @@ done:
 H5T_t*
 H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
 {
-    H5T_shared_t   *shared_fo;
-    H5T_t          *dt;
+    H5T_shared_t   *shared_fo=NULL;
+    H5T_t          *dt=NULL;
     H5T_t          *ret_value;
     
     FUNC_ENTER_NOAPI(H5T_open, NULL);

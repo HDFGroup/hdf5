@@ -97,7 +97,7 @@ typedef struct H5B_shared_t {
 typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
-    size_t	(*get_sizeof_rkey)(H5F_t*, const void*);    /*raw key size   */
+    size_t	(*get_sizeof_rkey)(const H5F_t*, const void*);    /*raw key size   */
     H5RC_t *    (*get_shared)(H5F_t*, const void*);    /*shared info for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
