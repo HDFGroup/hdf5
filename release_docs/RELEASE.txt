@@ -93,6 +93,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed bug with variable-length datatypes used in compound datatypes.
+            SLU - 2003/12/29
         - Fixed bug where scalar dataspaces for attributes were reporting as
             simple dataspaces.  QAK - 2003/12/13
         - Fixed problem with selection offsets of hyperslab selections in
