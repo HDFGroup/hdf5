@@ -427,6 +427,10 @@ test_reference_region(void)
     dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
     CHECK(dset2, FAIL, "H5Rdereference");
 
+    /* Check what H5Rget_object_type function returns */
+    ret = H5Rget_object_type(dset1, &rbuf[0]);
+    VERIFY(ret, H5G_UNKNOWN, "H5Rget_object_type");
+
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
