@@ -1433,7 +1433,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_chunk_read(hsize_t
+#ifdef NDEBUG
+UNUSED
+#endif /* NDEBUG */
+    nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist, 
     H5P_genplist_t *dx_plist, hid_t dxpl_id, hbool_t
 #ifndef H5_HAVE_PARALLEL
@@ -1456,6 +1460,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
+    hsize_t     chunk_nelmts;           /* Number of elements selected in current chunk */
     hsize_t     smine_start;            /*strip mine start loc  */
     hsize_t     n, smine_nelmts;        /*elements per strip    */    
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
@@ -1486,6 +1491,10 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
+
+        /* Get the number of elements selected in this chunk */
+        chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
+        assert(chunk_nelmts<=nelmts);
 #endif
   	/* Sanity check dataset, then read it */
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
@@ -1535,7 +1544,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
         
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
+        sconv->stats[1].read_nbytes += chunk_nelmts * H5T_get_size(dataset->type);
         sconv->stats[1].read_ncalls++;
 #endif
 
@@ -1609,7 +1618,6 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
 
     /* Iterate through chunks to be operated on */
     while(fchunk_node) {
-        hsize_t chunk_nelmts;   /* Number of elements selected in current chunk */
         H5D_fchunk_info_t *fchunk_info;   /* File chunk information */
         H5D_mchunk_info_t *mchunk_info;   /* Memory chunk information */
 
@@ -1780,7 +1788,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_chunk_write(hsize_t
+#ifdef NDEBUG
+UNUSED
+#endif /* NDEBUG */
+nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
     H5P_genplist_t *dx_plist, hid_t dxpl_id, hbool_t
 #ifndef H5_HAVE_PARALLEL
@@ -1803,6 +1815,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     size_t	dst_type_size;	        /*size of destination type*/
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
+    hsize_t     chunk_nelmts;           /* Number of elements selected in current chunk */
     hsize_t     smine_start;            /*strip mine start loc  */
     hsize_t     n, smine_nelmts;        /*elements per strip    */    
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
@@ -1833,6 +1846,10 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
+
+        /* Get the number of elements selected in this chunk */
+        chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
+        assert(chunk_nelmts<=nelmts);
 #endif
         /* Get first node in chunk trees */
         fchunk_node=H5TB_first(fm.fsel->root);
@@ -1878,7 +1895,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
         
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].write_timer), &timer);
-	sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
+	sconv->stats[0].write_nbytes += chunk_nelmts * H5T_get_size(mem_type);
 	sconv->stats[0].write_ncalls++;
 #endif
 
@@ -1956,7 +1973,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
 
     /* Iterate through chunks to be operated on */
     while(fchunk_node) {
-        hsize_t chunk_nelmts;   /* Number of elements selected in current chunk */
         H5D_fchunk_info_t *fchunk_info;   /* File chunk information */
         H5D_mchunk_info_t *mchunk_info;   /* Memory chunk information */
 
