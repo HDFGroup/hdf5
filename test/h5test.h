@@ -14,7 +14,7 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <signal.h>
 #endif
 

@@ -817,10 +817,10 @@ display_enum_type(hid_t type, int ind)
 		printf("%02x", value[i*dst_size+j]);
 	    }
 	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
-	    HDfprintf(stdout,"%"PRINTF_LL_WIDTH"u",
+	    HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
 		   *((unsigned long_long*)((void*)(value+i*dst_size))));
 	} else {
-	    HDfprintf(stdout,"%"PRINTF_LL_WIDTH"d",
+	    HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
 		   *((long_long*)((void*)(value+i*dst_size))));
 	}
     }

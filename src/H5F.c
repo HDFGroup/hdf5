@@ -3516,7 +3516,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
     assert(addr_p);
 
     *addr_p = objno[0];
-#if SIZEOF_LONG<SIZEOF_UINT64_T
+#if H5_SIZEOF_LONG<H5_SIZEOF_UINT64_T
     *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
 #endif
     
