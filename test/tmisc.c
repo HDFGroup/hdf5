@@ -3628,4 +3628,5 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
+    HDremove(MISC21_FILE);
 }
