@@ -38,6 +38,9 @@ typedef struct {
 
 #define H5D_RESERVED_ATOMS  0
 
+/* Set the minimum object header size to create objects with */
+#define H5D_MINHDR_SIZE 512
+
 /*-----------------_-- Local function prototypes ----------------------------*/
 hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name);
 herr_t H5D_flush(hatom_t oid);

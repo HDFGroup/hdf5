@@ -105,18 +105,18 @@ H5O_sim_dim_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
         if(sdim->rank>0)
           {
             sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-            for(u=0; u<sdim->size; u++)
+            for(u=0; u<sdim->rank; u++)
                 UINT32DECODE(p,sdim->size[u]);
             if(sdim->dim_flags&0x01)
               {
                 sdim->max=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-                for(u=0; u<sdim->size; u++)
+                for(u=0; u<sdim->rank; u++)
                     UINT32DECODE(p,sdim->max[u]);
               } /* end if */
             if(sdim->dim_flags&0x02)
               {
                 sdim->perm=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-                for(u=0; u<sdim->size; u++)
+                for(u=0; u<sdim->rank; u++)
                     UINT32DECODE(p,sdim->perm[u]);
               } /* end if */
           } /* end if */
@@ -169,90 +169,99 @@ H5O_sim_dim_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
     UINT32ENCODE(p,sdim->dim_flags);
     if(sdim->rank>0)
       {
-        for(u=0; u<=sdim->rank; u++);
+        for(u=0; u<sdim->rank; u++);
             UINT32ENCODE(p,sdim->size[u]);
         if(sdim->dim_flags&0x01)
           {
-            for(u=0; u<=sdim->rank; u++);
+            for(u=0; u<sdim->rank; u++);
                 UINT32ENCODE(p,sdim->max[u]);
+          } /* end if */
+        if(sdim->dim_flags&0x02)
+          {
+            for(u=0; u<sdim->rank; u++);
+                UINT32ENCODE(p,sdim->perm[u]);
           } /* end if */
       } /* end if */
 
     FUNC_LEAVE (SUCCEED);
-} /* end H5O_sim_dtype_encode() */
+} /* end H5O_sim_dim_encode() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_sim_dtype_fast
+    H5O_sim_dim_fast
  PURPOSE
-    Initializes a new simple datatype struct with info from a symbol table
-        entry.
+    Initializes a new simple dimensionality struct with info from a symbol
+        table entry.
  USAGE
-    void *H5O_sim_dtype_fast(ent, mesg)
+    void *H5O_sim_dim_fast(ent, mesg)
         const H5G_entry_t *ent; IN: pointer to the symbol table entry
-        const void *mesg;       IN: Pointer to the simple datatype struct
+        const void *mesg;       IN: Pointer to the simple dimensionality struct
  RETURNS
     Pointer to the message structure (allocated if none is supplied) on success,
         NULL on failure
  DESCRIPTION
-        This function fills the native memory form of the simple datatype
+        This function fills the native memory form of the simple dimensionality
     message from a symbol-table entry cache fields.  (This method is required
-    for simple datatypes, as they can be cached in the symbol-table entry)
+    for simple dimensionality, as they can be cached in the symbol-table entry)
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
+H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
 {
-   H5O_sim_dtype_t *sdtype = (H5O_sim_dtype_t *)mesg;
+   H5O_sim_dim_t *sdim = (H5O_sim_dim_t *)mesg;
+   uintn u;                    /* local counting variable */
    const uint8 *p;
    
-   FUNC_ENTER (H5O_sim_dtype_fast, NULL, NULL);
+   FUNC_ENTER (H5O_sim_dim_fast, NULL, NULL);
 
    /* check args */
    assert (ent);
 
    if (H5G_CACHED_SDATA==ent->type)
      {
-      if (!sdtype)
-          if((sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t)))!=NULL)
+      if (!sdim)
+          if((sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t)))!=NULL)
             {
-              p=&(uint8 *)ent->cache.sdata.nt;
-              sdtype->length=*p++;
-              sdtype->arch=*p++;
-              UINT16DECODE(p,sdtype->type);
+              p=&(uint8 *)ent->cache.sdata.ndim;
+              UINT32DECODE(p,sdim->rank);
+              sdim->dim_flags=0;    /* cached dimensions never have max. dims or permutation vectors */
+              sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
+              for(u=0; u<sdim->rank; u++)
+                  UINT32DECODE(p,sdim->size[u]);
             } /* end if */
      } /* end if */
    else
-      sdtype = NULL;
+      sdim = NULL;
 
-   FUNC_LEAVE (sdtype);
-} /* end H5O_sim_dtype_fast() */
+   FUNC_LEAVE (sdim);
+} /* end H5O_sim_dim_fast() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_sim_dtype_cache
+    H5O_sim_dim_cache
  PURPOSE
-    Copies a simple datatype message into the cache portion of a symbol table
-        entry.
+    Copies a simple dimensionality message into the cache portion of a symbol
+        table entry.
  USAGE
-    hbool_t H5O_sim_dtype_cache(ent, mesg)
+    hbool_t H5O_sim_dim_cache(ent, mesg)
         const H5G_entry_t *ent; IN: Pointer to the symbol table entry
-        const void *mesg;       IN: Pointer to the simple datatype struct
+        const void *mesg;       IN: Pointer to the simple dimensionality struct
  RETURNS
     BTRUE if symbol-table modified, BFALSE if not modified, BFAIL on failure.
  DESCRIPTION
-        This function is the opposite of the H5O_sim_dtype_fast method, it
+        This function is the opposite of the H5O_sim_dim_fast method, it
     copies a message into the cached portion of a symbol-table entry.  (This
-    method is required for simple datatypes, as they can be cached in the
-    symbol-table entry)
+    method is required for simple dimensionalities, as they can be cached in
+    the symbol-table entry)
 --------------------------------------------------------------------------*/
 static hbool_t
-H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
+H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
 {
-    const H5O_sim_dtype_t *sdtype = (const H5O_sim_dtype_t *)mesg;
+    const H5O_sim_dim_t *sdtype = (const H5O_sim_dim_t *)mesg;
+    uintn u;        /* Local counting variable */
     const uint8 *p;
     hbool_t modified = BFALSE;
    
-    FUNC_ENTER (H5O_sim_dtype_cache, NULL, BFAIL);
+    FUNC_ENTER (H5O_sim_dim_cache, NULL, BFAIL);
 
     /* check args */
     assert (ent);
@@ -268,29 +277,25 @@ H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
       {
         modified = BTRUE;
         ent->type = H5G_CACHED_SDATA;
-        *p++=sdtype->length;
-        *p++=sdtype->arch;
-        UINT16ENCODE(p,sdtype->type);
+        UINT32ENCODE(p,sdim->rank);
+        for(u=0; u<=sdim->rank; u++);
+            UINT32ENCODE(p,sdim->size[u]);
       } /* end if */
     else
       {
-        if(ent->cache.sdata.length= sdtype->length)
+        if(ent->cache.sdata.rank= sdim->rank)
           {
             modified = BTRUE;
-            ent->cache.sdata.length = sdtype->length;
+            ent->cache.sdata.rank = sdim->rank;
           } /* end if */
 
-        if (ent->cache.sdata.arch != sdtype->arch)
-          {
-           modified = BTRUE;
-           ent->cache.sdata.arch = sdtype->arch;
-          } /* end if */
-
-        if (ent->cache.sdata.type != sdtype->type)
-          {
-           modified = BTRUE;
-           ent->cache.sdata.type = sdtype->type;
-          } /* end if */
+        /* Check each dimension */
+        for(u=0; u<sdim->rank; u++)
+            if (ent->cache.sdata.dim[u] != sdim->size[u])
+              {
+               modified = BTRUE;
+               ent->cache.sdata.dim[u] = sdim->size[u];
+              } /* end if */
       } /* end else */
 
     FUNC_LEAVE (modified);

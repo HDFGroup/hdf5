@@ -288,7 +288,7 @@ herr_t H5D_flush(hatom_t oid)
             /* construct dataset symbol-table entry */
             d_sym.name_off=0;
             /* allocate the dataset's object header */
-            if((d_sym.header=H5O_new(file, 1, 0))<0)
+            if((d_sym.header=H5O_new(file, 0, H5D_MINHDR_SIZE))<0)
                 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
             d_sym.type=H5G_NOTHING_CACHED;
             dataset->header=d_sym.header;
