@@ -1,4 +1,7 @@
-HDF5 "testfiles/tall.h5" {
+#############################
+Expected output for 'h5dump tall.h5'
+#############################
+HDF5 "tall.h5" {
 GROUP "/" {
    ATTRIBUTE "attr1" {
       DATATYPE { H5T_STD_I8BE }
