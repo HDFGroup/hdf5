@@ -1281,7 +1281,6 @@ dump_data(hid_t obj_id, int obj_data)
         /* need to call h5dump_mem for the attribute data */    
         type = H5Aget_type(obj_id);
         p_type = h5dump_fixtype(type);
-        H5Tclose(type);
         space = H5Aget_space(obj_id);
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
@@ -1292,7 +1291,7 @@ dump_data(hid_t obj_id, int obj_data)
         assert(buf);
 
         if (H5Aread(obj_id, p_type, buf) >= 0)
-            d_status = h5dump_mem(stdout, outputformat, p_type, space, buf, depth);
+            d_status = h5dump_mem(stdout, outputformat, obj_id, p_type, space, buf, depth);
 
         free(buf);
         H5Tclose(p_type); 

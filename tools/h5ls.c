@@ -1328,7 +1328,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {
-		h5dump_mem(stdout, &info, p_type, space, buf,-1);
+		h5dump_mem(stdout, &info, attr, p_type, space, buf,-1);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 

@@ -1081,7 +1081,6 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    H5Tclose(memb);
     } else if (H5T_VLEN==H5Tget_class(type)) {
 	    unsigned int i;
-	    hid_t space;
 
         /* Get the VL sequences's base datatype for each element */
         memb=H5Tget_super(type);
@@ -1619,7 +1618,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
  *-------------------------------------------------------------------------
  */
 static int
-h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
+h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
 		  hid_t space, void *mem, int indentlevel)
 {
     hsize_t		i;			/*counters		*/
@@ -1655,7 +1654,7 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
     ctx.size_last_dim = ctx.p_max_idx[ctx.ndims - 1];
 
     /* Print it */
-    h5dump_simple_data(stream, info, -1/*no dataset*/, &ctx,
+    h5dump_simple_data(stream, info, obj_id, &ctx,
 		       START_OF_DATA|END_OF_DATA, nelmts, type, mem);
 
     /* Terminate the output */
@@ -1973,7 +1972,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
+h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type, hid_t space,
 	   void *mem,int indentlevel)
 {
     h5dump_t	info_dflt;
@@ -1991,7 +1990,7 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
     if (H5Sis_simple(space) <= 0)
 	return -1;
 
-    return h5dump_simple_mem(stream, info, type, space, mem, indentlevel);
+    return h5dump_simple_mem(stream, info, obj_id, type, space, mem, indentlevel);
 }
 
 /*************************************************************************/

@@ -369,8 +369,8 @@ typedef struct dump_header{
 hid_t h5dump_fixtype(hid_t f_type);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,
                 int indentlevel);
-int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
-               void *mem, int indentlevel);
+int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
+                hid_t space, void *mem, int indentlevel);
 hid_t h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
 
 
