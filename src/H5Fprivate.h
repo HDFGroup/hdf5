@@ -503,10 +503,12 @@ typedef struct H5F_t {
    case 2: UINT16DECODE(p,l); break;					      \
 }
 
-struct H5O_layout_t;		/*forward decl for prototype arguments */
-struct H5O_efl_t;		/*forward decl for prototype arguments */
-struct H5O_pline_t;		/*forward decl for prototype arguments */
-struct H5D_xfer_t;		/*forward decl for prototype arguments */
+/* Forward declarations for prototypes arguments */
+struct H5O_layout_t;
+struct H5O_efl_t;
+struct H5O_pline_t;
+struct H5D_xfer_t;
+struct H5O_fill_t;
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
@@ -533,12 +535,14 @@ herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
 		     const struct H5O_layout_t *layout,
 		     const struct H5O_pline_t *pline,
+		     const struct H5O_fill_t *fill,
 		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		     const hsize_t mem_size[], const hssize_t mem_offset[],
 		     const hssize_t file_offset[], void *_buf/*out*/);
 herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
 		      const struct H5O_layout_t *layout,
 		      const struct H5O_pline_t *pline,
+		      const struct H5O_fill_t *fill,
 		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		      const hsize_t mem_size[], const hssize_t mem_offset[],
 		      const hssize_t file_offset[], const void *_buf);
@@ -552,11 +556,13 @@ herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
 		       const struct H5O_layout_t *layout,
 		       const struct H5O_pline_t *pline,
+		       const struct H5O_fill_t *fill,
 		       const hssize_t offset[], const hsize_t size[],
 		       void *buf /*out */ );
 herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
 			const struct H5O_layout_t *layout,
 			const struct H5O_pline_t *pline,
+			const struct H5O_fill_t *fill,
 			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
 herr_t H5F_istore_allocate (H5F_t *f,

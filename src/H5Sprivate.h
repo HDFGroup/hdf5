@@ -191,6 +191,7 @@ typedef struct H5S_fconv_t {
     /* Gather elements from disk to type conversion buffer */
     size_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
 		   const struct H5O_pline_t *pline,
+		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		   size_t nelmts, const struct H5D_xfer_t *xfer_parms,
@@ -199,6 +200,7 @@ typedef struct H5S_fconv_t {
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
 		   const struct H5O_pline_t *pline,
+		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		   size_t nelmts, const struct H5D_xfer_t *xfer_parms,

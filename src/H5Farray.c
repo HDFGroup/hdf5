@@ -119,10 +119,10 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
 herr_t
 H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
 	      const struct H5O_layout_t *layout,
-	      const struct H5O_pline_t *pline, const struct H5O_efl_t *efl,
-	      const hsize_t _hslab_size[], const hsize_t mem_size[],
-	      const hssize_t mem_offset[], const hssize_t file_offset[],
-	      void *_buf/*out*/)
+	      const struct H5O_pline_t *pline, const H5O_fill_t *fill,
+	      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
+	      const hsize_t mem_size[], const hssize_t mem_offset[],
+	      const hssize_t file_offset[], void *_buf/*out*/)
 {
     uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
@@ -292,8 +292,8 @@ H5F_arr_read (H5F_t *f, const H5D_xfer_t *xfer,
 			       "unable to copy into a proper hyperslab");
 	    }
 	}
-	if (H5F_istore_read (f, xfer, layout, pline, file_offset, hslab_size,
-			     buf)<0) {
+	if (H5F_istore_read (f, xfer, layout, pline, fill, file_offset,
+			     hslab_size, buf)<0) {
 	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
 	}
 	break;
@@ -344,9 +344,10 @@ herr_t
 H5F_arr_write (H5F_t *f, const H5D_xfer_t *xfer,
 	       const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline,
-	       const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
-	       const hsize_t mem_size[], const hssize_t mem_offset[],
-	       const hssize_t file_offset[], const void *_buf)
+	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+	       const hsize_t _hslab_size[], const hsize_t mem_size[],
+	       const hssize_t mem_offset[], const hssize_t file_offset[],
+	       const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
@@ -522,8 +523,8 @@ H5F_arr_write (H5F_t *f, const H5D_xfer_t *xfer,
 			       "unable to copy from a proper hyperslab");
 	    }
 	}
-	if (H5F_istore_write (f, xfer, layout, pline, file_offset, hslab_size,
-			      buf)<0) {
+	if (H5F_istore_write (f, xfer, layout, pline, fill, file_offset,
+			      hslab_size, buf)<0) {
 	    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			   "chunked write failed");
 	}

@@ -1170,8 +1170,8 @@ H5F_istore_prune (H5F_t *f, size_t size)
 static void *
 H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 		 const double split_ratios[], const H5O_pline_t *pline,
-		 const hssize_t offset[], hbool_t relax,
-		 intn *idx_hint/*in,out*/)
+		 const H5O_fill_t *fill, const hssize_t offset[],
+		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
     uintn		idx;			/*hash index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
@@ -1268,9 +1268,20 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 			    "data pipeline read failed");
 	    }
 	    rdcc->nmisses++;
+	} else if (fill && fill->buf) {
+	    /*
+	     * The chunk doesn't exist in the file.  Replicate the fill
+	     * value throughout the chunk.
+	     */
+	    assert(0==chunk_size % fill->size);
+	    H5V_array_fill(chunk, fill->buf, fill->size,
+			   chunk_size/fill->size);
+	    rdcc->ninits++;
+
 	} else {
 	    /*
-	     * The chunk doesn't exist in the file.  Assume all zeros.
+	     * The chunk doesn't exist in the file and no fill value was
+	     * specified.  Assume all zeros.
 	     */
 	    HDmemset (chunk, 0, chunk_size);
 	    rdcc->ninits++;
@@ -1510,8 +1521,8 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
-		const H5O_pline_t *pline, const hssize_t offset_f[],
-		const hsize_t size[], void *buf)
+		const H5O_pline_t *pline, const H5O_fill_t *fill,
+		const hssize_t offset_f[], const hsize_t size[], void *buf)
 {
     hssize_t		offset_m[H5O_LAYOUT_NDIMS];
     hsize_t		size_m[H5O_LAYOUT_NDIMS];
@@ -1635,7 +1646,7 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	     * the chunk.
 	     */
 	    if (NULL==(chunk=H5F_istore_lock (f, layout, xfer->split_ratios, 
-					      pline, chunk_offset,
+					      pline, fill, chunk_offset,
 					      FALSE, &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			       "unable to read raw data chunk");
@@ -1682,8 +1693,9 @@ H5F_istore_read(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
-		 const H5O_pline_t *pline, const hssize_t offset_f[],
-		 const hsize_t size[], const void *buf)
+		 const H5O_pline_t *pline, const H5O_fill_t *fill,
+		 const hssize_t offset_f[], const hsize_t size[],
+		 const void *buf)
 {
     hssize_t		offset_m[H5O_LAYOUT_NDIMS];
     hsize_t		size_m[H5O_LAYOUT_NDIMS];
@@ -1811,7 +1823,7 @@ H5F_istore_write(H5F_t *f, const H5D_xfer_t *xfer, const H5O_layout_t *layout,
 	     * chunk.
 	     */
 	    if (NULL==(chunk=H5F_istore_lock (f, layout, xfer->split_ratios,
-					      pline, chunk_offset,
+					      pline, fill, chunk_offset,
 					      naccessed==chunk_size,
 					      &idx_hint))) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,

@@ -235,6 +235,7 @@
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
+./src/H5Ofill.c
 ./src/H5Olayout.c
 ./src/H5Omtime.c
 ./src/H5Oname.c

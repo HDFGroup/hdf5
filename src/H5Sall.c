@@ -24,12 +24,14 @@ static size_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 			      size_t max);
 static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
+			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
 			     const H5D_xfer_t *xfer_parms, void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
+			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
@@ -167,9 +169,10 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
 static size_t
 H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline,
-	       const struct H5O_efl_t *efl, size_t elmt_size,
-	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-	       size_t nelmts, const H5D_xfer_t *xfer_parms, void *_buf/*out*/)
+	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+	       size_t elmt_size, const H5S_t *file_space,
+	       H5S_sel_iter_t *file_iter, size_t nelmts,
+	       const H5D_xfer_t *xfer_parms, void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -222,8 +225,8 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, xfer_parms, layout, pline, efl, hsize, hsize, zero,
-		      file_offset, buf/*out*/)<0) {
+    if (H5F_arr_read (f, xfer_parms, layout, pline, fill, efl, hsize, hsize,
+		      zero, file_offset, buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -256,10 +259,10 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 static herr_t
 H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-	       const struct H5O_pline_t *pline, const struct H5O_efl_t *efl,
-	       size_t elmt_size, const H5S_t *file_space,
-	       H5S_sel_iter_t *file_iter, size_t nelmts,
-	       const H5D_xfer_t *xfer_parms, const void *_buf)
+	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
+	       const struct H5O_efl_t *efl, size_t elmt_size,
+	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
+	       size_t nelmts, const H5D_xfer_t *xfer_parms, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -308,8 +311,8 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Scatter to file.
      */
-    if (H5F_arr_write (f, xfer_parms, layout, pline, efl, hsize, hsize, zero,
-		       file_offset, buf)<0) {
+    if (H5F_arr_write (f, xfer_parms, layout, pline, fill, efl, hsize, hsize,
+		       zero, file_offset, buf)<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
 

@@ -346,6 +346,7 @@ H5P_close (H5P_class_t type, void *plist)
 	break;
 	
     case H5P_DATASET_CREATE:
+	H5O_reset(H5O_FILL, &(dc_list->fill));
 	H5O_reset(H5O_EFL, &(dc_list->efl));
 	H5O_reset(H5O_PLINE, &(dc_list->pline));
 	break;
@@ -2086,15 +2087,16 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_hyper_cache
  *
- * Purpose:	Given a dataset transfer property list, indicate whether to cache
- *      the hyperslab blocks during the I/O (which speeds things up) and the
- *      maximum size of the hyperslab block to cache.  If a block is smaller
- *      than to limit, it may still not be cached if no memory is available.
- *      Setting the limit to 0 indicates no limitation on the size of block
- *      to attempt to cache.
+ * Purpose:	Given a dataset transfer property list, indicate whether to
+ *		cache the hyperslab blocks during the I/O (which speeds
+ *		things up) and the maximum size of the hyperslab block to
+ *		cache.  If a block is smaller than to limit, it may still not
+ *		be cached if no memory is available. Setting the limit to 0
+ *		indicates no limitation on the size of block to attempt to
+ *		cache.
  *
- *      The default is to cache blocks with no limit on block size for serial
- *          I/O and to not cache blocks for parallel I/O
+ *		The default is to cache blocks with no limit on block size
+ *		for serial I/O and to not cache blocks for parallel I/O
  *
  * Return:	Success:	SUCCEED
  *
@@ -2147,7 +2149,8 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/, unsigned *limit/*out*/)
+H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
+		   unsigned *limit/*out*/)
 {
     H5D_xfer_t		*plist = NULL;
     
@@ -2594,7 +2597,6 @@ herr_t
 H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 		    double right)
 {
-    
     H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
@@ -2618,6 +2620,186 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
     plist->split_ratios[2] = right;
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_fill_value
+ *
+ * Purpose:	Set the fill value for a dataset creation property list. The
+ *		VALUE is interpretted as being of type TYPE, which need not
+ *		be the same type as the dataset but the library must be able
+ *		to convert VALUE to the dataset type when the dataset is
+ *		created.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, October  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
+{
+    H5D_create_t	*plist = NULL;
+    H5T_t		*type = NULL;
+    
+    FUNC_ENTER(H5Pset_fill_value, FAIL);
+    H5TRACE3("e","iix",plist_id,type_id,value);
+
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
+	NULL==(plist=H5I_object(plist_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset creation property list");
+    }
+    if (H5_DATATYPE!=H5I_group(type_id) ||
+	NULL==(type=H5I_object(type_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+    if (!value) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value specified");
+    }
+
+    /* Set the fill value */
+    H5O_reset(H5O_FILL, &(plist->fill));
+    if (NULL==(plist->fill.type=H5T_copy(type, H5T_COPY_TRANSIENT))) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to copy data type");
+    }
+    plist->fill.size = H5T_get_size(type);
+    if (NULL==(plist->fill.buf=H5MM_malloc(plist->fill.size))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
+		      "memory allocation failed for fill value");
+    }
+    HDmemcpy(plist->fill.buf, value, plist->fill.size);
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_fill_value
+ *
+ * Purpose:	Queries the fill value property of a dataset creation
+ *		property list.  The fill value is returned through the VALUE
+ *		pointer and the memory is allocated by the caller.  The fill
+ *		value will be converted from its current data type to the
+ *		specified TYPE.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, October  1, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
+{
+    H5D_create_t	*plist = NULL;
+    H5T_t		*type = NULL;
+    H5T_cdata_t		*cdata = NULL;		/*conversion data	*/
+    H5T_conv_t		cfunc = NULL;		/*conversion function	*/
+    void		*buf = NULL;		/*conversion buffer	*/
+    void		*bkg = NULL;		/*conversion buffer	*/
+    H5_timer_t		timer;			/*conversion timer	*/
+    hid_t		src_id = -1;		/*source data type id	*/
+    herr_t		status;
+    herr_t		ret_value = FAIL;
+    
+    FUNC_ENTER(H5Pget_fill_value, FAIL);
+    H5TRACE3("e","iix",plist_id,type_id,value);
+
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5P_get_class(plist_id) ||
+	NULL==(plist=H5I_object(plist_id))) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		    "not a dataset creation proprety list");
+    }
+    if (H5_DATATYPE!=H5I_group(type_id) ||
+	NULL==(type=H5I_object(type_id))) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+    if (!value) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		    "no fill value output buffer");
+    }
+
+    /*
+     * If no fill value is defined then return an error.  We can't even
+     * return zero because we don't know the data type of the dataset and
+     * data type conversion might not have resulted in zero.
+     */
+    if (NULL==plist->fill.buf) {
+	HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no fill value defined");
+    }
+
+    /*
+     * Can we convert between the source and destination data types?
+     */
+    if (NULL==(cfunc=H5T_find(plist->fill.type, type, H5T_BKG_NO, &cdata))) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "unable to convert between src and dst data types");
+    }
+    src_id = H5I_register(H5_DATATYPE,
+			  H5T_copy (plist->fill.type, H5T_COPY_TRANSIENT));
+    if (src_id<0) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "unable to copy/register data type");
+    }
+
+    /*
+     * Data type conversions are always done in place, so we need a buffer
+     * other than the fill value buffer that is large enough for both source
+     * and destination.  The app-supplied buffer might do okay.
+     */
+    if (H5T_get_size(type)>=H5T_get_size(plist->fill.type)) {
+	buf = value;
+	if (cdata->need_bkg>=H5T_BKG_TEMP &&
+	    NULL==(bkg=H5MM_malloc(H5T_get_size(type)))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"memory allocation failed for type conversion");
+	}
+    } else {
+	if (NULL==(buf=H5MM_malloc(H5T_get_size(plist->fill.type)))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"memory allocation failed for type conversion");
+	}
+	if (cdata->need_bkg>=H5T_BKG_TEMP) bkg = value;
+    }
+    HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
+    
+    /* Do the conversion */
+#ifdef H5T_DEBUG
+    H5T_timer_begin(&timer, cdata);
+#endif
+    cdata->command = H5T_CONV_CONV;
+    status = (cfunc)(src_id, type_id, cdata, 1, buf, bkg);
+#ifdef H5T_DEBUG
+    H5T_timer_end(&timer, cdata, 1);
+#endif
+    if (status<0) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "data type conversion failed");
+    }
+    if (buf!=value) HDmemcpy(value, buf, H5T_get_size(type));
+    ret_value = SUCCEED;
+
+ done:
+    if (buf!=value) H5MM_xfree(buf);
+    if (bkg!=value) H5MM_xfree(bkg);
+    if (src_id>=0) H5I_dec_ref(src_id);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3015,16 +3197,22 @@ H5P_copy (H5P_class_t type, const void *src)
 	dc_src = (const H5D_create_t*)src;
 	dc_dst = (H5D_create_t*)dst;
 
+	/* Copy the fill value */
+	if (NULL==H5O_copy(H5O_FILL, &(dc_src->fill), &(dc_dst->fill))) {
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
+			  "unabe to copy fill value message");
+	}
+	
 	/* Copy the external file list */
 	HDmemset(&(dc_dst->efl), 0, sizeof(dc_dst->efl));
 	if (NULL==H5O_copy(H5O_EFL, &(dc_src->efl), &(dc_dst->efl))) {
-	    HRETURN_ERROR(H5E_TEMPLATE, H5E_CANTINIT, NULL,
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
 			  "unable to copy external file list message");
 	}
 
 	/* Copy the filter pipeline */
 	if (NULL==H5O_copy(H5O_PLINE, &(dc_src->pline), &(dc_dst->pline))) {
-	    HRETURN_ERROR(H5E_TEMPLATE, H5E_CANTINIT, NULL,
+	    HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, NULL,
 			  "unable to copy filter pipeline message");
 	}
 	

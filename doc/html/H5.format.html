@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>
-      HDF5 Draft Disk-Format Specification
+      HDF5 Disk-Format Specification
     </title>
   </head>
   <body>
@@ -40,8 +40,8 @@
 		  Name: Data-Space</a>
 	      <li><a href="#DataTypeMessage">                   <!-- 0x0003 -->
 		  Name: Data-Type</a>
-	      <li><a href="#ReservedMessage_0004">              <!-- 0x0004 -->
-		  Name: Reserved - not assigned yet</a>
+	      <li><a href="#FillValueMessage">                  <!-- 0x0004 -->
+		  Name: Data Storage - Fill Value</a>
 	      <li><a href="#ReservedMessage_0005">              <!-- 0x0005 -->
 		  Name: Reserved - not assigned yet</a>
 	      <li><a href="#CompactDataStorageMessage">         <!-- 0x0006 -->
@@ -2268,15 +2268,64 @@
     </center>
 
     <p>Data type examples are <a href="Datatypes.html">here</a>.
-
+      
 
     <hr>
-    <h3><a name="ReservedMessage_0004">Name: Reserved - Not Assigned
-	Yet</a></h3> 
-    <b>Type:</b> 0x0004<BR>
-    <b>Length:</b> N/A<BR>
-    <b>Status:</b> N/A<BR>
+    <h3><a name="FillValueMessage">Name: Data Storage - Fill Value</a></h3>
+    <b>Type:</b> 0x0004<br>
+    <b>Length:</b> varies<br>
+    <b>Status:</b> Optional, may not be repeated.<br>
 
+    <p>The fill value message stores a single data point value which
+      is returned to the application when an uninitialized data point
+      is read from the dataset.  The fill value is interpretted with
+      the same data type as the dataset.  If no fill value message is
+      present then a fill value of all zero is assumed.
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Fill Value Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Size (4 bytes)</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Fill Value<br><br></td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Size (4 bytes)</td>
+	  <td>This is the size of the Fill Value field in bytes.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Fill Value</td>
+	  <td>The fill value.  The bytes of the fill value are
+	    interpreted using the same data type as for the dataset.</td>
+	</tr>
+      </table>
+    </center>
 
     <hr>
     <h3><a name="ReservedMessage_0005">Name: Reserved - Not Assigned
@@ -3353,7 +3402,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Fri Aug  7 11:04:44 EDT 1998
+Last modified: Thu Oct  1 10:09:54 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

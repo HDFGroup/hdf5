@@ -70,7 +70,7 @@ typedef enum H5E_major_t {
     H5E_DATASPACE,              /*Dataspace                                  */
     H5E_DATASET,                /*Dataset                                    */
     H5E_STORAGE,                /*data storage                               */
-    H5E_TEMPLATE,               /*Property lists                             */
+    H5E_PLIST,                  /*Property lists                             */
     H5E_ATTR,                   /*Attribute                                  */
     H5E_PLINE,			/*Data filters				     */
     H5E_EFL,			/*External file list			     */

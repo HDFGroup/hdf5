@@ -55,7 +55,7 @@ static const H5O_class_t *const message_type_g[] = {
     H5O_SDSPACE,	/*0x0001 Simple Dimensionality			*/
     NULL,		/*0x0002 Data space (fiber bundle?)		*/
     H5O_DTYPE,		/*0x0003 Data Type				*/
-    NULL,		/*0x0004 Not assigned				*/
+    H5O_FILL,		/*0x0004 Data storage -- fill value		*/
     NULL,		/*0x0005 Not assigned				*/
     NULL,		/*0x0006 Data storage -- compact object		*/
     H5O_EFL,		/*0x0007 Data storage -- external data files	*/

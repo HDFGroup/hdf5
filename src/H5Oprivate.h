@@ -133,6 +133,19 @@ extern const H5O_class_t H5O_DTYPE[1];
 /* operates on an H5T_t struct */
 
 /*
+ * Fill Value Message.
+ */
+#define H5O_FILL_ID		0x0004
+extern const H5O_class_t	H5O_FILL[1];
+
+typedef struct H5O_fill_t {
+    H5T_t	*type;			/*type. Null implies same as dataset */
+    size_t	size;			/*number of bytes in the fill value  */
+    void	*buf;			/*the fill value		     */
+} H5O_fill_t;
+
+
+/*
  * External File List Message
  */
 #define H5O_EFL_ID		0x0007	/*external file list id		     */
@@ -280,5 +293,8 @@ herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
 		     hsize_t size, uint8 *buf);
 herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
 		      hsize_t size, const uint8 *buf);
+
+/* Fill value operators */
+herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);
 
 #endif

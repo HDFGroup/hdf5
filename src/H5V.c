@@ -643,9 +643,9 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 /*-------------------------------------------------------------------------
  * Function:	H5V_array_fill
  *
- * Purpose:	Fills all bytes of an array with the same value using memset().
- *      Increases amount copied by power of two until the halfway point is
- *      crossed, then copies the rest in one swoop.
+ * Purpose:	Fills all bytes of an array with the same value using
+ *		memset(). Increases amount copied by power of two until the
+ *		halfway point is crossed, then copies the rest in one swoop.
  *
  * Return:	Success:	SUCCEED
  *

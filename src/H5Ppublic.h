@@ -112,6 +112,8 @@ herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 			   double right);
 herr_t H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/,
 			   double *middle/*out*/, double *right/*out*/);
+herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value);
+herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t plist_id, MPI_Comm comm, MPI_Info info);

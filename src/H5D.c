@@ -56,6 +56,9 @@ const H5D_create_t	H5D_create_dflt = {
      1, 1, 1, 1, 1, 1, 1, 1,	/*...produce fewer, but larger I/O......*/
      1, 1, 1, 1, 1, 1, 1, 1},	/*...requests.				*/
 
+    /* Fill value */
+    {NULL, 0, NULL},		/* No fill value			*/
+
     /* External file list */
     {H5F_ADDR_UNDEF,		/* External file list heap address	*/
      0,				/*...slots allocated			*/
@@ -531,6 +534,14 @@ H5Dget_create_plist(hid_t dset_id)
 		       "unable to copy the creation property list");
     }
 
+    /* Copy the dataset type into the fill value message */
+    if (!copied_parms->fill.type &&
+	NULL==(copied_parms->fill.type=H5T_copy(dset->type,
+						H5T_COPY_TRANSIENT))) {
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		      "unable to copy dataset data type for fill value");
+    }
+    
     /* Create an atom */
     if ((ret_value=H5I_register ((H5I_group_t)(H5_TEMPLATE_0+
 					       H5P_DATASET_CREATE),
@@ -944,6 +955,17 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		    "unable to create dataset object header");
     }
 
+    /* Convert the fill value to the dataset type and write the message */
+    if (H5O_fill_convert(&(new_dset->create_parms->fill), new_dset->type)<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to convert fill value to dataset type");
+    }
+    if (H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT,
+		   &(new_dset->create_parms->fill))<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to update fill value header message");
+    }
+    
     /* Update the type and space header messages */
     if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
 		   H5O_FLAG_CONSTANT|H5O_FLAG_SHARED, new_dset->type)<0 ||
@@ -1103,6 +1125,14 @@ H5D_open(H5G_entry_t *loc, const char *name)
     if (NULL==(space=H5S_read (&(dataset->ent)))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "unable to read data space info from dataset header");
+    }
+
+    /* Get the optional fill value message */
+    if (NULL==H5O_read(&(dataset->ent), H5O_FILL, 0,
+		       &(dataset->create_parms->fill))) {
+	H5E_clear();
+	HDmemset(&(dataset->create_parms->fill), 0,
+		 sizeof(dataset->create_parms->fill));
     }
 
     /* Get the optional filters message */
@@ -1513,6 +1543,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
         n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout),
 			     &(dataset->create_parms->pline),
+			     &(dataset->create_parms->fill),
 			     &(dataset->create_parms->efl), src_type_size,
 			     file_space, &file_iter, smine_nelmts,
 			     xfer_parms, tconv_buf/*out*/);
@@ -1913,6 +1944,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
             n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout),
 				 &(dataset->create_parms->pline),
+				 &(dataset->create_parms->fill),
 				 &(dataset->create_parms->efl), dst_type_size,
 				 file_space, &bkg_iter, smine_nelmts,
 				 xfer_parms, bkg_buf/*out*/);
@@ -1955,6 +1987,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 	status = (sconv->f->scat)(dataset->ent.file, &(dataset->layout),
 				  &(dataset->create_parms->pline),
+				  &(dataset->create_parms->fill),
 				  &(dataset->create_parms->efl), dst_type_size,
 				  file_space, &file_iter, smine_nelmts,
 				  xfer_parms, tconv_buf);

@@ -26,6 +26,7 @@ typedef struct {
     H5F_t *f;
     const struct H5O_layout_t *layout;
     const struct H5O_pline_t *pline;
+    const struct H5O_fill_t *fill;
     const struct H5O_efl_t *efl;
     size_t elmt_size;
     const H5S_t *space;
@@ -55,12 +56,14 @@ static size_t H5S_hyper_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 				size_t max);
 static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
+			       const struct H5O_fill_t *fill,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
 			       const H5D_xfer_t *xfer_parms, void *buf/*out*/);
 static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			       const struct H5O_pline_t *pline,
+			       const struct H5O_fill_t *fill,
 			       const struct H5O_efl_t *efl, size_t elmt_size,
 			       const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, size_t nelmts,
@@ -425,7 +428,8 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_hyper_block_cache (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_info, uintn block_read)
+H5S_hyper_block_cache (H5S_hyper_node_t *node,
+		       H5S_hyper_fhyper_info_t *fhyper_info, uintn block_read)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -454,8 +458,8 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_i
 
         if (H5F_arr_read (fhyper_info->f, fhyper_info->xfer_parms,
 			  fhyper_info->layout, fhyper_info->pline,
-			  fhyper_info->efl, hsize, hsize, zero, file_offset,
-			  node->cinfo.block/*out*/)<0)
+			  fhyper_info->fill, fhyper_info->efl, hsize, hsize,
+			  zero, file_offset, node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
     } /* end if */
     else {
@@ -501,9 +505,14 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
         !! NOTE !! This will need to be changed for different dimension
             permutations from the standard 'C' ordering!
     */
-    HDmemcpy(fhyper_info->dst,node->cinfo.pos,region_size*fhyper_info->elmt_size);
+    HDmemcpy(fhyper_info->dst,
+	     node->cinfo.pos,
+	     region_size*fhyper_info->elmt_size);
 
-    /* Decrement the number of elements left in block to read & move the offset */
+    /*
+     * Decrement the number of elements left in block to read & move the
+     * offset
+     */
     node->cinfo.pos+=region_size*fhyper_info->elmt_size;
     node->cinfo.left-=region_size;
 
@@ -536,7 +545,9 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_hyper_block_write (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_info, hsize_t region_size)
+H5S_hyper_block_write (H5S_hyper_node_t *node,
+		       H5S_hyper_fhyper_info_t *fhyper_info,
+		       hsize_t region_size)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -552,16 +563,24 @@ H5S_hyper_block_write (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_i
         !! NOTE !! This will need to be changed for different dimension
             permutations from the standard 'C' ordering!
     */
-    HDmemcpy(node->cinfo.pos,fhyper_info->src,region_size*fhyper_info->elmt_size);
+    HDmemcpy(node->cinfo.pos,
+	     fhyper_info->src,
+	     region_size*fhyper_info->elmt_size);
 
-    /* Decrement the number of elements left in block to read & move the offset */
+    /*
+     * Decrement the number of elements left in block to read & move the
+     * offset
+     */
     node->cinfo.pos+=region_size*fhyper_info->elmt_size;
     node->cinfo.left-=region_size;
 
     /* If we've read in all the elements from the block, throw it away */
     if(node->cinfo.left==0) {
         /* Copy the location of the region in the file */
-        HDmemcpy(file_offset,node->start,(fhyper_info->space->extent.u.simple.rank * sizeof(hssize_t)));
+        HDmemcpy(file_offset,
+		 node->start,
+		 (fhyper_info->space->extent.u.simple.rank *
+		  sizeof(hssize_t)));
         file_offset[fhyper_info->space->extent.u.simple.rank]=0;
 
         /* Set the hyperslab size to write */
@@ -571,8 +590,8 @@ H5S_hyper_block_write (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_i
 
         if (H5F_arr_write (fhyper_info->f, fhyper_info->xfer_parms,
 			   fhyper_info->layout, fhyper_info->pline,
-			   fhyper_info->efl, hsize, hsize, zero, file_offset,
-			   node->cinfo.block/*out*/)<0)
+			   fhyper_info->fill, fhyper_info->efl, hsize, hsize,
+			   zero, file_offset, node->cinfo.block/*out*/)<0)
             HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Release the temporary buffer */
@@ -650,10 +669,14 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
             /* perform I/O on data from regions */
             for(i=0; i<num_regions && fhyper_info->nelmts>0; i++) {
                 /* Compute the size of the region to read */
-                region_size=MIN(fhyper_info->nelmts, (regions[i].end-regions[i].start)+1);
+                region_size=MIN(fhyper_info->nelmts,
+				(regions[i].end-regions[i].start)+1);
 
                 /* Check if this hyperslab block is cached or could be cached */
-                if(!regions[i].node->cinfo.cached && (fhyper_info->xfer_parms->cache_hyper && (fhyper_info->xfer_parms->block_limit==0 || fhyper_info->xfer_parms->block_limit>=(regions[i].node->cinfo.size*fhyper_info->elmt_size)))) {
+                if(!regions[i].node->cinfo.cached &&
+		   (fhyper_info->xfer_parms->cache_hyper &&
+		    (fhyper_info->xfer_parms->block_limit==0 ||
+		     fhyper_info->xfer_parms->block_limit>=(regions[i].node->cinfo.size*fhyper_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
                     H5S_hyper_block_cache(regions[i].node,fhyper_info,1);
                 } /* end if */
@@ -691,17 +714,17 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                      */
                     if (H5F_arr_read (fhyper_info->f, fhyper_info->xfer_parms,
 				      fhyper_info->layout, fhyper_info->pline,
-				      fhyper_info->efl, hsize, hsize, zero,
-				      file_offset,
+				      fhyper_info->fill, fhyper_info->efl,
+				      hsize, hsize, zero, file_offset,
 				      fhyper_info->dst/*out*/)<0) {
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0,
 				       "read error");
                     }
 #ifdef QAK
-            printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
-            for(j=0; j<fhyper_info->space->extent.u.simple.rank; j++)
-                printf("%s: %d - pos=%d\n",
-                   FUNC,j,(int)fhyper_info->iter->hyp.pos[j]);
+		    printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
+		    for(j=0; j<fhyper_info->space->extent.u.simple.rank; j++)
+			printf("%s: %d - pos=%d\n",
+			       FUNC,j,(int)fhyper_info->iter->hyp.pos[j]);
 #endif /* QAK */
                 } /* end else */
 
@@ -789,6 +812,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 static size_t
 H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
+		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, const H5D_xfer_t *xfer_parms,
@@ -833,6 +857,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     fhyper_info.f=f;
     fhyper_info.layout=layout;
     fhyper_info.pline=pline;
+    fhyper_info.fill=fill;
     fhyper_info.efl=efl;
     fhyper_info.elmt_size=elmt_size;
     fhyper_info.space=file_space;
@@ -961,8 +986,9 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                      */
                     if (H5F_arr_write (fhyper_info->f, fhyper_info->xfer_parms,
 				       fhyper_info->layout, fhyper_info->pline,
-				       fhyper_info->efl, hsize, hsize, zero,
-				       file_offset, fhyper_info->src)<0) {
+				       fhyper_info->fill, fhyper_info->efl,
+				       hsize, hsize, zero, file_offset,
+				       fhyper_info->src)<0) {
                         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0,
 				       "write error");
                     }
@@ -1049,6 +1075,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 static herr_t
 H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
+		 const struct H5O_fill_t *fill,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, const H5D_xfer_t *xfer_parms,
@@ -1094,6 +1121,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     fhyper_info.f=f;
     fhyper_info.layout=layout;
     fhyper_info.pline=pline;
+    fhyper_info.fill=fill;
     fhyper_info.efl=efl;
     fhyper_info.elmt_size=elmt_size;
     fhyper_info.space=file_space;

@@ -45,6 +45,7 @@ typedef struct H5D_create_t {
     H5D_layout_t	layout;		/*storage layout		     */
     intn		chunk_ndims;	/*chunk dimensionality		     */
     hsize_t		chunk_size[32];	/*chunk size if chunked storage	     */
+    H5O_fill_t		fill;		/*fill value			     */
     H5O_efl_t		efl;		/*external file list		     */
     H5O_pline_t		pline;		/*data filter pipeline		     */
 } H5D_create_t;

@@ -18,7 +18,7 @@ static void *H5O_mtime_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
-static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE * stream,
+static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			     intn indent, intn fwidth);
 
 /* This message derives from H5O */
@@ -246,7 +246,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
  *
  * Return:	Success:	Message data size in bytes w/o alignment.
  *
- *		Failure:	FAIL
+ *		Failure:	0
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov

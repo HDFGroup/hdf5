@@ -517,16 +517,18 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		if (src2dst[i]<0) continue;
 		src_memb = src->u.compnd.memb + i;
 		dst_memb = dst->u.compnd.memb + src2dst[i];
-		offset -= dst_memb->size;
 
 		if (dst_memb->size > src_memb->size) {
 		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
 		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
+		    offset -= src_memb->size;
 		    memb_cdata->command = H5T_CONV_CONV;
 		    (tconv_func)(priv->src_memb_id[src2dst[i]],
 				 priv->dst_memb_id[src2dst[i]],
 				 memb_cdata, priv->memb_nelmts[i],
 				 buf+offset, bkg+dst_memb->offset);
+		} else {
+		    offset -= dst_memb->size;
 		}
 		HDmemmove (bkg+dst_memb->offset, buf+offset, dst_memb->size);
 	    }
