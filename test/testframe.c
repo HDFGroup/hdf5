@@ -169,14 +169,7 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
     for (CLLoop = 1; CLLoop < argc; CLLoop++) {
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-v") == 0))) {
-            if (argv[CLLoop + 1][0] == 'l')
-                SetTestVerbosity(VERBO_LO);
-            else if (argv[CLLoop + 1][0] == 'm')
-                SetTestVerbosity(VERBO_MED);
-            else if (argv[CLLoop + 1][0] == 'h')
-                SetTestVerbosity(VERBO_HI);
-            else
-                SetTestVerbosity(atoi(argv[CLLoop + 1]));
+	    ParseTestVerbosity(argv[CLLoop + 1]);
         }                       /* end if */
         if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
                                 (HDstrcmp(argv[CLLoop], "-s") == 0)))
@@ -318,6 +311,23 @@ int SetTestVerbosity(int newval)
     oldval = Verbosity;
     Verbosity = newval;
     return(oldval);
+}
+
+/*
+ * Parse an argument string for verbosity level and set it.
+ */
+void ParseTestVerbosity(char *argv)
+{
+    printf("argv = %s\n", argv);
+    if (*argv == 'l')
+	SetTestVerbosity(VERBO_LO);
+    else if (*argv == 'm')
+	SetTestVerbosity(VERBO_MED);
+    else if (*argv == 'h')
+	SetTestVerbosity(VERBO_HI);
+    else
+	SetTestVerbosity(atoi(argv));
+    printf("Verbosity = %d\n", GetTestVerbosity());
 }
 
 
