@@ -17,7 +17,7 @@
 */
 #include <h5test.h>
 
-#ifndef HAVE_GASS
+#ifndef H5_HAVE_GASS
 int main(void)
 {
     printf("Test skipped because GASS driver not available\n");
