@@ -1,5 +1,4 @@
 #! /bin/sh
-# $Id$
 # run the hdf5/bin/snapshot
 # Usage:
 #	runtest		run the test for the local host
@@ -41,7 +40,6 @@ SNAPCMD="$SRCDIR test clean"
 # Default Standard snaptest command options
 STANDARD_OPT=""
 ENABLE_PARALLEL="--enable-parallel"
-#SNAPCMD="$SRCDIR --enable-stream-vfd --enable-static-exec test clean"
 
 #***************
 # Various hosts
@@ -369,7 +367,8 @@ RUNSNAPTEST()
 # This should be invoke with configure file as stdin.
 # Syntax of the configure file:
 #    All lines started with the # are comment lines and are ignored.
-#    Each line starts with a "Scope" followed by test types.
+#    Blank lines are ignored too.
+#    Each config line starts with a "Scope" followed by test types.
 #
 # Scope can be:
 #    standard ...          # what the standard test types are.
@@ -396,8 +395,8 @@ SNAPTEST_CONFIG_PARSE()
 	    x=`echo $x | cut -f2 -d/`
 	fi
 	case "$x" in
-	    '#'*)
-		# comment.  Continue.
+	    '' | '#'*)
+		# blank or comment lines.  Continue.
 	    	;;
 	    ???/*)
 		# Ignore any entry not of this weekday.
