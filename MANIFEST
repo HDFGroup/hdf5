@@ -6,7 +6,7 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./.autom4te.cfg				_DO_NOT_DISTRIBUTE_
+./.autom4te.cfg             _DO_NOT_DISTRIBUTE_
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
@@ -27,7 +27,7 @@
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/distdep
-./bin/errors				_DO_NOT_DISTRIBUTE_
+./bin/errors			        _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -850,6 +850,7 @@
 ./src/H5Dcompact.c
 ./src/H5Dio.c
 ./src/H5Distore.c
+./src/H5Dmpio.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
@@ -1042,8 +1043,8 @@
 ./test/links.c
 ./test/mount.c
 ./test/mtime.c
-./test/ntypes.c
 ./test/noencoder.h5
+./test/ntypes.c
 ./test/ohdr.c
 ./test/reserved.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
@@ -1109,6 +1110,7 @@
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
+./testpar/t_coll_chunk.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
@@ -1175,14 +1177,36 @@
 
 ./tools/h5diff/Dependencies
 ./tools/h5diff/Makefile.in
-./tools/h5diff/testh5diff.sh
+./tools/h5diff/h5diff_main.c
 ./tools/h5diff/testh5diff_attr.c
+./tools/h5diff/testh5diff_basic.c
 ./tools/h5diff/testh5diff_dset.c
 ./tools/h5diff/testh5diff_main.c
 ./tools/h5diff/testh5diff_util.c
-./tools/h5diff/h5diff_main.c
-./tools/h5diff/testh5diff_basic.c
 ./tools/h5diff/testh5diff.h
+./tools/h5diff/testh5diff.sh
+
+
+# h5repack sources
+./tools/h5repack/Dependencies
+./tools/h5repack/Makefile.in
+./tools/h5repack/h5repack.sh.in
+./tools/h5repack/h5repack.c
+./tools/h5repack/h5repack.h
+./tools/h5repack/h5repack_copy.c
+./tools/h5repack/h5repack_filters.c
+./tools/h5repack/h5repack_layout.c
+./tools/h5repack/h5repack_list.c
+./tools/h5repack/h5repack_main.c
+./tools/h5repack/h5repack_opttable.c
+./tools/h5repack/h5repack_parse.c
+./tools/h5repack/h5repack_refs.c
+./tools/h5repack/h5repack_verify.c
+./tools/h5repack/testh5repack_attr.c
+./tools/h5repack/testh5repack_dset.c
+./tools/h5repack/testh5repack_main.c
+./tools/h5repack/testh5repack_make.c
+./tools/h5repack/testh5repack_util.c
 
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in
@@ -1191,26 +1215,25 @@
 
 ./tools/lib/Dependencies
 ./tools/lib/Makefile.in
+./tools/lib/h5diff.c
+./tools/lib/h5diff.h
+./tools/lib/h5diff_array.c
+./tools/lib/h5diff_attr.c
+./tools/lib/h5diff_dset.c
+./tools/lib/h5diff_util.c
+./tools/lib/h5trav.c
+./tools/lib/h5trav.h
+./tools/lib/h5trav_table.c
 ./tools/lib/h5tools.c
 ./tools/lib/h5tools.h
+./tools/lib/h5tools_filters.c
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h
 ./tools/lib/h5tools_utils.c
 ./tools/lib/h5tools_utils.h
-./tools/lib/h5tools_ref.h
 ./tools/lib/h5tools_ref.c
+./tools/lib/h5tools_ref.h
 ./tools/lib/talign.c
-./tools/lib/h5diff_attr.c
-./tools/lib/h5diff.h
-./tools/lib/h5tools_filters.c
-./tools/lib/h5trav.c
-./tools/lib/h5diff.c
-./tools/lib/h5diff_util.c
-./tools/lib/h5trav.h
-./tools/lib/h5diff_array.c
-./tools/lib/h5diff_dset.c
-./tools/lib/h5trav_table.c
-
 
 ./tools/misc/Dependencies
 ./tools/misc/Makefile.in
@@ -1339,7 +1362,6 @@
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
-./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tfilters.h5
@@ -1352,8 +1374,8 @@
 ./tools/testfiles/treference.ddl
 ./tools/testfiles/tshuffle.ddl
 ./tools/testfiles/tstring.ddl
-./tools/testfiles/tuserfilter.ddl
 ./tools/testfiles/tszip.ddl
+./tools/testfiles/tuserfilter.ddl
 ./tools/testfiles/tallfilters.ddl
 ./tools/testfiles/tstringe.ddl
 ./tools/testfiles/tindicesyes.ddl
@@ -1416,27 +1438,39 @@
 ./tools/testfiles/tloop.h5.xml
 ./tools/testfiles/tloop2.h5.xml
 ./tools/testfiles/tmany.h5.xml
+./tools/testfiles/tname-amp.h5
 ./tools/testfiles/tname-amp.h5.xml
+./tools/testfiles/tname-apos.h5
 ./tools/testfiles/tname-apos.h5.xml
+./tools/testfiles/tname-gt.h5
 ./tools/testfiles/tname-gt.h5.xml
+./tools/testfiles/tname-lt.h5
 ./tools/testfiles/tname-lt.h5.xml
+./tools/testfiles/tname-quot.h5
 ./tools/testfiles/tname-quot.h5.xml
+./tools/testfiles/tname-sp.h5
 ./tools/testfiles/tname-sp.h5.xml
 ./tools/testfiles/tnamed_dtype_attr.ddl
 ./tools/testfiles/tnamed_dtype_attr.h5
 ./tools/testfiles/tnamed_dtype_attr.h5.xml
 ./tools/testfiles/tnestedcomp.h5.xml
+./tools/testfiles/tnodata.h5
 ./tools/testfiles/tnodata.h5.xml
 ./tools/testfiles/tobjref.h5.xml
 ./tools/testfiles/topaque.h5.xml
+./tools/testfiles/tref-escapes-at.h5
 ./tools/testfiles/tref-escapes-at.h5.xml
+./tools/testfiles/tref-escapes.h5
 ./tools/testfiles/tref-escapes.h5.xml
+./tools/testfiles/tref.h5
 ./tools/testfiles/tref.h5.xml
 ./tools/testfiles/tsaf.h5.xml
 ./tools/testfiles/tslink.h5.xml
 ./tools/testfiles/tstr.h5.xml
 ./tools/testfiles/tstr2.h5.xml
+./tools/testfiles/tstring-at.h5
 ./tools/testfiles/tstring-at.h5.xml
+./tools/testfiles/tstring.h5
 ./tools/testfiles/tstring.h5.xml
 ./tools/testfiles/tvldtypes1.h5.xml
 ./tools/testfiles/tvldtypes2.h5.xml
@@ -1453,18 +1487,6 @@
 ./tools/testfiles/tempty-nons-2.h5.xml
 ./tools/testfiles/tempty-ns-2.h5.xml
 ./tools/testfiles/tall-2A.h5.xml
-./tools/testfiles/tname-amp.h5
-./tools/testfiles/tname-apos.h5
-./tools/testfiles/tname-gt.h5
-./tools/testfiles/tname-lt.h5
-./tools/testfiles/tname-quot.h5
-./tools/testfiles/tname-sp.h5
-./tools/testfiles/tnodata.h5
-./tools/testfiles/tref-escapes-at.h5
-./tools/testfiles/tref-escapes.h5
-./tools/testfiles/tref.h5
-./tools/testfiles/tstring-at.h5
-./tools/testfiles/tstring.h5
 
 #test files for h5diff
 ./tools/testfiles/file1.h5
@@ -1530,28 +1552,6 @@
 ./tools/testfiles/h5diff_629.txt
 ./tools/testfiles/h5diff_70.txt
 ./tools/testfiles/h5diff_80.txt
-
-
-# h5repack sources
-./tools/h5repack/Dependencies
-./tools/h5repack/h5repack_opttable.c
-./tools/h5repack/h5repack_verify.c
-./tools/h5repack/testh5repack_dset.c
-./tools/h5repack/testh5repack_make.c
-./tools/h5repack/h5repack.c
-./tools/h5repack/h5repack_layout.c
-./tools/h5repack/h5repack_parse.c
-./tools/h5repack/testh5repack_util.c
-./tools/h5repack/h5repack_copy.c
-./tools/h5repack/h5repack_list.c
-./tools/h5repack/h5repack_refs.c
-./tools/h5repack/Makefile.in
-./tools/h5repack/h5repack_filters.c
-./tools/h5repack/h5repack_main.c
-./tools/h5repack/h5repack.sh.in
-./tools/h5repack/testh5repack_attr.c
-./tools/h5repack/testh5repack_main.c
-./tools/h5repack/h5repack.h
 
 # h5repack test files
 ./tools/testfiles/test1.h5

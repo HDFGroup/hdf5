@@ -16,7 +16,6 @@
 #define PHDF5TEST_H
 
 #include "h5test.h"
-#include "testhdf5.h"
 
 #ifndef TRUE
 #define TRUE    1
@@ -113,6 +112,13 @@
 #define FACC_MULTI      0x4     /* Multi File */
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
+/*Constants for collective chunk definitions */
+#define SPACE_DIM1 24
+#define SPACE_DIM2 24
+#define BYROW_CONT 1
+#define BYROW_DISCONT 2
+#define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
+
 /* type definitions */
 typedef struct H5Ptest_param_t  /* holds extra test parameters */
 {
@@ -152,6 +158,10 @@ void extend_readAll(void);
 void compact_dataset(void);
 void big_dataset(void);
 void dataset_fillvalue(void);
+void coll_chunk1(void);
+void coll_chunk2(void);
+void coll_chunk3(void);
+void coll_chunk4(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);

@@ -44,7 +44,7 @@ int doindependent=1;			/* independent test */
 unsigned dobig=0;                       /* "big" dataset tests */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[10]={
+const char *FILENAME[14]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
@@ -54,8 +54,12 @@ const char *FILENAME[10]={
             "ParaIndividual",
             "ParaBig",
             "ParaFill",
+	    "ParaCC1",
+	    "ParaCC2",
+	    "ParaCC3",
+            "ParaCC4",
 	    NULL};
-char	filenames[10][PATH_MAX];
+char	filenames[14][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -461,6 +465,15 @@ int main(int argc, char **argv)
     }
     AddTest("fillvalue", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
+
+    AddTest("coll. chunked 1", coll_chunk1,NULL,
+	    "simple collective chunk io",filenames[9]);
+    AddTest("coll. chunked 2", coll_chunk2,NULL,
+	    "noncontiguous collective chunk io",filenames[10]);
+    AddTest("coll. chunked 3", coll_chunk3,NULL,
+	    "multi-chunk collective chunk io",filenames[11]);
+    AddTest("coll. chunked 4", coll_chunk4,NULL,
+	    "collective to independent chunk io",filenames[12]);
 
     /* Display testing information */
     TestInfo(argv[0]);

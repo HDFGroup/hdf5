@@ -21,7 +21,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -644,6 +643,8 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+    int         prop_value,new_value;
+    htri_t      check_prop;
 #endif /*H5_HAVE_PARALLEL*/
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
@@ -756,10 +757,33 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags, &use_par_opt_io)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space")
 
 #ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    /**** Test for collective chunk IO
+          notice the following code should be removed after 
+          a more general collective chunk IO algorithm is applied.
+    */
+
+    if(dataset->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
+        check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
+        if(check_prop < 0) 
+            HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
+        if(check_prop > 0) {
+            if(H5Pget(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&prop_value)<0) 
+                HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value"); 
+            if(!use_par_opt_io) {
+                new_value = 0;
+                if(H5Pset(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&new_value)<0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+            }
+        }
+    }
+    /* end Test for collective chunk IO */
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     /* Don't reset the transfer mode if we can't or won't use it */
     if(!use_par_opt_io || !H5T_path_noop(tpath))
         H5D_io_assist_mpio(dxpl_id, dxpl_cache, &xfer_mode_changed);
@@ -846,6 +870,8 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+    int         prop_value,new_value;
+    htri_t      check_prop;
 #endif /*H5_HAVE_PARALLEL*/
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
@@ -978,10 +1004,33 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags, &use_par_opt_io)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space")
         
 #ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    /**** Test for collective chunk IO
+          notice the following code should be removed after 
+          a more general collective chunk IO algorithm is applied.
+    */
+
+     if(dataset->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
+         
+       check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
+       if(check_prop < 0) 
+          HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
+       if(check_prop > 0) {
+         if(H5Pget(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&prop_value)<0) 
+           HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value"); 
+         if(!use_par_opt_io) {
+           new_value = 0;
+           if(H5Pset(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&new_value)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+         }
+       }
+     }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     /* Don't reset the transfer mode if we can't or won't use it */
     if(!use_par_opt_io || !H5T_path_noop(tpath))
         H5D_io_assist_mpio(dxpl_id, dxpl_cache, &xfer_mode_changed);
@@ -2494,7 +2543,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         } /* end if */
     } /* end else */
 
-#ifdef QAK 
+#ifdef QAK
 {
     int mpi_rank;
     double time;

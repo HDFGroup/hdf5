@@ -14,14 +14,18 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5S_mask
+
 #define _H5S_IN_H5S_C
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5FLprivate.h"	/* Free Lists	  */
-#include "H5MMprivate.h"	/* Memory Management functions		  */
-#include "H5Oprivate.h"		/* object headers		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Spkg.h"		/* Dataspaces 				*/
 
 /* Local static function prototypes */
 static H5S_t * H5S_create(H5S_class_t type);
@@ -30,7 +34,6 @@ static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
 static htri_t H5S_is_simple(const H5S_t *sdim);
 
 /* Interface initialization */
-#define PABLO_MASK	H5S_mask
 #define INTERFACE_INIT	H5S_init_interface
 static int		interface_initialize_g = 0;
 static herr_t		H5S_init_interface(void);
@@ -1403,7 +1406,12 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_conv_t *
-H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned
+H5S_find (const H5F_t 
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif/* H5_HAVE_PARALLEL*/
+*file,
+const H5S_t *mem_space, const H5S_t *file_space, unsigned
 #ifndef H5_HAVE_PARALLEL
 UNUSED
 #endif /* H5_HAVE_PARALLEL */
@@ -1411,7 +1419,13 @@ flags, hbool_t
 #ifndef H5_HAVE_PARALLEL
 UNUSED
 #endif /* H5_HAVE_PARALLEL */
-*use_par_opt_io)
+*use_par_opt_io,
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif
+const H5O_layout_t *layout
+
+)
 {
     H5S_conv_t	*path=NULL;  /* Space conversion path */
 #ifdef H5_HAVE_PARALLEL
@@ -1441,15 +1455,15 @@ UNUSED
             /*
              * Check if we can set direct MPI-IO read/write functions
              */
-            opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+            opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
             if(opt==FAIL)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
                 /* Set the pointers to the MPI-specific routines */
-                H5S_conv_g[i]->read = H5S_mpio_spaces_read;
-                H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+                H5S_conv_g[i]->read = H5D_mpio_spaces_read;
+                H5S_conv_g[i]->write = H5D_mpio_spaces_write;
 
                 /* Indicate that the I/O will be parallel */
                 *use_par_opt_io=TRUE;
@@ -1483,15 +1497,15 @@ UNUSED
     /*
      * Check if we can set direct MPI-IO read/write functions
      */
-    opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+    opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
     if(opt==FAIL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
         /* Set the pointers to the MPI-specific routines */
-        path->read = H5S_mpio_spaces_read;
-        path->write = H5S_mpio_spaces_write;
+        path->read = H5D_mpio_spaces_read;
+        path->write = H5D_mpio_spaces_write;
 
         /* Indicate that the I/O will be parallel */
         *use_par_opt_io=TRUE;

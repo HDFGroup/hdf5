@@ -206,8 +206,8 @@ typedef struct H5S_conv_t {
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection);
 H5_DLL herr_t H5S_close(H5S_t *ds);
-H5_DLL H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space,
-                unsigned flags, hbool_t *use_par_opt_io);
+H5_DLL H5S_conv_t *H5S_find(const H5F_t *file,const H5S_t *mem_space, const H5S_t *file_space,
+                unsigned flags, hbool_t *use_par_opt_io,const H5O_layout_t *layout );
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
 H5_DLL hssize_t H5S_get_simple_extent_npoints(const H5S_t *ds);
 H5_DLL hsize_t H5S_get_npoints_max(const H5S_t *ds);
@@ -287,8 +287,6 @@ H5_DLL herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
 /* Operations on hyperslab selections */
 H5_DLL herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
-H5_DLL herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal,
-    hsize_t startblock, hsize_t numblocks, hsize_t *buf);
 H5_DLL herr_t H5S_hyper_add_span_element(H5S_t *space, unsigned rank,
     hssize_t *coords);
 H5_DLL herr_t H5S_hyper_reset_scratch(H5S_t *space);
@@ -314,6 +312,14 @@ H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 /* (Defined in H5S.c) */
 H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
 #endif /* _H5S_IN_H5S_C */
+
+H5_DLL herr_t
+H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
+     /* out: */
+     MPI_Datatype *new_type,
+     size_t *count,
+     hsize_t *extra_offset,
+     hbool_t *is_derived_type );
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */

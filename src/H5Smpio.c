@@ -21,7 +21,6 @@
  *		I didn't make them portable.
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
 /* Pablo information */
@@ -29,10 +28,12 @@
 #define PABLO_MASK	H5S_mpio_mask
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* Files				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -63,17 +64,6 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
 		     size_t *count,
 		     hsize_t *extra_offset,
 		     hbool_t *is_derived_type );
-static herr_t
-H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
-		     /* out: */
-		     MPI_Datatype *new_type,
-		     size_t *count,
-		     hsize_t *extra_offset,
-		     hbool_t *is_derived_type );
-static herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
-                     const H5S_t *file_space, const H5S_t *mem_space,
-                     hid_t dxpl_id, void *buf/*out*/, hbool_t do_write);
 
 
 /*-------------------------------------------------------------------------
@@ -522,7 +512,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
 		     /* out: */
 		     MPI_Datatype *new_type,
@@ -586,221 +576,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_mpio_spaces_xfer
- *
- * Purpose:	Use MPI-IO to transfer data efficiently
- *		directly between app buffer and file.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Programmer:	rky 980813
- *
- * Notes:
- *      For collective data transfer only since this would eventually call
- *      H5FD_mpio_setup to do setup to eveually call MPI_File_set_view in
- *      H5FD_mpio_read or H5FD_mpio_write.  MPI_File_set_view is a collective
- *      call.  Letting independent data transfer use this route would result in
- *      hanging.
- *
- *      The preconditions for calling this routine are located in the
- *      H5S_mpio_opt_possible() routine, which determines whether this routine
- *      can be called for a given dataset transfer.
- *
- * Modifications:
- *	rky 980918
- *	Added must_convert parameter to let caller know we can't optimize
- *	the xfer.
- *
- *	Albert Cheng, 001123
- *	Include the MPI_type freeing as part of cleanup code.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_mpio_opt_possible() routine
- *
- *      QAK - 2002/06/17
- *      Removed 'disp' parameter from H5FD_mpio_setup routine and use the
- *      address of the dataset in MPI_File_set_view() calls, as necessary.
- *
- *      QAK - 2002/06/18
- *      Removed 'dc_plist' parameter, since it was not used.  Also, switch to
- *      getting the 'extra_offset' setting for each selection.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
-     const H5S_t *file_space, const H5S_t *mem_space,
-     hid_t dxpl_id, void *_buf /*out*/,
-     hbool_t do_write )
-{
-    haddr_t	 addr;                  /* Address of dataset (or selection) within file */
-    size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
-    hsize_t	 mpi_buf_offset, mpi_file_offset;       /* Offset within dataset where selection (ie. MPI type) begins */
-    MPI_Datatype mpi_buf_type, mpi_file_type;   /* MPI types for buffer (memory) and file */
-    hbool_t	 mbt_is_derived=0,      /* Whether the buffer (memory) type is derived and needs to be free'd */
-		 mft_is_derived=0;      /* Whether the file type is derived and needs to be free'd */
-    hbool_t	 plist_is_setup=0;      /* Whether the dxpl has been customized */
-    uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
-    int         mpi_code;               /* MPI return code */
-    herr_t	 ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_spaces_xfer);
-
-    /* Check args */
-    assert (f);
-    assert (dset);
-    assert (file_space);
-    assert (mem_space);
-    assert (buf);
-    assert (IS_H5FD_MPIO(f));
-    /* Make certain we have the correct type of property list */
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-
-    /* create the MPI buffer type */
-    if (H5S_mpio_space_type( mem_space, elmt_size,
-			       /* out: */
-			       &mpi_buf_type,
-			       &mpi_buf_count,
-			       &mpi_buf_offset,
-			       &mbt_is_derived )<0)
-    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
-
-    /* create the MPI file type */
-    if ( H5S_mpio_space_type( file_space, elmt_size,
-			       /* out: */
-			       &mpi_file_type,
-			       &mpi_file_count,
-			       &mpi_file_offset,
-			       &mft_is_derived )<0)
-    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
-
-    addr = H5D_contig_get_addr(dset) + mpi_file_offset;
-#ifdef H5Smpi_DEBUG
-    HDfprintf(stderr, "spaces_xfer: relative addr=%a\n", addr );
-#endif
-
-    /*
-     * Pass buf type, file type to the file driver. Request an MPI type
-     * transfer (instead of an elementary byteblock transfer).
-     */
-    if(H5FD_mpi_setup_collective(dxpl_id, mpi_buf_type, mpi_file_type)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
-    plist_is_setup=1;
-
-    /* Adjust the buffer pointer to the beginning of the selection */
-    buf+=mpi_buf_offset;
-
-    /* transfer the data */
-    if (do_write) {
-    	if (H5F_block_write(f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
-	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
-    } else {
-    	if (H5F_block_read (f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
-	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
-    }
-
-done:
-    /* Reset the dxpl settings */
-    if(plist_is_setup) {
-        if(H5FD_mpi_teardown_collective(dxpl_id)<0)
-    	    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
-    } /* end if */
-
-    /* free the MPI buf and file types */
-    if (mbt_is_derived) {
-	if (MPI_SUCCESS != (mpi_code= MPI_Type_free( &mpi_buf_type )))
-            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
-    }
-    if (mft_is_derived) {
-	if (MPI_SUCCESS != (mpi_code= MPI_Type_free( &mpi_file_type )))
-            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5S_mpio_spaces_xfer() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_mpio_spaces_read
- *
- * Purpose:	MPI-IO function to read directly from app buffer to file.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Programmer:	rky 980813
- *
- * Modifications:
- *
- * rky 980918
- * Added must_convert parameter to let caller know we can't optimize the xfer.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_mpio_opt_possible() routine
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t UNUSED *store,
-    size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    void *buf/*out*/)
-{
-    herr_t ret_value;
-
-    FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
-
-    ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
-        mem_space, dxpl_id, buf, 0/*read*/);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5S_mpio_spaces_read() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_mpio_spaces_write
- *
- * Purpose:	MPI-IO function to write directly from app buffer to file.
- *
- * Return:	non-negative on success, negative on failure.
- *
- * Programmer:	rky 980813
- *
- * Modifications:
- *
- * rky 980918
- * Added must_convert parameter to let caller know we can't optimize the xfer.
- *
- *      QAK - 2002/04/02
- *      Removed the must_convert parameter and move preconditions to
- *      H5S_mpio_opt_possible() routine
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
-    H5D_t *dset, const H5D_storage_t UNUSED *store,
-    size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space,
-    const void *buf)
-{
-    herr_t ret_value;
-
-    FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
-
-    /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-    ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
-        mem_space, dxpl_id, (void*)buf, 1/*write*/);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5S_mpio_spaces_write() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5S_mpio_opt_possible
  *
  * Purpose:	Checks if an direct I/O transfer is possible between memory and
@@ -817,7 +592,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags)
+H5S_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags,const H5O_layout_t *layout)
 {
     htri_t c1,c2;               /* Flags whether a selection is optimizable */
     htri_t ret_value=TRUE;
@@ -849,12 +624,126 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space))
         HGOTO_DONE(FALSE);
 
-    /* Dataset storage must be contiguous currently */
-    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS)
+    /* Dataset storage must be contiguous or chunked */
+    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS && 
+            (flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CHUNKED)
         HGOTO_DONE(FALSE);
+
+    if ((flags&H5S_CONV_STORAGE_MASK)==H5S_CONV_STORAGE_CHUNKED) {
+        hsize_t chunk_dim[H5O_LAYOUT_NDIMS];        /* Chunk dimensions */
+        hssize_t startf[H5S_MAX_RANK],      /* Selection start bounds */
+            endf[H5S_MAX_RANK];     /* Selection end bounds */
+        unsigned dim_rankf;         /* Number of dimensions of file dataspace */
+        int pcheck_hyper,check_hyper,   /* Flags for checking if selection is in one chunk */
+            tnum_chunkf,            /* Number of chunks selection overlaps */
+            max_chunkf,             /* Maximum number of chunks selection overlaps */
+            min_chunkf,             /* Minimum number of chunks selection overlaps */
+            num_chunks_same;        /* Flag indicating whether all processes have the same # of chunks to operate on */
+        unsigned dim_chunks;        /* Temporary number of chunks in a dimension */
+        MPI_Comm comm;              /* MPI communicator for file */
+        int mpi_rank;               /* Rank in MPI communicator */
+        int mpi_code;               /* MPI return code */
+        unsigned u;                 /* Local index variable */
+
+        /* Getting MPI communicator and rank */
+        if((comm = H5F_mpi_get_comm(file))==MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+        if((mpi_rank = H5F_mpi_get_rank(file))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
+
+      /* Currently collective chunking storage 
+	 inside HDF5 is supported for either one of the following two cases:
+	 1. All the hyperslabs for one process is inside one chunk.
+	 2. For single hyperslab selection, the number of chunks that covered 
+	    the single selection for all processes should be equal. 
+	    KY, 2004/7/14
+      */
+
+      /* Quincey, please read.
+	 This is maybe redundant, I think only when both memory and file space be SCALAR
+	 space, the collective IO can work. Otherwise, SELECT_POINT will be reached,collective
+	 IO shouldn't work.
+	 Please clarify and correct the code on the following,
+         Quincey said that it was probably okay if only one data space is SCALAR, 
+         Still keep the code here until we added more tests later.
+	 Kent */
+        if(H5S_SCALAR==mem_space->extent.type || H5S_SCALAR ==file_space->extent.type) {
+            if(!(H5S_SCALAR==mem_space->extent.type && H5S_SCALAR ==file_space->extent.type))
+                HGOTO_DONE(FALSE)
+            else
+                HGOTO_DONE(TRUE)
+        } /* end if */
+
+        dim_rankf = file_space->extent.rank;
+
+        if(H5S_SELECT_BOUNDS(file_space,startf,endf)==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE,FAIL, "invalid check for single selection blocks");
+
+        for(u=0; u < layout->u.chunk.ndims; u++) 
+            chunk_dim[u] = layout->u.chunk.dim[u];
+
+        /* Case 1: check whether all hyperslab in this process is inside one chunk.
+           Note: we don't handle when starting point is less than zero since that may cover
+           two chunks. */
+
+        /*for file space checking*/
+        pcheck_hyper = 1;
+        for (u=0; u<dim_rankf; u++)
+            if(endf[u]/chunk_dim[u]!=startf[u]/chunk_dim[u]) {
+                pcheck_hyper = 0;
+                break;
+            }
+      
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&pcheck_hyper,&check_hyper,1,MPI_INT,MPI_LAND,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&check_hyper,1,MPI_INT,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        /*if check_hyper is true, condition for collective IO case is fulfilled, no
+         need to do further test. */
+        if(check_hyper)
+            HGOTO_DONE(TRUE); 
+    
+      /* Case 2:Check whether the number of chunks that covered the single hyperslab is the same.
+	 If not,no collective chunk IO. 
+	 KY, 2004/7/14
+      */
+	 
+        c1 = H5S_SELECT_IS_SINGLE(file_space);
+        c2 = H5S_SELECT_IS_SINGLE(mem_space);
+
+        if(c1==FAIL || c2 ==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
+        if(c1==FALSE || c2 ==FALSE)
+            HGOTO_DONE(FALSE);
+
+        /* Compute the number of chunks covered by the selection on this process */
+        tnum_chunkf = 1;
+        for (u=0; u<dim_rankf; u++) {
+            dim_chunks = (endf[u]/chunk_dim[u]-startf[u]/chunk_dim[u])+1;
+            tnum_chunkf = dim_chunks*tnum_chunkf;
+        }
+
+        /* Determine the minimum and maximum # of chunks for all processes */
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,&max_chunkf,1,MPI_INT,MPI_MAX,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,&min_chunkf,1,MPI_INT,MPI_MIN,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+  
+        /* Let the rank==0 process determine if the same number of chunks will be operated on by all processes */
+        if(mpi_rank == 0)
+            num_chunks_same = (max_chunkf==min_chunkf);
+                    
+        /* Broadcast the flag indicating the number of chunks are the same */
+        if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&num_chunks_same,1,MPI_INT,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        /* Can't handle case when number of chunks is different (yet) */
+        if(!num_chunks_same)
+            HGOTO_DONE(FALSE);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_opt_possible() */
-
 #endif  /* H5_HAVE_PARALLEL */

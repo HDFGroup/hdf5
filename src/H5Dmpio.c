@@ -39,6 +39,10 @@
 
 #ifdef H5_HAVE_PARALLEL
 
+/* Interface initialization */
+#define INTERFACE_INIT  NULL
+static int             interface_initialize_g = 0;
+
 static herr_t
 H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
@@ -219,11 +223,12 @@ H5D_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t 
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_read);
+    FUNC_ENTER_NOAPI(H5D_mpio_spaces_read, FAIL);
 
     ret_value = H5D_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, buf, store, 0/*read*/);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_spaces_read() */
 
@@ -257,12 +262,13 @@ H5D_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_write);
+    FUNC_ENTER_NOAPI(H5D_mpio_spaces_write, FAIL);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     ret_value = H5D_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, (void*)buf, store, 1/*write*/);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_mpio_spaces_write() */
 #endif  /* H5_HAVE_PARALLEL */

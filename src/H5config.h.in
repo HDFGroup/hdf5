@@ -7,6 +7,9 @@
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
+/* Define if gettimeofday() populates the tz pointer passed in */
+#undef GETTIMEOFDAY_GIVES_TZ
+
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
@@ -87,6 +90,10 @@
 
 /* Define to 1 if you have the <gpfs.h> header file. */
 #undef HAVE_GPFS_H
+
+/* Define if library will contain instrumentation to detect correct
+   optimization operation */
+#undef HAVE_INSTRUMENTED_LIBRARY
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -355,9 +362,6 @@
 
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
-
-/* Define if gettimeofday() populates the tz pointer passed in */
-#undef GETTIMEOFDAY_GIVES_TZ
 
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */

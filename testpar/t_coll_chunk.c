@@ -189,13 +189,8 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     prop_value = H5D_XFER_COLL_CHUNK_DEF;
-#ifdef H5_WANT_H5_V1_6_COMPAT
     status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
                        NULL,NULL,NULL,NULL,NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     VRFY((status >= 0),"testing property list inserted succeeded");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
@@ -275,13 +270,8 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     prop_value = H5D_XFER_COLL_CHUNK_DEF;
-#ifdef H5_WANT_H5_V1_6_COMPAT
     status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
                        NULL,NULL,NULL,NULL,NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                       NULL,NULL,NULL,NULL,NULL,NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     VRFY((status >= 0),"testing property list inserted succeeded");
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
