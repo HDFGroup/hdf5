@@ -610,7 +610,6 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     static char	fmt_llong[8], fmt_ullong[8];
     H5T_str_t 	pad;
     H5G_stat_t	sb;
-
     
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
@@ -974,9 +973,15 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    }
 
 	    /* Print OID */
-	    h5dump_str_append(str, "-%lu:%lu:%lu:%lu",
-			      sb.fileno[1], sb.fileno[0],
-			      sb.objno[1], sb.objno[0]);
+		if (info->obj_hidefileno){
+			h5dump_str_append(str, info->obj_format,
+					  sb.objno[1], sb.objno[0]);
+		}
+		else {
+			h5dump_str_append(str, info->obj_format,
+				      sb.fileno[1], sb.fileno[0],
+					  sb.objno[1], sb.objno[0]);
+		}
 	}
 	
     } else {
@@ -1052,6 +1057,9 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
 	fputs(OPT(info->line_suf, ""), stream);
+		/*if (info->line_ncols != ctx->cur_column) {
+			putc('\n', stream);
+		}*/
         putc('\n',stream);
 	fputs(OPT(info->line_sep, ""), stream);
     }

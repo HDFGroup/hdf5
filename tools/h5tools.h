@@ -262,6 +262,10 @@ typedef struct h5dump_t {
 
 	int skip_first;				/*used to skip the first set of checks for line length*/
 
+	int obj_hidefileno; /*flag used to hide or show the file number for obj refs*/
+	const char *obj_format; /*string used to format the output for the obje refs*/
+
+
 } h5dump_t;
 
 

@@ -1075,7 +1075,13 @@ dump_data (hid_t obj_id, int obj_data) {
 	info.fmt_float = "%g";
 	info.fmt_schar = "%d";
 	info.fmt_int = "%d";
-	
+	info.fmt_uint = "%u";
+	info.fmt_uchar = "%u";
+	info.fmt_short = "%d";
+	info.fmt_ushort = "%u";
+	info.fmt_long = "%ld";
+	info.fmt_ulong = "%lu";
+
 	info.str_repeat = 0;
     info.raw = 0;
 
@@ -1087,6 +1093,9 @@ dump_data (hid_t obj_id, int obj_data) {
 	info.arr_linebreak = 1;
 
 	info.skip_first = 1;
+
+	info.obj_hidefileno = 1;
+	info.obj_format = " %lu:%lu";
     indent += COL;
 	/*the depth will tell us how far we need to indent extra.  we use to just
 	use indent but with the merging of the tools lib we have to do something different
