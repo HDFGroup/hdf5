@@ -2127,7 +2127,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
         /* Read the part before the metadata accumulator */
         if(addr<file->accum_loc) {
             /* Set the amount to read */
-            amount_read=file->accum_loc-addr;
+	     H5_ASSIGN_OVERFLOW(amount_read,file->accum_loc-addr,hsize_t,size_t);
 
             /* Dispatch to driver */
             if ((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf)<0)
@@ -2148,7 +2148,9 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
             amount_read=MIN((file->accum_size-read_off),size);
 
             /* Copy the data out of the buffer */
-            assert(amount_read==(hsize_t)((size_t)amount_read)); /*check for overflow*/
+	    H5_CHECK_OVERFLOW(amount_read,hsize_t,size_t);
+	    /*  assert(amount_read==(hsize_t)((size_t)amount_read)); *//*check for overflow*/
+	    
             HDmemcpy(read_buf,file->meta_accum+read_off,(size_t)amount_read);
 
             /* Adjust the buffer, address & size */
@@ -2342,8 +2344,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                 /* Check if the new metadata overlaps the beginning of the current accumulator */
                 else if(addr<file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size)) {
                     /* Calculate the new accumulator size, based on the amount of overlap */
-                    new_size=(file->accum_loc-addr)+file->accum_size;
-
+             	    H5_ASSIGN_OVERFLOW(new_size,(file->accum_loc-addr)+file->accum_size,hsize_t,size_t);
                     /* Check if we need more buffer space */
                     if(new_size>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */
@@ -2358,11 +2359,11 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     old_offset=(addr+size)-file->accum_loc;
 
                     /* Move the existing metadata to the proper location */
-                    assert((file->accum_size-old_offset)==(hsize_t)((size_t)(file->accum_size-old_offset))); /*check for overflow*/
+                    H5_ASSIGN_OVERFLOW(old_offset,(addr+size)-file->accum_loc,hsize_t,size_t);/*check for overflow*/
                     HDmemmove(file->meta_accum+size,file->meta_accum+old_offset,(size_t)(file->accum_size-old_offset));
 
                     /* Copy the new metadata at the front */
-                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+		    H5_CHECK_OVERFLOW(size,hsize_t,size_t); /*check for overflow*/
                     HDmemcpy(file->meta_accum,buf,(size_t)size);
 
                     /* Set the new size & location of the metadata accumulator */
@@ -2375,8 +2376,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                 /* Check if the new metadata overlaps the end of the current accumulator */
                 else if(addr>=file->accum_loc && (addr+size)>(file->accum_loc+file->accum_size)) {
                     /* Calculate the new accumulator size, based on the amount of overlap */
-                    new_size=(addr-file->accum_loc)+size;
-
+ 		    H5_ASSIGN_OVERFLOW(new_size,(addr-file->accum_loc)+size,hsize_t,size_t);
                     /* Check if we need more buffer space */
                     if(new_size>file->accum_buf_size) {
                         /* Reallocate the metadata accumulator buffer */

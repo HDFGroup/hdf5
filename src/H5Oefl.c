@@ -407,7 +407,12 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	      hsize_t size, uint8_t *buf)
 {
     int		i, fd=-1;
-    size_t	to_read, cur, skip=0;
+    size_t	to_read;
+#ifndef NDEBUG
+    hsize_t tempto_read;
+#endif
+    hsize_t     skip;
+    haddr_t     cur;
     ssize_t	n;
     herr_t	ret_value = FAIL;
     
@@ -447,7 +452,14 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
-	to_read = MIN(efl->slot[i].size-skip, size);
+#ifndef NDEBUG
+	tempto_read = MIN(efl->slot[i].size-skip,(hsize_t)size);
+        H5_CHECK_OVERFLOW(tempto_read,hsize_t,size_t);
+	to_read = (size_t)tempto_read;
+#else /* NDEBUG */
+	to_read = MIN((size_t)(efl->slot[i].size-skip), size);
+#endif /* NDEBUG */
+
 	if ((n=HDread (fd, buf, to_read))<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "read error in external raw data file");
@@ -492,7 +504,12 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	       hsize_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
-    size_t	to_write, cur, skip=0;
+    size_t	to_write;
+#ifndef NDEBUG
+    hsize_t	tempto_write;
+#endif /* NDEBUG */
+    haddr_t     cur;
+    hsize_t     skip;
     herr_t	ret_value = FAIL;
     
     FUNC_ENTER (H5O_efl_write, FAIL);
@@ -536,7 +553,13 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
-	to_write = MIN(efl->slot[i].size-skip, size);
+	#ifndef NDEBUG
+	tempto_write = MIN(efl->slot[i].size-skip,(hsize_t)size);
+        H5_CHECK_OVERFLOW(tempto_write,hsize_t,size_t);
+        to_write = (size_t)tempto_write;
+#else /* NDEBUG */
+	to_write = MIN((size_t)(efl->slot[i].size-skip), size);
+#endif /* NDEBUG */
 	if ((size_t)HDwrite (fd, buf, to_write)!=to_write) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "write error in external raw data file");

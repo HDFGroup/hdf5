@@ -437,6 +437,23 @@ Move H5_inline into windows version of H5pubconf.h; avoid duplicating warnings.
 #define H5_CHECK_OVERFLOW(var,vartype,casttype)
 #endif /* NDEBUG */
 
+
+/*
+ * A macro for detecting over/under-flow when assigning between types
+ */
+#ifndef NDEBUG
+#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
+{                                                       \
+    vartype _tmp_overflow=(vartype)(expr);              \
+    casttype _tmp_overflow2=(casttype)(_tmp_overflow);  \
+    assert((casttype)_tmp_overflow==_tmp_overflow2);    \
+    (var)=_tmp_overflow2;                               \
+}
+#else /* NDEBUG */
+#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
+    (var)=(casttype)(expr);
+#endif /* NDEBUG */
+
 /*
  * Data types and functions for timing certain parts of the library.
  */

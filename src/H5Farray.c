@@ -142,7 +142,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	file_start;			/*byte offset to start	*/
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
-    size_t	nelmts, z;			/*number of elements	*/
+    hsize_t	nelmts, z;			/*number of elements	*/
     unsigned	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     int	j;				    /*counters		*/
@@ -229,9 +229,8 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
              * and memory. Optimize the strides to result in the fewest number of
              * I/O requests.
              */
-            mem_start = H5V_hyper_stride(ndims, hslab_size, mem_size,
-                             mem_offset, mem_stride/*out*/);
-            file_start = H5V_hyper_stride(ndims, hslab_size, layout->dim,
+	    H5_ASSIGN_OVERFLOW(mem_start,H5V_hyper_stride(ndims, hslab_size, mem_size, mem_offset, mem_stride/*out*/),hsize_t,size_t);
+             file_start = H5V_hyper_stride(ndims, hslab_size, layout->dim,
                               file_offset, file_stride/*out*/);
             H5V_stride_optimize2(&ndims, &elmt_size, hslab_size,
                          mem_stride, file_stride);
@@ -424,7 +423,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	file_start;			/*byte offset to start	*/
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
-    size_t	nelmts, z;			/*number of elements	*/
+    hsize_t	nelmts, z;			/*number of elements	*/
     unsigned	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     int	j;				    /*counters		*/

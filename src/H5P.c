@@ -1495,7 +1495,7 @@ herr_t
 H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
     int			idx;
-    size_t		total, tmp;
+    hsize_t		total, tmp;
     H5D_create_t	*plist = NULL;
 
     FUNC_ENTER(H5Pset_external, FAIL);

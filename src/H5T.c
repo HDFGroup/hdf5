@@ -2803,8 +2803,7 @@ H5Tget_ebias(hid_t type_id)
     }
     
     /* bias */
-    ebias = dt->u.atomic.u.f.ebias;
-
+    H5_ASSIGN_OVERFLOW(ebias,dt->u.atomic.u.f.ebias,uint64_t,size_t);
     FUNC_LEAVE(ebias);
 }
 
@@ -7385,7 +7384,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
 
     /* Copy the array dimensions & compute the # of elements in the array */
     for(i=0, ret_value->u.array.nelem=1; i<ndims; i++) {
-        ret_value->u.array.dim[i] = dim[i];
+        H5_ASSIGN_OVERFLOW(ret_value->u.array.dim[i],dim[i],hsize_t,size_t);
         ret_value->u.array.nelem *= dim[i];
     } /* end for */
 
@@ -7701,12 +7700,12 @@ H5T_debug(H5T_t *dt, FILE *stream)
 		    (unsigned long) (dt->u.atomic.u.f.esize));
 	    tmp = dt->u.atomic.u.f.ebias >> 32;
 	    if (tmp) {
-		size_t hi = tmp;
-		size_t lo = dt->u.atomic.u.f.ebias & 0xffffffff;
+		size_t hi = (size_t)tmp;
+		size_t lo = (size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
 		fprintf(stream, " bias=0x%08lx%08lx",
 			(unsigned long)hi, (unsigned long)lo);
 	    } else {
-		size_t lo = dt->u.atomic.u.f.ebias & 0xffffffff;
+		size_t lo = (size_t)(dt->u.atomic.u.f.ebias & 0xffffffff);
 		fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
 	    }
 	    break;

@@ -253,7 +253,8 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     /* Compute the internal sizes */
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
     attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->extent.u.simple));
-    attr->data_size=H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt);
+    
+     H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(space)*H5T_get_size(attr->dt),hssize_t,size_t);
 
     /* Hold the symbol table entry (and file) open */
     if (H5O_open(&(attr->ent)) < 0) {
@@ -618,7 +619,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms */
     size_t		src_type_size;		/* size of source type	*/
     size_t		dst_type_size;		/* size of destination type*/
-    hsize_t		buf_size;		/* desired buffer size	*/
+    size_t		buf_size;		/* desired buffer size	*/
     int         idx;	      /* index of attribute in object header */
     herr_t		ret_value = FAIL;
 
@@ -636,16 +637,14 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     dst_type_size = H5T_get_size(attr->dt);
 
     /* Get the maximum buffer size needed and allocate it */
-    buf_size = nelmts*MAX(src_type_size,dst_type_size);
-    assert(buf_size==(hsize_t)((size_t)buf_size)); /*check for overflow*/
-    if (NULL==(tconv_buf = H5MM_malloc ((size_t)buf_size)) ||
-            NULL==(bkg_buf = H5MM_calloc((size_t)buf_size))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		     "memory allocation failed");
-    }
+   
 
+    H5_ASSIGN_OVERFLOW(buf_size,nelmts*MAX(src_type_size,dst_type_size),hsize_t,size_t);
+    if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    
     /* Copy the user's data into the buffer for conversion */
-    assert((src_type_size*nelmts)==(hsize_t)((size_t)(src_type_size*nelmts))); /*check for overflow*/
+    H5_CHECK_OVERFLOW((src_type_size*nelmts),hsize_t,size_t);
     HDmemcpy(tconv_buf,buf,(size_t)(src_type_size*nelmts));
 
     /* Convert memory buffer into disk buffer */
@@ -781,7 +780,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms*/
     size_t		src_type_size;		/* size of source type 	*/
     size_t		dst_type_size;		/* size of destination type */
-    hsize_t		buf_size;		/* desired buffer size	*/
+    size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5A_read, FAIL);
@@ -798,19 +797,16 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     dst_type_size = H5T_get_size(mem_type);
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
-    assert((dst_type_size*nelmts)==(hsize_t)((size_t)(dst_type_size*nelmts))); /*check for overflow*/
+    H5_CHECK_OVERFLOW((dst_type_size*nelmts),hsize_t,size_t);
+   
     if(attr->ent_opened && !attr->initialized) {
         HDmemset(buf,0,(size_t)(dst_type_size*nelmts));
     }   /* end if */
     else {  /* Attribute exists and has a value */
         /* Get the maximum buffer size needed and allocate it */
-        buf_size = nelmts*MAX(src_type_size,dst_type_size);
-        assert(buf_size==(hsize_t)((size_t)buf_size)); /*check for overflow*/
-        if (NULL==(tconv_buf = H5MM_malloc ((size_t)buf_size)) ||
-                NULL==(bkg_buf = H5MM_calloc((size_t)buf_size))) {
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed");
-        }
+	 H5_ASSIGN_OVERFLOW(buf_size,(nelmts*MAX(src_type_size,dst_type_size)),hsize_t,size_t);
+        if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* Copy the attribute data into the buffer for conversion */
         assert((src_type_size*nelmts)==(hsize_t)((size_t)(src_type_size*nelmts))); /*check for overflow*/
