@@ -25,7 +25,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
-#include "H5SLprivate.h"	/* Skip list routines			*/
+#include "H5SLprivate.h"	/* Skip lists				*/
 
 /* Typedefs */
 

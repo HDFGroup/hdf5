@@ -181,6 +181,11 @@ test_skiplist_insert(void)
     found_item=H5SL_search(slist,&search_key);
     VERIFY(found_item, NULL, "H5SL_search");
 
+    /* Attempt to insert duplicate key (should fail) */
+    search_key=2;
+    ret=H5SL_insert(slist,&search_key,&search_key);
+    VERIFY(ret, FAIL, "H5SL_insert");
+
     /* Close the skip list */
     ret=H5SL_close(slist);
     CHECK(ret, FAIL, "H5SL_close");
