@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <sys/fcntl.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <string.h>
 
 #include <h5toh4.h>
@@ -278,7 +278,7 @@ main(int argc, char **argv)
 
 *****************************************************************************/
 
-int PrintOptions_h5toh4()
+int PrintOptions_h5toh4(void)
 {
 		fprintf(stderr,"\nh5toh4 -h (gives this print-out)\n");
 		fprintf(stderr,"h5toh4 file.h5 file.hdf\n");
@@ -302,9 +302,7 @@ int PrintOptions_h5toh4()
 
 *****************************************************************************/
 
-int h5toh4(h5_filename, h4_filename)
-	char *h5_filename;
-	char *h4_filename;
+int h5toh4(char *h5_filename, char *h4_filename)
 {
 
 	hid_t fid, gid;
@@ -2267,8 +2265,7 @@ int test_file(char *filename,int oflag,mode_t mode)
 
 *****************************************************************************/
 
-int test_dir(path)
-	char	*path;
+int test_dir(char *path)
 {
 
 	struct stat buf;
