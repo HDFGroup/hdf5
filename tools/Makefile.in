@@ -44,6 +44,11 @@ progs: $(LIBTOOLS) $(LIBHDF5)
 	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
+dep depend:
+	@@SETX@; for d in lib $(SUBDIRS); do		      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
 check tests test _test: $(PROGS)
 	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
@@ -64,7 +69,7 @@ install-doc:
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 
-.PHONY: all lib progs test _test install uninstall dep depend clean           \
+.PHONY: all lib progs test _test install uninstall clean           \
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
