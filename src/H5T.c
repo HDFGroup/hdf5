@@ -3548,12 +3548,35 @@ H5Tget_member_type(hid_t type_id, int membno)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     }
     
+#ifdef WANT_H5_V1_2_COMPAT
+    /* HDF5-v1.2.x returns the base type of an array field, not the array
+     * field itself.  Emulate this difference. - QAK
+     */
+    if(dt->u.compnd.memb[membno].type->type==H5T_ARRAY) {
+        /* Copy parent's data type into an atom */
+        if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type->parent,
+                                        H5T_COPY_REOPEN))) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                          "unable to copy member data type");
+        }
+    } /* end if */
+    else {
+        /* Copy data type into an atom */
+        if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type,
+                                        H5T_COPY_REOPEN))) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                          "unable to copy member data type");
+        }
+    } /* end if */
+
+#else /* WANT_H5_V1_2_COMPAT */
     /* Copy data type into an atom */
     if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type,
 				    H5T_COPY_REOPEN))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to copy member data type");
     }
+#endif /* WANT_H5_V1_2_COMPAT */
     if ((memb_type_id = H5I_register(H5I_DATATYPE, memb_dt)) < 0) {
 	H5T_close(memb_dt);
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
