@@ -168,14 +168,37 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline 
 #endif
 
-/* Metroworks <sys/types.h> doesn't define off_t. */
-#ifdef __MWERKS__
-typedef long off_t;
-/* Metroworks does not define EINTR in <errno.h> */
-# define EINTR 4
-#endif /*__MWERKS__*/
-
 #endif /*WIN32*/
+
+/*
+ * This driver supports systems that have the lseek64() function by defining
+ * some macros here so we don't have to have conditional compilations later
+ * throughout the code.
+ *
+ * file_offset_t:	The datatype for file offsets, the second argument of
+ *			the lseek() or lseek64() call.
+ *
+ * file_seek:		The function which adjusts the current file position,
+ *			either lseek() or lseek64().
+ *
+ * adding for windows NT file system support. 
+ */
+
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#elif defined (WIN32)
+# ifdef __MWERKS__
+# define file_offset_t off_t
+# define file_seek lseek
+# else /*MSVC*/
+# define file_offset_t __int64
+# define file_seek _lseeki64
+# endif
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
 
 #ifndef F_OK
 #   define F_OK	00
@@ -760,7 +783,19 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwaitpid(P,W,O)	waitpid(P,W,O)
 #define HDwcstombs(S,P,Z)	wcstombs(S,P,Z)
 #define HDwctomb(S,C)		wctomb(S,C)
+
+
+
+
+#if defined (__MWERKS__)
+/* workaround for a bug in the Metrowerks header file for write
+ which is not defined as const void*
+ pvn
+ */
+#define HDwrite(F,M,Z)		write(F,(void*)M,Z)
+#else
 #define HDwrite(F,M,Z)		write(F,M,Z)
+#endif
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that

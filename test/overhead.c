@@ -208,7 +208,12 @@ test(fill_t fill_style, const double splits[],
     if ((dset=H5Dcreate(file, "chunked", H5T_NATIVE_INT,
 			fspace, dcpl))<0) goto error;
 
-#if !defined( __MWERKS__)			
+#if !defined( __MWERKS__)	
+
+ /* 
+  workaround for a bug in the Metrowerks open function
+  pvn
+  */		
     if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
 #endif  
 
@@ -245,9 +250,8 @@ test(fill_t fill_style, const double splits[],
 	    goto error;
 	}
 
-#if defined( __MWERKS__)
-    if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;		
-#endif	 
+
+#if !defined( __MWERKS__)			
 
 	/* Determine overhead */
 	if (verbose) {
@@ -262,6 +266,9 @@ test(fill_t fill_style, const double splits[],
 		   (unsigned long)i,
 		   (double)(hssize_t)(sb.st_size-i*sizeof(int))/(hssize_t)i);
 	}
+#endif    
+	
+	
     }
 
     H5Dclose(dset);
@@ -290,17 +297,22 @@ test(fill_t fill_style, const double splits[],
 	case FILL_ALL:
 	    abort();
 	}
+	
+#if !defined( __MWERKS__)
+	
 	if (fstat(fd, &sb)<0) goto error;
-	/*
-	 * The extra cast in the following statement is a bug workaround
-	 * for the Win32 version 5.0 compiler.
-	 * 1998-11-06 ptl
-	 */
-	printf("%-7s %8.3f\n", sname,
+		printf("%-7s %8.3f\n", sname,
 	       (double)(hssize_t)(sb.st_size-cur_size[0]*sizeof(int))/
 	           (hssize_t)cur_size[0]);
+#endif
+	          
     }
+
+
+#if !defined( __MWERKS__)
     close(fd);
+#endif
+
     return 0;
 
  error:

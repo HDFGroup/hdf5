@@ -16,16 +16,23 @@
 
 #include "hdf5.h"
 
+#ifdef H5_HAVE_STDIO_H
+#include <stdio.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #ifdef WIN32
-#include <windows.h>
+#if !defined(_68K_) && !defined(_MPPC_) && !defined(_PPC_) && !defined(_ALPHA_) && !defined(_MIPS_) && !defined(_X86_) && defined(_M_IX86)
+#define _X86_
+#endif
+#include <windef.h>
+#include <winbase.h>
+
 #include <io.h>
-#endif /*kent yang 6/21/2001, must be added for defination of open,write....
-       also the defination of longlong is valid, will investigate this to
-       make sure int64 can replace longlong. Otherwise, keep windows.h*/
+
+#endif
 
 #ifdef MAX
 #undef MAX
