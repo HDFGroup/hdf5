@@ -98,22 +98,22 @@ FORTRAN Reference API -- h5r
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5rget_region_region_f">
+<a name="h5rget_region_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_region_region_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_region_f</strong>
 <pre>
 
-          SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr) 
+          SUBROUTINE h5rget_region_f(dset_id, ref, space_id, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Dataset region reference 
             INTEGER(HID_T), INTENT(OUT) :: space_id   ! Space identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
  
-          END SUBROUTINE h5rget_region_region_f
+          END SUBROUTINE h5rget_region_f
 </pre>
 
 
@@ -121,15 +121,15 @@ FORTRAN Reference API -- h5r
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5rget_object_type_obj_f">
+<a name="h5rget_object_type_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_object_type_obj_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_object_type_f</strong>
 <pre>
 
-          SUBROUTINE h5rget_object_type_obj_f(dset_id, ref, obj_type, hdferr) 
+          SUBROUTINE h5rget_object_type_f(dset_id, ref, obj_type, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
@@ -142,7 +142,7 @@ FORTRAN Reference API -- h5r
 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
 
-          END SUBROUTINE h5rget_object_type_obj_f
+          END SUBROUTINE h5rget_object_type_f
 </pre>
 
  
@@ -158,10 +158,9 @@ FORTRAN Reference API -- h5r
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  13 July 2000
+Last modified:  3 April 2000
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
-
 
 </body>
 </html>

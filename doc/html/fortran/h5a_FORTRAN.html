@@ -235,14 +235,19 @@ FORTRAN Attribute API -- h5a
 <dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aread_f</strong>
 <pre>
 
-          SUBROUTINE h5aread_f(attr_id, memtype_id,  buf, hdferr) 
+          SUBROUTINE h5aread_f(attr_id, memtype_id,  buf, dims, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
                                                      ! identifier  (in memory)
-            TYPE(VOID), INTENT(OUT) :: buf            ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr       ! Error code
-                                                 ! 0 on success and -1 on failure
+            TYPE, INTENT(INOUT)  :: buf         ! Data buffer; may be a scalar or an array
+            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
+                                                ! dimension sizes of data buffer buf;
+                                                ! dim(k) has value of the k-th dimension
+                                                ! of buffer buf;
+                                                ! values are ignored if buf is a scalar
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                                ! 0 on success and -1 on failure
           END SUBROUTINE h5aread_f
 </pre>          
 
@@ -259,12 +264,17 @@ FORTRAN Attribute API -- h5a
 <dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5awrite_f</strong>
 <pre>
 
-          SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, hdferr) 
+          SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, dims, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
                                                      ! identifier  (in memory)
-            TYPE(VOID), INTENT(IN) :: buf            ! Attribute data 
+            TYPE, INTENT(IN) :: buf             ! Data buffer; may be a scalar or an array
+            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
+                                                ! dimension sizes of data buffer buf;
+                                                ! dim(k) has value of the k-th dimension
+                                                ! of buffer buf;
+                                                ! values are ignored if buf is a scalar
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                                  ! 0 on success and -1 on failure
           END SUBROUTINE h5awrite_f
@@ -283,10 +293,9 @@ FORTRAN Attribute API -- h5a
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  20 October 1999
+Last modified:  29 June 2001
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
-
 
 </body>
 </html>
