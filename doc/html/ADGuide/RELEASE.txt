@@ -1,12 +1,12 @@
-HDF5 version 1.4.2 released on Tue Jul 31 17:37:24 CDT 2001
+HDF5 version 1.4.2-post0 released on Sat Aug 11 03:46:29 CDT 2001
 ==============================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.4.1 and
-HDF5-1.4.2, and contains information on the platforms tested and
-known problems in HDF5-1.4.2. For more details check the HISTORY.txt
+This document describes the differences between HDF5-1.4.2 and
+HDF5-1.4.2-post0, and contains information on the platforms tested and
+known problems in HDF5-1.4.2-post0. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -26,7 +26,7 @@ If you have any questions or comments, please send them to:
 CONTENTS
 
 - New Features
-- Bug Fixes since HDF5-1.4.1
+- Bug Fixes since HDF5-1.4.2
 - Documentation
 - Platforms Tested
 - Supported Configuration Features
@@ -36,112 +36,16 @@ CONTENTS
 New Features
 ============
 
-    * File sizes greater than 2GB are now supported on Linux systems with
-      version 2.4.x or higher kernels.
-    * Added a global string variable H5_lib_vers_info_g which holds the
-      HDF5 library version information.  This can be used to identify
-      an hdf5 library or hdf5 application binary.
-      Also added a verification of the consistency between H5_lib_vers_info_g
-      and other version information in the source code.
-    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
-    * F90 API:
-        - Added aditional parameter "dims" to the h5dread_f/h5dwrite_f and
-          h5aread_f/h5awrite_f subroutines.  This parameter is a 1-D array 
-          of size 7 and contains the sizes of the data buffer dimensions. 
-          This change enables portability between Windows and UNIX platforms.
-          In previous versions of the F90 APIs, the data buffer parameters of 
-          the above functions were declared as assumed-shape arrays, which 
-          were passed to the C functions by a descriptor.  There is no 
-          portable means, however, of passing descriptors from F90 to C, 
-          causing portability problems between Windows and UNIX and among
-          UNIX platforms.  With this change, the data buffers are assumed-
-          size arrays, which can be portably passed to the C functions.
-    * F90 static library is available on Windows platforms. 
-      See INSTALL_Windows_withF90.txt for details.
-    * F90 APIs are available on HPUX 11.00 and 10.20 and IBM SP platforms.
-    * H5 <-> GIF convertor has been added. This is available under 
-      tools/gifconv. The convertor supports the ability to create animated
-      gifs as well.
-    * Verified correct operation of library on Solaris 2.8 in both 64-bit and
-      32-bit compilation modes.  See INSTALL document for instructions on
-      compiling the distribution with 64-bit support.
-    * Added support for the Metrowerks Code Warrior compiler for Windows.  
-    * For H4->H5 converter utility, added a new option to choose not to convert
-      HDF4 specified attributes(reference number, class) into HDF5 attributes.
-    * Added support chunking and compression in SDS and image in H4->H5 converter. 
-      Currently HDF5 only supports gzip compression, so by default an HDF4 file 
-      with any other compression method will be converted into an HDF5 file in 
-      gzip compression. 
-    * correct the order or reading HDF4 image array in H4->H5 conversion.  
-    * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
-      filesystem or the MPI-IO can really handle greater than 2GB files.
-      If it fails, it prints information message only without failing the
-      test.
-    * Added a parallel HDF5 example examples/ph5example.c to illustrate
-      the basic way of using parallel HDF5.
-    * Added a new public macro, H5_VERS_INFO, which is a string holding
-      the HDF5 library version information.  This string is also compiled
-      into all HDF5 binary code which helps to identify the version information
-      of the binary code.  One may use the Unix strings command on the binary
-      file and looks for the pattern "HDF5 library version".
-    * Added new checking in H5check_version() to verify the five HDF5 version
-      information macros (H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-      H5_VERS_SUBRELEASE and H5_VERS_INFO) are consistent.
-      
          
-Bug Fixes since HDF5-1.4.1 Release
+Bug Fixes since HDF5-1.4.2 Release
 ==================================
 
-    * Fixed bug with non-zero userblock sizes causing raw data to not
-      write correctly.
-    * Fixed problems with Pablo build and linking with non-standard MPI I/O.
-    * Fixed build on Linux systems with --enable-static-exec flag. It now
-      works correctly.
-    * IMPORTANT: Fixed file metadata corruption bug which could cause 
-      metadata data loss in certain situations.
-    * The allocation by alignment (H5Pset_alignment) feature code somehow
-      got dropped in some 1.3.x version. Re-implemented it with "new and
-      improved" algorithm.  It keeps track of "wasted" file-fragment in
-      the free-list too.
-    * Removed limitation that the data transfer buffer size needed to be
-      set for datasets whose dimensions were too large for the 'all' 
-      selection code to handle.  Any size dimensioned datasets should be 
-      handled correctly now.
-    * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
-      when --enable-hdf5v1_2 configure flag is enabled.
-    * Added --enable-linux-lfs flag to allow more control over whether to 
-      enable or disable large file support on Linux.
-    * Fixed various bugs releated to SDS dimensional scale conversions in H4->H5 
-      converter.
-    * Fixed a bug to correctly convert HDF4 objects with fill value into HDF5.
-    * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
-      more than once.  hdf5.h now includes H5public.h which includes
-      H5pubconf.h.  Applications should #include hdf5.h which handles multiple
-      inclusion correctly.
-    * Fixed H5FDmpio.h to be C++ friendly by making Parallel HDF5 API's to be
-      external to C++.
-    * Fixed a bug in H5FD_mpio_flush() that might result in negative file seek
-      if both MPIO and Split-file drivers are used together.
 
 
 
 Documentation
 =============
 
-    * The H5T_conv_t and H5T_cdata_t structures are now properly defined
-      in the H5Tregister entry in the "H5T" section of the "HDF5 Reference 
-      Manual" and described in detail in section 12, "Data Conversions," in 
-      the "Datatypes" chapter of the "HDF5 User's Guide."
-    * The new tools h52gif and gif2h5 have been added to the "Tools" section
-      of the Reference Manual.
-    * A "Freespace Management" section has been added to the "Performance" 
-      chapter of the User's Guide.
-    * Several user-reported bugs have been fixed since Release 1.4.1.
-    * The "HDF5 Image and Palette Specification" (in the "HDF5 Application
-      Developer's Guide") has been heavily revised.  Based on extensive user 
-      feedback and input from visualization software developers, Version 1.2 
-      of the image specification is substantially different from prior 
-      versions.
 
 
 Platforms Tested
