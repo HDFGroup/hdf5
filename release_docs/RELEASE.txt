@@ -46,6 +46,9 @@ New Features
         to 'unsigned long'.  QAK - 2003/08/08
       - Changed 'hobj_ref_t' type from structure with array field to 'haddr_t'.
         QAK - 2003/08/08
+      - Object references (hobj_ref_t) can now be compared with the 'objno'
+        field in the H5G_stat_t struct for testing if two objects are the same
+        within a file.  QAK - 2003/08/08
       - Switched over to new error API. SLU - 2003/07/25
 
     Parallel Library:
