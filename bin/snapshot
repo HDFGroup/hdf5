@@ -114,8 +114,8 @@ CONFIGURE="./configure $HDF4LIB"
 snapshot=yes
 
 # Show all settings right before execution.
-set
-exit 0
+# set
+# exit 0
 
 
 #=============================
@@ -130,7 +130,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
 
     # Check out the current version from CVS
     cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
-endif # Do CVS checkout
+fi # Do CVS checkout
 
 
 #=============================
