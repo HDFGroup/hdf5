@@ -2458,7 +2458,7 @@ test_derived_flt(void)
     }
     if(H5Tset_precision(tid1, 42)<0) {
         H5_FAILED();
-        printf("Can't set precision\n");
+        printf("Can't set precision 1\n");
         goto error;
     }
     if(H5Tset_size(tid1, 7)<0) {
@@ -2618,7 +2618,7 @@ test_derived_flt(void)
     }
     if(H5Tset_precision(tid2, 24)<0) {
         H5_FAILED();
-        printf("Can't set precision\n");
+        printf("Can't set precision 2\n");
         goto error;
     }
     if(H5Tset_size(tid2, 3)<0) {
@@ -6111,8 +6111,22 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	 * will be used for the conversion while the `saved' buffer will be
 	 * used for the comparison later.
 	 */
-	for (j=0; j<nelmts*src_size; j++)
+	for (j=0; j<nelmts*src_size; j++) {
             buf[j] = saved[j] = HDrand();
+
+            /* For Intel machines, the size of "long double" is 12 byte, precision
+             * is 80 bits, mantissa size is 64 bits, and no normalization.  So the
+             * most significant bit of mantissa is always 1 unless the floating number
+             * has special value.  This step tries to compensate this case by turning
+             * on the most significant bit of mantissa if the mantissa bits aren't 
+             * all 0s. */   
+            if(endian==H5T_ORDER_LE && src_type==FLT_LDOUBLE && src_size==12) { 
+                if(j%12==7) {
+                    buf[j] |= 0x80;
+                    saved[j] |= 0x80;
+                }
+            }
+        }
 
 	/* Perform the conversion */
 	if (H5Tconvert(src, dst, nelmts, buf, NULL, dxpl_id)<0)
