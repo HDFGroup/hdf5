@@ -160,7 +160,7 @@ for f in $host_cpu-$host_vendor-$host_os \
   fi
   AC_MSG_RESULT([no])
 done
-if test $host_config != "none"; then
+if test "X$host_config" != "Xnone"; then
   CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
   . $host_config
 fi
@@ -285,7 +285,7 @@ case $host_os in
     if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
       : using gcc
     else
-      echo 'fix $wl in' $ofile
+      echo 'fixing $wl in' $ofile
 ed - $ofile <<EOF 2> /dev/null
 /^wl=""/s//wl="-Wl,"/
 w
@@ -710,6 +710,15 @@ case $withval in
         ;;
     esac
 
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$dmalloc_inc" = "X/usr/include"; then
+      dmalloc_inc=""
+    fi
+    if test "X$dmalloc_lib" = "X/usr/lib"; then
+      dmalloc_lib=""
+    fi
+
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
 
@@ -772,6 +781,15 @@ case $withval in
         fi
         ;;
     esac
+
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$zlib_inc" = "X/usr/include"; then
+      zlib_inc=""
+    fi
+    if test "X$zlib_lib" = "X/usr/lib"; then
+      zlib_lib=""
+    fi
 
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -838,6 +856,15 @@ case "$withval" in
         ;;
     esac
 
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$pablo_inc" = "X/usr/include"; then
+      pablo_inc=""
+    fi
+    if test "X$pablo_lib" = "X/usr/lib"; then
+      pablo_lib=""
+    fi
+
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
     if test -n "$pablo_inc"; then
@@ -898,7 +925,9 @@ case "$withval" in
       ;;
    *)
       saved_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$with_ssl"
+      if test "X$with_ssl" != "X/usr/lib"; then
+        LDFLAGS="$LDFLAGS -L$with_ssl"
+      fi
       AC_CHECK_LIB(crypto,main,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
       AC_CHECK_LIB(ssl,SSL_get_version,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
       ;;
@@ -948,6 +977,15 @@ case "$withval" in
         fi
         ;;
     esac
+
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$gass_inc" = "X/usr/include"; then
+      gass_inc=""
+    fi
+    if test "X$gass_lib" = "X/usr/lib"; then
+      gass_lib=""
+    fi
 
     if test -n "$gass_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
@@ -1025,6 +1063,15 @@ case "$withval" in
         fi
         ;;
     esac
+
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$srb_inc" = "X/usr/include"; then
+      srb_inc=""
+    fi
+    if test "X$srb_lib" = "X/usr/lib"; then
+      srb_lib=""
+    fi
 
     if test -n "$srb_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
@@ -1104,6 +1151,15 @@ case "$withval" in
         fi
         ;;
     esac
+
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$pthread_inc" = "X/usr/include"; then
+      pthread_inc=""
+    fi
+    if test "X$pthread_lib" = "X/usr/lib"; then
+      pthread_lib=""
+    fi
 
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
