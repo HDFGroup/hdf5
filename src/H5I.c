@@ -118,6 +118,7 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static hid_t H5I_get_file_id(hid_t obj_id);
+static int H5I_get_ref(hid_t id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -959,6 +960,44 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Idec_ref
+ *
+ * Purpose:	Decrements the number of references outstanding for an ID.
+ *              If the reference count for an ID reaches zero, the object
+ *              will be closed.
+ *
+ * Return:	Success:	New reference count
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Dec  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Idec_ref(hid_t id)
+{
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_API(H5Idec_ref, FAIL);
+    H5TRACE1("Is","i",id);
+
+    /* Check arguments */
+    if (id<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+
+    /* Do actual decrement operation */
+    if((ret_value = H5I_dec_ref(id))<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Idec_ref() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_dec_ref
  *
  * Purpose:	Decrements the number of references outstanding for an ID.
@@ -999,46 +1038,88 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    H5I_type_t		grp = H5I_GRP(id);	/*group the object is in*/
-    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
-    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
-    int		ret_value=FAIL;	/*return value		*/
+    H5I_type_t		grp;		/*group the object is in*/
+    H5I_id_group_t	*grp_ptr;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the new ID	*/
+    int ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_dec_ref, FAIL);
 
+    /* Sanity check */
+    assert(id>=0);
+
     /* Check arguments */
+    grp = H5I_GRP(id);
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     
     /* General lookup of the ID */
-    if ((id_ptr=H5I_find_id(id))) {
-	/*
-	 * If this is the last reference to the object then invoke the group's
-	 * free method on the object. If the free method is undefined or
-	 * successful then remove the object from the group; otherwise leave
-	 * the object in the group without decrementing the reference
-	 * count. If the reference count is more than one then decrement the
-	 * reference count without calling the free method.
-	 *
-	 * Beware: the free method may call other H5I functions.
-	 */
-	if (1==id_ptr->count) {
-	    if (!grp_ptr->free_func ||
-		(grp_ptr->free_func)(id_ptr->obj_ptr)>=0) {
-		H5I_remove(id);
-		ret_value = 0;
-	    } else {
-		ret_value = FAIL;
-	    }
-	} else {
-	    ret_value = --(id_ptr->count);
-	}
+    if ((id_ptr=H5I_find_id(id))==NULL)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
+
+    /*
+     * If this is the last reference to the object then invoke the group's
+     * free method on the object. If the free method is undefined or
+     * successful then remove the object from the group; otherwise leave
+     * the object in the group without decrementing the reference
+     * count. If the reference count is more than one then decrement the
+     * reference count without calling the free method.
+     *
+     * Beware: the free method may call other H5I functions.
+     */
+    if (1==id_ptr->count) {
+        if (!grp_ptr->free_func || (grp_ptr->free_func)(id_ptr->obj_ptr)>=0) {
+            H5I_remove(id);
+            ret_value = 0;
+        } else {
+            ret_value = FAIL;
+        }
+    } else {
+        ret_value = --(id_ptr->count);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Iinc_ref
+ *
+ * Purpose:	Increments the number of references outstanding for an ID.
+ *
+ * Return:	Success:	New reference count
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Dec  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Iinc_ref(hid_t id)
+{
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_API(H5Iinc_ref, FAIL);
+    H5TRACE1("Is","i",id);
+
+    /* Check arguments */
+    if (id<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+
+    /* Do actual increment operation */
+    if((ret_value = H5I_inc_ref(id))<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Iinc_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -1060,16 +1141,20 @@ done:
 int
 H5I_inc_ref(hid_t id)
 {
-    H5I_type_t		grp = H5I_GRP(id);	/*group the object is in*/
-    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
-    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the ID		*/
-    int ret_value;                              /* Return value */
+    H5I_type_t		grp;		/*group the object is in*/
+    H5I_id_group_t	*grp_ptr;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
+    int ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_inc_ref, FAIL);
 
+    /* Sanity check */
+    assert(id>=0);
+
     /* Check arguments */
-    if (id<0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+    grp = H5I_GRP(id);
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (!grp_ptr || grp_ptr->count<=0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
@@ -1077,14 +1162,98 @@ H5I_inc_ref(hid_t id)
     /* General lookup of the ID */
     if (NULL==(id_ptr=H5I_find_id(id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
-    id_ptr->count++;
+
+    /* Set return value */
+    ret_value=++(id_ptr->count);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Iget_ref
+ *
+ * Purpose:	Retrieves the number of references outstanding for an ID.
+ *
+ * Return:	Success:	Reference count
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Dec  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Iget_ref(hid_t id)
+{
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_API(H5Iget_ref, FAIL);
+    H5TRACE1("Is","i",id);
+
+    /* Check arguments */
+    if (id<0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+
+    /* Do actual retrieve operation */
+    if((ret_value = H5I_get_ref(id))<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Iget_ref() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_ref
+ *
+ * Purpose:	Retrieve the reference count for an object.
+ *
+ * Return:	Success:	The reference count.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, Decemeber  6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5I_get_ref(hid_t id)
+{
+    H5I_type_t		grp;		/*group the object is in*/
+    H5I_id_group_t	*grp_ptr;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5I_get_ref, FAIL);
+
+    /* Sanity check */
+    assert(id>=0);
+
+    /* Check arguments */
+    grp = H5I_GRP(id);
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (!grp_ptr || grp_ptr->count<=0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
+
+    /* General lookup of the ID */
+    if (NULL==(id_ptr=H5I_find_id(id)))
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
 
     /* Set return value */
     ret_value=id_ptr->count;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5I_get_ref() */
 
 
 /*-------------------------------------------------------------------------

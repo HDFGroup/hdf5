@@ -27,6 +27,10 @@
  * tracing output look better when hid_t values are large numbers.  Change the
  * GROUP_BITS in H5I.c if the MAXID gets larger than 32 (an assertion will
  * fail otherwise).
+ *
+ * When adding groups here, add a section to the 'misc19' test in test/tmisc.c
+ * to verify that the H5I{inc|dec|get}_ref() routines work correctly with in.
+ *
  */
 typedef enum {
     H5I_BADID		= (-1),	/*invalid Group				    */
@@ -59,8 +63,11 @@ extern "C" {
 
 /* Public API functions */
 H5_DLL H5I_type_t H5Iget_type(hid_t id);
-H5_DLL hid_t H5Iget_file_id(hid_t obj_id);
-H5_DLL ssize_t H5Iget_name(hid_t object_id, char *name/*out*/, size_t size);
+H5_DLL hid_t H5Iget_file_id(hid_t id);
+H5_DLL ssize_t H5Iget_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL int H5Iinc_ref(hid_t id);
+H5_DLL int H5Idec_ref(hid_t id);
+H5_DLL int H5Iget_ref(hid_t id);
 
 #ifdef __cplusplus
 }
