@@ -1284,7 +1284,7 @@ else
     hname="`hostname`"
 
     case "$hname" in
-      *pacific.llnl.gov* | *gs01*)
+      *pacific.llnl.gov* | *s0*)
         hardcode_libdir_flag_spec='${wl}-b ${wl}libpath:$libdir:/usr/lib:/lib'
 	;;
       *)
