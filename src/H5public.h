@@ -41,7 +41,7 @@ static char             RcsId[] = "@(#)$Revision$";
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface/format changes  	     */
 #define H5_VERS_MINOR	1       /* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	96      /* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	97      /* For tweaks, bug-fixes, or development     */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
