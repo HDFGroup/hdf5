@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post13 released on Tue Jan  6 13:56:18 CST 2004
+HDF5 version 1.6.1-post15 released on Sun Jan 11 20:46:44 CST 2004
 ================================================================================
 
 
@@ -56,6 +56,10 @@ New Features
 
     Tools:
     ------
+        - Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
+	  AKC - 2004/01/08
+	- Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
+	  respectively if library is built in parallel mode.  AKC - 2004/01/07
         - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
 
     C++ API:
@@ -64,7 +68,10 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-  
+        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran compiler
+          version 8.1 Beta  
+          Use --disbale-shared --enable-static flags with configure when 
+          building HDF5 Fortran Library on MAC OSX.
 
 Bug Fixes since HDF5-1.6.1 release
 ==================================
@@ -204,6 +211,7 @@ Platforms Tested
     MAC OS X                      Darwin 6.8
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1175, based on gcc version 3.1
+                                  IBM XL Fortran version 8.1 Beta
                                   
 
 
