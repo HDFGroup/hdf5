@@ -3575,7 +3575,7 @@ done:
  * Function:    H5Pset_fill_time
  *
  * Purpose:	Set fill value writing time for dataset.  Valid values are
- *		H5D_ALLOC and H5D_NEVER.
+ *		H5D_FILL_TIME_ALLOC and H5D_FILL_TIME_NEVER.
  *
  * Return:      Non-negative on success/Negative on failure
  *
