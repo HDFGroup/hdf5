@@ -9240,6 +9240,57 @@ fi
 
 rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 
+
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+
+
+ CONFIG_DATE="`date`"
+
+ CONFIG_USER="`whoami`@`hostname`"
+if test -n "$ORGANIZATION"; then
+  CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
+fi
+
+
+
+
+if test "X$ac_cv_c_bigendian" = "Xyes"; then
+  BYTESEX="big-endian"
+else
+  BYTESEX="little-endian"
+fi
+
+PARALLEL=${PARALLEL:-no}
+
+
+if `echo $CC | grep / 2>&1 /dev/null`; then
+  CC_VERSION="$CC"
+else
+  CC_VERSION="$CC";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$CC; then
+      CC_VERSION="$x/$CC"
+      break
+    fi
+  done
+fi
+if test -n "$cc_vendor" && test -n "$cc_version"; then
+  CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
+fi
+
+
+if `echo $F9X | grep / 2>&1 /dev/null`; then
+  FC_VERSION="$F9X"
+else
+  FC_VERSION="$F9X";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$F9X; then
+      FC_VERSION="$x/$F9X"
+      break
+    fi
+  done
+fi
+
  DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
   for d in $LDFLAGS ; do
@@ -9286,7 +9337,7 @@ fi
 
 saved_no_create=$no_create
 no_create=yes
-ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/h5fc src/H5fortran_types.f90 src/Makefile test/Makefile $PARALLEL_MAKE examples/Makefile"
+ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/h5fc src/H5fortran_types.f90 src/libhdf5_fortran.settings src/Makefile test/Makefile $PARALLEL_MAKE examples/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9779,6 +9830,7 @@ do
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "src/h5fc" ) CONFIG_FILES="$CONFIG_FILES src/h5fc" ;;
   "src/H5fortran_types.f90" ) CONFIG_FILES="$CONFIG_FILES src/H5fortran_types.f90" ;;
+  "src/libhdf5_fortran.settings" ) CONFIG_FILES="$CONFIG_FILES src/libhdf5_fortran.settings" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "$PARALLEL_MAKE" ) CONFIG_FILES="$CONFIG_FILES $PARALLEL_MAKE" ;;
@@ -9917,6 +9969,13 @@ s,@FILTERS@,$FILTERS,;t t
 s,@ADD_PARALLEL_FILES@,$ADD_PARALLEL_FILES,;t t
 /@DEPEND@/r $DEPEND
 s,@DEPEND@,,;t t
+s,@H5_VERSION@,$H5_VERSION,;t t
+s,@CONFIG_DATE@,$CONFIG_DATE,;t t
+s,@CONFIG_USER@,$CONFIG_USER,;t t
+s,@CONFIG_MODE@,$CONFIG_MODE,;t t
+s,@BYTESEX@,$BYTESEX,;t t
+s,@CC_VERSION@,$CC_VERSION,;t t
+s,@FC_VERSION@,$FC_VERSION,;t t
 s,@DYNAMIC_DIRS@,$DYNAMIC_DIRS,;t t
 /@COMMENCE@/r $COMMENCE
 s,@COMMENCE@,,;t t

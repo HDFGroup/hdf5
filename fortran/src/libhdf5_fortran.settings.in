@@ -1,0 +1,18 @@
+SUMMARY OF THE HDF5 CONFIGURATION
+=================================
+
+HDF5 Version:       @H5_VERSION@
+Configured on:      @CONFIG_DATE@
+Configured by:      @CONFIG_USER@
+Configure mode:     @CONFIG_MODE@
+Host system:        @host_cpu@-@host_vendor@-@host_os@
+Byte sex:           @BYTESEX@
+Parallel support:   @PARALLEL@
+Installation point: @prefix@
+C Compiler:         @CC_VERSION@
+C Flags:            @CFLAGS@ @CPPFLAGS@
+Extra C libraries:  @LDFLAGS@ @LIBS@
+Fortran Compiler:   @FC_VERSION@
+Fortran Flags:      @FFLAGS@
+Archiver:           @AR@
+Ranlib:             @RANLIB@

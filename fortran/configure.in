@@ -906,6 +906,69 @@ dnl Some cleanup stuff
 rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 
 dnl ----------------------------------------------------------------------
+dnl Set some variables for general configuration information to be saved
+dnl and installed with the libraries.
+dnl
+
+dnl HDF5 version from the first line of the README.txt file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+AC_SUBST(H5_VERSION)
+
+dnl Configuration date
+AC_SUBST(CONFIG_DATE) CONFIG_DATE="`date`"
+
+dnl User doing the configuration
+AC_SUBST(CONFIG_USER) CONFIG_USER="`whoami`@`hostname`"
+if test -n "$ORGANIZATION"; then
+  CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
+fi
+
+dnl Configuration mode (production, development, profile, etc) saved above.
+AC_SUBST(CONFIG_MODE)
+
+dnl Byte sex from the AC_C_BIGENDIAN macro.
+AC_SUBST(BYTESEX)
+if test "X$ac_cv_c_bigendian" = "Xyes"; then
+  BYTESEX="big-endian"
+else
+  BYTESEX="little-endian"
+fi
+
+dnl Parallel support? (set above except empty if none)
+PARALLEL=${PARALLEL:-no}
+
+dnl Compiler with version information. This consists of the full path
+dnl name of the compiler and the reported version number.
+AC_SUBST(CC_VERSION)
+if `echo $CC | grep / 2>&1 /dev/null`; then
+  CC_VERSION="$CC"	
+else
+  CC_VERSION="$CC";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$CC; then
+      CC_VERSION="$x/$CC"
+      break
+    fi
+  done
+fi
+if test -n "$cc_vendor" && test -n "$cc_version"; then
+  CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
+fi
+
+AC_SUBST(FC_VERSION)
+if `echo $F9X | grep / 2>&1 /dev/null`; then
+  FC_VERSION="$F9X"	
+else
+  FC_VERSION="$F9X";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$F9X; then
+      FC_VERSION="$x/$F9X"
+      break
+    fi
+  done
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Determine the runtime libraries we may need to include in the
 dnl libtools command so that executables will find the correct dynamic
 dnl libraries.
@@ -983,6 +1046,7 @@ AC_CONFIG_FILES([config/depend1
                  Makefile
                  src/h5fc
                  src/H5fortran_types.f90
+                 src/libhdf5_fortran.settings
                  src/Makefile
                  test/Makefile
                  $PARALLEL_MAKE
