@@ -546,6 +546,10 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *      Removed the must_convert parameter and move preconditions to
  *      H5S_mpio_opt_possible() routine
  *
+ *      QAK - 2002/06/17
+ *      Removed 'disp' parameter from H5FD_mpio_setup routine and use the
+ *      address of the dataset in MPI_File_set_view() calls, as necessary.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -557,7 +561,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
 {
     herr_t	 ret_value = SUCCEED;
     int		 err;
-    haddr_t	 disp, addr;
+    haddr_t	 addr;
     size_t	 mpi_count;
     size_t	 mpi_buf_count, mpi_unused_count;
     MPI_Datatype mpi_buf_type, mpi_file_type;
@@ -629,21 +633,20 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
     if (MPI_SUCCESS != err)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
-    /* calculate the absolute base addr (i.e., the file view disp) */
-    disp = f->shared->base_addr + layout->addr;
+    /* Use the absolute base address of the dataset (or chunk, eventually) as
+     * the address to read from.  This should be used as the diplacement for
+     * a call to MPI_File_set_view() in the read or write call.
+     */
+    addr = f->shared->base_addr + layout->addr;
 #ifdef H5Smpi_DEBUG
-    HDfprintf(stdout, "spaces_xfer: disp=%Hu\n", disp );
+    HDfprintf(stdout, "spaces_xfer: addr=%a\n", addr );
 #endif
 
-    /* Effective address determined by base addr and the MPI file type */
-    addr = 0;
-
     /*
-     * Pass buf type, file type, and absolute base address (i.e., the file
-     * view disp) to the file driver. Request a dataspace transfer (instead
-     * of an elementary byteblock transfer).
+     * Pass buf type, file type to the file driver. Request an MPI type
+     * transfer (instead of an elementary byteblock transfer).
      */
-    H5FD_mpio_setup(f->shared->lf, mpi_buf_type, mpi_file_type, disp, 1);
+    H5FD_mpio_setup(f->shared->lf, mpi_buf_type, mpi_file_type, 1);
 
     /* transfer the data */
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
