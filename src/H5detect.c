@@ -248,12 +248,13 @@ precision (detected_t *d)
     volatile TYPE	_val=0;						      \
     volatile size_t	_ano=0;						      \
     void		(*_handler)(int) = signal(SIGBUS, sigbus_handler);    \
+    void		(*_handler2)(int) = signal(SIGSEGV, sigsegv_handler);    \
 									      \
     _buf = malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);		      \
     if (setjmp(jbuf_g)) _ano++;						      \
     if (_ano<NELMTS(align_g)) {						      \
-	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS*/	      \
-	_val = *((TYPE*)(_buf+align_g[_ano]));	/*possible SIGBUS*/	      \
+	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/	      \
+	_val = *((TYPE*)(_buf+align_g[_ano]));	/*possible SIGBUS or SEGSEGV*/	      \
 	(ALIGN)=align_g[_ano];						      \
     } else {								      \
 	(ALIGN)=0;							      \
@@ -261,6 +262,7 @@ precision (detected_t *d)
     }									      \
     free(_buf);								      \
     signal(SIGBUS, _handler); /*restore original handler*/		      \
+    signal(SIGSEGV, _handler2); /*restore original handler*/		      \
 }
 #else
 #define ALIGNMENT(TYPE,ALIGN) (ALIGN)=0
@@ -313,6 +315,31 @@ precision (detected_t *d)
 #endif
 #endif
 
+
+/*-------------------------------------------------------------------------
+ * Function:	sigsegv_handler
+ *
+ * Purpose:	Handler for SIGSEGV. We use signal() instead of sigaction()
+ *		because it's more portable to non-Posix systems. Although
+ *		it's not nearly as nice to work with, it does the job for
+ *		this simple stuff.
+ *
+ * Return:	Returns via longjmp to jbuf_g.
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, March 18, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+sigsegv_handler(int UNUSED signo)
+{
+    signal(SIGSEGV, sigsegv_handler);
+    longjmp(jbuf_g, 1);
+}
+    
 
 /*-------------------------------------------------------------------------
  * Function:	sigbus_handler
