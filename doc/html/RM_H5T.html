@@ -217,11 +217,11 @@ facilitate moving easily between them.</i>
 <!--<li><a href="#Datatype-GetMemberClass">H5Tget_member_class_f</a>        -->
     <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
     <li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>
-    <li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>
+<!--<li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>          -->
     <li><a href="#Datatype-GetMemberType">h5tget_member_type_f</a>
     <li><a href="#Datatype-Insert">h5tinsert_f</a>
     <li><a href="#Datatype-Pack">h5tpack_f</a>
-    <li><a href="#Datatype-InsertArray">h5tinsert_array_f</a>
+<!--<li><a href="#Datatype-InsertArray">h5tinsert_array_f</a>               -->
     <p>
     <i>Enumeration Datatypes</i>
     <li><a href="#Datatype-EnumCreate">h5tenum_create_f</a>
@@ -1801,23 +1801,18 @@ zero.
     <dd><em>H5T_str_t </em><code>H5Tget_strpad</code>(<em>hid_t </em><code>type_id</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Retrieves the string padding method for a string datatype.
+    <dd>Retrieves the storage mechanism for a string datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tget_strpad</code> retrieves the string padding method 
-        for a string datatype.  Valid string padding types are:
-        <ul> <dl>
-            <dt>H5T_STR_NULL (<code>0</code>)
-               <dd>Pad with zeros (as C does)
-            <dt>H5T_STR_SPACE (<code>1</code>)
-               <dd>Pad with spaces (as FORTRAN does)
-        </dl> </ul>
+    <dd><code>H5Tget_strpad</code> retrieves the storage mechanism
+        for a string datatype, as defined in 
+        <a href="#Datatype-SetStrpad"><code>H5Tset_strpad</code></a>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of datatype to query.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a valid string padding type if successful;
+    <dd>Returns a valid string storage mechanism if successful;
         otherwise <code>H5T_STR_ERROR</code> (-1).
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_strpad_f" 
@@ -2014,7 +2009,7 @@ zero.
     <dd>Returns the byte offset of the field if successful;
         otherwise returns <code>0</code> (zero).
         Note that zero is a valid offset and that this function 
-        will fail only if a call to <code>H5Tget_member_dims()</code> 
+        will fail only if a call to <code>H5Tget_member_class()</code> 
         fails with the same arguments.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_offset_f" 
@@ -2608,7 +2603,7 @@ zero.
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetArrayDims">H5Tget_array_dims</a>
 <dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Tget_array_dims</code>(
+    <dd><em>herr_t</em> <code>H5Tget_array_dims</code>(
                        <em>hid_t</em> <code>adtype_id</code>,
                        <em>hsize_t *</em><code>dims[]</code>,
                        <em>int *</em><code>perm[]</code>
@@ -2716,9 +2711,9 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  7 February 2001
+Last modified:  19 February 2001
 <br>
-Describes HDF5 Release 1.4, February 2001
+Describes HDF5 Release 1.4.1, April 2001
 
 </body>
 </html>

@@ -444,6 +444,18 @@ facilitate moving easily between them.</i>
             (But the file identifier is no longer valid and cannot be used.)
             Once all of the remaining access identifiers are closed,
             the file will be fully closed and access will end.
+            <p>
+            <strong>EXCEPTION:</strong> 
+            Note the following deviation from the above-described behavior.
+            If <code>H5close</code> is called for a file but one or more 
+            objects within the file remain open, those objects will remain 
+            accessible until they are individually closed.  
+            Thus, if the dataset <code>data_sample</code> is open when 
+            <code>H5close</code> is called for the file containing it, 
+            <code>data_sample</code> will remain open and accessible 
+            (including writable) until it is explicitely closed.  
+            The file will be automatically closed once all objects in the
+            file have been closed.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
@@ -642,7 +654,7 @@ H5F&nbsp;&nbsp;
 <br>
 Last modified:  12 October 2000
 <br>
-Describes HDF5 Release 1.4, February 2001
+Describes HDF5 Release 1.4.1, April 2001
 
 </body>
 </html>
