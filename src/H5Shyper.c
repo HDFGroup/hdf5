@@ -5893,7 +5893,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
         off_arr[i]=iter->hyp.span[i]->low;
 
         /* Compute the sequential element offset */
-        loc_off+=off_arr[i]*slab[i];
+        loc_off+=(off_arr[i]+space->select.offset[i])*slab[i];
     } /* end for */
 
     /* Perform the I/O on the elements, based on the position of the iterator */
@@ -6008,7 +6008,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
 
             /* Reset the buffer offset */
             for(i=0, loc_off=0; i<ndims; i++)
-                loc_off+=off_arr[i]*slab[i];
+                loc_off+=(off_arr[i]+space->select.offset[i])*slab[i];
         } /* end else */
     } /* end while */
 
@@ -6102,12 +6102,12 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
     for(u=0; u<ndims; u++) {
         tmp_count[u]=diminfo[u].count;
         tmp_block[u]=diminfo[u].block;
-        offset[u]=diminfo[u].start;
+        offset[u]=(diminfo[u].start+space->select.offset[u]);
     } /* end for */
 
     /* Initialize the starting location */
     for(loc=buf,u=0; u<ndims; u++)
-        loc+=diminfo[u].start*slab[u];
+        loc+=offset[u]*slab[u];
 
     /* Go iterate over the hyperslabs */
     while(user_ret==0) {
@@ -6185,7 +6185,7 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
 
         /* Re-compute buffer location & offset array */
         for(loc=buf,u=0; u<ndims; u++) {
-            temp_off=diminfo[u].start
+            temp_off=(diminfo[u].start+space->select.offset[u])
                 +diminfo[u].stride*(diminfo[u].count-tmp_count[u])
                     +(diminfo[u].block-tmp_block[u]);
             loc+=temp_off*slab[u];

@@ -79,6 +79,7 @@
 #define SPACE7_RANK	2
 #define SPACE7_DIM1	10
 #define SPACE7_DIM2	10
+#define SPACE7_FILL     254
 
 /* 4-D dataset with fixed dimensions */
 #define SPACE8_NAME  "Space8"
@@ -115,7 +116,8 @@ herr_t test_select_hyper_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t 
 herr_t test_select_point_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 herr_t test_select_all_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 herr_t test_select_none_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
-herr_t test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data);
+herr_t test_select_hyper_iter2(void *_elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *_operator_data);
+herr_t test_select_hyper_iter3(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 
 /****************************************************************
 **
@@ -4412,6 +4414,24 @@ test_select_combine(void)
 
 /****************************************************************
 **
+**  test_select_hyper_iter3(): Iterator for checking hyperslab iteration
+** 
+****************************************************************/
+herr_t 
+test_select_hyper_iter3(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+{
+    unsigned short *tbuf=(unsigned short *)_elem,     /* temporary buffer pointer */
+            *tbuf2=(unsigned short *)_operator_data; /* temporary buffer handle */
+
+    /* Simple check to make certain the values in the selected points match */
+    if(*tbuf!=*tbuf2)
+        return(-1);
+    else
+        return(0);
+}   /* end test_select_hyper_iter3() */
+
+/****************************************************************
+**
 **  test_select_fill_all(): Test basic H5S (dataspace) selection code.
 **      Tests filling "all" selections
 ** 
@@ -4445,17 +4465,13 @@ test_select_fill_all(void)
     /* Space defaults to "all" selection */
 
     /* Set fill value */
-    fill_value=254;
+    fill_value=SPACE7_FILL;
 
     /* Fill selection in memory */
     ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
     CHECK(ret, FAIL, "H5Dfill");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-    
-    /* Verify memory buffer */
+    /* Verify memory buffer the hard way... */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++)
             if(*tbuf!=(unsigned short)fill_value) {
@@ -4463,6 +4479,14 @@ test_select_fill_all(void)
                 printf("Error! j=%d, i=%d, *tbuf=%x, fill_value=%x\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
             } /* end if */
 
+    /* Iterate through selection, verifying correct data */
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    CHECK(ret, FAIL, "H5Diterate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
     /* Free memory buffers */
     free(wbuf);
 }   /* test_select_fill_all() */
@@ -4516,17 +4540,13 @@ test_select_fill_point(hssize_t *offset)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Set fill value */
-    fill_value=254;
+    fill_value=SPACE7_FILL;
 
     /* Fill selection in memory */
     ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
     CHECK(ret, FAIL, "H5Dfill");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-    
-    /* Verify memory buffer */
+    /* Verify memory buffer the hard way... */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
@@ -4544,6 +4564,14 @@ test_select_fill_point(hssize_t *offset)
             } /* end if */
         } /* end for */
 
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
     /* Free memory buffers */
     free(wbuf);
 }   /* test_select_fill_point() */
@@ -4599,17 +4627,13 @@ test_select_fill_hyper_simple(hssize_t *offset)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Set fill value */
-    fill_value=254;
+    fill_value=SPACE7_FILL;
 
     /* Fill selection in memory */
     ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
     CHECK(ret, FAIL, "H5Dfill");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-    
-    /* Verify memory buffer */
+    /* Verify memory buffer the hard way... */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             if((i>=(int)(start[0]+real_offset[0]) && i<(int)(start[0]+count[0]+real_offset[0]))
@@ -4627,6 +4651,14 @@ test_select_fill_hyper_simple(hssize_t *offset)
             } /* end else */
         } /* end for */
 
+    /* Iterate through selection, verifying correct data */
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    CHECK(ret, FAIL, "H5Diterate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
     /* Free memory buffers */
     free(wbuf);
 }   /* test_select_fill_hyper_simple() */
@@ -4693,17 +4725,13 @@ test_select_fill_hyper_regular(hssize_t *offset)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Set fill value */
-    fill_value=254;
+    fill_value=SPACE7_FILL;
 
     /* Fill selection in memory */
     ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
     CHECK(ret, FAIL, "H5Dfill");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-    
-    /* Verify memory buffer */
+    /* Verify memory buffer the hard way... */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
@@ -4721,7 +4749,14 @@ test_select_fill_hyper_regular(hssize_t *offset)
             } /* end if */
         } /* end for */
 
+    /* Iterate through selection, verifying correct data */
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    CHECK(ret, FAIL, "H5Diterate");
 
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
     /* Free memory buffers */
     free(wbuf);
 }   /* test_select_fill_hyper_regular() */
@@ -4794,17 +4829,13 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     CHECK(ret, FAIL, "H5Soffset_simple");
 
     /* Set fill value */
-    fill_value=254;
+    fill_value=SPACE7_FILL;
 
     /* Fill selection in memory */
     ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
     CHECK(ret, FAIL, "H5Dfill");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-    
-    /* Verify memory buffer */
+    /* Verify memory buffer the hard way... */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
@@ -4822,6 +4853,13 @@ test_select_fill_hyper_irregular(hssize_t *offset)
             } /* end if */
         } /* end for */
 
+    /* Iterate through selection, verifying correct data */
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    CHECK(ret, FAIL, "H5Diterate");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
 
     /* Free memory buffers */
     free(wbuf);
@@ -4937,6 +4975,7 @@ test_select(void)
     test_select_combine();
 
     /* Test filling selections */
+    /* (Also tests iterating through each selection */
     test_select_fill_all();
     test_select_fill_point(NULL);
     test_select_fill_point(offset);
@@ -4946,6 +4985,7 @@ test_select(void)
     test_select_fill_hyper_regular(offset);
     test_select_fill_hyper_irregular(NULL);
     test_select_fill_hyper_irregular(offset);
+
 }   /* test_select() */
 
 
