@@ -77,9 +77,6 @@
 /* Define if we have Globus GASS support */
 #undef HAVE_GASS
 
-/* Define if we have Globus support */
-#undef HAVE_GLOBUS
-
 /* Define if we have Globus Grid Storage support */
 #undef HAVE_GRIDSTORAGE
 
@@ -323,17 +320,11 @@
 /* Define if you have the globus_common library (-lglobus_common).  */
 #undef HAVE_LIBGLOBUS_COMMON
 
-/* Define if you have the globus_dc library (-lglobus_dc).  */
-#undef HAVE_LIBGLOBUS_DC
-
 /* Define if you have the globus_gaa library (-lglobus_gaa).  */
 #undef HAVE_LIBGLOBUS_GAA
 
 /* Define if you have the globus_gass_cache library (-lglobus_gass_cache).  */
 #undef HAVE_LIBGLOBUS_GASS_CACHE
-
-/* Define if you have the globus_gass_client library (-lglobus_gass_client).  */
-#undef HAVE_LIBGLOBUS_GASS_CLIENT
 
 /* Define if you have the globus_gass_file library (-lglobus_gass_file).  */
 #undef HAVE_LIBGLOBUS_GASS_FILE
@@ -352,9 +343,6 @@
 
 /* Define if you have the globus_io library (-lglobus_io).  */
 #undef HAVE_LIBGLOBUS_IO
-
-/* Define if you have the globus_nexus library (-lglobus_nexus).  */
-#undef HAVE_LIBGLOBUS_NEXUS
 
 /* Define if you have the grid_storage_client library (-lgrid_storage_client).  */
 #undef HAVE_LIBGRID_STORAGE_CLIENT
