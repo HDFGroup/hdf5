@@ -16,13 +16,7 @@ RANLIB=:
 # Compiler flags
 case "X-$CC_BASENAME" in
     X-gcc)
-	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O3"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
+	. $srcdir/config/gnu-flags
 	;;
 
     *)
