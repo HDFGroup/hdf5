@@ -47,11 +47,8 @@ using namespace H5;
 int 
 main(int argc, char *argv[])
 {
-    int Summary = 0;
-    int CleanUp = 1;
-
     /* Initialize testing framework */
-    TestInit();
+    TestInit(argv[0], NULL, NULL);
 
     // testing file creation and opening in tfile.cpp
     AddTest("file", test_file, cleanup_file, "File I/O Operations", NULL);
@@ -74,17 +71,17 @@ Comment out tests that are not done yet */
     TestInfo(argv[0]);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc,argv,&Summary,&CleanUp,NULL);
+    TestParseCmdLine(argc,argv);
 
     /* Perform requested testing */
     PerformTests();
 
     /* Display test summary, if requested */
-    if (Summary)
+    if (GetTestSummary())
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (CleanUp && !getenv("HDF5_NOCLEANUP"))
+    if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
     return (GetTestNumErrs());

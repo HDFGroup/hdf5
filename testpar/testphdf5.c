@@ -119,7 +119,7 @@ int MPI_Init(int *argc, char ***argv)
 static void
 usage(void)
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v<verbosity>] [-m<n_datasets>] [-n<n_groups>] "
+    printf("    [-r] [-w] [-v<verbosity>] [-m<n_datasets>] [-n<n_groups>] "
 	"[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read test\n");
     printf("\t-w\t\tno write test\n");
@@ -367,8 +367,6 @@ int main(int argc, char **argv)
     int mpi_size, mpi_rank;				/* mpi variables */
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
-    int		Summary = 0;
-    int		CleanUp = 1;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -387,7 +385,7 @@ int main(int argc, char **argv)
     h5_show_hostname();
 
     /* Initialize testing framework */
-    TestInit();
+    TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("mpio_dup", test_fapl_mpio_dup, NULL, 
@@ -447,13 +445,15 @@ int main(int argc, char **argv)
 
     
     if(mpi_size > 64) {
-      if(MAINPROCESS) {
-        printf("The collective chunk IO test hasn't been tested for the number of process greater than 64\n");
-        printf("Please try with the number of process no greater than 64\n");
-        printf("All collective chunk tests will be skipped \n");
-      }
+     if(MAINPROCESS) {
+      printf("Collective chunk IO tests haven't been tested \n");
+      printf("  for the number of process greater than 64.\n");
+      printf("Please try with the number of process \n");
+      printf("  no greater than 64 for collective chunk IO test.\n");
+      printf("Collective chunk tests will be skipped \n");
+     }
     }
-    else { 
+    else {
       AddTest("coll_chunked1", coll_chunk1,NULL,
 	    "simple collective chunk io",filenames[9]);
       AddTest("coll_chunked2", coll_chunk2,NULL,
@@ -472,7 +472,7 @@ int main(int argc, char **argv)
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc, argv, &Summary, &CleanUp, parse_options);
+    TestParseCmdLine(argc, argv);
 
     /*
     if (parse_options(argc, argv) != 0){
@@ -497,11 +497,11 @@ int main(int argc, char **argv)
     PerformTests();
 
     /* Display test summary, if requested */
-    if (Summary)
+    if (GetTestSummary())
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (CleanUp && !getenv("HDF5_NOCLEANUP"))
+    if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
     nerrors += GetTestNumErrs();

@@ -45,9 +45,14 @@ typedef struct TestStruct {
  */
 static int num_errs = 0;        /* Total number of errors during testing */
 static int Verbosity = VERBO_DEF;       /* Default Verbosity is Low */
+static int Summary = 0;		/* Show test summary. Default is no. */
+static int CleanUp = 1;		/* Do cleanup or not. Default is yes. */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
 static const void *Test_parameters = NULL;
+static const char *TestProgName = NULL;
+static void (*TestPrivateUsage)(void) = NULL;
+static int (*TestPrivateParser)(int ac, char *av[]) = NULL;
 
 
 /*
@@ -103,8 +108,19 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 
 /*
  * Initialize testing framework
+ *
+ * ProgName: Name of test program.
+ * private_usage: Optional routine provided by test program to print the
+ *      private portion of usage page.  Default to NULL which means none is
+ *      provided.
+ * private_parser: Optional routine provided by test program to parse the
+ *      private options.  Default to NULL which means none is provided.
+ *
+ * Modifications:
+ *     	Albert Cheng 2004/08/17
+ *     	Added the ProgName, private_usage and private_parser arguments.
  */
-void TestInit(void)
+void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))
 {
 #if !(defined MAC || defined __MWERKS__ || defined SYMANTEC_C)
     /* Un-buffer the stdout and stderr */
@@ -118,17 +134,31 @@ void TestInit(void)
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
     H5Eset_auto (NULL, NULL);
+
+    /*
+     * Record the program name and private routines if provided.
+     */
+    TestProgName = ProgName;
+    if (NULL != private_usage)
+	TestPrivateUsage = private_usage;
+    if (NULL != private_parser)
+	TestPrivateParser = private_parser;
 }
 
 
 /*
  * Print test usage.
+ *	First print the common test options, then the extra options if provided.
+ *
+ * Modification:
+ * 	2004/08/18 Albert Cheng.  Add TestPrivateUsage feature.
  */
 void TestUsage(void)
 {
 	int i;
 
-	print_func("Usage: ttsafe [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] \n");
+	print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n",
+	    TestProgName, (TestPrivateUsage ? "<extra options>" : ""));
 	print_func("              [-[e]x[clude] name+] \n");
 	print_func("              [-o[nly] name+] \n");
 	print_func("              [-b[egin] name] \n");
@@ -143,6 +173,10 @@ void TestUsage(void)
 	print_func("summary   prints a summary of test results at the end\n");
 	print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
 	print_func("help      print out this information\n");
+	if (TestPrivateUsage){
+	    print_func("\nExtra options\n");
+	    TestPrivateUsage();
+	}
 	print_func("\n\n");
 	print_func("This program currently tests the following: \n\n");
 	print_func("%16s %s\n", "Name", "Description");
@@ -172,15 +206,11 @@ void TestInfo(const char *ProgName)
 /*
  * Parse command line information.
  *      argc, argv: the usual command line argument count and strings
- *      Summary:    Return if summary is desired. Default no.
- *      CleanUp:    Return if Cleanup is desired. Default yes.
- *      extra_parse: Extra Parse function provided by individual application.
- *      	    NULL means no extra parsing needed.
  *
  * Modification:
- * 	2004/08/12 Albert Cheng.  Add extra_parse feature.
+ * 	2004/08/18 Albert Cheng.  Add extra_parse feature.
  */
-void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp, int (*extra_parse)(int ac, char *av[]))
+void TestParseCmdLine(int argc, char *argv[])
 {
     while (argv++, --argc > 0){
 	if ((HDstrcmp(*argv, "-verbose") == 0) ||
@@ -228,13 +258,13 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp, int (*
 	    }
 	}
 	else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
-            *Summary = 1;
+            Summary = 1;
 	else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
             TestUsage();
             exit(0);
         }
 	else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
-            *CleanUp = 0;
+            CleanUp = 0;
 	else {
 	    /* non-standard option.  Break out. */
 	    break;
@@ -243,8 +273,8 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp, int (*
     }
 
     /* Call extra parsing function if provided. */
-    if (NULL != extra_parse){
-	extra_parse(argc+1, argv-1);
+    if (NULL != TestPrivateParser){
+	TestPrivateParser(argc+1, argv-1);
     }
 }
 
@@ -337,6 +367,24 @@ int SetTestVerbosity(int newval)
     oldval = Verbosity;
     Verbosity = newval;
     return(oldval);
+}
+
+/*
+ * Retrieve Summary request value.
+ *     0 means no summary, 1 means yes.
+ */
+int GetTestSummary(void)
+{
+    return(Summary);
+}
+
+/*
+ * Retrieve Cleanup request value.
+ *     0 means no Cleanup, 1 means yes.
+ */
+int GetTestCleanup(void)
+{
+    return(CleanUp);
 }
 
 /*
