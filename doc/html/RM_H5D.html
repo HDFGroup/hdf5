@@ -25,6 +25,7 @@ HDF5/H5D API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -116,50 +117,56 @@ and set and retrieve their constant or persistent properties.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Dataset-Close">H5Dclose</a>
       <li><a href="#Dataset-Create">H5Dcreate</a>
       <li><a href="#Dataset-Extend">H5Dextend</a>
       <li><a href="#Dataset-Fill">H5Dfill</a>
       <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
-      <li><a href="#Dataset-GetOffset">H5Dget_offset</a>     
+      <li><a href="#Dataset-GetOffset">H5Dget_offset</a>
+	</ul>     
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Dataset-GetSpace">H5Dget_space</a>
       <li><a href="#Dataset-GetSpaceStatus">H5Dget_space_status</a>
       <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
       <li><a href="#Dataset-GetType">H5Dget_type</a>
       <li><a href="#Dataset-Iterate">H5Diterate</a>
       <li><a href="#Dataset-Open">H5Dopen</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Dataset-Read">H5Dread</a>
       <li><a href="#Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
       <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
       <li><a href="#Dataset-Write">H5Dwrite</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -191,7 +198,9 @@ facilitate moving easily between them.</i>
 </td></tr>
 </table>
 
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dcreate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Create">H5Dcreate</a>
@@ -245,7 +254,7 @@ facilitate moving easily between them.</i>
 	of specifying when fill values will be written to a dataset.
 	For further information on these topics, see the document 
 	<a href="http://hdf.ncsa.uiuc.edu/RFC/Fill_Value/FillValue.html"> 
-	<cite>Fill Value and Dataset Storage Allocation Issues in HDF5</a></cite> 
+	<cite>Fill Value and Dataset Storage Allocation Issues in HDF5</cite></a> 
 	and the descriptions of the following HDF5 functions in this 
 	<cite>HDF5 Reference Manual</cite>:
 	<table width=80% border="0">
@@ -294,7 +303,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dopen" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Open">H5Dopen</a>
@@ -328,7 +338,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_space" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetSpace">H5Dget_space</a>
@@ -359,7 +370,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_space_status" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetSpaceStatus">H5Dget_space_status</a>
@@ -411,7 +423,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_type" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetType">H5Dget_type</a>
@@ -446,7 +459,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_create_plist" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetCreatePlist">H5Dget_create_plist</a>
@@ -478,7 +492,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_offset" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetOffset">H5Dget_offset</a>
@@ -509,7 +524,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_storage_size" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetStorageSize">H5Dget_storage_size</a>
@@ -542,7 +558,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dvlen_get_buf_size" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
@@ -592,7 +609,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dvlen_reclaim" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-VLReclaim">H5Dvlen_reclaim</a>
@@ -645,7 +663,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dread" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Read">H5Dread</a>
@@ -815,7 +834,8 @@ facilitate moving easily between them.</i>
 </dl>
 
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dwrite" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Write">H5Dwrite</a>
@@ -996,6 +1016,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dextend" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Extend">H5Dextend</a>
@@ -1042,7 +1064,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dclose" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Close">H5Dclose</a>
@@ -1073,7 +1096,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Diterate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Iterate">H5Diterate</a>
@@ -1130,7 +1154,8 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dfill" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Fill">H5Dfill</a>
@@ -1242,9 +1267,12 @@ And in this document, the
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 25 June 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 25 June 2003");
+-->
+</SCRIPT>
+
  
 </body>
 </html>

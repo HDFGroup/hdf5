@@ -25,6 +25,7 @@ HDF5/H5A API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -104,39 +105,45 @@ and information about attributes.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Annot-Close">H5Aclose</a>
       <li><a href="#Annot-Create">H5Acreate</a>
       <li><a href="#Annot-Delete">H5Adelete</a>
-      <li><a href="#Annot-GetName">H5Aget_name</a>      
+      <li><a href="#Annot-GetName">H5Aget_name</a>
+	</ul>      
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Annot-NumAttrs">H5Aget_num_attrs</a>
       <li><a href="#Annot-GetSpace">H5Aget_space</a>
       <li><a href="#Annot-GetType">H5Aget_type</a>
       <li><a href="#Annot-Iterate">H5Aiterate</a>
-    </td>
+    </ul>
+	</td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Annot-OpenIdx">H5Aopen_idx</a>
       <li><a href="#Annot-OpenName">H5Aopen_name</a>
       <li><a href="#Annot-Read">H5Aread</a>
       <li><a href="#Annot-Write">H5Awrite</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
@@ -144,6 +151,7 @@ information.  You will probably want to adjust the size and location of
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
 </font>
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -189,6 +197,9 @@ library and is up to the user's interpretation.
 See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <a href="H5.user.html"><cite>HDF5 User's Guide</cite></a> for further information.
 
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Acreate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Create">H5Acreate</a>
@@ -253,7 +264,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aopen_name" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-OpenName">H5Aopen_name</a>
@@ -292,7 +304,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aopen_idx" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-OpenIdx">H5Aopen_idx</a>
@@ -332,7 +345,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Awrite" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Write">H5Awrite</a>
@@ -377,7 +391,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aread" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Read">H5Aread</a>
@@ -422,7 +437,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_space" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-GetSpace">H5Aget_space</a>
@@ -452,7 +468,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_type" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-GetType">H5Aget_type</a>
@@ -488,7 +505,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_name" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-GetName">H5Aget_name</a>
@@ -529,7 +547,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_num_attrs" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Aget_num_attrs</a>
@@ -559,7 +578,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aiterate" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Iterate">H5Aiterate</a>
@@ -631,7 +651,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Adelete" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Delete">H5Adelete</a>
@@ -668,7 +689,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aclose" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Close">H5Aclose</a>
@@ -738,9 +760,11 @@ And in this document, the
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2001
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 6 June 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>

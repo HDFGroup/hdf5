@@ -25,6 +25,7 @@ HDF5/H5E API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -100,43 +101,49 @@ These functions provide error handling capabilities in the HDF5 environment.
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Error-Clear">H5Eclear</a>
       <li><a href="#Error-GetAuto">H5Eget_auto</a>
-      <li><a href="#Error-GetMajor">H5Eget_major</a>     
+      <li><a href="#Error-GetMajor">H5Eget_major</a>
+	</ul>     
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Error-GetMinor">H5Eget_minor</a>
       <li><a href="#Error-Print">H5Eprint</a>
       <li><a href="#Error-Push">H5Epush</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Error-SetAuto">H5Eset_auto</a>
       <li><a href="#Error-Walk">H5Ewalk</a>
       <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -185,7 +192,9 @@ package maintains a single error stack. The error stack is
 statically allocated to reduce the complexity of handling
 errors within the H5E package.    
 
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eset_auto" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
@@ -228,7 +237,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_auto" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetAuto">H5Eget_auto</a>
@@ -266,7 +276,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eclear" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Clear">H5Eclear</a>
@@ -298,7 +309,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Epush" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Push">H5Epush</a>
@@ -355,7 +367,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eprint" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
@@ -390,7 +403,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-Walk">H5Ewalk</a>
@@ -469,7 +483,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk_cb" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-WalkCB">H5Ewalk_cb</a>
@@ -526,7 +541,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_major" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
@@ -555,7 +571,8 @@ errors within the H5E package.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_minor" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
@@ -623,9 +640,11 @@ And in this document, the
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 6 June 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>
