@@ -1144,7 +1144,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
  *
  *		If RELAX is non-zero and the chunk isn't in the cache then
  *		don't try to read it from the file, but just allocate an
- *		uninitialized buffer to hold the result.  This is indented
+ *		uninitialized buffer to hold the result.  This is intended
  *		for output functions that are about to overwrite the entire
  *		chunk.
  *

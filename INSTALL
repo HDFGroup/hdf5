@@ -25,9 +25,10 @@ for the install may be found in the file:  INSTALL.ascired.
 =======
 Step 0: Install optional third-party packages.
 
-    * GNU zlib compression library, version 1.0.2 or later is used for
+    * Zlib compression library, version 1.1.2 or later is used for
       the `deflate' compression method if available; otherwise no
-      compression filters will be predefined.
+      compression filters will be predefined. The source code can be
+      found at http://www.cdrom.com/pub/infozip/zlib
 
 Step 1. Unpack the source tree.
 

@@ -325,7 +325,10 @@ bogus(unsigned int __unused__ flags, size_t __unused__ cd_nelmts,
 /*-------------------------------------------------------------------------
  * Function:	test_compression
  *
- * Purpose:	Tests dataset compression.
+ * Purpose:	Tests dataset compression. If compression is requested when
+ *		it hasn't been compiled into the library (such as when
+ *		updating an existing compressed dataset) then data is sent to
+ *		the file uncompressed but no errors are returned.
  *
  * Return:	Success:	0
  *
@@ -347,10 +350,14 @@ test_compression(hid_t file)
     const hsize_t	chunk_size[2] = {2, 25};
     const hssize_t	hs_offset[2] = {7, 30};
     const hsize_t	hs_size[2] = {4, 50};
+    const char		*not_supported;
     
     hsize_t		i, j, n;
     void		*tconv_buf = NULL;
 
+    not_supported = "    Deflate compression is not supported.\n"
+		    "    The zlib was not found when hdf5 was configured.";
+    
     TESTING("compression (setup)");
     
     /* Create the data space */
@@ -372,7 +379,12 @@ test_compression(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_COMPRESS_NAME, H5T_NATIVE_INT, space,
 			     dc))<0) goto error;
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Read uninitialized data.  It should be zero.
@@ -394,7 +406,12 @@ test_compression(hid_t file)
 	    }
 	}
     }
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Test compression by setting up a chunked dataset and writing
@@ -411,7 +428,12 @@ test_compression(hid_t file)
 
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
 	goto error;
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 3: Try to read the data we just wrote.
@@ -435,7 +457,12 @@ test_compression(hid_t file)
 	    }
 	}
     }
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 4: Write new data over the top of the old data.  The new data is
@@ -470,7 +497,12 @@ test_compression(hid_t file)
 	    }
 	}
     }
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 5: Close the dataset and then open it and read it again.  This
@@ -497,7 +529,13 @@ test_compression(hid_t file)
 	    }
 	}
     }
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    
 
     /*----------------------------------------------------------------------
      * STEP 6: Test partial I/O by writing to and then reading from a
@@ -537,7 +575,12 @@ test_compression(hid_t file)
 	    }
 	}
     }
+#ifdef HAVE_COMPRESS2
     PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
 
     /*----------------------------------------------------------------------
      * STEP 7: Register an application-defined compression method and use it
@@ -685,7 +728,7 @@ main(void)
     h5_reset();
     fapl = h5_fileaccess();
     
-#if 1
+#if 0
     /* Turn off raw data cache */
     if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
     if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0)<0) goto error;

@@ -479,9 +479,9 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 	       const H5F_access_t *access_parms, int mode,
 	       H5F_search_t *key/*out*/)
 {
-    htri_t		    ret_value;
-    struct stat		    sb;
-	int fid;
+    htri_t		ret_value;
+    struct stat		sb;
+    int			fid;
 
     FUNC_ENTER(H5F_low_size, FAIL);
     assert(type);
@@ -492,17 +492,17 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
 	if (key) {
 #ifdef WIN32
-		/*
-			this extra block is needed because windows sets the st_dev member of sb
-			to be 0 if it is a file which makes the comparison below wrong
-		*/
-
-		fid=open(name,mode|_O_BINARY);
-		HDfstat(fid,&sb);
-		close(fid);
+	    /*
+	     * This extra block is needed because windows sets the st_dev
+	     * member of sb to be 0 if it is a file which makes the comparison
+	     * below wrong
+	     */
+	    fid=open(name,mode|_O_BINARY);
+	    HDfstat(fid,&sb);
+	    close(fid);
 #else
 	    HDstat(name, &sb);
-#endif	 
+#endif
 	    key->dev = sb.st_dev;
 	    key->ino = sb.st_ino;
 	}
