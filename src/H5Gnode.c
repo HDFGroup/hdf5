@@ -75,7 +75,7 @@ static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5G_node_t *sym);
 
 /* B-tree callbacks */
-static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
+static size_t H5G_node_sizeof_rkey(const H5F_t *f, const void *_udata);
 static H5RC_t *H5G_node_get_shared(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
@@ -172,7 +172,7 @@ H5FL_BLK_DEFINE_STATIC(grp_page);
  *-------------------------------------------------------------------------
  */
 static size_t
-H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
+H5G_node_sizeof_rkey(const H5F_t *f, const void UNUSED * udata)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_sizeof_rkey);
@@ -690,7 +690,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     hsize_t		    size = 0;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_create, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_create);
 
     /*
      * Check arguments.

@@ -20,14 +20,17 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5HLprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                 */
-
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5O_efl_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
@@ -617,11 +620,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5O_efl_readvv(const H5O_efl_t *efl,
+H5O_efl_readvv(H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *_buf)
 {
+    const H5O_efl_t *efl=&(io_info->store->efl); /* Pointer to efl info */
     unsigned char *buf;         /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
     size_t size;                /* Size of sequence in bytes */
@@ -696,11 +700,12 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5O_efl_writevv(const H5O_efl_t *efl,
+H5O_efl_writevv(H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *_buf)
 {
+    const H5O_efl_t *efl=&(io_info->store->efl); /* Pointer to efl info */
     const unsigned char *buf;   /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
     size_t size;                /* Size of sequence in bytes */

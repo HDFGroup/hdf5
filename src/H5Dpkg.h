@@ -46,16 +46,25 @@
 /* Set the minimum object header size to create objects with */
 #define H5D_MINHDR_SIZE 256
 
+/* [Simple] Macro to construct a H5D_io_info_t from it's components */
+#define H5D_BUILD_IO_INFO(io_info,ds,dxpl_c,dxpl_i,str)                 \
+    (io_info)->dset=ds;                                                 \
+    (io_info)->dxpl_cache=dxpl_c;                                       \
+    (io_info)->dxpl_id=dxpl_i;                                          \
+    (io_info)->store=str
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
 /* The raw data chunk cache */
 typedef struct H5D_rdcc_t {
+#ifdef H5D_ISTORE_DEBUG
     unsigned		ninits;	/* Number of chunk creations		*/
     unsigned		nhits;	/* Number of cache hits			*/
     unsigned		nmisses;/* Number of cache misses		*/
     unsigned		nflushes;/* Number of cache flushes		*/
+#endif /* H5D_ISTORE_DEBUG */
     size_t		nbytes;	/* Current cached raw data in bytes	*/
     size_t		nslots;	/* Number of chunk slots allocated	*/
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
@@ -132,23 +141,20 @@ H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_
                         hbool_t update_time, hbool_t full_overwrite);
 
 /* Functions that operate on contiguous storage */
-H5_DLL herr_t H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
-H5_DLL herr_t H5D_contig_fill(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
+H5_DLL herr_t H5D_contig_fill(H5D_t *dset, hid_t dxpl_id);
 
 /* Functions that operate on indexed storage */
-H5_DLL herr_t H5D_istore_init (H5F_t *f, H5D_t *dset);
-H5_DLL herr_t H5D_istore_flush (H5F_t *f, hid_t dxpl_id, H5D_t *dset, unsigned flags);
-H5_DLL herr_t H5D_istore_create(H5F_t *f, hid_t dxpl_id,
-				 H5O_layout_t *layout/*in,out*/);
-H5_DLL herr_t H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset);
-H5_DLL herr_t H5D_istore_allocate (H5F_t *f, hid_t dxpl_id,
-    const H5D_t *dset, hbool_t full_overwrite);
-H5_DLL hsize_t H5D_istore_allocated(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
-H5_DLL herr_t H5D_istore_prune_by_extent( H5F_t *f,
-        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, H5D_t *dset);
-H5_DLL herr_t H5D_istore_initialize_by_extent( H5F_t *f,
-        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, H5D_t *dset);
-H5_DLL herr_t H5D_istore_update_cache(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_init (const H5F_t *f, H5D_t *dset);
+H5_DLL herr_t H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
+H5_DLL herr_t H5D_istore_dest (H5D_t *dset, hid_t dxpl_id);
+H5_DLL herr_t H5D_istore_allocate (H5D_t *dset, hid_t dxpl_id,
+        hbool_t full_overwrite);
+H5_DLL hsize_t H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id);
+H5_DLL herr_t H5D_istore_prune_by_extent(H5D_io_info_t *io_info);
+H5_DLL herr_t H5D_istore_initialize_by_extent(H5D_io_info_t *io_info);
+H5_DLL herr_t H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
         haddr_t addr);
 #ifdef H5D_ISTORE_DEBUG

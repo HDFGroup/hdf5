@@ -143,6 +143,18 @@ typedef struct H5O_layout_compact_t {
     void        *buf;                   /* Buffer for compact dataset        */
 } H5O_layout_compact_t;
 
+/* Function pointers for I/O on particular types of dataset layouts */
+/* (Forward declare some structs/unions to avoid #include problems) */
+struct H5D_io_info_t;
+typedef ssize_t (*H5O_layout_readvv_func_t)(struct H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *buf);
+typedef ssize_t (*H5O_layout_writevv_func_t)(struct H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *buf);
+
 typedef struct H5O_layout_t {
     H5D_layout_t type;			/* Type of layout                    */
     unsigned version;                   /* Version of message                */
@@ -156,6 +168,8 @@ typedef struct H5O_layout_t {
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
         H5O_layout_compact_t compact;   /* Information for compact layout    */
     } u;
+    H5O_layout_readvv_func_t readvv;    /* I/O routine for reading data */
+    H5O_layout_writevv_func_t writevv;  /* I/O routine for writing data */
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */
@@ -268,11 +282,11 @@ H5_DLL size_t H5O_layout_meta_size(H5F_t *f, const void *_mesg);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
-H5_DLL ssize_t H5O_efl_readvv(const H5O_efl_t *efl,
+H5_DLL ssize_t H5O_efl_readvv(struct H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
-H5_DLL ssize_t H5O_efl_writevv(const H5O_efl_t *efl,
+H5_DLL ssize_t H5O_efl_writevv(struct H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
