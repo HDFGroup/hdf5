@@ -20,6 +20,7 @@
 ./acconfig.h
 ./configure
 ./configure.in
+./all.zip
 
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
@@ -85,9 +86,14 @@
 ./doc/html/H5.api_map.html
 ./doc/html/H5.format.html
 ./doc/html/H5.intro.html
-./doc/html/H5.intro.datamap.gif
 ./doc/html/H5.sample_code.html
 ./doc/html/H5.user.html
+./doc/html/IH_map1.gif
+./doc/html/IH_map2.gif
+./doc/html/IH_map3.gif
+./doc/html/IH_map4.gif
+./doc/html/IH_mapFoot.gif
+./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
@@ -101,7 +107,7 @@
 ./doc/html/RM_H5Front.html
 ./doc/html/RM_H5G.html
 ./doc/html/RM_H5P.html
-./doc/html/RM_H5R.html
+./doc/html/RM_H5RA.html
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
@@ -177,6 +183,12 @@
 ./examples/h5_write.c
 ./examples/h5_select.c
 ./examples/h5_attribute.c
+
+./pablo/HDFentries.txt
+./pablo/Makefile.in
+./pablo/PabloHDF.c
+./pablo/PabloHDF_RT.c
+./pablo/PabloHDF_SDDF.c
 
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
