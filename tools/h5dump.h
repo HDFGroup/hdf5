@@ -1,9 +1,7 @@
-#ifndef _DUMPER_H
-#define _DUMPER_H
+#ifndef _H5DUMP_H
+#define _H5DUMP_H
 
 #include <hdf5.h>
-#include <H5private.h>
-#include <h5tools.h>
 
 #define BOOT_BLOCK	"BOOT_BLOCK"
 #define GROUP		"GROUP"

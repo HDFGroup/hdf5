@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <h5dump.h>
-#include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

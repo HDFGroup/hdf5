@@ -1,3 +1,4 @@
+#include <H5private.h>
 #include <h5dump.h>
 
 static int indent = 0;
@@ -21,8 +22,8 @@ usage()
 printf("Usage: dumper <filename>\n");
 
 /*
-    printf(" Usage: h5dumper [OPTIONS] <file>\n");
-    printf(" OPTIONS\n");
+    printf(" Usage: h5dumper [options] <file>\n");
+    printf(" options\n");
     printf("  -H         Print a usage message \n");
     printf("  -nobb      No boot block\n");
     printf("  -nodata    No data\n");
