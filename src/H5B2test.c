@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
- *              Saturday, May 31, 2003
+ *              Thursday, February  3, 2005
  *
  * Purpose:	v2 B-tree testing functions.
  */
