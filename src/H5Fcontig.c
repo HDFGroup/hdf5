@@ -222,7 +222,8 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
                             elmt_size, size, addr, buf)<0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                 } /* end if */
-                mpi_round=(++mpi_round)%mpi_size;
+                ++mpi_round;
+                mpi_round %= mpi_size;
 
                 /* Indicate that blocks are being written */
                 blocks_written=1;

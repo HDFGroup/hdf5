@@ -31,7 +31,7 @@ static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /* Private typedefs & structs */
-typedef struct H5RS_str_t {
+struct H5RS_str_t {
     char *s;            /* String to be reference counted */
     unsigned wrapped;   /* Indicates that the string to be ref-counted is not copied */
     unsigned n;         /* Reference count of number of pointers sharing string */

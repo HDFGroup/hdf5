@@ -1335,7 +1335,8 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 	HDstrcpy(buf, "       NaN");
     } else {
 	bw = nbytes/nseconds;
-	if (bw==0.0) {
+        if (fabs(bw) < 0.0000000001) {
+            /* That is == 0.0, but direct comparison between floats is bad */
 	    HDstrcpy(buf, "0.000  B/s");
 	} else if (bw<1.0) {
 	    sprintf(buf, "%10.4e", bw);
@@ -1450,7 +1451,8 @@ H5_trace (double *returning, const char *func, const char *type, ...)
     }
 
     /* Get tim for event */
-    if (!first_time.etime)
+    if (fabs(first_time.etime) < 0.0000000001)
+        /* That is == 0.0, but direct comparison between floats is bad */
         H5_timer_begin(&first_time);
     if (H5_debug_g.ttimes) {
         H5_timer_begin(&event_time);
