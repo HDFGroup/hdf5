@@ -111,6 +111,12 @@ h5tools_str_len(h5tools_str_t *str)
  *
  * Modifications:
  *
+ *              Major change:  need to check results of vsnprintf to
+ *              handle errors, empty format, and overflows.
+ *
+ * Programmer:	REMcG Matzke
+ *              June 16, 2004
+ *
  *-------------------------------------------------------------------------
  */
 char *
@@ -129,24 +135,50 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 	str->len = 0;
     }
 
-    while (1) {
-	size_t avail = str->nalloc - str->len;
-	size_t nchars = (size_t)HDvsnprintf(str->s + str->len, avail, fmt, ap);
-
-	if (nchars < avail) {
-	    /* success */
-	    str->len += nchars;
-	    break;
-	}
-	
-	/* Try again with twice as much space */
-	str->nalloc *= 2;
-	str->s = realloc(str->s, str->nalloc);
-	assert(str->s);
+    if (strlen(fmt) == 0) {
+        /* nothing to print */
+        va_end(ap);
+        return str->s;
     }
 
-    va_end(ap);
-    return str->s;
+     /* Format the arguments and append to the value already in `str' */
+     while (1) {
+        /* How many bytes available for new value, counting the new NUL */
+	size_t avail = str->nalloc - str->len;
+
+	int nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+
+	if (nchars<0) {
+            /* failure, such as bad format */
+            va_end(ap);
+	    return NULL;
+        }
+
+	if ((size_t)nchars>=avail ||
+	    (0==nchars && (strcmp(fmt,"%s") ))) {
+	   /* Truncation return value as documented by C99, or zero return value with either of the
+            * following conditions, each of which indicates that the proper C99 return value probably
+            *  should have been positive when the format string is 
+            *  something other than "%s"
+            * Alocate at least twice as much space and try again.
+            */
+	   size_t newsize = MAX(str->len+nchars+1, 2*str->nalloc);
+	   assert(newsize > str->nalloc); /*overflow*/
+#ifndef H5_HAVE_VSNPRINTF
+	   /* If we even made it this far... the HDvsnprintf() clobbered memory: SIGSEGV probable*/
+	   abort();
+#endif
+	   str->s = realloc(str->s, newsize);
+	   assert(str->s);
+	   str->nalloc = newsize;
+	} else {
+	   /* Success */
+	   str->len += nchars;
+	   break;
+        }
+     }
+     va_end(ap);
+     return str->s;
 }
 
 /*-------------------------------------------------------------------------
