@@ -124,7 +124,7 @@ static int num_opaque_conversions_g = 0;
 #define INIT_INTEGER(TYPE, SRC_MAX, SRC_MIN, SRC_SIZE, DST_SIZE, SRC_PREC, BUF, SAVED, NELMTS)  \
 {                                                                                               \
     unsigned char *buf_p, *saved_p;                                                             \
-    int i;                                                                                      \
+    int n;                                                                                      \
     TYPE value1 = 1;                                                                            \
     TYPE value2 = 0;                                                                            \
                                                                                                 \
@@ -138,7 +138,7 @@ static int num_opaque_conversions_g = 0;
                                                                                                 \
     /*positive values, ascending order. VALUE1 starts from 00000001, to 00000010, until 10000000*/ \
     /*VALUE2 ascends from 00000000, to 00000011, 00000111,...,  until 11111111.*/               \
-    for(i=0; i<SRC_PREC-1; i++) {                                                               \
+    for(n=0; n<SRC_PREC-1; n++) {                                                               \
         if(value1<=SRC_MAX && value1>=SRC_MIN) {                                                \
             memcpy(buf_p, &value1, SRC_SIZE);                                                   \
             memcpy(saved_p, &value1, SRC_SIZE);                                                 \
@@ -158,7 +158,7 @@ static int num_opaque_conversions_g = 0;
                                                                                                 \
     /* negative values for signed; descending positive values for unsigned */                   \
     /* VALUE2 descends from 11111111 to 11111110, 11111100, ..., until 10000000. */             \
-    for(i=0; i<SRC_PREC; i++) {                                                                 \
+    for(n=0; n<SRC_PREC; n++) {                                                                 \
         if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
             memcpy(buf_p, &value2, SRC_SIZE);                                                   \
             memcpy(saved_p, &value2, SRC_SIZE);                                                 \
@@ -4619,7 +4619,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     }
 
     
-    /* Allocate buffers */
+    /* Some information about datatypes */
     endian = H5Tget_order(H5T_NATIVE_INT);
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
@@ -4632,7 +4632,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     noverflows_g = 0;
 #endif
 
-    /* Initialize the source buffer through macro INIT_INTEGER.  The BUF
+    /* Allocate and initialize the source buffer through macro INIT_INTEGER.  The BUF
      * will be used for the conversion while the SAVED buffer will be
      * used for the comparison later.
      */
@@ -6089,7 +6089,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     void                *user_data;             /*returned pointer to user data passed in to the callback*/
     hbool_t             except_set = FALSE;     /*whether user's exception handling is set*/
     const size_t	ntests=NTESTS;		/*number of tests	*/
-    size_t	        nelmts;	                /*num values per test	*/
+    size_t	        nelmts=0;	        /*num values per test	*/
     const size_t	max_fails=40;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/
@@ -6253,22 +6253,12 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	goto error;
     }
       
-    /* Reduce the number of elements if the source is "long double" 
-     * because it takes too long.
-     */
-    if(src_type == FLT_LDOUBLE)
-        nelmts = NTESTELEM / 10;
-    else
-        nelmts = NTESTELEM;
-   
-    /* Allocate buffers */
+    /* Some information about datatypes */
     endian = H5Tget_order(H5T_NATIVE_INT);
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(MAX(sizeof(long double), sizeof(long_long)));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
@@ -6304,26 +6294,50 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
         if(op != except_func || *(int*)user_data != fill_value)
             goto error;
     } 
-    
-    /* The tests */
-    for (i=0; i<ntests; i++) {
-	if (ntests>1) {
-	    sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
-		    name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
-	} else {
-	    sprintf(str, "Testing random %s %s -> %s conversions",
-		    name, src_type_name, dst_type_name);
-	}
-	printf("%-70s", str);
-	HDfflush(stdout);
-	fails_this_test=0;
 
-	/*
-	 * Initialize the source buffers to random bits.  The `buf' buffer
-	 * will be used for the conversion while the `saved' buffer will be
-	 * used for the comparison later.
-	 */
-	for (j=0; j<nelmts*src_size; j++) {
+    /* Allocate and initialize the source buffer through macro INIT_INTEGER if the source is integer.  
+     * The BUF will be used for the conversion while the SAVED buffer will be
+     * used for the comparison later.
+     */
+    if(src_type == INT_SCHAR) {
+        INIT_INTEGER(signed char, SCHAR_MAX, SCHAR_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_UCHAR) {
+        INIT_INTEGER(unsigned char, UCHAR_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_SHORT) {
+        INIT_INTEGER(short, SHRT_MAX, SHRT_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_USHORT) {
+        INIT_INTEGER(unsigned short, USHRT_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_INT) {
+        INIT_INTEGER(int, INT_MAX, INT_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_UINT) {
+        INIT_INTEGER(unsigned int, UINT_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_LONG) {
+        INIT_INTEGER(long, LONG_MAX, LONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_ULONG) {
+        INIT_INTEGER(unsigned long, ULONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_LLONG) {
+        INIT_INTEGER(long long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_ULLONG) {
+        INIT_INTEGER(unsigned long long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else { /* source is floating number.  Use the old way to fill in random values. */
+        /* Reduce the number of elements if the source is "long double" 
+         * because it takes too long.
+         */
+        if(src_type == FLT_LDOUBLE)
+            nelmts = NTESTELEM / 10;
+        else
+            nelmts = NTESTELEM;
+
+        /* Allocate buffers */
+        buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+        saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+
+        /*
+         * Initialize the source buffers to random bits.  The `buf' buffer
+         * will be used for the conversion while the `saved' buffer will be
+         * used for the comparison later.
+         */
+        for (j=0; j<nelmts*src_size; j++) {
             buf[j] = saved[j] = HDrand();
 
             /* For Intel machines, the size of "long double" is 12 byte, precision
@@ -6345,6 +6359,20 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                 }
             }
         }
+    }
+
+    /* The tests */
+    for (i=0; i<ntests; i++) {
+	if (ntests>1) {
+	    sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
+		    name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
+	} else {
+	    sprintf(str, "Testing random %s %s -> %s conversions",
+		    name, src_type_name, dst_type_name);
+	}
+	printf("%-70s", str);
+	HDfflush(stdout);
+	fails_this_test=0;
 
 	/* Perform the conversion */
 	if (H5Tconvert(src, dst, nelmts, buf, NULL, dxpl_id)<0)
