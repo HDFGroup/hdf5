@@ -35,6 +35,11 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * The first version of szip compression support were implemented. 
+      User should have static szlib library installed. Using function
+	H5Pset_szip to pass the szip parameters to the HDF5 library.
+        More detailed decription of the process will be followed.
+	KY-2003/04/01
     * -O caused errors in AIX 5.x platforms.  Removed it from
       --enable-production mode.  AKC - 2003/03/31
     * Corrected metadata caching bug in parallel I/O which could cause hangs
