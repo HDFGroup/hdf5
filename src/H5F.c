@@ -81,8 +81,9 @@ static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 #endif /* NOT_YET */
 
+static herr_t H5F_init_superblock(H5F_t *f, hid_t dxpl_id);
+static herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf);
 static herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf);
-static herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, unsigned alloc, uint8_t *buf);
 
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
@@ -1792,8 +1793,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
     hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
-    hsize_t             userblock_size = 0;
-    H5P_genplist_t     *c_plist;            /*file creation property list   */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
     H5F_t              *ret_value = NULL;   /*actual return value           */
@@ -1914,10 +1913,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
 
-    /* Get the shared file creation property list */
-    if(NULL == (c_plist = H5I_object(shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get property list")
-
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1925,32 +1920,41 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
-         * to write the superblock.
-         *
-         * The superblock starts immediately after the user-defined
-         * header, which we have already insured is a proper size. The
-         * base address is set to the same thing as the superblock for
-         * now.
-	 */
-        if(H5P_get(c_plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get user block size")
-        shared->super_addr = userblock_size;
-	shared->base_addr = shared->super_addr;
-	shared->consist_flags = 0x03;
-
+         * to create & write the superblock.
+         */
 #ifdef H5_HAVE_FPHDF5
-        /* Non-captn procs get bcast from capt. Call read_superblock with
-         * that buffer. Then call mkroot with root_ent pointer. Capt does
-         * just the mkroot call with NULL. Capt should do the mkroot
-         * first. Then bcast, then the rest can call it. */
+        /*
+         * Psuedo-code for FPHDF5 should be something like this:
+         * if(captn) {
+         *      H5F_init_superblock(...)
+         *      H5G_mkroot(...,NULL)
+         *      H5F_write_superblock(...,buf)
+         * }
+         * MPI_Bcast(...,captn,buf,...)
+         * if(!captn) {
+         *      H5F_read_superblock(...,HADDR_UNDEF,buf)
+         *      H5G_mkroot(...,&root_ret)
+         * }
+         */
 #endif  /* H5_HAVE_FPHDF5 */
 
-        if (H5F_write_superblock(file, dxpl_id, TRUE, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
+        /* Initialize information about the superblock and allocate space for it */
+        if (H5F_init_superblock(file, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
         /* Create and open the root group */
+        /* (This must be after the space for the superblock is allocated in
+         *      the file)
+         */
         if (H5G_mkroot(file, dxpl_id, NULL)<0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
+
+        /* Write the superblock to the file */
+        /* (This must be after the root group is created, since the root
+         *      group's symbol table entry is part of the superblock)
+         */
+        if (H5F_write_superblock(file, dxpl_id, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
     } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
 	if (HADDR_UNDEF == (shared->super_addr = H5F_locate_signature(lf,dxpl_id)))
@@ -2583,10 +2587,105 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_init_superblock
+ *
+ * Purpose:     Allocates the superblock for the file and initializes
+ *              information about the superblock in memory.  Does not write
+ *              any superblock information to the file.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Sept 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_init_superblock(H5F_t *f, hid_t dxpl_id)
+{
+    hsize_t         userblock_size = 0;         /* Size of userblock, in bytes */
+    size_t          superblock_size;            /* Size of superblock, in bytes     */
+    size_t          driver_size;                /* Size of driver info block (bytes)*/
+    unsigned        super_vers;                 /* Super block version              */
+    haddr_t         addr;                       /* Address of superblock            */
+    H5P_genplist_t *plist;                      /* Property list                    */
+    herr_t          ret_value = SUCCEED;
+
+    /* Encoding */
+    FUNC_ENTER_NOAPI(H5F_init_superblock, FAIL)
+
+    /* Get the shared file creation property list */
+    if (NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /*
+     * The superblock starts immediately after the user-defined
+     * header, which we have already insured is a proper size. The
+     * base address is set to the same thing as the superblock for
+     * now.
+     */
+    if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get user block size")
+    f->shared->super_addr = userblock_size;
+    f->shared->base_addr = f->shared->super_addr;
+    f->shared->consist_flags = 0x03;
+
+    /* Grab superblock version from property list */
+    if (H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get super block version")
+
+    /* Compute the size of the superblock */
+    superblock_size=H5F_SIGNATURE_LEN   /* Signature length (8 bytes) */
+        + 16                            /* Length of required fixed-size portion */
+        + ((super_vers>0) ? 4 : 0)      /* Version specific fixed-size portion */
+        + 4 * H5F_sizeof_addr(f)        /* Variable-sized addresses */
+        + H5G_SIZEOF_ENTRY(f);          /* Size of root group symbol table entry */
+
+    /* Compute the size of the driver information block. */
+    H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
+    if (driver_size > 0)
+	driver_size += 16; /* Driver block header */
+
+    /*
+     * Allocate space for the userblock, superblock, and driver info
+     * block. We do it with one allocation request because the
+     * userblock and superblock need to be at the beginning of the
+     * file and only the first allocation request is required to
+     * return memory at format address zero.
+     */
+
+    H5_CHECK_OVERFLOW(f->shared->base_addr, haddr_t, hsize_t);
+    addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
+                      ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
+
+    if (HADDR_UNDEF == addr)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                    "unable to allocate file space for userblock and/or superblock")
+
+    if (0 != addr)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+                    "file driver failed to allocate userblock and/or superblock at address zero")
+
+    /*
+     * The file driver information block begins immediately after the
+     * superblock.
+     */
+    if (driver_size > 0)
+        f->shared->driver_addr = superblock_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init_superblock() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_write_superblock
  *
- * Purpose:     Writes (and optionally allocates) the superblock for the
- *              file. If ALLOC is TRUE, then it allocates the superblock.
+ * Purpose:     Writes (and optionally allocates) the superblock for the file.
  *              If BUF is non-NULL, then write the serialized superblock
  *              information into it. It should be a buffer of size
  *              H5F_SUPERBLOCK_SIZE + H5F_DRVINFOBLOCK_SIZE or larger.
@@ -2603,7 +2702,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_write_superblock(H5F_t *f, hid_t dxpl_id, unsigned alloc, uint8_t *buf)
+H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf)
 {
     uint8_t         sbuf[H5F_SUPERBLOCK_SIZE];  /* Superblock encoding buffer       */
     uint8_t         dbuf[H5F_DRVINFOBLOCK_SIZE];/* Driver info block encoding buffer*/
@@ -2705,36 +2804,6 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id, unsigned alloc, uint8_t *buf)
 	/* Driver name */
 	HDmemcpy(dbuf + 8, driver_name, 8);
     } /* end if */
-
-    if (alloc) {
-        /*
-         * Allocate space for the userblock, superblock, and driver info
-         * block. We do it with one allocation request because the
-         * userblock and superblock need to be at the beginning of the
-         * file and only the first allocation request is required to
-         * return memory at format address zero.
-         */
-        haddr_t addr;
-
-        H5_CHECK_OVERFLOW(f->shared->base_addr, haddr_t, hsize_t);
-        addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                          ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
-
-        if (HADDR_UNDEF == addr)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-                        "unable to allocate file space for userblock and/or superblock")
-
-        if (0 != addr)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-                        "file driver failed to allocate userblock and/or superblock at address zero")
-
-        /*
-         * The file driver information block begins immediately after the
-         * superblock.
-         */
-        if (driver_size > 0)
-            f->shared->driver_addr = superblock_size;
-    }
 
     /* Compute super block checksum */
     assert(sizeof(chksum) == sizeof(f->shared->super_chksum));
@@ -2958,7 +3027,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
     /* Write the superblock to disk */
-    if (H5F_write_superblock(f, dxpl_id, FALSE, NULL) != SUCCEED)
+    if (H5F_write_superblock(f, dxpl_id, NULL) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to superblock to file")
 
     /* Flush file buffers to disk. */
