@@ -48,7 +48,6 @@
  	Reference Interface (H5R)		Reference
  	Dataspace Interface (H5S)		DataSpace
  	Datatype Interface (H5T)		DataType
- 	Filters and Compression Interface (H5Z)	FilterCompress (not done)
   \endverbatim
  * \section install_sec Installation
  *

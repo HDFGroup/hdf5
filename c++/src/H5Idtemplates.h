@@ -22,6 +22,7 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	resetIdComponent
 ///\brief	Resets the id of the passed-in object.
@@ -53,7 +54,7 @@ H5_DLLCPP void resetIdComponent(
       obj->reset();  // delete ref_count from IdComponent
    }
 }
-
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 #ifndef H5_NO_NAMESPACE
 }
 #endif
