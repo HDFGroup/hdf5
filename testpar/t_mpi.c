@@ -406,6 +406,7 @@ test_mpio_1wMr(char *filename, int special_request)
     unsigned char expect_val;
     int  i, irank; 
     int  nerrors = 0;		/* number of errors */
+    int  atomicity;
     MPI_Offset  mpi_off;
     MPI_Status  mpi_stat;
 
@@ -442,6 +443,30 @@ test_mpio_1wMr(char *filename, int special_request)
 	return 1;
     }
 
+if (special_request & USEATOM){
+    /* ==================================================
+     * Set atomcity to true (1).  A POSIX compliant filesystem
+     * should not need this.
+     * ==================================================*/
+    if ((mpi_err = MPI_File_get_atomicity(fh, &atomicity)) != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
+    }
+    printf("Initial atomicity = %d\n", atomicity);
+    if ((mpi_err = MPI_File_set_atomicity(fh, 1)) != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_set_atomicity failed (%s)\n", mpi_err_str);
+    }
+    if ((mpi_err = MPI_File_get_atomicity(fh, &atomicity)) != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
+    }
+    printf("After set_atomicity atomicity = %d\n", atomicity);
+}
+
     /* This barrier is not necessary but do it anyway. */
     MPI_Barrier(MPI_COMM_WORLD);
     PRINTID;
@@ -476,7 +501,28 @@ test_mpio_1wMr(char *filename, int special_request)
     PRINTID;
     printf("MPI_Bcast: mpi_err = %d\n", mpi_err);
 
-    /* This barrier is not necessary because the Bcase above */
+if (special_request & USEFSYNC){
+    /* ==================================================
+     * Do a file sync.  A POSIX compliant filesystem
+     * should not need this.
+     * ==================================================*/
+    printf("Apply MPI_File_sync\n");
+    /* call file_sync to force the write out */
+    if ((mpi_err = MPI_File_sync(fh)) != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_sync failed (%s)\n", mpi_err_str);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    /* call file_sync to force the write out */
+    if ((mpi_err = MPI_File_sync(fh)) != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_sync failed (%s)\n", mpi_err_str);
+    }
+}
+
+    /* This barrier is not necessary because the Bcase or File_sync above */
     /* should take care of it.  Do it anyway. */
     MPI_Barrier(MPI_COMM_WORLD);
     PRINTID;
@@ -509,14 +555,17 @@ test_mpio_1wMr(char *filename, int special_request)
     MPI_File_close(&fh);
 
     PRINTID;
-    if (nerrors > 0){
-	printf("%d data errors detected\n", nerrors);
-    }else{
-	printf("all tests passed\n");
+    printf("%d data errors detected\n", nerrors);
+
+    {
+	int temp;
+	MPI_Reduce(&nerrors, &temp, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+        if (mpi_rank == 0 && temp > 0)
+	    nerrors = temp;
     }
 
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
-    return 0;
+    return nerrors;
 }
 
 
@@ -594,6 +643,7 @@ int
 main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
+    int ret_code;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -617,7 +667,17 @@ main(int argc, char **argv)
     }
 
     MPI_BANNER("MPIO 1 write Many read test...");
-    test_mpio_1wMr(filenames[0], USENONE);
+    ret_code = test_mpio_1wMr(filenames[0], USENONE);
+    if (mpi_rank==0 && ret_code > 0)
+	printf("***FAILED with %d total errors\n", ret_code);
+    MPI_BANNER("MPIO 1 write Many read test with atomicity...");
+    ret_code = test_mpio_1wMr(filenames[0], USEATOM);
+    if (mpi_rank==0 && ret_code > 0)
+	printf("***FAILED with %d total errors\n", ret_code);
+    MPI_BANNER("MPIO 1 write Many read test with file sync...");
+    ret_code = test_mpio_1wMr(filenames[0], USEFSYNC);
+    if (mpi_rank==0 && ret_code > 0)
+	printf("***FAILED with %d total errors\n", ret_code);
     MPI_BANNER("MPIO File size range test...");
     test_mpio_gb_file(filenames[0]);
     MPI_BANNER("MPIO independent overlapping writes...");
