@@ -955,8 +955,14 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
      * we can extend any of the collections to make enough room.
      */
     if (!found) {
+        size_t new_need;
+
         for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
-            if((f->shared->cwfs[cwfsno]->size+need)<=H5HG_MAXSIZE && H5MF_can_extend(f,H5FD_MEM_GHEAP,f->shared->cwfs[cwfsno]->addr,(hsize_t)f->shared->cwfs[cwfsno]->size,(hsize_t)need)) {
+            new_need = need;
+            new_need -= f->shared->cwfs[cwfsno]->obj[0].size;
+            new_need = MAX(f->shared->cwfs[cwfsno]->size, new_need);
+
+            if((f->shared->cwfs[cwfsno]->size+need)<=H5HG_MAXSIZE && H5MF_can_extend(f,H5FD_MEM_GHEAP,f->shared->cwfs[cwfsno]->addr,(hsize_t)f->shared->cwfs[cwfsno]->size,(hsize_t)new_need)) {
                 if(H5HG_extend(f,f->shared->cwfs[cwfsno],size)<0)
                     HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL, "unable to extend global heap collection");
 	        addr = f->shared->cwfs[cwfsno]->addr;

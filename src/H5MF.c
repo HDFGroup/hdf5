@@ -78,10 +78,13 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "file is read-only");
+    /* Check that the file can address the new space */
+    if( H5MF_alloc_overflow(f, size) != 0 )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "not enough address space in file"); 
 
     /* Allocate space from the virtual file layer */
     if (HADDR_UNDEF==(ret_value=H5FD_alloc(f->shared->lf, type, dxpl_id, size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed");
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed");
 
     /* Convert absolute file address to relative file address */
     assert(ret_value>=f->shared->base_addr);
@@ -192,6 +195,11 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
     /* Convert old relative address to absolute address */
     old_addr += f->shared->base_addr;
 
+	/* Check that the file can address the new space. */
+	/* In the worst case, this means adding new_size bytes to the end of the file. */
+	if( H5MF_alloc_overflow(f, new_size) != 0 )
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "not enough address space in file");
+
     /* Reallocate memory from the virtual file layer */
     ret_value = H5FD_realloc(f->shared->lf, type, dxpl_id, old_addr, old_size,
 			     new_size);
@@ -206,6 +214,133 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_reserve
+ *
+ * Purpose:	Sets aside file space that has not yet been allocated, but will
+ *		be (or might be in the worst case).  This number is used to
+ *		ensure that there is room in the file when it is flushed to disk.
+ *
+ *		Nothing changes (and no error is generated) if the file is opened
+ *		as read-only.
+ *
+ * Return:	Success:	0
+ *
+ * 		Failure:	negative
+ *
+ * Programmer:	James Laird
+ *		Nat Furrer
+ *              Thursday, May 27, 2004
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+herr_t H5MF_reserve(H5F_t *f, hsize_t size)
+{
+	herr_t ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI(H5MF_reserve, FAIL);
+
+	/* Check arguments */
+	assert(f);
+
+	/* Check that there is room in the file to reserve this space */
+	if( H5MF_alloc_overflow( f, size ) != 0)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "not enough address space in file");
+
+	f->shared->lf->reserved_alloc += size;
+
+done:
+	FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_free_reserved
+ *
+ * Purpose:	Releases the file space set aside by H5MF_reserve.  This should
+ *			be called immediately before allocating the file space for which
+ *			the space was reserved.
+ *
+ * Return:	None
+ *
+ * Programmer:	James Laird
+ *				Nat Furrer
+ *              Thursday, May 27, 2004
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+void H5MF_free_reserved(H5F_t *f, hsize_t size)
+{
+	/* Check arguments */
+	assert(f);
+
+	/* If this assert breaks, it means that HDF5 is trying to free file space
+	 * that was never reserved.
+	 */
+	assert(size <= f->shared->lf->reserved_alloc);
+
+	f->shared->lf->reserved_alloc -= size;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_alloc_overflow
+ *
+ * Purpose:	Checks if an allocation of file space would cause an overflow.
+ *          F is the file whose space is being allocated, SIZE is the amount
+ *          of space needed.
+ *
+ * Return:	0 if no overflow would result
+ *          1 if overflow would result (the allocation should not be allowed)
+ *
+ * Programmer:	James Laird
+ *				Nat Furrer
+ *              Tuesday, June 1, 2004
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+int H5MF_alloc_overflow(H5F_t *f, hsize_t size)
+{
+    unsigned long long space_needed;    /* Accumulator variable */
+    hsize_t c;
+
+    /* Start with the current end of the file's address. */
+    space_needed = f->shared->lf->cls->get_eoa(f->shared->lf);
+
+    /* Subtract the file's base address to get the actual amount of
+     * space being used:
+     * (end of allocated space - beginning of allocated space)
+     */
+    assert(f->shared->base_addr < space_needed);
+    space_needed -= f->shared->base_addr;
+
+    /* Add the amount of space requested for this allocation */
+    space_needed += size;
+
+    /* Also add space that is "reserved" for data to be flushed
+     * to disk (e.g., for object headers and the heap).
+     * This is the total amount of file space that will be 
+     * allocated.
+     */
+    space_needed += f->shared->lf->reserved_alloc;
+
+    /* Ensure that this final number is less than the file's
+     * address space.  We do this by shifting in multiples
+     * of 16 bits because some systems will do nothing if
+     * we shift by the size of a long long (64 bits) all at
+     * once (<cough> Linux <cough>).  Thus, we break one shift
+     * into several smaller shifts.
+     */
+    for(c=0; c < H5F_SIZEOF_ADDR(f); c += 2)
+        space_needed = space_needed >> 16;
+
+    if(space_needed != 0)
+        return 1;
+    else
+       return 0;
 }
 
 
@@ -234,7 +369,6 @@ htri_t
 H5MF_can_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
     htri_t	ret_value;      /* Return value */
-    
     FUNC_ENTER_NOAPI(H5MF_can_extend, FAIL);
 
     /* Convert old relative address to absolute address */
@@ -243,6 +377,10 @@ H5MF_can_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t e
     /* Pass the request down to the virtual file layer */
     if((ret_value=H5FD_can_extend(f->shared->lf, type, addr, size, extra_requested))<0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate new file memory");
+
+    /* Make sure there is enough addressable space to satisfy the request */
+    if (ret_value == TRUE)
+        ret_value = !H5MF_alloc_overflow(f, extra_requested);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -269,11 +407,14 @@ htri_t
 H5MF_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
     htri_t	ret_value;      /* Return value */
-    
     FUNC_ENTER_NOAPI(H5MF_extend, FAIL);
 
     /* Convert old relative address to absolute address */
     addr += f->shared->base_addr;
+
+    /* Make sure there is enough addressable space to satisfy the request */
+    if ( H5MF_alloc_overflow(f, extra_requested) )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate new file memory: out of address space");
 
     /* Pass the request down to the virtual file layer */
     if((ret_value=H5FD_extend(f->shared->lf, type, addr, size, extra_requested))<0)

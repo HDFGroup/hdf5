@@ -155,6 +155,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
     heap->addr = *addr_p + (hsize_t)sizeof_hdr;
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
+    heap->disk_resrv = 0;
     if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + size_hint))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
@@ -253,7 +254,7 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* Allocate space in memory for the heap */
     if (NULL==(heap = H5FL_CALLOC(H5HL_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    
+
     /* heap data size */
     H5F_DECODE_LENGTH(f, p, heap->disk_alloc);
     heap->mem_alloc = heap->disk_alloc;
@@ -337,6 +338,13 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
     sizeof_hdr = H5HL_SIZEOF_HDR(f);    /* cache H5HL header size for file */
 
     /*
+     * When the heap is being flushed to disk, release the file space reserved
+     * for it.
+     */
+    H5MF_free_reserved(f, heap->disk_resrv);
+    heap->disk_resrv = 0;
+
+    /*
      * Check to see if we can reduce the size of the heap in memory by
      * eliminating free blocks at the tail of the buffer before flushing the
      * buffer out.
@@ -406,8 +414,9 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
                     assert(last_fl->size == H5HL_ALIGN(last_fl->size));
                 }
 
-                /* Resize the memory buffer */
+                /* Resize the memory buffer and reserved space in file */
                 if (new_mem_size != heap->mem_alloc) {
+
                     heap->mem_alloc = new_mem_size;
                     heap->chunk = H5FL_BLK_REALLOC(heap_chunk, heap->chunk, (sizeof_hdr + new_mem_size));
 
@@ -939,6 +948,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     size_t	offset = 0;
     size_t	need_size, old_size, need_more;
     hbool_t	found;
+    size_t	disk_resrv;	/* Amount of additional space to reserve in file */
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     size_t	ret_value;      /* Return value */
 
@@ -1003,6 +1013,19 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
      */
     if (found==FALSE) {
 	need_more = MAX3(need_size, heap->mem_alloc, H5HL_SIZEOF_FREE(f));
+
+	/* Reserve space in the file to hold the increased heap size
+	 */
+	if( heap->disk_resrv == heap->mem_alloc)
+		disk_resrv = need_more;
+	else
+		disk_resrv = heap->mem_alloc + need_more - heap->disk_resrv;
+
+	if( H5MF_reserve(f, disk_resrv) < 0 )
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "unable to reserve space in file");
+
+	/* Update heap's record of how much space it has reserved */
+	heap->disk_resrv += disk_resrv;
 
 	if (max_fl && max_fl->offset + max_fl->size == heap->mem_alloc) {
 	    /*

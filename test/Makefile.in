@@ -31,7 +31,7 @@ TEST_PROGS=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests    \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum gass_write gass_read gass_append \
            set_extent srb_write srb_append srb_read ttsafe stream_test       \
-           getname file_handle ntypes dangle dtransform filename
+           getname file_handle ntypes dangle dtransform filename reserved
            
 ## Test programs for Error API.  Only compile them but let testerror.sh run 
 ## them to compare the output error messages with standard ones.  'make check'
@@ -88,7 +88,7 @@ TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
          ttsafe_cancel.c ttsafe_acreate.c gass_write.c gass_read.c           \
          gass_append.c srb_read.c srb_write.c srb_append.c stream_test.c     \
          set_extent.c getname.c file_handle.c ntypes.c dangle.c error_test.c \
-         err_compat.c dtransform.c filename.c
+         err_compat.c dtransform.c filename.c reserved.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -244,5 +244,8 @@ dtransform: dtransform.lo
 
 filename: filename.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ filename.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+reserved: reserved.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ reserved.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

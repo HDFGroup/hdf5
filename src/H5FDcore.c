@@ -382,7 +382,8 @@ done:
  */
 static H5FD_t *
 H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
-	       haddr_t maxaddr)
+	       haddr_t 
+		   maxaddr)
 {
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;

@@ -39,7 +39,6 @@ const char *FILENAME[] = {
  * the library and simply compile gen_bogus.c with that HDF5 library and run it. */
 #define FILE_BOGUS "tbogus.h5"
 
-
 /*-------------------------------------------------------------------------
  * Function:	main
  *
