@@ -536,11 +536,6 @@ H5TN_init_interface(void)\n\
 \n\
     FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
 
-    printf("\n\
-    /* Set the native order for this machine */\n\
-    H5T_native_order_g = H5T_ORDER_%s;\n",
-	       byte_order ? "BE" : "LE");	/*byte order		*/
-
     for (i = 0; i < nd; i++) {
         /* The native endianess of this machine */
         /* The INFO.perm now contains `-1' for bytes that aren't used and
