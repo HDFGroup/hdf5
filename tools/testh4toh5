@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
 # Test script for the h4toh5 tests.
 # Using the h4toh5 convert to convert a pre-created hdf file to
 # an hdf5 file (output file), then compare it with a pre-created
@@ -12,7 +16,10 @@
 # h5dump is default to use the one just built.  It can be overridden
 # by setting $H5DUMP to a different value such as /usr/local/bin/h5dump.
 
-h4toh5=./h4toh5		# a relative name
+h4toh5=h4toh5		# a relative name
+
+COMMAND=`pwd`/"$h4toh5"	# an absolute command name
+
 cmp='cmp -s'
 diff='diff -c'
 
@@ -41,7 +48,9 @@ fi
 mkdir testfiles >/dev/null 2>&1
 
 SRCDIR="$srcdir/testfiles"
-OUTDIR="./testfiles"
+OUTDIR="./testfiles/Results"
+
+test -d "$OUTDIR" || mkdir $OUTDIR
 
 nerrors=0
 verbose=yes
@@ -80,6 +89,7 @@ CONVERT()
     # to the OUTDIR and transform the input file pathname because of the suffix
     # convention mentioned above.  This way, the hdf5 files are always created
     # in the OUTDIR directory.
+    #
 
     INFILES=""
     OUTFILES=""
@@ -91,8 +101,7 @@ CONVERT()
 	shift
 	for f in $*
 	do
-	    if [ "$SRCDIR" != "$OUTDIR" ]
-	    then
+	    if test "$SRCDIR" != "$OUTDIR"; then
 		cp $SRCDIR/$f $OUTDIR/$f
 	    fi
 	    INFILES="$INFILES $f"
@@ -102,16 +111,14 @@ CONVERT()
 	;;
     * )			# Single file conversion
 	case $# in
-	1)  if [ "$SRCDIR" != "$OUTDIR" ]
-	    then
+	1)  if test "$SRCDIR" != "$OUTDIR"; then
 		cp $SRCDIR/$1 $OUTDIR/$1
 	    fi
 	    INFILES="$1"
 	    OUTFILES="`basename $1 .hdf`.h5"
 	    ;;
 	2) 		# hdf4 file specified
-	    if [ "$SRCDIR" != "$OUTDIR" ]
-	    then
+	    if test "$SRCDIR" != "$OUTDIR"; then
 		cp $SRCDIR/$1 $OUTDIR/$1
 	    fi
 	    INFILES="$1"
@@ -128,9 +135,8 @@ CONVERT()
     # run the conversion and remove input files that have been copied over
     (
 	cd $OUTDIR
-	../$h4toh5 $INFILES $OUTFILES 2>/dev/null
-	if [ "$SRCDIR" != "$OUTDIR" ]
-	then
+	$COMMAND $INFILES $OUTFILES 2>/dev/null
+	if test "$SRCDIR" != "$OUTDIR"; then
 	    $RM $INFILES
 	fi
     )
@@ -174,7 +180,7 @@ CONVERT()
 	fi
 
 	# Clean up output file
-	if [ X = ${HDF5_NOCLEANUP:-X} ]; then
+	if test -z "$HDF5_NOCLEANUP"; then
 	    $RM $expect_out $actual_out
 	    $RM $OUTDIR/$f
 	fi
@@ -183,8 +189,6 @@ CONVERT()
 	    echo " PASSED"
     fi
 }
-
-
 
 ##############################################################################
 ##############################################################################
@@ -223,4 +227,5 @@ if test $nerrors -eq 0 ; then
 	echo "All h4toh5 tests passed."
 fi
 
+$RM -r $OUTDIR
 exit $nerrors
