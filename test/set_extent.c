@@ -57,11 +57,12 @@ int main( void )
  *-------------------------------------------------------------------------
  */
  
- TESTING("extend dataset create");
  
  /* Create a new file using default properties. */
  if ((file_id = H5Fcreate( "set_extent_create.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT ))<0) goto out;
  
+ TESTING("extend dataset create with fill value");
+
  /* Create the data space with unlimited dimensions. */
  if ((space_id = H5Screate_simple( RANK, dims, maxdims ))<0) goto out;
  
@@ -77,7 +78,7 @@ int main( void )
  */
  
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( file_id , "Dataset", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
+ if ((dataset_id = H5Dcreate( file_id , "Dataset1", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
  
  /* Write the data. */
  if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) goto out;
@@ -177,10 +178,126 @@ int main( void )
  H5Dclose( dataset_id );
  H5Sclose( space_id );
  H5Pclose( plist_id  );
+
+ PASSED();
+ TESTING("extend dataset create without fill value");
+
+ /* Create the data space with unlimited dimensions. */
+ if ((space_id = H5Screate_simple( RANK, dims, maxdims ))<0) goto out;
+ 
+ /* Modify dataset creation properties, i.e. enable chunking. */
+ if ((plist_id = H5Pcreate (H5P_DATASET_CREATE ))<0) goto out;
+ if (H5Pset_chunk( plist_id, RANK, dims_chunk )<0) goto out;
+ 
+/*-------------------------------------------------------------------------
+ * Create and write one dataset
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Create a new dataset */
+ if ((dataset_id = H5Dcreate( file_id , "Dataset2", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
+ 
+ /* Write the data. */
+ if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) goto out;
+ 
+/*-------------------------------------------------------------------------
+ * Set new dimensions for the array; shrink it 
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Set new dimensions for the array. */
+ if (H5Dset_extent( dataset_id , dims_new )<0) goto out;
+ 
+ /* Get the space. */
+ if ((space_id = H5Dget_space( dataset_id ))<0) goto out;
+ 
+ /* Get dimensions. */
+ if (H5Sget_simple_extent_dims( space_id, dims_out, NULL )<0) goto out;
+ 
+ if ( dims_out[0] != dims_new[0] ) 
+  goto out;
+ 
+ 
+/*-------------------------------------------------------------------------
+ * Read
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Read the new dataset. */
+ if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1 )<0) goto out;
+ 
+ 
+ /* Compare the read array with the original array */
+ for( i = 0; i < (int)dims_out[0]; i++ )
+ {
+  for( j = 0; j < (int)dims_out[1]; j++ )
+  {
+   if (  buf1[i][j] != data[i][j] ) {
+    goto out;
+   }
+  }
+ }
+ 
+ 
+/*-------------------------------------------------------------------------
+ * Set new dimensions for the array; expand it again 
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Set new dimensions for the array. */
+ if (H5Dset_extent( dataset_id , dims )<0) goto out;
+ 
+ /* Get the space. */
+ if ((space_id = H5Dget_space( dataset_id ))<0) goto out;
+ 
+ /* Get dimensions. */
+ if (H5Sget_simple_extent_dims( space_id, dims_out, NULL )<0) goto out;
+ 
+ if ( dims_out[0] != dims[0] ) 
+  goto out;
+ 
+ 
+/*-------------------------------------------------------------------------
+ * Read
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Read the new dataset. */
+ if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 )<0) goto out;
+ 
+ /* Compare the read array with the original array */
+ for( i = 0; i < (int)dims_out[0]; i++ )
+ {
+  for( j = 0; j < (int)dims_out[1]; j++ )
+  {
+   if ( i >= 70 || j >= 70 )
+   {
+    if (  buf2[i][j] != 0 ) {
+     goto out;
+    }
+   }
+   else
+   {
+    if (  buf2[i][j] != data[i][j] ) {
+     goto out;
+    }
+   }
+   
+  }
+ }
+ 
+ 
+/*-------------------------------------------------------------------------
+ * Close/release resources
+ *-------------------------------------------------------------------------
+ */
+ 
+ H5Dclose( dataset_id );
+ H5Sclose( space_id );
+ H5Pclose( plist_id  );
+
  H5Fclose( file_id );
- 
- 
- 
+  
  PASSED();
  
 
@@ -190,11 +307,12 @@ int main( void )
  *-------------------------------------------------------------------------
  */
  
-
- TESTING("extend dataset read");
  
  /* Create a new file using default properties. */
  if ((file_id = H5Fcreate( "set_extent_read.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT ))<0) goto out;
+
+
+ TESTING("extend dataset read with fill value");
  
  /* Create the data space with unlimited dimensions. */
  if ((space_id = H5Screate_simple( RANK, dims, maxdims ))<0) goto out; 
@@ -205,7 +323,7 @@ int main( void )
 	if (H5Pset_fill_value( plist_id, H5T_NATIVE_INT, &fillvalue )<0) goto out; 
  
  /* Create a new dataset within the file using cparms creation properties. */
- if ((dataset_id = H5Dcreate( file_id , "Dataset", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
+ if ((dataset_id = H5Dcreate( file_id , "Dataset1", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
  
  /* Write the data. */
  if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) goto out;
@@ -221,7 +339,7 @@ int main( void )
  if ((file_id = H5Fopen( "set_extent_read.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) goto out;
  
  /* Open the dataset */
- if ((dataset_id = H5Dopen( file_id , "Dataset" ))<0) goto out;
+ if ((dataset_id = H5Dopen( file_id , "Dataset1" ))<0) goto out;
   
  /* Set new dimensions for the array. */
  if (H5Dset_extent( dataset_id, dims_new )<0) goto out;
@@ -298,6 +416,115 @@ int main( void )
  
  H5Dclose( dataset_id );
  H5Sclose( space_id );
+
+ PASSED();
+
+
+ TESTING("extend dataset read without fill value");
+ 
+ /* Create the data space with unlimited dimensions. */
+ if ((space_id = H5Screate_simple( RANK, dims, maxdims ))<0) goto out; 
+ 
+ /* Modify dataset creation properties, i.e. enable chunking. */
+ if ((plist_id = H5Pcreate (H5P_DATASET_CREATE ))<0) goto out;
+ if (H5Pset_chunk( plist_id, RANK, dims_chunk )<0) goto out;
+ 
+ /* Create a new dataset within the file using cparms creation properties. */
+ if ((dataset_id = H5Dcreate( file_id , "Dataset2", H5T_NATIVE_INT, space_id, plist_id ))<0) goto out;
+ 
+ /* Write the data. */
+ if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data )<0) goto out;
+ 
+ /* Close/release resources. */
+ H5Dclose( dataset_id );
+ H5Sclose( space_id );
+ H5Pclose( plist_id  );
+ H5Fclose( file_id );
+ 
+ 
+ /* Open the file */
+ if ((file_id = H5Fopen( "set_extent_read.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) goto out;
+ 
+ /* Open the dataset */
+ if ((dataset_id = H5Dopen( file_id , "Dataset2" ))<0) goto out;
+  
+ /* Set new dimensions for the array. */
+ if (H5Dset_extent( dataset_id, dims_new )<0) goto out;
+ 
+ /* Get the space. */
+ if ((space_id = H5Dget_space( dataset_id ))<0) goto out;
+ 
+ /* Get dimensions. */
+ if (H5Sget_simple_extent_dims( space_id, dims_out, NULL )<0) goto out;
+ 
+ if ( dims_out[0] != dims_new[0] ) 
+  goto out;
+ 
+ /* Read the new dataset. */
+ if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1 )<0) goto out;
+ 
+ /* Compare the read array with the original array */
+ for( i = 0; i < (int)dims_out[0]; i++ )
+ {
+  for( j = 0; j < (int)dims_out[1]; j++ )
+  {
+   if (  buf1[i][j] != data[i][j] ) {
+    goto out;
+   }
+  }
+ }
+ 
+/*-------------------------------------------------------------------------
+ * Set new dimensions for the array; expand it again 
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Set new dimensions for the array. */
+ if (H5Dset_extent( dataset_id , dims )<0) goto out;
+ 
+ /* Get the space. */
+ if ((space_id = H5Dget_space( dataset_id ))<0) goto out;
+ 
+ /* Get dimensions. */
+ if (H5Sget_simple_extent_dims( space_id, dims_out, NULL )<0) goto out;
+ 
+ if ( dims_out[0] != dims[0] ) 
+  goto out;
+ 
+ /* Read the new dataset. */
+ if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 )<0) goto out;
+ 
+ /* Compare the read array with the original array */
+ for( i = 0; i < (int)dims_out[0]; i++ )
+ {
+  for( j = 0; j < (int)dims_out[1]; j++ )
+  {
+   if ( i >= 70 || j >= 70 )
+   {
+    if (  buf2[i][j] != 0 ) {
+     goto out;
+    }
+   }
+   else
+   {
+    if (  buf2[i][j] != data[i][j] ) {
+     goto out;
+    }
+   }
+   
+  }
+ }
+ 
+ 
+/*-------------------------------------------------------------------------
+ * Close/release resources
+ *-------------------------------------------------------------------------
+ */
+ 
+ H5Dclose( dataset_id );
+ H5Sclose( space_id );
+
+
  H5Fclose( file_id );
  
  PASSED();
@@ -315,4 +542,6 @@ out:
  return 1;
  
 }
+
+
 
