@@ -215,7 +215,7 @@ Supported Configuration Features Summary
     Win98          n              y         n        n    n     n
     WinNT          y              y         n        n    n     n
     WinNT CW       n              n         n        n    n     n
-    FreeBSD        y              y         n        n    n     y
+    FreeBSD        y              y         y        n    n     y
     Linux 2.2      y              y         y        n    n     y
     Linux 2.4      y              y         y        n    n     y
 
