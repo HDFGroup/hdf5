@@ -34,7 +34,7 @@ if test X = "X$cc_flags_set"; then
 fi
 
 # GCC compilers before gcc-2.8.1 have problems with `long long'.
-if test gcc = $cc_vendor -a $cc_vers_all -lt 2008001; then
+if test gcc = "$cc_vendor" -a "$cc_vers_all" -lt 2008001; then
     cat <<EOF
     **
     ** This compiler may be unable to properly compile the long long
@@ -49,7 +49,7 @@ EOF
 
 # Current EGCS compilers have problems with `long long' and register
 # allocation when optimizations are turned on for x86 systems.
-elif test egcs = $cc_vendor -a $cc_vers_all -le 2091066; then
+elif test egcs = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then
     cat <<EOF
     **
     ** This compiler may have problems allocating registers when
@@ -60,7 +60,7 @@ EOF
     sleep 5
 
 # All current versions of PGCC have problems also.
-elif test pgcc = $cc_vendor -a $cc_vers_all -le 2091066; then	    
+elif test pgcc = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then	    
     cat <<EOF
     **
     ** This compiler may have problems allocating registers for long
