@@ -1,14 +1,14 @@
 #include "H5f90.h"
 #include <mpi.h> 
-#include "H5config_fortran.h"
+#include "H5pubconf_fortran.h"
 
 
 /* Support for C to Fortran translation in MPI */
-#ifndef HAVE_MPI_MULTI_LANG_Comm 
+#ifndef H5_HAVE_MPI_MULTI_LANG_Comm 
 #define MPI_Comm_c2f(comm) (int_f)(comm)
 #define MPI_Comm_f2c(comm) (MPI_Comm)(comm)
 #endif /*MPI Comm*/
-#ifndef HAVE_MPI_MULTI_LANG_Info
+#ifndef H5_HAVE_MPI_MULTI_LANG_Info
 #define MPI_Info_c2f(info) (int_f)(info)
 #define MPI_Info_f2c(info) (MPI_Info)(info)
 #endif /*MPI Info*/
