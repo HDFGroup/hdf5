@@ -605,6 +605,8 @@
     * To build the Fortran Library on IA32 follow step described above, except 
       that DEC and MS compiler directives should be removed manually or 
       use a patch from HDF FTP server ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
+      Also check "How to build HDF5 Fortran with Intel Compiler" under HDF5 FAQ
+      http://hdf.ncsa.uiuc.edu/hdf5-quest.html#plat-intel
 
 
 5.8  Building and testing with PGI compilers
