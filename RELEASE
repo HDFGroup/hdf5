@@ -1,14 +1,13 @@
 
  
-                       HDF5 Release 1.2.2-pre0
-    			Under Development
+                       HDF5 Release 1.2.2
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.2.1 and 
 HDF5-1.2.2, and contains information on the platforms where HDF5-1.2.2
-was tested(??????????) and known problems in HDF5-1.2.2. For more details check the
+was tested and known problems in HDF5-1.2.2. For more details check the
 HISTORY file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server 
@@ -27,7 +26,7 @@ If you have any questions or comments, please send them to:
 
 CONTENTS
 
-- Bug fixes since HDF5-1.2.1 
+- Features added and bug fixes since HDF5-1.2.1 
 - Known Problems
 - Platforms Tested
 
@@ -40,12 +39,12 @@ Features added since HDF5-1.2.1
 Bug fixes since HDF5-1.2.1
 ==========================
    * h5dump correctly displays compound datatypes.
+   * h5dump correctly displays opaque and bitfield types.
+   * h5dump correctly displays the committed copy of predefined types.
    * Corrected an error in h5toh4 which did not convert the 32bits
      int from HDF5 to HDF4 corectly for the T3E platform.
    * Corrected a floating point number conversion error for the
      Cray J90 platform.  The error did not convert the value 0.0
-     correctly.
-   * h5dump correctly displays the committed copy of predefined types
      correctly.
    * New features added to snapshots.  Use 'snapshot help' to see a
      complete list of features.
@@ -62,7 +61,7 @@ Bug fixes since HDF5-1.2.1
      herr_t, to align them with the dataset and group iterator functions.
    * Changed H5Screate_simple and H5Sset_extent_simple to not allow dimensions
      of size 0 with out the same dimension being unlimited.
-   * QAK - 4/19/00 - Improved metadata hashing & caching algorithms to avoid
+   * Improved metadata hashing & caching algorithms to avoid
      many hash flushes and also remove some redundant I/O when moving metadata
      blocks in the file.
    * The libhdf5.settings file shows the correct machine byte-sex.
@@ -70,7 +69,6 @@ Bug fixes since HDF5-1.2.1
      certain compound datatype conversions was fixed for nested compound
      types. This required a small change in the datatype conversion
      function API.
-   * h5dump correctly displays opaque and bitfield types.
 
 Known Problems:
 ==============
@@ -82,24 +80,26 @@ Platforms tested
 =================
 
   AIX 4.3.2 (IBM SP)            3.6.6
-  Cray T3E 2.0.4.81             cc 6.3.0.1
+  Cray T3E 2.0.5.29             cc 6.3.0.2
                                 mpt.1.3
-  FreeBSD 3.3-STABLE            gcc 2.95.2
+  FreeBSD 4.0                   gcc 2.95.2
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.3 (SGI MPI 3.2.0.0)
 
-  Linux 2.2.10 SuSE             egcs-2.91.66               configured with
-  (i686-pc-linux-gnu)                                      --disable-hsizet
-                                mpich-1.2.0 egcs-2.91.66 19990314/Linux 
+  Linux 2.2.10 SMP              gcc 2.95.1 
+                                || compiler version egcs-1.1.2 
+  Linux 2.2.14 (RedHat 6.2)     gcc 2.95.2
 
   OSF1 V4.0                     DEC-V5.2-040
-  SunOS 5.6                     cc WorkShop Compilers 4.2  no optimization
+  SunOS 5.6                     cc WorkShop Compilers 5.0 no optimization
   SunOS 5.7                     cc WorkShop Compilers 5.0
-  TFLOPS 2.8                    cicc (pgcc Rel 3.0-5i)
+  SolarisX86 SunOS 5.5.1        gcc version 2.7.2 with --disable-hsizet
+  TFLOPS 3.1.2                  pgcc Rel 3.1-2i
                                 mpich-1.1.2 with local changes
   Windows NT4.0 sp5             MSVC++ 6.0
+  Windows 98                    MSVC++ 6.0
 
 
 
