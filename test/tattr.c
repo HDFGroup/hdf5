@@ -721,7 +721,9 @@ test_attr_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid;	        /* Dataspace ID			*/
     hid_t		attr;	    /* Attribute ID			*/
+    H5S_class_t         stype;          /* Dataspace class              */
     float       rdata=0.0;  /* Buffer for reading 1st attribute */
     herr_t		ret;		/* Generic return value		*/
 
@@ -748,6 +750,18 @@ test_attr_scalar_read(void)
     ret=H5Aread(attr,H5T_NATIVE_FLOAT,&rdata);
     CHECK(ret, FAIL, "H5Aread");
     VERIFY(rdata, attr_data5, "H5Aread");
+
+    /* Get the attribute's dataspace */
+    sid = H5Aget_space(attr);
+    CHECK(sid, FAIL, "H5Aget_space");
+
+    /* Make certain the dataspace is scalar */
+    stype = H5Sget_simple_extent_type (sid);
+    VERIFY(stype, H5S_SCALAR, "H5Sget_simple_extent_type");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
 
     /* Close attribute */
     ret=H5Aclose(attr);
