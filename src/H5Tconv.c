@@ -14,8 +14,6 @@
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
-#include <math.h>		/*for ceil()				     */
-#include <float.h>		/*for FLT_MAX and HUGE_VAL		     */
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {

@@ -133,7 +133,8 @@ dnl ----------------------------------------------------------------------
 dnl Check for header files.
 dnl
 AC_HEADER_STDC
-AC_CHECK_HEADERS(unistd.h zlib.h)
+AC_HEADER_TIME
+AC_CHECK_HEADERS(io.h sys/resource.h sys/time.h unistd.h winsock.h zlib.h)
 
 
 dnl ----------------------------------------------------------------------
@@ -146,6 +147,7 @@ AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
 AC_CHECK_SIZEOF(long long, 8)
+AC_CHECK_SIZEOF(__int64, 8)
 AC_CHECK_SIZEOF(float, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 8)
@@ -208,6 +210,15 @@ AC_DEFINE(HAVE_STRUCT_TIMEZONE)
 AC_MSG_RESULT(yes),
 AC_MSG_RESULT(no))
 
+dnl ----------------------------------------------------------------------
+dnl Does the struct stat have the st_blocks field?  This field is not Posix.
+dnl
+AC_MSG_CHECKING(for st_blocks in struct stat)
+AC_TRY_COMPILE([
+#include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;],
+AC_DEFINE(HAVE_STAT_ST_BLOCKS)
+AC_MSG_RESULT(yes),
+AC_MSG_RESULT(no))
 
 dnl ----------------------------------------------------------------------
 dnl Check for functions.

@@ -7,10 +7,17 @@
  *
  * Purpose:	Test H5Gunlink().
  */
-#include <hdf5.h>
-#include <stdlib.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <stdlib.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -18,14 +25,9 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
-#endif
 
 #define FILE_NAME_1	"unlink.h5"
 #define THE_OBJECT	"/foo"
-
 
 
 /*-------------------------------------------------------------------------

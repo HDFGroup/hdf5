@@ -30,19 +30,33 @@ static const char *FileHeader = "\n\
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#if !defined(WIN32)
-#include <unistd.h>
-#include <sys/time.h>
-#include <pwd.h>
+#include <H5config.h>
+
+/* See H5private.h for how to include files */
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <math.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
 #endif
 
-#include <H5config.h>
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+#ifdef _POSIX_VERSION
+#   include <pwd.h>
+#endif
+
+#if defined(TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
 
 #define MAXDETECT 16
 
@@ -801,11 +815,15 @@ print_header(void)
 
     time_t              now = time(NULL);
     struct tm           *tm = localtime(&now);
-    struct passwd       *pwd = NULL;
     char                real_name[30];
     char                host_name[256];
     int                 i;
     const char          *s;
+#ifdef HAVE_GETPWUID
+    struct passwd       *pwd = NULL;
+#else
+    int			pwd = 1;
+#endif
     static const char   *month_name[] =
     {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -895,7 +913,7 @@ bit.\n";
     if (pwd || real_name[0] || host_name[0]) {
         printf(" *\t\t\t");
         if (real_name[0]) printf("%s <", real_name);
-#if !defined(WIN32)
+#ifdef HAVE_GETPWUID
         if (pwd) fputs(pwd->pw_name, stdout);
 #endif
         if (host_name[0]) printf("@%s", host_name);
@@ -953,23 +971,21 @@ main(void)
     DETECT_I(long,		  LONG,	   d[nd]); nd++;
     DETECT_I(unsigned long,	  ULONG,   d[nd]); nd++;
 
-#if SIZEOF_LONG == SIZEOF_LONG_LONG
+#if SIZEOF_LONG_LONG > SIZEOF_LONG
+    DETECT_I(long long,           LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;
+#elif SIZEOF___INT64 > SIZEOF_LONG
+    DETECT_I(__int64,             LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned __int64,    ULLONG,  d[nd]); nd++;
+#else
     /*
-     * If sizeof(long)==sizeof(long long) then assume that `long long' isn't
-     * supported and use `long' instead.  This suppresses warnings on some
-     * systems.
+     * This architecture doesn't support an integer type larger than `long'
+     * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG.
      */
     DETECT_I(long,                LLONG,   d[nd]); nd++;
     DETECT_I(unsigned long,       ULLONG,  d[nd]); nd++;
-#else
-#if defined(WIN32)
-	DETECT_I(__int64,	  	  LLONG,   d[nd]); nd++;
-    DETECT_I(unsigned __int64,  ULLONG,  d[nd]); nd++;
-#else
-    DETECT_I(long long,	  	  LLONG,   d[nd]); nd++;
-    DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;
 #endif
-#endif
+
     DETECT_F(float,		  FLOAT,   d[nd]); nd++;
     DETECT_F(double,		  DOUBLE,  d[nd]); nd++;
 

@@ -27,10 +27,10 @@
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface/format changes  	     */
 #define H5_VERS_MINOR	1       /* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	6      /* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	20      /* For tweaks, bug-fixes, or development     */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
-				     H5_VERS_RELEASE)
+				        H5_VERS_RELEASE)
 
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
@@ -64,24 +64,22 @@ typedef int herr_t;
 typedef unsigned int hbool_t;
 typedef int htri_t;
 
-
 /*
- * The sizes of file-objects in hdf5 have their own types defined here.  On
- * most systems, these are the same as size_t and ssize_t, but on systems
- * with small address spaces these are defined to be larger.
+ * The sizes of file objects have their own types defined here.  If large
+ * sizes are enabled then use a 64-bit data type, otherwise use the size of
+ * memory objects.
  */
-#if defined(HAVE_LARGE_HSIZET) && SIZEOF_SIZE_T<SIZEOF_LONG_LONG
-#if defined(WIN32)
-typedef unsigned __int64 hsize_t;
-typedef signed __int64 hssize_t;
-typedef signed int ssize_t;
+#ifdef HAVE_LARGE_HSIZET
+#   if SIZEOF_LONG_LONG==8
+typedef unsigned long long 	hsize_t;
+typedef signed long long	hssize_t;
+#   elif SIZEOF___INT64==8
+typedef unsigned __int64	hsize_t;
+typedef signed __int64		hssize_t;
+#   endif
 #else
-typedef unsigned long long hsize_t;
-typedef signed long long hssize_t;
-#endif
-#else
-typedef size_t hsize_t;
-typedef ssize_t hssize_t;
+typedef size_t			hsize_t;
+typedef ssize_t			hssize_t;
 #endif
 
 #ifdef __cplusplus

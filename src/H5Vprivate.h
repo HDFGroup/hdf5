@@ -22,11 +22,6 @@
 #define H5V_vector_le_u(N,V1,V2) (H5V_vector_cmp_u (N, V1, V2)<=0)
 #define H5V_vector_ge_u(N,V1,V2) (H5V_vector_cmp_u (N, V1, V2)>=0)
 
-#if defined(WIN32)
-#undef inline
-#define inline
-#endif
-
 /* Other functions */
 #define H5V_vector_cpy(N,DST,SRC) {                                           \
     assert (sizeof(*(DST))==sizeof(*(SRC)));				      \

@@ -7,8 +7,16 @@
  *
  * Purpose:	Tests file mounting.
  */
+
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <stdlib.h>
+#endif
+
 #include <hdf5.h>
-#include <stdlib.h>
 
 #define FALSE		0
 #define TRUE		1
@@ -17,18 +25,12 @@
 #define FILE_NAME_2	"mount_2.h5"
 #define FILE_NAME_3	"mount_3.h5"
 
-#include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
-#endif
-
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
 #endif
 
 

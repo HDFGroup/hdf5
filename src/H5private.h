@@ -1,25 +1,122 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
-
-/* $Id$ */
-
 /*
- * This file contains macros & private information for general HDF5 functions.
- * Every HDF5 source file will include this file immediately after any
- * system include files but before any other private include files.
+ * Copyright (C) 1998 NCSA
+ *               All rights reserved.
+ *
+ * Programmer:  Robb Matzke <matzke@llnl.gov>
+ *              Friday, October 30, 1998
+ *
+ * Purpose:	This file is included by all HDF5 library source files to
+ *		define common things which are not defined in the HDF5 API.
+ *		The configuration constants like HAVE_UNISTD_H etc. are
+ *		defined in H5config.h which is included by H5public.h.
  */
 #ifndef _H5private_H
 #define _H5private_H
 #include <H5public.h>           /* Include Public Definitions     */
+
+/*
+ * Include ANSI-C header files.
+ */
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <ctype.h>
+#   include <errno.h>
+#   include <fcntl.h>
+#   include <float.h>
+#   include <math.h>
+#   include <stdarg.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
+#endif
+
+/*
+ * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
+ * compliant. Otherwise all bets are off.
+ */
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+#ifdef _POSIX_VERSION
+#   include <sys/stat.h>
+#   include <sys/wait.h>
+#   include <pwd.h>
+#endif
+
+/*
+ * If a program may include both `time.h' and `sys/time.h' then
+ * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.in).
+ * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
+ * protected against multiple inclusion, so programs should not explicitly
+ * include both files. This macro is useful in programs that use, for example,
+ * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
+ * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
+ * by `AC_CHECK_HEADERS(sys/time.h)' in configure.in.
+ */
+#if defined(TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
+
+/*
+ * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
+ * and debugging code if available.
+ */
+#ifdef HAVE_SYS_RESOURCE_H
+#   include <sys/resource.h>
+#endif
+
+/*
+ * Win32 is severely broken when it comes to ANSI-C and Posix.1 compliance.
+ */
+#ifdef HAVE_IO_H
+#   include <io.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#   include <winsock.h>
+#   include <winsock2.h>
+#endif
+#ifndef F_OK
+#   define F_OK	00
+#   define W_OK 02
+#   define R_OK 04
+#endif
+
+/*
+ * Pablo support files.
+ */
+#ifdef HAVE_PABLO
+#   define IOTRACE
+#   define HDFIOTRACE
+#   include "HDFIOTrace.h"
+#   include "ProcIDs.h"
+#endif
+
+/*
+ * Does the compiler support the __attribute__(()) syntax?  This is how gcc
+ * suppresses warnings about unused function arguments.  It's no big deal if
+ * we don't.
+ */
+#ifdef HAVE_ATTRIBUTE
+#   define __unused__		__attribute__((unused))
+#else
+#   define __attribute__(X)	/*void*/
+#   define __unused__		/*void*/
+#endif
+
+/*
+ * Does the compiler expand __FUNCTION__ to be the name of the function
+ * currently being defined?  If not then define it to be some constant
+ * string.
+ */
+#ifndef HAVE_FUNCTION
+#   define __FUNCTION__  "NoFunctionName"
+#endif
 
 /* Version #'s of the major components of the file format */
 #define HDF5_BOOTBLOCK_VERSION  0       /* of the boot block format       */
@@ -40,81 +137,24 @@
 #define FAIL            (-1)
 #define UFAIL           (unsigned)(-1)
 
-
-/*
- * Include those things that almost all source files need.
- */
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <ctype.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <string.h>
-#   include <time.h>
-
-#if defined(WIN32)
-#	include<sys\types.h>
-#	include<io.h>
-#define F_OK 00
-#define R_OK 04
-#define W_OK 02
-#else
-#   include <sys/time.h>
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif /*if defined(WIN32)*/
-
-#endif
-
-/*
- * Pablo support files.
- */
-#ifdef HAVE_PABLO
-#   define IOTRACE
-#   define HDFIOTRACE
-#   include "HDFIOTrace.h"
-#   include "ProcIDs.h"
-#endif
-
-/* Does the compiler support the __attribute__(()) syntax? */
-#ifndef HAVE_ATTRIBUTE
-#   define __attribute__(X)	/*void*/
-#   define __unused__		/*void*/
-#else
-#   define __unused__		__attribute__((unused))
-#endif
-
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
-#endif
-
-/* Does the compiler expand __FUNCTION__? */
-#ifndef HAVE_FUNCTION
-#   define __FUNCTION__  "NoFuntionName"
-#endif
-
 /* number of members in an array */
 #ifndef NELMTS
 #    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
 #endif
 
 /* minimum of two, three, or four values */
-#ifndef MIN
-#   define MIN(a,b)		(((a)<(b)) ? (a) : (b))
-#   define MIN2(a,b)		MIN(a,b)
-#   define MIN3(a,b,c)		MIN(a,MIN(b,c))
-#   define MIN4(a,b,c,d)	MIN(MIN(a,b),MIN(c,d))
-#endif
+#undef MIN
+#define MIN(a,b)		(((a)<(b)) ? (a) : (b))
+#define MIN2(a,b)		MIN(a,b)
+#define MIN3(a,b,c)		MIN(a,MIN(b,c))
+#define MIN4(a,b,c,d)		MIN(MIN(a,b),MIN(c,d))
 
 /* maximum of two, three, or four values */
-#ifndef MAX
-#   define MAX(a,b)    		(((a)>(b)) ? (a) : (b))
-#   define MAX2(a,b)		MAX(a,b)
-#   define MAX3(a,b,c)		MAX(a,MAX(b,c))
-#   define MAX4(a,b,c,d)	MAX(MAX(a,b),MAX(c,d))
-#endif
+#undef MAX
+#define MAX(a,b)    		(((a)>(b)) ? (a) : (b))
+#define MAX2(a,b)		MAX(a,b)
+#define MAX3(a,b,c)		MAX(a,MAX(b,c))
+#define MAX4(a,b,c,d)		MAX(MAX(a,b),MAX(c,d))
 
 /* limit the middle value to be within a range (inclusive) */
 #define RANGE(LO,X,HI)		MAX(LO,MIN(X,HI))
@@ -178,13 +218,11 @@ typedef unsigned        uint64;
 typedef long            int64;
 typedef unsigned long   uint64;
 #elif SIZEOF_LONG_LONG==8
-#if defined(WIN32)
-typedef __int64       int64;
-typedef unsigned __int64 uint64;
-#else
 typedef long long       int64;
 typedef unsigned long long uint64;
-#endif
+#elif SIZEOF___INT64==8
+typedef __int64		int64;
+typedef unsigned __int64 uint64;
 #else
 #  error "no 64-bit integer type"
 #endif

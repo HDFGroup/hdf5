@@ -7,34 +7,39 @@
  *
  * Purpose:     Tests the data type interface (H5T)
  */
-#include <assert.h>
-#include <float.h>
-#include <hdf5.h>
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#if !defined (WIN32)
-#include <sys/wait.h>
-#include <unistd.h>
+
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <float.h>
+#   include <math.h>
+#   include <signal.h>
+#   include <stdio.h>
+#   include <stdlib.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+#ifdef _POSIX_VERSION
+#   include <sys/wait.h>
+#endif
+
+#include <hdf5.h>
 
 #define H5T_PACKAGE
 #include <H5Tpkg.h>		/*to turn off hardware conversions*/
 
-#include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
-#endif
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
 #endif
 
 #if SIZEOF_DOUBLE != SIZEOF_LONG_DOUBLE

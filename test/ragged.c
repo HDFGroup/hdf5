@@ -5,10 +5,18 @@
  * Programmer:  Robb Matzke <robb@arborea.spizella.com>
  *              Tuesday, August 25, 1998
  */
-#include <assert.h>
+
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <signal.h>
+#   include <stdlib.h>
+#endif
+
 #include <hdf5.h>
-#include <signal.h>
-#include <stdlib.h>
 
 #include <H5private.h>	/*for performance monitoring*/
 
@@ -196,11 +204,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
     hssize_t		row;			/*current row number	*/
     hsize_t		i;			/*counter		*/
     hsize_t		max_width = quant_g[NELMTS(quant_g)-1].hi;
-#if !defined(WIN32)
     hsize_t		interval_nelmts;	/*elmts/interval timer	*/
-#else
-	hssize_t 	interval_nelmts;	/*elmts/interval timer	*/
-#endif
     hsize_t		*size=NULL;		/*size of each row	*/
     void		**buf=NULL;		/*buffer for each row	*/
     H5_timer_t		timer, timer_total;	/*performance timers	*/
@@ -302,11 +306,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
     int			total_nelmts=0;
     hsize_t		i, j;			/*counters		*/
     hssize_t		row;			/*current row number	*/
-#if !defined(WIN32)
     hsize_t		interval_nelmts;	/*elmts/interval timer	*/
-#else
-	hssize_t 	interval_nelmts;	/*elmts/interval timer	*/
-#endif
     hsize_t		*size=NULL;		/*size of each row	*/
     C_MTYPE		**buf=NULL;		/*buffer for each row	*/
     H5_timer_t		timer, timer_total;	/*performance timers	*/
@@ -437,14 +437,8 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
     int			total_nelmts=0;
     hsize_t		i, j;
     hssize_t		row;			/*current row number	*/
-#if !defined(WIN32)
     hsize_t		interval_nelmts;	/*elmts/interval timer	*/
-	hsize_t		read_nelmts=0;		/*total elements read	*/
-#else
-	hssize_t		read_nelmts=0;		/*total elements read	*/
-	hssize_t 	interval_nelmts;	/*elmts/interval timer	*/
-#endif
-    
+    hsize_t		read_nelmts=0;		/*total elements read	*/
     hsize_t		*size=NULL;		/*size of each row	*/
     C_MTYPE		**buf=NULL;		/*buffer for each row	*/
     H5_timer_t		timer, timer_total;	/*performance timers	*/

@@ -7,9 +7,17 @@
  *
  * Purpose:	Tests extendible datasets.
  */
-#include <assert.h>
+
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <stdlib.h>
+#endif
+
 #include <hdf5.h>
-#include <stdlib.h>
 
 #define TEST_FILE_NAME	"extend.h5"
 #define NX	100		/* USE AN EVEN NUMBER!*/

@@ -53,7 +53,7 @@ h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
 	      hsize_t min_idx[], hsize_t max_idx[])
 {
     hsize_t	p_prod[H5S_MAX_RANK], p_idx[H5S_MAX_RANK];
-    hsize_t	n, i;
+    hsize_t	n, i=0;
     char	temp[1024];
 
     if (ndims>0) {

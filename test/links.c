@@ -7,11 +7,18 @@
  *
  * Purpose:	Tests hard and soft (symbolic) links.
  */
-#include <hdf5.h>
-#include <stdlib.h>
-#include <string.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <stdlib.h>
+#   include <string.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -20,10 +27,6 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
-#endif
 #define TEST_FILE_NAME	"links.h5"
 
 #define FALSE		0

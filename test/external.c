@@ -7,28 +7,32 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include <assert.h>
-#include <fcntl.h>
-#include <hdf5.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#if !defined(WIN32)
-#include <unistd.h>
+
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <fcntl.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
 #endif
 
-#include <H5config.h>
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
-#endif
-
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
 #endif
 
 #define TEST_FILE_NAME1		"extern_1.h5"
@@ -606,7 +610,8 @@ test_2 (void)
 
 	hs_space = H5Scopy (space);
 	assert (hs_space>=0);
-	status = H5Sselect_hyperslab (hs_space, H5S_SELECT_SET, &hs_start, NULL, &hs_count, NULL);
+	status = H5Sselect_hyperslab (hs_space, H5S_SELECT_SET, &hs_start,
+				      NULL, &hs_count, NULL);
 	assert (status>=0);
 
 	memset (whole, 0, sizeof(whole));

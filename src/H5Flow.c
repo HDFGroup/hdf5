@@ -15,9 +15,6 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #define addr_defined(X) (((uint64)(-1)!=(X)->offset) ? TRUE : FALSE)
 
 #define PABLO_MASK	H5F_low
@@ -1017,7 +1014,7 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2])
+H5F_addr_pack(H5F_t __unused__ *f, haddr_t *addr, const long objno[2])
 {
     assert(f);
     assert(objno);

@@ -11,11 +11,18 @@
  *		calling _exit(0) since this doesn't flush HDF5 caches but
  *		still exits with success.
  */
-#include <hdf5.h>
-#include <stdio.h>
-#include <unistd.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <stdio.h>
+#   include <unistd.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/

@@ -7,14 +7,25 @@
  *
  * Purpose:	Creates a chunked dataset and measures the storage overhead.
  */
-#include <ctype.h>
-#include <fcntl.h>
-#include <hdf5.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <ctype.h>
+#   include <fcntl.h>
+#   include <stdlib.h>
+#   include <sys/stat.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/

@@ -415,7 +415,7 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
     {
         hsize_t	    dst_acc;	/*accumulator				*/
         hsize_t	    src_acc;	/*accumulator				*/
-        int         i;		/*counter				*/
+        int         ii;		/*counter				*/
 
         /* init */
         dst_stride[n-1] = 1;
@@ -424,17 +424,17 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
         src_start = src_offset ? src_offset[n-1] : 0;
 
         /* others */
-        for (i=n-2, dst_acc=1, src_acc=1; i>=0; --i) {
-            hsize_t tmp1 = dst_acc * (dst_size[i+1] - size[i+1]);
-            hsize_t tmp2 = src_acc * (src_size[i+1] - size[i+1]);
+        for (ii=n-2, dst_acc=1, src_acc=1; ii>=0; --ii) {
+            hsize_t tmp1 = dst_acc * (dst_size[ii+1] - size[ii+1]);
+            hsize_t tmp2 = src_acc * (src_size[ii+1] - size[ii+1]);
             assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
             assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
-            dst_stride[i] = (hssize_t)tmp1; /*overflow checked*/
-            src_stride[i] = (hssize_t)tmp2; /*overflow checked*/
-            dst_acc *= dst_size[i+1];
-            src_acc *= src_size[i+1];
-            dst_start += dst_acc * (dst_offset ? dst_offset[i] : 0);
-            src_start += src_acc * (src_offset ? src_offset[i] : 0);
+            dst_stride[ii] = (hssize_t)tmp1; /*overflow checked*/
+            src_stride[ii] = (hssize_t)tmp2; /*overflow checked*/
+            dst_acc *= dst_size[ii+1];
+            src_acc *= src_size[ii+1];
+            dst_start += dst_acc * (dst_offset ? dst_offset[ii] : 0);
+            src_start += src_acc * (src_offset ? src_offset[ii] : 0);
         }
     }
 #endif /* NO_INLINED_CODE */

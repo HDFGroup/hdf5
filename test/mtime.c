@@ -10,19 +10,30 @@
  *		very OS-dependent and this test tries to figure out if it's
  *		working properly.
  */
-#include <assert.h>
-#include <hdf5.h>
-#include <math.h>
-#if !defined(WIN32)
-#include <sys/time.h>
-#endif
-#include <time.h>
 
-#define FALSE		0
-#define TRUE		1
+/* See H5private.h for how to include headers */
+#undef NDEBUG
+#include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <math.h>
+#endif
+
+#if defined(TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
+
+#include <hdf5.h>
+#include <H5private.h>	/*for HDdifftime()*/
+
 #define FILE_NAME_1	"mtime.h5"
 
-#include <H5private.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -30,10 +41,7 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
-#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	display_error_cb

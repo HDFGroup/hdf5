@@ -7,26 +7,32 @@
  *
  * Purpose:	Tests the dataset interface (H5D)
  */
-#include <assert.h>
-#include <hdf5.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#if !defined(WIN32)
-#include <unistd.h>
-#endif
+
+/* See H5private.h for how to include files */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <math.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
-#endif
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
 #endif
 
 #ifndef HAVE_FUNCTION

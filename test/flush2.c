@@ -10,14 +10,20 @@
  *		as the file was flushed first.  This half tries to read the
  *		file created by the first half.
  */
-#undef NDEBUG
-#include <assert.h>
-#include <hdf5.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <math.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/

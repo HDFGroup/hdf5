@@ -49,10 +49,6 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Pprivate.h>		/*property lists			  */
 #include <H5Tprivate.h>		/*data types				  */
 
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
 /*
  * Define the following if you want H5F_block_read() and H5F_block_write() to
  * keep track of the file position and attempt to minimize calls to the file

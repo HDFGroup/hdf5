@@ -8,26 +8,27 @@
  * Purpose:	Checks the effect of various I/O request sizes and raw data
  *		cache sizes.  Performance depends on the amount of data read
  *		from disk and we use a filter to get that number.
-
  */
-#include <assert.h>
-#include <hdf5.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+/* See H5private.h for how to include headers */
+#undef NDEBUG
 #include <H5config.h>
+
+#ifdef STDC_HEADERS
+#   include <assert.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
+#endif
+
+#include <hdf5.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
-#endif
-
-#if defined(WIN32)
-#undef __unused__
-#define __unused__
 #endif
 
 #define FILE_NAME	"chunk.h5"
@@ -241,11 +242,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
 {
     hid_t	file, dset, mem_space, file_space;
     hsize_t	i, hs_size[2];
-#if defined(WIN32)
-	hssize_t nio = 0;
-#else
-	hsize_t nio = 0;
-#endif
+    hsize_t	nio = 0;
     hssize_t	hs_offset[2];
     char	*buf = calloc (1, SQUARE (io_size));
     int		mdc_nelmts, rdcc_nelmts;

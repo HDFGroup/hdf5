@@ -188,11 +188,13 @@
 ./examples/h5_select.c
 ./examples/h5_attribute.c
 
+./pablo/HDF5record_RT.h
 ./pablo/HDFentries.txt
 ./pablo/Makefile.in
 ./pablo/PabloHDF.c
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
+./pablo/ProcIDs.h
 
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
