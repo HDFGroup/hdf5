@@ -333,7 +333,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
 	    return FAIL;	
 	  }
        
-	  printf("okay compressed \n");
 	  if(H5Pset_deflate(create_plist,GZIP_COMLEVEL)<0){
 	    /*    if(H5Pset_deflate(create_plist,2)<0){*/
 	    printf("fail to set compression method for HDF5 file.\n"); 
