@@ -118,6 +118,7 @@
 #include "TraceParam.h"
 #include "ProcIDs.h"
 #include "IO_TraceParams.h"
+#include "IOTrace.h"
 #include "HDFTrace.h"
 #include "SDDFparam.h"
 #include <string.h>
@@ -248,7 +249,7 @@ void HDFinitTrace_RT( char *fileName, int OUTSW )
    // of the node as a suffix; if not, only one file is opened  	*
    // and it is not given a suffix.					*
    //===================================================================*/
-   IOtraceInit( fileName, OUTSW );
+   initIOTraceMP( fileName, OUTSW );
 }
 /*======================================================================*
 // NAME									*

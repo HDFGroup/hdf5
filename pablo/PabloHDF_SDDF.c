@@ -68,6 +68,7 @@
 #include "SDDFparam.h"
 #include "TraceParam.h"
 #include "Trace.h"
+#include "IOTrace.h"
 #include "HDFTrace.h"
 void HDFendTrace_SDDF(void);
 void startHDFtraceEvent(int eventID);
@@ -92,8 +93,6 @@ void _hdfTraceDescriptor( char *, char *, int );
 void createHDFTraceDescriptor( int );
 void HDFfinalTimeStamp( void );
 
-void initIOTrace( void );
-void endIOTrace( void );
 #define PABLO 1
 /* on the ipsc/860 we don't include unistd.h */
 #ifndef __NX
@@ -236,7 +235,7 @@ void HDFinitTrace_SDDF( char *traceFileName )
    MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
    setTraceProcessorNumber( myNode );
 #else 
-   IOtraceInit( traceFileName, RUNTIME_TRACE );
+   initIOTraceMP( traceFileName, RUNTIME_TRACE );
 #endif
    /*====================================================================
    // complete HDF initiailization.					*
