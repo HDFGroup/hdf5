@@ -537,6 +537,10 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
     assert(addr && H5F_addr_defined(addr));
     assert(buf_size > 0);
     assert(buf);
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, (size_t)(-1),
+		       "no write intent on file");
+    }
 
     if (NULL == (heap = H5AC_find(f, H5AC_LHEAP, addr, NULL, NULL))) {
 	HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, (size_t)(-1),
@@ -686,6 +690,10 @@ H5HL_write(H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
     assert (offset==H5HL_ALIGN (offset));
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
 
     if (NULL == (heap = H5AC_find(f, H5AC_LHEAP, addr, NULL, NULL))) {
 	HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
@@ -741,8 +749,12 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
     assert(addr && H5F_addr_defined(addr));
     assert(size > 0);
     assert (offset==H5HL_ALIGN (offset));
-    size = H5HL_ALIGN (size);
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
 
+    size = H5HL_ALIGN (size);
     if (NULL == (heap = H5AC_find(f, H5AC_LHEAP, addr, NULL, NULL))) {
 	HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
 		      "unable to load heap");

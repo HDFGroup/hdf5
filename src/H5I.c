@@ -640,7 +640,12 @@ H5I_dec_ref(hid_t id)
 	     * call the user's 'free' function for the atom's information,
 	     * otherwise just leak memory.
 	     */
-	    if (grp_ptr->free_func) (grp_ptr->free_func)(obj);
+	    if (grp_ptr->free_func) {
+		if ((grp_ptr->free_func)(obj)<0) {
+		    HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
+				   "unable to free atom");
+		}
+	    }
 	}
 	ret_value = SUCCEED;
     }

@@ -185,6 +185,7 @@ herr_t H5Tclose (hid_t type_id);
 hbool_t H5Tequal (hid_t type1_id, hid_t type2_id);
 herr_t H5Tlock (hid_t type_id);
 herr_t H5Tshare (hid_t location_id, hid_t type_id);
+hbool_t H5Tis_shared (hid_t location_id, hid_t type_id);
 
 /* Operations defined on compound data types */
 herr_t H5Tinsert (hid_t parent_id, const char *name, off_t offset,

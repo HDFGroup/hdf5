@@ -694,6 +694,10 @@ H5O_link(H5G_entry_t *ent, intn adjust)
     assert(ent);
     assert(ent->file);
     assert(H5F_addr_defined(&(ent->header)));
+    if (0==(ent->file->intent & H5F_ACC_RDWR)) {
+	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+		     "no write intent on file");
+    }
 
     /* get header */
     if (NULL == (oh = H5AC_protect(ent->file, H5AC_OHDR, &(ent->header),
@@ -967,6 +971,10 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     assert(type);
     assert(mesg);
     assert (0==(flags & ~H5O_FLAG_BITS));
+    if (0==(ent->file->intent & H5F_ACC_RDWR)) {
+	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+		     "no write intent on file");
+    }
 
     if (NULL == (oh = H5AC_protect(ent->file, H5AC_OHDR, &(ent->header),
 				   NULL, NULL))) {
@@ -1102,6 +1110,10 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
     assert(ent->file);
     assert(H5F_addr_defined(&(ent->header)));
     assert(type);
+    if (0==(ent->file->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
 
     /* load the object header */
     if (NULL == (oh = H5AC_protect(ent->file, H5AC_OHDR, &(ent->header),

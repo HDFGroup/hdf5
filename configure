@@ -2023,7 +2023,7 @@ fi
 
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v"
 if test X = "X$DEBUG_PKG" -o Xyes = "X$DEBUG_PKG"; then
-   DEBUG_PKG=ac,b,d,e,f,g,hg,hl,i,mf,mm,p,s,t,v
+   DEBUG_PKG=ac,b,d,e,f,g,hg,i,mm,p,s,t,v
    CPPFLAGS="$CPPFLAGS -UNDEBUG"
    echo "$ac_t""default ($DEBUG_PKG)" 1>&6
 elif test Xall = "X$DEBUG_PKG"; then

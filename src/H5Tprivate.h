@@ -34,6 +34,7 @@ H5T_t *H5T_copy (const H5T_t *old_dt);
 herr_t H5T_close (H5T_t *dt);
 herr_t H5T_share (H5F_t *f, H5T_t *dt);
 herr_t H5T_unshare (H5T_t *dt);
+intn H5T_invalidate_cb (void *obj, const void *call_data);
 size_t H5T_get_size (const H5T_t *dt);
 intn H5T_cmp (const H5T_t *dt1, const H5T_t *dt2);
 hbool_t H5T_is_atomic (const H5T_t *dt);

@@ -488,6 +488,11 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     assert (0==size || obj);
     assert (hobj);
 
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
+
     /* Find a large enough collection on the CWFS list */
     need = size + H5HG_SIZEOF_OBJHDR (f);
     for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
@@ -692,6 +697,10 @@ H5HG_link (H5F_t *f, H5HG_t *hobj, intn adjust)
     /* Check args */
     assert (f);
     assert (hobj);
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
 
     /* Load the heap */
     if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, &(hobj->addr), NULL, NULL))) {
@@ -743,6 +752,10 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     /* Check args */
     assert (f);
     assert (hobj);
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+		       "no write intent on file");
+    }
 
     /* Load the heap */
     if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, &(hobj->addr), NULL, NULL))) {

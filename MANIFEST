@@ -195,6 +195,7 @@
 ./test/hyperslab.c
 ./test/iopipe.c
 ./test/istore.c
+./test/shtype.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/tfile.c

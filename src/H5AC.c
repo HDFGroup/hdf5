@@ -399,7 +399,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
                 if (status < 0) {
                     map = H5MM_xfree(map);
                     HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                                  "can't flush cache");
+                                  "unable to flush cache");
                 }
                 cache->diagnostics[slot->type->id].nflushes++;
                 if (destroy)

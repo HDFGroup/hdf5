@@ -63,6 +63,11 @@ H5MF_alloc(H5F_t *f, intn op, size_t size, haddr_t *addr /*out */ )
     assert(size > 0);
     assert(addr);
 
+    /* Fail if we don't have write access */
+    if (0==(f->intent & H5F_ACC_RDWR)) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "file is read-only");
+    }
+
     /*
      * Eventually we'll maintain a free list(s) and try to satisfy requests
      * from there.  But for now we just allocate more memory from the end of

@@ -89,7 +89,7 @@ typedef struct {
 } H5I_id_group_t;
 
 /* Type of the function to compare objects & keys */
-typedef intn (*H5I_search_func_t) (const void * obj, const void * key);
+typedef intn (*H5I_search_func_t) (void * obj, const void * key);
 
 /* Private Functions in H5I.c */
 intn H5I_init_group (H5I_group_t grp, intn hash_size, uintn reserved,

@@ -12,8 +12,9 @@ static char		RcsId[] = "@(#)$Revision$";
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 #include <H5private.h>		/*generic functions			  */
-#include <H5Iprivate.h>		/*ID functions		  */
-#include <H5Eprivate.h>		/*error handling			 */
+#include <H5Iprivate.h>		/*ID functions		   		  */
+#include <H5Eprivate.h>		/*error handling			  */
+#include <H5Gprivate.h>		/*groups				  */
 #include <H5HGprivate.h>	/*global heap				  */
 #include <H5MMprivate.h>	/*memory management			  */
 #include <H5Sprivate.h>		/*data space				  */
@@ -2206,6 +2207,50 @@ H5Tshare (hid_t loc_id, hid_t type_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tis_shared
+ *
+ * Purpose:	Determines if a data type is shared in the specified file.
+ *		The TYPE_ID is the type in question and LOC_ID is a file id
+ *		or group id (a group id is used only to identify the file).
+ *
+ * Return:	Success:	TRUE or FALSE
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5Tis_shared (hid_t loc_id, hid_t type_id)
+{
+    H5G_t	*loc = NULL;
+    H5T_t	*dt = NULL;
+    hbool_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5Tis_shared, FAIL);
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (H5_DATATYPE!=H5I_group (type_id) ||
+	NULL==(dt=H5I_object (type_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    /* Is it sharable */
+    ret_value = (H5HG_defined (&(dt->sh_heap)) &&
+		 dt->sh_file->shared==H5G_fileof(loc)->shared) ? TRUE : FALSE;
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tregister_hard
  *
  * Purpose:	Register a hard conversion function for a data type
@@ -2767,6 +2812,49 @@ H5T_unshare (H5T_t *dt)
     dt->sh_file = NULL;
 
     FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_invalidate_cb
+ *
+ * Purpose:	This is a callback function for H5I_search(). When a file is
+ *		closed we scan through the data type list and invalidate
+ *		shared info for all types that have sharing enabled for the
+ *		specified file.  This insures that we don't having dangling 
+ *		pointers from data types to files.  We have to do this with
+ *		data types but not datasets because a dataset_id always
+ *		corresponds to an open object header which prevents the file
+ *		from closing in the first place, but a data type can exist
+ *		independent of a file and doesn't have an object header.
+ *
+ * Return:	Success:	0, this function never returns a non-zero
+ *				value because that would terminate
+ *				H5I_search().
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5T_invalidate_cb (void *obj, const void *call_data)
+{
+    H5T_t	*dt = (H5T_t *)obj;
+    const H5F_t	*f = (const H5F_t*)call_data; /*used only for comparison*/
+    
+    FUNC_ENTER (H5T_invalidate, 0);
+
+    if (H5HG_defined (&(dt->sh_heap)) && dt->sh_file->shared==f->shared) {
+	H5T_unshare (dt);
+	H5E_clear ();
+    }
+
+    FUNC_LEAVE (0);
 }
 
 

@@ -44,6 +44,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Gprivate.h>		/*symbol tables				  */
 #include <H5MMprivate.h>	/*core memory management		  */
 #include <H5Pprivate.h>		/*property lists			  */
+#include <H5Tprivate.h>		/*data types				  */
 
 #include <ctype.h>
 #include <sys/types.h>
@@ -97,7 +98,7 @@ static void H5F_term_interface(void);
 
 /* PRIVATE PROTOTYPES */
 static H5F_t *H5F_new(H5F_file_t *shared);
-static H5F_t *H5F_dest(H5F_t *f);
+static herr_t H5F_dest(H5F_t *f);
 static herr_t H5F_flush(H5F_t *f, hbool_t invalidate);
 static herr_t H5F_locate_signature(H5F_low_t *f_handle,
 				   const H5F_access_t *access_parms,
@@ -342,7 +343,7 @@ H5Fget_access_template (hid_t file_id)
        keys.
 --------------------------------------------------------------------------*/
 static intn
-H5F_compare_files(const void * _obj, const void * _key)
+H5F_compare_files(void * _obj, const void * _key)
 {
     const H5F_t		*obj = (const H5F_t *) _obj;
     const H5F_search_t	*key = (const H5F_search_t *) _key;
@@ -510,16 +511,14 @@ H5F_new(H5F_file_t *shared)
 /*-------------------------------------------------------------------------
  * Function:	H5F_dest
  *
- * Purpose:	Destroys a file structure.  This function does not flush
- *		the cache or anything else; it only frees memory associated
- *		with the file struct.  The shared info for the file is freed
+ * Purpose:	Destroys a file structure.  This function flushes the cache
+ *		but doesn't do any other cleanup other than freeing memory
+ *		for the file struct.  The shared info for the file is freed
  *		only when its reference count reaches zero.
  *
- * Errors:
+ * Return:	Success:	SUCCEED
  *
- * Return:	Success:	NULL
- *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -529,22 +528,28 @@ H5F_new(H5F_file_t *shared)
  *
  *-------------------------------------------------------------------------
  */
-static H5F_t *
+static herr_t
 H5F_dest(H5F_t *f)
 {
-    FUNC_ENTER(H5F_dest, NULL);
+    herr_t	ret_value = SUCCEED;
+    
+    FUNC_ENTER(H5F_dest, FAIL);
 
     if (f) {
 	if (0 == --(f->shared->nrefs)) {
 	    /* Do not close the root group since we didn't count it */
-	    H5AC_dest(f);
+	    if (H5AC_dest(f)) {
+		HERROR (H5E_FILE, H5E_CANTINIT, "problems closing file");
+		ret_value = FAIL; /*but keep going*/
+	    }
 	    f->shared = H5MM_xfree(f->shared);
 	}
 	f->name = H5MM_xfree(f->name);
 	H5MM_xfree(f);
     }
-    FUNC_LEAVE(NULL);
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_open
@@ -1242,7 +1247,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
 
     /* flush (and invalidate) the entire cache */
     if (H5AC_flush(f, NULL, 0, invalidate) < 0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
     }
 
     /* encode the file boot block */
@@ -1312,8 +1317,9 @@ H5F_close(H5F_t *f)
     while (H5G_pop(f)>=0) /*void*/;
     
     /* Flush the boot block and caches */
-    if (H5F_flush(f, TRUE) < 0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
+    if (H5F_flush(f, FALSE) < 0) {
+	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+		      "unable to flush cache");
     }
     
     /*
@@ -1336,14 +1342,31 @@ H5F_close(H5F_t *f)
 	fprintf(stderr, "H5F: H5F_close: operation completed\n");
 #endif
     }
+
+    /* Invalidate shared data types since they depend on the H5F_t pointer */
+    H5I_search (H5_DATATYPE, H5T_invalidate_cb, f);
     
-    /* Dump debugging info */
-    if (f->intent & H5F_ACC_DEBUG) H5AC_debug(f);
+    /*
+     * If this is the last reference to the shared part of the file then
+     * close it also.
+     */
+    if (1==f->shared->nrefs) {
+	/* Flush again just to be safe, but this time clean up the cache */
+	if (H5F_flush (f, TRUE)<0) {
+	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			   "unable to flush cache");
+	}
 
-    /* Close files and release resources */
-    H5F_low_close(f->shared->lf, &(f->shared->access_parms));
-    f = H5F_dest(f);
+	/* Dump debugging info */
+	if (f->intent & H5F_ACC_DEBUG) H5AC_debug(f);
 
+	/* Close files and release resources */
+	H5F_low_close(f->shared->lf, &(f->shared->access_parms));
+    }
+    if (H5F_dest(f)<0) {
+	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
+		       "problems closing file");
+    }
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1400,8 +1423,10 @@ H5Fclose(hid_t fid)
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    H5I_dec_ref (fid);
-
+    if (H5I_dec_ref (fid)<0) {
+	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
+    }
+    
  done:
     FUNC_LEAVE(ret_value < 0 ? FAIL : SUCCEED);
 }
