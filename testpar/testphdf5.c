@@ -296,6 +296,14 @@ main(int argc, char **argv)
 	goto finish;
     }
 
+	if (domdset){
+	    MPI_BANNER("multiple datasets write ...");
+	    multiple_dset_write(filenames[3]);
+	}
+	else{
+	    MPI_BANNER("Multiple datasets test skipped");
+	}
+
     if (dowrite){
 	MPI_BANNER("dataset using split communicators...");
 	test_split_comm_access(filenames[0]);
@@ -308,14 +316,6 @@ main(int argc, char **argv)
 
 	MPI_BANNER("extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
-
-	if (domdset){
-	    MPI_BANNER("multiple datasets write ...");
-	    multiple_dset_write(filenames[3]);
-	}
-	else{
-	    MPI_BANNER("Multiple datasets test skipped");
-	}
     }
     else{
 	MPI_BANNER("write tests skipped");
@@ -335,7 +335,7 @@ main(int argc, char **argv)
 	MPI_BANNER("read tests skipped");
     }
 
-    if (!(dowrite || doread)){
+    if (!(dowrite || doread || domdset)){
 	usage();
 	nerrors++;
     }
