@@ -362,9 +362,6 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     size_t total_mem;   /* Total memory used on list */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_reg_gc_list", "");
-#endif
 
     /* Calculate the total memory used on this list */
     total_mem=head->onlist*head->size;
@@ -399,9 +396,6 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     /* Decrement global count of free memory on "regular" lists */
     H5FL_reg_gc_head.mem_freed-=total_mem;
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_reg_gc_list() */
 
@@ -429,9 +423,6 @@ H5FL_reg_gc(void)
     H5FL_reg_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_reg_gc", "");
-#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_reg_gc_head.first;
@@ -446,9 +437,6 @@ H5FL_reg_gc(void)
     /* Double check that all the memory on the free lists is recycled */
     assert(H5FL_reg_gc_head.mem_freed==0);
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_reg_gc() */
 
@@ -912,9 +900,6 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     void *temp;     /* Temp. ptr to the free list page node */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_blk_gc_list", "");
-#endif
 
     /* Loop through all the nodes in the block free list queue */
     while(head->head!=NULL) {
@@ -952,9 +937,6 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     /* Double check that all the memory on this list is recycled */
     assert(head->list_mem==0);
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_blk_gc_list() */
 
@@ -980,9 +962,6 @@ H5FL_blk_gc(void)
     H5FL_blk_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_blk_gc", "");
-#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_blk_gc_head.first;
@@ -997,9 +976,6 @@ H5FL_blk_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_blk_gc_head.mem_freed==0);
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_blk_gc() */
 
@@ -1376,9 +1352,6 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     size_t total_mem;   /* Total memory used on list */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_arr_gc_list", "");
-#endif
 
     /* Check if the array has a fixed maximum number of elements */
     if(head->maxelem>0) {
@@ -1422,9 +1395,6 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
         H5FL_blk_gc_list(&(head->u.queue));
     } /* end else */
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_arr_gc_list() */
 
@@ -1450,9 +1420,6 @@ H5FL_arr_gc(void)
     H5FL_gc_arr_node_t *gc_arr_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_arr_gc", "");
-#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_arr_node=H5FL_arr_gc_head.first;
@@ -1467,9 +1434,6 @@ H5FL_arr_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_arr_gc_head.mem_freed==0);
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_arr_gc() */
 
@@ -1580,9 +1544,6 @@ herr_t
 H5FL_garbage_coll(void)
 {
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
-#ifdef H5_DEBUG_API
-    H5_trace(FALSE, "H5FL_garbage_coll", "");
-#endif
 
     /* Garbage collect the free lists for array objects */
     H5FL_arr_gc();
@@ -1593,9 +1554,6 @@ H5FL_garbage_coll(void)
     /* Garbage collect the free lists for regular objects */
     H5FL_reg_gc();
 
-#ifdef H5_DEBUG_API
-    H5_trace(TRUE, NULL, "e", SUCCEED);
-#endif
     return(SUCCEED);
 }   /* end H5FL_garbage_coll() */
 
