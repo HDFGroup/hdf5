@@ -26,6 +26,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
 #include <H5FDgass.h>           /*GASS I/O                                */
 #include <H5FDdpss.h>           /*Grid Storage I/O                        */
+#include <H5FDstream.h>         /*in-memory files streamed via sockets    */
 #include <H5FDsrb.h>            /*SRB I/O                                 */
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
@@ -185,6 +186,9 @@ H5F_init(void)
  *
  *      Raymond Lu, April 10, 2000
  *      Put SRB into the 'Register predefined file drivers' list.
+ *
+ *      Thomas Radke, 2000-09-12
+ *      Put Stream VFD into the 'Register predefined file drivers' list.
  *-------------------------------------------------------------------------
  */
 static herr_t 
@@ -239,6 +243,9 @@ H5F_init_interface(void)
 	if ((status=H5FD_MULTI)<0) goto end_registration;
 #ifdef H5_HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
+#endif
+#ifdef H5_HAVE_STREAM
+	if ((status=H5FD_STREAM)<0) goto end_registration;
 #endif
     end_registration: ;
 	} H5E_END_TRY;
