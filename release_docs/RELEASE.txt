@@ -26,6 +26,7 @@ CONTENTS
 
 - New Features
 - Bug Fixes since HDF5-1.4.0
+- Support for new platforms and languages
 - Platforms Tested
 - Known Problems
 
@@ -254,6 +255,12 @@ New Features
         - Added aditional parameter "dims" to the h5dread/h5dwrite and
           h5aread/h5awrite subroutines. This parameter is 1D array of size
           7 and contains the sizes of the data buffer dimensions. 
+        - F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were 
+          overloaded with "dims" argument to be assumed size array of type 
+          INTEGER(HSIZE_T). We recommend to use the subroutines with the new type. 
+          Module subroutines that accept "dims" as INTEGER array of size 7 will be 
+          depricated in 1.6 release. 
+          EIP - 2002/05/06 
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member
@@ -270,6 +277,10 @@ New Features
       allows change to a lower dimension. The unused space in the file is freed.
       PVN - 2002/03/31
 
+Support for new platforms and languages
+=======================================
+    * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
+      EIP - 2002/05/06
 
 Platforms Tested
 ================
@@ -330,7 +341,7 @@ Supported Configuration Features Summary
     IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
     HPUX10.20      y  n         y    n         n     y          y     y
     HPUX11.00      y  y         y    n         n     y          y     y
-    HPUX11 SysV    y  y         y    n         n     y          y     y
+    HPUX11 SysV    y  y         y    y         n     y          y     y
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
     SV1            y  n         y    n         n     n          y     y
