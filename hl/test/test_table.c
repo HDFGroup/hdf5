@@ -11,7 +11,10 @@
  *                                                                          *
  ****************************************************************************/
 
-#include "H5HL.h"
+
+
+#include "H5TA.h"
+
 #include <stdlib.h>
 #include <assert.h>
 
@@ -1443,6 +1446,10 @@ int main(void)
 {
  hid_t    fid;  /* identifier for the file */
  unsigned flags=H5F_ACC_RDONLY;
+	char     *srcdir = getenv("srcdir"); /* the source directory */
+	char     data_file[512]="";          /* buffer to hold name of existing data file */
+
+
 
 /*-------------------------------------------------------------------------
  * test1: create a file for the write/read test
@@ -1467,7 +1474,15 @@ int main(void)
  */  
  puts("Testing table with file open mode (read big-endian data):");
 
- fid=h5file_open("test_table_be.hdf5",flags);
+	/* compose the name of the file to open, using the srcdir, if appropriate */
+	if ( srcdir )
+	{
+	 strcpy(data_file, srcdir);
+	 strcat(data_file, "/");
+ }
+	strcat( data_file, "test_table_be.hdf5");
+
+ fid=h5file_open(data_file,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)
@@ -1482,7 +1497,15 @@ int main(void)
  */
  puts("Testing table with file open mode (read little-endian data):");
 
- fid=h5file_open("test_table_le.hdf5",flags);
+	/* compose the name of the file to open, using the srcdir, if appropriate */
+	if ( srcdir )
+	{
+	 strcpy(data_file, srcdir);
+	 strcat(data_file, "/");
+ }
+	strcat( data_file, "test_table_le.hdf5");
+
+ fid=h5file_open(data_file,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)
@@ -1497,7 +1520,15 @@ int main(void)
  */
  puts("Testing table with file open mode (read Cray data):");
 
- fid=h5file_open("test_table_cray.hdf5",flags);
+	/* compose the name of the file to open, using the srcdir, if appropriate */
+	if ( srcdir )
+	{
+	 strcpy(data_file, srcdir);
+	 strcat(data_file, "/");
+ }
+	strcat( data_file, "test_table_cray.hdf5");
+
+ fid=h5file_open(data_file,flags);
 
  /* test, do not write */
  if (test_table(fid,0)<0)

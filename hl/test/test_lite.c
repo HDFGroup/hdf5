@@ -13,7 +13,9 @@
 
 #include <stdlib.h>
 
-#include "H5HL.h"
+
+#include "H5LT.h"
+
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"

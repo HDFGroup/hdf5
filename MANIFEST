@@ -1550,7 +1550,6 @@
 ./hl/Makefile.in
 ./hl/src/Dependencies
 ./hl/src/Makefile.in
-./hl/src/H5HL.h
 ./hl/src/H5IM.c
 ./hl/src/H5IM.h
 ./hl/src/H5LT.c

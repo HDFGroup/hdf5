@@ -11,7 +11,8 @@ srcdir=@srcdir@
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src  @CPPFLAGS@
+		  
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.

@@ -12,7 +12,8 @@
  ****************************************************************************/
 
 
-#include "H5HL.h"
+
+#include "H5IM.h"
 
 #define FILE_NAME "test_image.h5"
 #define WIDTH  (hsize_t)500
