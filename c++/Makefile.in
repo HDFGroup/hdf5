@@ -1,5 +1,3 @@
-## Top-level HDF5-C++ Makefile(.in)
-##
 ##
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
@@ -13,7 +11,7 @@
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ## 
-## 
+## Top-level HDF5-C++ Makefile(.in)
 ## 
 ## This makefile mostly just reinvokes make in the various subdirectories
 ## but does so in the correct order.  You can alternatively invoke make from
