@@ -169,4 +169,82 @@
             hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
           END SUBROUTINE h5pget_dxpl_mpio_f
 
+
+!----------------------------------------------------------------------
+! Name:		h5pset_fapl_mpiposix_f 
+!
+! Purpose: 	Stores MPI IO communicator information to the file 
+!		access property list. 
+!
+! Inputs:  	
+!		prp_id		- file access property list identifier
+!		comm		- MPI-2 communicator
+!		use_gpfs	- logical flag to use the GPFS hints
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		May 6, 2003
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+         SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
+                                        ! as defined in MPI_FILE_OPEN of MPI-2
+            LOGICAL, INTENT(IN) :: use_gpfs
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: flag
+
+            INTEGER, EXTERNAL :: h5pset_fapl_mpiposix_c
+            flag = 0
+            if(use_gpfs) flag = 1 
+            hdferr = h5pset_fapl_mpiposix_c(prp_id, comm, flag)
+          END SUBROUTINE h5pset_fapl_mpiposix_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_fapl_mpiposix_f 
+!
+! Purpose: 	Returns MPI communicator information. 	
+!
+! Inputs:  
+!		prp_id		- file access property list identifier
+! Outputs:  
+!		comm		- MPI-2 communicator
+!		use_gpfs        - flag to use GPFS hints
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		May 6, 2003
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator 
+            LOGICAL, INTENT(OUT) :: use_gpfs
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: flag
+
+            INTEGER, EXTERNAL :: h5pget_fapl_mpiposix_c
+            hdferr = h5pget_fapl_mpiposix_c(prp_id, comm, flag)
+            use_gpfs = .FALSE.
+            if (flag .eq. 1) use_gpfs = .TRUE.
+          END SUBROUTINE h5pget_fapl_mpiposix_f
+
     END MODULE H5FDMPIO

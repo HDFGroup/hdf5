@@ -778,6 +778,8 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_btree_ratios_c         FNAME(H5PSET_BTREE_RATIOS_C)
 #   define nh5pset_fapl_mpio_c         FNAME(H5PSET_FAPL_MPIO_C)
 #   define nh5pget_fapl_mpio_c         FNAME(H5PGET_FAPL_MPIO_C)
+#   define nh5pset_fapl_mpiposix_c     FNAME(H5PSET_FAPL_MPIPOSIX_C)
+#   define nh5pget_fapl_mpiposix_c     FNAME(H5PGET_FAPL_MPIPOSIX_C)
 #   define nh5pset_dxpl_mpio_c        FNAME(H5PSET_DXPL_MPIO_C)
 #   define nh5pget_dxpl_mpio_c        FNAME(H5PGET_DXPL_MPIO_C)
 #   define nh5pget_fclose_degree_c    FNAME(H5PGET_FCLOSE_DEGREE_C)
@@ -885,6 +887,8 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_btree_ratios_c         FNAME(h5pset_btree_ratios_c)
 #   define nh5pset_fapl_mpio_c         FNAME(h5pset_fapl_mpio_c)
 #   define nh5pget_fapl_mpio_c         FNAME(h5pget_fapl_mpio_c)
+#   define nh5pset_fapl_mpiposix_c     FNAME(h5pset_fapl_mpiposix_c)
+#   define nh5pget_fapl_mpiposix_c     FNAME(h5pget_fapl_mpiposix_c)
 #   define nh5pset_dxpl_mpio_c        FNAME(h5pset_dxpl_mpio_c)
 #   define nh5pget_dxpl_mpio_c        FNAME(h5pget_dxpl_mpio_c)
 #   define nh5pget_fclose_degree_c    FNAME(h5pget_fclose_degree_c)
@@ -1056,6 +1060,10 @@ H5_DLL int_f
 nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
 H5_DLL int_f
 nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
+H5_DLL int_f
+nh5pget_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
+H5_DLL int_f
+nh5pset_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag);
 H5_DLL int_f
 nh5pget_dxpl_mpio_rc(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_DLL int_f

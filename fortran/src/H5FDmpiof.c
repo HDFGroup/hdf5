@@ -185,3 +185,67 @@ nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
      ret_value = 0;
      return ret_value;
 } 
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_fapl_mpiposix_c
+ * Purpose:     Call H5Pset_fapl_mpiposix to set mode for parallel I/O and the user 
+ *              supplied communicator 
+ * Inputs:      prp_id - property list identifier
+ *              comm   - MPI communicator 
+ *              flag   - flag to use GPFS hints
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal 
+ *              Tuesday, May 6, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5pset_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag)
+{
+     int ret_value = -1;
+     hid_t c_prp_id;
+     herr_t ret;
+     hbool_t c_flag;
+     MPI_Comm c_comm;
+     c_comm = MPI_Comm_f2c(*comm); 
+     c_flag  = (hbool_t)*flag;
+     /*
+      * Call H5Pset_fapl_mpiposix function.
+      */
+     c_prp_id = (hid_t) *prp_id;
+     ret = H5Pset_fapl_mpiposix(c_prp_id, c_comm, c_flag);
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+} 
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_fapl_mpiposix_c
+ * Purpose:     Call H5Pget_fapl_mpiposix to retrieve communicator and info object 
+ * Inputs:      prp_id - property list identifier
+ * Outputs:     comm   - buffer to return MPI communicator 
+ *              flag - flag to use GPFS hints
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal 
+ *              Tuesday, May 6, 2003 
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5pget_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag)
+{
+     int ret_value = -1;
+     hid_t c_prp_id;
+     herr_t ret;
+     hbool_t c_flag;
+     MPI_Comm c_comm;
+
+     /*
+      * Call H5Pget_fapl_mpiposix function.
+      */
+     c_prp_id = (hid_t) *prp_id;
+     ret = H5Pget_fapl_mpiposix(c_prp_id, &c_comm, &c_flag);
+     if (ret < 0) return ret_value;
+     *comm = (int_f) MPI_Comm_c2f(c_comm);
+     *flag = (int_f) c_flag;
+     ret_value = 0;
+     return ret_value;
+} 
