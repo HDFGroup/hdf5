@@ -177,7 +177,7 @@ VPATH=$srcdir/config $srcdir/src $srcdir/bin
 	cp $< H5.o
 
 foo: H5.o
-	rm H5.o
+	/bin/rm -f H5.o
 	@echo works
 EOF
     if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
@@ -195,7 +195,7 @@ VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
 	cp $< H5.o
 
 foo: H5.o
-	rm H5.o
+	/bin/rm -f H5.o
 	@echo works
 EOF
     if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
@@ -212,7 +212,7 @@ EOF
 	cp $< H5.o
 
 foo: H5.o
-	rm H5.o
+	/bin/rm -f H5.o
 	@echo works
 EOF
     if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
