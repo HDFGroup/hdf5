@@ -1226,7 +1226,7 @@ H5Sis_simple(hid_t space_id)
     htri_t		    ret_value;
 
     FUNC_ENTER_API(H5Sis_simple, FAIL);
-    H5TRACE1("b","i",space_id);
+    H5TRACE1("t","i",space_id);
 
     /* Check args and all the boring stuff. */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)

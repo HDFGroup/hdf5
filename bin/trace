@@ -16,7 +16,6 @@ $Source = "";
 #
 %TypeString = ("haddr_t"                    => "a",
                "hbool_t"                    => "b",
-               "htri_t"                     => "b",
                "double"                     => "d",
                "H5D_alloc_time_t"           => "Da",
                "H5D_fill_time_t"            => "Df",
@@ -56,6 +55,7 @@ $Source = "";
                "H5S_class_t"                => "Sc",
                "H5S_seloper_t"              => "Ss",
                "H5S_sel_type"               => "St",
+               "htri_t"                     => "t",
                "H5T_cset_t",                => "Tc",
                "H5T_direction_t",           => "Td",
                "H5T_norm_t"                 => "Tn",
@@ -87,6 +87,7 @@ $Source = "";
                "H5P_prp_set_func_t"         => "x",
                "H5T_cdata_t**"              => "x",
                "H5T_conv_t"                 => "x",
+               "H5T_conv_except_func_t"     => "x",
                "H5T_overflow_t"             => "x",
                "H5Z_func_t"                 => "x",
                "H5Z_filter_func_t"          => "x",

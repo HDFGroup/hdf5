@@ -462,7 +462,7 @@ H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op, void **operate_d
     herr_t              ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pget_type_conv_cb, FAIL);
-    H5TRACE3("e","ixx",plist_id,op,operate_data);
+    H5TRACE3("e","i*xx",plist_id,op,operate_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))

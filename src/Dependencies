@@ -3619,11 +3619,10 @@ H5Tinit.o: \
    ../../hdf5/src/H5Epublic.h \
    ../../hdf5/src/H5Epubgen.h \
    ../../hdf5/src/H5FLprivate.h \
-   ../../hdf5/src/H5MMprivate.h \
-   ../../hdf5/src/H5MMpublic.h \
    ../../hdf5/src/H5Tpkg.h \
    ../../hdf5/src/H5Tprivate.h \
    ../../hdf5/src/H5Tpublic.h \
+   ../../hdf5/src/H5MMpublic.h \
    ../../hdf5/src/H5Gprivate.h \
    ../../hdf5/src/H5Gpublic.h \
    ../../hdf5/src/H5Opublic.h \

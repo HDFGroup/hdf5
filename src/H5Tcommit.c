@@ -205,7 +205,7 @@ H5Tcommitted(hid_t type_id)
     htri_t      ret_value;       /* Return value */
     
     FUNC_ENTER_API(H5Tcommitted, FAIL);
-    H5TRACE1("b","i",type_id);
+    H5TRACE1("t","i",type_id);
 
     /* Check arguments */
     if (NULL==(type=H5I_object_verify(type_id,H5I_DATATYPE)))

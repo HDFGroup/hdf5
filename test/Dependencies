@@ -1965,6 +1965,53 @@ tmisc.o: \
    ../../hdf5/src/H5Zprivate.h \
    ../../hdf5/src/H5Sprivate.h \
    ../../hdf5/src/H5Pprivate.h
+tid.o: \
+   ../../hdf5/test/tid.c \
+   ../../hdf5/test/testhdf5.h \
+   ../../hdf5/src/H5private.h \
+   ../../hdf5/src/H5public.h \
+   ../src/H5pubconf.h \
+   ../../hdf5/src/H5api_adpt.h \
+   ../../hdf5/src/H5MPprivate.h \
+   ../../hdf5/src/H5FSprivate.h \
+   ../../hdf5/src/H5Eprivate.h \
+   ../../hdf5/src/H5Epublic.h \
+   ../../hdf5/src/H5Ipublic.h \
+   ../../hdf5/src/H5Epubgen.h \
+   ../../hdf5/test/h5test.h \
+   ../../hdf5/src/hdf5.h \
+   ../../hdf5/src/H5Apublic.h \
+   ../../hdf5/src/H5ACpublic.h \
+   ../../hdf5/src/H5Bpublic.h \
+   ../../hdf5/src/H5Dpublic.h \
+   ../../hdf5/src/H5Fpublic.h \
+   ../../hdf5/src/H5FDpublic.h \
+   ../../hdf5/src/H5FPpublic.h \
+   ../../hdf5/src/H5Gpublic.h \
+   ../../hdf5/src/H5Opublic.h \
+   ../../hdf5/src/H5HGpublic.h \
+   ../../hdf5/src/H5HLpublic.h \
+   ../../hdf5/src/H5MMpublic.h \
+   ../../hdf5/src/H5Ppublic.h \
+   ../../hdf5/src/H5Tpublic.h \
+   ../../hdf5/src/H5Zpublic.h \
+   ../../hdf5/src/H5Rpublic.h \
+   ../../hdf5/src/H5Spublic.h \
+   ../../hdf5/src/H5FDcore.h \
+   ../../hdf5/src/H5FDfamily.h \
+   ../../hdf5/src/H5FDgass.h \
+   ../../hdf5/src/H5FDlog.h \
+   ../../hdf5/src/H5FDmpi.h \
+   ../../hdf5/src/H5FDfphdf5.h \
+   ../../hdf5/src/H5FDmpio.h \
+   ../../hdf5/src/H5FDmpiposix.h \
+   ../../hdf5/src/H5FDmulti.h \
+   ../../hdf5/src/H5FDsec2.h \
+   ../../hdf5/src/H5FDsrb.h \
+   ../../hdf5/src/H5FDstdio.h \
+   ../../hdf5/src/H5FDstream.h \
+   ../../hdf5/src/H5Ipkg.h \
+   ../../hdf5/src/H5Iprivate.h
 unlink.o: \
    ../../hdf5/test/unlink.c \
    ../../hdf5/test/h5test.h \

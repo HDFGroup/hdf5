@@ -1638,7 +1638,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     htri_t		ret_value;
 
     FUNC_ENTER_API(H5Tequal, FAIL);
-    H5TRACE2("b","ii",type1_id,type2_id);
+    H5TRACE2("t","ii",type1_id,type2_id);
 
     /* check args */
     if (NULL == (dt1 = H5I_object_verify(type1_id,H5I_DATATYPE)) ||
@@ -1797,7 +1797,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tdetect_class, FAIL);
-    H5TRACE2("b","iTt",type,cls);
+    H5TRACE2("t","iTt",type,cls);
     
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type,H5I_DATATYPE)))
@@ -1895,7 +1895,7 @@ H5Tis_variable_str(hid_t dtype_id)
     htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tis_variable_str, FAIL);
-    H5TRACE1("b","i",dtype_id);
+    H5TRACE1("t","i",dtype_id);
     
     /* Check args */
     if (NULL == (dt = H5I_object_verify(dtype_id,H5I_DATATYPE)))

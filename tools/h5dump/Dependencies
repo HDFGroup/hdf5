@@ -45,7 +45,9 @@ h5dump.o: \
    ../../../hdf5/src/H5MPprivate.h \
    ../../../hdf5/src/H5FSprivate.h \
    ../../../hdf5/tools/lib/h5tools.h \
-   ../../../hdf5/tools/lib/h5tools_utils.h
+   ../../../hdf5/tools/lib/h5tools_utils.h \
+   ../../../hdf5/tools/lib/h5tools_ref.h \
+   ../../../hdf5/tools/lib/h5trav.h
 h5dumpgentest.o: \
    ../../../hdf5/tools/h5dump/h5dumpgentest.c \
    ../../../hdf5/src/hdf5.h \
