@@ -116,6 +116,18 @@ New Features
     * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
       EIP - 2002/05/06
     * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4
+    * Intel C++ compilers Version 6.0 are supported on windows 2000
+
+  
+  o Misc.
+  =========================================
+   * zlib is moved out of windows source release. Users should go to
+     HDF homepage(URL: http://???) to download the corresponding zlib library.
+   * Windows binary release is built with the old version of zlib library.
+     We expect users to use zlib 1.1.4 to build with source release.  
+   * In windows-specified install document, we specify how to test backward
+     compatibility. However, in this release, we are not testing the backward
+     compatibility of HDF5.
 
 
 Bug Fixes since HDF5-1.4.3 Release
@@ -261,8 +273,6 @@ Platforms Tested
     Windows NT4.0                 MSVC++ 6.0
                                   DEC Visual Fortran 6.0
     Windows NT4.0                 Code Warrior 6.0
-    Windows 98                    MSVC++ 6.0
-                                  DEC Visual Fortran 6.0
 
 
 Supported Configuration Features Summary
@@ -322,7 +332,6 @@ Supported Configuration Features Summary
     AIX-4.3 SP2    n              y (3)     n        n    n     y
     AIX-4.3 SP3    n              y         n        n    n     y
     Win2000        n              y         n        n    n     n
-    Win98          n              y         n        n    n     n
     WinNT          n              y         n        n    n     n
     WinNT CW       n              n         n        n    n     n
     FreeBSD        n              y         y        n    n     y
