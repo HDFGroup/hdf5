@@ -13,6 +13,7 @@ srcdir=@srcdir@
 ## to the library list.
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
+LIBH5TEST=../test/libh5test.la
 
 ## These tests are parallel
 RUNTEST=$(RUNPARALLEL)
@@ -30,10 +31,10 @@ TEST_OBJ=$(TEST_SRC:.c=.lo)
 TEST_HDR=testphdf5.h
 
 ## How to build the tests... They all depend on the hdf5 library
-$(TEST_PROGS): ../src/libhdf5.la
+$(TEST_PROGS): $(LIBHDF5) $(LIBH5TEST)
 
 testphdf5: $(TEST_OBJ)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJ) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJ) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 $(TEST_OBJ): $(TEST_HDR)
 @CONCLUDE@
