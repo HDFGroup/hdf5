@@ -1985,8 +1985,11 @@ test_misc12(void)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
         } /* end if */
 
+    ret = H5Sselect_all (space);
+    CHECK(ret, FAIL, "H5Sselect_all");
+
     /* Reclaim VL data memory */
-    ret = H5Dvlen_reclaim (tid1, sid1, H5P_DEFAULT, rdata);
+    ret = H5Dvlen_reclaim (tid1, space, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Everything */
