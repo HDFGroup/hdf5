@@ -18,6 +18,7 @@
 #define PHDF5TEST_H
 
 #include "h5test.h"
+#include "testhdf5.h"
 
 #ifndef TRUE
 #define TRUE    1

@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
       break;
 
       case 14:    /* read data size */
-        if (getInputSize(in, HDstrtol(argv[i], NULL, BASE_10)) == -1)
+        if (getInputSize(in, (int)HDstrtol(argv[i], NULL, BASE_10)) == -1)
         {
           (void) fprintf(stderr, err8, argv[i]);
 					goto err;
@@ -384,7 +384,6 @@ readIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
       
@@ -418,7 +417,6 @@ readIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
   
@@ -451,7 +449,6 @@ readIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
 
@@ -486,7 +483,6 @@ readIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
   	  break;
 #endif /* ifndef WIN32 */ 
@@ -551,7 +547,6 @@ readUIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
     
@@ -584,7 +579,6 @@ readUIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
   
@@ -617,7 +611,6 @@ readUIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
 
@@ -652,7 +645,6 @@ readUIntegerData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
 #endif /* ifndef WIN32 */
@@ -716,7 +708,6 @@ readFloatData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
 
@@ -754,7 +745,6 @@ readFloatData(FILE **strm, struct Input *in)
         default:
           (void) fprintf(stderr, err2);
           return (-1);
-        break;
       }
     break;
 
@@ -1796,12 +1786,10 @@ getCompressionParameter(struct Input *in, FILE** strm)
       }
       in->compressionParam = ival;
       return (0);
-    break;
 
     default:
       (void) fprintf(stderr, err3);
       return (-1);
-    break;      
   }
 }
 

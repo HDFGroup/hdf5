@@ -492,9 +492,9 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     if((mspace=H5Screate_simple(ndims,size,NULL))<0) TEST_ERROR;
 
     for (ctr=0; ctr<nblocks; ctr++) {
-	offset[0] = HDrandom() % (TEST_SPARSE_SIZE-nx);
-	offset[1] = HDrandom() % (TEST_SPARSE_SIZE-ny);
-	offset[2] = HDrandom() % (TEST_SPARSE_SIZE-nz);
+	offset[0] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-nx));
+	offset[1] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-ny));
+	offset[2] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-nz));
 
         /* Select region in file dataspace */
         if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL)<0) TEST_ERROR;
@@ -599,7 +599,7 @@ main(int argc, char *argv[])
     printf("\n");
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)time(NULL));
+    HDsrandom((unsigned long)HDtime(NULL));
 
     /* Reset library */
     h5_reset();

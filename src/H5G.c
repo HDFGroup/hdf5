@@ -595,9 +595,9 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id)))
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID");
     if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group");
         
     if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unable to retrieve number of members");
@@ -605,7 +605,7 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound");
         
     /*call private function*/
-    ret_value = H5G_get_objtype_by_idx(loc, idx, H5AC_ind_dxpl_id);
+    ret_value = (H5G_obj_t)H5G_get_objtype_by_idx(loc, idx, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2566,7 +2566,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
                     statbuf->mtime = 0;
                 }
 	    }
-	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
+	    statbuf->type = (H5G_obj_t)H5G_get_type(&obj_ent, dxpl_id);
 	    H5E_clear(); /*clear errors resulting from checking type*/
 
             /* Get object header information */

@@ -1683,10 +1683,9 @@ int_f
 nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
-     hid_t c_prp_id;
 #ifdef H5_WANT_H5_V1_4_COMPAT
+     hid_t c_prp_id;
      herr_t ret;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
      unsigned c_cache, c_limit;
 
      c_cache = (unsigned) *cache;
@@ -1696,7 +1695,6 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
       * Call H5Pset_hyper_cache function.
       */
      c_prp_id = (hid_t)*prp_id;
-#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pset_hyper_cache(c_prp_id, c_cache, c_limit);
      if (ret < 0) return ret_value;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
@@ -1860,7 +1858,7 @@ nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 {
   int ret_value = -1;
   hid_t c_fapl_id;
-  hid_t c_degree; 
+  H5F_close_degree_t c_degree; 
 
   c_fapl_id = (hid_t)*fapl_id;
   c_degree = (H5F_close_degree_t)*degree;
@@ -1915,7 +1913,7 @@ nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 
   c_prp_id = (hid_t)*prp_id;
   c_size = H5Pget_buffer(c_prp_id, NULL, NULL);
-  if ( c_size < 0  ) return ret_value;
+  if ( c_size == 0  ) return ret_value;
   *size = (hsize_t)c_size;
   ret_value = 0;
   return ret_value;

@@ -3955,7 +3955,6 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     int 		uflow=0;		/*underflow debug counters*/
     size_t		i, j, k;		/*counters		*/
     int			endian;			/*machine endianess	*/
-    size_t		src_ebias;		/* Source type's exponent bias */
     size_t		dst_ebias;		/* Destination type's exponent bias */
     size_t		src_epos;		/* Source type's exponent position */
     size_t		src_esize;		/* Source type's exponent size */
@@ -4056,7 +4055,6 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 
     /* Get "interesting" values */
-    src_ebias=H5Tget_ebias(src);
     dst_ebias=H5Tget_ebias(dst);
     H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
     H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
@@ -4259,7 +4257,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		/* Special check for denormalized values */
 		if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
 		    int expo_diff=check_expo[0]-check_expo[1];
-		    int valid_bits=((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
+		    int valid_bits=((int)(dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
 		    double epsilon=1.0;
 
 		    /* Re-scale the mantissas based on any exponent difference */
@@ -4604,7 +4602,7 @@ main(void)
     hid_t		fapl=-1;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)time(NULL));
+    HDsrandom((unsigned long)HDtime(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();

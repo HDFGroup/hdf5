@@ -2690,7 +2690,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
     } /* end for */
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+    if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
 
     /* Iterate through each chunk in the dataset */
@@ -2802,7 +2802,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             } while(coords[curr_dim]>sel_end[curr_dim]);
 
             /* Re-Calculate the index of this chunk */
-            if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+            if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->down_chunks,&chunk_index)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
         } /* end if */
     } /* end while */
@@ -3024,7 +3024,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_file_cb)
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory TBBTs */
@@ -3135,7 +3135,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_mem_cb);
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+    if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
 
     /* Find correct chunk in file & memory TBBTs */

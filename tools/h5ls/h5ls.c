@@ -1755,7 +1755,7 @@ list (hid_t group, const char *name, void *_iter)
  return 0;
     } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
  printf("Unknown type(%d)", sb.type);
- sb.type = -1;
+ sb.type = H5G_UNKNOWN;
     }
     if (sb.type>=0 && dispatch_g[sb.type].name) {
  fputs(dispatch_g[sb.type].name, stdout);

@@ -122,7 +122,7 @@ test_tst_init(void)
     /* Create randomized set of unique words */
     for(u=0; u<num_uniq_words; u++)
         rand_uniq_words[u]=uniq_words[u];
-    curr_time=time(NULL);
+    curr_time=HDtime(NULL);
     HDsrandom((unsigned long)curr_time);
     for(u=0; u<num_uniq_words; u++) {
         v=u+(HDrandom()%(num_uniq_words-u));

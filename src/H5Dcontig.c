@@ -138,7 +138,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
     int         mpi_rank=(-1);  /* This process's rank  */
-    int         mpi_size=(-1);  /* Total # of processes */
     int         mpi_code;       /* MPI return code */
     unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
     unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
@@ -167,8 +166,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
         /* Get the MPI rank & size */
         if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-        if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
 
         /* Set the MPI-capable file driver flag */
         using_mpi=1;
@@ -181,8 +178,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
         /* Get the MPI rank & size */
         if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-        if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
 
         /* Set the MPI-capable file driver flag */
         using_mpi=1;
@@ -196,9 +191,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
         /* Get the MPI rank & size */
         if ((mpi_rank = H5FD_fphdf5_mpi_rank(f->shared->lf)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-
-        if ((mpi_size = H5FD_fphdf5_mpi_size(f->shared->lf)) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
 
         /* Set the MPI-capable file driver flag */
         using_mpi = 1;

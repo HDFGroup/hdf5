@@ -197,7 +197,7 @@ static void test_iter_group(void)
         VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
         for(i=0; i< (int)num_membs; i++) {
-            ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
             CHECK(ret, FAIL, "H5Gget_objname_by_idx");
             
             ret = (herr_t)H5Gget_objtype_by_idx(root_group, (hsize_t)i);
@@ -229,7 +229,7 @@ static void test_iter_group(void)
             H5G_obj_t obj_type;         /* Type of object in file */
 #endif /*H5_WANT_H5_V1_4_COMPAT*/
 
-            ret = H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, NAMELEN);
+            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, NAMELEN);
             CHECK(ret, FAIL, "H5Gget_objname_by_idx");
             
             obj_type = H5Gget_objtype_by_idx(file, (hsize_t)i);
@@ -796,7 +796,7 @@ static void test_grp_memb_funcs(void)
         name_len = H5Gget_objname_by_idx(root_group, (hsize_t)i, NULL, NAMELEN);
         CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
         
-        ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
+        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
         CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
         /* Double-check that the length is the same */

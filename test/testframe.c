@@ -168,7 +168,7 @@ void TestInfo(const char *ProgName)
 void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
 {
     int                     CLLoop;     /* Command Line Loop */
-    int                     Loop, Loop1;
+    int                     Loop;
 
     for (CLLoop = 1; CLLoop < argc; CLLoop++) {
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||

@@ -942,12 +942,8 @@ test_vltypes_compound_vlen_vlen(void)
     hid_t	dataset;	        /* Dataset ID			*/
     hid_t	sid1;                   /* Dataspace ID			*/
     hid_t	tid1, tid2, tid3;       /* Datatype IDs         */
-    hid_t       xfer_pid;               /* Dataset transfer property list ID */
-    hid_t       dcpl_pid;               /* Dataset creation property list ID */
     hsize_t	dims1[] = {SPACE3_DIM1};
-    hsize_t     size;                   /* Number of bytes which will be used */
     unsigned    i,j,k;                  /* counting variables */
-    size_t      mem_used=0;             /* Memory used during allocation */
     hvl_t       *t1, *t2;               /* Temporary pointer to VL information */
     herr_t	ret;		        /* Generic return value		*/
 

@@ -599,7 +599,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_fill_t     *fill1=(const H5O_fill_t *)value1,     /* Create local aliases for values */
         *fill2=(const H5O_fill_t *)value2;
@@ -655,7 +655,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_efl_t     *efl1=(const H5O_efl_t *)value1,     /* Create local aliases for values */
         *efl2=(const H5O_efl_t *)value2;
@@ -737,7 +737,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_pline_t     *pline1=(const H5O_pline_t *)value1,     /* Create local aliases for values */
         *pline2=(const H5O_pline_t *)value2;
@@ -763,40 +763,40 @@ H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size)
     if(pline1->filter==NULL && pline2->filter!=NULL) HGOTO_DONE(-1);
     if(pline1->filter!=NULL && pline2->filter==NULL) HGOTO_DONE(1);
     if(pline1->filter!=NULL && pline1->nfilters>0) {
-        int i;       /* Local index variable */
+        size_t u;       /* Local index variable */
 
         /* Loop through all filters, comparing them */
-        for(i=0; i<pline1->nfilters; i++) {
+        for(u=0; u<pline1->nfilters; u++) {
             /* Check the ID of the filter */
-            if(pline1->filter[i].id < pline2->filter[i].id) HGOTO_DONE(-1);
-            if(pline1->filter[i].id > pline2->filter[i].id) HGOTO_DONE(1);
+            if(pline1->filter[u].id < pline2->filter[u].id) HGOTO_DONE(-1);
+            if(pline1->filter[u].id > pline2->filter[u].id) HGOTO_DONE(1);
 
             /* Check the flags for the filter */
-            if(pline1->filter[i].flags < pline2->filter[i].flags) HGOTO_DONE(-1);
-            if(pline1->filter[i].flags > pline2->filter[i].flags) HGOTO_DONE(1);
+            if(pline1->filter[u].flags < pline2->filter[u].flags) HGOTO_DONE(-1);
+            if(pline1->filter[u].flags > pline2->filter[u].flags) HGOTO_DONE(1);
 
             /* Check the name of the filter */
-            if(pline1->filter[i].name==NULL && pline2->filter[i].name!=NULL) HGOTO_DONE(-1);
-            if(pline1->filter[i].name!=NULL && pline2->filter[i].name==NULL) HGOTO_DONE(1);
-            if(pline1->filter[i].name!=NULL)
-                if((cmp_value=HDstrcmp(pline1->filter[i].name,pline2->filter[i].name))!=0)
+            if(pline1->filter[u].name==NULL && pline2->filter[u].name!=NULL) HGOTO_DONE(-1);
+            if(pline1->filter[u].name!=NULL && pline2->filter[u].name==NULL) HGOTO_DONE(1);
+            if(pline1->filter[u].name!=NULL)
+                if((cmp_value=HDstrcmp(pline1->filter[u].name,pline2->filter[u].name))!=0)
                     HGOTO_DONE(cmp_value);
 
             /* Check the number of parameters for the filter */
-            if(pline1->filter[i].cd_nelmts < pline2->filter[i].cd_nelmts) HGOTO_DONE(-1);
-            if(pline1->filter[i].cd_nelmts > pline2->filter[i].cd_nelmts) HGOTO_DONE(1);
+            if(pline1->filter[u].cd_nelmts < pline2->filter[u].cd_nelmts) HGOTO_DONE(-1);
+            if(pline1->filter[u].cd_nelmts > pline2->filter[u].cd_nelmts) HGOTO_DONE(1);
 
             /* Check the filter parameter information */
-            if(pline1->filter[i].cd_values==NULL && pline2->filter[i].cd_values!=NULL) HGOTO_DONE(-1);
-            if(pline1->filter[i].cd_values!=NULL && pline2->filter[i].cd_values==NULL) HGOTO_DONE(1);
-            if(pline1->filter[i].cd_values!=NULL && pline1->filter[i].cd_nelmts>0) {
+            if(pline1->filter[u].cd_values==NULL && pline2->filter[u].cd_values!=NULL) HGOTO_DONE(-1);
+            if(pline1->filter[u].cd_values!=NULL && pline2->filter[u].cd_values==NULL) HGOTO_DONE(1);
+            if(pline1->filter[u].cd_values!=NULL && pline1->filter[u].cd_nelmts>0) {
                 size_t v;       /* Local index variable */
 
                 /* Loop through all parameters, comparing them */
-                for(v=0; v<pline1->filter[i].cd_nelmts; v++) {
+                for(v=0; v<pline1->filter[u].cd_nelmts; v++) {
                     /* Check each parameter for the filter */
-                    if(pline1->filter[i].cd_values[v] < pline2->filter[i].cd_values[v]) HGOTO_DONE(-1);
-                    if(pline1->filter[i].cd_values[v] > pline2->filter[i].cd_values[v]) HGOTO_DONE(1);
+                    if(pline1->filter[u].cd_values[v] < pline2->filter[u].cd_values[v]) HGOTO_DONE(-1);
+                    if(pline1->filter[u].cd_values[v] > pline2->filter[u].cd_values[v]) HGOTO_DONE(1);
                 } /* end for */
             } /* end if */
         } /* end for */
