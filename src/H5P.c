@@ -7039,6 +7039,8 @@ static herr_t H5P_close_list(void *_plist)
     /* Destroy property list object */
     H5MM_xfree(plist);
 
+    ret_value=SUCCEED;     /* return value */
+
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_close_list() */
@@ -7083,7 +7085,7 @@ herr_t H5Pclose_list(hid_t plist_id)
     } /* end if */
 
     /* Close the property list */
-    if (H5P_close_list(plist) < 0)
+    if ((ret_value=H5P_close_list(plist)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
