@@ -280,7 +280,6 @@
 ./src/H5FDstdio.h
 ./src/H5FL.c
 ./src/H5FLprivate.h
-./src/H5FLpublic.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c
