@@ -36,6 +36,7 @@ const char *FILENAME[] = {
 #define INSERT_SPLIT_ROOT_NREC  80
 #define INSERT_MANY             (320*1000)
 #define FIND_MANY               (INSERT_MANY/100)
+#define FIND_NEIGHBOR           1000
 
 
 /*-------------------------------------------------------------------------
@@ -95,6 +96,34 @@ find_cb(const void *_record, void *_op_data)
 
     return(0);
 } /* end find_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	neighbor_cb
+ *
+ * Purpose:	v2 B-tree find callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  8, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+neighbor_cb(const void *_record, void *_op_data)
+{
+    const hsize_t *record = (const hsize_t *)_record;
+    hsize_t *search = (hsize_t *)_op_data;
+
+    *search = *record;
+
+    return(0);
+} /* end neighbor_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -4892,14 +4921,12 @@ test_remove_lots(hid_t fapl)
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
-    hsize_t     idx;                    /* Index within B-tree, for iterator */
     time_t      curr_time;              /* Current time, for seeding random number generator */
     hsize_t     *records;               /* Record #'s for random insertion */
     unsigned    u;                      /* Local index variable */
     unsigned    swap_idx;               /* Location to swap with when shuffling */
     hsize_t     temp_rec;               /* Temporary record */
     hsize_t     nrec;                   /* Number of records in B-tree */
-    herr_t      ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
     curr_time=HDtime(NULL);
@@ -5011,6 +5038,178 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_find_neighbor
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ *              code to find nearest neighbors to a given value in a B-tree.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, March  8, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_find_neighbor(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     search;                 /* Search value */
+    hsize_t     *records;               /* Record #'s for random insertion */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic error return value */
+
+    /* Allocate space for the records */
+    if((records = HDmalloc(sizeof(hsize_t)*FIND_NEIGHBOR))==NULL) TEST_ERROR;
+
+    /* Initialize record #'s */
+    for(u=0; u<FIND_NEIGHBOR; u++)
+        records[u] = u*2;
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Insert records */
+    for(u=0; u<FIND_NEIGHBOR; u++) {
+        record=records[u];
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    } /* end for */
+
+    /*
+     * Test nearest neighbor for '<' cases
+     */
+    TESTING("B-tree find: nearest neighbor less than a value");
+
+    /* Attempt to find record B-tree less than a value */
+    search = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    search = 1;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 0) TEST_ERROR;
+
+    search = 2;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 0) TEST_ERROR;
+
+    search = 3;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 2) TEST_ERROR;
+
+    search = 4;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 2) TEST_ERROR;
+
+    /* Neighbor is in internal node */
+    search = 85;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 84) TEST_ERROR;
+
+    /* Neighbor is in root node */
+    search = 859;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 858) TEST_ERROR;
+
+    search = (FIND_NEIGHBOR * 2) + 1;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_LESS, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR;
+
+    PASSED();
+
+    /*
+     * Test nearest neighbor for '>' cases
+     */
+    TESTING("B-tree find: nearest neighbor greater than a value");
+
+    /* Attempt to find record B-tree less than a value */
+    search = (FIND_NEIGHBOR * 2) + 1;
+    H5E_BEGIN_TRY {
+	ret = H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    search = 0;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 2) TEST_ERROR;
+
+    search = 1;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 2) TEST_ERROR;
+
+    search = 2;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 4) TEST_ERROR;
+
+    search = 3;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 4) TEST_ERROR;
+
+    /* Neighbor is in internal node */
+    search = 599;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 600) TEST_ERROR;
+
+    /* Neighbor is in root node */
+    search = 857;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != 858) TEST_ERROR;
+
+    search = ((FIND_NEIGHBOR-1) * 2) - 1;
+    if(H5B2_neighbor(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record)<0) TEST_ERROR;
+    if(record != ((FIND_NEIGHBOR-1)*2)) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    HDfree(records);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    HDfree(records);
+    return 1;
+} /* test_find_neighbor() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the B-tree v2 code
@@ -5081,6 +5280,13 @@ HDfprintf(stderr,"Uncomment tests!\n");
     nerrors += test_remove_level2_3internal_merge(fapl);
     nerrors += test_remove_level2_collapse_right(fapl);
     nerrors += test_remove_lots(fapl);
+#else /* QAK */
+HDfprintf(stderr,"Uncomment tests!\n");
+#endif /* QAK */
+
+#ifndef QAK
+    /* Test more complex B-tree queries */
+    nerrors += test_find_neighbor(fapl);
 #else /* QAK */
 HDfprintf(stderr,"Uncomment tests!\n");
 #endif /* QAK */

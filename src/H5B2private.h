@@ -62,6 +62,12 @@ typedef enum H5B2_subid_t {
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)   */
 } H5B2_subid_t;
 
+/* Comparisons for H5B2_neighbor() call */
+typedef enum H5B2_compare_t {
+    H5B2_COMPARE_LESS,            /* Records with keys less than query value */
+    H5B2_COMPARE_GREATER          /* Records with keys greater than query value */
+} H5B2_compare_t;
+
 /*
  * Each class of object that can be pointed to by a B-link tree has a
  * variable of this type that contains class variables and methods.
@@ -102,6 +108,9 @@ H5_DLL herr_t H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_found_t op, void *op_data);
 H5_DLL herr_t H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t idx, H5B2_found_t op, void *op_data);
+H5_DLL herr_t H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, H5B2_compare_t comp, void *udata, H5B2_found_t op,
+    void *op_data);
 H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
