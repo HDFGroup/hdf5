@@ -178,10 +178,10 @@ sub create_public ($) {
     print HEADER   "/* Major error codes */\n";
     print HEADER   "/*********************/\n\n";
     foreach $name (keys %major) {
-        printf HEADER "#define %-20s(H5OPEN %s_g)\n",$name,$name;
+        printf HEADER "#define %-20s (H5OPEN %s_g)\n",$name,$name;
     }
     foreach $name (keys %major) {
-        printf HEADER "H5_DLLVAR hid_t %-20s/* %s */\n","${name}_g;",$major{$name};
+        printf HEADER "H5_DLLVAR hid_t %-20s /* %s */\n","${name}_g;",$major{$name};
     }
 
     # Iterate over all the minor error sections
@@ -193,10 +193,10 @@ sub create_public ($) {
 
         # Iterate over all the minor errors in each section
         for $name ( @{$section_list{$sect_name}}) {
-            printf HEADER "#define %-20s(H5OPEN %s_g)\n",$name,$name;
+            printf HEADER "#define %-20s (H5OPEN %s_g)\n",$name,$name;
         }
         for $name ( @{$section_list{$sect_name}}) {
-            printf HEADER "H5_DLLVAR hid_t %-20s/* %s */\n","${name}_g;",$minor{$name};
+            printf HEADER "H5_DLLVAR hid_t %-20s /* %s */\n","${name}_g;",$minor{$name};
         }
     }
 
