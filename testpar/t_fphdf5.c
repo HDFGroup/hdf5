@@ -1,5 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Example of how to use Flexible Parallel HDF5.
+ * Flexible Parallel HDF5 test.
  *
  * Author:
  *      Bill Wendling (wendling@ncsa.uiuc.edu)
@@ -10,217 +24,368 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mpi.h"
+#include "testphdf5.h"
 
 #ifdef H5_HAVE_FPHDF5
 
-#include "hdf5.h"
-#include "H5public.h"
-#include "H5FPpublic.h"
+MPI_Comm SAP_Comm = MPI_COMM_NULL;
+MPI_Comm SAP_Barrier_Comm = MPI_COMM_NULL;
 
-MPI_Comm SAP_Comm;
-MPI_Comm SAP_Barrier_Comm;
+static void create_file(int);
 
-void err(const char *func, int mrc);
-void create_file(int);
+/* FILENAME and filenames must have the same number of names */
+const char *FILENAME[2] = {
+    "FPHDF5Test",
+    NULL
+};
 
-void create_file(int sap_rank)
+char    filenames[2][PATH_MAX];
+int     nerrors = 0;
+int     verbose = 0;
+hid_t   fapl = -1;
+
+static void create_file(int sap_rank)
 {
-    int my_rank, mrc;
-    hid_t fid, acc_tpl, sid, dataset;
+    const char dset_3x5[] = "/dataset-3x5";
+    const char dset_3x5x7[] = "/dataset-3x5x7";
+    const char dset_2x4x8[] = "dataset-2x4x8";
+    const char dset_5x7x11[] = "dataset-5x7x11";
+    const char group_1[] = "/group-1";
+    const char group_2[] = "/group-2";
 
-    if ((mrc = MPI_Comm_rank(SAP_Comm, &my_rank)) != MPI_SUCCESS) {
-        err("H5FPinit", mrc);
-        return;
-    }
+    int mpi_rank, mrc;
+    hid_t fid = -1, sid = -1, dataset = -1;
 
-    fprintf(stderr, "%d: Creating file foo.h5\n", my_rank);
+    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
+    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
 
-    if ((acc_tpl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        fprintf(stderr, "%d: Failed to create access property list\n", my_rank);
-        goto done;
-    }
+    /*===-------------------------------------------------------------------===
+     * Create the file
+     *===-------------------------------------------------------------------===
+     */
+    printf("%d: Creating file %s\n", mpi_rank, filenames[0]);
 
-    fprintf(stderr, "%d: Created access property list\n", my_rank);
+    fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    VRFY((fid >= 0), "H5Fcreate");
+    printf("%d: Created file %s\n", mpi_rank, filenames[0]);
 
-    if (H5Pset_fapl_fphdf5(acc_tpl, SAP_Comm, SAP_Barrier_Comm,
-                           MPI_INFO_NULL, (unsigned)sap_rank) < 0) {
-        fprintf(stderr, "%d: Failed to set fapl\n", my_rank);
-        goto done;
-    }
-
-    fprintf(stderr, "%d: Set access property list\n", my_rank);
-
-    if ((fid = H5Fcreate("/tmp/foo.h5", H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl)) < 0) {
-        fprintf(stderr, "%d: Failed to create file foo.h5\n", my_rank);
-        goto done;
-    }
-
-    fprintf(stderr, "%d: Created file foo.h5\n", my_rank);
-
-    fprintf(stderr, "%d: SAP_Barrier_Comm==%d\n", my_rank, SAP_Barrier_Comm);
-    MPI_Barrier(SAP_Barrier_Comm);
-
-    fflush(NULL);
-    fflush(NULL);
-    fflush(NULL);
-    sleep(3);
-
-goto done;
-
-    if (my_rank == 0) {
+    /*===-------------------------------------------------------------------===
+     * Create datasets
+     *===-------------------------------------------------------------------===
+     */
+    if (mpi_rank == 0) {
         /* Create a dataset in the file */
-        hsize_t dims[2];
+        hsize_t dims[3];
 
+        /*===---------------------------------------------------------------===
+         * Create 3x5 dataset
+         *===---------------------------------------------------------------===
+         */
         dims[0] = 3;
         dims[1] = 5;
 
-        if ((sid = H5Screate_simple(2, dims, NULL)) < 0) {
-            fprintf(stderr, "%d: Failed to create simple dataspace\n", my_rank);
-            goto done;
-        }
+        sid = H5Screate_simple(2, dims, NULL);
+        VRFY((sid >= 0), "H5Screate_simple");
+        printf("%d: Created simple 3x5\n", mpi_rank);
 
-        if ((dataset = H5Dcreate(fid, "/dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) {
-            fprintf(stderr, "%d: Failed to create simple dataset\n", my_rank);
-            goto done;
-        }
+        dataset = H5Dcreate(fid, dset_3x5, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        VRFY((dataset >= 0), "H5Dcreate");
+        printf("%d: Created dataset 3x5 \"%s\"\n", mpi_rank, dset_3x5);
 
-        fprintf(stderr, "%d: Created dataset ``/dataset''\n", my_rank);
+        VRFY((H5Sclose(sid) >= 0), "H5Sclose");
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        H5Sclose(sid);
-        H5Dclose(dataset);
-    }
+        /*===---------------------------------------------------------------===
+         * Create 3x5x7 dataset
+         *===---------------------------------------------------------------===
+         */
+        dims[0] = 3;
+        dims[1] = 5;
+        dims[2] = 7;
 
-    fprintf(stderr, "%d: SAP_Barrier_Comm==%d\n", my_rank, SAP_Barrier_Comm);
+        sid = H5Screate_simple(3, dims, NULL);
+        VRFY((sid >= 0), "H5Screate_simple");
+        printf("%d: Created 3x5x7 simple\n", mpi_rank);
+
+        dataset = H5Dcreate(fid, dset_3x5x7, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        VRFY((dataset >= 0), "H5Dcreate");
+        printf("%d: Created 3x5x7 dataset \"%s\"\n", mpi_rank, dset_3x5x7);
+
+        VRFY((H5Sclose(sid) >= 0), "H5Sclose");
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+    } 
+
+    printf("%d: MPI barrier 1.0\n", mpi_rank);
     MPI_Barrier(SAP_Barrier_Comm);
 
-    if (my_rank == 2) {
+    /*===-------------------------------------------------------------------===
+     * Access datasets
+     *===-------------------------------------------------------------------===
+     */
+    if (mpi_rank == 2) {
+        hid_t xfer;
+        int i, j;
+        int rdata[3][5];
+
+        /*===---------------------------------------------------------------===
+         * Open 3x5 dataset and write values to it.
+         *===---------------------------------------------------------------===
+         */
+        for (i = 0; i < 3; ++i)
+            for (j = 0; j < 5; ++j)
+                rdata[i][j] = i * j + 37;
+
         /* See if dataset is there */
-        if ((dataset = H5Dopen(fid, "/dataset")) < 0) {
-            fprintf(stderr, "%d: Failed to open dataset\n", my_rank);
-            goto done;
-        }
+        dataset = H5Dopen(fid, dset_3x5);
+        VRFY((dataset >= 0), "H5Dopen");
+        printf("%d: Opened dataset \"%s\"\n", mpi_rank, dset_3x5);
 
-        fprintf(stderr, "%d: Opened dataset ``/dataset''\n", my_rank);
+        xfer = H5Pcreate(H5P_DATASET_XFER);
+        VRFY((xfer >= 0), "H5Pcreate");
 
-        H5Dclose(dataset);
+        mrc = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, rdata);
+        VRFY((mrc >= 0), "H5Dwrite");
+        printf("%d: Wrote to dataset \"%s\"\n", mpi_rank, dset_3x5);
+
+        VRFY((H5Pclose(xfer) >= 0), "H5Pclose");
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+
+        /*===---------------------------------------------------------------===
+         * Open 3x5x7 dataset
+         *===---------------------------------------------------------------===
+         */
+        dataset = H5Dopen(fid, dset_3x5x7);
+        VRFY((dataset >= 0), "H5Dopen");
+        printf("%d: Opened dataset \"%s\"\n", mpi_rank, dset_3x5x7);
+
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
     }
 
-    fprintf(stderr, "%d: SAP_Barrier_Comm==%d\n", my_rank, SAP_Barrier_Comm);
+    printf("%d: MPI barrier 2.0\n", mpi_rank);
+    MPI_Barrier(SAP_Barrier_Comm);
+
+    /*===-------------------------------------------------------------------===
+     * Create a group
+     *===-------------------------------------------------------------------===
+     */
+    if (mpi_rank == 2) {
+        hid_t group;
+
+        /*===---------------------------------------------------------------===
+         * Create group "/group_1"
+         *===---------------------------------------------------------------===
+         */
+        printf("%d: Creating group \"%s\"\n", mpi_rank, group_1);
+
+        group = H5Gcreate(fid, group_1, 37);
+        VRFY((group >= 0), "H5Gcreate");
+        printf("%d: Created group \"%s\"\n", mpi_rank, group_1);
+
+        VRFY((H5Gclose(group) >= 0), "H5Gclose");
+    }
+
+    printf("%d: MPI barrier 3.0\n", mpi_rank);
+    MPI_Barrier(SAP_Barrier_Comm);
+
+    /*===-------------------------------------------------------------------===
+     * Create another group
+     *===-------------------------------------------------------------------===
+     */
+    if (mpi_rank == 0) {
+        hid_t group;
+
+        /*===---------------------------------------------------------------===
+         * Create group "/group_2"
+         *===---------------------------------------------------------------===
+         */
+        printf("%d: Creating group \"%s\"\n", mpi_rank, group_2);
+
+        group = H5Gcreate(fid, group_2, 37);
+        VRFY((group >= 0), "H5Gcreate");
+        printf("%d: Created group \"%s\"\n", mpi_rank, group_2);
+
+        VRFY((H5Gclose(group) >= 0), "H5Gclose");
+    }
+
+    printf("%d: MPI barrier 4.0\n", mpi_rank);
+    MPI_Barrier(SAP_Barrier_Comm);
+
+    /*===-------------------------------------------------------------------===
+     * Access groups and co-create datasets in them
+     *===-------------------------------------------------------------------===
+     */
+    if (mpi_rank == 0) {
+        hid_t group;
+        hsize_t dims[3];
+
+        /*===---------------------------------------------------------------===
+         * Access group "/group_1"
+         *===---------------------------------------------------------------===
+         */
+        printf("%d: Opening group \"%s\"\n", mpi_rank, group_1);
+
+        group = H5Gopen(fid, group_1);
+        VRFY((group >= 0), "H5Gopen");
+        printf("%d: Opened group \"%s\"\n", mpi_rank, group_1);
+
+        /*===---------------------------------------------------------------===
+         * Create dataset "/group_1/dset-2x4x8"
+         *===---------------------------------------------------------------===
+         */
+        dims[0] = 2;
+        dims[1] = 4;
+        dims[2] = 8;
+
+        sid = H5Screate_simple(3, dims, NULL);
+        VRFY((sid >= 0), "H5Screate_simple");
+        printf("%d: Created simple 2x4x8\n", mpi_rank);
+
+        dataset = H5Dcreate(group, dset_2x4x8, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        VRFY((dataset >= 0), "H5Dcreate");
+        printf("%d: Created dataset 2x4x8 \"%s\"\n", mpi_rank, dset_2x4x8);
+
+        VRFY((H5Sclose(sid) >= 0), "H5Sclose");
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+        VRFY((H5Gclose(group) >= 0), "H5Gclose");
+    } else {
+        hid_t group;
+        hsize_t dims[3];
+
+        /*===---------------------------------------------------------------===
+         * Access group "/group_2"
+         *===---------------------------------------------------------------===
+         */
+        printf("%d: Opening group \"%s\"\n", mpi_rank, group_2);
+
+        group = H5Gopen(fid, group_2);
+        VRFY((group >= 0), "H5Gopen");
+        printf("%d: Opened group \"%s\"\n", mpi_rank, group_2);
+
+        /*===---------------------------------------------------------------===
+         * Create dataset "/group_2/dset-5x7x11"
+         *===---------------------------------------------------------------===
+         */
+        dims[0] = 5;
+        dims[1] = 7;
+        dims[2] = 11;
+
+        sid = H5Screate_simple(3, dims, NULL);
+        VRFY((sid >= 0), "H5Screate_simple");
+        printf("%d: Created simple 5x7x11\n", mpi_rank);
+
+        dataset = H5Dcreate(group, dset_5x7x11, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        VRFY((dataset >= 0), "H5Dcreate");
+        printf("%d: Created dataset 5x7x11 \"%s\"\n", mpi_rank, dset_5x7x11);
+
+        VRFY((H5Sclose(sid) >= 0), "H5Sclose");
+        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+        VRFY((H5Gclose(group) >= 0), "H5Gclose");
+    }
+
+    printf("%d: MPI barrier 5.0\n", mpi_rank);
     MPI_Barrier(SAP_Barrier_Comm);
 
 done:
-    fprintf(stderr, "----------------------------\n");
-    fflush(stderr);
-    if (H5Pclose(acc_tpl) < 0)
-        fprintf(stderr, "%d: Failed to close access property list\n", my_rank);
-    else
-        fprintf(stderr, "%d: Closed access property list\n", my_rank);
-
-    if (H5Fclose(fid) < 0)
-        fprintf(stderr, "%d: Failed to close file\n", my_rank);
-    else
-        fprintf(stderr, "%d: Closed file\n", my_rank);
-
-    fprintf(stderr, "%d: leaving create_file\n", my_rank);
-    MPI_Barrier(SAP_Barrier_Comm);
-    fflush(NULL);
-    fflush(NULL);
-    fflush(NULL);
-    fflush(NULL);
-    fflush(NULL);
-    sleep(5);
+    if (fid > -1) {
+        VRFY((H5Fclose(fid) >= 0), "H5Fclose");
+        printf("%d: Closed file\n", mpi_rank);
+    }
 }
 
 int main(int argc, char *argv[])
 {
-    int ret = EXIT_SUCCESS, mrc;
-    int my_rank;
-    int sap_rank = 1;
+    int     mrc;
+    int     mpi_rank;
+    int     sap_rank = 1;
+    int     ret = EXIT_SUCCESS;
 
     MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    H5open();
+    h5_show_hostname();
+
+    if (MAINPROCESS) {
+        printf("===================================\n");
+        printf("FPHDF5 functionality tests\n");
+        printf("===================================\n");
+    }
+
     mrc = H5FPinit(MPI_COMM_WORLD, sap_rank, &SAP_Comm, &SAP_Barrier_Comm);
+    VRFY((mrc == MPI_SUCCESS), "H5FP_init");
+    printf("%d: Initialized FPHDF5\n", mpi_rank);
 
-    if (mrc < 0) {
-        err("H5FPinit", mrc);
-        ret = EXIT_FAILURE;
-        goto fail;
-    }
+    if (mpi_rank != sap_rank) {
+        /*
+         * Setup the file access property list that's used to create the
+         * file.
+         */
+        int i;
 
-    if ((mrc = MPI_Comm_rank(SAP_Comm, &my_rank)) != MPI_SUCCESS) {
-        err("H5FPinit", mrc);
-        ret = EXIT_FAILURE;
-        goto fail;
-    }
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((fapl >= 0), "H5Pcreate");
+        fprintf(stderr, "%d: Created access property list\n", mpi_rank);
 
-    fprintf(stderr, "%d: Initialized FPHDF5\n", my_rank);
+        mrc = H5Pset_fapl_fphdf5(fapl, SAP_Comm, SAP_Barrier_Comm,
+                                 MPI_INFO_NULL, (unsigned)sap_rank);
+        VRFY((fapl >= 0), "H5Pset_fapl_fphdf5");
+        printf("%d: Set access property list\n", mpi_rank);
 
-    if (my_rank != sap_rank) {
+        for (i = 0; i < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++i)
+            if (h5_fixname(FILENAME[i], fapl, filenames[i], sizeof(filenames[i])) == NULL) {
+                printf("h5_fixname failed\n");
+                ++nerrors;
+                goto fail;
+            }
+
         create_file(sap_rank);
-        MPI_Barrier(SAP_Barrier_Comm);
+
+        if (fapl > -1) {
+            if (!h5_cleanup(FILENAME, fapl)) {
+                printf("%d: h5_cleanup failed\n", mpi_rank);
+                ++nerrors;
+                goto fail;
+            }
+
+            printf("%d: Closed property list\n", mpi_rank);
+        }
     }
 
 fail:
-    H5FPfinalize();
-    fprintf(stderr, "%d: H5FP finalized\n", my_rank);
+    VRFY((H5FPfinalize() >= 0), "H5FPfinalize");
+    printf("%d: H5FP finalized\n", mpi_rank);
+
+    if (MAINPROCESS) {  /* only process 0 reports */
+        printf("===================================\n");
+
+        if (nerrors)
+            printf("***FPHDF5 test detected %d errors***\n", nerrors);
+        else
+            printf("FPHDF5 test finished with no errors\n");
+
+        printf("===================================\n");
+    }
 
     H5close();
-    fprintf(stderr, "%d: HDF5 Closed\n", my_rank);
-
     MPI_Finalize();
-    fprintf(stderr, "%d: MPI finalized\n", my_rank);
-    return ret;
-}
-
-void err(const char *func, int mrc)
-{
-    fprintf(stderr, "error: %s: ", func);
-
-    switch (mrc) {
-    case MPI_ERR_COMM:
-        fprintf(stderr, "invalid communicator\n");
-        break;
-    case MPI_ERR_COUNT:
-        fprintf(stderr, "invalid count argument\n");
-        break;
-    case MPI_ERR_TYPE:
-        fprintf(stderr, "invalid datatype argument\n");
-        break;
-    case MPI_ERR_TAG:
-        fprintf(stderr, "invalid tag argument\n");
-        break;
-    case MPI_ERR_RANK:
-        fprintf(stderr, "invalid source or destination rank\n");
-        break;
-    case MPI_ERR_INTERN:
-        fprintf(stderr, "internal MPI-IO error\n");
-        break;
-    case MPI_ERR_REQUEST:
-        fprintf(stderr, "invalid MPI_Request\n");
-        break;
-    case MPI_ERR_ARG:
-        fprintf(stderr, "invalid argument\n");
-        break;
-    default:
-        fprintf(stderr, "unknown MPI-IO error\n");
-        break;
-    }
+    return 0;
 }
 
 #else
 
-/* dummy program since H5_HAVE_PARALLE is not configured in */
+/* dummy program since FPHDF5 is not configured in */
 int
 main(int argc, char *argv[])
 {
-    int my_rank;
+    int mpi_rank;
 
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    if (my_rank==0){
-	printf("No t_fphdf5 Test because FPHDF5 is not configured in\n");
-    }
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (mpi_rank == 0)
+        printf("No t_fphdf5 Test because FPHDF5 is not configured in\n");
+
     MPI_Finalize();
-    return(0);
+    return 0;
 }
 #endif
