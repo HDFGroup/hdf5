@@ -402,7 +402,7 @@ int traverse( hid_t loc_id,
     {
      /* print it */
      if (print)
-      printf(" %-10s %s %s\n", "group", path, "HARDLINK"  );
+      printf(" %-10s %s %s %s\n", "group", path, "->", table->objs[j].name  );
     }
 
    }
@@ -448,7 +448,7 @@ int traverse( hid_t loc_id,
     {
      /* print it */
      if (print)
-      printf(" %-10s %s %s\n", "dataset", path, "(HARDLINK)"  );
+      printf(" %-10s %s %s %s\n", "dataset", path, "->", table->objs[j].name  );
     } /* displayed==1 */
    } /* nlink>1 */
   
