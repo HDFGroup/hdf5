@@ -1689,7 +1689,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
         if(invalidate) {
             if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) {
                 /* Return the unused portion of the metadata block to a free list */
-                if(f->shared->lf->eoma!=0 && f->shared->lf->cur_meta_block_size!=0)
+                if(f->shared->lf->eoma!=0)
                     if(H5FD_free(f->shared->lf,H5FD_MEM_DEFAULT,f->shared->lf->eoma,f->shared->lf->cur_meta_block_size)<0)
                         HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block");
 
@@ -1699,7 +1699,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
             } /* end if */
             if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_SMALLDATA) {
                 /* Return the unused portion of the "small data" block to a free list */
-                if(f->shared->lf->eosda!=0 && f->shared->lf->cur_sdata_block_size!=0)
+                if(f->shared->lf->eosda!=0)
                     if(H5FD_free(f->shared->lf,H5FD_MEM_DRAW,f->shared->lf->eosda,f->shared->lf->cur_sdata_block_size)<0)
                         HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block");
 

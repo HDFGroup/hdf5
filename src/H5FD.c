@@ -1457,7 +1457,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                     } /* end if */
                     else {
                         /* Return the unused portion of the metadata block to a free list */
-                        if(file->eoma!=0 && file->cur_meta_block_size!=0)
+                        if(file->eoma!=0)
                             if(H5FD_free(file,H5FD_MEM_DEFAULT,file->eoma,file->cur_meta_block_size)<0)
                                 HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free metadata block");
 
@@ -1526,7 +1526,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                     } /* end if */
                     else {
                         /* Return the unused portion of the "small data" block to a free list */
-                        if(file->eosda!=0 && file->cur_sdata_block_size!=0)
+                        if(file->eosda!=0)
                             if(H5FD_free(file,H5FD_MEM_DRAW,file->eosda,file->cur_sdata_block_size)<0)
                                 HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free 'small data' block");
 
@@ -1729,10 +1729,14 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     /* Check args */
     assert(file && file->cls);
     assert(type>=0 && type<H5FD_MEM_NTYPES);
-    if (!H5F_addr_defined(addr) || addr>file->maxaddr || 0==size ||
+    if (!H5F_addr_defined(addr) || addr>file->maxaddr || 
             H5F_addr_overflow(addr, size) || addr+size>file->maxaddr) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid region");
     }
+
+    /* Allow 0-sized free's to occur without penalty */
+    if(0==size)
+        HRETURN(SUCCEED);
 
     /* Map request type to free list */
     if (H5FD_MEM_DEFAULT==file->cls->fl_map[type]) {
