@@ -168,10 +168,10 @@ maintainer-clean: distclean
 	-$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
 ## Implicit rules
-.C.o:
+.cpp.o:
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
 
-.C.lo:
+.cpp.lo:
 	@$(LT_COMPILE) $(CXXFLAGS) $(CPPFLAGS) -c $<
 
 ##-----------------------------------------------------------------------------

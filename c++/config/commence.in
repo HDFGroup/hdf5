@@ -6,7 +6,7 @@
 
 ## Things that Make needs
 .SUFFIXES:
-.SUFFIXES: .C .o .lo
+.SUFFIXES: .cpp .o .lo
 @SET_MAKE@
 
 ## Directories to search
