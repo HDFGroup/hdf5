@@ -6,8 +6,16 @@
 # 
 @COMMENCE@
 TRACE=perl ../bin/trace
+###############################################################################
+# *** MODIFICATONS FOR CREATING THE PABLO INSTRUMENTED LIBRARY libhdf5-inst.a #
+# For Pablo instrumenation of parallel code, remove the # from in front of    #
+# PABLO_MPIO_FLAGS.  							      #
+# Set PABLO_INC equal to the path of the include directory for the Pablo      #
+# TraceLibrary								      #
+###############################################################################
+#PABLO_MPIO_FLAGS = -DHAVE_PARALLEL -DHAVE_MPIOTRACE	
 PABLO_INC = 
-PABLO_FLAGS = -I$(PABLO_INC) -DHAVE_PABLO
+PABLO_FLAGS = -I$(PABLO_INC) -DHAVE_PABLO $(PABLO_MPIO_FLAGS)
 
 # Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. -I../src $(PABLO_FLAGS) @CPPFLAGS@
