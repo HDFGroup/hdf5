@@ -512,11 +512,17 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
     assert(udata);
     assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
-#ifdef NEW_WAY
     /* Special case for faster checks on 1-D chunks */
     /* (Checking for ndims==2 because last dimension is the datatype size) */
+    /* The additional checking for the right key is necessary due to the */
+    /* slightly odd way the library initializes the right-most node in the */
+    /* indexed storage B-tree... */
+    /* (Dump the B-tree with h5debug to look at it) -QAK */
     if(udata->mesg->u.chunk.ndims==2) {
-        if(udata->key.offset[0]>=rt_key->offset[0])
+        if(udata->key.offset[0]>rt_key->offset[0])
+            ret_value=1;
+        else if(udata->key.offset[0]==rt_key->offset[0] &&
+                udata->key.offset[1]>=rt_key->offset[1])
             ret_value=1;
         else if(udata->key.offset[0]<lt_key->offset[0])
             ret_value=(-1);
@@ -529,14 +535,6 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
                             lt_key->offset))
             ret_value = -1;
     } /* end else */
-#else /* NEW_WAY */
-    if (H5V_vector_ge_s(udata->mesg->u.chunk.ndims, udata->key.offset,
-                             rt_key->offset))
-        ret_value = 1;
-    else if (H5V_vector_lt_s(udata->mesg->u.chunk.ndims, udata->key.offset,
-                        lt_key->offset))
-        ret_value = -1;
-#endif /* NEW_WAY */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_cmp3() */
@@ -3273,14 +3271,45 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 {
     H5O_layout_t        layout;
     H5D_istore_ud1_t	udata;
+    H5B_shared_t *shared;               /* Shared B-tree node info */
+    size_t	u;                      /* Local index variable */
+    herr_t      ret_value=SUCCEED;      /* Return value */
     
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_istore_debug);
+    FUNC_ENTER_NOAPI(H5D_istore_debug,FAIL);
 
     HDmemset (&udata, 0, sizeof udata);
     layout.u.chunk.ndims = ndims;
     udata.mesg = &layout;
 
+    /* Allocate space for the shared structure */
+    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+
+    /* Set up the "global" information for this file's groups */
+    shared->type= H5B_ISTORE;
+    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
+    assert(shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, H5B_ISTORE, &shared->sizeof_keys, shared->sizeof_rkey);
+    assert(shared->sizeof_rnode);
+    if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+    /* Initialize the offsets into the native key buffer */
+    for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
+        shared->nkey[u]=u*H5B_ISTORE->sizeof_nkey;
+
+    /* Make shared B-tree info reference counted */
+    if(NULL==(layout.u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+
     H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    /* Free the raw B-tree node buffer */
+    if(H5RC_DEC(layout.u.chunk.btree_shared)<0)
+	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_debug() */
