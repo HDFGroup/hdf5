@@ -436,12 +436,10 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Pclose(create_plist);
     return FAIL;							      
   }									      
-<<<<<<< h4toh5sds.c
-  /*  write_plist = H5Pcreate(H5P_DATASET_XFER);
-=======
+  /* comment this out.
+     write_plist = H5Pcreate(H5P_DATASET_XFER);
 
   write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
->>>>>>> 1.4
   bufsize = h4memsize;
   for(i=1;i<sds_rank;i++)
     bufsize *= h5dims[i];
@@ -458,15 +456,15 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     return FAIL;		
   }
   if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
-  (void *)sds_data)<0) {	*/
-  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,NULL,	    
+  (void *)sds_data)<0) {	
+  */
+  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
   (void *)sds_data)<0) {		      
     printf("failed to write data into hdf5 dataset");	
     printf(" converted from SDS.\n");
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     free(sds_start);
     free(sds_edge);
     free(sds_stride);
@@ -493,7 +491,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     return FAIL;
   }
 
@@ -507,7 +504,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     return FAIL;
   }
 
@@ -521,7 +517,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     return FAIL;
   }
   
@@ -536,7 +531,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     return FAIL;
   }
   check_gloattr = 0;
@@ -549,7 +543,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     printf(" Error in obtaining sds attributes. \n");
     return FAIL;
   }
@@ -570,7 +563,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     printf("unable to transfer sds label to HDF4 OBJECT TYPE.\n");
     return FAIL;
   }
@@ -585,7 +577,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
       H5Sclose(h5d_sid);
       H5Dclose(h5dset);
       H5Pclose(create_plist);
-      H5Pclose_list(write_plist);
       printf("unable to transfer sds name to HDF5 dataset attribute.\n");
       return FAIL;
     }
@@ -600,14 +591,12 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     H5Pclose(create_plist);
-    H5Pclose_list(write_plist);
     printf("unable to transfer sds ref. to HDF5 dataset attribute.\n");
     return FAIL;
   }
   }
   istat = SDendaccess(sds_id);
   ret   = H5Pclose(create_plist);
-  ret   = H5Pclose_list(write_plist);
   ret   = H5Sclose(h5d_sid);
   ret   = H5Dclose(h5dset);
   free(sds_data);
