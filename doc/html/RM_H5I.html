@@ -48,7 +48,8 @@ And in this document, the
 
 <h2>Identifier API Functions</h2>
 
-This function provides a tool for working with object identifiers.
+These functions provides tools for working with object identifiers and 
+object names.
 
 
 <p>
@@ -166,7 +167,47 @@ facilitate moving easily between them.</i>
 		     <em>char *</em><code>name</code>,
 		     <em>size_t</em> <code>size</code>
                      )
-
+<dt><strong>Purpose:</strong> </dt>
+    <dd>Retrieves a name of an object based on the object identifier.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_name</code> retrieves a name for the object identified 
+        by <code>obj_id</code>.
+        <p>
+        Up to <code>size</code> characters of the name are returned in 
+        <code>name</code>; additional characters, if any, are not returned
+        to the user application.
+        <p>
+	If the length of the name, which determines the required 
+	value of <code>size</code>, is unknown, a preliminary  
+	<code>H5Iget_name</code> call can be made.  
+	The return value of this call will be the size of the 
+	object name.  
+	That value can then be assigned to <code>size</code> 
+	for a second <code>H5Iget_name</code> call, 
+	which will retrieve the actual name.
+	<p>
+        If there is no name associated with the object identifier
+	or if the name is <code>NULL</code>, <code>H5Iget_name</code>
+        returns <code>0</code> (zero).
+	<p>
+	Note that an object in an HDF5 file may have multiple names,
+	varying according to the path through the HDF5 group 
+	hierarchy used to reach that object.
+<dt><strong>Parameters:</strong> 
+    <dl>
+    <dt><em>hid_t</em>  <code>obj_id</code> 
+        <dd>IN: Identifier of the object.  
+            This identifier can refer to a group, dataset, or 
+	    named datatype. 
+    <dt><em>char *</em><code>name</code> 
+        <dd>OUT: A name associated with the identifier.
+    <dt><em>size_t size</em> 
+        <dd>IN: The size of the <code>name</code> buffer.
+    </dl>
+<dt><strong>Returns:</strong> 
+    <dd>Returns the length of the name if successful,
+        returning <code>0</code> (zero) if no name is associated with the identifier.
+        Otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5i_FORTRAN.html#h5iget_name_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
@@ -217,7 +258,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 4 April 2003
+Last modified: 17 April 2003
 
 </body>
 </html>
