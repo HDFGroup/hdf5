@@ -57,8 +57,7 @@ uninstall-local:
 	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
-	fi;                                                             \
-	$(RM) $(bindir)/$(H5FC_NAME)
+	fi
 
 # Put in dependencies to the THDF5 module so that things will be built
 # in the correct order.
