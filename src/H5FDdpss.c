@@ -138,8 +138,8 @@ static const H5FD_class_t H5FD_dpss_g = {
     NULL,                                          /* dxpl_free      */
     H5FD_dpss_open,                                /* open           */
     H5FD_dpss_close,                               /* close          */
-    NULL,                                          /*  cmp           */
-    H5FD_dpss_query,				/*query			*/
+    NULL,                                          /* cmp            */
+    H5FD_dpss_query,                               /* query          */
     NULL,                                          /* alloc          */
     NULL,                                          /* free           */
     H5FD_dpss_get_eoa,                             /* get_eoa        */
@@ -397,7 +397,7 @@ H5FD_dpss_close (H5FD_t *_file)
  * Function:	H5FD_dpss_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -419,8 +419,9 @@ H5FD_dpss_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flags = 0;
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-    } /* end if */
+    }
 
     FUNC_LEAVE(ret_value);
 }
