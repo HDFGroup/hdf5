@@ -1,25 +1,15 @@
-HDF5 Install Instructions for Windows NT/95/98.
+HDF5 Build and Install Instructions for Windows 2000/NT/98.
 -------------------------------------------------------------------------
 
 The instructions which follow assume that you will be using the the source
 code release 'zip' file (hdf5-1_4_0.zip).
 
-The following sections discuss in detail installation procedures. 
+***************************WARNINGS*********************************
+Please read CAREFULLY about Preconditions before you go to the following sections
 
-  Section 1: Building from Source Code Release
-  Section 2: Building an application using the HDF5 library or DLL
-  Section 3: Some more helpful pointers
-  Section 4: ZLIB library - removing or changing the path
+Preconditions 
 
-Section 1:
-Building from Source Code Release (hdf5-1_4_0.zip)
-==================================================
-
-STEP I:  Preconditions
-
-To build the HDF5 and tests, it is assumed that you have done the following:
-
-    1. Installed MicroSoft Developer Studio, and Visual C++ 6.0.
+    1. Installed MicroSoft Developer Studio,Visual C++ 6.0 and WinZip.
 
     2. Set up a directory structure to unpack the library. For example:
 
@@ -34,33 +24,82 @@ To build the HDF5 and tests, it is assumed that you have done the following:
        creates a directory called 'hdf5' which contains several files and
        directories.
 
-    4. You do not have a version of the zlib library and you would like
-       to use it. If you do not want to use the zlib library or have your
-       own version read the section about the zlib library.
-
+    4. HDF5 uses zlib for compression and zlib is distributed with 
+       hdf5 lib. If you have your own version read section VI about the 
+       zlib library.
 
     5. You do need hdf4 (hdf and mfhdf) static and dll libraries to generate 
-       h4toh5 and h5toh4 converter tool.
+       hdf4-related tools.
 
-STEP II: Building the Libraries and tests.
+    6. Currently you can build and test either hdf5 libraries and non-hdf4 
+       related tools or hdf5 libraries and hdf4 related tools; but not BOTH.
+       In other words,you may either follow Section II or Section III but 
+       NOT both Sections to build HDF5 libraries and related tools.
 
-    1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.
+---------------------------------------------------------------------------
 
-    2. Unpack all.zip in 'hdf5' and move the zlib.dll from
+The following sections discuss installation procedures in detail:
+
+  Section I: What do we build and install
+  Section II: Building and testing hdf5 libraries and non-hdf4 related hdf5 tools 
+  Section III: Building and testing hdf5 libraries and all hdf5 tools
+  Section IV: Building an application using the HDF5 library or DLL
+  Section V: Some more helpful pointers
+  Section VI: ZLIB library - removing or changing the path
+
+************************************************************************
+
+Section I:
+
+What do we build and install? 
+
+ HDF5 static library: 
+	debug and release version
+
+ HDF5 Dynamic Link Library(DLL): 
+	debug and release version as well as export libraries for DLL
+
+ HDF5 tool library:
+	debug and release version
+
+ HDF5 tool export library for DLL:
+	debug and release version 
+
+ HDF5 tools:
+	non-hdf4 related tools and hdf4 related tools
+
+ HDF5 library testing programs:
+      hdf5 library related comprehensive tests
+		
+ HDF5 related tools testing programs:
+	hdf5 tools testing programs
+
+ HDF5 examples:
+      simple HDF5 examples
+
+**************************************************************
+
+Section II: 
+
+	Building and testing hdf5 libraries and non-hdf4 related tools 
+
+       ==================================================
+
+STEP 1: Building hdf5 libraries and non-hdf4 related tools
+
+
+    1. Unpack all.zip in 'hdf5' and move the zlib.dll from
        c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system directory.
 
-       NOTE TO ALPHA USERS- the version of zlib that is packaged in
-       all.zip is for Intel platforms. The Alpha versions of the
-       libraries can be obtained from ftp://hdf.ncsa.uiuc.edu/HDF5/. The
-       file to download is Alphazlib.zip. After the file is downloaded
-       replace the src\zlib directory with the files from Alphazlib.zip.
-
-    3. Invoke Microsoft Visual C++, go to "File" and select the "Open
+	 The system directory can usually be found under the path 
+		C:\WINNT\system or C:\WINDOWS\system
+      
+    2. Invoke Microsoft Visual C++, go to "File" and select the "Open
        Workspace" option. 
 
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw workspace. 
 
-    4. Select "Build", then Select "Set Active Configuration".
+    3. Select "Build", then Select "Set Active Configuration".
 
        On Windows platform select as the active configuration
 
@@ -73,42 +112,13 @@ STEP II: Building the Libraries and tests.
                                   single-threaded static libraries, and
                                   tests.
 
-       On the Alpha platform select as the active configuration
-
-	   "all -- Win32 AlphaDbg" to build debug versions of
-				   single-threaded static libraries, and
-                                   tests. 
-                or
-
-	   "all -- Win32 AlphaRel" to build release versions of
-                                   single-threaded static libraries, and
-                                   tests.
-
-       Select "Build" and "Build all.exe" to build the corresponding
-       version of the HDF5 library.
-
-       NOTE 1: "all" is a dummy target. You will get a link error when
+      
+       NOTE : "all" is a dummy target. You will get a link error when
        "all.exe." is built:
 
              LINK: error LNK2001: unresolved external symbol
 			_mainCRTStartup.....
              all.exe - 2 error(s), ....
-
-  
-       NOTE 2: In the HDF5_1.4 beta release, you may find strange errors
-       when compiling tvlstr.c at testhdf5 and testhdf5dll projects. 
-       Simply selecting tvlstr.c itself and compiling it separately, 
-       you may find tvlstr.c be compiled successfully this time.
-       Now coming back to Build menu and choose Build all.exe(or choose F7 key);
-       The rest of testhdf5 program will be linked successfully. We suggest users to
-       use batch build to avoid this annoying compiling behavior.    
-
-       NOTE 3: In order to test h4toh5 and h5toh4 converter, you need to have
-       hdf413(or higher version) library. Please adjust processor settings to include
-       hdf4 header files and adjust the hdf4 library path in your own machine. One way
-       to include library is to select the current project(h4toh5 etc.) and insert
-       hdf4 libraries into the current project. Make sure that you find all hdf4 library
-       files following the hdf4 library templates of the current project.
 
        Warning messages can be ignored. The "all.exe" is never created,
        so it is OK.
@@ -122,12 +132,17 @@ STEP II: Building the Libraries and tests.
                   hdf5.lib- the hdf5 library
 
             c:\MyHDFstuff\hdf5\proj\hdf5dll\debug - 
+
+                  hdf5d.dll- the hdf5 library
+                  hdf5d.lib- the dll export library                  
+
             c:\MyHDFstuff\hdf5\proj\hdf5dll\release - 
 
                   hdf5.dll- the hdf5 library
                   hdf5.lib- the dll export library
 
             c:\MyHDFstuff\hdf5\test\"test directory"-
+
             where test directory is one of the following:
 
 			big
@@ -172,7 +187,7 @@ STEP II: Building the Libraries and tests.
 
 			overhead
 
-			ragged 
+			
 
 			stab
 
@@ -180,60 +195,154 @@ STEP II: Building the Libraries and tests.
 
 			unlink 
 
-Each test directory contains debug and release subdirectories with the 
-corresponding tests.
+            
+		c:\MyHDFstuff\hdf5\tools\toolslib\debug
+	      c:\MyHDFstuff\hdf5\tools\toolslib\release
+
+                  toolslib.lib- the tools library
+
+            c:\MyHDFstuff\hdf5\tools\toolslibD\debug
+	      c:\MyHDFstuff\hdf5\tools\toolslibD\release
+
+                  toolslibD.lib- the dll export library 
+
+            c:\MyHDFstuff\hdf5\tools\"tools directory"-
+            where non-hdf4 related tools directory is one of the following:
+ 
+	            h5dump
+
+                  h5ls
+
+                  h5debug
+
+                  h5import	            
 		
 
-STEP III:   TESTING THE BUILD
+             Test and tool directory contains debug and release 
+subdirectories with the corresponding tests and tools.
+
+
+STEP 2:   testing hdf5 libraries and non-hdf4 related tools 
 
 In a command prompt window run the test batch file which resides in the
 hdf5\test directory to make sure that the library was built correctly.
 
-To test, cd into the hdf5\test directory. Then type: "hdf5test [debug or
-release] [dll]" depending on which version you would like to test.
+You can possibily test four versions of hdf5 library and tools. They are:
 
-To use the timing tests use the hdf5timingtest.bat file found in the
-hdf5\test directory. Type: "hdf5timingtest [debug or release] [dll]"
-depending on which version you would like to test.
+	release 
+	release dll
+	debug
+	debug dll
 
-To test the h5dump utility, cd into hdf5\tools. Then type: "dumptest
-[debug or release] [dll]" depending on which version you would like to
-test. We are using "fc" command to compare whether dumper generates 
-correct results.We recommend you to redirect(using ">") 
-the output into a file to check the test output manually.
+NOTE: The appropriate dll should be placed into the C:\WINNT\system or 
+      C:\WINDOWS\system directory before using the dlls.
 
-To test the h4toh5 utility,  cd into hdf5\tools. 
-Then type: "h4toh5testrun [debug or release] [dll]" depending on which 
-version you would like to test. We are using "fc" command to compare 
-whether converter converts correctly. We recommend you to redirect (using ">")
-the output into a file to check the test output manually.
-                                                                                                   To test the h5toh4 utility, you need to have "hdp" utilityin your system.
-cd into hdf5\tools. Four parameters should be input in this format:
+We strongly suggest you to redirect your testing results into an output file 
+and you can easily check the testing results. You may use either NotePad or 
+NoteTab Light or whatever other tools to check the results.
 
-1) For windows NT 4.0 and 5.0 
-type h5toh4testrun [para 1] [para 2] [para 3] [para 4] 
-2) For Windows 98
-type h5toh4testwin98 [para 1] [para 2] [para 3] [para 4]
+  1. hdf5 static libraries and DLLs testing 
 
-  para1: [Debug] or [Release] version you are testing.
-  para2: The top directory path(including the drive name) where hdf5 tools 
-         is located,for example: D:/h5_1.4 
-  para3: The full path where hdp is located, for example D:/H414/bin 
-  para4: If no dll version,leave this parameter empty or type DLL
+     cd into the hdf5\test directory. 
 
-***** Warnings:*******
-      Do make sure that you type the correct parameters according to the
-      correct orders. Para 2 and Para 3 should be correctly input. Otherwise,
-      the result may be unpredictable.
+        (1) basic tests
+            
+            Go to a) b) c) or d) to test your chosen version
 
-NOTE: The appropriate dll should be placed in the Windows\system
-      directory before using the dlls.
+            a) release static version
+            type:             
+               hdf5test release >"Your output filename" 
 
-NOTE: The debug dll tests on the Alpha platform currently are not
-      completely working. The release dll is fine though.
+	      b) release dll version
+            type:
+               hdf5test release dll > "Your output filename"
+				
+            c) debug static version
+            type: 
+               hdf5test debug >"Your output filename"
+
+            d) debug dll version
+            type:
+               hdf5test debug dll >"Your output filename"
+            
+        (2) timing tests
+
+            Go to a) b) c) or d) to test your chosen version
+
+            a) release static version
+            type:             
+               hdf5timingtest release >"Your output filename" 
+
+	      b) release dll version
+            type:
+               hdf5timingtest release dll > "Your output filename"
+				
+            c) debug static version
+            type: 
+               hdf5timingtest debug >"Your output filename"
+
+            d) debug dll version
+            type:
+               hdf5timingtest debug dll >"Your output filename"
 
 
-STEP IV: BUILDING THE EXAMPLES
+     Use notepad or notetab light to check results. You should not find any
+     FAILED marks in your output files.
+
+  Note: big test is currently not working for windows, we are still  
+  investigating this.
+ 
+ 2. hdf5 tools testing
+ 
+    Currently we are only supporting h5dump test. We are investigating
+    h5ls test now. 
+    
+    1) h5dump test
+
+    cd back into hdf5 directory and then go to tools directory
+
+    Go to a) b) c) or d) to test your chosen version
+
+        a) release static version
+        type:             
+           dumptest release >"Your output filename" 
+
+	  b) release dll version
+        type:
+           dumptest release dll > "Your output filename"
+				
+        c) debug static version
+        type: 
+           dumptest debug >"Your output filename"
+
+        d) debug dll version
+        type:
+           dumptest debug dll >"Your output filename"
+   
+
+    We are using "fc" command to compare whether dumper generates correct   
+    results. Supposedly you should find "FC: no differences encountered" in
+    your output file. However, since we are comparing the actual dumper output
+    with the expected dumper output under different directory, you may see
+    something like:
+
+"
+***** ..\TESTFILES\tall-1.ddl
+#############################
+Expected output for 'h5dump tall.h5'
+#############################
+HDF5 "tall.h5" {
+GROUP "/" {
+***** TALL-1.RESULTS
+HDF5 "..\..\testfiles\tall.h5" {
+GROUP "/" {
+*****
+"
+
+   The actual dumper output is correct. The difference showing here 
+   is the different representations of filename of the same file.
+
+STEP 3: BUILDING THE EXAMPLES
 
     1. Invoke Microsoft Visual C++, go to "File" and select
        the "Open Workspace" option. 
@@ -252,20 +361,7 @@ STEP IV: BUILDING THE EXAMPLES
 	   "allexamples -- Win32 Release" to build release versions the
 	                   examples.
 
-       On Alpha platform select as the active configuration
-
-	   "allexamples -- Win32 AlphaDbg" to build debug versions of the
-                           examples. 
-            
-                or
-	
-	   "allexamples -- Win32 AlphaRel" to build release versions the           
-                           examples.
-
-       Select "Build" and "Build allexamples.exe" to build the
-       corresponding version of the examples.
-
-       When the debug build or release build is done there should be
+          When the debug build or release build is done there should be
        the following subdirectories in C:\myHDFstuff\hdf5\examples\
 
 			attributetest
@@ -294,9 +390,260 @@ STEP IV: BUILDING THE EXAMPLES
        examples should be tested in these 2 new directories due to some
        dependencies between the examples.
 
+**********************************************************************
+
+Section III: BUILDING AND TESTING HDF5 LIBRARIES AND ALL HDF5 TOOLS
+
+--------------------------WARNINGS------------------------------------
+
+1. This section is specifically for building HDF5 tools that needs to 
+call HDF4 library. 
+
+Currently we are supporting two such kinds of tools: H4toh5 converter 
+and H5toh4 converter. If you are not using these tools, please go back
+to Section II for building and installing information. 
+
+2. This section builds and tests all versions of hdf5 libraries,testing 
+programs and tools covered in section II. Additionally, it also builds 
+and tests hdf4-related tools. We may refer some duplicated parts of this 
+section to section II. 
+
+3. In case 
+     a) you don't install hdf libraries and related tools in your machine, 
+     b) or if the top directory of your hdf4 libraries and tools are not 
+	  under C:\hdf41r4 and you are not familar on how to change settings of 
+        VC++ projects.
+
+   you may get binary distribution from 
+ftp://ftp.ncsa.uiuc.edu/HDF/HDF/HDF4.1r4/windows_precompiled_code/HDF41r4.zip
+and use Winzip to unpack HDF41r4.zip into C:\hdf41r4.
+
+4. We assume that you've installed hdf4(mfhdf and hdf) libraries into drive C.
+The top level path should be C:\HDF41r4. Under C:\HDF41r4 it should at least 
+include the following six directories: 
+
+C:\HDF41r4\bin where hdf4 utilities are stored
+C:\HDF41r4\dlllib where release dll versions of hdf and mfhdf libraries and 
+export libraries of dlls are stored
+C:\HDF41r4\dlllibdbg where debug dll versions of hdf and mfhdf libraries and
+export libraries of dlls are stored
+C:\HDF41r4\lib where release versions of hdf and mfhdf libraries are stored
+C:\HDF41r4\libdbg where debug versions of hdf and mfhdf libraries are stored
+C:\HDF41r4\include where header files are included 
+
+Make sure that you copy all *.dll files under C:\HDF41r4 into Windows system 
+directory before the next step.
+
+If your path of hdf libraries and mfhdf libraries is different from the 
+default assumption, please DO follow No.3 of Step 1 on the following:
 
 
-Section 2:  
+Step 1. 
+  
+    1. Unpack all_withhdf4.zip in 'hdf5' and move the zlib.dll from
+       c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system directory.
+
+	 The system directory can usually be found under the path 
+		C:\WINNT\system or C:\WIN98\system
+      
+    2. Invoke Microsoft Visual C++, go to "File" and select the "Open
+       Workspace" option. 
+
+       Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw workspace. 
+
+    3. This part is for users who are familar with handling settings of 
+       VC++ project and store their hdf4 libraries not under C:\hdf41r4. 
+       Other users can skip this part. 
+        
+       3.1 Change the path where hdf4 library header files are located
+       a) On the View menu, click Workspace, you may see a pop-up window 
+          with names of projects in all.dsw. 
+       b) click FileView on the bottom of this window if you are not 
+          seeing "all files big files ......."
+       c) You need to modify settings of four projects: h4toh5, 
+          h4toh5dll,h5toh4 and h5toh4dll.
+          You also need to modify both debug and release versions.
+ 
+          You may do as follows: 
+          c1)Right click the selected project and then click "Settings"
+          c2)A dialog box called "Project Settings" will be poped up
+          c3)On the upper-left part of the "Project Settings" box, you 
+             may find a small window "Settings for". Make sure inside 
+             this "Settings for" box is either "Win32 Debug" or
+             "Win32 Release". Change contents into "Win32 Debug" or 
+             "Win32 Release" otherwise.
+             Remember the version(Win32 Release or Debug) you choose.
+          c4)On the upper-right menu of the "Project Settings" box, 
+             find C/C++  and click it
+          c5)Just below the upper-right menu, find a small window 
+             called category, make sure that "Preprocessor" appear 
+             in this window.
+          c6)In the middle of "Project Settings" box, you may find a 
+             box called "Additional include directories:" you may find
+             "C:\hdf41r4\include" inside this box. This is the path 
+             where the default hdf4 header files is included. Replace 
+             only this path(C:\hdf41r4\include) with your own path that
+             includes your hdf4 header files.Don't touch any other paths.
+          c7)After you've done this, click OK at the bottom of 
+             "Project Settings" window. 
+          c8)Repeat c1)-c7)but change contents of "settings for" in C3)
+             from "Win32 Release" to "Win32 Debug" or vice versa.
+       d) repeat step c) for the other three projects.
+       
+	 3.2 Replace the user's hdf and mfhdf libraries, export libraries
+           of hdf and mfhdf DLLs
+
+	 You also need to modify four projects: h4toh5, h4toh5dll, h5toh4
+       and h5toh4dll.
+       a) select project h4toh5 following instruction 3.1 a) and b). 
+       b) click h4toh5, you may find four libraries: hm414d.lib,
+          hd414d.lib and hm414.lib,hd414.lib attached under the project 
+          h4toh5. hm414d.lib and hd414d.lib are debug versions of mfhdf
+	    and hdf libraries. hm414.lib and hd414.lib are release versions
+          of mfhdf and hdf libraries.
+       c) select these four libraries; go back to Edit menu and choose 
+          "delete" option to delete template of these libraries. 
+       d) select project h4toh5 and right click the mouse, find 
+          "Add Files to Projects", follow the instructions on the pop-up 
+          box, to insert your own hm414d.lib, hd414d.lib,hm414.lib and 
+	    hd414.lib. You must know their paths at first.
+       e) select project h4toh5dll following instruction 3.1 a) and b).
+       f) click h4toh5dll, you may also find four libraries: hd414m.lib,
+          hd414md.lib and hm414m.lib,hd414m.lib attached under the 
+          project h4toh5dll. These libraries are debug and release 
+          versions of Export libraries of mfhdf and hdf DLLs. 
+       g) select these four libraries; go back to Edit menu and choose 
+          "delete" option to delete template of these libraries. 
+       h) select project h4toh5 and right click the mouse, find 
+          "Add Files to Projects", follow the instructions on the pop-up 
+          box, to insert your own hd414m.lib, hd414md.lib,hm414m.lib and 
+	    hd414m.lib. You must know their paths at first.
+	 i) repeat a)-h) for h5toh4 and h5toh4dll.
+
+    4. Select "Build", then Select "Set Active Configuration".
+
+       On Windows platform select as the active configuration
+
+	   "all -- Win32 Debug" to build debug versions of
+				single-threaded static libraries, and
+				tests. 
+                or
+
+	   "all -- Win32 Release" to build release versions of
+                                  single-threaded static libraries, and
+                                  tests.
+
+      
+       NOTE : "all" is a dummy target. You will get a link error when
+       "all.exe." is built:
+
+             LINK: error LNK2001: unresolved external symbol
+			_mainCRTStartup.....
+             all.exe - 2 error(s), ....
+
+       Warning messages can be ignored. The "all.exe" is never created,
+       so it is OK.
+
+     You should see hdf5 libraries, tests and tools under section II 
+     Step 1. 
+     In addtion, under  c:\MyHDFstuff\hdf5\tools\"tools directory"-
+
+     You may also find:
+       h4toh5
+       h5toh4 
+     for both the debug and release versions.
+
+STEP 2:   testing hdf5 libraries and all hdf5 tools 
+
+     1. hdf5 static libraries and DLLs testing 
+       Follow all instructions of the same part in Section II STEP 2
+    
+     2. non-hdf4 related tools testing
+       Follow all instructions of the same part in Section II STEP 2
+
+     3. hdf4-related tools testing
+
+       1) h4toh5 converter tool testing
+          
+           First cd into hdf5\tools
+
+           Go to a) b) c) or d) to test your chosen version
+
+           a) release static version
+           type:             
+            h4toh5testrun release >"Your output filename" 
+
+ 	     b) release dll version
+           type:
+            h4toh5testrun release dll > "Your output filename"
+ 				
+           c) debug static version
+           type: 
+            h4toh5testrun debug >"Your output filename"
+
+           d) debug dll version
+           type:
+            h4toh5testrun debug dll >"Your output filename"
+
+        We are using "fc" command to compare whether h4toh5 converter 
+        converts the hdf4 file into the correct hdf5 file.In your output
+        files, Please only pay attention to those lines which start with
+        "FC:",you should find "FC: no differences encountered" for all
+        tested hdf4 files in your output.
+                       
+        2) h5toh4 converter tool testing                
+                                                             
+        To test the h5toh4 utility, you need to use hdf4 dumper utility
+        "hdp" in your system. 
+
+        Before the testing, you need to find 
+
+           a) The TOP directory path(including the drive name) where 
+              hdf5 library and tools is located,for example: C:/h5_1.4
+              (You may find the path by selecting folder "hdf5" where
+               your hdf5 library and tools are stored, right click and 
+               choose "property"; you should find the path from property
+               window.)
+
+           b) The full path where hdp is located, for example C:/H414/bin
+              (using property function to find the path of hdp).
+
+
+       1) cd into hdf5\tools. 
+
+        Four parameters should be input for h5toh4 test
+       
+       2) For windows NT 4.0 and 5.0 
+          type h5toh4testrun [para 1] [para 2] [para 3] [para 4] 
+
+       3) For Windows 98
+          type h5toh4testwin98 [para 1] [para 2] [para 3] [para 4]
+
+  para 1: [Debug] or [Release] version you are testing.
+  para 2: The top directory path(including the drive name) where hdf5 
+          tools is located,for example: C:\h5_1.4 
+  para 3: The full path where hdp is located, for example: 
+          C:\HDF41r4\bin
+  para 4: If no dll version,leave this parameter empty or type DLL
+
+        Again, we are using "fc" command to compare whether h5toh4 
+        converter converts the hdf5 file into the correct hdf4 file.
+        In your output files, Please only pay attention to those lines 
+        which start with
+        "FC:",you should find "FC: no differences encountered" for all
+        tested hdf5 files in your output.
+
+  
+				***** Warnings:*******
+      Do make sure that you type the correct parameters according to the
+      correct orders. Para 2 and Para 3 should be correctly input. 
+      Otherwise, the result may be unpredictable.
+
+STEP 3: BUILDING THE EXAMPLES
+
+      Follow all instructions of SECTION II STEP 3.
+
+Section IV:  
 BUILDING AN APPLICATION USING THE HDF5 LIBRARY OR DLL- SOME HELPFUL POINTERS
 ============================================================================
 
@@ -366,7 +713,7 @@ To use the DLL:
        e) The directories listed in the PATH environment variable. 
 
 
-Section 3:
+Section V:
 MORE HELPFUL POINTERS
 =====================
 
@@ -407,8 +754,29 @@ Settings... details:
 				   These are all set to use 
                                       Single-Threaded
 
+DLL... hints:
+  
+   If you want to use DLL versions of hdf5 library in your application, 
+   you should  
+      1) put hdf5 DLL into windows system directory
+      2) add hdf5 DLL export library into your project
+      3) Follow "Settings... details" into the last line:
+         change Single-Threaded into Multithreaded DLL or 
+         Debug Multithreaded DLL
+      4) Follow "Settings.. details" into PreProcessor:
+         Project
+	       Settings
+	           C/C++
+		       Category
+		          PreProcessor
 
-Section 4:
+         Find PreProcessor definations and Add _HDF5USEDLL_ at the
+         end of the PreProcessor definations
+         
+
+
+
+Section VI:
 ZLIB LIBRARY- REMOVING OR CHANGING THE PATH
 ============================================
 

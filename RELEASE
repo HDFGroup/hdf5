@@ -124,7 +124,8 @@ h4toh5 Utility
     The h4toh5 utility requires HDF5.1.4 and HDF4r1.4
 
     The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
-    Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, and Windows 2000.
+    Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, Windows 2000(NT5.0),Windows NT 
+    and Windows 98.
 
 F90 Support
 ===========
@@ -374,6 +375,7 @@ Platforms Tested
                                 Workshop Compilers 5.0 98/12/15 C++ 5.0
   TFLOPS 3.3                    mpich-1.2.0 with local changes
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
+  Windows 98                    MSVC++ 6.0
 
 Known Problems
 ==============
@@ -396,17 +398,13 @@ Known Problems
   
   This warning is innocuous and can be safely ignored.
 
-* When building the HDF5 test project on Windows NT 4.0 (testhdf5
-  and testhdf5dll), the compiler fails to compile tvstr.c within
-  the whole project; however, when separately selecting the 
-  tvstr.c source code, it passes the compiler and everything that
-  depends on tvstr.obj links correctly.
-
-* h4toh5 fails on object references on the Cray T3E.
-
 * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
 
+* When building hdf5 tools and applications on windows platform, a linking
+warning: defaultlib "LIBC" conflicts with use of other libs will appear
+on debug version when running VC++6.0. This warning doesn't affect building
+and testing hdf5 applications. We are investigating this now.
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
 
