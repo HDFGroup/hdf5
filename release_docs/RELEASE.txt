@@ -84,6 +84,8 @@ New Features
 
     Tools:
     ------
+        - h5repack.sh did not report errors encountered during tests.  It does
+          now.  AKC - 2004/04/02
         - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
             available for h5dump and h5ls
         - Added option --vfd= to h5ls to allow a VFL driver to be selected
