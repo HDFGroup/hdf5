@@ -28,6 +28,7 @@ PROGNAME="bin/runtest $DEBUGMODE"
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 H5DIR=$HOME/HDF5/v_1_4/hdf5
 TODAY=`date +%y%m%d`
+WEEKDAY=`date +%a`
 H5VER=			# default to current CVS version
 H5VERSTR=		# default to current CVS version
 
@@ -357,13 +358,27 @@ RUNSNAPTEST()
 # configuration parsing.
 # Taking configuration from input.
 # This should be invoke with configure file as stdin.
+# Syntax of the configure file:
+# All lines started with the # are comment lines and are ignored.
+# standard ...  # what the standard configure options are.
+# type of tests for individual host.
+# <host>: <test>        Do <test> for <host> 
+# all: <test>           Do <test> for all hosts. 
+# <weekday>/...		Use this configure if the <weekday> matches.
+#			<weekday> can be {Mon,Tue,Wed,Thu,Fri,Sat,Sun}
+# If no <host>: input for a <host>, the standard test is assumed.
 SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do
+	# Scan for entry for this weekday.
+	x=`echo $x | sed -e s%^$WEEKDAY/%%`
 	case "$x" in
 	    '#'*)
 		# comment.  Continue.
 	    	;;
+	    ???/*)
+		# Ignore any entry not of this weekday.
+		;;
 	    standard)
 		#standard configuration
 		STANDARD_OPT="$y"
