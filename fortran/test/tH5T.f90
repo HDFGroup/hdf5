@@ -655,20 +655,20 @@
          write (*,*) "got cset is not correct"
          total_error = total_error + 1
      end if
-     CALL h5tset_strpad_f(dtype5_id, H5T_STR_NULL_F, error)
+     CALL h5tset_strpad_f(dtype5_id, H5T_STR_NULLPAD_F, error)
      CALL check("h5tset_strpad_f",error,total_error)
      CALL h5tget_strpad_f(dtype5_id, strpad, error)
      CALL check("h5tget_strpad_f",error,total_error)
-     if(strpad .ne. H5T_STR_NULL_F ) then
+     if(strpad .ne. H5T_STR_NULLPAD_F ) then
          write (*,*) "got strpad is not correct"
          total_error = total_error + 1
      end if
 
-     CALL h5tset_strpad_f(dtype5_id, H5T_STR_SPACE_F, error)
+     CALL h5tset_strpad_f(dtype5_id, H5T_STR_SPACEPAD_F, error)
      CALL check("h5tset_strpad_f",error,total_error)
      CALL h5tget_strpad_f(dtype5_id, strpad, error)
      CALL check("h5tget_strpad_f",error,total_error)
-     if(strpad .ne. H5T_STR_SPACE_F ) then
+     if(strpad .ne. H5T_STR_SPACEPAD_F ) then
          write (*,*) "got strpad is not correct"
          total_error = total_error + 1
      end if

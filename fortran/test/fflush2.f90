@@ -71,7 +71,7 @@
      !
      !Initialize FORTRAN predifined datatypes
      !
-     CALL h5init_types_f(error) 
+     CALL h5init_fortran_f(error) 
           CALL check("h5init_types_f",error,total_error)
 
      !
@@ -152,7 +152,7 @@
      !
      !Close FORTRAN predifined datatypes
      !
-     CALL h5close_types_f(error)
+     CALL h5close_fortran_f(error)
          CALL check("h5close_types_f",error,total_error)
 
      END PROGRAM FFLUSH2EXAMPLE
