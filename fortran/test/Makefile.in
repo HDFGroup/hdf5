@@ -736,6 +736,10 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES
 	uninstall-libLTLIBRARIES
 
 
+        tH5F.lo tH5D.lo tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo       \
+        tH5Sselect.lo tH5P.lo tH5A.lo tH5I.lo tH5G.lo tH5E.lo tf.lo    \
+        t.lo
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -856,13 +860,6 @@ check-vfd:
 	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check;              \
 	    fi;                                                               \
 	done
-
-# Fortran dependencies must be hardcoded, unfortunately.
-#FORTLIBTEST_OBJ= fortranlib_test.lo                                    \
-#        tH5F.lo tH5D.lo tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo       \
-#        tH5Sselect.lo tH5P.lo tH5A.lo tH5I.lo tH5G.lo tH5E.lo tf.lo    \
-#        t.lo
-#fortranlib_test$(EXEEXT): $(FORTLIBTEST_OBJ)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
