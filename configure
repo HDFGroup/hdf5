@@ -33461,6 +33461,7 @@ fi
 
  USE_FILTER_SHUFFLE="no"
  USE_FILTER_FLETCHER32="no"
+ USE_FILTER_NBIT="no"
 echo "$as_me:$LINENO: checking for I/O filters" >&5
 echo $ECHO_N "checking for I/O filters... $ECHO_C" >&6
 # Check whether --enable-filters or --disable-filters was given.
@@ -33469,7 +33470,7 @@ if test "${enable_filters+set}" = set; then
   FILTERS=$enableval
 fi;
 
-all_filters="shuffle,fletcher32"
+all_filters="shuffle,fletcher32,nbit"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -33504,6 +33505,14 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
       USE_FILTER_FLETCHER32="yes"
+    fi
+    if test $filter = "NBIT"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FILTER_NBIT 1
+_ACEOF
+
+      USE_FILTER_NBIT="yes"
     fi
   done
 fi
@@ -34747,6 +34756,7 @@ s,@MPE@,$MPE,;t t
 s,@FILTERS@,$FILTERS,;t t
 s,@USE_FILTER_SHUFFLE@,$USE_FILTER_SHUFFLE,;t t
 s,@USE_FILTER_FLETCHER32@,$USE_FILTER_FLETCHER32,;t t
+s,@USE_FILTER_NBIT@,$USE_FILTER_NBIT,;t t
 s,@H5_VERSION@,$H5_VERSION,;t t
 s,@CONFIG_DATE@,$CONFIG_DATE,;t t
 s,@CONFIG_USER@,$CONFIG_USER,;t t

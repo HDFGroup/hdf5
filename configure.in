@@ -2430,6 +2430,7 @@ dnl
 AC_SUBST([FILTERS])
 AC_SUBST(USE_FILTER_SHUFFLE) USE_FILTER_SHUFFLE="no"
 AC_SUBST(USE_FILTER_FLETCHER32) USE_FILTER_FLETCHER32="no"
+AC_SUBST(USE_FILTER_NBIT) USE_FILTER_NBIT="no"
 AC_MSG_CHECKING([for I/O filters])
 AC_ARG_ENABLE([filters],
               [AC_HELP_STRING([--enable-filters=all],
@@ -2440,7 +2441,7 @@ AC_ARG_ENABLE([filters],
               [FILTERS=$enableval])
 
 dnl Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32"
+all_filters="shuffle,fletcher32,nbit"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -2470,6 +2471,11 @@ if test -n "$FILTERS"; then
       AC_DEFINE([HAVE_FILTER_FLETCHER32], [1],
                 [Define if support for Fletcher32 checksum is enabled])
       USE_FILTER_FLETCHER32="yes"
+    fi
+    if test $filter = "NBIT"; then
+      AC_DEFINE([HAVE_FILTER_NBIT], [1],
+                [Define if support for nbit filter is enabled])
+      USE_FILTER_NBIT="yes"
     fi
   done
 fi
