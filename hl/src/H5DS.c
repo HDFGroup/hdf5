@@ -111,6 +111,7 @@ herr_t H5DSattach_scale(hid_t did,
  hobj_ref_t ref;          /* reference to the DS */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  H5G_stat_t sb1, sb2;
+ H5I_type_t it1, it2;
  int        i, len;
  
 /*-------------------------------------------------------------------------
@@ -131,6 +132,15 @@ herr_t H5DSattach_scale(hid_t did,
 
  /* same object, not valid */
  if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno) 
+  return FAIL;
+
+ /* get ID type */
+ if ((it1 = H5Iget_type(did))<0)
+  return FAIL;
+ if ((it2 = H5Iget_type(dsid))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
   return FAIL;
 
 /*-------------------------------------------------------------------------
@@ -1376,7 +1386,7 @@ herr_t H5DSget_nscales(hid_t did,
   if (H5Aread(aid,tid,buf)<0)
    goto out;
 
-  for(i=0,n=0; i<buf[dim].len; i++)
+  for(i=0,n=0; i<(int)buf[dim].len; i++)
   {
    ref = ((hobj_ref_t *)buf[dim].p)[i]; 
    if (ref) n++;
@@ -1838,3 +1848,5 @@ out:
 } 
 
 #endif
+
+
