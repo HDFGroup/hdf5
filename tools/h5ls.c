@@ -818,7 +818,7 @@ display_enum_type(hid_t type, int ind)
     }
 
     /* Convert values to native data type */
-    if (native>0) H5Tconvert(super, native, nmembs, value, NULL);
+    if (native>0) H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
 
     /* Sort members by increasing value */
     /*not implemented yet*/
