@@ -117,7 +117,8 @@ herr_t H5D_convert_buf(void *dst, const void *src, uintn len, uintn size)
               break;
 
           default:
-              HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+              HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+			  "not implemented yet");
       } /* end switch */
 
 done:

@@ -120,18 +120,18 @@ H5Tcreate (H5T_class_t type, size_t size)
 
    /* check args */
    if (size<=0) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid size*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
    }
    
    /* create the type */
    if (NULL==(dt=H5T_create (type, size))) {
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL);/*can't create type*/
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create type");
    }
    
    /* Make it an atom */
    if ((ret_value=H5Aregister_atom (H5_DATATYPE, dt))<0) {
-      /* Can't register data type atom */
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+		     "can't register data type atom");
    }
 
    FUNC_LEAVE (ret_value);
@@ -169,16 +169,16 @@ H5T_create (H5T_class_t type, size_t size)
    case H5T_FIXED:
       /* Default type is a native `int' */
       if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_INT)))) {
-	 /* Can't derive type from native int */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+			"can't derive type from native int");
       }
       break;
 
    case H5T_FLOAT:
       /* Default type is a native `double' */
       if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_DOUBLE)))) {
-	 /* Can't derive type from native double */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+			"can't derive type from native double");
       }
       break;
 
@@ -187,7 +187,8 @@ H5T_create (H5T_class_t type, size_t size)
    case H5T_BITFIELD:
    case H5T_OPAQUE:
       assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
+		     "not implemented yet");
 
    case H5T_COMPOUND:
       dt = H5MM_xcalloc (1, sizeof(H5T_t));
@@ -195,8 +196,8 @@ H5T_create (H5T_class_t type, size_t size)
       break;
 
    default:
-      /* Unknown data type class */
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, NULL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
+		     "unknown data type class");
    }
 
    dt->size = size;
@@ -236,7 +237,7 @@ H5Tget_num_members (hid_t type_id)
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(dt=H5Aatom_object (type_id)) ||
        H5T_COMPOUND!=dt->type) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a compound data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
    }
 
    FUNC_LEAVE (dt->u.compnd.nmembs);
@@ -271,7 +272,7 @@ H5Tget_class (hid_t type_id)
    /* Check args */
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
 
    FUNC_LEAVE (dt->type);
@@ -309,7 +310,7 @@ H5Tget_size (hid_t type_id)
    /* Check args */
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
 
    /* size */
@@ -391,23 +392,23 @@ H5Tinsert_member (hid_t parent_id, const char *name, off_t offset,
    if (H5_DATATYPE!=H5Aatom_group (parent_id) ||
        NULL==(parent=H5Aatom_object (parent_id)) ||
        H5T_COMPOUND!=parent->type) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a compound data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
    }
    if (parent->locked) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*parent is locked*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "parent is locked");
    }
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no member name*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
    }
    if (H5_DATATYPE!=H5Aatom_group (member_id) ||
        NULL==(member=H5Aatom_object (member_id)) ||
        H5T_COMPOUND==member->type) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not an atomic data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
    }
 
    if (H5T_insert_member (parent, name, offset, member)<0) {
-      /* Can't insert member. */
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+		     "can't insert member");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -451,8 +452,8 @@ H5T_insert_member (H5T_t *parent, const char *name, off_t offset,
    /* Does NAME already exist in PARENT? */
    for (i=0; i<parent->u.compnd.nmembs; i++) {
       if (!HDstrcmp (parent->u.compnd.memb[i].name, name)) {
-	 /* Member name is not unique */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINSERT, FAIL,
+			"member name is not unique");
       }
    }
 
@@ -507,19 +508,19 @@ H5Tcopy (hid_t type_id)
    /* check args */
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
 
    /* copy */
    if (NULL==(new_dt = H5T_copy (dt))) {
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL); /*can't copy*/
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
    }
 
    /* atomize result */
    if ((ret_value=H5Aregister_atom (H5_DATATYPE, new_dt))<0) {
       H5T_close (new_dt);
-      /* Can't register data type atom */
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+		     "can't register data type atom");
    }
 
    FUNC_LEAVE (ret_value);
@@ -602,15 +603,15 @@ H5Tclose (hid_t type_id)
    /* check args */
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
    if (dt->locked) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*predefined data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "predefined data type");
    }
 
    /* When the reference count reaches zero the resources are freed */
    if (H5A_dec_ref (type_id)<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*problem freeing id*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -691,7 +692,7 @@ H5Tequal (hid_t type1_id, hid_t type2_id)
        NULL==(dt1=H5Aatom_object (type1_id)) ||
        H5_DATATYPE!=H5Aatom_group (type2_id) ||
        NULL==(dt2=H5Aatom_object (type2_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
 
    ret_value = (0==H5T_cmp (dt1, dt2));

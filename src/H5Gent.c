@@ -130,7 +130,7 @@ H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type)
 {
    FUNC_ENTER (H5G_ent_cache, NULL);
    if (!ent) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL, "no entry");
    }
    if (cache_type) *cache_type = ent->type;
    
@@ -208,7 +208,7 @@ H5G_ent_decode_vec (H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
    /* decode entries */
    for (i=0; i<n; i++) {
       if (H5G_ent_decode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL); /*can't decode*/
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
       }
    }
 
@@ -320,7 +320,7 @@ H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
    /* encode entries */
    for (i=0; i<n; i++) {
       if (H5G_ent_encode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL); /*can't encode*/
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
       }
    }
 

@@ -256,7 +256,8 @@ H5G_node_create (H5F_t *f, H5B_ins_t op,
    size = H5G_node_size (f);
    if (H5MF_alloc (f, H5MF_META, size, addr/*out*/)<0) {
       H5MM_xfree (sym);
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "unable to allocate file space");
    }
 
    sym->dirty = TRUE;
@@ -264,7 +265,8 @@ H5G_node_create (H5F_t *f, H5B_ins_t op,
    if (H5AC_set (f, H5AC_SNODE, addr, sym)<0) {
       H5MM_xfree (sym->entry);
       H5MM_xfree (sym);
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "unable to cache symbol table leaf node");
    }
 
    /*
@@ -324,7 +326,9 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
     */
    for (i=0; i<sym->nsyms; i++) {
       if (H5G_shadow_sync (sym->entry+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL,
+			"unable to synchronize symbol table node with open "
+			"objects");
       }
       if (sym->entry[i].dirty) sym->dirty = TRUE;
    }
@@ -355,7 +359,9 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
       
       status = H5F_block_write (f, addr, size, buf);
       buf = H5MM_xfree (buf);
-      if (status<0) HRETURN_ERROR (H5E_SYM, H5E_WRITEERROR, FAIL);
+      if (status<0) HRETURN_ERROR (H5E_SYM, H5E_WRITEERROR, FAIL,
+				   "unable to write symbol table node to "
+				   "the file");
    }
 
    /*
@@ -423,18 +429,21 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
    sym->entry = H5MM_xcalloc (2*H5G_NODE_K(f), sizeof(H5G_entry_t));
    
    if (H5F_block_read (f, addr, size, buf)<0) {
-      HGOTO_ERROR (H5E_SYM, H5E_READERROR, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_READERROR, NULL,
+		   "unabel to read symbol table node");
    }
 
    /* magic */
    if (HDmemcmp (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL,
+		   "bad symbol table node signature");
    }
    p += 4;
 
    /* version */
    if (H5G_NODE_VERS!=*p++) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL,
+		   "bad symbol table node version");
    }
 
    /* reserved */
@@ -445,7 +454,8 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
 
    /* entries */
    if (H5G_ent_decode_vec (f, &p, sym->entry, sym->nsyms)<0) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL,
+		   "unable to decode symbol table entries");
    }
    buf = H5MM_xfree (buf);
 
@@ -456,7 +466,9 @@ H5G_node_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
     */
    if (H5F_addr_defined (&(ac_udata->grp_addr)) &&
        H5G_shadow_assoc_node (f, sym, ac_udata)<0) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL,
+		   "unable to associate symbol table node with open "
+		   "objects");
    }
    
    ret_value = sym;
@@ -513,10 +525,12 @@ H5G_node_cmp2 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    assert (rt_key);
 
    if (NULL==(s1=H5H_peek (f, &(udata->heap_addr), lt_key->offset))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to read symbol name");
    }
    if (NULL==(s2=H5H_peek (f, &(udata->heap_addr), rt_key->offset))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to read symbol name");
    }
 
    cmp = HDstrcmp (s1, s2);
@@ -564,13 +578,15 @@ H5G_node_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 
    /* left side */
    if (NULL==(s=H5H_peek (f, &(udata->heap_addr), lt_key->offset))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to read symbol name");
    }
    if (HDstrcmp (udata->name, s)<=0) HRETURN (-1);
 
    /* right side */
    if (NULL==(s=H5H_peek (f, &(udata->heap_addr), rt_key->offset))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to read symbol name");
    }
    if (HDstrcmp (udata->name, s)>0) HRETURN(1);
 
@@ -633,7 +649,8 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
     * Load the symbol table node for exclusive access.
     */
    if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL,
+		   "unable to protect symbol table node");
    }
 
    /*
@@ -644,7 +661,8 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
       idx = (lt + rt) / 2;
       if (NULL==(s=H5H_peek (f, &(bt_udata->heap_addr),
 			     sn->entry[idx].name_off))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		      "unable to read symbol name");
       }
       cmp = HDstrcmp (bt_udata->name, s);
       
@@ -654,7 +672,7 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
 	 lt = idx+1;
       }
    }
-   if (cmp) HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   if (cmp) HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
 
    switch (bt_udata->operation) {
    case H5G_OPER_FIND:
@@ -669,7 +687,8 @@ H5G_node_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
       break;
 
    default:
-      HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		     "internal erorr (unknown symbol find operation)");
       break;
    }
    ret_value = SUCCEED;
@@ -682,7 +701,8 @@ done:
     */
    if (ret_value<0) {
       if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL,
+			"unable to release symbol table node");
       }
    }
 
@@ -776,7 +796,8 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
    ac_udata.grp_addr = bt_udata->grp_addr;
    ac_udata.heap_addr = bt_udata->heap_addr;
    if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
+		   "unable to protect symbol table node");
    }
 
    /*
@@ -787,11 +808,13 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
       idx = (lt + rt) / 2;
       if (NULL==(s=H5H_peek (f, &(bt_udata->heap_addr),
 			     sn->entry[idx].name_off))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR);
+	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR,
+		      "unable to read symbol name");
       }
       if (0==(cmp=HDstrcmp (bt_udata->name, s))) {
 	 /*already present*/
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
+		      "symbol is already present in symbol table");
       }
       if (cmp<0) {
 	 rt = idx;
@@ -809,8 +832,11 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
    offset = H5H_insert (f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
    bt_udata->entry.name_off = offset;
-   if (offset<=0) HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR);
-
+   if (offset<=0) {
+      HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
+		   "unable to insert symbol name into heap");
+   }
+   
    if (sn->nsyms>=2*H5G_NODE_K(f)) {
       /*
        * The node is full.  Split it into a left and right
@@ -822,10 +848,12 @@ H5G_node_insert (H5F_t *f, const haddr_t *addr,
       /* The right node */
       if (H5G_node_create (f, H5B_INS_FIRST, NULL, NULL, NULL,
 			   new_node/*out*/)<0) {
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR,
+		      "unable to split symbol table node");
       }
       if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, &ac_udata, NULL))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
+		      "unable to split symbol table node");
       }
       HDmemcpy (snrt->entry, sn->entry + H5G_NODE_K(f),
 		H5G_NODE_K(f) * sizeof(H5G_entry_t));
@@ -902,16 +930,19 @@ done:
    if (ret_value<0) {
       /* failing... */
       if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR);
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
+			"unable to release symbol table node");
       }
    } else if (insert_into!=sn) {
       /* unprotect the first node and protect the return value */
       if (H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR);
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, H5B_INS_ERROR,
+			"unable to release symbol table node");
       }
       if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, &insert_addr, &ac_udata,
 				  NULL))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
+		      "unable to protect symbol table node");
       }
       bt_udata->node_ptr = sn;
       bt_udata->entry_ptr = sn->entry + idx;
@@ -963,7 +994,8 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
    ac_udata.grp_addr = bt_udata->grp_addr;
    ac_udata.heap_addr = bt_udata->heap_addr;
    if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, addr, &ac_udata, NULL))) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL,
+		   "unable to protect symbol table node");
    }
 
    /*
@@ -989,7 +1021,8 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
       for (i=0; i<sn->nsyms && bt_udata->nsyms+i<bt_udata->maxentries; i++) {
 	 if (NULL==(s=H5H_peek (f, &(bt_udata->heap_addr),
 				sn->entry[i].name_off))) {
-	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+			 "unable to read symbol name");
 	 }
 	 bt_udata->name[bt_udata->nsyms+i] = H5MM_xstrdup (s);
       }
@@ -1003,7 +1036,8 @@ H5G_node_list (H5F_t *f, const haddr_t *addr, void *_udata)
 
 done:
    if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL);
+      HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL,
+		     "unable to release symbol table node");
    }
    FUNC_LEAVE (ret_value);
 }
@@ -1067,7 +1101,10 @@ H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    if (NULL==(sn=H5AC_protect(f, H5AC_SNODE, addr, &ac_udata, NULL))) {
       H5ECLEAR; /*discard that error*/
       status = H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE, NULL);
-      if (status<0) HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      if (status<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL,
+			"unable to debug B-tree node");
+      }
       HRETURN (SUCCEED);
    }
 

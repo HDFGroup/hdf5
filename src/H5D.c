@@ -179,24 +179,24 @@ H5Dcreate (hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
    /* check arguments */
    if (H5_FILE!=H5Aatom_group (file_id) ||
        NULL==(f=H5Aatom_object (file_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a file*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
    }
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no name*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
    }
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(type=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
    }
    if (H5_DATASPACE!=H5Aatom_group (space_id) ||
        NULL==(space=H5Aatom_object (space_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space */
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
    }
    if (create_parms_id>=0) {
       if (H5C_DATASET_CREATE!=H5Cget_class (create_parms_id) ||
 	  NULL==(create_parms=H5Aatom_object (create_parms_id))) {
-	 /* Not a dataset creation template */
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+			"not a dataset creation template");
       }
    } else {
       create_parms = &H5D_create_dflt;
@@ -204,14 +204,14 @@ H5Dcreate (hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
 
    /* build and open the new dataset */
    if (NULL==(new_dset=H5D_create (f, name, type, space, create_parms))) {
-      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL); /*can't create dataset*/
+      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "can't create dataset");
    }
 
    /* Register the new datatype and get an ID for it */
    if ((ret_value=H5Aregister_atom (H5_DATASET, new_dset))<0) {
       H5D_close (new_dset);
-      /* Can't register dataset */
-      HRETURN_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
+		     "can't register dataset");
    }
 
    FUNC_LEAVE (ret_value);
@@ -255,22 +255,22 @@ H5Dopen (hid_t file_id, const char *name)
    /* Check args */
    if (H5_FILE!=H5Aatom_group (file_id) ||
        NULL==(file=H5Aatom_object (file_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a file*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
    }
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no name*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
    }
 
    /* Find the dataset */
    if (NULL==(dataset=H5D_open (file, name))) {
-      HRETURN_ERROR (H5E_DATASET, H5E_NOTFOUND, FAIL); /*dataset not found*/
+      HRETURN_ERROR (H5E_DATASET, H5E_NOTFOUND, FAIL, "dataset not found");
    }
 
    /* Create an atom for the dataset */
    if ((ret_value=H5Aregister_atom (H5_DATASET, dataset))<0) {
       H5D_close (dataset);
-      /* Can't register dataset */
-      HRETURN_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
+		     "can't register dataset");
    }
 
    FUNC_LEAVE (ret_value);
@@ -311,7 +311,7 @@ H5Dclose (hid_t dataset_id)
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
        NULL==dataset->file) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a dataset*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
 
    /*
@@ -319,7 +319,7 @@ H5Dclose (hid_t dataset_id)
     * reaches zero.
     */
    if (H5A_dec_ref (dataset_id)<0) {
-      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL); /*can't free*/
+      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -379,31 +379,31 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
        NULL==dataset->file) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a dataset*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(type=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
    if (H5P_ALL!=space_id) {
       if (H5_DATASPACE!=H5Aatom_group (space_id) ||
 	  NULL==(space=H5Aatom_object (space_id))) {
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
       }
    }
    if (H5C_DEFAULT==xfer_parms_id) {
       xfer_parms = &H5D_xfer_dflt;
    } else if (H5C_DATASET_XFER!=H5Cget_class (xfer_parms_id) ||
 	      NULL==(xfer_parms=H5Aatom_object (xfer_parms_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not xfer parms*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
    }
    if (!buf) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no output buffer*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
    }
 
    /* read raw data */
    if (H5D_read (dataset, type, space, xfer_parms, buf/*out*/)<0) {
-      HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL); /*can't read data*/
+      HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
    }
    
    FUNC_LEAVE (SUCCEED);
@@ -459,31 +459,31 @@ H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
        NULL==dataset->file) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a dataset*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
        NULL==(type=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data type*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
    if (H5P_ALL!=space_id) {
       if (H5_DATASPACE!=H5Aatom_group (space_id) ||
 	  NULL==(space=H5Aatom_object (space_id))) {
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
       }
    }
    if (H5C_DEFAULT==xfer_parms_id) {
       xfer_parms = &H5D_xfer_dflt;
    } else if (H5C_DATASET_XFER!=H5Cget_class (xfer_parms_id) ||
 	      NULL==(xfer_parms=H5Aatom_object (xfer_parms_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not xfer parms*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
    }
    if (!buf) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no output buffer*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
    }
 
    /* write raw data */
    if (H5D_write (dataset, type, space, xfer_parms, buf)<0) {
-      HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL); /*can't write data*/
+      HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "can't write data");
    }
    
    FUNC_LEAVE (SUCCEED);
@@ -588,16 +588,16 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
     * is cached it shouldn't cause any disk activity.
     */
    if (NULL==(new_dset->ent = H5G_create (f, name, H5D_MINHDR_SIZE))) {
-      /* Problem with the dataset name */
-      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		   "problem with the dataset name");
    }
 
    /* Update the type and space header messages */
    if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_DTYPE, 0,
 		   new_dset->type)<0 ||
        H5P_modify (f, new_dset->ent, new_dset->space)<0) {
-      /* Can't update type or space header messages */
-      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		   "can't update type or space header messages");
    }
 
    /* Total raw data size */
@@ -609,13 +609,13 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
       new_dset->storage.cstore.size = nbytes;
       if (H5MF_alloc (f, H5MF_RAW, nbytes,
 		      &(new_dset->storage.cstore.addr))<0) {
-	 /* Can't allocate raw file storage */
-	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL);
+	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL,
+		      "can't allocate raw file storage");
       }
       if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_CSTORE, 0,
 		      &(new_dset->storage.cstore))<0) {
-	 /* Can't update dataset object header */
-	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		      "can't update dataset object header");
       }
       break;
 
@@ -628,27 +628,27 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
        */
       ndims = new_dset->create_parms.chunk_ndims;
       if (ndims != H5P_get_ndims (space)) {
-	 /* Dimensionality of chunks doesn't match the data space */
-	 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL);
+	 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
+		      "dimensionality of chunks doesn't match the data space");
       }
       assert (ndims<NELMTS (new_dset->create_parms.chunk_size));
       new_dset->create_parms.chunk_size[ndims] = H5T_get_size (type);
 
       if (H5F_istore_create (f, &(new_dset->storage.istore), ndims+1,
 			     new_dset->create_parms.chunk_size)<0) {
-	 /* Can't initialize chunked storage */
-	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		      "can't initialize chunked storage");
       }
       if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_ISTORE, 0,
 		      &(new_dset->storage.istore))<0) {
-	 /* Can't update dataset object header */
-	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		      "can't update dataset object header");
       }
       break;
       
    default:
       assert ("not implemented yet" && 0);
-      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL);
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
    }
 
    /* Success */
@@ -707,15 +707,15 @@ H5D_open (H5F_t *f, const char *name)
     
    /* Open the dataset object */
    if (NULL==(dataset->ent=H5G_open (f, name))) {
-      HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, NULL); /*not found*/
+      HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
    }
 
    /* Get the type and space */
    if (NULL==(dataset->type = H5O_read (f, NO_ADDR, dataset->ent, H5O_DTYPE,
 					0, NULL)) ||
        NULL==(dataset->space = H5P_read (f, dataset->ent))) {
-      /* Can't load type of space info from dataset header */
-      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		   "can't load type of space info from dataset header");
    }
 
    /*
@@ -746,7 +746,7 @@ H5D_open (H5F_t *f, const char *name)
       
    } else {
       assert ("not implemented yet" && 0);
-      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL);
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
    }
 
    /* Success */
@@ -819,8 +819,9 @@ H5D_close (H5D_t *dataset)
    H5MM_xfree (dataset);
 
    if (free_failed) {
-      /* Couldn't free the type or space, but the dataset was freed anyway. */
-      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "couldn't free the type or space, but the dataset was "
+		     "freed anyway.");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -866,16 +867,16 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    assert (buf);
 
    if (H5D_CONTIGUOUS!=dataset->create_parms.layout) {
-      /* Layout is not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "layout is not supported yet");
    }
    if (H5T_cmp (type, dataset->type)) {
-      /* Type conversion not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "type conversion not supported yet");
    }
    if (space && H5P_cmp (space, dataset->space)) {
-      /* Space conversion not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "space conversion not supported yet");
    }
 
    /* Compute the size of the request */
@@ -888,7 +889,7 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
        */
       if (H5F_block_read (dataset->file, &(dataset->storage.cstore.addr),
 			  nbytes, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
       break;
 
@@ -901,13 +902,14 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
       if (H5F_istore_read (dataset->file, &(dataset->storage.istore),
 			   offset, size, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
       break;
 
    default:
       assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		     "not implemented yet");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -954,16 +956,16 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    assert (buf);
 
    if (H5D_CONTIGUOUS!=dataset->create_parms.layout) {
-      /* Layout is not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "layout is not supported yet");
    }
    if (H5T_cmp (type, dataset->type)) {
-      /* Type conversion not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "type conversion not supported yet");
    }
    if (space && H5P_cmp (space, dataset->space)) {
-      /* Space conversion not supported yet */
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "space conversion not supported yet");
    }
 
    /* Compute the size of the request */
@@ -977,7 +979,7 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
        */
       if (H5F_block_write (dataset->file, &(dataset->storage.cstore.addr),
 			   nbytes, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }
       break;
 
@@ -990,13 +992,14 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
       if (H5F_istore_write (dataset->file, &(dataset->storage.istore),
 			    offset, size, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }
       break;
 
    default:
       assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		     "not implemented yet");
    }
    
    FUNC_LEAVE (SUCCEED);

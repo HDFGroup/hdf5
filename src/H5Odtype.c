@@ -124,8 +124,8 @@ H5O_dtype_decode_helper (const uint8 **pp, H5T_t *dt)
 	 dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
 	 break;
       default:
-	 /* unknown floating-point normalization */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"unknown floating-point normalization");
       }
       dt->u.atomic.u.f.sign = (flags>>8) & 0xff;
       UINT16DECODE (*pp, dt->u.atomic.offset);
@@ -167,16 +167,16 @@ H5O_dtype_decode_helper (const uint8 **pp, H5T_t *dt)
 	     H5T_COMPOUND==dt->u.compnd.memb[i].type.type) {
 	    for (j=0; j<=i; j++) H5MM_xfree (dt->u.compnd.memb[i].name);
 	    H5MM_xfree (dt->u.compnd.memb);
-	    /* Can't decode member type */
-	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTDECODE, FAIL);
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTDECODE, FAIL,
+			   "can't decode member type");
 	 }
       }
       break;
       
    default:
       if (flags) {
-	 /* class flags are non-zero */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"class flags are non-zero");
       }
       break;
    }
@@ -231,8 +231,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x01;
 	 break;
       default:
-	 /* Byte order is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"byte order is not supported in file format yet");
       }
 
       switch (dt->u.atomic.lo_pad) {
@@ -242,8 +242,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x02;
 	 break;
       default:
-	 /* Bit padding is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"bit padding is not supported in file format yet");
       }
       
       switch (dt->u.atomic.hi_pad) {
@@ -253,8 +253,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x04;
 	 break;
       default:
-	 /* Bit padding is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"bit padding is not supported in file format yet");
       }
 
       switch (dt->u.atomic.u.i.sign) {
@@ -264,8 +264,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x08;
 	 break;
       default:
-	 /* Sign scheme is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"sign scheme is not supported in file format yet");
       }
       
       UINT16ENCODE (*pp, dt->u.atomic.offset);
@@ -283,8 +283,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x01;
 	 break;
       default:
-	 /* Byte order is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"byte order is not supported in file format yet");
       }
 
       switch (dt->u.atomic.lo_pad) {
@@ -294,8 +294,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x02;
 	 break;
       default:
-	 /* Bit padding is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"bit padding is not supported in file format yet");
       }
       
       switch (dt->u.atomic.hi_pad) {
@@ -305,8 +305,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x04;
 	 break;
       default:
-	 /* Bit padding is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"bit padding is not supported in file format yet");
       }
       
       switch (dt->u.atomic.u.f.pad) {
@@ -316,8 +316,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x08;
 	 break;
       default:
-	 /* Bit padding is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"bit padding is not supported in file format yet");
       }
 
       switch (dt->u.atomic.u.f.norm) {
@@ -330,8 +330,9 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 flags |= 0x20;
 	 break;
       default:
-	 /* Normalization scheme is not supported in file format yet */
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			"normalization scheme is not supported in file "
+			"format yet");
       }
 
       flags |= (dt->u.atomic.u.f.sign << 8) & 0xff00;
@@ -369,8 +370,8 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 	 }
 	 UINT32ENCODE (*pp, perm_word);
 	 if (H5O_dtype_encode_helper (pp, &(dt->u.compnd.memb[i].type))<0) {
-	    /* Can't encode member type */
-	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTENCODE, FAIL);
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTENCODE, FAIL,
+			   "can't encode member type");
 	 }
       }
       break;
@@ -422,8 +423,8 @@ H5O_dtype_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 
    if (H5O_dtype_decode_helper (&p, dt)<0) {
       H5MM_xfree (dt);
-      /* can't decode type */
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTDECODE, NULL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTDECODE, NULL,
+		     "can't decode type");
    }
    assert (raw_size==H5O_dtype_size (f, (void*)dt));
    
@@ -462,8 +463,8 @@ H5O_dtype_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 
    /* encode */
    if (H5O_dtype_encode_helper (&p, dt)<0) {
-      /* can't encode type */
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTENCODE, FAIL);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTENCODE, FAIL,
+		     "can't encode type");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -499,7 +500,7 @@ H5O_dtype_copy (const void *_src, void *_dst)
 
    /* copy */
    if (NULL==(dst=H5T_copy (src))) {
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL); /*can't copy type*/
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "can't copy type");
    }
    
    /* was result already allocated? */

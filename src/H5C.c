@@ -69,13 +69,17 @@ H5C_init_interface (void)
       status = H5Ainit_group (H5_TEMPLATE_0+i, H5A_TEMPID_HASHSIZE, 0, NULL);
       if (status<0) ret_value = FAIL;
    }
-   if (ret_value<0) HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL);
+   if (ret_value<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
+		     "unable to initialize atom group");
+   }
 
    /*
     * Register cleanup function.
     */
    if (H5_add_exit (H5C_term_interface)<0) {
-      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		     "unable to install atexit function");
    }
 
    FUNC_LEAVE(ret_value);
@@ -143,8 +147,8 @@ H5Ccreate (H5C_class_t type)
       break;
 
    case H5C_FILE_ACCESS:
-      /* Not implemented yet */
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		     "not implemented yet");
 
    case H5C_DATASET_CREATE:
       tmpl = H5MM_xmalloc (sizeof(H5D_create_t));
@@ -157,13 +161,14 @@ H5Ccreate (H5C_class_t type)
       break;
       
    default:
-      /* Unknown template class */
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "unknown template class");
    }
 
    /* Atomize the new template */
    if ((ret_value = H5C_create (type, tmpl))<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL); /*can't register template*/
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
+		     "can't register template");
    }
 
    FUNC_LEAVE (ret_value);
@@ -201,7 +206,8 @@ H5C_create (H5C_class_t type, void *tmpl)
 
    /* Atomize the new template */
    if ((ret_value = H5Aregister_atom (H5_TEMPLATE_0+type, tmpl))<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL); /*can't register template*/
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
+		     "can't register template");
    }
 
    FUNC_LEAVE (ret_value);
@@ -229,7 +235,7 @@ H5Cclose (hid_t template)
 
    /* Chuck the object! :-) */
    if (NULL==(tmpl=H5Aremove_atom (template))) {
-      HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+      HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to remove atom");
    }
    H5MM_xfree (tmpl);
 
@@ -264,8 +270,7 @@ H5Cget_class (hid_t template)
    
    if ((group = H5Aatom_group (template))<0 ||
        group<H5_TEMPLATE_0 || group>=H5_TEMPLATE_MAX) {
-      /* not a template */
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS);
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS, "not a template");
    }
 
    ret_value = group - H5_TEMPLATE_0;
@@ -425,7 +430,7 @@ H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf/*out*/)
    /* check args */
    if ((type=H5Cget_class (template))<0 ||
        NULL==(tmpl=H5Aatom_object (template))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a template*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a template");
    }
 
    /* Handle each class of template */
@@ -479,14 +484,14 @@ H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf/*out*/)
 	 break;
 
       default:
-	 /* Unknown property for file create template */
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			"unknown property for file create template");
       }
       break;
 
    case H5C_FILE_ACCESS:
-      /* Unknown property for file access template */
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "unknown property for file access template");
        
    case H5C_DATASET_CREATE:
       dset_create = (const H5D_create_t *)tmpl;
@@ -499,8 +504,8 @@ H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf/*out*/)
 	 if (H5D_CHUNKED==dset_create->layout) {
 	    *(int*)buf = dset_create->chunk_ndims; 
 	 } else {
-	    /* Chunk dimensionality is not initialized */
-	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL);
+	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL,
+			   "chunk dimensionality is not initialized");
 	 }
 	 break;
 
@@ -510,30 +515,30 @@ H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf/*out*/)
 	       ((size_t*)buf)[i] = dset_create->chunk_size[i];
 	    }
 	 } else {
-	    /* Chunk size is not initialized */
-	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL);
+	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL,
+			   "chunk size is not initialized");
 	 }
 	 break;
 
       case H5D_COMPRESS:
       case H5D_PRE_OFFSET:
       case H5D_PRE_SCALE:
-	 /* Not implemented yet */
-	 HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	 HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+			"not implemented yet");
 
       default:
-	 /* Unknown property for dataset create template */
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			"unknown property for dataset create template");
       }
       break;
        
    case H5C_DATASET_XFER:
-      /* Unknown property for dataset transfer template */
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "unknown property for dataset transfer template");
 
    default:
-      /* Unknown template class */
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "unknown template class");
    }
    FUNC_LEAVE (SUCCEED);
 }
@@ -583,7 +588,7 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
    
    if ((type=H5Cget_class (template))<0 ||
        NULL==(tmpl=H5Aatom_object (template))) {
-      HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a template*/
+      HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a template");
    }
 
    /* Handle each class of template */
@@ -599,8 +604,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
 	    if (size==p2) break;
 	 }
 	 if (i>=8*sizeof(int)) {
-	    /* Userblock size is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			 "userblock size is not valid");
 	 }
 	 file_create->userblock_size = size;
 	 break;
@@ -608,8 +613,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_SIZEOF_ADDR:
 	 size = va_arg (ap, size_t);
 	 if (size!=2 && size!=4 && size!=8 && size!=16) {
-	    /* file haddr_t size is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			 "file haddr_t size is not valid");
 	 }
 	 file_create->sizeof_addr = size;
 	 break;
@@ -617,8 +622,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_SIZEOF_SIZE:
 	 size = va_arg (ap, size_t);
 	 if (size!=2 && size!=4 && size!=8 && size!=16) {
-	    /* file size_t size is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			 "file size_t size is not valid");
 	 }
 	 file_create->sizeof_size = size;
 	 break;
@@ -626,8 +631,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_SYM_LEAF_K:
 	 n = va_arg (ap, int);
 	 if (n<2) {
-	    /* Symbol leaf node 1/2 rank is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			 "symbol leaf node 1/2 rank is not valid");
 	 }
 	 file_create->sym_leaf_k = n;
 	 break;
@@ -635,8 +640,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_SYM_INTERN_K:
 	 n = va_arg (ap, int);
 	 if (n<2) {
-	    /* Symbol internal node 1/2 rank is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			 "symbol internal node 1/2 rank is not valid");
 	 }
 	 file_create->btree_k[H5B_SNODE_ID] = n;
 	 break;
@@ -644,8 +649,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_ISTORE_K:
 	 n = va_arg (ap, int);
 	 if (n<2) {
-	    /* Indexed storage internal node 1/2 rank is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			 "indexed storage internal node 1/2 rank not valid");
 	 }
 	 file_create->btree_k[H5B_ISTORE_ID] = n;
 	 break;
@@ -655,18 +660,18 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5F_FREESPACE_VER:
       case H5F_OBJECTDIR_VER:
       case H5F_SHAREDHEADER_VER:
-	 /* This is a read-only property */
-	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		      "this is a read-only property");
 
       default:
-	 /* Unknown file creation property */
-	 HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	 HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "unknown file creation property");
       }
       break;
 
    case H5C_FILE_ACCESS:
-      /* Unknown property for file access template */
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		   "unknown property for file access template");
        
    case H5C_DATASET_CREATE:
       dset_create = (H5D_create_t *)tmpl;
@@ -675,8 +680,8 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5D_LAYOUT:
 	 layout = va_arg (ap, H5D_layout_t);
 	 if (layout<0 || layout>=H5D_NLAYOUTS) {
-	    /* Raw data layout method is not valid */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			 "raw data layout method is not valid");
 	 }
 	 dset_create->layout = layout;
 	 break;
@@ -684,12 +689,12 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5D_CHUNK_NDIMS:
 	 n = va_arg (ap, int);
 	 if (H5D_CHUNKED!=dset_create->layout) {
-	    /* Not a chunked layout template */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+			 "not a chunked layout template");
 	 }
 	 if (n<=0 || n>NELMTS (dset_create->chunk_size)) {
-	    /* Invalid number of dimensions */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			 "invalid number of dimensions");
 	 }
 	 dset_create->chunk_ndims = n;
 	 for (i=0; i<n; i++) dset_create->chunk_size[i] = 1;
@@ -698,16 +703,16 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5D_CHUNK_SIZE:
 	 dims = va_arg (ap, size_t*);
 	 if (H5D_CHUNKED!=dset_create->layout) {
-	    /* Not a chunked layout template */
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+			 "not a chunked layout template");
 	 }
 	 if (!dims) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no dims*/
+	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no dims");
 	 }
 	 for (i=0; i<dset_create->chunk_ndims; i++) {
 	    if (dims[i]<=0) {
-	       /* Invalid dimension size */
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	       HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			    "invalid dimension size");
 	    }
 	 }
 	 for (i=0; i<dset_create->chunk_ndims; i++) {
@@ -718,22 +723,22 @@ H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
       case H5D_COMPRESS:
       case H5D_PRE_OFFSET:
       case H5D_PRE_SCALE:
-	 /* Not implemented yet */
-	 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		      "not implemented yet");
 
       default:
-	 /* Unknown property for dataset create template */
-	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		      "unknown property for dataset create template");
       }
       break;
        
    case H5C_DATASET_XFER:
-      /* Unknown property for dataset transfer template */
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		   "unknown property for dataset transfer template");
 
    default:
-      /* Unknown template class */
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		   "unknown template class");
    }
 
    ret_value = SUCCEED;
@@ -783,8 +788,8 @@ H5Ccopy (hid_t template)
    if (NULL==(tmpl=H5Aatom_object (template)) ||
        (type=H5Cget_class (template))<0 ||
        (group=H5Aatom_group (template))<0) {
-      /* Can't unatomize template */
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL,
+		     "can't unatomize template");
    }
 
    /* How big is the template */
@@ -794,8 +799,8 @@ H5Ccopy (hid_t template)
       break;
 
    case H5C_FILE_ACCESS:
-      /* File access properties are not implemented yet */
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		     "file access properties are not implemented yet");
 
    case H5C_DATASET_CREATE:
       size = sizeof(H5D_create_t);
@@ -806,8 +811,8 @@ H5Ccopy (hid_t template)
       break;
 
    default:
-      /* Unknown template class */
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "unknown template class");
    }
 
    /* Create the new template */
@@ -816,7 +821,8 @@ H5Ccopy (hid_t template)
 
    /* Register the atom for the new template */
    if ((ret_value=H5Aregister_atom (group, new_tmpl))<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL);
+      HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		     "unable to atomize template pointer");
    }
 
    FUNC_LEAVE (ret_value);

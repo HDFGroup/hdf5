@@ -351,8 +351,9 @@ H5T_init (void)\n\
       /* Atomize the type */
       printf ("\
    if ((H5T_NATIVE_%s = H5Aregister_atom (H5_DATATYPE, dt))<0) {\n\
-      /* Can't initialize type system - atom registration failure */\n\
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL);\n\
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\n\
+                     \"can't initialize type system (atom registration \"\n\
+                     \"failure\");\n\
    }\n", 
 	      d[i].varname);
       

@@ -79,7 +79,7 @@ H5F_low_open (const H5F_low_class_t *type, const char *name, uintn flags,
    assert (name && *name);
 
    if (NULL==(lf=(type->open)(name, flags, key))) {
-      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);/*open failed*/
+      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
    }
    lf->type = type;
 
@@ -123,7 +123,7 @@ H5F_low_close (H5F_low_t *lf)
    if (lf) {
       if ((lf->type->close)(lf)<0) {
 	 H5MM_xfree (lf);
-	 HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, NULL); /*close failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, NULL, "close failed");
       }
       H5MM_xfree (lf);
    }
@@ -172,10 +172,10 @@ H5F_low_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
 
    if (lf->type->read) {
       if ((ret_value = (lf->type->read)(lf, addr, size, buf))<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, ret_value);/*read failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, ret_value, "read failed");
       }
    } else {
-      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL);/*no read method*/
+      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "no read method");
    }
 
    FUNC_LEAVE (ret_value);
@@ -231,10 +231,10 @@ H5F_low_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
    /* Write the data */
    if (lf->type->write) {
       if ((ret_value = (lf->type->write)(lf, addr, size, buf))<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, ret_value);/*write failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, ret_value, "write failed");
       }
    } else {
-      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL);/*no write method*/
+      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "no write method");
    }
 
    FUNC_LEAVE (ret_value);
@@ -288,8 +288,8 @@ H5F_low_flush (H5F_low_t *lf)
    /* Invoke the subclass the flush method */
    if (lf->type->flush) {
       if ((lf->type->flush)(lf)<0) {
-	 /* Low level flush failed */
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			"low level flush failed");
       }
    }
 
@@ -438,8 +438,8 @@ H5F_low_extend (H5F_low_t *lf, intn op, size_t size, haddr_t *addr/*out*/)
 
    if (lf->type->extend) {
       if ((lf->type->extend)(lf, op, size, addr/*out*/)<0) {
-	 /* Unable to extend file */
-	 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+	 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"unable to extend file");
       }
    } else {
       *addr = lf->eof;

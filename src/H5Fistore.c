@@ -370,8 +370,8 @@ H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
    nbytes = H5V_vector_reduce_product (udata->mesg.ndims, udata->key.size);
    assert (nbytes>0);
    if (H5MF_alloc (f, H5MF_RAW, nbytes, addr/*out*/)<0) {
-      /* Couldn't allocate new file storage */
-      HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL,
+		     "couldn't allocate new file storage");
    }
    udata->addr = *addr;
    udata->key.file_number = 0;
@@ -518,7 +518,7 @@ H5F_istore_insert (H5F_t *f, const haddr_t *addr,
    if (cmp<0) {
       /* Negative indices not supported yet */
       assert ("HDF5 INTERNAL ERROR -- see rpm" && 0);
-      HRETURN_ERROR (H5E_STORAGE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_STORAGE, H5E_UNSUPPORTED, FAIL, "internal error");
       
    } else if (H5V_hyper_eq (udata->mesg.ndims,
 			    udata->key.offset,  udata->key.size, 
@@ -554,7 +554,8 @@ H5F_istore_insert (H5F_t *f, const haddr_t *addr,
        * Allocate storage for the new chunk
        */
       if (H5MF_alloc (f, H5MF_RAW, nbytes, new_node/*out*/)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL);
+	 HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL,
+			"file allocation failed");
       }
       udata->addr = *new_node;
       udata->key.file_number = 0;
@@ -562,7 +563,7 @@ H5F_istore_insert (H5F_t *f, const haddr_t *addr,
       
    } else {
       assert ("HDF5 INTERNAL ERROR -- see rpm" && 0);
-      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "internal error");
    }
    
    FUNC_LEAVE (ret_value);
@@ -704,7 +705,8 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 	 if (status>=0 && H5F_addr_defined (&(udata.addr))) {
 	    assert (0==udata.key.file_number);
 	    if (H5F_block_read (f, &(udata.addr), chunk_size, chunk)<0) {
-	       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
+	       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			    "unable to read raw storage chunk");
 	    }
 	 } else {
 	    HDmemset (chunk, 0, chunk_size);
@@ -718,7 +720,8 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 			 size_m, sub_offset_m, buf);
 	 assert (0==udata.key.file_number);
 	 if (H5F_block_write (f, &(udata.addr), chunk_size, chunk)<0) {
-	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			 "unable to write raw storage chunk");
 	 }
       } else {
 	 H5V_hyper_copy (istore->ndims, sub_size,
@@ -774,8 +777,8 @@ H5F_istore_read (H5F_t *f, const H5O_istore_t *istore,
 
    if (H5F_istore_copy_hyperslab (f, istore, H5F_ISTORE_READ,
 				  offset, size, H5V_ZERO, size, buf)<0) {
-      /* hyperslab output failure */
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+		     "hyperslab output failure");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -815,8 +818,8 @@ H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
 
    if (H5F_istore_copy_hyperslab (f, istore, H5F_ISTORE_WRITE,
 				  offset, size, H5V_ZERO, size, buf)<0) {
-      /* hyperslab output failure */
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		     "hyperslab output failure");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -868,7 +871,7 @@ H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore/*out*/,
 
    udata.mesg.ndims = istore->ndims = ndims;
    if (H5B_create (f, H5B_ISTORE, &udata, &(istore->btree_addr)/*out*/)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL); /* Can't create B-tree */
+      HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree");
    }
 
    for (i=0; i<ndims; i++) {

@@ -229,11 +229,12 @@ hid_t H5Maccess(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].access==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		    "no access method");
     ret_value=(meta_func_arr[i].access)(oid);
 
 done:
@@ -272,11 +273,11 @@ hid_t H5Mcopy(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].copy==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no copy method");
     ret_value=(meta_func_arr[i].copy)(oid);
 
 done:
@@ -326,12 +327,12 @@ H5Mfind_name (hid_t owner_id, group_t type, const char *name)
     i=H5M_find_type(group);
 #else /* OLD_WAY */
     if(type<=BADGROUP || type>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(type);
 #endif /* OLD_WAY */
     if(meta_func_arr[i].find_name==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no open method");
     ret_value=(meta_func_arr[i].find_name)(owner_id,type,name);
 
 done:
@@ -370,11 +371,11 @@ uint32 H5Mname_len(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].name_len==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no name_len method");
     ret_value=(meta_func_arr[i].name_len)(oid);
 
 done:
@@ -414,11 +415,12 @@ herr_t H5Mget_name(hid_t oid, char *name)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_name==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		    "no get_name method");
     ret_value=(meta_func_arr[i].get_name)(oid,name);
 
 done:
@@ -458,11 +460,12 @@ herr_t H5Mset_name(hid_t oid, const char *name)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].set_name==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		    "no set_name method");
     ret_value=(meta_func_arr[i].set_name)(oid,name);
 
 done:
@@ -504,11 +507,11 @@ H5Msearch (hid_t oid, group_t type, const char *name)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].search==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no search method");
     ret_value=(meta_func_arr[i].search)(oid,type,name);
 
 done:
@@ -550,11 +553,11 @@ H5Mindex (hid_t oid, group_t type, uint32 idx)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,  "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].index==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no index method");
     ret_value=(meta_func_arr[i].index)(oid,type,idx);
 
 done:
@@ -594,12 +597,12 @@ hid_t H5Mflush(hid_t oid)
     H5ECLEAR;
     group=H5Aatom_group(oid);	/* look up group for incoming object */
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     /* Find correct function pointer set from static array */
     i=H5M_find_type(group);
     if(meta_func_arr[i].flush==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no flush method");
     ret_value=(meta_func_arr[i].flush)(oid);
 
 done:
@@ -639,11 +642,11 @@ herr_t H5Mdelete(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].delete==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no delete method");
     ret_value=(meta_func_arr[i].delete)(oid);
 
 done:
@@ -682,11 +685,12 @@ hid_t H5Mget_parent(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_parent==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		    "no get_parent method");
     ret_value=(meta_func_arr[i].get_parent)(oid);
 
 done:
@@ -725,11 +729,12 @@ hid_t H5Mget_file(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].get_file==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+		    "no get_file method");
     ret_value=(meta_func_arr[i].get_file)(oid);
 
 done:
@@ -768,11 +773,11 @@ herr_t H5Mclose(hid_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(group<=BADGROUP || group>=MAXGROUP)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
     i=H5M_find_type(group);
     if(meta_func_arr[i].close==NULL)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+	HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "no close method");
     ret_value=(meta_func_arr[i].close)(oid);
 
 done:

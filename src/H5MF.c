@@ -70,8 +70,8 @@ H5MF_alloc (H5F_t *f, intn op, size_t size, haddr_t *addr/*out*/)
     * the file.
     */
    if (H5F_low_extend (f->shared->lf, op, size, addr/*out*/)<0) {
-      /* Low level mem management failed */
-      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "low level mem management failed");
    }
    /* Convert from absolute to relative */
    addr->offset -= f->shared->base_addr.offset;

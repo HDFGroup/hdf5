@@ -112,7 +112,8 @@ H5AC_dest (H5F_t *f)
    cache = f->shared->cache;
    
    if (H5AC_flush (f, NULL, NO_ADDR, TRUE)<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+		     "unable to flush cache");
    }
 
 #ifdef H5AC_DEBUG
@@ -212,7 +213,8 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
     * of the wrong type.
     */
    if (slot->type && slot->type!=type && H5F_addr_eq (&(slot->addr), addr)) {
-      HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
+      HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL,
+		     "internal error (correct address, wrong type)");
    }
 
 #ifdef H5AC_DEBUG
@@ -234,7 +236,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
     * without preempting anything.
     */
    if (NULL==(thing=(type->load)(f, addr, udata1, udata2))) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load object");
    }
 
    /*
@@ -249,9 +251,11 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 	  * Release the new thing and fail.
 	  */
 	 if ((type->flush)(f, TRUE, addr, thing)<0) {
-	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL);
+	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL,
+			   "unable to flush just-loaded object");
 	 }
-	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL,
+			"unable to flush existing cached object");
       }
       cache->diagnostics[slot->type->id].nflushes++;
    }
@@ -398,7 +402,8 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 	    status = (flush)(f, destroy, &(slot->addr), slot->thing);
 	    if (status<0) {
 	       map = H5MM_xfree (map);
-	       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			      "can't flush cache");
 	    }
 	    cache->diagnostics[slot->type->id].nflushes++;
 	    if (destroy) slot->type = NULL;
@@ -411,7 +416,8 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
        * else should have been flushed.
        */
       if (cache->nprots>0) {
-	 HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL,
+			"cache has protected items");
       }
       
    } else {
@@ -425,7 +431,8 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 	 status =  (flush) (f, destroy, &(cache->slot[i].addr),
 			    cache->slot[i].thing);
 	 if (status<0) {
-	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			   "can't flush object");
 	 }
 	 cache->diagnostics[cache->slot[i].type->id].nflushes++;
 	 if (destroy) cache->slot[i].type = NULL;
@@ -492,7 +499,8 @@ H5AC_set (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr, void *thing)
       flush = slot->type->flush;
       status = (flush)(f, TRUE, &(slot->addr), slot->thing);
       if (status<0) {
-	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			"can't flush object");
       }
       cache->diagnostics[slot->type->id].nflushes++;
    }
@@ -582,7 +590,8 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
       status = (flush)(f, TRUE, &(cache->slot[new_idx].addr),
 		       cache->slot[new_idx].thing);
       if (status<0) {
-	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			"can't flush object");
       }
       cache->diagnostics[cache->slot[new_idx].type->id].nflushes++;
    }
@@ -668,7 +677,8 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
       /*
        * Right address but wrong object type.
        */
-      HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
+      HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL,
+		     "internal error");
 	      
    } else {
 #ifdef H5AC_DEBUG
@@ -689,7 +699,8 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
        */
       cache->diagnostics[type->id].nmisses++;
       if (NULL==(thing=(type->load)(f, addr, udata1, udata2))) {
-	 HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL,
+			"can't load object");
       }
    }
 
@@ -770,7 +781,8 @@ H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
       flush = slot->type->flush;
       status = (flush)(f, TRUE, &(slot->addr), slot->thing);
       if (status<0) {
-	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			"can't flush object");
       }
       cache->diagnostics[slot->type->id].nflushes++;
    }

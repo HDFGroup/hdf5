@@ -110,7 +110,7 @@ H5F_fam_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 	 if (!H5F_low_access (H5F_LOW_DFLT, member_name, F_OK, NULL)) {
 	    break;
 	 } else if (unlink (member_name)<0) {
-	    HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL);/*can't delete member*/
+	    HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "can't delete member");
 	 }
       }
    }
@@ -133,8 +133,8 @@ H5F_fam_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 			     0==membno?key:NULL);
       if (!member) {
 	 if (0==membno) {
-	    /* Can't open first family member */
-	    HGOTO_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);
+	    HGOTO_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL,
+			 "can't open first family member");
 	 }
 	 break;
       }
@@ -294,8 +294,8 @@ H5F_fam_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 	 cur_addr.offset = offset;
 	 if (H5F_low_read (lf->u.fam.memb[membno], &cur_addr,
 			   nbytes, buf)<0) {
-	    /* Can't read from family member */
-	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+	    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+			   "can't read from family member");
 	 }
 	 buf += nbytes;
 	 size -= nbytes;
@@ -366,8 +366,8 @@ H5F_fam_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 				   lf->u.fam.flags|H5F_ACC_CREAT,
 				   NULL);
 	    if (!member) {
-	       /* Can't create a new member */
-	       HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, FAIL);
+	       HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, FAIL,
+			      "can't create a new member");
 	    }
 
 	    /*
@@ -401,8 +401,8 @@ H5F_fam_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
       /* Write the data to the member */
       if (H5F_low_write (lf->u.fam.memb[membno], &cur_addr,
 			 nbytes, buf)<0) {
-	 /* Can't write to family member */
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			"can't write to family member");
       }
       buf += nbytes;
       size -= nbytes;
@@ -458,12 +458,12 @@ H5F_fam_flush (H5F_low_t *lf)
    H5F_addr_inc (&addr3, (size_t)1);
    H5F_low_seteof (lf->u.fam.memb[0], &addr3); /*prevent a warning*/
    if (H5F_low_read (lf->u.fam.memb[0], &addr1, 1, buf)<0) {
-      /* Can't read from first family member */
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+		     "can't read from first family member");
    }
    if (H5F_low_write (lf->u.fam.memb[0], &addr1, 1, buf)<0) {
-      /* Can't write to first family member */
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		     "can't write to first family member");
    }
    H5F_low_seteof (lf->u.fam.memb[0], &addr2); /*reset old eof*/
    
@@ -477,8 +477,8 @@ H5F_fam_flush (H5F_low_t *lf)
       }
    }
    if (nerrors) {
-      /* Can't flush family member */
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+		     "can't flush family member");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -539,8 +539,8 @@ H5F_fam_access (const char *name, int mode, H5F_search_t *key/*out*/)
       }
 				    
       if (status<0) {
-	 /* Access method failed for a member file */
-	 HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, FAIL);
+	 HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, FAIL,
+			"access method failed for a member file");
       }
    }
 

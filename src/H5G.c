@@ -96,24 +96,24 @@ H5Gnew (hid_t file, const char *name, size_t size_hint)
 
    /* Check/fix arguments */
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
    }
    if (H5_FILE!=H5Aatom_group (file)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
    }
    if (NULL==(f=H5Aatom_object (file))) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
    }
    
    /* Create the group */
    if (NULL==(grp_handle=H5G_new (f, name, size_hint))) {
-      /*can't create group*/
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "can't create group");
    }
 
    /* Close the group handle */
    if (H5G_close (f, grp_handle)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);/*can't close handle*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't close handle");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -162,18 +162,18 @@ H5Gset (hid_t file, const char *name)
 
    /* Check/fix arguments */
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
    }
    if (H5_FILE!=H5Aatom_group (file)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
    }
    if (NULL==(f=H5Aatom_object (file))) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
    }
 
    if (H5G_set (f, name)<0) {
-      /* Can't change current working group */
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "can't change current working group");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -221,18 +221,18 @@ H5Gpush (hid_t file, const char *name)
 
    /* Check/fix arguments */
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
    }
    if (H5_FILE!=H5Aatom_group (file)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
    }
    if (NULL==(f=H5Aatom_object (file))) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
    }
 
    if (H5G_push (f, name)<0) {
-      /* Can't change current working group */
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "can't change current working group");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -281,15 +281,15 @@ H5Gpop (hid_t file)
 
    /* Check/fix arguments */
    if (H5_FILE!=H5Aatom_group (file)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
    }
    if (NULL==(f=H5Aatom_object (file))) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
    }
 
    if (H5G_pop (f)<0) {
-      /* Stack is empty */
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		     "stack is empty");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -436,8 +436,8 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
    /* starting point */
    if ('/'==*name) {
       if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
-	 /* No root group */
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL,
+			"no root group");
       }
       ret_value = f->shared->root_sym;
       grp = *(f->shared->root_sym);
@@ -466,9 +466,8 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
        * we can pass it down to the other symbol table functions.
        */
       if (nchars+1 > sizeof(comp)) {
-	 /* component is too long */
 	 if (grp_ent) *grp_ent = grp;
-	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL, "component is too long");
       }
       HDmemcpy (comp, name, nchars);
       comp[nchars] = '\0';
@@ -492,10 +491,9 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 	    ret_value = f->shared->root_sym;
 	    aside = TRUE;
 	 } else {
-	    /* component not found */
 	    H5O_reset (H5O_NAME, &mesg);
 	    if (grp_ent) *grp_ent = grp;
-	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "component not found");
 	 }
       }
 
@@ -516,7 +514,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 
    /* Perhaps the root object doesn't even exist! */
    if (!H5F_addr_defined (&(ret_value->header))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*root not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "root not found");
    }
    
    FUNC_LEAVE (ret_value);
@@ -587,12 +585,12 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     */
    if (H5F_addr_defined (&(f->shared->root_sym->header))) {
       if (H5O_read (f, NO_ADDR, f->shared->root_sym, H5O_STAB, 0, &stab)) {
-	 /* root group already exists */
-	 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, -2);
+	 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, -2,
+		      "root group already exists");
       } else if (NULL==(handle=H5G_shadow_open (f, NULL,
 						f->shared->root_sym))) {
-	 /* can't open root object */
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		      "can't open root object");
       } else if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &name)) {
 	 obj_name = "Root Object";
       } else {
@@ -607,10 +605,11 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     * info back into f->root_sym because we set the dirty bit.
     */
    if (H5G_stab_create (f, f->shared->root_sym, size_hint)<0) {
-      HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*cant create root*/
+      HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "cant create root");
    }
    if (1!=H5O_link (f, f->shared->root_sym, 1)) {
-      HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL,
+		   "internal error (wrong link count)");
    }
 
    /*
@@ -620,13 +619,13 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     */
    if (obj_name) {
       if (1!=H5O_link (f, handle, 0)) {
-	 /* Bad link count on old root object */
-	 HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL,
+		      "bad link count on old root object");
       }
       if (NULL==(ent_ptr=H5G_stab_insert (f, f->shared->root_sym, obj_name,
 					  handle))) {
-	 /* Can't reinsert old root object */
-	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		      "can't reinsert old root object");
       }
       
       /*
@@ -719,14 +718,14 @@ H5G_new (H5F_t *f, const char *name, size_t size_hint)
     * fails because the root group already exists.
     */
    if ((status=H5G_mkroot (f, H5G_SIZE_HINT))<0 && -2!=status) {
-      /* Can't create root group */
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+		     "can't create root group");
    }
    H5ECLEAR;
 
    /* lookup name */
    if (H5G_namei (f, cwg, name, &rest, &grp_ent)) {
-      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*already exists*/
+      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL, "already exists");
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
 
@@ -735,11 +734,11 @@ H5G_new (H5F_t *f, const char *name, size_t size_hint)
    assert (rest && *rest);
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
-	 /* missing component */
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL,
+			"missing component");
       } else if (nchars+1 > sizeof _comp) {
-	 /* component is too long */
-	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL,
+			"component is too long");
       } else {
 	 /* null terminate */
 	 HDmemcpy (_comp, rest, nchars);
@@ -750,17 +749,17 @@ H5G_new (H5F_t *f, const char *name, size_t size_hint)
    
    /* create group */
    if (H5G_stab_create (f, &ent, size_hint)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't create grp*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
    }
 
    /* insert child name into parent */
    if (NULL==(ent_ptr=H5G_stab_insert (f, &grp_ent, rest, &ent))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't insert*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
    }
 
    /* open the group */
    if (NULL==(ret_value=H5G_shadow_open (f, &grp_ent, ent_ptr))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't open*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't open");
    }
 
    FUNC_LEAVE (ret_value);
@@ -803,12 +802,10 @@ H5G_set (H5F_t *f, const char *name)
    FUNC_ENTER (H5G_set, FAIL);
 
    if (NULL==(handle=H5G_open (f, name))) {
-      /* Can't open group */
-      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't open group");
    }
    if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &stab_mesg)) {
-      /* Not a group */
-      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "not a group");
    }
 
    /*
@@ -820,8 +817,8 @@ H5G_set (H5F_t *f, const char *name)
       f->cwg_stack->handle = handle;
    } else {
       if (H5G_close (f, f->cwg_stack->handle)<0) {
-	 /* Couldn't close previous c.w.g. */
-	 HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL,
+		      "couldn't close previous c.w.g.");
       }
       f->cwg_stack->handle = handle;
    }
@@ -907,12 +904,10 @@ H5G_push (H5F_t *f, const char *name)
    FUNC_ENTER (H5G_push, FAIL);
 
    if (NULL==(handle=H5G_open (f, name))) {
-      /* Can't open group */
-      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "can't open group");
    }
    if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &stab_mesg)) {
-      /* Not a group */
-      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL, "not a group");
    }
 
    /*
@@ -962,15 +957,14 @@ H5G_pop (H5F_t *f)
 
    if ((stack=f->cwg_stack)) {
       if (H5G_close (f, stack->handle)<0) {
-	 /* Can't close current working group */
-	 HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL,
+			"can't close current working group");
       }
       f->cwg_stack = stack->next;
       stack->handle = NULL;
       H5MM_xfree (stack);
    } else {
-      /* Stack is empty */
-      HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL, "stack is empty");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -1040,7 +1034,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     * Look up the name -- it shouldn't exist yet.
     */
    if (H5G_namei (f, cwg, name, &rest, &grp)) {
-      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*already exists*/
+      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL, "already exists");
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
    rest = H5G_component (rest, &nchars);
@@ -1052,18 +1046,19 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
        * it already has as a message.
        */
       if (H5F_addr_defined (&(f->shared->root_sym->header))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*root exists*/
+	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL, "root exists");
       }
       if (H5O_create (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
-	 /* can't create header */
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+			"can't create header");
       }
       if (1!=H5O_link (f, &ent, 1)) {
-	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*bad link count*/
+	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL, "bad link count");
       }
       *(f->shared->root_sym) = ent;
       if (NULL==(ret_value=H5G_shadow_open (f, NULL, f->shared->root_sym))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+			"can't open root object");
       }
       HRETURN (ret_value);
    }
@@ -1074,11 +1069,11 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     */
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
-	 /* component not found */
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL,
+			"component not found");
       } else if (nchars+1 > sizeof _comp) {
-	 /* component is too long */
-	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL,
+			"component is too long");
       } else {
 	 /* null terminate */
 	 HDmemcpy (_comp, rest, nchars);
@@ -1091,7 +1086,8 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     * Create the object header.
     */
    if (H5O_create (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+		     "can't create object header");
    }
    
 
@@ -1105,15 +1101,16 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
       H5O_name_t name_mesg;
       name_mesg.s = rest;
       if (H5O_modify (f, NO_ADDR, &ent, H5O_NAME, 0, &name_mesg)<0) {
-	 /* cannot add/change name message */
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+			"cannot add/change name message");
       }
       if (1!=H5O_link (f, &ent, 1)) {
-	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*bad link count*/
+	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL, "bad link count");
       }
       *(f->shared->root_sym) = ent;
       if (NULL==(ret_value=H5G_shadow_open (f, &grp, f->shared->root_sym))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+			"can't open root object");
       }
       HRETURN (ret_value);
    } else {
@@ -1125,8 +1122,8 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
 					&(f->shared->root_sym->header));
       herr_t status = H5G_mkroot (f, H5G_SIZE_HINT);
       if (status<0 && -2!=status) {
-	 /* Can't create root group */
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL,
+			"can't create root group");
       }
       H5ECLEAR;
       if (update_grp) grp = *(f->shared->root_sym);
@@ -1137,13 +1134,13 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     * entry into a symbol table.
     */
    if (H5O_link (f, &ent, 1)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*link inc failure*/
+      HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL, "link inc failure");
    }
    if (NULL==(ent_ptr=H5G_stab_insert (f, &grp, rest, &ent))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't insert*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
    }
    if (NULL==(ret_value=H5G_shadow_open (f, &grp, ent_ptr))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't open object*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't open object");
    }
    FUNC_LEAVE (ret_value);
 }
@@ -1192,7 +1189,7 @@ H5G_open (H5F_t *f, const char *name)
    /* check args */
    assert (f);
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL, "no name");
    }
 
    /* Get CWG */
@@ -1200,13 +1197,13 @@ H5G_open (H5F_t *f, const char *name)
    assert (cwg || '/'==*name);
 
    if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "object not found");
    }
    if (NULL==(ent=H5G_namei (f, cwg, name, NULL, &grp))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "object not found");
    }
    if (NULL==(ret_value=H5G_shadow_open (f, &grp, ent))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL); /*can't open obj*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "can't open obj");
    }
 
    FUNC_LEAVE (ret_value);
@@ -1241,8 +1238,8 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
    assert (f);
 
    if (ent && H5G_shadow_close (f,  ent)<0) {
-      /* Can't close object */
-      HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL,
+		     "can't close object");
    }
    
    FUNC_LEAVE (SUCCEED);
@@ -1303,11 +1300,11 @@ H5G_find (H5F_t *f, const char *name,
    assert (cwg || '/'==*name);
 
    if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
    }
 
    if (NULL==(ent_p=H5G_namei (f, cwg, name, NULL, grp_ent))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
    }
 
    if (ent) *ent = *ent_p;

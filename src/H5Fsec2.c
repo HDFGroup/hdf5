@@ -82,7 +82,7 @@ H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    oflags |= (flags & H5F_ACC_TRUNC) ? O_TRUNC : 0;
 
    if ((fd=open (name, oflags, 0666))<0) {
-      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);/*open failed*/
+      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
    }
       
    lf = H5MM_xcalloc (1, sizeof(H5F_low_t));
@@ -126,7 +126,7 @@ H5F_sec2_close (H5F_low_t *lf)
    FUNC_ENTER (H5F_sec2_close, FAIL);
 
    if (close (lf->u.sec2.fd)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL); /*close failed*/
+      HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL, "close failed");
    }
    lf->u.sec2.fd = -1;
 
@@ -185,7 +185,7 @@ H5F_sec2_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
        lf->u.sec2.op==H5F_OP_UNKNOWN ||
        lf->u.sec2.cur!=offset) {
       if (lseek (lf->u.sec2.fd, offset, SEEK_SET)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*lseek failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "lseek failed");
       }
       lf->u.sec2.cur = offset;
    }
@@ -205,7 +205,7 @@ H5F_sec2_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
     */
    if ((n=read (lf->u.sec2.fd, buf, size))<0) {
       lf->u.sec2.op = H5F_OP_UNKNOWN;
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
    } else if (n<size) {
       HDmemset (buf+n, 0, size-n);
    }
@@ -264,7 +264,7 @@ H5F_sec2_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
        lf->u.sec2.op==H5F_OP_UNKNOWN ||
        lf->u.sec2.cur!=offset) {
       if (lseek (lf->u.sec2.fd, offset, SEEK_SET)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*lseek failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "lseek failed");
       }
       lf->u.sec2.cur = offset;
    }
@@ -275,7 +275,7 @@ H5F_sec2_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
     */
    if (size != write (lf->u.sec2.fd, buf, size)) {
       lf->u.sec2.op = H5F_OP_UNKNOWN;
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
    }
 
    /*

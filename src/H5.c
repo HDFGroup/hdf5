@@ -41,6 +41,7 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5ACprivate.h>		/*cache				*/
 #include <H5Bprivate.h>			/*B-link trees			*/
 #include <H5Eprivate.h>			/*error handling		*/
+#include <H5MMprivate.h>		/*memory management		*/
 #include <H5Tprivate.h>			/*data types			*/
 
 #define PABLO_MASK	H5_mask
@@ -83,14 +84,16 @@ herr_t H5_init_library(void)
    /* Install atexit() library cleanup routine */
    if(install_atexit_g==TRUE)
       if (HDatexit(&H5_term_library) != 0)
-	 HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
+	 HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+		       "unable to register atexit function");
 
    /*
     * Initialize interfaces that might not be able to initialize themselves
     * soon enough.
     */
    if (H5T_init_interface ()<0) {
-      HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
+		     "unable to initialize type interface");
    }
    
 
@@ -127,8 +130,7 @@ H5_add_exit (void (*func)(void))
 
     assert(func);
 
-    if((new=HDcalloc(1,sizeof(H5_exit_t)))==NULL)
-       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+    new = H5MM_xcalloc (1, sizeof(H5_exit_t));
 
     new->func=func;
     new->next=lib_exit_head;
@@ -188,11 +190,13 @@ herr_t H5_init_thread(void)
 
     /* Create/initialize this thread's error stack */
     if((thrderrid=H5Enew_err_stack(16))==FAIL)
-       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
+       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
+		      "unable to create thread error stack");
 
     /* Add the "thread termination" routine to the exit chain */
     if(H5_add_exit(&H5_term_thread)==FAIL)
-       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
+       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
+		      "unable to set thread atexit function");
 
     FUNC_LEAVE (SUCCEED);
 }	/* H5_init_thread */
@@ -301,7 +305,8 @@ herr_t H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if (majnum==NULL || minnum==NULL || relnum==NULL || patnum==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
+		    "null pointer argument");
 
     /* Set the version information */
     *majnum=HDF5_MAJOR_VERSION;

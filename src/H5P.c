@@ -124,17 +124,18 @@ H5Pcreate (H5P_class_t type)
       break;
 
    case H5P_COMPLEX:
-      /* Complex types are not supported yet */
-      HGOTO_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HGOTO_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		   "complex types are not supported yet");
 
    default:
-      /* Unknown data space type */
-      HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);
+      HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		   "unknown data space type");
    }
 
    /* Register the new data space and get an ID for it */
    if ((ret_value = H5Aregister_atom (H5_DATASPACE, ds))<0) {
-      HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL);
+      HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		   "unable to register data space for ID");
    }
 
  done:
@@ -173,12 +174,12 @@ H5Pclose (hid_t space_id)
    /* check args */
    if (H5_DATASPACE!=H5Aatom_group (space_id) ||
        NULL==H5Aatom_object (space_id)) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
    }
    
    /* When the reference count reaches zero the resources are freed */
    if (H5A_dec_ref (space_id)<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*problem freeing id*/
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -327,7 +328,7 @@ H5Pget_npoints (hid_t space_id)
    /* check args */
    if (H5_DATASPACE!=H5Aatom_group (space_id) ||
        NULL==(ds=H5Aatom_object (space_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0); /*not a data space*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
    }
 
    ret_value = H5P_get_npoints (ds);
@@ -375,12 +376,13 @@ H5P_get_npoints (const H5P_t *ds)
       break;
 
    case H5P_COMPLEX:
-      /* complex data spaces are not supported yet */
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0,
+		     "complex data spaces are not supported yet");
 
    default:
       assert ("unknown data space class" && 0);
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0,
+		     "internal error (unknown data space class)");
    }
 
    FUNC_LEAVE (ret_value);
@@ -415,7 +417,7 @@ H5Pget_ndims (hid_t space_id)
    /* check args */
    if (H5_DATASPACE!=H5Aatom_group (space_id) ||
        NULL==(ds=H5Aatom_object (space_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
    }
 
    ret_value = H5P_get_ndims (ds);
@@ -461,12 +463,13 @@ H5P_get_ndims (const H5P_t *ds)
       break;
 
    case H5P_COMPLEX:
-      /* complex data spaces are not supported yet */
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "complex data spaces are not supported yet");
 
    default:
       assert ("unknown data space class" && 0);
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "internal error (unknown data space class)");
    }
 
    FUNC_LEAVE (ret_value);
@@ -504,10 +507,10 @@ H5Pget_dims (hid_t space_id, size_t dims[]/*out*/)
    /* check args */
    if (H5_DATASPACE!=H5Aatom_group (space_id) ||
        NULL==(ds=H5Aatom_object (space_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
    }
    if (!dims) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no output buffer*/
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
    }
    
 
@@ -559,12 +562,13 @@ H5P_get_dims (const H5P_t *ds, size_t dims[])
       break;
 
    case H5P_COMPLEX:
-      /* complex data spaces are not supported yet */
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "complex data spaces are not supported yet");
 
    default:
       assert ("unknown data space class" && 0);
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "internal error (unknown data space class)");
    }
 
    FUNC_LEAVE (ret_value);
@@ -599,19 +603,19 @@ H5P_modify (H5F_t *f, H5G_entry_t *ent, const H5P_t *ds)
 
    switch (ds->type) {
    case H5P_SCALAR:
-      /* Scalar data spaces are not implemented yet */
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "scalar data spaces are not implemented yet");
 
    case H5P_SIMPLE:
       if (H5O_modify (f, NO_ADDR, ent, H5O_SDSPACE, 0, &(ds->u.simple))<0) {
-	 /* Can't update simple data space message */
-	 HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL);
+	 HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+			"can't update simple data space message");
       }
       break;
 
    case H5P_COMPLEX:
-      /* Complex data spaces are not implemented yet */
-      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		     "complex data spaces are not implemented yet");
 
    default:
       assert ("unknown data space class" && 0);
@@ -783,7 +787,7 @@ hbool_t H5Pis_simple(hid_t sid)
     H5ECLEAR;
 
     if((space=H5Aatom_object(sid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value=H5P_is_simple(space);
 
@@ -832,9 +836,9 @@ herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
 
     /* Get the object */
     if((space=H5Aatom_object(sid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if(rank>0 && dims==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
 
     /* shift out of the previous state to a "simple" dataspace */
     switch(space->type)
@@ -851,7 +855,8 @@ herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
             /* Fall through to report error */
 
         default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL);
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			"unknown data space class");
       } /* end switch */
     space->type=H5P_SIMPLE;
 
@@ -881,18 +886,18 @@ herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
 
         /* Set the rank and copy the dims */
         space->u.simple.rank=rank;
-        if((space->u.simple.size=HDcalloc(sizeof(intn),rank))==NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+        space->u.simple.size = H5MM_xcalloc (sizeof(intn), rank);
         HDmemcpy(space->u.simple.size,dims,sizeof(intn)*rank);
 
         /* check if there are unlimited dimensions and create the maximum dims array */
         for(u=0; u<rank; u++)
             if(dims[u]==0)
               {
-                if(u>0) /* sanity check for unlimited dimensions not in the lowest dimensionality */
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
-                if((space->u.simple.max=HDcalloc(sizeof(intn),rank))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+                if(u>0)
+		   HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, 
+			       "unlimited dimensions not in the lowest "
+			       "dimensionality");
+                space->u.simple.max = H5MM_xcalloc (sizeof(intn),rank);
                 HDmemcpy(space->u.simple.max,dims,sizeof(intn)*rank);
                 space->u.simple.dim_flags|=H5P_VALID_MAX;
                 break;

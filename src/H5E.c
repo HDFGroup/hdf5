@@ -239,11 +239,11 @@ intn H5Edelete_err_stack(int32 err_stack)
 
     /* Clear errors and check args and all the boring stuff. */
     if (H5Aatom_group(err_stack)!=H5_ERR)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack");
 
     /* Get the error stack to put the error on */
     if((old_stack=H5Aremove_atom(err_stack))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't remove atom");
 
     /* Clear the error descriptions and reset the stack top */
     for(; old_stack->stack_top>0; old_stack->stack_top--)
@@ -292,11 +292,11 @@ H5Eclear (int32 err_hand)
 
     /* Get the error stack for this error handler, initialized earlier in H5Enew_err_stack */
     if (H5Aatom_group(err_hand)!=H5_ERR)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack");
 
     /* Get the error stack to put the error on */
     if((err_stack=H5Aatom_object(err_hand))==NULL)
-        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL, "not an error stack");
 
     /* Clear the error descriptions and reset the stack top */
     for(; err_stack->stack_top>0; err_stack->stack_top--)
@@ -337,7 +337,7 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 herr_t
-H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
+H5E_store(int32 errid, H5E_major_t maj, H5E_minor_t min, const char *function_name, const char *file_name, intn line)
 {
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
@@ -349,7 +349,7 @@ H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const cha
 
     /* Get the error stack to put the error on */
     if((err_stack=H5Aatom_object(errid))==NULL)
-        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL, "not an error stack");
 
     /* Check if we need to expand the stack */
     if(err_stack->stack_top>=err_stack->stack_size)
@@ -403,7 +403,7 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 herr_t
-H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
+H5Epush(H5E_major_t maj, H5E_minor_t min, const char *function_name, const char *file_name, intn line)
 {
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
@@ -412,11 +412,11 @@ H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_nam
 
     /* Clear errors and check args and all the boring stuff. */
     if (function_name==NULL || file_name==NULL || H5Aatom_group(thrderrid)!=H5_ERR)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "wrong arguments");
 
     /* Get the error stack to put the error on */
     if((err_stack=H5Aatom_object(thrderrid))==NULL)
-        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL);
+        HGOTO_ERROR(H5E_BADATOM, H5E_BADATOM, FAIL, "not an error stack");
 
     (err_stack->push)(thrderrid, maj, min, function_name, file_name, line);
 

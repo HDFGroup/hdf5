@@ -72,22 +72,23 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
 
    /* Create symbol table private heap */
    if (H5H_create (f, H5H_LOCAL, init, &(stab.heap_addr)/*out*/)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create heap*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap");
    }
    if ((name = H5H_insert (f, &(stab.heap_addr), 1, "")<0)) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't initialize heap*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
    }
    if (0!=name) {
       /*
        * B-tree's won't work if the first name isn't at the beginning
        * of the heap.
        */
-      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		     "internal error (heap doesn't begin at zero)");
    }
 
    /* Create the B-tree */
    if (H5B_create (f, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create B-tree*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree");
    }
 
    /*
@@ -96,14 +97,14 @@ H5G_stab_create (H5F_t *f, H5G_entry_t *self, size_t init)
     * incremented if the object is added to the group directed graph.
     */
    if (H5O_create (f, 0, 4+2*H5F_SIZEOF_ADDR(f), &addr/*out*/)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create header");
    }
    
    /* insert the symbol table message */
    memset (self, 0, sizeof(H5G_entry_t));
    self->header = addr;
    if (H5O_modify(f, NO_ADDR, self, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create message*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -153,16 +154,16 @@ H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
    assert (f);
    assert (!addr || H5F_addr_defined (addr));
    if (!addr && (!self || !H5F_addr_defined (&(self->header)))) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "bad address");
    }
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "no name");
    }
    if (!addr) addr = &(self->header);
 
    /* set up the udata */
    if (NULL==H5O_read (f, addr, self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL); /*can't read message*/
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL, "can't read message");
    }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
@@ -175,14 +176,15 @@ H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
       if (udata.node_ptr) {
 	 H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr);
       }
-      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL, "not found");
    }
 
    /* Unprotect the symbol table node */
    if (udata.node_ptr) {
       if (H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr),
 			  udata.node_ptr)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL,
+			"unable to release symbol table node");
       }
    }
 
@@ -238,7 +240,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
    
    /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, &(self->header), self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL); /*can't read message*/
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, NULL, "can't read message");
    }
 
    udata.operation = H5G_OPER_INSERT;
@@ -254,7 +256,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
       if (udata.node_ptr) {
 	 H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr);
       }
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, NULL); /*can't insert entry*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, NULL, "can't insert entry");
    }
 
    /*
@@ -264,7 +266,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
     * until the next call to H5AC.
     */
    if (H5AC_unprotect (f, H5AC_SNODE, &(udata.node_addr), udata.node_ptr)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL); /*can't unprotect*/
+      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL, "can't unprotect");
    }
       
    /* update the name offset in the entry */
@@ -321,7 +323,7 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
 
    /* initialize data to pass through B-tree */
    if (NULL==H5O_read (f, &(self->header), self, H5O_STAB, 0, &stab)) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*not a symbol table*/
+      HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
    }
    udata.entry = entries;
    udata.name = names;
@@ -336,7 +338,7 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);
       }
-      HRETURN_ERROR (H5E_SYM, H5E_CANTLIST, FAIL); /*B-tree list failure*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTLIST, FAIL, "b-tree list failure");
    }
 
    FUNC_LEAVE (udata.nsyms);

@@ -232,18 +232,18 @@ H5Fget_create_template (hid_t fid)
 
     /* check args */
     if (H5_FILE!=H5Aatom_group (fid)) {
-       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*not a file*/
+       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "not a file");
     }
     if (NULL==(file=H5Aatom_object (fid))) {
-       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
+       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't get file struct");
     }
 
     /* Create the template object to return */
     tmpl = H5MM_xmalloc (sizeof(H5F_create_t));
     *tmpl = file->shared->create_parms;
     if ((ret_value=H5C_create (H5C_FILE_CREATE, tmpl))<0) {
-       /* Can't register template */
-       HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL);
+       HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		      "can't register template");
     }
 
     FUNC_LEAVE (ret_value);
@@ -313,7 +313,7 @@ H5F_locate_signature (H5F_low_t *f_handle, haddr_t *addr/*out*/)
    H5F_addr_reset (addr);
    while (H5F_addr_lt (addr, &max_addr)) {
       if (H5F_low_read (f_handle, addr, H5F_SIGNATURE_LEN, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "can't read file");
       }
       if (!HDmemcmp (buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) break;
       H5F_addr_pow2 (n++, addr);
@@ -357,12 +357,12 @@ hbool_t H5Fis_hdf5(const char *filename)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if(filename==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL); /*no filename specified*/
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL, "no filename specified");
 
     /* Open the file */
     if (NULL==(f_handle=H5F_low_open (H5F_LOW_DFLT, filename, 0, NULL))) {
-       /* Low-level file open failure */
-       HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
+       HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL,
+		   "low-level file open failure");
     }
 
     if (H5F_locate_signature (f_handle, &addr)>=0) {
@@ -616,8 +616,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 #endif
       type = H5F_LOW_FAM;
    } else if (type==H5F_LOW_FAM) {
-      /* Invalid file family name */
-      HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+      HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		     "invalid file family name");
    }
 
    /*
@@ -659,29 +659,29 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
     */
    if (file_exists) {
       if (flags & H5F_ACC_EXCL) {
-	 /* File already exists - CREAT EXCL failed */
-	 HRETURN_ERROR (H5E_FILE, H5E_FILEEXISTS, NULL);
+	 HRETURN_ERROR (H5E_FILE, H5E_FILEEXISTS, NULL,
+			"file already exists - CREAT EXCL failed");
       }
       if (!H5F_low_access (type, name, R_OK, NULL)) {
-	 /* File is not readable */
-	 HRETURN_ERROR (H5E_FILE, H5E_READERROR, NULL);
+	 HRETURN_ERROR (H5E_FILE, H5E_READERROR, NULL,
+			"file is not readable");
       }
       if ((flags & H5F_ACC_WRITE) &&
 	  !H5F_low_access (type, name,  W_OK, NULL)) {
-	 /* File is not writable */
-	 HRETURN_ERROR (H5E_FILE, H5E_WRITEERROR, NULL);
+	 HRETURN_ERROR (H5E_FILE, H5E_WRITEERROR, NULL,
+			"file is not writable");
       }
 
       if ((old=H5Asearch_atom (H5_FILE, H5F_compare_files, &search))) {
 	 if (flags & H5F_ACC_TRUNC) {
-	    /* File already open - TRUNC failed */
-	    HRETURN_ERROR (H5E_FILE, H5E_FILEOPEN, NULL);
+	    HRETURN_ERROR (H5E_FILE, H5E_FILEOPEN, NULL,
+			   "file already open - TRUNC failed");
 	 }
 	 if ((flags & H5F_ACC_WRITE) &&
 	     0==(old->shared->flags & H5F_ACC_WRITE)) {
 	    if (NULL==(fd=H5F_low_open (type, name, H5F_ACC_WRITE, NULL))) {
-	       /* File cannot be reopened with write access */
-	       HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	       HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+			      "file cannot be reopened with write access");
 	    }
 	    H5F_low_close (old->shared->lf);
 	    old->shared->lf = fd;
@@ -693,13 +693,13 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       } else if (flags & H5F_ACC_TRUNC) {
 	 /* Truncate existing file */
 	 if (0==(flags & H5F_ACC_WRITE)) {
-	    /* Can't truncate without write intent */
-	    HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
+	    HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL,
+			   "can't truncate without write intent");
 	 }
 	 fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_TRUNC, NULL);
 	 if (!fd) {
-	    /* Can't truncate file */
-	    HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
+	    HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL,
+			   "can't truncate file");
 	 }
 	 f = H5F_new (NULL);
 	 f->shared->key = search;
@@ -710,8 +710,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       } else {
 	 fd = H5F_low_open (type, name, (flags & H5F_ACC_WRITE), NULL);
 	 if (!fd) {
-	    /* Cannot open existing file */
-	    HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	    HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+			   "cannot open existing file");
 	 }
 	 f = H5F_new (NULL);
 	 f->shared->key = search;
@@ -721,15 +721,15 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       
    } else if (flags & H5F_ACC_CREAT) {
       if (0==(flags & H5F_ACC_WRITE)) {
-	 /* Can't create file without write intent */
-	 HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
+	 HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL,
+			"can't create file without write intent");
       }
       fd = H5F_low_open (type, name,
 			 H5F_ACC_WRITE|H5F_ACC_CREAT|H5F_ACC_EXCL,
 			 &search);
       if (!fd) {
-	 /* Can't create file */
-	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
+	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL,
+			"can't create file");
       }
       f = H5F_new (NULL);
       f->shared->key = search;
@@ -738,8 +738,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       empty_file = TRUE;
 
    } else {
-      /* File does not exist */
-      HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+      HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		     "file does not exist");
    }
    assert (f);
 
@@ -778,17 +778,17 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       
       f->shared->consist_flags = 0x03;
       if (H5F_flush (f, FALSE)<0) {
-	 /* Can't write file boot block */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
+		      "can't write file boot block");
       }
    } else if (1==f->shared->nrefs) {
       /* For existing files we must read the boot block. */
       if (H5F_locate_signature (f->shared->lf, &(f->shared->boot_addr))<0) {
-	 HGOTO_ERROR (H5E_FILE, H5E_NOTHDF5, NULL);/*Can't find signature*/
+	 HGOTO_ERROR (H5E_FILE, H5E_NOTHDF5, NULL, "can't find signature");
       }
       if (H5F_low_read (f->shared->lf, &(f->shared->boot_addr),
 			fixed_size, buf)<0) {
-	 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL);/*Can't read boot block*/
+	 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "can't read boot block");
       }
       
       /*
@@ -810,32 +810,32 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 
       cp->bootblock_ver = *p++;
       if (cp->bootblock_ver != HDF5_BOOTBLOCK_VERSION) {
-	 /* Bad boot block version number */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad boot block version number");
       }
 
       cp->smallobject_ver = *p++;
       if (cp->smallobject_ver != HDF5_SMALLOBJECT_VERSION) {
-	 /* Bad small object heap version number */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad small object heap version number");
       }
 
       cp->freespace_ver = *p++;
       if (cp->freespace_ver != HDF5_FREESPACE_VERSION) {
-	 /* Bad free space version number */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad free space version number");
       }
 
       cp->objectdir_ver = *p++;
       if (cp->objectdir_ver != HDF5_OBJECTDIR_VERSION) {
-	 /* Bad object dir version number */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad object dir version number");
       }
 
       cp->sharedheader_ver = *p++;
       if (cp->sharedheader_ver != HDF5_SHAREDHEADER_VERSION) {
-	 /* Bad shared header version number */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad shared header version number");
       }
 
       cp->sizeof_addr = *p++;
@@ -844,8 +844,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	  cp->sizeof_addr!=8 &&
 	  cp->sizeof_addr!=16 &&
 	  cp->sizeof_addr!=32) {
-	 /* Bad address size */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad address size");
       }
 
       cp->sizeof_size = *p++;
@@ -854,8 +854,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	  cp->sizeof_size!=8 &&
 	  cp->sizeof_size!=16 &&
 	  cp->sizeof_size!=32) {
-	 /* Bad length size */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad length size");
       }
 
       /* Reserved byte */
@@ -863,14 +863,14 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 
       UINT16DECODE (p, cp->sym_leaf_k);
       if (cp->sym_leaf_k<1) {
-	 /* Bad symbol table leaf node 1/2 rank */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad symbol table leaf node 1/2 rank");
       }
 	 
       UINT16DECODE (p, cp->btree_k[H5B_SNODE_ID]);
       if (cp->btree_k[H5B_SNODE_ID]<1) {
-	 /* Bad symbol table internal node 1/2 rank */
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "bad symbol table internal node 1/2 rank");
       }
 
       UINT32DECODE (p, f->shared->consist_flags);
@@ -887,8 +887,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       addr1 = f->shared->boot_addr;
       H5F_addr_inc (&addr1, fixed_size);
       if (H5F_low_read (f->shared->lf, &addr1, variable_size, buf)<0) {
-	 /*can't read boot block*/
-	 HGOTO_ERROR (H5E_FILE, H5E_NOTHDF5, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_NOTHDF5, NULL,
+		      "can't read boot block");
       }
 	 
       p = buf;
@@ -896,8 +896,8 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       H5F_addr_decode (f, &p, &(f->shared->freespace_addr));
       H5F_addr_decode (f, &p, &(f->shared->hdf5_eof));
       if (H5G_ent_decode (f, &p, f->shared->root_sym)<0) {
-	 /*can't read root symbol entry*/
-	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "can't read root symbol entry");
       }
    }
 
@@ -913,7 +913,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
        * Truncated file? This might happen if one tries to open the first
        * member of a file family.
        */
-      HGOTO_ERROR (H5E_FILE, H5E_TRUNCATED, NULL);
+      HGOTO_ERROR (H5E_FILE, H5E_TRUNCATED, NULL, "truncated file");
    } else if (H5F_addr_gt (&addr1, &addr2)) {
       /*
        * The file is larger than the hdf5 data.  It either has extra junk at
@@ -1013,16 +1013,16 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
 
     /* Check/fix arguments */
     if (!filename || !*filename)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid file name*/
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name");
     if (flags & ~H5ACC_OVERWRITE)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*invalid flags*/
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
     flags = (H5F_ACC_WRITE | H5F_ACC_CREAT) |
             (H5ACC_OVERWRITE==flags ? H5F_ACC_TRUNC : H5F_ACC_EXCL);
     
     if (create_temp<=0) {
        create_parms = &H5F_create_dflt;
     } else if (NULL==(create_parms=H5Aatom_object (create_temp))) {
-       HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't unatomize template*/
+       HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize template");
     }
     
 #ifdef LATER
@@ -1038,12 +1038,12 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
      */
     if (NULL==(new_file = H5F_open (H5F_LOW_DFLT, filename, flags,
 				    create_parms))) {
-       HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL); /*can't create file */
+       HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't create file");
     }
 
     /* Get an atom for the file */
     if ((ret_value=H5Aregister_atom (H5_FILE, new_file))<0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL); /*can't atomize file*/
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
 
  done:
     if (ret_value<0 && new_file) {
@@ -1108,7 +1108,7 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 
     /* Check/fix arguments. */
     if (!filename || !*filename)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);/*invalid file name*/
+        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "invalid file name");
     flags = flags & H5ACC_WRITE ? H5F_ACC_WRITE : 0;
 
 #ifdef LATER
@@ -1120,12 +1120,12 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 
     /* Open the file */
     if (NULL==(new_file=H5F_open (H5F_LOW_DFLT, filename, flags, NULL))) {
-       HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL); /*cant open file*/
+       HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL, "cant open file");
     }
 
     /* Get an atom for the file */
     if ((ret_value = H5Aregister_atom (H5_FILE, new_file))<0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);/*can't atomize file*/
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
 
  done:
     if (ret_value<0 && new_file) {
@@ -1187,7 +1187,7 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
       
    /* flush (and invalidate) the entire cache */
    if (H5AC_flush (f, NULL, 0, invalidate)<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL); /*can't flush cache*/
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
    }
 
    /* encode the file boot block */
@@ -1219,17 +1219,17 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
 
    /* write the boot block to disk */
    if (H5F_low_write (f->shared->lf, &(f->shared->boot_addr), p-buf, buf)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*can't write header*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "can't write header");
    }
 
    /* Flush file buffers to disk */
    if (H5F_low_flush (f->shared->lf)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*low level flush failed*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
    }
 
    /* Did shadow flush fail above? */
    if (shadow_flush<0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, -2);/*object are still open*/
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, -2, "object are still open");
    }
    
    FUNC_LEAVE (SUCCEED);
@@ -1263,8 +1263,8 @@ H5F_close (H5F_t *f)
    if (-2==(ret_value=H5F_flush (f, TRUE))) {
       /*objects are still open, but don't fail yet*/
    } else if (ret_value<0) {
-      /*can't flush cache*/
-      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
+		     "can't flush cache");
    }
    if (f->intent & H5F_ACC_DEBUG) H5AC_debug (f);
 
@@ -1273,7 +1273,7 @@ H5F_close (H5F_t *f)
 
    /* Did the H5F_flush() fail because of open objects? */
    if (ret_value<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, ret_value);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, ret_value, "objects are open");
    }
 
    FUNC_LEAVE (ret_value);
@@ -1322,16 +1322,16 @@ herr_t H5Fclose(hid_t fid)
 
     /* Check/fix arguments. */
     if (H5_FILE!=H5Aatom_group (fid))
-       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+       HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     if (NULL==(file=H5Aatom_object (fid)))
-       HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+       HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
 
     /* Close the file */
     ret_value = H5F_close (file);
     
     /* Remove the file atom */
     if (NULL==H5Aremove_atom(fid)) {
-       HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);/*can't remove atom*/
+       HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't remove atom");
     }
 
 done:
@@ -1376,7 +1376,7 @@ H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf)
 
    /* Read the data */
    if (H5F_low_read (f->shared->lf, &abs_addr, size, buf)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*low-level read failed*/
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "low-level read failed");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -1416,8 +1416,7 @@ H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
    if (0==size) return 0;
 
    if (0==(f->intent & H5F_ACC_WRITE)) {
-      /* no write intent */
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "no write intent");
    }
 
    /* Convert the relative address to an absolute address */
@@ -1426,7 +1425,7 @@ H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, const void *buf)
 
    /* Write the data */
    if (H5F_low_write (f->shared->lf, &abs_addr, size, buf)) {
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);/*low-level write failed*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "low-level write failed");
    }
 
    FUNC_LEAVE (SUCCEED);

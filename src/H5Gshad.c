@@ -255,8 +255,8 @@ H5G_shadow_sync (H5G_entry_t *ent)
 
    if (shadow && shadow->entry.dirty) {
       if (!ent) {
-	 /* Main entry is not cached */
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTCACHED, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTCACHED, FAIL,
+			"main entry is not cached");
       }
       *ent = shadow->entry;
       shadow->entry.dirty = FALSE;
@@ -466,10 +466,12 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *grp, H5G_entry_t *ent)
        * Some entry other than the root.
        */
       if (NULL==H5O_read (f, NO_ADDR, grp, H5O_STAB, 0, &stab)) {
-	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, NULL,
+		      "unable to read symbol table object header message");
       }
       if (NULL==(s=H5H_peek (f, &(stab.heap_addr), ent->name_off))) {
-	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
+	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, NULL,
+		      "unable to read symbol name");
       }
       shadow->name = H5MM_xstrdup (s);
    }
@@ -576,7 +578,8 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
    if (1==shadow->nrefs && ent->dirty) {
       if (!shadow->main &&
 	  NULL==H5G_stab_find (f, &(shadow->grp_addr), NULL, shadow->name)) {
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+			"unable to find shadow name in symbol table");
       }
       assert (shadow->main);
       *(shadow->main) = *ent;
@@ -760,7 +763,9 @@ H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
 		  if (!shadow->main &&
 		      NULL==H5G_stab_find (f, &(shadow->grp_addr), NULL,
 					   shadow->name)) {
-		     HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+		     HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+				    "unable to find shadow name in symbol "
+				    "table");
 		  }
 		  assert (shadow->main);
 		  *(shadow->main) = shadow->entry;
@@ -797,7 +802,8 @@ H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
        * shadow and then something else tries to access it (perhaps to close
        * it) then they trample on freed memory.
        */
-      HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL);
+      HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		     "leaking memory due to shadow errors");
    }
 
    FUNC_LEAVE (SUCCEED);

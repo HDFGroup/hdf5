@@ -80,13 +80,13 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
       if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_WRITE)) {
 	 f = fopen (name, "wb+");
       } else {
-	 /* File doesn't exist and CREAT wasn't specified */
-	 HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);
+	 HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL,
+			"file doesn't exist and CREAT wasn't specified");
       }
       
    } else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_EXCL)) {
-      /* File exists but CREAT and EXCL were specified */
-      HRETURN_ERROR (H5E_IO, H5E_FILEEXISTS, NULL);
+      HRETURN_ERROR (H5E_IO, H5E_FILEEXISTS, NULL,
+		     "file exists but CREAT and EXCL were specified");
       
    } else if (flags & H5F_ACC_WRITE) {
       if (flags & H5F_ACC_TRUNC) f = fopen (name, "wb+");
@@ -95,7 +95,7 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    } else {
       f = fopen (name, "rb");
    }
-   if (!f) HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL); /*fopen failed*/
+   if (!f) HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL, "fopen failed");
 
    /* Build the return value */
    lf = H5MM_xcalloc (1, sizeof(H5F_low_t));
@@ -126,7 +126,7 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
  * Purpose:	Closes a file.
  *
  * Errors:
- *		IO        CLOSEERROR    Close failed. 
+ *		IO        CLOSEERROR    Fclose failed. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -145,7 +145,7 @@ H5F_stdio_close (H5F_low_t *lf)
    FUNC_ENTER (H5F_stdio_close, FAIL);
 
    if (fclose (lf->u.stdio.f)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL); /*close failed*/
+      HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, FAIL, "fclose failed");
    }
    lf->u.stdio.f = NULL;
 
@@ -202,7 +202,7 @@ H5F_stdio_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
        lf->u.stdio.op!=H5F_OP_READ ||
        lf->u.stdio.cur!=offset) {
       if (fseek (lf->u.stdio.f, offset, SEEK_SET)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
       }
       lf->u.stdio.cur = offset;
    }
@@ -224,7 +224,7 @@ H5F_stdio_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
    n = fread (buf, 1, size, lf->u.stdio.f);
    if (n<=0 && ferror (lf->u.stdio.f)) {
       lf->u.stdio.op = H5F_OP_UNKNOWN;
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*fread failed*/
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "fread failed");
    } else if (n<size) {
       HDmemset (buf+n, 0, size-n);
    }
@@ -279,7 +279,7 @@ H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
        lf->u.stdio.op!=H5F_OP_WRITE ||
        lf->u.stdio.cur!=offset) {
       if (fseek (lf->u.stdio.f, offset, SEEK_SET)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
+	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
       }
       lf->u.stdio.cur = offset;
    }
@@ -291,7 +291,7 @@ H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
     */
    if (size != fwrite (buf, 1, size, lf->u.stdio.f)) {
       lf->u.stdio.op = H5F_OP_UNKNOWN;
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*fwrite failed*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "fwrite failed");
    }
 
    /*
@@ -337,7 +337,7 @@ H5F_stdio_flush (H5F_low_t *lf)
     * Flush
     */
    if (fflush (lf->u.stdio.f)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*fflush failed*/
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed");
    }
    
    FUNC_LEAVE (SUCCEED);

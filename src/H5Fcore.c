@@ -102,8 +102,8 @@ H5F_core_open (const char *name, uintn flags, H5F_search_t *key)
    FUNC_ENTER (H5F_core_open, NULL);
 
    if (0==(flags & H5F_ACC_WRITE) || 0==(flags & H5F_ACC_CREAT)) {
-      /* must creat file with write access */
-      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);
+      HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL,
+		     "must creat file with write access");
    }
       
    lf = H5MM_xcalloc (1, sizeof(H5F_low_t));

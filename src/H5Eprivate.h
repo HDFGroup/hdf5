@@ -36,14 +36,14 @@
    Assume that func and file are both stored in static space, or at
    least be not corrupted in the meanwhile. */
 
-#define HERROR(maj, min) H5Epush(maj, min, FUNC, __FILE__, __LINE__)
+#define HERROR(maj, min, str) H5Epush(maj, min, FUNC, __FILE__, __LINE__)
 
 /* HRETURN_ERROR macro, used to facilitate error reporting.  Makes
    same assumptions as HERROR.  IN ADDITION, this macro causes
    a return from the calling routine */
 
-#define HRETURN_ERROR(maj, min, ret_val) {				      \
-   HERROR (maj, min);							      \
+#define HRETURN_ERROR(maj, min, ret_val, str) {				      \
+   HERROR (maj, min, str);						      \
    PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
    return (ret_val);							      \
 }
@@ -60,8 +60,8 @@
    a jump to the label 'done' which should be in every fucntion
    Also there is an assumption of a variable 'ret_value' */
 
-#define HGOTO_ERROR(maj, min, ret_val) {				      \
-   HERROR (maj, min);							      \
+#define HGOTO_ERROR(maj, min, ret_val, str) {				      \
+   HERROR (maj, min,  str);						      \
    ret_value = ret_val;							      \
    goto done;								      \
 }
@@ -87,7 +87,7 @@
  */
 typedef struct 
   {
-      hdf_maj_err_code_t error_code;
+      H5E_major_t error_code;
       const char *str;
   }
 hdf_maj_error_messages_t;
@@ -95,7 +95,7 @@ hdf_maj_error_messages_t;
 
 typedef struct 
   {
-      hdf_min_err_code_t error_code;
+      H5E_minor_t error_code;
       const char *str;
   }
 hdf_min_error_messages_t;
@@ -107,8 +107,8 @@ hdf_min_error_messages_t;
 /* the structure of the error stack element */
 typedef struct error_t
   {
-      hdf_maj_err_code_t maj;    /* Major error number */
-      hdf_min_err_code_t min;    /* Minor error number */
+      H5E_major_t maj;    /* Major error number */
+      H5E_minor_t min;    /* Minor error number */
       char function_name[MAX_FUNC_NAME_LEN];    /* function where error occur */
       const char *file_name;    /* file where error occur */
       intn        line;         /* line in file where error occurs */
@@ -132,6 +132,6 @@ extern int32 thrderrid;     	/* Thread-specific "global" error-handler ID */
 extern hbool_t install_atexit;	/* Whether to install the atexit routine */
 
 /* Private functions in H5E.c */
-herr_t H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
+herr_t H5E_store(int32 errid, H5E_major_t maj, H5E_minor_t min, const char *function_name, const char *file_name, intn line);
 
 #endif

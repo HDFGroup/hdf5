@@ -93,7 +93,7 @@ typedef struct H5O_t {
 extern const H5O_class_t H5O_NULL[1];
 
 /*
- * Simple Dimensionality Message.
+ * Simple Data Space Message.
  */
 #define H5O_SDSPACE_ID	0x0001
 extern const H5O_class_t H5O_SDSPACE[1];

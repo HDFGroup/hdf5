@@ -108,7 +108,8 @@ H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
    /* allocate disk space for header and first chunk */
    size = H5O_SIZEOF_HDR(f) + size_hint;
    if (H5MF_alloc (f, H5MF_META, size, addr/*out*/)<0) {
-      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		     "unable to allocate file space for object header hdr");
    }
 
    /* allocate the object header and fill in header fields */
@@ -145,7 +146,8 @@ H5O_create (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
    /* cache it */
    if (H5AC_set (f, H5AC_OHDR, addr, oh)<0) {
       H5MM_xfree (oh);
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+		     "unable to cache object header");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -199,20 +201,23 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
    /* read fixed-lenth part of object header */
    hdr_size = H5O_SIZEOF_HDR (f);
    if (H5F_block_read (f, addr, hdr_size, buf)<0) {
-      HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL,
+		   "unable to read object header");
    }
    p = buf;
 
    /* decode version */
    oh->version = *p++;
    if (H5O_VERSION!=oh->version) {
-      HGOTO_ERROR (H5E_OHDR, H5E_VERSION, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_VERSION, NULL,
+		   "bad object header version number");
    }
 
    /* decode alignment */
    oh->alignment = *p++;
    if (4!=oh->alignment) {
-      HGOTO_ERROR (H5E_OHDR, H5E_ALIGNMENT, NULL);
+      HGOTO_ERROR (H5E_OHDR, H5E_ALIGNMENT, NULL,
+		   "unsupported object header alignment");
    }
 
    /* decode number of messages */
@@ -248,7 +253,8 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
       oh->chunk[chunkno].image = H5MM_xmalloc (chunk_size);
       if (H5F_block_read (f, &chunk_addr, chunk_size,
 			  oh->chunk[chunkno].image)<0) {
-	 HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL);
+	 HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL,
+		      "unable to read object header data");
       }
       
 
@@ -260,10 +266,12 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	 UINT16DECODE (p, mesg_size);
       
 	 if (id>=NELMTS(message_type_g) || NULL==message_type_g[id]) {
-	    HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, NULL);
+	    HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, NULL,
+			 "corrupt object header");
 	 }
 	 if (p + mesg_size > oh->chunk[chunkno].image + chunk_size) {
-	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL);
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
+			 "corrupt object header");
 	 }
 
 	 if (H5O_NULL_ID==id && oh->nmesgs>0 &&
@@ -275,7 +283,8 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	 } else {
 	    /* new message */
 	    if (oh->nmesgs>=nmesgs) {
-	       HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+	       HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+			    "corrupt object header");
 	    }
 	    mesgno = oh->nmesgs++;
 	    oh->mesg[mesgno].type = message_type_g[id];
@@ -373,7 +382,8 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 
       /* write the object header header */
       if (H5F_block_write (f, addr, H5O_SIZEOF_HDR(f), buf)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+			"unable to write object header hdr to disk");
       }
 
       /* encode messages */
@@ -396,7 +406,9 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 		  cont->size = oh->chunk[cont->chunkno].size;
 		  if (H5MF_alloc (f, H5MF_META, cont->size,
 				  &(cont->addr)/*out*/)<0) {
-		     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+		     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+				    "unable to allocate space for object "
+				    "header data");
 		  }
 		  oh->chunk[cont->chunkno].addr = cont->addr;
 	       }
@@ -410,7 +422,8 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	       if ((oh->mesg[i].type->encode)(f, oh->mesg[i].raw_size,
 					      oh->mesg[i].raw,
 					      oh->mesg[i].native)<0) {
-		  HRETURN_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL);
+		  HRETURN_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL,
+				 "unable to encode object header message");
 	       }
 	    }
 	    oh->mesg[i].dirty = FALSE;
@@ -424,7 +437,8 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	    assert (H5F_addr_defined (&(oh->chunk[i].addr)));
 	    if (H5F_block_write (f, &(oh->chunk[i].addr), oh->chunk[i].size,
 				 oh->chunk[i].image)<0) {
-	       HRETURN_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL);
+	       HRETURN_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+			      "unable to write object header data to disk");
 	    }
 	    oh->chunk[i].dirty = FALSE;
 	 }
@@ -483,7 +497,8 @@ H5O_reset (const H5O_class_t *type, void *native)
       if (type->reset) {
 	 if ((type->reset)(native)<0) {
 	    /* reset class method failed */
-	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+			   "reset method failed");
 	 }
       } else {
 	 HDmemset (native, 0, type->native_size);
@@ -528,13 +543,15 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
    
    /* get header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		     "unable to load object header");
    }
 
    /* adjust link count */
    if (adjust<0) {
       if (oh->nlink + adjust < 0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL,
+			"link could would be negative");
       }
       oh->nlink += adjust;
       if (1==oh->nlink && ent) {
@@ -589,7 +606,8 @@ H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    assert (f);
    if (!addr) {
       if (!ent || H5G_ent_addr (ent, &_addr/*out*/)) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
+			"invalid symbol table entry");
       }
       addr = &_addr;
    }
@@ -608,7 +626,8 @@ H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 
    /* can we get it from the object header? */
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
+		     "unable to find message in object header");
    }
 
 #ifdef LATER
@@ -617,11 +636,15 @@ H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 
    /* copy the message to the user-supplied buffer */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+		     "unable to load object header");
    }
    retval = (type->copy)(oh->mesg[idx].native, mesg);
-   if (!retval) HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL);
-
+   if (!retval) {
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
+		     "unable to copy object header message to user space");
+   }
+   
    FUNC_LEAVE (retval);
 }
 
@@ -660,7 +683,8 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 
    /* load the object header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		     "unable to load object header");
    }
 
    /* scan through the messages looking for the right one */
@@ -668,7 +692,10 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
       if (*type_p && (*type_p)->id!=oh->mesg[i].type->id) continue;
       if (--sequence<0) break;
    }
-   if (sequence>=0) HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL);
+   if (sequence>=0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL,
+		     "unable to find object header message");
+   }
    
    /* decode the message if necessary */
    if (NULL==oh->mesg[i].native) {
@@ -677,7 +704,8 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 						      oh->mesg[i].raw_size,
 						      oh->mesg[i].raw);
       if (NULL==oh->mesg[i].native) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTDECODE, FAIL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTDECODE, FAIL,
+			"unable to decode message");
       }
    }
 
@@ -725,10 +753,12 @@ H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
    assert (addr && H5F_addr_defined (addr));
 
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
+		     "unable to find object header message");
    }
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+		     "unable to load object header");
    }
 
    FUNC_LEAVE (oh->mesg[idx].native);
@@ -784,14 +814,16 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    assert (mesg);
    if (!addr) {
       if (!ent || H5G_ent_addr (ent, &_addr)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+			"invalid object header address");
       }
       addr = &_addr;
    }
    assert (H5F_addr_defined (addr));
    
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		     "unable to load object header");
    }
 
    /* Count similar messages */
@@ -808,7 +840,7 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
       if (overwrite==sequence+1) {
 	 overwrite = -1;
       } else {
-	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL); /*message not found*/
+	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found");
       }
    }
 
@@ -817,14 +849,18 @@ H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
       size = (type->raw_size)(f, mesg);
       H5O_ALIGN (size, oh->alignment);
       idx = H5O_alloc (f, oh, type, size);
-      if (idx<0) HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      if (idx<0) {
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+			"unable to allocate object header space for message");
+      }
       sequence++;
    }
 
    /* Copy the native value into the object header */
    oh->mesg[idx].native = (type->copy)(mesg, oh->mesg[idx].native);
    if (NULL==oh->mesg[idx].native) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+		     "unable to copy message to object header");
    }
    oh->mesg[idx].dirty = TRUE;
    oh->dirty = TRUE;
@@ -887,7 +923,8 @@ H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
    assert (type);
    if (!addr) {
       if (!ent || H5G_ent_addr (ent, &_addr)<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+			"invalid object header address");
       }
       addr = &_addr;
    }
@@ -895,7 +932,8 @@ H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 
    /* load the object header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		     "unable to load object header");
    }
 
    for (i=seq=0; i<oh->nmesgs; i++) {
@@ -963,7 +1001,7 @@ H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size)
    assert (size>0);
 
    if (H5F_addr_defined (&(oh->chunk[chunkno].addr))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOSPACE, FAIL); /*chunk is on disk*/
+      HRETURN_ERROR (H5E_OHDR, H5E_NOSPACE, FAIL, "chunk is on disk");
    }
 
    /* try to extend a null message */
@@ -1269,7 +1307,8 @@ H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
        */
       if (idx<0) {
 	 if ((idx=H5O_alloc_new_chunk (f, oh, size))<0) {
-	    HRETURN_ERROR (H5E_OHDR, H5E_NOSPACE, FAIL);
+	    HRETURN_ERROR (H5E_OHDR, H5E_NOSPACE, FAIL,
+			   "unable to create a new object header data chunk");
 	 }
       }
    }
@@ -1341,7 +1380,8 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    assert (fwidth>=0);
 
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		     "unable to load object header");
    }
 
    /* debug */
