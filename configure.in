@@ -2771,12 +2771,15 @@ PARALLEL=${PARALLEL:-no}
 dnl Compiler with version information. This consists of the full path
 dnl name of the compiler and the reported version number.
 AC_SUBST([CC_VERSION])
-if `echo $CC | grep / >/dev/null 2>&1`; then
+dnl Strip anything that looks like a flag off of $CC
+CC_NOFLAGS=`echo $CC | sed 's/ -.*//'`
+
+if `echo $CC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
   CC_VERSION="$CC"
 else
   CC_VERSION="$CC";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
-    if test -x $x/$CC; then
+    if test -x $x/$CC_NOFLAG; then
       CC_VERSION="$x/$CC"
       break
     fi

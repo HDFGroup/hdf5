@@ -47580,12 +47580,14 @@ fi
 PARALLEL=${PARALLEL:-no}
 
 
-if `echo $CC | grep / >/dev/null 2>&1`; then
+CC_NOFLAGS=`echo $CC | sed 's/ -.*//'`
+
+if `echo $CC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
   CC_VERSION="$CC"
 else
   CC_VERSION="$CC";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
-    if test -x $x/$CC; then
+    if test -x $x/$CC_NOFLAG; then
       CC_VERSION="$x/$CC"
       break
     fi
