@@ -3,14 +3,14 @@
 #include "gif.h"                  
 
 int EndianOrder;
-int i;
 
+static BYTE * ReadDataSubBlocks(BYTE **MemGif2, WORD *DSize);
 
 WORD 
 GetWord (MemGif)
 BYTE *MemGif;
 {
-	register WORD w;
+	WORD w;
 	if (EndianOrder == 1) /* LittleEndian */
 	{
 		w  = (WORD) (*MemGif++ & 0xFF);
@@ -46,14 +46,14 @@ ReadGifHeader(GifHead, MemGif2)
 GIFHEAD *GifHead;       /* Pointer to GIF header structure  */
 BYTE    **MemGif2;       /* GIF image file input FILE stream */
 {
-    register WORD i;    /* Loop counter                                */
+    WORD i;    /* Loop counter                                */
     WORD tableSize;     /* Number of entires in the Global Color Table */
 	
 	GifHead->TableSize = 0;
 	for (i = 0 ; i < 6 ; i++) {
 		GifHead->HeaderDump[i] = *(*MemGif2)++;
 	}
-	if (strncmp(GifHead->HeaderDump , "GIF" , 3)) {
+	if (strncmp((const char *)GifHead->HeaderDump , "GIF" , 3)) {
 		printf("The file does not appear to be a valid GIF file.\n");
 		exit(-1);
 	}
@@ -114,9 +114,9 @@ ReadGifImageDesc(GifImageDesc, MemGif2)
 GIFIMAGEDESC *GifImageDesc; /* Pointer to GIF image descriptor structure  */
 BYTE         **MemGif2;     /* GIF image file input FILE stream           */
 {
-    register WORD i;        /* Loop counter                               */
+    WORD i;        /* Loop counter                               */
     WORD tableSize;         /* Number of entries in the Local Color Table */
-	BYTE Interlace;         /* PackedField & 0x20 gives information on interlacing */
+	/* BYTE Interlace; */         /* PackedField & 0x20 gives information on interlacing */
 	BYTE *TempPtr;
 	int	 ch , ch1;
 
@@ -210,11 +210,11 @@ ReadGifGraphicControl(GifGraphicControl, MemGif2)
 GIFGRAPHICCONTROL *GifGraphicControl; /* Pointer to GC Extension structure */
 BYTE              **MemGif2;          /* GIF image file input FILE stream  */
 {
+    int i;
 
-    
-	for (i = 0 ; i < 5 ; i++) {
-		GifGraphicControl->GCEDump[i] = *(*MemGif2)++;
-	}
+    for (i = 0 ; i < 5 ; i++) {
+            GifGraphicControl->GCEDump[i] = *(*MemGif2)++;
+    }
 
     return(0);          /* No FILE stream error occured */
 }
@@ -234,6 +234,8 @@ ReadGifPlainText(GifPlainText, MemGif2)
 GIFPLAINTEXT *GifPlainText; /* Pointer to Plain Text Extension structure */
 BYTE         **MemGif2;       /* GIF image file input FILE stream          */
 {
+    int i;
+
 	for (i = 0 ; i < 13 ; i++) {
 		GifPlainText->PTEDump[i] = *(*MemGif2)++;
 	}
@@ -270,6 +272,8 @@ ReadGifApplication(GifApplication, MemGif2)
 GIFAPPLICATION *GifApplication; /* Pointer to Application Extension structure */
 BYTE           **MemGif2;          /* GIF image file input FILE stream           */
 {
+    int i;
+
 	for (i = 0 ; i < 12 ; i++) {
 		GifApplication->AEDump[i] = *(*MemGif2)++;
 	}
@@ -327,9 +331,8 @@ BYTE       **MemGif2;      /* GIF image file input FILE stream           */
 **           otherwise a valid pointer if no error occured.
 */
 static BYTE *
-ReadDataSubBlocks(MemGif2 , DSize)
-BYTE **MemGif2;        /* GIF image file input FILE stream              */
-WORD *DSize;
+ReadDataSubBlocks(BYTE **MemGif2, /* GIF image file input FILE stream              */
+    WORD *DSize)
 {
     BYTE *ptr1;     /* Pointer used to "walk the heap"               */
     BYTE *ptr2;     /* Pointer used to mark the top of the heap      */
@@ -342,7 +345,7 @@ WORD *DSize;
     dataSize = *(*MemGif2)++;		/* Get the size of the first sub-block */
 	
     /* Allocate initial data buffer */
-    if (!(ptr1 = ptr2 = (BYTE *) malloc(dataSize + 1))) {
+    if (!(ptr1 = ptr2 = (BYTE *) malloc((size_t)dataSize + 1))) {
 		printf("Out of memory. Allocation of memory for data sub-blocks for\neither Comment, Plain Text or Application Extensions failed");
         return((BYTE *) NULL);
 	}
@@ -352,7 +355,9 @@ WORD *DSize;
         bufSize += (dataSize);  /* Running total of the buffer size */
 		*DSize = bufSize;
 
-        /* *ptr1++ = dataSize;			/* Write the data count */
+#ifdef COMMENTED_OUT
+        *ptr1++ = dataSize;			/* Write the data count */
+#endif /* COMMENTED_OUT */
         while (dataSize--)			/* Read/write the Plain Text data */
              *ptr1++ = *(*MemGif2)++;
         
@@ -370,7 +375,9 @@ WORD *DSize;
 	
     }
 
-    /**ptr1++ = (BYTE) NULL;			/* Add NULL to simulate Terminator value */
+#ifdef COMMENTED_OUT
+    *ptr1++ = (BYTE) NULL;			/* Add NULL to simulate Terminator value */
+#endif /* COMMENTED_OUT */
    	*ptr1++ = '\0';
 	
     return(ptr2);					/* Return a pointer to the sub-block data */

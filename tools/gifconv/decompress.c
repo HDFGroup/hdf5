@@ -19,13 +19,8 @@ static int BitOffset = 0,	/* Bit Offset of next code */
 XC = 0, YC = 0,				/* Output X and Y coords of current pixel */
 Pass = 0,					/* Used by output routine if WORDerlaced pic */
 OutCount = 0,				/* Decompressor output 'stack count' */
-RWidth, RHeight,			/* screen dimensions */
 IWidth, IHeight,			/* image dimensions */
-LeftOfs, TopOfs,			/* image offset */
-BitsPerPixel,				/* Bits per pixel, read from GIF header */
 BytesPerScanline,			/* Bytes per scanline in output raster */
-ColorMapSize,				/* number of colors */
-Background,					/* background color */
 CodeSize,					/* Code size, read from GIF header */
 InitCodeSize,				/* Starting code size, used during Clear */
 Code,						/* Value returned by ReadCode */
@@ -73,7 +68,7 @@ int  numused;
 * three BYTEs, compute the bit Offset WORDo our 24-bit chunk, shift to
 * bring the desired code to the bottom, then mask it off and return it. 
 */
-ReadCode()
+static int ReadCode(void)
 {
 	int RawCode, ByteOffset;
 	
@@ -87,8 +82,7 @@ ReadCode()
 }
 
 
-AddToPixel(Index)
-BYTE Index;
+static void AddToPixel(BYTE Index)
 {
     if (YC<IHeight)
         *(Image + YC * BytesPerScanline + XC) = Index;
@@ -202,7 +196,7 @@ GIFHEAD      *GifHead;
 	
 	/* Allocate the Image */
 	
-	if (!(Image = (BYTE *)malloc(IWidth*IHeight))) {
+	if (!(Image = (BYTE *)malloc((size_t)IWidth*(size_t)IHeight))) {
 		printf("Out of memory");
 		exit(-1);
 	}

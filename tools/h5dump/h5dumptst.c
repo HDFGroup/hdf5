@@ -1667,15 +1667,15 @@ static void test_nestcomp(void)
 	float  b;
 	double c; 
         cmp_t  d; 
-    } s1_t;
+    } s2_t;
     hid_t      cmp_tid;    /* Handle for the compound datatype */
     hid_t      char_id;    /* Handle for the string datatype */
     hid_t      array_dt;
     hsize_t     array_dims[] = {2};    /* Dataspace dimensions */
     int        ndims = 1;    /* Number of dimensions in the array field */
 
-    s1_t       s1[10];
-    hid_t      s1_tid;     /* File datatype identifier */
+    s2_t       s1[10];
+    hid_t      s2_tid;     /* File datatype identifier */
 
     int        i;
     hid_t      file, dataset, space; /* Handles */
@@ -1724,30 +1724,30 @@ static void test_nestcomp(void)
     H5Tinsert(cmp_tid, "array_name", HOFFSET(cmp_t, b), array_dt);
     H5Tclose(array_dt);
 
-    s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-    H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
-    H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
-    H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+    s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
+    H5Tinsert(s2_tid, "a_name", HOFFSET(s2_t, a), H5T_NATIVE_INT);
+    H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
+    H5Tinsert(s2_tid, "b_name", HOFFSET(s2_t, b), H5T_NATIVE_FLOAT);
 
     /* Insert compound memeber created above */
-    H5Tinsert(s1_tid, "d_name", HOFFSET(s1_t, d), cmp_tid);
+    H5Tinsert(s2_tid, "d_name", HOFFSET(s2_t, d), cmp_tid);
 
     /* 
      * Create the dataset.
      */
-    dataset = H5Dcreate(file, datasetname, s1_tid, space, H5P_DEFAULT);
+    dataset = H5Dcreate(file, datasetname, s2_tid, space, H5P_DEFAULT);
 
     /*
      * Wtite data to the dataset; 
      */
-    status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
+    status = H5Dwrite(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
     if (status < 0)
 	fprintf(stderr, "test_nestcomp H5Dwrite failed\n");
 
     /*
      * Release resources
      */
-    H5Tclose(s1_tid);
+    H5Tclose(s2_tid);
     H5Tclose(cmp_tid);
     H5Tclose(char_id);
     H5Sclose(space);
@@ -2241,8 +2241,8 @@ static void test_array4(void)
     typedef struct {        /* Typedef for compound datatype */
         int i;
         float f;
-    } s1_t;
-    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    } s2_t;
+    s2_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1;       /* Dataspace ID			*/
@@ -2267,13 +2267,13 @@ static void test_array4(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create a compound datatype to refer to */
-    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
+    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
 
     /* Insert integer field */
-    ret = H5Tinsert (tid2, "i", HOFFSET(s1_t,i), H5T_NATIVE_INT);
+    ret = H5Tinsert (tid2, "i", HOFFSET(s2_t,i), H5T_NATIVE_INT);
 
     /* Insert float field */
-    ret = H5Tinsert (tid2, "f", HOFFSET(s1_t,f), H5T_NATIVE_FLOAT);
+    ret = H5Tinsert (tid2, "f", HOFFSET(s2_t,f), H5T_NATIVE_FLOAT);
 
     /* Create an array datatype to refer to */
     tid1 = H5Tarray_create (tid2,ARRAY1_RANK,tdims1,NULL);
@@ -2299,8 +2299,8 @@ static void test_array5(void)
     typedef struct {        /* Typedef for compound datatype */
         int i;
         float f[ARRAY1_DIM1];
-    } s1_t;
-    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    } s2_t;
+    s2_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1;       /* Dataspace ID			*/
@@ -2327,16 +2327,16 @@ static void test_array5(void)
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
     /* Create a compound datatype to refer to */
-    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
+    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
 
     /* Insert integer field */
-    ret = H5Tinsert (tid2, "i", HOFFSET(s1_t,i), H5T_NATIVE_INT);
+    ret = H5Tinsert (tid2, "i", HOFFSET(s2_t,i), H5T_NATIVE_INT);
 
     /* Create an array of floats datatype */
     tid3 = H5Tarray_create (H5T_NATIVE_FLOAT,ARRAY1_RANK,tdims1,NULL);
 
     /* Insert float array field */
-    ret = H5Tinsert (tid2, "f", HOFFSET(s1_t,f), tid3);
+    ret = H5Tinsert (tid2, "f", HOFFSET(s2_t,f), tid3);
 
     /* Close array of floats field datatype */
     ret=H5Tclose(tid3);

@@ -90,8 +90,8 @@ h5tools_close(void)
 {
     if (h5tools_init_g) {
 	if (rawdatastream && rawdatastream != stdout) {
-	    if (fclose(rawdatastream))
-		perror("closing rawdatastream");
+	    if (HDfclose(rawdatastream))
+		HDperror("closing rawdatastream");
 	    else
 		rawdatastream = NULL;
 	}
@@ -204,7 +204,7 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
     /* Save the driver name */
     if (drivername && drivername_size) {
         if (fid >= 0) {
-            strncpy(drivername, driver[drivernum].name, drivername_size);
+            HDstrncpy(drivername, driver[drivernum].name, drivername_size);
             drivername[drivername_size - 1] = '\0';
         } else {
             /*no file opened*/
@@ -271,13 +271,13 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
     if (!ctx->need_prefix)
 	return;
  
-    memset(&prefix, 0, sizeof(h5tools_str_t));
+    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-	fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-	fputs(OPT(info->line_sep, ""), stream);
+	HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+	HDfputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -298,16 +298,16 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
     else if (secnum && info->line_cont)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
     else
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++){
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
         templength += h5tools_str_len(&prefix);
     }
 
@@ -366,7 +366,7 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                                           *to the ctx->size_last_dim.   */
 
     /* Setup */
-    memset(&buffer, 0, sizeof(h5tools_str_t));
+    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
     size = H5Tget_size(type);
 
     if (info->line_ncols > 0)
@@ -390,8 +390,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
          */
         if (info->line_multi_new == 1 &&
                 (ctx->cur_column + h5tools_ncols(s) +
-                 strlen(OPT(info->elmt_suf2, " ")) +
-                 strlen(OPT(info->line_suf, ""))) > ncols) {
+                 HDstrlen(OPT(info->elmt_suf2, " ")) +
+                 HDstrlen(OPT(info->line_suf, ""))) > ncols) {
             if (ctx->prev_multiline) {
                 /*
                  * ... and the previous element also occupied more than one
@@ -399,8 +399,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                  */
                 ctx->need_prefix = TRUE;
             } else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
-                    strlen(OPT(info->elmt_suf2, " ")) +
-                    strlen(OPT(info->line_suf, ""))) <= ncols) {
+                    HDstrlen(OPT(info->elmt_suf2, " ")) +
+                    HDstrlen(OPT(info->line_suf, ""))) <= ncols) {
                 /* 
                  * ...but *could* fit on one line otherwise, then we
                  * should end the current line and start this element on its
@@ -432,8 +432,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
          */
         if (info->line_multi_new == 1 && ctx->prev_multiline &&
                 (ctx->cur_column + h5tools_ncols(s) +
-                 strlen(OPT(info->elmt_suf2, " ")) +
-                 strlen(OPT(info->line_suf, ""))) > ncols)
+                 HDstrlen(OPT(info->elmt_suf2, " ")) +
+                 HDstrlen(OPT(info->line_suf, ""))) > ncols)
             ctx->need_prefix = TRUE;
 
         /*
@@ -463,8 +463,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
              */
             if ((!info->skip_first || i) &&
                     (ctx->cur_column + strlen(section) +
-                     strlen(OPT(info->elmt_suf2, " ")) +
-                     strlen(OPT(info->line_suf, ""))) > ncols)
+                     HDstrlen(OPT(info->elmt_suf2, " ")) +
+                     HDstrlen(OPT(info->line_suf, ""))) > ncols)
                 ctx->need_prefix = 1;
 
             /*
@@ -477,13 +477,13 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 
                 h5tools_simple_prefix(stream, info, ctx, i, secnum);
             } else if ((i || ctx->continuation) && secnum == 0) {
-                fputs(OPT(info->elmt_suf2, " "), stream);
-                ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
+                HDfputs(OPT(info->elmt_suf2, " "), stream);
+                ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
             }
             
             /* Print the section */
-            fputs(section, stream);
-            ctx->cur_column += strlen(section);
+            HDfputs(section, stream);
+            ctx->cur_column += HDstrlen(section);
         }
 
         ctx->prev_multiline = multiline;
@@ -513,7 +513,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
 {
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
-    hsize_t		elmtno, i;		/*counters		*/
+    hsize_t		i;		        /*counters		*/
     hssize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
@@ -542,7 +542,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
      * great and the dimensionality of the items selected for printing must
      * match the dimensionality of the dataset.
      */
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
@@ -604,7 +604,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
             }
 
         assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
-        sm_buf = malloc((size_t)sm_nelmts * p_type_nbytes);
+        sm_buf = HDmalloc((size_t)sm_nelmts * p_type_nbytes);
         sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
         H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
@@ -613,7 +613,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
         if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
             H5Sclose(f_space);
             H5Sclose(sm_space);
-            free(sm_buf);
+            HDfree(sm_buf);
             return FAIL;
         }
 
@@ -629,15 +629,15 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
 
         h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
                                  p_type, sm_buf);
-        free(sm_buf);
+        HDfree(sm_buf);
         ctx.continuation++;
     }
 
     /* Terminate the output */
     if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+        HDfputs(OPT(info->line_sep, ""), stream);
     }
 
     ret = SUCCEED;
@@ -707,7 +707,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      * great and the dimensionality of the items selected for printing must
      * match the dimensionality of the dataset.
      */
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
@@ -757,13 +757,13 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     }
 
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
-    sm_buf = malloc((size_t)sm_nbytes);
+    sm_buf = HDmalloc((size_t)sm_nbytes);
     sm_nelmts = sm_nbytes / p_type_nbytes;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
     /* The stripmine loop */
-    memset(hs_offset, 0, sizeof hs_offset);
-    memset(zero, 0, sizeof zero);
+    HDmemset(hs_offset, 0, sizeof hs_offset);
+    HDmemset(zero, 0, sizeof zero);
 
     for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) {
         /* Calculate the hyperslab size */
@@ -788,7 +788,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
             H5Sclose(f_space);
             H5Sclose(sm_space);
-            free(sm_buf);
+            HDfree(sm_buf);
             return FAIL;
         }
 
@@ -818,14 +818,14 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 
     /* Terminate the output */
     if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+        HDfputs(OPT(info->line_sep, ""), stream);
     }
 
     H5Sclose(sm_space);
     H5Sclose(f_space);
-    free(sm_buf);
+    HDfree(sm_buf);
     return SUCCEED;
 }
 
@@ -859,7 +859,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
      * great and the dimensionality of the items selected for printing must
      * match the dimensionality of the dataset.
      */
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.ndims = H5Sget_simple_extent_ndims(space);
 
     if ((size_t)ctx.ndims > NELMTS(ctx.p_min_idx))
@@ -888,9 +888,9 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
 
     /* Terminate the output */
     if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+        HDfputs(OPT(info->line_sep, ""), stream);
     }
  
     return SUCCEED;
@@ -989,8 +989,8 @@ h5tools_fixtype(hid_t f_type)
 	 */
 	nmembs = H5Tget_nmembers(f_type);
         assert(nmembs > 0);
-	memb = calloc((size_t)nmembs, sizeof(hid_t));
-	name = calloc((size_t)nmembs, sizeof(char *));
+	memb = HDcalloc((size_t)nmembs, sizeof(hid_t));
+	name = HDcalloc((size_t)nmembs, sizeof(char *));
 	
 	for (i = 0, size = 0; i < nmembs; i++) {
 	    /* Get the member type and fix it */
@@ -1087,18 +1087,18 @@ h5tools_fixtype(hid_t f_type)
  done:
     /* Clean up temp buffers */
     if (memb && name) {
-        register int j;
+        int j;
 
         for (j = 0; j < nmembs; j++) {
             if (memb[j] >= 0)
                 H5Tclose(memb[j]);
 
             if (name[j])
-                free(name[j]);
+                HDfree(name[j]);
         }
 
-        free(memb);
-        free(name);
+        HDfree(memb);
+        HDfree(name);
     }
     
     return m_type;
@@ -1151,7 +1151,7 @@ h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
         stream = stdout;
 
     if (!info) {
-        memset(&info_dflt, 0, sizeof info_dflt);
+        HDmemset(&info_dflt, 0, sizeof info_dflt);
         info = &info_dflt;
     }
 
@@ -1221,7 +1221,7 @@ h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
 	stream = stdout;
 
     if (!info) {
-	memset(&info_dflt, 0, sizeof(info_dflt));
+	HDmemset(&info_dflt, 0, sizeof(info_dflt));
 	info = &info_dflt;
     }
 

@@ -36,9 +36,11 @@
 #endif
 
 /* We need this on Irix64 even though we've included stdio.h as documented */
+#ifdef FIXME_ON_IRIX_THEN
 #if !defined __MWERKS__  
 FILE *fdopen(int fd, const char *mode);
 #endif
+#endif /* FIXME_ON_IRIX_THEN */
 
 #define PABLO_MASK      H5_mask
 

@@ -169,7 +169,6 @@ int WriteHDF(GIFTOMEM , CHAR * , CHAR *);
 */
 int ReadHDF(BYTE** data , BYTE palette[256][3] , hsize_t *image_size , CHAR *h5_file , CHAR *dset_name , CHAR *pal_name);
 
-BYTE *ReadDataSubBlocks(BYTE ** , WORD *);
 BYTE *Decompress (GIFIMAGEDESC * , GIFHEAD *);
 BYTE GetByte(BYTE *);
 WORD GetWord(BYTE *);

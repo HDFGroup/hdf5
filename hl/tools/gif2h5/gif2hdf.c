@@ -3,10 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 int
-main(argv , argc)
-int argv;
-char *argc[];
+main(int argv , char *argc[])
 {
 	
 	GIFTOMEM GifMemoryStruct;
@@ -60,11 +59,11 @@ char *argc[];
 	filesize = ftell(fpGif);
 	fseek(fpGif, 0L , 0);
 	if (filesize == 0) printf("File Size Zero");
-	if (!(MemGif = StartPos = (BYTE *)malloc(filesize))) {
+	if (!(MemGif = StartPos = (BYTE *)malloc((size_t)filesize))) {
 		printf("Out of memory");
 		exit (-1);
 	}
-	if (fread(MemGif,filesize,1,fpGif) != 1) {
+	if (fread(MemGif,(size_t)filesize,1,fpGif) != 1) {
 		printf("Corrupted Input File");
 		exit(-1);
 	}

@@ -24,7 +24,7 @@ extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5dump_t *info,
                                    hsize_t elmtno, int ndims, hsize_t min_idx[],
                                    hsize_t max_idx[]);
 extern int      h5tools_str_dump_region(h5tools_str_t *, hid_t, const h5dump_t *);
-extern void     h5tools_print_char(h5tools_str_t *, const h5dump_t *, unsigned char);
+extern void     h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch);
 extern char    *h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);

@@ -567,12 +567,8 @@ test_select_all(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hid_t		sid1;	        /* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
-    hssize_t	        start[SPACE4_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE4_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE4_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE4_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */

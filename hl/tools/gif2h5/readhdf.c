@@ -35,14 +35,10 @@ int ReadHDF(BYTE** data ,
 	herr_t status;	/* status variable */
 	hid_t dspace;	/* dataspace identifier for the the dataset */
 	hid_t dset;		/* dataset identifier */
-
 	hid_t pal_set;	/* dataset for palette */
 	hid_t pal_space;/* dataspace for palette */
-	hsize_t pal_size;	/* size of the palette */
-	
 	hsize_t datasize;	/* size of the image */
 	hsize_t maxdims;	/* dummy */
-
 	int pal_exist = 0;	/* do we have a palette? */
 
 	/* check stuff */
@@ -85,7 +81,7 @@ int ReadHDF(BYTE** data ,
 	datasize = image_size[0] * image_size[1];
 
 	/* allocate memory to store the image */
-	if ((*data = (BYTE*) malloc(datasize)) == NULL) {
+	if ((*data = (BYTE*) malloc((size_t)datasize)) == NULL) {
 		fprintf(stderr , "Out of memory, exiting");
 		return -1;
 	}
@@ -98,11 +94,8 @@ int ReadHDF(BYTE** data ,
 	}
 
 	if (pal_exist) {
-		hsize_t pal_size[2];
-		hsize_t max_pal_dims[2];
+		hsize_t loc_pal_size[2];
 		hsize_t pal_datasize;
-		CHAR *pal_path;
-
 		BYTE *temp_buf;
 		hsize_t temp_size;
 
@@ -121,19 +114,19 @@ int ReadHDF(BYTE** data ,
 		}
 		
 		/* get the dimension size of the palette. */
-		if (H5Sget_simple_extent_dims(pal_space , pal_size , &max_pal_dims) !=2 ) {
+		if (H5Sget_simple_extent_dims(pal_space , loc_pal_size , NULL) !=2 ) {
 			fprintf(stderr , "Unable to get dimension info\n");
 			pal_exist = 0;
 			return -1;
 		}
 		
 		/* size needed to store the image */
-		pal_datasize = pal_size[0] * pal_size[1];
+		pal_datasize = loc_pal_size[0] * loc_pal_size[1];
 		
 		/* copy stuff into a temp buffer and then copy 256*3 elements to palette */
 		temp_size = H5Dget_storage_size(pal_set);
 		
-		temp_buf = (BYTE*) malloc (temp_size * sizeof(BYTE));
+		temp_buf = (BYTE*) malloc ((size_t)temp_size * sizeof(BYTE));
 
 		/* make sure that the palette is actually 256 X 3 so that we don't create overflows */
 		if (pal_datasize > 256 * 3)
@@ -152,7 +145,7 @@ int ReadHDF(BYTE** data ,
 		}
 
 		/* copy stuff into the actual palette */
-		memcpy(palette , temp_buf , pal_datasize);
+		memcpy(palette , temp_buf , (size_t)pal_datasize);
 
 		/* get rid of the temp memory */
 		cleanup(temp_buf);

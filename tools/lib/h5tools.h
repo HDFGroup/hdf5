@@ -404,7 +404,7 @@ typedef struct h5tools_context_t {
 
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
-    hsize_t *start;
+    hssize_t *start;
     hsize_t *stride;
     hsize_t *count;
     hsize_t *block;

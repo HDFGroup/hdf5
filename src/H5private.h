@@ -761,15 +761,11 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  */
 #ifdef WIN32
 #define HDstrdup(S)    _strdup(S)
-#else
+#else /* WIN32 */
 
-#ifdef LATER
-#if !defined strdup && !defined HAVE_STRDUP 
+#if !defined strdup && !defined H5_HAVE_STRDUP 
 extern char *strdup(const char *s);
 #endif
-#else /* LATER */
-extern char *strdup(const char *s);
-#endif /* LATER */
 
 #define HDstrdup(S)     strdup(S)
 

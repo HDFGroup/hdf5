@@ -1295,16 +1295,16 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 		}
 #endif
 		assert(tmp);		/* bark in debug mode */
-		if (tmp){
-		    if (tmp->size = (best->size - head - size)){
+		if (tmp) {
+		    if ((tmp->size = (best->size - head - size))) {
 			tmp->addr = best->addr + head + size;
 			tmp->next = best->next;
 			best->next = tmp;
-		    }else{
+		    } else {
 			/* no tail piece */
 			H5MM_xfree(tmp);
 		    }
-		}else{
+		} else {
 		    /* cannot keep the tail piece.  leak file memory. */
 		}
 		best->size = head;

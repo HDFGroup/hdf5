@@ -51,7 +51,7 @@ void test_vltypes_free_custom(void *mem, void *info);
 void *test_vltypes_alloc_custom(size_t size, void *info)
 {
     void *ret_value=NULL;       /* Pointer to return */
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
     size_t extra;               /* Extra space needed */
 
     /*
@@ -79,7 +79,7 @@ void *test_vltypes_alloc_custom(size_t size, void *info)
 void test_vltypes_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
     size_t extra;               /* Extra space needed */
 
     /*
@@ -114,7 +114,7 @@ test_vltypes_vlen_atomic(void)
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     uintn       i,j;        /* counting variables */
-    int         mem_used=0; /* Memory used during allocation */
+    size_t         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -242,7 +242,7 @@ test_vltypes_vlen_compound(void)
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     uintn       i,j;        /* counting variables */
-    int         mem_used=0; /* Memory used during allocation */
+    size_t         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -392,7 +392,7 @@ test_vltypes_compound_vlen_atomic(void)
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     uintn       i,j;        /* counting variables */
-    int         mem_used=0; /* Memory used during allocation */
+    size_t         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -531,11 +531,11 @@ test_vltypes_compound_vlen_atomic(void)
 **      Tests VL datatype with VL datatypes of atomic datatypes.
 ** 
 ****************************************************************/
-static unsigned long vlen_size_func(unsigned long n)
+static size_t vlen_size_func(unsigned long n)
 {
-    unsigned long u=1;
-    unsigned long tmp=1;
-    unsigned long result=1;
+    size_t u=1;
+    size_t tmp=1;
+    size_t result=1;
 
     while(u<n) {
         u++;
@@ -565,7 +565,7 @@ test_vltypes_vlen_vlen_atomic(void)
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     uintn       i,j,k;      /* counting variables */
-    int         mem_used=0; /* Memory used during allocation */
+    size_t         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */

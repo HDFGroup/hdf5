@@ -7,7 +7,8 @@
 ** Function:	write_text_attribute
 ** Use:			Just a small wrapper to write text attributes easily
 ********************************************************************/
-int write_text_attribute(hid_t dataset_id , char *attr_name , char *attr_value) {
+static int write_text_attribute(hid_t dataset_id , const char *attr_name , const char *attr_value)
+{
 	
 	/* variables for the attributes */
 	hsize_t attr_dims_size;		/* dimensions for the attribute */
@@ -26,7 +27,7 @@ int write_text_attribute(hid_t dataset_id , char *attr_name , char *attr_value) 
 
 	/* set the type to string */
 	attr_type_id = H5Tcopy(H5T_C_S1);
-	H5Tset_size(attr_type_id , attr_dims_size);
+	H5Tset_size(attr_type_id , (size_t)attr_dims_size);
 
 	/* create the dataspace for the attribute */
 	attr_dataspace_id = H5Screate_simple(1 , &attr_dims_size , NULL);
@@ -59,18 +60,14 @@ char     *HDFName;
 char     *GIFFileName;
 {
 	GIFHEAD            gifHead;           /* GIF Header structure            */
-    GIFIMAGEDESC*	   gifImageDesc;      /* Logical Image Descriptor struct */
+        GIFIMAGEDESC*	   gifImageDesc;      /* Logical Image Descriptor struct */
 
 	long ImageCount ,			/* number of images */
 		CommentCount,			/* number of comments */
 		ApplicationCount ,		/* number of application extensions */
 		PlainTextCount;			/* number of plain text extensions */
 
-	char ImageName[256],		/* Image name for the GR Image */
-		CommentName[256],
-		ApplicationName[256],
-		PlainTextName[256];
-	
+	char ImageName[256];		/* Image name for the GR Image */
 	char GroupName[VSNAMELENMAX];	/* so that we can name the subgroups appropriately */
 	
 	/* H5 variables */
@@ -82,11 +79,6 @@ char     *GIFFileName;
 	
 	/* temp counter */
 	int i;
-
-	
-	
-	
-	
 	
 	/* get the GIFMem stuff */
 	gifHead = *(GifMemoryStruct.GifHeader);

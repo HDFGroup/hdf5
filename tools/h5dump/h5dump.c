@@ -1745,7 +1745,7 @@ dump_subsetting_header(struct subset_t *sset, int dims)
     indentation(indent);
     printf("%s %s ", dump_header_format->startbegin,
            dump_header_format->startblockbegin);
-    dump_dims(sset->start, dims);
+    dump_dims((hsize_t *)sset->start, dims);
     printf("%s %s\n", dump_header_format->startend,
            dump_header_format->startblockend);
 
@@ -2040,7 +2040,7 @@ parse_subset_params(char *dset)
             *brace++ = '\0';
 
             s = calloc(1, sizeof(struct subset_t));
-            s->start = parse_hsize_list(brace);
+            s->start = (hssize_t *)parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -2531,7 +2531,7 @@ parse_start:
              */
             do {
                 switch ((char)opt) {
-                case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
+                case 's': free(s->start); s->start = (hssize_t *)parse_hsize_list(opt_arg); break;
                 case 'S': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
                 case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
                 case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
@@ -2902,10 +2902,10 @@ print_enum(hid_t type)
 	    for (j = 0; j < dst_size; j++)
 		printf("%02x", value[i * dst_size + j]);
 	} else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-	    printf("%" PRINTF_LL_WIDTH "u", *((unsigned long_long *)
+	    HDfprintf(stdout,"%" PRINTF_LL_WIDTH "u", *((unsigned long_long *)
 					      ((void *) (value + i * dst_size))));
 	} else {
-	    printf("%" PRINTF_LL_WIDTH "d",
+	    HDfprintf(stdout,"%" PRINTF_LL_WIDTH "d",
 		   *((long_long *) ((void *) (value + i * dst_size))));
 	}
 
@@ -4867,10 +4867,10 @@ xml_print_enum(hid_t type)
 	    for (j = 0; j < dst_size; j++)
 		printf("%02x", value[i * dst_size + j]);
 	} else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-	    printf("%" PRINTF_LL_WIDTH "u", *((unsigned long_long *)
+	    HDfprintf(stdout,"%" PRINTF_LL_WIDTH "u", *((unsigned long_long *)
 					      ((void *) (value + i * dst_size))));
 	} else {
-	    printf("%" PRINTF_LL_WIDTH "d",
+	    HDfprintf(stdout,"%" PRINTF_LL_WIDTH "d",
 		   *((long_long *) ((void *) (value + i * dst_size))));
 	}
 	printf("\n");

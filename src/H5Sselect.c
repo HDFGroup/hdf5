@@ -214,7 +214,7 @@ H5Sget_select_npoints(hid_t spaceid)
  PURPOSE
     Get the number of elements in current selection
  USAGE
-    herr_t H5Sselect_hyperslab(ds)
+    herr_t H5S_get_select_npoints(ds)
         H5S_t *ds;             IN: Dataspace pointer
  RETURNS
     The number of elements in selection on success, 0 on failure

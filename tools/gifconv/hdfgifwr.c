@@ -67,7 +67,6 @@ static long CountDown;
 static int  Interlace;
 
 #ifdef __STDC__
-static void putword(int, FILE *);
 static void compress(int, FILE *, byte *, int);
 static void output(int);
 static void cl_block(void);
@@ -76,27 +75,16 @@ static void char_init(void);
 static void char_out(int);
 static void flush_char(void);
 #else
-static void putword(), compress(), output(), cl_block(), cl_hash();
+static void compress(), output(), cl_block(), cl_hash();
 static void char_init(), char_out(), flush_char();
 #endif
 
 static byte pc2nc[256],r1[256],g1[256],b1[256];
 
-void xvbzero(s, len)
-     char *s;
-     int   len;
-{
-  for ( ; len>0; len--) *s++ = 0;
-}
-
 /*************************************************************/
-int hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, pc2ncmap,  numcols, colorstyle, BitsPerPixel)
-    FILE *fp;
-    byte *pic;
-    int   ptype, w,h;
-    byte *rmap, *gmap, *bmap , *pc2ncmap;
-    int   numcols, colorstyle;
-    int	  BitsPerPixel;
+int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
+    byte *gmap, byte *bmap, byte *pc2ncmap,  int numcols, int colorstyle,
+    int BitsPerPixel)
 {
   int   RWidth, RHeight;
   int   LeftOfs, TopOfs;
@@ -138,21 +126,6 @@ int hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, pc2ncmap,  numcols, colo
 
   if (ferror(fp)) return -1;
   return (0);
-}
-
-
-
-
-/******************************/
-static void putword(w, fp)
-int w;
-FILE *fp;
-{
-  /* writes a 16-bit integer in GIF order (LSB first) */
-  
-  fputc(w &0xff, fp);
-    
-  fputc((w>>8)&0xff,fp);
 }
 
 
@@ -252,8 +225,8 @@ int   len;
   /* initialize 'compress' globals */
   maxbits = XV_BITS;
   maxmaxcode = 1<<XV_BITS;
-  xvbzero((char *) htab,    sizeof(htab));
-  xvbzero((char *) codetab, sizeof(codetab));
+  memset(htab, 0, sizeof(htab));
+  memset(codetab, 0, sizeof(codetab));
   hsize = HSIZE;
   free_ent = 0;
   clear_flg = 0;
@@ -375,7 +348,7 @@ int code;
   cur_bits += n_bits;
 
   while( cur_bits >= 8 ) {
-    char_out( (unsigned int) (cur_accum & 0xff) );
+    char_out( (int)((unsigned int) cur_accum & 0xff) );
     cur_accum >>= 8;
     cur_bits -= 8;
   }
@@ -403,7 +376,7 @@ int code;
   if( code == EOFCode ) {
     /* At EOF, write the rest of the buffer */
     while( cur_bits > 0 ) {
-      char_out( (unsigned int)(cur_accum & 0xff) );
+      char_out( (int)((unsigned int)cur_accum & 0xff) );
       cur_accum >>= 8;
       cur_bits -= 8;
     }
@@ -434,14 +407,14 @@ static void cl_block ()             /* table clear for block compress */
 
 
 /********************************/
-static void cl_hash(hsize)          /* reset code table */
-register count_int hsize;
+static void cl_hash(hashsize)          /* reset code table */
+count_int hashsize;
 {
-  register count_int *htab_p = htab+hsize;
-  register long i;
-  register long m1 = -1;
+  count_int *htab_p = htab+hashsize;
+  long i;
+  long m1 = -1;
 
-  i = hsize - 16;
+  i = hashsize - 16;
   do {                            /* might use Sys V memset(3) here */
     *(htab_p-16) = m1;
     *(htab_p-15) = m1;
@@ -495,8 +468,7 @@ static char accum[ 256 ];
  * Add a character to the end of the current packet, and if it is 254
  * characters, flush the packet to disk.
  */
-static void char_out(c)
-int c;
+static void char_out(int c)
 {
   accum[ a_count++ ] = c;
   if( a_count >= 254 ) 
@@ -510,7 +482,7 @@ static void flush_char()
 {
   if( a_count > 0 ) {
     fputc( a_count, g_outfile );
-    fwrite( accum, 1, a_count, g_outfile );
+    fwrite( accum, 1, (size_t)a_count, g_outfile );
     a_count = 0;
   }
 }	

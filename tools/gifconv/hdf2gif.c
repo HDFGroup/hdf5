@@ -19,16 +19,18 @@ extern int hdfWriteGIF(FILE *fp, BYTE *pic, int ptype, int w, int h, BYTE *rmap,
 
 int EndianOrder;
 
-void PutByte(BYTE b , FILE *fpGif)
+#ifdef NOT_USED
+static void PutByte(BYTE b , FILE *fpGif)
 {
 	if (fputc(b , fpGif) == EOF) {
 		printf("File Writing Error, cannot continue");
 		exit(-1);
 	}
 }
+#endif /* NOT_USED */
 
 
-void putword(int w, FILE *fp)
+static void putword(int w, FILE *fp)
 {
 	/* writes a 16-bit integer in GIF order (LSB first) */
 	
@@ -37,7 +39,8 @@ void putword(int w, FILE *fp)
 	fputc((w>>8)&0xff,fp);
 }
 
-void usage() {
+static void usage(void )
+{
 	printf("Usage: h52gif <h5_file> <gif_file> -i <h5_image> [-p <h5_palette>]\n");
 	printf("h52gif expects *at least* one h5_image. You may repeat -i <h5_image> [-p <h5_palette>] at most 50 times (maximum of 50 images).\n");
 }
@@ -53,8 +56,6 @@ int main(int argc , char **argv) {
 	
 	CHAR *HDFName = NULL;
 	CHAR *GIFName = NULL;
-	CHAR *image_path = NULL;
-	CHAR *pal_path = NULL;
 	/* reference variables */
 	
 	int has_local_palette; /* treated as a flag */
@@ -76,7 +77,7 @@ int main(int argc , char **argv) {
 	int   CountDown;
 	int   curx , cury;
 	int   time_out = 0;		/* time between two images in the animation */
-	int   n_images , index;
+	int   n_images , idx;
 	
 	BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
 	
@@ -172,7 +173,7 @@ int main(int argc , char **argv) {
 	n_images = number_of_images;
 
 	Background = 0;
-	for (index = 0 ; index < n_images ; index++) {
+	for (idx = 0 ; idx < n_images ; idx++) {
 		
 		/* try to read the image and the palette */
 		/* Lots of funky stuff to support multiple images has been taken off.
@@ -183,7 +184,7 @@ int main(int argc , char **argv) {
 		** to write the global palette out and then independantly write the smaller local 
 		** palettes
 		*/
-		if (ReadHDF(&Image , GlobalPalette , dim_sizes , HDFName , image_name_arr[index] , pal_name_arr[index]) < 0) {
+		if (ReadHDF(&Image , GlobalPalette , dim_sizes , HDFName , image_name_arr[idx] , pal_name_arr[idx]) < 0) {
 			fprintf(stderr , "Unable to read HDF file\n");
 			return -1;
 		}
@@ -257,7 +258,7 @@ int main(int argc , char **argv) {
 		/* If it is the first image we do all the header stuff that isn't required for the
 		** rest of the images. 
         */
-		if (index == 0) {
+		if (idx == 0) {
 			/* Write out the GIF header and logical screen descriptor */
 			if (n_images > 1) {
 				fwrite("GIF89a", 1, 6, fpGif);    /* the GIF magic number */
@@ -331,7 +332,7 @@ int main(int argc , char **argv) {
 
 		fputc (InitCodeSize , fpGif);
 		
-		i = hdfWriteGIF(fpGif , Image , 0 , dim_sizes[0] , dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 , BitsPerPixel);
+		i = hdfWriteGIF(fpGif , Image , 0 , (int)dim_sizes[0] , (int)dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 , BitsPerPixel);
 		fputc(0x00 , fpGif);		
 		free (Image);
 	} 

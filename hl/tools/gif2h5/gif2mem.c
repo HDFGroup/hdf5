@@ -25,7 +25,6 @@
 /* #include <hdf.h> */
 
 #define VERSION                     "1.00"
-extern int EndianOrder;
 
 GIFTOMEM
 Gif2Mem(MemGif)

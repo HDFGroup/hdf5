@@ -14,24 +14,23 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "hdf5.h"
+
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-
-
-#include "hdf5.h"
 
 #ifdef MAX
 #undef MAX
 #endif /* MAX */
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
+
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
 #define R_OK 04
-
 #endif
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_STDIO_g = 0;
 
