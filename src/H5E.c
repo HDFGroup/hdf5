@@ -1523,7 +1523,14 @@ H5Epush_stack(hid_t err_stack, const char *file, const char *func, unsigned line
 
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len=HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))>tmp_len) {
+        /* shutdown & restart the va_list */
+        va_end(ap);
+        va_start(ap, fmt);
+
+        /* Release the previous description, it's too small */
         H5MM_xfree(tmp);
+
+        /* Allocate a description of the appropriate length */
         tmp_len = desc_len+1;
         if((tmp=H5MM_malloc((size_t)tmp_len))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
