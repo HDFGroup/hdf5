@@ -591,7 +591,7 @@ H5S_get_npoints_max(const H5S_t *ds)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sget_ndims
+ * Function:	H5Sextent_ndims
  *
  * Purpose:	Determines the dimensionality of a data space.
  *
@@ -607,25 +607,25 @@ H5S_get_npoints_max(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_ndims (hid_t space_id)
+H5Sextent_ndims (hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
-    FUNC_ENTER(H5Sget_ndims, FAIL);
+    FUNC_ENTER(H5Sextent_ndims, FAIL);
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    ret_value = H5S_get_ndims(ds);
+    ret_value = H5S_extent_ndims(ds);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_get_ndims
+ * Function:	H5S_extent_ndims
  *
  * Purpose:	Returns the number of dimensions in a data space.
  *
@@ -642,11 +642,11 @@ H5Sget_ndims (hid_t space_id)
  *-------------------------------------------------------------------------
  */
 intn
-H5S_get_ndims(const H5S_t *ds)
+H5S_extent_ndims(const H5S_t *ds)
 {
     intn		    ret_value = FAIL;
 
-    FUNC_ENTER(H5S_get_ndims, FAIL);
+    FUNC_ENTER(H5S_extent_ndims, FAIL);
 
     /* check args */
     assert(ds);
@@ -674,13 +674,13 @@ H5S_get_ndims(const H5S_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Sget_dims
+ * Function:	H5Sextent_dims
  *
  * Purpose:	Returns the size and maximum sizes in each dimension of
  *		a data space DS through	the DIMS and MAXDIMS arguments.
  *
  * Return:	Success:	Number of dimensions, the same value as
- *				returned by H5Sget_ndims().
+ *				returned by H5Sextent_ndims().
  *
  *		Failure:	FAIL
  *
@@ -696,25 +696,25 @@ H5S_get_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
+H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
-    FUNC_ENTER(H5Sget_dims, FAIL);
+    FUNC_ENTER(H5Sextent_dims, FAIL);
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    ret_value = H5S_get_dims(ds, dims, maxdims);
+    ret_value = H5S_extent_dims(ds, dims, maxdims);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_get_dims
+ * Function:	H5S_extent_dims
  *
  * Purpose:	Returns the size in each dimension of a data space.  This
  *		function may not be meaningful for all types of data spaces.
@@ -731,12 +731,12 @@ H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
  *-------------------------------------------------------------------------
  */
 intn
-H5S_get_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
+H5S_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
     intn	ret_value = FAIL;
     intn	i;
 
-    FUNC_ENTER(H5S_get_dims, FAIL);
+    FUNC_ENTER(H5S_extent_dims, FAIL);
 
     /* check args */
     assert(ds);
@@ -1048,6 +1048,15 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims,
     if (rank<0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     }
+#ifdef OLD_WAY
+    if (dims) {
+        for (u=0; u<rank; u++) {
+            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) && dims[u]==0) {
+                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension size");
+            }
+        }
+    }
+#endif /* OLD_WAY */
     if (max!=NULL) {
         if(dims==NULL) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,

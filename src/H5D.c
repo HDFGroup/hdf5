@@ -810,7 +810,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 
     /* Total raw data size */
     new_dset->layout.type = new_dset->create_parms->layout;
-    new_dset->layout.ndims = H5S_get_ndims(space) + 1;
+    new_dset->layout.ndims = H5S_extent_ndims(space) + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
     new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(type);
 
@@ -821,7 +821,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	 * Also, only the slowest varying dimension of a simple data space
 	 * can be extendible.
 	 */
-	if ((ndims=H5S_get_dims(space, new_dset->layout.dim, max_dim)) < 0) {
+	if ((ndims=H5S_extent_dims(space, new_dset->layout.dim, max_dim)) < 0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize contiguous storage");
 	}
@@ -859,7 +859,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	 * Chunked storage allows any type of data space extension, so we
 	 * don't even bother checking.
 	 */
-	if (new_dset->create_parms->chunk_ndims != H5S_get_ndims(space)) {
+	if (new_dset->create_parms->chunk_ndims != H5S_extent_ndims(space)) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
 		   "dimensionality of chunks doesn't match the data space");
 	}
@@ -2026,7 +2026,7 @@ printf("Enter %s:\n", FUNC);
 			 "unable to read data space info from dataset header");
 	}
 	/* get current dims of dataset */
-	if ((space_ndims=H5S_get_dims(space, space_dim, NULL)) <= 0 ||
+	if ((space_ndims=H5S_extent_dims(space, space_dim, NULL)) <= 0 ||
 	    space_ndims+1 != layout->ndims){
 	    HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			"unable to allocate chunk storage");

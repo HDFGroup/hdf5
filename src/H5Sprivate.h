@@ -206,7 +206,7 @@ herr_t H5S_close_simple (H5S_simple_t *simple);
 herr_t H5S_close (H5S_t *ds);
 hsize_t H5S_extent_npoints (const H5S_t *ds);
 hsize_t H5S_get_npoints_max(const H5S_t *ds);
-intn H5S_get_ndims (const H5S_t *ds);
+intn H5S_extent_ndims (const H5S_t *ds);
 intn H5S_get_dims (const H5S_t *ds, hsize_t dims[]/*out*/,
 		   hsize_t max_dims[]/*out*/);
 herr_t H5S_modify (H5G_entry_t *ent, const H5S_t *space);

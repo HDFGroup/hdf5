@@ -359,7 +359,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
     assert (nelmts>0);
     assert (tconv_buf);
 
-    if ((space_ndims=H5S_get_dims (mem_space, mem_size, NULL))<0) {
+    if ((space_ndims=H5S_extent_dims (mem_space, mem_size, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve data space dimensions");
     }
@@ -434,7 +434,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
      * only handle hyperslabs with unit sample because there's currently no
      * way to pass sample information to H5V_hyper_copy().
      */
-    if ((space_ndims=H5S_get_dims (mem_space, mem_size, NULL))<0) {
+    if ((space_ndims=H5S_extent_dims (mem_space, mem_size, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve data space dimensions");
     }
@@ -482,11 +482,21 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 herr_t
 H5S_point_release (H5S_t *space)
 {
+    H5S_pnt_node_t *curr, *next;        /* Point selection nodes */
     FUNC_ENTER (H5S_point_release, FAIL);
 
     /* Check args */
     assert (space);
 
+    /* Delete all the nodes from the list */
+    curr=space->select.sel_info.pnt_lst->head;
+    while(curr!=NULL) {
+        next=curr->next;
+        H5MM_xfree(curr->pnt);
+        H5MM_xfree(curr);
+        curr=next;
+    } /* end while */
+    
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_point_release() */
 
