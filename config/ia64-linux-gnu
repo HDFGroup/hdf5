@@ -59,6 +59,11 @@ esac
 R_LARGE=18
 R_INTEGER=9
 
+# Use Intel Fortran compiler by default.
+if test "X-$F9X" = "X-"; then
+  F9X="efc"
+fi
+
 case $F9X in
   *efc)
     # this is for efc v7.  Older efc do not work with these.
