@@ -47,7 +47,7 @@ HDF5 Reference Manual&nbsp;&nbsp;
 <center>
 <h1>HDF5: API Specification<br>Reference Manual</h1>
 
-<!-- following line(s) for Fortran90 releases only
+<!-- Following line(s) for Fortran90-only releases only
      <h3>Released: July 2000</h3>
      <h3>Software based on HDF5 R1.2.2<br>Documentation based on HDF5 R1.2.3 
      (unreleased development version)</h3>
@@ -56,27 +56,8 @@ HDF5 Reference Manual&nbsp;&nbsp;
 </center>
 The HDF5 library provides several interfaces, each of which provides the 
 tools required to meet specific aspects of the HDF5 data-handling requirements.
-
 <p>
-<i><strong>A note regarding the prototype FORTRAN90 APIs:</strong><br>
-This version of the </i>HDF5 Reference Manual<i> includes a description
-of a partial FORTRAN90 <strong>prototype</strong> API to HDF5.
-Prototype Fortran subroutines exist in the H5A, H5D, H5E, H5F, H5G, H5I, H5P, H5R, H5S, and H5T
-interfaces and are described on those pages.
-<p>  
-In general, each Fortran subroutine performs exactly the same task 
-as the corresponding C function.  The links at the top of each reference manual 
-section go to the C function descriptions, which serve as general descriptions 
-for both the C and Fortran APIs.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the Fortran-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.
-<p>
-See <a href="README_Fortran90.txt" target="FortranWin">README_Fortran90.txt</a>,
-a copy of the README file in the Fortran prototype source code directory, 
-for more detailed notes regarding the prototype API.  </i>
+See <a href="#F90andCPPlus">below</a> for the FORTRAN90 and C++ APIs.
 <p>
 
 <center>
@@ -136,6 +117,50 @@ for more detailed notes regarding the prototype API.  </i>
 </td></tr>
 </table>
 </center>
+
+<a name="F90andCPPlus">
+<hr>
+<h3>The Fortran90 and C++ APIs to HDF5</h3>
+</a>
+
+The HDF5 Library distribution now includes FORTRAN90 and C++ APIs.
+These APIs are described in the following documents.
+
+<p>
+<strong>Fortran90 API</strong>
+    <dir>
+    <a href="fortran/F90UserNotes.html" target="External">
+    <cite>HDF5 FORTRAN90 User's Notes</cite></a>
+    contains general information regarding the API.
+    Specific information on each API call is found in the 
+    <cite>Reference Manual</cite>.
+    <p>
+    <u>Fortran90 APIs in the <cite>Reference Manual</cite>:</u>
+    The current version of the <cite>HDF5 Reference Manual</cite> includes 
+    a description of the FORTRAN90 API to HDF5.
+    Fortran subroutines exist in the H5A, H5D, H5E, H5F, H5G, H5I, H5P, 
+    H5R, H5S, and H5T interfaces and are described on those pages.
+    <p>  
+    In general, each Fortran subroutine performs exactly the same task 
+    as the corresponding C function.  The links at the top of each reference 
+    manual section go to the C function descriptions, which serve as general 
+    descriptions for both the C and Fortran APIs.  A button, under 
+    <strong>Non-C API(s)</strong> at the end of the C function description,
+    opens an external browser window displaying the Fortran-specific 
+    information.  You will probably want to adjust the size and location of 
+    this external window so that both browser windows are visible and to 
+    facilitate moving easily between them.
+    </dir>
+
+<strong>C++ API</strong>
+    <dir>
+    <a href="cpplus/CppUserNotes.pdf" target="External">
+    <cite>HDF5 C++ User's Notes</cite></a>
+    <p>
+    <a href="cpplus/CppInterfaces.html" target="External">
+    <cite>HDF5 C++ Interfaces</cite></a>
+    </dir>
+
 
 <br><br>
 
