@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
     InitTest("stab", test_stab, "Symbol Tables");
     InitTest("h5t", test_h5t, "Datatypes");
     InitTest("h5p", test_h5p, "Dataspaces");
+    InitTest("h5d", test_h5d, "Datasets");
 
     Verbosity = 4;  /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
