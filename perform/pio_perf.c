@@ -230,6 +230,8 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
                 fprintf(output, "PHDF5\n");
 
             for (j = MIN_HDF5_BUF_SIZE; j <= MAX_HDF5_BUF_SIZE; j <<= 1) {
+                results res;
+
                 parms.num_dsets = ONE_GB / j;
                 parms.num_elmts = (max_size * j) / sizeof(int);
 
@@ -239,8 +241,17 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
                         parms.num_files, parms.num_dsets, parms.num_elmts);
 
                 /* call Albert's testing here */
-		do_pio(parms); 
+                res = do_pio(parms); 
+
+                print_indent(output, TAB_SPACE * 3);
+                fprintf(output, "Write Results = %f MB/s\n",
+                        (parms.num_dsets * parms.num_elmts * sizeof(int)) /
+                        get_time(res.timers, HDF5_WRITE_FIXED_DIMS));
+
                 /* get back ``result'' object and report */
+                /* (res.ret_code == SUCCESS); */
+                /* (res.timers); */
+                pio_time_destroy(res.timers);
             }
         }
     }
@@ -259,8 +270,6 @@ print_indent(register FILE *output, register int indent)
 {
     for (; indent > 0; --indent)
         fputc(' ', output);
-
-    fputc('\n', output);
 }
 
 /*

@@ -7,6 +7,8 @@
 #ifndef PIO_PERF_H__
 #define PIO_PERF_H__
 
+#include "pio_timer.h"
+
 typedef enum iotype_ {
     RAW,
     MPIO,
@@ -23,6 +25,11 @@ typedef struct parameters_ {
     unsigned int num_iters;         /* Number of times to loop doing the IO */
 } parameters;
 
+typedef struct results_ {
+    herr_t      ret_code;
+    pio_time   *timers;
+} results;
+
 #ifndef SUCCESS
 #define SUCCESS     0
 #endif  /* !SUCCESS */
@@ -31,6 +38,12 @@ typedef struct parameters_ {
 #define FAIL        -1
 #endif  /* !FAIL */
 
-extern herr_t do_pio(parameters param);
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+extern results do_pio(parameters param);
+#ifdef __cplusplus
+}
+#endif  /* __cplusplus */
 
 #endif  /* PIO_PERF_H__ */
