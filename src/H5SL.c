@@ -130,7 +130,12 @@ struct H5SL_t {
     H5SL_node_t *header;        /* Header for nodes in skip list */
 };
 
+/* Interface initialization */
+static int interface_initialize_g = 0;
+#define INTERFACE_INIT H5SL_init_interface
+
 /* Static functions */
+static herr_t H5SL_init_interface(void);
 static size_t H5SL_random_level(double p, size_t max_level);
 static H5SL_node_t * H5SL_new_node(size_t lvl, void *item, void *key);
 

@@ -71,9 +71,9 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_REFERENCE,	"References layer"},
     {H5E_VFL,		"Virtual File Layer"},
     {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},
-    {H5E_FPHDF5,	"Flexible Parallel HDF5"},
     {H5E_TST,		"Ternary Search Trees"},
     {H5E_RS,		"Reference Counted Strings"},
+    {H5E_SLIST,		"Skip Lists"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
@@ -93,6 +93,8 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_ALREADYEXISTS, "Object already exists"},
     {H5E_CANTLOCK, 	"Unable to lock object"},
     {H5E_CANTUNLOCK, 	"Unable to unlock object"},
+    {H5E_CANTGC, 	"Unable to garbage collect"},
+    {H5E_CANTGETSIZE, 	"Unable to compute size"},
 
     /* File accessability errors */
     {H5E_FILEEXISTS, 	"File already exists"},
@@ -128,9 +130,15 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Cache related errors */
     {H5E_CANTFLUSH, 	"Unable to flush data from cache"},
-    {H5E_CANTLOAD, 	"Unable to load meta data into cache"},
-    {H5E_PROTECT, 	"Protected meta data error"},
-    {H5E_NOTCACHED, 	"Meta data not currently cached"},
+    {H5E_CANTSERIALIZE, "Unable to serialize data from cache"},
+    {H5E_CANTLOAD, 	"Unable to load metadata into cache"},
+    {H5E_PROTECT, 	"Protected metadata error"},
+    {H5E_NOTCACHED, 	"Metadata not currently cached"},
+    {H5E_SYSTEM, 	"Internal error detected"},
+    {H5E_CANTINS, 	"Unable to insert metadata into cache"},
+    {H5E_CANTRENAME, 	"Unable to rename metadata"},
+    {H5E_CANTPROTECT, 	"Unable to protect metadata"},
+    {H5E_CANTUNPROTECT,	"Unable to unprotect metadata"},
 
     /* B-tree related errors */
     {H5E_NOTFOUND, 	"Object not found"},
@@ -150,6 +158,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Group related errors */
     {H5E_CANTOPENOBJ, 	"Can't open object"},
+    {H5E_CANTCLOSEOBJ, 	"Can't close object"},
     {H5E_COMPLEN, 	"Name component is too long"},
     {H5E_CWG, 		"Problem with current working group"},
     {H5E_LINK, 		"Link count failure"},
@@ -176,12 +185,11 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_MPI,		"Some MPI function failed"},
     {H5E_MPIERRSTR,     "MPI Error String"},
 
-    /* FPHDF5 errors */
-    {H5E_CANTMAKETREE,  "Can't create a binary tree node"},
-    {H5E_CANTRECV,      "Can't receive messages from processes"},
-    {H5E_CANTSENDMDATA, "Can't send metadata message"},
-    {H5E_CANTCHANGE,    "Can't register change with server"},
-    {H5E_CANTALLOC,     "Can't allocate from file"},
+    /* Heap errors */
+    {H5E_CANTRESTORE,	"Can't restore condition"},
+
+    /* TBBT errors */
+    {H5E_CANTMAKETREE,	"Can't create TBBT tree"},
 
     /* I/O pipeline errors */
     {H5E_NOFILTER,      "Requested filter is not available"},

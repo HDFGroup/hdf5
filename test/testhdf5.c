@@ -48,6 +48,7 @@ main(int argc, char *argv[])
     AddTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees", NULL);
     AddTest("tst", test_tst, NULL,  "Ternary Search Trees", NULL);
     AddTest("heap", test_heap, NULL,  "Memory Heaps", NULL);
+    AddTest("skiplist", test_skiplist, NULL,  "Skip Lists", NULL);
     AddTest("refstr", test_refstr, NULL,  "Reference Counted Strings", NULL);
     AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL);
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);

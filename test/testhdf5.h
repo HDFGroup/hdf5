@@ -128,6 +128,7 @@ void                    test_array(void);
 void                    test_genprop(void);
 void			test_configure(void);
 void			test_misc(void);
+void			test_skiplist(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);

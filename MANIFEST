@@ -1216,6 +1216,8 @@
 ./src/H5Spublic.h
 ./src/H5Sselect.c
 ./src/H5Stest.c
+./src/H5SL.c
+./src/H5SLprivate.h
 ./src/H5ST.c
 ./src/H5STprivate.h
 ./src/H5T.c
@@ -1339,6 +1341,7 @@
 ./test/trefer.c
 ./test/trefstr.c
 ./test/tselect.c
+./test/tskiplist.c
 ./test/ttbbt.c
 ./test/ttst.c
 ./test/ttsafe.c

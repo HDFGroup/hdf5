@@ -101,9 +101,9 @@ typedef enum H5E_major_t {
     H5E_REFERENCE,              /*References                                 */
     H5E_VFL,			/*Virtual File Layer			     */
     H5E_TBBT, 		        /*Threaded, Balanced, Binary Trees           */
-    H5E_FPHDF5,		        /*Flexible Parallel HDF5                     */
     H5E_TST, 		        /*Ternary Search Trees                       */
-    H5E_RS  		        /*Reference Counted Strings                  */
+    H5E_RS,  		        /*Reference Counted Strings                  */
+    H5E_SLIST  		        /*Skip Lists                                 */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */
@@ -124,6 +124,8 @@ typedef enum H5E_minor_t {
     H5E_ALREADYEXISTS,          /*Object already exists */
     H5E_CANTLOCK,               /*Unable to lock object                      */
     H5E_CANTUNLOCK,             /*Unable to unlock object                    */
+    H5E_CANTGC,                 /*Unable to garbage collect                  */
+    H5E_CANTGETSIZE,            /*Unable to compute size                     */
 
     /* File accessability errors */
     H5E_FILEEXISTS,             /*file already exists                        */
@@ -159,9 +161,15 @@ typedef enum H5E_minor_t {
 
     /* Cache related errors */
     H5E_CANTFLUSH,              /*Can't flush object from cache              */
+    H5E_CANTSERIALIZE,          /*Unable to serialize data from cache        */
     H5E_CANTLOAD,               /*Can't load object into cache               */
     H5E_PROTECT,                /*protected object error                     */
     H5E_NOTCACHED,              /*object not currently cached                */
+    H5E_SYSTEM,                 /*Internal error detected                    */
+    H5E_CANTINS,                /*Unable to insert metadata into cache       */
+    H5E_CANTRENAME,             /*Unable to rename metadata                  */
+    H5E_CANTPROTECT,            /*Unable to protect metadata                 */
+    H5E_CANTUNPROTECT,          /*Unable to unprotect metadata               */
 
     /* B-tree related errors */
     H5E_NOTFOUND,               /*object not found                           */
@@ -181,6 +189,7 @@ typedef enum H5E_minor_t {
 
     /* Group related errors */
     H5E_CANTOPENOBJ,            /*Can't open object                          */
+    H5E_CANTCLOSEOBJ,           /*Can't close object                         */
     H5E_COMPLEN,                /*name component is too long                 */
     H5E_CWG,                    /*problem with current working group         */
     H5E_LINK,                   /*link count failure                         */
@@ -207,12 +216,11 @@ typedef enum H5E_minor_t {
     H5E_MPI,			/*some MPI function failed		     */
     H5E_MPIERRSTR,		/*MPI Error String 			     */
 
-    /* FPHDF5 errors */
-    H5E_CANTMAKETREE,           /*can't make a TBBT tree                     */
-    H5E_CANTRECV,               /*can't receive messages from processes      */
-    H5E_CANTSENDMDATA,          /*can't send metadata message                */
-    H5E_CANTCHANGE,             /*can't register change on server            */
-    H5E_CANTALLOC,              /*can't allocate from file                   */
+    /* Heap errors */
+    H5E_CANTRESTORE,		/*Can't restore condition                    */
+
+    /* TBBT errors */
+    H5E_CANTMAKETREE,		/*Can't create TBBT tree                     */
 
     /* I/O pipeline errors */
     H5E_NOFILTER,               /*requested filter is not available          */
