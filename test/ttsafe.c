@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 	if (num_errs)
 		print_func("!!! %d Error(s) were detected !!!\n\n", (int) num_errs);
 	else
-		print_func("All tests were successful. \n\n");
+		print_func("All threadsafe tests were successful. \n\n");
 
 	if (Summary) {
 		print_func("Summary of Test Results:\n");

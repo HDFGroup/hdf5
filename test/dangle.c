@@ -54,7 +54,6 @@ static int
 test_dangle_dataset(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    off_t file_size;    /* Size of file */
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t dsid; /* Dataset ID */
@@ -118,7 +117,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
     if(H5close()<0)
         TEST_ERROR;
 
-    if((file_size=h5_get_file_size(filename))==0)
+    if(h5_get_file_size(filename)==0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -152,7 +151,6 @@ static int
 test_dangle_group(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    off_t file_size;    /* Size of file */
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t gid;  /* Group ID */
@@ -212,7 +210,7 @@ test_dangle_group(H5F_close_degree_t degree)
     if(H5close()<0)
         TEST_ERROR;
 
-    if((file_size=h5_get_file_size(filename))==0)
+    if(h5_get_file_size(filename)==0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -246,7 +244,6 @@ static int
 test_dangle_datatype(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    off_t file_size;    /* Size of file */
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t tid;  /* Datatype ID */
@@ -310,7 +307,7 @@ test_dangle_datatype(H5F_close_degree_t degree)
     if(H5close()<0)
         TEST_ERROR;
 
-    if((file_size=h5_get_file_size(filename))==0)
+    if(h5_get_file_size(filename)==0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -344,7 +341,6 @@ static int
 test_dangle_attribute(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    off_t file_size;    /* Size of file */
     hid_t fid;  /* File ID */
     hid_t fapl; /* File access property list */
     hid_t dsid; /* Dataset ID */
@@ -419,7 +415,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
     if(H5close()<0)
         TEST_ERROR;
 
-    if((file_size=h5_get_file_size(filename))==0)
+    if(h5_get_file_size(filename)==0)
         TEST_ERROR;
 
     /* Clean up temporary file */

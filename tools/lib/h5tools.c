@@ -472,7 +472,6 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                                           *this var to count elements and
                                           *break after we see a number equal
                                           *to the ctx->size_last_dim.   */
-    unsigned char       *tmp=NULL;
 
     /* Setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));

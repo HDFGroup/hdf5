@@ -856,7 +856,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  hid_t        space2_id =-1;
  hid_t        f_type1=-1, f_type2=-1; /* file data type */ 
  hid_t        m_type1=-1, m_type2=-1; /* memory data type */
- size_t       f_size1, f_size2;       /* size of type in file */
  size_t       m_size1, m_size2;       /* size of type in memory */
  H5T_sign_t   sign1, sign2;           /* sign of type */
  int          rank1, rank2; 
@@ -1094,8 +1093,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  m_type1 = fixtype( f_type1 );
  m_type2 = fixtype( f_type2 );
 
- f_size1 = H5Tget_size( f_type1 );
- f_size2 = H5Tget_size( f_type2 );
  m_size1 = H5Tget_size( m_type1 );
  m_size2 = H5Tget_size( m_type2 );
 

@@ -3868,6 +3868,7 @@ static void gent_attr_all(void)
  space_id = H5Screate_simple(1,dims,NULL);
  dset_id  = H5Dcreate(file_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
  status   = H5Sclose(space_id);
+ assert(status>=0);
 
 	/* Create groups */
  group_id  = H5Gcreate(file_id,"g1",0);
@@ -3892,12 +3893,17 @@ static void gent_attr_all(void)
 
  /* Close */
  status = H5Dclose(dset_id);
+ assert(status>=0);
 	status = H5Gclose(group_id);
+ assert(status>=0);
 	status = H5Gclose(group2_id);
+ assert(status>=0);
 	status = H5Gclose(root_id);
+ assert(status>=0);
 
 	/* Close file */
  status = H5Fclose(file_id);
+ assert(status>=0);
 }
 
 

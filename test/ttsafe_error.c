@@ -45,9 +45,7 @@
  ********************************************************************/
 #include "ttsafe.h"
 
-#ifndef H5_HAVE_THREADSAFE
-static int dummy;	/* just to create a non-empty object file */
-#else
+#ifdef H5_HAVE_THREADSAFE
 
 #define NUM_THREAD              16
 #define FILENAME                "ttsafe_error.h5"

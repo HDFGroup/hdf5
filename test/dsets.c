@@ -1048,7 +1048,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 
     /* Check for native integer datatype and set private property */
     if(H5Tequal(type_id,H5T_NATIVE_INT)>0)
-        add_on=H5Tget_size(type_id);
+        add_on=(unsigned)H5Tget_size(type_id);
 
     /* Get the filter's current parameters */
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_BOGUS2,&flags,&cd_nelmts,
@@ -2685,8 +2685,8 @@ file)
 
 #ifdef H5_HAVE_FILTER_SZIP
 error:
-#endif /* H5_HAVE_FILTER_SZIP */
     return -1;
+#endif /* H5_HAVE_FILTER_SZIP */
 } /* end test_can_apply_szip() */
 
 #ifndef H5_WANT_H5_V1_4_COMPAT

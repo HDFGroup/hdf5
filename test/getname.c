@@ -2869,6 +2869,7 @@ int main( void )
  
  /* Close file */
  H5Fclose( file_id );
+ puts("All getname tests passed.");
  h5_cleanup(FILENAME, fapl);
  return 0;
 

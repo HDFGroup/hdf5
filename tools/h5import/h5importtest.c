@@ -33,12 +33,12 @@ main(void)
     int         i, j, k;
     FILE       *sp;
 
-    float     b32r2[3][4], b32r3[5][3][4];
+    float     b32r3[5][3][4];
     float     row4[3], col4[4], pln4[5];
     float     rowo4 = (float)11.0e0, colo4 = (float)21.0e0, plno4 = (float)51.0e0;
     float     rowi4 = (float)1.0e0, coli4 = (float)2.0e0, plni4 = (float)5.0e0;
 
-    int     b32i2[3][4], b32i3[5][3][4];          
+    int     b32i3[5][3][4];          
     int     row4i[3], col4i[4], pln4i[5];
     int     rowo4i = (int)11 , colo4i = (int)21 , plno4i = (int)51 ;
     int     rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
@@ -50,17 +50,17 @@ main(void)
     long_long     rowi4i64 = (long_long)1 , coli4i64 = (long_long)2 , plni4i64 = (long_long)5 ;
 #endif
 
-    short     b16i2[3][4], b16i3[5][3][4];          
+    short     b16i3[5][3][4];          
     short     row4i16[3], col4i16[4], pln4i16[5];
     short     rowo4i16 = (short)11 , colo4i16 = (short)21 , plno4i16 = (short)51 ;
     short     rowi4i16 = (short)1 , coli4i16 = (short)2 , plni4i16 = (short)5 ;
 
-    char     b8i2[3][4], b8i3[5][3][4];          
+    char     b8i3[5][3][4];          
     char     row4i8[3], col4i8[4], pln4i8[5];
     char     rowo4i8 = (char)11 , colo4i8 = (char)21 , plno4i8 = (char)51 ;
     char     rowi4i8 = (char)1 , coli4i8 = (char)2 , plni4i8 = (char)5 ;
 
-    double     b64r2[3][4], b64r3[5][3][4];
+    double     b64r3[5][3][4];
     double     row8[3], col8[4], pln8[5];
     double     rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
 	double     rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
@@ -146,14 +146,9 @@ main(void)
    {
      for (j = 0; j < ncol; j++)
      {
-        b32r2[i][j] = row4[i] + col4[j];
-        b64r2[i][j] = row8[i] + col8[j];
-	b32i2[i][j] = row4i[i] + col4i[j];  
 #ifndef WIN32
   	b64i2[i][j] = row4i64[i] + col4i64[j];  
 #endif
-	b16i2[i][j] = row4i16[i] + col4i16[j]; 
-	b8i2[i][j] = row4i8[i] + col4i8[j]; 
      }
    }
 

@@ -269,7 +269,9 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     const char     *suffix = ".h5"; /* suffix has default */
     char           *ptr, last = '\0';
     size_t          i, j;
+#ifdef H5_HAVE_PARALLEL
     static int	    HDF5_PARAPREFIX_explained=0;
+#endif /* H5_HAVE_PARALLEL */
     hid_t           driver=(-1);
     
     if (!base_name || !fullname || size < 1)

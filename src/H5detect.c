@@ -329,9 +329,9 @@ precision (detected_t *d)
 	/*              word aligned. -QAK */                                 \
 	memset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
 	if(INFO.perm[0]) /* Big-Endian */				      \
-	    memcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(INFO.precision/8)); \
+	    memcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(size_t)(INFO.precision/8)); \
 	else /* Little-Endian */					      \
-	    memcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(INFO.precision/8)); \
+	    memcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
 	_val2 = *((TYPE*)(_buf+align_g[_ano]));				      \
 	if(_val!=_val2)							      \
 	    longjmp(jbuf_g, 1);						      \

@@ -469,6 +469,7 @@ int main( void )
 
     PASSED();
 
+    puts("All set_extent tests passed.");
     return 0;
 
 

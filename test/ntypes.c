@@ -26,9 +26,12 @@ const char *FILENAME[] = {
     NULL
 };
 
-int	ipoints2[100][200], icheck2[100][200];
-short	spoints2[100][200], scheck2[100][200];
-int	ipoints3[100][200][5], icheck3[100][200][5];
+#define DIM0    100
+#define DIM1    200
+
+int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+short	spoints2[DIM0][DIM1], scheck2[DIM0][DIM1];
+int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 
 #define DSET_ATOMIC_NAME_1	"atomic_type_1"
 #define DSET_ATOMIC_NAME_2	"atomic_type_2"
@@ -82,15 +85,15 @@ test_atomic_dtype(hid_t file)
     TESTING("atomic datatype");
 
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = n = 0; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++) {
 	    ipoints2[i][j] = n++;
 	}
     }
 
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DIM0;
+    dims[1] = DIM1;
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /*------------------- Test data values ------------------------*/
@@ -123,22 +126,22 @@ test_atomic_dtype(hid_t file)
 
     /* Read the dataset back.  The temporary buffer is for special platforms 
      * like Cray. */
-    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    tmp = malloc((size_t)(DIM0*DIM1*H5Tget_size(native_type)));
     
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
     
     /* Copy data from temporary buffer to destination buffer */
-    memcpy(icheck2, tmp, dims[0]*dims[1]*H5Tget_size(native_type)); 
+    memcpy(icheck2, tmp, (size_t)(DIM0*DIM1*H5Tget_size(native_type))); 
     free(tmp);
     
     /* Convert to the integer type */
-    if(H5Tconvert(native_type, H5T_NATIVE_INT, dims[0]*dims[1], icheck2, NULL, H5P_DEFAULT)<0)
+    if(H5Tconvert(native_type, H5T_NATIVE_INT, (hsize_t)(DIM0*DIM1), icheck2, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
     
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < dims[0]; i++) {
-	for (j = 0; j < dims[1]; j++) {
+    for (i = 0; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++) {
 	    if (ipoints2[i][j] != icheck2[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -289,14 +292,14 @@ test_compound_dtype2(hid_t file)
     TESTING("nested compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*100*200))==NULL)
+    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),100*200))==NULL)
+    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < 100; i++) {
-	for (j = 0; j < 200; j++,temp_point++) {
+    for (i = n = 0, temp_point=points; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->i = n++;
 	    temp_point->st.c2 = i+j;
@@ -306,8 +309,8 @@ test_compound_dtype2(hid_t file)
     }
 
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DIM0;
+    dims[1] = DIM1;
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
@@ -442,24 +445,24 @@ test_compound_dtype2(hid_t file)
      
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
-    if((bkg=calloc(sizeof(s1),dims[0]*dims[1]))==NULL)
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
+    if((bkg=calloc(sizeof(s1),DIM0*DIM1))==NULL)
         TEST_ERROR;
             
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], check, bkg, H5P_DEFAULT))
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
         TEST_ERROR;
 
     free(bkg);
 
     /* Check that the values read are the same as the values written */
-    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
-	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+    for (i = 0, temp_point=points, temp_check=check; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++, temp_point++,temp_check++) {
 	    if (temp_point->c != temp_check->c ||
 	        temp_point->i != temp_check->i ||
 	        temp_point->st.c2 != temp_check->st.c2 ||
@@ -536,14 +539,14 @@ test_compound_dtype(hid_t file)
 
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*100*200))==NULL)
+    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),100*200))==NULL)
+    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < 100; i++) {
-	for (j = 0; j < 200; j++,temp_point++) {
+    for (i = n = 0, temp_point=points; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->i = n++;
 	    temp_point->l = (i*10+j*100)*n;
@@ -551,8 +554,8 @@ test_compound_dtype(hid_t file)
     }
 
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DIM0;
+    dims[1] = DIM1;
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
@@ -625,23 +628,23 @@ test_compound_dtype(hid_t file)
         
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
-    bkg = calloc(sizeof(s1),dims[0]*dims[1]);
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
+    bkg = calloc(sizeof(s1),DIM0*DIM1);
     
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
     
-    if (H5Tconvert(native_type, tid2, dims[0]*dims[1], check, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid2, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT)<0)
         TEST_ERROR;
                 
     free(bkg);
                 
     /* Check that the values read are the same as the values written */
-    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
-	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+    for (i = 0, temp_point=points, temp_check=check; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++, temp_point++,temp_check++) {
 	    if (temp_point->c != temp_check->c ||
 	        temp_point->i != temp_check->i ||
 	        temp_point->l != temp_check->l ) {
@@ -710,14 +713,14 @@ test_compound_dtype3(hid_t file)
     TESTING("compound datatype with array as field");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*100*200))==NULL)
+    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),100*200))==NULL)
+    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < 100; i++) {
-	for (j = 0; j < 200; j++,temp_point++) {
+    for (i = n = 0, temp_point=points; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->l = (i*10+j*100)*n;
 	    for (k = 0; k < 5; k++)
@@ -726,8 +729,8 @@ test_compound_dtype3(hid_t file)
     }
 
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DIM0;
+    dims[1] = DIM1;
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
         
     /* Create array datatype */
@@ -818,24 +821,24 @@ test_compound_dtype3(hid_t file)
   
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
-    if((bkg=calloc(sizeof(s1),dims[0]*dims[1]))==NULL)
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
+    if((bkg=calloc(sizeof(s1),DIM0*DIM1))==NULL)
         TEST_ERROR;
    
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], check, bkg, H5P_DEFAULT))
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
         TEST_ERROR;
 
     free(bkg);
 
     /* Check that the values read are the same as the values written */
-    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
-	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+    for (i = 0, temp_point=points, temp_check=check; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++, temp_point++,temp_check++) {
 	    if (temp_point->c != temp_check->c ||
 	        temp_point->l != temp_check->l ) {
 		H5_FAILED();
@@ -911,14 +914,14 @@ test_enum_dtype(hid_t file)
     TESTING("enum datatype");
 
     /* Initialize the dataset */
-    for (i = 0; i < 100; i++) {
-        for (j=0, n=0; j < 200; j++, n++)
+    for (i = 0; i < DIM0; i++) {
+        for (j=0, n=0; j < DIM1; j++, n++)
 	    spoints2[i][j] = (i*10+j*100+n)%8;
     }
 
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DIM0;
+    dims[1] = DIM1;
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /* Construct enum type based on native type */   
@@ -965,20 +968,20 @@ test_enum_dtype(hid_t file)
     
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
     
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(scheck2, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    memcpy(scheck2, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
    
-    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], scheck2, NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), scheck2, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++) {
 	    if (spoints2[i][j] != scheck2[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -1037,14 +1040,14 @@ test_array_dtype(hid_t file)
     TESTING("array of compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*100*200*5))==NULL)
+    if((points=malloc(sizeof(s1)*DIM0*DIM1*5))==NULL)
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),100*200*5))==NULL)
+    if((check=calloc(sizeof(s1),DIM0*DIM1*5))==NULL)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for(i = n = 0, temp_point=points; i < 100; i++)
-	for(j = 0; j < 200; j++)
+    for(i = n = 0, temp_point=points; i < DIM0; i++)
+	for(j = 0; j < DIM1; j++)
             for(k = 0; k < 5; k++,temp_point++) {
                 temp_point->c= 't';
                 temp_point->i= n++;
@@ -1052,8 +1055,8 @@ test_array_dtype(hid_t file)
             }
 
     /* Create the data space */
-    space_dims[0] = 100;
-    space_dims[1] = 200;
+    space_dims[0] = DIM0;
+    space_dims[1] = DIM1;
     if ((space = H5Screate_simple(2, space_dims, NULL))<0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
@@ -1104,21 +1107,20 @@ test_array_dtype(hid_t file)
 
     /* Read the dataset back. Temporary buffer is for special platforms like 
      * Cray */
-    tmp = malloc(space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(check, tmp, space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
     
-    if (H5Tconvert(native_type, tid_m, space_dims[0]*space_dims[1], check, 
-        NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0, temp_point=points, temp_check=check; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++) {
             for (k = 0; k < 5; k++, temp_point++,temp_check++) {
                 if (temp_point->c != temp_check->c ||
 	            temp_point->i != temp_check->i ||
@@ -1183,14 +1185,14 @@ test_array_dtype2(hid_t file)
     TESTING("array of atomic datatype");
 
     /* Initialize the dataset */
-    for(i = n = 0;i < 100; i++)
-	for(j = 0; j < 200; j++)
+    for(i = n = 0;i < DIM0; i++)
+	for(j = 0; j < DIM1; j++)
             for(k = 0; k < 5; k++) 
                 ipoints3[i][j][k] = n++;
 
     /* Create the data space */
-    space_dims[0] = 100;
-    space_dims[1] = 200;
+    space_dims[0] = DIM0;
+    space_dims[1] = DIM1;
     if ((space = H5Screate_simple(2, space_dims, NULL))<0) TEST_ERROR;
 
     /* Create array datatype for disk storage */
@@ -1227,21 +1229,20 @@ test_array_dtype2(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
     
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
-    memcpy(icheck3, tmp, space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    memcpy(icheck3, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, space_dims[0]*space_dims[1], icheck3, NULL, 
-        H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), icheck3, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++) {
             for (k = 0; k < 5; k++) {
                 if(icheck3[i][j][k] != ipoints3[i][j][k]) {
                     H5_FAILED();
@@ -1386,14 +1387,14 @@ test_vl_dtype(hid_t file)
             tmp=malloc(t2->len*sizeof(unsigned int));
             memcpy(tmp, t2->p, t2->len*H5Tget_size(nat_super_type));
 
-            if (H5Tconvert(nat_super_type, H5T_NATIVE_UINT, t2->len, tmp, NULL, H5P_DEFAULT))
+            if (H5Tconvert(nat_super_type, H5T_NATIVE_UINT, (hsize_t)t2->len, tmp, NULL, H5P_DEFAULT))
                 TEST_ERROR;
 
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)tmp)[k] ) {
                     H5_FAILED();
-                    printf("    VL data don't match!, wdata[%d].p=%d, rdata[%d].p=%d\n",
-                        i,((unsigned int*)t1->p)[k],i,(unsigned int*)tmp[k]);
+                    printf("    VL data don't match!, wdata[%u].p=%d, rdata[%u].p=%u\n",
+                        (unsigned)i,((unsigned int*)t1->p)[k],(unsigned)i,((unsigned int*)tmp)[k]);
                     goto error;
                 }
             } /* end for */
