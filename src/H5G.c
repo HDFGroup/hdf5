@@ -2566,7 +2566,11 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
                     statbuf->mtime = 0;
                 }
 	    }
-	    statbuf->type = (H5G_obj_t)H5G_get_type(&obj_ent, dxpl_id);
+	    statbuf->type =
+#ifndef H5_WANT_H5_V1_4_COMPAT
+                (H5G_obj_t)
+#endif /*H5_WANT_H5_V1_4_COMPAT*/
+                H5G_get_type(&obj_ent, dxpl_id);
 	    H5E_clear(); /*clear errors resulting from checking type*/
 
             /* Get object header information */
