@@ -905,7 +905,6 @@
 
 ./tools/Dependencies
 ./tools/Makefile.in
-./tools/talign.c
 
 ./tools/h4toh5/Dependencies
 ./tools/h4toh5/Makefile.in
@@ -946,6 +945,7 @@
 ./tools/lib/h5tools.h
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h
+./tools/lib/talign.c
 
 ./tools/misc/Dependencies
 ./tools/misc/Makefile.in
