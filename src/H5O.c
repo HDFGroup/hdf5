@@ -728,15 +728,15 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    }
 
    /* Count similar messages */
-   for (idx=sequence=0; idx<oh->nmesgs; idx++) {
+   for (idx=0,sequence=-1; idx<oh->nmesgs; idx++) {
       if (type->id != oh->mesg[idx].type->id) continue;
-      if (sequence==overwrite) break;
-      sequence++;
+      if (++sequence==overwrite) break;
    }
 
    /* Was the right message found? */
-   if (overwrite>=0 && sequence!=overwrite) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL);
+   if (overwrite>=0 &&
+       (idx>=oh->nmesgs || sequence!=overwrite)) {
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL); /*message not found*/
    }
 
    /* Allocate space for the new message */
@@ -745,6 +745,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
       H5O_ALIGN (size, oh->alignment);
       idx = H5O_alloc (f, oh, type, size);
       if (idx<0) HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      sequence++;
    }
 
    /* Copy the native value into the object header */

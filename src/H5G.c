@@ -99,6 +99,7 @@ H5G_component (const char *name, size_t *size_p)
  *
  *-------------------------------------------------------------------------
  */
+#if 0
 static const char *
 H5G_basename (const char *name, size_t *size_p)
 {
@@ -122,6 +123,7 @@ H5G_basename (const char *name, size_t *size_p)
    if (size_p) *size_p = strcspn (s, "/");
    return s;
 }
+#endif
    
 
 /*-------------------------------------------------------------------------
@@ -251,11 +253,11 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 	       aside = TRUE;
 	    }
 	    H5O_reset (H5O_NAME, &mesg);
+	 } else {
+	    /* component not found */
+	    if (dir_ent) *dir_ent = *dir;
+	    HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2);
 	 }
-
-	 /* component not found */
-	 if (dir_ent) *dir_ent = *dir;
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2);
       }
 
       /* next component */
@@ -637,7 +639,9 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    if (f->root_sym->header<=0) {
       H5O_name_t name_mesg;
       name_mesg.s = rest;
-      if (H5O_modify (f, ent->header, ent, NULL, H5O_NAME, 0, &name_mesg)<0) {
+      if (H5O_modify (f, ent->header, ent, NULL, H5O_NAME, 0, &name_mesg)<0 &&
+	  H5O_modify (f, ent->header, ent, NULL, H5O_NAME, H5O_NEW_MESG,
+		      &name_mesg)<0) {
 	 /* cannot add/change name message */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
       }
