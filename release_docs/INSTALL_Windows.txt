@@ -25,13 +25,13 @@ Preconditions
    4. HDF5 uses zlib version 1.1.4 for compression and zlib is NOT distributed 
       with hdf5 lib in 1.6.2 release. You have to install your own
       zlib library or you may go to HDF web site
-	(ftp://ftp.ncsa.uiuc.edu/HDF/gzip/) 
+	(ftp://ftp.ncsa.uiuc.edu/HDF/gzip/bin/windows/zlib114/) 
       to download the correponding zlib library. If you want to build
 	 HDF5 library without using zlib, please read section V.
 
    5. HDF5 uses szlib(szip) for compression and szlib is distributed 
-	with hdf5 lib in 1.6.2 release. You can also download szlib source 
-	codes and binaries from ftp://ftp.ncsa.uiuc.edu/HDF/szip/
+	with hdf5 lib in 1.6.2 binary release. You can also download szlib source 
+	codes and binaries from ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows
       If you want to build HDF5 library without using szlib, please read
       section V.
 
@@ -45,6 +45,7 @@ Preconditions
 
    9. For users who would like to build, test and use HDF5 snapshot release, 
 	please read Section VII.
+B
 
 ---------------------------------------------------------------
 
@@ -118,15 +119,22 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw 
        workspace. 
 
-    3. Select project hdf5dll, right click mouse; choose settings,
-       find "Link", go to the Category box and choose "Input",
+    3. You should find all project files listed as "all files, big files etc." on the left.
+       Select project hdf5dll, right click mouse, 
+       choose settings,
+       click "Link" on the right-upper box, 
+       go to the Category box and choose "Input",
        go to the box "Object/library modules" and go to the end of the line;
        see whether the zlib dll library path is the same as C:\zlib114\dll
        or the correct path where you install your dll export library.
        If not, replace the old zlib dll library path with the correct path.
-       check the same path for szlib dll.
 
-       You should do this for both Debug and release version.
+       You should do this for both debug and release version.
+       To interchange between "debug" and "release",
+          find "Build" from the main menu,
+          click "Build" and then click "set active configuration",
+          "hdf5dll-Win32 Release" and "hdf5dll-Win32 Debug" should be found.
+          Change from release to debug or vice versa. 
 
     4. Go to "Tools" and select "Options", find "Directories";
         4.1 Find the box "Show directories for", choose "Include files",
@@ -137,9 +145,9 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
             the included directories.
         4.2 Find the box "Show directories for", choose "Library files",
             If you cannot find your zlib and szlib library path
-            (for example, C:\zlib114\lib,C:szlib\lib)
+            (for example, C:\zlib114\lib,C:\szlib\lib,C:\szlib\dll)
 	    from the directory list,
-            add the library path(C:\zlib114\lib,C:\szlib\lib) to the 
+            add the library path(C:\zlib114\lib,C:\szlib\lib,C:\szlib\dll) to the 
 		library directories.
 
     5. Select "Build", then Select "Set Active Configuration".
