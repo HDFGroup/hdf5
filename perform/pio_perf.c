@@ -1051,7 +1051,13 @@ parse_command_line(int argc, char *argv[])
             cl_opts->num_iters = atoi(opt_arg);
             break;
         case 'n':       /* Turn off writing fill values */
+#ifdef H5_HAVE_NOFILL
             cl_opts->h5_no_fill = 1;
+#else
+	    fprintf(stderr, "pio_perf: --no-fill not supported\n");
+            usage(progname);
+	    exit(1);
+#endif
             break;
         case 'o':
             cl_opts->output_file = opt_arg;
@@ -1147,7 +1153,6 @@ usage(const char *prog)
     MPI_Comm_rank(pio_comm_g, &myrank);
 
     if (myrank == 0) {
-        fflush(stdout);
 	print_version(prog);
         printf("usage: %s [OPTIONS]\n", prog);
         printf("  OPTIONS\n");

@@ -534,7 +534,7 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
                 } /* end if */
             } /* end if */
 
-#if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
+#ifdef H5_HAVE_NOFILL
             /* Disable writing fill values if asked */
             if(parms->h5_no_fill) {
                 hrc = H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
