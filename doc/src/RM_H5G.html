@@ -284,7 +284,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-	  <dd>The file or group identifier.
+	  <dd>The file, group, dataset, or datatype identifier.
       </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns SUCCEED (0) if successful;
@@ -348,7 +348,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
+        <dd>File, group, dataset, or datatype identifier.
       <dt><em>H5G_link_t</em> <code>link_type</code>
         <dd>Link type.
             Possible values are <code>H5G_LINK_HARD</code> and <code>H5G_LINK_SOFT</code>.
@@ -566,7 +566,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File, group, or dataset identifier.
+        <dd>IN: File, group, dataset, or datatype identifier.
       <dt><em>const char</em> <code>*name</code>
         <dd>IN: Name of the object for which status is being sought.
       <dt><em>hbool_t</em> <code>follow_link</code>
@@ -608,7 +608,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group .
+        <dd>IN: Identifier of the file, group, dataset, or datatype.
       <dt><em>const char *</em><code>name</code>
         <dd>IN: Name of the object whose link value is to be checked.
       <dt><em>size_t</em> <code>size</code>
@@ -655,7 +655,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group .
+        <dd>IN: Identifier of the file, group, dataset, or datatype.
       <dt><em>const char *</em><code>name</code>
         <dd>IN: Name of the object whose comment is to be set or reset.
       <dt><em>const char *</em><code>comment</code>
@@ -692,7 +692,7 @@ then be trivial.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group .
+        <dd>IN: Identifier of the file, group, dataset, or datatype.
       <dt><em>const char *</em><code>name</code>
         <dd>IN: Name of the object whose comment is to be set or reset.
       <dt><em>size_t</em> <code>bufsize</code>
