@@ -223,8 +223,9 @@ of the <cite>HDF5 User's Guide.</cite>.
         <p>
         No element of <code>maxdims</code> should be smaller than the 
         corresponding element of <code>dims</code>.  
-        If an element of <code>maxdims</code> is <code>H5S_UNLIMITED</code>, 
-        the corresponding dimension is unlimited.
+        If an element of <code>maxdims</code> is 
+        <code>H5S_UNLIMITED</code>, (<code>-1</code>), 
+        the maximum size of corresponding dimension is unlimited.
         <p>
         The dataspace identifier returned from this function must be 
         released with <code>H5Sclose</code> or resource leaks will occur.
@@ -548,6 +549,10 @@ of the <cite>HDF5 User's Guide.</cite>.
         <p>
         Either or both of <code>dims</code> and <code>maxdims</code> 
         may be NULL.
+        <p>
+        If a value in the returned array <code>maxdims</code> is
+        <code>H5S_UNLIMITED</code> (</code>-1</code>), 
+        the maximum size of that dimension is unlimited.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
