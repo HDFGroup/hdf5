@@ -796,7 +796,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, H5T_bkg_t bkg_type)
+H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     FUNC_ENTER (H5T_conv_need_bkg, FAIL);
     
@@ -804,8 +804,15 @@ H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, H5T_bkg_t bkg_typ
     assert(dst);
     assert(cdata);
 
+    /* Compound datatypes only need a "temp" buffer */
     if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
-        cdata->need_bkg = bkg_type;
+        cdata->need_bkg = H5T_BKG_TEMP;
+
+    /* Compound datatypes need a "yes" buffer though */
+    if (H5T_detect_class(src,H5T_VLEN)==TRUE || H5T_detect_class(dst,H5T_VLEN)==TRUE)
+        cdata->need_bkg = H5T_BKG_YES;
+    if (H5T_detect_class(src,H5T_ARRAY)==TRUE || H5T_detect_class(dst,H5T_ARRAY)==TRUE)
+        cdata->need_bkg = H5T_BKG_YES;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -931,7 +938,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     }
 
     /* Check if we need a background buffer */
-    H5T_conv_need_bkg (src, dst, cdata, H5T_BKG_TEMP);
+    H5T_conv_need_bkg (src, dst, cdata);
 
     cdata->recalc = FALSE;
     FUNC_LEAVE (SUCCEED);
@@ -1845,7 +1852,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             assert (H5T_VLEN==dst->type);
 
             /* Check if we need a background buffer */
-            H5T_conv_need_bkg (src, dst, cdata, H5T_BKG_YES);
+            H5T_conv_need_bkg (src, dst, cdata);
 
             break;
 
@@ -2080,7 +2087,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #endif /* LATER */
 
             /* Check if we need a background buffer */
-            H5T_conv_need_bkg (src, dst, cdata, H5T_BKG_YES);
+            H5T_conv_need_bkg (src, dst, cdata);
 
             break;
 
