@@ -1,13 +1,13 @@
 #! /bin/sh
 ##
-## Copyright (C) 2002
+## Copyright (C) 2002, 2003
 ##     National Center for Supercomputing Applications
 ##     All rights reserved.
 ##
 
 ## Update HDF5 compiler tools after the HDF5 software has been installed
 ## in a new location.
-## For help page, use "h5redeploy -h"
+## For help page, use "h5redeploy -help"
 
 # Function definitions
 
