@@ -69,9 +69,9 @@ typedef struct H5S_tconv_t {
 
     /* Gather elements from disk to type conversion buffer */
     size_t (*fgath)(H5F_t *f, const struct H5O_layout_t *layout,
-                    size_t elmt_size, const H5S_t *file_space,
-                    const H5S_number_t *numbering, size_t start, size_t nelmts,
-                    void *tconv_buf/*out*/);
+		    const struct H5O_efl_t *efl, size_t elmt_size,
+		    const H5S_t *file_space, const H5S_number_t *numbering,
+		    size_t start, size_t nelmts, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to application buffer */
     herr_t (*mscat)(const void *tconv_buf, size_t elmt_size,
@@ -85,9 +85,9 @@ typedef struct H5S_tconv_t {
 
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*fscat)(H5F_t *f, const struct H5O_layout_t *layout,
-                    size_t elmt_size, const H5S_t *file_space,
-                    const H5S_number_t *numbering, size_t start, size_t nelmts,
-                    const void *tconv_buf);
+		    const struct H5O_efl_t *efl, size_t elmt_size,
+		    const H5S_t *file_space, const H5S_number_t *numbering,
+		    size_t start, size_t nelmts, const void *tconv_buf);
 } H5S_conv_t;
 
 H5S_t *H5S_copy (const H5S_t *src);
@@ -112,9 +112,9 @@ size_t H5S_simp_init (const struct H5O_layout_t *layout,
                       const H5S_t *mem_space, const H5S_t *file_space,
                       H5S_number_t *numbering/*out*/);
 size_t H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-                       size_t elmt_size, const H5S_t *file_space,
-                       const H5S_number_t *numbering, size_t start,
-                       size_t nelmts, void *tconv_buf/*out*/);
+		       const struct H5O_efl_t *efl, size_t elmt_size,
+		       const H5S_t *file_space, const H5S_number_t *numbering,
+		       size_t start, size_t nelmts, void *tconv_buf/*out*/);
 herr_t H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
                        const H5S_t *mem_space, const H5S_number_t *numbering,
                        size_t start, size_t nelmts, void *buf/*out*/);
@@ -122,7 +122,7 @@ size_t H5S_simp_mgath (const void *buf, size_t elmt_size,
                        const H5S_t *mem_space, const H5S_number_t *numbering,
                        size_t start, size_t nelmts, void *tconv_buf/*out*/);
 herr_t H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-                       size_t elmt_size, const H5S_t *file_space,
-                       const H5S_number_t *numbering, size_t start,
-                       size_t nelmts, const void *tconv_buf);
+		       const struct H5O_efl_t *efl, size_t elmt_size,
+		       const H5S_t *file_space, const H5S_number_t *numbering,
+		       size_t start, size_t nelmts, const void *tconv_buf);
 #endif

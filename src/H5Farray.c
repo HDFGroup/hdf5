@@ -89,8 +89,9 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  *
  * Purpose:	Reads a hyperslab of a file byte array into a hyperslab of
  *		a byte array in	memory.  The data is read from file F and the
- *		array's size and storage information is in LAYOUT.  The
- *		hyperslab offset is FILE_OFFSET[] in the file and
+ *		array's size and storage information is in LAYOUT.  External
+ *		files are described according to the external file list, EFL.
+ *		The hyperslab offset is FILE_OFFSET[] in the file and
  *		MEM_OFFSET[] in memory (offsets are relative to the origin of
  *		the array) and the size of the hyperslab is HSLAB_SIZE[]. The
  *		total size of the file array is implied in the LAYOUT
@@ -111,6 +112,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  */
 herr_t
 H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
+	      const struct H5O_efl_t *efl,
 	      const size_t _hslab_size[], const size_t mem_size[],
 	      const size_t mem_offset[], const size_t file_offset[],
 	      void *_buf/*out*/)
@@ -165,7 +167,11 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	 */
 	H5V_vector_cpy (ndims, idx, hslab_size);
 	nelmts = H5V_vector_reduce_product (ndims, hslab_size);
-	addr = layout->addr;
+	if (efl && efl->nused>0) {
+	    H5F_addr_reset (&addr);
+	} else {
+	    addr = layout->addr;
+	}
 	H5F_addr_inc (&addr, file_start);
 	buf += mem_start;
 
@@ -176,7 +182,12 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	for (z=0; z<nelmts; z++) {
 
 	    /* Read from file */
-	    if (H5F_block_read (f, &addr, elmt_size, buf)<0) {
+	    if (efl && efl->nused>0) {
+		if (H5O_efl_read (f, efl, &addr, elmt_size, buf)<0) {
+		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				   "external data read failed");
+		}
+	    } else if (H5F_block_read (f, &addr, elmt_size, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			       "block read failed");
 	    }
@@ -195,8 +206,14 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     case H5D_CHUNKED:
 	/*
-	 * This method is unable to copy into a proper hyperslab.
+	 * This method is unable to access external raw data files or to copy
+	 * into a proper hyperslab.
 	 */
+	if (efl && efl->nused>0) {
+	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
+			   "chunking and external files are mutually "
+			   "exclusive");
+	}
 	for (i=0; i<layout->ndims; i++) {
 	    if (0!=mem_offset[i] || hslab_size[i]!=mem_size[i]) {
 		HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
@@ -224,13 +241,14 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
  * Purpose:	Copies a hyperslab of a memory array to a hyperslab of a
  *		file array.  The data is written to file F and the file
  *		array's size and storage information is implied by LAYOUT.
- *		The hyperslab offset is FILE_OFFSET[] in the file and
- *		MEM_OFFSET[] in memory (offsets are relative to the origin of
- *		the array) and the size of the hyperslab is HSLAB_SIZE[].
- *		The total size of the file array is implied by the LAYOUT
- *		argument and the total size of the memory array is
- *		MEM_SIZE[].  The dimensionality of these vectors is implied
- *		by the LAYOUT argument.
+ *		The data is stored in external files according to the
+ *		external file list, EFL. The hyperslab offset is
+ *		FILE_OFFSET[] in the file and MEM_OFFSET[] in memory (offsets
+ *		are relative to the origin of the array) and the size of the
+ *		hyperslab is HSLAB_SIZE[].  The total size of the file array
+ *		is implied by the LAYOUT argument and the total size of the
+ *		memory array is MEM_SIZE[].  The dimensionality of these
+ *		vectors is implied by the LAYOUT argument.
  *
  * Return:	Success:	SUCCEED
  *
@@ -245,9 +263,9 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
-	       const size_t _hslab_size[], const size_t mem_size[],
-	       const size_t mem_offset[], const size_t file_offset[],
-	       const void *_buf)
+	       const struct H5O_efl_t *efl, const size_t _hslab_size[],
+	       const size_t mem_size[], const size_t mem_offset[],
+	       const size_t file_offset[], const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
     ssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
@@ -300,7 +318,11 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	 */
 	H5V_vector_cpy (ndims, idx, hslab_size);
 	nelmts = H5V_vector_reduce_product (ndims, hslab_size);
-	addr = layout->addr;
+	if (efl && efl->nused>0) {
+	    H5F_addr_reset (&addr);
+	} else {
+	    addr = layout->addr;
+	}
 	H5F_addr_inc (&addr, file_start);
 	buf += mem_start;
 
@@ -311,7 +333,12 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	for (z=0; z<nelmts; z++) {
 
 	    /* Write to file */
-	    if (H5F_block_write (f, &addr, elmt_size, buf)<0) {
+	    if (efl && efl->nused>0) {
+		if (H5O_efl_write (f, efl, &addr, elmt_size, buf)<0) {
+		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				   "external data write failed");
+		}
+	    } else if (H5F_block_write (f, &addr, elmt_size, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "block write failed");
 	    }
@@ -331,8 +358,14 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 
     case H5D_CHUNKED:
 	/*
-	 * This method is unable to copy from a proper hyperslab.
+	 * This method is unable to access external raw daa files or to copy
+	 * from a proper hyperslab.
 	 */
+	if (efl && efl->nused>0) {
+	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
+			   "chunking and external files are mutually "
+			   "exclusive");
+	}
 	for (i=0; i<layout->ndims; i++) {
 	    if (0!=mem_offset[i] || hslab_size[i]!=mem_size[i]) {
 		HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,

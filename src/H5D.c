@@ -413,7 +413,7 @@ H5Dget_type (hid_t dataset_id)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dget_create_parms
+ * Function:	H5Dget_create_plist
  *
  * Purpose:	Returns a copy of the dataset creation property list.
  *
@@ -431,13 +431,13 @@ H5Dget_type (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_create_parms (hid_t dataset_id)
+H5Dget_create_plist (hid_t dataset_id)
 {
     H5D_t		*dataset = NULL;
     H5D_create_t	*copied_parms = NULL;
     hid_t		ret_value = FAIL;
     
-    FUNC_ENTER (H5Dget_create_parms, FAIL);
+    FUNC_ENTER (H5Dget_create_plist, FAIL);
 
     /* Check args */
     if (H5_DATASET!=H5A_group (dataset_id) ||
@@ -962,9 +962,9 @@ H5D_open(H5F_t *f, const char *name)
     }
 
     /* Get the external file list message, which might not exist */
-    if (!H5F_addr_defined (&(dataset->layout.addr)) &&
-	NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
-			&(dataset->create_parms->efl))) {
+    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
+			&(dataset->create_parms->efl)) &&
+	!H5F_addr_defined (&(dataset->layout.addr))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "storage address is undefined an no external file list");
     }
@@ -1128,10 +1128,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (dataset->create_parms->efl.nused>0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "reading externally-stored data is not implemented yet");
-    }
     
     /*
      * Compute the size of the request and allocate scratch buffers.
@@ -1157,6 +1153,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * later ;-)
      */
     if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+			    &(dataset->create_parms->efl), 
 			    H5T_get_size (dataset->type), file_space,
 			    &numbering, 0, nelmts,
 			    tconv_buf/*out*/)!=nelmts) {
@@ -1275,11 +1272,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (dataset->create_parms->efl.nused>0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "writing externally-stored data is not implemente yet");
-    }
-    
+
     /*
      * Compute the size of the request and allocate scratch buffers.
      */
@@ -1310,6 +1303,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (H5T_BKG_YES==cdata->need_bkg) {
 	if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
 				&numbering, 0, nelmts,
 				bkg_buf/*out*/)!=nelmts) {
@@ -1332,6 +1326,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Scatter the data out to the file.
      */
     if ((sconv_func->fscat)(dataset->ent.file, &(dataset->layout),
+			    &(dataset->create_parms->efl),
 			    H5T_get_size (dataset->type), file_space,
 			    &numbering, 0, nelmts, tconv_buf)<0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");

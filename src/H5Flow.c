@@ -628,7 +628,7 @@ H5F_addr_defined(const haddr_t *addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_reset(haddr_t *addr /*out */ )
+H5F_addr_reset(haddr_t *addr/*out*/)
 {
     assert(addr);
     addr->offset = 0;

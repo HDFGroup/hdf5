@@ -350,6 +350,169 @@ H5O_efl_total_size (H5O_efl_t *efl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_efl_read
+ *
+ * Purpose:	Reads data from an external file list.  It is an error to
+ *		read past the logical end of file, but reading past the end
+ *		of any particular member of the external file list results in
+ *		zeros.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
+	      uint8 *buf)
+{
+    int		i, fd=-1;
+    size_t	to_read, cur, skip;
+    ssize_t	n;
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5O_efl_read, FAIL);
+
+    /* Check args */
+    assert (efl && efl->nused>0);
+    assert (addr && H5F_addr_defined (addr));
+    assert (buf || 0==size);
+
+    /* Find the first efl member from which to read */
+    for (i=0, cur=0; i<efl->nused; i++) {
+	if (addr->offset < cur+efl->slot[i].size) {
+	    skip = addr->offset - cur;
+	    break;
+	}
+	cur += efl->slot[i].size;
+    }
+    
+    /* Read the data */
+    while (size) {
+	if (i>=efl->nused) {
+	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
+			 "read past logical end of file");
+	}
+	if ((fd=open (efl->slot[i].name, O_RDONLY))<0) {
+	    HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
+			 "unable to open external raw data file");
+	}
+	if (lseek (fd, efl->slot[i].offset+skip, SEEK_SET)<0) {
+	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
+			 "unable to seek in external raw data file");
+	}
+	to_read = MIN(efl->slot[i].size-skip, size);
+	if ((n=read (fd, buf, to_read))<0) {
+	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
+			 "read error in external raw data file");
+	} else if (n<to_read) {
+	    HDmemset (buf+n, 0, to_read-n);
+	}
+	close (fd);
+	fd = -1;
+	size -= to_read;
+	buf += to_read;
+	skip = 0;
+	i++;
+    }
+    ret_value = SUCCEED;
+    
+ done:
+    if (fd>=0) close (fd);
+    FUNC_LEAVE (ret_value);
+}
+	
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_efl_write
+ *
+ * Purpose:	Writes data to an external file list.  It is an error to
+ *		write past the logical end of file, but writing past the end
+ *		of any particular member of the external file list just
+ *		extends that file.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
+	       const uint8 *buf)
+{
+    int		i, fd=-1;
+    size_t	to_write, cur, skip;
+    ssize_t	n;
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5O_efl_write, FAIL);
+
+    /* Check args */
+    assert (efl && efl->nused>0);
+    assert (addr && H5F_addr_defined (addr));
+    assert (buf || 0==size);
+
+    /* Find the first efl member in which to write */
+    for (i=0, cur=0; i<efl->nused; i++) {
+	if (addr->offset < cur+efl->slot[i].size) {
+	    skip = addr->offset - cur;
+	    break;
+	}
+	cur += efl->slot[i].size;
+    }
+    
+    /* Write the data */
+    while (size) {
+	if (i>=efl->nused) {
+	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
+			 "write past logical end of file");
+	}
+	if ((fd=open (efl->slot[i].name, O_RDWR))<0) {
+	    if (access (efl->slot[i].name, F_OK)<0) {
+		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
+			     "external raw data file does not exist");
+	    } else {
+		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
+			     "unable to open external raw data file");
+	    }
+	}
+	if (lseek (fd, efl->slot[i].offset+skip, SEEK_SET)<0) {
+	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
+			 "unable to seek in external raw data file");
+	}
+	to_write = MIN(efl->slot[i].size-skip, size);
+	if ((n=write (fd, buf, to_write))!=to_write) {
+	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
+			 "write error in external raw data file");
+	} 
+	close (fd);
+	fd = -1;
+	size -= to_write;
+	buf += to_write;
+	skip = 0;
+	i++;
+    }
+    ret_value = SUCCEED;
+    
+ done:
+    if (fd>=0) close (fd);
+    FUNC_LEAVE (ret_value);
+}
+	
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_efl_debug
  *
  * Purpose:	Prints debugging info for a message.

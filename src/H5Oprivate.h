@@ -216,5 +216,9 @@ herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 
 /* EFL operators */
 size_t H5O_efl_total_size (H5O_efl_t *efl);
+herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+		     size_t size, uint8 *buf);
+herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+		      size_t size, const uint8 *buf);
 
 #endif

@@ -41,7 +41,7 @@ hid_t H5Dopen (hid_t file_id, const char *name);
 herr_t H5Dclose (hid_t dataset_id);
 hid_t H5Dget_space (hid_t dataset_id);
 hid_t H5Dget_type (hid_t dataset_id);
-hid_t H5Dget_create_parms (hid_t dataset_id);
+hid_t H5Dget_create_plist (hid_t dataset_id);
 herr_t H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
                 hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/);
 herr_t H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,

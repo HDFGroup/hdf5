@@ -12,7 +12,10 @@
 #include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
+static int nerrors_g = 0;
 
 
 /*-------------------------------------------------------------------------
@@ -36,7 +39,52 @@ display_error_cb (void *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
+    nerrors_g++;
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	same_contents
+ *
+ * Purpose:	Determines whether two files are exactly the same.
+ *
+ * Return:	Success:	nonzero if same, zero if different.
+ *
+ *		Failure:	zero
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+same_contents (const char *name1, const char *name2)
+{
+    int		fd1, fd2;
+    ssize_t	n1, n2;
+    char	buf1[1024], buf2[1024];
+
+    fd1 = open (name1, O_RDONLY);
+    fd2 = open (name2, O_RDONLY);
+    assert (fd1>=0 && fd2>=0);
+
+    while (1) {
+	n1 = read (fd1, buf1, sizeof(buf1));
+	n2 = read (fd2, buf2, sizeof(buf2));
+	assert (n1==n2);
+	if (n1<=0 && n2<=0) break;
+	if (memcmp (buf1, buf2, n1)) {
+	    close (fd1);
+	    close (fd2);
+	    return 0;
+	}
+    }
+    close (fd1);
+    close (fd2);
+    return 1;
 }
 
 
@@ -46,9 +94,7 @@ display_error_cb (void *client_data)
  * Purpose:	Describes various external datasets in an HDF5 file without
  *		actually creating the external raw files.
  *
- * Return:	Success:	0
- *
- *		Failure:	-1
+ * Return:	void
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
@@ -57,7 +103,7 @@ display_error_cb (void *client_data)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 test_1 (void) 
 {
     hid_t	file, plist, space, dset, grp;
@@ -78,8 +124,6 @@ test_1 (void)
     grp = H5Gcreate (file, "emit-diagnostics", 8);
     H5Gclose (grp);
 
-    printf ("Testing external storage descriptions...\n");
-    
     /*
      * A single external file for a non-extendible dataset.
      */
@@ -127,6 +171,7 @@ test_1 (void)
 	if (dset>=0) {
 	    puts ("*FAILED*");
 	    printf ("   Small external file succeeded instead of failing\n");
+	    nerrors_g++;
 	    H5Dclose (dset);
 	    break;
 	}
@@ -188,6 +233,7 @@ test_1 (void)
 	    puts ("*FAILED*");
 	    printf ("   Small external file succeeded instead of failing\n");
 	    H5Dclose (dset);
+	    nerrors_g++;
 	    break;
 	}
 	puts (" PASSED");
@@ -234,7 +280,7 @@ test_1 (void)
 
 	dset = H5Dopen (file, "dset1");
 	assert (dset>=0);
-	plist = H5Dget_create_parms (dset);
+	plist = H5Dget_create_plist (dset);
 	assert (plist>=0);
 
 	n = H5Pget_external_count (plist);
@@ -242,6 +288,7 @@ test_1 (void)
 	if (1!=n) {
 	    puts ("*FAILED*");
 	    printf ("   Returned external count is wrong.\n");
+	    nerrors_g++;
 	    break;
 	}
 	strcpy (name+sizeof(name)-4, "...");
@@ -253,10 +300,12 @@ test_1 (void)
 	} else if (file_offset!=0) {
 	    puts ("*FAILED*");
 	    printf ("   Wrong file offset.\n");
+	    nerrors_g++;
 	    break;
 	} else if (file_size!=400) {
 	    puts ("*FAILED*");
 	    printf ("   Wrong file size.\n");
+	    nerrors_g++;
 	    break;
 	}
 	puts (" PASSED");
@@ -279,7 +328,7 @@ test_1 (void)
 
 	dset = H5Dopen (file, "dset5");
 	assert (dset>=0);
-	plist = H5Dget_create_parms (dset);
+	plist = H5Dget_create_plist (dset);
 	assert (plist>=0);
 
 	n = H5Pget_external_count (plist);
@@ -287,6 +336,7 @@ test_1 (void)
 	if (1!=n) {
 	    puts ("*FAILED*");
 	    printf ("   Returned external count is wrong.\n");
+	    nerrors_g++;
 	    break;
 	}
 	strcpy (name+sizeof(name)-4, "...");
@@ -298,10 +348,12 @@ test_1 (void)
 	} else if (file_offset!=0) {
 	    puts ("*FAILED*");
 	    printf ("   Wrong file offset.\n");
+	    nerrors_g++;
 	    break;
 	} else if (H5F_UNLIMITED!=file_size) {
 	    puts ("*FAILED*");
 	    printf ("   Wrong file size.\n");
+	    nerrors_g++;
 	    break;
 	}
 	puts (" PASSED");
@@ -358,6 +410,7 @@ test_1 (void)
 	if (status>=0) {
 	    puts ("*FAILED*");
 	    puts ("   H5Pset_external() succeeded when it should have failed");
+	    nerrors_g++;
 	    break;
 	}
 
@@ -367,6 +420,8 @@ test_1 (void)
 	if (1!=n) {
 	    puts ("*FAILED*");
 	    puts ("   Wrong external file count returned.");
+	    nerrors_g++;
+	    break;
 	}
 	puts (" PASSED");
     } while (0);
@@ -392,6 +447,7 @@ test_1 (void)
 	if (status>=0) {
 	    puts ("*FAILED*");
 	    puts ("   H5Pset_external() succeeded when it should have failed");
+	    nerrors_g++;
 	    break;
 	}
 	puts (" PASSED");
@@ -402,7 +458,6 @@ test_1 (void)
 
     /* END OF TESTS */
     H5Fclose (file);
-    return 0;
 }
 
 
@@ -411,9 +466,7 @@ test_1 (void)
  *
  * Purpose:	Tests reading from an external file set.
  *
- * Return:	Success:	0
- *
- *		Failure:	-1
+ * Return:	void
  *
  * Programmer:	Robb Matzke
  *              Wednesday, March  4, 1998
@@ -422,7 +475,7 @@ test_1 (void)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 test_2 (void)
 {
     hid_t	file, plist, space, dset, grp;
@@ -434,7 +487,6 @@ test_2 (void)
     size_t	size;
 
     /* Write the data to external files */
-    printf ("Writing external data...\n");
     for (i=0; i<4; i++) {
 	for (j=0; j<25; j++) {
 	    part[j] = i*25+j;
@@ -443,6 +495,8 @@ test_2 (void)
 	sprintf (fname, "extern_%d.raw", i+1);
 	fd = open (fname, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
+	n = lseek (fd, i*10, SEEK_SET);
+	assert (n==i*10);
 	n = write (fd, part, sizeof(part));
 	assert (n==sizeof(part));
 	close (fd);
@@ -457,18 +511,17 @@ test_2 (void)
     assert (file>=0);
     grp = H5Gcreate (file, "emit-diagnostics", 8);
     H5Gclose (grp);
-    printf ("Testing external data reading...\n");
 
     /* Create the external file list */
     plist = H5Pcreate (H5P_DATASET_CREATE);
     assert (plist>=0);
     status = H5Pset_external (plist, "extern_1.raw", 0, sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_2.raw", 0, sizeof(part));
+    status = H5Pset_external (plist, "extern_2.raw", 10, sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_3.raw", 0, sizeof(part));
+    status = H5Pset_external (plist, "extern_3.raw", 20, sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_4.raw", 0, sizeof(part));
+    status = H5Pset_external (plist, "extern_4.raw", 30, sizeof(part));
     assert (status>=0);
 
     /* Create the data space */
@@ -487,6 +540,8 @@ test_2 (void)
 	/* Read from the dataset */
 	printf ("%-70s", "...reading entire dataset");
 	fflush (stdout);
+
+	memset (whole, 0, sizeof(whole));
 	status = H5Dread (dset, H5T_NATIVE_INT, space, space,
 			  H5P_DEFAULT, whole);
 	if (status<0) {
@@ -498,6 +553,53 @@ test_2 (void)
 	    if (whole[i]!=i) {
 		puts ("*FAILED*");
 		puts ("   Incorrect value(s) read.");
+		nerrors_g++;
+		break;
+	    }
+	}
+	puts (" PASSED");
+    } while (0);
+
+
+    
+    /*
+     * Read the middle of the dataset
+     */
+    do {
+	hid_t hs_space;
+	int hs_start = 30;
+	size_t hs_count = 25;
+
+	/* Read from the dataset */
+	printf ("%-70s", "...reading partial dataset");
+	fflush (stdout);
+
+	hs_space = H5Scopy (space);
+	assert (hs_space>=0);
+	status = H5Sset_hyperslab (hs_space, &hs_start, &hs_count, NULL);
+	assert (status>=0);
+
+	memset (whole, 0, sizeof(whole));
+	status = H5Dread (dset, H5T_NATIVE_INT, hs_space, hs_space,
+			  H5P_DEFAULT, whole);
+	H5Sclose (hs_space);
+	if (status<0) {
+	    puts ("   Failed to read dataset");
+	    break;
+	}
+
+#if 0
+	for (i=0; i<100; i++) {
+	    printf ("  #%02d %3d %s\n",
+		    i, whole[i], whole[i]==i?"":" <------------------------");
+	}
+#endif
+
+	for (i=hs_start; i<hs_start+hs_count; i++) {
+	    if (whole[i]!=i) {
+		puts ("*FAILED*");
+		puts ("   Incorrect value(s) read.");
+		nerrors_g++;
 		break;
 	    }
 	}
@@ -508,8 +610,95 @@ test_2 (void)
     H5Pclose (plist);
     H5Sclose (space);
     H5Fclose (file);
-    return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_3
+ *
+ * Purpose:	Tests writing to an external file set.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+test_3 (void)
+{
+    hid_t	file, plist, space, dset;
+    herr_t	status;
+    int		i;
+    int		part[25], whole[100];
+    size_t	size;
+
+    /*
+     * Open the file from test_2().
+     */
+    file = H5Fcreate ("extern_2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert (file>=0);
+
+    /* Create the external file list */
+    plist = H5Pcreate (H5P_DATASET_CREATE);
+    assert (plist>=0);
+    status = H5Pset_external (plist, "extern_1b.raw", 0, sizeof(part));
+    assert (status>=0);
+    status = H5Pset_external (plist, "extern_2b.raw", 10, sizeof(part));
+    assert (status>=0);
+    status = H5Pset_external (plist, "extern_3b.raw", 20, sizeof(part));
+    assert (status>=0);
+    status = H5Pset_external (plist, "extern_4b.raw", 30, sizeof(part));
+    assert (status>=0);
+
+    /* Touch the files so they exist */
+    system ("touch extern_1b.raw extern_2b.raw extern_3b.raw extern_4b.raw");
+
+    /* Create the data space */
+    size = 100;
+    space = H5Screate_simple (1, &size, NULL);
+    assert (space>=0);
+
+    /* Create the dataset */
+    dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, plist);
+    assert (dset>=0);
+
+    /*
+     * Write the entire dataset and compare with the original
+     */
+    do {
+	/* Write to the dataset */
+	printf ("%-70s", "...writing entire dataset");
+	fflush (stdout);
+
+	for (i=0; i<100; i++) whole[i] = i;
+	status = H5Dwrite (dset, H5T_NATIVE_INT, space, space,
+			   H5P_DEFAULT, whole);
+	if (status<0) break;
+	for (i=0; i<4; i++) {
+	    char name1[64], name2[64];
+	    sprintf (name1, "extern_%d.raw", i+1);
+	    sprintf (name2, "extern_%db.raw", i+1);
+	    if (!same_contents (name1, name2)) {
+		puts ("*FAIL*");
+		puts ("   Output differs from expected value.");
+		nerrors_g++;
+		break;
+	    }
+	}
+	puts (" PASSED");
+    } while (0);
+
+
+    H5Dclose (dset);
+    H5Pclose (plist);
+    H5Sclose (space);
+    H5Fclose (file);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -531,20 +720,17 @@ test_2 (void)
 int
 main (void)
 {
-    herr_t	status;
-    int		nerrors=0;
-
     H5Eset_auto (display_error_cb, NULL);
 
-    status = test_1 ();
-    nerrors += (status<0 ? 1 : 0);
+    test_1 ();
+    test_2 ();
+    test_3 ();
 
-    status = test_2 ();
-    nerrors += (status<0 ? 1 : 0);
-
-    if (0==nerrors) {
+    if (0==nerrors_g) {
 	printf ("All external storage tests passed.\n");
+    } else {
+	printf ("%d TEST%s FAILED.\n", nerrors_g, 1==nerrors_g?"":"s");
     }
 
-    exit (nerrors?1:0);
+    exit (nerrors_g?1:0);
 }

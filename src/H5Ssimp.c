@@ -63,7 +63,8 @@ H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
  *
  * Purpose:	Gathers data points from file F and accumulates them in the
  *		type conversion buffer BUF.  The LAYOUT argument describes
- *		how the data is stored on disk.  ELMT_SIZE is the size in
+ *		how the data is stored on disk and EFL describes how the data
+ *		is organized in external files.  ELMT_SIZE is the size in
  *		bytes of a datum which this function treats as opaque.
  *		FILE_SPACE describes the data space of the dataset on disk
  *		and the elements that have been selected for reading (via
@@ -85,6 +86,7 @@ H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
  */
 size_t
 H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+		const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
 		const H5S_number_t *numbering, size_t start, size_t nelmts,
 		void *buf/*out*/)
@@ -153,7 +155,7 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, layout, hsize, hsize, zero, file_offset,
+    if (H5F_arr_read (f, layout, efl, hsize, hsize, zero, file_offset,
 		      buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
@@ -375,10 +377,10 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
  * Purpose:	Scatters dataset elements from the type conversion buffer BUF
  *		to the file F where the data points are arranged according to
  *		the file data space FILE_SPACE and stored according to
- *		LAYOUT. Each element is ELMT_SIZE bytes and has a unique
- *		number according to NUMBERING.  The caller is requesting that
- *		NELMTS elements are coppied beginning with element number
- *		START.
+ *		LAYOUT and EFL. Each element is ELMT_SIZE bytes and has a
+ *		unique number according to NUMBERING.  The caller is
+ *		requesting that NELMTS elements are coppied beginning with
+ *		element number START.
  *
  * Return:	Success:	SUCCEED
  *
@@ -393,6 +395,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
  */
 herr_t
 H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+		const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
 		const H5S_number_t *numbering, size_t start, size_t nelmts,
 		const void *buf)
@@ -461,7 +464,8 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Scatter to file.
      */
-    if (H5F_arr_write (f, layout, hsize, hsize, zero, file_offset, buf)<0) {
+    if (H5F_arr_write (f, layout, efl, hsize, hsize, zero,
+		       file_offset, buf)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
 
