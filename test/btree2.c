@@ -223,9 +223,19 @@ test_insert_basic(hid_t fapl)
     /* Should fail */
     if(ret != FAIL) TEST_ERROR;
 
+    /* Try again with NULL 'op' */
+    H5E_BEGIN_TRY {
+	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
     /* Attempt to find existant record in B-tree with 1 record */
     idx = 42;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Try again with NULL 'op' */
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL)<0) TEST_ERROR;
 
     /* Attempt to index non-existant record in B-tree with 1 record */
     idx = 0;

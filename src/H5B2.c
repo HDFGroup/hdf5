@@ -2941,6 +2941,9 @@ done:
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
  *
+ *              If 'OP' is NULL, then this routine just returns "SUCCEED" when
+ *              a record is found.
+ *
  * Return:	Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
@@ -2969,7 +2972,6 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(f);
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
-    HDassert(op);
 
     /* Look up the B-tree header */
     if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
@@ -3027,7 +3029,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         } /* end if */
         else {
             /* Make callback for current record */
-            if ((op)(H5B2_INT_NREC(internal,shared,idx), op_data) <0) {
+            if ( op && (op)(H5B2_INT_NREC(internal,shared,idx), op_data) <0) {
                 /* Unlock current node */
                 if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
@@ -3073,7 +3075,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         } /* end if */
         else {
             /* Make callback for current record */
-            if ((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
+            if ( op && (op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
                 /* Unlock current node */
                 if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
@@ -3901,6 +3903,10 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Look up the B-tree header */
     if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Check for empty tree */
+    if(!H5F_addr_defined(bt2->root.addr))
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Attempt to find neighbor record in B-tree */
     if(bt2->depth>0) {
