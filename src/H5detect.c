@@ -1130,7 +1130,7 @@ main(void)
     
 #if H5_SIZEOF_LONG_LONG>0
     DETECT_I(long_long,		  LLONG,        d[nd]);
-    COMP_ALIGNMENT(long long,     d[nd].comp_align);    nd++;
+    COMP_ALIGNMENT(long_long,     d[nd].comp_align);    nd++;
     
     DETECT_I(unsigned long_long,  ULLONG,       d[nd]); nd++;
 #else
