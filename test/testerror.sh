@@ -44,24 +44,19 @@ TESTING() {
 # non-zero value.
 #
 TEST() {
-   TEST_ERR=$1                  # The test name
-   TEST_ERR_BIN=`pwd`/$TEST_ERR # The path of the test binary
-
    expect1="$srcdir/testfiles/$1_1"
    expect2="$srcdir/testfiles/$1_2"
-   actual="./testfiles/`basename $1`.out"
-   actual_err="./testfiles/`basename $1`.err"
-   actual_ext="./testfiles/`basename $1`.ext"
-   shift
+   actual="./`basename $1`.out"
+   actual_err="./`basename $1`.err"
+   actual_ext="./`basename $1`.ext"
 
    # Run test.
    TESTING $1 
    (
       echo "#############################"
-      echo "Expected output for $TEST_ERR" 
+      echo "Expected output for $1" 
       echo "#############################"
-      cd $srcdir/testfiles
-      $RUNSERIAL $TEST_ERR_BIN 
+      $RUNSERIAL $1 
    ) >$actual 2>$actual_err
    # Extract file name, line number, version and thread IDs because they may be different
    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' -e 's/line [0-9]*/line (number)/' -e 's/[1-9]*\.[0-9]*\.[0-9]*/version (number)/' $actual_err > $actual_ext
