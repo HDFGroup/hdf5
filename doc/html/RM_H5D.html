@@ -62,7 +62,7 @@ and set and retrieve their constant or persistent properties.
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
-    <li><a href="#Dataset-GetVLBuff">H5Dget_vlen_buff_size</a>
+    <li><a href="#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
     <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
@@ -232,10 +232,10 @@ and set and retrieve their constant or persistent properties.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Dataset-GetVLBuff">H5Dget_vlen_buff_size</a>
+<dt><strong>Name:</strong> <a name="Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i><b>(Not yet implemented.)</b></i>
 <dt><strong>Signature:</strong>   
-    <dd><em>herr_t </em><code>H5Dget_vlen_buff_size</code>(<em>hid_t </em><code>dataset_id</code>,
+    <dd><em>herr_t </em><code>H5Dget_vlen_buf_size</code>(<em>hid_t </em><code>dataset_id</code>,
     <em>hid_t</em> <code>type_id</code>,
     <em>hid_t</em> <code>space_id</code>,
     <em>hsize_t</em> *<code>size</code>
@@ -243,7 +243,7 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Purpose:</strong>
     <dd>Determines the number of bytes required to store VL data.
 <dt><strong>Description:</strong>
-    <dd><code>H5Dget_vlen_buff_size</code> determines the number of bytes 
+    <dd><code>H5Dget_vlen_buf_size</code> determines the number of bytes 
         required to store the VL data from the dataset, using the 
         <code>space_id</code> for the selection in the dataset on 
         disk and the <code>type_id</code> for the memory representation 
