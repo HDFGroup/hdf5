@@ -905,10 +905,11 @@ test_split_comm_access(char filenames[][PATH_MAX])
 void
 usage()
 {
-    printf("Usage: testphdf5 -f <prefix> [-r] [-w] [-v]\n");
+    printf("Usage: testphdf5 [-f <prefix>] [-r] [-w] [-v]\n");
     printf("\t-f\tfile prefix for parallel test files.\n");
     printf("\t  \te.g. pfs:/PFS/myname\n");
     printf("\t  \tcan be set via $" PARAPREFIX ".\n");
+    printf("\t  \tDefault is current directory.\n");
     printf("\t-c\tno cleanup\n");
     printf("\t-r\tno read\n");
     printf("\t-w\tno write\n");
@@ -998,10 +999,9 @@ parse_options(int argc, char **argv){
     if (testfiles[0][0] == '\0'){
 	/* try get it from environment variable HDF5_PARAPREFIX */
 	char *env;
+	char *env_default = ".";	/* default to current directory */
 	if ((env=getenv(PARAPREFIX))==NULL){
-	    usage();
-	    nerrors++;
-	    return(1);
+	    env = env_default;
 	}
 	mkfilenames(env);
     }
