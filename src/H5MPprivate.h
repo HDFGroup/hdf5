@@ -165,6 +165,7 @@
 #define color_H5Inmembers "red"
 #define color_H5Iclear_type "red"
 #define color_H5Idestroy_type "red"
+#define color_H5Itype_exists "red"
 
 #define color_H5Rdereference "red"
 #define color_H5Rcreate "red"

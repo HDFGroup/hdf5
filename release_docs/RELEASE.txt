@@ -88,6 +88,7 @@ New Features
             field in the H5G_stat_t struct for testing if two objects are the
             same within a file.  QAK - 2003/08/08
         - Switched over to new error API. SLU - 2003/07/25
+        - Added support for user defined identifier types.  NF/JL - 2004/06/29
 
     Parallel Library:
     -----------------
