@@ -1776,8 +1776,7 @@ H5S_hyper_add (H5S_t *space, H5S_hyper_node_t *piece_lst)
 
     /* Check args */
     assert (space);
-    assert (start);
-    assert (end);
+    assert (piece_lst);
 
     /* Count the number of hyperslab pieces to add to the selection */
     piece_count=0;
