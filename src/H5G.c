@@ -89,7 +89,6 @@
 #include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
-#include <H5RAprivate.h>
 
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
@@ -709,7 +708,6 @@ H5G_init_interface(void)
     H5G_register_type(H5G_TYPE,    H5T_isa,  "data type");
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
-    H5G_register_type(H5G_RAGGED,  H5RA_isa, "ragged array");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1753,7 +1751,6 @@ H5G_loc (hid_t loc_id)
     H5T_t	*dt=NULL;
     H5D_t	*dset=NULL;
     H5A_t	*attr=NULL;
-    H5RA_t	*ra=NULL;
 
     FUNC_ENTER (H5G_loc, NULL);
 
@@ -1831,17 +1828,6 @@ H5G_loc (hid_t loc_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of buffer");
     
-    case H5I_RAGGED:
-	if (NULL==(ra=H5I_object(loc_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "invalid ragged array ID");
-	}
-	if (NULL==(ret_value=H5RA_entof(ra))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-			  "unable to get symbol table entry of ragged array");
-	}
-	break;
-	
     case H5I_NGROUPS:
     case H5I_BADID:
     case H5I_FILE_CLOSING:

@@ -96,7 +96,6 @@ typedef enum H5E_major_t {
     H5E_ATTR,                   /*Attribute                                  */
     H5E_PLINE,                  /*Data filters                               */
     H5E_EFL,                    /*External file list                         */
-    H5E_RAGGED,                 /*Ragged arrays                              */
     H5E_REFERENCE,              /*References                                 */
     H5E_VFL,			/*Virtual File Layer			     */
     H5E_TBBT 		        /*Threaded, Balanced, Binary Trees           */

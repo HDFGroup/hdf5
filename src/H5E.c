@@ -57,7 +57,6 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_ATTR, 		"Attribute layer"},
     {H5E_PLINE,		"Data filters layer"},
     {H5E_EFL, 		"External file list"},
-    {H5E_RAGGED,	"Ragged array layer"},
     {H5E_REFERENCE,	"References layer"},
     {H5E_VFL,		"Virtual File Layer"},
     {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},

@@ -24,7 +24,6 @@ testphdf5.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -56,7 +55,6 @@ t_dset.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -88,7 +86,6 @@ t_file.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -120,7 +117,6 @@ t_mpi.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -152,7 +148,6 @@ t_mdset.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \

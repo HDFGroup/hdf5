@@ -23,7 +23,6 @@ h5_chunk_read.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -59,7 +58,6 @@ h5_compound.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -95,7 +93,6 @@ h5_extend_write.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -131,7 +128,6 @@ h5_group.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -167,7 +163,6 @@ h5_read.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -203,7 +198,6 @@ h5_write.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -239,7 +233,6 @@ h5_select.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -275,7 +268,6 @@ h5_attribute.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -311,7 +303,6 @@ h5_mount.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -347,7 +338,6 @@ h5_reference.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \

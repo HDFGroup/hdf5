@@ -336,6 +336,9 @@ Bug Fixes since HDF5-1.4.0-beta2
         the switches.
     * Changed parameters for H5Tconvert, H5Pset_bufer and H5Pget_buffer from
         size_t to hsize_t
+    * Fixed fairly obscure bug in hyperslab I/O which could (in rare cases)
+        not copy all the data during a transfer.
+    * Removed ragged array code from library.
 
 Platforms Tested
 ================

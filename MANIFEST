@@ -770,9 +770,6 @@
 ./src/H5R.c
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
-./src/H5RA.c
-./src/H5RAprivate.h
-./src/H5RApublic.h
 ./src/H5S.c
 ./src/H5Sall.c
 ./src/H5Shyper.c
@@ -839,7 +836,6 @@
 ./test/mtime.c
 ./test/ohdr.c
 ./test/overhead.c
-./test/ragged.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_

@@ -1602,34 +1602,6 @@ datatype_list2(hid_t type, const char UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	ragged_list2
- *
- * Purpose:	List information about a ragged array which should appear
- *		after information which is general to all objects.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Thursday, November  5, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-ragged_list2(hid_t UNUSED ra, const char UNUSED *name)
-{
-    if (data_g) {
-	puts("    Data:      Not implemented yet (see values of member");
-	puts("               datasets `raw', `over', and `meta')");
-    }
-    return -1;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	link_open
  *
  * Purpose:	This gets called to open a symbolic link.  Since symbolic
@@ -1965,8 +1937,6 @@ main (int argc, char *argv[])
 	     NULL, datatype_list2);
     DISPATCH(H5G_LINK, "-> ", link_open, NULL,
 	     NULL, NULL);
-    DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
-	     NULL, ragged_list2);
 
 #if 0
     /* Name of this program without the path */

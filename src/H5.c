@@ -202,7 +202,6 @@ H5_term_library(void)
 	pending += DOWN(FD);
 	pending += DOWN(D);
 	pending += DOWN(Z);
-	pending += DOWN(RA);
 	pending += DOWN(G);
 	pending += DOWN(FL);
 	pending += DOWN(R);
@@ -1848,12 +1847,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf(out, " (tbuf");
 			}
 			break;
-		    case H5I_RAGGED:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp(argname, "array")) {
-			    fprintf(out, " (array)");
-			}
-			break;
 		    case H5I_REFERENCE:
 			fprintf(out, "%ld (reference)", (long)obj);
 			break;
@@ -1978,9 +1971,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			break;
 		    case H5I_TEMPBUF:
 			fprintf (out, "H5I_TEMPBUF");
-			break;
-		    case H5I_RAGGED:
-			fprintf (out, "H5I_RAGGED");
 			break;
 		    case H5I_REFERENCE:
 			fprintf (out, "H5I_REFERENCE");

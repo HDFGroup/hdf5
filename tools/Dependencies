@@ -24,7 +24,6 @@ h5tools.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -101,7 +100,6 @@ h5import.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -140,7 +138,6 @@ h5ls.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -176,7 +173,6 @@ h5repart.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -213,7 +209,6 @@ h5dump.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -253,7 +248,6 @@ h5toh4.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -290,7 +284,6 @@ h5dumptst.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
@@ -328,7 +321,6 @@ pdb2hdf.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
    $(top_srcdir)/src/H5Spublic.h \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \

@@ -34,7 +34,6 @@
 #include <H5Opublic.h>		/* Object headers			*/
 #include <H5Ppublic.h>		/* Property lists			*/
 #include <H5Rpublic.h>		/* References				*/
-#include <H5RApublic.h>		/* Ragged arrays			*/
 #include <H5Spublic.h>		/* Dataspaces				*/
 #include <H5Tpublic.h>		/* Datatypes				*/
 #include <H5Zpublic.h>		/* Data filters				*/

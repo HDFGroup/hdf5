@@ -1150,32 +1150,6 @@
       parameter ( IDH5Psetvlenmemmanager = 575 )
       integer IDH5Punregister 
       parameter ( IDH5Punregister = 576 )
-      integer IDH5RAclose 
-      parameter ( IDH5RAclose = 577 )
-      integer IDH5RAcreate 
-      parameter ( IDH5RAcreate = 578 )
-      integer IDH5RAfixoverflow 
-      parameter ( IDH5RAfixoverflow = 579 )
-      integer IDH5RAinitinterface 
-      parameter ( IDH5RAinitinterface = 580 )
-      integer IDH5RAisa 
-      parameter ( IDH5RAisa = 581 )
-      integer IDH5RAopen 
-      parameter ( IDH5RAopen = 582 )
-      integer IDH5RAread 
-      parameter ( IDH5RAread = 583 )
-      integer IDH5RAwrite 
-      parameter ( IDH5RAwrite = 584 )
-      integer IDH5RAclose 
-      parameter ( IDH5RAclose = 585 )
-      integer IDH5RAcreate 
-      parameter ( IDH5RAcreate = 586 )
-      integer IDH5RAopen 
-      parameter ( IDH5RAopen = 587 )
-      integer IDH5RAread 
-      parameter ( IDH5RAread = 588 )
-      integer IDH5RAwrite 
-      parameter ( IDH5RAwrite = 589 )
       integer IDH5Rcreate 
       parameter ( IDH5Rcreate = 590 )
       integer IDH5Rdereference 
@@ -2050,8 +2024,6 @@
       parameter ( IDH5Ostabc = 1025 )
       integer IDH5Pc 
       parameter ( IDH5Pc = 1026 )
-      integer IDH5RAc 
-      parameter ( IDH5RAc = 1027 )
       integer IDH5Rc 
       parameter ( IDH5Rc = 1028 )
       integer IDH5Sc 

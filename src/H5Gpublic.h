@@ -46,7 +46,7 @@ typedef enum H5G_link_t {
 #define H5G_GROUP	1		/* Object is a group		*/
 #define H5G_DATASET	2		/* Object is a dataset		*/
 #define H5G_TYPE	3		/* Object is a named data type	*/
-#define H5G_RAGGED	4		/* Object is a ragged array	*/
+#define H5G_RESERVED_4	4		/* Reserved for future use	*/
 #define H5G_RESERVED_5	5		/* Reserved for future use	*/
 #define H5G_RESERVED_6	6		/* Reserved for future use	*/
 #define H5G_RESERVED_7	7		/* Reserved for future use	*/
