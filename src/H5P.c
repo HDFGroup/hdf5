@@ -196,7 +196,7 @@ H5P_init_interface(void)
 
     /* Allocate the root class */
     assert(H5P_CLS_NO_CLASS_g==(-1));
-    if (NULL==(root_class = H5P_create_class (NULL,"none",H5P_NO_CLASS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(root_class = H5P_create_class (NULL,"root",H5P_NO_CLASS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the root class */
@@ -618,7 +618,7 @@ H5P_dup_prop(H5P_genprop_t *oprop)
     HDmemcpy(prop,oprop,sizeof(H5P_genprop_t));
 
     /* Duplicate name */
-    prop->name = HDstrdup(oprop->name);
+    prop->name = H5MM_xstrdup(oprop->name);
 
     /* Duplicate current value, if it exists */
     if(oprop->value!=NULL) {
@@ -710,7 +710,7 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
 
     /* Set the property initial values */
     prop->xor_val = H5P_xor_name(name); /* Generate the XOR'd value for the name */
-    prop->name = HDstrdup(name); /* Duplicate name */
+    prop->name = H5MM_xstrdup(name); /* Duplicate name */
     prop->size=size;
 
     /* Duplicate value, if it exists */
@@ -1146,7 +1146,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
 
     /* Set class state */
     pclass->parent = par_class;
-    pclass->name = HDstrdup(name);
+    pclass->name = H5MM_xstrdup(name);
     pclass->nprops = 0;     /* Classes are created without properties initially */
     pclass->hashsize = hashsize;
     pclass->plists = 0;     /* No properties lists of this class yet */
@@ -4612,7 +4612,7 @@ done:
     Internal routine to query the name of a generic property list class
  USAGE
     char *H5P_get_class_name(pclass)
-        H5P_genclass_t *pclass;    IN: Property list to check
+        H5P_genclass_t *pclass;    IN: Property list class to check
  RETURNS
     Success: Pointer to a malloc'ed string containing the class name
     Failure: NULL
@@ -4633,8 +4633,8 @@ char *H5P_get_class_name(H5P_genclass_t *pclass)
 
     assert(pclass);
 
-    /* Get property size */
-    ret_value=HDstrdup(pclass->name);
+    /* Get class name */
+    ret_value=H5MM_xstrdup(pclass->name);
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4679,6 +4679,114 @@ char *H5Pget_class_name(hid_t pclass_id)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_class_path
+ PURPOSE
+    Internal routine to query the full path of a generic property list class
+ USAGE
+    char *H5P_get_class_name(pclass)
+        H5P_genclass_t *pclass;    IN: Property list class to check
+ RETURNS
+    Success: Pointer to a malloc'ed string containing the full path of class
+    Failure: NULL
+ DESCRIPTION
+        This routine retrieves the full path name of a generic property list
+    class, starting with the root of the class hierarchy.
+    The pointer to the name must be free'd by the user for successful calls.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+char *H5P_get_class_path(H5P_genclass_t *pclass)
+{
+    char *par_path;     /* Parent class's full path */
+    size_t par_path_len;/* Parent class's full path's length */
+    size_t my_path_len; /* This class's name's length */
+    char *ret_value;    /* return value */
+
+    FUNC_ENTER_NOAPI(H5P_get_class_path, NULL);
+
+    assert(pclass);
+
+    /* Recursively build the full path */
+    if(pclass->parent!=NULL) {
+        /* Get the parent class's path */
+        par_path=H5P_get_class_path(pclass->parent);
+        if(par_path!=NULL) {
+            /* Get the string lengths we need to allocate space */
+            par_path_len=HDstrlen(par_path);
+            my_path_len=HDstrlen(pclass->name);
+
+            /* Allocate enough space for the parent class's path, plus the '/'
+             * separator, this class's name and the string terminator
+             */
+            if(NULL==(ret_value=H5MM_malloc(par_path_len+1+my_path_len+1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for class name");
+
+            /* Build the full path for this class */
+            HDstrcpy(ret_value,par_path);
+            HDstrcat(ret_value,"/");
+            HDstrcat(ret_value,pclass->name);
+
+            /* Free the parent class's path */
+            H5MM_xfree(par_path);
+        } /* end if */
+        else
+            ret_value=H5MM_xstrdup(pclass->name);
+    } /* end if */
+    else
+        ret_value=H5MM_xstrdup(pclass->name);
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_class_path() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_class_path
+ PURPOSE
+    Routine to query the full path of a generic property list class
+ USAGE
+    char *H5Pget_class_name(pclass_id)
+        hid_t pclass_id;         IN: Property class to query
+ RETURNS
+    Success: Pointer to a malloc'ed string containing the full path of class
+    Failure: NULL
+ DESCRIPTION
+        This routine retrieves the full path name of a generic property list
+    class, starting with the root of the class hierarchy.
+    The pointer to the name must be free'd by the user for successful calls.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING H5P_get_class_path()
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+char *H5Pget_class_path_test(hid_t pclass_id)
+{
+    H5P_genclass_t	*pclass;    /* Property class to query */
+    char *ret_value;       /* return value */
+
+    FUNC_ENTER_API(H5Pget_class_path_test, NULL);
+
+    /* Check arguments. */
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
+
+    /* Get the property list class path */
+    if ((ret_value=H5P_get_class_path(pclass))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Pget_class_path_test() */
 
 
 /*--------------------------------------------------------------------------

@@ -20,17 +20,22 @@
 *
 *************************************************************/
 
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5P_TESTING
+
 #include "testhdf5.h"
 #include "hdf5.h"
-#include "H5Dprivate.h"         /* For Datset creation property list names */
+#include "H5Dprivate.h"         /* For Dataset creation property list names */
 
 #define FILENAME   "tgenprop.h5"
 
 /* Property definitions */
 #define CLASS1_NAME     "Class 1"
+#define CLASS1_PATH     "root/Class 1"
 #define CLASS1_HASHSIZE 25
 
 #define CLASS2_NAME     "Class 2"
+#define CLASS2_PATH     "root/Class 1/Class 2"
 #define CLASS2_HASHSIZE 25
 
 /* Property definitions */
@@ -1371,7 +1376,7 @@ test_genprop_class_addprop(void)
 
 /****************************************************************
 **
-**  test_genprop_list_equal(): Test basic generic property list code.
+**  test_genprop_equal(): Test basic generic property list code.
 **      More tests for H5Pequal()
 ** 
 ****************************************************************/
@@ -1419,6 +1424,67 @@ test_genprop_equal(void)
 
 /****************************************************************
 **
+**  test_genprop_path(): Test basic generic property list code.
+**      Tests for class paths
+** 
+****************************************************************/
+static void 
+test_genprop_path(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    hid_t		cid2;		/* Generic Property class ID */
+    char               *path;           /* Class path */
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Generic Property List Class Path Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Get full path for first class */
+    path=H5Pget_class_path_test(cid1);
+    CHECK_PTR(path, "H5Pget_class_path_test");
+    if(HDstrcmp(path,CLASS1_PATH)!=0) {
+        num_errs++;
+        printf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
+    } /* end if */
+    free(path);
+
+    /* Create another new generic class, derived from first class */
+    cid2 = H5Pcreate_class(cid1,CLASS2_NAME,CLASS2_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid2, "H5Pcreate_class");
+
+    /* Insert second property into class (with no callbacks) */
+    ret = H5Pregister(cid2,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Get full path for second class */
+    path=H5Pget_class_path_test(cid2);
+    CHECK_PTR(path, "H5Pget_class_path_test");
+    if(HDstrcmp(path,CLASS2_PATH)!=0) {
+        num_errs++;
+        printf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
+    } /* end if */
+    free(path);
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+
+    /* Close class */
+    ret = H5Pclose_class(cid2);
+    CHECK_I(ret, "H5Pclose_class");
+
+} /* ent test_genprop_path() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -1443,6 +1509,7 @@ test_genprop(void)
     test_genprop_class_addprop();   /* Test adding properties to HDF5 property class */
 
     test_genprop_equal();       /* Tests for more H5Pequal verification */
+    test_genprop_path();        /* Tests for class path verification */
 
 }   /* test_genprop() */
 
