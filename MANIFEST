@@ -257,6 +257,8 @@
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
+./src/H5FDdpss.c
+./src/H5FDdpss.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
 ./src/H5FDgass.c
@@ -355,6 +357,8 @@
 ./test/bittests.c
 ./test/chunk.c
 ./test/cmpd_dset.c
+./test/dpss_read.c
+./test/dpss_write.c
 ./test/dsets.c
 ./test/dtypes.c
 ./test/enum.c
@@ -410,7 +414,6 @@
 ./tools/h5dump.h
 ./tools/h5dumptst.c
 ./tools/h5dumputil.c
-./tools/h5findshd.c
 ./tools/h5import.c
 ./tools/h5ls.c
 ./tools/h5repart.c
