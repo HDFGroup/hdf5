@@ -7,9 +7,9 @@
 # See BlankForm in this directory for details.
 
 # The default compiler is `gcc'.
-if test "X-" =  "X-$CC"; then
-    CC=gcc
-    CC_BASENAME=gcc
+if test -z "$CC"; then
+   CC=gcc
+   CC_BASENAME=gcc
 fi
 
 # Omit frame pointer for optimized code?

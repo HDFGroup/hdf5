@@ -14,6 +14,7 @@ $(LIB) __no_library__: $(LIB_OBJ)
 progs: $(LIB) $(PROGS)
 
 ## Build a tags file in this directory.
+##
 TAGS: $(LIB_SRC)
 	$(RM) $@
 	-etags $(LIB_SRC)
@@ -21,6 +22,7 @@ TAGS: $(LIB_SRC)
 ## Runs each test in order, passing $(TEST_FLAGS) to the program.
 ## Since tests are done in a shell loop, "make -i" does apply inside it.
 ## Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
+##
 tests: $(TEST_PROGS) $(LIB)
 check test _test: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
@@ -52,6 +54,7 @@ check test _test: tests
 	test $$test = dummy || false
 
 ## Make installation directories directories if they don't exist.
+##
 $(libdir):
 	mkdir $@ && chmod 755 $@
 
@@ -62,6 +65,7 @@ $(bindir):
 	mkdir $@ && chmod 755 $@
 
 ## Install the library, the public header files, and public programs.
+##
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
@@ -88,10 +92,11 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	done
 
 ## Install the documents.
+##
 install-doc: $(PUB_DOCS)
 	@if test -d $(DOCDIR) ; then                                          \
-       :;                                                                 \
-    else                                                                  \
+	    :;                                                                \
+	else                                                                  \
 	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
@@ -102,15 +107,16 @@ install-doc: $(PUB_DOCS)
 	@for f in X $(PUB_DOCS); do                                           \
 	   if test $$f != X; then                                             \
 	      if test -f $$f; then                                            \
-		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);             \
+		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
 	      else                                                            \
 	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
-		    exit 1);                                                      \
+		    exit 1);                                                  \
 	      fi;                                                             \
 	   fi;                                                                \
 	done
 
 ## Removes those things that `make install' (would have) installed.
+##
 uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
             $(LT_UNINSTALL) $(libdir)/$$f;				      \
@@ -125,6 +131,7 @@ uninstall:
 	done
 
 ## Removes those things that `make install-doc' (would have) installed.
+##
 uninstall-doc:
 	@for d in X $(SUBDIRS); do					      \
 	    if test $$d != X; then					      \
@@ -139,6 +146,11 @@ uninstall-doc:
 ## remove things like object files but not libraries or executables.
 ##
 mostlyclean:
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o)
 	-$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o)
 	-$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN)
@@ -148,6 +160,11 @@ mostlyclean:
 ## is part of the HDF5 distribution.
 ##
 clean: mostlyclean
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
 	-$(RM) -r .libs
 
@@ -158,18 +175,28 @@ clean: mostlyclean
 ##
 distclean: clean
 	-$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	@if test -f $(srcdir)/Makefile.in; then				      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
-
 
 ## Like `distclean' except it deletes all files that can be regenerated from
 ## the makefile, including those generated from autoheader and autoconf.
 ##
 maintainer-clean: distclean
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
 ## Implicit rules
+##
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
