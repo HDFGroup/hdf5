@@ -1061,7 +1061,9 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
         }
         assert(nbytes>=0);
         assert((size_t)nbytes<=size);
+        H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
         size -= (size_t)nbytes;
+        H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
@@ -1196,7 +1198,9 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
         }
         assert(nbytes>0);
         assert((size_t)nbytes<=size);
+        H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
         size -= (size_t)nbytes;
+        H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
         addr += (haddr_t)nbytes;
         buf = (const char*)buf + nbytes;
     }

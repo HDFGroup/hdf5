@@ -86,6 +86,7 @@
         H5FDfamily.c
         H5FDlog.c
         H5FDmulti.c
+        H5FDsec2.c
 
         H5V.c
         H5Z.c
@@ -100,4 +101,5 @@
         H5FDgass.c
         H5FDmpio.c
         H5FDmpiposix.c
+        H5FDsrb.c
 */
