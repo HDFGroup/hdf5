@@ -73,6 +73,22 @@ typedef enum H5FD_mem_t {
     H5FD_MEM_DEFAULT			/*ohdr*/			      \
 }
 
+
+/* Define VFL driver features that can be enabled on a per-driver basis */
+/* These are returned queried with the 'query' function pointer in H5FD_class_t */
+    /*
+     * Defining the H5FD_FEAT_AGGREGATE_METADATA for a VFL driver means that
+     * the library will attempt to allocate a larger block for metadata and
+     * then sub-allocate each metadata request from that larger block.
+     */
+#define H5FD_FEAT_AGGREGATE_METADATA    0x00000001
+    /*
+     * Defining the H5FD_FEAT_ACCUMULATE_METADATA for a VFL driver means that
+     * the library will attempt to cache metadata as it is written to the file
+     * and build up a larger block of metadata to eventually pass to the VFL
+     * 'write' routine.
+     */
+#define H5FD_FEAT_ACCUMULATE_METADATA   0x00000002
 	
 
 /* Forward declaration */
@@ -97,6 +113,7 @@ typedef struct H5FD_class_t {
 		    haddr_t maxaddr);
     herr_t (*close)(H5FD_t *file);
     int (*cmp)(const H5FD_t *f1, const H5FD_t *f2);
+    herr_t (*query)(const H5FD_t *f1, unsigned long *flags);
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hsize_t size);
     herr_t (*free)(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
     haddr_t (*get_eoa)(H5FD_t *file);
@@ -104,7 +121,7 @@ typedef struct H5FD_class_t {
     haddr_t (*get_eof)(H5FD_t *file);
     herr_t (*read)(H5FD_t *file, hid_t dxpl, haddr_t addr, hsize_t size,
 		   void *buffer);
-    herr_t (*write)(H5FD_t *file, hid_t dxpl, haddr_t addr, hsize_t size,
+    herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size,
 		    const void *buffer);
     herr_t (*flush)(H5FD_t *file);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
@@ -124,6 +141,21 @@ typedef struct H5FD_free_t {
 struct H5FD_t {
     hid_t		driver_id;	/*driver ID for this file	*/
     const H5FD_class_t	*cls;		/*constant class info		*/
+
+    unsigned long feature_flags;  /* VFL Driver feature Flags */
+
+    /* Metadata aggregation fields */
+    hsize_t def_meta_block_size;  /* Metadata allocation block size (if aggregating metadata) */
+    hsize_t cur_meta_block_size;  /* Current size of metadata allocation region left */
+    haddr_t eoma;       /* End of metadata allocated region */
+
+    /* Metadata accumulator fields */
+    unsigned char *meta_accum;  /* Buffer to hold the accumulated metadata */
+    haddr_t accum_loc;      /* File location (offset) of the accumulated metadata */
+    hsize_t accum_size;     /* Size of the accumulated metadata buffer used (in bytes) */
+    hsize_t accum_buf_size; /* Size of the accumulated metadata buffer allocated (in bytes) */
+    unsigned accum_dirty;   /* Flag to indicate that the accumulated metadata is dirty */
+
     haddr_t		maxaddr;	/*for this file, overrides class*/
     H5FD_free_t		*fl[H5FD_MEM_NTYPES];/*freelist per allocation type*/
     hsize_t		maxsize;	/*largest object on FL, or zero	*/
@@ -149,7 +181,7 @@ __DLL__ herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
 __DLL__ haddr_t H5FDget_eof(H5FD_t *file);
 __DLL__ herr_t H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		void *buf/*out*/);
-__DLL__ herr_t H5FDwrite(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		 const void *buf);
 __DLL__ herr_t H5FDflush(H5FD_t *file);
 
