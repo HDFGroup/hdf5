@@ -15,7 +15,9 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=src test
+# We include examples now since those are our "tests" at this time. We
+# can remove it later.
+SUBDIRS=src test examples
 
 ##############################################################################
 ##		    T A R G E T S
