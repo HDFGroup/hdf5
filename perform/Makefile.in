@@ -1,0 +1,55 @@
+## HDF5 Library Performance Makefile(.in)
+##
+## Copyright (C) 2001 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+@COMMENCE@
+
+## Add include directory to the C preprocessor flags and the hdf5 library
+## to the library list.
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+LIBHDF5=../src/libhdf5.la
+LIBH5TEST=../test/libh5test.la
+
+## These are the programs that `make all' or `make tests' will build and which
+## `make check' will run. List them in the order they should be run.
+TEST_PROGS_PARA=mpi-perf perf
+TEST_PROGS=iopipe chunk overhead \
+	$(TEST_PROGS_PARA)
+
+## These are the files that `make clean' (and derivatives) will remove from
+## this directory.
+CLEAN=*.h5
+
+## List all source files here.  The list of object files will be
+## created by replacing the `.c' with a `.o'.  This list is necessary
+## for building automatic dependencies.
+TEST_SRC_PARA=mpi-perf.c perf.c
+TEST_SRC=iopipe.c chunk.c overhead.c \
+	 $(TEST_SRC_PARA)
+TEST_OBJ=$(TEST_SRC:.c=.lo)
+
+## How to build the programs... they all depend on the hdf5 library
+$(TEST_PROGS): $(LIBHDF5)
+
+perf: perf.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) \
+	$(LDFLAGS) $(LIBS)
+
+mpi-perf: mpi-perf.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mpi-perf.lo $(LIBH5TEST) $(LIBHDF5) \
+	$(LDFLAGS) $(LIBS)
+
+iopipe: iopipe.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ iopipe.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+chunk: chunk.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ chunk.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+overhead: overhead.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ overhead.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+@CONCLUDE@
