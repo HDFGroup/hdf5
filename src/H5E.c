@@ -345,6 +345,7 @@ done:
     PABLO_TRACE_OFF(H5E_mask, ID_H5Epush);  /* ignore ret_value set */
 }	/* H5Epush */
 
+#ifdef H5_ERROR_DEBUG
 /*--------------------------------------------------------------------------
 NAME
    H5Eset_push -- Set the function to call when an error value is reported
@@ -391,4 +392,5 @@ done:
 
     FUNC_LEAVE(H5E_mask, ID_H5Eset_push, ret_value);
 }	/* H5Eset_push */
+#endif /* H5_ERROR_DEBUG */
 

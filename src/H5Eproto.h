@@ -114,7 +114,9 @@ extern      "C"
 /* Functions in H5E.c */
 int32 H5Enew_err_stack(uintn initial_stack_size);
 intn H5Edelete_err_stack(int32 err_hand);
+#ifdef H5_ERROR_DEBUG
 H5E_push_func_t H5Eset_push(H5E_push_func_t func);
+#endif /* H5_ERROR_DEBUG */
 void H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 void H5Eclear(int32 err_hand);
 
