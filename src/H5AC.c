@@ -1431,12 +1431,12 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
              * The object is already cached; simply remove it from the cache.
              */
             thing = (*info);
-            (*info)->type = NULL;
-            (*info)->addr = HADDR_UNDEF;
-            (*info)= NULL;
 #ifdef H5AC_DEBUG
             cache->diagnostics[(*info)->type->id].nhits++;
 #endif /* H5AC_DEBUG */
+            (*info)->type = NULL;
+            (*info)->addr = HADDR_UNDEF;
+            (*info)= NULL;
         } else {
 #ifdef H5AC_DEBUG
             /*

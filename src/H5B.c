@@ -1,8 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997-2001 National Center for Supercomputing Applications
- *			   All rights reserved.
- *
- *-------------------------------------------------------------------------
  *
  * Created:		hdf5btree.c
  *			Jul 10 1997
@@ -131,7 +141,7 @@ static herr_t H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t 
 			haddr_t *new_addr/*out*/);
 static H5B_t * H5B_copy(H5F_t *f, const H5B_t *old_bt);
 #ifdef H5B_DEBUG
-static herr_t H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type,
+static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
 			 void *udata);
 #endif
 
@@ -259,7 +269,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     if (H5AC_set(f, dxpl_id, H5AC_BT, *addr_p, bt) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree root node to cache");
 #ifdef H5B_DEBUG
-    H5B_assert(f, *addr_p, type, udata);
+    H5B_assert(f, dxpl_id, *addr_p, type, udata);
 #endif
     
 done:
@@ -983,7 +993,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     HDmemcpy(bt->key[2].nkey, rt_key, type->sizeof_nkey);
 
 #ifdef H5B_DEBUG
-    H5B_assert(f, addr, type, udata);
+    H5B_assert(f, dxpl_id, addr, type, udata);
 #endif
     
 done:
@@ -1403,7 +1413,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    herr_t status = H5B_decode_key(f, bt, bt->nchildren);
 	    assert(status >= 0);
 	}
-	cmp = (type->cmp2) (f, bt->key[bt->nchildren].nkey, udata,
+	cmp = (type->cmp2) (f, dxpl_id, bt->key[bt->nchildren].nkey, udata,
 			    twin->key[0].nkey);
 	assert(0 == cmp);
 #endif
@@ -1851,7 +1861,7 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     }
     
 #ifdef H5B_DEBUG
-    H5B_assert(f, addr, type, udata);
+    H5B_assert(f, dxpl_id, addr, type, udata);
 #endif
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2122,7 +2132,7 @@ done:
  */
 #ifdef H5B_DEBUG
 static herr_t
-H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
+H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
     int	i, ncell, cmp;
@@ -2199,7 +2209,7 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 		/* Check that the keys are monotonically increasing */
 		status = H5B_decode_keys(f, bt, i);
 		assert(status >= 0);
-		cmp = (type->cmp2) (f, bt->key[i].nkey, udata,
+		cmp = (type->cmp2) (f, dxpl_id, bt->key[i].nkey, udata,
 				    bt->key[i+1].nkey);
 		assert(cmp < 0);
 	    }
