@@ -333,13 +333,13 @@ static int test_simple(void)
   goto out;
 
  /* verify that "dset_a" has 1 dimension scale at DIM 0   */
- if (H5DSget_nscales(did,0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,0))<0)
   goto out;
  if (nscales!=2)
   goto out;
 
  /* verify that "dset_a" has 3 dimension scales at DIM 1   */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=3)
   goto out;
@@ -388,13 +388,13 @@ static int test_simple(void)
   goto out;
 
  /* verify that "dset_b" has 1 dimension scale at DIM 0   */
- if (H5DSget_nscales(did,0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,0))<0)
   goto out;
  if (nscales!=1)
   goto out;
 
  /* verify that "dset_b" has 0 dimension scales at DIM 1   */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=0)
   goto out;
@@ -487,12 +487,12 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
  /* verify that "dset_c" has 1 dimension scale at DIM 0   */
- if (H5DSget_nscales(did,0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,0))<0)
   goto out;
  if (nscales!=1)
   goto out;
  /* verify that "dset_c" has 3 dimension scales at DIM 1   */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=3)
   goto out;
@@ -532,7 +532,7 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
   /* verify that "dset_c" has 2 dimension scales at DIM 1  */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=2)
   goto out;
@@ -572,7 +572,7 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
   /* verify that "dset_c" has 1 dimension scale at DIM 1  */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=1)
   goto out;
@@ -612,7 +612,7 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
   /* verify that "dset_c" has 1 dimension scale at DIM 1  */
- if (H5DSget_nscales(did,1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,1))<0)
   goto out;
  if (nscales!=0)
   goto out;
@@ -731,7 +731,7 @@ static int test_simple(void)
   goto out;
 
  /* verify that "ds_d_1" has only 1 scale at DIM0  */
- if (H5DSget_nscales(did,DIM0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,DIM0))<0)
   goto out;
  if (nscales!=1)
   goto out;
@@ -770,7 +770,7 @@ static int test_simple(void)
   goto out;
 
  /* verify that "ds_d_1" has no scale at DIM1  */
- if (H5DSget_nscales(did,DIM1,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,DIM1))<0)
   goto out;
  if (nscales!=0)
   goto out;
@@ -805,7 +805,7 @@ static int test_simple(void)
   goto out;
 
  /* verify that "ds_d_2" has only 1 scale at DIM1  */
- if (H5DSget_nscales(did,DIM0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,DIM0))<0)
   goto out;
  if (nscales!=1)
   goto out;
@@ -819,7 +819,7 @@ static int test_simple(void)
   goto out;
 
  /* verify that "ds_d_2" has only 1 scale at DIM1  */
- if (H5DSget_nscales(did,DIM0,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,DIM0))<0)
   goto out;
  if (nscales!=1)
   goto out;

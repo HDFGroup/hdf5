@@ -885,7 +885,7 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5DSget_nscales
+ * Function: H5DSget_num_scales
  *
  * Purpose: get the number of scales linked to the IDX dimension of DNAME 
  *
@@ -904,9 +904,8 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5DSget_nscales(hid_t did,
-                       unsigned int dim,
-                       int *nscales) 
+int H5DSget_num_scales(hid_t did,
+                       unsigned int dim)
 { 
  int        has_dimlist;
  hid_t      sid;          /* space ID */
@@ -915,6 +914,7 @@ herr_t H5DSget_nscales(hid_t did,
  int        rank;         /* rank of dataset */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  H5I_type_t it;           /* ID type */
+ int nscales;
 
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -979,7 +979,7 @@ herr_t H5DSget_nscales(hid_t did,
   if (H5Aread(aid,tid,buf)<0)
    goto out;
 
-  *nscales=(int)buf[dim].len;
+  nscales=(int)buf[dim].len;
 
   /* close */
   if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
@@ -995,7 +995,7 @@ herr_t H5DSget_nscales(hid_t did,
    
  } /* has_dimlist */ 
 
- return SUCCESS;
+ return nscales;
  
 /* error zone, gracefully close */
 out:
@@ -1459,12 +1459,12 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5DSis_scale(hid_t did) 
+htri_t H5DSis_scale(hid_t did) 
 {  
  hid_t      tid;        /* attribute type ID */
  hid_t      aid;        /* attribute ID */
  herr_t     has_class;  /* has the "CLASS" attribute */
- herr_t     is_ds;      /* boolean return value */
+ htri_t     is_ds;      /* boolean return value */
  H5I_type_t it;           /* ID type */
  char       buf[20];
 
@@ -1598,7 +1598,7 @@ herr_t H5DSiterate_scales(hid_t did,
   return FAIL;
 
  /* get the number of scales assotiated with this DIM */
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if ((nscales = H5DSget_num_scales(did,dim))<0)
   goto out;
 
  /* get dataset space */

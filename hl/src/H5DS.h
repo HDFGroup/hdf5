@@ -51,9 +51,8 @@ herr_t H5DSdetach_scale(hid_t did,
 herr_t H5DSset_scale(hid_t dsid, 
                      char *dimname);
 
-herr_t H5DSget_nscales(hid_t did,
-                       unsigned int dim,
-                       int *nscales);
+int H5DSget_num_scales(hid_t did,
+                       unsigned int dim);
 
 herr_t H5DSset_label(hid_t did, 
                      unsigned int idx,
@@ -68,7 +67,7 @@ ssize_t H5DSget_scale_name(hid_t did,
                            char *name,
                            size_t size);
 
-herr_t H5DSis_scale(hid_t did);
+htri_t H5DSis_scale(hid_t did);
 
 herr_t H5DSiterate_scales(hid_t did, 
                           unsigned int dim, 
