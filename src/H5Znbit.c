@@ -127,7 +127,6 @@ H5Z_can_apply_nbit(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
     H5T_class_t dtype_class;            /* Datatype's class */
     unsigned dtype_size;                /* Datatype's size (in bytes) */
-    H5T_order_t dtype_order;            /* Datatype's endianness order */
     herr_t ret_value=TRUE;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_can_apply_nbit, FAIL)
@@ -223,12 +222,17 @@ static herr_t H5Z_calc_parms_array(hid_t type_id)
     /* Calculate number of the rest parameters according to base datatype's class */
     switch(dtype_base_class) {
         case H5T_INTEGER:
-        case H5T_FLOAT: H5Z_calc_parms_atomic();
-             break;
-        case H5T_ARRAY: H5Z_calc_parms_array(dtype_base); 
-             break;
-        case H5T_COMPOUND:H5Z_calc_parms_compound(dtype_base);
-             break;
+        case H5T_FLOAT: 
+            H5Z_calc_parms_atomic();
+            break;
+        case H5T_ARRAY: 
+            if(H5Z_calc_parms_array(dtype_base)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
+            break;
+        case H5T_COMPOUND:
+            if(H5Z_calc_parms_compound(dtype_base)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
+            break;
         default: 
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
     } /* end switch */
@@ -293,12 +297,17 @@ static herr_t H5Z_calc_parms_compound(hid_t type_id)
         /* Calculate parameters according to member's datatype class */
         switch(dtype_member_class) {
             case H5T_INTEGER:
-            case H5T_FLOAT: H5Z_calc_parms_atomic();
-                 break;
-            case H5T_ARRAY: H5Z_calc_parms_array(dtype_member); 
-                 break;
-            case H5T_COMPOUND:H5Z_calc_parms_compound(dtype_member);
-                 break;
+            case H5T_FLOAT: 
+                H5Z_calc_parms_atomic();
+                break;
+            case H5T_ARRAY: 
+                if(H5Z_calc_parms_array(dtype_member)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
+                break;
+            case H5T_COMPOUND:
+                if(H5Z_calc_parms_compound(dtype_member)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
+                break;
             default: 
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
         } /* end switch */
@@ -437,12 +446,18 @@ static herr_t H5Z_set_parms_array(hid_t type_id, unsigned cd_values[])
     /* Call appropriate function according to base datatype's class */
     switch(dtype_base_class) {
         case H5T_INTEGER:
-        case H5T_FLOAT: H5Z_set_parms_atomic(dtype_base, cd_values);
-             break;
-        case H5T_ARRAY: H5Z_set_parms_array(dtype_base, cd_values); 
-             break;
-        case H5T_COMPOUND: H5Z_set_parms_compound(dtype_base, cd_values);
-             break;
+        case H5T_FLOAT: 
+            if(H5Z_set_parms_atomic(dtype_base, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
+        case H5T_ARRAY: 
+            if(H5Z_set_parms_array(dtype_base, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
+        case H5T_COMPOUND: 
+            if(H5Z_set_parms_compound(dtype_base, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
         default: 
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
     } /* end switch */
@@ -515,12 +530,18 @@ static herr_t H5Z_set_parms_compound(hid_t type_id, unsigned cd_values[])
         /* Call appropriate function according to member's datatype class */
         switch(dtype_member_class) {
             case H5T_INTEGER:
-            case H5T_FLOAT: H5Z_set_parms_atomic(dtype_member, cd_values);
-                 break;
-            case H5T_ARRAY: H5Z_set_parms_array(dtype_member, cd_values); 
-                 break;
-            case H5T_COMPOUND:H5Z_set_parms_compound(dtype_member, cd_values);
-                 break;
+            case H5T_FLOAT: 
+                if(H5Z_set_parms_atomic(dtype_member, cd_values)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+                break;
+            case H5T_ARRAY: 
+                if(H5Z_set_parms_array(dtype_member, cd_values)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype") 
+                break;
+            case H5T_COMPOUND:
+                if(H5Z_set_parms_compound(dtype_member, cd_values)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+                break;
             default: 
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
         } /* end switch */
@@ -570,12 +591,17 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values_actual_nparms = 3; 
     switch(dtype_class) {
         case H5T_INTEGER:
-        case H5T_FLOAT: H5Z_calc_parms_atomic();
-             break;
-        case H5T_ARRAY: H5Z_calc_parms_array(type_id); 
-             break;
-        case H5T_COMPOUND: H5Z_calc_parms_compound(type_id);
-             break;
+        case H5T_FLOAT: 
+            H5Z_calc_parms_atomic();
+            break;
+        case H5T_ARRAY: 
+            if(H5Z_calc_parms_array(type_id)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype") 
+            break;
+        case H5T_COMPOUND: 
+            if(H5Z_calc_parms_compound(type_id)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
+            break;
         default: /* no need to calculate other datatypes at top level */
              break;
     } /* end switch */
@@ -612,12 +638,18 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Call appropriate function according to the datatype class */
     switch(dtype_class) {
         case H5T_INTEGER:
-        case H5T_FLOAT: H5Z_set_parms_atomic(type_id, cd_values);
-             break;
-        case H5T_ARRAY: H5Z_set_parms_array(type_id, cd_values); 
-             break;
-        case H5T_COMPOUND:H5Z_set_parms_compound(type_id, cd_values);
-             break;
+        case H5T_FLOAT: 
+            if(H5Z_set_parms_atomic(type_id, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
+        case H5T_ARRAY: 
+            if(H5Z_set_parms_array(type_id, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
+        case H5T_COMPOUND:
+            if(H5Z_set_parms_compound(type_id, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")     
+            break;
         default: /* no need to set parameters for other datatypes at top level */
              break;
     } /* end switch */
