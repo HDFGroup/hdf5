@@ -116,7 +116,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;atomic_type&gt; ::= &lt;integer&gt; | &lt;float&gt; | &lt;time&gt; | &lt;string&gt; | &lt;bitfield&gt; | &lt;opaque&gt;
 
-&lt;integer&gt; ::= H5T_STD_I8LE | H5T_STD_I16BE | H5T_STD_I16LE | H5T_STD_I32BE |
+&lt;integer&gt; ::=  H5T_STD_I8BE | H5T_STD_I8LE | H5T_STD_I16BE | H5T_STD_I16LE | H5T_STD_I32BE |
               H5T_STD_I32LE | H5T_STD_I64BE | H5T_STD_I64LE |  H5T_STD_U8BE |
               H5T_STD_U8LE | H5T_STD_U16BE | H5T_STD_U16LE | H5T_STD_U32BE |
               H5T_STD_U32LE | H5T_STD_U64BE | H5T_STD_U64LE | H5T_NATIVE_CHAR |
@@ -187,7 +187,8 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;scalar_space_data&gt; ::= &lt;atomic_scalar_data&gt; | &lt;compound_scalar_data&gt;
 
 &lt;atomic_scalar_data&gt; :: = the value of data 
-// A string is enclosed in double quotes.
+// A string is enclosed in double quotes. 
+// If a string is displayed on more than one line, string concatenate operator '//' is used.
 
 &lt;compound_scalar_data&gt; ::= { [ &lt;member_data&gt; ], [ &lt;member_data&gt; ], ... }
 
@@ -287,7 +288,7 @@ GROUP "/" {
       }
       DATASPACE { SCALAR }
       DATA {
-         "string attribute\000"
+         "string attribute"
       }
    }
    DATASET "dset1" {
@@ -314,11 +315,31 @@ GROUP "/" {
       }
       DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
       DATA {
-         {[1], [0.1], [0.001]}, 
-         {[2], [0.2], [0.002]}, 
-         {[3], [0.3], [0.003]}, 
-         {[4], [0.4], [0.004]}, 
-         {[5], [0.5], [0.005]}
+         {
+            [ 1 ],
+            [ 0.1 ],
+            [ 0.01 ]
+         },
+         {
+            [ 2 ],
+            [ 0.2 ],
+            [ 0.02 ]
+         },
+         {
+            [ 3 ],
+            [ 0.3 ],
+            [ 0.03 ]
+         },
+         {
+            [ 4 ],
+            [ 0.4 ],
+            [ 0.04 ]
+         },
+         {
+            [ 5 ],
+            [ 0.5 ],
+            [ 0.05 ]
+         }
       }
    }
    GROUP "group1" {
@@ -328,11 +349,46 @@ GROUP "/" {
          }
          DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
          DATA {
-            {[100, 100], [0.1]}, 
-            {[200, 200], [0.2]}, 
-            {[300, 300], [0.3]}, 
-            {[400, 400], [0.4]}, 
-            {[500, 500], [0.5]}
+            {
+               [ 0, 1, 2, 3 ],
+               [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,
+                 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+                 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+            },
+            {
+               [ 0, 1, 2, 3 ],
+               [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,
+                 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+                 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+            },
+            {
+               [ 0, 1, 2, 3 ],
+               [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,
+                 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+                 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+            },
+            {
+               [ 0, 1, 2, 3 ],
+               [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,
+                 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+                 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+            },
+            {
+               [ 0, 1, 2, 3 ],
+               [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,
+                 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+                 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+            }
          }
       }
    }
@@ -343,8 +399,8 @@ GROUP "/" {
       LINKTARGET "somevalue"
    }
    DATATYPE "type1" {
-      H5T_STD_I32BE "a"[2];
-      H5T_IEEE_F32BE "b";
+      H5T_STD_I32BE "a"[4];
+      H5T_IEEE_F32BE "b"[5][6];
    }
 }
 }

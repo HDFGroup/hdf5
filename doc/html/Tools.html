@@ -152,33 +152,40 @@ These tools enable the user to examine HDF5 files interactively.
         <ul>
         <li>Group
         <ul>
-           <li>group attributes
+           <li>group attribute (see Attribute)
            <li>group member
         </ul>
         <li>Dataset
         <ul>
-           <li>dataset attributes
-           <li>data type
-           <li>data space
-           <li>data
+           <li>dataset attribute (see Attribute)
+           <li>dataset type (see Data type)
+           <li>dataset space (see Data space)
+           <li>dataset data
+        </ul>
+        <li>Attribute
+        <ul>
+           <li>attribute type (see Data type)
+           <li>attribute space (see Data space)
+           <li>attribute data
         </ul>
         <li>Data type
         <ul>
-           <li>atomic type
-           <li>compound type
+           <li>integer type
+           <dt>- H5T_STD_I8BE, H5T_STD_I8LE, H5T_STD_I16BE, ...
+           <li>floating point type
+           <dt>- H5T_IEEE_F32BE, H5T_IEEE_F32LE, H5T_IEEE_F64BE, ...
            <li>string type
+           <li>compound type 
+           <dt>- named, unamed and transient compound type
+           <dt>- integer, floating or string type member
         </ul>
-        <li>Simple data space
+        <li>Data space 
+        <ul>
+           <li>scalar and simple space
+        </ul>
         <li>Soft link
         <li>Hard link
         <li>Loop detection
-        </ul>
-    <dd>The to do list includes:
-        <ul>
-        <li>Display data correctly
-        <li>Make h5dump output consistent with DDL
-        <li>Support storage layout
-        <li>Define file boot block
         </ul>
      
 <dt><strong>See Also:</strong>
