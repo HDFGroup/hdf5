@@ -310,6 +310,8 @@ herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
+    if(H5Aatom_group(tid)!=H5_TEMPLATE)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
     if(buf==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
 
@@ -324,11 +326,11 @@ herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
             break;
 
         case H5_OFFSET_SIZE:
-            *(uintn *)buf=template->offset_size;
+            *(uint8 *)buf=template->offset_size;
             break;
 
         case H5_LENGTH_SIZE:
-            *(uintn *)buf=template->length_size;
+            *(uint8 *)buf=template->length_size;
             break;
 
         case H5_SYM_LEAF_K:
@@ -366,10 +368,11 @@ herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
 done:
   if(ret_value == FAIL)   
     { /* Error condition cleanup */
-
+        /* none */
     } /* end if */
 
     /* Normal function cleanup */
+        /* none */
 
     FUNC_LEAVE(ret_value);
 } /* end H5Cgetparm() */
@@ -404,6 +407,8 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
+    if(H5Aatom_group(tid)!=H5_TEMPLATE)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
     if(buf==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
 
@@ -414,50 +419,66 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
     switch(parm)
       {
         case H5_USERBLOCK_SIZE:
-            template->userblock_size=*(const uintn *)buf;
+            val = *(const uintn *)buf;
+            /* If anyone knows a faster test for a power of two, please change this silly code -QAK */
+            if (val!=0 && !(val==512 || val==1024 || val==2048 || val==4096
+                || val==8192 || val==16374 || val==32768 || val==65536
+                || val==131072 || val==262144 || val==524288 || val==1048576
+                || val==2097152 || val==4194304 || val==8388608
+                || val==16777216 || val==33554432 || val==67108864
+                || val==134217728 || val==268435456)) {
+               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+            }
+            template->userblock_size=val;
             break;
 
         case H5_OFFSET_SIZE:
-            template->offset_size=*(const uintn *)buf;
+            val = *(const uintn *)buf;
+            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || hash_size==256))
+               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+            template->offset_size=val;
             break;
 
         case H5_LENGTH_SIZE:
-            template->length_size=*(const uintn *)buf;
+            val = *(const uintn *)buf;
+            if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || hash_size==256))
+               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+            template->length_size=val;
             break;
 
         case H5_SYM_LEAF_K:
-	    val = *(const uintn *)buf;
-	    if (val<2) {
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
-	    }
-	    template->sym_leaf_k = val;
-	    break;
+            val = *(const uintn *)buf;
+            if (val<2) {
+               HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+            }
+            template->sym_leaf_k = val;
+            break;
 
         case H5_SYM_INTERN_K:
-	    val = *(const uintn *)buf;
-	    if (val<2) {
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
-	    }
-	    template->btree_k[H5B_SNODE_ID] = val;
-	    break;
+            val = *(const uintn *)buf;
+            if (val<2) {
+               HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+            }
+            template->btree_k[H5B_SNODE_ID] = val;
+            break;
 	    
-        case H5_BOOTBLOCK_VER:
+        case H5_BOOTBLOCK_VER:  /* this should be range checked */
             template->bootblock_ver=*(const uint8 *)buf;
             break;
 
-        case H5_SMALLOBJECT_VER:
+        case H5_SMALLOBJECT_VER:    /* this should be range checked */
             template->smallobject_ver=*(const uint8 *)buf;
             break;
 
-        case H5_FREESPACE_VER:
+        case H5_FREESPACE_VER:  /* this should be range checked */
             template->freespace_ver=*(const uint8 *)buf;
             break;
 
-        case H5_OBJECTDIR_VER:
+        case H5_OBJECTDIR_VER:  /* this should be range checked */
             template->objectdir_ver=*(const uint8 *)buf;
             break;
 
-        case H5_SHAREDHEADER_VER:
+        case H5_SHAREDHEADER_VER:   /* this should be range checked */
             template->sharedheader_ver=*(const uint8 *)buf;
             break;
 
@@ -468,10 +489,11 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 done:
   if(ret_value == FAIL)   
     { /* Error condition cleanup */
-
+        /* none */
     } /* end if */
 
     /* Normal function cleanup */
+        /* none */
 
     FUNC_LEAVE(ret_value);
 } /* end H5Csetparm() */
