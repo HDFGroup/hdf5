@@ -137,7 +137,7 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     FUNC_ENTER_NOAPI(H5O_plist_decode, NULL);
 
     /* check args */
-    assert(!f);
+    assert(f);
     assert(p);
     assert(!sh);
 
@@ -296,7 +296,7 @@ H5O_plist_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     FUNC_ENTER_NOAPI(H5O_plist_encode, FAIL);
 
     /* check args */
-    assert(!f);
+    assert(f);
     assert(p);
     assert(plist);
 
@@ -518,7 +518,7 @@ H5O_plist_debug(H5F_t UNUSED *f, const void *mesg, FILE *stream,
     FUNC_ENTER_NOAPI(H5O_plist_debug, FAIL);
 
     /* check args */
-    assert(!f);
+    assert(f);
     assert(plist);
     assert(stream);
     assert(indent >= 0);
