@@ -7,7 +7,6 @@
 
 #include "hdf5.h"
 #include "H5Git.h"
-
 #define FALSE 0
 
 herr_t count_elems(hid_t loc_id, const char *name, void *opdata);

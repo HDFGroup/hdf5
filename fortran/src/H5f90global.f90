@@ -1,5 +1,20 @@
     MODULE H5GLOBAL
       USE H5FORTRAN_TYPES
+!
+! Definitions for reference datatypes.
+! If you change the value of these parameters, do not forget to change corresponding
+! values in the H5f90.h file. 
+        INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 
+        INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
+
+        TYPE hobj_ref_t_f
+             INTEGER ref(REF_OBJ_BUF_LEN)  
+        END TYPE 
+
+        TYPE hdset_reg_ref_t_f
+             INTEGER ref(REF_REG_BUF_LEN) 
+        END TYPE 
+
       INTEGER, PARAMETER :: PREDEF_TYPES_LEN = 6 ! Do not forget to change this
                                                  ! value when new predefined
                                                  ! datatypes are added
@@ -78,12 +93,18 @@
 !                                H5T_NATIVE_CHARACTER, &
 !                                H5T_STD_REF_OBJ, &
 !                                H5T_STD_REF_DSETREG
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /PREDEFINED_TYPES/
+!DEC$endif
       COMMON /PREDEFINED_TYPES/  predef_types
 
 !      COMMON /FLOATING_TYPES/ H5T_IEEE_F32BE,  &
 !                              H5T_IEEE_F32LE,  &
 !                              H5T_IEEE_F64BE,  &
 !                              H5T_IEEE_F64LE
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /FLOATING_TYPES/
+!DEC$endif
       COMMON /FLOATING_TYPES/ floating_types 
 !
 !      COMMON /INTEGER_TYPES/ H5T_STD_I8BE,  &
@@ -102,6 +123,9 @@
 !                             H5T_STD_U32LE,   &
 !                             H5T_STD_U64BE,   &
 !                             H5T_STD_U64LE
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /INTEGER_TYPES/
+!DEC$endif
       COMMON /INTEGER_TYPES/ integer_types
 !
 ! Fortran flags
@@ -113,6 +137,9 @@
 !
       INTEGER, PARAMETER :: H5F_FLAGS_LEN = 7
       INTEGER H5F_flags(H5F_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5F_FLAGS/
+!DEC$endif
       COMMON /H5F_FLAGS/ H5F_flags
 
       INTEGER :: H5F_ACC_RDWR_F 
@@ -135,6 +162,9 @@
 !
       INTEGER, PARAMETER :: H5G_FLAGS_LEN = 8 
       INTEGER H5G_flags(H5G_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5G_FLAGS/
+!DEC$endif
       COMMON /H5G_FLAGS/ H5G_flags
 
       INTEGER :: H5G_UNKNOWN_F
@@ -160,6 +190,9 @@
 
       INTEGER, PARAMETER :: H5D_FLAGS_LEN = 3 
       INTEGER H5D_flags(H5D_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5D_FLAGS/
+!DEC$endif
       COMMON /H5D_FLAGS/ H5D_flags
 
       INTEGER :: H5D_COMPACT_F  
@@ -188,6 +221,9 @@
 !
       INTEGER, PARAMETER :: H5E_FLAGS_LEN = 24
       INTEGER H5E_flags(H5E_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5E_FLAGS/
+!DEC$endif
       COMMON /H5E_FLAGS/ H5E_flags
 
       INTEGER ::  H5E_NONE_MAJOR_F 
@@ -245,6 +281,9 @@
 !
       INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
       INTEGER H5I_flags(H5I_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5I_FLAGS/
+!DEC$endif
       COMMON /H5I_FLAGS/ H5I_flags
 
       INTEGER ::  H5I_FILE_F
@@ -268,6 +307,9 @@
 !
       INTEGER, PARAMETER :: H5P_FLAGS_LEN = 6
       INTEGER H5P_flags(H5P_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5P_FLAGS/
+!DEC$endif
       COMMON /H5P_FLAGS/ H5P_flags
 
       INTEGER ::  H5P_FILE_CREATE_F 
@@ -289,6 +331,9 @@
 !
       INTEGER, PARAMETER :: H5R_FLAGS_LEN = 2
       INTEGER H5R_flags(H5R_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5R_FLAGS/
+!DEC$endif
       COMMON /H5R_FLAGS/ H5R_flags
       
       INTEGER :: H5R_OBJECT_F
@@ -302,6 +347,9 @@
 !
       INTEGER, PARAMETER :: H5S_FLAGS_LEN = 6
       INTEGER H5S_flags(H5S_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5S_FLAGS/
+!DEC$endif
       COMMON /H5S_FLAGS/ H5S_flags
 
       INTEGER :: H5S_SCALAR_F 
@@ -323,6 +371,9 @@
 !
       INTEGER, PARAMETER :: H5T_FLAGS_LEN = 28
       INTEGER H5T_flags(H5T_FLAGS_LEN)
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: /H5T_FLAGS/
+!DEC$endif
       COMMON /H5T_FLAGS/ H5T_flags
 
       INTEGER ::  H5T_NO_CLASS_F 

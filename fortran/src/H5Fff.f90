@@ -6,8 +6,42 @@
  
         CONTAINS
           
+!----------------------------------------------------------------------
+! Name:		h5fcreate_f 
+!
+! Purpose:	Creates HDF5 files. 
+!
+! Inputs:  
+!		name		- name of the file to create
+!		access_flags	- File access flags. Allowable values are: 
+!				  H5F_ACC_TRUNC_F 
+!				  H5F_ACC_EXCL_F 
+! Outputs:  
+!		file_id		- file identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		creation_prp	- file creation property list identifier
+!		access_prp	- file access property list identifier
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &
                                  creation_prp, access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fcreate_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -23,7 +57,26 @@
             INTEGER :: creation_prp_default 
             INTEGER :: access_prp_default
             INTEGER :: namelen ! Length of the name character string
-            INTEGER, EXTERNAL :: h5fcreate_c
+
+!            INTEGER, EXTERNAL :: h5fcreate_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5fcreate_c(name, namelen, access_flags, &
+                               creation_prp_default, access_prp_default, file_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FCREATE_C':: h5fcreate_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name 
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN) :: access_flags
+              INTEGER(HID_T), INTENT(OUT) :: file_id
+              INTEGER, INTENT(IN) :: creation_prp_default
+              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER :: namelen
+              END FUNCTION h5fcreate_c
+            END INTERFACE
   
             creation_prp_default = H5P_DEFAULT_F
             access_prp_default = H5P_DEFAULT_F
@@ -35,8 +88,44 @@
                      creation_prp_default, access_prp_default, file_id) 
 
           END SUBROUTINE h5fcreate_f
-
+          
+!----------------------------------------------------------------------
+! Name:		h5fflush_f 
+!
+! Purpose:	Flushes all buffers associated with a file to disk	
+!
+! Inputs:  
+!		object_id	- identifier of object used to identify 
+!				  the file. 
+!		scope		- specifies the scope of the flushing action. 
+!				  Possible values are:
+!				  H5F_SCOPE_GLOBAL_F
+!				  H5F_SCOPE_LOCAL_F
+! Outputs:  
+!		file_id		- file identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		creation_prp	- file creation property list identifier
+!		access_prp	- file access property list identifier
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5fflush_f(object_id, scope, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fflush_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: object_id !identifier for any object
@@ -57,54 +146,198 @@
 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code 
 
-            INTEGER, EXTERNAL :: h5fflush_c
+!            INTEGER, EXTERNAL :: h5fflush_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fflush_c(object_id, scope)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FFLUSH_C':: h5fflush_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: object_id
+              INTEGER, INTENT(IN) :: scope
+              END FUNCTION h5fflush_c
+            END INTERFACE
 
            hdferr = h5fflush_c(object_id, scope) 
 
           END SUBROUTINE h5fflush_f
 
+!----------------------------------------------------------------------
+! Name:		h5fmount_f 
+!
+! Purpose:	Mounts a file. 	
+!
+! Inputs:  
+!		loc_id		- the identifier for of file or group in 
+!				  which name is defined
+!		name		- the name of the group onto which the file 
+!				  specified by child_id is to be mounted. 
+!		child_id	- the identifier of the file to be mounted. 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		access_prp	- the identifier of the property list to be used
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
  
-          SUBROUTINE h5fmount_f(loc_id, dsetname, file_id, hdferr, access_prp)
+          SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr, access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fmount_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for file or group 
                                                    ! in which dsetname is defined 
-            CHARACTER(LEN=*), INTENT(IN) :: dsetname  ! Name of the dataset
-            INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier for the
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the group
+            INTEGER(HID_T), INTENT(IN) :: child_id ! File identifier for the
                                                    ! file to be mounted 
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
             INTEGER :: access_prp_default 
-            INTEGER :: namelen ! Length of the dsetname character string
-            INTEGER, EXTERNAL :: h5fmount_c
+            INTEGER :: namelen ! Length of the name character string
   
+!            INTEGER, EXTERNAL :: h5fmount_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5fmount_c(loc_id, name, namelen, &
+                                          child_id, access_prp_default)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FMOUNT_C':: h5fmount_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name 
+              INTEGER(HID_T), INTENT(IN) :: loc_id 
+              CHARACTER(LEN=*), INTENT(IN) :: name 
+              INTEGER(HID_T), INTENT(IN) :: child_id 
+              INTEGER(HID_T), INTENT(IN) :: access_prp_default
+              INTEGER :: namelen 
+              END FUNCTION h5fmount_c
+            END INTERFACE
+
             access_prp_default = H5P_DEFAULT_F
             if (present(access_prp))   access_prp_default   = access_prp 
-            namelen = LEN(dsetname)
-            hdferr = h5fmount_c(loc_id, dsetname, namelen, file_id, access_prp_default) 
+            namelen = LEN(name)
+            hdferr = h5fmount_c(loc_id, name, namelen, child_id, access_prp_default) 
                       
           END SUBROUTINE h5fmount_f
 
 
-          SUBROUTINE h5funmount_f(loc_id, dsetname, hdferr)
+!----------------------------------------------------------------------
+! Name:		h5funmount_f 
+!
+! Purpose:	Unmounts a file. 	
+!
+! Inputs:  
+!		loc_id		- the identifier for of file or group in 
+!				  which name is defined
+!		name		- the name of the mount point
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5funmount_f(loc_id, name, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5funmount_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for file or group 
-                                                   ! in which dsetname is defined 
-            CHARACTER(LEN=*), INTENT(IN) :: dsetname  ! Name of the dataset
+                                                   ! at which the specified file 
+                                                   ! is to be unmounted
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the mount point
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
-            INTEGER :: namelen ! Length of the dsetname character string
-            INTEGER, EXTERNAL :: h5funmount_c
+            INTEGER :: namelen ! Length of the name character string
   
-            namelen = LEN(dsetname)
-            hdferr = h5funmount_c(loc_id, dsetname, namelen) 
+!            INTEGER, EXTERNAL :: h5fumount_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5funmount_c(loc_id, name, namelen)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FUNMOUNT_C':: h5funmount_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name 
+              INTEGER(HID_T), INTENT(IN) :: loc_id 
+              CHARACTER(LEN=*), INTENT(IN) :: name 
+              INTEGER :: namelen 
+              END FUNCTION h5funmount_c
+            END INTERFACE
+  
+            namelen = LEN(name)
+            hdferr = h5funmount_c(loc_id, name, namelen) 
     
           END SUBROUTINE h5funmount_f
           
+!----------------------------------------------------------------------
+! Name:		h5fopen_f 
+!
+! Purpose:	Opens HDF5 file. 
+!
+! Inputs:  
+!		name		- name of the file to acecss
+!		access_flags	- File access flags. Allowable values are: 
+!				  H5F_ACC_RDWR_F 
+!				  H5F_ACC_RDONLY_F 
+! Outputs:  
+!		file_id		- file identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		access_prp	- file access property list identifier
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &
                                access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fopen_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -116,7 +349,25 @@
                                                    ! identifier
             INTEGER :: access_prp_default 
             INTEGER :: namelen ! Length of the name character string
-            INTEGER, EXTERNAL :: h5fopen_c
+
+!            INTEGER, EXTERNAL :: h5fopen_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fopen_c(name, namelen, access_flags, &
+                               access_prp_default, file_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FOPEN_C':: h5fopen_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER :: namelen
+              INTEGER, INTENT(IN) :: access_flags
+              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER(HID_T), INTENT(OUT) :: file_id
+              END FUNCTION h5fopen_c
+            END INTERFACE
   
             access_prp_default = H5P_DEFAULT_F
             if (present(access_prp))   access_prp_default   = access_prp 
@@ -125,47 +376,213 @@
                                access_prp_default, file_id) 
 
           END SUBROUTINE h5fopen_f
+          
+!----------------------------------------------------------------------
+! Name:		h5freopen_f 
+!
+! Purpose:	Reopens HDF5 file. 
+!
+! Inputs:  
+!		file_id		- identifier of a file for which an 
+!				  additional identifier is required
+! Outputs:  
+!		ret_file_id	- new file identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5freopen_f(file_id, ret_file_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5freopen_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id      ! File identifier 
             INTEGER(HID_T), INTENT(OUT) :: ret_file_id ! New File identifier 
             INTEGER, INTENT(OUT) :: hdferr             ! Error code 
-            INTEGER, EXTERNAL :: h5freopen_c
-  
-            hdferr = h5freopen_c(file_id, ret_file_id) 
 
+!            INTEGER, EXTERNAL :: h5freopen_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5freopen_c(file_id, ret_file_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FREOPEN_C':: h5freopen_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER(HID_T), INTENT(OUT) :: ret_file_id
+              END FUNCTION h5freopen_c
+            END INTERFACE
+
+            hdferr = h5freopen_c(file_id, ret_file_id) 
+          
           END SUBROUTINE h5freopen_f
           
+!----------------------------------------------------------------------
+! Name:		h5fget_create_plist_f
+!
+! Purpose:	Returns a file creation property list identifier.	
+!
+! Inputs:  
+!		file_id		- identifier of a file to get 
+!				  get creation property list of 
+! Outputs:  
+!		prop_id 	- creation property list identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
+          
           SUBROUTINE h5fget_create_plist_f(file_id, prop_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_create_plist_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id    ! File identifier 
             INTEGER(HID_T), INTENT(OUT) :: prop_id   ! File creation property
                                                      ! list identifier 
             INTEGER, INTENT(OUT) :: hdferr           ! Error code 
-            INTEGER, EXTERNAL :: h5fget_create_plist_c
+
+!            INTEGER, EXTERNAL :: h5fget_create_plist_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fget_create_plist_c(file_id, prop_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+!MS$ATTRIBUTES C,reference,alias:'_H5FGET_CREATE_PLIST_C':: h5fget_create_plist_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER(HID_T), INTENT(OUT) :: prop_id
+              END FUNCTION h5fget_create_plist_c
+            END INTERFACE
   
             hdferr = h5fget_create_plist_c(file_id, prop_id) 
 
           END SUBROUTINE h5fget_create_plist_f
+          
+!----------------------------------------------------------------------
+! Name:		h5fget_access_plist_f
+!
+! Purpose:	Returns a file access property list identifier.	
+!
+! Inputs:  
+!		file_id		- identifier of a file to get 
+!				  get creation property list of 
+! Outputs:  
+!		access_id 	- access property list identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5fget_access_plist_f(file_id, access_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_access_plist_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id      ! File identifier 
             INTEGER(HID_T), INTENT(OUT) :: access_id   ! File access property
                                                        ! list identifier 
             INTEGER, INTENT(OUT) :: hdferr             ! Error code 
-            INTEGER, EXTERNAL :: h5fget_access_plist_c
+
+!            INTEGER, EXTERNAL :: h5fget_access_plist_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fget_access_plist_c(file_id, access_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+!MS$ATTRIBUTES C,reference,alias:'_H5FGET_CREATE_PLIST_C':: h5fget_access_plist_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER(HID_T), INTENT(OUT) :: access_id
+              END FUNCTION h5fget_access_plist_c
+            END INTERFACE
+  
   
             hdferr = h5fget_access_plist_c(file_id, access_id) 
 
           END SUBROUTINE h5fget_access_plist_f
+          
+!----------------------------------------------------------------------
+! Name:		h5fis_hdf5_f
+!
+! Purpose:	Determines whether a file is in the HDF5 format. 
+!
+! Inputs:  
+!		name		- name of the file to check
+! Outputs:  
+!		status		- indicates if file is and HDF5 file
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
  
-
           SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fis_hdf5_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -175,7 +592,22 @@
             INTEGER :: namelen ! Length of the name character string
             INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
                                ! to define status value. 
-            INTEGER, EXTERNAL :: h5fis_hdf5_c
+
+!            INTEGER, EXTERNAL :: h5fis_hdf5_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FIS_HDF5_C':: h5fis_hdf5_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER :: namelen
+              INTEGER :: flag
+              END FUNCTION h5fis_hdf5_c
+            END INTERFACE
   
             namelen = LEN(name)
             hdferr = h5fis_hdf5_c(name, namelen, flag) 
@@ -184,12 +616,54 @@
 
           END SUBROUTINE h5fis_hdf5_f
           
+!----------------------------------------------------------------------
+! Name:		h5fclose_f
+!
+! Purpose:	Closes HDF5 file.
+!
+! Inputs:  
+!		file_id		- file identifier
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  February 28, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
+          
           SUBROUTINE h5fclose_f(file_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fclose_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
-            INTEGER, EXTERNAL :: h5fclose_c
+
+!            INTEGER, EXTERNAL :: h5fclose_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fclose_c(file_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FCLOSE_C':: h5fclose_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              END FUNCTION h5fclose_c
+            END INTERFACE
 
             hdferr = h5fclose_c(file_id)
 
