@@ -124,9 +124,9 @@ main (void)
     hid_t		file, dataset, space;
     herr_t		status;
     static size_t	dim[] = {NX, NY};
-    size_t		f_offset[2];	/*offset of hyperslab in file	*/
-    size_t		h_size[2];	/*size of hyperslab		*/
-    size_t		h_sample[2];	/*hyperslab sampling		*/
+    int 		f_offset[2];	/*offset of hyperslab in file	*/
+    int 		h_size[2];	/*size of hyperslab		*/
+    int 		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
     file = H5Fcreate ("cmpd_dset.h5", H5ACC_OVERWRITE,
@@ -395,7 +395,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     assert (status>=0);
 
     /* Create memory data space */
-    s8_m_sid = H5Pcreate_simple (2, h_size);
+    s8_m_sid = H5Pcreate_simple (2, (size_t *)h_size);
     assert (s8_m_sid>=0);
 
     /* Read the dataset */
