@@ -128,9 +128,6 @@ static H5B_ins_t H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 static herr_t H5B_insert_child(H5F_t *f, const H5B_class_t *type,
 			       H5B_t *bt, int idx, haddr_t child,
 			       H5B_ins_t anchor, void *md_key);
-static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
-static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
-static herr_t H5B_dest(H5F_t *f, H5B_t *b);
 static herr_t H5B_decode_key(H5F_t *f, H5B_t *bt, int idx);
 static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, int idx);
 static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
@@ -145,12 +142,19 @@ static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_
 			 void *udata);
 #endif
 
+/* Metadata cache callbacks */
+static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
+static herr_t H5B_dest(H5F_t *f, H5B_t *b);
+static herr_t H5B_clear(H5B_t *b);
+
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
     H5AC_BT_ID,
     (H5AC_load_func_t)H5B_load,
     (H5AC_flush_func_t)H5B_flush,
     (H5AC_dest_func_t)H5B_dest,
+    (H5AC_clear_func_t)H5B_clear,
 }};
 
 /* Interface initialization? */
@@ -531,6 +535,42 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5B_clear
+ *
+ * Purpose:	Mark a B-tree node in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 20 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_clear(H5B_t *bt)
+{
+    int	i;      /* Local index variable */
+
+    FUNC_ENTER_NOINIT(H5B_clear);
+
+    /*
+     * Check arguments.
+     */
+    assert(bt);
+
+    /* Look for dirty keys and reset the dirty flag.  */
+    for (i=0; i<=bt->nchildren; i++)
+        bt->key[i].dirty = FALSE;
+    bt->cache_info.dirty = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5B_clear() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B_find
  *
  * Purpose:	Locate the specified information in a B-tree and return
@@ -611,7 +651,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     }
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt) < 0 && ret_value>=0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -769,7 +809,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     old_bt->right = *new_addr_p;
 
 done:
-    if (new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt) < 0 && ret_value>=0)
+    if (new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt, FALSE) < 0 && ret_value>=0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1425,8 +1465,8 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
 done:
     {
-	herr_t e1 = (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt) < 0);
-	herr_t e2 = (twin && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_node_p, twin)<0);
+	herr_t e1 = (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0);
+	herr_t e2 = (twin && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_node_p, twin, FALSE)<0);
 	if (e1 || e2)  /*use vars to prevent short-circuit of side effects */
 	    HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node(s)");
     }
@@ -1708,9 +1748,8 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    bt->right = HADDR_UNDEF;
 	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
 	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
-	    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt)<0 ||
-                    H5AC_flush(f, dxpl_id, H5AC_BT, addr, H5F_FLUSH_INVALIDATE)<0 ||
-                    H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0) {
+	    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0
+                    || H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0) {
 		bt = NULL;
 		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to free B-tree node");
 	    }
@@ -1803,7 +1842,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     
     
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt)<0 && ret_value>=0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE)<0 && ret_value>=0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1870,6 +1909,83 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B_delete
+ *
+ * Purpose:	Deletes an entire B-tree from the file, calling the 'remove'
+ *              callbacks for each node.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *udata)
+{
+    H5B_t	*bt;                    /* B-tree node being operated on */
+    size_t	sizeof_rkey;            /* Size of raw key */
+    hsize_t	sizeof_node;            /* Size of B-tree node */
+    int         i;                      /* Local index variable */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5B_delete, FAIL);
+
+    /* Check args */
+    assert(f);
+    assert(type);
+    assert(H5F_addr_defined(addr));
+
+    /* Lock this B-tree node into memory for now */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node");
+
+    /* Iterate over all children in tree, deleting them */
+    if (bt->level > 0) {
+        /* Iterate over all children in node, deleting them */
+        for (i=0; i<bt->nchildren; i++)
+            if (H5B_delete(f, dxpl_id, type, bt->child[i], udata)<0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to delete B-tree node");
+
+    } else {
+        hbool_t lt_key_changed, rt_key_changed; /* Whether key changed (unused here, just for callback) */
+
+        /* Check for removal callback */
+        if(type->remove) {
+            /* Iterate over all entries in node, calling callback */
+            for (i=0; i<bt->nchildren; i++) {
+                /* Decode native keys */
+                if (H5B_decode_keys(f, bt, i)<0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode B-tree key(s)");
+
+                /* Call user's callback for each entry */
+                if ((type->remove)(f, dxpl_id,
+                          bt->child[i], bt->key[i].nkey, &lt_key_changed, udata,
+                          bt->key[i+1].nkey, &rt_key_changed)<0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't remove B-tree node");
+            } /* end for */
+        } /* end if */
+    } /* end else */
+
+    /* Delete this node from disk */
+    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
+    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
+    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node");
+    
+    /* Release node in metadata cache */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5B_delete() */
 
 
 /*-------------------------------------------------------------------------
@@ -2233,7 +2349,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	    }
 	}
 	/* Release node */
-	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, bt);
+	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, bt, FALSE);
 	assert(status >= 0);
 
 	/* Advance current location in queue */

@@ -147,6 +147,8 @@ H5_DLL herr_t H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B
                             op, haddr_t addr, void *udata);
 H5_DLL herr_t H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 			  void *udata);
+H5_DLL herr_t H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
+                        void *udata);
 H5_DLL herr_t H5B_debug (H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 			  int indent, int fwidth, const H5B_class_t *type,
 			  void *udata);
