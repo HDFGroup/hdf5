@@ -3225,6 +3225,9 @@ EOF
         # of library paths
         finalize_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
         compile_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
+	# Add a space before each path
+	finalize_rpath=" $finalize_rpath"
+	compile_rpath=" $compile_rpath"
         ;;
       *)
         finalize_rpath="$rpath";
