@@ -29,6 +29,7 @@ Expected output for 'h5dump --xml tobjref.h5'
    </Dataset>
    <Group Name="Group1" OBJ-XID="/Group1" Parents="/" >
       <NamedDataType Name="Datatype1" OBJ-XID="/Group1/Datatype1" Parents="/Group1">
+         <DataType>
          <CompoundType>
             <Field FieldName="a">
                <DataType> 
@@ -52,6 +53,7 @@ Expected output for 'h5dump --xml tobjref.h5'
                </DataType>
             </Field>
          </CompoundType>
+         </DataType>
       </NamedDataType>
       <Dataset Name="Dataset1" OBJ-XID="/Group1/Dataset1" Parents="/Group1">
          <Dataspace>

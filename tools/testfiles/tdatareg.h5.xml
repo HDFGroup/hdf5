@@ -19,8 +19,8 @@ Expected output for 'h5dump --xml tdatareg.h5'
          </AtomicType>
       </DataType>
    <Data>
-   <DataFromFile>
-   </DataFromFile>
+   <!-- Note: Region references not supported -->
+   <NoData />
    </Data>
    </Dataset>
    <Dataset Name="Dataset2" OBJ-XID="/Dataset2" Parents="root">

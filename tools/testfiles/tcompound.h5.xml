@@ -6,6 +6,7 @@ Expected output for 'h5dump --xml tcompound.h5'
 <HDF5-File>
 <RootGroup OBJ-XID="root">
    <NamedDataType Name="#6632:0" OBJ-XID="/#6632:0" Parents="root">
+      <DataType>
       <CompoundType>
          <Field FieldName="int">
             <DataType> 
@@ -22,8 +23,10 @@ Expected output for 'h5dump --xml tcompound.h5'
             </DataType>
          </Field>
       </CompoundType>
+      </DataType>
    </NamedDataType>
    <NamedDataType Name="type1" OBJ-XID="/type1" Parents="root">
+      <DataType>
       <CompoundType>
          <Field FieldName="int_name">
             <DataType> 
@@ -40,8 +43,10 @@ Expected output for 'h5dump --xml tcompound.h5'
             </DataType>
          </Field>
       </CompoundType>
+      </DataType>
    </NamedDataType>
    <NamedDataType Name="type2" OBJ-XID="/type2" Parents="root">
+      <DataType>
       <CompoundType>
          <Field FieldName="int_array">
             <DataType> 
@@ -69,6 +74,7 @@ Expected output for 'h5dump --xml tcompound.h5'
             </DataType>
          </Field>
       </CompoundType>
+      </DataType>
    </NamedDataType>
    <Dataset Name="dset1" OBJ-XID="/dset1" Parents="root">
       <Dataspace>
@@ -110,6 +116,7 @@ Expected output for 'h5dump --xml tcompound.h5'
    </Dataset>
    <Group Name="group1" OBJ-XID="/group1" Parents="/" >
       <NamedDataType Name="type3" OBJ-XID="/group1/type3" Parents="/group1">
+         <DataType>
          <CompoundType>
             <Field FieldName="int">
                <DataType> 
@@ -126,6 +133,7 @@ Expected output for 'h5dump --xml tcompound.h5'
                </DataType>
             </Field>
          </CompoundType>
+         </DataType>
       </NamedDataType>
       <Dataset Name="dset2" OBJ-XID="/group1/dset2" Parents="/group1">
          <Dataspace>

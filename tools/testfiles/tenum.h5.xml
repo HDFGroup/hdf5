@@ -6,6 +6,7 @@ Expected output for 'h5dump --xml tenum.h5'
 <HDF5-File>
 <RootGroup OBJ-XID="root">
    <NamedDataType Name="enum normal" OBJ-XID="/enum normal" Parents="root">
+      <DataType>
          <AtomicType>
             <EnumType Nelems="5">
                <EnumElement>
@@ -40,6 +41,7 @@ Expected output for 'h5dump --xml tenum.h5'
                </EnumValue>
             </EnumType>
          </AtomicType>
+      </DataType>
    </NamedDataType>
    <Dataset Name="table" OBJ-XID="/table" Parents="root">
       <Dataspace>
