@@ -34,46 +34,25 @@
 This document is intended to assist application developers who must keep 
 an application synchroniaed with the HDF5 library or related software.
 
+<!-- Document API CHANGES ONLY in this file. -->
 
-<h2>Release 1.4.1 (current release) Versus Release 1.4</h2> 
+<h2>Release 1.4.1 (current release) Versus Release 1.4.0</h2> 
 <dir>
-    Release 1.4.1 is a "Tools Release," so changes to the 
-    underlying HDF5 library have included only bugfixes.
-    <p>
-    The <code>h5dump</code> utility has a new XML output option, 
-    <code>--xml</code>.  The XML output is suitable for use with other 
-    tools, including the HDF5 Java Tools.
-    <p>
-    An image conversion bug in the <code>h4toh5</code> utility has been 
-    fixed.  Earlier releases of the utility produced images that did not
-    correctly conform to the 
-    <a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/ImageSpec.html">
-    <cite>HDF5 Image and Palette Specification</cite></a>.
-    Several required HDF5 attributes were omitted, and the dataspace
-    were reversed (i.e., the height and width of the image dataset were
-    incorrectly described).  For more information, see
-    <a href="http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm"
-    target="ExtWin"><cite>Revisions and Updates to HDF5 Image 
-    Handling</cite></a>.
-    (As of Release 1.4.1, that document is still under revision.  
-    An updated version will be posted at the above-referenced site 
-    as soon as it is available.)
-    <p>
-    See <a href="RELEASE.txt" target="ExtWin">RELEASE.txt</a> for
-    a list of bugs fixed in the HDF5 library.
+    Release 1.4.1 is a "Tools Release"; there are no API changes in the 
+    underlying HDF5 library.
 </dir>
 
 
-<h2>Release 1.4 Versus Release 1.2.2</h2> 
+<h2>Release 1.4.0 Versus Release 1.2.2</h2> 
 
 <dir>
 
     Several functions were added to or removed from the HDF5 library
-    in the development of Release 1.4.
+    in the development of Release 1.4.0.
     A few functions have been modified in minor ways.
 
     <h3>New Functions</h3>
-        The following functions are new for Release 1.4 and are included in the
+        The following functions are new for Release 1.4.0 and are included in the
         <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
 
 <dir>
@@ -141,7 +120,7 @@ int <font color=red>H5Tget_array_ndims</font> (hid_t adtype_id)
 
 
         <p>
-        The following functions are new for Release 1.4, but 
+        The following functions are new for Release 1.4.0, but 
         are intended only for use in specialized environments.
         These are also included in the
         <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
@@ -159,7 +138,7 @@ herr_t <font color=red>H5Pset_fapl_srb</font> (hid_t fapl_id, SRB_Info info);
 
 
         <p>
-        The following functions are new for Release 1.4 but are intended 
+        The following functions are new for Release 1.4.0 but are intended 
         only for driver development work, not for general use.  
         They are listed in the
         <a href="../TechNotes/VFLfunc.html"><cite>List of VFL Functions</cite></a>
@@ -268,7 +247,7 @@ H5Tinsert_array
 </dir>
 <p>&nbsp;
 
-<h2>Migration from Release 1.2.2 to Release 1.4 (current release) </h2> 
+<h2>Migration from Release 1.2.2 to Release 1.4.0 (current release) </h2> 
 
 <dir>
     <h3>H5Tinsert_array</h3>
