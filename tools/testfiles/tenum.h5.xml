@@ -54,11 +54,7 @@ green
       </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:Data>
-                  <hdf5:DataFromFile>
-                  "RED"
-                  </hdf5:DataFromFile>
-               </hdf5:Data>
+               <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>

@@ -17,11 +17,7 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
       </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:Data>
-                  <hdf5:DataFromFile>
-                  "0"
-                  </hdf5:DataFromFile>
-               </hdf5:Data>
+               <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -39,9 +35,9 @@ Expected output for 'h5dump --xml tnamed_dtype_attr.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Attribute>
-   <hdf5:Data>
-   <hdf5:NoData/>
-   </hdf5:Data>
+      <hdf5:Data>
+         <hdf5:NoData/>
+      </hdf5:Data>
    </hdf5:Dataset>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

@@ -98,9 +98,9 @@ Expected output for 'h5dump --xml -A tall.h5'
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
-         <hdf5:Data>
-         <hdf5:NoData/>
-         </hdf5:Data>
+            <hdf5:Data>
+               <hdf5:NoData/>
+            </hdf5:Data>
          </hdf5:Dataset>
          <hdf5:Dataset Name="dset1.1.2" OBJ-XID="xid_5968-0" H5Path= "/g1/g1.1/dset1.1.2" Parents="xid_2968-0" H5ParentPaths="/g1/g1.1">
             <hdf5:StorageLayout>
@@ -121,9 +121,9 @@ Expected output for 'h5dump --xml -A tall.h5'
                   <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
                </hdf5:AtomicType>
             </hdf5:DataType>
-         <hdf5:Data>
-         <hdf5:NoData/>
-         </hdf5:Data>
+            <hdf5:Data>
+               <hdf5:NoData/>
+            </hdf5:Data>
          </hdf5:Dataset>
       </hdf5:Group>
       <hdf5:Group Name="g1.2" OBJ-XID="xid_3944-0" H5Path="/g1/g1.2" Parents="xid_1344-0" H5ParentPaths="/g1" >
@@ -152,9 +152,9 @@ Expected output for 'h5dump --xml -A tall.h5'
                <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
             </hdf5:AtomicType>
          </hdf5:DataType>
-      <hdf5:Data>
-      <hdf5:NoData/>
-      </hdf5:Data>
+         <hdf5:Data>
+            <hdf5:NoData/>
+         </hdf5:Data>
       </hdf5:Dataset>
       <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_7288-0" H5Path= "/g2/dset2.2" Parents="xid_2320-0" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
@@ -176,9 +176,9 @@ Expected output for 'h5dump --xml -A tall.h5'
                <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
             </hdf5:AtomicType>
          </hdf5:DataType>
-      <hdf5:Data>
-      <hdf5:NoData/>
-      </hdf5:Data>
+         <hdf5:Data>
+            <hdf5:NoData/>
+         </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
 </hdf5:RootGroup>
