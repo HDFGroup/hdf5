@@ -8,18 +8,32 @@ RM='rm -f'
 SED='sed '
 H4DUMP='hdp'
 
-# Find out which version of hdp is being used.  Over simplified
-# algorithm but will do the job for now.
-if ( $H4DUMP | grep -s 'NCSA HDF Version 4.1 Release 3' > /dev/null )
-then
-    H4DUMPVER=413
-else
-    H4DUMPVER=0
-    echo "    Some tests are skipped because your version of $H4DUMP does"
-    echo "    not handle loops in Vgroups correctly.  You need version"
-    echo "    4.1 Release 3 or later.  Visit http://hdf.ncsa.uiuc.edu"
+# Verify if $H4DUMP is a valid command.
+tmpfile=/tmp/testh5toh4.$$
+$H4DUMP -H > $tmpfile
+if [ ! -s $tmpfile ]; then
+    echo "    Could not run the '$H4DUMP' command.  The test can still proceed"
+    echo "    but it may fail if '$H4DUMP' is needed to verify the output."
+    echo "    You can make sure '$H4DUMP' is among your shell PATH and run"
+    echo "    the test again.  You may also visit http://hdf.ncsa.uiuc.edu"
     echo "    or email hdfhelp@ncsa.uiuc.edu for more information."
+    H4DUMP=:
+    H4DUMPVER=0
+else
+    # Find out which version of hdp is being used.  Over simplified
+    # algorithm but will do the job for now.
+    if ( grep -s 'NCSA HDF Version 4.1 Release 3' $tmpfile > /dev/null )
+    then
+	H4DUMPVER=413
+    else
+	H4DUMPVER=0
+	echo "    Some tests maybe skipped because your version of $H4DUMP does"
+	echo "    not handle loops in Vgroups correctly.  You need version"
+	echo "    4.1 Release 3 or later.  Visit http://hdf.ncsa.uiuc.edu"
+	echo "    or email hdfhelp@ncsa.uiuc.edu for more information."
+    fi
 fi
+$RM $tmpfile
 
 # The build (current) directory might be different than the source directory.
 if test "X$srcdir" = X; then
@@ -155,7 +169,13 @@ CONVERT()
 		sed -e 's/reference = [0-9]*;//' > $actual_out
 	    fi
 
-	    if $cmp $expect_out $actual_out; then
+	    if [ "passed" = $result -a ! -s $actual_out ] ; then
+		echo "*FAILED*"
+		nerrors="`expr $nerrors + 1`"
+		result=failed
+		test yes = "$verbose" &&
+		echo "    H4DUMP failed to produce valid output"
+	    elif $cmp $expect_out $actual_out; then
 		:
 	    else
 		if test "passed" = $result; then
