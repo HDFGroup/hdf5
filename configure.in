@@ -415,7 +415,7 @@ AC_HEADER_TIME
 dnl Unix
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
 AC_CHECK_HEADERS(sys/socket.h sys/types.h)
-AC_CHECK_HEADERS(stddef.h setjmp.h)
+AC_CHECK_HEADERS(stddef.h setjmp.h features.h)
 AC_CHECK_HEADERS(stdint.h, C9x=yes)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
@@ -453,6 +453,15 @@ case "$host_cpu-$host_vendor-$host_os" in
               fi
            done
         fi)
+        dnl Add POSIX support on Linux systems, so <features.h> defines
+        dnl __USE_POSIX, which is required to get the prototype for fdopen
+        dnl defined correctly in <stdio.h>
+        CPPFLAGS="-D_POSIX_SOURCE $CPPFLAGS"
+        dnl Also add BSD support on Linux systems, so <features.h> defines
+        dnl __USE_BSD, which is required to get the prototype for strdup
+        dnl defined correctly in <string.h> and snprintf & vsnprintf defined
+        dnl correctly in <stdio.h>
+        CPPFLAGS="-D_BSD_SOURCE $CPPFLAGS"
       ;;
 esac
 
