@@ -243,7 +243,7 @@ test_atomic_dtype(hid_t file)
     return 0;
 
   error:
-    return 1;
+    return -1;
 }
 
 
@@ -432,7 +432,7 @@ error:
         free(points);
     if(check!=NULL)
         free(check);
-    return 1;
+    return -1;
 }
 
 
@@ -576,7 +576,7 @@ test_compound_dtype(hid_t file)
     return 0;
 
   error:
-    return 1;
+    return -1;
 }
 
 
@@ -737,7 +737,7 @@ test_compound_dtype3(hid_t file)
     return 0;
 
   error:
-    return 1;
+    return -1;
 }
 
 
@@ -866,7 +866,7 @@ test_enum_dtype(hid_t file)
     return 0;
 
   error:
-    return 1;
+    return -1;
 }
 
 
@@ -1021,7 +1021,7 @@ error:
         free(points);
     if(check!=NULL)
         free(check);
-    return 1;
+    return -1;
 }
 
 
@@ -1135,7 +1135,7 @@ test_array_dtype2(hid_t file)
     return 0;
 
 error:
-    return 1;
+    return -1;
 }
 
 
@@ -1280,7 +1280,7 @@ test_vl_dtype(hid_t file)
     return 0;
 
  error:
-    return 1;
+    return -1;
 } /* end test_vl_type() */
 
 
@@ -1390,7 +1390,7 @@ test_vlstr_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return 1;
+    return -1;
 } /* end test_vlstr_dtype() */
 
 
@@ -1545,7 +1545,7 @@ test_refer_dtype(hid_t file)
     return 0;
 
 error:
-    return 1;
+    return -1;
 }   /* test_refer_dtype() */
 
 
@@ -1624,7 +1624,7 @@ test_refer_dtype2(hid_t file)
     /* Create references */
     /* Select 6x6 hyperslab for first reference */
     start[0]=2; start[1]=2;
-    stride[0]=1; stride[1]=1;
+    stride[0]=0; stride[1]=0;
     count[0]=1; count[1]=1;
     block[0]=6; block[1]=6;
 
@@ -1736,7 +1736,7 @@ test_refer_dtype2(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return 1;
+    return -1;
 }   /* test_refer_dtype2() */
 
 
@@ -1815,7 +1815,7 @@ test_opaque_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return 1;
+    return -1;
 } /* test_opaque_dtype */
 
 
@@ -1893,7 +1893,7 @@ test_bitfield_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return 1;
+    return -1;
 } /* test_opaque_dtype */
 
 
