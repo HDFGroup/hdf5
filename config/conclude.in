@@ -10,8 +10,18 @@
 lib: $(LIB)
 $(LIB) __no_library__: $(LIB_OBJ)
 	@$(LT_LINK_LIB) -o $@ $(CFLAGS) $(LIB_OBJ) $(LDFLAGS) $(LIBS)
+	@for d in X $(SUBDIRS); do                                      \
+	    if test $$d != X; then                                      \
+	        (set -x; cd $$d && $(MAKE) lib) || exit 1;              \
+	    fi;                                                         \
+	done
 
 progs: $(LIB) $(PROGS)
+	@for d in X $(SUBDIRS); do                                      \
+	    if test $$d != X; then                                      \
+	        (set -x; cd $$d && $(MAKE) progs) || exit 1;            \
+	    fi;                                                         \
+	done
 
 ## Build a tags file in this directory.
 ##
@@ -52,6 +62,11 @@ check test _test: tests
 	   fi;								      \
 	done;								      \
 	test $$test = dummy || false
+	@for d in X $(SUBDIRS); do                                      \
+	    if test $$d != X; then                                      \
+	        (set -x; cd $$d && $(MAKE) tests) || exit 1;            \
+	    fi;                                                         \
+	done
 
 ## Make installation directories directories if they don't exist.
 ##
@@ -89,6 +104,11 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	   if test $$f != X; then					      \
 	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
 	   fi;							              \
+	done
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
+	    fi;                                                               \
 	done
 
 ## Install the documents.
