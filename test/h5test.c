@@ -46,9 +46,9 @@
 #ifndef HDF5_PARAPREFIX
 #ifdef __PUMAGON__
 /* For the PFS of TFLOPS */
-#define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1/"
+#define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1"
 #else
-#define HDF5_PARAPREFIX "/tmp/"
+#define HDF5_PARAPREFIX "/tmp"
 #endif
 #endif
 char	*paraprefix = NULL;	/* for command line option para-prefix */
