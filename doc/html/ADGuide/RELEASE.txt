@@ -1,4 +1,4 @@
-HDF5 version 1.7.43 released on Sun Dec  5 03:51:33 CST 2004
+HDF5 version 1.7.44 released on Sun Dec 12 03:42:12 CST 2004
 ================================================================================
 
 
@@ -36,6 +36,9 @@ New Features
 
     Configuration:
     --------------
+	- Intel v8.0 compiler would infinite loop when compiling some test
+	  code with -O3 option.  Changed enable-production default compiler
+	  option to -O2. AKC - 2004/12/06
 	- Long double is assumed to be a supported C data type.  It is a
 	  stanadard C89 type. AKC - 2004/10/22
 	- The IA64 will use ecc as the C++ compiler by default.
@@ -574,6 +577,17 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
 Known Problems
 ==============
+* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
+  messages like "INFO: 0031-XXX ...".  This is from the command poe.
+  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
+  and run the tests again.
+  The tests may fail with messages like "The socket name is already
+  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
+  due to problems of the poe command trying to set up the debug socket.
+  Check if there are many old /tmp/s.pedb.* staying around.  These are
+  sockets used by the poe command and left behind due to failed commands.
+  Ask your system administrator to clean them out.  Lastly, request IBM
+  to provide a mean to run poe without the debug socket.
 
 * PGI C++ compiler fails when compiling the C++ library's tests.
   Therefore, we cannot verify that the C++ library built with the PGI C++
