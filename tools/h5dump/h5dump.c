@@ -2420,11 +2420,6 @@ parse_command_line(int argc, const char *argv[])
     struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
 
-    if (argc < 2) {
-        usage(progname);
-        exit(EXIT_FAILURE);
-    }
-
     /* this will be plenty big enough to hold the info */
     hand = calloc((size_t)argc, sizeof(struct handler_t));
 
@@ -2612,6 +2607,12 @@ end_collect:
     }
 
 parse_end:
+    /* check for file name to be processed */
+    if (argc <= opt_ind) {
+        error_msg(progname, "missing file name\n");
+        usage(progname);
+        exit(EXIT_FAILURE);
+    }
     return hand;
 }
 
@@ -2693,11 +2694,6 @@ main(int argc, const char *argv[])
     find_objs_t         info;
     struct handler_t   *hand;
     int                 i;
-
-    if (argc < 2) {
-        usage(progname);
-        exit(EXIT_FAILURE);
-    }
 
     dump_header_format = &standardformat;
     dump_function_table = &ddl_function_table;
