@@ -366,13 +366,17 @@ test_compression(hid_t file)
     const hsize_t	chunk_size[2] = {2, 25};
     const hssize_t	hs_offset[2] = {7, 30};
     const hsize_t	hs_size[2] = {4, 50};
+#if !(defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ))
     const char		*not_supported;
+#endif
     
     hsize_t		i, j, n;
     void		*tconv_buf = NULL;
 
+#if !(defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ))
     not_supported = "    Deflate compression is not supported.\n"
 		    "    The zlib was not found when hdf5 was configured.";
+#endif
     
     TESTING("compression (setup)");
     

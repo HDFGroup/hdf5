@@ -68,7 +68,9 @@ void multiple_dset_write(char *filename, int ndatasets)
 
 	H5Dclose (dataset);
 	if (! ((n+1) % 10)) {
+#ifdef VERBOSE
 	    printf("created %d datasets\n", n+1);
+#endif /* VERBOSE */
 	    MPI_Barrier(MPI_COMM_WORLD);
 	}
     }
@@ -153,7 +155,9 @@ void multiple_group_write(char *filename, int ngroups)
         H5Gclose(gid);
 
         if(! ((m+1) % 10)) {
+#ifdef VERBOSE
             printf("created %d groups\n", m+1);
+#endif /* VERBOSE */
             MPI_Barrier(MPI_COMM_WORLD);
 	}
     }
@@ -218,7 +222,9 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
    if(! ((counter+1) % 10)) {
+#ifdef VERBOSE
         printf("created %dth child groups\n", counter+1);
+#endif /* VERBOSE */
         MPI_Barrier(MPI_COMM_WORLD);
    }
  

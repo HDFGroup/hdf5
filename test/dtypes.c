@@ -1112,7 +1112,6 @@ test_query(void)
     hid_t       file=-1, tid1=-1, tid2=-1;
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
-    int         nmembs, indx;
     short       enum_val;
 
     TESTING("query functions of compound and enumeration types");
@@ -1182,24 +1181,24 @@ test_query(void)
     } /* end if */
 
     /* Query member number and member index by name, for compound type. */
-    if((nmembs=H5Tget_nmembers(tid1))!=4) {
+    if(H5Tget_nmembers(tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((indx=H5Tget_member_index(tid1, "c"))!=2) {
+    if(H5Tget_member_index(tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
     /* Query member number and member index by name, for enumeration type. */
-    if((nmembs=H5Tget_nmembers(tid2))!=5) {
+    if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((indx=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -1242,24 +1241,24 @@ test_query(void)
     } /* end if */
 
     /* Query member number and member index by name, for compound type */
-    if((nmembs=H5Tget_nmembers(tid1))!=4) {
+    if(H5Tget_nmembers(tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((indx=H5Tget_member_index(tid1, "c"))!=2) {
+    if(H5Tget_member_index(tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
     /* Query member number and member index by name, for enumeration type */
-    if((nmembs=H5Tget_nmembers(tid2))!=5) {
+    if(H5Tget_nmembers(tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((indx=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;

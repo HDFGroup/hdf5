@@ -84,7 +84,7 @@ typedef struct table_t {
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
-    int prefix_len; 
+    size_t prefix_len; 
     char *prefix;
     unsigned int threshold; /* should be 0 or 1 */
     table_t *group_table;

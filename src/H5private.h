@@ -411,6 +411,20 @@
 #endif
 
 /*
+ * A macro to portably increment enumerated types.
+ */
+#ifndef H5_INC_ENUM
+#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
+#endif
+
+/*
+ * A macro to portably decrement enumerated types.
+ */
+#ifndef H5_DEC_ENUM
+#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
+#endif
+
+/*
  * A macro for detecting over/under-flow when casting between types
  */
 #ifndef NDEBUG

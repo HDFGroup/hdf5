@@ -116,10 +116,10 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     }
     
     /* Space allocation time */
-    mesg->space_time = *p++;
+    mesg->space_time = (H5D_space_time_t)*p++;
 
     /* Fill value write time */
-    mesg->fill_time = *p++;
+    mesg->fill_time = (H5D_fill_time_t)*p++;
 
     /* Whether fill value is defined */
     mesg->fill_defined = *p++;
@@ -510,9 +510,9 @@ H5O_fill_new_reset(void *_mesg)
 	H5T_close(mesg->type);
 	mesg->type = NULL;
     }
-    mesg->space_time   = 0;
-    mesg->fill_time    = 0;
-    mesg->fill_defined = 0; 
+    mesg->space_time   = (H5D_space_time_t)0;
+    mesg->fill_time    = (H5D_fill_time_t)0;
+    mesg->fill_defined = (H5D_fill_value_t)0; 
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -712,7 +712,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     }
     H5T_close(fill->type);
     fill->type = NULL;
-    fill->size = H5T_get_size(dset_type);
+    H5_ASSIGN_OVERFLOW(fill->size,H5T_get_size(dset_type),size_t,ssize_t);
     ret_value = SUCCEED;
 
  done:

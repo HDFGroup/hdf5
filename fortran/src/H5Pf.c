@@ -645,7 +645,11 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
      int i;
      herr_t ret;
      int c_ik;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      int c_lk;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+     unsigned c_lk;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
      /*
       * Call H5Pget_sym_k function.
@@ -1646,12 +1650,14 @@ nh5pget_external_c(hid_t_f *prp_id,int*idx, size_t_f* name_size, _fcd name, int_
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
+nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      hid_t c_prp_id;
      herr_t ret;
      unsigned c_cache, c_limit;
+
      c_cache = (unsigned) *cache;
      c_limit = (unsigned) *limit;
 
@@ -1659,7 +1665,6 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
       * Call H5Pset_hyper_cache function.
       */
      c_prp_id = *prp_id;
-#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pset_hyper_cache(c_prp_id, c_cache, c_limit);
      if (ret < 0) return ret_value;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
@@ -1681,9 +1686,10 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
+nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      hid_t c_prp_id;
      herr_t ret;
      unsigned c_cache, c_limit;
@@ -1691,7 +1697,6 @@ nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
       * Call H5Pget__hyper_cache function.
       */
      c_prp_id = *prp_id;
-#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pget_hyper_cache(c_prp_id, &c_cache, &c_limit);
      if (ret < 0) return ret_value;
      *cache = (int_f)c_cache;

@@ -151,7 +151,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		H5FD_mem_t mt;
 		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
 
-		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt=mt+1) {
+		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
 		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
 			       filename, multi_letters[mt]);
 		    HDremove(temp); /*don't care if it fails*/
@@ -443,7 +443,7 @@ h5_fileaccess(void)
 	HDmemset(memb_addr, 0, sizeof memb_addr);
 
 	assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=mt+1) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
 	    memb_fapl[mt] = H5P_DEFAULT;
 	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
 	    memb_name[mt] = sv[mt];

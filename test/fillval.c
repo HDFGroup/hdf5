@@ -100,7 +100,6 @@ static hid_t create_compound_type(void)
 static int
 test_getset(void)
 {
-    herr_t	status;
     hid_t	dcpl=-1;
     int		fill_i;
     hid_t	type_ss=-1, type_si=-1;
@@ -138,7 +137,7 @@ test_getset(void)
      * no fill value should result in a failure.
      */
     H5E_BEGIN_TRY {
-	status = H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
+	H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
     } H5E_END_TRY;
     if (fill_i != 0) {
 	H5_FAILED();
@@ -226,7 +225,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     hid_t	file=-1, space=-1, dcpl=-1, comp_type_id=-1;
     hid_t	dset1=-1, dset2=-1, dset3=-1, dset4=-1, dset5=-1, 
-		dset6=-1, dset7=-1, dset8=-1, dset9=-1;
+		dset6=-1, /* dset7=-1, */ dset8=-1, dset9=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
     hsize_t	ch_size[5] = {1, 1, 1, 4, 2};
     short	rd_s, fill_s = 0x1234;
@@ -303,7 +302,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if(H5Pset_fill_value(dcpl, -1, NULL)<0) goto error;
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error; 
     H5E_BEGIN_TRY {
-        if((dset7 = H5Dcreate(file, "dset7", H5T_NATIVE_LONG, space, dcpl))!=FAIL)
+        if(H5Dcreate(file, "dset7", H5T_NATIVE_LONG, space, dcpl)!=FAIL)
             goto error;
     } H5E_END_TRY;
 
@@ -342,7 +341,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
      * Supposed to fail. */
     if(H5Pset_fill_value(dcpl, -1, NULL)<0) goto error;
     H5E_BEGIN_TRY {
-        if((dset7 = H5Dcreate(file, "dset7", H5T_NATIVE_LONG, space, dcpl))!=FAIL) 
+        if(H5Dcreate(file, "dset7", H5T_NATIVE_LONG, space, dcpl)!=FAIL) 
             goto error;
     } H5E_END_TRY;
 

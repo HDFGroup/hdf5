@@ -107,7 +107,7 @@ test_long(hid_t file)
     /* Group names */
     name1 = malloc(namesize);
     for (i=0; i<namesize; i++)
-        name1[i] = 'A' + i%26;
+        name1[i] = (char)('A' + i%26);
     name1[namesize-1] = '\0';
     name2 = malloc(2*namesize + 2);
     sprintf(name2, "%s/%s", name1, name1);
