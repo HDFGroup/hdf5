@@ -1114,7 +1114,12 @@
 ./tools/h5diff/Dependencies
 ./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff_main.c
-./tools/h5diff/test_h5diff.c
+./tools/h5diff/testh5diff_util.c
+./tools/h5diff/testh5diff_main.c
+./tools/h5diff/testh5diff_dset.c
+./tools/h5diff/testh5diff_basic.c
+./tools/h5diff/testh5diff_attr.c
+./tools/h5diff/testh5diff.h
 ./tools/h5diff/testh5diff.sh
 
 ./tools/h5repack/Dependencies
@@ -1396,6 +1401,8 @@
 ./tools/testfiles/file4.h5
 ./tools/testfiles/file5.h5
 ./tools/testfiles/file6.h5
+./tools/testfiles/file7.h5
+./tools/testfiles/file8.h5
 ./tools/testfiles/h5diff_10.txt
 ./tools/testfiles/h5diff_11.txt
 ./tools/testfiles/h5diff_12.txt
@@ -1409,18 +1416,6 @@
 ./tools/testfiles/h5diff_23.txt
 ./tools/testfiles/h5diff_24.txt
 ./tools/testfiles/h5diff_25.txt
-./tools/testfiles/h5diff_30.txt
-./tools/testfiles/h5diff_31.txt
-./tools/testfiles/h5diff_32.txt
-./tools/testfiles/h5diff_33.txt
-./tools/testfiles/h5diff_34.txt
-./tools/testfiles/h5diff_35.txt
-./tools/testfiles/h5diff_36.txt
-./tools/testfiles/h5diff_37.txt
-./tools/testfiles/h5diff_38.txt
-./tools/testfiles/h5diff_40.txt
-./tools/testfiles/h5diff_41.txt
-./tools/testfiles/h5diff_42.txt
 ./tools/testfiles/h5diff_50.txt
 ./tools/testfiles/h5diff_51.txt
 ./tools/testfiles/h5diff_52.txt
@@ -1459,6 +1454,8 @@
 ./tools/testfiles/h5diff_627.txt
 ./tools/testfiles/h5diff_628.txt
 ./tools/testfiles/h5diff_629.txt
+./tools/testfiles/h5diff_70.txt
+./tools/testfiles/h5diff_80.txt
 
 
 ./windows/all.zip
