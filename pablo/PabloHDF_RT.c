@@ -280,7 +280,7 @@ void HDFendTrace_RT( int OUTSW )
 	int j, numSetIDs;
 	HDFnode_t *P;
 	char **Names;
-	char* mapFile;
+/*	char* mapFile;*/
 
 	HDFfinalTimeStamp();
 	/*==============================================================*
@@ -289,14 +289,15 @@ void HDFendTrace_RT( int OUTSW )
 	HDFassignPabloIDs( &numSetIDs, &Names );
 	/*==============================================================*
 	//  Create a file name for the File map file.			*
+	//  Disable for now.						*
 	//==============================================================*/
-	mapFile = (char *)malloc( strlen(FileName) + 4 );
+/*	mapFile = (char *)malloc( strlen(FileName) + 4 );
 	strcpy(mapFile,FileName);
-	strcat(mapFile,".map");
+	strcat(mapFile,".map"); */
 	/*==============================================================*
 	//  print the file mappings.					*
 	//==============================================================*/
-        printFileMappingsRT( mapFile, Names, numSetIDs ); 
+/*        printFileMappingsRT( mapFile, Names, numSetIDs ); */
 	/*==============================================================*
 	// Print SDDF summary records					*
 	//==============================================================*/
