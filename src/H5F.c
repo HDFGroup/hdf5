@@ -1999,6 +1999,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
             H5P_genplist_t *d_plist;
 
             /* Wait for all processes to catch up */
+            /* XXX: Calls which end up here are already required to be
+             * collective, is this barrier really necessary? -QAK
+             */
             MPI_Barrier(H5FP_SAP_BARRIER_COMM);
 
             /* Get the data xfer property list */
@@ -3136,6 +3139,9 @@ H5F_close(H5F_t *f)
         }
 
         /* Let's all meet up now... */
+        /* XXX: Calls which end up here are already required to be
+         * collective, is this barrier really necessary? -QAK
+         */
         if (H5FD_is_fphdf5_driver(f->shared->lf))
             MPI_Barrier(H5FP_SAP_BARRIER_COMM);
 #endif  /* H5_HAVE_FPHDF5 */

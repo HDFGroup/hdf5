@@ -2084,9 +2084,9 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
 
 #ifdef H5_HAVE_FPHDF5
     /*
-     * When we're using the FPHDF5 driver, allocate from the SAP. If this
+     * When we're using the FPHDF5 driver, free with the SAP. If this
      * is the SAP executing this code, then skip the send to the SAP and
-     * try to do the actual allocations.
+     * try to do the actual free.
      */
     if (H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file)) {
         unsigned        req_id;
@@ -2306,7 +2306,9 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed");
     } else {
         /* leak memory */
+#ifdef H5F_DEBUG
 HDfprintf(stderr, "%s: LEAKED MEMORY!!!!!!\n", FUNC);
+#endif /* H5F_DEBUG */
     }
 
 done:
