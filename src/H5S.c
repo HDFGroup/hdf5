@@ -1494,7 +1494,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
  *-------------------------------------------------------------------------
  */
 H5S_conv_t *
-H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
+H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
 {
     H5S_conv_t	*path;  /* Space conversion path */
     htri_t c1,c2;       /* Flags whether a selection is contiguous */
@@ -1531,8 +1531,19 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
                 HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
             if (c1==TRUE && c2==TRUE) {
+#ifdef H5_HAVE_PARALLEL
+                if(flags&H5S_CONV_PAR_IO_POSSIBLE) {
+                    H5S_conv_g[i]->read = H5S_mpio_spaces_read;
+                    H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+                } /* end if */
+                else {
+                    H5S_conv_g[i]->read = H5S_all_read;
+                    H5S_conv_g[i]->write = H5S_all_write;
+                } /* end else */
+#else /* H5_HAVE_PARALLEL */
                 H5S_conv_g[i]->read = H5S_all_read;
                 H5S_conv_g[i]->write = H5S_all_write;
+#endif /* H5_HAVE_PARALLEL */
             }
             else {
                 H5S_conv_g[i]->read = NULL;
@@ -1569,8 +1580,19 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
         HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
     if (c1==TRUE && c2==TRUE) {
-        path->read = H5S_all_read;
-        path->write = H5S_all_write;
+#ifdef H5_HAVE_PARALLEL
+        if(flags&H5S_CONV_PAR_IO_POSSIBLE) {
+            H5S_conv_g[i]->read = H5S_mpio_spaces_read;
+            H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+        } /* end if */
+        else {
+            H5S_conv_g[i]->read = H5S_all_read;
+            H5S_conv_g[i]->write = H5S_all_write;
+        } /* end else */
+#else /* H5_HAVE_PARALLEL */
+        H5S_conv_g[i]->read = H5S_all_read;
+        H5S_conv_g[i]->write = H5S_all_write;
+#endif /* H5_HAVE_PARALLEL */
     } /* end if */
     
     /*

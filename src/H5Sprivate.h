@@ -30,6 +30,9 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
+/* Flags for H5S_find */
+#define H5S_CONV_PAR_IO_POSSIBLE        0x0001
+
 /* Forward references of common typedefs */
 typedef struct H5S_t H5S_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
@@ -192,7 +195,8 @@ __DLLVAR__ const H5S_mconv_t	H5S_HYPER_MCONV[];
 __DLL__ H5S_t *H5S_create(H5S_class_t type);
 __DLL__ H5S_t *H5S_copy(const H5S_t *src);
 __DLL__ herr_t H5S_close(H5S_t *ds);
-__DLL__ H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space);
+__DLL__ H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space,
+                unsigned flags);
 __DLL__ H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
 __DLL__ hssize_t H5S_get_simple_extent_npoints(const H5S_t *ds);
 __DLL__ hsize_t H5S_get_npoints_max(const H5S_t *ds);

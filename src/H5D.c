@@ -23,7 +23,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspace functions rky 980813       */
+#include "H5Sprivate.h"		/* Dataspace functions                  */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
@@ -2009,7 +2009,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5O_fill_t          fill;    
     H5P_genplist_t *dx_plist=NULL;      /* Property list */
     H5P_genplist_t *dc_plist;      /* Property list */
-    
+    unsigned		sconv_flags=0;	        /* Flags for the space conversion */
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -2052,9 +2052,18 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to retrieve data xfer info");
     } /* end if */
     /* Collective access is not permissible without the MPIO driver */
-    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-            !(IS_H5FD_MPIO(dataset->ent.file)))
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE && !(IS_H5FD_MPIO(dataset->ent.file)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
+
+    /* Set the "parallel I/O possible" flag, for H5S_find() */
+    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
+	/* Only collective write should call this since it eventually
+	 * calls MPI_File_set_view which is a collective call.
+	 * See H5S_mpio_spaces_xfer() for details.
+	 */
+	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
+            sconv_flags |= H5S_CONV_PAR_IO_POSSIBLE;
+    } /* end if */
 #endif
 
 #ifdef QAK
@@ -2081,25 +2090,8 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
     } /* end if */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space)))
+    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space");
-
-#ifdef H5_HAVE_PARALLEL
-    /* rky 980813 This is a temporary KLUGE.
-     * The sconv functions should be set by H5S_find,
-     * or we should use a different way to call the MPI-IO
-     * mem-and-file-dataspace-xfer functions
-     * (the latter in case the arguments to sconv_funcs
-     * turn out to be inappropriate for MPI-IO).  */
-    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
-	/* Only collective write should call this since it eventually
-	 * calls MPI_File_set_view which is a collective call.
-	 * See H5S_mpio_spaces_xfer() for details.
-	 */
-	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
-	    sconv->read = H5S_mpio_spaces_read;
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
 
 #ifdef QAK
 printf("%s: check 1.1, \n",FUNC);
@@ -2472,6 +2464,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5O_fill_t          fill;    
     H5P_genplist_t *dx_plist=NULL;      /* Property list */
     H5P_genplist_t *dc_plist;      /* Property list */
+    unsigned		sconv_flags=0;	        /* Flags for the space conversion */
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -2540,7 +2533,17 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
             !(IS_H5FD_MPIO(dataset->ent.file)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
-#endif
+
+    /* Set the "parallel I/O possible" flag, for H5S_find() */
+    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
+	/* Only collective write should call this since it eventually
+	 * calls MPI_File_set_view which is a collective call.
+	 * See H5S_mpio_spaces_xfer() for details.
+	 */
+	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
+            sconv_flags |= H5S_CONV_PAR_IO_POSSIBLE;
+    } /* end if */
+#endif /*H5_HAVE_PARALLEL*/
 
 #ifdef QAK
     printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n", FUNC, (int)nelmts, mem_space->extent.u.simple.rank);
@@ -2569,27 +2572,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /* QAK */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(mem_space, file_space)))
+    if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space");
 
-#ifdef H5_HAVE_PARALLEL
-    /* rky 980813 This is a temporary KLUGE.
-     * The sconv functions should be set by H5S_find,
-     * or we should use a different way to call the MPI-IO
-     * mem-and-file-dataspace-xfer functions
-     * (the latter in case the arguments to sconv_funcs
-     * turn out to be inappropriate for MPI-IO).  */
-    if (H5_mpi_opt_types_g &&
-            IS_H5FD_MPIO(dataset->ent.file)) {
-	/* Only collective write should call this since it eventually
-	 * calls MPI_File_set_view which is a collective call.
-	 * See H5S_mpio_spaces_xfer() for details.
-	 */
-	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
-	    sconv->write = H5S_mpio_spaces_write;
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
-    
     /*
      * If there is no type conversion then try writing directly from
      * application buffer to file.
@@ -3799,6 +3784,4 @@ herr_t H5D_update_chunk( H5D_t *dset )
  return 0;
 
 }
-
-
 
