@@ -70,7 +70,7 @@ typedef struct H5FD_mpio_t {
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    int		old_use_types;  /*remember value of use_types		*/
+    unsigned	old_use_view;   /*remember value of use_view		*/
 } H5FD_mpio_t;
 
 /* Prototypes */
@@ -521,7 +521,7 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
+H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype, unsigned use_view)
 {
     H5D_xfer_t	*xfer_parms = NULL;
 
@@ -537,7 +537,7 @@ H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
 
     xfer_parms->btype = btype;
     xfer_parms->ftype = ftype;
-    xfer_parms->use_types = 1;
+    xfer_parms->use_view = use_view;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -575,7 +575,7 @@ H5FD_mpio_teardown(hid_t dxpl_id)
 
     xfer_parms->btype = MPI_DATATYPE_NULL;
     xfer_parms->ftype = MPI_DATATYPE_NULL;
-    xfer_parms->use_types = 0;
+    xfer_parms->use_view = 0;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1193,7 +1193,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Status  		mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
-    int				use_types_this_time, used_types_last_time;
+    unsigned			use_view_this_time=0, used_view_last_time;
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_read, FAIL);
@@ -1240,12 +1240,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
-     * wouldn't need to rely on the use_types field if MPI semantics allowed
+     * wouldn't need to rely on the use_view field if MPI semantics allowed
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    use_types_this_time = xfer_parms->use_types;
-    if (use_types_this_time) {
+    use_view_this_time = xfer_parms->use_view;
+    if (use_view_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = xfer_parms->btype;
         file_type = xfer_parms->ftype;
@@ -1269,20 +1269,16 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * Don't bother to reset the view if we're not using the types this time,
      * and did we didn't use them last time either.
      */
-    used_types_last_time = file->old_use_types;
-    if (used_types_last_time || /* change to new ftype or MPI_BYTE */
-            use_types_this_time) { 	/* almost certainly a different ftype */
+    used_view_last_time = file->old_use_view;
+    if (used_view_last_time || /* change to new ftype or MPI_BYTE */
+            use_view_this_time) { 	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native",  file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
-    /*
-     * We always set the use_types flag to 0 because the default is not to
-     * use types next time, unless someone explicitly requests it by setting
-     * this flag to !=0.
-     */
-    file->old_use_types = use_types_this_time;
+    /* Keep the 'use view' flag around for the next I/O */
+    file->old_use_view = use_view_this_time;
 
     /* Read the data. */
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
@@ -1308,7 +1304,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
      * had the 'buf_type' set to MPI_BYTE -QAK
      */
-    if(use_types_this_time) {
+    if(use_view_this_time) {
         /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
          * If this gets fixed (and MPI_Get_count() is reliable), the
          * kludge below where the 'bytes_read' value from MPI_Get_count() is
@@ -1343,7 +1339,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * reading past logical end of HDF5 file???
      */
     if ((n=(size_i-bytes_read)) > 0) {
-        if (use_types_this_time) {
+        if (use_view_this_time) {
             /*
              * INCOMPLETE rky 1998-09-18
              * Haven't implemented reading zeros beyond EOF. What to do???
@@ -1487,7 +1483,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
-    int				use_types_this_time, used_types_last_time;
+    unsigned			use_view_this_time=0, used_view_last_time;
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_write, FAIL);
@@ -1534,12 +1530,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
-     * wouldn't need to rely on the use_types field if MPI semantics allowed
+     * wouldn't need to rely on the use_view field if MPI semantics allowed
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    use_types_this_time = xfer_parms->use_types;
-    if (use_types_this_time) {
+    use_view_this_time = xfer_parms->use_view;
+    if (use_view_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = xfer_parms->btype;
         file_type = xfer_parms->ftype;
@@ -1563,20 +1559,16 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * Don't bother to reset the view if we're not using the types this time,
      * and did we didn't use them last time either.
      */
-    used_types_last_time = file->old_use_types;
-    if (used_types_last_time ||	/* change to new ftype or MPI_BYTE */
-            use_types_this_time) {	/* almost certainly a different ftype */
+    used_view_last_time = file->old_use_view;
+    if (used_view_last_time ||	/* change to new ftype or MPI_BYTE */
+            use_view_this_time) {	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native", file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
-    /*
-     * We always set the use_types flag to 0 because the default is not to
-     * use types next time, unless someone explicitly requests it by setting
-     * this flag to !=0.
-     */
-    file->old_use_types = use_types_this_time;
+    /* Keep the 'use view' flag around for the next I/O */
+    file->old_use_view = use_view_this_time;
 
     /* Only p<round> will do the actual write if all procs in comm write same data */
     if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
@@ -1618,7 +1610,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
      * had the 'buf_type' set to MPI_BYTE -QAK
      */
-    if(use_types_this_time) {
+    if(use_view_this_time) {
         /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
          * If this gets fixed (and MPI_Get_count() is reliable), the
          * kludge below where the 'bytes_written' value from MPI_Get_count() is

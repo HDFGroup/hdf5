@@ -73,7 +73,7 @@ typedef struct H5D_xfer_t {
                                         /*transaction                        */
 #endif
 #ifdef H5_HAVE_PARALLEL
-    unsigned            use_types;      /* Whether to use types for this I/O */
+    unsigned            use_view;       /* Whether to use a view for this I/O */
     MPI_Datatype        btype;          /* MPI type for buffer (memory) */
     MPI_Datatype        ftype;          /* MPI type for file */
 #endif /* H5_HAVE_PARALLEL */

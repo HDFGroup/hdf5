@@ -99,7 +99,7 @@ H5D_xfer_t	H5D_xfer_dflt = {
                                 /*transaction                               */
 #endif
 #ifdef H5_HAVE_PARALLEL
-    0,                          /* Whether to use types for this I/O */
+    0,                          /* Whether to use a view for this I/O */
     MPI_DATATYPE_NULL,          /* MPI type for buffer (memory) */
     MPI_DATATYPE_NULL,          /* MPI type for file */
 #endif /* H5_HAVE_PARALLEL */
