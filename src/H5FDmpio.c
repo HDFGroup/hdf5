@@ -944,6 +944,15 @@ H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+
+        /* Distinguish between updating the metadata accumulator on writes and
+         * reads.  This is particularly (perhaps only, even) important for MPI-I/O
+         * where we guarantee that writes are collective, but reads may not be.
+         * If we were to allow the metadata accumulator to be written during a
+         * read operation, the application would hang.
+         */
+        *flags|=H5FD_FEAT_ACCUMULATE_METADATA_WRITE; /* OK to accumulate metadata for faster writes */
+
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     } /* end if */
 

@@ -90,8 +90,16 @@ typedef enum H5FD_mem_t {
      * the library will attempt to cache metadata as it is written to the file
      * and build up a larger block of metadata to eventually pass to the VFL
      * 'write' routine.
+     * 
+     * Distinguish between updating the metadata accumulator on writes and
+     * reads.  This is particularly (perhaps only, even) important for MPI-I/O
+     * where we guarantee that writes are collective, but reads may not be.
+     * If we were to allow the metadata accumulator to be written during a
+     * read operation, the application would hang.
      */
-#define H5FD_FEAT_ACCUMULATE_METADATA   0x00000002
+#define H5FD_FEAT_ACCUMULATE_METADATA_WRITE     0x00000002
+#define H5FD_FEAT_ACCUMULATE_METADATA_READ      0x00000004
+#define H5FD_FEAT_ACCUMULATE_METADATA   (H5FD_FEAT_ACCUMULATE_METADATA_WRITE|H5FD_FEAT_ACCUMULATE_METADATA_READ)
     /*
      * Defining the H5FD_FEAT_DATA_SIEVE for a VFL driver means that
      * the library will attempt to cache raw data as it is read from/written to
@@ -99,13 +107,13 @@ typedef enum H5FD_mem_t {
      *  http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
      *  http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
      */
-#define H5FD_FEAT_DATA_SIEVE            0x00000004
+#define H5FD_FEAT_DATA_SIEVE            0x00000008
     /*
      * Defining the H5FD_FEAT_AGGREGATE_SMALLDATA for a VFL driver means that
      * the library will attempt to allocate a larger block for "small" raw data
      * and then sub-allocate "small" raw data requests from that larger block.
      */
-#define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000008
+#define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000010
 	
 
 /* Forward declaration */
