@@ -506,8 +506,6 @@
 ./tools/h5dump.c
 ./tools/h5dump.h
 ./tools/h5dumptst.c
-./tools/h5dumputil.c
-./tools/h5findshd.c
 ./tools/h5import.c
 ./tools/h5ls.c
 ./tools/h5repart.c
