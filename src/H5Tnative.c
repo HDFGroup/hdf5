@@ -719,7 +719,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
 	    native_size = sizeof(long double);	
         } else {   /* If not match, return the biggest datatype */
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long);
+	    native_size = sizeof(long double);
 	}	
     } else {
         if(size>=sizeof(long double)) {
