@@ -1,8 +1,9 @@
 #------------------------------------------------------------------------------
-# This is the list of files that are part of HDF5.  All files have a
-# `./' prefix and appear in lexicographic order.  Lines that end with
-# _DO_NOT_DISTRIBUTE_ will not be included in a release.  Blank lines
-# and comments are ignored.  Comments must start in column one.
+# This is the list of files that are part of HDF5 source distribution. 
+# All files have a `./' prefix and appear in lexicographic order.
+# Lines that end with _DO_NOT_DISTRIBUTE_ will not be included in a
+# release.  Blank lines and comments are ignored.  Comments must start
+# in column one with a '#'.
 #------------------------------------------------------------------------------
 
 ./COPYING
