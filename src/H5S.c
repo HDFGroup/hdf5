@@ -741,7 +741,7 @@ H5S_copy(const H5S_t *src)
  *
  * Return:	Success:	Number of data points in the dataset extent.
  *
- *		Failure:	0
+ *		Failure:	negative
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -751,13 +751,13 @@ H5S_copy(const H5S_t *src)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+hssize_t
 H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
-    hsize_t		    ret_value = 0;
+    hssize_t		    ret_value = -1;
     intn		    i;
 
-    FUNC_ENTER(H5S_get_simple_extent_npoints, 0);
+    FUNC_ENTER(H5S_get_simple_extent_npoints, -1);
 
     /* check args */
     assert(ds);
@@ -774,12 +774,12 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
             break;
 
         case H5S_COMPLEX:
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0,
+            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, -1,
                   "complex data spaces are not supported yet");
 
         default:
             assert("unknown data space class" && 0);
-            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0,
+            HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, -1,
                   "internal error (unknown data space class)");
     }
 
@@ -794,7 +794,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
  *
  * Return:	Success:	Number of data points in the dataset.
  *
- *		Failure:	0
+ *		Failure:	negative
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
@@ -804,18 +804,18 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+hssize_t
 H5Sget_simple_extent_npoints(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
-    hsize_t		    ret_value = 0;
+    hssize_t		    ret_value = -1;
 
-    FUNC_ENTER(H5Sget_simple_extent_npoints, 0);
+    FUNC_ENTER(H5Sget_simple_extent_npoints, -1);
     H5TRACE1("h","i",space_id);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a data space");
     }
     ret_value = H5S_get_simple_extent_npoints(ds);
 

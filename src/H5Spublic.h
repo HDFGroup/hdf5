@@ -60,7 +60,7 @@ __DLL__ herr_t H5Sset_extent_simple(hid_t space_id, int rank,
 				    const hsize_t max[]);
 __DLL__ hid_t H5Scopy(hid_t space_id);
 __DLL__ herr_t H5Sclose(hid_t space_id);
-__DLL__ hsize_t H5Sget_simple_extent_npoints(hid_t space_id);
+__DLL__ hssize_t H5Sget_simple_extent_npoints(hid_t space_id);
 __DLL__ int H5Sget_simple_extent_ndims(hid_t space_id);
 __DLL__ int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[],
 				      hsize_t maxdims[]);

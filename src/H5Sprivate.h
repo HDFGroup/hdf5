@@ -200,7 +200,7 @@ __DLL__ H5S_t *H5S_copy(const H5S_t *src);
 __DLL__ herr_t H5S_close(H5S_t *ds);
 __DLL__ H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space);
 __DLL__ H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
-__DLL__ hsize_t H5S_get_simple_extent_npoints(const H5S_t *ds);
+__DLL__ hssize_t H5S_get_simple_extent_npoints(const H5S_t *ds);
 __DLL__ hsize_t H5S_get_npoints_max(const H5S_t *ds);
 __DLL__ intn H5S_get_simple_extent_ndims(const H5S_t *ds);
 __DLL__ intn H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
