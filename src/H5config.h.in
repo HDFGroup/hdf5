@@ -540,7 +540,7 @@
    values. */
 #undef SW_LDOUBLE_TO_INTEGER_WORKS
 
-/* Define if your system can accurately convert unsigned long long values to
+/* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
 #undef SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
 

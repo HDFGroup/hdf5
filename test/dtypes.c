@@ -7396,11 +7396,11 @@ run_float_int_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
     if(!strcmp(name, "hw")) { /* Hardware conversion */
         /* Windows .NET 2003 doesn't work for hardware conversion of this case.
-         * .NET should define this macro H5_HW_FLOAT_TO_LLONG_NOT_WORKS. */  
-#ifndef H5_HW_FLOAT_TO_LLONG_NOT_WORKS
+         * .NET should define this macro H5_HW_FP_TO_LLONG_NOT_WORKS. */  
+#ifndef H5_HW_FP_TO_LLONG_NOT_WORKS
         nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
         nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
-#endif /*H5_HW_FLOAT_TO_LLONG_NOT_WORKS*/
+#endif /*H5_HW_FP_TO_LLONG_NOT_WORKS*/
     } else {  /* Software conversion */
         nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
         nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
@@ -7999,7 +7999,7 @@ main(void)
     
     /* Test software integer-float conversion functions */
     nerrors += run_int_float_conv("sw");
-
+    
     reset_hdf5();
     
     if (nerrors) {

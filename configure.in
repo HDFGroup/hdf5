@@ -2618,7 +2618,7 @@ fi
 
 if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
   AC_DEFINE([SW_ULONG_TO_FP_BOTTOM_BIT_WORKS], [1],
-            [Define if your system can accurately convert unsigned long long values to floating-point values.])
+            [Define if your system can accurately convert unsigned (long) long values to floating-point values.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -2626,7 +2626,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
-dnl 'float' or 'double' to 'unsigned (long) long' values.
+dnl 'float' or 'double' to 'unsigned long long' values.
 dnl (This flag should be set for all machines, except for PGI compiler 
 dnl where round-up happens when the fraction of float-point value is greater 
 dnl than 0.5.
@@ -2663,7 +2663,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
-dnl 'float', 'double' or 'long double' to 'unsigned (long) long' values.
+dnl 'float', 'double' or 'long double' to 'unsigned long long' values.
 dnl (This flag should be set for all machines, except for HP-UX machines
 dnl where the maximal number for unsigned long long is 0x7fffffffffffffff
 dnl during conversion.

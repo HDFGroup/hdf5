@@ -5122,6 +5122,7 @@ int main(void)
     nerrors += test_missing_chunk(file)<0	?1:0;
 
     if (H5Fclose(file)<0) goto error;
+
     if (nerrors) goto error;
     printf("All dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl); 
