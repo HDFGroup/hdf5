@@ -393,6 +393,8 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
     if (!idx)
         idx = &_idx;
+    if (*idx<0)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
     if (!op)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
@@ -401,10 +403,10 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
      * we can pass to the application-defined operator.
      */
     if (NULL==(udata.group = H5G_open (loc, name, H5AC_dxpl_id)))
-	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
+	HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     if ((udata.group_id=H5I_register (H5I_GROUP, udata.group))<0) {
 	H5G_close(udata.group);
-	HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to register group");
+	HGOTO_ERROR (H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
     }
     
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
@@ -418,12 +420,17 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5AC_dxpl_id, H5B_SNODE,
               H5G_node_iterate, udata.group->ent.cache.stab.btree_addr, &udata))<0)
-        HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+        HERROR (H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
+
+    H5I_dec_ref (udata.group_id); /*also closes udata.group*/
+
+    /* Check for too high of a starting index (ex post facto :-) */
+    /* (Skipping exactly as many entries as are in the group is currently an error) */
+    if (*idx>0 && *idx>=udata.final_ent)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
     /* Set the index we stopped at */
     *idx=udata.final_ent;
-
-    H5I_dec_ref (udata.group_id); /*also closes udata.group*/
 
 done:
     FUNC_LEAVE_API(ret_value);
