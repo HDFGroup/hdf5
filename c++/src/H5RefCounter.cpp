@@ -13,35 +13,73 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5Include.h"
+#include "H5Exception.h"
 #include "H5RefCounter.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
-// Creates a reference counter to be used by an HDF5 object
+//--------------------------------------------------------------------------
+// Function:	RefCounter default constructor
+///\brief	Default constructor: Creates a reference counter and set it
+///		to 1.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 RefCounter::RefCounter() : counter(1) {} 
  
-// Returns the current value of the reference counter
+//--------------------------------------------------------------------------
+// Function:	RefCounter::getCounter
+///\brief	Returns the current value of the reference counter.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int RefCounter::getCounter () const { return counter; }
 
-// Increments the reference counter as a copy of the object that uses
-// this counter is created.
+//--------------------------------------------------------------------------
+// Function:	RefCounter::increment
+///\brief	Increments the reference counter.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void RefCounter::increment() { counter++; }
 
-// Decrements the reference counter as a copy of the object that uses
-// this counter is destroyed.
-void RefCounter::decrement() { counter--; }
-
-// Decrements the reference counter then determines if there are no more 
-// reference to the object that uses this counter
-bool RefCounter::noReference()
-{
-   if( counter > 0 )
+//--------------------------------------------------------------------------
+// Function:	RefCounter::decrement
+///\brief	Decrements the reference counter.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void RefCounter::decrement() 
+{ 
+   if (counter > 0)
       counter--;
-   return( counter == 0 ? true:false );
+   else
+      throw IdComponentException("RefCounter::decrement",
+                "reference counter of this object has non-positive value");
 }
 
+//--------------------------------------------------------------------------
+// Function:	RefCounter::noReference
+///\brief	Returns true if there are no more reference to the object 
+///		that uses this counter.
+///\return	true if there are no more reference to the object
+///             that uses this counter, and false, otherwise.
+// Description
+//		Decrements the reference counter then determines if there 
+//		are no more reference to the object that uses this counter.
+///\note	This function will be obsolete in the next release.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+bool RefCounter::noReference()
+{
+   if (counter > 0)
+      counter--;
+   return(counter <= 0 ? true:false);
+}
+
+//--------------------------------------------------------------------------
+// Function:	RefCounter destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 RefCounter::~RefCounter() {}
 
 #ifndef H5_NO_NAMESPACE
