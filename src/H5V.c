@@ -751,6 +751,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
         for (i=0; i<nelmts; i++) {
 
             /* Copy an element */
+            H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
             HDmemcpy(dst, src, (size_t)elmt_size);
 
             /* Decrement indices and advance pointers */
@@ -765,7 +766,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
             }
         }
     } else {
-        assert(elmt_size==(hsize_t)((size_t)elmt_size)); /*check for overflow*/
+        H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
         HDmemcpy (dst, src, (size_t)elmt_size);
         HRETURN (SUCCEED);
     }

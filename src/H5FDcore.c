@@ -382,7 +382,7 @@ H5FD_core_flush(H5FD_t *_file)
         while (size) {
             ssize_t n;
 
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            H5_CHECK_OVERFLOW(size,hsize_t,size_t);
             n = HDwrite(file->fd, ptr, (size_t)size);
             if (n<0 && EINTR==errno) continue;
             if (n<0)
@@ -613,7 +613,16 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     /* Read the part which is before the EOF marker */
     if (addr < file->eof) {
-        size_t nbytes = MIN(size, file->eof-addr);
+        size_t nbytes;
+#ifndef NDEBUG
+        hsize_t temp_nbytes;
+
+        temp_nbytes = file->eof-addr;
+        H5_CHECK_OVERFLOW(temp_nbytes,hsize_t,size_t);
+        nbytes = MIN(size,(size_t)temp_nbytes);
+#else /* NDEBUG */
+        nbytes = MIN(size,(size_t)(file->eof-addr));
+#endif /* NDEBUG */
 
         HDmemcpy(buf, file->mem + addr, nbytes);
         size -= nbytes;
@@ -673,7 +682,9 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
      */
     if (addr+size>file->eof) {
         unsigned char *x;
-        size_t new_eof = file->increment * ((addr+size)/file->increment);
+        size_t new_eof;
+
+        H5_ASSIGN_OVERFLOW(new_eof,file->increment*((addr+size)/file->increment),hsize_t,size_t);
 
         if ((addr+size) % file->increment)
             new_eof += file->increment;

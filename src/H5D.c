@@ -152,7 +152,7 @@ H5D_init_interface(void)
     hid_t           def_vfl_id               = H5D_XFER_VFL_ID_DEF;     
     void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;    
 #ifdef COALESCE_READS
-    unsigned        def_gather_reads         = H5D_XFER_GATHER_READS_DEF;   
+    hsize_t         def_gather_reads         = H5D_XFER_GATHER_READS_DEF;   
 #endif /* COALESCE_READS */
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF; 
 
@@ -3087,7 +3087,9 @@ H5D_get_file (const H5D_t *dset)
 static herr_t
 H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
-    hssize_t            npoints, ptsperbuf;
+    hssize_t            snpoints;       /* Number of points in space (for error checking) */
+    size_t              npoints;        /* Number of points in space */
+    size_t              ptsperbuf;
     size_t		bufsize=8*1024;
     size_t		size;
     haddr_t		addr;
@@ -3119,23 +3121,25 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
              * even if it is all zero.  This allows the application to force
              * filling when the underlying storage isn't initialized to zero.
              */
-            npoints = H5S_get_simple_extent_npoints(space);
+            snpoints = H5S_get_simple_extent_npoints(space);
+            assert(snpoints>=0);
+            H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
             
-            if (fill.buf && npoints==H5S_get_select_npoints(space)) {
+            if (fill.buf && npoints==(size_t)H5S_get_select_npoints(space)) {
                 /*
                  * Fill the entire current extent with the fill value.  We can do
                  * this quite efficiently by making sure we copy the fill value
                  * in relatively large pieces.
                  */
-                ptsperbuf = (hssize_t)MAX(1, bufsize/fill.size);
-                bufsize   = ptsperbuf * fill.size; 
+			
+                ptsperbuf = MAX(1, bufsize/fill.size);
+                bufsize = ptsperbuf*fill.size;
 
                 /* Allocate temporary buffer */
                 if ((buf=H5FL_BLK_ALLOC(fill_conv,bufsize,0))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
 
-                assert(ptsperbuf==(hssize_t)((size_t)ptsperbuf)); /*check for overflow*/
-                H5V_array_fill(buf, fill.buf, fill.size, (size_t)ptsperbuf);
+                H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
                 if (efl.nused) {
                     addr = 0;
                 } else {
@@ -3148,8 +3152,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 		        if(H5O_efl_write(dset->ent.file, &efl, addr, size, buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                     } else {
-                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, addr,
-                                size, H5P_DATASET_XFER_DEFAULT, buf)<0)
+                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, addr, size, H5P_DATASET_XFER_DEFAULT, buf)<0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                     }
                     npoints -= MIN(ptsperbuf, npoints);

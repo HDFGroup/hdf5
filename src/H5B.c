@@ -724,11 +724,11 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
      * and the new node.
      */
     if (!H5F_addr_defined(old_bt->right)) {
-	nleft = 2 * k * split_ratios[2];	/*right*/
+	nleft = (int)(2 * k * split_ratios[2]);	/*right*/
     } else if (!H5F_addr_defined(old_bt->left)) {
-	nleft = 2 * k * split_ratios[0];	/*left*/
+	nleft = (int)(2 * k * split_ratios[0]);	/*left*/
     } else {
-	nleft = 2 * k * split_ratios[1];	/*middle*/
+	nleft = (int)(2 * k * split_ratios[1]);	/*middle*/
     }
 
     /*

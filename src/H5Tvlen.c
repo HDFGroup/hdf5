@@ -208,7 +208,7 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
-    size_t len=seq_len*base_size;
+    size_t len;
     H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER (H5T_vlen_seq_mem_write, FAIL);
@@ -218,8 +218,9 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     assert(buf);
 
     if(seq_len!=0) {
+        H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
+
         /* Use the user's memory allocation routine is one is defined */
-        assert((seq_len*base_size)==(hsize_t)((size_t)(seq_len*base_size))); /*check for overflow*/
 
         /* Get the allocation function & info */
         if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
@@ -230,11 +231,11 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
             HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
         if(alloc_func!=NULL) {
-            if(NULL==(vl->p=(alloc_func)((size_t)(seq_len*base_size),alloc_info)))
+            if(NULL==(vl->p=(alloc_func)(len,alloc_info)))
                 HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end if */
         else {  /* Default to system malloc */
-            if(NULL==(vl->p=H5MM_malloc((size_t)(seq_len*base_size))))
+            if(NULL==(vl->p=H5MM_malloc(len)))
                 HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end else */
 
@@ -246,7 +247,7 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
         vl->p=NULL;
 
     /* Set the sequence length */
-    vl->len=seq_len;
+    H5_ASSIGN_OVERFLOW(vl->len,seq_len,hsize_t,size_t);
 
     FUNC_LEAVE (SUCCEED);
 }   /* end H5T_vlen_seq_mem_write() */
@@ -331,16 +332,16 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
     char **s=(char **)vl_addr;   /* Pointer to the user's hvl_t information */
-    size_t len=seq_len*base_size;
+    size_t len;
     H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER (H5T_vlen_str_mem_write, FAIL);
 
     /* check parameters */
     assert(buf);
+    H5_CHECK_OVERFLOW(((seq_len+1)*base_size),hsize_t,size_t);
 
-    /* Use the user's memory allocation routine is one is defined */
-    assert(((seq_len+1)*base_size)==(hsize_t)((size_t)((seq_len+1)*base_size))); /*check for overflow*/
+    /* Use the user's memory allocation routine if one is defined */
 
     /* Get the allocation function & info */
     if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
@@ -359,6 +360,7 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end else */
 
+    len=(size_t)seq_len*base_size;
     HDmemcpy(*s,buf,len);
     (*s)[len]='\0';
 
@@ -459,7 +461,7 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
-    size_t len=seq_len*base_size;
+    size_t len;
 
     FUNC_ENTER (H5T_vlen_disk_write, FAIL);
 
@@ -469,11 +471,13 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     assert(f);
 
     /* Set the length of the sequence */
+    H5_CHECK_OVERFLOW(seq_len,hsize_t,size_t);
     UINT32ENCODE(vl, seq_len);
     
     /* Check if this sequence actually has any data */
     if(seq_len!=0) {
         /* Write the VL information to disk (allocates space also) */
+        H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
         if(H5HG_insert(f,len,buf,&hobjid)<0)
             HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
     } /* end if */

@@ -132,7 +132,7 @@
 #ifdef COALESCE_READS
 /* Definitions for 'gather reads' property */
 #define H5D_XFER_GATHER_READS_NAME       "gather_reads"
-#define H5D_XFER_GATHER_READS_SIZE       sizeof(unsigned)
+#define H5D_XFER_GATHER_READS_SIZE       sizeof(hsize_t)
 #define H5D_XFER_GATHER_READS_DEF  0
 #endif /* COALESCE_READS */
 /* Definitions for hyperslab vector size property */

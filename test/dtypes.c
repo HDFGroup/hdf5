@@ -1174,7 +1174,7 @@ test_named (hid_t fapl)
     /* It should be possible to define an attribute for the named type */
     if ((attr1=H5Acreate (type, "attr1", H5T_NATIVE_UCHAR, space,
 			  H5P_DEFAULT))<0) goto error;
-    for (i=0; i<ds_size[0]*ds_size[1]; i++) attr_data[0][i] = i;/*tricky*/
+    for (i=0; i<ds_size[0]*ds_size[1]; i++) attr_data[0][i] = (int)i;/*tricky*/
     if (H5Awrite(attr1, H5T_NATIVE_UINT, attr_data)<0) goto error;
     if (H5Aclose (attr1)<0) goto error;
 
@@ -3375,7 +3375,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    } else if (FLT_DOUBLE==src_type) {
 		memcpy(aligned, saved+j*sizeof(double), sizeof(double));
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((double*)aligned);
+		    hw_f = (float)(*((double*)aligned));
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = *((double*)aligned);

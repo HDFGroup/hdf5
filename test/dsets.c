@@ -438,7 +438,7 @@ test_compression(hid_t file)
     
     for (i=n=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
-	    points[i][j] = n++;
+	    points[i][j] = (int)(n++);
 	}
     }
 

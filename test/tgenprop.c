@@ -39,7 +39,7 @@ int         prop1_def=10;   /* Property 1 default value */
 #define PROP1_DEF_VALUE (&prop1_def)
 
 #define PROP2_NAME     "Property 2"
-float         prop2_def=3.14;   /* Property 2 default value */
+float         prop2_def=(float)3.14;   /* Property 2 default value */
 #define PROP2_SIZE      sizeof(prop2_def)
 #define PROP2_DEF_VALUE (&prop2_def)
 

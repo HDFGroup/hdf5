@@ -393,17 +393,17 @@ static void test_compound_dt(void) {       /* test compound data type */
   
   for (i = 0; i < (int)sdim; i++) {
        dset1[i].a = i; 
-       dset1[i].b = i*i;
-       dset1[i].c = 1./(i+1);
+       dset1[i].b = (float)(i*i);
+       dset1[i].c = (float)(1./(i+1));
        
        dset2[i].a = i;
-       dset2[i].b = i+ i*0.1;
+       dset2[i].b = (float)(i+ i*0.1);
 
        dset4[i].a = i;
-       dset4[i].b = i+3;
+       dset4[i].b = (float)(i+3);
 
        dset5[i].a = i;
-       dset5[i].b = i*0.1;
+       dset5[i].b = (float)(i*0.1);
   }
 
 
@@ -478,7 +478,7 @@ static void test_compound_dt(void) {       /* test compound data type */
                  dset3[i][j].a[k] = k+j+i;
             for (k = 0; k < 5; k++)
                  for (l = 0; l < 6; l++)
-                      dset3[i][j].b[k][l] = (k+1)+l+j+i;
+                      dset3[i][j].b[k][l] = (float)((k+1)+l+j+i);
        }
   }
   H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
@@ -580,17 +580,17 @@ static void test_compound_dt2(void) {       /* test compound data type */
   sdim = 10;
   for (i = 0; i < (int)sdim; i++) {
        dset1[i].a = i; 
-       dset1[i].b = i*i;
-       dset1[i].c = 1./(i+1);
+       dset1[i].b = (float)(i*i);
+       dset1[i].c = (float)(1./(i+1));
        
        dset2[i].a = i;
-       dset2[i].b = i+ i*0.1;
+       dset2[i].b = (float)(i+ i*0.1);
 
        dset4[i].a = i;
-       dset4[i].b = i*1.0;
+       dset4[i].b = (float)(i*1.0);
 
        dset5[i].a = i;
-       dset5[i].b = i*1.0;
+       dset5[i].b = (float)(i*1.0);
   }
 
   fid = H5Fcreate(FILE9, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -826,7 +826,7 @@ float dset2_1[10], dset2_2[3][5];
   space = H5Screate_simple(1, dims, NULL);
   dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
-       dset2_1[i] = i*0.1+1;
+       dset2_1[i] = (float)(i*0.1+1);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -837,7 +837,7 @@ float dset2_1[10], dset2_2[3][5];
   dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
-            dset2_2[i][j] = (i+1)*j*0.1;
+            dset2_2[i][j] = (float)((i+1)*j*0.1);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -1693,7 +1693,7 @@ static void test_nestcomp(void)
      */
     for (i = 0; i< 10; i++) {
         s1[i].a = i;
-        s1[i].b = i*i;
+        s1[i].b = (float)(i*i);
         s1[i].c = 1./(i+1);
         s1[i].d.a = 65 + i;
         s1[i].d.b[0] = -100.;
@@ -1896,7 +1896,7 @@ static void test_vldatatypes(void)
         wdata[i].len = i + 1;
 
         for (j = 0; j < i + 1; j++)
-            ((float *)wdata[i].p)[j] = i * 10 + ((float)j) / 10.0;
+            ((float *)wdata[i].p)[j] = (float)(i * 10 + ((float)j) / 10.0);
     }
 
     /* write out the floats in little-endian format */
@@ -2029,7 +2029,7 @@ static void test_vldatatypes3(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(i*20)/3.0;
+        wdata[i].f=(float)((i*20)/3.0);
         wdata[i].v.p=malloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)
@@ -2101,7 +2101,7 @@ static void test_vldatatypes4(void)
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
             ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(i*20+j)/3.0;
+            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0);
           } /* end for */
     } /* end for */
 
@@ -2311,7 +2311,7 @@ static void test_array4(void)
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
-            wdata[i][j].f=i*2.5+j;
+            wdata[i][j].f=(float)(i*2.5+j);
         } /* end for */
 
     /* Create file */
@@ -2379,7 +2379,7 @@ static void test_array5(void)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
-                wdata[i][j].f[k]=i*10+j*2.5+k;
+                wdata[i][j].f[k]=(float)(i*10+j*2.5+k);
         } /* end for */
 
     /* Create file */

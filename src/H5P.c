@@ -1452,7 +1452,7 @@ herr_t
 H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 {
     int			idx;
-    size_t		total, tmp;
+    hsize_t		total, tmp;
     H5O_efl_t           efl;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;      /* return value */
@@ -1484,8 +1484,8 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
             tmp = total + efl.slot[idx].size;
             if (tmp <= total)
                 HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "total external data size overflowed");
-        }
-    }
+        } /* end for */
+    } /* end if */
     
 
     /* Add to the list */

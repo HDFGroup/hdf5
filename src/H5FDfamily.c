@@ -863,6 +863,9 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     int			i;
     haddr_t		sub;
     size_t		req;
+#ifndef NDEBUG
+    hsize_t             tempreq;
+#endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5FD_family_read, FAIL);
@@ -883,9 +886,18 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 
     /* Read from each member */
     while (size>0) {
-        i = addr / file->memb_size;
+        H5_ASSIGN_OVERFLOW(i,addr /file->memb_size,hsize_t,int);
+
         sub = addr % file->memb_size;
-        req = MIN(size, file->memb_size-sub);
+
+#ifndef NDEBUG
+        tempreq = file->memb_size-sub;
+        H5_CHECK_OVERFLOW(tempreq,hsize_t,size_t);
+        req = MIN(size, (size_t)tempreq);
+#else /* NDEBUG */
+        req = MIN(size, (size_t)(file->memb_size-sub));
+#endif /* NDEBUG */
+
         assert(i<file->nmembs);
 
         if (H5FDread(file->memb[i], type, memb_dxpl_id, sub, req, buf)<0)
@@ -929,6 +941,9 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     int			i;
     haddr_t		sub;
     size_t		req;
+#ifndef NDEBUG
+    hsize_t             tempreq;
+#endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER(H5FD_family_write, FAIL);
@@ -949,9 +964,18 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 
     /* Write to each member */
     while (size>0) {
-        i = addr / file->memb_size;
+        H5_ASSIGN_OVERFLOW(i,addr /file->memb_size,hsize_t,int);
+
         sub = addr % file->memb_size;
-        req = MIN(size, file->memb_size-sub);
+
+#ifndef NDEBUG
+        tempreq = file->memb_size-sub;
+        H5_CHECK_OVERFLOW(tempreq,hsize_t,size_t);
+        req = MIN(size, (size_t)tempreq);
+#else /* NDEBUG */
+        req = MIN(size, (size_t)(file->memb_size-sub));
+#endif /* NDEBUG */
+
         assert(i<file->nmembs);
 
         if (H5FDwrite(file->memb[i], type, memb_dxpl_id, sub, req, buf)<0)

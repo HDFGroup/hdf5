@@ -348,7 +348,7 @@ test_select_point(hid_t xfer_plist)
         VERIFY(temp_coord1[i][2],coord1[i][2],"H5Sget_select_elem_pointlist");
     } /* end for */
 
-    ret = H5Sget_select_npoints(sid1);
+    ret = (int)H5Sget_select_npoints(sid1);
     VERIFY(ret, 10, "H5Sget_select_npoints");
 
     /* Append another sequence of ten points to disk dataset */
@@ -373,7 +373,7 @@ test_select_point(hid_t xfer_plist)
         VERIFY(temp_coord1[i][2],coord1[i][2],"H5Sget_select_elem_pointlist");
     } /* end for */
 
-    ret = H5Sget_select_npoints(sid1);
+    ret = (int)H5Sget_select_npoints(sid1);
     VERIFY(ret, 20, "H5Sget_select_npoints");
 
     /* Select sequence of ten points for memory dataset */
@@ -402,7 +402,7 @@ test_select_point(hid_t xfer_plist)
     /*  the next list of points to the beginning of the point selection list) */
     HDmemcpy(((char *)pi.coord)+sizeof(coord2),coord2,sizeof(coord2));
 
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_npoints");
 
     /* Append another sequence of ten points to memory dataset */
@@ -426,7 +426,7 @@ test_select_point(hid_t xfer_plist)
         VERIFY(temp_coord2[i][1],coord2[i][1],"H5Sget_select_elem_pointlist");
     } /* end for */
 
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 20, "H5Sget_select_npoints");
 
     /* Save points for later iteration */
@@ -468,7 +468,7 @@ test_select_point(hid_t xfer_plist)
         VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");
     } /* end for */
 
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_npoints");
 
     /* Append another sequence of ten points to disk dataset */
@@ -491,8 +491,7 @@ test_select_point(hid_t xfer_plist)
         VERIFY(temp_coord3[i][0],coord3[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");
     } /* end for */
-
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 20, "H5Sget_select_npoints");
 
     /* Read selection from disk */

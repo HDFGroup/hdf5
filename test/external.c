@@ -703,7 +703,7 @@ test_3 (hid_t fapl)
     hid_t	dset=-1;		/*dataset			*/
     unsigned	i;			/*miscellaneous counters	*/
     int		fd;			/*external file descriptor	*/
-    int		part[25], whole[100];	/*raw data buffers		*/
+    int	    part[25],whole[100];	/*raw data buffers		*/
     hsize_t	cur_size=100;		/*current data space size	*/
     hsize_t	max_size=200;		/*maximum data space size	*/
     hssize_t	hs_start=100;		/*hyperslab starting offset	*/

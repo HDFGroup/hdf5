@@ -379,6 +379,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
+    assert(hdr_size<=sizeof(buf));
     if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, H5P_DATASET_XFER_DEFAULT, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");

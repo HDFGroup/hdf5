@@ -1252,6 +1252,7 @@ list_attr (hid_t obj, const char *attr_name, void * UNUSED op_data)
     hsize_t	size[64], nelmts=1;
     int		ndims, i, n;
     size_t	need;
+	hsize_t temp_need;
     void	*buf;
     h5dump_t	info;
 
@@ -1314,7 +1315,10 @@ list_attr (hid_t obj, const char *attr_name, void * UNUSED op_data)
 	    p_type = h5tools_fixtype(type);
 	}
 	if (p_type>=0) {
-	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+		temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+		assert(temp_need==(hsize_t)((size_t)temp_need));
+		need = (size_t)temp_need;
+	    /*need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));*/
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {

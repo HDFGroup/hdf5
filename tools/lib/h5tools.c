@@ -649,7 +649,8 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-    ctx.size_last_dim = total_size[ctx.ndims - 1];
+	assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));
+    ctx.size_last_dim = (int)(total_size[ctx.ndims - 1]);
 
     count = sset->count[ctx.ndims - 1];
     sset->count[ctx.ndims - 1] = 1;
@@ -819,7 +820,10 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-    ctx.size_last_dim = total_size[ctx.ndims - 1];
+    /* printf("total_size[ctx.ndims-1]%d\n",total_size[ctx.ndims-1]);
+     printf("total_size cast %d\n",(int)(total_size[ctx.ndims-1])); */
+	/*assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));*/
+    ctx.size_last_dim = (total_size[ctx.ndims - 1]);
 
     /* calculate the number of elements we're going to print */
     p_nelmts = 1;
@@ -975,8 +979,8 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
  
     if (nelmts == 0)
         return SUCCEED; /*nothing to print*/
-
-    ctx.size_last_dim = ctx.p_max_idx[ctx.ndims - 1];
+    assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
+    ctx.size_last_dim = (int)(ctx.p_max_idx[ctx.ndims - 1]);
 
     /* Print it */
     h5tools_dump_simple_data(stream, info, obj_id, &ctx,

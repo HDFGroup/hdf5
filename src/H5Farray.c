@@ -142,7 +142,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	file_start;			/*byte offset to start	*/
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
-    size_t	nelmts, z;			/*number of elements	*/
+    hsize_t	nelmts, z;			/*number of elements	*/
     unsigned	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     int	j;				    /*counters		*/
@@ -153,7 +153,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
 #ifdef COALESCE_READS
-    unsigned gather_reads;                         /* # of MPIO reads to gather */
+    hsize_t gather_reads;                         /* # of MPIO reads to gather */
 #endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
@@ -242,8 +242,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
              * and memory. Optimize the strides to result in the fewest number of
              * I/O requests.
              */
-            mem_start = H5V_hyper_stride(ndims, hslab_size, mem_size,
-                             mem_offset, mem_stride/*out*/);
+            H5_ASSIGN_OVERFLOW(mem_start,H5V_hyper_stride(ndims, hslab_size, mem_size, mem_offset, mem_stride/*out*/),hsize_t,size_t);
             file_start = H5V_hyper_stride(ndims, hslab_size, layout->dim,
                               file_offset, file_stride/*out*/);
             H5V_stride_optimize2(&ndims, &elmt_size, hslab_size,
@@ -311,7 +310,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 /* Track the number of reads to gather */
                 if(H5P_set(plist, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
                     HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
-
 #else
             for (z=0; z<nelmts; z++) {
 #endif
@@ -433,7 +431,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	file_start;			/*byte offset to start	*/
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
-    size_t	nelmts, z;			/*number of elements	*/
+    hsize_t	nelmts, z;			/*number of elements	*/
     unsigned	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     int	j;				    /*counters		*/
@@ -548,6 +546,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
              */
             H5V_vector_cpy(ndims, idx, hslab_size);
             nelmts = H5V_vector_reduce_product(ndims, hslab_size);
+            
             if (efl && efl->nused>0) {
                 addr = 0;
             } else {

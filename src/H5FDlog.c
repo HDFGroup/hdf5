@@ -749,7 +749,7 @@ printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
     /* Retain the (first) flavor of the information written to the file */
     if(file->fa.verbosity>=0) {
         assert(addr<file->iosize);
-        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+        H5_CHECK_OVERFLOW(size,hsize_t,size_t);
         HDmemset(&file->flavor[addr],type,(size_t)size);
 
         if(file->fa.verbosity>1)

@@ -254,7 +254,7 @@ test_vltypes_vlen_compound(void)
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
             ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(i*20+j)/3.0;
+            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0);
           } /* end for */
     } /* end for */
 
@@ -401,7 +401,7 @@ test_vltypes_compound_vlen_atomic(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(i*20)/3.0;
+        wdata[i].f=(float)((i*20)/3.0);
         wdata[i].v.p=malloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)

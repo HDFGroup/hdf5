@@ -477,6 +477,8 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     H5T_t	*dst = NULL;
 #ifdef NO_DUFFS_DEVICE
     hsize_t	i;
+#else /* NO_DUFFS_DEVICE */
+    size_t duff_count;
 #endif /* NO_DUFFS_DEVICE */
     size_t	j, md;
 
@@ -541,538 +543,532 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
         buf_stride = buf_stride ? buf_stride : src->size;
 
         /* Optimize for popular sizes */
-        if(nelmts>0) {
-            switch(md) {
-                case 1:     /* Swap 2-byte objects */
+        switch(md) {
+            case 1:     /* Swap 2-byte objects */
 #ifdef NO_DUFFS_DEVICE
-                    for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                        /* Swap the byte pair */
-                        tmp = buf[0];
-                        buf[0] = buf[1];
-                        buf[1] = tmp;
-                    }
+                for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                    /* Swap the byte pair */
+                    tmp = buf[0];
+                    buf[0] = buf[1];
+                    buf[1] = tmp;
+                }
 #else /* NO_DUFFS_DEVICE */
-    {
-        size_t duff_count = (nelmts + 7) / 8;
+                H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
+                duff_count = ((size_t)nelmts + 7) / 8;
 
-                  switch ((long)(nelmts % 8))
-                    {
-                        case 0:
-                            do
-                              {
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 7:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 6:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 5:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 4:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 3:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 2:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                        case 1:
-                                /* Swap the byte pair */
-                                tmp = buf[0];
-                                buf[0] = buf[1];
-                                buf[1] = tmp;
-                                buf+=buf_stride;
-                              }
-                            while (--duff_count > 0);
-                    }
-    }
+                switch ((size_t)(nelmts % 8))
+                  {
+                    case 0:
+                        do
+                          {
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 7:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 6:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 5:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 4:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 3:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 2:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                    case 1:
+                            /* Swap the byte pair */
+                            tmp = buf[0];
+                            buf[0] = buf[1];
+                            buf[1] = tmp;
+                            buf+=buf_stride;
+                          }
+                        while (--duff_count > 0);
+                }
 #endif /* NO_DUFFS_DEVICE */
-                    break;
+                break;
 
-                case 2:     /* Swap 4-byte objects */
+            case 2:     /* Swap 4-byte objects */
 #ifdef NO_DUFFS_DEVICE
-                    for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                        /* Swap the outer pair of bytes */
-                        tmp = buf[0];
-                        buf[0] = buf[3];
-                        buf[3] = tmp;
+                for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                    /* Swap the outer pair of bytes */
+                    tmp = buf[0];
+                    buf[0] = buf[3];
+                    buf[3] = tmp;
 
-                        /* Swap the inner pair of bytes */
-                        tmp = buf[1];
-                        buf[1] = buf[2];
-                        buf[2] = tmp;
-                    }
+                    /* Swap the inner pair of bytes */
+                    tmp = buf[1];
+                    buf[1] = buf[2];
+                    buf[2] = tmp;
+                }
 #else /* NO_DUFFS_DEVICE */
-    {
-        size_t duff_count = (nelmts + 7) / 8;
+                H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
+                duff_count = ((size_t)nelmts + 7) / 8;
 
-                  switch ((long)(nelmts % 8))
-                    {
-                        case 0:
-                            do
-                              {
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                switch ((size_t)(nelmts % 8))
+                  {
+                    case 0:
+                        do
+                          {
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 7:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 7:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 6:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 6:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 5:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 5:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 4:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 4:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 3:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 3:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 2:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 2:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 1:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[3];
-                                buf[3] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 1:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[3];
+                            buf[3] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[2];
-                                buf[2] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[2];
+                            buf[2] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                              }
-                            while (--duff_count > 0);
-                    }
-    }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                          }
+                        while (--duff_count > 0);
+                }
 #endif /* NO_DUFFS_DEVICE */
-                    break;
+                break;
 
-                case 4:     /* Swap 8-byte objects */
+            case 4:     /* Swap 8-byte objects */
 #ifdef NO_DUFFS_DEVICE
-                    for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                        /* Swap the outer pair of bytes */
-                        tmp = buf[0];
-                        buf[0] = buf[7];
-                        buf[7] = tmp;
+                for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                    /* Swap the outer pair of bytes */
+                    tmp = buf[0];
+                    buf[0] = buf[7];
+                    buf[7] = tmp;
 
-                        /* Swap the next-outer pair of bytes */
-                        tmp = buf[1];
-                        buf[1] = buf[6];
-                        buf[6] = tmp;
+                    /* Swap the next-outer pair of bytes */
+                    tmp = buf[1];
+                    buf[1] = buf[6];
+                    buf[6] = tmp;
 
-                        /* Swap the next-next-outer pair of bytes */
-                        tmp = buf[2];
-                        buf[2] = buf[5];
-                        buf[5] = tmp;
+                    /* Swap the next-next-outer pair of bytes */
+                    tmp = buf[2];
+                    buf[2] = buf[5];
+                    buf[5] = tmp;
 
-                        /* Swap the inner pair of bytes */
-                        tmp = buf[3];
-                        buf[3] = buf[4];
-                        buf[4] = tmp;
-                    }
+                    /* Swap the inner pair of bytes */
+                    tmp = buf[3];
+                    buf[3] = buf[4];
+                    buf[4] = tmp;
+                }
 #else /* NO_DUFFS_DEVICE */
-    {
-        size_t duff_count = (nelmts + 7) / 8;
+                H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
+                duff_count = ((size_t)nelmts + 7) / 8;
 
-                  switch ((long)(nelmts % 8))
-                    {
-                        case 0:
-                            do
-                              {
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                switch ((size_t)(nelmts % 8))
+                  {
+                    case 0:
+                        do
+                          {
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 7:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 7:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 6:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 6:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 5:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 5:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 4:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 4:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 3:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 3:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 2:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 2:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 1:
-                                /* Swap the outer pair of bytes */
-                                tmp = buf[0];
-                                buf[0] = buf[7];
-                                buf[7] = tmp;
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 1:
+                            /* Swap the outer pair of bytes */
+                            tmp = buf[0];
+                            buf[0] = buf[7];
+                            buf[7] = tmp;
 
-                                /* Swap the next-outer pair of bytes */
-                                tmp = buf[1];
-                                buf[1] = buf[6];
-                                buf[6] = tmp;
+                            /* Swap the next-outer pair of bytes */
+                            tmp = buf[1];
+                            buf[1] = buf[6];
+                            buf[6] = tmp;
 
-                                /* Swap the next-next-outer pair of bytes */
-                                tmp = buf[2];
-                                buf[2] = buf[5];
-                                buf[5] = tmp;
+                            /* Swap the next-next-outer pair of bytes */
+                            tmp = buf[2];
+                            buf[2] = buf[5];
+                            buf[5] = tmp;
 
-                                /* Swap the inner pair of bytes */
-                                tmp = buf[3];
-                                buf[3] = buf[4];
-                                buf[4] = tmp;
+                            /* Swap the inner pair of bytes */
+                            tmp = buf[3];
+                            buf[3] = buf[4];
+                            buf[4] = tmp;
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                              }
-                            while (--duff_count > 0);
-                    }
-    }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                          }
+                        while (--duff_count > 0);
+                }
 #endif /* NO_DUFFS_DEVICE */
-                    break;
+                break;
 
-                default:    /* Swap n-byte objects */
+            default:    /* Swap n-byte objects */
 #ifdef NO_DUFFS_DEVICE
-                    for (i=0; i<nelmts; i++, buf+=buf_stride) {
-                        for (j=0; j<md; j++) {
-                            tmp = buf[j];
-                            buf[j] = buf[src->size-(j+1)];
-                            buf[src->size-(j+1)] = tmp;
-                        }
+                for (i=0; i<nelmts; i++, buf+=buf_stride) {
+                    for (j=0; j<md; j++) {
+                        tmp = buf[j];
+                        buf[j] = buf[src->size-(j+1)];
+                        buf[src->size-(j+1)] = tmp;
                     }
+                }
 #else /* NO_DUFFS_DEVICE */
-    {
-        size_t duff_count = (nelmts + 7) / 8;
+                H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
+                duff_count = ((size_t)nelmts + 7) / 8;
 
-                  switch ((long)(nelmts % 8))
-                    {
-                        case 0:
-                            do
-                              {
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                switch ((size_t)(nelmts % 8))
+                  {
+                    case 0:
+                        do
+                          {
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 7:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 7:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 6:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 6:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 5:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 5:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 4:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 4:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 3:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 3:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 2:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 2:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                        case 1:
-                                /* Generic byte-swapping loop */
-                                for (j=0; j<md; j++) {
-                                    tmp = buf[j];
-                                    buf[j] = buf[src->size-(j+1)];
-                                    buf[src->size-(j+1)] = tmp;
-                                }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                    case 1:
+                            /* Generic byte-swapping loop */
+                            for (j=0; j<md; j++) {
+                                tmp = buf[j];
+                                buf[j] = buf[src->size-(j+1)];
+                                buf[src->size-(j+1)] = tmp;
+                            }
 
-                                /* Advance the pointer */
-                                buf+=buf_stride;
-                              }
-                            while (--duff_count > 0);
-                    }
-    }
+                            /* Advance the pointer */
+                            buf+=buf_stride;
+                          }
+                        while (--duff_count > 0);
+                }
 #endif /* NO_DUFFS_DEVICE */
-                    break;
-            } /* end switch */
-        } /* end if */
+                break;
+        } /* end switch */
 	break;
 
     case H5T_CONV_FREE:
@@ -1607,8 +1603,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    src_delta = src->size;
         bkg_stride = dst->size;
 	} else {
-	    src_delta = -(src->size);
-        bkg_stride = -(dst->size);
+	    src_delta = -(int)src->size; /*overflow shouldn't be possible*/
+            bkg_stride = -(int)dst->size; /*overflow shouldn't be possible*/
 	    xbuf += (nelmts-1) * src->size;
 	    xbkg += (nelmts-1) * dst->size;
 	}
@@ -2469,8 +2465,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 /* Get length of sequences in bytes */
                 seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
                 assert(seq_len>=0);
-                src_size=seq_len*src_base_size;
-                dst_size=seq_len*dst_base_size;
+                H5_CHECK_OVERFLOW(seq_len,hssize_t,size_t);
+                src_size=(size_t)seq_len*src_base_size;
+                dst_size=(size_t)seq_len*dst_base_size;
 
                 /* Check if conversion buffer is large enough, resize if
                  * necessary */      
@@ -3301,7 +3298,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		 * accomodate that value.  The mantissa of course is no
 		 * longer normalized.
 		 */
-		mrsh += 1-expo;
+                H5_ASSIGN_OVERFLOW(mrsh,(mrsh+1-expo),hssize_t,size_t);
+		/*mrsh += 1-expo;*/
 		expo = 0;
 		
 	    } else if (expo>=expo_max) {

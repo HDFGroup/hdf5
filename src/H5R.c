@@ -200,11 +200,9 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
             buf_size+=sizeof(haddr_t);
 
             /* Allocate the space to store the serialized information */
-            assert(buf_size==(hssize_t)((size_t)buf_size)); /*check for overflow*/
-            if (NULL==(buf = H5MM_malloc((size_t)buf_size))) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                       "memory allocation failed");
-            }
+            H5_CHECK_OVERFLOW(buf_size,hssize_t,size_t);
+            if (NULL==(buf = H5MM_malloc((size_t)buf_size)))
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Serialize information for dataset OID */
             p=(uint8_t *)buf;
@@ -213,14 +211,12 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
 
             /* Serialize the selection */
             if (H5S_select_serialize(space,p) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL,
-                  "Unable to serialize selection");
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Unable to serialize selection");
 
             /* Save the serialized buffer for later */
-            assert(buf_size==(hssize_t)((size_t)buf_size)); /*check for overflow*/
+            H5_CHECK_OVERFLOW(buf_size,hssize_t,size_t);
             if(H5HG_insert(loc->file,(size_t)buf_size,buf,&hobjid)<0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL,
-                  "Unable to serialize selection");
+                HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL, "Unable to serialize selection");
 
             /* Serialize the heap ID and index for storage in the file */
             p=(uint8_t *)ref->heapid;

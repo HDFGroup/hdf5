@@ -449,8 +449,7 @@ printf("%s: Called!\n",FUNC);
     ispan=iter->hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    assert(nelem==(hsize_t)((size_t)(nelem))); /*check for overflow*/
-    io_bytes_left=nelem*elmt_size;
+    H5_ASSIGN_OVERFLOW(io_bytes_left,(nelem*elmt_size),hsize_t,size_t);
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elmt_size; i>=0; i--) {
@@ -484,7 +483,7 @@ printf("%s: Called!\n",FUNC);
         /* Finish the span in the fastest changing dimension */
 
         /* Compute the number of bytes to attempt in this span */
-        span_size=((curr_span->high-abs_arr[fast_dim])+1)*elmt_size;
+        H5_ASSIGN_OVERFLOW(span_size,((curr_span->high-abs_arr[fast_dim])+1)*elmt_size,hsize_t,size_t);
 
         /* Check number of bytes against upper bounds allowed */
         if(span_size>io_bytes_left)
@@ -632,8 +631,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
             loc_off+=curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            assert(curr_span->nelem==(hsize_t)((size_t)(curr_span->nelem))); /*check for overflow*/
-            span_size=curr_span->nelem;
+            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
 
             /* Check number of elements against upper bounds allowed */
             if(span_size>=io_bytes_left) {
@@ -868,9 +866,9 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
         fast_dim_offset;
     hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
         fast_dim_block,
-        fast_dim_count,
         fast_dim_buf_off;
-    hsize_t tot_blk_count;      /* Total number of blocks left to output */
+    size_t fast_dim_count;
+    size_t tot_blk_count;      /* Total number of blocks left to output */
     size_t act_blk_count;      /* Actual number of blocks to output */
     int fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     int temp_dim;  /* Temporary rank holder */
@@ -931,8 +929,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     } /* end for */
 
     /* Set the number of elements left for I/O */
-    assert(nelmts==(hsize_t)((size_t)nelmts)); /*check for overflow*/
-    io_left=(size_t)nelmts;
+    H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
 #ifdef QAK
     printf("%s: fast_dim=%d\n",FUNC,(int)fast_dim);
@@ -954,7 +951,7 @@ printf("%s: Check 1.0\n",FUNC);
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't read too many */
-        actual_read=MIN(leftover,nelmts);
+        actual_read=MIN(leftover,io_left);
         actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
@@ -1042,7 +1039,7 @@ for(i=0; i<ndims; i++) {
             buf_off+=offset[i]*slab[i];
 
         /* Set the number of elements to read each time */
-        actual_read=file_space->select.sel_info.hslab.diminfo[fast_dim].block;
+        H5_ASSIGN_OVERFLOW(actual_read,file_space->select.sel_info.hslab.diminfo[fast_dim].block,hsize_t,size_t);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_read*elmt_size;
@@ -1087,7 +1084,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Read in data until an entire sequence can't be read in any longer */
         while(io_left>0) {
             /* Reset copy of number of blocks in fastest dimension */
-            fast_dim_count=tdiminfo[fast_dim].count-tmp_count[fast_dim];
+            H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count-tmp_count[fast_dim],hsize_t,size_t);
 
             /* Check if this entire row will fit into buffer */
             if(fast_dim_count<=tot_blk_count) {
@@ -1551,8 +1548,7 @@ printf("%s: Called!\n",FUNC);
     ispan=iter->hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    assert(nelem==(hsize_t)((size_t)(nelem))); /*check for overflow*/
-    io_bytes_left=nelem*elmt_size;
+    H5_ASSIGN_OVERFLOW(io_bytes_left,(nelem*elmt_size),hsize_t,size_t);
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elmt_size; i>=0; i--) {
@@ -1586,7 +1582,7 @@ printf("%s: Called!\n",FUNC);
         /* Finish the span in the fastest changing dimension */
 
         /* Compute the number of bytes to attempt in this span */
-        span_size=((curr_span->high-abs_arr[fast_dim])+1)*elmt_size;
+        H5_ASSIGN_OVERFLOW(span_size,((curr_span->high-abs_arr[fast_dim])+1)*elmt_size,hsize_t,size_t);
 
         /* Check number of bytes against upper bounds allowed */
         if(span_size>io_bytes_left)
@@ -1734,8 +1730,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
             loc_off+=curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            assert(curr_span->nelem==(hsize_t)((size_t)(curr_span->nelem))); /*check for overflow*/
-            span_size=curr_span->nelem;
+            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
 
             /* Check number of elements against upper bounds allowed */
             if(span_size>=io_bytes_left) {
@@ -1970,9 +1965,9 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
         fast_dim_offset;
     hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
         fast_dim_block,
-        fast_dim_count,
         fast_dim_buf_off;
-    hsize_t tot_blk_count;      /* Total number of blocks left to output */
+    size_t fast_dim_count;
+    size_t tot_blk_count;      /* Total number of blocks left to output */
     size_t act_blk_count;      /* Actual number of blocks to output */
     int fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     int temp_dim;  /* Temporary rank holder */
@@ -2033,8 +2028,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     } /* end for */
 
     /* Set the number of elements left for I/O */
-    assert(nelmts==(hsize_t)((size_t)nelmts)); /*check for overflow*/
-    io_left=(size_t)nelmts;
+    H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
 #ifdef QAK
     printf("%s: fast_dim=%d\n",FUNC,(int)fast_dim);
@@ -2056,7 +2050,7 @@ printf("%s: Check 1.0\n",FUNC);
             leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
-        actual_write=MIN(leftover,nelmts);
+        actual_write=MIN(leftover,io_left);
         actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
@@ -2144,7 +2138,7 @@ for(i=0; i<ndims; i++) {
             buf_off+=offset[i]*slab[i];
 
         /* Set the number of elements to write each time */
-        actual_write=file_space->select.sel_info.hslab.diminfo[fast_dim].block;
+        H5_ASSIGN_OVERFLOW(actual_write,file_space->select.sel_info.hslab.diminfo[fast_dim].block,hsize_t,size_t);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_write*elmt_size;
@@ -2189,7 +2183,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Write out data until an entire sequence can't be written any longer */
         while(io_left>0) {
             /* Reset copy of number of blocks in fastest dimension */
-            fast_dim_count=tdiminfo[fast_dim].count-tmp_count[fast_dim];
+            H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count-tmp_count[fast_dim],hsize_t,size_t);
 
             /* Check if this entire row will fit into buffer */
             if(fast_dim_count<=tot_blk_count) {
@@ -2634,8 +2628,7 @@ printf("%s: Called!\n",FUNC);
     ispan=iter->hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    assert(nelem==(hsize_t)((size_t)(nelem))); /*check for overflow*/
-    io_bytes_left=nelem*elmt_size;
+    H5_ASSIGN_OVERFLOW(io_bytes_left,nelem*elmt_size,hsize_t,size_t);
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elmt_size; i>=0; i--) {
@@ -2657,13 +2650,13 @@ printf("%s: Called!\n",FUNC);
         /* Finish the span in the fastest changing dimension */
 
         /* Compute the number of bytes to attempt in this span */
-        span_size=((curr_span->high-abs_arr[fast_dim])+1)*elmt_size;
+        H5_ASSIGN_OVERFLOW(span_size,((curr_span->high-abs_arr[fast_dim])+1)*elmt_size,hsize_t,size_t);
 
         /* Check number of elements against upper bounds allowed */
         if(span_size>io_bytes_left)
             span_size=io_bytes_left;
 
-        HDmemcpy(dst,tmp_src,(size_t)span_size);
+        HDmemcpy(dst,tmp_src,span_size);
 
         /* Increment offset in destination */
         dst+=span_size;
@@ -2800,8 +2793,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
             tmp_src+=curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            assert(curr_span->nelem==(hsize_t)((size_t)(curr_span->nelem))); /*check for overflow*/
-            span_size=curr_span->nelem;
+            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
 
             /* Check number of elements against upper bounds allowed */
             if(span_size>=io_bytes_left) {
@@ -2811,7 +2803,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
 /* COMMON */
                 /* "Read" the data from the source buffer */
-                HDmemcpy(dst,tmp_src,(size_t)span_size);
+                HDmemcpy(dst,tmp_src,span_size);
 
                 /* Increment offset in destination */
                 dst+=span_size;
@@ -2826,7 +2818,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
 /* COMMON */
                 /* "Read" the data from the source buffer */
-                HDmemcpy(dst,tmp_src,(size_t)span_size);
+                HDmemcpy(dst,tmp_src,span_size);
 
                 /* Increment offset in destination */
                 dst+=span_size;
@@ -2983,10 +2975,10 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
         fast_dim_offset;
     hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
-        fast_dim_block,
-        fast_dim_count;
-    hsize_t tot_blk_count;              /* Total number of blocks left to output */
-    size_t act_blk_count;              /* Actual number of blocks to output */
+        fast_dim_block;
+    size_t fast_dim_count;
+    size_t tot_blk_count;               /* Total number of blocks left to output */
+    size_t act_blk_count;               /* Actual number of blocks to output */
     size_t fast_dim_buf_off;            /* Local copy of amount to move fastest dimension buffer offset */
     int fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     int temp_dim;  /* Temporary rank holder */
@@ -2998,7 +2990,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     size_t actual_bytes;    /* The actual number of bytes to copy */
     size_t io_left;         /* The number of elements left in I/O operation */
 #ifndef NO_DUFFS_DEVICE
-    hsize_t duffs_index;    /* Counting index for Duff's device */
+    size_t duffs_index;     /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER (H5S_hyper_mread_opt, 0);
@@ -3036,13 +3028,12 @@ for(i=0; i<ndims; i++)
 #endif /* QAK */
 
     /* Set the number of elements left for I/O */
-    assert(nelmts==(hsize_t)((size_t)nelmts)); /*check for overflow*/
-    io_left=(size_t)nelmts;
+    H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-        ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
-        unsigned leftover;  /* The number of elements left over from the last sequence */
+            ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+        size_t leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
@@ -3054,7 +3045,7 @@ printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
             leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
-        actual_read=MIN(leftover,nelmts);
+        actual_read=MIN(leftover,io_left);
         actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
@@ -3122,7 +3113,7 @@ printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
             src+=offset[i]*slab[i];
 
         /* Set the number of elements to write each time */
-        actual_read=mem_space->select.sel_info.hslab.diminfo[fast_dim].block;
+        H5_ASSIGN_OVERFLOW(actual_read,mem_space->select.sel_info.hslab.diminfo[fast_dim].block,hsize_t,size_t);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_read*elmt_size;
@@ -3147,7 +3138,7 @@ for(i=0; i<ndims; i++)
         fast_dim_start=tdiminfo[fast_dim].start;
         fast_dim_stride=tdiminfo[fast_dim].stride;
         fast_dim_block=tdiminfo[fast_dim].block;
-        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        H5_ASSIGN_OVERFLOW(fast_dim_buf_off,(slab[fast_dim]*fast_dim_stride),hsize_t,size_t);
         fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
@@ -3164,7 +3155,7 @@ for(i=0; i<ndims; i++)
         /* Read in data until an entire sequence can't be written out any longer */
         while(io_left>0) {
             /* Reset copy of number of blocks in fastest dimension */
-            fast_dim_count=tdiminfo[fast_dim].count-tmp_count[fast_dim];
+            H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count-tmp_count[fast_dim],hsize_t,size_t);
 
             /* Check if this entire row will fit into buffer */
             if(fast_dim_count<=tot_blk_count) {
@@ -3193,7 +3184,7 @@ for(i=0; i<ndims; i++)
                  * order to make the system compuiler happy.  It can be
                  * removed when we are no longer supporting that platform. -QAK
                  */
-                switch (((size_t)fast_dim_count) % 8) {
+                switch (fast_dim_count % 8) {
                     case 0:
                         do
                           {
@@ -3510,8 +3501,7 @@ printf("%s: Called!\n",FUNC);
     ispan=iter->hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    assert(nelem==(hsize_t)((size_t)(nelem))); /*check for overflow*/
-    io_bytes_left=nelem*elmt_size;
+    H5_ASSIGN_OVERFLOW(io_bytes_left,nelem*elmt_size,hsize_t,size_t);
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elmt_size; i>=0; i--) {
@@ -3533,13 +3523,13 @@ printf("%s: Called!\n",FUNC);
         /* Finish the span in the fastest changing dimension */
 
         /* Compute the number of bytes to attempt in this span */
-        span_size=((curr_span->high-abs_arr[fast_dim])+1)*elmt_size;
+        H5_ASSIGN_OVERFLOW(span_size,((curr_span->high-abs_arr[fast_dim])+1)*elmt_size,hsize_t,size_t);
 
         /* Check number of elements against upper bounds allowed */
         if(span_size>io_bytes_left)
             span_size=io_bytes_left;
 
-        HDmemcpy(tmp_dst,src,(size_t)span_size);
+        HDmemcpy(tmp_dst,src,span_size);
 
         /* Increment offset in destination */
         src+=span_size;
@@ -3676,8 +3666,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
             tmp_dst+=(size_t)curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            assert(curr_span->nelem==(hsize_t)((size_t)(curr_span->nelem))); /*check for overflow*/
-            span_size=curr_span->nelem;
+            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
 
             /* Check number of elements against upper bounds allowed */
             if(span_size>=io_bytes_left) {
@@ -3687,7 +3676,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
 /* COMMON */
                 /* "Write" the data into the destination buffer */
-                HDmemcpy(tmp_dst,src,(size_t)span_size);
+                HDmemcpy(tmp_dst,src,span_size);
 
                 /* Increment offset in destination */
                 src+=span_size;
@@ -3702,7 +3691,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
 /* COMMON */
                 /* "Write" the data into the destination buffer */
-                HDmemcpy(tmp_dst,src,(size_t)span_size);
+                HDmemcpy(tmp_dst,src,span_size);
 
                 /* Increment offset in destination */
                 src+=span_size;
@@ -3850,7 +3839,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     hsize_t	slab[H5O_LAYOUT_NDIMS];         /* Hyperslab size */
     hssize_t	wrap[H5O_LAYOUT_NDIMS];         /* Bytes to wrap around at the end of a row */
     hsize_t	skip[H5O_LAYOUT_NDIMS];         /* Bytes to skip between blocks */
-    hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset on disk */
+    hssize_t    offset[H5O_LAYOUT_NDIMS];       /* Offset on disk */
     hsize_t	tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary block count */
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     const uint8_t	*src=(const uint8_t *)_tconv_buf;   /* Alias for pointer arithmetic */
@@ -3859,9 +3848,9 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
         fast_dim_offset;
     hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
-        fast_dim_block,
-        fast_dim_count;
-    hsize_t tot_blk_count;              /* Total number of blocks left to output */
+        fast_dim_block;
+    size_t fast_dim_count;
+    size_t tot_blk_count;              /* Total number of blocks left to output */
     size_t act_blk_count;              /* Actual number of blocks to output */
     size_t fast_dim_buf_off;            /* Local copy of amount to move fastest dimension buffer offset */
     int fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
@@ -3874,7 +3863,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     size_t actual_bytes;     /* The actual number of bytes to copy */
     size_t io_left;             /* The number of elements left in I/O operation */
 #ifndef NO_DUFFS_DEVICE
-    hsize_t duffs_index;        /* Counting index for Duff's device */
+    size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER (H5S_hyper_mwrite_opt, 0);
@@ -3912,13 +3901,12 @@ for(i=0; i<ndims; i++)
 #endif /* QAK */
 
     /* Set the number of elements left for I/O */
-    assert(nelmts==(hsize_t)((size_t)nelmts)); /*check for overflow*/
-    io_left=(size_t)nelmts;
+    H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-        ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
-        unsigned leftover;  /* The number of elements left over from the last sequence */
+            ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+        size_t leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
@@ -3930,7 +3918,7 @@ printf("%s: Check 1.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
             leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
-        actual_write=MIN(leftover,nelmts);
+        actual_write=MIN(leftover,io_left);
         actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
@@ -3998,7 +3986,7 @@ printf("%s: Check 2.0, io_left=%lu\n",FUNC,(unsigned long)io_left);
             dst+=offset[i]*slab[i];
 
         /* Set the number of elements to write each time */
-        actual_write=mem_space->select.sel_info.hslab.diminfo[fast_dim].block;
+        H5_ASSIGN_OVERFLOW(actual_write,mem_space->select.sel_info.hslab.diminfo[fast_dim].block,hsize_t,size_t);
 
         /* Set the number of actual bytes */
         actual_bytes=actual_write*elmt_size;
@@ -4023,7 +4011,7 @@ for(i=0; i<ndims; i++)
         fast_dim_start=tdiminfo[fast_dim].start;
         fast_dim_stride=tdiminfo[fast_dim].stride;
         fast_dim_block=tdiminfo[fast_dim].block;
-        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        H5_ASSIGN_OVERFLOW(fast_dim_buf_off,slab[fast_dim]*fast_dim_stride,hsize_t,size_t);
         fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
 
         /* Compute the number of blocks which would fit into the buffer */
@@ -4040,7 +4028,7 @@ for(i=0; i<ndims; i++)
         /* Read in data until an entire sequence can't be written out any longer */
         while(io_left>0) {
             /* Reset copy of number of blocks in fastest dimension */
-            fast_dim_count=tdiminfo[fast_dim].count-tmp_count[fast_dim];
+            H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count-tmp_count[fast_dim],hsize_t,size_t);
 
             /* Check if this entire row will fit into buffer */
             if(fast_dim_count<=tot_blk_count) {
@@ -4069,7 +4057,7 @@ for(i=0; i<ndims; i++)
                  * order to make the system compuiler happy.  It can be
                  * removed when we are no longer supporting that platform. -QAK
                  */
-                switch (((size_t)fast_dim_count) % 8) {
+                switch (fast_dim_count % 8) {
                     case 0:
                         do
                           {
@@ -5901,7 +5889,7 @@ H5S_hyper_select_iterate_helper(H5S_hyper_iter_info_t *iter_info)
     hsize_t loc_off;    /* Element offset in the dataspace */
     int i;             /* Index variable */
     unsigned u;            /* Index variable */
-    hssize_t ret_value=FAIL;
+    herr_t ret_value=FAIL;
 
     FUNC_ENTER (H5S_hyper_select_iterate_helper, FAIL);
 

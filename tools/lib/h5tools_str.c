@@ -786,7 +786,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         }
     } else if (H5Tget_class(type) == H5T_ARRAY) {
         int k, ndims;
-        hsize_t	i, dims[H5S_MAX_RANK];
+        hsize_t	i, dims[H5S_MAX_RANK],temp_nelmts;
 
         /* Get the array's base datatype for each element */
         memb = H5Tget_super(type);
@@ -796,9 +796,12 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* Calculate the number of array elements */
-        for (k = 0, nelmts = 1; k < ndims; k++)
-            nelmts *= dims[k];
-			
+        for (k = 0, nelmts = 1; k < ndims; k++){
+			temp_nelmts = nelmts;
+			temp_nelmts *= dims[k];
+			assert(temp_nelmts==(hsize_t)((size_t)temp_nelmts));
+            nelmts = (size_t)temp_nelmts;
+		}	
         /* Print the opening bracket */
         h5tools_str_append(str, "%s", OPT(info->arr_pre, "["));
 

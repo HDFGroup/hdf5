@@ -106,7 +106,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     /* fill in the return values */
     *new_type = MPI_BYTE;
     H5_CHECK_OVERFLOW(total_bytes, hsize_t, size_t);
-    *count = total_bytes;
+    *count = (size_t)total_bytes;
     *is_derived_type = 0;
 
 #ifdef H5Smpi_DEBUG

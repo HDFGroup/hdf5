@@ -75,7 +75,7 @@ struct attr4_struct {
 
 #define ATTR5_NAME  "Attr5"
 #define ATTR5_RANK	0
-float attr_data5=-5.123;        /* Test data for 5th attribute */
+float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 
 herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
 

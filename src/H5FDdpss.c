@@ -553,7 +553,7 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     H5P_genplist_t *plist;      /* Property list pointer */
     globus_result_t  globus_result;
 #ifdef COALESCE_READS
-    static int count = 0;                 /* counter for single reads */
+    static hsize_t count = 0;                 /* counter for single reads */
 #endif
 
     FUNC_ENTER (H5FD_dpss_read, FAIL);

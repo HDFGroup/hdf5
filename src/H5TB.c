@@ -1154,13 +1154,15 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
     H5TB_NODE  *parent = NULL;
     int        side;
     int        cmp = 1;
+    haddr_t    cmp_addr = 1;
+    H5TB_NODE  *ret_value = NULL;
 
     FUNC_ENTER (H5TB_ffind, NULL);
 
     switch(fast_compare) {
         case H5TB_FAST_HADDR_COMPARE:
             if (ptr) {
-                while (0 != (cmp = (*(haddr_t *)key - *(haddr_t *)ptr->key))) {
+                while (0 != (cmp_addr = (*(haddr_t *)key - *(haddr_t *)ptr->key))) {
                       parent = ptr;
                       side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
@@ -1170,6 +1172,9 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
               } /* end if */
             if (NULL != pp)
                 *pp = parent;
+
+            /* Set return value */
+            ret_value= (0 == cmp_addr) ? ptr : NULL;
             break;
 
         case H5TB_FAST_INTN_COMPARE:
@@ -1184,13 +1189,16 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
               } /* end if */
             if (NULL != pp)
                 *pp = parent;
+
+            /* Set return value */
+            ret_value= (0 == cmp) ? ptr : NULL;
             break;
 
         default:
             break;
     } /* end switch */
 
-    FUNC_LEAVE((0 == cmp) ? ptr : NULL);
+    FUNC_LEAVE(ret_value);
 } /* H5TB_ffind() */
 
 /* swapkid -- Often refered to as "rotating" nodes.  ptr and ptr's `side'

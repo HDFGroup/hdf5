@@ -211,8 +211,8 @@ test_reference_obj(void)
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
-
-    ret=H5Sget_simple_extent_npoints(sid1);
+    
+    ret=(int)H5Sget_simple_extent_npoints(sid1);
     VERIFY(ret, 4, "H5Sget_simple_extent_npoints");
 
     /* Read from disk */
@@ -359,7 +359,7 @@ test_reference_region(void)
     ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 36, "H5Sget_select_npoints");
 
     /* Store first dataset region */
@@ -380,7 +380,7 @@ test_reference_region(void)
     ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_npoints");
 
     /* Store second dataset region */
@@ -431,7 +431,7 @@ test_reference_region(void)
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
 
-    ret=H5Sget_simple_extent_npoints(sid1);
+    ret=(int)H5Sget_simple_extent_npoints(sid1);
     VERIFY(ret, 100, "H5Sget_simple_extent_npoints");
 
     /* Read from disk */
@@ -446,9 +446,9 @@ test_reference_region(void)
     CHECK(sid2, FAIL, "H5Rget_region");
 
     /* Verify correct hyperslab selected */
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 36, "H5Sget_select_npoints");
-    ret = H5Sget_select_hyper_nblocks(sid2);
+    ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
     coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)*2); /* allocate space for the hyperslab blocks */
     ret = H5Sget_select_hyper_blocklist(sid2,(hsize_t)0,(hsize_t)ret,coords);
@@ -474,9 +474,9 @@ test_reference_region(void)
     CHECK(sid2, FAIL, "H5Rget_region");
 
     /* Verify correct elements selected */
-    ret = H5Sget_select_npoints(sid2);
+    ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_npoints");
-    ret = H5Sget_select_elem_npoints(sid2);
+    ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
     coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)); /* allocate space for the element points */
     ret = H5Sget_select_elem_pointlist(sid2,(hsize_t)0,(hsize_t)ret,coords);

@@ -2043,7 +2043,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     /*
      * Encode the driver information block.
      */
-    if ((driver_size=H5FD_sb_size(f->shared->lf))) {
+    H5_ASSIGN_OVERFLOW(driver_size,H5FD_sb_size(f->shared->lf),hsize_t,size_t);
+    if (driver_size>0) {
 	driver_size += 16; /*driver block header */
 	assert(driver_size<=sizeof(dbuf));
 	p = dbuf;

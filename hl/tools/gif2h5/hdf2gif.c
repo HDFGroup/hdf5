@@ -16,7 +16,7 @@
  */
 
 #include <stdio.h>
-
+#include <assert.h>
 #include "gif.h"
 
 #define MAX_FILE_LEN            256
@@ -208,8 +208,10 @@ int main(int argc , char **argv)
             return -1;
         }
 
-        RWidth  = dim_sizes[1];
-        RHeight = dim_sizes[0];
+		assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
+		assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
+        RWidth  = (int)dim_sizes[1];
+        RHeight = (int)dim_sizes[0];
 #ifdef UNUSED
         w = dim_sizes[1];
         h = dim_sizes[0];
