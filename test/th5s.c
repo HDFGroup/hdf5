@@ -464,6 +464,94 @@ test_h5s_compound_scalar_read(void)
     CHECK(ret, FAIL, "H5Fclose");
 }				/* test_h5s_compound_scalar_read() */
 
+/* Data arrays for chunk test */
+double  chunk_data_dbl[50000][3];
+float  chunk_data_flt[50000][3];
+
+/****************************************************************
+**
+**  test_h5s_chunk(): Exercise chunked I/O, testing when data conversion
+**      is necessary and the entire chunk read in doesn't fit into the
+**      conversion buffer
+** 
+****************************************************************/
+static void 
+test_h5s_chunk(void)
+{
+    herr_t status;
+    hid_t fileID, dsetID;
+    hid_t plist_id;
+    hid_t space_id;
+    hsize_t dims[2];
+    hsize_t csize[2];
+    int i,j;
+
+    fileID = H5Fcreate(FILE,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+    CHECK(fileID, FAIL, "H5Fcreate");
+
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(plist_id, FAIL, "H5Pcreate");
+
+    csize[0] = 50000;
+    csize[1] = 3;
+    status = H5Pset_chunk(plist_id, 2, csize);
+    CHECK(status, FAIL, "H5Pset_chunk");
+
+    /* Create the data space */
+    dims[0] = 50000;
+    dims[1] = 3;
+    space_id = H5Screate_simple(2, dims, NULL);
+    CHECK(space_id, FAIL, "H5Screate_simple");
+
+    dsetID = H5Dcreate(fileID,"coords",H5T_NATIVE_FLOAT,space_id,plist_id);
+    CHECK(dsetID, FAIL, "H5Dcreate");
+
+    /* Initialize float array */
+    for(i=0; i<50000; i++)
+        for(j=0; j<3; j++)
+            chunk_data_flt[i][j]=i*2.5-j*100.3;
+
+    status= H5Dwrite(dsetID,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_flt);
+    CHECK(status, FAIL, "H5Dwrite");
+
+    status=H5Pclose(plist_id);
+    CHECK(status, FAIL, "H5Pclose");
+    status=H5Sclose(space_id);
+    CHECK(status, FAIL, "H5Sclose");
+    status=H5Dclose(dsetID);
+    CHECK(status, FAIL, "H5Dclose");
+    status=H5Fclose(fileID);
+    CHECK(status, FAIL, "H5Fclose");
+
+    /* Reset/initialize the data arrays to read in */
+    HDmemset(chunk_data_dbl,0,sizeof(double)*50000*3);
+    HDmemset(chunk_data_flt,0,sizeof(float)*50000*3);
+
+    fileID = H5Fopen(FILE,H5F_ACC_RDONLY,H5P_DEFAULT);
+    CHECK(fileID, FAIL, "H5Fopen");
+    dsetID = H5Dopen(fileID,"coords");
+    CHECK(dsetID, FAIL, "H5Dopen");
+
+    status= H5Dread (dsetID,H5T_NATIVE_DOUBLE,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_dbl);
+    CHECK(status, FAIL, "H5Dread");
+    status= H5Dread (dsetID,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_flt);
+    CHECK(status, FAIL, "H5Dread");
+
+    status=H5Dclose(dsetID);
+    CHECK(status, FAIL, "H5Dclose");
+    status=H5Fclose(fileID);
+    CHECK(status, FAIL, "H5Fclose");
+
+    for(i=0; i<50000; i++) {
+        for(j=0; j<3; j++) {
+            if(chunk_data_dbl[i][j]!=chunk_data_flt[i][j]) {
+                num_errs++;
+                printf("chunk_data_dbl[%d][%d]=%f, chunk_data_flt[%d][%d]=%f\n",i,j,chunk_data_dbl[i][j],i,j,chunk_data_flt[i][j]);
+            } /* end if */
+        } /* end for */
+    } /* end for */
+} /* test_h5s_chunk() */
+
 /****************************************************************
 **
 **  test_h5s(): Main H5S (dataspace) testing routine.
@@ -480,6 +568,9 @@ test_h5s(void)
     test_h5s_scalar_read();		/* Test scalar H5S reading code */
     test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
     test_h5s_compound_scalar_read();	/* Test compound datatype scalar H5S reading code */
+
+    /* This test was added later to exercise a bug in chunked I/O */
+    test_h5s_chunk();	        /* Exercise bug fix for chunked I/O */
 } /* test_h5s() */
 
 
