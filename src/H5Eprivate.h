@@ -208,29 +208,6 @@ typedef struct H5E_t_new {
 #define    H5E_MIN_SETLOCAL_MSG_new      "Error from filter \"set local\" callback"
 #endif /* NEW_ERR */
 
-#ifndef NEW_ERR
-#ifdef H5_HAVE_THREADSAFE
-/*
- * The per-thread error stack. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of stacks to threads will
- * be handled by the pthread library.
- *
- * In order for this macro to work, H5E_get_my_stack() must be preceeded
- * by "H5E_t *estack =".
- */
-#define H5E_get_my_stack_new()  H5E_get_stack_new()
-#else /* H5_HAVE_THREADSAFE */
-/*
- * The current error stack.  Eventually we'll have some sort of global table 
- * so each thread has it's own stack.  The stacks will be created on demand 
- * when the thread first calls H5E_push().  */
-H5E_t_new		H5E_stack_g_new[1];
-#define H5E_get_my_stack_new() (H5E_stack_g_new+0)
-#endif /* H5_HAVE_THREADSAFE */
-#endif /* NEW_ERR */
-
-
 /*
  * HERROR macro, used to facilitate error reporting between a FUNC_ENTER()
  * and a FUNC_LEAVE() within a function body.  The arguments are the major

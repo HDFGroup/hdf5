@@ -341,7 +341,7 @@ hid_t H5E_ERR_CLS_g			= FAIL;
 
 #endif /* NEW_ERR */
 
-#ifdef NEW_ERR
+#ifndef NEW_ERR
 #ifdef H5_HAVE_THREADSAFE
 /*
  * The per-thread error stack. pthread_once() initializes a special
