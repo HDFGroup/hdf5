@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
@@ -188,16 +186,19 @@ void Group::throwException(const string func_name, const string msg) const
 // Function:	Group destructor
 ///\brief	Properly terminates access to this group.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 Group::~Group()
 {  
    // The group id will be closed properly
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
-
 }  
 
 #ifndef H5_NO_NAMESPACE

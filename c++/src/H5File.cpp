@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5FaccProp.h"
@@ -183,24 +181,28 @@ bool H5File::isHdf5(const string& name )
 //		If this object has represented another HDF5 file, the previous
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
+// Note:        This wrapper doesn't seem right regarding the 'id' and should
+//              be investigated.  BMR - 2/20/2005
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 void H5File::reOpen()
 {
-   // reset the identifier of this H5File - send 'this' in so that
-   // H5Fclose can be called appropriately
+   // If this object has a valid id, appropriately decrement reference
+   // counter and close the id.
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        throw FileIException("H5File::reopen", close_error.getDetailMsg());
+        decRefCount();
+    }
+    catch (Exception close_error) {
+        throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
    // call C routine to reopen the file - Note: not sure about this
    // does id need to be closed later?  which id to be the parameter?
    id = H5Freopen( id );
    if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
-   {
-      throw FileIException("H5File::reopen", "H5Freopen failed");
-   }
+      throw FileIException("H5File::reOpen", "H5Freopen failed");
 }
 
 //--------------------------------------------------------------------------
@@ -574,13 +576,17 @@ void H5File::throwException(const string func_name, const string msg) const
 // Function:	H5File destructor
 ///\brief	Properly terminates access to this file. 
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 H5File::~H5File() 
 {  
    // The HDF5 file id will be closed properly
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }  

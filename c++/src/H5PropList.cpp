@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -88,22 +86,23 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 ///\param	like_plist - IN: Reference to the existing property list
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
-   // reset the identifier of this PropList - send 'this' in so that
-   // H5Pclose can be called appropriately
+    // If this object has a valid id, appropriately decrement reference
+    // counter and close the id.
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         throw PropListIException("PropList::copy", close_error.getDetailMsg());
     }
 
    // call C routine to copy the property list
    id = H5Pcopy( like_plist.getId() );
-
-   // points to the same ref counter
-   ref_count = new RefCounter;
 
    if( id <= 0 )
       throw PropListIException("PropList::copy", "H5Pcopy failed");
@@ -582,14 +581,18 @@ PropList PropList::getClassParent() const
 // Function:	PropList destructor
 ///\brief	Properly terminates access to this property list.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 PropList::~PropList()
-{  
+{
    // The property list id will be closed properly
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        cerr << "PropList::~PropList" << close_error.getDetailMsg() << endl;
+        decRefCount();
+    }
+    catch (Exception close_error) {
+        cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
     }
 }  
 

@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5DataSpace.h"
 #include "H5Object.h"
@@ -96,22 +94,25 @@ DataType::DataType(const DataType& original) : H5Object(original)
 ///\param	like_type - IN: Datatype to be copied
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
-   // reset the identifier of this instance, H5Tclose will be called 
-   // if needed 
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+   // reset the identifier of this instance, H5Tclose will be called
+   // if needed
+   if( is_predtype == false ) {
+        try {
+            decRefCount();
+        }
+        catch (Exception close_error) {
+            throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+        }
     }
 
    // call C routine to copy the datatype
    id = H5Tcopy( like_type.getId() );
-
-   // new reference counter for this id
-   ref_count = new RefCounter;
 
    if( id <= 0 )
       throw DataTypeIException("DataType::copy", "H5Tcopy failed");
@@ -642,14 +643,20 @@ void DataType::p_close() const
 // Function:	DataType destructor
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {  
    // The datatype id will be closed properly
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
+   if( is_predtype == false ) {
+        try {
+            decRefCount();
+        }
+        catch (Exception close_error) {
+            cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
+        }
     }
 }  
 

@@ -21,9 +21,7 @@
 
 #include "H5Include.h"
 #include "H5Exception.h"
-#include "H5RefCounter.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
@@ -282,15 +280,19 @@ void Attribute::p_close() const
 // Function:	Attribute destructor
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by QAK, Feb 20, 2005
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {
    // The attribute id will be closed properly
-    try {
-      resetIdComponent(this); }
-    catch (Exception close_error) { // thrown by p_close
-        cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
-    }
+   try {
+      decRefCount();
+   }
+   catch (Exception close_error) {
+      cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
+   }
 }
 
 #ifndef H5_NO_NAMESPACE

@@ -69,8 +69,6 @@ class H5_DLLCPP IdComponent {
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	hid_t id;	// HDF5 object id
-	RefCounter* ref_count; // used to keep track of the
-	                              // number of copies of an object
 
 	// Default constructor.
 	IdComponent();
