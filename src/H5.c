@@ -580,17 +580,42 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     if (checked)
 	HGOTO_DONE(SUCCEED);
     
-    if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
-            H5_VERS_RELEASE!=relnum) {
-        const char *s;  /* Environment string for disabling version check */
+    {    const char *s;  /* Environment string for disabling version check */
 
         /* Allow different versions of the header files and library? */
         s = HDgetenv ("HDF5_DISABLE_VERSION_CHECK");
 
         if (s && HDisdigit(*s))
             disable_version_check = (int)HDstrtol (s, NULL, 0);
+    }
 
-        if(disable_version_check) {
+    if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
+            H5_VERS_RELEASE!=relnum) {
+        switch (disable_version_check) {
+	case 0:
+            HDfputs ("Warning! The HDF5 header files included by this application "
+                     "do not match the\nversion used by the HDF5 library to which "
+                     "this application is linked. Data\ncorruption or "
+                     "segmentation faults may occur if the application "
+                     "is\nallowed to continue.  You can, at your own risk, "
+                     "disable this check by setting\nthe environment variable "
+                     "'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+		     "Setting it to 2 will suppress the warning totally.\n",
+		     stderr);
+	    /* Mention the versions we are referring to */
+	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
+		     majnum, minnum, relnum, 
+		     H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+
+	    /* Bail out now. */
+	    HDfputs ("Bye...\n", stderr);
+	    HDabort ();
+	    break;
+	case 2:
+	    /* continue silently */
+	    break;
+	default:
+	    /* continue with a warning */
             HDfputs ("Warning! The HDF5 header files included by this application "
                      "do not match the\nversion used by the HDF5 library to which "
                      "this application is linked. Data\ncorruption or "
@@ -598,54 +623,45 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                      "continues.\n'HDF5_DISABLE_VERSION_CHECK' "
                      "environment variable set, application will\n"
                      "continue.\n", stderr);
-        } /* end if */
-        else {
-            HDfputs ("Warning! The HDF5 header files included by this application "
-                     "do not match the\nversion used by the HDF5 library to which "
-                     "this application is linked. Data\ncorruption or "
-                     "segmentation faults may occur if the application "
-                     "is\nallowed to continue.  You can, at your own risk, "
-                     "disable this check by setting\nthe environment variable "
-                     "'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n", stderr);
-        } /* end else */
+	    /* Mention the versions we are referring to */
+	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
+		     majnum, minnum, relnum, 
+		     H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+	    break;
+        } /* end switch */
 
-        /* Mention the versions we are referring to */
-        HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
-                 majnum, minnum, relnum, 
-                 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-
-        /* Bail out now, if the version check isn't disabled */
-        if(!disable_version_check) {
-            HDfputs ("Bye...\n", stderr);
-            HDabort ();
-        } /* end if */
     } /* end if */
 
     /* Indicate that the version check has been performed */
     checked = 1;
 
-    /*
-     *verify if H5_VERS_INFO is consistent with the other version information.
-     *Check only the first sizeof(lib_str) char.  Assume the information
-     *will fit within this size or enough significance.
-     */
-    sprintf(lib_str, "HDF5 library version: %d.%d.%d",
-	H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-    if (*substr){
-	HDstrcat(lib_str, "-");
-	HDstrncat(lib_str, substr, sizeof(lib_str) - HDstrlen(lib_str) - 1);
-    } /* end if */
-    if (HDstrcmp(lib_str, H5_lib_vers_info_g)){
-	HDfputs ("Warning!  Library version information error.\n"
-	         "The HDF5 library version information are not "
-		 "consistent in its source code.\nThis is NOT a fatal error "
-		 "but should be corrected.\n", stderr);
-	HDfprintf (stderr, "Library version information are:\n"
-		 "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
-		 "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
-		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-		 H5_VERS_SUBRELEASE, H5_VERS_INFO);
-    } /* end if */
+    if (!disable_version_check){
+	/*
+	 *verify if H5_VERS_INFO is consistent with the other version information.
+	 *Check only the first sizeof(lib_str) char.  Assume the information
+	 *will fit within this size or enough significance.
+	 */
+	sprintf(lib_str, "HDF5 library version: %d.%d.%d",
+	    H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+	if (*substr){
+	    HDstrcat(lib_str, "-");
+	    HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
+	} /* end if */
+	if (HDstrcmp(lib_str, H5_lib_vers_info_g)){
+	    HDfputs ("Warning!  Library version information error.\n"
+		     "The HDF5 library version information are not "
+		     "consistent in its source code.\nThis is NOT a fatal error "
+		     "but should be corrected.  Setting the environment\n"
+		     "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of 1 "
+		     "will suppress\nthis warning.\n",
+		     stderr);
+	    HDfprintf (stderr, "Library version information are:\n"
+		     "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
+		     "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
+		     H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+		     H5_VERS_SUBRELEASE, H5_VERS_INFO);
+	} /* end if */
+    }
 
 done:
     FUNC_LEAVE_API(ret_value);
