@@ -41,6 +41,6 @@ GROUP "/" {
    } 
 } 
 GROUP "/y" {
-   h5dump error: unable to open group "/y"
+   } 
 } 
-} 
+h5dump error: unable to open group "/y"
