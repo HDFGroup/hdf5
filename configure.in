@@ -519,7 +519,7 @@ GASS=yes
 AC_SUBST(TESTGASS)
 TESTGASS='$(srcdir)/testgass'
 
-AC_ARG_WITH(gass,[  --with-gass=INC,LIB   Use the GASS Library [default=no]],
+AC_ARG_WITH(gass,[  --with-gass=INC,LIB     Use the GASS Library [default=no]],
 	    ,withval=no)
 case $withval in
     yes)
@@ -580,6 +580,57 @@ case $withval in
 esac
 if test "X-" != "X-$GASS"; then
     AC_DEFINE(HAVE_GASS)
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Are SRB Client and other system libraries(socket, elf) present?  
+dnl
+AC_SUBST(SRB)
+SRB=yes
+AC_SUBST(TESTSRB)
+TESTSRB='$(srcdir)/testsrb'
+AC_ARG_WITH(srb,[  --with-srb=INC,LIB      Use the SRB Library [default=no]],
+	    ,withval=no)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(srbClient.h,,unset SRB TESTSRB)
+	AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+	AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+	AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+	;;
+    no)
+	AC_MSG_CHECKING(for SRB)
+	AC_MSG_RESULT(suppressed)
+	unset SRB TESTSRB
+	;;
+    *)
+        srb_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$srb_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$srb_inc"
+ 	    AC_CHECK_HEADERS(srbClient.h,,
+ 	        CPPFLAGS="$saved_CPPFLAGS"
+                unset SRB TESTSRB)
+        else
+	    AC_CHECK_HEADERS(srbClient.h)
+        fi
+
+        srb_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$srb_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$srb_lib"
+	    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+            AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+	    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+        else
+	    AC_CHECK_LIB(elf,main,,unset SRB TESTSRB)
+            AC_CHECK_LIB(socket,main,,unset SRB TESTSRB)
+	    AC_CHECK_LIB(SrbClient,clConnect,,unset SRB TESTSRB)
+        fi
+	;;
+esac
+if test "X-" != "X-$SRB"; then
+    AC_DEFINE(HAVE_SRB)
 fi
 
 dnl ----------------------------------------------------------------------

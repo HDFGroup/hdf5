@@ -42,9 +42,3 @@
 
 /* Define if the ioctl TIOCGWINSZ is defined */
 #undef HAVE_TIOCGWINSZ
-
-/* Define if we have Globus GASS support */
-#undef HAVE_GASS
-
-/* Define if we have Globus Grid Storage support */
-#undef HAVE_GRIDSTORAGE
