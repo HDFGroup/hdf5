@@ -8,8 +8,6 @@
  *
  * Purpose:	The public header file for the Stream Virtual File Driver.
  *
- * Version: $Header$
- *
  * Modifications:
  *          Thomas Radke, Thursday, October 26, 2000
  *          Added support for Windows.

@@ -404,7 +404,6 @@ H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
-H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
 

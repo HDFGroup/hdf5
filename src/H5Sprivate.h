@@ -206,8 +206,6 @@ typedef struct H5S_conv_t {
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection);
 H5_DLL herr_t H5S_close(H5S_t *ds);
-H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
-H5_DLL H5S_t *H5S_decode(unsigned char *buf);
 H5_DLL H5S_conv_t *H5S_find(const H5F_t *file,const H5S_t *mem_space, const H5S_t *file_space,
                 unsigned flags, hbool_t *use_par_opt_io,const H5O_layout_t *layout );
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);

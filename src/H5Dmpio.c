@@ -267,4 +267,3 @@ H5D_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t
 } /* end H5D_mpio_spaces_write() */
 
 #endif  /* H5_HAVE_PARALLEL */
-

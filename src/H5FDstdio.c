@@ -680,7 +680,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 #else
     H5Eclear(H5E_DEFAULT);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
-            
+
     *file_handle = &(file->fp);
     if(*file_handle==NULL)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "get handle failed", -1)

@@ -485,8 +485,8 @@ H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
 H5_DLL herr_t H5Tlock(hid_t type_id);
 H5_DLL herr_t H5Tcommit(hid_t loc_id, const char *name, hid_t type_id);
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
-H5_DLL herr_t H5Tencode(hid_t obj_id, unsigned char* buf, size_t* nalloc);
-H5_DLL hid_t H5Tdecode(unsigned char* buf);
+H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
+H5_DLL hid_t H5Tdecode(const void *buf);
 
 /* Operations defined on compound datatypes */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,

@@ -4397,40 +4397,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_size
- *
- * Purpose:	Retrieves the size of the communicator used for the file
- *
- * Return:	Success:	The communicator size (non-negative)
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_mpi_get_size(const H5F_t *f)
-{
-    int	ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_mpi_get_size, FAIL)
-
-    assert(f && f->shared);
-    
-    /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_size(f->shared->lf))<0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_mpi_get_size() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_mpi_get_comm
  *
  * Purpose:	Retrieves the file's communicator

@@ -12,8 +12,6 @@
  *          In addition to that, the memory image of the file is
  *          read from/written to a socket during an open/flush operation.
  *
- * Version: $Id$
- *
  * Modifications:
  *          Thomas Radke, Thursday, October 26, 2000
  *          Added support for Windows.

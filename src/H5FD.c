@@ -49,13 +49,12 @@
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-
 #ifdef H5_HAVE_FPHDF5
 #include "H5FPprivate.h"        /*Flexible Parallel HDF5                */
 #endif  /* H5_HAVE_FPHDF5 */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /* static prototypes */
 static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,

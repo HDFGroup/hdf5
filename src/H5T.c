@@ -258,6 +258,8 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
+static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
+static H5T_t *H5T_decode(const unsigned char *buf);
 
 /* Local macro definitions */
 #define H5T_ENCODE_VERSION      0
@@ -2575,7 +2577,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tencode(hid_t obj_id, unsigned char* buf, size_t* nalloc)
+H5Tencode(hid_t obj_id, void *buf, size_t* nalloc)
 {
     H5T_t       *dtype;
     herr_t      ret_value=SUCCEED;
@@ -2615,12 +2617,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Tdecode(unsigned char* buf)
+H5Tdecode(const void *buf)
 {
     H5T_t       *dt;
     hid_t       ret_value;
     
     FUNC_ENTER_API (H5Tdecode, FAIL);
+    H5TRACE1("i","x",buf);
 
     if (buf==NULL)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
@@ -2660,7 +2663,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      buf_size;
@@ -2711,8 +2714,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5T_t*
-H5T_decode(unsigned char *buf)
+static H5T_t *
+H5T_decode(const unsigned char *buf)
 {
     H5T_t       *ret_value;
 

@@ -143,7 +143,7 @@ H5D_contig_fill(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
         if (MPI_COMM_NULL == (mpi_comm=H5F_mpi_get_comm(f)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
 
-        /* Get the MPI rank & size */
+        /* Get the MPI rank */
         if ((mpi_rank=H5F_mpi_get_rank(f))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
 

@@ -40,6 +40,8 @@ static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
+static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
+static H5S_t *H5S_decode(const unsigned char *buf);
 
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
@@ -1766,12 +1768,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Sencode(hid_t obj_id, unsigned char* buf, size_t* nalloc)
+H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
 {
     H5S_t       *dspace;
     herr_t      ret_value=SUCCEED;
     
     FUNC_ENTER_API (H5Sencode, FAIL);
+    H5TRACE3("e","ix*z",obj_id,buf,nalloc);
 
     /* Check argument and retrieve object */
     if (NULL==(dspace=H5I_object_verify(obj_id, H5I_DATASPACE)))
@@ -1884,12 +1887,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Sdecode(unsigned char* buf)
+H5Sdecode(const void *buf)
 {
     H5S_t       *ds;
     hid_t       ret_value;
     
     FUNC_ENTER_API (H5Sdecode, FAIL);
+    H5TRACE1("i","x",buf);
 
     if (buf==NULL)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")
@@ -1925,7 +1929,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t*
-H5S_decode(unsigned char *buf)
+H5S_decode(const unsigned char *buf)
 {
     H5S_t       *ds;
     H5S_extent_t        *extent;

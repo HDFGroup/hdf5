@@ -1086,5 +1086,6 @@ void
 cleanup_h5s(void)
 {
     remove(DATAFILE);
+    remove(NULLFILE);
     remove(BASICFILE);
 }
