@@ -1,4 +1,4 @@
-HDF5 version 1.4.3-snap6 currently under development
+HDF5 version 1.4.3-snap7 currently under development
 Please refer to the INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
