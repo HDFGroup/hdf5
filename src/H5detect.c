@@ -29,6 +29,7 @@ static const char *FileHeader = "\n\
  *
  *-------------------------------------------------------------------------
  */
+#undef NDEBUG
 #include <assert.h>
 #include <math.h>
 #include <pwd.h>
@@ -599,6 +600,7 @@ bit_cmp(int nbytes, int *perm, void *_a, void *_b)
                 if ((aa & 1) != (bb & 1)) return i * 8 + j;
             }
             assert("INTERNAL ERROR" && 0);
+	    abort();
         }
     }
     return -1;

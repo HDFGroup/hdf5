@@ -386,8 +386,8 @@ list (hid_t group, const char *name, void __unused__ *cd)
 	H5Gget_comment(group, name, sizeof(comment), comment);
 	strcpy(comment+sizeof(comment)-4, "...");
 	if (comment[0]) printf("    %-10s %s\n", "Comment:", comment);
-	if (dispatch_g[sb.type].list2) (dispatch_g[sb.type].list2)(obj);
     }
+    if (dispatch_g[sb.type].list2) (dispatch_g[sb.type].list2)(obj);
     
     /*
      * Close the object.

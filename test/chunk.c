@@ -40,17 +40,17 @@
 #define RM_CACHE_STRT	25
 #define RM_CACHE_END	25
 #define RM_CACHE_DELT	5
-#define RM_START	0.20
+#define RM_START	0.50
 #define RM_END	        5.00
-#define RM_DELTA	0.0025
+#define RM_DELTA	0.50
 
 /* Diagonal test */
 #define DIAG_CACHE_STRT	25
 #define DIAG_CACHE_END	25
 #define DIAG_CACHE_DELT	5
-#define DIAG_START	0.20
+#define DIAG_START	0.50
 #define DIAG_END	5.00
-#define DIAG_DELTA	0.0025
+#define DIAG_DELTA	0.50
 
 static size_t	nio_g;
 static hid_t	fapl_g = -1;
@@ -299,6 +299,8 @@ main (void)
     create_dataset ();
     f = fopen ("x-gnuplot", "w");
 
+    printf("Test      %8s %8s %8s\n", "CacheSz", "ChunkSz",  "Effic");
+    printf("--------- -------- -------- --------\n");
 
 #if 1
     /*
@@ -345,7 +347,7 @@ main (void)
     fclose (d);
     fprintf (f, "pause -1\n");
 #endif
-
+    
 #if 1
     /*
      * Test row-major writing of the dataset with various sizes of request

@@ -177,6 +177,7 @@ writer (int wrt_n)
     FILE	*out = fopen(DNAME, "w");
 
     printf("%-70s", "Writing large dataset");
+    fflush(stdout);
     
     /*
      * Make sure that `hsize_t' is large enough to represent the entire data

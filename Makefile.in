@@ -76,23 +76,23 @@ H5Tinit.c:
 
 clean mostlyclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	   (cd $$d && $(MAKE) $@);					      \
 	done
 
 distclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	   (cd $$d && $(MAKE) $@);					      \
 	done
-	$(RM) config/commence config/conclude config/depend
-	$(RM) config.cache config.log config.status src/H5config.h
-	$(RM) Makefile
-	$(CP) Makefile.dist Makefile
+	-$(RM) config/commence config/conclude config/depend
+	-$(RM) config.cache config.log config.status src/H5config.h
+	-$(RM) Makefile
+	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:
 	@echo "This command is intented for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	   (cd $$d && $(MAKE) $@);					      \
 	done
-	$(RM) config.cache config.log config.status src/H5config.h
-	$(RM) configure src/H5config.h.in
+	-$(RM) config.cache config.log config.status src/H5config.h
+	-$(RM) configure src/H5config.h.in

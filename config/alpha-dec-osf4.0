@@ -58,18 +58,9 @@
 #			warnings.  HDF5 attempts to be ANSI and Posix
 #			compliant and employ good programming
 #			practices resulting in few if any
-#			warnings.
-#
-# Note:			Warning flags do not have to be added to CFLAGS
-#			variable if the compiler is the GNU gcc
-#			compiler or a descendent of gcc.
-#
-# Note:			The CFLAGS should contains *something* or else 
-#			configure will probably add `-g'.  For most
-#			systems this isn't a problem but some systems
-#			will disable optimizations in favor of the
-#			`-g'.
-#			
+#			warnings. Note: warning flags do not have to
+#			be added to this variable if the compiler is
+#			the GNU gcc compiler or a descendent of gcc.
 #
 
 case "$CC" in
@@ -77,17 +68,17 @@ case "$CC" in
 	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-	PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O3 -finline-functions -malign-double -fomit-frame-pointer -fschedule-insns2"
+	PROD_CFLAGS="-O3"
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
 	PROFILE_CPPFLAGS=
 	;;
 
     *)
-	CFLAGS="$CFLAGS -ansi"
-	DEBUG_FLAGS="-g"
+	#CFLAGS="$CFLAGS"
+	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-	PROD_CFLAGS="-O"
+	PROD_CFLAGS="-g0 -fast -tune host"
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
 	PROFILE_CPPFLAGS=
