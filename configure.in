@@ -87,6 +87,9 @@ case $host_os in
   aix4.*)
     host_os_novers=aix4.x
     ;;
+  aix5.*)
+    host_os_novers=aix5.x
+    ;;
   freebsd*)
     host_os_novers=freebsd
     ;;

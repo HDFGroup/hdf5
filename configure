@@ -1524,6 +1524,9 @@ case $host_os in
   aix4.*)
     host_os_novers=aix4.x
     ;;
+  aix5.*)
+    host_os_novers=aix5.x
+    ;;
   freebsd*)
     host_os_novers=freebsd
     ;;
@@ -4093,7 +4096,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4096 "configure"' > conftest.$ac_ext
+  echo '#line 4099 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4634,7 +4637,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4637: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4640: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6445,7 +6448,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6448 "configure"
+#line 6451 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6543,7 +6546,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6546 "configure"
+#line 6549 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
