@@ -83,16 +83,6 @@
 
 ./doc/Makefile.in
 
-./doc/html/ADGuide.html
-./doc/html/ADGuide/Changes.html
-./doc/html/ADGuide/H4toH5Mapping.pdf
-./doc/html/ADGuide/H4toH5Mapping.doc    _DO_NOT_DISTRIBUTE_
-./doc/html/ADGuide/HISTORY.txt
-./doc/html/ADGuide/ImageSpec.html
-./doc/html/ADGuide/PaletteExample1.gif
-./doc/html/ADGuide/Palettes.fm.anc.gif
-./doc/html/ADGuide/RELEASE.txt
-
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
@@ -163,6 +153,39 @@
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
+./doc/html/Tools.html
+./doc/html/Version.html
+./doc/html/chunk1.gif
+./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/compat.html
+./doc/html/dataset_p1.gif
+./doc/html/dataset_p1.obj               _DO_NOT_DISTRIBUTE_
+./doc/html/extern1.gif
+./doc/html/extern1.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/extern2.gif
+./doc/html/extern2.obj			_DO_NOT_DISTRIBUTE_
+
+./doc/html/ADGuide.html
+./doc/html/ADGuide/Changes.html
+./doc/html/ADGuide/Dependencies
+./doc/html/ADGuide/H4toH5Mapping.pdf
+./doc/html/ADGuide/H4toH5Mapping.doc    _DO_NOT_DISTRIBUTE_
+./doc/html/ADGuide/HISTORY.txt
+./doc/html/ADGuide/ImageSpec.html
+./doc/html/ADGuide/Makefile.in
+./doc/html/ADGuide/PaletteExample1.gif
+./doc/html/ADGuide/Palettes.fm.anc.gif
+./doc/html/ADGuide/RELEASE.txt
+
+./doc/html/Graphics/C++.gif
+./doc/html/Graphics/Dependencies
+./doc/html/Graphics/FORTRAN.gif
+./doc/html/Graphics/Java.gif
+./doc/html/Graphics/Makefile.in
+./doc/html/Graphics/OtherAPIs.gif
+
+./doc/html/PSandPDF/Dependencies
+./doc/html/PSandPDF/Makefile.in
 
 ./doc/html/TechNotes.html
 ./doc/html/TechNotes/BigDataSmMach.html
@@ -172,15 +195,17 @@
 ./doc/html/TechNotes/ChStudy_5000x1000.gif
 ./doc/html/TechNotes/ChStudy_500x500.gif
 ./doc/html/TechNotes/ChStudy_p1.gif
-./doc/html/TechNotes/ChStudy_p1.obj
+./doc/html/TechNotes/ChStudy_p1.obj     _DO_NO_DISTRIBUTE_
 ./doc/html/TechNotes/ChunkingStudy.html
 ./doc/html/TechNotes/CodeReview.html
+./doc/html/TechNotes/Dependencies
 ./doc/html/TechNotes/ExternalFiles.html
 ./doc/html/TechNotes/FreeLists.html
 ./doc/html/TechNotes/H4-H5Compat.html
 ./doc/html/TechNotes/HeapMgmt.html
 ./doc/html/TechNotes/IOPipe.html
 ./doc/html/TechNotes/LibMaint.html
+./doc/html/TechNotes/Makefile.in
 ./doc/html/TechNotes/MemoryMgmt.html
 ./doc/html/TechNotes/MoveDStruct.html
 ./doc/html/TechNotes/NamingScheme.html
@@ -189,25 +214,23 @@
 ./doc/html/TechNotes/SWControls.html
 ./doc/html/TechNotes/SymbolTables.html
 ./doc/html/TechNotes/ThreadSafeLibrary.html
-./doc/html/TechNotes/Version.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
+./doc/html/TechNotes/Version.html
 ./doc/html/TechNotes/openmp-hdf5.c
 ./doc/html/TechNotes/openmp-hdf5.html
 ./doc/html/TechNotes/pipe1.gif
-./doc/html/TechNotes/pipe1.obj
+./doc/html/TechNotes/pipe1.obj          _DO_NOT_DISTRIBUTE_
 ./doc/html/TechNotes/pipe2.gif
-./doc/html/TechNotes/pipe2.obj
+./doc/html/TechNotes/pipe2.obj          _DO_NOT_DISTRIBUTE_
 ./doc/html/TechNotes/pipe3.gif
-./doc/html/TechNotes/pipe3.obj
+./doc/html/TechNotes/pipe3.obj          _DO_NOT_DISTRIBUTE_
 ./doc/html/TechNotes/pipe4.gif
-./doc/html/TechNotes/pipe4.obj
+./doc/html/TechNotes/pipe4.obj          _DO_NOT_DISTRIBUTE_
 ./doc/html/TechNotes/pipe5.gif
-./doc/html/TechNotes/pipe5.obj
+./doc/html/TechNotes/pipe5.obj          _DO_NOT_DISTRIBUTE_
 ./doc/html/TechNotes/version.gif
-./doc/html/TechNotes/version.obj
-
-./doc/html/Tools.html
+./doc/html/TechNotes/version.obj        _DO_NOT_DISTRIBUTE_
 
 ./doc/html/Tutor/Contents.html
 ./doc/html/Tutor/ContentsAdd.html
@@ -261,6 +284,7 @@
 ./doc/html/Tutor/Graphics/CreateFile.gif
 ./doc/html/Tutor/Graphics/CreateGrp1.gif
 ./doc/html/Tutor/Graphics/CreateGrp2.gif
+./doc/html/Tutor/Graphics/Dependencies
 ./doc/html/Tutor/Graphics/Examples.gif
 ./doc/html/Tutor/Graphics/FileOrg.gif
 ./doc/html/Tutor/Graphics/FullTOC1.gif
@@ -270,6 +294,7 @@
 ./doc/html/Tutor/Graphics/Intro.gif
 ./doc/html/Tutor/Graphics/IntroTopics.gif
 ./doc/html/Tutor/Graphics/Iterate.gif
+./doc/html/Tutor/Graphics/Makefile.in
 ./doc/html/Tutor/Graphics/MountFile.gif
 ./doc/html/Tutor/Graphics/Quiz.gif
 ./doc/html/Tutor/Graphics/QuizAns.gif
@@ -285,6 +310,8 @@
 ./doc/html/Tutor/Graphics/TitlePg.gif
 ./doc/html/Tutor/Graphics/Utilities.gif
 
+./doc/html/Tutor/examples/Dependencies
+./doc/html/Tutor/examples/Makefile.in
 ./doc/html/Tutor/examples/h5_compound.c
 ./doc/html/Tutor/examples/h5_copy.c
 ./doc/html/Tutor/examples/h5_crtatt.c
@@ -305,23 +332,18 @@
 ./doc/html/Tutor/examples/h5_ref2regw.c
 ./doc/html/Tutor/examples/h5_reference.c
 
-./doc/html/Version.html
-./doc/html/chunk1.gif
-./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/compat.html
-
-./doc/html/dataset_p1.gif
-./doc/html/dataset_p1.obj
-./doc/html/extern1.gif
-./doc/html/extern1.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/extern2.gif
-./doc/html/extern2.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/Tutor/examples/java/Dependencies
+./doc/html/Tutor/examples/java/Makefile.in
 
 ./doc/html/cpplus/CppInterfaces.html
 ./doc/html/cpplus/CppUserNotes.doc
 ./doc/html/cpplus/CppUserNotes.pdf
+./doc/html/cpplus/Dependencies
+./doc/html/cpplus/Makefile.in
 
+./doc/html/fortran/Dependencies
 ./doc/html/fortran/F90UserNotes.html
+./doc/html/fortran/Makefile.in
 ./doc/html/fortran/h5a_FORTRAN.html
 ./doc/html/fortran/h5d_FORTRAN.html
 ./doc/html/fortran/h5e_FORTRAN.html
@@ -332,11 +354,6 @@
 ./doc/html/fortran/h5r_FORTRAN.html
 ./doc/html/fortran/h5s_FORTRAN.html
 ./doc/html/fortran/h5t_FORTRAN.html
-
-./doc/html/Graphics/C++.gif
-./doc/html/Graphics/FORTRAN.gif
-./doc/html/Graphics/Java.gif
-./doc/html/Graphics/OtherAPIs.gif
 
 ./doc/html/group_p1.gif
 ./doc/html/group_p1.obj			_DO_NOT_DISTRIBUTE_
