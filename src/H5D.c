@@ -1124,7 +1124,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if (!ret_value && new_dset) {
 	if (new_dset->type) H5T_close(new_dset->type);
 	if (new_dset->create_parms) {
-	    H5P_close (H5P_DATASET_CREATE, new_dset->create_parms);
+	    H5P_close (new_dset->create_parms);
 	    new_dset->create_parms = NULL;
 	}
 	if (H5F_addr_defined(new_dset->ent.header)) {
@@ -1384,7 +1384,7 @@ done:
             H5T_close(dataset->type);
         }
         if (dataset->create_parms) {
-            H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
+            H5P_close (dataset->create_parms);
         }
         dataset->ent.file = NULL;
         H5FL_FREE(H5D_t,dataset);
@@ -1429,7 +1429,7 @@ H5D_close(H5D_t *dataset)
      * can do if one of these fails, so we just continue.
      */
     free_failed = (H5T_close(dataset->type) < 0 ||
-		   H5P_close(H5P_DATASET_CREATE, dataset->create_parms)); 
+		   H5P_close(dataset->create_parms)); 
 
     /* Close the dataset object */
     H5O_close(&(dataset->ent));

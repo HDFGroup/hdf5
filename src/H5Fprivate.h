@@ -312,6 +312,11 @@ typedef struct H5F_file_t {
     haddr_t	driver_addr;	/* File driver information block address*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t *fcpl;		/* File-creation property list		*/
+                            /* This actually ends up being a pointer to a */
+                            /* H5P_t type, which is returned from H5P_copy */
+                            /* But that's ok because we only access it like */
+                            /* a H5F_create_t until we pass it back to */
+                            /* H5P_close to release it - QAK */
     intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
     intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
