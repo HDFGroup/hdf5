@@ -1,24 +1,23 @@
 /* $Id$ */
 
 /*
- * Parallel tests for file operations
+ * Parallel tests for datasets
  */
 
 /*
  * Example of using the parallel HDF5 library to access datasets.
  *
- * This program contains two parts.  In the first part, the mpi processes
- * collectively create a new parallel HDF5 file and create two fixed
- * dimension datasets in it.  Then each process writes a hyperslab into
- * each dataset in an independent mode.  All processes collectively
- * close the datasets and the file.
- * In the second part, the processes collectively open the created file
- * and the two datasets in it.  Then each process reads a hyperslab from
- * each dataset in an independent mode and prints them out.
- * All processes collectively close the datasets and the file.
+ * This program contains two major parts.  Part 1 tests fixed dimension
+ * datasets, for both independent and collective transfer modes.
+ * Part 2 tests extendable datasets, for independent transfer mode
+ * only.  Collective mode for extendable datasets are not supported yet.
  */
 
 #include <testphdf5.h>
+
+/*
+ * The following are various utility routines used by the tests.
+ */
 
 /*
  * Setup the dimensions of the hyperslab.
@@ -159,6 +158,10 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
     return(vrfyerrs);
 }
 
+
+/*
+ * Part 1.a--Independent read/write for fixed dimension datasets.
+ */
 
 /*
  * Example of using the parallel HDF5 library to create two datasets
@@ -323,7 +326,7 @@ dataset_readInd(char *filename)
 
 
     /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid != FAIL), "");
 
     /* Release file-access template */
@@ -386,6 +389,10 @@ dataset_readInd(char *filename)
     H5Fclose(fid);
 }
 
+
+/*
+ * Part 1.b--Collective read/write for fixed dimension datasets.
+ */
 
 /*
  * Example of using the parallel HDF5 library to create two datasets
@@ -620,7 +627,7 @@ dataset_readAll(char *filename)
     VRFY((ret != FAIL), "H5Pset_mpi succeed");
 
     /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid != FAIL), "H5Fopen succeed");
 
     /* Release file-access template */
@@ -742,8 +749,12 @@ dataset_readAll(char *filename)
 
 
 /*
+ * Part 2--Independent read/write for extendable datasets.
+ */
+
+/*
  * Example of using the parallel HDF5 library to create two extendable
- * datasets in one HDF5 file with parallel MPIO access support.
+ * datasets in one HDF5 file with independent parallel MPIO access support.
  * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
  * Each process controls only a slab of size DIM1 x DIM2 within each
  * dataset.
@@ -760,10 +771,10 @@ extend_writeInd(char *filename)
     hid_t dataset1, dataset2;	/* Dataset ID */
     hsize_t dims[RANK] = {DIM1,DIM2};		/* dataset initial dim sizes */
     hsize_t max_dims[RANK] =
-    		{DIM1, DIM2};	/* dataset maximum dim sizes */
-    hsize_t dimslocal1[RANK] = {DIM1,DIM2}; 	/* local dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];		/* data buffer */
-    hsize_t	chunk_dims[RANK];		/* chunk sizes */
+		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
+    hsize_t	dimslocal1[RANK] = {DIM1,DIM2};	/* local dataset dim sizes */
+    DATATYPE	data_array1[DIM1][DIM2];	/* data buffer */
+    hsize_t	chunk_dims[RANK] = {7, 13};	/* chunk sizes */
     hid_t	dataset_pl;			/* dataset create prop. list */
 
     hssize_t	start[RANK];	/* for hyperslab setting */
@@ -810,8 +821,6 @@ extend_writeInd(char *filename)
      * ------------------------- */
 
     /* set up dataset storage chunk sizes and creation property list */
-    chunk_dims[0] = 7;
-    chunk_dims[1] = 13;
     if (verbose)
 	printf("chunks[]=%d,%d\n", chunk_dims[0], chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
@@ -821,22 +830,23 @@ extend_writeInd(char *filename)
 
 
     /* setup dimensionality object */
+    /* start out with no rows, extend it later. */
+    dims[0] = dims[1] = 0;
     sid = H5Screate_simple (RANK, dims, max_dims);
     VRFY((sid != FAIL), "H5Screate_simple succeed");
 
-    
     /* create an extendable dataset collectively */
-    dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid,
-			dataset_pl);
+    dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid, dataset_pl);
     VRFY((dataset1 != FAIL), "H5Dcreate succeed");
 
     /* create another extendable dataset collectively */
-    dataset2 = H5Dcreate(fid, DATASETNAME2, H5T_NATIVE_INT, sid,
-			dataset_pl);
+    dataset2 = H5Dcreate(fid, DATASETNAME2, H5T_NATIVE_INT, sid, dataset_pl);
     VRFY((dataset2 != FAIL), "H5Dcreate succeed");
 
-    /* extend both datasets */
-    ret = H5Dextend (dataset2, dims);
+    /* extend dataset1 only */
+    dims[0] = DIM1;
+    dims[1] = DIM2;
+    ret = H5Dextend (dataset1, dims);
     VRFY((ret != FAIL), "H5Dextend succeed");
 
 
@@ -869,8 +879,34 @@ extend_writeInd(char *filename)
     dataset_fill(start, count, stride, &data_array1[0][0]);
     MESG("data_array initialized");
 
+    /* release resource */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+
+
+    /* Try write to dataset2 without extending it first.  Should fail. */
+    /* first turn off auto error reporting */
+    H5Eget_auto(&old_func, &old_client_data);
+    H5Eset_auto(NULL, NULL);
+
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset2);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret == FAIL), "H5Sset_hyperslab fail as expected");
+
+    /* restore auto error reporting */
+    H5Eset_auto(old_func, old_client_data);
+
+    /* Extend dataset2 and try again.  Should succeed. */
+    dims[0] = DIM1;
+    dims[1] = DIM2;
+    ret = H5Dextend (dataset2, dims);
+    VRFY((ret != FAIL), "H5Dextend succeed");
+
+    /* create a file dataspace independently */
+    H5Sclose(file_dataspace);
+    file_dataspace = H5Dget_space (dataset2);				    
     VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
     ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
     VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
@@ -884,10 +920,13 @@ extend_writeInd(char *filename)
 	    H5P_DEFAULT, data_array1);					    
     VRFY((ret != FAIL), "H5Dwrite succeed");
 
+
+    /* --------------------------
+     * close all requested resources
+     * ------------------------- */
     /* release dataspace ID */
     H5Sclose(file_dataspace);
-#ifdef NO
-#endif /* NO */
+    H5Sclose(mem_dataspace);
 
     /* close dataset collectively */					    
     ret=H5Dclose(dataset1);
@@ -902,7 +941,7 @@ extend_writeInd(char *filename)
     H5Fclose(fid);							    
 }
 
-/* Example of using the parallel HDF5 library to read a dataset */
+/* Example of using the parallel HDF5 library to read an extendable dataset */
 void
 extend_readInd(char *filename)
 {
@@ -914,6 +953,7 @@ extend_readInd(char *filename)
     hid_t dataset1, dataset2;	/* Dataset ID */
     hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
     DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    DATATYPE data_array2[DIM1][DIM2];	/* data buffer */
     DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
@@ -943,7 +983,7 @@ extend_readInd(char *filename)
 
 
     /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid != FAIL), "");
 
     /* Release file-access template */
@@ -958,7 +998,24 @@ extend_readInd(char *filename)
     dataset2 = H5Dopen(fid, DATASETNAME1);
     VRFY((dataset2 != FAIL), "");
 
+    /* Try extend dataset1 which is open RDONLY.  Should fail. */
+    /* first turn off auto error reporting */
+    H5Eget_auto(&old_func, &old_client_data);
+    H5Eset_auto(NULL, NULL);
 
+    file_dataspace = H5Dget_space (dataset1);
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sget_dims(file_dataspace, dims, NULL);
+    VRFY((ret > 0), "H5Sget_dims succeed");
+    dims[0]=dims[0]*2;
+    ret=H5Dextend(dataset1, dims);
+    VRFY((ret == FAIL), "H5Dextend fail as expected");
+
+    /* restore auto error reporting */
+    H5Eset_auto(old_func, old_client_data);
+
+
+    /* Read dataset1 using BYROW pattern */
     /* set up dimensions of the slab this process accesses */
     slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
 
@@ -978,22 +1035,46 @@ extend_readInd(char *filename)
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    H5P_DEFAULT, data_array1);
-    VRFY((ret != FAIL), "");
+    VRFY((ret != FAIL), "H5Dread succeed");
 
     /* verify the read data with original expected data */
     ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
     VRFY((ret == 0), "dataset1 read verified correct");
     if (ret) nerrors++;
 
+    H5Sclose(mem_dataspace);
+    H5Sclose(file_dataspace);
+
+
+    /* Read dataset2 using BYCOL pattern */
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset2);
+    VRFY((file_dataspace != FAIL), "");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill dataset with test data */
+    dataset_fill(start, count, stride, &data_origin1[0][0]);
+
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    H5P_DEFAULT, data_array1);
-    VRFY((ret != FAIL), "");
+    VRFY((ret != FAIL), "H5Dread succeed");
 
     /* verify the read data with original expected data */
     ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
     VRFY((ret == 0), "dataset2 read verified correct");
     if (ret) nerrors++;
+
+    H5Sclose(mem_dataspace);
+    H5Sclose(file_dataspace);
 
     /* close dataset collectively */
     ret=H5Dclose(dataset1);
@@ -1001,8 +1082,6 @@ extend_readInd(char *filename)
     ret=H5Dclose(dataset2);
     VRFY((ret != FAIL), "");
 
-    /* release all IDs created */
-    H5Sclose(file_dataspace);
 
     /* close the file collectively */
     H5Fclose(fid);

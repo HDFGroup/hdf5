@@ -7,8 +7,10 @@
 #include <testphdf5.h>
 
 /* global variables */
-int nerrors = 0;				/* errors count */
+int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
+herr_t (*old_func)(void*);		/* previous error handler */
+void *old_client_data;			/* previous error handler arg.*/
 
 /* other option flags */
 int doread=1;				/* read test */
@@ -146,6 +148,7 @@ main(int argc, char **argv)
 
 	MPI_BANNER("testing dataset collective write...");
 	dataset_writeAll(filenames[1]);
+
 	MPI_BANNER("testing extendable dataset independent write...");
 	extend_writeInd(filenames[2]);
     }
@@ -155,6 +158,7 @@ main(int argc, char **argv)
 
 	MPI_BANNER("testing dataset collective read...");
 	dataset_readAll(filenames[1]);
+
 	MPI_BANNER("testing extendable dataset independent read...");
 	extend_readInd(filenames[2]);
     }

@@ -46,8 +46,8 @@
 /* Constants definitions */
 /* DIM1 and DIM2 must be multiples of mpi-sizes to be used. */
 /* E.g. 24, a multiple of 2, 3, 4, 6, 8, 12, would be a good choice. */
-#define DIM1		12
-#define DIM2		12
+#define DIM1		24
+#define DIM2		24
 #define RANK		2
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"
@@ -63,5 +63,7 @@ typedef int DATATYPE;
 /* shared global variables */
 extern int nerrors;				/* errors count */
 extern int verbose;				/* verbose, default as no. */
+extern herr_t (*old_func)(void*);		/* previous error handler */
+extern void *old_client_data;			/* previous error handler arg.*/
 
 #endif /* PHDF5TEST_H */
