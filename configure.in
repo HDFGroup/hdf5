@@ -711,8 +711,9 @@ dnl
 AC_SUBST(PTHREAD)
 PTHREAD=yes
 
-AC_ARG_WITH(pthread,[  --with-pthread=INC,LIB  Use the Pthreads library],
-            ,withval=no)
+AC_ARG_WITH(pthread,
+	[  --with-pthread=INC,LIB  Use the Pthreads library],
+	,withval=no)
 case $withval in
     yes)
 	AC_CHECK_HEADERS(pthread.h)
@@ -720,7 +721,7 @@ case $withval in
         AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
     else
         CFLAGS="$CFLAGS -D_THREAD_SAFE"
-	    LDFLAGS="$LDFLAGS -pthread"
+	LDFLAGS="$LDFLAGS -pthread"
     fi
 	;;
     no)
@@ -748,13 +749,16 @@ case $withval in
 	fi
 	;;
 esac
+
 dnl ----------------------------------------------------------------------
 dnl Enable thread-safe version of library.  It requires pthread on.
 dnl
-AC_MSG_CHECKING(for thread safe support);
+AC_MSG_CHECKING(for thread safe support)
 AC_ARG_ENABLE(threadsafe,
-  [  --enable-threadsafe  Enable thread safe capability])
-case X-$enableval in
+  [  --enable-threadsafe     Enable thread safe capability],
+  THREADSAFE=$enableval)
+
+case X-$THREADSAFE in
     X-|X-no)
 	AC_MSG_RESULT(no)
 	;;
@@ -772,7 +776,8 @@ case X-$enableval in
 	AC_MSG_ERROR(\"$enableval\" is not a valid threadsafe type)
 	;;
 esac
-if test X- != X-$THREADSAFE; then
+
+if test X-yes != X-$THREADSAFE; then
     AC_DEFINE(HAVE_THREADSAFE)
 fi
 
