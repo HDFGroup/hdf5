@@ -48,7 +48,7 @@ static char RcsId[] = "$Revision$";
 
 /* 3-d 32-bit integer dataset */
 #define DATA1_NAME  "Data1"
-int32 data1[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3]={1,2,3,4,5,6};
+int32 data1[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
 
 /* 4-D dataset with fixed dimensions */
 #define SPACE2_NAME  "Space2"
@@ -66,8 +66,25 @@ int32 data1[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3]={1,2,3,4,5,6};
 
 /* 4-d 64-bit floating-point dataset */
 #define DATA2_NAME  "Data2"
-float64 data2[SPACE2_DIM1][SPACE2_DIM2][SPACE2_DIM3][SPACE2_DIM4]=
-    {0.5,1.0,2.0,4.0,8.0,16.0,32.0};
+float64 data2[SPACE2_DIM1][SPACE2_DIM2][SPACE2_DIM3][SPACE2_DIM4];
+
+/****************************************************************
+**
+**  init_data(): Initialize data arrays.
+** 
+****************************************************************/
+static void init_data(void)
+{
+    int32 *ip;
+    float64 *fp;
+    uintn u;
+
+    for(ip=(int32 *)data1, u=0; u<(SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3); u++)
+        *ip++=(int32)u*2;
+
+    for(fp=(float64 *)data2, u=0; u<(SPACE2_DIM1*SPACE2_DIM2*SPACE2_DIM3*SPACE2_DIM4); u++)
+        *fp++=((float64)u/4.0);
+}
 
 /****************************************************************
 **
@@ -121,6 +138,7 @@ static void test_h5d_basic_write(void)
     ret=H5Mrelease(tid1);
     CHECK(ret,FAIL,"H5Mrelease");
     
+    /* Write second dataset out */
     sid2=H5Mcreate(fid1,H5_DATASPACE,SPACE2_NAME);
     CHECK(sid1,FAIL,"H5Mcreate");
 
@@ -187,19 +205,11 @@ static void test_h5d_basic_read(void)
     fid1=H5Fopen(FILE,0,0);
     CHECK(fid1,FAIL,"H5Fopen");
 
-#if 0
-    oid1=H5Mfind_name(fid1,H5_DATASET,DATA1_NAME);
-    CHECK(oid1,FAIL,"H5Mfind_name");
-
-    did1=H5Maccess(oid1);
-    CHECK(did1,FAIL,"H5Maccess");
-#else
     did1 = H5Mfind_name (fid1, H5_DATASET,  DATA1_NAME);
     CHECK (did1, FAIL, "H5Mfind_name");
-#endif
 
     ret=H5Dget_info(did1,&tid1,&sid1);
-    CHECK(ret,FAIL,"H5Pset_space");
+    CHECK(ret,FAIL,"H5Pget_info");
     
     ret=H5Tis_atomic(tid1);
     VERIFY(ret,BTRUE,"H5Tis_atomic");
@@ -246,6 +256,7 @@ void test_h5d(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing datasets\n"));
 
+    init_data();                 /* initialize data arrays */
     test_h5d_basic_write();      /* Test basic H5D writing code */
     test_h5d_basic_read();       /* Test basic H5D reading code */
 }   /* test_h5d() */
