@@ -29,6 +29,7 @@
 #include "hdf5.h"
 
 #define DATAFILE   "tvlstr.h5"
+#define DATAFILE2  "tvlstr2.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -42,6 +43,9 @@
 #define SPACE2_DIM2	10
 
 #define VLSTR_TYPE      "vl_string_type"
+
+/* Definitions for the VL re-writing test */
+#define REWRITE_NDATASETS       32
 
 /* String for testing attributes */
 static const char *string_att = "This is the string for the attribute";
@@ -713,6 +717,127 @@ static void test_read_vl_string_attribute(void)
     return;
 }
 
+/* Helper routine for test_vl_rewrite() */
+static void write_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
+{
+      hid_t dset;
+      herr_t ret;
+
+      dset = H5Dcreate (file, name, type, space, H5P_DEFAULT);
+      CHECK(dset, FAIL, "H5Dcreate");
+
+      ret = H5Dwrite(dset, type, space, space, H5P_DEFAULT, &data);
+      CHECK(ret, FAIL, "H5Dwrite");
+
+      ret = H5Dclose(dset);
+      CHECK(ret, FAIL, "H5Dclose");
+}
+
+/* Helper routine for test_vl_rewrite() */
+static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
+{
+    hid_t dset;
+    herr_t ret;
+    char *data_read;
+
+    dset = H5Dopen (file, name);
+    CHECK(dset, FAIL, "H5Dopen");
+
+    ret = H5Dread(dset, type, space, space, H5P_DEFAULT, &data_read);
+    CHECK(ret, FAIL, "H5Dread");
+
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    if(HDstrcmp(data, data_read))
+        TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
+
+    HDfree(data_read);
+}
+
+/****************************************************************
+**
+**  test_vl_rewrite(): Test basic VL string code.
+**      Tests I/O on VL strings when lots of objects in the file
+**      have been linked/unlinked.
+** 
+****************************************************************/
+static void test_vl_rewrite(void)
+{
+    hid_t file1, file2; /* File IDs */
+    hid_t type;         /* VL string datatype ID */
+    hid_t space;        /* Scalar dataspace */
+    char name[256];     /* Buffer for names & data */
+    int i;              /* Local index variable */
+    herr_t ret;         /* Generic return value */
+
+    /* Create the VL string datatype */
+    type = H5Tcopy(H5T_C_S1);
+    CHECK(type, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size(type, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Create the scalar dataspace */
+    space = H5Screate(H5S_SCALAR);
+    CHECK(space, FAIL, "H5Screate");
+
+    /* Open the files */
+    file1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1, FAIL, "H5Fcreate");
+
+    file2 = H5Fcreate(DATAFILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1, FAIL, "H5Fcreate");
+
+    /* Create in file 1 */
+    for(i=0; i<REWRITE_NDATASETS; i++) {
+        sprintf(name, "/set_%d", i);
+        write_scalar_dset(file1, type, space, name, name);
+    }
+
+    /* Effectively copy data from file 1 to 2 */
+    for(i=0; i<REWRITE_NDATASETS; i++) {
+        sprintf(name, "/set_%d", i);
+        read_scalar_dset(file1, type, space, name, name);
+        write_scalar_dset(file2, type, space, name, name);
+    }
+
+    /* Read back from file 2 */
+    for(i=0; i<REWRITE_NDATASETS; i++) {
+        sprintf(name, "/set_%d", i);
+        read_scalar_dset(file2, type, space, name, name);
+    }
+
+    /* Remove from file 2. */
+    for(i=0; i<REWRITE_NDATASETS; i++) {
+        sprintf(name, "/set_%d", i);
+        ret = H5Gunlink(file2, name);
+        CHECK(ret, FAIL, "H5Gunlink");
+    }
+
+    /* Effectively copy from file 1 to file 2 */
+    for(i=0; i<REWRITE_NDATASETS; i++) {
+        sprintf(name, "/set_%d", i);
+        read_scalar_dset(file1, type, space, name, name);
+        write_scalar_dset(file2, type, space, name, name);
+    }
+
+    /* Close everything */
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Fclose(file1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Fclose(file2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    return;
+} /* end test_vl_rewrite() */
+
 /****************************************************************
 **
 **  test_vlstrings(): Main VL string testing routine.
@@ -734,6 +859,9 @@ test_vlstrings(void)
     /* Test using VL strings in attributes */
     test_write_vl_string_attribute();
     test_read_vl_string_attribute();
+
+    /* Test writing VL datasets in files with lots of unlinking */
+    test_vl_rewrite();
 }   /* test_vlstrings() */
 
 
@@ -754,6 +882,7 @@ test_vlstrings(void)
 void
 cleanup_vlstrings(void)
 {
-    remove(DATAFILE);
+    HDremove(DATAFILE);
+    HDremove(DATAFILE2);
 }
 

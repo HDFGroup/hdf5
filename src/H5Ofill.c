@@ -883,9 +883,9 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
     /* Don't bother doing anything if there will be no actual conversion */
     if (!H5T_path_noop(tpath)) {
         if ((src_id = H5I_register(H5I_DATATYPE,
-                                   H5T_copy(fill->type, H5T_COPY_TRANSIENT)))<0 ||
+                                   H5T_copy(fill->type, H5T_COPY_ALL)))<0 ||
                 (dst_id = H5I_register(H5I_DATATYPE,
-                                   H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0)
+                                   H5T_copy(dset_type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
         /*

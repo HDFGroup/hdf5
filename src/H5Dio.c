@@ -220,13 +220,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     FUNC_ENTER_NOAPI_NOINIT(H5D_fill)
 
     /* Check args */
+    assert(fill_type);
     assert(buf);
     assert(buf_type);
     assert(space);
-
-    /* Check for "default" fill value */
-    if(fill_type==NULL)
-        fill_type=buf_type;
 
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(fill_type);
@@ -245,19 +242,20 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
         /* Copy the user's data into the buffer for conversion */
         HDmemcpy(tconv_buf,fill,src_type_size);
 
-        /* Convert memory buffer into disk buffer */
         /* Set up type conversion function */
-        if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id))) {
+        if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-        } else if (!H5T_path_noop(tpath)) {
+
+        /* Convert memory buffer into disk buffer */
+        if (!H5T_path_noop(tpath)) {
             if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL)))<0 ||
                     (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL)))<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-        }
 
-        /* Perform data type conversion */
-        if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+            /* Perform data type conversion */
+            if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+        } /* end if */
     } /* end if */
 
     /* Fill the selection in the memory buffer */
@@ -600,7 +598,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             HGOTO_DONE(SUCCEED)
 
         /* Go fill the user's selection with the dataset's fill value */
-        if(H5D_fill(fill.buf,fill.type,buf,mem_type,mem_space, dxpl_id)<0)
+        if(H5D_fill(fill.buf,dataset->type,buf,mem_type,mem_space, dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
         else
             HGOTO_DONE(SUCCEED)
@@ -819,13 +817,20 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if(nelmts > 0 && dataset->efl.nused==0 && dataset->layout.type!=H5D_COMPACT 
             && dataset->layout.addr==HADDR_UNDEF) {
         hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
+        hbool_t full_overwrite; /* Whether we are over-writing all the elements */
 
         /* Get the number of elements in file dataset's dataspace */
         if((file_nelmts=H5S_get_simple_extent_npoints(file_space))<0)
             HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
 
+        /* Always allow fill values to be written if the dataset has a VL datatype */
+        if(H5T_detect_class(dataset->type, H5T_VLEN))
+            full_overwrite=FALSE;
+        else
+            full_overwrite=(hsize_t)file_nelmts==nelmts ? TRUE : FALSE;
+
  	/* Allocate storage */
-        if(H5D_alloc_storage(dataset->ent.file,dxpl_id,dataset,H5D_ALLOC_WRITE, TRUE, (hbool_t)((hsize_t)file_nelmts==nelmts ? TRUE : FALSE))<0)
+        if(H5D_alloc_storage(dataset->ent.file,dxpl_id,dataset,H5D_ALLOC_WRITE, TRUE, full_overwrite)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
 

@@ -741,8 +741,7 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 #endif /* H5_WANT_H5_V1_6_COMPAT */
     
     /* Check args */
-    if (cd_nelmts || cd_values)
-{
+    if (cd_nelmts || cd_values) {
         if (cd_nelmts && *cd_nelmts>256)
             /*
              * It's likely that users forget to initialize this on input, so
