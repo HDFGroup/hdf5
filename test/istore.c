@@ -99,8 +99,7 @@ print_array (uint8 *array, size_t nx, size_t ny, size_t nz)
 static int
 new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
 {
-   H5O_istore_t	istore;
-   size_t	alignment[H5O_ISTORE_NDIMS];
+   H5O_layout_t	layout;
    intn		i;
    
    /* Create the object header */
@@ -113,16 +112,18 @@ new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
       return -1;
    }
 
-   /* Add the indexed-storage message */
+   /* create chunked storage */
+   layout.type = H5D_CHUNKED;
+   layout.ndims = ndims;
    for (i=0; i<ndims; i++) {
       if (i<NELMTS (align_g)) {
-	 alignment[i] = align_g[i];
+	 layout.dim[i] = align_g[i];
       } else {
-	 alignment[i] = 2;
+	 layout.dim[i] = 2;
       }
    }
-   H5F_istore_create (f, &istore, ndims, alignment);
-   if (H5O_modify (ent, H5O_ISTORE, H5O_NEW_MESG, 0, &istore)<0) {
+   H5F_arr_create (f, &layout/*in,out*/);
+   if (H5O_modify (ent, H5O_LAYOUT, H5O_NEW_MESG, 0, &layout)<0) {
       printf ("*FAILED*\n");
       if (!isatty (1)) {
 	 AT();
@@ -174,7 +175,7 @@ test_create (H5F_t *f, const char *prefix)
    
    printf ("%-70s", "Testing istore create");
 
-   for (i=1; i<=H5O_ISTORE_NDIMS; i++) {
+   for (i=1; i<=H5O_LAYOUT_NDIMS; i++) {
       sprintf (name, "%s_%02d", prefix, i);
       if (new_object (f, name, i, &handle)<0) return FAIL;
    }
@@ -216,7 +217,7 @@ test_extend (H5F_t *f, const char *prefix,
    size_t	size[3];
    size_t	whole_size[3];
    size_t	nelmts;
-   H5O_istore_t	istore;
+   H5O_layout_t	layout;
 
    if (!nz) {
       if (!ny) {
@@ -250,7 +251,7 @@ test_extend (H5F_t *f, const char *prefix,
       }
       goto error;
    }
-   if (NULL==H5O_read (&handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (&handle, H5O_LAYOUT, 0, &layout)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -258,7 +259,7 @@ test_extend (H5F_t *f, const char *prefix,
       }
       goto error;
    }
-   if (ndims!=istore.ndims) {
+   if (ndims!=layout.ndims) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -312,7 +313,7 @@ test_extend (H5F_t *f, const char *prefix,
       memset (buf, 128+ctr, nelmts);
 
       /* Write to disk */
-      if (H5F_istore_write (f, &istore, offset, size, buf)<0) {
+      if (H5F_arr_write (f, &layout, offset, size, buf)<0) {
 	 puts ("*FAILED*");
 	 if (!isatty (1)) {
 	    AT ();
@@ -323,7 +324,7 @@ test_extend (H5F_t *f, const char *prefix,
 
       /* Read from disk */
       memset (check, 0xff, nelmts);
-      if (H5F_istore_read (f, &istore, offset, size, check)<0) {
+      if (H5F_arr_read (f, &layout, offset, size, check)<0) {
 	 puts ("*FAILED*");
 	 if (!isatty (1)) {
 	    AT ();
@@ -357,7 +358,7 @@ test_extend (H5F_t *f, const char *prefix,
 
    /* Now read the entire array back out and check it */
    memset (buf, 0xff, nx*ny*nz);
-   if (H5F_istore_read (f, &istore, H5V_ZERO, whole_size, buf)<0) {
+   if (H5F_arr_read (f, &layout, H5V_ZERO, whole_size, buf)<0) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -426,7 +427,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
    char		dims[64], s[256], name[256];
    size_t	offset[3], size[3], total=0;
    H5G_entry_t	handle;
-   H5O_istore_t	istore;
+   H5O_layout_t	layout;
    uint8	*buf = NULL;
    
    if (!nz) {
@@ -458,7 +459,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
       }
       goto error;
    }
-   if (NULL==H5O_read (&handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (&handle, H5O_LAYOUT, 0, &layout)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -477,7 +478,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
       memset (buf, 128+ctr, nx*ny*nz);
 
       /* write to disk */
-      if (H5F_istore_write (f, &istore, offset, size, buf)<0) {
+      if (H5F_arr_write (f, &layout, offset, size, buf)<0) {
 	 puts ("*FAILED*");
 	 if (!isatty (1)) {
 	    AT ();

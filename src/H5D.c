@@ -40,10 +40,7 @@ struct H5D_t {
    H5T_t		*type;		/*datatype of this dataset	*/
    H5P_t		*space;		/*dataspace of this dataset	*/
    H5D_create_t		create_parms;	/*creation parameters		*/
-   union {
-      H5O_cstore_t	cstore;		/*contiguous storage info	*/
-      H5O_istore_t	istore;		/*chunked storage info		*/
-   } storage;
+   H5O_layout_t		layout;		/*data layout			*/
 };
 
 /* Default dataset creation template */
@@ -330,15 +327,20 @@ H5Dclose (hid_t dataset_id)
  *
  * Purpose:	Reads (part of) a DATASET from the file into application
  *		memory BUF. The part of the dataset to read is defined with
- *		SPACE_ID (if SPACE_ID is negative then we assume that the
- *		caller desires to read the entire dataset).  The data points
- *		are converted from their file type to the TYPE_ID specified.
+ *		MEM_SPACE_ID and FILE_SPACE_ID.  The data points are
+ *		converted from their file type to the MEM_TYPE_ID specified. 
  *		Additional miscellaneous data transfer properties can be
  *		passed to this function with the XFER_PARMS_ID argument.
  *
- *		The SPACE_ID can be the constant H5P_ALL in which case the
- *		destination (memory) data space is the same as the source
- *		(file) data space defined when the dataset was created.
+ *		The FILE_SPACE_ID can be the constant H5P_ALL which indicates
+ *		that the entire file data space is to be referenced.
+ *
+ *		The MEM_SPACE_ID can be the constant H5P_ALL in which case
+ *		the memory data space is the same as the file data space
+ *		defined when the dataset was created.
+ *
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The XFER_PARMS_ID can be the constant H5C_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -363,12 +365,13 @@ H5Dclose (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
-	 hid_t xfer_parms_id,  void *buf/*out*/)
+H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
+	 hid_t file_space_id, hid_t xfer_parms_id,  void *buf/*out*/)
 {
    H5D_t		*dataset = NULL;
-   const H5T_t		*type = NULL;
-   const H5P_t		*space = NULL;
+   const H5T_t		*mem_type = NULL;
+   const H5P_t		*mem_space = NULL;
+   const H5P_t		*file_space = NULL;
    const H5D_xfer_t	*xfer_parms = NULL;
    
    FUNC_ENTER (H5Dread, FAIL);
@@ -380,13 +383,19 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
        NULL==dataset->ent.file) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
-   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
-       NULL==(type=H5Aatom_object (type_id))) {
+   if (H5_DATATYPE!=H5Aatom_group (mem_type_id) ||
+       NULL==(mem_type=H5Aatom_object (mem_type_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
-   if (H5P_ALL!=space_id) {
-      if (H5_DATASPACE!=H5Aatom_group (space_id) ||
-	  NULL==(space=H5Aatom_object (space_id))) {
+   if (H5P_ALL!=mem_space_id) {
+      if (H5_DATASPACE!=H5Aatom_group (mem_space_id) ||
+	  NULL==(mem_space=H5Aatom_object (mem_space_id))) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+      }
+   }
+   if (H5P_ALL!=file_space_id) {
+      if (H5_DATASPACE!=H5Aatom_group (file_space_id) ||
+	  NULL==(file_space=H5Aatom_object (file_space_id))) {
 	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
       }
    }
@@ -401,7 +410,8 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
    }
 
    /* read raw data */
-   if (H5D_read (dataset, type, space, xfer_parms, buf/*out*/)<0) {
+   if (H5D_read (dataset, mem_type, mem_space, file_space, xfer_parms,
+		 buf/*out*/)<0) {
       HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
    }
    
@@ -414,17 +424,21 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
  *
  * Purpose:	Writes (part of) a DATASET from application memory BUF to the
  *		file.  The part of the dataset to write is defined with the
- *		SPACE_ID (if SPACE_ID is negative then we assume that the
- *		caller desires to write the entire dataset). The data points
- *		are converted from their current type (TYPE_ID) to their file
- *		data type.  Additional miscellaneous data transfer properties
- *		can be passed to this function with the XFER_PARMS_ID
- *		argument.
+ *		MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
+ *		are converted from their current type (MEM_TYPE_ID) to their
+ *		file data type.  Additional miscellaneous data transfer
+ *		properties can be passed to this function with the
+ *		XFER_PARMS_ID argument.
  *
- *		The SPACE_ID can be the constant H5P_ALL in which case the
- *		source (memory) data space is the same as the destination
- *		(file) memory space which was defined when the dataset was
- * 		created.
+ *		The FILE_SPACE_ID can be the constant H5P_ALL which indicates
+ *		that the entire file data space is to be referenced.
+ *
+ *		The MEM_SPACE_ID can be the constant H5P_ALL in which case
+ *		the memory data space is the same as the file data space
+ *		defined when the dataset was created.
+ *
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The XFER_PARMS_ID can be the constant H5C_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -443,12 +457,13 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
-	  hid_t xfer_parms_id, const void *buf)
+H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
+	  hid_t file_space_id, hid_t xfer_parms_id, const void *buf)
 {
    H5D_t		*dataset = NULL;
-   const H5T_t		*type = NULL;
-   const H5P_t		*space = NULL;
+   const H5T_t		*mem_type = NULL;
+   const H5P_t		*mem_space = NULL;
+   const H5P_t		*file_space = NULL;
    const H5D_xfer_t	*xfer_parms = NULL;
    
    FUNC_ENTER (H5Dwrite, FAIL);
@@ -460,13 +475,19 @@ H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
        NULL==dataset->ent.file) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
-   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
-       NULL==(type=H5Aatom_object (type_id))) {
+   if (H5_DATATYPE!=H5Aatom_group (mem_type_id) ||
+       NULL==(mem_type=H5Aatom_object (mem_type_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
-   if (H5P_ALL!=space_id) {
-      if (H5_DATASPACE!=H5Aatom_group (space_id) ||
-	  NULL==(space=H5Aatom_object (space_id))) {
+   if (H5P_ALL!=mem_space_id) {
+      if (H5_DATASPACE!=H5Aatom_group (mem_space_id) ||
+	  NULL==(mem_space=H5Aatom_object (mem_space_id))) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+      }
+   }
+   if (H5P_ALL!=file_space_id) {
+      if (H5_DATASPACE!=H5Aatom_group (file_space_id) ||
+	  NULL==(file_space=H5Aatom_object (file_space_id))) {
 	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
       }
    }
@@ -481,7 +502,8 @@ H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
    }
 
    /* write raw data */
-   if (H5D_write (dataset, type, space, xfer_parms, buf)<0) {
+   if (H5D_write (dataset, mem_type, mem_space, file_space, xfer_parms,
+		  buf)<0) {
       HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "can't write data");
    }
    
@@ -561,7 +583,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    H5D_t	*new_dset = NULL;
    H5D_t	*ret_value = NULL;
    size_t	nbytes;
-   intn		ndims;
+   intn		i;
 
    FUNC_ENTER (H5D_create, NULL);
 
@@ -596,53 +618,41 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 
    /* Total raw data size */
    nbytes = H5T_get_size (type) * H5P_get_npoints (space);
+   new_dset->layout.type = new_dset->create_parms.layout;
+   new_dset->layout.ndims = H5P_get_ndims (space) + 1;
+   assert (new_dset->layout.ndims<=NELMTS (new_dset->layout.dim));
+   new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size (type);
 
-   /* Initialize storage */
    switch (new_dset->create_parms.layout) {
    case H5D_CONTIGUOUS:
-      new_dset->storage.cstore.size = nbytes;
-      if (H5MF_alloc (f, H5MF_RAW, nbytes,
-		      &(new_dset->storage.cstore.addr))<0) {
-	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL,
-		      "can't allocate raw file storage");
-      }
-      if (H5O_modify (&(new_dset->ent), H5O_CSTORE, 0, 0,
-		      &(new_dset->storage.cstore))<0) {
+      if (H5P_get_dims (space, new_dset->layout.dim)<0) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-		      "can't update dataset object header");
+		      "unable to initialize contiguous storage");
       }
       break;
 
    case H5D_CHUNKED:
-      /*
-       * The dimensionality of the chunk should match the dimensionality of
-       * the data space.  We will add one more dimension here though, to
-       * describe the individual bytes of a data point.  Therefore, there
-       * must be room in the template for one more dimension size.
-       */
-      ndims = new_dset->create_parms.chunk_ndims;
-      if (ndims != H5P_get_ndims (space)) {
+      if (new_dset->create_parms.chunk_ndims != H5P_get_ndims (space)) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
 		      "dimensionality of chunks doesn't match the data space");
       }
-      assert (ndims<NELMTS (new_dset->create_parms.chunk_size));
-      new_dset->create_parms.chunk_size[ndims] = H5T_get_size (type);
-
-      if (H5F_istore_create (f, &(new_dset->storage.istore), ndims+1,
-			     new_dset->create_parms.chunk_size)<0) {
-	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-		      "can't initialize chunked storage");
-      }
-      if (H5O_modify (&(new_dset->ent), H5O_ISTORE, 0, 0,
-		      &(new_dset->storage.istore))<0) {
-	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-		      "can't update dataset object header");
+      for (i=0; i<new_dset->layout.ndims-1; i++) {
+	 new_dset->layout.dim[i] = new_dset->create_parms.chunk_size[i];
       }
       break;
       
    default:
-      assert ("not implemented yet" && 0);
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
+   }
+
+   /*
+    * Initialize storage
+    */
+   if (H5F_arr_create (f, &(new_dset->layout))<0 ||
+       H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, 0,
+		   &(new_dset->layout))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		   "unable to initialize storage");
    }
 
    /* Give the dataset a name */
@@ -693,7 +703,6 @@ H5D_open (H5F_t *f, const char *name)
 {
    H5D_t	*dataset = NULL;	/*the dataset which was found	*/
    H5D_t	*ret_value = NULL;	/*return value			*/
-   H5O_istore_t	*istore = NULL;
    intn		i;
 
    FUNC_ENTER (H5D_open, NULL);
@@ -722,31 +731,34 @@ H5D_open (H5F_t *f, const char *name)
    }
 
    /*
-    * Get the raw data storage info.  It's actually stored in two locations:
+    * Get the raw data layout info.  It's actually stored in two locations:
     * the storage message of the dataset (dataset->storage) and certain
     * values are copied to the dataset create template so the user can query
     * them.
     */
-   if (H5O_read (&(dataset->ent), H5O_CSTORE, 0, &(dataset->storage.cstore))) {
-      /* Contiguous storage */
+   if (H5O_read (&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		   "unable to read data layout message");
+   }
+   switch (dataset->layout.type) {
+   case H5D_CONTIGUOUS:
       dataset->create_parms.layout = H5D_CONTIGUOUS;
-      
-   } else if (H5O_read (&(dataset->ent), H5O_ISTORE, 0,
-			&(dataset->storage.istore))) {
+      break;
+
+   case H5D_CHUNKED:
       /*
        * Chunked storage.  The creation template's dimension is one less than
        * the chunk dimension because the chunk includes a dimension for the
        * individual bytes of the data type.
        */
-      istore = &(dataset->storage.istore);
       dataset->create_parms.layout = H5D_CHUNKED;
-      dataset->create_parms.chunk_ndims = istore->ndims - 1;
-      assert (istore->ndims<=NELMTS (dataset->create_parms.chunk_size));
-      for (i=0; i<istore->ndims-1; i++) {
-	 dataset->create_parms.chunk_size[i] = istore->alignment[i];
+      dataset->create_parms.chunk_ndims = dataset->layout.ndims - 1;
+      for (i=0; i<dataset->layout.ndims-1; i++) {
+	 dataset->create_parms.chunk_size[i] = dataset->layout.dim[i];
       }
-      
-   } else {
+      break;
+
+   default:
       assert ("not implemented yet" && 0);
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
    }
@@ -834,12 +846,8 @@ H5D_close (H5D_t *dataset)
 /*-------------------------------------------------------------------------
  * Function:	H5D_read
  *
- * Purpose:	Reads (part of) a DATASET into application memory BUF. The
- *		SPACE argument determines what part of the dataset to read
- *		(the whole thing is read if SPACE is null) and individual
- *		data points are translated from their file data type to the
- *		specified TYPE.  The XFER_PARMS contains additional
- *		miscellaneous properties that control the data transfer.
+ * Purpose:	Reads (part of) a DATASET into application memory BUF. See
+ *		H5Dread() for complete details.
  *
  * Return:	Success:	SUCCEED
  *
@@ -853,12 +861,13 @@ H5D_close (H5D_t *dataset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
-	  const H5D_xfer_t *xfer_parms, void *buf/*out*/)
+H5D_read (H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
+	  const H5P_t *file_space, const H5D_xfer_t *xfer_parms,
+	  void *buf/*out*/)
 {
    size_t	nelmts, src_size, dst_size;
-   size_t	offset[H5O_ISTORE_NDIMS];
-   size_t	size[H5O_ISTORE_NDIMS];
+   size_t	offset[H5O_LAYOUT_NDIMS];
+   size_t	size[H5O_LAYOUT_NDIMS];
    intn		i;
    herr_t	ret_value = FAIL;
    uint8	*conv_buf = NULL;	/*data type conv buffer		*/
@@ -869,25 +878,23 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 
    /* check args */
    assert (dataset && dataset->ent.file);
-   assert (type);
+   assert (mem_type);
    assert (xfer_parms);
    assert (buf);
 
-   if (H5D_CONTIGUOUS!=dataset->create_parms.layout) {
-      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		   "layout is not supported yet");
-   }
-   if (space && H5P_cmp (space, dataset->space)) {
+   if ((mem_space && H5P_cmp (mem_space, dataset->space)) ||
+       (file_space && H5P_cmp (file_space, dataset->space))) {
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		   "space conversion not supported yet");
    }
+
 
    /*
     * Convert data types to atoms because the conversion functions are
     * application-level functions.
     */
    if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (dataset->type)))<0 ||
-       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (type)))<0) {
+       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (mem_type)))<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		   "unable to register types for conversion");
    }
@@ -895,39 +902,24 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    /* Compute the size of the request and allocate scratch buffers */
    nelmts = H5P_get_npoints (dataset->space);
    src_size = nelmts * H5T_get_size (dataset->type);
-   dst_size = nelmts * H5T_get_size (type);
+   dst_size = nelmts * H5T_get_size (mem_type);
    conv_buf = H5MM_xmalloc (MAX (src_size, dst_size));
-   if (NULL==(conv_func=H5T_find (dataset->type, type))) {
+   if (NULL==(conv_func=H5T_find (dataset->type, mem_type))) {
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		   "unable to convert between src and dest data types");
    }
 
    /*
     * Read data into the data type conversion buffer.
+    * (We only support complete reads currently)
     */
-   switch (dataset->create_parms.layout) {
-   case H5D_CONTIGUOUS:
-      /* Read a block of contiguous data */
-      if (H5F_block_read (dataset->ent.file, &(dataset->storage.cstore.addr),
-			  src_size, conv_buf)<0) {
-	 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
-      }
-      break;
-
-   case H5D_CHUNKED:
-      /* Read one or more chunks from indexed storage */
-      for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
-      H5P_get_dims (dataset->space, size);
-      size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
-      if (H5F_istore_read (dataset->ent.file, &(dataset->storage.istore),
-			   offset, size, conv_buf)<0) {
-	 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
-      }
-      break;
-
-   default:
-      assert ("not implemented yet" && 0);
-      HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+   for (i=0; i<dataset->layout.ndims; i++) {
+      offset[i] = 0;
+      size[i] = dataset->layout.dim[i];
+   }
+   if (H5F_arr_read (dataset->ent.file, &(dataset->layout), offset, size,
+		     conv_buf)<0) {
+      HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
    }
 
    /*
@@ -956,12 +948,7 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
  * Function:	H5D_write
  *
  * Purpose:	Writes (part of) a DATASET to a file from application memory
- *		BUF. The SPACE argument determines what part of the dataset
- *		to write (the whole thing is read if SPACE is null) and
- *		individual data points are translated from their memory data
- *		type (TYPE) to the file data type.  The XFER_PARMS contains
- *		additional miscellaneous properties that control the data
- *		transfer.
+ *		BUF. See H5Dwrite() for complete details.
  *
  * Return:	Success:	SUCCEED
  *
@@ -975,12 +962,13 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
-	   const H5D_xfer_t *xfer_parms, const void *buf)
+H5D_write (H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
+	   const H5P_t *file_space,  const H5D_xfer_t *xfer_parms,
+	   const void *buf)
 {
    size_t	nelmts, src_size, dst_size;
-   size_t	offset[H5O_ISTORE_NDIMS];
-   size_t	size[H5O_ISTORE_NDIMS];
+   size_t	offset[H5O_LAYOUT_NDIMS];
+   size_t	size[H5O_LAYOUT_NDIMS];
    intn		i;
    herr_t	ret_value = FAIL;
    uint8	*conv_buf = NULL;	/*data type conversion buffer	*/
@@ -991,7 +979,7 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 
    /* check args */
    assert (dataset && dataset->ent.file);
-   assert (type);
+   assert (mem_type);
    assert (xfer_parms);
    assert (buf);
 
@@ -999,7 +987,8 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "layout is not supported yet");
    }
-   if (space && H5P_cmp (space, dataset->space)) {
+   if ((mem_space && H5P_cmp (mem_space, dataset->space)) ||
+       (file_space && H5P_cmp (file_space, dataset->space))) {
       HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "space conversion not supported yet");
    }
@@ -1008,8 +997,8 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
     * Convert data types to atoms because the conversion functions are
     * application-level functions.
     */
-   if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (dataset->type)))<0 ||
-       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (type)))<0) {
+   if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (mem_type)))<0 ||
+       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (dataset->type)))<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		   "unable to register types for conversion");
    }
@@ -1017,10 +1006,10 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 
    /* Compute the size of the request and allocate scratch buffers */
    nelmts = H5P_get_npoints (dataset->space);
-   src_size = nelmts * H5T_get_size (type);
+   src_size = nelmts * H5T_get_size (mem_type);
    dst_size = nelmts * H5T_get_size (dataset->type);
    conv_buf = H5MM_xmalloc (MAX (src_size, dst_size));
-   if (NULL==(conv_func=H5T_find (type, dataset->type))) {
+   if (NULL==(conv_func=H5T_find (mem_type, dataset->type))) {
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		   "unable to convert between src and dest data types");
    }
@@ -1041,30 +1030,15 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 
    /*
     * Write data into the file.
+    * (We only support complete writes currently.)
     */
-   switch (dataset->create_parms.layout) {
-   case H5D_CONTIGUOUS:
-      /* Write a contiguous chunk of data */
-      if (H5F_block_write (dataset->ent.file, &(dataset->storage.cstore.addr),
-			   dst_size, conv_buf)<0) {
-	 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
-      }
-      break;
-
-   case H5D_CHUNKED:
-      /* Write one or more chunks to indexed storage */
-      for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
-      H5P_get_dims (dataset->space, size);
-      size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
-      if (H5F_istore_write (dataset->ent.file, &(dataset->storage.istore),
-			    offset, size, conv_buf)<0) {
-	 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
-      }
-      break;
-
-   default:
-      assert ("not implemented yet" && 0);
-      HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+   for (i=0; i<dataset->layout.ndims; i++) {
+      offset[i] = 0;
+      size[i] = dataset->layout.dim[i];
+   }
+   if (H5F_arr_write (dataset->ent.file, &(dataset->layout), offset, size,
+		      conv_buf)<0) {
+      HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
    }
 
    ret_value = SUCCEED;

@@ -55,10 +55,10 @@ static const H5O_class_t *const message_type_g[] = {
    NULL,		/*0x0002 Data space (fiber bundle?)		*/
    H5O_DTYPE,   /*0x0003 Data Type					*/
    NULL,		/*0x0004 Not assigned				*/
-   H5O_CSTORE,  /*0x0005 Contiguous Data Storage			*/
+   NULL,  		/*0x0005 Not assigned				*/
    NULL,		/*0x0006 Data storage -- compact object		*/
    NULL,		/*0x0007 Data storage -- external object	*/
-   H5O_ISTORE, 	/*0x0008 Indexed Data Storage				*/
+   H5O_LAYOUT, 	/*0x0008 Data Layout					*/
    H5O_EFL,	/*0x0009 External File List				*/
    NULL,		/*0x000A Not assigned				*/
    NULL,		/*0x000B Data storage -- compressed object	*/

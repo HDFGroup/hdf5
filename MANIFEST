@@ -47,6 +47,7 @@
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
 ./src/H5F.c
+./src/H5Farray.c
 ./src/H5Fcore.c
 ./src/H5Ffamily.c
 ./src/H5Fistore.c
@@ -77,10 +78,9 @@
 ./src/H5Mpublic.h
 ./src/H5O.c
 ./src/H5Ocont.c
-./src/H5Ocstore.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
-./src/H5Oistore.c
+./src/H5Olayout.c
 ./src/H5Oname.c
 ./src/H5Onull.c
 ./src/H5Oprivate.h

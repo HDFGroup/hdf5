@@ -231,7 +231,8 @@ test_simple_io (hid_t file)
    assert (dataset>=0);
 
    /* Write the data to the dataset */
-   status = H5Dwrite (dataset, H5T_NATIVE_INT, H5P_ALL, H5C_DEFAULT, points);
+   status = H5Dwrite (dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
+		      H5C_DEFAULT, points);
    if (status<0) {
       puts ("*FAILED*");
       if (!isatty (1)) {
@@ -242,7 +243,8 @@ test_simple_io (hid_t file)
    }
 
    /* Read the dataset back */
-   status = H5Dread (dataset, H5T_NATIVE_INT, H5P_ALL, H5C_DEFAULT, check);
+   status = H5Dread (dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
+		     H5C_DEFAULT, check);
    if (status<0) {
       puts ("*FAILED*");
       if (!isatty (1)) {
@@ -321,7 +323,8 @@ test_tconv (hid_t file)
    assert (dataset>=0);
 
    /* Write the data to the dataset */
-   status = H5Dwrite (dataset, H5T_NATIVE_INT32, H5P_ALL, H5C_DEFAULT, out);
+   status = H5Dwrite (dataset, H5T_NATIVE_INT32, H5P_ALL, H5P_ALL,
+		      H5C_DEFAULT, out);
    assert (status>=0);
 
    /* Create a new type with the opposite byte order */
@@ -339,7 +342,7 @@ test_tconv (hid_t file)
    }
 
    /* Read data with byte order conversion */
-   status = H5Dread (dataset, type, H5P_ALL, H5C_DEFAULT, in);
+   status = H5Dread (dataset, type, H5P_ALL, H5P_ALL, H5C_DEFAULT, in);
    assert (status>=0);
 
    /* Check */

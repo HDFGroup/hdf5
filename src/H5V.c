@@ -11,7 +11,7 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-#define H5V_HYPER_NDIMS	H5O_ISTORE_NDIMS
+#define H5V_HYPER_NDIMS	H5O_LAYOUT_NDIMS
 #define PABLO_MASK	H5V_mask
 static hbool_t		interface_initialize_g = TRUE;
 #define INTERFACE_INIT	NULL

@@ -55,9 +55,11 @@ H5D_t *H5D_create (H5F_t *f, const char *name, const H5T_t *type,
 		const H5P_t *space, const H5D_create_t *create_parms);
 H5D_t *H5D_open (H5F_t *f, const char *name);
 herr_t H5D_close (H5D_t *dataset);
-herr_t H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
-		 const H5D_xfer_t *xfer_parms, void *buf/*out*/);
-herr_t H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
+herr_t H5D_read (H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
+		 const H5P_t *file_space, const H5D_xfer_t *xfer_parms,
+		 void *buf/*out*/);
+herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
+		  const H5P_t *mem_space, const H5P_t *file_space,
 		  const H5D_xfer_t *xfer_parms, const void *buf);
 hid_t H5D_find_name (hid_t file_id, group_t UNUSED, const char *name);
      

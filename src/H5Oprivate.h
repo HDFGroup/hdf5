@@ -109,28 +109,18 @@ extern const H5O_class_t H5O_DTYPE[1];
 /* operates on an H5T_t struct */
 
 /*
- * Contiguous Data Storage Message.
+ * Data Layout Message
  */
-#define H5O_CSTORE_ID		0x0005
-extern const H5O_class_t H5O_CSTORE[1];
+#define H5O_LAYOUT_ID		0x0008
+#define H5O_LAYOUT_NDIMS	32
+extern const H5O_class_t H5O_LAYOUT[1];
 
-typedef struct H5O_cstore_t {
-   haddr_t	addr;
-   size_t	size;
-} H5O_cstore_t;
-
-/*
- * Indexed Data Storage Message.
- */
-#define H5O_ISTORE_ID		0x0008
-#define H5O_ISTORE_NDIMS	32
-extern const H5O_class_t H5O_ISTORE[1];
-
-typedef struct H5O_istore_t {
-   haddr_t	btree_addr;		/*file address of B-tree	*/
+typedef struct H5O_layout_t {
+   int		type;			/*type of layout, H5D_layout_t	*/
+   haddr_t	addr;			/*file address of data or B-tree*/
    uintn	ndims;			/*num dimensions in stored data	*/
-   size_t	alignment[H5O_ISTORE_NDIMS];	/*algn in logical space	*/
-} H5O_istore_t;
+   size_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		*/
+} H5O_layout_t;
 
 /*
  * External File List Message

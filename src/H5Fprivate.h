@@ -395,7 +395,7 @@ typedef struct H5F_t {
    case 2: UINT16DECODE(p,l); break;					      \
 }
 
-struct H5O_istore_t; /*forward decl for prototype arguments*/
+struct H5O_layout_t; /*forward decl for prototype arguments*/
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
@@ -408,13 +408,21 @@ herr_t H5F_close (H5F_t *f);
 herr_t H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		  intn fwidth);
 
+/* Functions that operate on array storage */
+herr_t H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/);
+herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout, 
+		     const size_t offset[], const size_t size[],
+		     void *buf/*out*/);
+herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
+		      const size_t offset[], const size_t size[],
+		      const void *buf);
+
 /* Functions that operate on indexed storage */
-herr_t H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore,
-			  uintn ndims, const size_t alignment[]);
-herr_t H5F_istore_read (H5F_t *f, const struct H5O_istore_t *mesg,
+herr_t H5F_istore_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/);
+herr_t H5F_istore_read (H5F_t *f, const struct H5O_layout_t *layout,
 			const size_t offset[], const size_t size[],
-			void *buf);
-herr_t H5F_istore_write (H5F_t *f, const struct H5O_istore_t *mesg,
+			void *buf/*out*/);
+herr_t H5F_istore_write (H5F_t *f, const struct H5O_layout_t *layout,
 			 const size_t offset[], const size_t size[],
 			 const void *buf);
 

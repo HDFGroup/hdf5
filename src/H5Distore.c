@@ -6,6 +6,7 @@
  *             Wednesday, October  8, 1997
  */
 #include <H5private.h>
+#include <H5Dprivate.h>
 #include <H5Eprivate.h>
 #include <H5Fprivate.h>
 #include <H5MFprivate.h>
@@ -48,7 +49,7 @@ static herr_t H5F_istore_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				     void *_key);
 static herr_t H5F_istore_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				     void *_key);
-static herr_t H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore,
+static herr_t H5F_istore_copy_hyperslab (H5F_t *f, const H5O_layout_t *layout,
 					 H5F_isop_t op,
 					 const size_t offset_f[],
 					 const size_t size[],
@@ -72,14 +73,14 @@ static herr_t H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore,
  */
 typedef struct H5F_istore_key_t {
    uintn	file_number;			/*external file number	*/
-   size_t	offset[H5O_ISTORE_NDIMS];	/*logical offset to start*/
-   size_t	size[H5O_ISTORE_NDIMS];		/*logical chunk size	*/
+   size_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+   size_t	size[H5O_LAYOUT_NDIMS];		/*logical chunk size	*/
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
    H5F_istore_key_t key;			/*key values		*/
    haddr_t	addr;				/*file address of chunk	*/
-   H5O_istore_t	mesg;				/*storage message	*/
+   H5O_layout_t	mesg;				/*layout message	*/
 } H5F_istore_ud1_t;
    
 /* inherits B-tree like properties from H5B */
@@ -127,7 +128,7 @@ H5F_istore_sizeof_rkey (H5F_t *f, const void *_udata)
    size_t			nbytes;
 
    assert (udata);
-   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_ISTORE_NDIMS);
+   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_LAYOUT_NDIMS);
 
    nbytes = 4 +					/*external file number	*/
 	    udata->mesg.ndims * 4 +		/*dimension indices	*/
@@ -168,7 +169,7 @@ H5F_istore_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
    assert (bt);
    assert (raw);
    assert (key);
-   assert (ndims>0 && ndims<=H5O_ISTORE_NDIMS);
+   assert (ndims>0 && ndims<=H5O_LAYOUT_NDIMS);
 
    /* decode */
    UINT32DECODE (raw, key->file_number);
@@ -213,7 +214,7 @@ H5F_istore_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
    assert (bt);
    assert (raw);
    assert (key);
-   assert (ndims>0 && ndims<=H5O_ISTORE_NDIMS);
+   assert (ndims>0 && ndims<=H5O_LAYOUT_NDIMS);
 
    /* encode */
    UINT32ENCODE (raw, key->file_number);
@@ -261,7 +262,7 @@ H5F_istore_cmp2 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    assert (lt_key);
    assert (rt_key);
    assert (udata);
-   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_ISTORE_NDIMS);
+   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_LAYOUT_NDIMS);
 
    /* Compare the offsets but ignore the other fields */
    cmp = H5V_vector_cmp (udata->mesg.ndims, lt_key->offset, rt_key->offset);
@@ -312,7 +313,7 @@ H5F_istore_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
    assert (lt_key);
    assert (rt_key);
    assert (udata);
-   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_ISTORE_NDIMS);
+   assert (udata->mesg.ndims>0 && udata->mesg.ndims<=H5O_LAYOUT_NDIMS);
 
    if (H5V_vector_lt (udata->mesg.ndims, udata->key.offset, lt_key->offset)) {
       cmp = -1;
@@ -363,7 +364,7 @@ H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
    assert (lt_key);
    assert (rt_key);
    assert (udata);
-   assert (udata->mesg.ndims>=0 && udata->mesg.ndims<H5O_ISTORE_NDIMS);
+   assert (udata->mesg.ndims>=0 && udata->mesg.ndims<H5O_LAYOUT_NDIMS);
    assert (addr);
 
    /* Allocate new storage */
@@ -543,8 +544,8 @@ H5F_istore_insert (H5F_t *f, const haddr_t *addr,
        */
       md_key->file_number = udata->key.file_number;
       for (i=0, nbytes=1; i<udata->mesg.ndims; i++) {
-	 assert (0==udata->key.offset[i] % udata->mesg.alignment[i]);
-	 assert (udata->key.size[i] == udata->mesg.alignment[i]);
+	 assert (0==udata->key.offset[i] % udata->mesg.dim[i]);
+	 assert (udata->key.size[i] == udata->mesg.dim[i]);
 	 md_key->offset[i] = udata->key.offset[i];
 	 md_key->size[i] = udata->key.size[i];
 	 nbytes *= udata->key.size[i];
@@ -603,18 +604,18 @@ H5F_istore_insert (H5F_t *f, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
+H5F_istore_copy_hyperslab (H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
 			   const size_t offset_f[], const size_t size[],
 			   const size_t offset_m[], const size_t size_m[],
 			   void *buf)
 {
    intn			i, carry;
-   size_t		idx_cur[H5O_ISTORE_NDIMS];
-   size_t		idx_min[H5O_ISTORE_NDIMS];
-   size_t		idx_max[H5O_ISTORE_NDIMS];
-   size_t		sub_size[H5O_ISTORE_NDIMS];
-   size_t		offset_wrt_chunk[H5O_ISTORE_NDIMS];
-   size_t		sub_offset_m[H5O_ISTORE_NDIMS];
+   size_t		idx_cur[H5O_LAYOUT_NDIMS];
+   size_t		idx_min[H5O_LAYOUT_NDIMS];
+   size_t		idx_max[H5O_LAYOUT_NDIMS];
+   size_t		sub_size[H5O_LAYOUT_NDIMS];
+   size_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
+   size_t		sub_offset_m[H5O_LAYOUT_NDIMS];
    size_t		chunk_size;
    uint8		*chunk=NULL;
    H5F_istore_ud1_t	udata;
@@ -625,60 +626,60 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 
    /* check args */
    assert (f);
-   assert (istore);
-   assert (H5F_addr_defined (&(istore->btree_addr)));
-   assert (istore->ndims>0 && istore->ndims<=H5O_ISTORE_NDIMS);
+   assert (layout && H5D_CHUNKED==layout->type);
+   assert (H5F_addr_defined (&(layout->addr)));
+   assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
    assert (H5F_ISTORE_READ==op || H5F_ISTORE_WRITE==op);
    assert (size);
    assert (size_m);
    assert (buf);
 #ifndef NDEBUG
-   for (i=0; i<istore->ndims; i++) {
+   for (i=0; i<layout->ndims; i++) {
       assert (!offset_f || offset_f[i]>=0);/*neg domains unsupported	*/
       assert (!offset_m || offset_m[i]>=0);/*mem array offset never neg	*/
       assert (size[i]>=0);	/*size may be zero, implies no-op	*/
       assert (size_m[i]>0);	/*destination must exist		*/
       /*hyperslab must fit in BUF*/
       assert ((offset_m?offset_m[i]:0)+size[i]<=size_m[i]);
-      assert (istore->alignment[i]>0);
+      assert (layout->dim[i]>0);
    }
 #endif
 
    /* Initialize indices */
-   for (i=0; i<istore->ndims; i++) {
-      idx_min[i] = (offset_f?offset_f[i]:0) / istore->alignment[i];
-      idx_max[i] = ((offset_f?offset_f[i]:0)+size[i]-1)/istore->alignment[i]+1;
+   for (i=0; i<layout->ndims; i++) {
+      idx_min[i] = (offset_f?offset_f[i]:0) / layout->dim[i];
+      idx_max[i] = ((offset_f?offset_f[i]:0)+size[i]-1)/layout->dim[i]+1;
       idx_cur[i] = idx_min[i];
    }
 
    /* Allocate buffers */
-   for (i=0, chunk_size=1; i<istore->ndims; i++) {
-      chunk_size *= istore->alignment[i];
+   for (i=0, chunk_size=1; i<layout->ndims; i++) {
+      chunk_size *= layout->dim[i];
    }
    chunk = H5MM_xmalloc (chunk_size);
 
    /* Initialize non-changing part of udata */
-   udata.mesg = *istore;
+   udata.mesg = *layout;
    
    /* Loop over all chunks */
    while (1) {
 
       /* Read/Write chunk  or create it if it doesn't exist */
-      udata.mesg.ndims = istore->ndims;
+      udata.mesg.ndims = layout->ndims;
       H5F_addr_undef (&(udata.addr));
       udata.key.file_number = 0;
 
-      for (i=0; i<istore->ndims; i++) {
+      for (i=0; i<layout->ndims; i++) {
 
 	 /* The location and size of the chunk being accessed */
-	 udata.key.offset[i] = idx_cur[i] * istore->alignment[i];
-	 udata.key.size[i] = istore->alignment[i];
+	 udata.key.offset[i] = idx_cur[i] * layout->dim[i];
+	 udata.key.size[i] = layout->dim[i];
 	 
 	 /* The offset and size wrt the chunk */
 	 offset_wrt_chunk[i] = MAX ((offset_f?offset_f[i]:0),
 				    udata.key.offset[i]) -
 			       udata.key.offset[i];
-	 sub_size[i] = MIN ((idx_cur[i]+1)*istore->alignment[i],
+	 sub_size[i] = MIN ((idx_cur[i]+1)*layout->dim[i],
 			    (offset_f?offset_f[i]:0)+size[i]) -
 		       (udata.key.offset[i]+offset_wrt_chunk[i]);
 
@@ -689,10 +690,10 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
       }
       
       if (H5F_ISTORE_WRITE==op) {
-	 status = H5B_insert (f, H5B_ISTORE, &(istore->btree_addr), &udata);
+	 status = H5B_insert (f, H5B_ISTORE, &(layout->addr), &udata);
 	 assert (status>=0);
       } else {
-	 status = H5B_find (f, H5B_ISTORE, &(istore->btree_addr), &udata);
+	 status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
       }
 
       /*
@@ -700,8 +701,8 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
        * partial chunk then load the chunk from disk. 
        */
       if (H5F_ISTORE_READ==op ||
-	  !H5V_vector_zerop (istore->ndims, offset_wrt_chunk) ||
-	  !H5V_vector_eq (istore->ndims, sub_size, udata.key.size)) {
+	  !H5V_vector_zerop (layout->ndims, offset_wrt_chunk) ||
+	  !H5V_vector_eq (layout->ndims, sub_size, udata.key.size)) {
 	 if (status>=0 && H5F_addr_defined (&(udata.addr))) {
 	    assert (0==udata.key.file_number);
 	    if (H5F_block_read (f, &(udata.addr), chunk_size, chunk)<0) {
@@ -715,7 +716,7 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 
       /* Transfer data to/from the chunk */
       if (H5F_ISTORE_WRITE==op) {
-	 H5V_hyper_copy (istore->ndims, sub_size,
+	 H5V_hyper_copy (layout->ndims, sub_size,
 			 udata.key.size, offset_wrt_chunk, chunk,
 			 size_m, sub_offset_m, buf);
 	 assert (0==udata.key.file_number);
@@ -724,13 +725,13 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 			 "unable to write raw storage chunk");
 	 }
       } else {
-	 H5V_hyper_copy (istore->ndims, sub_size,
+	 H5V_hyper_copy (layout->ndims, sub_size,
 			 size_m, sub_offset_m, buf,
 			 udata.key.size, offset_wrt_chunk, chunk);
       }
 	 
       /* Increment indices */
-      for (i=istore->ndims-1, carry=1; i>=0 && carry; --i) {
+      for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
 	 if (++idx_cur[i]>=idx_max[i]) idx_cur[i] = idx_min[i];
 	 else carry = 0;
       }
@@ -763,19 +764,19 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_read (H5F_t *f, const H5O_istore_t *istore,
+H5F_istore_read (H5F_t *f, const H5O_layout_t *layout,
 		 const size_t offset[], const size_t size[], void *buf)
 {
    FUNC_ENTER (H5F_istore_read, FAIL);
 
    /* Check args */
    assert (f);
-   assert (istore);
-   assert (istore->ndims>0 && istore->ndims<=H5O_ISTORE_NDIMS);
+   assert (layout && H5D_CHUNKED==layout->type);
+   assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
    assert (size);
    assert (buf);
 
-   if (H5F_istore_copy_hyperslab (f, istore, H5F_ISTORE_READ,
+   if (H5F_istore_copy_hyperslab (f, layout, H5F_ISTORE_READ,
 				  offset, size, H5V_ZERO, size, buf)<0) {
       HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 		     "hyperslab output failure");
@@ -803,7 +804,7 @@ H5F_istore_read (H5F_t *f, const H5O_istore_t *istore,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
+H5F_istore_write (H5F_t *f, const H5O_layout_t *layout,
 		  const size_t offset[], const size_t size[],
 		  const void *buf)
 {
@@ -811,12 +812,12 @@ H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
 
    /* Check args */
    assert (f);
-   assert (istore);
-   assert (istore->ndims>0 && istore->ndims<=H5O_ISTORE_NDIMS);
+   assert (layout && H5D_CHUNKED==layout->type);
+   assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
    assert (size);
    assert (buf);
 
-   if (H5F_istore_copy_hyperslab (f, istore, H5F_ISTORE_WRITE,
+   if (H5F_istore_copy_hyperslab (f, layout, H5F_ISTORE_WRITE,
 				  offset, size, H5V_ZERO, size, buf)<0) {
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 		     "hyperslab output failure");
@@ -850,8 +851,7 @@ H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore/*out*/,
-		   uintn ndims, const size_t alignment[])
+H5F_istore_create (H5F_t *f, H5O_layout_t *layout/*out*/)
 {
    H5F_istore_ud1_t	udata;
    int			i;
@@ -860,22 +860,17 @@ H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore/*out*/,
 
    /* Check args */
    assert (f);
-   assert (istore);
-   assert (ndims>0 && ndims<=H5O_ISTORE_NDIMS);
-   assert (alignment);
+   assert (layout && H5D_CHUNKED==layout->type);
+   assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
 #ifndef NDEBUG
-   for (i=0; i<ndims; i++) {
-      assert (alignment[i]>0);
+   for (i=0; i<layout->ndims; i++) {
+      assert (layout->dim[i]>0);
    }
 #endif
 
-   udata.mesg.ndims = istore->ndims = ndims;
-   if (H5B_create (f, H5B_ISTORE, &udata, &(istore->btree_addr)/*out*/)<0) {
+   udata.mesg.ndims = layout->ndims;
+   if (H5B_create (f, H5B_ISTORE, &udata, &(layout->addr)/*out*/)<0) {
       HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree");
-   }
-
-   for (i=0; i<ndims; i++) {
-      istore->alignment[i] = alignment[i];
    }
 
    FUNC_LEAVE (SUCCEED);
