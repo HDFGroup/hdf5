@@ -1,8 +1,16 @@
+/*
+ * Copyright (C) 2002 NCSA
+ *                    All rights reserved.
+ *
+ * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *              April 12, 2002
+ *
+ * Purpose:     Tests the H5Dset_extent call
+ */
+
 #include "hdf5.h"
 #include "h5test.h"
  
-
-
 /* Compound datatype */
 typedef struct s1_t {
     unsigned int a;
@@ -10,17 +18,17 @@ typedef struct s1_t {
     float c;
 } s1_t;
 
-#define FILE0 "getname.h5"
-#define FILE1 "getname1.h5"
-#define FILE2 "getname2.h5"
-#define FILE3 "getname3.h5"
-
-
+const char *FILENAME[] = {
+    "getname",
+    "getname1",
+    "getname2",
+    "getname3",
+    NULL
+};
 
 #define RANK 2
 #define NX 4
 #define NY 5
-
 
 static int check_name( char *name, const char* check )
 {
@@ -31,34 +39,47 @@ static int check_name( char *name, const char* check )
   
 }
 
-                           
+#define NAME_BUF_SIZE   40
+#define SMALL_NAME_BUF_SIZE   2
 
 int main( void )
 {
- 
+ char	filename0[1024];
+ char	filename1[1024];
+ char	filename2[1024];
+ char	filename3[1024];
+ hid_t   fapl;
  hid_t   file_id, file1_id, file2_id, file3_id;
- hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id;
+ hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
  hid_t   dataset_id, dataset2_id;
  hid_t   space_id;  
  hid_t   type_id;
  hsize_t dims[1] = { 5 };
 
  /*buffer to hold name and its size */
- char    name[20];
- size_t  size=20;
+ char    name[NAME_BUF_SIZE];
+ size_t  size=NAME_BUF_SIZE;
 
  /*small buffer to hold name and its size */
- char    name2[2];
- size_t  size2=2;
+ char    name2[SMALL_NAME_BUF_SIZE];
+ size_t  size2=SMALL_NAME_BUF_SIZE;
 
  /*dynamic buffer to hold name and its size */
  char    *name3 = NULL;
  size_t  name_len;
 
+ /* Reset the library and get the file access property list */
+ h5_reset();
+ fapl = h5_fileaccess();
+
+ /* Initialize the file names */
+ h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
+ h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
+ h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
+ h5_fixname(FILENAME[3], fapl, filename3, sizeof filename3);
  
  /* Create a new file_id using default properties. */
- if ((file_id = H5Fcreate( FILE0, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file_id = H5Fcreate( filename0, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
 
 /*-------------------------------------------------------------------------
@@ -75,8 +96,7 @@ int main( void )
  if (H5Iget_name( group_id, name, size )<0) goto out;
   
  /* Verify */
- if (check_name( name, "/g0" )!=0)
-  goto out;
+ if (check_name( name, "/g0" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -349,18 +369,14 @@ int main( void )
  /* Reopen the group */
  if ((group_id = H5Gopen( file_id, "/g1" ))<0) goto out;
 
-
  /* Rename group */
  if (H5Gmove( file_id, "/g1", "/g1a" )<0)  goto out;
-
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g1a" )!=0)
-  goto out;
-
+ if (check_name( name, "/g1a" )!=0) goto out;
  
  /* Close */
  H5Gclose( group_id );
@@ -437,27 +453,55 @@ int main( void )
  /* Create group "/g3/foo" using absolute name */
  if ((group2_id = H5Gcreate( file_id, "/g3/foo1", 0 ))<0) goto out;
 
+ /* Open group "/g3/foo" again */
+ if ((group3_id = H5Gopen( file_id, "/g3/foo1"))<0) goto out;
+
  /* Rename group */
  if (H5Gmove( group_id, "foo1", "foo2" )<0)  goto out;
-
 
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
  
  /* Verify */
- if (check_name( name, "/g3" )!=0)
-  goto out;
+ if (check_name( name, "/g3" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g3/foo2" )!=0)
-  goto out;
+ if (check_name( name, "/g3/foo2" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/foo2" )!=0) goto out;
+
+ /* Rename group again */
+ if (H5Gmove( file_id, "g3/foo2", "g3/foo1" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+ 
+ /* Verify */
+ if (check_name( name, "/g3" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/foo1" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/foo1" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
+ H5Gclose( group3_id );
 
  
  PASSED();
@@ -469,7 +513,7 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
- TESTING("H5Iget_name with H5Gmove and H5Gopen");
+ TESTING("H5Iget_name with H5Gmove and a long path");
 
  /* Create group "g4/A/B" */
  if ((group_id = H5Gcreate( file_id, "g4", 0 ))<0) goto out;
@@ -494,9 +538,32 @@ int main( void )
  if (H5Iget_name( group3_id, name, size )<0) goto out;
  
  /* Verify */
- if (check_name( name, "/g5/C/D" )!=0)
-  goto out;
-  
+ if (check_name( name, "/g5/C/D" )!=0) goto out;
+
+ /* Move group "/g5/C/D" back to "/g4/A/B" using relative name */
+ if (H5Gmove2( group5_id, "D", group2_id, "B" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g4/A/B" )!=0) goto out;
+
+ /* Move group "/g4/A/B" to "/g4/F/B" using relative name */
+ if (H5Gmove2( group_id, "A", group_id, "F")<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g4/F/B" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g4/F" )!=0) goto out;
+
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -508,11 +575,11 @@ int main( void )
 
 
  /*-------------------------------------------------------------------------
- * Test H5Iget_name with H5Gmove and a long path
+ * Test H5Iget_name with H5Gmove and a long path #2
  *-------------------------------------------------------------------------
  */
 
- TESTING("H5Iget_name with H5Gmove and H5Gopen");
+ TESTING("H5Iget_name with H5Gmove and a long path #2");
 
  /* Create group "g6/A/B" and "g7" */
  if ((group_id = H5Gcreate( file_id, "g6", 0 ))<0) goto out;
@@ -534,8 +601,13 @@ int main( void )
  if (H5Iget_name( group2_id, name, size )<0) goto out;
  
  /* Verify */
- if (check_name( name, "/g7/C" )!=0)
-  goto out;
+ if (check_name( name, "/g7/C" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+ 
+ /* Verify */
+ if (check_name( name, "/g7/C/B" )!=0) goto out;
   
  /* Close */
  H5Gclose( group_id );
@@ -556,15 +628,13 @@ int main( void )
  if ((group_id = H5Gcreate( file_id, "/g8", 0 ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file_id, "/g8")<0) 
-  goto out;
+ if (H5Gunlink( file_id, "/g8")<0) goto out;
  
  /* Get name */
  if (H5Iget_name( group_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -584,27 +654,49 @@ int main( void )
  if ((group3_id = H5Gcreate( file_id, "g9/a/b", 0 ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file_id, "/g9/a")<0) 
-  goto out;
+ if (H5Gunlink( file_id, "/g9/a")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Recreate groups */
+ if ((group2_id = H5Gcreate( group_id, "a", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( group_id, "a/b", 0 ))<0) goto out;
+
+ /* Delete, using relative path */
+ if (H5Gunlink( group_id, "a")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
 
  /* Close */
  H5Gclose( group_id );
- H5Gclose( group2_id );
- H5Gclose( group3_id );
 
  /* Create group "g10/a/b" */
  if ((group_id = H5Gcreate( file_id, "g10", 0 ))<0) goto out;
@@ -612,20 +704,35 @@ int main( void )
  if ((group3_id = H5Gcreate( file_id, "g10/a/b", 0 ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file_id, "/g10/a/b")<0) 
-  goto out;
+ if (H5Gunlink( file_id, "/g10/a/b")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group3_id );
+
+ /* Recreate group */
+ if ((group3_id = H5Gcreate( group_id, "a/b", 0 ))<0) goto out;
+
+ /* Delete, using relative path */
+ if (H5Gunlink( group_id, "a/b")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group3_id );
 
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
- H5Gclose( group3_id );
 
  PASSED();
 
@@ -643,28 +750,23 @@ int main( void )
   
  /* Create two datasets "g11/d" and "g11/g/d"*/
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
- if ((dataset_id = H5Dcreate( group_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
- if ((dataset2_id = H5Dcreate( group2_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset_id = H5Dcreate( group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
+ if ((dataset2_id = H5Dcreate( group2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file_id, "/g11/d")<0) 
-  goto out;
+ if (H5Gunlink( file_id, "/g11/d")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( dataset2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g11/g/d" )!=0)
-  goto out;
+ if (check_name( name, "/g11/g/d" )!=0) goto out;
   
  /* Close */
  H5Dclose( dataset_id ); 
@@ -690,14 +792,13 @@ int main( void )
  H5Gclose( group_id );
 
  /* Create second file and dataset "d" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
  /* Create a data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
  
  /* Create the dataset */
- if ((dataset_id = H5Dcreate( file1_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset_id = H5Dcreate( file1_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Close */
  H5Dclose( dataset_id );
@@ -712,8 +813,7 @@ int main( void )
  if (H5Iget_name( dataset_id, name, size )< 0) goto out;
 
  /* Verify */
- if (check_name( name, "/g12/d" )!=0)
-  goto out;
+ if (check_name( name, "/g12/d" )!=0) goto out;
 
  /* Close */
  H5Dclose( dataset_id );
@@ -742,7 +842,7 @@ int main( void )
  H5Gclose( group3_id );
 
  /* Create second file and group "g" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
  if ((group_id = H5Gcreate( file1_id, "/g14", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g14/g3", 0 ))<0) goto out;
@@ -763,8 +863,7 @@ int main( void )
  if (H5Iget_name( group_id, name, size )< 0) goto out;
 
  /* Verify */
- if (check_name( name, "/g13/g1/g14/g3/g4" )!=0)
-  goto out;
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
 
  if (H5Funmount(file_id, "/g13/g1")<0) goto out;
 
@@ -773,11 +872,179 @@ int main( void )
  if (H5Iget_name( group_id, name, size )< 0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
+
+ /* Mount second file under "/g13/g1" in the first file (again) */
+ if (H5Fmount(file_id, "/g13/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get a group ID for the parent of the newly mounted group */
+ if ((group2_id = H5Gopen( file_id, "/g13"))<0) goto out;
+
+ /* Access group in the first file */
+ if ((group_id = H5Gopen( file_id, "/g13/g1/g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ if (H5Funmount(group2_id, "g1")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+
+ /* Mount second file under "/g13/g1" in the first file (again) */
+ if (H5Fmount(file_id, "/g13/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get a group ID for the newly mounted group */
+ if ((group2_id = H5Gopen( file_id, "/g13/g1"))<0) goto out;
+
+ /* Access group in the first file */
+ if ((group_id = H5Gopen( file_id, "/g13/g1/g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ if (H5Funmount(group2_id, ".")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+
+ /* Mount second file under "/g13/g1" in the first file, using relative path */
+
+ if ((group3_id = H5Gopen( file_id, "/g13"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13" )!=0) goto out;
+
+ if (H5Fmount(group3_id, "g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get a group ID for the newly mounted group */
+ if ((group2_id = H5Gopen( file_id, "/g13/g1"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1" )!=0) goto out;
+
+ /* Access group in the first file */
+ if ((group_id = H5Gopen( file_id, "/g13/g1/g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+
+ /* Access group in the first file, with relative path */
+ if ((group_id = H5Gopen( group2_id, "g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+
+ if (H5Funmount(group2_id, ".")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Mount second file under "/g13/g1" in the first file, using relative path */
+
+ if ((group3_id = H5Gopen( file_id, "/g13/g1"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1" )!=0) goto out;
+
+ if (H5Fmount(group3_id, ".", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get a group ID for the newly mounted group */
+ if ((group2_id = H5Gopen( file_id, "/g13/g1"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1" )!=0) goto out;
+
+ /* Access group in the first file */
+ if ((group_id = H5Gopen( file_id, "/g13/g1/g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+
+ /* Access group in the first file, with relative path */
+ if ((group_id = H5Gopen( group2_id, "g14/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g13/g1/g14/g3/g4" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+
+ if (H5Funmount(group2_id, ".")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
  H5Fclose( file1_id );
 
 
@@ -804,7 +1071,7 @@ int main( void )
  H5Gclose( group4_id );
 
  /* Create second file and group "g" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
  if ((group_id = H5Gcreate( file1_id, "/g16", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g16/g4", 0 ))<0) goto out;
@@ -821,11 +1088,21 @@ int main( void )
  /* Mount second file under "/g13/g1" in the first file */
  if (H5Fmount(file_id, "/g15/g1", file1_id, H5P_DEFAULT)<0) goto out;
 
+ /* Access group in the second file */
+ if ((group2_id = H5Gopen( file_id, "/g15/g1/g16/g4/g5"))<0) goto out;
+ 
  /* Get name */
  if (H5Iget_name( group_id, name, size )< 0) goto out;
 
  /* Verify */
  if (check_name( name, "" )!=0)
+  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g15/g1/g16/g4/g5" )!=0)
   goto out;
 
  if (H5Funmount(file_id, "/g15/g1")<0) goto out;
@@ -837,8 +1114,16 @@ int main( void )
  if (check_name( name, "/g15/g1/g2/g3" )!=0)
   goto out;
 
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0)
+  goto out;
+
  /* Close */
  H5Gclose( group_id );
+ H5Gclose( group2_id );
  H5Fclose( file1_id );
 
 
@@ -925,41 +1210,34 @@ int main( void )
  TESTING("H5Iget_name with different files");
  
  /* Create a new file using default properties. */
- if ((file2_id = H5Fcreate( FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
 /* Create a new file using default properties. */
- if ((file3_id = H5Fcreate( FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file3_id = H5Fcreate( filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
   /* Create the data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( file2_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset_id = H5Dcreate( file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset2_id = H5Dcreate( file3_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset2_id = H5Dcreate( file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file2_id, "/d")<0) 
-  goto out;
+ if (H5Gunlink( file2_id, "/d")<0) goto out;
  
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( dataset2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/d" )!=0)
-  goto out;
+ if (check_name( name, "/d" )!=0) goto out;
   
  /* Close */
  H5Dclose( dataset_id ); 
@@ -976,44 +1254,37 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
- TESTING("H5Iget_name with different files");
+ TESTING("H5Iget_name with different files #2");
  
  /* Create a new file using default properties. */
- if ((file2_id = H5Fcreate( FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
 /* Create a new file using default properties. */
- if ((file3_id = H5Fcreate( FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file3_id = H5Fcreate( filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
 
   /* Create the data space  */
  if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset_id = H5Dcreate( file2_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset_id = H5Dcreate( file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Create a new dataset */
- if ((dataset2_id = H5Dcreate( file3_id , "d", H5T_NATIVE_INT, space_id, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((dataset2_id = H5Dcreate( file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT ))<0) goto out;
 
  /* Delete */
- if (H5Gunlink( file3_id, "/d")<0) 
-  goto out;
+ if (H5Gunlink( file3_id, "/d")<0) goto out;
  
  /* Get name */
  if (H5Iget_name( dataset_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/d"  )!=0)
-  goto out;
+ if (check_name( name, "/d"  )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( dataset2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
   
  /* Close */
  H5Dclose( dataset_id ); 
@@ -1042,8 +1313,7 @@ int main( void )
   name_len=H5Iget_name( group_id, name, size );
 
  /* Verify */
- if (check_name( name, "/g15" )!=0)
-  goto out;
+ if (check_name( name, "/g15" )!=0) goto out;
   
  /* Close */
  H5Gclose( group_id );
@@ -1138,7 +1408,7 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g18/g2", 0 ))<0) goto out;
  
  /* Create second file and group "/g3/g4/g5" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group3_id = H5Gcreate( file1_id, "/g3", 0 ))<0) goto out;
  if ((group4_id = H5Gcreate( file1_id, "/g3/g4", 0 ))<0) goto out;
  if ((group5_id = H5Gcreate( file1_id, "/g3/g4/g5", 0 ))<0) goto out;
@@ -1146,12 +1416,11 @@ int main( void )
  /* Mount first file at "g3/g4" in the second file */
  if (H5Fmount(file1_id, "/g3/g4", file_id, H5P_DEFAULT)<0) goto out;
 
- /* Get name for the ID of the first file, should be "/g19/g2" still */
+ /* Get name for the ID of the first file, should be "/g18/g2" still */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g18/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g18/g2" )!=0) goto out;
 
  /* Open the mounted group */
  if ((group6_id = H5Gopen( file_id, "/g3/g4/g18/g2" ))<0) goto out;
@@ -1160,8 +1429,7 @@ int main( void )
  if (H5Iget_name( group6_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g3/g4/g18/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g3/g4/g18/g2" )!=0) goto out;
 
  /* Unmount */
  if (H5Funmount(file1_id, "/g3/g4")<0) goto out;
@@ -1201,7 +1469,7 @@ int main( void )
  TESTING("H5Iget_name with H5Fclose");
  
  /* Create a file and group "/g1/g2" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g1/g2", 0 ))<0) goto out;
 
@@ -1238,17 +1506,16 @@ int main( void )
  TESTING("H5Iget_name with H5Fmount and H5Gunlink");
 
  /* Create a file and group "/g1/g2" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g1/g2", 0 ))<0) goto out;
  
  /* Create a new file and group "/g3/g4" in it */
- if ((file2_id = H5Fcreate( FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
  if ((group3_id = H5Gcreate( file2_id, "/g3", 0 ))<0) goto out;
  if ((group4_id = H5Gcreate( file2_id, "/g3/g4", 0 ))<0) goto out;
 
- /* Mount first file at "g3/g4" in the second file */
+ /* Mount first file at "/g3/g4" in the second file */
  if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT)<0) goto out;
  
  /* Open the mounted group */
@@ -1258,19 +1525,22 @@ int main( void )
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g3/g4/g1/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g3/g4/g1/g2" )!=0) goto out;
 
  /* Delete */
- if (H5Gunlink( file1_id, "/g3/g4/g1/g2")<0) 
-  goto out;
+ if (H5Gunlink( file1_id, "/g3/g4/g1/g2")<0) goto out;
  
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
   
  /* Close */
  H5Gclose( group_id );
@@ -1293,20 +1563,24 @@ int main( void )
  TESTING("H5Iget_name with H5Fmount and H5Gmove");
 
  /* Create a file and group "/g1/g2" in it */
- file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group_id = H5Gcreate( file1_id, "/g1", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file1_id, "/g1/g2", 0 ))<0) goto out;
  
  /* Create a new file and group "/g3/g4" in it */
- if ((file2_id = H5Fcreate( FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, 
-  H5P_DEFAULT ))<0) goto out;
+ if ((file2_id = H5Fcreate( filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl ))<0) goto out;
  if ((group3_id = H5Gcreate( file2_id, "/g3", 0 ))<0) goto out;
  if ((group4_id = H5Gcreate( file2_id, "/g3/g4", 0 ))<0) goto out;
-
 
  /* Mount first file at "g3/g4" in the second file */
  if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT)<0) goto out;
  
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4" )!=0) goto out;
+
  /* Open the mounted group */
  if ((group5_id = H5Gopen( file2_id, "/g3/g4/g1/g2" ))<0) goto out;
 
@@ -1314,8 +1588,16 @@ int main( void )
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g3/g4/g1/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g3/g4/g1/g2" )!=0) goto out;
+
+ /* Open another mounted group, in the middle of the path */
+ if ((group6_id = H5Gopen( file2_id, "/g3/g4/g1" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1" )!=0) goto out;
 
  /* Rename group */
  if (H5Gmove( file2_id, "/g3/g4/g1/g2", "/g3/g4/g1/g5" )<0)  goto out;
@@ -1324,15 +1606,94 @@ int main( void )
  if (H5Iget_name( group5_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g3/g4/g1/g5" )!=0)
-  goto out;
+ if (check_name( name, "/g3/g4/g1/g5" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g1/g5" )!=0)
-  goto out;
+ if (check_name( name, "/g1/g5" )!=0) goto out;
+  
+ /* Rename group */
+ if (H5Gmove( file2_id, "/g3/g4/g1", "/g3/g4/g1a" )<0)  goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1a/g5" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1a/g5" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1a" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1a" )!=0) goto out;
+  
+ /* Rename middle group back, using relative path */
+ if (H5Gmove( group3_id, "g4/g1a", "g4/g1" )<0)  goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1/g5" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1/g5" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1" )!=0) goto out;
+  
+ /* Rename end group back, using relative path */
+ if (H5Gmove( group3_id, "g4/g1/g5", "g4/g1/g2" )<0)  goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1/g2" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1/g2" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g3/g4/g1" )!=0) goto out;
+  
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g1" )!=0) goto out;
   
  /* Close */
  H5Gclose( group_id );
@@ -1340,6 +1701,7 @@ int main( void )
  H5Gclose( group3_id );
  H5Gclose( group4_id );
  H5Gclose( group5_id );
+ H5Gclose( group6_id );
  H5Fclose( file1_id );
  H5Fclose( file2_id );
  
@@ -1360,15 +1722,13 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g19/g1", 0 ))<0) goto out;
 
   /* Create hard link to "g19/g1/ group */
- if (H5Glink(file_id, H5G_LINK_HARD, "/g19/g1", "/g19/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_HARD, "/g19/g1", "/g19/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g19/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g19/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g19/g2" ))<0) goto out;
@@ -1377,8 +1737,109 @@ int main( void )
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g19/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g19/g2" )!=0) goto out;
+
+ /* Rename original group */
+ if (H5Gmove( file_id, "/g19/g1", "/g19/g3" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g3" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g2" )!=0) goto out;
+
+ /* Rename original group back, using relative path */
+ if (H5Gmove( group_id, "g3", "g1" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g1" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g2" )!=0) goto out;
+
+  /* Create another hard link to "/g19/g1" group */
+ if (H5Glink(file_id, H5G_LINK_HARD, "/g19/g1", "/g19/g3")<0) goto out;
+
+ /* Open the group */
+ if ((group4_id = H5Gopen( file_id, "/g19/g3" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g3" )!=0) goto out;
+
+ /* Delete group */
+ if (H5Gunlink( file_id, "/g19/g3")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g1" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g2" )!=0) goto out;
+
+ /* Close the unlinked group */
+ H5Gclose( group4_id );
+
+  /* Create another hard link to "/g19/g1" group */
+ if (H5Glink(file_id, H5G_LINK_HARD, "/g19/g1", "/g19/g3")<0) goto out;
+
+ /* Open the group */
+ if ((group4_id = H5Gopen( file_id, "/g19/g3" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g3" )!=0) goto out;
+
+ /* Delete group, using relative path */
+ if (H5Gunlink( group_id, "g3")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g1" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g19/g2" )!=0) goto out;
+
+ /* Close the unlinked group */
+ H5Gclose( group4_id );
 
  /* Close */
  H5Gclose( group_id );
@@ -1401,15 +1862,13 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g20/g1", 0 ))<0) goto out;
 
   /* Create symbolic link to "g20/g1/ group */
- if (H5Glink(file_id, H5G_LINK_SOFT, "/g20/g1", "/g20/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_SOFT, "/g20/g1", "/g20/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g20/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g20/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g20/g2" ))<0) goto out;
@@ -1418,8 +1877,7 @@ int main( void )
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g20/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g20/g2" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -1441,15 +1899,13 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g21/g1", 0 ))<0) goto out;
 
  /* Create symbolic link to "g21/g1/ group */
- if (H5Glink(file_id, H5G_LINK_SOFT, "/g21/g1", "/g21/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_SOFT, "/g21/g1", "/g21/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g21/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g21/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g21/g2" ))<0) goto out;
@@ -1461,15 +1917,13 @@ int main( void )
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g21/g3" )!=0)
-  goto out;
+ if (check_name( name, "/g21/g3" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g21/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g21/g2" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -1491,35 +1945,46 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g22/g1", 0 ))<0) goto out;
 
  /* Create symbolic link to "g22/g1/ group */
- if (H5Glink(file_id, H5G_LINK_SOFT, "/g22/g1", "/g22/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_SOFT, "/g22/g1", "/g22/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g22/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g22/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g22/g2" ))<0) goto out;
 
- /* Rename group */
+ /* Rename soft link */
  if (H5Gmove( file_id, "/g22/g2", "/g22/g3" )<0)  goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g22/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g22/g1" )!=0) goto out;
 
  /* Get name */
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g22/g3" )!=0)
-  goto out;
+ if (check_name( name, "/g22/g3" )!=0) goto out;
+
+ /* Rename soft link, using relative paths */
+ if (H5Gmove( group_id, "g3", "g2" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g22/g1" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g22/g2" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -1542,15 +2007,13 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g23/g1", 0 ))<0) goto out;
 
  /* Create symbolic link to "g23/g1/ group */
- if (H5Glink(file_id, H5G_LINK_SOFT, "/g23/g1", "/g23/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_SOFT, "/g23/g1", "/g23/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g23/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g23/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g23/g2" ))<0) goto out;
@@ -1562,8 +2025,7 @@ int main( void )
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g23/g2" )!=0)
-  goto out;
+ if (check_name( name, "/g23/g2" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -1584,15 +2046,13 @@ int main( void )
  if ((group2_id = H5Gcreate( file_id, "/g24/g1", 0 ))<0) goto out;
 
  /* Create symbolic link to "g24/g1/ group */
- if (H5Glink(file_id, H5G_LINK_SOFT, "/g24/g1", "/g24/g2")<0) 
-  goto out;
+ if (H5Glink(file_id, H5G_LINK_SOFT, "/g24/g1", "/g24/g2")<0) goto out;
 
  /* Get name */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "/g24/g1" )!=0)
-  goto out;
+ if (check_name( name, "/g24/g1" )!=0) goto out;
 
  /* Open the group */
  if ((group3_id = H5Gopen( file_id, "/g24/g2" ))<0) goto out;
@@ -1604,8 +2064,7 @@ int main( void )
  if (H5Iget_name( group3_id, name, size )<0) goto out;
 
  /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (check_name( name, "" )!=0) goto out;
 
  /* Close */
  H5Gclose( group_id );
@@ -1616,6 +2075,787 @@ int main( void )
 
  
 /*-------------------------------------------------------------------------
+ * Test H5Iget_name with several nested mounted files
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with several nested mounted files");
+
+ /* Create a group "g25/g1/g2" in the first file */
+ if ((group_id = H5Gcreate( file_id, "/g25", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file_id, "/g25/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file_id, "/g25/g1/g2", 0 ))<0) goto out;
+ 
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create second file and group "/g26/g3/g4" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g26", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g26/g3", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g26/g3/g4", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create third file and group "/g27/g5/g6" in it */
+ file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file2_id, "/g27", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file2_id, "/g27/g5", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file2_id, "/g27/g5/g6", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create fourth file and group "/g28/g5/g6" in it */
+ file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file3_id, "/g28", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file3_id, "/g28/g7", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file3_id, "/g28/g7/g8", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Access group which will be hidden in the first file */
+ if ((group_id = H5Gopen( file_id, "/g25/g1/g2"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g2" )!=0) goto out;
+
+ /* Mount second file under "/g25/g1" in the first file */
+ if (H5Fmount(file_id, "/g25/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group which will be hidden in the second file */
+ if ((group2_id = H5Gopen( file_id, "/g25/g1/g26/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g26/g3/g4" )!=0) goto out;
+
+ /* Mount third file under "/g25/g1/g26/g3" in the first file */
+ if (H5Fmount(file_id, "/g25/g1/g26/g3", file2_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group in the third file */
+ if ((group3_id = H5Gopen( file_id, "/g25/g1/g26/g3/g27/g5/g6"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g26/g3/g27/g5/g6" )!=0) goto out;
+
+ /* Mount fourth file under "/g25/g1/g26/g3/g27/g5" in the first file */
+ if (H5Fmount(file_id, "/g25/g1/g26/g3/g27/g5", file3_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group in the fourth file */
+ if ((group4_id = H5Gopen( file_id, "/g25/g1/g26/g3/g27/g5/g28/g7/g8"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g26/g3/g27/g5/g28/g7/g8" )!=0) goto out;
+
+ if (H5Funmount(file_id, "/g25/g1/g26/g3/g27/g5")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g26/g3/g27/g5/g6" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group4_id );
+ H5Fclose( file3_id );
+
+ if (H5Funmount(file_id, "/g25/g1/g26/g3")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g26/g3/g4" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group3_id );
+ H5Fclose( file2_id );
+
+ if (H5Funmount(file_id, "/g25/g1")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g25/g1/g2" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Fclose( file1_id );
+
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name and H5Gmove with repeated path components
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name and H5Gmove with repeated path components");
+
+ /* Create a group "g29/g1/g2/g1/g2" in a file */
+ if ((group_id = H5Gcreate( file_id, "/g29", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file_id, "/g29/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file_id, "/g29/g1/g2", 0 ))<0) goto out;
+ if ((group4_id = H5Gcreate( file_id, "/g29/g1/g2/g1", 0 ))<0) goto out;
+ if ((group5_id = H5Gcreate( file_id, "/g29/g1/g2/g1/g2", 0 ))<0) goto out;
+ 
+ /* Rename group */
+ if (H5Gmove( file_id, "/g29/g1/g2/g1/g2", "/g29/g1/g2/g1/g3" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g29/g1/g2/g1/g3" )!=0) goto out;
+
+ /* Rename group in middle of path, keeping within the same group */
+ if (H5Gmove( file_id, "/g29/g1/g2/g1", "/g29/g1/g2/g3" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g29/g1/g2/g3" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g29/g1/g2/g3/g3" )!=0) goto out;
+
+ /* Rename group in middle of path, moving to another group in file */
+ if (H5Gmove( file_id, "/g29/g1/g2/g3", "/g29/g3" )<0)  goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g29/g3" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g29/g3/g3" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+ H5Gclose( group4_id );
+ H5Gclose( group5_id );
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name with higher mounted file
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with higher mounted file");
+
+ /* Create a group "/g30/g1/g2" in the first file */
+ if ((group_id = H5Gcreate( file_id, "/g30", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file_id, "/g30/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file_id, "/g30/g1/g2", 0 ))<0) goto out;
+ 
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create second file and group "/g31/g3/g4" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g31", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g31/g3", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g31/g3/g4", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create third file and group "/g32/g5/g6" in it */
+ file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file2_id, "/g32", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file2_id, "/g32/g5", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file2_id, "/g32/g5/g6", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create fourth file and group "/g33/g5/g6" in it */
+ file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file3_id, "/g33", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file3_id, "/g33/g7", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file3_id, "/g33/g7/g8", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Access group which will be hidden in the first file */
+ if ((group_id = H5Gopen( file_id, "/g30/g1/g2"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g2" )!=0) goto out;
+
+ /* Mount second file under "/g30/g1" in the first file */
+ if (H5Fmount(file_id, "/g30/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group which will be hidden in the second file */
+ if ((group2_id = H5Gopen( file_id, "/g30/g1/g31/g3/g4"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g31/g3/g4" )!=0) goto out;
+
+ /* Mount third file under "/g30/g1/g31/g3" in the first file */
+ if (H5Fmount(file_id, "/g30/g1/g31/g3", file2_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group which will be hidden in the third file */
+ if ((group3_id = H5Gopen( file_id, "/g30/g1/g31/g3/g32/g5/g6"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g31/g3/g32/g5/g6" )!=0) goto out;
+
+ /* Mount fourth file under "/g30" in the first file, hiding the files below it */
+ if (H5Fmount(file_id, "/g30", file3_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Access group which will be in the fourth file */
+ if ((group4_id = H5Gopen( file_id, "/g30/g33/g7/g8"))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g33/g7/g8" )!=0) goto out;
+
+ /* Unmount fourth file */
+ if (H5Funmount(file_id, "/g30")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g31/g3/g32/g5/g6" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Unmount third file */
+ if (H5Funmount(file_id, "/g30/g1/g31/g3")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g31/g3/g4" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Unmount second file */
+ if (H5Funmount(file_id, "/g30/g1")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )< 0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g30/g1/g2" )!=0) goto out;
+
+ /* Close groups */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+ H5Gclose( group4_id );
+
+ /* Close files */
+ H5Fclose( file1_id );
+ H5Fclose( file2_id );
+ H5Fclose( file3_id );
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name with multiple hard links and mounted files
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with multiple hard links and mounted files");
+
+ /* Create second file and group "/g35/g3/g4" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g35", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g35/g3", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g35/g3/g4", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create group "/g34/g1/g2" in first file */
+ if ((group_id = H5Gcreate( file_id, "/g34", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file_id, "/g34/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file_id, "/g34/g1/g2", 0 ))<0) goto out;
+
+  /* Create hard link to "/g34/g1/g2 group */
+ if (H5Glink(file_id, H5G_LINK_HARD, "/g34/g1/g2", "/g34/g2a")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g34/g1/g2" )!=0) goto out;
+
+ /* Open the link to the group */
+ if ((group4_id = H5Gopen( file_id, "/g34/g2a" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g34/g2a" )!=0) goto out;
+
+ /* Mount second file under "/g34/g1" in the first file */
+ if (H5Fmount(file_id, "/g34/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g34/g2a" )!=0) goto out;
+
+ /* Unmount second file */
+ if (H5Funmount(file_id, "/g34/g1")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g34/g1/g2" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g34/g2a" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+ H5Gclose( group4_id );
+ H5Fclose( file1_id );
+ 
+ PASSED();
+
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name with mounted files and unlinking
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with mounted files and unlinking");
+
+ /* Create group "/g36/g1/g2" in first file */
+ if ((group_id = H5Gcreate( file_id, "/g36", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file_id, "/g36/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file_id, "/g36/g1/g2", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create second file and group "/g37/g4" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g37", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g37/g4", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g37/g4/g5a", 0 ))<0) goto out;
+ if ((group4_id = H5Gcreate( file1_id, "/g37/g4/g5b", 0 ))<0) goto out;
+
+ /* Mount second file under "/g36/g1" in the first file */
+ if (H5Fmount(file_id, "/g36/g1", file1_id, H5P_DEFAULT)<0) goto out;
+
+ /* Open group in mounted file */
+ if ((group5_id = H5Gopen( file_id, "/g36/g1/g37/" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group5_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g36/g1/g37" )!=0) goto out;
+
+ /* Open group to delete in mounted file */
+ if ((group6_id = H5Gopen( file_id, "/g36/g1/g37/g4/g5a" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g36/g1/g37/g4/g5a" )!=0) goto out;
+
+ /* Delete end group in mounted file, using relative paths */
+ if (H5Gunlink( group5_id, "g4/g5a")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group3_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close deleted group */
+ H5Gclose( group6_id );
+
+ /* Open groups to delete in mounted file */
+ if ((group6_id = H5Gopen( file_id, "/g36/g1/g37/g4" ))<0) goto out;
+ if ((group7_id = H5Gopen( file_id, "/g36/g1/g37/g4/g5b" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g36/g1/g37/g4" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group7_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g36/g1/g37/g4/g5b" )!=0) goto out;
+
+ /* Delete middle group in mounted file, using relative paths */
+ if (H5Gunlink( group5_id, "g4")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group6_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group7_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group4_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close deleted groups */
+ H5Gclose( group6_id );
+ H5Gclose( group7_id );
+
+ /* Close group in mounted file */
+ H5Gclose( group5_id );
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+ H5Gclose( group4_id );
+ H5Fclose( file1_id );
+ 
+ PASSED();
+
+
+
+/*-------------------------------------------------------------------------
+ * Test H5Iget_name with mounting already mounted file
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with mounting already mounted files");
+
+ /* Create file and group "/g38/g1/g2" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g38", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g38/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g38/g1/g2", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create second file and group "/g39/g1/g2" in it */
+ file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file2_id, "/g39", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file2_id, "/g39/g3", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file2_id, "/g39/g3/g4", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create third file and group "/g40/g5/g6" in it */
+ file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file3_id, "/g40", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file3_id, "/g40/g5", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file3_id, "/g40/g5/g6", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Mount second file under "/g38/g1" in the first file */
+ if (H5Fmount(file1_id, "/g38/g1", file2_id, H5P_DEFAULT)<0) goto out;
+
+ if ((group_id = H5Gopen( file1_id, "/g38/g1/g39/g3/g4" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g38/g1/g39/g3/g4" )!=0) goto out;
+
+ /* Mount first file under "/g40/g5" in the third file */
+ if (H5Fmount(file3_id, "/g40/g5", file1_id, H5P_DEFAULT)<0) goto out;
+
+ if ((group2_id = H5Gopen( file3_id, "/g40/g5/g38/g1/g39/g3/g4" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g40/g5/g38/g1/g39/g3/g4" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g38/g1/g39/g3/g4" )!=0) goto out;
+
+ /* Unmount first file */
+ if (H5Funmount(file3_id, "/g40/g5")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g38/g1/g39/g3/g4" )!=0) goto out;
+
+ /* Unmount second file */
+ if (H5Funmount(file1_id, "/g38/g1")<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Fclose( file1_id );
+ H5Fclose( file2_id );
+ H5Fclose( file3_id );
+ 
+ PASSED();
+
+
+
+/*-------------------------------------------------------------------------
  * end tests 
  *-------------------------------------------------------------------------
  */
@@ -1623,14 +2863,12 @@ int main( void )
  
  /* Close file */
  H5Fclose( file_id );
-  
+ h5_cleanup(FILENAME, fapl);
  return 0;
 
 out:
  H5Fclose( file_id );
  H5_FAILED();
  return 1;
-  
- 
 }
 
