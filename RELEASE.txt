@@ -112,6 +112,8 @@ Platforms Tested
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
                                 mpich-1.2.1
+  Linux 2.4.4                   gcc-2.95.3
+                                g++ 2.95.3
   Linux 2.2.16-3smp             gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
@@ -143,7 +145,7 @@ Known Problems
   libraries on Solaris are available in a static format.
 
   The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode.  The parallel mode works fine
+  on IBM SP2 platform for the serial mode. The parallel mode works fine
   with this option.
   
   It is suggested that you don't use this option on these platforms
@@ -202,7 +204,7 @@ Known Problems
 * The h4toh5 utility produces images that do not correctly conform
   to the HDF5 Image and Palette Specification. 
 
-      http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+     http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
 
   Several required HDF5 attributes are omitted, and the dataspace 
   is reversed (i.e., the ht. and width of the image dataset is 
@@ -212,6 +214,5 @@ Known Problems
 
 * The test_compression in ./c++/test/dsets.cpp failed on Linux.  A size
   value that is passed to a memcpy mysteriously becomes very large resulting 
-  in a Segnmentation Fault.  This specific test is disabled until we can 
+  in a Segnmentation Fault. This specific test is disabled until we can 
   figure out the problem and come up with a solution.
-  
