@@ -40,5 +40,6 @@ H5_DLL herr_t H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t a
 		  const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, unsigned closing);
 H5_DLL herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
+H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 
 #endif /* !_H5FDprivate_H */

@@ -320,6 +320,16 @@ H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 #define H5F_CLOSE_DEGREE_SIZE		        sizeof(H5F_close_degree_t)
 #define H5F_CLOSE_DEGREE_DEF		        H5F_CLOSE_DEFAULT
 
+/* Definition for offset position in file for family file driver */
+#define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset"
+#define H5F_ACS_FAMILY_OFFSET_SIZE              sizeof(hsize_t)
+#define H5F_ACS_FAMILY_OFFSET_DEF               0
+
+/* Definition for data type in multi file driver */
+#define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"
+#define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
+#define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
+
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"
@@ -343,6 +353,7 @@ H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
                                  unsigned *obj_id_count);
 H5_DLL herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
+H5_DLL herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 
 /* Functions that operate on array storage */
 H5_DLL herr_t H5F_arr_read (H5F_t *f, hid_t dxpl_id,

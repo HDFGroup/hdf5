@@ -137,6 +137,7 @@ static herr_t H5FD_stdio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_stdio_get_eoa(H5FD_t *_file);
 static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_stdio_get_eof(H5FD_t *_file);
+static herr_t  H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
                 size_t size, void *buf);
 static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
@@ -166,6 +167,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_get_eoa,		                /*get_eoa		*/
     H5FD_stdio_set_eoa, 	                /*set_eoa		*/
     H5FD_stdio_get_eof,		                /*get_eof		*/
+    H5FD_stdio_get_handle,                      /*get_handle            */
     H5FD_stdio_read,		                /*read			*/
     H5FD_stdio_write,		                /*write			*/
     H5FD_stdio_flush,		                /*flush			*/
@@ -572,6 +574,36 @@ H5FD_stdio_get_eof(H5FD_t *_file)
     H5Eclear();
 
     return(MAX(file->eof, file->eoa));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5FD_stdio_get_handle
+ * 
+ * Purpose:        Returns the file handle of stdio file driver.
+ * 
+ * Returns:        Non-negative if succeed or negative if fails.
+ * 
+ * Programmer:     Raymond Lu
+ *                 Sept. 16, 2002
+ * 
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t  
+H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+{   
+    H5FD_stdio_t       *file = (H5FD_stdio_t *)_file;
+    static const char  *func="H5FD_stdio_get_handle";  /* Function Name for error reporting */
+   
+    /* Clear the error stack */
+    H5Eclear();
+             
+    *file_handle = &(file->fp);
+    if(*file_handle==NULL)
+        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "get handle failed", -1);
+    return(0); 
 }
 
 

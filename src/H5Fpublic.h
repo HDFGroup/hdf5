@@ -94,6 +94,7 @@ H5_DLL hid_t  H5Fget_create_plist (hid_t file_id);
 H5_DLL hid_t  H5Fget_access_plist (hid_t file_id);
 H5_DLL herr_t H5Fget_obj_count(hid_t file_id, unsigned types, 
                                 unsigned *obj_id_count);
+H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *obj_id_list);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);

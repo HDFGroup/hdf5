@@ -223,6 +223,10 @@ Documentation
 New Features
 ============
 
+    * Added API functions to return pointer to low-level file handle
+      (H5Fget_vfd_handle and H5FDget_vfd_handle) and related property list
+      setting functions(H5Pset_family_offset and H5Pset_multi_type).
+      SLU - 2002/09/30
     * Changed "H5P[set|get]_space_time" functions to "H5P[set|get]_alloc_time"
       Unify all symbolic names for these functions to use "alloc time" instead
       of other names.  QAK - 2002/09/13

@@ -25,6 +25,7 @@
 #include "H5Ipublic.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
+#include "H5FDpublic.h"
 #include "H5MMpublic.h"
 #include "H5Zpublic.h"
 
@@ -179,6 +180,10 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
 H5_DLL void *H5Pget_driver_info(hid_t plist_id);
+H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
+H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
+H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
+H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
 #ifdef H5_WANT_H5_V1_4_COMPAT
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv,
         void *bkg);

@@ -205,6 +205,8 @@ H5F_init_interface(void)
     hid_t           driver_id           = H5F_ACS_FILE_DRV_ID_DEF;
     void            *driver_info        = H5F_ACS_FILE_DRV_INFO_DEF;
     H5F_close_degree_t close_degree     = H5F_CLOSE_DEGREE_DEF;
+    hsize_t         family_offset       = H5F_ACS_FAMILY_OFFSET_DEF;
+    H5FD_mem_t      mem_type            = H5F_ACS_MULTI_TYPE_DEF;
 
     /* File mount property class variable. 
      * - Mount property class to modify
@@ -385,6 +387,13 @@ H5F_init_interface(void)
         if(H5P_register(acs_pclass,H5F_CLOSE_DEGREE_NAME,H5F_CLOSE_DEGREE_SIZE, &close_degree,NULL,NULL,NULL,NULL,NULL,NULL)<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
+        /* Register the offset of family driver info */
+        if(H5P_register(acs_pclass,H5F_ACS_FAMILY_OFFSET_NAME,H5F_ACS_FAMILY_OFFSET_SIZE, &family_offset,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+        /* Register the data type of multi driver info */
+        if(H5P_register(acs_pclass,H5F_ACS_MULTI_TYPE_NAME,H5F_ACS_MULTI_TYPE_SIZE, &mem_type,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     } /* end if */
 
     /* Only register the default property list if it hasn't been created yet */
@@ -1161,6 +1170,74 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
 done:
     FUNC_LEAVE(ret_value); 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_vfd_handle
+ *
+ * Purpose:     Returns a pointer to the file handle of the low-level file
+ *              driver.
+ *
+ * Return:      Success:        non-negative value. 
+ *
+ *              Failture:       negative. 
+ * 
+ * Programmer:  Raymond Lu
+ *              Sep. 16, 2002
+ *
+ * Modification:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
+{
+    H5F_t               *file=NULL;
+    herr_t              ret_value;
+    
+    FUNC_ENTER_API(H5Fget_vfd_handle, NULL);
+
+    /* Check args */
+    assert(file_handle);
+    if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
+
+    ret_value=H5F_get_vfd_handle(file, fapl, file_handle);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_vfd_handle
+ *
+ * Purpose:     Returns a pointer to the file handle of the low-level file
+ *              driver.  This is the private function for H5Fget_vfd_handle.
+ *
+ * Return:      Success:        Non-negative.
+ *
+ *              Failture:       negative.
+ *
+ * Programmer:  Raymond Lu
+ *              Sep. 16, 2002
+ *
+ * Modification:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void**file_handle) 
+{
+    herr_t ret_value;
+
+    FUNC_ENTER_NOINIT(H5F_get_vfd_handle);
+
+    assert(file_handle);
+    if((ret_value=H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

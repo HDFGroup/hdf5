@@ -122,6 +122,7 @@ static herr_t H5FD_multi_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_multi_get_eoa(H5FD_t *_file);
 static herr_t H5FD_multi_set_eoa(H5FD_t *_file, haddr_t eoa);
 static haddr_t H5FD_multi_get_eof(H5FD_t *_file);
+static herr_t  H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static haddr_t H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size);
 static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr,
 			      hsize_t size);
@@ -155,6 +156,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_eoa,				/*get_eoa		*/
     H5FD_multi_set_eoa,				/*set_eoa		*/
     H5FD_multi_get_eof,				/*get_eof		*/
+    H5FD_multi_get_handle,                      /*get_handle            */
     H5FD_multi_read,				/*read			*/
     H5FD_multi_write,				/*write			*/
     H5FD_multi_flush,				/*flush			*/
@@ -1512,6 +1514,39 @@ H5FD_multi_get_eof(H5FD_t *_file)
     } END_MEMBERS;
     
     return MAX(file->eoa, eof);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5FD_multi_get_handle
+ * 
+ * Purpose:        Returns the file handle of MULTI file driver.
+ *  
+ * Returns:        Non-negative if succeed or negative if fails.
+ *  
+ * Programmer:     Raymond Lu   
+ *                 Sept. 16, 2002  
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+{                
+    H5FD_multi_t        *file = (H5FD_multi_t *)_file;
+    H5FD_mem_t          type, mmt;
+    static const char   *func="H5FD_multi_get_handle";  /* Function Name for error reporting */
+
+    /* Get data type for multi driver */
+    if(H5Pget_multi_type(fapl, &type) < 0)
+        H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "can't get data type for multi driver", -1);
+    if(type<H5FD_MEM_DEFAULT || type>=H5FD_MEM_NTYPES)
+        H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "data type is out of range", -1);
+    mmt = file->fa.memb_map[type];
+    if(H5FD_MEM_DEFAULT==mmt) mmt = type;
+                                                                     
+    return (H5FDget_vfd_handle(file->memb[mmt], fapl, file_handle));
 }
 
 

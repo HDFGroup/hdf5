@@ -2872,3 +2872,62 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5F_get_fileno() */
 
+
+/*--------------------------------------------------------------------------
+ * Function:    H5FDget_vfd_handle
+ *
+ * Purpose:     Returns a pointer to the file handle of low-level virtual 
+ *              file driver.
+ *
+ * Return:      Non-negative if succeed; negative otherwise.
+ *
+ * Programmer:  Raymond Lu
+ *              Sep. 16, 2002
+ *
+ * Modifications:
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+{
+    herr_t              ret_value;
+
+    FUNC_ENTER_API(H5FDget_vfd_handle, FAIL);
+    
+    /* Check arguments */
+    assert(file);
+    assert(file_handle);
+    ret_value=H5FD_get_vfd_handle(file, fapl, file_handle);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5FD_get_vfd_handle
+ *
+ * Purpose:     Retrieve the file handle for file driver.
+ *
+ * Return:      Non-negative if succeed; negative if fails.
+ * 
+ * Programmer:  Raymond Lu
+ *              Sep. 16, 2002
+ *
+ * Modifications:
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+{
+    herr_t ret_value = SUCCEED;
+    
+    FUNC_ENTER_NOAPI(H5FD_get_vfd_handle, FAIL);
+
+    assert(file_handle);
+    if(file->cls->get_handle && ((ret_value=file->cls->get_handle(file, fapl, file_handle)) < 0))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");        
+
+done:
+    FUNC_LEAVE(ret_value);
+}    

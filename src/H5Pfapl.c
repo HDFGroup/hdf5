@@ -498,8 +498,304 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5Pget_driver_info() */
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_family_offset
+ * 
+ * Purpose:     Set offset for family driver.  This file access property
+ *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
+ *              to retrieve VFD file handle.
+ *              
+ * Return:      Success:        Non-negative value. 
+ *                              
+ *              Failure:        Negative value. 
+ *                              
+ * Programmer:  Raymond Lu     
+ *              Sep 17, 2002 
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+*/
+herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
+{
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t              ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER_API(H5Pset_family_offset, FAIL);
+
+    /* Get the plist structure */
+    if(H5P_DEFAULT == fapl_id)
+         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    /* Set values */
+    if((ret_value=H5P_set_family_offset(plist, offset)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset");
+                    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_family_offset
+ * 
+ * Purpose:     Set offset for family driver.  Private function for 
+ *              H5Pset_family_offset
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                          
+ * Programmer:  Raymond Lu  
+ *              Sep 17, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
+{
+    herr_t      ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5P_set_family_offset, FAIL);
+
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+         if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
+              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set offset for family file");
+    } else {
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+ 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_family_offset
+ * 
+ * Purpose:     Get offset for family driver.  This file access property
+ *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
+ *              to retrieve VFD file handle.
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                              
+ * Programmer:  Raymond Lu      
+ *              Sep 17, 2002    
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
+{
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t              ret_value=SUCCEED;      /* return value */
+                               
+    FUNC_ENTER_API(H5Pget_family_offset, FAIL);
+                                            
+    /* Get the plist structure */
+    if(H5P_DEFAULT == fapl_id)
+         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    /* Set values */
+    if((ret_value=H5P_get_family_offset(plist, offset)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset");
+                                                                                                          
+done:               
+    FUNC_LEAVE(ret_value);
+}   
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_get_family_offset
+ * 
+ * Purpose:     Get offset for family driver.  Private function for
+ *              H5Pget_family_offset
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                              
+ * Programmer:  Raymond Lu      
+ *              Sep 17, 2002    
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
+{
+    herr_t      ret_value=SUCCEED;
+                            
+    FUNC_ENTER_NOAPI(H5P_get_family_offset, FAIL);
+                                    
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set offset for family file");
+    } else {  
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+    }    
+                                                                                               
+done:
+    FUNC_LEAVE(ret_value);
+}   
+                
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_multi_type
+ * 
+ * Purpose:     Set data type for multi driver.  This file access property
+ *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
+ *              to retrieve VFD file handle.
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                          
+ * Programmer:  Raymond Lu  
+ *              Sep 17, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
+{
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t              ret_value=SUCCEED;      /* return value */
+
+    FUNC_ENTER_API(H5Pset_multi_type, FAIL);
+
+    /* Get the plist structure */
+    if(H5P_DEFAULT == fapl_id)
+         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    /* Set values */
+    if((ret_value=H5P_set_multi_type(plist, type)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver");
+                                                  
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_multi_type
+ *  
+ * Purpose:     Set data type for multi file driver.  Private function for
+ *              H5Pset_multi_type.
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                              
+ * Programmer:  Raymond Lu              
+ *              Sep 17, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
+{
+    herr_t      ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5P_set_multi_type, FAIL);
+
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+         if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set type for multi driver");
+    } else {
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+}               
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_multi_type
+ * 
+ * Purpose:     Get data type for multi driver.  This file access property
+ *              list will be passed to H5Fget_vfd_handle or H5FDget_vfd_handle
+ *              to retrieve VFD file handle.
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                              
+ * Programmer:  Raymond Lu      
+ *              Sep 17, 2002    
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
+{
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t              ret_value=SUCCEED;      /* return value */
+                                
+    FUNC_ENTER_API(H5Pget_multi_type, FAIL);
+                                        
+    /* Get the plist structure */
+    if(H5P_DEFAULT == fapl_id)
+         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    /* Set values */
+    if((ret_value=H5P_get_multi_type(plist, type)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver");
+                                                                                                                                     
+done:                                              
+    FUNC_LEAVE(ret_value);                         
+}   
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_get_multi_type
+ *  
+ * Purpose:     Get data type for multi file driver.  Private function for
+ *              H5Pget_multi_type.
+ *              
+ * Return:      Success:        Non-negative value.
+ *                              
+ *              Failure:        Negative value.
+ *                              
+ * Programmer:  Raymond Lu      
+ *              Sep 17, 2002    
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
+{
+    herr_t      ret_value=SUCCEED;
+                           
+    FUNC_ENTER_NOAPI(H5P_get_multi_type, FAIL);
+                                    
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0) 
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't get type for multi driver");    
+    } else {    
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");    
+    }    
+                                                                                          
+done:
+    FUNC_LEAVE(ret_value);
+}               
+
+
+#ifdef H5_WANT_H5_V1_4_COMPAT
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_cache
  *

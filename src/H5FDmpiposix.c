@@ -164,6 +164,7 @@ static herr_t H5FD_mpiposix_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mpiposix_get_eoa(H5FD_t *_file);
 static herr_t H5FD_mpiposix_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_mpiposix_get_eof(H5FD_t *_file);
+static herr_t  H5FD_mpiposix_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, void *buf);
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
@@ -199,6 +200,7 @@ static const H5FD_class_t H5FD_mpiposix_g = {
     H5FD_mpiposix_get_eoa,			/*get_eoa		*/
     H5FD_mpiposix_set_eoa, 			/*set_eoa		*/
     H5FD_mpiposix_get_eof,			/*get_eof		*/
+    H5FD_mpiposix_get_handle,                   /*get_handle            */
     H5FD_mpiposix_read,				/*read			*/
     H5FD_mpiposix_write,			/*write			*/
     H5FD_mpiposix_flush,			/*flush			*/
@@ -950,6 +952,38 @@ H5FD_mpiposix_get_eof(H5FD_t *_file)
 done:
     FUNC_LEAVE(ret_value);
 } /* end H5FD_mpiposix_get_eof() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5FD_mpiposix_get_handle
+ * 
+ * Purpose:        Returns the file handle of MPI-POSIX file driver.
+ * 
+ * Returns:        Non-negative if succeed or negative if fails.
+ * 
+ * Programmer:     Raymond Lu
+ *                 Sept. 16, 2002
+ * 
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t  
+H5FD_mpiposix_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
+{   
+    H5FD_mpiposix_t       *file = (H5FD_mpiposix_t *)_file;
+    herr_t                ret_value = SUCCEED;
+                             
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_get_handle, FAIL);
+                                    
+    if(!file_handle)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
+
+    *file_handle = &(file->fd);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

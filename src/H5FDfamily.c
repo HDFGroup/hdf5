@@ -77,6 +77,7 @@ static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_family_get_eoa(H5FD_t *_file);
 static herr_t H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa);
 static haddr_t H5FD_family_get_eof(H5FD_t *_file);
+static herr_t  H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, void *_buf/*out*/);
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -107,6 +108,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_get_eoa,			/*get_eoa		*/
     H5FD_family_set_eoa,			/*set_eoa		*/
     H5FD_family_get_eof,			/*get_eof		*/
+    H5FD_family_get_handle,                     /*get_handle            */
     H5FD_family_read,				/*read			*/
     H5FD_family_write,				/*write			*/
     H5FD_family_flush,				/*flush			*/
@@ -500,7 +502,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     char		memb_name[4096], temp[4096];
     hsize_t		eof;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genplist_t      *plist;      /* Property list pointer */
     
     FUNC_ENTER_NOAPI(H5FD_family_open, NULL);
 
@@ -893,6 +895,50 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:       H5FD_family_get_handle
+ * 
+ * Purpose:        Returns the file handle of FAMILY file driver.
+ * 
+ * Returns:        Non-negative if succeed or negative if fails.
+ * 
+ * Programmer:     Raymond Lu
+ *                 Sept. 16, 2002
+ *  
+ * Modifications:
+ *  
+ *-------------------------------------------------------------------------
+ */ 
+static herr_t  
+H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+{   
+    H5FD_family_t       *file = (H5FD_family_t *)_file;
+    H5P_genplist_t      *plist;
+    hsize_t             offset;
+    int                 memb;
+    herr_t              ret_value;
+                              
+    FUNC_ENTER_NOAPI(H5FD_family_get_handle, FAIL);
+
+    /* Get the plist structure and family offset */
+    if(H5P_DEFAULT == fapl)
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if(NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get offset for family driver");
+
+    if(offset>(file->memb_size*file->nmembs))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "offset is bigger than file size");
+    memb = (int)(offset/file->memb_size);
+
+    ret_value = H5FD_get_vfd_handle(file->memb[memb], fapl, file_handle);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_family_read
  *
  * Purpose:	Reads SIZE bytes of data from FILE beginning at address ADDR
@@ -922,8 +968,8 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     haddr_t		sub;
     size_t		req;
     hsize_t             tempreq;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genplist_t      *plist;      /* Property list pointer */
+    herr_t              ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_read, FAIL);
 
