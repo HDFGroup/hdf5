@@ -676,6 +676,15 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
 <dd>
 <table border="0">
   <tr>
+    <td align="left" valign="top"><code>H5set_free_list_limits</code></td>
+    <td align="left" valign="top">
+        <em>herr_t</em> <code>H5set_free_list_limits</code> (<em>int</em> <code>reg_global_lim</code>, 
+        <em>int</em> <code>reg_list_lim</code>, <em>int</em> <code>arr_global_lim</code>,
+        <em>int</em> <code>arr_list_lim</code>, <em>int</em> <code>blk_global_lim</code>, 
+	<em>int</em> <code>blk_list_lim</code>)
+    </td>
+  </tr>
+  <tr>
     <td align="left" valign="top"><code>H5Dget_offset</code></td>
     <td align="left" valign="top"><em>hsize_t</em> <code>H5Dget_offset</code> (<em>hid_t </em><code>dset_id</code>)</td>
   </tr>
@@ -772,6 +781,15 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
     </td>
   </tr>
   <tr>
+    <td align="left" valign="top"><code>H5Pget_fclose_degree</code></td>
+    <td align="left" valign="top">
+        <em>herr_t</em> <code>H5Pget_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
+        <em>H5F_close_degree_t *</em><code>fc_degree</code>) 
+        <br>
+        <i>(This item corrected 14 September 2004.)</i>
+    </td>
+  </tr>
+  <tr>
     <td align="left" valign="top"><code>H5Pget_fill_time</code></td>
     <td align="left" valign="top">
         <em>herr_t </em><code>H5Pget_fill_time</code> (<em>hid_t</em> <code>plist_id</code>,
@@ -838,6 +856,15 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
     </td>
   </tr>
   <tr>
+    <td align="left" valign="top"><code>H5Pset_fclose_degree</code></td>
+    <td align="left" valign="top">
+        <em>herr_t</em> <code>H5Pset_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
+        <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+        <br>
+        <i>(This item corrected 14 September 2004.)</i>
+    </td>
+  </tr>
+  <tr>
     <td align="left" valign="top"><code>H5Pset_fill_time</code></td>
     <td align="left" valign="top">
         <em>herr_t </em><code>H5Pset_fill_time</code> (<em>hid_t</em> <code>plist_id</code>,
@@ -901,15 +928,6 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
     <td align="left" valign="top">
         <em>int</em> <code>H5Rget_object_type</code> (<em>hid_t</em> <code>id</code>,
         <em>void *</em><code>ref</code>)
-    </td>
-  </tr>
-  <tr>
-    <td align="left" valign="top"><code>H5set_free_list_limits</code></td>
-    <td align="left" valign="top">
-        <em>herr_t</em> <code>H5set_free_list_limits</code> (<em>int</em> <code>reg_global_lim</code>, 
-        <em>int</em> <code>reg_list_lim</code>, <em>int</em> <code>arr_global_lim</code>,
-        <em>int</em> <code>arr_list_lim</code>, <em>int</em> <code>blk_global_lim</code>, 
-	<em>int</em> <code>blk_list_lim</code>)
     </td>
   </tr>
   <tr>
@@ -1033,7 +1051,7 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
                 <code><em>int</em></code> to 
                 <code><em>size_t</em></code>. 
                 <br>
-                <i>(This item corrected 3 March 2004.)
+                <i>(This item corrected 3 March 2004.)</i>
         <dt>* <code>H5Pset_fapl_log</code>
           <dd>The <code>verbosity</code> parameter has been removed.
           <dd>Two new parameters have been added:  
@@ -1657,7 +1675,7 @@ V1.4.0
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 27 August 2004 
+Last modified: 14 September 2004 
 <!-- hhmts end -->
 
 </body>
