@@ -176,11 +176,11 @@ do_pio(parameters param)
         break;
     case RAWIO:
         fd.rawfd = -1;
-        res.timers = pio_time_new(SYS_TIMER);
+        res.timers = pio_time_new(MPI_TIMER);
         break;
     case PHDF5:
         fd.h5fd = -1;
-        res.timers = pio_time_new(SYS_TIMER);
+        res.timers = pio_time_new(MPI_TIMER);
         break;
     default:
         /* unknown request */
