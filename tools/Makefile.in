@@ -24,7 +24,7 @@ LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
 PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @H4TOH5@ @PDB2HDF@
-PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst
+PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst h4toh5test
 
 ## Source and object files for the library; do not install
 LIB_SRC=h5tools.c
@@ -39,7 +39,7 @@ H4TOH5_HDR=h4toh5main.h h4toh5util.h
 
 ## Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5toh4.c	\
-	 h5dumptst.c pdb2hdf.c talign.c $(H4TOH5_SRC)
+	 h5dumptst.c h4toh5test.c pdb2hdf.c talign.c $(H4TOH5_SRC)
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h $(H4TOH5_HDR)
 
@@ -74,6 +74,9 @@ h5toh4: h5toh4.lo
 
 h5dumptst: h5dumptst.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dumptst.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+h4toh5test: h4toh5test.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h4toh5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h4toh5: $(H4TOH5_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(H4TOH5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
