@@ -1,6 +1,7 @@
 ## Top-level HDF5 Makefile(.in)
 ##
-## Copyright (C) 1997 National Center for Supercomputing Applications.
+## Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002
+##    National Center for Supercomputing Applications
 ##                    All rights reserved.
 ##
 ## 
@@ -61,7 +62,7 @@ lib progs check test _test uninstall:
 	done
 
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS) perform examples; do			      \
+	@@SETX@; for d in $(SUBDIRS) perform; do			      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
