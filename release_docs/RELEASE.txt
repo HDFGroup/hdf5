@@ -63,6 +63,8 @@ New Features
 
   o Parallel Library
   ==================
+    * Allowed the call to MPI_File_sync to be avoided when the file is going to
+      immediately be closed, improving performance.  QAK - 2002/05/13
     * Allow the metadata writes to be shared among all processes, easing the
       burden on process 0.  QAK - 2002/05/10
 
