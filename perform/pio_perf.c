@@ -499,7 +499,7 @@ run_test(FILE *output, iotype iot, parameters parms)
     }
 
     /* accumulate and output the max, min, and average "write" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Write details:\n");
@@ -520,7 +520,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross write" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Write Open-Close details:\n");
@@ -541,7 +541,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "read" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Read details:\n");
@@ -562,7 +562,7 @@ run_test(FILE *output, iotype iot, parameters parms)
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross read" times */
-    if (pio_debug_level == 3) {
+    if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(output, 3);
         output_report(output, "Read Open-Close details:\n");
