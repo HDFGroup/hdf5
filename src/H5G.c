@@ -720,6 +720,16 @@ H5G_init_interface(void)
 static void
 H5G_term_interface(void)
 {
+    size_t	i;
+    
+    /* Empty the object type table */
+    for (i=0; i<H5G_ntypes_g; i++) {
+	H5MM_xfree(H5G_type_g[i].desc);
+    }
+    H5G_ntypes_g = H5G_atypes_g = 0;
+    H5G_type_g = H5MM_xfree(H5G_type_g);
+    
+    /* Destroy the group object id group */
     H5I_destroy_group(H5I_GROUP);
 }
 

@@ -29,6 +29,364 @@ typedef struct H5T_conv_struct_t {
 static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
+/*
+ * These macros are for the bodies of functions that convert buffers of one
+ * integer type to another using hardware.  They all start with `H5T_CONV_'
+ * and end with two letters that represent the source and destination types,
+ * respectively. The letters `s' and `S' refer to signed values while the
+ * letters `u' and `U' refer to unsigned values. The letter which is
+ * capitalized indicates that the corresponding type (source or destination)
+ * is at least as large as the other type.  Certain conversions may
+ * experience overflow conditions which arise when the source value has a
+ * magnitude that cannot be represented by the destination type.
+ *
+ * Suffix	Description
+ * ------       -----------
+ * sS:		Signed integers to signed integers where the destination is
+ *		at least as wide as the source.  This case cannot generate
+ *		overflows.
+ *
+ * sU:		Signed integers to unsigned integers where the destination is
+ *		at least as wide as the source.  This case experiences
+ *		overflows when the source value is negative.
+ *
+ * uS:		Unsigned integers to signed integers where the destination is
+ *		at least as wide as the source.  This case can experience
+ *		overflows when the source and destination are the same size.
+ *
+ * uU:		Unsigned integers to unsigned integers where the destination
+ *		is at least as wide as the source.  Overflows are not
+ *		possible in this case.
+ *
+ * Ss:		Signed integers to signed integers where the source is at
+ *		least as large as the destination.  Overflows can occur when
+ *		the destination is narrower than the source.
+ *
+ * Su:		Signed integers to unsigned integers where the source is at
+ *		least as large as the destination.  Overflows occur when the
+ *		source value is negative and can also occur if the
+ *		destination is narrower than the source.
+ *
+ * Us:		Unsigned integers to signed integers where the source is at
+ *		least as large as the destination.  Overflows can occur for
+ *		all sizes.
+ *
+ * Uu:		Unsigned integers to unsigned integers where the source is at
+ *		least as large as the destination. Overflows can occur if the
+ *		destination is narrower than the source.
+ *
+ * The macros take a subset of these arguments in the order listed here:
+ *
+ * CDATA:	A pointer to the H5T_cdata_t structure that was passed to the
+ *		conversion function.
+ *
+ * S_ID:	The hid_t value for the source data type.
+ *
+ * D_ID:	The hid_t value for the destination data type.
+ *
+ * BUF:		A pointer to the conversion buffer.
+ *
+ * NELMTS:	The number of values to be converted.
+ *
+ * ST:		The C name for source data type (e.g., int)
+ *
+ * DT:		The C name for the destination data type (e.g., signed char)
+ *
+ * D_MIN:	The minimum possible destination value.  For unsigned
+ *		destination types this should be zero.  For signed
+ *		destination types it's a negative value with a magnitude that
+ *		is usually one greater than D_MAX.  Source values which are
+ *		smaller than D_MIN generate overflows.
+ *
+ * D_MAX:	The maximum possible destination value. Source values which
+ *		are larger than D_MAX generate overflows.
+ * 
+ */
+
+#define H5T_CONV_sS(CDATA,BUF,NELMTS,ST,DT) {				      \
+    size_t		elmtno;		/*element number		*/    \
+    ST			*s;		/*source buffer			*/    \
+    DT			*d;		/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF)+(NELMTS);					      \
+	d = (DT*)(BUF)+(NELMTS);					      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++) {			      \
+	    *--d = *--s;						      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_sU(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT) {			      \
+    size_t		elmtno;		/*element number		*/    \
+    ST			*s;		/*source buffer			*/    \
+    DT			*d;		/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF)+(NELMTS)-1;					      \
+	d = (DT*)(BUF)+(NELMTS)-1;					      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, --s, --d) {		      \
+	    if (*s<0) {							      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = 0;						      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_uS(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
+    size_t		elmtno;		/*element number		*/    \
+    ST			*s;		/*source buffer			*/    \
+    DT			*d;		/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF)+(NELMTS)-1;					      \
+	d = (DT*)(BUF)+(NELMTS)-1;					      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, --s, --d) {		      \
+	    if (*s > (D_MAX)) {						      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MAX);					      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_uU(CDATA,BUF,NELMTS,ST,DT) {				      \
+    size_t		elmtno;		/*element number		*/    \
+    ST			*s;		/*source buffer			*/    \
+    DT			*d;		/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF)+(NELMTS);					      \
+	d = (DT*)(BUF)+(NELMTS);					      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++) {			      \
+	    *--d = *--s;						      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_Ss(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MIN,D_MAX) {	      \
+    size_t	elmtno;			/*element number		*/    \
+    ST		*s;			/*source buffer			*/    \
+    DT		*d;			/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF);							      \
+	d = (DT*)(BUF);							      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
+	    if (*s > (D_MAX)) {						      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MAX);					      \
+		}							      \
+	    } else if (*s < (D_MIN)) {					      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MIN);					      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_Su(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
+    size_t	elmtno;			/*element number		*/    \
+    ST		*s;			/*source buffer			*/    \
+    DT		*d;			/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF);							      \
+	d = (DT*)(BUF);							      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
+	    if (sizeof(ST)>sizeof(DT) && *s>(D_MAX)) {/*sign vs. unsign ok*/  \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MAX);					      \
+		}							      \
+	    } else if (*s < 0) {					      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = 0;						      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_Us(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
+    size_t	elmtno;			/*element number		*/    \
+    ST		*s;			/*source buffer			*/    \
+    DT		*d;			/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF);							      \
+	d = (DT*)(BUF);							      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
+	    if (*s > (D_MAX)) {						      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MAX);					      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
+#define H5T_CONV_Uu(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
+    size_t	elmtno;			/*element number		*/    \
+    ST		*s;			/*source buffer			*/    \
+    DT		*d;			/*destination buffer		*/    \
+									      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    switch ((CDATA)->command) {						      \
+    case H5T_CONV_INIT:							      \
+	(CDATA)->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
+									      \
+    case H5T_CONV_FREE:							      \
+	break;								      \
+									      \
+    case H5T_CONV_CONV:							      \
+	s = (ST*)(BUF);							      \
+	d = (DT*)(BUF);							      \
+									      \
+	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
+	    if (*s > (D_MAX)) {						      \
+		if (!H5T_overflow_g ||					      \
+		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
+		    *d = (D_MAX);					      \
+		}							      \
+	    } else {							      \
+		*d = *s;						      \
+	    }								      \
+	}								      \
+	break;								      \
+									      \
+    default:								      \
+	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
+		      "unknown conversion command");			      \
+    }									      \
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_conv_noop
  *
@@ -1532,7 +1890,1299 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5MM_xfree(dbuf);
     FUNC_LEAVE(ret_value);
 }
-	
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_short
+ *
+ * Purpose:	Convertes `signed char' to `short'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		    void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_short, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, signed char, short);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_ushort
+ *
+ * Purpose:	Convertes `signed char' to `unsigned short'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_ushort, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+		signed char, unsigned short);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_short
+ *
+ * Purpose:	Converts `unsigned char' to `short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_short, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned char, short, SHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_ushort
+ *
+ * Purpose:	Converts `unsigned char' to `unsigned short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_ushort(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		      void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_ushort, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned short);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_int
+ *
+ * Purpose:	Converts `signed char' to `int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		  H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		  void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_int, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, signed char, int);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_uint
+ *
+ * Purpose:	Convertes `signed char' to `unsigned int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_uint, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, signed char, unsigned);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_int
+ *
+ * Purpose:	Convertes `unsigned char' to `int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_int, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned char, int, INT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_uint
+ *
+ * Purpose:	Converts `unsigned char' to `unsigned int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		    void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_uint, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_long
+ *
+ * Purpose:	Converts `signed char' to `long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		   void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_long, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, signed char, long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_char_ulong
+ *
+ * Purpose:	Convertes `signed char' to `unsigned long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_char_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_char_ulong, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+		signed char, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_long
+ *
+ * Purpose:	Convertes `unsigned char' to `long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_long, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned char, long, LONG_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uchar_ulong
+ *
+ * Purpose:	Converts `unsigned char' to `unsigned long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		     void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uchar_ulong, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_char
+ *
+ * Purpose:	Converts `short' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_char, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		short, signed char, CHAR_MIN, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_uchar
+ *
+ * Purpose:	Converts `short' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_uchar, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		short, unsigned char, UCHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_char
+ *
+ * Purpose:	Converts `unsigned short' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_char, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned short, signed char, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_uchar
+ *
+ * Purpose:	Converts `unsigned short' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_uchar, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned short, unsigned char, UCHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_int
+ *
+ * Purpose:	Converts `short' to `int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		   void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_int, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, short, int);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_uint
+ *
+ * Purpose:	Convertes `short' to `unsigned int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_uint, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, short, unsigned);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_int
+ *
+ * Purpose:	Convertes `unsigned short' to `int'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_int, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned short, int, INT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_uint
+ *
+ * Purpose:	Converts `unsigned short' to `unsigned int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		     void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_uint, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_long
+ *
+ * Purpose:	Converts `short' to `long'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		    void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_long, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, short, long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_short_ulong
+ *
+ * Purpose:	Convertes `short' to `unsigned long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_short_ulong, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, short, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_long
+ *
+ * Purpose:	Convertes `unsigned short' to `long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_long, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned short, long, LONG_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ushort_ulong
+ *
+ * Purpose:	Converts `unsigned short' to `unsigned long'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ushort_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		      void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ushort_ulong, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_char
+ *
+ * Purpose:	Converts `int' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		  size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_char, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		int, signed char, CHAR_MIN, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_uchar
+ *
+ * Purpose:	Converts `int' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_uchar, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		int, unsigned char, UCHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_char
+ *
+ * Purpose:	Converts `unsigned int' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_char, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned, signed char, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_uchar
+ *
+ * Purpose:	Converts `unsigned int' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_uchar, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned, unsigned char, UCHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_short
+ *
+ * Purpose:	Converts `int' to `short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_short, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		int, short, SHRT_MIN, SHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_ushort
+ *
+ * Purpose:	Converts `int' to `unsigned short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_ushort, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		int, unsigned short, USHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_short
+ *
+ * Purpose:	Converts `unsigned int' to `short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_short, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned, short, SHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_ushort
+ *
+ * Purpose:	Converts `unsigned int' to `unsigned short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_ushort, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned, unsigned short, USHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_long
+ *
+ * Purpose:	Converts `int' to `long'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		  H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		  void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_long, FAIL);
+    H5T_CONV_sS(cdata, buf, nelmts, int, long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_int_ulong
+ *
+ * Purpose:	Convertes `int' to `unsigned long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_int_ulong, FAIL);
+    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, int, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_long
+ *
+ * Purpose:	Convertes `unsigned int' to `long'
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_long, FAIL);
+    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
+		unsigned, long, LONG_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_uint_ulong
+ *
+ * Purpose:	Converts `unsigned int' to `unsigned long'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_uint_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		    void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_uint_ulong, FAIL);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned, unsigned long);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_char
+ *
+ * Purpose:	Converts `long' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_char, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		long, signed char, CHAR_MIN, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_uchar
+ *
+ * Purpose:	Converts `long' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_uchar, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		long, unsigned char, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_char
+ *
+ * Purpose:	Converts `unsigned long' to `signed char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_char, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, signed char, CHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_uchar
+ *
+ * Purpose:	Converts `unsigned long' to `unsigned char'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_uchar, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, unsigned char, UCHAR_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_short
+ *
+ * Purpose:	Converts `long' to `short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_short, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		long, short, SHRT_MIN, SHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_ushort
+ *
+ * Purpose:	Converts `long' to `unsigned short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_ushort, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		long, unsigned short, USHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_short
+ *
+ * Purpose:	Converts `unsigned long' to `short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_short, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, short, SHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_ushort
+ *
+ * Purpose:	Converts `unsigned long' to `unsigned short'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_ushort, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, unsigned short, USHRT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_int
+ *
+ * Purpose:	Converts `long' to `int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		  size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_int, FAIL);
+    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
+		long, int, INT_MIN, INT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_long_uint
+ *
+ * Purpose:	Converts `long' to `unsigned int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_long_uint, FAIL);
+    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
+		long, unsigned, UINT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_int
+ *
+ * Purpose:	Converts `unsigned long' to `int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_int, FAIL);
+    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, int, INT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ulong_uint
+ *
+ * Purpose:	Converts `unsigned long' to `unsigned int'
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    FUNC_ENTER(H5T_conv_ulong_uint, FAIL);
+    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
+		unsigned long, unsigned, UINT_MAX);
+    FUNC_LEAVE(SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_float_double

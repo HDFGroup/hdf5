@@ -135,17 +135,126 @@ herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *_buf, void __unused__ *bkg);
+		     size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *_buf, void __unused__ *bkg);
+		     size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *_buf, void __unused__ *bkg);
+		     size_t nelmts, void *_buf, void *bkg);
+
+herr_t H5T_conv_char_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_char_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_char_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			 size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_char_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_char_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_char_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_short_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_int_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			 size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			 size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_long_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *buf, void *bkg);
+
+herr_t H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			 size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			  size_t nelmts, void *buf, void *bkg);
+herr_t H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			   size_t nelmts, void *buf, void *bkg);
+
 herr_t H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-			      size_t nelmts, void *buf, void __unused__ *bkg);
+			      size_t nelmts, void *buf, void *bkg);
 herr_t H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-			      size_t nelmts, void *buf, void __unused__ *bkg);
+			      size_t nelmts, void *buf, void *bkg);
 herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-			     size_t nelmts, void *_buf, void __unused__ *bkg);
+			     size_t nelmts, void *_buf, void *bkg);
 
 /* Bit twiddling functions */
 void H5T_bit_copy (uint8 *dst, size_t dst_offset, const uint8 *src,

@@ -1,4 +1,4 @@
-# HDF5 Library Test Makefile(.in)			       -*- makefile -*-
+# HDF5 Library Test Makefile(.in)
 #
 # Copyright (C) 1997 National Center for Supercomputing Applications.
 #                    All rights reserved.
@@ -13,8 +13,9 @@ LIBS=../src/libhdf5.a @LIBS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TESTS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
-      external shtype links unlink big mtime fillval mount flush1 flush2
+TEST_PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset   \
+      extend external shtype links unlink big mtime fillval mount flush1     \
+      flush2
 TIMINGS=iopipe chunk ragged overhead
 
 # Temporary files
@@ -55,7 +56,7 @@ timings _timings: $(TIMINGS)
 	done;
 
 # How to build the tests...  They all depend on the hdf5 library.
-$(TESTS): ../src/libhdf5.a
+$(TEST_PROGS): ../src/libhdf5.a
 TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o trefer.o tselect.o tstab.o th5s.o
 testhdf5: $(TESTHDF5_OBJ)
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LDFLAGS) $(LIBS)
