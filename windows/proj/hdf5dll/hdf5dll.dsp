@@ -43,8 +43,8 @@ CFG=hdf5dll - Win32 AlphaDbg
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 F90=df.exe
-# ADD BASE F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
+# ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt /dll
+# ADD F90 /compile_only /include:"../../../proj/hdf5dll/Release/" /include:"Release/" /nologo /warn:nofileopt /dll
 CPP=cl.exe
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /D "ZLIB_DLL" /D "_SZDLL_" /YX /FD /c
@@ -59,7 +59,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB_DLL) $(HDF5_EXT_SZIP_DLL) /nologo /subsystem:windows /dll /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP) /nologo /subsystem:windows /dll /machine:I386
 
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
 
@@ -75,8 +75,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 F90=df.exe
-# ADD BASE F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
+# ADD BASE F90 /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt /dll
+# ADD F90 /compile_only /debug:full /include:"../../../proj/hdf5dll/Debug/" /include:"Debug/" /nologo /warn:nofileopt /dll
 CPP=cl.exe
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /D "ZLIB_DLL" /D "_SZDLL_" /YX /FD /c
@@ -91,7 +91,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB_DLL) $(HDF5_EXT_SZIP_DLL) /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../proj/hdf5dll/Debug/hdf5ddll.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP) /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../../../proj/hdf5dll/Debug/hdf5ddll.dll" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
 
@@ -111,8 +111,8 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /Gt0 /W3 /GX /Zi /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /MTd /c
 # ADD CPP /nologo /Gt0 /W3 /GX /Zi /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /MDd /c
 F90=df.exe
-# ADD BASE F90 /compile_only /debug:full /include:"hdf5dll_/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /debug:full /include:"Debug/" /dll /nologo /warn:nofileopt
+# ADD BASE F90 /compile_only /debug:full /include:"hdf5dll_/" /nologo /warn:nofileopt /dll
+# ADD F90 /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt /dll
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -142,8 +142,8 @@ CPP=cl.exe
 # ADD BASE CPP /nologo /MT /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /c
 # ADD CPP /nologo /MD /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_HDF5DLL_" /YX /FD /c
 F90=df.exe
-# ADD BASE F90 /compile_only /include:"hdf5dll0/" /dll /nologo /warn:nofileopt
-# ADD F90 /compile_only /include:"Release/" /dll /nologo /warn:nofileopt
+# ADD BASE F90 /compile_only /include:"hdf5dll0/" /nologo /warn:nofileopt /dll
+# ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt /dll
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
