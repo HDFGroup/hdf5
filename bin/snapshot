@@ -171,6 +171,11 @@ BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
+if [ $H5VERSION != hdf5 ]; then
+    CVSVERSION="-r $H5VERSION"
+else
+    CVSVERSION=				# use the default (main) version
+fi
 
 # Try finding a version of diff that supports the -I option too.
 DIFF=diff
@@ -189,7 +194,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
     # Check out the current version from CVS
-    cvs -Q co -d ${CURRENT} hdf5 || exit 1
+    cvs -Q co -d ${CURRENT} ${CVSVERSION} hdf5 || exit 1
 fi # Do CVS checkout
 
 
