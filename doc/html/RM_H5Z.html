@@ -74,15 +74,15 @@ and customized raw data processing during I/O operations.
 HDF5 is distributed with a small set of standard filters such as 
 compression (gzip and a shuffling algorithm) and 
 error checking (Fletcher32 checksum).
-For further flexibility, the library includes tools enabling a 
+For further flexibility, the library allows a 
 user application to extend the pipeline through the 
 creation and registration of customized filters.
 <p>
 As mentioned above, one set of filters distributed with HDF5 provides 
 built-in methods for raw data compression.  
 The flexibility of the filter pipeline implementation enables the 
-definition of additional compression methods by a user application.
-A compression method<br>
+definition of additional filters by a user application.
+A filter<br>
 &nbsp;&mdash;&nbsp;
     is associated with a dataset when the dataset is created,<br>
 &nbsp;&mdash;&nbsp;
@@ -91,9 +91,9 @@ A compression method<br>
 &nbsp;&mdash;&nbsp;
     is applied independently to each chunk of the dataset.
 <p>
-The HDF5 library does not support compression for contiguous datasets 
+The HDF5 library does not support filters for contiguous datasets 
 because of the difficulty of implementing random access for partial I/O. 
-Compact dataset compression is not supported because it would not produce 
+Compact dataset filters are not supported because it would not produce 
 significant results.
 <p>
 See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a> 
@@ -146,16 +146,16 @@ facilitate moving easily between them.</i>
       HDF5 library.  
       <p>
       Making a new filter available to an application is a two-step 
-      process.  The first step is to <span class="termEmphasis">define</span> 
-      the three filter callback filter functions described below:
-      <code>can_applyr_func</code>, <code>set_local_func</code>, and
+      process.  The first step is to write
+      the three filter callback functions described below:
+      <code>can_apply_func</code>, <code>set_local_func</code>, and
       <code>filter_func</code>.
-      This step can be skipped only when the filter is predefined, as is 
-      the case with the Fletcher32 checksum and shuffle filters that
-      are distributed with the HDF5 Library.
       This call to <code>H5Zregister</code>, 
       <span class="termEmphasis">registering</span> the filter with the
       library, is the second step.  
+      The <code>can_apply_func</code> and <code>set_local_func</code>
+      fields can be set to <code>NULL</code> 
+      if they are not required for the filter being registered.
       <p>
       <code>H5Zregister</code> accepts a single parameter, 
       the <code>filter_class</code> data structure, 
@@ -172,13 +172,18 @@ facilitate moving easily between them.</i>
         
       <p>
       <code>filter_id</code> is the identifier for the new filter. 
+      This is a user-defined value between 
+      <code>H5Z_FILTER_RESERVED</code> and <code>H5Z_FILTER_MAX</code>, 
+      both of which are defined in the HDF5 source file 
+      <code>H5Zpublic.h</code>.
       <p>
-      <code>comment</code> is used for debugging and may be 
-      the null pointer. 
+      <code>comment</code> is used for debugging, 
+      may contain a descriptive name for the filter, 
+      and may be the null pointer. 
       <p>
       <code>can_apply_func</code>, described in detail below, 
       is a user-defined callback function which determines whether 
-      the combination of the dataset creation property list setting, 
+      the combination of the dataset creation property list values, 
       the datatype, and the dataspace represent a valid combination 
       to apply this filter to.
       <p>
@@ -257,7 +262,7 @@ facilitate moving easily between them.</i>
       <code>space_id</code>, a dataspace describing the chunk 
       (for chunked dataset storage), which should also not be modified.
       <p>
-      The <i>set local</i> callback must set any parameters that are  
+      The <i>set local</i> callback must set any filter parameters that are  
       specific to this dataset, based on the combination of the 
       dataset creation property list values, the datatype, and the dataspace.  
       For example, some filters perform different actions based on 
