@@ -1,4 +1,4 @@
-HDF5 version 1.7.22 released on Sun Apr 18 04:08:41 CDT 2004
+HDF5 version 1.7.23 released on Sun Apr 25 04:09:03 CDT 2004
 ================================================================================
 
 
@@ -84,6 +84,11 @@ New Features
         - Added parallel test, test_mpio_1wMr, which tests if the
           underlaying parallel I/O system is conforming to the POSIX
           write/read requirement.  AKC - 2003/11/12
+
+    Fortran Library:
+    ----------------
+         - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
+           of the type INTEGER(HSIZE_T).
 
     Tools:
     ------
