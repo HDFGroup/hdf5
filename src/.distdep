@@ -1005,39 +1005,6 @@ H5TB.o: \
    H5Iprivate.h \
    H5Ipublic.h \
    H5Eprivate.h
-H5F.o: \
-   H5F.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Aprivate.h \
-   H5Apublic.h \
-   H5Ipublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Dpublic.h \
-   H5Dprivate.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h \
-   H5Zpublic.h \
-   H5Iprivate.h \
-   H5ACprivate.h \
-   H5ACpublic.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5MMprivate.h \
-   H5MMpublic.h
 H5Fmpio.o: \
    H5Fmpio.c \
    H5private.h \
@@ -1163,3 +1130,36 @@ H5Tinit.o: \
    H5Fpublic.h \
    H5Dpublic.h \
    H5Tprivate.h
+H5F.o: \
+   H5F.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Aprivate.h \
+   H5Apublic.h \
+   H5Ipublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Dpublic.h \
+   H5Dprivate.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Zprivate.h \
+   H5Zpublic.h \
+   H5Iprivate.h \
+   H5ACprivate.h \
+   H5ACpublic.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5MMprivate.h \
+   H5MMpublic.h
