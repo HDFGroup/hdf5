@@ -42,9 +42,9 @@ const int    RANK_OUT = 3;
 
 int main (void)
 {
-   //
-   // Output buffer initialization.
-   //
+   /*
+    * Output buffer initialization.
+    */
    int i, j, k;
    int         data_out[NX][NY][NZ ]; /* output buffer */
    for (j = 0; j < NX; j++)
@@ -56,52 +56,78 @@ int main (void)
       }
    } 
 
-   // Try block to detect exceptions raised by any of the calls inside it
+   /*
+    * Try block to detect exceptions raised by any of the calls inside it
+    */
    try
    {
-      //
-      // Open the specified file and the specified dataset in the file.
-      //
+      /*
+       * Turn off the auto-printing when failure occurs so that we can
+       * handle the errors appropriately
+       */
+      Exception::dontPrint();
+
+      /*
+       * Open the specified file and the specified dataset in the file.
+       */
       H5File file( FILE_NAME, H5F_ACC_RDONLY );
       DataSet dataset = file.openDataSet( DATASET_NAME );
 
-      // Get the class of the datatype that is used by the dataset.
+      /*
+       * Get the class of the datatype that is used by the dataset.
+       */
       H5T_class_t type_class = dataset.getTypeClass();
 
-      // Get class of datatype and print message if it's an integer.
+      /*
+       * Get class of datatype and print message if it's an integer.
+       */
       if( type_class == H5T_INTEGER )
       {
 	 cout << "Data set has INTEGER type" << endl;
 
-	 // Get the integer datatype
+         /*
+	  * Get the integer datatype
+          */
 	 IntType intype = dataset.getIntType();
 
-         // Get order of datatype and print message if it's a little endian.
+         /*
+          * Get order of datatype and print message if it's a little endian.
+          */
 	 string order_string;
          H5T_order_t order = intype.getOrder( order_string );
 	 cout << order_string << endl;
 
-         // Get size of the data element stored in file and print it.
+         /*
+          * Get size of the data element stored in file and print it.
+          */
          size_t size = intype.getSize();
          cout << "Data size is " << size << endl;
       }
 
-      // Get dataspace of the dataset.
+      /*
+       * Get dataspace of the dataset.
+       */
       DataSpace dataspace = dataset.getSpace();
 
-      // Get the number of dimensions in the dataspace.
+      /*
+       * Get the number of dimensions in the dataspace.
+       */
       int rank = dataspace.getSimpleExtentNdims();
 
-      // Get the dimension size of each dimension in the dataspace and
-      // display them.
+      /*
+       * Get the dimension size of each dimension in the dataspace and
+       * display them.
+       */
       hsize_t dims_out[2];
       int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
       cout << "rank " << rank << ", dimensions " <<
 	      (unsigned long)(dims_out[0]) << " x " <<
 	      (unsigned long)(dims_out[1]) << endl;
 
-      // Define hyperslab in the dataset; implicitly giving strike and 
-      // block NULL.
+      /*
+       * Define hyperslab in the dataset; implicitly giving strike and 
+       * block NULL.
+       */
       hssize_t     offset[2];	// hyperslab offset in the file
       hsize_t      count[2];	// size of the hyperslab in the file
       offset[0] = 1;
@@ -110,14 +136,18 @@ int main (void)
       count[1]  = NY_SUB;
       dataspace.selectHyperslab( H5S_SELECT_SET, count, offset );
 
-      // Define the memory dataspace.
+      /*
+       * Define the memory dataspace.
+       */
       hsize_t     dimsm[3];              /* memory space dimensions */
       dimsm[0] = NX;
       dimsm[1] = NY;
       dimsm[2] = NZ ;
       DataSpace memspace( RANK_OUT, dimsm );   
 
-      // Define memory hyperslab. 
+      /*
+       * Define memory hyperslab. 
+       */
       hssize_t     offset_out[3];	// hyperslab offset in memory
       hsize_t      count_out[3];	// size of the hyperslab in memory
       offset_out[0] = 3;
@@ -128,8 +158,10 @@ int main (void)
       count_out[2]  = 1;
       memspace.selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
 
-      // Read data from hyperslab in the file into the hyperslab in 
-      // memory and display the data.
+      /*
+       * Read data from hyperslab in the file into the hyperslab in 
+       * memory and display the data.
+       */
       dataset.read( data_out, PredType::NATIVE_INT, memspace, dataspace );
 
       for (j = 0; j < NX; j++)
@@ -153,24 +185,28 @@ int main (void)
    catch( FileIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataTypeIException error )
    {
       error.printError();
+      return -1;
    }
 
    return 0;  // successfully terminated

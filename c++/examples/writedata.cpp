@@ -70,28 +70,34 @@ int main (void)
    // Try block to detect exceptions raised by any of the calls inside it
    try
    {
-      //
-      //Create a file.
-      //
+      /*
+       * Turn off the auto-printing when failure occurs so that we can
+       * handle the errors appropriately
+       */
+      Exception::dontPrint();
+
+      /*
+       * Create a file.
+       */
       H5File* file = new H5File( FILE_NAME, H5F_ACC_TRUNC );
 
-      // 
-      //Create dataspace for the dataset in the file.
-      //
+      /*
+       * Create dataspace for the dataset in the file.
+       */
       hsize_t fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
       DataSpace fspace( FSPACE_RANK, fdim );
 
-      //
-      // Create dataset and write it into the file.
-      //
+      /*
+       * Create dataset and write it into the file.
+       */
       DataSet* dataset = new DataSet( 
             file->createDataSet( DATASET_NAME, PredType::NATIVE_INT, fspace ));
       dataset->write( matrix, PredType::NATIVE_INT );
 
-      //
-      // Select hyperslab for the dataset in the file, using 3x2 blocks, 
-      // (4,3) stride and (2,4) count starting at the position (0,1).
-      //
+      /*
+       * Select hyperslab for the dataset in the file, using 3x2 blocks, 
+       * (4,3) stride and (2,4) count starting at the position (0,1).
+       */
       hssize_t start[2]; // Start of hyperslab
       hsize_t stride[2]; // Stride of hyperslab
       hsize_t count[2];  // Block count
@@ -102,9 +108,9 @@ int main (void)
       block[0]  = 3; block[1]  = 2;
       fspace.selectHyperslab( H5S_SELECT_SET, count, start, stride, block);
 
-      //
-      // Create dataspace for the first dataset.
-      //
+      /*
+       * Create dataspace for the first dataset.
+       */
       hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
                                          (in memory) */ 
       DataSpace mspace1( MSPACE1_RANK, dim1 );
@@ -220,19 +226,23 @@ int main (void)
    catch( FileIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
       error.printError();
+      return -1;
    }
 
    return 0;
+
 }

@@ -45,21 +45,30 @@ int main (void)
    try
    {
       /*
+       * Turn off the auto-printing when failure occurs so that we can
+       * handle the errors appropriately
+       */
+      Exception::dontPrint();
+
+      /*
        * Open the file and the dataset.
        */
       H5File file( FILE_NAME, H5F_ACC_RDONLY );
       DataSet dataset = file.openDataSet( DATASET_NAME );
  
       /*
-       * Get dataset rank and dimension.
+       * Get filespace for rank and dimension
        */
-      // Get filespace first.
       DataSpace filespace = dataset.getSpace();
 
-      // Get number of dimensions in the file dataspace
+      /*
+       * Get number of dimensions in the file dataspace
+       */
       int rank = filespace.getSimpleExtentNdims();
 
-      // Get and print the dimension sizes of the file dataspace
+      /*
+       * Get and print the dimension sizes of the file dataspace
+       */
       hsize_t     dims[2];       // dataset dimensions 
       rank = filespace.getSimpleExtentDims( dims );
       cout << "dataset rank = " << rank << ", dimensions " 
@@ -199,18 +208,21 @@ int main (void)
    catch( FileIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
       error.printError();
+      return -1;
    }
 
    return 0;

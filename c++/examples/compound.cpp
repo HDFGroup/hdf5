@@ -70,6 +70,12 @@ int main(void)
       }
 
       /*
+       * Turn off the auto-printing when failure occurs so that we can
+       * handle the errors appropriately
+       */
+      Exception::dontPrint();
+
+      /*
        * Create the data space.
        */
       hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
@@ -181,24 +187,28 @@ int main(void)
    catch( FileIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
       error.printError();
+      return -1;
    }
 
    // catch failure caused by the DataSpace operations
    catch( DataTypeIException error )
    {
       error.printError();
+      return -1;
    }
 
    return 0;
