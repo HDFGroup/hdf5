@@ -139,6 +139,24 @@ int main (void)
 
  PASSED();
 
+ TESTING("    copy of allocation early file");
+
+/*-------------------------------------------------------------------------
+ * alloc early test
+ *-------------------------------------------------------------------------
+ */
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME5,FNAME5OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME5,FNAME5OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME5OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+  PASSED();  
+
  TESTING("    removing all filters");
 
 /*-------------------------------------------------------------------------
@@ -893,8 +911,13 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
   PASSED();  
 
+  
 
-
+  
+/*-------------------------------------------------------------------------
+ * end
+ *-------------------------------------------------------------------------
+ */
 
  puts("All h5repack tests passed.");
  
