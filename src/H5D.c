@@ -1099,13 +1099,16 @@ H5D_open(H5G_t *loc, const char *name)
 #ifdef HAVE_PARALLEL
     /*
      * If the dataset uses chunk storage and is accessed via
-     * parallel I/O, allocate file space for all chunks now.
+     * parallel I/O, and file is open writable,
+     * allocate file space for chunks that have not been
+     * allocated in its "previous access".
      */
-    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
-	dataset->layout.type == H5D_CHUNKED){
+    if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
+	dataset->layout.type == H5D_CHUNKED &&
+	(f->intent & H5F_ACC_RDWR)){
 	if (H5D_allocate(dataset)==FAIL){
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		"fail in file space allocation for chunks");
+		"fail in file space allocation dataset");
 	}
     }
 #endif /* HAVE_PARALLEL */
@@ -1890,25 +1893,27 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     }
 
     /* Save the new dataspace in the file if necessary */
-    if (changed>0 &&
-	H5S_modify (&(dataset->ent), space)<0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
+    if (changed>0){
+	if (H5S_modify (&(dataset->ent), space)<0) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "unable to update file with new dataspace");
+	}
+#ifdef HAVE_PARALLEL
+	/*
+	 * If the dataset uses chunk storage and is accessed via
+	 * parallel I/O, need to allocate file space for all extended
+	 * chunks now.
+	 */
+	if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
+	    dataset->layout.type==H5D_CHUNKED){
+	    if (H5D_allocate(dataset)==FAIL){
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		    "fail in file space allocation for chunks");
+	    }
+	}
+#endif /* HAVE_PARALLEL */
     }
 
-#ifdef HAVE_PARALLEL
-    /*
-     * If the dataset uses chunk storage and is accessed via
-     * parallel I/O, need to allocate file space for all chunks now.
-     */
-    if (/*dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&*/
-	dataset->layout.type == H5D_CHUNKED){
-	if (H5D_allocate(dataset)==FAIL){
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		"fail in file space allocation for chunks");
-	}
-    }
-#endif /* HAVE_PARALLEL */
 
     ret_value = SUCCEED;
 
@@ -1993,7 +1998,7 @@ static herr_t
 H5D_allocate (H5D_t *dataset)
 {
     H5S_t	*space = NULL;
-    herr_t	ret_value = SUCCEED;
+    herr_t	ret_value = FAIL;
     hsize_t		space_dim[H5O_LAYOUT_NDIMS];
     intn		space_ndims;
     H5O_layout_t	*layout;
@@ -2039,6 +2044,8 @@ printf("Enter %s:\n", FUNC);
     default:
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
     }
+
+    ret_value = SUCCEED;
 
   done:
     if (space)
