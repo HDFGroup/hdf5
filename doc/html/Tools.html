@@ -289,10 +289,12 @@ installed with HDF5.
         <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--help</code></dt>
             <dd>Print a usage message and exit.</dd>
+        <dt><code>-n</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--contents</code></dt>
+            <dd>Print a list of the file contents and exit.</dd>
         <dt><code>-B</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--bootblock</code></dt>
-            <dd>Print the content of the boot block.<br>
-                <em>(This option is not yet implemented.)</em></dd>
+            <dd>Print the contents of the boot block.</dd>
         <dt><code>-H</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--header</code></dt>
             <dd>Print the header only; no data is displayed.</dd>
@@ -305,6 +307,8 @@ installed with HDF5.
         <dt><code>-r</code> &nbsp;&nbsp;or&nbsp;&nbsp;
               <code>--string</code></dt>
             <dd>Print 1-bytes integer datasets as ASCII.</dd>
+        <dt><code>-e</code></dt>
+            <dd>Escape non-printing characters.</dd>
         <dt><code>-V</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--version</code></dt>
             <dd>Print version number and exit.</dd>
@@ -314,6 +318,11 @@ installed with HDF5.
         <dt><code>-d <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--dataset=<em>P</em></code></dt>
             <dd>Print the specified dataset.</dd>
+        <dt><code>-y</code></dt>
+            <dd>Do not print array indices with data.</dd>
+        <dt><code>-p</code> &nbsp;&nbsp;or&nbsp;&nbsp;
+              <code>--properties</code></dt>
+            <dd>Print dataset filters, storage layout, and fill value.</dd>
         <dt><code>-f <em>D</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--filedriver=<em>D</em></code></dt>
             <dd>Specify which driver to open the file with.</dd>
@@ -347,12 +356,21 @@ installed with HDF5.
             <dd>In XML output, (XML Schema) use qualified names in the XML:<br>
 	        &nbsp;&nbsp; &nbsp;&nbsp;
 		":": no namespace, default: "hdf5:"</dd>
+
+<!-- NEW PAGE -->
+        <dt>The next four options enable subsetting, which is 
+            accomplished by selecting a hyperslab from a dataset.
+            These options mirror the techniques used by an HDF5 
+            application when performing hyperslab selection.
+            The <code>start</code> and <code>count</code> parameters
+            are mandatory if subsetting is to be performed; 
+            the <code>stride</code> and <code>block</code> parameters
+            are optional and will default to <code>1</code> (one).
         <dt><code>-s <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--start=<em>L</em></code></dt>
             <dd>Offset of start of subsetting selection.  
                 <br>
                 Default: the beginning of the dataset.</dd>
-<!-- NEW PAGE -->
         <dt><code>-S <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--stride=<em>L</em></code></dt>
             <dd>Hyperslab stride.
@@ -367,7 +385,7 @@ installed with HDF5.
                 <br>
                 Default: 1 in all dimensions.</dd>
         <dt><code>--</code></dt>
-            <dd>Indicate that all following arguments are non-options.
+            <dd>Indicates that all following arguments are non-options.
                 E.g., to dump a file called `-f', use h5dump -- -f.</dd>
         <dt><em>file</em></dt>
             <dd>The file to be examined.</dd>
@@ -2502,7 +2520,7 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 Describes HDF5 Release 1.6.3, September 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 23 January 2004");
+document.writeln("Last modified: 19 January 2004");
 -->
 </SCRIPT>
 
