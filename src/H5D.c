@@ -1407,7 +1407,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
-    hsize_t		nelmts;			/*number of elements	*/
+    hssize_t    nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
     hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
@@ -1768,7 +1768,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	  const void *buf)
 {
-    hsize_t		nelmts;			/*total number of elmts	*/
+    hssize_t	nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
     hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
@@ -2310,7 +2310,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
     intn		ndims;
     hsize_t		dim[H5O_LAYOUT_NDIMS];
-    hsize_t		npoints, ptsperbuf;
+    hssize_t    npoints, ptsperbuf;
     size_t		size, bufsize=8*1024;
     hid_t		buf_id = -1;
     haddr_t		addr;
