@@ -1208,6 +1208,72 @@ H5G_basename(const char *name, size_t *size_p)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_normalize
+ *
+ * Purpose:	Returns a pointer to a new string which has duplicate and
+ *              trailing slashes removed from it.
+ *
+ * Return:	Success:	Ptr to normalized name.
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, August 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static char *
+H5G_normalize(const char *name)
+{
+    char *norm;         /* Pointer to the normalized string */
+    size_t	s,d;    /* Positions within the strings */
+    unsigned    last_slash;     /* Flag to indicate last character was a slash */
+    char *ret_value;    /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5G_normalize);
+
+    /* Sanity check */
+    assert(name);
+
+    /* Duplicate the name, to return */
+    if (NULL==(norm=H5MM_strdup(name)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string");
+
+    /* Walk through the characters, omitting duplicated '/'s */
+    s=d=0;
+    last_slash=0;
+    while(name[s]!='\0') {
+        if(name[s]=='/')
+            if(last_slash)
+                ;
+            else {
+                norm[d++]=name[s];
+                last_slash=1;
+            } /* end else */
+        else {
+            norm[d++]=name[s];
+            last_slash=0;
+        } /* end else */
+        s++;
+    } /* end while */
+
+    /* Terminate normalized string */
+    norm[d]='\0';
+
+    /* Check for final '/' on normalized name & eliminate it */
+    if(d>1 && last_slash)
+        norm[d-1]='\0';
+
+    /* Set return value */
+    ret_value=norm;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_normalize() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_namei
  *
  * Purpose:	Translates a name to a symbol table entry.
@@ -2258,9 +2324,12 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
 	  const char *new_name, H5G_link_t type, unsigned namei_flags, hid_t dxpl_id)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
+    unsigned            cur_obj_init=0; /* Flag to indicate that the current object is initialized */
     H5G_entry_t		grp_ent;	/*ent for grp containing link hd*/
     H5O_stab_t		stab_mesg;	/*symbol table message		*/
     const char		*rest = NULL;	/*last component of new name	*/
+    char		*norm_cur_name = NULL;	/* Pointer to normalized current name */
+    char		*norm_new_name = NULL;	/* Pointer to normalized current name */
     char		_comp[1024];	/*name component		*/
     size_t		nchars;		/*characters in component	*/
     size_t		offset;		/*offset to sym-link value	*/
@@ -2274,13 +2343,19 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     assert (cur_name && *cur_name);
     assert (new_name && *new_name);
 
+    /* Get normalized copies of the current and new names */
+    if((norm_cur_name=H5G_normalize(cur_name))==NULL)
+        HGOTO_ERROR (H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize name");
+    if((norm_new_name=H5G_normalize(new_name))==NULL)
+        HGOTO_ERROR (H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize name");
+
     switch (type) {
         case H5G_LINK_SOFT:
             /*
              * Lookup the the new_name so we can get the group which will contain
              * the new entry.  The entry shouldn't exist yet.
              */
-            if (H5G_namei(new_loc, new_name, &rest, &grp_ent, NULL, 
+            if (H5G_namei(new_loc, norm_new_name, &rest, &grp_ent, NULL, 
                             H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)>=0)
                 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
             H5E_clear (); /*it's okay that we didn't find it*/
@@ -2291,9 +2366,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * terminated and that `rest' points to it.
              */
             if (rest[nchars]) {
-                if (H5G_component (rest+nchars, NULL)) {
-                    HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
-                } else if (nchars+1 > sizeof _comp) {
+                if (nchars+1 > sizeof _comp) {
                     HGOTO_ERROR (H5E_SYM, H5E_COMPLEN, FAIL, "name component is too long");
                 } else {
                     HDmemcpy (_comp, rest, nchars);
@@ -2309,7 +2382,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (NULL==H5O_read (&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine local heap address");
             if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file, dxpl_id,
-                   stab_mesg.heap_addr, HDstrlen(cur_name)+1, cur_name)))
+                   stab_mesg.heap_addr, HDstrlen(norm_cur_name)+1, norm_cur_name)))
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap");
             H5O_reset (H5O_STAB_ID, &stab_mesg);
 
@@ -2322,6 +2395,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             cur_obj.file = grp_ent.file;
             cur_obj.type = H5G_CACHED_SLINK;
             cur_obj.cache.slink.lval_offset = offset;
+            cur_obj_init=1;     /* Indicate that the cur_obj struct is initialized */
 
             /*
              * Insert the link head in the symbol table.  This shouldn't ever
@@ -2335,9 +2409,10 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             break;
 
         case H5G_LINK_HARD:
-            if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
+            if (H5G_namei(cur_loc, norm_cur_name, NULL, NULL, &cur_obj, namei_flags, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
-            if (H5G_insert (new_loc, new_name, &cur_obj, dxpl_id)<0)
+            cur_obj_init=1;     /* Indicate that the cur_obj struct is initialized */
+            if (H5G_insert (new_loc, norm_new_name, &cur_obj, dxpl_id)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
             break;
 
@@ -2351,7 +2426,15 @@ done:
         H5G_free_ent_name(&grp_ent);
 			  
     /* Free the ID to name buffer */
-    H5G_free_ent_name(&cur_obj);
+    if(cur_obj_init)
+        H5G_free_ent_name(&cur_obj);
+
+    /* Free the normalized path names */
+    if(norm_cur_name)
+        H5MM_xfree(norm_cur_name);
+    if(norm_new_name)
+        H5MM_xfree(norm_new_name);
+
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -2816,6 +2899,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     H5G_entry_t		grp_ent, obj_ent;
     size_t		len;
     const char		*base=NULL;
+    char		*norm_name = NULL;	/* Pointer to normalized name */
     H5G_stat_t		statbuf;        /* Info about object to unlink */
     H5RS_str_t          *name_r;        /* Ref-counted version of name */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -2824,21 +2908,25 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     assert(loc);
     assert(name && *name);
 
+    /* Get normalized copy of the name */
+    if((norm_name=H5G_normalize(name))==NULL)
+        HGOTO_ERROR (H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize name");
+
     /* Reset the group entries to known values in a portable way */
     HDmemset(&grp_ent,0,sizeof(H5G_entry_t));
     HDmemset(&obj_ent,0,sizeof(H5G_entry_t));
 
     /* Get object type before unlink */
-    if (H5G_get_objinfo(loc, name, FALSE, &statbuf, dxpl_id)<0)
+    if (H5G_get_objinfo(loc, norm_name, FALSE, &statbuf, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Get the entry for the group that contains the object to be unlinked */
-    if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent,
+    if (H5G_namei(loc, norm_name, NULL, &grp_ent, &obj_ent,
 		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     if (!H5F_addr_defined(grp_ent.header))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no containing group specified");
-    if (NULL==(base=H5G_basename(name, &len)) || '/'==*base)
+    if (NULL==(base=H5G_basename(norm_name, &len)) || '/'==*base)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "problems obtaining object base name");
     
     /* Remove the name from the symbol table */
@@ -2846,7 +2934,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
-    name_r=H5RS_wrap(name);
+    name_r=H5RS_wrap(norm_name);
     assert(name_r);
     if (H5G_replace_name(statbuf.type, &obj_ent, name_r, NULL, NULL, NULL, OP_UNLINK )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to replace name");
@@ -2856,6 +2944,10 @@ done:
     /* Free the ID to name buffers */
     H5G_free_ent_name(&grp_ent);
     H5G_free_ent_name(&obj_ent);
+
+    /* Free the normalized path name */
+    if(norm_name)
+        H5MM_xfree(norm_name);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -28,6 +28,7 @@ const char *FILENAME[] = {
     "new_move_b",
     "lunlink",
     "filespace",
+    "slashes",
     NULL
 };
 
@@ -57,6 +58,11 @@ const char *FILENAME[] = {
 #define FILESPACE_TOP_GROUPS    10
 #define FILESPACE_NESTED_GROUPS 50
 #define FILESPACE_NDATASETS     50
+#define SLASHES_GROUP_NAME      "Group///"
+#define SLASHES_HARDLINK_NAME   "Hard///"
+#define SLASHES_SOFTLINK_NAME   "Soft///"
+#define SLASHES_SOFTLINK2_NAME  "Soft2///"
+#define SLASHES_ROOTLINK_NAME   "Root///"
 
 
 /*-------------------------------------------------------------------------
@@ -1302,6 +1308,146 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_link_slashes
+ *
+ * Purpose:     Tests creating links with various multiple & trailing slashes
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, August 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_link_slashes(void)
+{
+    hid_t 	fapl;           /* File access property list */
+    hid_t fid;          /* File ID */
+    hid_t gid,gid2;     /* Group ID */
+    char	filename[1024];
+
+    TESTING("creating links with multiple slashes");
+   
+    /* Create file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+
+    /* Create a file */
+    if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Create a group in the root group */
+    if((gid = H5Gcreate(fid, SLASHES_GROUP_NAME, 0))<0) TEST_ERROR;
+
+    /* Create a nested group in the root group */
+    if((gid2 = H5Gcreate(gid, SLASHES_GROUP_NAME, 0))<0) TEST_ERROR;
+
+    /* Close the nested group */
+    if(H5Gclose(gid2)<0) TEST_ERROR;
+
+    /* Create a hard link to the nested group */
+    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5G_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+
+    /* Create a soft link with a relative path to the nested group */
+    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK_NAME)<0) TEST_ERROR;
+
+    /* Create a soft link with the full path to the nested group */
+    if(H5Glink2(gid, "////"SLASHES_GROUP_NAME""SLASHES_GROUP_NAME, H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK2_NAME)<0) TEST_ERROR;
+
+    /* Create a soft link to the root group */
+    if(H5Glink2(gid, "////", H5G_LINK_SOFT, H5G_SAME_LOC, SLASHES_ROOTLINK_NAME)<0) TEST_ERROR;
+
+    /* Close the group */
+    if(H5Gclose(gid)<0) TEST_ERROR;
+
+    /* Create a hard link to the existing group */
+    if(H5Glink2(fid, SLASHES_GROUP_NAME, H5G_LINK_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_link_slashes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_unlink_slashes
+ *
+ * Purpose:     Tests deleting links with various multiple & trailing slashes
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, August 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_unlink_slashes(void)
+{
+    hid_t 	fapl;           /* File access property list */
+    hid_t fid;          /* File ID */
+    hid_t gid;          /* Group ID */
+    char	filename[1024];
+
+    TESTING("deleting links with multiple slashes");
+   
+    /* Create file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+
+    /* Open the file */
+    if((fid=H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Open the top level group */
+    if((gid = H5Gopen(fid, SLASHES_GROUP_NAME))<0) TEST_ERROR;
+
+    /* Delete the root link */
+    if(H5Gunlink(gid,SLASHES_ROOTLINK_NAME)<0) TEST_ERROR;
+
+    /* Delete the soft link with the full path */
+    if(H5Gunlink(gid,SLASHES_SOFTLINK2_NAME)<0) TEST_ERROR;
+
+    /* Delete the soft link with the relative path */
+    if(H5Gunlink(gid,SLASHES_SOFTLINK_NAME)<0) TEST_ERROR;
+
+    /* Delete the hard link */
+    if(H5Gunlink(gid,SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+
+    /* Delete the group itself */
+    if(H5Gunlink(gid,SLASHES_GROUP_NAME)<0) TEST_ERROR;
+
+    /* Close the group */
+    if(H5Gclose(gid)<0) TEST_ERROR;
+
+    /* Delete the hard link */
+    if(H5Gunlink(fid,SLASHES_HARDLINK_NAME)<0) TEST_ERROR;
+
+    /* Delete the group itself */
+    if(H5Gunlink(fid,SLASHES_GROUP_NAME)<0) TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_link_slashes() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test H5Gunlink()
@@ -1369,6 +1515,9 @@ main(void)
     nerrors += test_create_unlink("create and unlink large number of objects",fapl);
     /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
     nerrors += test_create_unlink("create and unlink large number of objects with small cache",fapl2);
+
+    nerrors += test_link_slashes();
+    nerrors += test_unlink_slashes();
  
     /* Close */
     if (H5Fclose(file)<0) TEST_ERROR;
