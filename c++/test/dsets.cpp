@@ -18,9 +18,10 @@
 *
 *************************************************************/
 
+#include <iostream>
+#include "H5Cpp.h"
 #include "h5test.h"
 #include "testhdf5.h"
-#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
