@@ -379,10 +379,11 @@ typedef double float32;
 #   error "nothing appropriate for float32"
 #endif
 
-#if SIZEOF_FLOAT>=8
-typedef float float64;
-#elif SIZEOF_DOUBLE>=8
+/* Bias float64 toward using double - QAK */
+#if SIZEOF_DOUBLE>=8
 typedef double float64;
+#elif SIZEOF_FLOAT>=8
+typedef float float64;
 #else
 #  error "nothing appropriate for float64"
 #endif

@@ -994,6 +994,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	 * exists), or if the new request adds write access (since the
 	 * readers don't expect the file to change under them).
 	 */
+	H5FD_close(lf);
 	if (flags & H5F_ACC_TRUNC) {
 	    file = NULL; /*to prevent destruction of wrong file*/
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
@@ -1009,7 +1010,6 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"file is already open for read-only");
 	}
-	H5FD_close(lf);
 	file = H5F_new(file->shared, fcpl_id, fapl_id);
 	lf = file->shared->lf;
     } else if (flags!=tent_flags) {
