@@ -15,12 +15,13 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-#if 1
+#if 0
 #  define FILETYPE	H5F_LOW_DFLT
 #  define FILENAME	"istore.h5"
-#elif 0
+#elif 1
 #  define FILETYPE	H5F_LOW_FAM
 #  define FILENAME	"istore-%05d.h5"
+#  define TEST_FAMILY	1
 #else
 #  define FILETYPE	H5F_LOW_SPLIT
 #  define FILENAME	"istore-split"
@@ -574,14 +575,14 @@ main (int argc, char *argv[])
       exit (1);
    }
 
-#if 0
+#ifdef TEST_FAMILY
    {
       /*
        * For testing file families, fool the library into thinking it already
        * allocated a whole bunch of data.
        */
       haddr_t	addr;
-      addr.offset = 250 * ((uint64)1<<30); /*250 GB*/
+      addr.offset = 8 * ((uint64)1<<30); /*8 GB*/
       H5F_low_seteof (f->shared->lf, &addr);
    }
 #endif
