@@ -1,4 +1,4 @@
-HDF5 version 1.5.7 released on Wed Jul 11 07:20:09 CDT 2001
+HDF5 version 1.5.8 released on Sun Jul 22 05:08:59 CDT 2001
 ================================================================================
 
 
@@ -66,6 +66,8 @@ Configuration
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
+    * Added --enable-linux-lfs flag to allow more control over whether to enable
+      or disable large file support on Linux.
 
 
 Tools
