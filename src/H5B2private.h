@@ -115,6 +115,8 @@ H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t *nrec);
+H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr);
 
 #endif /* _H5B2private_H */
 

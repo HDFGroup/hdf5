@@ -37,6 +37,9 @@ const char *FILENAME[] = {
 #define INSERT_MANY             (320*1000)
 #define FIND_MANY               (INSERT_MANY/100)
 #define FIND_NEIGHBOR           1000
+#define DELETE_SMALL            10
+#define DELETE_MEDIUM           200
+#define DELETE_LARGE            1000
 
 
 /*-------------------------------------------------------------------------
@@ -5210,6 +5213,248 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_delete
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ *              code to delete a B-tree from a file
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, March  9, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_delete(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    off_t       empty_size;             /* Size of an empty file */
+    off_t       file_size;              /* Size of each file created */
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+/* Create empty file for size comparisons later */
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Close file */
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of an empty file */
+    if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Attempt to delete empty B-tree */
+    TESTING("B-tree delete: delete empty B-tree");
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Delete v2 B-tree 
+     */
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to delete level-0 B-tree */
+    TESTING("B-tree delete: delete level-0 B-tree");
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert records */
+    for(u=0; u<DELETE_SMALL; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    } /* end for */
+
+    /*
+     * Delete v2 B-tree 
+     */
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to delete level-1 B-tree */
+    TESTING("B-tree delete: delete level-1 B-tree");
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert records */
+    for(u=0; u<DELETE_MEDIUM; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    } /* end for */
+
+    /*
+     * Delete v2 B-tree 
+     */
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+    /* Attempt to delete level-2 B-tree */
+    TESTING("B-tree delete: delete level-2 B-tree");
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert records */
+    for(u=0; u<DELETE_LARGE; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    } /* end for */
+
+    /*
+     * Delete v2 B-tree 
+     */
+    if (H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Get the size of the file */
+    if((file_size=h5_get_file_size(filename))==0) TEST_ERROR;
+
+    /* Verify the file is correct size */
+    if(file_size!=empty_size) TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_find_neighbor() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the B-tree v2 code
@@ -5278,6 +5523,9 @@ main(void)
 
     /* Test more complex B-tree queries */
     nerrors += test_find_neighbor(fapl);
+
+    /* Test deleting B-trees */
+    nerrors += test_delete(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
