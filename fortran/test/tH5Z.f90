@@ -168,7 +168,7 @@
               endif
           endif    
 
-          options_mask = H5_SZIP_NN_OM_F + H5_SZIP_CHIP_OM_F
+          options_mask = H5_SZIP_NN_OM_F
           pix_per_block = 32
           !
           ! Initialize the dset_data array.

@@ -8674,15 +8674,8 @@ SUBROUTINE h5pset_szip_f(prp_id, hdferr)
                                    ! A bit-mask conveying the desired
                                    ! SZIP options
                                    ! Current valid values in Fortran are:
-                                   !    H5_SZIP_AK13_OM_F
-                                   !    H5_SZIP_CHIP_OM_F
                                    !    H5_SZIP_EC_OM_F
                                    !    H5_SZIP_NN_OM_F
-                                   !    Or the sum of any combination
-                                   !    of the above, e.g.,
-                                   !    (H5_SZIP_AK13_OM_F + H5_SZIP_NN_OM_F)
-                                   ! Check C reference manual regarding 
-                                   ! mutually-exclusive options
   INTEGER, INTENT(IN) :: pixels_per_block  
                                    ! The number of pixels or data elements 
                                    ! in each data block
