@@ -126,6 +126,9 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
  * Programmer:	rky 980813
  *
  * Modifications:  ppw 990401
+ *		rky, ppw 2000-09-26 Freed old type after creating struct type.
+ *		rky 2000-10-05 Changed displacements to be MPI_Aint.
+ *		rky 2000-10-06 Added code for cases of empty hyperslab.
  *
  *-------------------------------------------------------------------------
  */
@@ -145,20 +148,23 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     } d[32];
 
     int			i, err, new_rank, num_to_collapse;
-    int			offset[32], max_xtent[32], block_length[2], displacement[2];
+    int			offset[32], max_xtent[32], block_length[2];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
     intn		rank;
     MPI_Datatype	inner_type, outer_type, old_type[32];
-    MPI_Aint            extent_len;
+    MPI_Aint            extent_len, displacement[2];
 
     FUNC_ENTER (H5S_mpio_hyper_type, FAIL);
 
     /* Check and abbreviate args */
     assert (space);
+    assert(sizeof(MPI_Aint) >= sizeof(elmt_size));
     diminfo = space->select.sel_info.hslab.diminfo;
     assert (diminfo);
     rank = space->extent.u.simple.rank;
     assert (rank >= 0);
+    if (0==rank) goto empty;
+    if (0==elmt_size) goto empty;
 
     /* make a local copy of the dimension info so we can transform them */
     assert(rank<=32);	/* within array bounds */
@@ -175,6 +181,9 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 	if (i==0) fprintf(stdout, "  rank=%d\n", rank );
 	else	  fprintf(stdout, "\n" );
 #endif
+	if (0==d[i].block) goto empty;
+	if (0==d[i].count) goto empty;
+	if (0==d[i].xtent) goto empty;
     }
     
 /**********************************************************************
@@ -232,11 +241,11 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     } /* end for */
     num_to_collapse = i;
     if (num_to_collapse == rank) num_to_collapse--;
-    printf ("num_to_collapse=%d\n", num_to_collapse);
 
     assert(0<=num_to_collapse && num_to_collapse<rank);
     new_rank = rank - num_to_collapse;
 #ifdef H5Smpi_DEBUG
+    fprintf(stdout, "num_to_collapse=%d\n", num_to_collapse);
     fprintf(stdout, "hyper_type: new_rank=%d\n", new_rank );
 #endif
 
@@ -389,6 +398,10 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
       if (err) {
          HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI struct type");
       }
+      MPI_Type_free (&old_type[0]);
+      if (err) {
+            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't resize MPI vector type");
+      }
     }
     else {
       *new_type = inner_type;
@@ -402,9 +415,18 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     /* fill in the remaining return values */
     *count = 1;			/* only have to move one of these suckers! */
     *is_derived_type = 1;
+    goto done;
 
+empty:
+    /* special case: empty hyperslab */
+    *new_type = MPI_BYTE;
+    *count = 0;
+    *is_derived_type = 0;
+
+done:
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "Leave %s\n", FUNC );
+    HDfprintf(stdout, "Leave %s, count=%Hu  is_derived_type=%d\n",
+		FUNC, *count, *is_derived_type );
 #endif
     FUNC_LEAVE (SUCCEED);
 }
@@ -574,7 +596,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     /* calculate the absolute base addr (i.e., the file view disp) */
     disp = f->shared->base_addr + layout->addr;
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "spaces_xfer: disp=%Hu\n", disp.offset );
+    HDfprintf(stdout, "spaces_xfer: disp=%Hu\n", disp );
 #endif
 
     /* Effective address determined by base addr and the MPI file type */
