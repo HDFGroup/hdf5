@@ -59,10 +59,12 @@
 ./doc/html/Caching.html
 ./doc/html/CodeReview.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Coding.html
+./doc/html/Copyright.html
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/Debugging.html
+./doc/html/Environment.html
 ./doc/html/Errors.html
 ./doc/html/ExternalFiles.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Files.html
@@ -78,6 +80,7 @@
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
 ./doc/html/Properties.html
+./doc/html/Ragged.html
 ./doc/html/RM_H5.html
 ./doc/html/RM_H5A.html
 ./doc/html/RM_H5D.html
@@ -137,7 +140,7 @@
 ./doc/html/symtab			_DO_NOT_DISTRIBUTE_
 ./doc/html/version.gif
 ./doc/html/version.obj			_DO_NOT_DISTRIBUTE_
-
+./doc/src/Copyright.html
 ./doc/src/Glossary.html
 ./doc/src/H5.intro.doc
 ./doc/src/RM_H5.html
@@ -148,16 +151,16 @@
 ./doc/src/RM_H5Front.html
 ./doc/src/RM_H5G.html
 ./doc/src/RM_H5P.html
+./doc/src/RM_H5R.html
 ./doc/src/RM_H5S.html
 ./doc/src/RM_H5T.html
 ./doc/src/RM_H5Z.html
-
+./doc/src/Tools.html
 ./doc/tgif/APIGrammar.obj		_DO_NOT_DISTRIBUTE_
 ./doc/tgif/FileGrammar.obj		_DO_NOT_DISTRIBUTE_
 ./doc/tgif/IOPipe.obj			_DO_NOT_DISTRIBUTE_
 ./doc/tgif/RobbPipe.obj			_DO_NOT_DISTRIBUTE_
 ./doc/tgif/UserView.obj			_DO_NOT_DISTRIBUTE_
-
 ./examples/Attributes.txt
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
