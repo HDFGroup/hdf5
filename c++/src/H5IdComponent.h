@@ -26,7 +26,7 @@ class IdComponent {
 	IdComponent( const IdComponent& original );
 
 	// Gets the value of IdComponent's data member
-	hid_t getId () const;
+	virtual hid_t getId () const;
 
 	// Increment reference counter
 	void incRefCount();
@@ -41,6 +41,9 @@ class IdComponent {
 	// reference to this object
 	bool noReference();
 
+	// Assignment operator
+	virtual IdComponent& operator=( const IdComponent& rhs );
+
 	// Resets this IdComponent instance
 	//template <class Type>
 	//void reset( Type* parent );
@@ -54,9 +57,6 @@ class IdComponent {
 	hid_t id;	// HDF5 object id
 	RefCounter* ref_count; // used to keep track of the
 	                              // number of copies of an object
-
-	// Assignment operator
-	IdComponent& operator=( const IdComponent& rhs );
 
 	// Default constructor
 	IdComponent();

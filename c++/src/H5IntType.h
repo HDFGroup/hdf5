@@ -23,6 +23,10 @@ class IntType : public AtomType {
 	// Gets the integer datatype of the specified dataset
 	IntType( const DataSet& dataset );
 
+	// Assignment operator that takes a predefined type
+	// may not use - BMR
+	// virtual IntType& operator=( const PredType& rhs );
+
 	// Retrieves the sign type for an integer type
 	H5T_sign_t getSign() const;
 

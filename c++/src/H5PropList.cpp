@@ -64,6 +64,14 @@ void PropList::copy( const PropList& like_plist )
    }
 }
 
+// Makes a copy of the property list on the right hand side and stores 
+// the new id in the left hand side object.
+PropList& PropList::operator=( const PropList& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
+
 // Closes the property list if it is not a default one
 void PropList::p_close() const
 {

@@ -25,11 +25,7 @@ class PropList : public IdComponent {
 	void copy( const PropList& like_plist );
 
 	// Make a copy of the given property list using assignment statement
-	//PropList& operator=( const PropList& rhs );
-
-	// Sets and gets PropList's data member
-        //hid_t getId () const;
-        //void setId( hid_t new_plist_id );
+	virtual PropList& operator=( const PropList& rhs );
 
 	// Gets the class of this property list, i.e. H5P_FILE_CREATE,
 	// H5P_FILE_ACCESS, ...

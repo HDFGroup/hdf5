@@ -32,10 +32,18 @@ IntType::IntType( const PredType& pred_type ) : AtomType()
    copy( pred_type );
 }
 
+/* BMR - may not keep
+IntType& IntType::operator=( const PredType& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
+*/
+
 // Creates a integer datatype using an existing id
 IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
 
-// Gets the integer datatype of the specified dataset - will reimplement -BMR
+// Gets the integer datatype of the specified dataset - may reimplement -BMR
 IntType::IntType( const DataSet& dataset ) : AtomType()
 {  
    // Calls C function H5Dget_type to get the id of the datatype

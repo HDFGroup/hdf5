@@ -68,6 +68,22 @@ void DataType::copy( const DataType& like_type )
    }
 }
 
+// Makes a copy of the type on the right hand side and stores the new
+// id in the left hand side object.  
+DataType& DataType::operator=( const DataType& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
+
+// Makes a copy of the predefined type and stores the new
+// id in the left hand side object.  
+DataType& DataType::operator=( const PredType& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
+
 // Determines whether two datatypes refer to the same actual datatype.
 bool DataType::operator==(const DataType& compared_type ) const
 {

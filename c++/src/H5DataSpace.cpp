@@ -68,6 +68,14 @@ void DataSpace::copy( const DataSpace& like_space )
    }
 }
 
+// Makes a copy of the dataspace on the right hand side and stores 
+// the new id in the left hand side object.
+DataSpace& DataSpace::operator=( const DataSpace& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
+
 // Determines whether this dataspace is a simple dataspace.
 bool DataSpace::isSimple () const
 {

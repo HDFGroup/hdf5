@@ -35,7 +35,8 @@ Exception::Exception(const string& func_name, const string& message) : detailMes
 Exception::Exception(const char* func_name, const char* message)
 {
     detailMessage = string(message);
-    funcName = string(func_name);
+    if (func_name != NULL)
+	funcName = string(func_name);
 }
 
 // copy constructor
