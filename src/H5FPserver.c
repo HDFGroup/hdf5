@@ -547,6 +547,7 @@ H5FP_free_file_info_node(H5FP_file_info *info)
     if (info) {
         H5TB_dfree(info->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
         H5TB_dfree(info->locks, (void (*)(void*))H5FP_free_object_lock, NULL);
+        H5FD_free_freelist(&info->file);
         HDfree(info);
     }
 
