@@ -39,6 +39,7 @@
 #define DATASETNAME2	"Data2"
 #define DATASETNAME3	"Data3"
 
+#define FAIL -1
 
 /* Example of using the parallel HDF5 library to create a dataset */
 void
@@ -50,9 +51,9 @@ phdf5write()
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    uint32 rank = SPACE1_RANK; 	/* Logical rank of dataspace */
+    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
     size_t dims1[SPACE1_RANK] = {SPACE1_DIM1,SPACE1_DIM2};   	/* dataspace dim sizes */
-    int32 data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
+    int data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
     int   start[SPACE1_RANK];				/* for hyperslab setting */
     size_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
@@ -101,13 +102,13 @@ phdf5write()
 
     
     /* create a dataset collectively */
-    dataset1 = H5Dcreate(fid1, DATASETNAME1, H5T_NATIVE_INT32, sid1,
+    dataset1 = H5Dcreate(fid1, DATASETNAME1, H5T_NATIVE_INT, sid1,
 			H5P_DEFAULT);
     assert(dataset1 != FAIL);
     MESG("H5Dcreate succeed");
 
     /* create another dataset collectively */
-    dataset2 = H5Dcreate(fid1, DATASETNAME2, H5T_NATIVE_INT32, sid1,
+    dataset2 = H5Dcreate(fid1, DATASETNAME2, H5T_NATIVE_INT, sid1,
 			H5P_DEFAULT);
     assert(dataset2 != FAIL);
     MESG("H5Dcreate succeed");
@@ -145,13 +146,13 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     assert (mem_dataspace != FAIL);
 
     /* write data independently */
-    ret = H5Dwrite(dataset1, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,	    
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
 	    H5P_DEFAULT, data_array1);					    
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
     /* write data independently */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,	    
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
 	    H5P_DEFAULT, data_array1);					    
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
@@ -182,15 +183,15 @@ phdf5read()
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    uint32 rank = SPACE1_RANK; 	/* Logical rank of dataspace */
+    int rank = SPACE1_RANK; 	/* Logical rank of dataspace */
     size_t dims1[] = {SPACE1_DIM1,SPACE1_DIM2};   	/* dataspace dim sizes */
-    int32 data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
+    int data_array1[SPACE1_DIM1][SPACE1_DIM2];	/* data buffer */
 
     int   start[SPACE1_RANK];				/* for hyperslab setting */
     size_t count[SPACE1_RANK], stride[SPACE1_RANK];	/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    intn   i, j;
+    int   i, j;
     int numprocs, myid;
 #ifdef HAVE_PARALLEL
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -255,7 +256,7 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     
 
     /* read data independently */
-    ret = H5Dread(dataset1, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
 
@@ -269,7 +270,7 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     }
 
     /* read data independently */
-    ret = H5Dread(dataset2, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,
+    ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
 
