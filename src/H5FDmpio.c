@@ -105,7 +105,7 @@ static const H5FD_class_t H5FD_mpio_g = {
     H5FD_mpio_open,				/*open			*/
     H5FD_mpio_close,				/*close			*/
     NULL,					/*cmp			*/
-    H5FD_mpio_query,		/*query			*/
+    H5FD_mpio_query,		                /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_mpio_get_eoa,				/*get_eoa		*/
@@ -880,7 +880,7 @@ H5FD_mpio_close(H5FD_t *_file)
  * Function:	H5FD_mpio_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -905,6 +905,7 @@ H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
     } /* end if */
 
@@ -1071,7 +1072,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Offset			mpi_off, mpi_disp;
     MPI_Status  		mpi_stat;
     MPI_Datatype		buf_type, file_type;
-    int         		mpierr, size_i, bytes_read, n;
+    int         		size_i, bytes_read, n;
     int				use_types_this_time, used_types_last_time;
 
     FUNC_ENTER(H5FD_mpio_read, FAIL);
@@ -1162,6 +1163,13 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at_all failed");
     }
 
+    /* KLUDGE, Robb Matzke, 2000-12-29
+     * The LAM implementation of MPI_Get_count() says
+     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
+     * So I'm commenting this out until it can be investigated. The
+     * returned `bytes_written' isn't used anyway because of Kim's
+     * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_write(). */
+#ifndef LAM_MPI /*Robb's kludge*/
     /* How many bytes were actually read? */
     if (MPI_SUCCESS != MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
@@ -1171,6 +1179,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	    "In H5FD_mpio_read after Get_count size_i=%d bytes_read=%d\n",
 	    size_i, bytes_read );
 #endif
+#endif /*Robb's kludge*/
 #if 1
     /*
      * KLUGE rky 1998-02-02
@@ -1308,7 +1317,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
     MPI_Offset 		 	mpi_off, mpi_disp;
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
-    int         		mpierr, size_i, bytes_written;
+    int         		size_i, bytes_written;
     int				mpi_rank=-1;
     int				use_types_this_time, used_types_last_time;
     hbool_t     		allsame;
@@ -1423,6 +1432,13 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at_all failed");
     }
 
+    /* KLUDGE, Robb Matzke, 2000-12-29
+     * The LAM implementation of MPI_Get_count() says
+     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
+     * So I'm commenting this out until it can be investigated. The
+     * returned `bytes_written' isn't used anyway because of Kim's
+     * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_read(). */
+#ifndef LAM_MPI /*Robb's kludge*/
     /* How many bytes were actually written? */
     if (MPI_SUCCESS!= MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written))
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
@@ -1432,6 +1448,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
 	    "In H5FD_mpio_write after Get_count size_i=%d bytes_written=%d\n",
 	    size_i, bytes_written );
 #endif
+#endif /*Robb's kludge*/
 #if 1
     /*
      * KLUGE rky, 1998-02-02
@@ -1451,7 +1468,7 @@ done:
     if (allsame && H5_mpi_1_metawrite_g) {
 	if (MPI_SUCCESS !=
 	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, 0, file->comm))
-          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Bcast failed");
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Bcast failed");
     }
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1480,13 +1497,20 @@ done:
  *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ *              Robb Matzke, 2000-12-29
+ *              Make sure file size is at least as large as the last
+ *              allocated byte.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_mpio_flush(H5FD_t *_file)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
-    int                 mpierr;
+    int                 mpi_rank=-1;
+    uint8_t             byte=0;
+    MPI_Status          mpi_stat;
+    MPI_Offset          mpi_off;
 
     FUNC_ENTER(H5FD_family_flush, FAIL);
 
@@ -1496,6 +1520,32 @@ H5FD_mpio_flush(H5FD_t *_file)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+
+    /* Extend the file to make sure it's large enough, then sync.
+     * Unfortunately, keeping track of EOF is an expensive operation, so
+     * we can't just check whether EOF<EOA like with other drivers.
+     * Therefore we'll just read the byte at EOA-1 and then write it back. */
+    if (haddr_to_MPIOff(file->eoa-1, &mpi_off)<0) {
+        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL,
+                      "cannot convert from haddr_t to MPI_Offset");
+    }
+    if (MPI_SUCCESS!=MPI_Comm_rank(file->comm, &mpi_rank)) {
+        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
+                      "MPI_Comm_rank() failed");
+    }
+    if (0==mpi_rank) {
+        if (MPI_SUCCESS != MPI_File_read_at(file->f, mpi_off, &byte,
+                                            1, MPI_BYTE, &mpi_stat)) {
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
+                          "MPI_File_read_at() failed");
+        }
+        if (MPI_SUCCESS != MPI_File_write_at(file->f, mpi_off, &byte,
+                                             1, MPI_BYTE, &mpi_stat)) {
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
+                          "MPI_File_write_at() failed");
+        }
+    }
+
 
     if (MPI_SUCCESS != MPI_File_sync(file->f))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_sync failed");
