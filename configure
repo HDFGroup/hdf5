@@ -30278,7 +30278,7 @@ if test "$HAVE_PABLO" = "yes"; then
   fi
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile"
+ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5diff/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -30778,6 +30778,7 @@ do
   "perform/Makefile" ) CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "tools/h5dump/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
+  "tools/h5diff/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5diff/Makefile" ;;
   "tools/h5ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5ls/Makefile" ;;
   "tools/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/lib/Makefile" ;;
   "tools/misc/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
