@@ -2253,11 +2253,8 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    if(H5Zregister (H5Z_FILTER_BOGUS, "bogus", filter_bogus)<0) {
-#else /* H5_WANT_H5_V1_4_COMPAT */
+#ifndef H5_WANT_H5_V1_4_COMPAT
     if(H5Zregister (H5Z_CAN_APPLY)<0) {
-#endif /* H5_WANT_H5_V1_4_COMPAT */
         H5_FAILED();
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
@@ -2267,6 +2264,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
         goto error;
     }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) {
@@ -2559,11 +2557,8 @@ test_set_local(const char *filename, hid_t fapl)
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
     } /* end if */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    if(H5Zregister (H5Z_FILTER_BOGUS2, "bogus2", filter_bogus2)<0) {
-#else /* H5_WANT_H5_V1_4_COMPAT */
+#ifndef H5_WANT_H5_V1_4_COMPAT
     if(H5Zregister (H5Z_SET_LOCAL)<0) {
-#endif /* H5_WANT_H5_V1_4_COMPAT */
         H5_FAILED();
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
         goto error;
@@ -2573,6 +2568,7 @@ test_set_local(const char *filename, hid_t fapl)
         printf("    Line %d: Can't set bogus2 filter\n",__LINE__);
         goto error;
     }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) {
@@ -2827,10 +2823,12 @@ main(void)
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
-    nerrors += test_missing_filter(file)<0	?1:0; 
+    nerrors += test_missing_filter(file)<0	?1:0;
+#ifndef H5_WANT_H5_V1_4_COMPAT
     nerrors += test_can_apply(file)<0	?1:0; 
-    nerrors += test_can_apply_szip(file)<0	?1:0; 
     nerrors += test_set_local(filename,fapl)<0	?1:0; 
+#endif /* H5_WANT_H5_V1_4_COMPAT */
+    nerrors += test_can_apply_szip(file)<0	?1:0; 
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
