@@ -29,9 +29,9 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
     H5Fstdio.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c \
     H5MM.c H5O.c H5Oattr.c H5Ocomp.c H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c \
     H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c H5Oshared.c \
-    H5Ostab.c H5P.c H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Spoint.c \
-    H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c H5TB.c H5V.c H5Z.c \
-    PabloHDF.c PabloHDF_RT.c PabloHDF_SDDF.c
+    H5Ostab.c H5P.c H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c \
+    H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c \
+    H5TB.c H5V.c H5Z.c PabloHDF5.c PabloHDF_RT.c PabloHDF_SDDF.c
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
@@ -53,8 +53,8 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
     H5Tprivate.h H5TBprivate.h H5Tpkg.h H5Vprivate.h H5Zprivate.h
 
 # Number format detection
-H5Tinit.c: ../src/H5detect
-	$(RUNTEST) ../src/H5detect >H5Tinit.c
+H5Tinit.c: ../src/H5Tinit.c
+	cp ../src/H5Tinit.c .
 
 #------------------------------------------------------------- -*- makefile -*-
 # The following section of this makefile comes from the
@@ -138,9 +138,10 @@ maintainer-clean: distclean
 .c.o: 
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c
 
-PABLO_INCLUDES = HDFentryNames.h HDFidList.h HDF5record_RT.h ProcIDs.h 
+PABLO_INCLUDES = HDFentryNames.h HDFidList.h HDF5record_RT.h ProcIDs.h \
+	         ProcTrace.h
 
-PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES)
+PabloHDF5.o: PabloHDF5.c $(PABLO_INCLUDES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES)
@@ -150,10 +151,10 @@ PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 HDFentryNames.h: HDFentries.txt
-	sed "s/.*/\"&\",/" $? > $@
+	sort $? | sed "s/.*/\"&\",/" > $@
 
 HDFidList.h: HDFentries.txt
-	sed "s/.*/ID_&,/" $? > $@
+	sort $? | sed "s/.*/ID_&,/" > $@
 
 #------------------------------------------------------------------------------
 # The following section of this makefile contains dependencies between the
@@ -1232,6 +1233,33 @@ HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
+../src/H5Eprivate.h \
+../src/H5Epublic.h \
+../src/H5Ipublic.h \
+../src/H5Sprivate.h \
+../src/H5Spublic.h \
+../src/H5Fprivate.h \
+../src/H5Fpublic.h \
+../src/H5Dpublic.h \
+../src/H5Gprivate.h \
+../src/H5Gpublic.h \
+../src/H5Bprivate.h \
+../src/H5Bpublic.h \
+../src/H5Oprivate.h \
+../src/H5Opublic.h \
+../src/H5HGprivate.h \
+../src/H5HGpublic.h \
+../src/H5Tprivate.h \
+../src/H5Tpublic.h
+H5Snone.c:  ../src/H5Snone.c 
+H5Snone.o: \
+H5Snone.c \
+ProcIDs.h \
+HDFidList.h \
+../src/H5private.h \
+../src/H5public.h \
+../src/H5config.h \
+../src/H5api_adpt.h \
 ../src/H5Eprivate.h \
 ../src/H5Epublic.h \
 ../src/H5Ipublic.h \

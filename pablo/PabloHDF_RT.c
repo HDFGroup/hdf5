@@ -114,6 +114,7 @@
 #include "Trace.h"
 #include "TraceParam.h"
 #include "ProcIDs.h"
+#include "IO_TraceParams.h"
 #include "HDF5Trace.h"
 #include "SDDFparam.h"
 #include <string.h>
@@ -141,9 +142,12 @@
 
 #ifdef HAVE_PARALLEL
 #include "mpio.h"
+#include "MPIO_TraceParams.h"
 #include "MPIO_Init.h"
 #include "MPIO_EventArgs.h"
-#include "MPIO_TraceParams.h"
+#endif
+
+#ifdef HAVE_MPIOTRACE
 #endif
 
 #ifndef TRgetThreadID
@@ -156,8 +160,6 @@
 
 #define AllThreads -1
 
-#define set_c_mappedID( fd ) (fd)
-#define c_mappedID( fd ) (fd)
 /*======================================================================*
 //  User output file pointer.						*
 //======================================================================*/
@@ -183,8 +185,8 @@ fileRec_t *HDFfileList;
 /*======================================================================*
 // Internal Function prototypes						*
 //======================================================================*/
-void HDFinitTrace_RT( char *, unsigned );
-void HDFendTrace_RT( void );
+void HDFinitTrace_RT( char *, int );
+void HDFendTrace_RT( int );
 int initproctracert_( void );
 int initHDFProcTrace_RT( void );
 void HDFtraceEvent_RT( int , char *, unsigned ) ;
@@ -222,14 +224,14 @@ extern char *hdfRecordPointer;
 // NAME									*
 //     HDFinitTrace_RT-- initialize HDF real-time tracing		*
 // USAGE								*
-//     VOID HDFinitTrace_RT( fileName, procTraceMask)			*
+//     VOID HDFinitTrace_RT( fileName, OUTSW )				*
 //									*
 //     char *fileName;		IN: name of output file			*
-//     unsigned procTraceMask;	IN: families of procedures to trace	*
+//     int OUTSW        ;	IN: Type of tracing                	*
 // RETURNS								*
 //     None.								*
 //======================================================================*/
-void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
+void HDFinitTrace_RT( char *fileName, int OUTSW )
 {
 #ifdef  HAVE_PARALLEL
 	int myNode;
@@ -239,7 +241,6 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 	TRgetClock( &epoch );
 	criticalSection = TRlock();
 	error = initHDFProcTrace_RT() ;
-    	procTrace = procTraceMask;
 	TRunlock( criticalSection );
 	if ( error != SUCCESS ) {
 	   fprintf (stderr,"Unable to Initialize properly.  Exiting program\n");
@@ -247,13 +248,21 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 	}
 	FileName = ( char * ) malloc ( strlen( fileName ) + 10 );
 #ifdef  HAVE_PARALLEL
-        MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-        setTraceProcessorNumber( myNode );
-	sprintf(FileName,"%s.nd%d",fileName,myNode);
 	/*==============================================================*
-	// In the parallel case, initialize MPI-IO tracing.  This will	*
-	// set the trace file name.					*
+	// Here the library was built to linked with the MPI and MPIO	*
+	// libraries.  However, the use may chose not to run with MPI.	*
+	// A check is made to see if MPI has been initialized.  If so,  *
+	// a trace file is assigned to the current node with the number *
+	// of the node as a suffix; if not, only one file is opened  	*
+	// and it is not given a suffix.				*
 	//==============================================================*/
+	if ( OUTSW == MPI_SUMMARY_TRACE ) {
+           MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+           setTraceProcessorNumber( myNode );
+	   sprintf(FileName,"%s.nd%d",fileName,myNode);
+	} else {
+	   strcpy( FileName, fileName ) ;
+	}
 #else
 	/*==============================================================*
 	// In the non-parallel case, set the trace file name and 	*
@@ -272,14 +281,16 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 // RETURNS								*
 //     None.								*
 //======================================================================*/
-void HDFendTrace_RT( void )
+void HDFendTrace_RT( int OUTSW )
 {
 	int j, numSetIDs;
 	HDFnode_t *P;
 	char **Names;
 	char* mapFile;
+	TR_LOCK	criticalSection;
 
 	HDFfinalTimeStamp();
+	criticalSection = TRlock();
 	/*==============================================================*
 	//  Assing pablo ids to named identifiers and tag records	*
 	//==============================================================*/
@@ -303,23 +314,7 @@ void HDFendTrace_RT( void )
 	   HDFSummarySDDF( HDFQueues[j], j );
 	}  
 	endTracing();
-	/*==============================================================*
-	// Clean up storage						*
-	//==============================================================*/
-	free( (void *)mapFile );
-	for ( j = 0; j < numSetIDs; ++j ) {
-	    if ( Names[j] != NULL ) {
-               free((void *)Names[j]);
-	    }
-	}
-	free( (void *)Names );
-        P = CallStack;
-        if ( P->ptr != NULL ) {
-	   fprintf(stderr,"CallStack not empty at termination\n");
-        } else {
-           free((void *)P);
-	}
-	free((void *)HDFQueues) ; 
+	TRunlock( criticalSection ); 
 }
 /*======================================================================*
 // initHFDProcTrace_RT							*
@@ -726,6 +721,7 @@ void EndHDFEventRecord ( int eventID, CLOCK secs, void *dataPtr )
 	HDFnode_t	*HDFrec;
 	CLOCK  		incSecs;
 	static int	dummyIDs = -4;
+	eventID = 0;
 	/*==============================================================*
 	// pop record from top of the stack, compute inclusive duration	*
 	// and set the corresponding record field and increment nCalls.	*
@@ -1114,7 +1110,6 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   arrayLen = 0;	/* name length */
 	   memcpy( Packet, &arrayLen, sizeof(int) );
 	   putBytes( buff, Header.packetLen ); 
-           free((void *)P);
            P = Q;
 	} 
 }
@@ -1411,6 +1406,11 @@ void _hdfDescriptorRT( char *recordName, char *recordDescription,
 void writeHDFRecDescrptrsRT( void ) 
 {
 	char HDFProcNames[][40] = {
+	"noName",
+	"noName",
+	"noName",
+	"noName",
+	"noName",
 #	include "HDFentryNames.h"
 	"HDF_Last_Entry"
 	};

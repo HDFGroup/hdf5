@@ -74,110 +74,125 @@
 // 1-B-333164.
 //-------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------
- * File:  ProcIDs.h
- * Purpose: define IDs for identifying procedures in traces
+ * File:  ProcTrace.h
+ * Purpose: define entities for tracing HDF procedures
  *-------------------------------------------------------------------------*/
 
-#ifndef PROCIDS_H		/* avoid re-inclusion */
-#define PROCIDS_H
-
-extern int *procTrace;
-/*
- * Define the event IDs that will be used for the various HDF events
- */
-#include "ProcTrace.h"
-
-#define H5_mask			ID_H5_c
-#define H5A_mask		ID_H5A_c
-#define H5AC_mask		ID_H5AC_c
-#define H5B_mask		ID_H5B_c
-#define H5D_mask		ID_H5D_c
-#define H5E_mask		ID_H5E_c
-#define H5F_mask		ID_H5F_c
-#define H5F_arr_mask		ID_H5Farray_c
-#define H5F_core_mask		ID_H5Fcore_c
-#define H5F_family_mask		ID_H5Ffamily_c
-#define H5F_istore_mask		ID_H5Fistore_c
-#define H5F_low_mask		ID_H5Flow_c
-#define H5F_mpio_mask		ID_H5Fmpio_c
-#define H5F_sec2_mask		ID_H5Fsec2_c
-#define H5F_split_mask		ID_H5Fsplit_c
-#define H5F_stdio_mask		ID_H5Fstdio_c
-#define H5G_mask		ID_H5G_c
-#define H5G_ent_mask		ID_H5Gent_c
-#define H5G_node_mask		ID_H5Gnode_c
-#define H5G_stab_mask		ID_H5Gstab_c
-#define H5HG_mask		ID_H5HG_c
-#define H5HL_mask		ID_H5HL_c
-#define H5I_mask		ID_H5I_c
-#define H5MF_mask		ID_H5MF_c
-#define H5MM_mask		ID_H5MM_c
-#define H5O_mask		ID_H5O_c
-#define H5O_attr_mask		ID_H5Oattr_c
-#define H5O_pline_mask		ID_H5Ocomp_c
-#define H5O_cont_mask		ID_H5Ocont_c
-#define H5O_dtype_mask		ID_H5Odtype_c
-#define H5O_efl_mask		ID_H5Oefl_c
-#define H5O_fill_mask		ID_H5Ofill_c
-#define H5O_layout_mask		ID_H5Olayout_c
-#define H5O_mtime_mask		ID_H5Omtime_c
-#define H5O_name_mask		ID_H5Oname_c
-#define H5O_null_mask		ID_H5Onull_c
-#define H5O_sdspace_mask	ID_H5Osdspace_c
-#define H5O_shared_mask		ID_H5Oshared_c
-#define H5O_stab_mask		ID_H5Ostab_c
-#define H5P_mask		ID_H5P_c
-#define H5R_mask		ID_H5R_c
-#define H5RA_mask		ID_H5RA_c
-#define H5S_mask		ID_H5S_c
-#define H5S_all_mask		ID_H5Sall_c
-#define H5S_hyper_mask		ID_H5Shyper_c
-#define H5S_mpio_mask		ID_H5Smpio_c
-#define H5S_none_mask		ID_H5Snone_c
-#define H5S_point_mask		ID_H5Spoint_c
-#define H5S_select_mask		ID_H5Sselect_c
-#define H5T_mask		ID_H5T_c
-#define H5TB_mask		ID_H5TB_c
-#define H5Tbit_mask		ID_H5Tbit_c
-#define H5T_conv_mask		ID_H5Tconv_c
-#define H5T_init_mask		ID_H5Tinit_c
-#define H5V_mask		ID_H5V_c
-#define H5Z_mask		ID_H5Z_c
-
-#define	ID_HDFprocName		9996
-#define	ID_malloc		9997
-#define	ID_free			9998
-#define	ID_timeStamp		9999
-#define	DUMMY_HDF		10000
-
-#define BEGIN_HDF (DUMMY_HDF + 1)
-#define END_HDF (ID_HDF_Last_Entry + DUMMY_HDF)
-#define NumHDFProcs ( ID_HDF_Last_Entry )
-
-#define BEGIN_MPIO            900800
-#define END_MPIO              900899
+#ifndef PROCTRACE_H		/* avoid re-inclusion */
+#define PROCTRACE_H
+#include <stdarg.h>
+/*======================================================================*
+// By default, all HDF procedures are traced.  Tracing of individual	*
+// procedures or all of the procedures in a particular source file in	*
+// the HDF 5 library can be done by calling the procedure PabloHDF5trace*
+// with the appropriate argument.  The call must be made prior to	*
+// calling HDF5initTrace.  As many calls as necessary may be made prior	*
+// to calling HDF5initTrace so several specific procedures can be 	*
+// traced. 								*
+// PabloHDF5trace has the following syntax.				*
+//   #include "ProcTrace.h"						*
+//   void PabloHDF5trace( int traceID );				*
+// where								*
+//   traceID specifies the procedure or procedures within an HDF 5 file	*
+//   that are to be traced.  If a single procedure named <proc> is to 	*
+//   be traced, then traceID should have the value ID_<proc>.  If all 	*
+//   of the procedures within the HDF 5 library routine <file>.c are to *
+//   be traced, then the value of traceID should be FID_<file>.  The	*
+//   constants ID_<proc> and FID_<file> are declared for all possible	*
+//   values of <proc> and <file> below.                         	*
+//      								*
+//   Example:								*
+//     To enable tracing of the individual procedures H5I_register and	*
+//     H5Topen and all of the procedures in the HDF 5 library source 	*
+//     files H5A.c and H5Gent.c the following code segements could be 	*
+//     used:								*
+//     									*
+//     #include "ProcTrace.h"						*
+//	 ...								*
+//     PabloHDF5trace( ID_H5I_register );				*
+//     PabloHDF5trace( ID_H5Topenr );					*
+//     PabloHDF5trace( FID_H5A );					*
+//     PabloHDF5trace( FID_H5Gent );					*
+//	...								*
+//     HDF5initTrace( ... );   						*
+//     									*
+// See the document PabloHDF5.doc for further information		*
+//======================================================================*/
 /*======================================================================*/
-/* Macros to tell if the ID is that of an HDF Entry or Exit             */
+/* Assign HDF identifier routine tags					*/
 /*======================================================================*/
-#define isBeginHDFEvent( ID ) ( BEGIN_HDF <= (ID) && (ID) <= END_HDF )
-#define isEndHDFEvent( ID )   isBeginHDFEvent(-(ID))
-#define isBeginMPIOEvent( ID ) \
-            ( BEGIN_MPIO <= (ID) && (ID) <= END_MPIO && (ID)%2 == 0 )
+#ifdef RUNTIME_TRACE
+#undef RUNTIME_TRACE
+#endif
+enum HDF_IDS {
+RUNTIME_TRACE,
+SUMMARY_TRACE,
+MPI_RUNTIME_TRACE,
+MPI_SUMMARY_TRACE,
+NO_TRACE,
+#include "HDFidList.h"
+ID_HDF_Last_Entry,
+AllHDF5 = ID_HDF_Last_Entry,
+ID_H5_c,
+ID_H5A_c,
+ID_H5AC_c,
+ID_H5B_c,
+ID_H5D_c,
+ID_H5E_c,
+ID_H5F_c,
+ID_H5Farray_c,
+ID_H5Fcore_c,
+ID_H5Ffamily_c,
+ID_H5Fistore_c,
+ID_H5Flow_c,
+ID_H5Fmpio_c,
+ID_H5Fsec2_c,
+ID_H5Fsplit_c,
+ID_H5Fstdio_c,
+ID_H5G_c,
+ID_H5Gent_c,
+ID_H5Gnode_c,
+ID_H5Gstab_c,
+ID_H5HG_c,
+ID_H5HL_c,
+ID_H5I_c,
+ID_H5MF_c,
+ID_H5MM_c,
+ID_H5O_c,
+ID_H5Oattr_c,
+ID_H5Ocomp_c,
+ID_H5Ocont_c,
+ID_H5Odtype_c,
+ID_H5Oefl_c,
+ID_H5Ofill_c,
+ID_H5Olayout_c,
+ID_H5Omtime_c,
+ID_H5Oname_c,
+ID_H5Onull_c,
+ID_H5Osdspace_c,
+ID_H5Oshared_c,
+ID_H5Ostab_c,
+ID_H5P_c,
+ID_H5R_c,
+ID_H5RA_c,
+ID_H5S_c,
+ID_H5Sall_c,
+ID_H5Shyper_c,
+ID_H5Smpio_c,
+ID_H5Snone_c,
+ID_H5Spoint_c,
+ID_H5Sselect_c,
+ID_H5T_c,
+ID_H5TB_c,
+ID_H5Tbit_c,
+ID_H5Tconv_c,
+ID_H5Tinit_c,
+ID_H5V_c,
+ID_H5Z_c,
+NUM_HDF5_IDS
+} ;
 
-#define isEndMPIOEvent( ID ) \
-            ( BEGIN_MPIO <= (ID) && (ID) <= END_MPIO && (ID)%2 == 1 )
-#define isBeginIOEvent( ID )  \
-        ( IOerrorID < (ID) && (ID) <= fsetposEndID && (ID)%2 == 1 )
-#define isEndIOEvent( ID ) \
-        ( IOerrorID < (ID) && (ID) <= fsetposEndID && (ID)%2 == 0 )
-#define ProcIndex( ID ) ( (ID) - BEGIN_HDF )
-#define ProcIndexForHDFEntry( ID ) ( (ID) - BEGIN_HDF )
-#define ProcIndexForHDFExit( ID )  ProcIndexForHDFEntry(-ID)
-#define HDFIXtoEventID( ID ) ( (ID) + BEGIN_HDF )
-
-#define TRACE_ON(mask, ID) \
-if ( procTrace[mask] || procTrace[ID] ) startHDFtraceEvent( HDFIXtoEventID( ID ) )
-#define TRACE_OFF(mask, ID ) \
-if ( procTrace[mask] || procTrace[ID] ) endHDFtraceEvent(-HDFIXtoEventID(ID), 0, NULL, 0 )
- 
-#endif /* PROCIDS_H */
+void PabloHDF5Trace( int ) ;
+void HDF5initTrace( const char *, int trace_id, ... ); 
+void HDF5endTrace( void ); 
+#endif /* PROCTRACE_H */

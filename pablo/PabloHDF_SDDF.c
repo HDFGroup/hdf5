@@ -72,7 +72,7 @@
 #include "TraceParam.h"
 #include "Trace.h"
 #include "HDF5Trace.h"
-void HDFendTrace_SDDF(void);
+void HDFendTrace_SDDF(int);
 void startHDFtraceEvent(int eventID);
 void endHDFtraceEvent(int , int , char *, int );
 int preInitHDFProcTrace( void );
@@ -83,7 +83,8 @@ TR_RECORD *HDFprocEventRecord( int, TR_EVENT *, CLOCK, HDFsetInfo *, unsigned );
 TR_RECORD *miscEventRecord( int , TR_EVENT *, CLOCK, void *, unsigned );
 void _hdfMiscDescriptor( void );
 void _hdfProcNameDescriptor( void );
-int setEventRecordFunction( int, void *(*)() );
+/*int setEventRecordFunction( int, void *(*)() );*/
+int setEventRecordFunction( int, TR_RECORD *(*)() );
 void HDFtraceIOEvent( int, void *, unsigned );
 void initIOTrace( void );
 void enableIOdetail( void );
@@ -107,12 +108,14 @@ void endIOTrace( void );
 #ifdef HAVE_MPIOTRACE
 	int initMPIOTrace( char *, int );
 	void endMPIOTrace( void ) ;
+#else
+	void endMPIOTrace( void ) {return;} 
 #endif
 extern char *hdfRecordPointer;
 /*======================================================================*
 // Prototypes of functions in this file.				*
 //======================================================================*/
-void HDFinitTrace_SDDF( char *, uint32 );
+void HDFinitTrace_SDDF( char *, int );
 /*======================================================================* 
 // Each procedure being traced has associated with it a distinct pair 	* 
 // of entry and exit event IDs.  This code maintains a vector of such  	* 
@@ -191,6 +194,7 @@ struct miscTraceRecordData {
 // events. 								*
 //======================================================================*/
 int procEntries[] = {
+0, 0, 0, 0, 0,
 #include "HDFidList.h"
 ID_HDF_Last_Entry
 };
@@ -203,6 +207,11 @@ int *procEntryCalled;
 // The HDFProcNames array holds the names of the HDF entries.       	*
 //======================================================================*/
 static char HDFProcNames[][40] = {
+"noName",
+"noName",
+"noName",
+"noName",
+"noName",
 #include "HDFentryNames.h"
 "HDF_LAST_ENTRY"
 };
@@ -218,30 +227,64 @@ static char HDFProcNames[][40] = {
 // RETURNS								*
 //     	None 								*
 //======================================================================*/
-void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
+void HDFinitTrace_SDDF( char *traceFileName, int OUTSW )
 {
 	/*===============================================================
         // set traceFileName and set IO tracing switches.  If MPIO 	*
-	// tracing is available, this will be initialized also.  	*
+	// tracing is available, MPIO tracing will also be initialized. *
 	//==============================================================*/
 #ifdef HAVE_PARALLEL
+	/*===============================================================
+	// The code is built to handle parallel processing using MPI.	*	
+	// However, the code may or may not be run using MPI and there  *
+	// may or may not be support for MPIO tracing in the Pablo	*
+	// Trace libraries.  The type of initialization performed 	*
+	// depends on these factors.					*
+	//==============================================================*/
 	int myNode;
 	char *buff;
 	/*===============================================================
-	// in the parallel case, initialize MPI-IO tracing.  This will	*
-	// initialize the traceFileName and set the I/O tracing 	*
-	// switches.							*
+	// Determine if MPI is running the program.			*
 	//==============================================================*/
-        MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-	setTraceProcessorNumber( myNode );
+	if ( OUTSW == MPI_RUNTIME_TRACE ) {
+	   /*============================================================
+	   // in the parallel case, initialize MPI-IO tracing. This  	*
+	   // will initialize the traceFileName and set the I/O tracing	*
+	   // switches.							*
+	   //===========================================================*/
+           MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+	   setTraceProcessorNumber( myNode );
 #ifdef HAVE_MPIOTRACE
-        initMPIOTrace( traceFileName, 0 ); 
+	   /*============================================================
+	   // MPIO Tracing is supported in the Pablo Library.  Let the  *
+	   // MPIO initialization be performed and handle the naming of *
+	   // trace files.						*
+	   //===========================================================*/
+           initMPIOTrace( traceFileName, RUNTIME_TRACE ); 
 #else 
-	buff = (char *)malloc( strlen(traceFileName)+12);
-	sprintf( buff, "%s.nd%.4d\0",traceFileName,myNode);
-	setTraceFileName( buff );
-	free( buff );
+	   /*============================================================
+	   // MPIO tracing is not supported.				*
+	   // Set up the trace file names depending on the number of    *
+	   // current node.						*
+	   //===========================================================*/
+	   buff = (char *)malloc( strlen(traceFileName)+12);
+	   sprintf( buff, "%s.nd%.4d\0",traceFileName,myNode);
+	   setTraceFileName( buff );
+	   free( buff );
 #endif
+	} else {
+	   /*============================================================
+	   // The HDF library was built to run with MPI, but the	*
+	   // application is being run in serial mode.  Initialization	*
+	   // is done as in the serial case.				*
+	   //===========================================================*/
+	   setTraceFileName(traceFileName);
+    	   initIOTrace();
+    	   enableIOdetail();
+    	   disableLifetimeSummaries();
+           disableTimeWindowSummaries();
+	   disableFileRegionSummaries();
+	} 
 #else 
 	/*===============================================================
 	// in the non-parallel case, set the trace file name and the 	*
@@ -259,7 +302,6 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 	//==============================================================*/
 	preInitHDFProcTrace();
         initHDFProcTrace( sizeof(procEntries)/sizeof(int), procEntries );
-    	procTrace = procTraceMask;
 }
 /*=======================================================================
 // NAME									*
@@ -269,22 +311,23 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 // RETURNS								*
 //     None.								*
 //======================================================================*/
-void HDFendTrace_SDDF(void)
+void HDFendTrace_SDDF(int OUTSW)
 {
 	HDFfinalTimeStamp();
-#ifdef HAVE_MPIOTRACE
-	/*===============================================================
-	// termintate MPI-IO tracing in the parallel case.  This will	*
-	// terminate the I/O tracing and close tracing as well.		*
-	//==============================================================*/
-	endMPIOTrace(); 
-#else
-	/*===============================================================
-	// terminate tracing 						*
-	//==============================================================*/
-       	endIOTrace();
-       	endTracing();
-#endif
+	if ( OUTSW == MPI_RUNTIME_TRACE ) {
+	   /*============================================================
+	   // termintate MPI-IO tracing in the parallel case.  This 	*
+	   // will terminate the I/O tracing and close tracing as well.	*
+	   //===========================================================*/
+	   endMPIOTrace(); 
+	} else {
+	   /*============================================================
+	   // terminate tracing						*
+	   //===========================================================*/
+       	   endIOTrace();
+       	   endTracing();
+	   exit(1);
+	} 
 }
 /*=======================================================================
 // NAME									*
@@ -306,7 +349,7 @@ void HDFendTrace_SDDF(void)
 //======================================================================*/
 int initHDFProcTrace( int numProcs, int *procEntryID )
 {
-	int			procIndex;
+	int			procIndex, IX, ID;
 
   	if (( numProcs <= 0 ) || ( procEntryID == (int *) 0 )  )
 		return FAILURE; 
@@ -331,13 +374,13 @@ int initHDFProcTrace( int numProcs, int *procEntryID )
 	//==============================================================*/
 	for ( procIndex = 0; procIndex < numProcs; procIndex++ ) {
 
-		procEvents[ procIndex ].entryID = procEntryID[ procIndex ];
-		procEvents[ procIndex ].exitID = -procEntryID[ procIndex ];
+	        IX = procEntryID[ procIndex ];
+		ID = HDFIXtoEventID( IX );
+		procEvents[ procIndex ].entryID = ID;
+		procEvents[ procIndex ].exitID = -ID;
 
-		setEventRecordFunction( procEntryID[ procIndex ],
-					(void *(*)())HDFprocEventRecord );
-		setEventRecordFunction( -procEntryID[ procIndex ],
-					(void *(*)())HDFprocEventRecord );
+		setEventRecordFunction( ID, HDFprocEventRecord );
+		setEventRecordFunction( -ID, HDFprocEventRecord );
 		procEntryCalled[ procIndex ] = 0;
 
 	}
@@ -349,12 +392,12 @@ int initHDFProcTrace( int numProcs, int *procEntryID )
 	//==============================================================*/
 	procEvents[ numProcs ].entryID = ID_malloc;
 	procEvents[ numProcs ].exitID = -ID_malloc;
-	setEventRecordFunction( ID_malloc, (void *(*)())miscEventRecord );
-	setEventRecordFunction( -ID_malloc, (void *(*)())miscEventRecord );
+	setEventRecordFunction( ID_malloc, miscEventRecord );
+	setEventRecordFunction( -ID_malloc, miscEventRecord );
 	procEvents[ numProcs+1 ].entryID = ID_free;
 	procEvents[ numProcs+1 ].exitID = -ID_free;
-	setEventRecordFunction( ID_free, (void *(*)())miscEventRecord );
-	setEventRecordFunction( -ID_free, (void *(*)())miscEventRecord );
+	setEventRecordFunction( ID_free, miscEventRecord );
+	setEventRecordFunction( -ID_free, miscEventRecord );
 
 	return SUCCESS;
 }
@@ -533,7 +576,7 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	     TraceRecordHeader->nameLen = 0;
 	  }   
 	} else {
-	  TraceRecordHeader->setID = NoDSid;
+	  TraceRecordHeader->setID = 0;
 	  TraceRecordHeader->nameLen = 0;
         } 
 
