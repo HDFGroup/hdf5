@@ -82,7 +82,8 @@ New Features
 
   o Parallel Library
   ==================
-    * Parallel C HDF5 now works on HP-UX platforms.
+    * Parallel C HDF5 now works on HP-UX platforms, Compaq clusters,
+      Linux clusters, Cplants (alpha-linux clusters).
 
   o Tools
   =======
