@@ -168,7 +168,11 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
  *              in a way similar to shifting a variable value, like
  *              value <<= 3, or value >>= 16.  SHIFT_DIST is positive for 
  *              left shift, negative for right shift.  The bit vector starts
- *              at OFFSET and is SIZE long.
+ *              at OFFSET and is SIZE long.  The caller has to make sure
+ *              SIZE+OFFSET doesn't exceed the size of BUF.
+ *
+ *              For example, if we have a bit sequence 00011100, offset=2,
+ *              size=3, shift_dist=2, the result will be 00010000. 
  *
  * Return:	void
  *
@@ -379,9 +383,9 @@ H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
  * Purpose:	Finds the first bit with the specified VALUE within a region
  *		of a bit vector.  The region begins at OFFSET and continues
  *		for SIZE bits, but the region can be searched from the least
- *		significat end toward the most significant end(H5T_BIT_MSB
+ *		significat end toward the most significant end(H5T_BIT_LSB
  *		as DIRECTION), or from the most significant end to the least 
- *		significant end(H5T_BIT_LSB as DIRECTION).
+ *		significant end(H5T_BIT_MSB as DIRECTION).
  *
  * Return:	Success:	The position of the bit found, relative to
  *				the offset.
@@ -493,8 +497,8 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Friday, June 26, 1998
+ * Programmer:	Raymond Lu
+ *              Mar 17, 2004
  *
  * Modifications:
  *
@@ -596,14 +600,14 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
         idx++;
         size -= (8 - pos);
     } else { /* bit sequence ends in the same byte as starts */
-        /* Example: a sequence like 11000100 and start=3, size=3.  We substract 00001000 
+        /* Example: a sequence like 11000100 and pos=3, size=3.  We substract 00001000 
          * and get 10111100.  A bit is borrowed from 6th bit(buf[idx]>>6=00000010, tmp>>6=00000011,
          * not equal).  We need to put this bit back by increment 1000000.
          */ 
         tmp = buf[idx];
         buf[idx] -= 1 << pos;
-        if((buf[idx] >> (start+size)) != tmp >> (start+size)) {
-            buf[idx] += 1 << (start+size);
+        if((buf[idx] >> (pos+size)) != tmp >> (pos+size)) {
+            buf[idx] += 1 << (pos+size);
             borrow = 1;
         }
         goto done;
