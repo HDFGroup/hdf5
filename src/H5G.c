@@ -678,7 +678,7 @@ H5Gunlink(hid_t loc_id, const char *name)
  */
 herr_t
 H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
-	 H5G_stat_t *statbuf/*out*/)
+	       H5G_stat_t *statbuf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
     
@@ -2111,7 +2111,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
  */
 herr_t
 H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
-	  H5G_stat_t *statbuf/*out*/)
+		 H5G_stat_t *statbuf/*out*/)
 {
     H5O_stab_t		stab_mesg;
     H5G_entry_t		grp_ent, obj_ent;
@@ -2419,15 +2419,52 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 herr_t
 H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
 {
+    H5G_stat_t		sb;
+    char		*linkval=NULL;
+    size_t		lv_size=32;
+    
     FUNC_ENTER(H5G_move, FAIL);
     assert(loc);
     assert(src_name && *src_name);
     assert(dst_name && *dst_name);
 
-    if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name)<0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-		      "unable to register new name for object");
+    if (H5G_get_objinfo(loc, src_name, FALSE, &sb)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
+    if (H5G_LINK==sb.type) {
+	/*
+	 * When renaming a symbolic link we rename the link but don't change
+	 * the value of the link.
+	 */
+	do {
+	    if (NULL==(linkval=H5MM_realloc(linkval, 2*lv_size))) {
+		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			      "unable to allocate space for symbolic link "
+			      "value");
+	    }
+	    linkval[lv_size-1] = '\0';
+	    if (H5G_linkval(loc, src_name, lv_size, linkval)<0) {
+		HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+			      "unable to read symbolic link value");
+	    }
+	} while (linkval[lv_size-1]);
+	if (H5G_link(loc, H5G_LINK_SOFT, linkval, dst_name)<0) {
+	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+			  "unable to rename symbolic link");
+	}
+	H5MM_xfree(linkval);
+	
+    } else {
+	/*
+	 * Rename the object.
+	 */
+	if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name)<0) {
+	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+			  "unable to register new name for object");
+	}
+    }
+
+    /* Remove the old name */
     if (H5G_unlink(loc, src_name)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to deregister old object name");
