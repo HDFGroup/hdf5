@@ -1,14 +1,14 @@
 /****************************************************************************
-* NCSA HDF                                                                 *
-* Software Development Group                                               *
-* National Center for Supercomputing Applications                          *
-* University of Illinois at Urbana-Champaign                               *
-* 605 E. Springfield, Champaign IL 61820                                   *
-*                                                                          *
-* For conditions of distribution and use, see the accompanying             *
-* hdf/COPYING file.                                                        *
-*                                                                          *
-****************************************************************************/
+ * NCSA HDF                                                                 *
+ * Software Development Group                                               *
+ * National Center for Supercomputing Applications                          *
+ * University of Illinois at Urbana-Champaign                               *
+ * 605 E. Springfield, Champaign IL 61820                                   *
+ *                                                                          *
+ * For conditions of distribution and use, see the accompanying             *
+ * hdf/COPYING file.                                                        *
+ *                                                                          *
+ ****************************************************************************/
 
 #ifdef RCSID
 static char             RcsId[] = "@(#)$Revision$";
@@ -34,6 +34,10 @@ static char             RcsId[] = "@(#)$Revision$";
 /* datatypes of predefined drivers needed by H5_trace() */
 #include <H5FDmpio.h>
 
+/* we need this for the struct rusage declaration */
+#if defined(HAVE_GETRUSAGE) && defined(linux)
+#include <sys/resource.h>
+#endif
 
 /* We need this on Irix64 even though we've included stdio.h as documented */
 FILE *fdopen(int fd, const char *mode);
@@ -167,12 +171,13 @@ H5_term_library(void)
 
     /* explicit locking of the API */
     pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-
     H5TS_mutex_lock(&H5_g.init_lock);
 
-    if (!H5_g.H5_libinit_g) return;
+    if (!H5_g.H5_libinit_g)
+	return;
 #else
-    if (!H5_libinit_g) return;
+    if (!H5_libinit_g)
+	return;
 #endif
 
     /* Check if we should display error output */
@@ -189,7 +194,6 @@ H5_term_library(void)
       at += strlen(loop+at),						      \
       n):0)
     
-
     do {
 	pending = 0;
 	pending += DOWN(F);
@@ -206,7 +210,8 @@ H5_term_library(void)
 	pending += DOWN(A);
 	pending += DOWN(P);
 	pending += DOWN(I);
-    } while (pending && ntries++<100);
+    } while (pending && ntries++ < 100);
+
     if (pending) {
         /* Only display the error message if the user is interested in them. */
         if (func) {
@@ -218,7 +223,6 @@ H5_term_library(void)
     /* Mark library as closed */
 #ifdef H5_HAVE_THREADSAFE
     H5_g.H5_libinit_g = FALSE;
-
     H5TS_mutex_unlock(&H5_g.init_lock);
 #else
     H5_libinit_g = FALSE;
@@ -259,11 +263,13 @@ H5dont_atexit(void)
   /* locking code explicitly since FUNC_ENTER is not called */
 #ifdef H5_HAVE_THREADSAFE
     pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-
     H5TS_mutex_lock(&H5_g.init_lock);
 #endif
     H5_trace(FALSE, "H5dont_atexit", "");
-    if (dont_atexit_g) return FAIL;
+
+    if (dont_atexit_g)
+	    return FAIL;
+
     dont_atexit_g = TRUE;
     H5_trace(TRUE, NULL, "e", SUCCEED);
 #ifdef H5_HAVE_THREADSAFE
@@ -565,13 +571,14 @@ H5close (void)
      * thing just to release it all right away.  It is safe to call this
      * function for an uninitialized library.
      */
-  /* Explicitly lock the call since FUNC_ENTER is not called */
 #ifdef H5_HAVE_THREADSAFE
+    /* Explicitly lock the call since FUNC_ENTER is not called */
     pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-
     H5TS_mutex_lock(&H5_g.init_lock);
 #endif
+
     H5_term_library();
+
 #ifdef H5_HAVE_THREADSAFE
     H5TS_mutex_unlock(&H5_g.init_lock);
 #endif
@@ -621,9 +628,8 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 }
 #endif /* HAVE_SNPRINTF */
 
+
 #ifndef HAVE_VSNPRINTF
-
-
 /*-------------------------------------------------------------------------
  * Function:	HDvsnprintf
  *
@@ -654,7 +660,6 @@ HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
     return vsprintf(buf, fmt, ap);
 }
 #endif /* HAVE_VSNPRINTF */
-
 
 
 /*-------------------------------------------------------------------------
@@ -1132,7 +1137,6 @@ H5_timer_begin (H5_timer_t *timer)
     timer->etime = 0.0;
 #endif
 }
-
 
 
 /*-------------------------------------------------------------------------
