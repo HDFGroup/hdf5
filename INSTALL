@@ -245,6 +245,15 @@
 	    $ export SGI_ABI
 	    $ ./configure
 
+        Similarly, users compiling on a Solaris machine and desiring to
+        build the distribution with 64-bit support should specify the
+        correct flags with the CC variable:
+
+	    $ CC='cc -xarch=v9' ./configure
+
+        Specifying these machine architecture flags in the CFLAGS variable
+        (see below) will not work correctly.
+
 5.3.3. Additional compilation flags
 	If addtional flags must be passed to the compilation commands
 	then specify those flags with the CFLAGS variable. For instance,
