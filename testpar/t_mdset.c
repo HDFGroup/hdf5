@@ -302,6 +302,9 @@ void big_dataset(void)
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
+    /* Verify MPI_Offset can handle larger than 2GB sizes */
+    VRFY((sizeof(MPI_Offset)>4), "sizeof(MPI_Offset)>4");
+
     filename = (char *) GetTestParameters();
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
