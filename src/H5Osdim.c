@@ -217,20 +217,16 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
 
    /* check args */
    assert (ent);
-   assert (mesg);
 
    if (H5G_CACHED_SDATA==ent->type)
      {
-      if (!sdim)
-          if((sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t)))!=NULL)
-            {
-              p=(const uint8 *)&ent->cache.sdata.ndim;
-              UINT32DECODE(p,sdim->rank);
-              sdim->dim_flags=0;    /* cached dimensions never have max. dims or permutation vectors */
-              sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-              for(u=0; u<sdim->rank; u++)
-                  UINT32DECODE(p,sdim->size[u]);
-            } /* end if */
+	if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
+	p=(const uint8 *)&ent->cache.sdata.ndim;
+	UINT32DECODE(p,sdim->rank);
+	sdim->dim_flags=0;    /* cached dimensions never have max. dims or permutation vectors */
+	sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
+	for(u=0; u<sdim->rank; u++)
+	   UINT32DECODE(p,sdim->size[u]);
      } /* end if */
    else
       sdim = NULL;
