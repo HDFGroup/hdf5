@@ -2367,6 +2367,7 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
 			if (H5Aread(oid, p_type, sm_buf) < 0){
 				return (status);
 			}
+			status = 0;
 			/*print it*/
 			switch (H5Tget_class(p_type)) {
 			case H5T_INTEGER:
@@ -2401,6 +2402,7 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
 				
 			default: break;
 			}
+			free(sm_buf);
 		}
 
     H5Sclose(f_space);
