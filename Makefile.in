@@ -105,7 +105,6 @@ distclean:
 	-$(RM) config/commence config/conclude config/depend
 	-$(RM) config.cache config.log config.status src/H5config.h
 	-$(RM) config/stamp1 config/stamp2 libtool Makefile
-	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
