@@ -2744,6 +2744,14 @@ H5T_open (H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     if ((dt=H5T_open_oid(&ent, dxpl_id)) ==NULL)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
 
+    /* Mark any datatypes as being in memory now */
+    if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+            
+    /* Unlock data type */
+    if (H5T_lock (dt, FALSE)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to lock transient data type")
+
     /* Set return value */
     ret_value=dt;
 

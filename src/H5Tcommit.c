@@ -139,13 +139,17 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if (H5T_STATE_IMMUTABLE==type->state)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "data type is immutable");
 
+    /* Find the insertion file */
+    if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point");
+
     /* Check for a "sensible" datatype to store on disk */
     if(H5T_is_sensible(type)!=TRUE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible");
 
-    /* Find the insertion file */
-    if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point");
+    /* Mark datatype as being on disk now */
+    if (H5T_vlen_mark(type, file, H5T_VLEN_DISK)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /*
      * Create the object header and open it for write access. Insert the data
@@ -158,6 +162,11 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if (H5G_insert (loc, name, &(type->ent), dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name data type");
     type->state = H5T_STATE_OPEN;
+
+    /* Mark datatype as being on memory now because this datatype may be still used in 
+     * memory after committed to disk.  So we need to change its size back. */
+    if (H5T_vlen_mark(type, NULL, H5T_VLEN_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
 
 done:
     if (ret_value<0) {
