@@ -356,7 +356,7 @@ case $withval in
 	fi
 
 	zlib_lib="`echo $withval |cut -f2 -d, -s`"
-	if test "X" != "$zlb_lib"; then
+	if test "X" != "$zlib_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$zlib_lib"
 	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
