@@ -287,7 +287,7 @@ int do_copy_file(hid_t fidin,
      {
       obj.chunk.rank=rank;
       for (j=0; j<rank; j++) 
-       obj.chunk.chunk_lengths[j] = dims[j] / 2;
+       obj.chunk.chunk_lengths[j] = dims[j];
      }
      if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
       continue;
