@@ -752,6 +752,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
 
     /* Double check parameters */
     assert(head);
+    assert(size);
 
     /* Make certain the list is initialized first */
     if(!head->init)
@@ -828,6 +829,7 @@ H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size)
 
     /* Double check parameters */
     assert(head);
+    assert(size);
 
     /* Allocate the block */
     if (NULL==(ret_value = H5FL_blk_malloc(head,size)))
@@ -942,6 +944,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 
     /* Double check parameters */
     assert(head);
+    assert(new_size);
 
     /* Check if we are actually re-allocating a block */
     if(block!=NULL) {
@@ -1303,6 +1306,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
 
     /* Double check parameters */
     assert(head);
+    assert(elem);
 
     /* Make certain the list is initialized first */
     if(!head->init)
@@ -1387,6 +1391,7 @@ H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem)
 
     /* Double check parameters */
     assert(head);
+    assert(elem);
 
     /* Allocate the array */
     if (NULL==(ret_value = H5FL_arr_malloc(head,elem)))
@@ -1426,6 +1431,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 
     /* Double check parameters */
     assert(head);
+    assert(new_elem);
 
     /* Check if we are really allocating the object */
     if(obj==NULL) {
