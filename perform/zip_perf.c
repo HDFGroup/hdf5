@@ -86,7 +86,7 @@ static const char *prog;
 static const char *option_prefix;
 static char *filename;
 static int compress_level = Z_DEFAULT_COMPRESSION;
-static int output;
+static int output, random_test = FALSE;
 
 /* internal functions */
 static void error(const char *fmt, ...);
@@ -94,7 +94,7 @@ static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
                             uLong sourceLen);
 
 /* commandline options : long and short form */
-static const char *s_opts = "hB:b:p:s:0123456789";
+static const char *s_opts = "hB:b:p:rs:0123456789";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "file-size", require_arg, 's' },
@@ -131,6 +131,15 @@ static struct long_options l_opts[] = {
     { "pref", require_arg, 'p' },
     { "pre", require_arg, 'p' },
     { "pr", require_arg, 'p' },
+    { "random-test", no_arg, 'r' },
+    { "random-tes", no_arg, 'r' },
+    { "random-te", no_arg, 'r' },
+    { "random-t", no_arg, 'r' },
+    { "random", no_arg, 'r' },
+    { "rando", no_arg, 'r' },
+    { "rand", no_arg, 'r' },
+    { "ran", no_arg, 'r' },
+    { "ra", no_arg, 'r' },
     { NULL, 0, '\0' }
 };
 
@@ -310,7 +319,8 @@ usage(void)
     printf("     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
     printf("     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
     printf("     -p D, --prefix=D           The directory prefix to place the file\n");
-    printf("                                [default: /tmp]\n");
+    printf("     -r, --random-test          Use random data to write to the file\n");
+    printf("                                [default: no]\n");
     printf("\n");
     printf("  D  - a directory which exists\n");
     printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
@@ -386,6 +396,11 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
             cleanup();
             error("out of memory");
         }
+
+        if (random_test)
+            /* fill the buffer with random data */
+            for (i = 0; i < src_len; ++i)
+                src[i] = 0xff | (int) (255.0 * rand()/(RAND_MAX + 1.0));
 
         printf("Buffer size == ");
 
@@ -497,6 +512,9 @@ main(int argc, char **argv)
             break;
         case 'p':
             option_prefix = opt_arg;
+            break;
+        case 'r':
+            random_test = TRUE;
             break;
         case 's':
             file_size = parse_size_directive(opt_arg);
