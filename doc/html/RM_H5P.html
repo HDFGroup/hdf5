@@ -6794,7 +6794,7 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
                      <em>hid_t</em> <code>fapl_id</code>,
                      <em>const H5FD_mem_t *</em><code>memb_map</code>,
                      <em>const hid_t *</em><code>memb_fapl</code>,
-                     <em>const char **</em><code>memb_name</code>,
+                     <em>const char * const *</em><code>memb_name</code>,
                      <em>const haddr_t *</em><code>memb_addr</code>,
                      <em>hbool_t</em> <code>relax</code>
     )
@@ -6879,7 +6879,7 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
             <dd>IN: Maps memory usage types to other memory usage types.
         <dt><em>const hid_t *</em><code>memb_fapl</code>
             <dd>IN: Property list for each memory usage type.
-        <dt><em>const char **</em><code>memb_name</code>
+        <dt><em>const char * const *</em><code>memb_name</code>
             <dd>IN: Name generator for names of member files.
         <dt><em>const haddr_t *</em><code>memb_addr</code>
             <dd>IN: The offsets within the virtual address space, 
