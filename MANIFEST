@@ -1129,11 +1129,14 @@
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack_list.c
 ./tools/h5repack/h5repack_copy.c
+./tools/h5repack/h5repack_refs.c
 ./tools/h5repack/h5repack_main.c
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_parse.c
-./tools/h5repack/test_h5repack_add.c
-./tools/h5repack/test_h5repack_main.c
+./tools/h5repack/testh5repack_attr.c
+./tools/h5repack/testh5repack_dset.c
+./tools/h5repack/testh5repack_filters.c
+./tools/h5repack/testh5repack_main.c
 
 
 ./tools/h5ls/Dependencies
