@@ -624,16 +624,16 @@ nh5pset_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int c_ik;
-     int c_lk;
+     unsigned c_ik;
+     unsigned c_lk;
      herr_t ret;
 
      /*
       * Call H5Pset_sym_k function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_ik = (int)*ik;
-     c_lk = (int)*lk;
+     c_ik = (unsigned)*ik;
+     c_lk = (unsigned)*lk;
      ret = H5Pset_sym_k(c_prp_id, c_ik, c_lk);
 
      if (ret < 0) return ret_value;
@@ -659,7 +659,7 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
-     int c_ik;
+     unsigned c_ik;
      unsigned c_lk;
 
      /*
@@ -690,14 +690,14 @@ nh5pset_istore_k_c (hid_t_f *prp_id, int_f* ik)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int c_ik;
+     unsigned c_ik;
      herr_t ret;
 
      /*
       * Call H5Pset_istore_k function.
       */
      c_prp_id = (hid_t)*prp_id;
-     c_ik = (int)*ik;
+     c_ik = (unsigned)*ik;
      ret = H5Pset_istore_k(c_prp_id, c_ik);
 
      if (ret < 0) return ret_value;
@@ -722,7 +722,7 @@ nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
-     int c_ik;
+     unsigned c_ik;
 
      /*
       * Call H5Pget_istore_k function.

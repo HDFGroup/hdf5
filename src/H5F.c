@@ -185,7 +185,7 @@ H5F_init_interface(void)
     H5P_genclass_t  *crt_pclass;
     hsize_t         userblock_size      = H5F_CRT_USER_BLOCK_DEF;
     unsigned        sym_leaf_k          = H5F_CRT_SYM_LEAF_DEF;
-    int             btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;
+    unsigned        btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;
     size_t          sizeof_addr         = H5F_CRT_ADDR_BYTE_NUM_DEF;
     size_t          sizeof_size         = H5F_CRT_OBJ_BYTE_NUM_DEF;
     int             bootblock_ver       = H5F_CRT_BOOT_VERS_DEF;
@@ -1805,7 +1805,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     size_t              sizeof_addr = 0;
     size_t              sizeof_size = 0;
     unsigned            sym_leaf_k = 0;
-    int                 btree_k[H5B_NUM_BTREE_ID];
+    unsigned            btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t      *c_plist;
     H5P_genplist_t      *a_plist;            /* Property list */
     H5F_close_degree_t  fc_degree;
@@ -2078,7 +2078,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad 1/2 rank for btree internal nodes");
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for btree internal nodes");
-        HDmemcpy(shared->btree_k,btree_k,sizeof(int)*H5B_NUM_BTREE_ID); /* Keep a local copy also */
+        HDmemcpy(shared->btree_k,btree_k,sizeof(unsigned)*H5B_NUM_BTREE_ID); /* Keep a local copy also */
 
 	/* File consistency flags. Not really used yet */
 	UINT32DECODE(p, shared->consist_flags);
@@ -3812,7 +3812,7 @@ unsigned H5F_sym_leaf_k(const H5F_t *f)
  *		Added this header and removed unused ret_value variable.
  *-------------------------------------------------------------------------
  */
-int
+unsigned
 H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 {
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */

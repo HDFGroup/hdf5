@@ -123,7 +123,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
 	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:",
-              (unsigned) (f->shared->btree_k[H5B_SNODE_ID]));
+              f->shared->btree_k[H5B_SNODE_ID]);
     HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
 	      "File consistency flags:",
 	      (unsigned long) (f->shared->consist_flags));

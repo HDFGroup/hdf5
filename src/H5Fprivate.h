@@ -256,7 +256,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_SYM_LEAF_DEF         4
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_NAME      "btree_rank"
-#define H5F_CRT_BTREE_RANK_SIZE      sizeof(int[H5B_NUM_BTREE_ID])
+#define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
 #define H5F_CRT_BTREE_RANK_DEF       {16,32}
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"
@@ -398,7 +398,7 @@ H5_DLL htri_t H5F_has_mount(const H5F_t *file);
 H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
-H5_DLL int H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
+H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 
 /* Functions that operate on blocks of bytes wrt boot block */
 H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,

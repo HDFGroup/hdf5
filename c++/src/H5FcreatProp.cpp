@@ -86,7 +86,7 @@ void FileCreatPropList::getSizes( size_t& sizeof_addr, size_t& sizeof_size ) con
    }
 }
 
-void FileCreatPropList::setSymk( int ik, unsigned lk ) const
+void FileCreatPropList::setSymk( unsigned ik, unsigned lk ) const
 {
    herr_t ret_value = H5Pset_sym_k( id, ik, lk );
    if( ret_value < 0 )
@@ -96,7 +96,7 @@ void FileCreatPropList::setSymk( int ik, unsigned lk ) const
    }
 }
 
-void FileCreatPropList::getSymk( int& ik, unsigned& lk ) const
+void FileCreatPropList::getSymk( unsigned& ik, unsigned& lk ) const
 {
    herr_t ret_value = H5Pget_sym_k( id, &ik, &lk );
    if( ret_value < 0 )
@@ -106,7 +106,7 @@ void FileCreatPropList::getSymk( int& ik, unsigned& lk ) const
    }
 }
 
-void FileCreatPropList::setIstorek( int ik ) const
+void FileCreatPropList::setIstorek( unsigned ik ) const
 {
    herr_t ret_value = H5Pset_istore_k( id, ik );
    if( ret_value < 0 )
@@ -115,9 +115,9 @@ void FileCreatPropList::setIstorek( int ik ) const
 		"H5Pset_istore_k failed");
    }
 }
-int FileCreatPropList::getIstorek() const
+unsigned FileCreatPropList::getIstorek() const
 {
-   int ik;
+   unsigned ik;
    herr_t ret_value = H5Pget_istore_k( id, &ik );
    if( ret_value < 0 )
    {

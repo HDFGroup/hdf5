@@ -116,7 +116,7 @@ typedef struct H5F_file_t {
     size_t	sizeof_addr;	/* Size of addresses in file            */
     size_t	sizeof_size;	/* Size of offsets in file              */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
-    int btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
+    unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
 
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */

@@ -289,6 +289,7 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sym_k
@@ -323,7 +324,117 @@ done:
 herr_t
 H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pset_sym_k, FAIL);
+    H5TRACE3("e","iIsIu",plist_id,ik,lk);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+   
+    /* Set values */
+    if (ik > 0) {
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+        btree_k[H5B_SNODE_ID] = (unsigned)ik;
+        if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree nodes");
+    }
+    if (lk > 0)
+        if(H5P_set(plist, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_sym_k
+ *
+ * Purpose:	Retrieves the symbol table B-tree 1/2 rank (IK) and the
+ *		symbol table leaf node 1/2 size (LK).  See H5Pset_sym_k() for
+ *		details. Either (or even both) IK and LK may be null
+ *		pointers.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *		Raymond Lu
+ *		Changed to the new generic property list.
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
+{
+    unsigned btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pget_sym_k, FAIL);
+    H5TRACE3("e","ixx",plist_id,ik,lk);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get values */
+    if (ik) {
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree nodes");
+        *ik = (int)btree_k[H5B_SNODE_ID];
+    }
+    if (lk)
+        if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+#else /* H5_WANT_H5_V1_6_COMPAT */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_sym_k
+ *
+ * Purpose:	IK is one half the rank of a tree that stores a symbol
+ *		table for a group.  Internal nodes of the symbol table are on
+ *		average 75% full.  That is, the average rank of the tree is
+ *		1.5 times the value of IK.
+ *
+ *		LK is one half of the number of symbols that can be stored in
+ *		a symbol table node.  A symbol table node is the leaf of a
+ *		symbol table tree which is used to store a group.  When
+ *		symbols are inserted randomly into a group, the group's
+ *		symbol table nodes are 75% full on average.  That is, they
+ *		contain 1.5 times the number of symbols specified by LK.
+ *
+ *		Either (or even both) of IK and LK can be zero in which case
+ *		that value is left unchanged.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *		Raymond Lu, Oct 14, 2001
+ *         	Changed to the new generic property list. 
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
+{
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -372,9 +483,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
+H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */ , unsigned *lk /*out */ )
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -398,7 +509,9 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
 done:
     FUNC_LEAVE_API(ret_value);
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_istore_k
@@ -422,7 +535,7 @@ done:
 herr_t
 H5Pset_istore_k(hid_t plist_id, int ik)
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -431,6 +544,102 @@ H5Pset_istore_k(hid_t plist_id, int ik)
 
     /* Check arguments */
     if (ik <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set value */
+    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+    btree_k[H5B_ISTORE_ID] = (unsigned)ik;
+    if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_istore_k
+ *
+ * Purpose:	Queries the 1/2 rank of an indexed storage B-tree.  See
+ *		H5Pset_istore_k() for details.	The argument IK may be the
+ *		null pointer.
+ *
+ * Return:	Success:	Non-negative, size returned through IK
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *		Raymond Lu, Oct 14, 2001
+ *		Changed to the new generic property list.
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
+{
+    unsigned btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_istore_k, FAIL);
+    H5TRACE2("e","ix",plist_id,ik);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get value */
+    if (ik) {
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
+        *ik = (int)btree_k[H5B_ISTORE_ID];
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+#else /* H5_WANT_H5_V1_6_COMPAT */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_istore_k
+ *
+ * Purpose:	IK is one half the rank of a tree that stores chunked raw
+ *		data.  On average, such a tree will be 75% full, or have an
+ *		average rank of 1.5 times the value of IK.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *		Raymond Lu, Oct 14, 2001
+ *		Changed to the new generic property list.
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_istore_k(hid_t plist_id, unsigned ik)
+{
+    unsigned btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Pset_istore_k, FAIL);
+    H5TRACE2("e","iIs",plist_id,ik);
+
+    /* Check arguments */
+    if (ik == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
 
     /* Get the plist structure */
@@ -471,9 +680,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
+H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
@@ -494,4 +703,5 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
 done:
     FUNC_LEAVE_API(ret_value);
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
