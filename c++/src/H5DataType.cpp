@@ -76,14 +76,6 @@ DataType& DataType::operator=( const DataType& rhs )
    return(*this);
 }
 
-// Makes a copy of the predefined type and stores the new
-// id in the left hand side object.  
-DataType& DataType::operator=( const PredType& rhs )
-{
-   copy(rhs);
-   return(*this);
-}
-
 // Determines whether two datatypes refer to the same actual datatype.
 bool DataType::operator==(const DataType& compared_type ) const
 {
@@ -108,7 +100,7 @@ bool DataType::operator==(const DataType& compared_type ) const
 //{
 //}
 
-// Creates a new variable-length datatype - Note: make it inheritance???
+// Creates a new variable-length datatype - Note: should use inheritance -
 // work in progress
 //DataType DataType::vlenCreate( const DataType& base_type )
 //{

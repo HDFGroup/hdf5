@@ -42,7 +42,7 @@ class IdComponent {
 	bool noReference();
 
 	// Assignment operator
-	virtual IdComponent& operator=( const IdComponent& rhs );
+	IdComponent& operator=( const IdComponent& rhs );
 
 	// Resets this IdComponent instance
 	//template <class Type>

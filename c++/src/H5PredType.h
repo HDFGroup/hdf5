@@ -227,7 +227,7 @@ class PredType : public AtomType {
 
 	// Makes a copy of the predefined type and stores the new
 	// id in the left hand side object.  
-	DataType& operator=( const PredType& rhs );
+	PredType& operator=( const PredType& rhs );
 };
 #ifndef H5_NO_NAMESPACE
 }
