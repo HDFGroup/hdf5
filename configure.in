@@ -906,7 +906,7 @@ AC_ARG_ENABLE(stream-vfd,
 
 if test "X$STREAM_VFD" = "Xyes"; then
    AC_MSG_RESULT(yes)
-   AC_CHECK_HEADERS(netinet/tcp.h, sys/filio.h)
+   AC_CHECK_HEADERS(netinet/tcp.h sys/filio.h)
    AC_DEFINE(HAVE_STREAM)
 
    dnl Check if 'socklen_t' available
