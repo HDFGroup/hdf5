@@ -323,7 +323,7 @@ RUNSNAPTEST()
 
     # Setup log file name to save test output
     LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}
-    echo Running snapshot with output saved in $LOGFILE
+    echo "Running snapshot with output saved in\n   $LOGFILE"
     (date; echo Hostname=$HOSTNAME) >> $LOGFILE
 
     (
@@ -520,7 +520,7 @@ echo TEST_TYPES=$TEST_TYPES
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
 if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
-    echo Running CVS checkout with output saved in $CVSLOG
+    echo "Running CVS checkout with output saved in\n   $CVSLOG"
     # Set CVS lock first
     touch $CVSLOG_LOCK
     ($SNAPSHOT checkout ) >> $CVSLOG 2>&1
