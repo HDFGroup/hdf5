@@ -132,7 +132,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_LLONG)) 
         goto error;
-    if(sizeof(long long)!=H5Tget_size(native_type))
+    if(sizeof(long_long)!=H5Tget_size(native_type))
         goto error;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         goto error;
@@ -220,7 +220,7 @@ test_compound_dtype_2(hid_t file)
         char            c;
         int             i;
         s2              st;
-        unsigned long long       l;
+        unsigned long_long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid_m, tid_m2;
@@ -352,7 +352,7 @@ test_compound_dtype(hid_t file)
     typedef struct {
         char            c;
         unsigned int    i;
-        long long       l;
+        long_long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2;
@@ -474,7 +474,7 @@ test_enum_dtype(hid_t file)
     hsize_t		dims[2];
     short               points[100][200], check[100][200];
     short               colors[8];
-    char                *mname[] = { "RED",
+    const char         *mname[] = { "RED",
                                      "GREEN",
                                      "BLUE",
                                      "YELLOW",
@@ -590,26 +590,31 @@ test_array_dtype(hid_t file)
     typedef struct {
         char    c;
         int     i;
-        long long l;
+        long_long l;
     } s1;
-    hid_t		dataset, space, tmp_t;
+    hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid3, tid_m;
     int			i, j, k, n;
     hsize_t		space_dims[2], array_dims[1]={5};
-    s1 	                points[100][200][5], check[100][200][5];
+    s1                 *temp_point, *temp_check;
+    s1 	               *points=NULL, *check=NULL;
 
     TESTING("array datatype");
 
+    /* Allocate space for the points & check arrays */
+    if((points=malloc(sizeof(s1)*100*200*5))==NULL)
+        goto error;
+    if((check=calloc(sizeof(s1),100*200*5))==NULL)
+        goto error;
+
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for(i = n = 0, temp_point=points; i < 100; i++)
+	for(j = 0; j < 200; j++)
             for(k = 0; k < 5; k++) {
-	       (points[i][j][k]).c = 't';
-	       (points[i][j][k]).i = n++;
-	       (points[i][j][k]).l = (i*10+j*100)*n;
+                temp_point->c= 't';
+                temp_point->i= n++;
+                temp_point->l= (i*10+j*100)*n;
             }
-	}
-    }
 
     /* Create the data space */
     space_dims[0] = 100;
@@ -669,12 +674,12 @@ test_array_dtype(hid_t file)
 	goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
+    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
 	for (j = 0; j < 200; j++) {
             for (k = 0; k < 5; k++) {
-                if ((points[i][j][k]).c != (check[i][j][k]).c ||
-	            (points[i][j][k]).i != (check[i][j][k]).i ||
-	            (points[i][j][k]).l != (check[i][j][k]).l ) {
+                if (temp_point->c != temp_check->c ||
+	            temp_point->i != temp_check->i ||
+	            temp_point->l != temp_check->l ) {
                     H5_FAILED();
                     printf("    Read different values than written.\n");
                     printf("    At index %d,%d\n", i, j);
@@ -684,73 +689,26 @@ test_array_dtype(hid_t file)
 	}
     }
 
+    /* Close HDF5 objects */
     if(H5Dclose(dataset)) goto error;
     if(H5Tclose(native_type)) goto error;
     if(H5Tclose(dtype)) goto error;
     if(H5Tclose(tid_m)<0) goto error;
     if(H5Tclose(tid3)<0) goto error;
+
+    /* Free memory for test data */
+    free(points);
+    free(check);
+
     PASSED();
     return 0;
 
-  error:
+error:
+    if(points!=NULL)
+        free(points);
+    if(check!=NULL)
+        free(check);
     return -1;
-}
-
-
-/****************************************************************
-**
-**  test_vl_alloc_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses malloc to
-**      allocate the memory and increments the amount of memory
-**      allocated.
-** 
-****************************************************************/
-static void *test_vl_alloc_custom(size_t size, void *info)
-{
-    void *ret_value=NULL;       /* Pointer to return */
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
-
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
-    } /* end if */
-    ret_value=((unsigned char *)ret_value)+extra;
-    return(ret_value);
-}
-
-
-/****************************************************************
-**
-**  test_vl_free_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses free to
-**      release the memory and decrements the amount of memory
-**      allocated.
-** 
-****************************************************************/
-static void test_vl_free_custom(void *_mem, void *info)
-{
-    unsigned char *mem;
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
-
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)mem;
-        HDfree(mem);
-    } /* end if */
 }
 
 
@@ -776,13 +734,10 @@ test_vl_dtype(hid_t file)
     hvl_t               wdata[SPACE1_DIM1];   /* Information to write */
     hvl_t               rdata[SPACE1_DIM1];   /* Information read in */
     hvl_t               *t1, *t2;             /* Temporary pointer to VL information */
-    hid_t               xfer_pid;   /* Dataset transfer property list ID */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    size_t              mem_used=0; /* Memory used during allocation */
-
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid_m, tid_m2;
-    int			i, j, k;
+    size_t		i, j, k;
 
     TESTING("variable length datatype");
 
@@ -849,14 +804,8 @@ test_vl_dtype(hid_t file)
     if(!H5Tequal(native_type, tid_m)) 
         goto error;
         
-    /* Change to the custom memory allocation routines for reading VL data */
-    if((xfer_pid=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
-
-    if(H5Pset_vlen_mem_manager(xfer_pid,test_vl_alloc_custom,&mem_used,test_vl_free_custom,&mem_used)<0) 
-        goto error;
-
     /* Read dataset from disk */
-    if(H5Dread(dataset,native_type,H5S_ALL,H5S_ALL,xfer_pid,rdata)<0) goto error;
+    if(H5Dread(dataset,native_type,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata)<0) goto error;
     
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -882,7 +831,7 @@ test_vl_dtype(hid_t file)
     } /* end for */
 
     /* Reclaim the read VL data */
-    if(H5Dvlen_reclaim(native_type,space,xfer_pid,rdata)<0) goto error;
+    if(H5Dvlen_reclaim(native_type,space,H5P_DEFAULT,rdata)<0) goto error;
 
     /* Reclaim the write VL data */
     if(H5Dvlen_reclaim(native_type,space,H5P_DEFAULT,wdata)<0) goto error;
@@ -900,9 +849,6 @@ test_vl_dtype(hid_t file)
     /* Close disk dataspace */
     if(H5Sclose(space)<0) goto error;
     
-    /* Close dataset transfer property list */
-    if(H5Pclose(xfer_pid)<0) goto error;
-
     PASSED();
     return 0;
 
@@ -940,13 +886,8 @@ test_vlstr_dtype(hid_t file)
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1,dtype,native_type;       /* Datatype ID			*/
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i;          /* counting variable */
-    int         str_used;   /* String data in memory */
-    int         mem_used=0; /* Memory used during allocation */
-    herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     TESTING("variable length string datatype");
@@ -1051,15 +992,13 @@ test_refer_dtype(hid_t file)
         float c;
     } s1_t;
 
-    hid_t		dataset,	/* Dataset ID			*/
-                        dset2;      /* Dereferenced dataset ID */
+    hid_t		dataset;	/* Dataset ID			*/
     hid_t		group;      /* Group ID             */
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1, dtype, native_type;       /* Datatype ID	*/
     hsize_t		dims1[] = {1};
     hobj_ref_t          *wbuf,      /* buffer to write to disk */
                         *rbuf;       /* buffer read from disk */
-    int                 i;          /* counting variables */
 
     /* Output message about test being performed */
     TESTING("reference datatype");
@@ -1155,15 +1094,11 @@ test_refer_dtype(hid_t file)
         goto error;
 
     /* Verify correct datatype */
-    {
-        H5T_class_t tclass;
+    if(H5Tget_class(tid1)!=H5T_COMPOUND)
+        goto error;
 
-        if(H5Tget_class(tid1)!=H5T_COMPOUND)
-            goto error;
-
-        if(H5Tget_nmembers(tid1)!=3)
-            goto error;
-    }
+    if(H5Tget_nmembers(tid1)!=3)
+        goto error;
 
     /* Close datatype */
     if(H5Tclose(tid1)<0)
@@ -1204,10 +1139,9 @@ error:
 static herr_t
 test_opaque_dtype(hid_t file)
 {
-    hid_t		grp=-1, type=-1, space=-1, dset=-1;
+    hid_t		type=-1, space=-1, dset=-1;
     hid_t               dataset, dtype, native_type;
-    int			i, j, n;
-    hsize_t		dims[2];
+    size_t              i;
     unsigned char	wbuf[32], rbuf[32];
     hsize_t		nelmts;
     
@@ -1216,11 +1150,14 @@ test_opaque_dtype(hid_t file)
     /* opaque_1 */
     nelmts = sizeof(wbuf);
     if ((type=H5Tcreate(H5T_OPAQUE, 1))<0 ||
-	H5Tset_tag(type, "testing 1-byte opaque type")<0 ||
-	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
-	(dset=H5Dcreate(file, DSET_OPAQUE_NAME, type, space, H5P_DEFAULT))<0)
+            H5Tset_tag(type, "testing 1-byte opaque type")<0 ||
+            (space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+            (dset=H5Dcreate(file, DSET_OPAQUE_NAME, type, space, H5P_DEFAULT))<0)
 	goto error;
-    for (i=0; i<sizeof wbuf; i++) wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+
+    for (i=0; i<sizeof(wbuf); i++)
+        wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+
     if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
 	goto error;
     if (H5Sclose(space)<0) goto error;
@@ -1281,10 +1218,9 @@ error:
 static herr_t
 test_bitfield_dtype(hid_t file)
 {
-    hid_t		grp=-1, type=-1, space=-1, dset=-1;
+    hid_t		type=-1, space=-1, dset=-1;
     hid_t               dataset, dtype, native_type;
-    int			i, j, n;
-    hsize_t		dims[2];
+    size_t		i;
     unsigned char	wbuf[32], rbuf[32];
     hsize_t		nelmts;
     
@@ -1293,10 +1229,13 @@ test_bitfield_dtype(hid_t file)
     /* opaque_1 */
     nelmts = sizeof(wbuf);
     if ((type=H5Tcopy(H5T_STD_B8LE))<0 ||
-	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
-	(dset=H5Dcreate(file, DSET_BITFIELD_NAME, type, space, H5P_DEFAULT))<0)
+            (space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+            (dset=H5Dcreate(file, DSET_BITFIELD_NAME, type, space, H5P_DEFAULT))<0)
 	goto error;
-    for (i=0; i<sizeof wbuf; i++) wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+
+    for (i=0; i<sizeof(wbuf); i++)
+        wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+
     if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
 	goto error;
     if (H5Sclose(space)<0) goto error;
@@ -1361,9 +1300,8 @@ main(void)
     fapl = h5_fileaccess();
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    }
 
     nerrors += test_atomic_dtype(file)<0 	?1:0;
     nerrors += test_compound_dtype(file)<0 	?1:0;
