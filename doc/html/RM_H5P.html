@@ -6969,9 +6969,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
             address objects in an HDF5 file.  This function is only valid for
             file creation property lists.  Passing in a value of 0 for one of the
             sizeof parameters retains the current value.  The default value
-            for both values is same as <code>sizeof(hsize_t)</code> in the library
-            (normally 8 bytes).  Valid values currently are 2, 4,
-            8 and 16.
+            for both values is the same as <code>sizeof(hsize_t)</code> 
+            in the library (normally 8 bytes).  
+            Valid values currently are 2, 4, 8 and 16.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
