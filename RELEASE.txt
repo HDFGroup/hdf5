@@ -377,7 +377,8 @@ Platforms Tested
 ================
 
 
-  AIX 4.3.3.0 (IBM SP powerpc)  mpcc_r 3.6.6
+  AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
+  				mpcc_r 3.6.6
   Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
