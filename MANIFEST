@@ -207,6 +207,7 @@
 ./pablo/PabloSedscr
 ./pablo/ProcTrace.h
 ./pablo/ProcTrace.inc
+./pablo/READ_ME
 
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
