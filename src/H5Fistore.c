@@ -40,10 +40,11 @@
  *		entry which is added to the end of the list.
  */
 
+#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Bprivate.h"		/* B-link trees				*/
+#include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/

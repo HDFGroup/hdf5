@@ -31,9 +31,9 @@
 #include "H5Bpublic.h"		/*API prototypes			     */
 
 /* Private headers needed by this file */
-#include "H5private.h"
-#include "H5Fprivate.h"
-#include "H5ACprivate.h"	/*cache					*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Fprivate.h"		/* File access				*/
 
 /*
  * Feature: Define this constant if you want to check B-tree consistency
@@ -46,10 +46,6 @@
 #endif
 #define H5B_MAGIC	"TREE"		/*tree node magic number	     */
 #define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
-#define H5B_SIZEOF_HDR(F)						      \
-   (H5B_SIZEOF_MAGIC +		/*magic number				  */  \
-    4 +				/*type, level, num entries		  */  \
-    2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	  */
      
 typedef enum H5B_ins_t {
     H5B_INS_ERROR	 = -1,	/*error return value			     */
@@ -72,6 +68,9 @@ typedef enum H5B_iterate_t {
 typedef H5B_iterate_t (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t addr,
                                         void *_rt_key, void *_udata);
 
+/* Typedef for B-tree in memory (defined in H5Bpkg.h) */
+typedef struct H5B_t H5B_t;
+
 /*
  * Each class of object that can be pointed to by a B-link tree has a
  * variable of this type that contains class variables and methods.  Each
@@ -79,7 +78,6 @@ typedef H5B_iterate_t (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t 
  * has an array of K values indexed by the `id' class field below.  The
  * array is initialized with the HDF5_BTREE_K_DEFAULT macro.
  */
-struct H5B_t;				/*forward decl			     */
 
 typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
@@ -108,31 +106,6 @@ typedef struct H5B_class_t {
     herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
 
 } H5B_class_t;
-
-/*
- * The B-tree node as stored in memory...
- */
-typedef struct H5B_key_t {
-    hbool_t	dirty;	/*native key is more recent than raw key	     */
-    uint8_t	*rkey;	/*ptr into node->page for raw key		     */
-    void	*nkey;	/*null or ptr into node->native for key		     */
-} H5B_key_t;
-
-typedef struct H5B_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    const H5B_class_t	*type;		/*type of tree			     */
-    size_t		sizeof_rkey;	/*size of raw (disk) key	     */
-    int		ndirty;		/*num child ptrs to emit	     */
-    int		level;		/*node level			     */
-    haddr_t		left;		/*address of left sibling	     */
-    haddr_t		right;		/*address of right sibling	     */
-    int		nchildren;	/*number of child pointers	     */
-    uint8_t		*page;		/*disk page			     */
-    uint8_t		*native;	/*array of keys in native format     */
-    H5B_key_t		*key;		/*2k+1 key entries		     */
-    haddr_t		*child;		/*2k child pointers		     */
-} H5B_t;
 
 /*
  * Library prototypes.

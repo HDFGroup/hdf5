@@ -19,16 +19,19 @@
 #define H5G_PACKAGE
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5Gpkg.h"
-#include "H5HLprivate.h"
-#include "H5MMprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 #define PABLO_MASK      H5G_ent_mask
 static int          	interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
+
+/* Private prototypes */
+static herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 
 
 /*-------------------------------------------------------------------------
@@ -36,7 +39,7 @@ static int          	interface_initialize_g = 0;
  *
  * Purpose:     Returns a pointer to the cache associated with the symbol
  *              table entry.  You should modify the cache directly, then call
- *              H5G_modified() with the new cache type (even if the type is
+ *              H5G_ent_modified() with the new cache type (even if the type is
  *              still the same).
  *
  * Return:      Success:        Ptr to the cache in the symbol table entry.
@@ -88,7 +91,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
     herr_t ret_value=SUCCEED;   /* Return value */

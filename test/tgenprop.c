@@ -22,13 +22,15 @@
 *
 *************************************************************/
 
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5P_TESTING
 
 #include "testhdf5.h"
 #include "hdf5.h"
 #include "H5Dprivate.h"         /* For Dataset creation property list names */
-#include "H5Pprivate.h"         /* For H5P testing functions */
+#include "H5Ppkg.h"		/* Generic Properties			*/
 
 #define FILENAME   "tgenprop.h5"
 

@@ -834,6 +834,7 @@
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
 ./src/H5B.c
+./src/H5Bpkg.h
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
 ./src/H5D.c
@@ -906,6 +907,7 @@
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
+./src/H5Ipkg.h
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
 ./src/H5MF.c

@@ -12,20 +12,21 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* private headers */
-#include "H5private.h"          /*library                 		*/
-#include "H5Bprivate.h"         /*B-link trees                    	*/
-#include "H5Dprivate.h"         /*datasets                              */
-#include "H5Eprivate.h"         /*error handling          		*/
-#include "H5FDprivate.h"	/*file driver				*/
-#include "H5FLprivate.h"	/*free lists                            */
-#include "H5Iprivate.h"		/*atoms					*/
-#include "H5MMprivate.h"        /*memory management               	*/
-#include "H5Pprivate.h"		/*property lists			*/
-#include "H5Rpublic.h"		/*references				*/
-#include "H5Sprivate.h"		/*data spaces				*/
-#include "H5Tprivate.h"         /*data types                      	*/
-#include "H5Zprivate.h"		/*filters				*/
+#define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Bprivate.h"		/* B-link trees				*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Ipkg.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Rpublic.h"		/* References				*/
+#include "H5Sprivate.h"		/* Dataspaces 				*/
+#include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5Zprivate.h"         /* I/O pipeline filters			*/
 
 /* datatypes of predefined drivers needed by H5_trace() */
 #include "H5FDmpio.h"

@@ -27,13 +27,16 @@
 #ifndef _H5Fpkg_H
 #define _H5Fpkg_H
 
+/* Get package's private header */
 #include "H5Fprivate.h"
-#include "H5FOprivate.h"        /* File objects                         */
 
-/* This is a near top-level header! Try not to include much! */
-#include "H5private.h"
-
+/* Other public headers needed by this file */
 #include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID */
+
+/* Other private headers needed by this file */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5FOprivate.h"        /* File objects                         */
+#include "H5Gprivate.h"		/* Groups 			  	*/
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -193,6 +196,7 @@ H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 			 int indent, int fwidth);
+H5_DLL herr_t H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5F_istore_init (H5F_t *f);

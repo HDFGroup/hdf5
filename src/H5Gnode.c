@@ -31,19 +31,33 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file... */
-#include "H5private.h"		/*library				*/
-#include "H5ACprivate.h"	/*cache					*/
-#include "H5Bprivate.h"		/*B-link trees				*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fpkg.h"		/*file access				*/
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gpkg.h"		/*me					*/
-#include "H5HLprivate.h"	/*local heap				*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Bprivate.h"		/* B-link trees				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File access				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MFprivate.h"	/*file memory management		*/
-#include "H5MMprivate.h"	/*core memory management		*/
-#include "H5Oprivate.h"		/*header messages			*/
-#include "H5Pprivate.h"		/*property lists			*/
+#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"		/* Property lists			*/
+
+/* Private typedefs */
+
+/*
+ * Each key field of the B-link tree that points to symbol table
+ * nodes consists of this structure...
+ */
+typedef struct H5G_node_key_t {
+    size_t      offset;                 /*offset into heap for name          */
+} H5G_node_key_t;
+
+/* Private macros */
+#define H5G_NODE_VERS   1               /*symbol table node version number   */
+#define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 
 #define PABLO_MASK	H5G_node_mask
 

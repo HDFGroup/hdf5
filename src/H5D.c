@@ -15,7 +15,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
+#include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -23,8 +23,8 @@
 #include "H5HLprivate.h"	/* Local heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Sprivate.h"		/* Dataspace functions			*/
-#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5Sprivate.h"		/* Dataspaces 				*/
+#include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
 /*#define H5D_DEBUG*/
 

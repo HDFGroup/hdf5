@@ -26,13 +26,14 @@
  */
 
 #define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
+#define H5G_PACKAGE	/*suppress error about including H5Gpkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Gpkg.h"		/* Groups				*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 
 #define PABLO_MASK      H5O_stab_mask
 

@@ -91,8 +91,8 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
-#include "H5Bprivate.h"		/* B-trees				*/
-#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Bprivate.h"		/* B-link trees				*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -102,8 +102,20 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
+/* Local macros */
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
+#define H5G_SIZE_HINT   256             /*default root grp size hint         */
+#define H5G_NLINKS	16		/*max symlinks to follow per lookup  */
+
+/*
+ * During name lookups (see H5G_namei()) we sometimes want information about
+ * a symbolic link or a mount point.  The normal operation is to follow the
+ * symbolic link or mount point and return information about its target.
+ */
+#define H5G_TARGET_NORMAL	0x0000
+#define H5G_TARGET_SLINK	0x0001
+#define H5G_TARGET_MOUNT	0x0002
 
 #define PABLO_MASK		H5G_mask
 
@@ -112,12 +124,7 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT	H5G_init_interface
 static herr_t H5G_init_interface(void);
 
-/* Local variables and typedefs */
-static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
-static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
-static size_t H5G_atypes_g = 0;			/*entries allocated	*/
-static char *H5G_comp_g = NULL;                 /*component buffer      */
-static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
+/* Local typedefs */
 
 /* Struct only used by change name callback function */
 typedef struct H5G_names_t {
@@ -133,7 +140,25 @@ typedef struct H5G_names_t {
 typedef enum {
     H5G_NAMEI_TRAVERSE,         /* Just traverse groups */
     H5G_NAMEI_INSERT            /* Insert entry in group */
-}H5G_namei_act_t ;
+} H5G_namei_act_t ;
+
+/*
+ * This table contains a list of object types, descriptions, and the
+ * functions that determine if some object is a particular type.  The table
+ * is allocated dynamically.
+ */
+typedef struct H5G_typeinfo_t {
+    int 	type;			        /*one of the public H5G_* types	     */
+    htri_t	(*isa)(H5G_entry_t*, hid_t);	/*function to determine type	     */
+    char	*desc;			        /*description of object type	     */
+} H5G_typeinfo_t;
+
+/* Local variables */
+static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
+static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
+static size_t H5G_atypes_g = 0;			/*entries allocated	*/
+static char *H5G_comp_g = NULL;                 /*component buffer      */
+static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -165,6 +190,9 @@ static herr_t H5G_set_comment(H5G_entry_t *loc, const char *name,
 			       const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_entry_t *loc, const char *name,
 			     size_t bufsize, char *buf, hid_t dxpl_id);
+static herr_t H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t),
+				 const char *desc);
+static H5G_t *H5G_rootof(H5F_t *f);
 
 
 /*-------------------------------------------------------------------------
@@ -1033,7 +1061,7 @@ H5G_term_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t), const char *_desc)
 {
     char	*desc = NULL;
@@ -1937,7 +1965,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5G_t *
+static H5G_t *
 H5G_rootof(H5F_t *f)
 {
     H5G_t *ret_value;   /* Return value */
@@ -3265,7 +3293,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
     assert(obj_ptr);
  
     /* Get the symbol table entry */
-    switch(H5I_GROUP(obj_id)) {
+    switch(H5I_get_type(obj_id)) {
         case H5I_GROUP:
             ent = H5G_entof((H5G_t*)obj_ptr);
             break;

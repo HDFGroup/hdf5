@@ -37,20 +37,20 @@
 #include "H5FDstream.h"         /*in-memory files streamed via sockets    */
 
 /* Packages needed by this file... */
-#include "H5private.h"		/*library functions			  */
-#include "H5Aprivate.h"		/*attributes				  */
-#include "H5ACprivate.h"	/*cache					  */
-#include "H5Dprivate.h"		/*datasets				  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Fpkg.h"             /*file access                             */
-#include "H5FDprivate.h"	/*file driver				  */
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5FPprivate.h"        /*Flexible Parallel HDF5                  */
-#include "H5Iprivate.h"		/*object IDs				  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes				*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5FPprivate.h"        /* Flexible parallel			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Gprivate.h"		/* Groups				*/
-#include "H5MMprivate.h"	/*core memory management		  */
-#include "H5Pprivate.h"		/*property lists			  */
-#include "H5Tprivate.h"		/*data types				  */
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 
 #define PABLO_MASK	H5F_mask
 
@@ -86,6 +86,7 @@ static haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 static herr_t H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
 				unsigned *obj_id_count);
 static herr_t H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE_STATIC(H5F_t);
@@ -1232,7 +1233,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
+herr_t
+H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
 {
     H5F_t               *file=NULL;
     herr_t              ret_value;
@@ -1268,7 +1270,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void**file_handle) 
+static herr_t
+H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void**file_handle) 
 {
     herr_t ret_value;
 

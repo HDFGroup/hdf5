@@ -19,11 +19,19 @@
 #ifndef _H5Fprivate_H
 #define _H5Fprivate_H
 
+/* Include package's public header */
 #include "H5Fpublic.h"
 
-/* This is a near top-level header! Try not to include much! */
-#include "H5FDpublic.h"		/*file drivers				     */
+/* Public headers needed by this file */
+#include "H5FDpublic.h"		/* File drivers				*/
 
+/* Private headers needed by this file */
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/* Main file structure */
 typedef struct H5F_t H5F_t;
 
 /*===----------------------------------------------------------------------===
@@ -361,27 +369,22 @@ typedef struct H5F_t H5F_t;
 #define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
 
 /* Forward declarations for prototype arguments */
-struct H5G_entry_t;
-struct H5O_layout_t;
-struct H5O_efl_t;
-struct H5O_pline_t;
-struct H5O_fill_t;
-struct H5P_genplist_t;
-struct H5S_t;
 struct H5B_class_t;
 union H5D_storage_t;
+struct H5O_fill_t;
+struct H5O_layout_t;
+struct H5P_genplist_t;
+struct H5S_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5F_init(void);
-H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
+H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
                                  unsigned *obj_id_count);
 H5_DLL herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
-H5_DLL herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
-H5_DLL herr_t H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size);
 
 /* Functions than check file mounting information */
 H5_DLL htri_t H5F_is_mount(const H5F_t *file);
@@ -457,7 +460,7 @@ H5_DLL void H5F_addr_decode(H5F_t *, const uint8_t** /*in,out*/,
 H5_DLL herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr_p /*out*/,
 			     const unsigned long objno[2]);
 
-/* callback Functions for file access class */
+/* Callback functions for file access class */
 H5_DLL herr_t H5F_acs_create(hid_t fapl_id, void *close_data);
 H5_DLL herr_t H5F_acs_close(hid_t fapl_id, void *close_data);
 H5_DLL herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, 

@@ -27,12 +27,11 @@
 #ifndef _H5Gpkg_H
 #define _H5Gpkg_H
 
-#include "H5ACprivate.h"
+/* Get package's private header */
 #include "H5Gprivate.h"
 
-#define H5G_NODE_VERS   1               /*symbol table node version number   */
-#define H5G_SIZE_HINT   256             /*default root grp size hint         */
-#define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
+/* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			  */
 
 /*
  * A symbol table node is a collection of symbol table entries.  It can
@@ -48,14 +47,6 @@ typedef struct H5G_node_t {
 } H5G_node_t;
 
 /*
- * Each key field of the B-link tree that points to symbol table
- * nodes consists of this structure...
- */
-typedef struct H5G_node_key_t {
-    size_t      offset;                 /*offset into heap for name          */
-} H5G_node_key_t;
-
-/*
  * A group handle passed around through layers of the library within and
  * above the H5G layer.
  */
@@ -63,15 +54,6 @@ struct H5G_t {
     int         nref;                   /*open reference count               */
     H5G_entry_t ent;                    /*info about the group               */
 };
-
-/*
- * During name lookups (see H5G_namei()) we sometimes want information about
- * a symbolic link or a mount point.  The normal operation is to follow the
- * symbolic link or mount point and return information about its target.
- */
-#define H5G_TARGET_NORMAL	0x0000
-#define H5G_TARGET_SLINK	0x0001
-#define H5G_TARGET_MOUNT	0x0002
 
 /*
  * These operations can be passed down from the H5G_stab layer to the
@@ -148,6 +130,7 @@ H5_DLL herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 			     H5G_entry_t *obj_ent/*out*/, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
 			       H5G_entry_t *obj_ent, hid_t dxpl_id);
+H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr);
 H5_DLL herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name, hid_t dxpl_id);
 
 /*

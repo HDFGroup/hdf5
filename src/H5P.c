@@ -86,6 +86,7 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_create_func_t cls_create, void *create_data,
      H5P_cls_copy_func_t cls_copy, void *copy_data,
      H5P_cls_close_func_t cls_close, void *close_data);
+static herr_t H5P_close_class(void *_pclass);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
@@ -4208,51 +4209,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_peek_hsize_t
- PURPOSE
-    Internal routine to quickly retrieve the value of a property in a property list.
- USAGE
-    hsize_t H5P_peek_hsize_t(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
-        const char *name;       IN: Name of property to query
- RETURNS
-    Directly returns the value of the property in the list
- DESCRIPTION
-        This function directly returns the value of a property in a property
-    list.  Because this function is only able to just copy a particular property
-    value to the return value, there is no way to check for errors.  We attempt
-    to make certain that bad things don't happen by validating that the size of
-    the property is the same as the size of the return type, but that can't
-    catch all errors.
-        This function does call the user's 'get' callback routine still.
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    No error checking!
-    Use with caution!
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-hsize_t
-H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
-{
-    hsize_t ret_value;            /* return value */
-
-    FUNC_ENTER_NOAPI(H5P_peek_hsize_t, UFAIL);
-
-    assert(plist);
-    assert(name);
-
-    /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist,name,&ret_value);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5P_peek_hsize_t() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5P_peek_size_t
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
@@ -5656,7 +5612,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;

@@ -36,15 +36,15 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include "H5private.h"
-#include "H5ACprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"         /* IDs */
-#include "H5MMprivate.h"
-#include "H5Pprivate.h"         /* Property lists */
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* Files				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"         /* Property lists                       */
 
 /*
  * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are

@@ -149,7 +149,7 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Typedef for reference counted string (defined in H5Dpkg.h) */
+/* Typedef for dataset in memory (defined in H5Dpkg.h) */
 typedef struct H5D_t H5D_t;
 
 /* Typedef for dataset storage information */

@@ -32,28 +32,86 @@
  *	6/10/97 - Moved into HDF5 library
  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"
-#include "H5MMprivate.h"
+#define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Ipkg.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
 #ifndef H5I_DEBUG_OUTPUT
-#include "H5Gprivate.h"         /*symbol tables	*/
+#include "H5Gprivate.h"		/* Groups				*/
 #else /* H5I_DEBUG_OUTPUT */
 #define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
-#include "H5Gpkg.h"
-#include "H5Dprivate.h"		/*datasets				  */
-#include "H5Tprivate.h"		/*data types				*/
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 #endif /* H5I_DEBUG_OUTPUT */
 
-/* Interface initialialization? */
+/* Pablo information */
 #define PABLO_MASK	H5I_mask
+
+/* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5I_init_interface
-static herr_t H5I_init_interface(void);
+
+/* Local Macros */
+
+/*
+ * Define the following macro for fast hash calculations (but limited
+ * hash sizes)
+ */
+#define HASH_SIZE_POWER_2
+
+/* Define the following macro for atom caching over all the atoms */
+#define IDS_ARE_CACHED
+
+#ifdef IDS_ARE_CACHED
+#  define ID_CACHE_SIZE 4	      /*# of previous atoms cached	   */
+#endif
+
+#ifdef HASH_SIZE_POWER_2
+/*
+ * Map an ID to a hash location (assumes s is a power of 2 and smaller
+ * than the ID_MASK constant).
+ */
+#  define H5I_LOC(a,s)		((hid_t)((size_t)(a)&((s)-1)))
+#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
+#else
+/*
+ * Map an ID to a hash location.
+ */
+#  define H5I_LOC(a,s)	(((hid_t)(a)&ID_MASK)%(s))
+#endif
+
+/* Combine a Group number and an atom index into an atom */
+#define H5I_MAKE(g,i)	((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|	  \
+			     ((hid_t)(i)&ID_MASK))
+
+/* Local typedefs */
+
+/* Atom information structure used */
+typedef struct H5I_id_info_t {
+    hid_t	id;		/* ID for this info			    */
+    unsigned	count;		/* ref. count for this atom		    */
+    void	*obj_ptr;	/* pointer associated with the atom	    */
+    struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
+} H5I_id_info_t;
+
+/* ID group structure used */
+typedef struct {
+    unsigned	count;		/*# of times this group has been initialized*/
+    unsigned	reserved;	/*# of IDs to reserve for constant IDs	    */
+    unsigned	wrapped;	/*whether the id count has wrapped around   */
+    size_t	hash_size;	/*sizeof the hash table to store the IDs in */
+    unsigned	ids;		/*current number of IDs held		    */
+    unsigned	nextid;		/*ID to use for the next atom		    */
+    H5I_free_t	free_func;	/*release object method	    		    */
+    H5I_id_info_t **id_list;	/*pointer to an array of ptrs to IDs	    */
+} H5I_id_group_t;
 
 /*-------------------- Locally scoped variables -----------------------------*/
 
@@ -69,6 +127,7 @@ static H5I_id_group_t *H5I_id_group_list_g[H5I_NGROUPS];
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
+static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);

@@ -36,6 +36,10 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 
+/**************************/
+/* Package Private Macros */
+/**************************/
+
 /* The number of reserved IDs in dataset ID group */
 #define H5D_RESERVED_ATOMS  0
 
@@ -70,7 +74,10 @@ typedef enum {
     H5D_ALLOC_WRITE             /* Dataset is being extended */
 } H5D_time_alloc_t;
 
-/* Package-private functions defined in H5D package */
+/******************************/
+/* Package Private Prototypes */
+/******************************/
+
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
 #endif /*_H5Dpkg_H*/

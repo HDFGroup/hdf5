@@ -38,6 +38,10 @@ static int             interface_initialize_g = 0;
 /* Local datatypes */
 
 /* Static function prototypes */
+static herr_t H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset);
+static herr_t H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset);
+static herr_t H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type);
+static herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type);
 
 
 /*-------------------------------------------------------------------------
@@ -517,7 +521,8 @@ done:
  * 
  *-------------------------------------------------------------------------
 */
-herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
+herr_t
+H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
@@ -555,7 +560,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
+static herr_t
+H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
 {
     herr_t      ret_value=SUCCEED;
 
@@ -591,7 +597,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
+herr_t
+H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
@@ -629,7 +636,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
+static herr_t
+H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
 {
     herr_t      ret_value=SUCCEED;
                             
@@ -665,7 +673,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
+herr_t
+H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
@@ -703,7 +712,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
+static herr_t
+H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
 {
     herr_t      ret_value=SUCCEED;
 
@@ -739,7 +749,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
+herr_t
+H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
     herr_t              ret_value=SUCCEED;      /* return value */
@@ -777,7 +788,8 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
+static herr_t
+H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
 {
     herr_t      ret_value=SUCCEED;
                            

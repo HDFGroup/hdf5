@@ -97,23 +97,33 @@
  *-------------------------------------------------------------------------
  */
 
+#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* private headers */
-#include "H5private.h"		/*library				*/
-#include "H5ACprivate.h"	/*cache					*/
-#include "H5Bprivate.h"		/*B-link trees				*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fpkg.h"		/*file access				*/
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"		/*IDs					*/
-#include "H5MFprivate.h"	/*file memory management		*/
-#include "H5MMprivate.h"	/*core memory management		*/
-#include "H5Pprivate.h"		/*property lists				*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Bpkg.h"		/* B-link trees				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File access				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
+/* Pablo information */
 #define PABLO_MASK	H5B_mask
 
+/* Local macros */
+
 #define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
+
+#define H5B_SIZEOF_HDR(F)						      \
+   (H5B_SIZEOF_MAGIC +		/*magic number				  */  \
+    4 +				/*type, level, num entries		  */  \
+    2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	  */
+
+/* Local typedefs */
 
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr,
