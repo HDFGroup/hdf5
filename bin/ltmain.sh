@@ -2457,19 +2457,10 @@ EOF
       # "recompile" just before execution. -BW 20. April 2001
       case "$host" in
       *irix[56]*)
-        bar='';
-        libs=`echo $rpath | sed -e "s#${wl}-rpath ${wl}##" | sed -e 's#:# #g'`;
-        for foo in X $libs; do
-          if test "$foo" != "X"; then
-            if test -n "$bar"; then
-              bar="$bar ${wl}-rpath ${wl}$foo";
-            else
-              bar="${wl}-rpath ${wl}$foo";
-            fi;
-          fi;
-        done
-        finalize_rpath="$bar";
-        compile_rpath="$bar"
+        pwd=`pwd`;
+	rpath="$rpath:$pwd/.libs:$pwd/../src/.libs";
+        finalize_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
+        compile_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
         ;;
       *)
         finalize_rpath="$rpath";
