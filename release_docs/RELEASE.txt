@@ -46,6 +46,7 @@ New Features
 
     Tools:
     ------
+        - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
 
     C++ API:
     --------
