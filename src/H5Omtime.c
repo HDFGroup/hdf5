@@ -149,7 +149,6 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 	{
 
    struct timeb timebuffer;
-   char *timeline;
    long  tz;
    ftime( &timebuffer );
 
