@@ -28,7 +28,7 @@
 #define H5TOOLS_BUFSIZE         (1024 * 1024)
 #else
 #define H5TOOLS_BUFSIZE         (1024)
-#endif
+#endif  /* 1 */
 
 #define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
 
@@ -44,17 +44,17 @@ FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_init
- *
- * Purpose:	Initialize the H5 Tools library.
- *		This should be called before any other h5tools function is
- *		called.  Effect of any h5tools function called before this
- *		has been called is undetermined.
- *
- * Return:	None
- *
- * Programmer:	Albert Cheng, 2000-10-31
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Initialize the H5 Tools library
+ * Description:
+ *      This should be called before any other h5tools function is called.
+ *      Effect of any h5tools function called before this has been called is
+ *      undetermined.
+ * Return:
+ *      None
+ * Programmer:
+ *      Albert Cheng, 2000-10-31
  * Modifications:
  *-------------------------------------------------------------------------
  */
@@ -70,18 +70,18 @@ h5tools_init(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_close
- *
- * Purpose:	Close the H5 Tools library by closing or releasing resources
- *		such as files opened by the library.
- *		This should be called after all other h5tools functions have
- *		been called.  Effect of any h5tools function called after this
- *		has been called is undetermined.
- *
- * Return:	None
- *
- * Programmer:	Albert Cheng, 2000-10-31
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:	Close the H5 Tools library
+ * Description:
+ *      Close or release resources such as files opened by the library. This
+ *      should be called after all other h5tools functions have been called.
+ *      Effect of any h5tools function called after this has been called is
+ *      undetermined.
+ * Return:
+ *      None
+ * Programmer:
+ *      Albert Cheng, 2000-10-31
  * Modifications:
  *-------------------------------------------------------------------------
  */
@@ -101,43 +101,47 @@ h5tools_close(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_fopen
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Open a file with various VFL drivers.
+ * Description:
+ *      Loop through the various types of VFL drivers trying to open FNAME.
+ *      If the HDF5 library is version 1.2 or less, then we have only the SEC2
+ *      driver to try out. If the HDF5 library is greater than version 1.2,
+ *      then we have the FAMILY, SPLIT, and MULTI drivers to play with (and
+ *      the STREAM driver if H5_HAVE_STREAM is defined, that is).
+ * Return:
+ *      On success, returns a file id for the opened file. If DRIVERNAME is
+ *      non-null then the first DRIVERNAME_SIZE-1 characters of the driver
+ *      name are copied into the DRIVERNAME array and null terminated.
  *
- * Purpose:     Attempts to open a file with various VFL drivers.
- *
- * Return:      Success:        a file id for the opened file. If
- *                              DRIVERNAME is non-null then the first
- *                              DRIVERNAME_SIZE-1 characters of the driver
- *                              name are copied into the DRIVERNAME array
- *                              and null terminated.
- *
- *              Failure:        -1. If DRIVERNAME is non-null then the
- *                              first byte is set to the null terminator.
- *
+ *      Otherwise, the function returns FAIL. If DRIVERNAME is non-null then
+ *      the first byte is set to the null terminator.
+ * Programmer:
+ *      Lost in the mists of time.
  * Modifications:
- *              Robb Matzke, 2000-06-23
- *              We only have to initialize driver[] on the first call,
- *              thereby preventing memory leaks from repeated calls to
- *              H5Pcreate().
+ *      Robb Matzke, 2000-06-23
+ *      We only have to initialize driver[] on the first call, thereby
+ *      preventing memory leaks from repeated calls to H5Pcreate().
  *
- *              Robb Matzke, 2000-06-23
- *              Added DRIVERNAME_SIZE arg to prevent overflows when
- *              writing to DRIVERNAME.
+ *      Robb Matzke, 2000-06-23
+ *      Added DRIVERNAME_SIZE arg to prevent overflows when writing to
+ *      DRIVERNAME.
  *
- *              Robb Matzke, 2000-06-23
- *              Added test to prevent coredump when the file could not be
- *              opened by any driver.
+ *      Robb Matzke, 2000-06-23
+ *      Added test to prevent coredump when the file could not be opened by
+ *      any driver.
  *
- *              Robb Matzke, 2000-06-23
- *              Changed name from H5ToolsFopen() so it jives better with
- *              the names we already have at the top of this source file.
+ *      Robb Matzke, 2000-06-23
+ *      Changed name from H5ToolsFopen() so it jives better with the names we
+ *      already have at the top of this source file.
  *
- *              Thomas Radke, 2000-09-12
- *              Added Stream VFD to the driver[] array.
+ *      Thomas Radke, 2000-09-12
+ *      Added Stream VFD to the driver[] array.
  *
- *              Bill Wendling, 2001-01-10
- *              Changed macro behavior so that if we have a version other
- *              than 1.2.x (i.e., > 1.2), then we do the drivers check.
+ *      Bill Wendling, 2001-01-10
+ *      Changed macro behavior so that if we have a version other than 1.2.x
+ *      (i.e., > 1.2), then we do the drivers check.
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -148,11 +152,11 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
         hid_t		fapl;
     } driver[16];
     static int          ndrivers = 0;
+    register int        drivernum;
     hid_t               fid = -1;
 #ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;
 #endif  /* !VERSION12 */
-    int                 drivernum;
 
     if (!ndrivers) {
         /* Build a list of file access property lists which we should try
@@ -203,7 +207,8 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
             strncpy(drivername, driver[drivernum].name, drivername_size);
             drivername[drivername_size - 1] = '\0';
         } else {
-            drivername[0] = '\0'; /*no file opened*/
+            /*no file opened*/
+            drivername[0] = '\0';
         }
     }
 
@@ -211,21 +216,18 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_ncols
- *
- * Purpose:	Count the number of columns in a string. This is the number
- *		of characters in the string not counting line-control
- *		characters.
- *
- * Return:	Success:	Width of string.
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Tuesday, April 27, 1999
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Count the number of columns in a string.
+ * Description:
+ *      Count the number of columns in a string. This is the number of
+ *      characters in the string not counting line-control characters.
+ * Return:
+ *      On success, returns the width of the string. Otherwise this function
+ *      returns 0.
+ * Programmer:
+ *       Robb Matzke, Tuesday, April 27, 1999
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -241,21 +243,21 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_simple_prefix
- *
- * Purpose:	If ctx->need_prefix is set then terminate the current line
- *		(if applicable), calculate the prefix string, and display it
- * 		at the start of a line.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Monday, April 26, 1999
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Emit a simple prefix to STREAM.
+ * Description:
+ *      If /ctx->need_prefix/ is set then terminate the current line (if
+ *      applicable), calculate the prefix string, and display it at the start
+ *      of a line.
+ * Return:
+ *      None
+ * Programmer:
+ *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
- *		Robb Matzke, 1999-09-29
- *		If a new prefix is printed then the current element number is
- *		set back to zero.
+ *      Robb Matzke, 1999-09-29
+ *	If a new prefix is printed then the current element number is set back
+ *	to zero.
  *-------------------------------------------------------------------------
  */
 static void
@@ -287,10 +289,10 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
         indentlevel = ctx->indent_level;
     } else {
         /*
-         * this is because sometimes we dont print out all the header
-         * info for the data(like the tattr-2.ddl example. if that happens
-         * the ctx->indent_level a negative so we need to skip the above
-         * and just print out the default indent levels.
+         * This is because sometimes we don't print out all the header
+         * info for the data (like the tattr-2.ddl example). If that happens
+         * the ctx->indent_level is negative so we need to skip the above and
+         * just print out the default indent levels.
          */
 	indentlevel = ctx->default_indent_level;
     }
@@ -318,31 +320,28 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_simple_data
- *
- * Purpose:	Prints some (NELMTS) data elements to output STREAM. The
- *		elements are stored in _MEM as type TYPE and are printed
- *		according to the format described in INFO. The CTX struct
- *		contains context information shared between calls to this
- *		function. The FLAGS is a bit field that indicates whether
- *		the data supplied in this call falls at the beginning or end
- *		of the total data to be printed (START_OF_DATA and
- *		END_OF_DATA).
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Monday, April 26, 1999
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Prints NELMTS data elements to output STREAM.
+ * Description:
+ *      Prints some (NELMTS) data elements to output STREAM. The elements are
+ *      stored in _MEM as type TYPE and are printed according to the format
+ *      described in INFO. The CTX struct contains context information shared
+ *      between calls to this function. The FLAGS is a bit field that
+ *      indicates whether the data supplied in this call falls at the
+ *      beginning or end of the total data to be printed (START_OF_DATA and
+ *      END_OF_DATA).
+ * Return:
+ *      None
+ * Programmer:
+ *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
- * 		Robb Matzke, 1999-06-04
- *		The `container' argument is the optional dataset for
- *		reference types.
+ * 	Robb Matzke, 1999-06-04
+ *	The `container' argument is the optional dataset for reference types.
  *
- * 		Robb Matzke, 1999-09-29
- *		Understands the `per_line' property which indicates that
- *		every Nth element should begin a new line.
- *
+ * 	Robb Matzke, 1999-09-29
+ *	Understands the `per_line' property which indicates that every Nth
+ *	element should begin a new line.
  *-------------------------------------------------------------------------
  */
 static void
@@ -494,19 +493,17 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_simple_subset
- *
- * Purpose:
- *
- * Return:	Success:    SUCCEED
- *
- *		Failure:    FAIL
- *
- * Programmer:	Bill Wendling
- *              Wednesday, 07. March 2001
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Dump out a subset of a dataset.
+ * Description:
+ *      Select a hyperslab from the dataset DSET using the parameters
+ *      specified in SSET. Dump this out to STREAM.
+ * Return:
+ *      On success, return SUCCEED. Otherwise, the function returns FAIL.
+ * Programmer:
+ *      Bill Wendling, Wednesday, 07. March 2001
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */ 
 static herr_t
@@ -524,7 +521,6 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     /* Print info */
     h5tools_context_t	ctx;			/*print context		*/
     size_t		p_type_nbytes;		/*size of memory type	*/
-    hsize_t		p_nelmts;		/*total selected elmts	*/
 
     /* Stripmine info */
     hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
@@ -532,6 +528,8 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		sm_nelmts;		/*elements per stripmine*/
     unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
+
+    hsize_t             count;
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
@@ -560,54 +558,80 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
-    /* calculate the potential number of elements we're going to print */
-    H5Sselect_hyperslab(f_space, H5S_SELECT_SET, sset->start, sset->stride,
-                        sset->count, sset->block);
-    p_nelmts = H5Sget_select_npoints(f_space);
+    count = sset->count[ctx.ndims - 1];
+    sset->count[ctx.ndims - 1] = 1;
 
-    if (p_nelmts == 0) {
-        /* nothing to print */
-        ret = SUCCEED;
-        goto done_close;
-    }
+    for (; count > 0; sset->start[ctx.ndims - 1] += sset->stride[ctx.ndims - 1],
+                      count--) {
+        /* calculate the potential number of elements we're going to print */
+        H5Sselect_hyperslab(f_space, H5S_SELECT_SET, sset->start, sset->stride,
+                            sset->count, sset->block);
+        sm_nelmts = H5Sget_select_npoints(f_space);
 
-    /*
-     * determine the strip mine size and allocate a buffer. the strip mine is
-     * a hyperslab whose size is manageable.
-     */
-    sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
+        /*
+         * start (0, 0)
+         * block (2, 2)
+         * stride (15, 5)
+         * count (4, 3)
+         *
+         * make:
+         *
+         * for up to "count" times.
+         *
+         * start (0, += stride[last_dim])
+         * block (2, 2)
+         * stride (15, 5)
+         * count (4, 1)
+         */
 
-    if (ctx.ndims > 0)
-        for (i = ctx.ndims; i > 0; --i) {
-            sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
-            sm_nbytes *= sm_size[i - 1];
-            assert(sm_nbytes > 0);
+        if (sm_nelmts == 0) {
+            /* nothing to print */
+            ret = SUCCEED;
+            goto done_close;
         }
 
-    assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
-    sm_buf = malloc((size_t)p_nelmts * p_type_nbytes);
-    sm_nelmts = p_nelmts;
-    sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+        /*
+         * determine the strip mine size and allocate a buffer. the strip mine is
+         * a hyperslab whose size is manageable.
+         */
+        sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
 
-    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
+        if (ctx.ndims > 0)
+            for (i = ctx.ndims; i > 0; --i) {
+                sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                sm_nbytes *= sm_size[i - 1];
+                assert(sm_nbytes > 0);
+            }
 
-    /* Read the data */
-    if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
-        H5Sclose(f_space);
-        H5Sclose(sm_space);
+        assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+        sm_buf = malloc((size_t)sm_nelmts * p_type_nbytes);
+        sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+
+        H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
+
+        /* Read the data */
+        if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
+            H5Sclose(f_space);
+            H5Sclose(sm_space);
+            free(sm_buf);
+            return FAIL;
+        }
+
+        /* Print the data */
+        flags = START_OF_DATA;
+
+        if (count == 1)
+            flags |= END_OF_DATA;
+
+        for (i = 0; i < (hsize_t)ctx.ndims; i++) {
+            ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
+        }
+
+        h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
+                                 p_type, sm_buf);
         free(sm_buf);
-        return FAIL;
+        ctx.continuation++;
     }
-
-    /* Print the data */
-    flags = START_OF_DATA | END_OF_DATA;
-
-    for (i = 0; i < (hsize_t)ctx.ndims; i++) {
-        ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
-    }
-
-    h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
-                             p_type, sm_buf);
 
     /* Terminate the output */
     if (ctx.cur_column) {
@@ -625,24 +649,21 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_dump_simple_dset
- *
+ * Audience:    Public
+ * Chapter:     H5Tools Library
  * Purpose:	Print some values from a dataset with a simple data space.
- *		This is a special case of h5tools_dump_dset(). This function
- *		only intended for dumping datasets -- it does strip mining and
- *		some other things which are unnecessary for smaller objects
- *		such as attributes (to print small objects like attributes
- *		simply read the attribute and call h5tools_dump_simple_mem()).
- *
- * Return:	Success:    SUCCEED
- *
- *		Failure:    FAIL
- *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
- *
+ * Description:
+ *      This is a special case of h5tools_dump_dset(). This function only
+ *      intended for dumping datasets -- it does strip mining and some other
+ *      things which are unnecessary for smaller objects such as attributes
+ *      (to print small objects like attributes simply read the attribute and
+ *      call h5tools_dump_simple_mem()).
+ * Return:
+ *      On success, the function returns SUCCEED. Otherwise, the function
+ *      returns FAIL.
+ * Programmer:
+ *      Robb Matzke, Thursday, July 23, 1998
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */ 
 static int
