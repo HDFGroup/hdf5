@@ -19,15 +19,15 @@ CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CP
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
 ## List all source files here. The list of object files will be
-## created by replacing the `.C' with a `.lo'. This list is necessary
+## created by replacing the `.cpp' with a `.lo'. This list is necessary
 ## for building automatic dependencies.
-TEST_SRC=compound.C h5group.C create.C readdata.C chunks.C extend_ds.C	\
-	 writedata.C
-TEST_OBJ=$(TEST_SRC:.C=.lo)
+TEST_SRC=compound.cpp h5group.cpp create.cpp readdata.cpp chunks.cpp	\
+         extend_ds.cpp writedata.cpp
+TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-TEST_PROGS=$(TEST_SRC:.C=)
+TEST_PROGS=$(TEST_SRC:.cpp=)
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.

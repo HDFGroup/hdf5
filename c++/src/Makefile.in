@@ -21,13 +21,13 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 LIB=libhdf5_cpp.la
 
 ## Source and object files for the library
-LIB_SRC=H5Exception.C H5RefCounter.C H5IdComponent.C H5Library.C	\
-	H5Attribute.C H5Object.C H5PropList.C H5FaccProp.C		\
-	H5FcreatProp.C H5DcreatProp.C H5DxferProp.C H5DataType.C	\
-	H5DataSpace.C H5AbstractDs.C H5AtomType.C H5PredType.C		\
-	H5EnumType.C H5IntType.C H5FloatType.C H5StrType.C		\
-	H5CompType.C H5DataSet.C H5CommonFG.C H5Group.C H5File.C
-LIB_OBJ=$(LIB_SRC:.C=.lo)
+LIB_SRC=H5Exception.cpp H5RefCounter.cpp H5IdComponent.cpp H5Library.cpp  \
+	H5Attribute.cpp H5Object.cpp H5PropList.cpp H5FaccProp.cpp	  \
+	H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp H5DataType.cpp  \
+	H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp H5PredType.cpp	  \
+	H5EnumType.cpp H5IntType.cpp H5FloatType.cpp H5StrType.cpp	  \
+	H5CompType.cpp H5DataSet.cpp H5CommonFG.cpp H5Group.cpp H5File.cpp
+LIB_OBJ=$(LIB_SRC:.cpp=.lo)
 
 PUB_HDR=H5Cpp.h
 

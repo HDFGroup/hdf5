@@ -27,11 +27,11 @@ TEST_PROGS_SRC=
 TEST_PROGS=
 
 TEST_SRC=
-TEST_OBJ=$(TEST_SRC:.C=.lo)
+TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
 TEST_SCRIPTS=testexamples.sh
 
-DISTCLEAN=$(TEST_PROGS_SRC:.C=.lo) $(TEST_PROGS_SRC:.C=.o) *.h5
+DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
 
 $(TEST_PROGS): $(LIB)
 	@echo No C++ test as of yet.
