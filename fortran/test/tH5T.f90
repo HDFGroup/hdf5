@@ -82,7 +82,6 @@
      CHARACTER(LEN=256) :: member_name 
      INTEGER :: len ! Lenght of the name of the compound datatype member 
      INTEGER :: member_index ! index of the field
-     LOGICAL :: flag
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
      INTEGER :: array_dims_range = 3
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
