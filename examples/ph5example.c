@@ -14,7 +14,7 @@
  */
 
 #include <assert.h>
-#include <hdf5.h>
+#include "hdf5.h"
 
 #ifdef H5_HAVE_PARALLEL
 /* Temporary source code */
@@ -952,7 +952,7 @@ parse_options(int argc, char **argv){
 int
 main(int argc, char **argv)
 {
-    char    *filenames[]={ "ParaEg1.h5f", "ParaEg2.h5f" };
+    char    *filenames[]={ "ParaEg1.h5", "ParaEg2.h5" };
 
     int mpi_namelen;		
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
