@@ -172,10 +172,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *              as the destination.  Overflows can occur when the destination is
  *              narrower than the source.
  *
- * SU:		Generic signed to unsigned conversion where the source is 
- *              the same size or smaller than the destination.  Overflow occurs
- *		when the source value is negative.
- *
  * Ux:		Generic conversion for the `Us', `Uu' & `us' cases
  *		Overflow occurs when the source magnitude is too large for the
  *		destination.
@@ -196,14 +192,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_SU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S)<0) {							      \
-        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
-            *((DT*)D) = 0;						      \
-    } else								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-
 #define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) > (D_MAX)) {						      \
         if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
@@ -214,12 +202,20 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+}
+
+#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S)<0) {							      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = 0;						      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -232,17 +228,17 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
@@ -259,48 +255,65 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+}
+
+#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    /* Assumes memory format of unsigned & signed integers is same */	      \
+    if (*((ST*)S)<0) {							      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = 0;						      \
+    }									      \
 }
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+}
+
+#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    /* Assumes memory format of unsigned & signed integers is same */	      \
+    if (*((ST*)S) > (D_MAX)) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    }									      \
 }
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
 }
 
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
 }
 
 /* The main part of every integer hardware conversion macro */
-#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,STRT) {	      \
-    hsize_t	elmtno;			/*element number		*/    \
+#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    size_t	elmtno;			/*element number		*/    \
     uint8_t	*src, *s;		/*source buffer			*/    \
     uint8_t	*dst, *d;		/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
     ATYPE	aligned;		/*aligned type			*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
-    size_t	s_stride, d_stride;	/*src and dst strides		*/    \
+    ssize_t	s_stride, d_stride;	/*src and dst strides		*/    \
+    size_t      safe;                   /* How many elements are safe to process in each pass */ \
 									      \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
@@ -322,20 +335,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	break;								      \
 									      \
     case H5T_CONV_CONV:							      \
-	/* Initialize pointers */					      \
+	/* Initialize source & destination strides */			      \
 	if (buf_stride) {						      \
+            assert(buf_stride>=sizeof(ST));				      \
+            assert(buf_stride>=sizeof(DT));				      \
 	    s_stride = d_stride = buf_stride;				      \
 	} else {							      \
             s_stride = sizeof(ST);					      \
             d_stride = sizeof(DT);					      \
-        }								      \
-        if (STRT) {							      \
-            src = (uint8_t*)buf+(STRT)*s_stride;			      \
-            dst = (uint8_t*)buf+(STRT)*d_stride;			      \
-            s_stride = -s_stride;					      \
-            d_stride = -d_stride;					      \
-        } else {							      \
-            src = dst = buf;						      \
         }								      \
 									      \
 	/* Is alignment required for source or dest? */			      \
@@ -350,21 +357,57 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	CI_INC_SRC(s_mv)						      \
 	CI_INC_DST(d_mv)						      \
 									      \
-        if (s_mv && d_mv) {						      \
-            /* Alignment is required for both source and dest */	      \
-            s = (uint8_t*)&aligned;					      \
-            H5T_CONV_LOOP(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
-        } else if(s_mv) {						      \
-            /* Alignment is required only for source */			      \
-            s = (uint8_t*)&aligned;					      \
-            H5T_CONV_LOOP(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
-        } else if(d_mv) {						      \
-            /* Alignment is required only for destination */		      \
-            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
-        } else {							      \
-            /* Alignment is not required for both source and destination */   \
-            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
-        }	 	 	 	 	 	 	 	      \
+        /* The outer loop of the type conversion macro, controlling which */  \
+        /* direction the buffer is walked */				      \
+        while (nelmts>0) {						      \
+            /* Check if we need to go backwards through the buffer */	      \
+            if(d_stride>s_stride) {					      \
+                /* Compute the number of "safe" destination elements at */    \
+                /* the end of the buffer (Those which don't overlap with */   \
+                /* any source elements at the beginning of the buffer) */     \
+                safe=nelmts-(((nelmts*s_stride)+(d_stride-1))/d_stride);      \
+									      \
+                /* If we're down to the last few elements, just wrap up */    \
+                /* with a "real" reverse copy */			      \
+                if(safe<2) {						      \
+                    src = (uint8_t*)buf+(nelmts-1)*s_stride;		      \
+                    dst = (uint8_t*)buf+(nelmts-1)*d_stride;		      \
+                    s_stride = -s_stride;				      \
+                    d_stride = -d_stride;				      \
+									      \
+                    safe=nelmts;					      \
+                } /* end if */						      \
+                else {							      \
+                    src = (uint8_t*)buf+(nelmts-safe)*s_stride;		      \
+                    dst = (uint8_t*)buf+(nelmts-safe)*d_stride;		      \
+                } /* end else */					      \
+            } /* end if */						      \
+            else {							      \
+                /* Single forward pass over all data */			      \
+                src = dst = buf;					      \
+                safe=nelmts;						      \
+            } /* end else */						      \
+									      \
+            /* Perform loop over elements to convert */			      \
+            if (s_mv && d_mv) {						      \
+                /* Alignment is required for both source and dest */	      \
+                s = (uint8_t*)&aligned;					      \
+                H5T_CONV_LOOP(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+            } else if(s_mv) {						      \
+                /* Alignment is required only for source */		      \
+                s = (uint8_t*)&aligned;					      \
+                H5T_CONV_LOOP(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+            } else if(d_mv) {						      \
+                /* Alignment is required only for destination */	      \
+                H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+            } else {							      \
+                /* Alignment is not required for both source and destination */ \
+                H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+            }	 	 	 	 	 	 	 	      \
+									      \
+            /* Decrement number of elements left to convert */		      \
+            nelmts-=safe;						      \
+        } /* end while */						      \
         break;								      \
 									      \
     default:								      \
@@ -408,9 +451,9 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 #define H5T_CONV_LOOP_POST_DNOALIGN(DT) {				      \
 }
 
-/* The inner loop of the type conversion macro */
+/* The inner loop of the type conversion macro, actually converting the elements */
 #define H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
-    for (elmtno=0; elmtno<nelmts; elmtno++) {				      \
+    for (elmtno=0; elmtno<safe; elmtno++) {				      \
         /* Handle source pre-alignment */				      \
         H5_GLUE(H5T_CONV_LOOP_,PRE_SALIGN_GUTS)(ST)			      \
 									      \
