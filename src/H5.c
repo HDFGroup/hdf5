@@ -92,8 +92,6 @@ DESCRIPTION
 herr_t 
 H5_init_library(void)
 {
-    const char	*s = NULL;
-   
     FUNC_ENTER_INIT(H5_init_library, NULL, FAIL);
 
     /*
@@ -349,7 +347,8 @@ H5_debug_mask(const char *s)
 {
     FILE	*stream = stderr;
     char	pkg_name[32], *rest;
-    int		i, clear;
+    size_t	i;
+    int		clear;
 	
     while (s && *s) {
 	if (isalpha(*s) || '-'==*s || '+'==*s) {
@@ -1685,6 +1684,12 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf(out, " (tbuf");
 			}
 			break;
+		    case H5_RAGGED:
+			fprintf(out, "%ld", (long)obj);
+			if (strcmp(argname, "array")) {
+			    fprintf(out, " (array)");
+			}
+			break;
 		    default:
 			fprintf(out, "%ld", (long)obj);
 			fprintf (out, " (unknown class)");
@@ -2120,6 +2125,19 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    if (ptr) {
 		if (vp) {
 		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (asize_idx>=0 && asize[asize_idx]>=0) {
+			void **p = (void**)vp;
+			fprintf(out, " {");
+			for (i=0; i<asize[asize_idx]; i++) {
+			    if (p[i]) {
+				fprintf(out, "%s0x%lx", i?", ":"",
+					(unsigned long)(p[i]));
+			    } else {
+				fprintf(out, "%sNULL", i?", ":"");
+			    }
+			}
+			fprintf(out, "}");
+		    }
 		} else {
 		    fprintf(out, "NULL");
 		}

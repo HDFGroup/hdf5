@@ -160,7 +160,7 @@ H5Z_term_interface (void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zregister (H5Z_filter_t id, const char *comment, H5Z_func_t func)
+H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
     FUNC_ENTER (H5Zregister, FAIL);
     H5TRACE3("e","Zfsx",id,comment,func);

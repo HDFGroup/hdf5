@@ -86,6 +86,9 @@
 #   define MAX4(a,b,c,d)	MAX(MAX(a,b),MAX(c,d))
 #endif
 
+/* limit the middle value to be within a range (inclusive) */
+#define RANGE(LO,X,HI)		MAX(LO,MIN(X,HI))
+
 /* absolute value */
 #ifndef ABS
 #   define ABS(a)		(((a)>=0) ? (a) : -(a))

@@ -44,6 +44,7 @@ typedef enum {
     H5_DATASET,                 /*group ID for Dataset objects               */
     H5_ATTR,                    /*group ID for Attribute objects             */
     H5_TEMPBUF,                 /*group ID for Temporary buffer objects      */
+    H5_RAGGED,			/*group ID for Ragged array objects	     */
     MAXGROUP               /*highest group in group_t (Invalid as true group)*/
 } H5I_group_t;
 

@@ -223,6 +223,9 @@
 ./src/H5P.c
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
+./src/H5R.c
+./src/H5Rprivate.h
+./src/H5Rpublic.h
 ./src/H5S.c
 ./src/H5Sall.c
 ./src/H5Shyper.c
@@ -266,6 +269,7 @@
 ./test/istore.c
 ./test/links.c
 ./test/mtime.c
+./test/ragged.c
 ./test/shtype.c
 ./test/testhdf5.c
 ./test/testhdf5.h

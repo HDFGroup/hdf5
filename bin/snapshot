@@ -41,6 +41,7 @@ cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 snapshot=yes
 if [ -d ${COMPARE}/previous ]; then
     if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
+        snapshot=no
 	for src in `cat ${COMPARE}/current/MANIFEST`; do
 	    if (diff -I H5_VERS_RELEASE -I " released on " \
 		${COMPARE}/previous/$src ${COMPARE}/current/$src); then

@@ -292,7 +292,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Screate (H5S_class_t type)
+H5Screate(H5S_class_t type)
 {
     H5S_t  *new_ds=NULL;
     hid_t	ret_value = FAIL;
@@ -426,7 +426,7 @@ H5S_close(H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Sclose (hid_t space_id)
+H5Sclose(hid_t space_id)
 {
     FUNC_ENTER(H5Sclose, FAIL);
     H5TRACE1("e","i",space_id);
@@ -492,7 +492,7 @@ H5S_release_simple(H5S_simple_t *simple)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Scopy (hid_t space_id)
+H5Scopy(hid_t space_id)
 {
     H5S_t	*src = NULL;
     H5S_t	*dst = NULL;
@@ -535,7 +535,7 @@ H5Scopy (hid_t space_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Sextent_copy (hid_t dst_id,hid_t src_id)
+H5Sextent_copy(hid_t dst_id,hid_t src_id)
 {
     H5S_t	*src = NULL;
     H5S_t	*dst = NULL;
@@ -730,7 +730,7 @@ H5S_extent_npoints(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5Sextent_npoints (hid_t space_id)
+H5Sextent_npoints(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     hsize_t		    ret_value = 0;
@@ -832,7 +832,7 @@ H5S_get_npoints_max(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sextent_ndims (hid_t space_id)
+H5Sextent_ndims(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
@@ -922,7 +922,7 @@ H5S_extent_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/,
+H5Sextent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 		hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
@@ -1215,7 +1215,7 @@ H5S_is_simple(const H5S_t *sdim)
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
 hbool_t
-H5Sis_simple (hid_t space_id)
+H5Sis_simple(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     hbool_t		    ret_value = FAIL;
@@ -1262,7 +1262,7 @@ H5Sis_simple (hid_t space_id)
     dimension in the array (the slowest) may be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[/*rank*/],
+H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 		      const hsize_t max[/*rank*/])
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
@@ -1578,7 +1578,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Screate_simple (int rank, const hsize_t dims[/*rank*/],
+H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/])
 {
     hid_t	ret_value = FAIL;
@@ -1646,7 +1646,7 @@ H5Screate_simple (int rank, const hsize_t dims[/*rank*/],
  *-------------------------------------------------------------------------
  */
 H5S_class_t
-H5Sextent_class (hid_t sid)
+H5Sextent_class(hid_t sid)
 {
     H5S_class_t	ret_value = H5S_NO_CLASS;
     H5S_t	*space = NULL;
@@ -1680,7 +1680,7 @@ H5Sextent_class (hid_t sid)
     extent information stored for the dataspace.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_extent_none (hid_t space_id)
+H5Sset_extent_none(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
 
@@ -1718,7 +1718,7 @@ H5Sset_extent_none (hid_t space_id)
     dataspace without requiring it to be re-defined.
 --------------------------------------------------------------------------*/
 herr_t
-H5Soffset_simple (hid_t space_id, const hssize_t *offset)
+H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
 

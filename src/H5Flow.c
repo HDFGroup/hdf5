@@ -282,7 +282,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     haddr_t		tmp_addr;
 
 #ifdef HAVE_PARALLEL
-    int			use_types;
+    int			use_types=0;
 #endif
 
     FUNC_ENTER(H5F_low_write, FAIL);
@@ -293,8 +293,8 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     /* check for writing past the end of file marker */
 #ifdef HAVE_PARALLEL
-    if (H5F_LOW_MPIO==access_parms->driver
-    &&  access_parms->u.mpio.use_types) {
+    if (H5F_LOW_MPIO==access_parms->driver &&
+	access_parms->u.mpio.use_types) {
 	/* In the case of fancy use of MPI datatypes, the addr and size
 	 * parameters have a very peculiar interpretation.
 	 * It is logically possible, but quite complex, to calculate
@@ -335,11 +335,11 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     if (H5F_LOW_MPIO==access_parms->driver && use_types) {
 	/* set logical eof to current physical eof
 	 * (ephemeral though it may be...) */
-	MPI_Offset size;
-	if (MPI_SUCCESS != MPI_File_get_size(lf->u.mpio.f,&size)) {
-	    HRETURN_ERROR(H5E_IO, H5E_MPI, NULL, "couldn't get file size" );
+	MPI_Offset mpi_offset_size;
+	if (MPI_SUCCESS != MPI_File_get_size(lf->u.mpio.f,&mpi_offset_size)) {
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "couldn't get file size" );
 	}
-	lf->eof.offset = size;
+	lf->eof.offset = mpi_offset_size;
     }
 #endif
 

@@ -56,7 +56,7 @@ usage (const char *argv0)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file, space, dset;
+    hid_t	file, space=-1, dset=-1;
     const char	*output_name, *dset_name;
     int		argno, fd=-1;
     hsize_t	size[1];
@@ -108,8 +108,14 @@ main (int argc, char *argv[])
 	if (fd>=0) close (fd);
 	fd = -1;
 	H5E_BEGIN_TRY {
-	    H5Sclose (space);
-	    H5Dclose (dset);
+	    if (space>=0) {
+		H5Sclose (space);
+		space = -1;
+	    }
+	    if (dset>=0) {
+		H5Dclose (dset);
+		dset = -1;
+	    }
 	} H5E_END_TRY;
     }
 

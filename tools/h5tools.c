@@ -157,6 +157,26 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	sprintf(temp, "%ld", *((long*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
 	sprintf(temp, "%lu", *((unsigned long*)vp));
+    } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
+	if (sizeof(hssize_t)==sizeof(long)) {
+	    sprintf(temp, "%ld", *((long*)vp));
+	} else {
+	    char fmt[8];
+	    strcpy(fmt, "%");
+	    strcat(fmt, PRINTF_LL_WIDTH);
+	    strcat(fmt, "d");
+	    sprintf(temp, fmt, *((long long*)vp));
+	}
+    } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
+	if (sizeof(hsize_t)==sizeof(long)) {
+	    sprintf(temp, "%lu", *((unsigned long*)vp));
+	} else {
+	    char fmt[8];
+	    strcpy(fmt, "%");
+	    strcat(fmt, PRINTF_LL_WIDTH);
+	    strcat(fmt, "u");
+	    sprintf(temp, fmt, *((unsigned long long*)vp));
+	}
     } else if (H5T_COMPOUND==H5Tget_class(type)) {
 	nmembs = H5Tget_nmembers(type);
 	strcpy(temp, OPT(info->cmpd_pre, "{"));

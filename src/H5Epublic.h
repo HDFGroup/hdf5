@@ -73,7 +73,8 @@ typedef enum H5E_major_t {
     H5E_TEMPLATE,               /*Property lists                             */
     H5E_ATTR,                   /*Attribute                                  */
     H5E_PLINE,			/*Data filters				     */
-    H5E_EFL			/*External file list			     */
+    H5E_EFL,			/*External file list			     */
+    H5E_RAGGED			/*Ragged arrays				     */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */

@@ -12,6 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
+#endif
+
 #define TEST_FILE_NAME	"cmpd_dset.h5"
 
 /* The first dataset */
@@ -88,6 +97,31 @@ cleanup(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	display_error_cb
+ *
+ * Purpose:	Displays the error stack after printing "*FAILED*".
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+display_error_cb (void __unused__ *client_data)
+{
+    puts ("*FAILED*");
+    H5Eprint (stdout);
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Creates a simple dataset of a compound type and then reads
@@ -143,40 +177,39 @@ main (void)
     /* Tenth dataset */
 
     /* Eleventh dataset */
+#if 0
     s4_t		*s11 = NULL;
+    int			ndims;
+#endif
 
     /* Other variables */
     unsigned int	i, j;
-    int			ndims;
     hid_t		file, dataset, space, PRESERVE;
-    herr_t		status;
     static hsize_t	dim[] = {NX, NY};
     hssize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     size_t		memb_size[1] = {4};
 
+    /* Set up error handling */
+    H5Eset_auto(display_error_cb, NULL);
+
     /* Create the file */
-    file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-		      H5P_DEFAULT, H5P_DEFAULT);
-    assert (file>=0);
+    if ((file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+			   H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 
     /* Create the data space */
-    space = H5Screate_simple (2, dim, NULL);
-    assert (space>=0);
+    if ((space = H5Screate_simple (2, dim, NULL))<0) goto error;
 
     /* Create xfer properties to preserve initialized data */
-    PRESERVE = H5Pcreate (H5P_DATASET_XFER);
-    assert (PRESERVE>=0);
-    status = H5Pset_preserve (PRESERVE, 1);
-    assert (status>=0);
+    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
+    if (H5Pset_preserve (PRESERVE, 1)<0) goto error;
 
     /*
      *######################################################################
      * STEP 1: Save the original dataset natively.
      */
-    printf ("\
-STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
-    fflush (stdout);
+    printf("%-70s", "Testing basic compound write");
+    fflush(stdout);
     
     /* Initialize the dataset */
     for (i=0; i<NX*NY; i++) {
@@ -191,22 +224,26 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
     }
 
     /* Create the memory data type */
-    s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-    H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
-    H5Tinsert_array (s1_tid, "c", HOFFSET(s1_t,c), 1, memb_size, NULL,
-		     H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT);
-    assert (s1_tid>=0);
+    if ((s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t)))<0) goto error;
+    if (H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array (s1_tid, "c", HOFFSET(s1_t,c), 1, memb_size, NULL,
+			 H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT)<0) {
+	goto error;
+    }
 
     /* Create the dataset */
-    dataset = H5Dcreate (file, "s1", s1_tid, space, H5P_DEFAULT);
-    assert (dataset>=0);
+    if ((dataset = H5Dcreate (file, "s1", s1_tid, space, H5P_DEFAULT))<0) {
+	goto error;
+    }
 
     /* Write the data */
-    status = H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
-    assert (status>=0);
+    if (H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+	goto error;
+    }
+    puts(" PASSED");
 
     /*
      *######################################################################
@@ -214,37 +251,41 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
      * 	       it's the same as the first just to test things better, but
      *	       in fact, we could have used s1_tid.
      */
-    printf ("\
-STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
-         same data type and space. This will be the typical case.\n");
-    fflush (stdout);
+    printf("%-70s", "Testing basic compound read");
+    fflush(stdout);
     
-
     /* Create a data type for s2 */
-    s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
-    H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT);
-    H5Tinsert_array (s2_tid, "c", HOFFSET(s2_t,c), 1, memb_size, NULL,
-		     H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT);
-    assert (s2_tid>=0);
+    if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t)))<0) goto error;
+    if (H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array (s2_tid, "c", HOFFSET(s2_t,c), 1, memb_size, NULL,
+			 H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT)<0) {
+	goto error;
+    }
     
     /* Read the data */
-    status = H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2);
-    assert (status>=0);
+    if (H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2)<0) {
+	goto error;
+    }
 
     /* Compare s2 with s1.  They should be the same */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].a==s2[i].a);
-	assert (s1[i].b==s2[i].b);
-	assert (s1[i].c[0]==s2[i].c[0]);
-	assert (s1[i].c[1]==s2[i].c[1]);
-	assert (s1[i].c[2]==s2[i].c[2]);
-	assert (s1[i].c[3]==s2[i].c[3]);
-	assert (s1[i].d==s2[i].d);
-	assert (s1[i].e==s2[i].e);
+	if (s1[i].a!=s2[i].a ||
+	    s1[i].b!=s2[i].b ||
+	    s1[i].c[0]!=s2[i].c[0] ||
+	    s1[i].c[1]!=s2[i].c[1] ||
+	    s1[i].c[2]!=s2[i].c[2] ||
+	    s1[i].c[3]!=s2[i].c[3] ||
+	    s1[i].d!=s2[i].d ||
+	    s1[i].e!=s2[i].e) {
+	    puts("*FAILED*");
+	    puts("   Incorrect values read from the file");
+	    goto error;
+	}
     }
+    puts(" PASSED");
     
     /*
      *######################################################################
@@ -252,69 +293,78 @@ STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
      * 	       has the same data space but the data type is different: the
      *	       data type is a struct whose members are in the opposite order.
      */
-    printf ("\
-STEP  3: Read the dataset again with members in a different order.\n");
+    printf("%-70s", "Testing reversal of struct members");
     fflush (stdout);
     
     /* Create a data type for s3 */
-    s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t));
-    H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT);
-    H5Tinsert_array (s3_tid, "c", HOFFSET(s3_t,c), 1, memb_size, NULL,
-		     H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT);
-    assert (s3_tid>=0);
+    if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t)))<0) goto error;
+    if (H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array (s3_tid, "c", HOFFSET(s3_t,c), 1, memb_size, NULL,
+			 H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT)<0) {
+	goto error;
+    }
     
     /* Read the data */
-    status = H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3);
-    assert (status>=0);
+    if (H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3)<0) {
+	goto error;
+    }
 
     /* Compare s3 with s1.  They should be the same */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].a==s3[i].a);
-	assert (s1[i].b==s3[i].b);
-	assert (s1[i].c[0]==s3[i].c[0]);
-	assert (s1[i].c[1]==s3[i].c[1]);
-	assert (s1[i].c[2]==s3[i].c[2]);
-	assert (s1[i].c[3]==s3[i].c[3]);
-	assert (s1[i].d==s3[i].d);
-	assert (s1[i].e==s3[i].e);
+	if (s1[i].a!=s3[i].a ||
+	    s1[i].b!=s3[i].b ||
+	    s1[i].c[0]!=s3[i].c[0] ||
+	    s1[i].c[1]!=s3[i].c[1] ||
+	    s1[i].c[2]!=s3[i].c[2] ||
+	    s1[i].c[3]!=s3[i].c[3] ||
+	    s1[i].d!=s3[i].d ||
+	    s1[i].e!=s3[i].e) {
+	    puts("*FAILED*");
+	    puts("   Incorrect values read from the file");
+	    goto error;
+	}
     }
+    puts(" PASSED");
 
     /*
      *######################################################################
      * STEP 4: Read a subset of the members.  Of the <a,b,c,d,e> members
      *         stored on disk we'll read <b,d>.
      */
-    printf ("\
-STEP  4: Read a subset of the members.\n");
+    printf("%-70s", "Testing subset struct read");
     fflush (stdout);
 
     /* Create a datatype for s4 */
-    s4_tid = H5Tcreate (H5T_COMPOUND, sizeof(s4_t));
-    H5Tinsert (s4_tid, "b", HOFFSET(s4_t,b), H5T_NATIVE_INT);
-    H5Tinsert (s4_tid, "d", HOFFSET(s4_t,d), H5T_NATIVE_INT);
-    assert (s4_tid>=0);
+    if ((s4_tid = H5Tcreate (H5T_COMPOUND, sizeof(s4_t)))<0) goto error;
+    if (H5Tinsert (s4_tid, "b", HOFFSET(s4_t,b), H5T_NATIVE_INT)<0) goto error;
+    if (H5Tinsert (s4_tid, "d", HOFFSET(s4_t,d), H5T_NATIVE_INT)<0) goto error;
 
     /* Read the data */
-    status = H5Dread (dataset, s4_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s4);
-    assert (status>=0);
+    if (H5Dread (dataset, s4_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s4)<0) {
+	goto error;
+    }
 
     /* Compare s4 with s1 */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].b==s4[i].b);
-	assert (s1[i].d==s4[i].d);
+	if (s1[i].b!=s4[i].b ||
+	    s1[i].d!=s4[i].d) {
+	    puts("*FAILED*");
+	    puts("   Incorrect values read from the file");
+	    goto error;
+	}
     }
+    puts(" PASSED");
 
     /*
      *######################################################################
      * STEP 5: Read all the members into a struct which has other members
      * 	       which have already been initialized.
      */
-    printf ("\
-STEP  5: Read members into a superset which is partially initialized.\n");
-    fflush (stdout);
+    printf("%-70s", "Testing partially initialized superset read");
+    fflush(stdout);
 
     /* Initialize some members */
     for (i=0; i<NX*NY; i++) {
@@ -325,38 +375,49 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     }
     
     /* Create a data type for s5 */
-    s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t));
-    H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT);
-    H5Tinsert_array (s5_tid, "c", HOFFSET(s5_t,c), 1, memb_size, NULL,
-		     H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT);
-    assert (s5_tid>=0);
+    if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t)))<0) goto error;
+    if (H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT)<0 ||
+	H5Tinsert_array (s5_tid, "c", HOFFSET(s5_t,c), 1, memb_size, NULL,
+			 H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT)<0 ||
+	H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT)) {
+	goto error;
+    }
 	
     /* Read the data */
-    status = H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5);
-    assert (status>=0);
+    if (H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5)<0) {
+	goto error;
+    }
 
     /* Check that the data was read properly */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].a==s5[i].a);
-	assert (s1[i].b==s5[i].b);
-	assert (s1[i].c[0]==s5[i].c[0]);
-	assert (s1[i].c[1]==s5[i].c[1]);
-	assert (s1[i].c[2]==s5[i].c[2]);
-	assert (s1[i].c[3]==s5[i].c[3]);
-	assert (s1[i].d==s5[i].d);
-	assert (s1[i].e==s5[i].e);
+	if (s1[i].a!=s5[i].a ||
+	    s1[i].b!=s5[i].b ||
+	    s1[i].c[0]!=s5[i].c[0] ||
+	    s1[i].c[1]!=s5[i].c[1] ||
+	    s1[i].c[2]!=s5[i].c[2] ||
+	    s1[i].c[3]!=s5[i].c[3] ||
+	    s1[i].d!=s5[i].d ||
+	    s1[i].e!=s5[i].e) {
+	    puts("*FAILED*");
+	    puts("   Incorrect values read from the file");
+	    goto error;
+	}
     }
 
     /* Check that no previous values were clobbered */
     for (i=0; i<NX*NY; i++) {
-	assert (s5[i].pre  == 1000+4*i);
-	assert (s5[i].mid1 == 1001+4*i);
-	assert (s5[i].mid2 == 1002+4*i);
-	assert (s5[i].post == 1003+4*i);
+	if (s5[i].pre  != 1000+4*i ||
+	    s5[i].mid1 != 1001+4*i ||
+	    s5[i].mid2 != 1002+4*i ||
+	    s5[i].post != 1003+4*i) {
+	    puts("*FAILED*");
+	    puts("   Memory values were clobbered");
+	    goto error;
+	}
     }
+    puts(" PASSED");
 
     /*
      *######################################################################
@@ -364,9 +425,7 @@ STEP  5: Read members into a superset which is partially initialized.\n");
      *         fields unchanged.  This tests member alignment and background
      *	       buffers.
      */
-    printf ("\
-STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
-         unchanged.\n");
+    printf("%-70s", "Testing partially initialized superset write");
     fflush (stdout);
 
     /* Initialize `s4' with new values */
@@ -376,24 +435,31 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
     }
 
     /* Write the data to file */
-    status = H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, PRESERVE, s4);
-    assert (status>=0);
-    
+    if (H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, PRESERVE, s4)<0) {
+	goto error;
+    }
+
     /* Read the data back */
-    status = H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
-    assert (status>=0);
+    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<NX*NY; i++) {
-	assert (s1[i].a == 8*i+0);
-	assert (s1[i].b == 8*i+1);
-	assert (s1[i].c[0] == 8*i+2);
-	assert (s1[i].c[1] == 8*i+3);
-	assert (s1[i].c[2] == 8*i+4);
-	assert (s1[i].c[3] == 8*i+5);
-	assert (s1[i].d == 8*i+6);
-	assert (s1[i].e == 8*i+7);
+	if (s1[i].a != 8*i+0 ||
+	    s1[i].b != 8*i+1 ||
+	    s1[i].c[0] != 8*i+2 ||
+	    s1[i].c[1] != 8*i+3 ||
+	    s1[i].c[2] != 8*i+4 ||
+	    s1[i].c[3] != 8*i+5 ||
+	    s1[i].d != 8*i+6 ||
+	    s1[i].e != 8*i+7) {
+	    puts("*FAILED*");
+	    puts("   File values were clobbered");
+	    goto error;
+	}
     }
+    puts(" PASSED");
     
     /*
      *######################################################################
@@ -401,29 +467,33 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
      * though these data spaces are equal it tests a different part of the
      * library.
      */
-    printf ("\
-STEP  7: Reading original dataset with explicit data space.\n");
+    printf("%-70s", "Testing explicit data space");
     fflush (stdout);
 
     /* Create the data space */
-    s7_sid = H5Screate_simple (2, dim, NULL);
-    assert (s7_sid>=0);
+    if ((s7_sid = H5Screate_simple (2, dim, NULL))<0) goto error;
     
     /* Read the dataset */
-    status = H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5P_DEFAULT, s2);
-    assert (status>=0);
+    if (H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5P_DEFAULT, s2)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<NX*NY; i++) {
-	assert (s2[i].a == s1[i].a);
-	assert (s2[i].b == s1[i].b);
-	assert (s2[i].c[0] == s1[i].c[0]);
-	assert (s2[i].c[1] == s1[i].c[1]);
-	assert (s2[i].c[2] == s1[i].c[2]);
-	assert (s2[i].c[3] == s1[i].c[3]);
-	assert (s2[i].d == s1[i].d);
-	assert (s2[i].e == s1[i].e);
+	if (s2[i].a != s1[i].a ||
+	    s2[i].b != s1[i].b ||
+	    s2[i].c[0] != s1[i].c[0] ||
+	    s2[i].c[1] != s1[i].c[1] ||
+	    s2[i].c[2] != s1[i].c[2] ||
+	    s2[i].c[3] != s1[i].c[3] ||
+	    s2[i].d != s1[i].d ||
+	    s2[i].e != s1[i].e) {
+	    puts("*FAILED*");
+	    puts("   Incorrect values read from file");
+	    goto error;
+	}
     }
+    puts(" PASSED");
     
 
     /*
@@ -431,30 +501,27 @@ STEP  7: Reading original dataset with explicit data space.\n");
      * STEP 8. Read a hyperslab of the file into a complete array in memory.
      * The hyperslab is the middle third of the array.
      */
-    printf ("\
-STEP  8: Read middle third hyperslab into memory array.\n");
+    printf("%-70s", "Testing hyperslab partial read to array");
     fflush (stdout);
 
     /* Create the file data space */
-    s8_f_sid = H5Dget_space (dataset);
-    assert (s8_f_sid>=0);
+    if ((s8_f_sid = H5Dget_space (dataset))<0) goto error;
     f_offset[0] = NX/3;
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
-    status = H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL,
-				  h_size, NULL);
-    assert (status>=0);
+    if (H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL,
+			     h_size, NULL)<0) goto error;
 
     /* Create memory data space */
-    s8_m_sid = H5Screate_simple (2, h_size, NULL);
-    assert (s8_m_sid>=0);
+    if ((s8_m_sid = H5Screate_simple (2, h_size, NULL))<0) goto error;
 
     /* Read the dataset */
     s8 = calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
     assert (s8);
-    status = H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8);
-    assert (status>=0);
+    if (H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<h_size[0]; i++) {
@@ -462,19 +529,24 @@ STEP  8: Read middle third hyperslab into memory array.\n");
 	    s1_t *ps1 = s1 + (f_offset[0]+i)*NY + f_offset[1] + j;
 	    s1_t *ps8 = s8 + i*h_size[1] + j;
 
-	    assert (ps8->a == ps1->a);
-	    assert (ps8->b == ps1->b);
-	    assert (ps8->c[0] == ps1->c[0]);
-	    assert (ps8->c[1] == ps1->c[1]);
-	    assert (ps8->c[2] == ps1->c[2]);
-	    assert (ps8->c[3] == ps1->c[3]);
-	    assert (ps8->d == ps1->d);
-	    assert (ps8->e == ps1->e);
+	    if (ps8->a != ps1->a ||
+		ps8->b != ps1->b ||
+		ps8->c[0] != ps1->c[0] ||
+		ps8->c[1] != ps1->c[1] ||
+		ps8->c[2] != ps1->c[2] ||
+		ps8->c[3] != ps1->c[3] ||
+		ps8->d != ps1->d ||
+		ps8->e != ps1->e) {
+		puts("*FAILED*");
+		puts("   Incorrect values read from file");
+		goto error;
+	    }
 	}
     }
 
     free (s8);
     s8 = NULL;
+    puts(" PASSED");
 
 
     /*
@@ -482,8 +554,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
      * STEP 9.  Read a hyperslab of the file into a hyperslab of memory.  The
      * part of memory not read is already initialized and must not change.
      */
-    printf ("\
-STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
+    printf("%-70s", "Testing hyperslab partial read to another hyperslab");
     fflush (stdout);
 
     /* Initialize */
@@ -493,8 +564,9 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
     }
     
     /* Read the hyperslab */
-    status = H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2);
-    assert (status>=0);
+    if (H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<NX; i++) {
@@ -505,35 +577,42 @@ STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
 		(hsize_t)i<f_offset[0]+h_size[0] &&
 		(hssize_t)j>=f_offset[1] &&
 		(hsize_t)j<f_offset[1]+h_size[1]) {
-		assert (ps2->a == ps1->a);
-		assert (ps2->b == ps1->b);
-		assert (ps2->c[0] == ps1->c[0]);
-		assert (ps2->c[1] == ps1->c[1]);
-		assert (ps2->c[2] == ps1->c[2]);
-		assert (ps2->c[3] == ps1->c[3]);
-		assert (ps2->d == ps1->d);
-		assert (ps2->e == ps1->e);
+		if (ps2->a != ps1->a ||
+		    ps2->b != ps1->b ||
+		    ps2->c[0] != ps1->c[0] ||
+		    ps2->c[1] != ps1->c[1] ||
+		    ps2->c[2] != ps1->c[2] ||
+		    ps2->c[3] != ps1->c[3] ||
+		    ps2->d != ps1->d ||
+		    ps2->e != ps1->e) {
+		    puts("*FAILED*");
+		    puts("   Memory values clobbered");
+		    goto error;
+		}
 	    } else {
-		assert (ps2->a == (unsigned)(-1));
-		assert (ps2->b == (unsigned)(-1));
-		assert (ps2->c[0] == (unsigned)(-1));
-		assert (ps2->c[1] == (unsigned)(-1));
-		assert (ps2->c[2] == (unsigned)(-1));
-		assert (ps2->c[3] == (unsigned)(-1));
-		assert (ps2->d == (unsigned)(-1));
-		assert (ps2->e == (unsigned)(-1));
+		if (ps2->a != (unsigned)(-1) ||
+		    ps2->b != (unsigned)(-1) ||
+		    ps2->c[0] != (unsigned)(-1) ||
+		    ps2->c[1] != (unsigned)(-1) ||
+		    ps2->c[2] != (unsigned)(-1) ||
+		    ps2->c[3] != (unsigned)(-1) ||
+		    ps2->d != (unsigned)(-1) ||
+		    ps2->e != (unsigned)(-1)) {
+		    puts("*FAILED*");
+		    puts("   Incorrect values read from file");
+		    goto error;
+		}
 	    }
 	}
     }
+    puts(" PASSED");
     
     /*
      *######################################################################
      * STEP 10. Same as step 9 except the memory array contains some members
      * which are already initialized, like step 5.
      */
-    printf ("\
-STEP 10: Read middle third of hyperslab into middle third of memory array\n\
-         where some of the struct members are already initialized.\n");
+    printf("%-70s", "Testing hyperslab to hyperslab part initialized read");
     fflush (stdout);
 
     /* Initialize */
@@ -544,8 +623,9 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
     }
     
     /* Read the hyperslab */
-    status = H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5);
-    assert (status>=0);
+    if (H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<NX; i++) {
@@ -556,34 +636,43 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 		(hsize_t)i<f_offset[0]+h_size[0] &&
 		(hssize_t)j>=f_offset[1] &&
 		(hsize_t)j<f_offset[1]+h_size[1]) {
-		assert (ps5->pre == (unsigned)(-1));
-		assert (ps5->a == ps1->a);
-		assert (ps5->b == ps1->b);
-		assert (ps5->mid1 == (unsigned)(-1));
-		assert (ps5->c[0] == ps1->c[0]);
-		assert (ps5->c[1] == ps1->c[1]);
-		assert (ps5->c[2] == ps1->c[2]);
-		assert (ps5->c[3] == ps1->c[3]);
-		assert (ps5->mid2 == (unsigned)(-1));
-		assert (ps5->d == ps1->d);
-		assert (ps5->e == ps1->e);
-		assert (ps5->post == (unsigned)(-1));
+		if (ps5->pre != (unsigned)(-1) ||
+		    ps5->a != ps1->a ||
+		    ps5->b != ps1->b ||
+		    ps5->mid1 != (unsigned)(-1) ||
+		    ps5->c[0] != ps1->c[0] ||
+		    ps5->c[1] != ps1->c[1] ||
+		    ps5->c[2] != ps1->c[2] ||
+		    ps5->c[3] != ps1->c[3] ||
+		    ps5->mid2 != (unsigned)(-1) ||
+		    ps5->d != ps1->d ||
+		    ps5->e != ps1->e ||
+		    ps5->post != (unsigned)(-1)) {
+		    puts("*FAILED*");
+		    puts("   Memory values clobbered");
+		    goto error;
+		}
 	    } else {
-		assert (ps5->pre == (unsigned)(-1));
-		assert (ps5->a == (unsigned)(-1));
-		assert (ps5->b == (unsigned)(-1));
-		assert (ps5->mid1 == (unsigned)(-1));
-		assert (ps5->c[0] == (unsigned)(-1));
-		assert (ps5->c[1] == (unsigned)(-1));
-		assert (ps5->c[2] == (unsigned)(-1));
-		assert (ps5->c[3] == (unsigned)(-1));
-		assert (ps5->mid2 == (unsigned)(-1));
-		assert (ps5->d == (unsigned)(-1));
-		assert (ps5->e == (unsigned)(-1));
-		assert (ps5->post == (unsigned)(-1));
+		if (ps5->pre != (unsigned)(-1) ||
+		    ps5->a != (unsigned)(-1) ||
+		    ps5->b != (unsigned)(-1) ||
+		    ps5->mid1 != (unsigned)(-1) ||
+		    ps5->c[0] != (unsigned)(-1) ||
+		    ps5->c[1] != (unsigned)(-1) ||
+		    ps5->c[2] != (unsigned)(-1) ||
+		    ps5->c[3] != (unsigned)(-1) ||
+		    ps5->mid2 != (unsigned)(-1) ||
+		    ps5->d != (unsigned)(-1) ||
+		    ps5->e != (unsigned)(-1) ||
+		    ps5->post != (unsigned)(-1)) {
+		    puts("*FAILED*");
+		    puts("   Incorrect values read from file");
+		    goto error;
+		}
 	    }
 	}
     }
+    puts(" PASSED");
 		
     /*
      *######################################################################
@@ -656,5 +745,12 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     H5Fclose (file);
 
     cleanup();
+    puts("All compound dataset tests passed.");
     return 0;
+
+error:
+    cleanup();
+    puts("Remaining tests have been skipped.");
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
 }

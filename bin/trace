@@ -93,9 +93,9 @@ sub argstring ($$$) {
   $atype =~ s/\s+$//;
   if ($atype =~ /(.*)\[(.*)\]$/) {
     ($array, $atype) = ($2, $1);
+    $atype =~ s/\s+$//;
   }
   $fq_atype = $atype . ('*' x $ptr);
-
 
   if ($ptr>0 && exists $TypeString{$fq_atype}) {
     $ptr = 0;
@@ -172,7 +172,7 @@ sub rewrite_func ($$$$$) {
     $trace .= join("", @arg_str) . "\"";
     my $len = 4 + length $trace;
     for (@arg_name) {
-      if ($len + length >= 78) {
+      if ($len + length >= 77) {
 	$trace .= ",\n             $_";
 	$len = 13 + length;
       } else {
@@ -203,7 +203,7 @@ sub rewrite_func ($$$$$) {
 
   
  error:
-  return "\n$type\n$name ($args)\n$body";
+  return "\n$type\n$name($args)\n$body";
 }
 
 ##############################################################################

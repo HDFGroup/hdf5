@@ -182,22 +182,25 @@ H5S_select_release (H5S_t *space)
     assert (space);
 
     switch(space->select.type) {
-        case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value=H5S_point_release(space);
-            break;
+    case H5S_SEL_POINTS:         /* Sequence of points selected */
+	ret_value=H5S_point_release(space);
+	break;
 
-        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=H5S_hyper_release(space);
-            break;
+    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+	ret_value=H5S_hyper_release(space);
+	break;
 
-        case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value=H5S_all_release(space);
-            break;
+    case H5S_SEL_ALL:            /* Entire extent selected */
+	ret_value=H5S_all_release(space);
+	break;
 
-        case H5S_SEL_NONE:           /* Nothing selected */
-        default:
-            break;
-    } /* end switch() */
+    case H5S_SEL_NONE:           /* Nothing selected */
+	break;
+
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+	break;
+    }
 
     /* Reset type of selection to "all" */
     space->select.type=H5S_SEL_ALL;
@@ -233,22 +236,13 @@ H5S_select_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
+H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 		     const hssize_t start[/*space_id*/],
 		     const hsize_t _stride[/*space_id*/],
 		     const hsize_t count[/*space_id*/],
 		     const hsize_t _block[/*space_id*/])
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    hsize_t *stride,        /* Stride array */
-        *block=NULL;        /* Block size array */
-    hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
-    size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
-    uintn acc;                /* Accumulator for building slices */
-    uintn contig;             /* whether selection is contiguous or not */
-    int i,j;                  /* Counters */
-    H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
-    herr_t ret_value=FAIL;    /* return value */
 
     FUNC_ENTER (H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*[a0]Hs*[a0]h*[a0]h*[a0]h",space_id,op,start,_stride,
@@ -261,41 +255,103 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
     }
     if(start==NULL || count==NULL) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-    } /* end if */
+    }
     if(op!=H5S_SELECT_SET) {
         HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
             "operations other than H5S_SELECT_SET not supported currently");
-    } /* end if */
+    }
 
+    if (H5S_select_hyperslab(space, op, start, _stride, count, _block)<0) {
+	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		      "unable to set hyperslab selection");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_select_hyperslab
+ *
+ * Purpose:	Internal version of H5Sselect_hyperslab().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke (split from HSselect_hyperslab()).
+ *              Tuesday, August 25, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
+		      const hssize_t start[/*space_id*/],
+		      const hsize_t stride[/*space_id*/],
+		      const hsize_t count[/*space_id*/],
+		      const hsize_t block[/*space_id*/])
+{
+    
+    hsize_t *_stride=NULL;        /* Stride array */
+    hsize_t *_block=NULL;        /* Block size array */
+    hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
+    size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
+    uintn acc;                /* Accumulator for building slices */
+    uintn contig;             /* whether selection is contiguous or not */
+    int i,j;                  /* Counters */
+    H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
+    herr_t ret_value=FAIL;    /* return value */
+
+    FUNC_ENTER (H5S_select_hyperslab, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(start);
+    assert(count);
+    assert(H5S_SELECT_SET==op);
+    
     /* Fill in the correct stride values */
-    if(_stride==NULL) {
+    if(stride==NULL) {
         hssize_t fill=1;
 
-        if((stride = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
+        if((_stride = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate stride vector");
-        H5V_array_fill(stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
-    } else {
-        stride=(hsize_t *)_stride;
-    } /* end else */
+        H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
+	stride = _stride;
+    }
 
     /* Fill in the correct block values */
-    if(_block==NULL) {
+    if(block==NULL) {
         hssize_t fill=1;
 
-        if((block = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
+        if((_block = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate block vector");
-        H5V_array_fill(block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
-    } else {
-        block=(hsize_t *)_block;
-    } /* end else */
+        H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
+	block = _block;
+    }
+
+    /* Copy all the per-dimension selection info into the space descriptor */
+    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate per-dimension vector");
+    } /* end if */
+    for(i=0; i<space->extent.u.simple.rank; i++) {
+	diminfo[i].start = start[i];
+	diminfo[i].stride = stride[i];
+	diminfo[i].count = count[i];
+	diminfo[i].block = block[i];
+    } /* end for */
+    space->select.sel_info.hyper.diminfo = diminfo;
 
     /*
      * Check for overlapping blocks (remove when real block-merging algorithm
      * is in place).
      */
-    if(op==H5S_SELECT_SET && _block!=NULL) {
+    if(op==H5S_SELECT_SET && block!=NULL) {
 	for(i=0; i<space->extent.u.simple.rank; i++) {
 	    if(stride[i]<block[i]) {
 		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -410,13 +466,11 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
 #endif /* QAK */
 
 done:
-    if(_stride==NULL && stride!=NULL)
-        H5MM_xfree(stride);
-    if(_block==NULL && block!=NULL)
-        H5MM_xfree(block);
-
+    H5MM_xfree(_stride);
+    H5MM_xfree(_block);
     FUNC_LEAVE (ret_value);
-}   /* H5Sselect_hyperslab() */
+}
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -616,7 +670,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5Sselect_npoints (hid_t spaceid)
+H5Sselect_npoints(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hsize_t ret_value=0;        /* return value */
@@ -662,23 +716,26 @@ H5S_select_npoints (const H5S_t *space)
     assert(space);
 
     switch(space->select.type) {
-        case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value=H5S_point_npoints(space);
-            break;
+    case H5S_SEL_POINTS:         /* Sequence of points selected */
+	ret_value=H5S_point_npoints(space);
+	break;
 
-        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=H5S_hyper_npoints(space);
-            break;
+    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+	ret_value=H5S_hyper_npoints(space);
+	break;
 
-        case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value=H5S_all_npoints(space);
-            break;
+    case H5S_SEL_ALL:            /* Entire extent selected */
+	ret_value=H5S_all_npoints(space);
+	break;
 
-        case H5S_SEL_NONE:           /* Nothing selected */
-        default:
-            ret_value=0;
-            break;
-    } /* end switch */
+    case H5S_SEL_NONE:           /* Nothing selected */
+	ret_value=0;
+	break;
+
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+	break;
+    }
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sselect_npoints() */
@@ -712,20 +769,23 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
     assert (sel_iter);
 
     switch(space->select.type) {
-        case H5S_SEL_POINTS:         /* Sequence of points selected */
-        case H5S_SEL_ALL:            /* Entire extent selected */
-            /* no action needed */
-            ret_value=SUCCEED;
-            break;
+    case H5S_SEL_POINTS:         /* Sequence of points selected */
+    case H5S_SEL_ALL:            /* Entire extent selected */
+	/* no action needed */
+	ret_value=SUCCEED;
+	break;
 
-        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=H5S_hyper_sel_iter_release(sel_iter);
-            break;
+    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+	ret_value=H5S_hyper_sel_iter_release(sel_iter);
+	break;
 
-        case H5S_SEL_NONE:           /* Nothing selected */
-        default:
-            break;
-    } /* end switch() */
+    case H5S_SEL_NONE:           /* Nothing selected */
+	break;
+
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+	break;
+    }
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_sel_iter_release() */
@@ -751,7 +811,7 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hbool_t
-H5Sselect_valid (hid_t spaceid)
+H5Sselect_valid(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hbool_t ret_value=FAIL;     /* return value */
@@ -800,20 +860,23 @@ H5S_select_valid (const H5S_t *space)
     assert(space);
 
     switch(space->select.type) {
-        case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value=H5S_point_select_valid(space);
-            break;
+    case H5S_SEL_POINTS:         /* Sequence of points selected */
+	ret_value=H5S_point_select_valid(space);
+	break;
 
-        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=H5S_hyper_select_valid(space);
-            break;
+    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+	ret_value=H5S_hyper_select_valid(space);
+	break;
 
-        case H5S_SEL_ALL:            /* Entire extent selected */
-        case H5S_SEL_NONE:           /* Nothing selected */
-        default:
-            ret_value=TRUE;
-            break;
-    } /* end switch */
+    case H5S_SEL_ALL:            /* Entire extent selected */
+    case H5S_SEL_NONE:           /* Nothing selected */
+	ret_value=TRUE;
+	break;
+
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+	break;
+    }
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_valid() */

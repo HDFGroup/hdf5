@@ -169,7 +169,7 @@ herr_t H5TB_close(H5TB_t *tb)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5TBget_buf (hsize_t size, hbool_t resize)
+H5TBget_buf(hsize_t size, hbool_t resize)
 {
     hid_t	ret_value = FAIL;
     H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
@@ -335,7 +335,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBresize_ptr (hid_t tbuf_id, hsize_t size)
+H5TBresize_ptr(hid_t tbuf_id, hsize_t size)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
@@ -430,7 +430,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBgarbage_coll (void)
+H5TBgarbage_coll(void)
 {
     herr_t ret_value = FAIL;
     H5TB_t *curr,*next;      /* Current temp. buffer node */
@@ -494,7 +494,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBrelease_buf (hid_t tbuf_id)
+H5TBrelease_buf(hid_t tbuf_id)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */

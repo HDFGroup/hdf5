@@ -178,7 +178,7 @@ H5D_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
     H5G_t		   *loc = NULL;
@@ -206,14 +206,12 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (plist_id >= 0) {
-	if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-	    NULL == (create_parms = H5I_object(plist_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-			  "not a dataset creation property list");
-	}
-    } else {
+    if (H5P_DEFAULT==plist_id) {
 	create_parms = &H5D_create_dflt;
+    } else if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	       NULL == (create_parms = H5I_object(plist_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset creation property list");
     }
 
     /* build and open the new dataset */
@@ -222,7 +220,7 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		      "unable to create dataset");
     }
-    /* Register the new datatype and get an ID for it */
+    /* Register the new dataset to get an ID for it */
     if ((ret_value = H5I_register(H5_DATASET, new_dset)) < 0) {
 	H5D_close(new_dset);
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
@@ -253,7 +251,7 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dopen (hid_t loc_id, const char *name)
+H5Dopen(hid_t loc_id, const char *name)
 {
     H5G_t	*loc = NULL;		/*location holding the dataset	*/
     H5D_t	*dataset = NULL;	/*the dataset			*/
@@ -307,7 +305,7 @@ H5Dopen (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dclose (hid_t dset_id)
+H5Dclose(hid_t dset_id)
 {
     H5D_t		   *dset = NULL;	/* dataset object to release */
 
@@ -351,7 +349,7 @@ H5Dclose (hid_t dset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_space (hid_t dset_id)
+H5Dget_space(hid_t dset_id)
 {
     H5D_t	*dset = NULL;
     H5S_t	*space = NULL;
@@ -367,9 +365,9 @@ H5Dget_space (hid_t dset_id)
     }
 
     /* Read the data space message and return a data space object */
-    if (NULL==(space=H5S_read (&(dset->ent)))) {
+    if (NULL==(space=H5D_get_space (dset))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to load space info from dataset header");
+		       "unable to get data space");
     }
 
     /* Create an atom */
@@ -380,6 +378,39 @@ H5Dget_space (hid_t dset_id)
     }
 
     FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_get_space
+ *
+ * Purpose:	Returns the data space associated with the dataset.
+ *
+ * Return:	Success:	Ptr to a copy of the data space.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August 25, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_t *
+H5D_get_space(H5D_t *dset)
+{
+    H5S_t	*space = NULL;
+    
+    FUNC_ENTER(H5D_get_space, NULL);
+    assert(dset);
+
+    if (NULL==(space=H5S_read(&(dset->ent)))) {
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		      "unable to load space info from dataset header");
+    }
+
+    FUNC_LEAVE(space);
 }
 
 
@@ -407,7 +438,7 @@ H5Dget_space (hid_t dset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_type (hid_t dset_id)
+H5Dget_type(hid_t dset_id)
 {
     
     H5D_t	*dset = NULL;
@@ -464,7 +495,7 @@ H5Dget_type (hid_t dset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_create_plist (hid_t dset_id)
+H5Dget_create_plist(hid_t dset_id)
 {
     H5D_t		*dset = NULL;
     H5D_create_t	*copied_parms = NULL;
@@ -540,7 +571,7 @@ H5Dget_create_plist (hid_t dset_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
     H5D_t		   *dset = NULL;
@@ -641,7 +672,7 @@ H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t plist_id, const void *buf)
 {
     H5D_t		   *dset = NULL;
@@ -723,7 +754,7 @@ H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dextend (hid_t dset_id, const hsize_t *size)
+H5Dextend(hid_t dset_id, const hsize_t *size)
 {
     H5D_t	*dset = NULL;
     

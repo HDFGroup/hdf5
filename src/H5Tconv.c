@@ -64,7 +64,6 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	break;
 
     case H5T_CONV_FREE:
-	/* Nothing to free */
 	cdata->stats = H5MM_xfree (cdata->stats);
 	break;
 	
@@ -1345,7 +1344,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     intn	direction;		/*direction of traversal	*/
     size_t	elmtno;			/*element number		*/
     size_t	olap;			/*num overlapping elements	*/
-    size_t	nchars;			/*number of characters copied	*/
+    size_t	nchars=0;		/*number of characters copied	*/
     uint8	*s, *sp, *d, *dp;	/*src and dst traversal pointers*/
     uint8	*dbuf=NULL;		/*temp buf for overlap convers.	*/
     herr_t	ret_value=FAIL;		/*return value			*/

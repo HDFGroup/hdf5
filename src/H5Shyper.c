@@ -1698,6 +1698,11 @@ done:
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
+ * 	Robb Matzke, 1998-08-25
+ *	The fields which are freed are set to NULL to prevent them from being
+ *	freed again later.  This fixes some allocation problems where
+ *	changing the hyperslab selection of one data space causes a core dump
+ *	when closing some other data space.
 --------------------------------------------------------------------------*/
 herr_t
 H5S_hyper_release (H5S_t *space)
@@ -1718,21 +1723,26 @@ H5S_hyper_release (H5S_t *space)
 
     /* Release the per-dimension selection info */
     H5MM_xfree(space->select.sel_info.hyper.diminfo);
+    space->select.sel_info.hyper.diminfo = NULL;
 
     /* Release hi and lo boundary information */
     for(i=0; i<space->extent.u.simple.rank; i++) {
         H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds[i]);
+	space->select.sel_info.hyper.hyper_lst->lo_bounds[i] = NULL;
         H5MM_xfree(space->select.sel_info.hyper.hyper_lst->hi_bounds[i]);
+	space->select.sel_info.hyper.hyper_lst->hi_bounds[i] = NULL;
     } /* end for */
     H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds);
+    space->select.sel_info.hyper.hyper_lst->lo_bounds = NULL;
     H5MM_xfree(space->select.sel_info.hyper.hyper_lst->hi_bounds);
+    space->select.sel_info.hyper.hyper_lst->hi_bounds = NULL;
 
     /* Release list of selected regions */
     curr=space->select.sel_info.hyper.hyper_lst->head;
     while(curr!=NULL) {
         next=curr->next;
-        H5MM_xfree(curr->start);
-        H5MM_xfree(curr->end);
+        curr->start = H5MM_xfree(curr->start);
+        curr->end = H5MM_xfree(curr->end);
         H5MM_xfree(curr);
         curr=next;
     } /* end while */

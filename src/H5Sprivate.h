@@ -285,6 +285,11 @@ intn H5S_cmp (const H5S_t *ds1, const H5S_t *ds2);
 hbool_t H5S_is_simple (const H5S_t *sdim);
 uintn H5S_nelem (const H5S_t *space);
 H5S_conv_t *H5S_find (const H5S_t *mem_space, const H5S_t *file_space);
+herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
+			     const hssize_t start[],
+			     const hsize_t _stride[],
+			     const hsize_t count[],
+			     const hsize_t _block[]);
 intn H5S_get_hyperslab (const H5S_t *ds, hssize_t offset[]/*out*/,
 			hsize_t size[]/*out*/, hsize_t stride[]/*out*/);
 herr_t H5S_release_simple(H5S_simple_t *simple);

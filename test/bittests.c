@@ -521,7 +521,7 @@ main (void)
     nerrors += test_copy ()<0?1:0;
 
     if (nerrors) {
-        printf("***** %lu FAILURE%s! *****\n",
+        printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         exit(1);
     }

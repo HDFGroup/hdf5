@@ -58,7 +58,7 @@ herr_t
 H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 {
     haddr_t             tmp_addr;
-    intn		i, found, status;
+    intn		i, found, status=-1;
     hsize_t		n;
     H5MF_free_t		blk;
     hsize_t		thresh = f->shared->access_parms->threshold;

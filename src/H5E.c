@@ -57,6 +57,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_ATTR, 		"Attribute layer"},
     {H5E_PLINE,		"Data filters layer"},
     {H5E_EFL, 		"External file list"},
+    {H5E_RAGGED,	"Ragged array layer"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
@@ -157,7 +158,7 @@ void *H5E_auto_data_g = stderr;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eset_auto (H5E_auto_t func, void *client_data)
+H5Eset_auto(H5E_auto_t func, void *client_data)
 {
     FUNC_ENTER (H5Eset_auto, FAIL);
     H5TRACE2("e","xx",func,client_data);
@@ -188,7 +189,7 @@ H5Eset_auto (H5E_auto_t func, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto (H5E_auto_t *func, void **client_data)
+H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
     FUNC_ENTER (H5Eget_auto, FAIL);
     H5TRACE2("e","*x*x",func,client_data);
@@ -219,7 +220,7 @@ H5Eget_auto (H5E_auto_t *func, void **client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eclear (void)
+H5Eclear(void)
 {
     FUNC_ENTER (H5Eclear, FAIL);
     H5TRACE0("e","");
@@ -248,7 +249,7 @@ H5Eclear (void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eprint (FILE *stream)
+H5Eprint(FILE *stream)
 {
     H5E_t	*estack = H5E_get_my_stack ();
     hbool_t	H5E_clearable_g = FALSE; /*override global*/
@@ -286,7 +287,7 @@ H5Eprint (FILE *stream)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
+H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
     hbool_t	H5E_clearable_g = FALSE; /*override global*/
     herr_t	status = FAIL;
@@ -334,7 +335,7 @@ H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data)
+H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
 {
     FILE		*stream = (FILE *)client_data;
     const char		*maj_str = NULL;

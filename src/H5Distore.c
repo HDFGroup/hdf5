@@ -508,7 +508,8 @@ H5F_istore_found(H5F_t __unused__ *f, const haddr_t *addr,
 
     /* Is this *really* the requested chunk? */
     for (i=0; i<udata->mesg.ndims; i++) {
-	if (udata->key.offset[i]>=lt_key->offset[i]+udata->mesg.dim[i]) {
+	if (udata->key.offset[i] >=
+	    lt_key->offset[i]+(hssize_t)(udata->mesg.dim[i])) {
 	    HRETURN(FAIL);
 	}
     }
@@ -1961,8 +1962,11 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	/* Increment indices */
 	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
 	    chunk_offset[i] += layout->dim[i];
-	    if (chunk_offset[i] >= space_dim[i]) chunk_offset[i] = 0;
-	    else carry = 0;
+	    if (chunk_offset[i] >= (hssize_t)(space_dim[i])) {
+		chunk_offset[i] = 0;
+	    } else {
+		carry = 0;
+	    }
 	}
 	if (carry) break;
     }

@@ -125,7 +125,7 @@ static void H5G_term_interface(void);
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate (hid_t loc_id, const char *name, size_t size_hint)
+H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
@@ -175,7 +175,7 @@ H5Gcreate (hid_t loc_id, const char *name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gopen (hid_t loc_id, const char *name)
+H5Gopen(hid_t loc_id, const char *name)
 {
     hid_t	ret_value = FAIL;
     H5G_t	*grp = NULL;
@@ -224,7 +224,7 @@ H5Gopen (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gclose (hid_t group_id)
+H5Gclose(hid_t group_id)
 {
     FUNC_ENTER(H5Gclose, FAIL);
     H5TRACE1("e","i",group_id);
@@ -275,7 +275,7 @@ H5Gclose (hid_t group_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gset (hid_t loc_id, const char *name)
+H5Gset(hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
     H5G_t	*loc = NULL;
@@ -336,7 +336,7 @@ H5Gset (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gpush (hid_t loc_id, const char *name)
+H5Gpush(hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
     H5G_t	*loc = NULL;
@@ -401,7 +401,7 @@ H5Gpush (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gpop (hid_t loc_id)
+H5Gpop(hid_t loc_id)
 {
     H5G_t	*loc = NULL;
 
@@ -449,7 +449,7 @@ H5Gpop (hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Giterate (hid_t loc_id, const char *name, int *idx,
+H5Giterate(hid_t loc_id, const char *name, int *idx,
 	    H5G_iterate_t op, void *op_data)
 {
     int			_idx = 0;
@@ -521,7 +521,7 @@ H5Giterate (hid_t loc_id, const char *name, int *idx,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gmove (hid_t __unused__ loc_id, const char __unused__ *src,
+H5Gmove(hid_t __unused__ loc_id, const char __unused__ *src,
 	 const char __unused__ *dst)
 {
     FUNC_ENTER (H5Gmove, FAIL);
@@ -563,7 +563,7 @@ H5Gmove (hid_t __unused__ loc_id, const char __unused__ *src,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
+H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
 	 const char *new_name)
 {
     H5G_t	*loc = NULL;
@@ -616,7 +616,7 @@ H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gunlink (hid_t __unused__ loc_id, const char __unused__ *name)
+H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
 {
     FUNC_ENTER (H5Gunlink, FAIL);
     H5TRACE2("e","is",loc_id,name);
@@ -648,7 +648,7 @@ H5Gunlink (hid_t __unused__ loc_id, const char __unused__ *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
+H5Gstat(hid_t loc_id, const char *name, hbool_t follow_link,
 	 H5G_stat_t *statbuf/*out*/)
 {
     H5G_t	*loc = NULL;
@@ -692,7 +692,7 @@ H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
+H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
     H5G_t	*loc = NULL;
     
@@ -737,7 +737,7 @@ H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gset_comment (hid_t loc_id, const char *name, const char *comment)
+H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
     H5G_t	*loc = NULL;
     
@@ -784,7 +784,7 @@ H5Gset_comment (hid_t loc_id, const char *name, const char *comment)
  *-------------------------------------------------------------------------
  */
 int
-H5Gget_comment (hid_t loc_id, const char *name, size_t bufsize, char *buf)
+H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5G_t	*loc = NULL;
     intn	retval = FAIL;

@@ -260,7 +260,7 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_create_template (hid_t file_id)
+H5Fget_create_template(hid_t file_id)
 {
     H5F_t		*file = NULL;
     hid_t		ret_value = FAIL;
@@ -311,7 +311,7 @@ H5Fget_create_template (hid_t file_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_access_template (hid_t file_id)
+H5Fget_access_template(hid_t file_id)
 {
     H5F_t		*f = NULL;
     H5F_access_t	*tmpl = NULL;
@@ -444,7 +444,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     This function determines if a file is an HDF5 format file.
 --------------------------------------------------------------------------*/
 hbool_t
-H5Fis_hdf5 (const char *filename)
+H5Fis_hdf5(const char *filename)
 {
     H5F_low_t	*f_handle = NULL;	/* file handle */
     haddr_t	addr;		       /* Address of file signature & header */
@@ -1135,7 +1135,7 @@ H5F_open(const char *name, uintn flags,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fcreate (const char *filename, unsigned flags, hid_t create_id,
+H5Fcreate(const char *filename, unsigned flags, hid_t create_id,
 	  hid_t access_id)
 {
     
@@ -1249,7 +1249,7 @@ H5Fcreate (const char *filename, unsigned flags, hid_t create_id,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fopen (const char *filename, unsigned flags, hid_t access_id)
+H5Fopen(const char *filename, unsigned flags, hid_t access_id)
 {
     H5F_t		*new_file = NULL;	/* file struct for new file */
     const H5F_access_t	*access_parms;		/* pointer to the file access
@@ -1317,7 +1317,7 @@ H5Fopen (const char *filename, unsigned flags, hid_t access_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fflush (hid_t object_id)
+H5Fflush(hid_t object_id)
 {
     H5F_t	*f = NULL;
     H5G_t	*grp = NULL;
@@ -1612,7 +1612,7 @@ H5F_close(H5F_t *f)
     changed.
 --------------------------------------------------------------------------*/
 herr_t
-H5Fclose (hid_t file_id)
+H5Fclose(hid_t file_id)
 {
     herr_t	ret_value = SUCCEED;
 
