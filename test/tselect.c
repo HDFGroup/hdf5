@@ -586,7 +586,7 @@ test_select_all(hid_t xfer_plist)
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
         for(j=0; j<SPACE4_DIM2; j++)
-            for(k=0; k<SPACE4_DIM2; k++)
+            for(k=0; k<SPACE4_DIM3; k++)
                 *tbuf++=(uint8_t)(((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k;
 
     /* Create file */
@@ -2783,7 +2783,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
             for(k=0; k<SPACE5_DIM3; k++)
                 for(l=0; l<SPACE5_DIM4; l++)
                     for(m=0; m<SPACE5_DIM5; m++)
-                        *tbuf++=(int)(((((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k)*SPACE5_DIM4)+l)*SPACE5_DIM5)+m;
+                        *tbuf++=(int)(((((((i*SPACE5_DIM2)+j)*SPACE5_DIM3)+k)*SPACE5_DIM4)+l)*SPACE5_DIM5)+m;
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
