@@ -298,7 +298,7 @@ failure.
 </DD>
 
 <DT>
-<TT>hsize_t H5Sextent_npoints (hid_t <I>space</I>)</TT></DT>
+<TT>hsize_t H5Sget_simple_extent_npoints (hid_t <I>space</I>)</TT></DT>
 
 <DD>
 This function determines the number of elements in a dataspace. For example, a
@@ -308,7 +308,7 @@ Returns the number of elements in the dataspace, negative on failure.
 </DD>
 
 <DT>
-<TT>int H5Sextent_ndims (hid_t <I>space</I>)</TT></DT>
+<TT>int H5Sget_simple_extent_ndims (hid_t <I>space</I>)</TT></DT>
 
 <DD>
 This function determines the dimensionality (or rank) of a dataspace. 
@@ -316,7 +316,7 @@ Returns the number of dimensions in the dataspace, negative on failure.
 </DD>
 
 <DT>
-<TT>herr_t H5Sextent_dims (hid_t <I>space</I>, hsize_t *<I>dims</I>,
+<TT>herr_t H5Sget_simple_extent_dims (hid_t <I>space</I>, hsize_t *<I>dims</I>,
     hsize_t *<I>max</I>)</TT></DT>
 
 <DD>
@@ -481,7 +481,7 @@ the selection or extent is not defined).
 </DD>
 
 <DT>
-<TT>hsize_t H5Sselect_npoints (hid_t <I>space</I>)</TT></DT>
+<TT>hsize_t H5Sget_select_npoints (hid_t <I>space</I>)</TT></DT>
 
 <DD>
 This function determines the number of elements in the current selection
@@ -556,13 +556,27 @@ is returned.
 </DL>
 
 <HR>
+<!--
 <ADDRESS>
 <A HREF="mailto:matzke@llnl.gov">Robb Matzke</A></ADDRESS>
 
 <ADDRESS>
 <A HREF="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</A></ADDRESS>
 
-<BR><!-- Created: Thu Dec  4 14:57:32 EST 1997 --><!-- hhmts start -->Last
-modified: Thu May 28 15:12:04 EST 1998&nbsp;<!-- hhmts end -->
+<BR>
+-->
+<!-- Created: Thu Dec  4 14:57:32 EST 1997 --><!-- hhmts start -->Last
+<!--
+modified: Thu May 28 15:12:04 EST 1998&nbsp;
+-->
+<!-- hhmts end -->
+
+<hr>
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+
+<br>
+Last modified:  3 September 1998
+
 </BODY>
 </HTML>

@@ -777,6 +777,22 @@
 	    <td><code>H5T_NATIVE_LDOUBLE</code></td>
 	    <td><code>long double</code></td>
 	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_HSIZE</code></td>
+	    <td><code>hsize_t</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_HSSIZE</code></td>
+	    <td><code>hssize_t</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_HERR</code></td>
+	    <td><code>herr_t</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_HBOOL</code></td>
+	    <td><code>hbool_t</code></td>
+	  </tr>
 	</table>
       </center>
 
@@ -1024,7 +1040,9 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
 	</table>
       </center>
 
+    <a name="Datatypes-DataConversion">
     <h2>8. Data Conversion</h2>
+    </a>
 
     <p>The library is capable of converting data from one type to
       another and does so automatically when reading or writing the
@@ -1049,11 +1067,18 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
       conversion functions than calling an application-defined
       conversion function).
 
-    <p><b>Note:</b> The alpha version of the library does not contain
-      a full set of conversions.  It can convert from one integer
-      format to another and one struct to another.  It can also
-      perform byte swapping when the source and destination types are
-      otherwise the same.
+    <p><b>Note:</b> The HDF5 library contains a deliberately limited
+      set of conversion routines.  It can convert from one integer
+      format to another, from one floating point format to another,
+      and from one struct to another.  It can also perform byte 
+      swapping when the source and destination types are otherwise 
+      the same.  The library does not contain any functions for
+      converting data between integer and floating point formats.
+      It is anticipated that some users will find it necessary to
+      develop float to integer or integer to float conversion functions 
+      at the application level; if they wish, users are invited to 
+      submit those functions to be considered for inclusion in future 
+      versions of the library.
 
     <p>A conversion path contains a source and destination data type
       and each path contains a <em>hard</em> conversion function
@@ -1383,12 +1408,24 @@ H5Tregister_soft ("cus2be", H5T_INTEGER, H5T_INTEGER, cray_ushort2be);
       conversion path whether that conversion path was actually used
       or not.
 
+<!--
     <hr>
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
     <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
+-->
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
+<!--
 Last modified: Tue Sep  8 14:43:32 EDT 1998
+-->
 <!-- hhmts end -->
+
+<hr>
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+</address>
+
+Last modified:  9 September 1998
+
   </body>
 </html>

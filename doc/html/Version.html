@@ -94,7 +94,7 @@
 	include file and determine the version of the include files.
 
 	<br><br>
-      <dt><code>herr_t H5version (unsigned *<em>majnum</em>, unsigned
+      <dt><code>herr_t H5get_libversion (unsigned *<em>majnum</em>, unsigned
 	  *<em>minnum</em>, unsigned *<em>relnum</em>)</code>
       <dd>This function returns through its arguments the version
 	numbers for the library to which the application is linked.
@@ -112,20 +112,32 @@
 	standard error stream and aborts with a core dump.
 
 	<br><br>
-      <dt><code>herr_t H5vers_check (unsigned <em>majnum</em>,
+      <dt><code>herr_t H5check_version (unsigned <em>majnum</em>,
 	  unsigned <em>minnum</em>, unsigned <em>relnum</em>)</code>
       <dd>This function is called by the <code>H5check()</code> macro
 	with the include file version constants.  The function
 	compares its arguments to the result returned by
-	<code>H5version()</code> and if a mismatch is detected prints
+	<code>H5get_libversion()</code> and if a mismatch is detected prints
 	an error message on the standard error stream and aborts.
     </dl>
 
+<!--
     <hr>
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
+-->
 <!-- Created: Wed Apr 22 11:24:40 EDT 1998 -->
 <!-- hhmts start -->
+<!--
 Last modified: Mon Jul 20 11:42:20 EDT 1998
+-->
 <!-- hhmts end -->
+
+<hr>
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+
+<br>
+Last modified:  3 September 1998
+
   </body>
 </html>
