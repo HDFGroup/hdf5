@@ -338,9 +338,9 @@ static int check_options(pack_opt_t *options)
     szip_pixels_per_block=pack.filter[j].cd_values[0];
     
     /* check szip parameters */
-    if (check_szip(pack.chunk.rank,
+    if (check_szip(0, /* do not test size */
+     pack.chunk.rank,
      pack.chunk.chunk_lengths,
-     0, /* do not test size */
      szip_options_mask,
      &szip_pixels_per_block,
      options)==0)

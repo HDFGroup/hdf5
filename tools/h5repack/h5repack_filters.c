@@ -94,6 +94,198 @@ int filter_this(const char* name,    /* object name from traverse list */
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: apply_filters
+ *
+ * Purpose: apply the filters in the object to the property list; 
+ *  do extra checking in the case of SZIP; delete all filters in the case
+ *  of H5Z_FILTER_NONE present in the PACK_INFO_T filter array
+ *
+ * Return: 0 success, -1 an error occured
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 19, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+
+int apply_filters(const char* name,    /* object name from traverse list */
+                  int rank,            /* rank of dataset */
+                  hsize_t *dims,       /* dimensions of dataset */
+                  hid_t dcpl_id,       /* dataset creation property list */
+                  hid_t type_id,       /* dataset datatype */
+                  pack_opt_t *options, /* repack options */
+                  pack_info_t *obj)    /* info about object to filter */
+{
+ int          nfilters;       /* number of filters in DCPL */
+ unsigned     aggression;     /* the deflate level */
+ hsize_t      nelmts;         /* number of elements in dataset */
+ size_t       size;           /* size of datatype in bytes */
+ unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
+ unsigned     szip_pixels_per_block;
+ int          i;
+
+ /* check first if the object is to be filtered */
+ if (filter_this(name,options,obj)==0)
+  return 0;
+
+ if (rank==0)
+  goto out;
+
+ /* check for datasets too small */
+  if ((size=H5Tget_size(type_id))==0)
+   return 0;
+  nelmts=1;
+  for (i=0; i<rank; i++) 
+   nelmts*=dims[i];
+  if (nelmts*size < options->threshold )
+  {
+   if (options->verbose)
+    printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
+    name,options->threshold);
+   return 0;
+  }
+  
+
+ /* get information about input filters */
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
+  return -1;
+ 
+/*-------------------------------------------------------------------------
+ * check if we have the H5Z_FILTER_NONE filter
+ * if so, just delete all filters from the DCPL and exit
+ *-------------------------------------------------------------------------
+ */
+
+ for ( i=0; i<obj->nfilters; i++)
+ {
+  if (obj->filter[i].filtn==H5Z_FILTER_NONE)
+  {
+   if (nfilters && H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+    return -1;
+   return 0;
+  }
+ }
+
+/*-------------------------------------------------------------------------
+ * check if we have filters in the pipeline
+ * we want to replace them with the input filters
+ *-------------------------------------------------------------------------
+ */
+
+ if (nfilters) {
+  if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
+   return -1;
+ }
+
+/*-------------------------------------------------------------------------
+ * filters require CHUNK layout; if we do not have one define a default
+ *-------------------------------------------------------------------------
+ */
+ 
+ if (obj->chunk.rank<=0)
+ {
+  obj->chunk.rank=rank;
+  for (i=0; i<rank; i++) 
+   obj->chunk.chunk_lengths[i] = dims[i];
+ }
+
+/*-------------------------------------------------------------------------
+ * the type of filter and additional parameter 
+ * type can be one of the filters
+ * H5Z_FILTER_NONE       0,  uncompress if compressed
+ * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ * H5Z_FILTER_SHUFFLE    2 , shuffle the data
+ * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
+ * H5Z_FILTER_SZIP       4 , szip compression 
+ *-------------------------------------------------------------------------
+ */
+ 
+ for ( i=0; i<obj->nfilters; i++)
+ {
+  switch (obj->filter[i].filtn)
+  {
+  default:
+   break;
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ *-------------------------------------------------------------------------
+ */
+  case H5Z_FILTER_DEFLATE:
+   aggression=obj->filter[i].cd_values[0];
+   /* set up for deflated data */
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+    return -1;
+   if(H5Pset_deflate(dcpl_id,aggression)<0)
+    return -1;
+   break;
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SZIP       4 , szip compression 
+ *-------------------------------------------------------------------------
+ */
+  case H5Z_FILTER_SZIP:
+   szip_pixels_per_block=obj->filter[i].cd_values[0];
+   /* check szip parameters */
+   if (check_szip(type_id,
+    obj->chunk.rank,
+    obj->chunk.chunk_lengths,
+    szip_options_mask,
+    &szip_pixels_per_block,
+    options)==1)
+   {
+    /* set up for szip data */
+    if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
+     return -1;
+    if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
+     return -1;
+   }
+   else
+   {
+    if (options->verbose)
+     printf("Warning: SZIP filter cannot be applied to <%s>\n",name);
+   }
+   break;
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SHUFFLE    2 , shuffle the data
+ *-------------------------------------------------------------------------
+ */
+  case H5Z_FILTER_SHUFFLE:
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+    return -1;
+   if (H5Pset_shuffle(dcpl_id)<0) 
+    return -1;
+   break;
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
+ *-------------------------------------------------------------------------
+ */
+  case H5Z_FILTER_FLETCHER32:
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+    return -1;
+   if (H5Pset_fletcher32(dcpl_id)<0) 
+    return -1;
+   break;
+  } /* switch */
+ }/*i*/
+
+ return 0;
+
+out:
+ if (options->verbose)
+  printf("Warning: Filter could not be applied to <%s>\n",name);
+ return 0;
+
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: print_filters
  *
@@ -152,150 +344,6 @@ int print_filters(hid_t dcpl_id)
 
 
 /*-------------------------------------------------------------------------
- * Function: apply_filters
- *
- * Purpose: apply the filters in the object to the property list; 
- *  do extra checking in the case of SZIP; delete all filters in the case
- *  of H5Z_FILTER_NONE present in the PACK_INFO_T filter array
- *
- * Return: 0 success, -1 an error occured
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 19, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-int apply_filters(hid_t dcpl_id,
-                  size_t size,         /* size of datatype in bytes */
-                  pack_opt_t *options, /* repack options */
-                  pack_info_t *obj)    /* info about object to filter */
-{
- int          nfilters;       /* number of filters in DCPL */
- unsigned     aggression;     /* the deflate level */
- unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
- unsigned     szip_pixels_per_block;
- int          i;
-
- /* get information about input filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
-  return -1;
- 
-/*-------------------------------------------------------------------------
- * check if we have the H5Z_FILTER_NONE filter
- * if so, just delete all filters from the DCPL and exit
- *-------------------------------------------------------------------------
- */
-
- for ( i=0; i<obj->nfilters; i++)
- {
-  if (obj->filter[i].filtn==H5Z_FILTER_NONE)
-  {
-   if (nfilters && H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
-    return -1;
-   return 0;
-  }
- }
-
-/*-------------------------------------------------------------------------
- * check if we have filters in the pipeline
- * we want to replace them with the input filters
- *-------------------------------------------------------------------------
- */
-
- if (nfilters) {
-  if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
-   return -1;
- }
-
-/*-------------------------------------------------------------------------
- * the type of filter and additional parameter 
- * type can be one of the filters
- * H5Z_FILTER_NONE       0,  uncompress if compressed
- * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
- * H5Z_FILTER_SHUFFLE    2 , shuffle the data
- * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
- * H5Z_FILTER_SZIP       4 , szip compression 
- *-------------------------------------------------------------------------
- */
-
- for ( i=0; i<obj->nfilters; i++)
- {
-  switch (obj->filter[i].filtn)
-  {
-  default:
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_DEFLATE:
-   aggression=obj->filter[i].cd_values[0];
-   /* set up for deflated data */
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-    return -1;
-   if(H5Pset_deflate(dcpl_id,aggression)<0)
-    return -1;
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_SZIP       4 , szip compression 
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_SZIP:
-   szip_pixels_per_block=obj->filter[i].cd_values[0];
-   /* check szip parameters */
-   if (check_szip(obj->chunk.rank,
-    obj->chunk.chunk_lengths,
-    size,
-    szip_options_mask,
-    &szip_pixels_per_block,
-    options)==1)
-   {
-    /* set up for szip data */
-    if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
-     return -1;
-    if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
-     return -1;
-   }
-   else
-   {
-    printf("Warning: SZIP filter cannot be applied\n");
-   }
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_SHUFFLE    2 , shuffle the data
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_SHUFFLE:
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-    return -1;
-   if (H5Pset_shuffle(dcpl_id)<0) 
-    return -1;
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_FLETCHER32:
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-    return -1;
-   if (H5Pset_fletcher32(dcpl_id)<0) 
-    return -1;
-   break;
-  } /* switch */
- }/*i*/
-
- return 0;
-}
-
-
-
-/*-------------------------------------------------------------------------
  * Function: check_szip
  *
  * Purpose: utility to check SZIP parameters
@@ -317,16 +365,34 @@ int apply_filters(hid_t dcpl_id,
  *-------------------------------------------------------------------------
  */
 
-int check_szip(int rank,        /* chunk rank */
+int check_szip(hid_t type_id,   /* dataset datatype */
+               int rank,        /* chunk rank */
                hsize_t *dims,   /* chunk dims */
-               size_t size,     /* size of datatype in bytes */
                unsigned szip_options_mask /*IN*/,
                unsigned *szip_pixels_per_block /*IN,OUT*/,
                pack_opt_t *options)
 {
+ size_t      size;     /* size of datatype in bytes */
  szip_comp_t szip;
  int         i;
  unsigned    ppb=*szip_pixels_per_block;
+
+ if (type_id)
+ {
+  if ((size=H5Tget_size(type_id))==0)
+   return 0;
+  
+  switch (H5Tget_class(type_id)) 
+  {
+  default:
+   return 0;
+   break;
+  case H5T_INTEGER:
+  case H5T_FLOAT:
+   break;
+  }
+ }
+
 
  /*
  pixels_per_scanline = size of the fastest-changing dimension 
@@ -380,12 +446,10 @@ int check_szip(int rank,        /* chunk rank */
   bits_per_pixel
   Must be in range 1..24,32,64
   */
+ szip.bits_per_pixel = 0;
+ if (type_id) {
  switch(size) 
  {
- case 0:
-  /* size was not provided for test */
-  szip.bits_per_pixel = 0;
-  break;
  case 1:
   szip.bits_per_pixel = 8;
   break;
@@ -401,7 +465,7 @@ int check_szip(int rank,        /* chunk rank */
  default:
   printf("Warning: Invalid numeric type of size <%d> for SZIP\n",size);
   return 0;
- }
+ }}
 
  return check_szip_params( szip.bits_per_pixel, 
                            szip.pixels_per_block, 

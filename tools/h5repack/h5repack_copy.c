@@ -268,34 +268,18 @@ int do_copy_objects(hid_t fidin,
       */
      if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
      {
+      obj.chunk.rank=rank;
       if (apply_layout(dcpl_id,&obj)<0)
        goto error;
      }
+
     /*-------------------------------------------------------------------------
-     * apply the filter; check first if the object is to be filtered.
+     * apply the filter; check if the object is to be filtered.
      *-------------------------------------------------------------------------
      */
-     if (filter_this(travt->objs[i].name,options,&obj))
-     {
-      if (rank)
-      {
-       /* filters require CHUNK layout; if we do not have one define a default */
-       if (obj.chunk.rank<=0)
-       {
-        obj.chunk.rank=rank;
-        for (j=0; j<rank; j++) 
-         obj.chunk.chunk_lengths[j] = dims[j];
-       }
-       if (apply_filters(dcpl_id,msize,options,&obj)<0)
-        goto error;
-      }
-      else
-      {
-       if (options->verbose)
-        printf("Warning: Filter could not be applied to <%s>\n",
-        travt->objs[i].name);
-      }/*rank*/
-     }/*filter_this*/
+     if (apply_filters(travt->objs[i].name,rank,dims,dcpl_id,mtype_id,options,&obj)<0)
+      goto error;
+
     }/*nelmts*/
     
     /*-------------------------------------------------------------------------

@@ -180,10 +180,13 @@ int filter_this(const char* name,
                 pack_opt_t *options,
                 pack_info_t *pack); /* info about object to filter */
 
-int apply_filters(hid_t dcpl_id,
-                  size_t size,         /* size of datatype in bytes */
+int apply_filters(const char* name,    /* object name from traverse list */
+                  int rank,            /* rank of dataset */
+                  hsize_t *dims,       /* dimensions of dataset */
+                  hid_t dcpl_id,       /* dataset creation property list */
+                  hid_t type_id,       /* datatype */
                   pack_opt_t *options, /* repack options */
-                  pack_info_t *pack);  /* info about object to filter */
+                  pack_info_t *obj);   /* info about object to filter */
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
@@ -193,10 +196,10 @@ int check_szip_params( unsigned bits_per_pixel,
                        unsigned pixels_per_scanline, 
                        hsize_t image_pixels);
 
-int check_szip(int rank,        /* chunk rank */
+int check_szip(hid_t type_id,   /* dataset datatype */
+               int rank,        /* chunk rank */
                hsize_t *dims,   /* chunk dims */
-               size_t size,     /* size of datatype in bytes */
-               unsigned szip_options_mask,
+               unsigned szip_options_mask /*IN*/,
                unsigned *szip_pixels_per_block /*IN,OUT*/,
                pack_opt_t *options);
 
