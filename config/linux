@@ -41,6 +41,12 @@ PROD_CPPFLAGS=
 PROFILE_CFLAGS=-pg
 PROFILE_CPPFLAGS=
 
+#----------------------------------------------------------------------------
+# Enable parallel support by default for Robb's development system.
+#
+if [ 'robb@arborea' = `whoami`@`hostname` ]; then
+    enable_parallel=${enable_parallel:-yes}
+fi
 
 #----------------------------------------------------------------------------
 # Values for overriding configuration tests when cross compiling.
