@@ -825,6 +825,11 @@
 ./src/H5FDstream.h
 ./src/H5FL.c
 ./src/H5FLprivate.h
+./src/H5FP.c
+./src/H5FPclient.c
+./src/H5FPprivate.h
+./src/H5FPpublic.h
+./src/H5FPserver.c
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c
@@ -853,10 +858,12 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Ofphdf5.c
 ./src/H5Olayout.c
 ./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
+./src/H5Oplist.c
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
 ./src/H5Osdspace.c
