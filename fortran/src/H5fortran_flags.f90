@@ -96,11 +96,11 @@
          
 !H5I interface related fortran flags:
          INTEGER, PARAMETER ::  H5I_FILE_F = 1
-         INTEGER, PARAMETER ::  H5I_GROUP_F = 2
-         INTEGER, PARAMETER ::  H5I_DATATYPE_F = 3
-         INTEGER, PARAMETER ::  H5I_DATASPACE_F = 4
-         INTEGER, PARAMETER ::  H5I_DATASET_F = 5
-         INTEGER, PARAMETER ::  H5I_ATTR_F = 6
+         INTEGER, PARAMETER ::  H5I_GROUP_F = 12
+         INTEGER, PARAMETER ::  H5I_DATATYPE_F = 13
+         INTEGER, PARAMETER ::  H5I_DATASPACE_F = 14
+         INTEGER, PARAMETER ::  H5I_DATASET_F = 15
+         INTEGER, PARAMETER ::  H5I_ATTR_F = 16
          INTEGER, PARAMETER ::  H5I_BADID_F = -1
 
 !H5E interface related fortran flags: 

@@ -73,6 +73,7 @@
             MODULE PROCEDURE h5aread_real_7
 ! Comment if on T3E
             MODULE PROCEDURE h5aread_double_scalar
+            MODULE PROCEDURE h5aread_double_1
             MODULE PROCEDURE h5aread_double_2
             MODULE PROCEDURE h5aread_double_3
             MODULE PROCEDURE h5aread_double_4
@@ -866,7 +867,7 @@
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
                                                      ! identifier  (in memory)
-            CHARACTER(LEN=*), DIMENSION(:), INTENT(OUT) :: buf 
+            CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: buf 
                                                     ! Attribute data 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
             INTEGER, EXTERNAL :: h5areadc_c
