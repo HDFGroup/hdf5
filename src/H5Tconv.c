@@ -2455,6 +2455,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     if(nested) {
                         uint8_t *tmp=bg_ptr;
                         UINT32DECODE(tmp, bg_seq_len);
+
                         if(bg_seq_len>0) {
                             H5_CHECK_OVERFLOW( bg_seq_len*MAX(src_base_size,dst_base_size) ,hsize_t,size_t);
                             if(tmp_buf_size<(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size))) {
@@ -2478,12 +2479,12 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                     /* Convert VL sequence */
                     H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
-                    if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, bkg_stride, conv_buf, tmp_buf, dxpl_id)<0)
+
+                    if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, 0, conv_buf, tmp_buf, dxpl_id)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
                     /* Write sequence to destination location */
                     if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,d,conv_buf, bg_ptr, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                     /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorted than the old data elements.*/
                     H5_CHECK_OVERFLOW(bg_seq_len,hsize_t,hssize_t);

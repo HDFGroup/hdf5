@@ -818,16 +818,18 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, void *_bg, hs
 	HDmemset(&bg_hobjid,0,sizeof(H5HG_t));
         UINT32DECODE(bg, bg_seq_len);
 
-        /* Get heap information */
-        H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
-        INT32DECODE(bg, bg_hobjid.idx);
+        if(bg_seq_len > 0) {
+            /* Get heap information */
+            H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+            INT32DECODE(bg, bg_hobjid.idx);
 
-        /* Free heap object for old data */
-        if(bg_hobjid.addr>0) {
-            /* Free heap object */
-            if(H5HG_remove(f, dxpl_id, &bg_hobjid)<0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
-         } /* end if */
+            /* Free heap object for old data */
+            if(bg_hobjid.addr>0) {
+                /* Free heap object */
+                if(H5HG_remove(f, dxpl_id, &bg_hobjid)<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
+            } /* end if */
+        } /* end if */
     } /* end if */
 
     /* Set the length of the sequence */
