@@ -119,14 +119,14 @@ case "`hostname`" in
         ;;
 esac
 
-# Compiler flags
+# Common GCC flags for various situations
 case "$cc_vendor-$cc_version" in
-    gcc-2.7*)
+    gcc*|egcs*|pgcc*)
 	# General
-	CFLAGS="$CFLAGS $ARCH -ansi"
+	CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wchar-subscripts -Wall -W -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline -Wpointer-arith -Wconversion -Wredundant-decls"
 
 	# Production
-	PROC_CFLAGS="-O3 $NOFP -finline-functions"
+	PROD_CFLAGS="-O2 $NOFP -finline-functions"
 	PROD_CPPFLAGS=
 
 	# Debug
@@ -136,6 +136,14 @@ case "$cc_vendor-$cc_version" in
 	# Profile
 	PROFILE_CFLAGS=-pg
 	PROFILE_CPPFLAGS=
+
+        ;;
+esac
+
+# Version specific GCC flags
+case "$cc_vendor-$cc_version" in
+    gcc-2.7*)
+        # No changes from default GCC flags...
 
 	# Flags are set
 	cc_flags_set=yes
@@ -146,36 +154,14 @@ case "$cc_vendor-$cc_version" in
         CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="-O3 $NOFP -finline-functions -fschedule-insns2"
-	PROD_CPPFLAGS=
-
-	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-
-	# Profile
-	PROFILE_CFLAGS=-pg
-	PROFILE_CPPFLAGS=
+	PROD_CFLAGS="$PROD_CFLAGS -fschedule-insns2"
 
 	# Flags are set
 	cc_flags_set=yes
 	;;
 
     gcc-2.95*)
-	# General
-	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
-
-	# Production
-	PROD_CFLAGS="-O2 $NOFP"
-	PROD_CPPFLAGS=
-
-	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-
-	# Profile
-	PROFILE_CFLAGS=-pg
-	PROFILE_CPPFLAGS=
+        # No changes from default GCC flags...
 
 	# Flags are set
 	cc_flags_set=yes
@@ -187,15 +173,6 @@ case "$cc_vendor-$cc_version" in
 
 	# Production
 	PROD_CFLAGS="-O6 $NOFP"
-	PROD_CPPFLAGS=
-
-	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-
-	# Profile
-	PROFILE_CFLAGS=-pg
-	PROFILE_CPPFLAGS=
 
 	# Flags are set
 	cc_flags_set=yes

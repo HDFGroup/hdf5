@@ -357,13 +357,6 @@ done
 rm maketest
 
 dnl ----------------------------------------------------------------------
-dnl Turn on warning flags for gcc.
-dnl
-if test "X$GCC" = "Xyes"; then
-   CFLAGS="$CFLAGS -ansi -pedantic -Wchar-subscripts -Wall -W -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Production flags?  Save the value in $CONFIG_MODE so we have it for
 dnl the record.
 dnl
