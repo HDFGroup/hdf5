@@ -23,11 +23,11 @@ include $(top_srcdir)/config/commence.am
 AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 INCLUDES=-I$(top_srcdir)/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS=-static
+
 # The Fortran test library
 lib_LTLIBRARIES=libh5test_fortran.la
-
-# Fortran library is linked statically to solve a build problem.
-libh5test_fortran_la_LDFLAGS=-static
 
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2

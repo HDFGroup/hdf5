@@ -14,6 +14,9 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS=-I$(top_srcdir)/src $(top_builddir)/src
 AM_FFLAGS=-I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS=-static
+
 # Our main target, the test programs
 TEST_PROG=tstlite tstimage tsttable
 check_PROGRAMS=$(TEST_PROG)

@@ -24,11 +24,11 @@ include $(top_srcdir)/config/commence.am
 INCLUDES = -I$(top_srcdir)/src
 AM_FFLAGS=-I$(top_srcdir)/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS=-static
+
 # This is our main target, the fortran library
 lib_LTLIBRARIES=libhdf5_fortran.la
-
-# Fortran library is linked statically to solve a build problem.
-libhdf5_fortran_la_LDFLAGS=-static
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL

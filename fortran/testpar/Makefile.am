@@ -22,6 +22,9 @@ include $(top_srcdir)/config/commence.am
 # Include files
 AM_FFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS=-static
+
 # These are our main targets
 TEST_PROG_PARA=ptesthdf5_fortran
 check_PROGRAMS=$(TEST_PROG_PARA)

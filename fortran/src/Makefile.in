@@ -198,11 +198,11 @@ F9XMODFLAG = @F9XMODFLAG@
 INCLUDES = -I$(top_srcdir)/src
 AM_FFLAGS = -I$(top_srcdir)/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS = -static
+
 # This is our main target, the fortran library
 lib_LTLIBRARIES = libhdf5_fortran.la
-
-# Fortran library is linked statically to solve a build problem.
-libhdf5_fortran_la_LDFLAGS = -static
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
@@ -249,6 +249,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5fc H5fortran_types.f90 libhdf5_fortran.settings
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
+libhdf5_fortran_la_LDFLAGS =
 libhdf5_fortran_la_LIBADD =
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5FDmpiof.lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	HDF5mpio.lo H5FDmpioff.lo

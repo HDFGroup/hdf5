@@ -197,11 +197,11 @@ F9XMODFLAG = @F9XMODFLAG@
 AM_FFLAGS = -I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 INCLUDES = -I$(top_srcdir)/src
 
+# Fortran libraries are linked statically to solve a build problem.
+AM_LDFLAGS = -static
+
 # The Fortran test library
 lib_LTLIBRARIES = libh5test_fortran.la
-
-# Fortran library is linked statically to solve a build problem.
-libh5test_fortran_la_LDFLAGS = -static
 
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2
@@ -251,6 +251,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
+libh5test_fortran_la_LDFLAGS =
 libh5test_fortran_la_LIBADD =
 am_libh5test_fortran_la_OBJECTS = fortranlib_test.lo tH5F.lo tH5D.lo \
 	tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo tH5Sselect.lo tH5P.lo \
