@@ -534,75 +534,23 @@ done:
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-        Ths function returns the size of the datatype in bytes as it is stored
-    on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
-    BTRUE returns the size in memory, BFALSE returns the size on disk.
+        Ths function returns a list of OIDs for the fields in a compound
+    datatype.  Atomic fields are returned in the list of OIDs, but have special
+    OID values which cannot be further dereferenced.
 --------------------------------------------------------------------------*/
-herr_t H5Tget_fields(hatom_t tid, hoid_t *field_list)
+herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list)
 {
-    CONSTR(FUNC, "H5Tsize");    /* for HERROR */
-    uintn ret_value = UFAIL;
+    CONSTR(FUNC, "H5Tget_fields");    /* for HERROR */
+    herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tsize, H5T_init_interface, UFAIL);
+    FUNC_ENTER(H5T_mask, ID_H5Tget_fields, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
-
-    if((H5Ais_reserved(tid)==BTRUE) && tid!=H5T_COMPOUND) /* Check if this is a "simple" datatype */
-      {
-        switch(tid)
-          {
-            case H5T_CHAR:
-            case H5T_INT:
-            case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
-                ret_value=len;
-                break;
-
-            case H5T_DATE:
-                ret_value=8;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_TIME:
-                ret_value=6;    /* Number of characters for ISO 8601 format */
-                break;
-
-            case H5T_SPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            case H5T_PPTR:
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
-          } /* end switch */
-      } /* end if */
-    else
-      {
-        if(tid==H5T_COMPOUND)
-          {
-            intn i;             /* local counting variable */
-            h5_datatype_t *dt;  /* datatype pointer */
-
-            /* Go get the object */
-            if((dt=H5Aatom_object(tid))==NULL)
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-            /* Check the base type of the datatype */
-            if(H5T_COMPOUND!=dt->dt.base)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-            
-            /* Check if the compound information has been initialized */
-            if(NULL==dt->ci)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
-
-            /* Grab the number of fields */
-            for(i=0; i<=dt->ci->n; i++)
-                ret_value+=H5Tsize(dt->ci->flist[i].dt.base, dt->ci->flist[i].dt.len,
-                        dt->ci->flist[i].dt.arch,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
-          } /* end if */
-      } /* end else */
+    if(H5Aatom_group(tid)!=H5_DATATYPE)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    if(field_list==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
 
 done:
   if(ret_value == UFAIL)
@@ -612,8 +560,8 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tsize, ret_value);
-} /* end H5Tsize() */
+    FUNC_LEAVE(H5T_mask, ID_H5Tget_fields, ret_value);
+} /* end H5Tget_fields() */
 
 /*--------------------------------------------------------------------------
  NAME
