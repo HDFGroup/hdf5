@@ -782,7 +782,6 @@
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
-./src/H5Dseq.c
 ./src/H5Dtest.c
 ./src/H5Ztrans.c
 ./src/H5E.c
