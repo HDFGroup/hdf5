@@ -25,6 +25,17 @@
 #include <string.h>
 
 #include "hdf5.h"
+
+/* Strictly speaking, the "ifdef H5_HAVE_PDB_H" is unnecessary, since this
+ * file won't be compiled unless PDB is available (see the Makefile.in for
+ * this directory, as well as the PDB detection in the main configure.in).
+ * However, the Intel C compiler, v7.1, seems to have problems generating
+ * correct dependencies with the -MG flag when include files are not found
+ * and having this ifdef here removes the PDB headers from its consideration.
+ * QAK - 2004/02/07
+ */
+#ifdef H5_HAVE_PDB_H
+
 #include "pdb.h"
 #include "score.h"
 
@@ -513,3 +524,4 @@ main(int argc, char *argv[])
     }
     return 0;
 }
+#endif /* H5_HAVE_PDB_H */
