@@ -83,7 +83,9 @@ nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
      hid_t c_prp_id;
      herr_t ret;
      H5FD_mpio_xfer_t c_data_xfer_mode;
+/*
      int CASE;
+
      CASE = *data_xfer_mode;
      switch (CASE) {
 
@@ -97,6 +99,8 @@ nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
         default:
           return ret_value;
       }
+*/
+     c_data_xfer_mode = (H5FD_mpio_xfer_t)*data_xfer_mode;
      /*
       * Call H5Pset_dxpl_mpio function.
       */
@@ -133,7 +137,8 @@ nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
      c_prp_id = *prp_id;
      ret = H5Pget_dxpl_mpio(c_prp_id, &c_data_xfer_mode);
      if (ret < 0) return ret_value;
-
+     *data_xfer_mode = (int_f)c_data_xfer_mode; 
+/*
      CASE = c_data_xfer_mode;
      switch (CASE) {
 
@@ -148,6 +153,7 @@ nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
         default:
           return ret_value;
       }
+*/
      ret_value = 0;
      return ret_value;
 } 
