@@ -31,6 +31,7 @@ CONTENTS
 - F90 Support
 - C++ Support
 - Bug Fixes since HDF5-1.2.0 
+- Bug Fixes since HDF5-1.4.0-beta2
 - Platforms Tested
 - Known Problems
 
@@ -311,6 +312,8 @@ Bug Fixes since HDF5-1.4.0-beta2
     * Cleaned up lots of warnings.
     * Changed a few h5dump command line switches and added long versions of
         the switches.
+    * Changed parameters for H5Tconvert, H5Pset_bufer and H5Pget_buffer from
+        size_t to hsize_t
 
 Platforms Tested
 ================
