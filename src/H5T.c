@@ -3608,6 +3608,7 @@ H5Tenum_create(hid_t parent_id)
     dt->type = H5T_ENUM;
     dt->parent = H5T_copy(parent, H5T_COPY_ALL);
     dt->size = dt->parent->size;
+    H5F_addr_undef (&(dt->ent.header));
 
     /* Atomize the type */
     if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0) {

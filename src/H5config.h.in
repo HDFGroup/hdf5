@@ -293,9 +293,6 @@
 /* Define if you have the <zlib.h> header file.  */
 #undef HAVE_ZLIB_H
 
-/* Define if you have the coug library (-lcoug).  */
-#undef HAVE_LIBCOUG
-
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
 
@@ -308,8 +305,14 @@
 /* Define if you have the mfhdf library (-lmfhdf).  */
 #undef HAVE_LIBMFHDF
 
+/* Define if you have the mpi library (-lmpi).  */
+#undef HAVE_LIBMPI
+
 /* Define if you have the mpich library (-lmpich).  */
 #undef HAVE_LIBMPICH
+
+/* Define if you have the mpio library (-lmpio).  */
+#undef HAVE_LIBMPIO
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL

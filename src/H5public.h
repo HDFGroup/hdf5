@@ -58,6 +58,9 @@ static char             RcsId[] = "@(#)$Revision$";
 #undef SIZEOF_UINT_FAST64_T
 #undef SIZEOF_UINT_LEAST64_T
 
+#undef SIZEOF___INT64_T
+
+
 #include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
 #ifdef STDC_HEADERS
@@ -165,6 +168,8 @@ extern "C" {
 #undef SIZEOF_UINT64_T
 #undef SIZEOF_UINT_FAST64_T
 #undef SIZEOF_UINT_LEAST64_T
+
+#undef SIZEOF___INT64_T
 
 /* Functions in H5.c */
 __DLL__ herr_t H5open(void);
