@@ -38,10 +38,10 @@ typedef enum
       H5E_SYM,		       /* Symbol Table */
       H5E_HEAP,		       /* Heap */
       H5E_OHDR,		       /* Object Header */
-      H5E_DIRECTORY,       /* Directory */
       H5E_DATATYPE,	       /* Datatype */
-      H5E_DATASPACE,       /* Dataspace */
-      H5E_DATASET          /* Dataset */
+      H5E_DATASPACE,           /* Dataspace */
+      H5E_DATASET,	       /* Dataset */
+      H5E_STORAGE              /* Data storage */
   }
 hdf_maj_err_code_t;
 
@@ -102,9 +102,10 @@ typedef enum
       H5E_ALIGNMENT,	       /* Alignment error */
       H5E_BADMESG,	       /* Unrecognized message */
 
-    /* Directory related errors */
+    /* Group related errors */
       H5E_CANTOPENOBJ,	       /* Can't open object */
       H5E_COMPLEN,	       /* Name component is too long */
+      H5E_CWG,		       /* Problem with current working group */
       H5E_LINK		       /* Link count failure */
   }
 hdf_min_err_code_t;

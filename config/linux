@@ -1,6 +1,17 @@
 # Site configuration -- do not distribute this file.
 
+CFLAGS_WARN="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
+
+CFLAGS_DEBUG="-g -DH5AC_DEBUG_PROTECT  -DFILELIB=1 -fverbose-asm"
+CFLAGS_PROFILE="-pg"
+CFLAGS_PRODUCTION="-O3 -UH5AC_DEBUG_PROTECT -DNDEBUG -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
+
 if test "x$CFLAGS" = "x"; then
-   CFLAGS="-g -DH5AC_DEBUG_PROTECT -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
+
+   # Uncomment the following line for a production version of the library.
+   #CFLAGS="-pipe $CFLAGS_PRODUCTION $CFLAGS_WARN"
+
+   # Uncomment the following line for normal development
+   CFLAGS="-pipe $CFLAGS_DEBUG $CFLAGS_WARN"
 fi
 

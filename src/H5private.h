@@ -63,8 +63,19 @@
 #define MACIO		2
 #define WINNTIO		3
 #define PAGEBUFIO	4
-#define FILELIB		POSIXBUFIO
+#ifndef FILELIB
+#  define FILELIB		POSIXBUFIO
+#endif
 
+/* Does the compiler support the __attribute__(()) syntax? */
+#ifndef HAVE_ATTRIBUTE
+#  define __attribute__(X)	/*void*/
+#endif
+
+/* Does the compiler expand __FUNCTION__? */
+#ifndef HAVE_FUNCTION
+#  define __FUNCTION__	"NoFuntionName"
+#endif
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -359,6 +370,7 @@ typedef off_t		haddr_t;
 /*
  * And now for a couple non-Posix functions...
  */
+extern char *strdup (const char *s);
 #define HDstrdup(S)		strdup(S)
 
 /*-------------------------------------------------------------------------

@@ -410,7 +410,7 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 29 1997
  *
  * Modifications:

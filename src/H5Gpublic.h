@@ -19,15 +19,19 @@
 #define _H5Gpublic_H
 
 /* Public headers needed by this file */
+#include <sys/types.h>
 #include <H5public.h>
-
-/* Default root directory size */
-#define H5G_DEFAULT_ROOT SIZE   256
+#include <H5Apublic.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+herr_t H5Gnew (hid_t file, const char *name, size_t size_hint);
+herr_t H5Gset (hid_t file, const char *name);
+herr_t H5Gpush (hid_t file, const char *name);
+herr_t H5Gpop (hid_t file);
+   
 #ifdef __cplusplus
 }
 #endif

@@ -158,7 +158,7 @@ hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name)
 
     /* Open (and create) a new file object */
     if (NULL==(new_dset->ent = H5G_create (file, name, H5D_MINHDR_SIZE))) {
-       HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
+       HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
     }
 
     /* Register the new datatype and get an ID for it */
@@ -183,14 +183,14 @@ done:
     Get the OID for accessing an existing HDF5 dataset object
  USAGE
     hoid_t H5D_find_name(grp_id, type, name)
-        hid_t grp_id;         IN: Atom for directory to search for dataset
+        hid_t grp_id;         IN: Atom for group to search for dataset
         hobjtype_t type;        IN: Type of object to search for (dataset in
  	                        this case)
         const char *name;       IN: Name of the object to search for
  RETURNS
     Returns ID (atom) on success, FAIL on failure
  DESCRIPTION
-        This function finds for a dataset by name in a directory.
+        This function finds for a dataset by name in a group.
 --------------------------------------------------------------------------*/
 hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
 {
@@ -215,7 +215,7 @@ hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
     if(NULL==(dset=HDcalloc(1, sizeof(H5D_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
 
-    /* Initialize file, directory, name fields */
+    /* Initialize file, group, name fields */
     dset->file = file;
     dset->dirty = FALSE;
     

@@ -87,14 +87,14 @@ H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
    }
 
    /* Create the B-tree */
-   if ((stab.btree_addr = H5B_new (f, H5B_SNODE))<0) {
+   if ((stab.btree_addr = H5B_new (f, H5B_SNODE, NULL))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create B-tree*/
    }
 
    /*
     * Create symbol table object header.  It has a zero link count
     * since nothing refers to it yet.  The link count will be
-    * incremented if the object is added to the directory hierarchy.
+    * incremented if the object is added to the group directed graph.
     */
    if ((addr = H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
@@ -169,7 +169,7 @@ H5G_stab_find (H5F_t *f, haddr_t addr, H5G_entry_t *self,
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
    udata.heap_addr = stab.heap_addr;
-   udata.dir_addr = addr;
+   udata.grp_addr = addr;
    udata.node_ptr = NULL;
 
    /* search the B-tree */
@@ -245,7 +245,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
    udata.operation = H5G_OPER_INSERT;
    udata.name = name;
    udata.heap_addr = stab.heap_addr;
-   udata.dir_addr = self->header;
+   udata.grp_addr = self->header;
    udata.entry = *ent;
    udata.entry.name_off = -1;
    udata.node_ptr = NULL;
@@ -326,7 +326,7 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
    }
    udata.entry = entries;
    udata.name = names;
-   udata.dir_addr = self->header;
+   udata.grp_addr = self->header;
    udata.heap_addr = stab.heap_addr;
    udata.maxentries = maxentries;
    udata.nsyms = 0;

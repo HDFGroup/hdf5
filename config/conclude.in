@@ -23,7 +23,7 @@ TAGS: $(LIB_SRC)
 test: $(PROGS)
 	@for test in $(TESTS) dummy; do			                      \
 	   if test $$test != dummy; then				      \
-	      echo "$$test $(TEST_FLAGS)";				      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      $$test $(TEST_FLAGS) || exit 1;				      \
 	   fi;								      \
 	done;
@@ -68,7 +68,7 @@ clean: mostlyclean
 # in the distribution.
 #
 distclean: clean
-	$(RM) .depend TAGS
+	$(RM) .depend TAGS *~ core *.bak *.old *.new
 	@if test -f Makefile.in; then					      \
 	   (set -x; $(RM) Makefile);					      \
 	fi

@@ -110,7 +110,7 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
 
 *******************************************************************************/
 hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
-    const VOIDP object                    /* IN: Object to attach to atom */
+    const void *object                    /* IN: Object to attach to atom */
 );
 
 /******************************************************************************

@@ -73,7 +73,7 @@ distclean:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 	$(RM) config/commence config/conclude config/depend
-	$(RM) config.cache config.log config.status src/config.h
+	$(RM) config.cache config.log config.status src/H5config.h
 	$(RM) Makefile
 
 maintainer-clean:
@@ -82,8 +82,8 @@ maintainer-clean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
-	$(RM) config.cache config.log config.status src/config.h
-	$(RM) configure src/config.h.in
+	$(RM) config.cache config.log config.status src/H5config.h
+	$(RM) configure src/H5config.h.in
 
 
 # This file does not end with the `CONCLUDE' statement since it has

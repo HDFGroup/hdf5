@@ -33,11 +33,17 @@
 #define H5B_K(F,TYPE)		/*K value given file and Btree subclass	*/    \
    ((F)->shared->file_create_parms.btree_k[(TYPE)->id])
 
-#define H5B_ANCHOR_LT	0	/* left node is anchored, right is new	*/
-#define H5B_ANCHOR_RT	1	/* right node is anchored, left is new	*/
+typedef enum H5B_ins_t {
+   H5B_INS_ERROR	=-1, 	/*error return value			*/
+   H5B_INS_NOOP		=0, 	/*insert made no changes		*/
+   H5B_INS_LEFT		=1, 	/*insert new node to left of cur node	*/
+   H5B_INS_RIGHT	=2, 	/*insert new node to right of cur node	*/
+   H5B_INS_CHANGE	=3	/*change child address for cur node	*/
+} H5B_ins_t;
 
 typedef enum H5B_subid_t {
-   H5B_SNODE_ID		=0	/*B-tree is for symbol table nodes	*/
+   H5B_SNODE_ID		=0,	/*B-tree is for symbol table nodes	*/
+   H5B_ISTORE_ID	=1	/*B-tree is for indexed object storage	*/
 } H5B_subid_t;
    
 
@@ -48,18 +54,21 @@ typedef enum H5B_subid_t {
  * has an array of K values indexed by the `id' class field below.  The
  * array is initialized with the HDF5_BTREE_K_DEFAULT macro.
  */
+struct H5B_t; /*forward decl*/
 typedef struct H5B_class_t {
    H5B_subid_t	id;		/*id as found in file			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
-   size_t	(*get_sizeof_rkey)(H5F_t*);
-   haddr_t	(*new)(H5F_t*,void*,void*,void*);
-   intn		(*cmp)(H5F_t*,void*,void*,void*);
+   size_t	(*get_sizeof_rkey)(H5F_t*,const void*);/*raw key size	*/
+   haddr_t	(*new)(H5F_t*,void*,void*,void*); /*create new leaf	*/
+   intn		(*cmp)(H5F_t*,void*,void*,void*); /*compare keys	*/
    herr_t	(*found)(H5F_t*,haddr_t,const void*,void*,const void*);
-   haddr_t	(*insert)(H5F_t*,haddr_t,int*,void*,hbool_t*,void*,void*,
-			  void*,hbool_t*);
-   herr_t	(*list)(H5F_t*,haddr_t,void*);
-   herr_t	(*decode)(H5F_t*,uint8*,void*);
-   herr_t	(*encode)(H5F_t*,uint8*,void*);
+   haddr_t	(*insert)(H5F_t*,haddr_t,H5B_ins_t*,void*,hbool_t*,void*,void*,
+			  void*,hbool_t*); /*insert new data		*/
+   hbool_t	follow_min;	/*min insert uses min leaf, not new()	*/
+   hbool_t	follow_max;	/*max insert uses max leaf, not new()	*/
+   herr_t	(*list)(H5F_t*,haddr_t,void*); /*traverse leaf nodes	*/
+   herr_t	(*decode)(H5F_t*,struct H5B_t*,uint8*,void*);
+   herr_t	(*encode)(H5F_t*,struct H5B_t*,uint8*,void*);
 } H5B_class_t;
 
 /*
@@ -91,8 +100,8 @@ typedef struct H5B_t {
  * Library prototypes.
  */
 herr_t H5B_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
-		  intn fwidth, H5B_class_t *type);
-haddr_t H5B_new (H5F_t *f, const H5B_class_t *type);
+		  intn fwidth, H5B_class_t *type, void *udata);
+haddr_t H5B_new (H5F_t *f, const H5B_class_t *type, void *udata);
 herr_t H5B_find (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
 haddr_t H5B_insert (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
 herr_t H5B_list (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);

@@ -29,7 +29,7 @@
 static hbool_t interface_initialize_g = FALSE;
 
 typedef struct H5G_hash_t {
-   haddr_t		dir_addr;
+   haddr_t		grp_addr;
    H5G_shadow_t		*head;
    struct H5G_hash_t	*next;
    struct H5G_hash_t	*prev;
@@ -81,15 +81,15 @@ H5G_shadow_check (H5F_t *f)
 	       shadow_error = TRUE;
 	    }
 	    
-	    /* Valid directory addresses */
-	    if (shadow->dir_addr<0 || (shadow->dir_addr==0 && idx!=0)) {
-	       fprintf (stderr, "dir_addr=%lu, ",
-			(unsigned long)(shadow->dir_addr));
+	    /* Valid group addresses */
+	    if (shadow->grp_addr<0 || (shadow->grp_addr==0 && idx!=0)) {
+	       fprintf (stderr, "grp_addr=%lu, ",
+			(unsigned long)(shadow->grp_addr));
 	       shadow_error = TRUE;
-	    } else if (shadow->dir_addr!=hash->dir_addr) {
-	       fprintf (stderr, "dir_addr=%lu (not %lu), ",
-			(unsigned long)(shadow->dir_addr),
-			(unsigned long)(hash->dir_addr));
+	    } else if (shadow->grp_addr!=hash->grp_addr) {
+	       fprintf (stderr, "grp_addr=%lu (not %lu), ",
+			(unsigned long)(shadow->grp_addr),
+			(unsigned long)(hash->grp_addr));
 	    }
 	    
 	    /* Linked to symbol table entry */
@@ -107,9 +107,9 @@ H5G_shadow_check (H5F_t *f)
 
 	    /* If an error occurred then print other info */
 	    if (shadow_error) {
-	       fprintf (stderr, "idx=%u, shadow=0x%08lx, dir_addr=%lu\n",
+	       fprintf (stderr, "idx=%u, shadow=0x%08lx, grp_addr=%lu\n",
 			idx, (unsigned long)shadow,
-			(unsigned long)(shadow->dir_addr));
+			(unsigned long)(shadow->grp_addr));
 	       nerrors++;
 	    }
 	 }
@@ -247,7 +247,7 @@ H5G_shadow_sync (H5G_entry_t *ent)
  * Function:	H5G_shadow_list
  *
  * Purpose:	Returns a doubly linked list of shadows for the symbol
- *		table whose header address is DIR_ADDR.
+ *		table whose header address is GRP_ADDR.
  *
  * Return:	Success:	Ptr shadow list or null.
  *
@@ -261,15 +261,15 @@ H5G_shadow_sync (H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 H5G_shadow_t *
-H5G_shadow_list (H5F_t *f, haddr_t dir_addr)
+H5G_shadow_list (H5F_t *f, haddr_t grp_addr)
 {
-   uintn	idx = dir_addr % f->shared->nshadows;
+   uintn	idx = grp_addr % f->shared->nshadows;
    H5G_hash_t	*bucket = NULL;
 
    FUNC_ENTER (H5G_shadows, NULL, NULL);
 
    for (bucket=f->shared->shadow[idx]; bucket; bucket=bucket->next) {
-      if (bucket->dir_addr==dir_addr) {
+      if (bucket->grp_addr==grp_addr) {
 	 HRETURN (bucket->head);
       }
    }
@@ -317,7 +317,7 @@ H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
    H5G_shadow_check (f);
 #endif
 
-   if ((shadow=H5G_shadow_list (f, ac_udata->dir_addr))) {
+   if ((shadow=H5G_shadow_list (f, ac_udata->grp_addr))) {
       heap_addr = ac_udata->heap_addr;
 
       while (i<sym->nsyms && shadow) {
@@ -352,7 +352,7 @@ H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
  *		object, open the object (again) and return a handle
  *		to it.
  *
- * 		DIR can be the null pointer if `ent' is the root entry.
+ * 		GRP can be the null pointer if `ent' is the root entry.
  *
  * Return:	Success:	Handle to open object
  *
@@ -366,7 +366,7 @@ H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
+H5G_shadow_open (H5F_t *f, H5G_entry_t *grp, H5G_entry_t *ent)
 {
    H5G_shadow_t	*shadow = NULL;
    H5O_stab_t 	stab;
@@ -376,15 +376,15 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
    uintn	idx;
    H5O_name_t	name_mesg = {NULL};
    H5G_entry_t	*ret_value = NULL;
-   haddr_t	dir_addr;
+   haddr_t	grp_addr;
    
    FUNC_ENTER (H5G_shadow_open, NULL, NULL);
 
    /* check args */
    assert (f);
-   assert (ent==f->shared->root_sym || dir);
+   assert (ent==f->shared->root_sym || grp);
    assert (ent);
-   dir_addr = dir ? dir->header : 0;
+   grp_addr = grp ? grp->header : 0;
 
    if ((shadow = ent->shadow)) {
       /*
@@ -396,7 +396,7 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
 
    
    shadow = H5MM_xcalloc (1, sizeof(H5G_shadow_t));
-   if (ent==f->shared->root_sym && 0==dir_addr) {
+   if (ent==f->shared->root_sym && 0==grp_addr) {
       /*
        * We're opening the root entry.
        */
@@ -411,7 +411,7 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
       /*
        * Some entry other than the root.
        */
-      if (NULL==H5O_read (f, NO_ADDR, dir, H5O_STAB, 0, &stab)) {
+      if (NULL==H5O_read (f, NO_ADDR, grp, H5O_STAB, 0, &stab)) {
 	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
       }
       if (NULL==(s=H5H_peek (f, stab.heap_addr, ent->name_off))) {
@@ -428,18 +428,18 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
    shadow->nrefs = 1;
    shadow->entry = *ent;
    shadow->entry.dirty = FALSE;
-   shadow->dir_addr = dir_addr;
+   shadow->grp_addr = grp_addr;
 
    /*
     * Link it into the shadow heap
     */
-   idx = dir_addr % f->shared->nshadows;
+   idx = grp_addr % f->shared->nshadows;
    for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {
-      if (hash->dir_addr==dir_addr) break;
+      if (hash->grp_addr==grp_addr) break;
    }
    if (!hash) {
       hash = H5MM_xcalloc (1, sizeof(H5G_hash_t));
-      hash->dir_addr = dir_addr;
+      hash->grp_addr = grp_addr;
       hash->next = f->shared->shadow[idx];
       f->shared->shadow[idx] = hash;
       if (hash->next) hash->next->prev = hash;
@@ -524,7 +524,7 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
    /* clean the shadow */
    if (1==shadow->nrefs && ent->dirty) {
       if (!shadow->main &&
-	  NULL==H5G_stab_find (f, shadow->dir_addr, NULL, shadow->name)) {
+	  NULL==H5G_stab_find (f, shadow->grp_addr, NULL, shadow->name)) {
 	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
       }
       assert (shadow->main);
@@ -540,9 +540,9 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
       H5G_shadow_dissociate (ent);
 
       /* find symtabs shadow list */
-      idx = shadow->dir_addr % f->shared->nshadows;
+      idx = shadow->grp_addr % f->shared->nshadows;
       for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {
-	 if (hash->dir_addr==shadow->dir_addr) break;
+	 if (hash->grp_addr==shadow->grp_addr) break;
       }
       assert (hash);
 
@@ -577,7 +577,7 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
  * Function:	H5G_shadow_move
  *
  * Purpose:	Moves the SHADOW for some entry to correspond to a
- *		NEW_ENTRY. The DIR_ADDR is the address for the directory
+ *		NEW_ENTRY. The GRP_ADDR is the address for the group
  *		which contains NEW_ENTRY.
  *
  * Return:	Success:	SUCCEED
@@ -593,7 +593,7 @@ H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
  */
 herr_t
 H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow, const char *new_name,
-		 H5G_entry_t *new_entry, haddr_t dir_addr)
+		 H5G_entry_t *new_entry, haddr_t grp_addr)
 {
    H5G_hash_t	*hash;
    uintn	idx;
@@ -602,29 +602,29 @@ H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow, const char *new_name,
 
    assert (shadow);
    assert (new_entry);
-   assert (dir_addr>0);
+   assert (grp_addr>0);
 
-   if (0==shadow->dir_addr) {
+   if (0==shadow->grp_addr) {
       /*
        * We're moving the shadow for the root object.  This simplifies things
        * greatly since it implies that this is the only shadow currently
        * defined for the entire file.
        */
-      idx = dir_addr % f->shared->nshadows;
+      idx = grp_addr % f->shared->nshadows;
       assert (NULL==f->shared->shadow[idx]); /*Nothing at new idx...	*/
       hash = f->shared->shadow[0];
       assert (hash);			/*..but root idx has something. */
-      assert (0==hash->dir_addr);	/*..and it's the root something	*/
+      assert (0==hash->grp_addr);	/*..and it's the root something	*/
       assert (NULL==hash->next);	/*..and just that		*/
       assert (hash->head==shadow);	/*..and exactly that		*/
 
       /* Move root entry to new hash bucket */
       f->shared->shadow[idx] = hash;
       f->shared->shadow[0] = NULL;
-      hash->dir_addr = dir_addr;
+      hash->grp_addr = grp_addr;
 
       /* Associate SHADOW with NEW_ENTRY */
-      shadow->dir_addr = dir_addr;
+      shadow->grp_addr = grp_addr;
       shadow->main = new_entry;
       new_entry->shadow = shadow;
 
@@ -636,7 +636,7 @@ H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow, const char *new_name,
       /*
        * Other shadows never move.
        */
-      assert (shadow->dir_addr==dir_addr);
+      assert (shadow->grp_addr==grp_addr);
       shadow->main = new_entry;
       new_entry->shadow = shadow;
    }
@@ -682,7 +682,7 @@ H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
 	     */
 	    if (shadow->entry.dirty) {
 	       if (!shadow->main &&
-		   NULL==H5G_stab_find (f, shadow->dir_addr, NULL,
+		   NULL==H5G_stab_find (f, shadow->grp_addr, NULL,
 					shadow->name)) {
 		  HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
 	       }
@@ -698,12 +698,12 @@ H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
 	     * some object before closing the file.  Since this is hard to
 	     * debug, we'll be nice and print the names here.  We don't know
 	     * the full name, but we'll print the file address (relative to
-	     * the boot block) of the object header for the directory that
+	     * the boot block) of the object header for the group that
 	     * contains the open object.
 	     */
 	    if (invalidate) {
-	       fprintf (stderr, "Open object <%lu>/%s",
-			(unsigned long)(shadow->dir_addr),
+	       fprintf (stderr, "Warning: open object <%lu>/%s",
+			(unsigned long)(shadow->grp_addr),
 			shadow->name);
 	       if (shadow->nrefs>1) {
 		  fprintf (stderr,  " (%d times)", shadow->nrefs);

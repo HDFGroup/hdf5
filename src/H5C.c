@@ -146,7 +146,7 @@ hid_t H5C_get_default_atom(hobjtype_t type)
         case H5_TEMPLATE:
             if(default_file_id==FAIL)
               {
-                if((default_file_id=H5Aregister_atom(H5_TEMPLATE, (const VOIDP)&default_file_create))==FAIL)
+                if((default_file_id=H5Aregister_atom(H5_TEMPLATE, (const void *)&default_file_create))==FAIL)
                     HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
               } /* end else */
             HGOTO_DONE(default_file_id);
@@ -324,6 +324,9 @@ done:
  	Robb Matzke, 13 Aug 1997
 	Removed H5_BTREE_SIZE and replaced it with H5_SYM_LEAF_K and
 	H5_SYM_INTERN_K.
+ 
+  	Robb Matzke, 17 Oct 1997
+ 	Added H5_ISTORE_K.
 --------------------------------------------------------------------------*/
 herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf)
 {
@@ -363,6 +366,10 @@ herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf)
 
         case H5_SYM_INTERN_K:
 	    *(uintn *)buf = template->btree_k[H5B_SNODE_ID];
+	    break;
+
+        case H5_ISTORE_K:
+	    *(uintn *)buf = template->btree_k[H5B_ISTORE_ID];
 	    break;
 
         case H5_BOOTBLOCK_VER:
@@ -430,6 +437,9 @@ done:
 
 	Robb Matzke, 15 Sep 1997
 	Fixed the power-of-two test to work with any size integer.
+ 
+  	Robb Matzke, 17 Oct 1997
+ 	Added H5_ISTORE_K.
 --------------------------------------------------------------------------*/
 herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf)
 {
@@ -494,6 +504,14 @@ herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf)
             }
             template->btree_k[H5B_SNODE_ID] = val;
             break;
+
+        case H5_ISTORE_K:
+	    val = *(const uintn *)buf;
+	    if (val<2) {
+	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    }
+	    template->btree_k[H5B_ISTORE_ID] = val;
+	    break;
 	    
         case H5_BOOTBLOCK_VER:  /* this should be range checked */
             template->bootblock_ver=*(const uint8 *)buf;

@@ -69,7 +69,6 @@ static herr_t H5F_init_interface(void);
 static H5F_t *H5F_new (H5F_file_t *shared);
 static H5F_t *H5F_dest (H5F_t *f);
 static herr_t H5F_flush (H5F_t *f, hbool_t invalidate);
-static herr_t H5F_close (H5F_t *f);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -500,7 +499,7 @@ H5F_dest (H5F_t *f)
  *				block is written.  This operation will fail
  *				if the file is already open.
  *
- *		Unlinking the file name from the directory hierarchy while
+ *		Unlinking the file name from the group directed graph while
  *		the file is opened causes the file to continue to exist but
  *		one will not be able to upgrade the file from read-only
  *		access to read-write access by reopening it. Disk resources
@@ -508,13 +507,20 @@ H5F_dest (H5F_t *f)
  *		closed. NOTE: This paragraph probably only applies to Unix;
  *		deleting the file name in other OS's has undefined results.
  *
+ *		The CREATE_PARMS argument is optional.  A null pointer will
+ *		cause the default file creation parameters to be used.
+ *
  * Errors:
+ *		ATOM      BADATOM       Can't unatomize default template
+ *		                        id. 
  *		FILE      BADVALUE      Can't create file without write
  *		                        intent. 
  *		FILE      BADVALUE      Can't truncate without write intent. 
  *		FILE      CANTCREATE    Can't create file. 
  *		FILE      CANTCREATE    Can't stat file. 
  *		FILE      CANTCREATE    Can't truncate file. 
+ *		FILE      CANTINIT      Can't get default file create template
+ *		                        id. 
  *		FILE      CANTINIT      Can't write file boot block. 
  *		FILE      CANTINIT      Cannot determine file size. 
  *		FILE      CANTOPENFILE  Bad boot block version number. 
@@ -550,7 +556,7 @@ H5F_dest (H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-static H5F_t *
+H5F_t *
 H5F_open (const char *name, uintn flags,
 	  const file_create_temp_t *create_parms)
 {
@@ -572,6 +578,21 @@ H5F_open (const char *name, uintn flags,
 
    assert (name && *name);
 
+   /*
+    * If no file creation parameters are supplied then use defaults.
+    */
+   if (!create_parms) {
+      hid_t create_temp = H5C_get_default_atom (H5_TEMPLATE);
+      if (create_temp<0) {
+	 /* Can't get default file create template id */
+	 HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
+      }
+      if (NULL==(create_parms=H5Aatom_object (create_temp))) {
+	 /* Can't unatomize default template id */
+	 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL);
+      }
+   }
+   
    /*
     * Does the file exist?  If so, get the device and i-node values so we can
     * compare them with other files already open.  On Unix (and other systems
@@ -984,11 +1005,6 @@ hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
 hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 {
     H5F_t	*new_file=NULL;     	/* file struct for new file */
-    hid_t 	create_temp;            /* file-creation template ID */
-    const file_create_temp_t *f_create_parms;    /* pointer to the parameters
-						  * to use when creating the
-						  * file
-						  */
     hid_t 	ret_value = FAIL;
 
     FUNC_ENTER(H5Fopen, H5F_init_interface, FAIL);
@@ -999,10 +1015,6 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
         HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);/*invalid file name*/
     flags = flags & H5ACC_WRITE ? H5F_ACC_WRITE : 0;
 
-    create_temp = H5C_get_default_atom (H5_TEMPLATE);
-    if (NULL==(f_create_parms=H5Aatom_object(create_temp)))
-        HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize template*/
-
 #ifdef LATER
     if (access_temp<=0)
         access_temp = H5CPget_default_atom (H5_TEMPLATE);
@@ -1011,7 +1023,7 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 #endif
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open (filename, flags, f_create_parms))) {
+    if (NULL==(new_file=H5F_open (filename, flags, NULL))) {
        HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, FAIL); /*cant open file*/
     }
 
@@ -1188,7 +1200,7 @@ H5Fflush (hid_t fid, hbool_t invalidate)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_close (H5F_t *f)
 {
    herr_t	ret_value = FAIL;

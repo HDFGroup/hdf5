@@ -84,7 +84,7 @@ test_1 (void)
     */
    HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
-   status = H5G_find (f, NULL, &dir_ent, "/", &ent1);
+   status = H5G_find (f, "/", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
    VERIFY (dir_ent.header, 0, "H5G_find");
    VERIFY (ent1.header, obj1->header, "H5G_find");
@@ -107,7 +107,7 @@ test_1 (void)
 
    /* try to read the first object */
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
-   status = H5G_find (f, NULL, NULL, "/Root Object", &ent1);
+   status = H5G_find (f, "/Root Object", NULL, &ent1);
    CHECK_I (status, "H5G_find");
    VERIFY (ent1.header, obj1->header, "H5G_find");
 
@@ -151,7 +151,7 @@ test_1 (void)
     */
    HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
-   status = H5G_find (f, NULL, &dir_ent, "/", &ent1);
+   status = H5G_find (f, "/", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
    VERIFY (dir_ent.header, 0, "H5G_find");
    VERIFY (ent1.header, obj1->header, "H5G_find");
@@ -163,7 +163,7 @@ test_1 (void)
    /* now as `/foo' */
    HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
-   status = H5G_find (f, NULL, &dir_ent, "/foo", &ent1);
+   status = H5G_find (f, "/foo", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
    VERIFY (dir_ent.header, 0, "H5G_find");
    VERIFY (ent1.header, obj1->header, "H5G_find");
@@ -185,7 +185,7 @@ test_1 (void)
 
    /* try to read the first object */
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
-   status = H5G_find (f, NULL, NULL, "/foo", &ent1);
+   status = H5G_find (f, "/foo", NULL, &ent1);
    CHECK_I (status, "H5G_find");
    VERIFY (ent1.header, obj1->header, "H5G_find");
 
@@ -243,7 +243,7 @@ test_2 (void)
     * Create a directory that has so many entries that the root
     * of the B-tree ends up splitting.
     */
-   obj1 = H5G_mkdir (f, "/big", nsyms*12+2);
+   obj1 = H5G_new (f, "/big", nsyms*12+2);
    CHECK_PTR (obj1, "H5G_mkdir");
    H5G_close (f, obj1);
    obj1 = NULL;

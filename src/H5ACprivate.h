@@ -39,7 +39,7 @@
  *		by the LOAD method if the DEST argument is non-zero.
  */
 typedef struct H5AC_class_t {
-   void		*(*load)(H5F_t*, haddr_t addr, void *udata);
+   void		*(*load)(H5F_t*, haddr_t addr, void *udata1, void *udata2);
    herr_t	(*flush)(H5F_t*, hbool_t dest, haddr_t addr, void *thing);
 } H5AC_class_t;
 
@@ -78,9 +78,9 @@ typedef struct H5AC_t {
  */
 herr_t H5AC_dest (H5F_t *f);
 void *H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-		   void *udata);
+		   void *udata1, void *udata2);
 void * H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-		     void *udata);
+		     void *udata1, void *udata2);
 herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		       void *thing);
 herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
@@ -91,11 +91,11 @@ herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type, haddr_t old,
 herr_t H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		 void *thing);
 
-#define H5AC_find(F,TYPE,ADDR,UDATA)					      \
+#define H5AC_find(F,TYPE,ADDR,UDATA1,UDATA2)				      \
    (((F)->shared->cache->slot[H5AC_HASH(F,ADDR)].type==(TYPE) &&	      \
      (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].addr==(ADDR)) ?	      \
     (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].thing :			      \
-    H5AC_find_f (F, TYPE, ADDR, UDATA))
+    H5AC_find_f (F, TYPE, ADDR, UDATA1, UDATA2))
       
 
 #endif /* !_H5ACprivate_H */

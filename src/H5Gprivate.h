@@ -82,14 +82,15 @@ typedef struct H5G_entry_t H5G_entry_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5G_entry_t *H5G_mkdir (H5F_t *f, const char *name, size_t size_hint);
-herr_t H5G_pushd (H5F_t *f, const char *name);
-herr_t H5G_popd (H5F_t *f);
+H5G_entry_t *H5G_new (H5F_t *f, const char *name, size_t size_hint);
+herr_t H5G_set (H5F_t *f, const char *name);
+herr_t H5G_push (H5F_t *f, const char *name);
+herr_t H5G_pop (H5F_t *f);
 H5G_entry_t *H5G_create (H5F_t *f, const char *name, size_t ohdr_hint);
 H5G_entry_t *H5G_open (H5F_t *f, const char *name);
 herr_t H5G_close (H5F_t *f, H5G_entry_t *ent);
-herr_t H5G_find (H5F_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
-		 const char *name, H5G_entry_t *ent);
+herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent,
+		 H5G_entry_t *ent);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
 

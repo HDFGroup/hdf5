@@ -48,6 +48,7 @@
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
 ./src/H5F.c
+./src/H5Fistore.c
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
 ./src/H5G.c
@@ -72,6 +73,7 @@
 ./src/H5Mpublic.h
 ./src/H5O.c
 ./src/H5Ocont.c
+./src/H5Oistore.c
 ./src/H5Oname.c
 ./src/H5Onull.c
 ./src/H5Oprivate.h
@@ -88,10 +90,14 @@
 ./src/H5T.c
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
+./src/H5V.c
+./src/H5Vprivate.h
 ./src/hdf5.h
 ./src/Makefile.in
 ./src/Naming-Conventions
 ./test/Makefile.in
+./test/hyperslab.c
+./test/istore.c
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/tfile.c

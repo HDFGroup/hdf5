@@ -10,18 +10,38 @@
 CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets:
-PROGS=testhdf5
+PROGS=testhdf5 hyperslab istore
 TESTS=$(PROGS)
 
-# Source and object files for programs...
-PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c th5p.c th5d.c
+# Source and object files for programs...  The PROG_SRC list contains all the
+# source files and is used for things like dependencies, archiving, etc.  The
+# other source lists are for the individual tests, the files of which may
+# overlap with other tests.
+PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c th5p.c    \
+         th5d.c hyperslab.c istore.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
+
+TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c       \
+	     th5p.c th5d.c
+TESTHDF5_OBJ=$(TESTHDF5_SRC:.c=.o)
+
+HYPERSLAB_SRC=hyperslab.c
+HYPERSLAB_OBJ=$(HYPERSLAB_SRC:.c=.o)
+
+ISTORE_SRC=istore.c
+ISTORE_OBJ=$(ISTORE_SRC:.c=.o)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
 
 # How to build the programs...
-testhdf5: $(PROG_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(PROG_OBJ) ../src/libhdf5.a $(LIBS)
+testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
+
+hyperslab: $(HYPERSLAB_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(HYPERSLAB_OBJ) ../src/libhdf5.a $(LIBS)
+
+istore: $(ISTORE_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(ISTORE_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

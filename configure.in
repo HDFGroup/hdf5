@@ -105,9 +105,21 @@ AC_CHECK_SIZEOF(double, 8)
 
 
 dnl ----------------------------------------------------------------------
-dnl AC_FUNC_MEMCMP
-dnl AC_C_CONST
-dnl AC_C_INLINE
+dnl Check compiler characteristics
+dnl
+
+AC_C_CONST
+AC_C_INLINE
+
+AC_MSG_CHECKING(for __attribute__ extension)
+AC_TRY_COMPILE(,[int __attribute__((unused)) f(void){return 1;}],
+		     AC_DEFINE(HAVE_ATTRIBUTE) AC_MSG_RESULT(yes),
+		     AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for __FUNCTION__ extension)
+AC_TRY_COMPILE(,[int f(void){return __FUNCTION__;}],
+		     AC_DEFINE(HAVE_FUNCTION) AC_MSG_RESULT(yes),
+		     AC_MSG_RESULT(no))
 
 
 

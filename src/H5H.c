@@ -45,14 +45,14 @@ typedef struct H5H_t {
 } H5H_t;
 
 /* PRIVATE PROTOTYPES */
-static H5H_t *H5H_load (H5F_t *f, haddr_t addr, void *udata);
+static H5H_t *H5H_load (H5F_t *f, haddr_t addr, void *udata1, void *udata2);
 static herr_t H5H_flush (H5F_t *f, hbool_t dest, haddr_t addr, H5H_t *heap);
 
 /*
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
-   (void*(*)(H5F_t*,haddr_t,void*))H5H_load,
+   (void*(*)(H5F_t*,haddr_t,void*,void*))H5H_load,
    (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
 
@@ -161,7 +161,7 @@ H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (H5F_t *f, haddr_t addr, void *udata)
+H5H_load (H5F_t *f, haddr_t addr, void *udata1, void *udata2)
 {
    uint8	hdr[20], *p;
    H5H_t	*heap=NULL;
@@ -175,7 +175,8 @@ H5H_load (H5F_t *f, haddr_t addr, void *udata)
    assert (f);
    assert (addr>0);
    assert (H5H_SIZEOF_HDR(f) <= sizeof hdr);
-   assert (!udata);
+   assert (!udata1);
+   assert (!udata2);
 
    if (H5F_block_read (f, addr, H5H_SIZEOF_HDR(f), hdr)<0) {
       HRETURN_ERROR (H5E_HEAP, H5E_READERROR, NULL);
@@ -395,7 +396,7 @@ H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
    assert (addr>0);
    assert (offset>=0);
 
-   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
    assert (offset<heap->mem_alloc);
@@ -455,7 +456,7 @@ H5H_peek (H5F_t *f, haddr_t addr, off_t offset)
    assert (addr>0);
    assert (offset>=0);
 
-   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
    assert (offset<heap->mem_alloc);
@@ -536,7 +537,7 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
    need = buf_size;
    H5H_ALIGN (need);
 
-   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
    }
    heap->dirty += 1;
@@ -686,7 +687,7 @@ H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
    assert (offset>=0);
    assert (buf);
 
-   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
    }
    assert (offset<heap->mem_alloc);
@@ -748,7 +749,7 @@ H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
    assert (offset>=0);
    assert (size>0);
 
-   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
    }
    assert (offset<heap->mem_alloc);
@@ -864,7 +865,7 @@ H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
    assert (indent>=0);
    assert (fwidth>=0);
 
-   if (NULL==(h=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
+   if (NULL==(h=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
    }
 

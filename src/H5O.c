@@ -26,7 +26,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
-static H5O_t *H5O_load (H5F_t *f, haddr_t addr, void *_data);
+static H5O_t *H5O_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2);
 static intn H5O_find_in_ohdr (H5F_t *f, haddr_t addr,
 			      const H5O_class_t **type_p, intn sequence);
 static intn H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type,
@@ -36,7 +36,7 @@ static intn H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
-   (void*(*)(H5F_t*,haddr_t,void*))H5O_load,
+   (void*(*)(H5F_t*,haddr_t,void*,void*))H5O_load,
    (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5O_flush,
 }};
 
@@ -45,17 +45,17 @@ static intn interface_initialize_g = FALSE;
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
-   H5O_NULL,    /*0x0000 Null 					*/
-   H5O_SIM_DIM, /*0x0001 Simple dimensionality			*/
+   H5O_NULL,      /*0x0000 Null 					*/
+   H5O_SIM_DIM,   /*0x0001 Simple dimensionality			*/
    NULL,		/*0x0002 Data space (fiber bundle?)		*/
-   H5O_SIM_DTYPE, /*0x0003 Simple data type			*/
+   H5O_SIM_DTYPE, /*0x0003 Simple data type				*/
    NULL,		/*0x0004 Compound data type			*/
-   H5O_STD_STORE, /*0x0005 Data storage -- standard object	*/
+   H5O_STD_STORE, /*0x0005 Data storage -- standard object		*/
    NULL,		/*0x0006 Data storage -- compact object		*/
    NULL,		/*0x0007 Data storage -- external object	*/
-   NULL,		/*0x0008 Data storage -- indexed object		*/
-   NULL,		/*0x0009 Data storage -- chunked object		*/
-   NULL,		/*0x000A Data storage -- sparse object		*/
+   H5O_ISTORE, 	  /*0x0008 Data storage -- indexed object		*/
+   NULL, 		/*0x0009 Not assigned				*/
+   NULL,		/*0x000A Not assigned				*/
    NULL,		/*0x000B Data storage -- compressed object	*/
    NULL,		/*0x000C Attribute list				*/
    H5O_NAME,		/*0x000D Object name				*/
@@ -105,7 +105,7 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
    }
 
-   /* allocate the object header in fill in header fields */
+   /* allocate the object header and fill in header fields */
    oh = H5MM_xcalloc (1, sizeof(H5O_t));
    oh->dirty = TRUE;
    oh->version = H5O_VERSION;
@@ -165,7 +165,7 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load (H5F_t *f, haddr_t addr, void *_data)
+H5O_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2)
 {
    H5O_t	*oh = NULL;
    H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/
@@ -182,7 +182,8 @@ H5O_load (H5F_t *f, haddr_t addr, void *_data)
    /* check args */
    assert (f);
    assert (addr>=0);
-   assert (!_data);
+   assert (!_udata1);
+   assert (!_udata2);
 
    /* allocate ohdr and init chunk list */
    oh = H5MM_xcalloc (1, sizeof(H5O_t));
@@ -454,7 +455,7 @@ H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -513,7 +514,7 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
    addr = H5G_ent_addr (ent);
    
    /* get header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 
@@ -600,7 +601,7 @@ H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 #endif
 
    /* copy the message to the user-supplied buffer */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
    }
    retval = (type->copy)(oh->mesg[idx].native, mesg);
@@ -643,7 +644,7 @@ H5O_find_in_ohdr (H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
    assert (type_p);
 
    /* load the object header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 
@@ -710,7 +711,7 @@ H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type, intn sequence)
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
    }
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
    }
 
@@ -767,7 +768,7 @@ H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
    assert (mesg);
    if (addr<=0) addr = H5G_ent_addr (ent);
    
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 
@@ -842,7 +843,7 @@ H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 28 1997
  *
  * Modifications:
@@ -865,7 +866,7 @@ H5O_remove (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
    if (addr<=0) addr = H5G_ent_addr (ent);
 
    /* load the object header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 
@@ -1309,7 +1310,7 @@ H5O_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
    assert (indent>=0);
    assert (fwidth>=0);
 
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 

@@ -20,7 +20,7 @@
 #define _H5Fprivate_H
 #include <H5Fpublic.h>
 
-/* Private headers needed by this file */
+/* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
 
 /* Maximum size of boot-block buffer */
@@ -397,6 +397,7 @@ typedef struct H5F_t {
    uintn	intent;		/* The flags passed to H5F_open()	*/
    char		*name;		/* Name used to open file		*/
    H5F_file_t	*shared;	/* The shared file info			*/
+   struct H5G_cwgstk_t *cwg_stack; /* CWG stack for push/pop functions	*/
 } H5F_t;
 
 
@@ -446,12 +447,20 @@ typedef struct H5F_t {
    case 2: UINT16DECODE(p,l); break;					      \
 }
 
+struct H5O_istore_t; /*forward decl for prototype arguments*/
 
 /* Private functions, not part of the publicly documented API */
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
 void H5F_encode_offset_unusual(const H5F_t *f, uint8 **p, uint8 *o);
+H5F_t *H5F_open (const char *name, uintn flags,
+		 const file_create_temp_t *create_parms);
+herr_t H5F_close (H5F_t *f);
 herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
 herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_istore_read (H5F_t *f, struct H5O_istore_t *mesg,
+			size_t offset[], size_t size[], void *buf);
+herr_t H5F_istore_write (H5F_t *f, struct H5O_istore_t *mesg,
+			 size_t offset[], size_t size[], void *buf);
 herr_t H5F_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth);
 

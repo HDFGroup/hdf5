@@ -34,7 +34,7 @@
 	 
 #define H5C_BTREE_K_DEFAULT	{					      \
    16,					/* Symbol table internal nodes	*/    \
-    0,					/* unused			*/    \
+   32,					/* Indexed storage intern nodes	*/    \
     0,					/* unused			*/    \
     0,					/* unused			*/    \
     0,					/* unused			*/    \

@@ -115,10 +115,23 @@ typedef h5_atomic_type_t H5O_sim_dtype_t;
 #define H5O_STD_STORE_ID	0x0005
 extern const H5O_class_t H5O_STD_STORE[1];
 
-typedef struct H5O_std_store {
-    haddr_t off;
-    haddr_t len;
-  } H5O_std_store_t;
+typedef struct H5O_std_store_t {
+   haddr_t	off;
+   haddr_t	len;
+} H5O_std_store_t;
+
+/*
+ * Indexed Data Storage message.
+ */
+#define H5O_ISTORE_ID		0x0008
+#define H5O_ISTORE_NDIMS	32
+extern const H5O_class_t H5O_ISTORE[1];
+
+typedef struct H5O_istore_t {
+   haddr_t	btree_addr;		/*file address of B-tree	*/
+   uintn	ndims;			/*num dimensions in stored data	*/
+   size_t	alignment[H5O_ISTORE_NDIMS];	/*algn in logical space	*/
+} H5O_istore_t;
 
 /*
  * Object name message.

@@ -276,7 +276,7 @@ done:
 
 *******************************************************************************/
 hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
-    const VOIDP object                    /* IN: Object to attach to atom */
+    const void *object                    /* IN: Object to attach to atom */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */

@@ -6,7 +6,7 @@
  *
  * Created:		H5Oname.c
  * 			Aug 12 1997
- * 			Robb Matzke <robb@maya.nuance.com>
+ * 			Robb Matzke <matzke@llnl.gov>
  *
  * Purpose:		Object name message.
  *
@@ -62,7 +62,7 @@ static hbool_t interface_initialize_g = FALSE;
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -101,7 +101,7 @@ H5O_name_decode (H5F_t *f, size_t raw_size, const uint8 *p)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -144,7 +144,7 @@ H5O_name_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -184,7 +184,7 @@ H5O_name_copy (const void *_mesg, void *_dest)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -219,7 +219,7 @@ H5O_name_size (H5F_t *f, const void *_mesg)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -253,7 +253,7 @@ H5O_name_reset (void *_mesg)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:

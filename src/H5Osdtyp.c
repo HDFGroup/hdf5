@@ -205,7 +205,7 @@ H5O_sim_dtype_fast (const H5G_cache_t *cache, void *mesg)
     method is required for simple datatypes, as they can be cached in the
     symbol-table entry)
 --------------------------------------------------------------------------*/
-static herr_t
+static hbool_t
 H5O_sim_dtype_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
 		     const void *mesg)
 {

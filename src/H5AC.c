@@ -143,10 +143,12 @@ H5AC_dest (H5F_t *f)
  *
  * Purpose:	Given an object type and the address at which that object
  *		is located in the file, return a pointer to the object.
- *		The optional UDATA structure is passed down to the function
- *		that is responsible for loading the object into memory.
- *		The pointer is guaranteed to be valid until the next call
- *		to an H5AC function (if you want a pointer which is valid
+ *		The optional UDATA1 and UDATA2 structures are passed down to
+ *		the function that is responsible for loading the object into
+ *		memory.
+ *
+ * 		The returned pointer is guaranteed to be valid until the next
+ *		call to an H5AC function (if you want a pointer which is valid
  *		indefinately then see H5AC_protect()).
  *
  * 		If H5AC_DEBUG_PROTECT is defined then this function also
@@ -175,7 +177,8 @@ H5AC_dest (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
+H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
+	     void *udata1, void *udata2)
 {
    unsigned	idx;
    herr_t	status;
@@ -228,7 +231,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
     * Load a new thing.  If it can't be loaded, then return an error
     * without preempting anything.
     */
-   if (NULL==(thing=(type->load)(f, addr, udata))) {
+   if (NULL==(thing=(type->load)(f, addr, udata1, udata2))) {
       HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
    }
 
@@ -272,7 +275,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
  *		Failure:	never fails
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -604,7 +607,7 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Sep  2 1997
  *
  * Modifications:
@@ -612,7 +615,8 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
+H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
+	      void *udata1, void *udata2)
 {
    int		idx;
    void		*thing = NULL;
@@ -663,7 +667,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
        * Load a new thing.  If it can't be loaded, then return an error
        * without preempting anything.
        */
-      if (NULL==(thing=(type->load)(f, addr, udata))) {
+      if (NULL==(thing=(type->load)(f, addr, udata1, udata2))) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
       }
    }
@@ -706,7 +710,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Sep  2 1997
  *
  * Modifications:

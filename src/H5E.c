@@ -59,10 +59,10 @@ static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
     {H5E_SYM,		"Symbol Table"},
     {H5E_HEAP,		"Heap"},
     {H5E_OHDR,		"Object Header"},
-    {H5E_DIRECTORY,	"Directory"},
     {H5E_DATATYPE, 	"Datatype"},
     {H5E_DATASPACE,	"Dataspace"},
-    {H5E_DATASET,  	"Dataset"}
+    {H5E_DATASET,  	"Dataset"},
+    {H5E_STORAGE, 	"Data Storage"}, 
 };
 
 static const hdf_min_error_messages_t hdf_min_error_messages[] =
@@ -104,6 +104,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_ALIGNMENT,	"Alignment error"},
     {H5E_BADMESG,	"Unrecognized message"},
     {H5E_COMPLEN,	"Name component is too long"},
+    {H5E_CWG, 		"Problem with current working group"},
     {H5E_LINK,		"Link count failure"},
 };
 

@@ -14,10 +14,10 @@ LIB=libhdf5.a
 PROGS=debug
 
 # Source and object files for the library (lexicographically)...
-LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dconv.c H5E.c H5F.c H5G.c       \
-        H5Gent.c H5Gnode.c H5Gshad.c H5Gstab.c H5H.c H5M.c H5MF.c H5MM.c      \
-        H5O.c H5Ocont.c H5Oname.c H5Onull.c H5Osdtyp.c H5Osdim.c H5Ostab.c    \
-        H5Ostdst.c H5P.c H5T.c
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dconv.c H5E.c H5F.c H5Fistore.c \
+        H5G.c H5Gent.c H5Gnode.c H5Gshad.c H5Gstab.c H5H.c H5M.c H5MF.c       \
+        H5MM.c H5O.c H5Ocont.c H5Oistore.c H5Oname.c H5Onull.c H5Osdtyp.c     \
+        H5Osdim.c H5Ostab.c H5Ostdst.c H5P.c H5T.c H5V.c
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
@@ -35,7 +35,7 @@ PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h	      \
 PRIVATE_HDR=H5private.h H5Aprivate.h H5ACprivate.h H5Bprivate.h		      \
 	H5Cprivate.h H5Dprivate.h H5Eprivate.h H5Fprivate.h H5Gprivate.h      \
 	H5Gpkg.h H5Hprivate.h H5Mprivate.h H5MFprivate.h H5MMprivate.h	      \
-	H5Oprivate.h H5Pprivate.h H5Tprivate.h
+	H5Oprivate.h H5Pprivate.h H5Tprivate.h H5Vprivate.h
 
 # How to build the programs...
 debug: debug.o $(LIB)

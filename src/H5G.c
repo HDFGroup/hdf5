@@ -10,15 +10,15 @@
  *
  * Purpose:		Symbol table functions.  The functions that
  *			begin with `H5G_stab_' don't understand the
- *			directory hierarchy; they operate on a single
+ *			naming system; they operate on a single
  *			symbol table at a time.
  *
  * 			The functions that begin with `H5G_node_' operate
  *			on the leaf nodes of a symbol table B-tree.  They
  *			should be defined in the H5Gnode.c file.
  *
- * 			The remaining functions know about the directory
- *			hierarchy.
+ *			The remaining functions know how to traverse the
+ *			group directed graph
  *
  * Modifications:
  *
@@ -53,6 +53,266 @@ static hbool_t interface_initialize_g = FALSE;
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Gnew
+ *
+ * Purpose:	Creates a new group in FILE and gives it the specified
+ *		NAME. Unless NAME begins with `/' it is relative to the
+ *		current working group.
+ *
+ * 		The optional SIZE_HINT specifies how much file space to
+ *		reserve to store the names that will appear in this
+ *		group (an even number of characters, counting the null
+ *		terminator, is allocated for each name). If a non-positive
+ *		value is supplied for the SIZE_HINT then a default size is
+ *		chosen.
+ *
+ * See also:	H5Gset(), H5Gpush(), H5Gpop()
+ *
+ * Errors:
+ *		ARGS      BADTYPE       Not a file atom. 
+ *		ARGS      BADVALUE      No name given. 
+ *		ATOM      BADATOM       Can't unatomize file. 
+ *		SYM       CANTINIT      Can't close handle. 
+ *		SYM       CANTINIT      Can't create group. 
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gnew (hid_t file, const char *name, size_t size_hint)
+{
+   H5F_t	*f=NULL;
+   H5G_entry_t	*grp_handle=NULL;
+   
+   FUNC_ENTER (H5Gnew, NULL, FAIL);
+
+   /* Check/fix arguments */
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+   }
+   if (H5_FILE!=H5Aatom_group (file)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+   }
+   if (NULL==(f=H5Aatom_object (file))) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+   }
+   
+   /* Create the group */
+   if (NULL==(grp_handle=H5G_new (f, name, size_hint))) {
+      /*can't create group*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+
+   /* Close the group handle */
+   if (H5G_close (f, grp_handle)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);/*can't close handle*/
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gset
+ *
+ * Purpose:	Sets the working group for file handle FILE to the
+ *		specified NAME.  Unless NAME begins with a `/' it is
+ *		interpretted relative to the current working group.
+ *
+ *		Each file handle maintains its own notion of the current
+ *		working group.  That is, if a single file is opened with
+ *		multiple calls to H5Fopen(), which returns multiple file
+ *		handles, then each handle's current working group can be
+ *		set independently of the other file handles for that file.
+ *
+ * See also:	H5Gpush(), H5Gpop()
+ *
+ * Errors:
+ *		ARGS      BADTYPE       Not a file atom. 
+ *		ARGS      BADVALUE      No name given. 
+ *		ATOM      BADATOM       Can't unatomize file. 
+ *		SYM       CANTINIT      Can't change current working group. 
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gset (hid_t file, const char *name)
+{
+   H5F_t	*f=NULL;
+   
+   FUNC_ENTER (H5Gset, NULL, FAIL);
+
+   /* Check/fix arguments */
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+   }
+   if (H5_FILE!=H5Aatom_group (file)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+   }
+   if (NULL==(f=H5Aatom_object (file))) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+   }
+
+   if (H5G_set (f, name)<0) {
+      /* Can't change current working group */
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gpush
+ *
+ * Purpose:	Similar to H5Gset() except the new working group is pushed
+ *		on a stack.
+ *
+ *		Each file handle maintains its own notion of the current
+ *		working group.  That is, if a single file is opened with
+ *		multiple calls to H5Fopen(), which returns multiple file
+ *		handles, then each handle's current working group can be
+ *		set independently of the other file handles for that file.
+ *
+ * See also:	H5Gset(), H5Gpop()
+ *
+ * Errors:
+ *		ARGS      BADTYPE       Not a file atom. 
+ *		ARGS      BADVALUE      No name given. 
+ *		ATOM      BADATOM       Can't unatomize file. 
+ *		SYM       CANTINIT      Can't change current working group. 
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gpush (hid_t file, const char *name)
+{
+   H5F_t	*f=NULL;
+   
+   FUNC_ENTER (H5Gpush, NULL, FAIL);
+
+   /* Check/fix arguments */
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);/*no name given*/
+   }
+   if (H5_FILE!=H5Aatom_group (file)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+   }
+   if (NULL==(f=H5Aatom_object (file))) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+   }
+
+   if (H5G_push (f, name)<0) {
+      /* Can't change current working group */
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+   
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gpop
+ *
+ * Purpose:	Removes the top (latest) entry from the working group stack
+ *		and sets the current working group to the previous value.
+ *
+ *		Each file handle maintains its own notion of the current
+ *		working group.  That is, if a single file is opened with
+ *		multiple calls to H5Fopen(), which returns multiple file
+ *		handles, then each handle's current working group can be
+ *		set independently of the other file handles for that file.
+ *
+ * See also:	H5Gset(), H5Gpush()
+ *
+ * Errors:
+ *		ARGS      BADTYPE       Not a file atom. 
+ *		ATOM      BADATOM       Can't unatomize file. 
+ *		SYM       CANTINIT      Stack is empty. 
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL.  The final entry cannot be popped from
+ *				the group stack (but it can be changed
+ *				with H5Gset()).
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gpop (hid_t file)
+{
+   H5F_t	*f=NULL;
+   
+   FUNC_ENTER (H5Gpop, NULL, FAIL);
+
+   /* Check/fix arguments */
+   if (H5_FILE!=H5Aatom_group (file)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);/*not a file atom*/
+   }
+   if (NULL==(f=H5Aatom_object (file))) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL);/*can't unatomize file*/
+   }
+
+   if (H5G_pop (f)<0) {
+      /* Stack is empty */
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+   
+
+
+
+/*
+ *-------------------------------------------------------------------------
+ *-------------------------------------------------------------------------
+ *   N O   A P I   F U N C T I O N S   B E Y O N D   T H I S   P O I N T
+ *-------------------------------------------------------------------------
+ *------------------------------------------------------------------------- 
+ */
+
+
+
+
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_component
  *
  * Purpose:	Returns the pointer to the first component of the
@@ -67,7 +327,7 @@ static hbool_t interface_initialize_g = FALSE;
  *		Failure:	Ptr to the null terminator of NAME.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 11 1997
  *
  * Modifications:
@@ -102,7 +362,7 @@ H5G_component (const char *name, size_t *size_p)
  *		Failure:	Ptr to the null terminator of NAME.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 11 1997
  *
  * Modifications:
@@ -122,7 +382,7 @@ H5G_basename (const char *name, size_t *size_p)
    while (s>name && '/'!=s[-1]) --s; /*skip past base name*/
 
    /*
-    * If the input was the name of the root directory `/' (or
+    * If the input was the name of the root group `/' (or
     * equivalent) then return the null string.
     */
    if ('/'==*s) {
@@ -142,42 +402,43 @@ H5G_basename (const char *name, size_t *size_p)
  * Purpose:	(Partially) translates a name to a symbol table entry.
  *
  *		Given a name (absolute or relative) return the symbol table
- *		entry for that name and for the directory that contains the
- *		base name.  These entries (DIR_ENT and BASE_ENT) are returned
+ *		entry for that name and for the group that contains the
+ *		base name.  These entries (GRP_ENT and BASE_ENT) are returned
  *		through memory passed into the function by the caller.  Either
  *		or both pointers may be null.  Absolute names are looked up
- *		relative to the root directory of file F while relative
- *		names are traversed beginning at the CWD argument.
+ *		relative to the root group of file F while relative
+ *		names are traversed beginning at the CWG argument.
  *
  * 		Consecutive slash characters are treated like single
  *		slash characters.  Trailing slashes are ignored. The
- *		component `.' is recognized as the current directory
- *		during the traversal (initially CWD), but the component
+ *		component `.' is recognized as the current group
+ *		during the traversal (initially CWG), but the component
  *		`..' is not internally recognized (it is recognized if
  * 		such a name appears in the symbol table).
  *
  * 		If the name cannot be fully resolved, then REST will
  *		point to the part of NAME where the traversal failed
  *		(REST will always point to a relative name) and this
- *		function will return null. DIR_ENT will be initialized with
- *		information about the directory (or other object) at which
+ *		function will return null. GRP_ENT will be initialized with
+ *		information about the group (or other object) at which
  *		the traversal failed.  However, if the name can be fully
  *		resolved, then REST points to the null terminator of NAME.
  *
  * 		As a special case, if the NAME is the name `/' (or
- *		equivalent) then DIR_ENT is initialized to all zero
+ *		equivalent) then GRP_ENT is initialized to all zero
  *		and a pointer to the root symbol table entry is returned.
  *
  * 		As a special case, if the NAME is the string `/foo' (or
  *		equivalent) and the root symbol table entry points to a
- *		non-directory object with a name message with the value
- *		`foo' then DIR_ENT is initialized to all zero and a pointer
+ *		non-group object with a name message with the value
+ *		`foo' then GRP_ENT is initialized to all zero and a pointer
  * 		to the root symbol table entry is returned.
  *
  * Errors:
- *		DIRECTORY COMPLEN       Component is too long. 
- *		DIRECTORY NOTFOUND      Component not found. 
- *		DIRECTORY NOTFOUND      Root not found. 
+ *		SYM       COMPLEN       Component is too long. 
+ *		SYM       NOTFOUND      Component not found. 
+ *		SYM       NOTFOUND      No root group. 
+ *		SYM       NOTFOUND      Root not found. 
  *
  * Return:	Success:	Pointer to a cached symbol table entry if the
  *				name can be fully resolved. The pointer is
@@ -185,11 +446,11 @@ H5G_basename (const char *name, size_t *size_p)
  *				is called.
  *
  *		Failure:	Null if the name could not be fully resolved.
- *				REST and DIR_ENT are initialized (possibly to
+ *				REST and GRP_ENT are initialized (possibly to
  *				zero if the failure occurred soon enough).
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 11 1997
  *
  * Modifications:
@@ -197,10 +458,10 @@ H5G_basename (const char *name, size_t *size_p)
  *-------------------------------------------------------------------------
  */
 static H5G_entry_t *
-H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
-	   const char **rest, H5G_entry_t *dir_ent)
+H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
+	   const char **rest, H5G_entry_t *grp_ent)
 {
-   H5G_entry_t  dir;			/*entry for current directory	*/
+   H5G_entry_t  grp;			/*entry for current group	*/
    size_t	nchars;			/*component name length		*/
    char		comp[1024];		/*component name buffer		*/
    hbool_t	aside = FALSE;		/*did we look at a name message?*/
@@ -208,7 +469,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
 
    /* clear output args before FUNC_ENTER() in case it fails */
    if (rest) *rest = name;
-   if (dir_ent) memset (dir_ent, 0, sizeof(H5G_entry_t));
+   if (grp_ent) memset (grp_ent, 0, sizeof(H5G_entry_t));
    
    FUNC_ENTER (H5G_namei, NULL, NULL);
 
@@ -216,18 +477,19 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
    assert (f);
    assert (f->shared->root_sym);
    assert (name && *name);
-   assert (cwd || '/'==*name);
+   assert (cwg || '/'==*name);
 
    /* starting point */
    if ('/'==*name) {
       if (f->shared->root_sym->header<=0) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL);
+	 /* No root group */
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
       }
       ret_value = f->shared->root_sym;
-      dir = *(f->shared->root_sym);
+      grp = *(f->shared->root_sym);
    } else {
-      ret_value = cwd;
-      dir = *cwd;
+      ret_value = cwg;
+      grp = *cwg;
    }
 
    /* traverse the name */
@@ -241,7 +503,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
       /*
        * Advance to the next component of the name.
        */
-      dir = *ret_value;
+      grp = *ret_value;
       ret_value = NULL;
       if (rest) *rest = name;
 
@@ -251,23 +513,23 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
        */
       if (nchars+1 > sizeof(comp)) {
 	 /* component is too long */
-	 if (dir_ent) *dir_ent = dir;
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, NULL);
+	 if (grp_ent) *grp_ent = grp;
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
       }
       HDmemcpy (comp, name, nchars);
       comp[nchars] = '\0';
 
-      if (NULL==(ret_value=H5G_stab_find (f, NO_ADDR, &dir, comp))) {
+      if (NULL==(ret_value=H5G_stab_find (f, NO_ADDR, &grp, comp))) {
 	 /*
 	  * Component was not found in the current symbol table, possibly
-	  * because DIR isn't a symbol table.  If it is the root symbol then
+	  * because GRP isn't a symbol table.  If it is the root symbol then
 	  * see if it has the appropriate name field.  The ASIDE variable
 	  * prevents us from saying `/foo/foo' where the root object has
 	  * the name `foo'.
 	  */
 	 H5O_name_t mesg={0};
-	 if (!aside && dir.header==f->shared->root_sym->header &&
-	     H5O_read (f, dir.header, &dir, H5O_NAME, 0, &mesg) &&
+	 if (!aside && grp.header==f->shared->root_sym->header &&
+	     H5O_read (f, grp.header, &grp, H5O_NAME, 0, &mesg) &&
 	     !HDstrcmp (mesg.s, comp)) {
 	    H5O_reset (H5O_NAME, &mesg);
 	    ret_value = f->shared->root_sym;
@@ -275,8 +537,8 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
 	 } else {
 	    /* component not found */
 	    H5O_reset (H5O_NAME, &mesg);
-	    if (dir_ent) *dir_ent = dir;
-	    HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL);
+	    if (grp_ent) *grp_ent = grp;
+	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
 	 }
       }
 
@@ -286,17 +548,17 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
 
    /* output parameters */
    if (rest) *rest = name; /*final null*/
-   if (dir_ent) {
+   if (grp_ent) {
       if (ret_value->header == f->shared->root_sym->header) {
-	 HDmemset (dir_ent, 0, sizeof(H5G_entry_t)); /*root has no parent*/
+	 HDmemset (grp_ent, 0, sizeof(H5G_entry_t)); /*root has no parent*/
       } else {
-	 *dir_ent = dir;
+	 *grp_ent = grp;
       }
    }
 
    /* Perhaps the root object doesn't even exist! */
    if (ret_value->header<=0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL); /*root not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*root not found*/
    }
    
    FUNC_LEAVE (ret_value);
@@ -306,10 +568,10 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
 /*-------------------------------------------------------------------------
  * Function:	H5G_mkroot
  *
- * Purpose:	Creates the root directory if it doesn't exist; otherwise
+ * Purpose:	Creates the root group if it doesn't exist; otherwise
  *		nothing happens.  If the root symbol table entry previously
- *		pointed to something other than a directory, then that object
- *		is made a member of the root directory and is given a name
+ *		pointed to something other than a group, then that object
+ *		is made a member of the root group and is given a name
  *		corresponding to the object's name message (the name message
  *		is removed).  If the root object doesn't have a name message
  *		then the name `Root Object' is used.
@@ -317,19 +579,21 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
  * Warning:	This function has a few subtleties. Be warned!
  *
  * Errors:
- *		DIRECTORY CANTINIT      Can't create root. 
- *		DIRECTORY CANTINIT      Can't insert old root object in
- *		                        new root directory. 
- *		DIRECTORY EXISTS        Root directory already exists. 
+ *		SYM       CANTINIT      Can't open root object. 
+ *		SYM       CANTINIT      Can't reinsert old root object. 
+ *		SYM       CANTINIT      Cant create root. 
+ *		SYM       EXISTS        Root group already exists. 
+ *		SYM       LINK          Bad link count on old root object. 
+ *		SYM       LINK          Cant create root. 
  *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL.  This function returns -2 if the
- *				failure is because a root directory already
+ *				failure is because a root group already
  *				exists.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 11 1997
  *
  * Modifications:
@@ -356,20 +620,21 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
    
    /*
     * If we already have a root object, then open it and get it's name. The
-    * root object had better not already be a directory.  Once the old root
+    * root object had better not already be a group.  Once the old root
     * object is opened and we have a HANDLE, set the dirty bit on the handle.
     * This causes the handle data to be written back into f->root_sym by
     * H5G_close() if something goes wrong before the old root object is
-    * re-inserted back into the directory hierarchy.  We might leak file
+    * re-inserted back into the group directed graph.  We might leak file
     * memory, but at least we don't loose the original root object.
     */
    if (f->shared->root_sym->header>0) {
       if (H5O_read (f, NO_ADDR, f->shared->root_sym, H5O_STAB, 0, &stab)) {
-	 /* root directory already exists */
-	 HGOTO_ERROR (H5E_DIRECTORY, H5E_EXISTS, -2);
-      } else if (NULL==(handle=H5G_shadow_open (f, NULL, f->shared->root_sym))) {
+	 /* root group already exists */
+	 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, -2);
+      } else if (NULL==(handle=H5G_shadow_open (f, NULL,
+						f->shared->root_sym))) {
 	 /* can't open root object */
-	 HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       } else if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &name)) {
 	 obj_name = "Root Object";
       } else {
@@ -379,15 +644,15 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
    }
 
    /*
-    * Create the new root directory directly into the file descriptor. If
+    * Create the new root group directly into the file descriptor. If
     * something goes wrong at this step, closing the `handle' will rewrite
     * info back into f->root_sym because we set the dirty bit.
     */
    if (H5G_stab_new (f, f->shared->root_sym, size_hint)<0) {
-      HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*cant create root*/
+      HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*cant create root*/
    }
    if (1!=H5O_link (f, f->shared->root_sym, 1)) {
-      HGOTO_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL);
    }
 
    /*
@@ -397,11 +662,13 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     */
    if (obj_name) {
       if (1!=H5O_link (f, handle, 0)) {
-	 HGOTO_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL);
+	 /* Bad link count on old root object */
+	 HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL);
       }
       if (NULL==(ent_ptr=H5G_stab_insert (f, f->shared->root_sym, obj_name,
 					  handle))) {
-	 HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
+	 /* Can't reinsert old root object */
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
       
       /*
@@ -418,10 +685,10 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
  done:
    /*
     * If the handle is closed before the H5G_stab_insert() call that
-    * reinserts the root object into the directory hierarchy, then
+    * reinserts the root object into the group directed graph, then
     * H5G_close() will reset f->root_sym to point to the old root symbol and
-    * the new root directory (if it was created) will be unlinked from the
-    * directory hierarchy (and memory leaked).
+    * the new root group (if it was created) will be unlinked from the
+    * group directed graph (and memory leaked).
     */
    if (handle) H5G_close (f, handle);
    H5O_reset (H5O_NAME, &name);
@@ -431,32 +698,33 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_mkdir
+ * Function:	H5G_new
  *
- * Purpose: 	Creates a new empty directory with the specified name,
+ * Purpose: 	Creates a new empty group with the specified name,
  *		opening it as an object. The name is either an absolute name
- *		or is relative to the current working directory.
+ *		or is relative to the current working group.
  *
- * 		A root directory is created implicitly by this function
+ * 		A root group is created implicitly by this function
  *		when necessary.  Calling this function with the name "/"
  *		(or any equivalent name) will result in an H5E_EXISTS
  * 		failure.
  *
  * Errors:
- *		DIRECTORY CANTINIT      Can't create dir. 
- *		DIRECTORY CANTINIT      Can't insert. 
- *		DIRECTORY CANTINIT      Lookup failed. 
- *		DIRECTORY COMPLEN       Component is too long. 
- *		DIRECTORY EXISTS        Already exists. 
- *		DIRECTORY NOTFOUND      Missing component. 
+ *		SYM       CANTINIT      Can't create grp. 
+ *		SYM       CANTINIT      Can't create root group. 
+ *		SYM       CANTINIT      Can't insert. 
+ *		SYM       CANTINIT      Can't open. 
+ *		SYM       COMPLEN       Component is too long. 
+ *		SYM       EXISTS        Already exists. 
+ *		SYM       NOTFOUND      Missing component. 
  *
- * Return:	Success:	A handle to the open directory.  Please call
+ * Return:	Success:	A handle to the open group.  Please call
  *				H5G_close() when you're done with it.
  *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 11 1997
  *
  * Modifications:
@@ -464,42 +732,43 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
+H5G_new (H5F_t *f, const char *name, size_t size_hint)
 {
    const char	*rest=NULL;		/*the base name			*/
-   H5G_entry_t	*cwd=NULL;		/*current working directory	*/
-   H5G_entry_t	dir_ent;		/*directory containing new dir	*/
-   H5G_entry_t	ent;			/*new directory entry		*/
-   H5G_entry_t	*ent_ptr=NULL;		/*ptr to new directory entry	*/
+   H5G_entry_t	*cwg=NULL;		/*current working group		*/
+   H5G_entry_t	grp_ent;		/*group containing new group	*/
+   H5G_entry_t	ent;			/*new group entry		*/
+   H5G_entry_t	*ent_ptr=NULL;		/*ptr to new group entry	*/
    H5G_entry_t	*ret_value=NULL;	/*handle return value		*/
    char		_comp[1024];		/*name component		*/
    size_t	nchars;			/*number of characters in compon*/
    herr_t	status;			/*function return status	*/
    
-   FUNC_ENTER (H5G_mkdir, NULL, NULL);
+   FUNC_ENTER (H5G_new, NULL, NULL);
 
    /* check args */
    assert (f);
    assert (name && *name);
 #ifndef LATER
-   /* Get current working directory */
+   /* Get current working group */
    H5G_shadow_sync (f->shared->root_sym);
-   cwd = f->shared->root_sym;
+   cwg = f->shared->root_sym;
 #endif
-   assert (cwd || '/'==*name);
+   assert (cwg || '/'==*name);
 
    /*
-    * Try to create the root directory.  Ignore the error if this function
-    * fails because the root directory already exists.
+    * Try to create the root group.  Ignore the error if this function
+    * fails because the root group already exists.
     */
    if ((status=H5G_mkroot (f, H5G_SIZE_HINT))<0 && -2!=status) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+      /* Can't create root group */
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
    }
    H5ECLEAR;
 
    /* lookup name */
-   if (H5G_namei (f, cwd, name, &rest, &dir_ent)) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, NULL); /*already exists*/
+   if (H5G_namei (f, cwg, name, &rest, &grp_ent)) {
+      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*already exists*/
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
 
@@ -509,10 +778,10 @@ H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
 	 /* missing component */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
       } else if (nchars+1 > sizeof _comp) {
 	 /* component is too long */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
       } else {
 	 /* null terminate */
 	 HDmemcpy (_comp, rest, nchars);
@@ -521,19 +790,19 @@ H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
       }
    }
    
-   /* create directory */
+   /* create group */
    if (H5G_stab_new (f, &ent, size_hint)<0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL); /*can't create dir*/
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't create grp*/
    }
 
    /* insert child name into parent */
-   if (NULL==(ent_ptr=H5G_stab_insert (f, &dir_ent, rest, &ent))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL); /*can't insert*/
+   if (NULL==(ent_ptr=H5G_stab_insert (f, &grp_ent, rest, &ent))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't insert*/
    }
 
-   /* open the directory */
-   if (NULL==(ret_value=H5G_shadow_open (f, &dir_ent, ent_ptr))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL); /*can't open*/
+   /* open the group */
+   if (NULL==(ret_value=H5G_shadow_open (f, &grp_ent, ent_ptr))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't open*/
    }
 
    FUNC_LEAVE (ret_value);
@@ -542,9 +811,121 @@ H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_pushd
+ * Function:	H5G_set
  *
- * Purpose:	Pushes a new current working directory onto the stack.
+ * Purpose:	Sets the current working group to be the specified name.
+ *		This affects only the top item on the group stack for the
+ *		specified file as accessed through this file handle.  If the
+ *		file is opened multiple times, then the current working group
+ *		for this file handle is the only one that is changed.
+ *
+ * Errors:
+ *		SYM       CWG           Can't open group. 
+ *		SYM       CWG           Couldn't close previous c.w.g. 
+ *		SYM       CWG           Not a group. 
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_set (H5F_t *f, const char *name)
+{
+   H5G_entry_t	*handle=NULL;
+   H5O_stab_t	stab_mesg;
+   herr_t	ret_value=FAIL;
+   
+   FUNC_ENTER (H5G_set, NULL, FAIL);
+
+   if (NULL==(handle=H5G_open (f, name))) {
+      /* Can't open group */
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+   }
+   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &stab_mesg)) {
+      /* Not a group */
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+   }
+
+   /*
+    * If there is no stack then create one, otherwise close the current
+    * working group.
+    */
+   if (!f->cwg_stack) {
+      f->cwg_stack = H5MM_xcalloc (1, sizeof(H5G_cwgstk_t));
+      f->cwg_stack->handle = handle;
+   } else {
+      if (H5G_close (f, f->cwg_stack->handle)<0) {
+	 /* Couldn't close previous c.w.g. */
+	 HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      }
+      f->cwg_stack->handle = handle;
+   }
+   ret_value = SUCCEED;
+
+ done:
+   if (ret_value<0 && handle) {
+      H5G_close (f, handle);
+   }
+   
+   FUNC_LEAVE (ret_value);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_getcwg
+ *
+ * Purpose:	Returns a handle for the current working group.  If there
+ *		is no current working group then a pointer to the root
+ *		symbol is returned but that object is not opened (and it
+ *		might not even be a group).
+ *
+ * Return:	Success:	Ptr to open group handle with exceptions
+ *				noted above.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, September 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5G_entry_t *
+H5G_getcwg (H5F_t *f)
+{
+   H5G_entry_t	*handle=NULL;
+   
+   FUNC_ENTER (H5G_getcwg, NULL, NULL);
+   
+   if (f->cwg_stack && f->cwg_stack->handle) {
+      handle = f->cwg_stack->handle;
+   } else {
+      H5G_shadow_sync (f->shared->root_sym);
+      handle = f->shared->root_sym;
+   }
+
+   FUNC_LEAVE (handle);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_push
+ *
+ * Purpose:	Pushes a new current working group onto the stack.
+ *
+ * Errors:
+ *		SYM       CWG           Can't open group. 
+ *		SYM       CWG           Not a group. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -558,31 +939,54 @@ H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_pushd (H5F_t *f, const char *name)
+H5G_push (H5F_t *f, const char *name)
 {
+   H5G_entry_t	*handle=NULL;
+   H5G_cwgstk_t	*stack=NULL;
+   H5O_stab_t	stab_mesg;
+   herr_t	ret_value = FAIL;
+   
    FUNC_ENTER (H5G_pushd, NULL, FAIL);
 
-#ifndef LATER
-   /*
-    * Current working directories are not implemented yet.
-    */
-   if (strcmp (name, "/")) {
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+   if (NULL==(handle=H5G_open (f, name))) {
+      /* Can't open group */
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
    }
-#endif
-   
+   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &stab_mesg)) {
+      /* Not a group */
+      HGOTO_ERROR (H5E_SYM, H5E_CWG, FAIL);
+   }
+
+   /*
+    * Push a new entry onto the stack.
+    */
+   stack = H5MM_xcalloc (1, sizeof(H5G_cwgstk_t));
+   stack->handle = handle;
+   stack->next = f->cwg_stack;
+   f->cwg_stack = stack;
+   ret_value = SUCCEED;
+
+ done:
+   if (ret_value<0 && handle) {
+      H5G_close (f, handle);
+   }
+
    FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_popd
+ * Function:	H5G_pop
  *
- * Purpose:	Pops the top current working directory off the stack.
+ * Purpose:	Pops the top current working group off the stack.
+ *
+ * Errors:
+ *		SYM       CWG           Can't close current working group. 
+ *		SYM       CWG           Stack is empty. 
  *
  * Return:	Success:	SUCCEED
  *
- *		Failure:	FAIL
+ *		Failure:	FAIL if the stack is empty.
  *
  * Programmer:	Robb Matzke
  *              Friday, September 19, 1997
@@ -592,13 +996,24 @@ H5G_pushd (H5F_t *f, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_popd (H5F_t *f)
+H5G_pop (H5F_t *f)
 {
-   FUNC_ENTER (H5G_popd, NULL, FAIL);
+   H5G_cwgstk_t	*stack=NULL;
+   
+   FUNC_ENTER (H5G_pop, NULL, FAIL);
 
-#ifndef LATER
-   /* CWD is not implemented yet. */
-#endif
+   if ((stack=f->cwg_stack)) {
+      if (H5G_close (f, stack->handle)<0) {
+	 /* Can't close current working group */
+	 HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL);
+      }
+      f->cwg_stack = stack->next;
+      stack->handle = NULL;
+      H5MM_xfree (stack);
+   } else {
+      /* Stack is empty */
+      HRETURN_ERROR (H5E_SYM, H5E_CWG, FAIL);
+   }
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -611,6 +1026,21 @@ H5G_popd (H5F_t *f)
  *		the object for modification, and returns a handle to the
  *		object.  The initial size of the object header can be
  *		supplied with the OHDR_HINT argument.
+ *
+ * Errors:
+ *		SYM       CANTINIT      Bad link count. 
+ *		SYM       CANTINIT      Can't create header. 
+ *		SYM       CANTINIT      Can't create root group. 
+ *		SYM       CANTINIT      Can't insert. 
+ *		SYM       CANTINIT      Can't open object. 
+ *		SYM       CANTINIT      Cannot add/change name message. 
+ *		SYM       CANTINIT      Create the object header. 
+ *		SYM       COMPLEN       Component is too long. 
+ *		SYM       EXISTS        Already exists. 
+ *		SYM       EXISTS        Root exists. 
+ *		SYM       LINK          Bad link count. 
+ *		SYM       LINK          Link inc failure. 
+ *		SYM       NOTFOUND      Component not found. 
  *
  * Return:	Success:	A handle for the object.  Be sure to
  *				eventually close it.
@@ -629,9 +1059,9 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
 {
    H5G_entry_t	ent;			/*entry data for the new object	*/
    H5G_entry_t	*ent_ptr;		/*ptr into symbol node for entry*/
-   H5G_entry_t	*cwd=NULL;		/*ptr to CWD handle		*/
+   H5G_entry_t	*cwg=NULL;		/*ptr to c.w.g. handle		*/
    const char	*rest = NULL;		/*part of name not existing yet	*/
-   H5G_entry_t	dir;			/*entry for dir to contain obj	*/
+   H5G_entry_t	grp;			/*entry for group to contain obj*/
    H5G_entry_t	*ret_value=NULL;	/*the object handle		*/
    size_t	nchars;			/*number of characters in name	*/
    char		_comp[1024];		/*name component		*/
@@ -644,18 +1074,15 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
    HDmemset (&ent, 0, sizeof(H5G_entry_t));
 
    /*
-    * Get the current working directory.
+    * Get the current working group.
     */
-#ifndef LATER
-   H5G_shadow_sync (f->shared->root_sym);
-   cwd = f->shared->root_sym;
-#endif
+   cwg = H5G_getcwg (f);
 
    /*
     * Look up the name -- it shouldn't exist yet.
     */
-   if (H5G_namei (f, cwd, name, &rest, &dir)) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, NULL); /*already exists*/
+   if (H5G_namei (f, cwg, name, &rest, &grp)) {
+      HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*already exists*/
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
    rest = H5G_component (rest, &nchars);
@@ -667,18 +1094,18 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
        * it already has as a message.
        */
       if (f->shared->root_sym->header>0) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, NULL); /*root exists*/
+	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*root exists*/
       }
       if ((ent.header = H5O_new (f, 0, ohdr_hint))<0) {
 	 /* can't create header */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       if (1!=H5O_link (f, &ent, 1)) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, NULL); /*bad link count*/
+	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*bad link count*/
       }
       *(f->shared->root_sym) = ent;
-      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->shared->root_sym))) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+      if (NULL==(ret_value=H5G_shadow_open (f, &grp, f->shared->root_sym))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       HRETURN (ret_value);
    }
@@ -690,10 +1117,10 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
    if (rest[nchars]) {
       if (H5G_component (rest+nchars, NULL)) {
 	 /* component not found */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
       } else if (nchars+1 > sizeof _comp) {
 	 /* component is too long */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_COMPLEN, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, NULL);
       } else {
 	 /* null terminate */
 	 HDmemcpy (_comp, rest, nchars);
@@ -706,7 +1133,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     * Create the object header.
     */
    if ((ent.header = H5O_new (f, 0, ohdr_hint))<0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
    }
    
 
@@ -721,28 +1148,29 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
       name_mesg.s = rest;
       if (H5O_modify (f, NO_ADDR, &ent, H5O_NAME, 0, &name_mesg)<0) {
 	 /* cannot add/change name message */
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       if (1!=H5O_link (f, &ent, 1)) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, NULL); /*bad link count*/
+	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*bad link count*/
       }
       *(f->shared->root_sym) = ent;
-      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->shared->root_sym))) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+      if (NULL==(ret_value=H5G_shadow_open (f, &grp, f->shared->root_sym))) {
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       HRETURN (ret_value);
    } else {
       /*
-       * Make sure the root directory exists.  Ignore the failure if it's
-       * because the directory already exists.
+       * Make sure the root group exists.  Ignore the failure if it's
+       * because the group already exists.
        */
-      hbool_t update_dir = (dir.header==f->shared->root_sym->header);
+      hbool_t update_grp = (grp.header==f->shared->root_sym->header);
       herr_t status = H5G_mkroot (f, H5G_SIZE_HINT);
       if (status<0 && -2!=status) {
-	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
+	 /* Can't create root group */
+	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       H5ECLEAR;
-      if (update_dir) dir = *(f->shared->root_sym);
+      if (update_grp) grp = *(f->shared->root_sym);
    }
    
    /*
@@ -750,13 +1178,13 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
     * entry into a symbol table.
     */
    if (H5O_link (f, &ent, 1)<0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, NULL); /*link inc failure*/
+      HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*link inc failure*/
    }
-   if (NULL==(ent_ptr=H5G_stab_insert (f, &dir, rest, &ent))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL); /*can't insert*/
+   if (NULL==(ent_ptr=H5G_stab_insert (f, &grp, rest, &ent))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't insert*/
    }
-   if (NULL==(ret_value=H5G_shadow_open (f, &dir, ent_ptr))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL); /*can't open object*/
+   if (NULL==(ret_value=H5G_shadow_open (f, &grp, ent_ptr))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL); /*can't open object*/
    }
    FUNC_LEAVE (ret_value);
 }
@@ -776,6 +1204,11 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
  *		structs.  The structs that are returned should be
  *		released by calling H5G_close().
  *
+ * Errors:
+ *		SYM       BADVALUE      Check args. 
+ *		SYM       CANTOPENOBJ   Can't open obj. 
+ *		SYM       NOTFOUND      Object not found. 
+ *
  * Return:	Success:	Ptr to a handle for the object.
  *
  *		Failure:	NULL
@@ -792,32 +1225,29 @@ H5G_open (H5F_t *f, const char *name)
 {
    H5G_entry_t	*ent=NULL;
    H5G_entry_t	*ret_value=NULL;
-   H5G_entry_t	dir;
-   H5G_entry_t	*cwd=NULL;
+   H5G_entry_t	grp;
+   H5G_entry_t	*cwg=NULL;
    
    FUNC_ENTER (H5G_open, NULL, NULL);
 
    /* check args */
    assert (f);
    if (!name || !*name) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_BADVALUE, NULL);
+      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL);
    }
 
-   /* Get CWD */
-#ifndef LATER
-   H5G_shadow_sync (f->shared->root_sym);
-   cwd = f->shared->root_sym;
-#endif
-   assert (cwd || '/'==*name);
+   /* Get CWG */
+   cwg = H5G_getcwg (f);
+   assert (cwg || '/'==*name);
 
    if (f->shared->root_sym->header<=0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*object not found*/
    }
-   if (NULL==(ent=H5G_namei (f, cwd, name, NULL, &dir))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL); /*object not found*/
+   if (NULL==(ent=H5G_namei (f, cwg, name, NULL, &grp))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*object not found*/
    }
-   if (NULL==(ret_value=H5G_shadow_open (f, &dir, ent))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTOPENOBJ, NULL);
+   if (NULL==(ret_value=H5G_shadow_open (f, &grp, ent))) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL); /*can't open obj*/
    }
 
    FUNC_LEAVE (ret_value);
@@ -829,6 +1259,9 @@ H5G_open (H5F_t *f, const char *name)
  * Function:	H5G_close
  *
  * Purpose:	Closes an object that was open for modification.
+ *
+ * Errors:
+ *		SYM       CANTFLUSH     Can't close object. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -849,6 +1282,7 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
    assert (f);
 
    if (ent && H5G_shadow_close (f,  ent)<0) {
+      /* Can't close object */
       HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
    }
    
@@ -861,22 +1295,21 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
  *
  * Purpose:	Finds an object with the specified NAME in file F.  If
  *		the name is relative then it is interpretted relative
- *		to CWD, a symbol table entry for a symbol table.  On
- *		successful return, DIR_ENT (if non-null) will be
- *		initialized with the symbol table information for the
- *		directory in which the object appears (or all zero if
- *		the returned object is the root object) and ENT will
- *		be initialized with the symbol table entry for the
- *		object (ENT is optional when the caller is interested
- *		only in the existence of the object).
+ *		to the current working group.  On successful return,
+ *		GRP_ENT (if non-null) will be initialized with the symbol
+ *		table information for the group in which the object
+ *		appears (or all zero if the returned object is the root
+ *		object) and ENT will be initialized with the symbol table
+ *		entry for the object (ENT is optional when the caller is
+ *		interested only in the existence of the object).
  *
  * 		This function will fail if the root object is
  * 		requested and there is none.
  *
  * Errors:
- *		DIRECTORY NOTFOUND      Object not found. 
+ *		SYM       NOTFOUND      Object not found. 
  *
- * Return:	Success:	SUCCEED with DIR_ENT and ENT initialized. ENT
+ * Return:	Success:	SUCCEED with GRP_ENT and ENT initialized. ENT
  *				is intended for immediate read-only access.
  *				If the object that ENT refers to is open
  *				through the ENT entry (see H5G_open()) then
@@ -888,7 +1321,7 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 12 1997
  *
  * Modifications:
@@ -896,23 +1329,25 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_find (H5F_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
-	  const char *name, H5G_entry_t *ent)
+H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent, H5G_entry_t *ent)
 {
    H5G_entry_t	*ent_p = NULL;
+   H5G_entry_t	*cwg = NULL;
+   
    FUNC_ENTER (H5G_find, NULL, FAIL);
 
    /* check args */
    assert (f);
    assert (name && *name);
-   assert (cwd || '/'==*name);
+   cwg = H5G_getcwg (f);
+   assert (cwg || '/'==*name);
 
    if (f->shared->root_sym->header<=0) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*object not found*/
    }
 
-   if (NULL==(ent_p=H5G_namei (f, cwd, name, NULL, dir_ent))) {
-      HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
+   if (NULL==(ent_p=H5G_namei (f, cwg, name, NULL, grp_ent))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*object not found*/
    }
 
    if (ent) *ent = *ent_p;
