@@ -2446,7 +2446,7 @@ parse_start:
 
         /** begin subsetting parameters **/
         case 's':
-        case 'T':
+        case 'S':
         case 'c':
         case 'k': {
             struct subset_t *s;
@@ -2472,7 +2472,7 @@ parse_start:
              * slightly convoluted, but...we are only interested in options
              * for subsetting: "--start", "--stride", "--count", and "--block"
              * which can come in any order. If we run out of parameters (EOF)
-             * or run into one which isn't a subsetting parameter (NOT s, T,
+             * or run into one which isn't a subsetting parameter (NOT s, S,
              * c, or K), then we exit the do-while look, set the subset_info
              * to the structure we've been filling. If we've reached the end
              * of the options, we exit the parsing (goto parse_end) otherwise,
