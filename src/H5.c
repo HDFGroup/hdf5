@@ -45,6 +45,10 @@ H5_api_t H5_g;
 hbool_t H5_libinit_g = FALSE;   /* Library hasn't been initialized */
 #endif
 
+#ifdef H5_HAVE_MPE
+hbool_t H5_MPEinit_g = FALSE;	/* MPE Library hasn't been initialized */
+#endif
+
 char			H5_lib_vers_info_g[] = H5_VERS_INFO;
 hbool_t                 dont_atexit_g = FALSE;
 H5_debug_t		H5_debug_g;		/*debugging info	*/
@@ -74,7 +78,6 @@ H5_init_library(void)
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5_init_library, FAIL);
-
     /*
      * Make sure the package information is updated.
      */
@@ -97,6 +100,24 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
+
+#ifdef H5_HAVE_MPE
+    /* Initialize MPE instrumentation library.  May need to move this
+     * up earlier if any of the above initialization involves using
+     * the instrumentation code.
+     */
+    if (!H5_MPEinit_g)
+    {
+	int mpe_code;
+	int mpi_initialized;
+	MPI_Initialized(&mpi_initialized);
+	if (mpi_initialized){
+	    mpe_code = MPE_Init_log();
+	    assert(mpe_code >=0);
+	    H5_MPEinit_g = TRUE;
+	}
+    }
+#endif
 
     /*
      * Install atexit() library cleanup routine unless the H5dont_atexit()
@@ -208,6 +229,23 @@ H5_term_library(void)
             fprintf(stderr, "      %s...\n", loop);
         }
     }
+
+#ifdef H5_HAVE_MPE
+    /* Close MPE instrumentation library.  May need to move this
+     * down if any of the below code involves using the instrumentation code.
+     */
+    if (H5_MPEinit_g)
+    {
+	int mpe_code;
+	int mpi_initialized;
+	MPI_Initialized(&mpi_initialized);
+	if (mpi_initialized){
+	    mpe_code = MPE_Finish_log("cpilog");
+	    assert(mpe_code >=0);
+	}
+	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
+    }
+#endif
     
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;

@@ -74,6 +74,7 @@
  * the return value.
  */
 #define HRETURN(ret_val) {						      \
+   FINISH_MPE_LOG;                                                            \
    PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
    H5TRACE_RETURN(ret_val);						      \
    H5_API_UNLOCK                                                              \

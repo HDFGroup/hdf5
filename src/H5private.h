@@ -156,6 +156,15 @@
 #endif
 
 /*
+ * MPE Instrumentation support
+ * Do not #if the following header file because it contains
+ * the needed null definitions for the H5-MPE macros when MPE
+ * support is not configured.
+ *
+ */
+#include "H5MPprivate.h"
+
+/*
  * dmalloc (debugging malloc) support
  */
 #ifdef H5_HAVE_DMALLOC_H
@@ -1057,13 +1066,19 @@ extern H5_api_t H5_g;
 /* extern global variables */
 extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
+
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL H5_libinit_g
 
 #endif /* H5_HAVE_THREADSAFE */
 
+#ifdef H5_HAVE_MPE
+extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
+#endif
+
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
    CONSTR (FUNC, #func_name);						      \
+   MPE_LOG_VARS(func_name)                                                    \
    PABLO_SAVE (ID_ ## func_name)  					      \
    H5TRACE_DECL;							      \
 									      \
@@ -1083,8 +1098,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(func_name,err) {                                       \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
-    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err)                       \
-                                                                              \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                       \
     /* Clear thread error stack entering public functions */		      \
     H5E_clear();						              \
     {
@@ -1095,7 +1109,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
  */
 #define FUNC_ENTER_API_NOCLEAR(func_name,err) {                               \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
-    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err)                       \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                       \
     {
 
 /*
@@ -1105,6 +1119,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {                                    \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
+    BEGIN_MPE_LOG(func_name);                                                 \
     {
 
 /* Use this macro for all "normal" non-API functions */
@@ -1144,7 +1159,8 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
          HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "interface initialization failed");		                      \
       }								              \
-   }
+   }                                                                          \
+  BEGIN_MPE_LOG(func_name)
 
 #define FUNC_ENTER_NOAPI_INIT(func_name,interface_init_func,err)       	      \
    /* Initialize this interface or bust */				      \
@@ -1174,6 +1190,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
  *-------------------------------------------------------------------------
  */
 #define FUNC_LEAVE(return_value)                                              \
+	MPE_LOG_VARS_USE(func_name);					      \
         HRETURN(return_value)                                                 \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
@@ -1209,6 +1226,7 @@ H5_DLL int H5S_term_interface(void);
 H5_DLL int H5TN_term_interface(void);
 H5_DLL int H5T_term_interface(void);
 H5_DLL int H5Z_term_interface(void);
+
 
 
 #endif
