@@ -303,6 +303,15 @@ Documentation
       See doc/html/PSandPDF/index.html for more details. 
 
    
+Bug Fixes since HDF5-1.4.0-beta2
+================================
+
+    * Corrected configuration error which was not including compression support
+        correctly.
+    * Cleaned up lots of warnings.
+    * Changed a few h5dump command line switches and added long versions of
+        the switches.
+
 Platforms Tested
 ================
 
