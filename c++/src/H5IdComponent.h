@@ -1,4 +1,4 @@
-// This may look like C code, but it is really -*- C++ -*-
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _IdComponent_H
 #define _IdComponent_H
 

@@ -1,4 +1,4 @@
-// This may look like C code, but it is really -*- C++ -*-
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _Reset_h
 #define _Reset_h
 

@@ -1,4 +1,4 @@
-// This may look like C code, but it is really -*- C++ -*-
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5Exception_H
 #define _H5Exception_H
 
@@ -32,34 +32,32 @@ class Exception {
 
 	// Returns the detailed message set at the time the exception is thrown
 	string getDetailMesg() const;
+	char* getCDetailMesg();	// C string of detailed message
 
 	// Turns on the automatic error printing.
-	void setAutoPrint( H5E_auto_t func, 
-				void* client_data ) const;
+	static void setAutoPrint( H5E_auto_t func, void* client_data );
 
 	// Turns off the automatic error printing.
 	static void dontPrint();
 
 	// Retrieves the current settings for the automatic error stack 
 	// traversal function and its data.
-	void getAutoPrint( H5E_auto_t& func, 
-				void** client_data ) const;
+	static void getAutoPrint( H5E_auto_t& func, void** client_data );
 
 	// Clears the error stack for the current thread.
-	void clearErrorStack() const;
+	static void clearErrorStack();
 
 	// Walks the error stack for the current thread, calling the 
 	// specified function.
-	void walkErrorStack( H5E_direction_t direction, 
-				H5E_walk_t func, void* client_data ) const;
+	static void walkErrorStack( H5E_direction_t direction, 
+				H5E_walk_t func, void* client_data );
 
 	// Default error stack traversal callback function that prints 
 	// error messages to the specified output stream.
-	void walkDefErrorStack( int n, H5E_error_t& err_desc,
-				void* client_data ) const;
+	static void walkDefErrorStack( int n, H5E_error_t& err_desc,
+				void* client_data );
 
 	// Prints the error stack in a default manner.
-	//void printError() const;
 	virtual void printError( FILE* stream = NULL ) const;
 
 	// virtual Destructor

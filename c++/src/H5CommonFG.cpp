@@ -79,7 +79,6 @@ Group CommonFG::openGroup( const char* name ) const
    }
    else
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -107,7 +106,6 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
    }
    else
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -131,7 +129,6 @@ DataSet CommonFG::openDataSet( const char* name ) const
    }
    else
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -147,7 +144,6 @@ void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* ne
    herr_t ret_value = H5Glink( getLocId(), link_type, curr_name, new_name );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -162,7 +158,6 @@ void CommonFG::unlink( const char* name ) const
    herr_t ret_value = H5Gunlink( getLocId(), name );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -177,7 +172,6 @@ void CommonFG::move( const char* src, const char* dst ) const
    herr_t ret_value = H5Gmove( getLocId(), src, dst );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -192,7 +186,6 @@ void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& st
    herr_t ret_value = H5Gget_objinfo( getLocId(), name, follow_link, &statbuf );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -209,7 +202,6 @@ string CommonFG::getLinkval( const char* name, size_t size ) const
    herr_t ret_value = H5Gget_linkval( getLocId(), name, size, value_C );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
    string value = string( value_C );
@@ -227,7 +219,6 @@ void CommonFG::setComment( const char* name, const char* comment ) const
    herr_t ret_value = H5Gset_comment( getLocId(), name, comment );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -247,7 +238,6 @@ string CommonFG::getComment( const char* name, size_t bufsize ) const
    // if H5Gget_comment returns SUCCEED, return the string comment
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
    string comment = string( comment_C );
@@ -272,7 +262,6 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
    // Raise exception if H5Fmount returns negative value
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -290,7 +279,6 @@ void CommonFG::unmount( const char* name ) const
    // Raise exception if H5Funmount returns negative value
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
       throwException();
    }
 }
@@ -309,7 +297,6 @@ hid_t CommonFG::p_openDataType( const char* name ) const
       return( datatype_id );
    else
    { 
-      //throw GroupIException();
       throwException();
    }  
 }  

@@ -1,4 +1,4 @@
-// This may look like C code, but it is really -*- C++ -*-
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5Group_H
 #define _H5Group_H
 

@@ -56,13 +56,13 @@ string Exception::getMinorString( H5E_minor_t minor_num ) const
 }
 
 // Turns on the automatic error printing.
-void Exception::setAutoPrint( H5E_auto_t func, void* client_data ) const
+void Exception::setAutoPrint( H5E_auto_t func, void* client_data )
 {
    // calls the C API routine H5Eset_auto to set the auto printing to
    // the specified function.
    herr_t ret_value = H5Eset_auto( func, client_data );
    if( ret_value < 0 )
-      throw Exception( "setAutoPrint: H5Eset_auto fails" );
+      throw Exception( "Exception::setAutoPrint" );
 }
 
 // Turns off the automatic error printing.
@@ -72,46 +72,46 @@ void Exception::dontPrint()
    // off the automatic error printing.
    herr_t ret_value = H5Eset_auto( NULL, NULL );
    if( ret_value < 0 )
-      throw Exception( "dontPrint: H5Eset_auto fails" );
+      throw Exception( "Exception::dontPrint" );
 }
 
 // Retrieves the current settings for the automatic error stack traversal
 // function and its data.
-void Exception::getAutoPrint( H5E_auto_t& func, void** client_data ) const
+void Exception::getAutoPrint( H5E_auto_t& func, void** client_data )
 {
    // calls the C API routine H5Eget_auto to get the current setting of
    // the automatic error printing 
    herr_t ret_value = H5Eget_auto( &func, client_data );
    if( ret_value < 0 )
-      throw Exception( "getAutoPrint: H5Eget_auto fails" );
+      throw Exception( "Exception::getAutoPrint" );
 }
 
 // Clears the error stack for the current thread.
-void Exception::clearErrorStack() const
+void Exception::clearErrorStack()
 {
    // calls the C API routine H5Eclear to clear the error stack
    herr_t ret_value = H5Eclear();
    if( ret_value < 0 )
-      throw Exception( "clearErrorStack: H5Eclear fails" );
+      throw Exception( "Exception::clearErrorStack" );
 }
 
 // Walks the error stack for the current thread, calling the specified function.
-void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void* client_data ) const
+void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void* client_data )
 {
    // calls the C API routine H5Ewalk to walk the error stack
    herr_t ret_value = H5Ewalk( direction, func, client_data );
    if( ret_value < 0 )
-      throw Exception( "walkErrorStack: H5Ewalk fails" );
+      throw Exception( "Exception::walkErrorStack" );
 }
 
 // Default error stack traversal callback function that prints error
 // messages to the specified output stream.
-void Exception::walkDefErrorStack( int n, H5E_error_t& err_desc, void* client_data ) const
+void Exception::walkDefErrorStack( int n, H5E_error_t& err_desc, void* client_data )
 {
    // calls the C API routine H5Ewalk_cb to walk the error stack
    herr_t ret_value = H5Ewalk_cb( n, &err_desc, client_data );
    if( ret_value < 0 )
-      throw Exception( "walkDefErrorStack: H5Ewalk_cb fails" );
+      throw Exception( "Exception::walkDefErrorStack" );
 }
 
 // Returns the detailed message set at the time the exception is thrown
@@ -125,14 +125,14 @@ void Exception::printError( FILE* stream ) const
 {
    herr_t ret_value = H5Eprint( NULL ); // print to stderr
    if( ret_value < 0 )
-      throw Exception( "printError: H5Eprint fails" );
+      throw Exception( "Exception::printError" );
 }
 
 Exception::~Exception()
 {
    herr_t ret_value = H5Eprint( NULL ); // print to stderr
    if( ret_value < 0 )
-      throw Exception( "printError: H5Eprint fails" );
+      throw Exception( "Exception::printError" );
 }
 
 FileIException::FileIException():Exception(){}

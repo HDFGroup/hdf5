@@ -56,7 +56,7 @@ void H5File::getFile( const char* name, unsigned int flags, const FileCreatPropL
 
    if( id <= 0 )  // throw an exception when open/create fail
    {
-      throw FileIException();
+      throw FileIException( "H5File constructor" );
    }
 }
 
@@ -79,7 +79,7 @@ bool H5File::isHdf5(const char* name )
       return false;
    else // Raise exception when H5Fis_hdf5 returns a negative value 
    {
-      throw FileIException();
+      throw FileIException( "H5File::isHdf5" );
    }
 }
 
@@ -102,7 +102,7 @@ void H5File::reopen()
    id = H5Freopen( id );
    if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
    {
-      throw FileIException();
+      throw FileIException( "H5File::reopen" );
    }
 }
 
@@ -120,7 +120,7 @@ FileCreatPropList H5File::getCreatePlist() const
    }
    else
    {
-      throw FileIException();
+      throw FileIException( "H5File::getCreatePlist" );
    }
 }
 
@@ -138,7 +138,7 @@ FileAccPropList H5File::getAccessPlist() const
    }
    else // Raise an exception
    {
-      throw FileIException();
+      throw FileIException( "H5File::getAccessPlist" );
    }
 }
 
@@ -148,7 +148,7 @@ void H5File::p_close() const
    herr_t ret_value = H5Fclose( id );
    if( ret_value < 0 )
    {
-      throw FileIException();
+      throw FileIException( "H5File::p_close" );
    }
 }
 
