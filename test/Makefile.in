@@ -1,0 +1,26 @@
+# HDF5 Library Test Makefile(.in)			       -*- makefile -*-
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+@COMMENCE@
+
+# Add include directory to the C preprocessor flags.
+CPPFLAGS=-I. -I../src @CPPFLAGS@
+
+# These are our main targets:
+PROGS=testhdf5
+
+# Source and object files for programs...
+PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c
+PROG_OBJ=$(PROG_SRC:.c=.o)
+
+# Private header files (not to be installed)...
+PRIVATE_HDR=testhdf5.h
+
+# How to build the programs...
+testhdf5: $(PROG_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(PROG_OBJ) ../src/libhdf5.a
+
+@CONCLUDE@
