@@ -768,12 +768,14 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     assert(H5F_addr_defined(addr));
     assert(buf_size > 0);
     assert(buf);
+
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, (size_t)(-1), "no write intent on file");
 
-    if (NULL == (heap = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, (size_t)(-1), "unable to load heap");
-    heap->cache_info.dirty += 1;
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap");
+
+    ++heap->cache_info.dirty;
 
     /* Cache this for later */
     sizeof_hdr= H5HL_SIZEOF_HDR(f);
@@ -893,6 +895,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     ret_value=offset;
 
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED && ret_value != (size_t)(-1))
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -933,18 +938,23 @@ H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, co
     assert(H5F_addr_defined(addr));
     assert(buf);
     assert (offset==H5HL_ALIGN (offset));
+
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
-    if (NULL == (heap = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
+
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
-    heap->cache_info.dirty += 1;
+    ++heap->cache_info.dirty;
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED && ret_value != FAIL)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* NOT_YET */
@@ -991,17 +1001,20 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     assert(H5F_addr_defined(addr));
     assert(size > 0);
     assert (offset==H5HL_ALIGN (offset));
+
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
     size = H5HL_ALIGN (size);
-    if (NULL == (heap = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
+
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
-    fl = heap->freelist;
 
-    heap->cache_info.dirty += 1;
+    fl = heap->freelist;
+    ++heap->cache_info.dirty;
 
     /*
      * Check if this chunk can be prepended or appended to an already
@@ -1076,6 +1089,9 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     heap->freelist = fl;
 
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED && ret_value != FAIL)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

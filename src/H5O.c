@@ -1648,7 +1648,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
     assert(type_p);
 
     /* Load the object header */
-    if (NULL == (oh = H5AC_find(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL)))
+    if (NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, UFAIL, "unable to load object header");
 
     /* Scan through the messages looking for the right one */
@@ -1687,6 +1687,9 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
     ret_value=u;
 
 done:
+    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, FALSE) != SUCCEED && ret_value != UFAIL)
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, UFAIL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
