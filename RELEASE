@@ -49,6 +49,8 @@ Library
      their regions retrieved correctly.
    * Added internal free-lists to reduce memory required by the library and
      H5garbage_collect API function
+   * Fixed error in H5Giterate which was not updating the "index" parameter
+     correctly.
 
 Configuration
 -------------
