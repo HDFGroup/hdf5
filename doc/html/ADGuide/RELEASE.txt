@@ -1,4 +1,4 @@
-HDF5 version 1.5.27 released on Sat Apr 27 04:28:26 CDT 2002
+HDF5 version 1.5.28 released on Tue May 28 09:05:50 CDT 2002
 ================================================================================
 
 
@@ -26,6 +26,7 @@ CONTENTS
 
 - New Features
 - Bug Fixes since HDF5-1.4.0
+- Support for new platforms and languages
 - Platforms Tested
 - Known Problems
 
@@ -35,6 +36,10 @@ Bug Fixes since HDF5-1.4.2
 Library
 -------
 
+    * Fixed bug where read/write intent in file IDs created with H5Freopen
+      was not being kept the same as the original file.  QAK - 2002/05/14
+    * Fixed bug where selection offsets were not being used when iterating
+      through point and hyperslab selections with H5Diterate().  QAK - 2002/04/29
     * Fixed bug where the data for several level deep nested compound &
       variable-length datatypes used for datasets were getting corrupted when
       written to the file.  QAK - 2002/04/17
@@ -159,6 +164,22 @@ Documentation
 New Features
 ============
 
+    * Added 'closing' parameter to VFL 'flush' callback function and H5FDflush.
+      This allows the library to indicate that the file will be closed
+      immediately following the call to 'flush' and can be used to avoid actions
+      that are duplicated in the VFL 'close' callback function.  QAK - 2002/05/20
+    * Added feature to parallel chunk allocation routine to not write fill
+      values to chunks allocated if the user has set the "fill time" to never.
+      This can improve parallel I/O performance for chunked
+      datasets.  QAK - 2002/05/17
+    * Changed method for allocating chunked dataset blocks in parallel to only
+      allocate blocks that don't already exist, instead of attempting to create
+      all the blocks all the time.  This improves parallel I/O performance for
+      chunked datasets.  QAK - 2002/05/17
+    * Allowed the call to MPI_File_sync to be avoided when the file is going to
+      immediately be closed, improving performance.  QAK - 2002/05/13
+    * Allow the metadata writes to be shared among all processes, easing the
+      burden on process 0.  QAK - 2002/05/10
     * New functions H5Glink2 and H5Gmove2 were added to allow link and move to
       be in different locations in the same file.  The old functions H5Glink 
       and H5Gmove remain valid.  SLU - 2002/04/26 
@@ -175,9 +196,12 @@ New Features
       datatype conversion is unneccessary.  QAK - 2002/04/02
     * Improved performance of single hyperslab I/O when datatype conversion is
       unneccessary.  QAK - 2002/04/02
+    * New API function H5Dset_extent. Modifies the dimensions of a dataset, 
+      allows change to a lower dimension. The unused space in the file is freed.
+      PVN - 2002/03/31
     * Added new "H5Sget_select_type" API function to determine which type of
       selection is defined for a dataspace ("all", "none", "hyperslab" or
-      "point"). QAK - 2002/02/7
+      "point"). QAK - 2002/02/07
     * Added support to read/write portions of chunks directly, if they are
       uncompressed and too large to cache.  This should speed up I/O on chunked
       datasets for a few more cases.  QAK - 2002/01/31
@@ -252,6 +276,12 @@ New Features
         - Added aditional parameter "dims" to the h5dread/h5dwrite and
           h5aread/h5awrite subroutines. This parameter is 1D array of size
           7 and contains the sizes of the data buffer dimensions. 
+        - F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were 
+          overloaded with "dims" argument to be assumed size array of type 
+          INTEGER(HSIZE_T). We recommend to use the subroutines with the new type. 
+          Module subroutines that accept "dims" as INTEGER array of size 7 will be 
+          depricated in 1.6 release. 
+          EIP - 2002/05/06 
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member
@@ -264,10 +294,11 @@ New Features
     * A helper script called ``h5cc'', which helps compilation of HDF5
       programs, is now distributed with HDF5. See the reference manual
       for information on how to use this feature.
-    * New API function H5Dset_extent. Modifies the dimensions of a dataset, 
-      allows change to a lower dimension. The unused space in the file is freed.
-      PVN - 2002/03/31
 
+Support for new platforms and languages
+=======================================
+    * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
+      EIP - 2002/05/06
 
 Platforms Tested
 ================
@@ -328,7 +359,7 @@ Supported Configuration Features Summary
     IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
     HPUX10.20      y  n         y    n         n     y          y     y
     HPUX11.00      y  y         y    n         n     y          y     y
-    HPUX11 SysV    y  y         y    n         n     y          y     y
+    HPUX11 SysV    y  y         y    y         n     y          y     y
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
     SV1            y  n         y    n         n     n          y     y
@@ -457,4 +488,16 @@ Known Problems
 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
 
+* On IA32 and IA64 systems, if you use a compiler other than GCC (such as
+  Intel's ecc or icc compilers), you will need to modify the generated
+  "libtool" program after configuration is finished. On or around line 104 of
+  the libtool file, there are lines which look like:
+
+      # How to pass a linker flag through the compiler.
+      wl=""
+
+  change these lines to this:
+
+      # How to pass a linker flag through the compiler.
+      wl="-Wl,"
 
