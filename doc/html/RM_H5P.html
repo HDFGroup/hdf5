@@ -2913,11 +2913,11 @@ facilitate moving easily between them.</i>
         metadata to be written to separate files.  These files are viewed 
         by the HDF5 library and the application as a single virtual HDF5 file
         with a single HDF5 file address space.
-        The types of data that can be broken out into separate file include 
+        The types of data that can be broken out into separate files include 
         raw data, the superblock, B-tree data, global heap data, 
         local heap data, and object headers.
         At the programmer's discretion, two or more types of data can be 
-        written the same file while other types of data are written to 
+        written to the same file while other types of data are written to 
         separate files.
         <p>
         The array <code>memb_map</code> maps memory usage types to other
@@ -3203,6 +3203,13 @@ facilitate moving easily between them.</i>
         <p> 
         <code>raw_plist_id</code> is the file access property list identifier 
         for the raw data file.
+        <p>
+        If a user wishes to check to see whether this driver is in use, 
+        the user must call <code>H5Pget_driver</code> and compare the
+        returned value to the string <code>H5FD_MULTI</code>.
+        A positive match will confirm that the multi driver is in use; 
+        HDF5 provides no mechanism to determine whether it was called
+        as the special case invoked by <code>H5Pset_fapl_split</code>.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt>
@@ -3989,7 +3996,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  16 January 2002
+Last modified:  25 April 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 
