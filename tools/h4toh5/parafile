@@ -1,4 +1,0 @@
-0      #memory optimization parameter,change to 1 to set memory optimization
-64     #when memory optimization parameter is 1, set the appropriate slab memory size
-20     #when the SDS is extensible and the current dimensional size is 0. the default
-       # chunk size has to be defined.
