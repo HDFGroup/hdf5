@@ -38,7 +38,10 @@ int compound_data=0;
  */
 #define REPEAT_VERBOSE
 
-
+/*
+	this is the original value of the repeat_threshold in the h5dump_sprint function
+*/
+#define DEFAULT_REPEAT_THRESHOLD 8
 /*
  * The output functions need a temporary buffer to hold a piece of the
  * dataset while it's being printed.  This constant sets the limit on the
@@ -446,15 +449,19 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
  *
  *-------------------------------------------------------------------------
  */
+
+/* 
+	if the repeat_threshold = -1 or less then that will mean we will let it 
+	repeat as much as it wants to. 
+*/
 static char *
 h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
-	      hid_t type, void *vp)
+	      hid_t type, void *vp, const int repeat_threshold)
 {
     size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts, start;
     char	*name, quote='\0';
     hid_t	memb;
     int		nmembs, j, k, ndims;
-    const int	repeat_threshold = 8;
     static char	fmt_llong[8], fmt_ullong[8];
 	H5T_str_t pad;
 
@@ -515,12 +522,15 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		for (i=0; i<size && ((pad == H5T_STR_NULLPAD)?1:(((char*)vp)[i] != '\0')); i++) {
 			
 			/* Count how many times the next character repeats */
-	/*		if (repeat_threshold >= 0){*/
+			/* if the threshold = -1 or lower then that will mean we will let
+			   it repeat as much as it wants to. */
+			if (repeat_threshold >= 0){
 				j=1;
 				while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
-	/*		}
-			else j = -2;
-	*/
+			}
+			else {
+				j = repeat_threshold - 1;
+			}
 			/*
 			* Print the opening quote.  If the repeat count is high enough
 			* to warrant printing the number of repeats instead of
@@ -675,7 +685,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 						OPT(info->arr_sep,
 						"," OPTIONAL_LINE_BREAK));
 				}
-				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size);
+				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size, repeat_threshold);
 			}
 			if (nelmts>1) {
 				h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
@@ -839,7 +849,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info,
 	
 	/* Render the element */
 	h5dump_str_reset(&buffer);
-	h5dump_sprint(&buffer, info, type, mem+i*size);
+	h5dump_sprint(&buffer, info, type, mem+i*size, DEFAULT_REPEAT_THRESHOLD);
 	if (i+1<nelmts || 0==(flags & END_OF_DATA)) {
 	    h5dump_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 	}
@@ -1465,7 +1475,8 @@ struct h5dump_str_t tempstr;
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes, -1);
+		tempstr.len = tempstr.len - 2; /* since there are 2 quotes added from the h5dump_sprint function*/
          if ((int)(strlen(out_buf)+tempstr.len+1) > (NCOLS-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
@@ -1574,8 +1585,11 @@ static void display_string
 		row_size++;
 		
 		h5dump_str_reset(&tempstr);		
-		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes);
-		
+		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes,-1);
+
+		memmove(tempstr.s, tempstr.s + 1, tempstr.len -1);
+		tempstr.s[tempstr.len - 2] = '\0';
+
 		free_space = NCOLS - indent - COL - strlen(out_buf);
 
          if ((elmtno+i+1) == p_nelmts) { /* last element */
@@ -1601,20 +1615,16 @@ static void display_string
              } else {
                  x = free_space - 5;
                  if (compound_data && first_row) {
-                  /*   printf("%s\"", out_buf);*/
-					 printf("%s", out_buf);
+                     printf("%s\"", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     /*printf("%s\" //\n", out_buf);*/
-					 printf("%s //\n", out_buf);
+                     printf("%s\" //\n", out_buf);
                      first_row = 0;
                  } else {
                      indentation(indent+COL); 
-                   /*  printf("%s\"", out_buf);*/
-                     printf("%s", out_buf);
+                     printf("%s\"", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     /*printf("%s //\n", out_buf);*/
 					 printf("%s\" //\n", out_buf);
                  }
                  out_buf[0] = '\0';
@@ -1631,8 +1641,7 @@ static void display_string
                   indentation(indent+COL);
                   strncpy(out_buf, tempstr.s+x+j*y, y);
                   out_buf[y] = '\0';
-                  /*printf("\"%s\" //\n", out_buf);*/
-                  printf("%s //\n", out_buf);
+                  printf("\"%s\" //\n", out_buf);
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
@@ -1640,11 +1649,9 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     /*printf("\"%s\" //\n", out_buf);*/
-                     printf("%s //\n", out_buf);
+                     printf("\"%s\" //\n", out_buf);
                      indentation(indent+COL);
-                     /*printf("\"%s\"", tempstr.s+x+m*y);*/
-					 printf("%s", tempstr.s+x+m*y);
+                     printf("\"%s\"", tempstr.s+x+m*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1655,9 +1662,7 @@ static void display_string
 
                   } else {
                      indentation(indent+COL);
-                     /*printf("\"%s\"", tempstr.s+x+j*y);*/
-
-					 printf("%s", tempstr.s+x+j*y);
+                     printf("\"%s\"", tempstr.s+x+j*y);
                      if (compound_data) {
                          if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
@@ -1673,15 +1678,12 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     /*printf("\"%s\" //\n", out_buf);*/
-					 printf("%s //\n", out_buf);
+                     printf("\"%s\" //\n", out_buf);
                      indentation(indent+COL);
-                     /*printf("\"%s\",\n", tempstr.s+x+m*y);*/
-					 printf("%s,\n", tempstr.s+x+m*y);
+                     printf("\"%s\",\n", tempstr.s+x+m*y);
                   } else {
                      indentation(indent+COL);
-                     /*printf("\"%s\",\n", tempstr.s+x+j*y);*/
-					 printf("%s,\n", tempstr.s+x+j*y);
+                     printf("\"%s\",\n", tempstr.s+x+j*y);
 
                   }
                   out_buf[0] = '\0';
@@ -1692,19 +1694,15 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     /*printf("\"%s\" //\n", out_buf);*/
-					 printf("%s //\n", out_buf);
-
-   /*                  strcpy(out_buf, "\"");*/
+                     printf("\"%s\" //\n", out_buf);
+                     strcpy(out_buf, "\"");
                      strcat(out_buf, tempstr.s+x+m*y);
-                     /*strcat(out_buf, "\",");*/
-					 strcat(out_buf, ",");
+                     strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   } else {
-                    /* strcpy(out_buf, "\"");*/
+                     strcpy(out_buf, "\"");
                      strcat (out_buf, tempstr.s+x+j*y);
-                     /*strcat(out_buf, "\",");*/
-					 strcat(out_buf, ",");
+                     strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   }
              }
@@ -1715,17 +1713,13 @@ static void display_string
             /* flush out_buf if it's end of a row */
             if (row_size == dim_n_size) {
                 if (compound_data && (elmtno+i+1) == dim_n_size) { /* 1st row */
-/*
+
                     printf("%s\"%s\"", out_buf, tempstr.s);
-*/
-					printf("%s%s", out_buf, tempstr.s);
                     first_row = 0;
                 } else {
                     indentation(indent+COL); 
-/*
+
 					printf("%s\"%s\"", out_buf, tempstr.s);
-*/
-                    printf("%s%s", out_buf, tempstr.s);
                 }
 
                if ((elmtno+i+1) != p_nelmts) 
@@ -1742,11 +1736,9 @@ static void display_string
                out_buf[0] = '\0';
                row_size = 0;
             } else {
-               /*  strcat(out_buf, "\"");
+                 strcat(out_buf, "\"");
                  strcat(out_buf, tempstr.s);
                  strcat(out_buf, "\",");
-				 */
-                 strcat(out_buf, tempstr.s);
                  if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " ");
             }
 
