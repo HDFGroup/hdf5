@@ -175,9 +175,9 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>A file or group identifier.
+            <dd>IN: A file or group identifier.
         <dt><em>const char *</em> <code>name</code>
-            <dd>A datatype name, defined within the file or group identified by <code>loc_id</code>.
+            <dd>IN: A datatype name, defined within the file or group identified by <code>loc_id</code>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
@@ -204,11 +204,11 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>A file or group identifier.
+            <dd>IN: A file or group identifier.
         <dt><em>const char *</em> <code>name</code>
-            <dd>A datatype name.
+            <dd>IN: A datatype name.
         <dt><em>hid_t</em> <code>type</code>
-            <dd>A datatype identifier.
+            <dd>IN: A datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -234,7 +234,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type</code>
-            <dd>Datatype identifier.
+            <dd>IN: Datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>When successful, returns a positive value, for <code>TRUE</code>, 
@@ -265,27 +265,39 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         and the size of the array is </em><code>dim</code>.
         The new member's name, <code>name</code>, must be unique 
         within the compound datatype.  
-        The <code>offset</code> argument defines the start of the 
+        The <code>offset</code> argument defines the byte offset of the start of the 
         member in an instance of the compound datatype and
         <code>member_id</code> is the type identifier of the new member.  
         The total member size should be relatively small.
+        <p>
+        The functionality of the <code>perm</code> parameter has 
+        not yet been implemented.  
+        Currently, <code>perm</code> is best set to <code>NULL</code>.
+        (When implemented, <code>perm</code> will specify the mapping 
+        of dimensions within a struct.  At that time, a 
+        <code>NULL</code> value for <code>perm</code> will mean 
+        no mappiing change is to take place.  Thus, using a value 
+        of <code>NULL</code> ensures that application behavior will 
+        remain unchanged upon implementation of this functionality.)
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>parent_id</code>
-            <dd>Identifier of the parent compound datatype.
+            <dd>IN: Identifier of the parent compound datatype.
         <dt><em>const char *</em><code>name</code>
-            <dd>Name of new member.
+            <dd>IN: Name of new member.
         <dt><em>size_t</em> <code>offset</code>
-            <dd>Offset to start of new member within compound datatype.
+            <dd>IN: Offset to start of new member within compound datatype.
         <dt><em>int</em> <code>ndims</code>
-            <dd>Dimensionality of new member.
+            <dd>IN: Dimensionality of new member.
+                Valid values are  <code>0</code> (zero) 
+                through <code>4</code> (four).
         <dt><em>const size_t *</em><code>dim</code>
-            <dd>Size of new member array.
+            <dd>IN: Size of new member array.
         <dt><em>const int *</em><code>perm</code>
-            <dd>Pointer to buffer to store the permutation vector of 
+            <dd>IN: Pointer to buffer to store the permutation vector of 
                 the field.
         <dt><em>hid_t</em> <code>member_id</code>
-            <dd>Identifier of the datatype of the new member.
+            <dd>IN: Identifier of the datatype of the new member.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -314,11 +326,11 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>src_id</code>
-            <dd>Identifier for the source datatype.
+            <dd>IN: Identifier for the source datatype.
         <dt><em>hid_t</em> <code>dst_id</code>
-            <dd>Identifier for the destination datatype.
+            <dd>IN: Identifier for the destination datatype.
         <dt><em>H5T_cdata_t **</em><code>pcdata</code>
-            <dd>Pointer to type conversion data.
+            <dd>IN: Pointer to type conversion data.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
@@ -1522,7 +1534,7 @@ zero.
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetNmembers">H5Tget_nmembers</a>
 <dt><strong>Signature:</strong>
-    <dd><em>intn </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
+    <dd><em>int </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the number of fields in a compound datatype.
