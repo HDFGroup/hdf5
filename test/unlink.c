@@ -60,11 +60,11 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:	verify_file_size
+ * Function:	get_file_size
  *
- * Purpose:	Verify that a file is a particular size.
+ * Purpose:	Get the current size of a file (in bytes)
  *
- * Return:	Success:	1
+ * Return:	Success:	Size of file in bytes (could be 0)
  *		Failure:	0
  *
  * Programmer:	Quincey Koziol
