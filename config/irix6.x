@@ -74,7 +74,7 @@ case "X-$CC_BASENAME" in
 	DEBUG_CPPFLAGS=
 
 	# Extra production flags
-	PROD_CFLAGS=-O
+	PROD_CFLAGS="-O -s"
 	PROD_CPPFLAGS=
 
 	# Extra profiling flags
