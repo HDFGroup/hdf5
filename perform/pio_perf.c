@@ -779,10 +779,16 @@ output_report(FILE *output, const char *fmt, ...)
 static void
 print_indent(register FILE *output, register int indent)
 {
-    indent *= TAB_SPACE;
+    int myrank;
 
-    for (; indent > 0; --indent)
-        fputc(' ', output);
+    MPI_Comm_rank(pio_comm_g, &myrank);
+
+    if (myrank == 0) {
+    	indent *= TAB_SPACE;
+
+    	for (; indent > 0; --indent)
+    		fputc(' ', output);
+    }
 }
 
 /*
