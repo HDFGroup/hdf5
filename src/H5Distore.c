@@ -1758,9 +1758,8 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
 {
     intn		i;
     herr_t		status;			/*func return status	*/
-    herr_t		ret_value=FAIL;		/*return value		*/
     
-    FUNC_ENTER (H5F_istore_get_addr, NULL);
+    FUNC_ENTER (H5F_istore_get_addr, FAIL);
 
     assert(f);
     assert(layout && (layout->ndims > 0));
@@ -1840,7 +1839,7 @@ printf("Enter %s:\n", FUNC);
     /* get current dims of dataset */
     if ((space_ndims=H5S_get_dims(space, space_dim, NULL)) <= 0 ||
 	space_ndims+1 != layout->ndims){
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "unable to allocate chunk storage");
     }
     /* copy the element size over */

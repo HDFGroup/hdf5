@@ -1372,7 +1372,6 @@ printf("%s: check 1.0\n",FUNC);
 printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
 
-done:
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_release() */
 

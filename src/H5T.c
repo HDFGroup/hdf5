@@ -3284,6 +3284,7 @@ H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     H5T_cdata_t		*cdata = NULL;		/*conversion data	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     herr_t		status;			/*func return status	*/
+    H5T_t		*src=NULL, *dst=NULL;	/*unatomized types	*/
 #ifdef H5T_DEBUG
     H5_timer_t		timer;			/*conversion timer	*/
 #endif
@@ -3291,7 +3292,16 @@ H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     FUNC_ENTER (H5Tconvert, FAIL);
     H5TRACE5("e","iizxx",src_id,dst_id,nelmts,buf,background);
 
-    if (NULL==(tconv_func=H5Tfind (src_id, dst_id, &cdata))) {
+    /* Check args */
+    if (H5_DATATYPE!=H5I_group(src_id) ||
+	NULL==(src=H5I_object(src_id)) ||
+	H5_DATATYPE!=H5I_group(dst_id) ||
+	NULL==(dst=H5I_object(dst_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    /* Find the conversion function */
+    if (NULL==(tconv_func=H5T_find (src, dst, H5T_BKG_NO, &cdata))) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to convert between src and dst data types");
     }

@@ -328,9 +328,10 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 
     for (i=0; i<src->u.compnd.nmembs; i++) {
 	if (priv->src2dst[i]>=0) {
-	    H5T_conv_t tconv_func = H5Tfind (priv->src_memb_id[src2dst[i]],
-					     priv->dst_memb_id[src2dst[i]],
-					     priv->memb_cdata+src2dst[i]);
+	    H5T_conv_t tconv_func;
+	    tconv_func = H5T_find(src->u.compnd.memb[i].type,
+				  dst->u.compnd.memb[src2dst[i]].type,
+				  H5T_BKG_NO, priv->memb_cdata+src2dst[i]);
 	    if (!tconv_func) {
 		H5MM_xfree (priv->src2dst);
 		H5MM_xfree (priv->src_memb_id);

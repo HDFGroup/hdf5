@@ -494,6 +494,9 @@ typedef struct H5F_t {
 struct H5O_layout_t;		/*forward decl for prototype arguments */
 struct H5O_efl_t;		/*forward decl for prototype arguments */
 struct H5O_compress_t;		/*forward decl for prototype arguments */
+struct H5F_istore_ud1_t;	/*forward decl for prototype arguments */
+struct H5S_t;			/*forward decl for prototype arguments */
+struct H5D_t;			/*forward decl for prototype arguments */
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
@@ -540,6 +543,13 @@ herr_t H5F_istore_write(H5F_t *f, const struct H5O_layout_t *layout,
 			const struct H5O_compress_t *comp,
 			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
+herr_t H5F_istore_get_addr (H5F_t *f, const struct H5O_layout_t *layout,
+			    const hssize_t offset[],
+			    struct H5F_istore_ud1_t *udata/*out*/);
+herr_t H5F_istore_allocate (struct H5D_t *dataset, H5F_t *f,
+			    const struct H5O_layout_t *layout,
+			    const struct H5S_t *space,
+			    const struct H5O_compress_t *comp);
 
 /* Functions that operate on contiguous storage wrt boot block */
 herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,

@@ -168,13 +168,15 @@ herr_t H5TB_close(H5TB_t *tb)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5TBget_buf(hsize_t size, hbool_t resize)
+hid_t
+H5TBget_buf (hsize_t size, hbool_t resize)
 {
     hid_t	ret_value = FAIL;
     H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
         *new;                          /* pointer to a newly created temp. buffer */
 
     FUNC_ENTER (H5TBget_buf, FAIL);
+    H5TRACE2("i","hb",size,resize);
 
     while(curr!=NULL) {
         if(!curr->inuse && size<curr->size)
@@ -291,7 +293,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void *H5TBbuf_ptr(hid_t tbid)
+void *
+H5TBbuf_ptr(hid_t tbid)
 {
     void *ret_value = NULL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
@@ -331,7 +334,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5TBresize_ptr(hid_t tbid, hsize_t size)
+herr_t
+H5TBresize_ptr (hid_t tbid, hsize_t size)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
@@ -339,6 +343,7 @@ herr_t H5TBresize_ptr(hid_t tbid, hsize_t size)
     void * old_ptr;             /* Pointer to the previous buffer */
 
     FUNC_ENTER (H5TBresize_ptr, FAIL);
+    H5TRACE2("e","ih",tbid,size);
 
     if (H5_TEMPBUF != H5I_group(tbid) ||
             NULL == (tbuf = H5I_object(tbid))) {
@@ -420,12 +425,14 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5TBgarbage_coll(void)
+herr_t
+H5TBgarbage_coll (void)
 {
     herr_t ret_value = FAIL;
     H5TB_t *curr,*next;      /* Current temp. buffer node */
 
     FUNC_ENTER (H5TBgarbage_coll, FAIL);
+    H5TRACE0("e","");
 
     /* Step through the list, remove each unused node, repair the list and free the node */
     curr=H5TB_list_head;
@@ -479,12 +486,14 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5TBrelease_buf(hid_t tbid)
+herr_t
+H5TBrelease_buf (hid_t tbid)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
 
     FUNC_ENTER (H5TBresize_ptr, FAIL);
+    H5TRACE1("e","i",tbid);
 
     if (H5_TEMPBUF != H5I_group(tbid) ||
             NULL == (tbuf = H5I_object(tbid))) {

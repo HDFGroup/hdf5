@@ -415,14 +415,11 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 herr_t
 H5S_point_release (H5S_t *space)
 {
-    intn i;     /* Counters */
-
     FUNC_ENTER (H5S_point_release, FAIL);
 
     /* Check args */
     assert (space);
 
-done:
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_point_release() */
 

@@ -353,7 +353,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
     int			    i;
 
-    FUNC_ENTER(H5S_extent_copy, NULL);
+    FUNC_ENTER(H5S_extent_copy, FAIL);
 
     /* Copy the regular fields */
     *dst=*src;
@@ -1029,11 +1029,11 @@ H5Sis_simple (hid_t sid)
     dimension in the array (the slowest) may be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims, const hsize_t *max)
+H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims,
+		      const hsize_t *max)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     intn		    u;	/* local counting variable */
-    herr_t		    ret_value = SUCCEED;
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
     H5TRACE4("e","iIs*h*h",sid,rank,dims,max);
@@ -1050,24 +1050,64 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims, const hsize_t *m
     }
     if (dims) {
         for (u=0; u<rank; u++) {
-            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) && dims[u]==0) {
+            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) &&
+		dims[u]==0) {
                 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-                       "invalid dimension size");
+			       "invalid dimension size");
             }
         }
     }
     if (max!=NULL) {
-        if(dims==NULL)
+        if(dims==NULL) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-                   "maximum dimension specified, but no current dimensions specified");
+			   "maximum dimension specified, but no current "
+			   "dimensions specified");
+	}
         for (u=0; u<rank; u++) {
             if (max[u]!=H5S_UNLIMITED && max[u]<dims[u]) {
                 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-                       "invalid maximum dimension size");
+			       "invalid maximum dimension size");
             }
         }
     }
 
+    /* Do it */
+    if (H5S_set_extent_simple(space, rank, dims, max)<0) {
+	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		      "unable to set simple extent");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_set_extent_simple
+ *
+ * Purpose:	This is where the real work happens for
+ *		H5Sset_extent_simple().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke (copied from H5Sset_extent_simple)
+ *              Wednesday, July  8, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
+		       const hsize_t *max)
+{
+    FUNC_ENTER(H5S_set_extent_simple, FAIL);
+
+    /* Check args */
+    assert(rank>=0);
+    assert(0==rank || dims);
+    
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->extent.type) {
         case H5S_SCALAR:
@@ -1107,8 +1147,9 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims, const hsize_t *m
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_find
@@ -1344,6 +1385,7 @@ hid_t
 H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
 {
     hid_t	ret_value = FAIL;
+    H5S_t	*space = NULL;
     int		i;
 
     FUNC_ENTER(H5Screate, FAIL);
@@ -1367,18 +1409,23 @@ H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
         }
     }
 
-    if((ret_value=H5Screate(H5S_SIMPLE))==FAIL)
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL,
-               "can't create simple dataspace");
-
-    if(H5Sset_extent_simple(ret_value,rank,dims,maxdims)<0) {
-        H5Sclose(ret_value);
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-               "can't set dimensions");
-    } /* end if */
-
-done:
-    if (ret_value < 0) {
+    /* Create the space and set the extent */
+    if(NULL==(space=H5S_create(H5S_SIMPLE))) {
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL,
+		     "can't create simple dataspace");
     }
+    if(H5S_set_extent_simple(space,rank,dims,maxdims)<0) {
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		     "can't set dimensions");
+    }
+    
+    /* Atomize */
+    if ((ret_value=H5I_register (H5_DATASPACE, space))<0) {
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		     "unable to register data space atom");
+    }
+    
+ done:
+    if (ret_value<0 && space) H5S_close(space);
     FUNC_LEAVE(ret_value);
 }
