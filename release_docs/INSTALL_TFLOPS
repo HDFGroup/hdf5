@@ -31,28 +31,8 @@ FROM SASN100,
     configure: WARNING: If you wanted to set the --build type, don't use --host.
 	If a cross compiler is detected then cross compile mode will be used.
    You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
-
-   Due to a bug, you need to patch up two Makefile, src/Makefile and
-   test/Makefile, before the next step.  You can use the following
-   shell commands.
-
-# Patch up various Makefile's.
-# patch up src/Makefile
-echo "patching src/Makefile"
-ed - src/Makefile <<'EOF'
-/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
-w
-q
-EOF
-
-# patch up test/Makefile
-echo "patching test/Makefile"
-ed - test/Makefile <<'EOF'
-/^RUNTEST=$(LT_RUN)/s/^/#/
-w
-q
-EOF
-
+   (The previous bugs in src/Makefile and test/Makefile have been resolved.
+    You don't need to edit them any more.)
 
 3) make H5detect
 
@@ -117,27 +97,8 @@ FROM SASN100,
     configure: WARNING: If you wanted to set the --build type, don't use --host.
 	If a cross compiler is detected then cross compile mode will be used.
    You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
-
-   Due to a bug, you need to patch up two Makefile, src/Makefile and
-   test/Makefile, before the next step.  You can use the following
-   shell commands.
-
-# Patch up various Makefile's.
-# patch up src/Makefile
-echo "patching src/Makefile"
-ed - src/Makefile <<'EOF'
-/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
-w
-q
-EOF
-
-# patch up test/Makefile
-echo "patching test/Makefile"
-ed - test/Makefile <<'EOF'
-/^RUNTEST=$(LT_RUN)/s/^/#/
-w
-q
-EOF
+   (The previous bugs in src/Makefile and test/Makefile have been resolved.
+    You don't need to edit them any more.)
 
 3) make H5detect
 
