@@ -42,22 +42,24 @@ void *old_client_data;			/* previous error handler arg.*/
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 int docompact=1;                        /* compact dataset test */
+int donull=1;                           /* null dataset test */
 int doindependent=1;			/* independent test */
 unsigned dobig=0;                       /* "big" dataset tests */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[10]={
+const char *FILENAME[11]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
 	    "ParaMdset",
             "ParaMgroup",
             "ParaCompact",
+            "ParaNull",
             "ParaIndividual",
             "ParaBig",
             "ParaFill",
 	    NULL};
-char	filenames[10][PATH_MAX];
+char	filenames[11][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -126,6 +128,7 @@ usage(void)
     printf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");  
     printf("\t-o\t\tno compact dataset test\n");
+    printf("\t-e\t\tno null dataset test\n");
     printf("\t-i\t\tno independent read test\n");
     printf("\t-b\t\trun big dataset test\n");
     printf("\t-v<verbosity>\tset verbose level (0-9,l,m,h)\n");
@@ -177,6 +180,8 @@ parse_options(int argc, char **argv)
 			    }
                             break;
                 case 'o':   docompact = 0;
+                            break;
+                case 'e':   donull = 0;
                             break;
                 case 'i':   doindependent = 0;
                             break;
@@ -443,6 +448,8 @@ int main(int argc, char **argv)
 
     AddTest("compact", compact_dataset, NULL, 
 	    "compact dataset test", filenames[5]);
+    AddTest("null", null_dataset, NULL, 
+	    "null dataset test", filenames[6]);
 
     collngroups_params.name = filenames[6];
     collngroups_params.count = ngroups;
@@ -550,13 +557,21 @@ int main(int argc, char **argv)
     else {
         MPI_BANNER("compact dataset test skipped");
     }
-    
+
+    if (donull){
+        MPI_BANNER("null dataset test...");
+        null_dataset(filenames[6]); 
+    }
+    else {
+        MPI_BANNER("null dataset test skipped");
+    }
+   
     if (doindependent){
 	MPI_BANNER("collective group and dataset write ...");
-        collective_group_write(filenames[6], ngroups);
+        collective_group_write(filenames[7], ngroups);
         if (doread) {
        	    MPI_BANNER("independent group and dataset read ...");
-            independent_group_read(filenames[6], ngroups);
+            independent_group_read(filenames[7], ngroups);
         }
     }
     else{
@@ -565,17 +580,17 @@ int main(int argc, char **argv)
         
     if (dobig && sizeof(MPI_Offset)>4){
         MPI_BANNER("big dataset test...");
-        big_dataset(filenames[7]); 
+        big_dataset(filenames[8]); 
     }
     else {
         MPI_BANNER("big dataset test skipped");
     }
     
     MPI_BANNER("dataset fill value test...");
-    dataset_fillvalue(filenames[8]); 
+    dataset_fillvalue(filenames[9]); 
 #endif
     
-    if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig )){
+    if (!(dowrite || doread || ndatasets || ngroups || docompact || donull || doindependent || dobig )){
 	usage();
 	nerrors++;
     }

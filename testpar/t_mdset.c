@@ -111,7 +111,8 @@ void multiple_dset_write(void)
     H5Fclose (iof);
 }
 
-/* Example of using PHDF5 to create, write, and read compact dataset.  
+/* 
+ * Example of using PHDF5 to create, write, and read compact dataset.  
  */
 void compact_dataset(void)
 {
@@ -193,6 +194,101 @@ void compact_dataset(void)
                                                             
     H5Pclose(plist);
     H5Pclose(dxpl);
+    H5Dclose(dataset);
+    H5Fclose(iof);
+}
+
+/* 
+ * Example of using PHDF5 to create, write, and read dataset and attribute of Null dataspace.  
+ */
+void null_dataset(void)
+{
+    int mpi_size, mpi_rank;
+    hbool_t use_gpfs = FALSE;
+    hid_t iof, plist, dxpl, dataset, attr, sid;
+    unsigned uval=2;    /* Buffer for writing to dataset */
+    int val=1;          /* Buffer for writing to attribute */
+    int nelem;
+    char dname[]="dataset";
+    char attr_name[]="attribute";
+    herr_t ret;
+    char *filename;
+                                
+    MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
+
+    filename = (char *) GetTestParameters();
+    VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
+
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
+    iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+
+    /* Define data space */
+    sid = H5Screate(H5S_NULL);
+    
+    /* Check that the null dataspace actually has 0 elements */
+    nelem = H5Sget_simple_extent_npoints(sid);
+    VRFY((nelem== 0), "H5Sget_simple_extent_npoints");
+
+    /* Create a compact dataset */
+    dataset = H5Dcreate (iof, dname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");        
+
+    /* set up the collective transfer properties list */
+    dxpl = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "");
+    ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+
+    /* Write "nothing" to the dataset (with type conversion) */
+    ret=H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, &uval);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+    
+    /* Create an attribute for the group */
+    attr=H5Acreate(dataset,attr_name,H5T_NATIVE_UINT,sid,H5P_DEFAULT);
+    VRFY((attr>=0), "H5Acreate");
+    
+    /* Write "nothing" to the attribute (with type conversion) */
+    ret = H5Awrite(attr, H5T_NATIVE_INT, &val);
+    VRFY((ret>=0), "H5Awrite");
+
+    H5Aclose (attr);
+    H5Dclose (dataset);
+    H5Pclose (plist);
+    H5Sclose (sid);
+    H5Fclose (iof);
+
+    /* Open the file and dataset, read and compare the data. */
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
+    iof = H5Fopen(filename, H5F_ACC_RDONLY, plist);
+    VRFY((iof >= 0), "H5Fopen succeeded");
+
+    /* set up the collective transfer properties list */
+    dxpl = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "");
+    ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+
+    dataset = H5Dopen(iof, dname);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");
+    
+    /* Try reading from the dataset (make certain our buffer is unmodified) */
+    ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, dxpl, &uval);
+    VRFY((ret>=0), "H5Dread");
+    VRFY((uval==2), "H5Dread");
+    
+    /* Open the attribute for the dataset */
+    attr=H5Aopen_name(dataset,attr_name);
+    VRFY((attr>=0), "H5Aopen_name");
+    
+    /* Try reading from the attribute (make certain our buffer is unmodified) */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &val);
+    VRFY((ret>=0), "H5Aread");
+    VRFY((val==1), "H5Aread");
+                                                          
+    H5Pclose(plist);
+    H5Pclose(dxpl);
+    H5Aclose (attr);
     H5Dclose(dataset);
     H5Fclose(iof);
 }
