@@ -318,7 +318,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 
     /* Iterate over the group members */
     if ((ret_value = H5B_iterate (H5G_fileof(udata.group), H5B_SNODE,
-				  &(udata.group->ent.cache.stab.btree_addr),
+				  udata.group->ent.cache.stab.btree_addr,
 				  &udata))<0) {
 	HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
     }
@@ -1124,7 +1124,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		     "unable to determine local heap address");
     }
-    if (NULL==(clv=H5HL_peek (grp_ent->file, &(stab_mesg.heap_addr),
+    if (NULL==(clv=H5HL_peek (grp_ent->file, stab_mesg.heap_addr,
 			      obj_ent->cache.slink.lval_offset))) {
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		     "unable to read symbolic link value");
@@ -1268,7 +1268,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
-    assert(H5F_addr_defined(&(grp_ent.header)));
+    assert(H5F_addr_defined(grp_ent.header));
 
     /* should be one null-terminated component left */
     rest = H5G_component(rest, &nchars);
@@ -1913,7 +1913,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 			   "unable to determine local heap address");
 	}
 	if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file,
-					       &(stab_mesg.heap_addr),
+					       stab_mesg.heap_addr,
 					       HDstrlen(cur_name)+1,
 					       cur_name))) {
 	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
@@ -2053,7 +2053,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	if (H5G_CACHED_SLINK==obj_ent.type) {
 	    /* Named object is a symbolic link */
 	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
-		NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr), 
+		NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr, 
 				    obj_ent.cache.slink.lval_offset))) {
 		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			       "unable to read symbolic link value");
@@ -2066,9 +2066,9 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    
 	} else {
 	    /* Some other type of object */
-	    statbuf->objno[0] = (unsigned long)(obj_ent.header.offset);
+	    statbuf->objno[0] = (unsigned long)(obj_ent.header);
 #if SIZEOF_UINT64_T>SIZEOF_LONG
-	    statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
+	    statbuf->objno[1] = (unsigned long)(obj_ent.header >>
 						8*sizeof(long));
 #else
 	    statbuf->objno[1] = 0;
@@ -2139,7 +2139,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		       "unable to determine local heap address");
     }
-    if (NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr),
+    if (NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr,
 			    obj_ent.cache.slink.lval_offset))) {
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		       "unable to read symbolic link value");
@@ -2277,7 +2277,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
-    if (!H5F_addr_defined(&(grp_ent.header))) {
+    if (!H5F_addr_defined(grp_ent.header)) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "no containing group specified");
     }

@@ -71,14 +71,14 @@ main(void)
 
     /* create a new message */
     TESTING("message creation");
-    stab.btree_addr.offset = 11111111;
-    stab.heap_addr.offset = 22222222;
+    stab.btree_addr = 11111111;
+    stab.heap_addr = 22222222;
     if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -88,13 +88,13 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5F_addr_ne(&(ro.btree_addr), &(stab.btree_addr)) ||
-	H5F_addr_ne(&(ro.heap_addr), &(stab.heap_addr))) {
+    if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
+	H5F_addr_ne(ro.heap_addr, stab.heap_addr)) {
 	FAILED();
 	HDfprintf(stdout, "    got: {%a, %a}\n",
-		  &(ro.btree_addr), &(ro.heap_addr));
+		  ro.btree_addr, ro.heap_addr);
 	HDfprintf(stdout, "    ans: {%a, %a}\n",
-		  &(stab.btree_addr), &(stab.heap_addr));
+		  stab.btree_addr, stab.heap_addr);
 	goto error;
     }
     PASSED();
@@ -103,14 +103,14 @@ main(void)
      * Test modification of an existing message.
      */
     TESTING("message modification");
-    stab.btree_addr.offset = 33333333;
-    stab.heap_addr.offset = 44444444;
+    stab.btree_addr = 33333333;
+    stab.heap_addr = 44444444;
     if (H5O_modify(&oh_ent, H5O_STAB, 0, 0, &stab)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -120,13 +120,13 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5F_addr_ne(&(ro.btree_addr), &(stab.btree_addr)) ||
-	H5F_addr_ne(&(ro.heap_addr), &(stab.heap_addr))) {
+    if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
+	H5F_addr_ne(ro.heap_addr, stab.heap_addr)) {
 	FAILED();
 	HDfprintf(stdout, "    got: {%a, %a}\n",
-		  &(ro.btree_addr), &(ro.heap_addr));
+		  ro.btree_addr, ro.heap_addr);
 	HDfprintf(stdout, "    ans: {%a, %a}\n",
-		  &(stab.btree_addr), &(stab.heap_addr));
+		  stab.btree_addr, stab.heap_addr);
 	goto error;
     }
     PASSED();
@@ -136,14 +136,14 @@ main(void)
      * Test creation of a second message of the same type.
      */
     TESTING("duplicate message creation");
-    stab.btree_addr.offset = 55555555;
-    stab.heap_addr.offset = 66666666;
+    stab.btree_addr = 55555555;
+    stab.heap_addr = 66666666;
     if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -153,13 +153,13 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5F_addr_ne(&(ro.btree_addr), &(stab.btree_addr)) ||
-	H5F_addr_ne(&(ro.heap_addr), &(stab.heap_addr))) {
+    if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
+	H5F_addr_ne(ro.heap_addr, stab.heap_addr)) {
 	FAILED();
 	HDfprintf(stdout, "    got: {%a, %a}\n",
-		  &(ro.btree_addr), &(ro.heap_addr));
+		  ro.btree_addr, ro.heap_addr);
 	HDfprintf(stdout, "    ans: {%a, %a}\n",
-		  &(stab.btree_addr), &(stab.heap_addr));
+		  stab.btree_addr, stab.heap_addr);
 	goto error;
     }
     PASSED();
@@ -168,14 +168,14 @@ main(void)
      * Test modification of the second message with a symbol table.
      */
     TESTING("duplicate message modification");
-    stab.btree_addr.offset = 77777777;
-    stab.heap_addr.offset = 88888888;
+    stab.btree_addr = 77777777;
+    stab.heap_addr = 88888888;
     if (H5O_modify(&oh_ent, H5O_STAB, 1, 0, &stab)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -185,13 +185,13 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5F_addr_ne(&(ro.btree_addr), &(stab.btree_addr)) ||
-	H5F_addr_ne(&(ro.heap_addr), &(stab.heap_addr))) {
+    if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
+	H5F_addr_ne(ro.heap_addr, stab.heap_addr)) {
 	FAILED();
 	HDfprintf(stdout, "    got: {%a, %a}\n",
-		  &(ro.btree_addr), &(ro.heap_addr));
+		  ro.btree_addr, ro.heap_addr);
 	HDfprintf(stdout, "    ans: {%a, %a}\n",
-		  &(stab.btree_addr), &(stab.heap_addr));
+		  stab.btree_addr, stab.heap_addr);
 	goto error;
     }
     PASSED();
@@ -202,15 +202,15 @@ main(void)
      */
     TESTING("object header overflow in memory");
     for (i=0; i<40; i++) {
-        stab.btree_addr.offset = (i+1)*1000+1;
-        stab.heap_addr.offset = (i+1)*1000+2;
+        stab.btree_addr = (i+1)*1000+1;
+        stab.heap_addr = (i+1)*1000+2;
         if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab)<0) {
 	    FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
     }
-    if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+    if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -223,14 +223,14 @@ main(void)
      */
     TESTING("object header overflow on disk");
     for (i=0; i<10; i++) {
-        stab.btree_addr.offset = (i + 1) * 1000 + 10;
-        stab.heap_addr.offset = (i + 1) * 1000 + 20;
+        stab.btree_addr = (i + 1) * 1000 + 10;
+        stab.heap_addr = (i + 1) * 1000 + 20;
         if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab)<0) {
 	    FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
-        if (H5AC_flush(f, NULL, 0, TRUE)<0) {
+        if (H5AC_flush(f, NULL, H5F_ADDR_UNDEF, TRUE)<0) {
 	    FAILED();
 	    H5Eprint(stdout);
 	    goto error;

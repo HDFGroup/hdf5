@@ -33,12 +33,11 @@ static H5F_low_t *H5F_split_open(const char *name,
 				 H5F_search_t *key/*out*/);
 static herr_t H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     const H5F_xfer_t *xfer_parms, haddr_t addr,
 			     size_t size, uint8_t *buf/*out*/);
 static herr_t H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 			      const H5F_xfer_t *xfer_parms,
-			      const haddr_t *addr, size_t size,
-			      const uint8_t *buf);
+			      haddr_t addr, size_t size, const uint8_t *buf);
 static herr_t H5F_split_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 			       intn op, hsize_t size, haddr_t *addr/*out*/);
@@ -148,7 +147,7 @@ H5F_split_open(const char *name, const H5F_access_t *access_parms,
     
     /* Initialize the file size */
     H5F_low_size(lf->u.split.raw, &(lf->eof));
-    lf->eof.offset |= lf->u.split.mask;
+    lf->eof |= lf->u.split.mask;
 
     HRETURN(lf);
 
@@ -204,15 +203,17 @@ H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *              Monday, November 13, 1997
  *
  * Modifications:
- *		June 2, 1998	Albert Cheng
- *		Added xfer_mode argument
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-	       const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-	       size_t size, uint8_t *buf/*out*/)
+	       const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	       uint8_t *buf/*out*/)
 {
     haddr_t             tmp_addr;
     H5F_low_t           *sub = NULL;
@@ -222,24 +223,24 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     FUNC_ENTER(H5F_split_read, FAIL);
 
     assert(lf);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(buf);
     /* no collective support */
     assert(xfer_parms->xfer_mode != H5D_XFER_COLLECTIVE);
 
     /* Which file to we actually read from? */
-    if (addr->offset & lf->u.split.mask) {
+    if (addr & lf->u.split.mask) {
         sub = lf->u.split.raw;
 	sub_parms = access_parms->u.split.raw_access;
-        tmp_addr.offset = addr->offset & (lf->u.split.mask - 1);
+        tmp_addr = addr & (lf->u.split.mask - 1);
     } else {
         sub = lf->u.split.meta;
 	sub_parms = access_parms->u.split.meta_access;
-        tmp_addr = *addr;
+        tmp_addr = addr;
     }
 
     /* Read the data */
-    status = H5F_low_read(sub, sub_parms, xfer_parms, &tmp_addr, size,
+    status = H5F_low_read(sub, sub_parms, xfer_parms, tmp_addr, size,
 			  buf/*out*/);
     FUNC_LEAVE(status);
 }
@@ -256,15 +257,17 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *              Monday, November 13, 1997
  *
  * Modifications:
- *		June 2, 1998	Albert Cheng
- *		Added xfer_mode argument
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	        const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-		size_t size, const uint8_t *buf)
+	        const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+		const uint8_t *buf)
 {
     haddr_t             tmp_addr;
     H5F_low_t           *sub = NULL;
@@ -274,24 +277,24 @@ H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     FUNC_ENTER(H5F_split_write, FAIL);
 
     assert(lf);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(buf);
     /* no collective support */
     assert(xfer_parms->xfer_mode != H5D_XFER_COLLECTIVE);
 
     /* Which file to we actually write to? */
-    if (addr->offset & lf->u.split.mask) {
+    if (addr & lf->u.split.mask) {
         sub = lf->u.split.raw;
 	sub_parms = access_parms->u.split.raw_access;
-        tmp_addr.offset = addr->offset & (lf->u.split.mask - 1);
+        tmp_addr = addr & (lf->u.split.mask - 1);
     } else {
         sub = lf->u.split.meta;
 	sub_parms = access_parms->u.split.meta_access;
-        tmp_addr = *addr;
+        tmp_addr = addr;
     }
 
     /* Write the data */
-    status = H5F_low_write(sub, sub_parms, xfer_parms, &tmp_addr, size, buf);
+    status = H5F_low_write(sub, sub_parms, xfer_parms, tmp_addr, size, buf);
     FUNC_LEAVE(status);
 }
 
@@ -408,7 +411,7 @@ H5F_split_access(const char *name, const H5F_access_t *access_parms,
  *              data file.
  *
  * Return:      Non-negative on success (with the address of the allocated
- *                      memory returned through the ADDR argument.) /Negative
+ *                      memory returned through the ADDR_P argument.) /Negative
  *                      on failure
  *
  * Programmer:  Robb Matzke
@@ -420,33 +423,33 @@ H5F_split_access(const char *name, const H5F_access_t *access_parms,
  */
 static herr_t
 H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
-		 hsize_t size, haddr_t *addr/*out*/)
+		 hsize_t size, haddr_t *addr_p/*out*/)
 {
     FUNC_ENTER(H5F_split_extend, FAIL);
 
     assert(lf);
     assert(H5MF_META == op || H5MF_RAW == op);
     assert(size > 0);
-    assert(addr);
+    assert(addr_p);
 
     if (H5MF_META == op) {
         if (H5F_low_extend(lf->u.split.meta, access_parms->u.split.meta_access,
-			   op, size, addr/*out*/)<0) {
+			   op, size, addr_p/*out*/)<0) {
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "meta data allocation failed");
         }
-        if (addr->offset + size > lf->eof.offset) {
-            lf->eof.offset = addr->offset + size;
+        if (*addr_p + size > lf->eof) {
+            lf->eof = *addr_p + size;
         }
     } else {
         if (H5F_low_extend(lf->u.split.raw, access_parms->u.split.raw_access,
-			   op, size, addr/*out*/)<0) {
+			   op, size, addr_p/*out*/)<0) {
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "raw data allocation failed");
         }
-        addr->offset |= lf->u.split.mask;
+        *addr_p |= lf->u.split.mask;
         lf->eof = lf->u.split.raw->eof;
-        lf->eof.offset |= lf->u.split.mask;
+        lf->eof |= lf->u.split.mask;
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -465,7 +468,7 @@ H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  *
  * Return:	Success:	Positive if the free block satisfies the
  *				request exactly, zero if the free block
- *				over-satisfies the request.  The ADDR will
+ *				over-satisfies the request.  The ADDR_P will
  *				contain the address within the free block
  *				where the request starts.
  *
@@ -480,7 +483,7 @@ H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  */
 static intn
 H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
-		 hsize_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
+		 hsize_t size, H5MF_free_t *blk, haddr_t *addr_p/*out*/)
 {
     intn	ret_value = FAIL;
     hsize_t	wasted;
@@ -490,30 +493,30 @@ H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
     assert (alignment>0);
     assert (size>0);
     assert (blk);
-    assert (addr);
+    assert (addr_p);
 
     switch (op) {
     case H5MF_META:
-	if (blk->addr.offset & lf->u.split.mask) HRETURN(FAIL);
+	if (blk->addr & lf->u.split.mask) HRETURN(FAIL);
 	break;
     case H5MF_RAW:
-	if (0==(blk->addr.offset & lf->u.split.mask)) HRETURN(FAIL);
+	if (0==(blk->addr & lf->u.split.mask)) HRETURN(FAIL);
 	break;
     }
 
     if (size>=threshold) {
-	wasted = blk->addr.offset % alignment;
+	wasted = blk->addr % alignment;
     } else {
 	wasted = 0;
     }
     if (0==wasted && size==blk->size) {
 	/* exact match */
-	*addr = blk->addr;
+	*addr_p = blk->addr;
 	ret_value = 1;
     } else if (blk->size>wasted && blk->size-wasted>=size) {
 	/* over-satisfied */
-	*addr = blk->addr;
-	H5F_addr_inc (addr, wasted);
+	*addr_p = blk->addr;
+	H5F_addr_inc (addr_p, wasted);
 	ret_value = 0;
     }
     

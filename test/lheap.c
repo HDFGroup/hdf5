@@ -76,7 +76,7 @@ main(void)
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';
 
-        if ((size_t)(-1)==(obj[i]=H5HL_insert(f, &heap_addr, strlen(buf)+1,
+        if ((size_t)(-1)==(obj[i]=H5HL_insert(f, heap_addr, strlen(buf)+1,
 					      buf))) {
 	    FAILED();
 	    H5Eprint(stdout);
@@ -101,7 +101,7 @@ main(void)
 	sprintf(buf, "%03d-", i);
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';
-        if (NULL==(s=H5HL_peek(f, &heap_addr, obj[i]))) {
+        if (NULL==(s=H5HL_peek(f, heap_addr, obj[i]))) {
 	    FAILED();
 	    H5Eprint(stdout);
 	    goto error;

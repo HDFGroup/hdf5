@@ -51,7 +51,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
     /* check args */
     assert (f);
     assert (layout);
-    H5F_addr_undef (&(layout->addr)); /*just in case we fail*/
+    H5F_addr_undef(&(layout->addr)); /*just in case we fail*/
    
     switch (layout->type) {
     case H5D_CONTIGUOUS:
@@ -250,11 +250,11 @@ H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 
 	    /* Read from file */
 	    if (efl && efl->nused>0) {
-		if (H5O_efl_read (f, efl, &addr, elmt_size, buf)<0) {
+		if (H5O_efl_read (f, efl, addr, elmt_size, buf)<0) {
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data read failed");
 		}
-	    } else if (H5F_block_read (f, &addr, elmt_size, xfer, buf)<0) {
+	    } else if (H5F_block_read (f, addr, elmt_size, xfer, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			       "block read failed");
 	    }
@@ -262,7 +262,7 @@ H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 	    /* Decrement indices and advance pointers */
 	    for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
 		
-		H5F_addr_adj (&addr, file_stride[j]);
+		H5F_addr_adj(&addr, file_stride[j]);
 		buf += mem_stride[j];
 
 		if (--idx[j]) carray = FALSE;
@@ -477,11 +477,11 @@ H5F_arr_write (H5F_t *f, const H5F_xfer_t *xfer,
 
 	    /* Write to file */
 	    if (efl && efl->nused>0) {
-		if (H5O_efl_write (f, efl, &addr, elmt_size, buf)<0) {
+		if (H5O_efl_write (f, efl, addr, elmt_size, buf)<0) {
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data write failed");
 		}
-	    } else if (H5F_block_write(f, &addr, elmt_size, xfer, buf)<0) {
+	    } else if (H5F_block_write(f, addr, elmt_size, xfer, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "block write failed");
 	    }

@@ -30,10 +30,8 @@
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
-#define H5F_FAM_OFFSET(LF,ADDR)	((off_t)((ADDR)->offset %		     \
-					 (LF)->u.fam.memb_size.offset))
-#define H5F_FAM_MEMBNO(LF,ADDR)	((intn)((ADDR)->offset /		     \
-					(LF)->u.fam.memb_size.offset))
+#define H5F_FAM_OFFSET(LF,ADDR)	((off_t)((ADDR) % (LF)->u.fam.memb_size))
+#define H5F_FAM_MEMBNO(LF,ADDR)	((intn)((ADDR) / (LF)->u.fam.memb_size))
 
 static htri_t H5F_fam_access(const char *name,
 			     const H5F_access_t *access_parms, int mode,
@@ -43,10 +41,10 @@ static H5F_low_t *H5F_fam_open(const char *name,
 			       H5F_search_t *key/*out*/);
 static herr_t H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			   const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			   const H5F_xfer_t *xfer_parms, haddr_t addr,
 			   size_t size, uint8_t *buf);
 static herr_t H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    const H5F_xfer_t *xfer_parms, haddr_t addr,
 			    size_t size, const uint8_t *buf);
 static herr_t H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
@@ -167,9 +165,9 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	member = NULL;
     }
 
-    H5F_low_size (lf->u.fam.memb[0], &tmp_addr);
+    H5F_low_size (lf->u.fam.memb[0], &tmp_addr/*out*/);
     if (1==lf->u.fam.nmemb &&
-	H5F_addr_gt (&tmp_addr, &(access_parms->u.fam.memb_size))) {
+	H5F_addr_gt (tmp_addr, access_parms->u.fam.memb_size)) {
 	/*
 	 * If there's only one member and the member is larger than the
 	 * specified member size, then adjust the specified member size to be
@@ -179,10 +177,10 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	if (H5DEBUG(F)) {
 	    HDfprintf (H5DEBUG(F), "H5F: family member size has been "
 		       "increased from %a to %a\n",
-		       &(access_parms->u.fam.memb_size), &tmp_addr);
+		       access_parms->u.fam.memb_size, tmp_addr);
 	}
 #endif
-	if (tmp_addr.offset<1024) tmp_addr.offset = 1024;
+	if (tmp_addr<1024) tmp_addr = 1024;
 	lf->u.fam.memb_size = tmp_addr;
 	
     } else if (1==lf->u.fam.nmemb) {
@@ -193,7 +191,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	lf->u.fam.memb_size = access_parms->u.fam.memb_size;
 	
     } else if (lf->u.fam.nmemb>1 &&
-	       H5F_addr_ne (&tmp_addr, &(access_parms->u.fam.memb_size))) {
+	       H5F_addr_ne(tmp_addr, access_parms->u.fam.memb_size)) {
 	/*
 	 * If there are more than one member then use the size of the first
 	 * member as the member size.
@@ -201,14 +199,13 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 #ifdef H5F_DEBUG
 	if (H5DEBUG(F)) {
 	    HDfprintf (H5DEBUG(F), "H5F: family member size adjusted from "
-		       "%a to %a\n", &(access_parms->u.fam.memb_size),
-		       &tmp_addr);
+		       "%a to %a\n", access_parms->u.fam.memb_size, tmp_addr);
 	}
 #endif
 	lf->u.fam.memb_size = tmp_addr;
 	for (membno=1; membno<lf->u.fam.nmemb; membno++) {
-	    H5F_low_size (lf->u.fam.memb[membno], &tmp_addr);
-	    if (H5F_addr_gt (&tmp_addr, &(lf->u.fam.memb_size))) {
+	    H5F_low_size(lf->u.fam.memb[membno], &tmp_addr/*out*/);
+	    if (H5F_addr_gt(tmp_addr, lf->u.fam.memb_size)) {
 		HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "family contains "
 			     "member(s) larger than first member");
 	    }
@@ -226,9 +223,9 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
      * file on a 32-bit machine is 2^32-1.
      */
     if (H5DEBUG(F) &&
-	lf->u.fam.memb_size.offset == ((size_t)1<<(sizeof(off_t)-1))) {
+	lf->u.fam.memb_size == ((size_t)1<<(sizeof(off_t)-1))) {
 	HDfprintf(H5DEBUG(F), "H5F: family member size may be too large: %a\n",
-		  &(lf->u.fam.memb_size));
+		  lf->u.fam.memb_size);
     }
 #endif
 	
@@ -237,8 +234,8 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
      */
     assert(lf->u.fam.nmemb >= 1);
     lf->eof = lf->u.fam.memb_size;
-    lf->eof.offset *= (lf->u.fam.nmemb-1);
-    lf->eof.offset += lf->u.fam.memb[lf->u.fam.nmemb-1]->eof.offset;
+    lf->eof *= (lf->u.fam.nmemb-1);
+    lf->eof += lf->u.fam.memb[lf->u.fam.nmemb-1]->eof;
 
     HRETURN(lf);
 
@@ -305,15 +302,17 @@ H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *		Monday, November 10, 1997
  *
  * Modifications:
- *		June 2, 1998	Albert Cheng
- *		Added xfer_mode argument
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-	     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-	     size_t size, uint8_t *buf)
+	     const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	     uint8_t *buf)
 {
     size_t		nbytes;
     haddr_t		cur_addr;
@@ -323,25 +322,25 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     FUNC_ENTER(H5F_fam_read, FAIL);
 
     assert(lf);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(buf);
 
     member_size = lf->u.fam.memb_size;
     membno = H5F_FAM_MEMBNO(lf, addr);
     H5F_addr_reset (&offset);
-    offset.offset = H5F_FAM_OFFSET(lf, addr);
-    cur_addr = *addr;
+    offset = H5F_FAM_OFFSET(lf, addr);
+    cur_addr = addr;
 
     while (size > 0) {
 	if (membno >= lf->u.fam.nmemb) {
 	    HDmemset(buf, 0, size);
 	    break;
 	} else {
-	    nbytes = MIN(size, member_size.offset-offset.offset);
+	    nbytes = MIN(size, member_size-offset);
 	    cur_addr = offset;
 	    if (H5F_low_read(lf->u.fam.memb[membno],
 			     access_parms->u.fam.memb_access, xfer_parms,
-			     &cur_addr, nbytes, buf) < 0) {
+			     cur_addr, nbytes, buf) < 0) {
 		HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 			      "can't read from family member");
 	    }
@@ -370,15 +369,17 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		Monday, November 10, 1997
  *
  * Modifications:
- *		June 2, 1998	Albert Cheng
- *		Added xfer_mode argument
+ *		Albert Cheng, 1998-06-02
+ *		Added XFER_MODE argument.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	      const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-	      size_t size, const uint8_t *buf)
+	      const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	      const uint8_t *buf)
 {
     size_t		   	nbytes;
     haddr_t		    	cur_addr, max_addr;
@@ -393,7 +394,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     /* Check args */
     assert(lf);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(buf);
     assert (access_parms);
     assert (H5F_LOW_FAMILY==access_parms->driver);
@@ -404,11 +405,11 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     member_size = lf->u.fam.memb_size;
     membno = H5F_FAM_MEMBNO(lf, addr);
     H5F_addr_reset (&offset);
-    offset.offset = H5F_FAM_OFFSET(lf, addr);
-    cur_addr = *addr;
+    offset = H5F_FAM_OFFSET(lf, addr);
+    cur_addr = addr;
 
     while (size > 0) {
-	nbytes = MIN(size, member_size.offset - offset.offset);
+	nbytes = MIN(size, member_size-offset);
 	cur_addr = offset;
 
 	if (membno >= lf->u.fam.nmemb) {
@@ -444,8 +445,8 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		 */
 		if (i < membno) {
 		    H5F_addr_reset(&max_addr);
-		    H5F_addr_inc(&max_addr, member_size.offset);
-		    H5F_low_seteof(member, &max_addr);
+		    H5F_addr_inc(&max_addr, member_size);
+		    H5F_low_seteof(member, max_addr);
 		}
 		lf->u.fam.memb[lf->u.fam.nmemb++] = member;
 	    }
@@ -457,14 +458,14 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	 */
 	max_addr = cur_addr;
 	H5F_addr_inc(&max_addr, (hsize_t)nbytes);
-	if (H5F_addr_gt(&max_addr, &(lf->u.fam.memb[membno]->eof))) {
-	    H5F_low_seteof(lf->u.fam.memb[membno], &max_addr);
+	if (H5F_addr_gt(max_addr, lf->u.fam.memb[membno]->eof)) {
+	    H5F_low_seteof(lf->u.fam.memb[membno], max_addr);
 	}
 	
 	/* Write the data to the member */
 	if (H5F_low_write(lf->u.fam.memb[membno],
 			  access_parms->u.fam.memb_access, xfer_parms,
-			  &cur_addr, nbytes, buf) < 0) {
+			  cur_addr, nbytes, buf) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			  "can't write to family member");
 	}
@@ -512,24 +513,24 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
      * byte from the member (which defaults to zero if we're reading past the
      * end of the member) and then writing it back.
      */
-    max_offset = lf->u.fam.memb_size.offset - 1;
+    max_offset = lf->u.fam.memb_size - 1;
     H5F_addr_reset(&addr1);
     H5F_addr_inc(&addr1, max_offset);
-    H5F_low_size(lf->u.fam.memb[0], &addr2);	/*remember logical eof */
+    H5F_low_size(lf->u.fam.memb[0], &addr2/*out*/);/*remember logical eof */
     addr3 = addr1;
     H5F_addr_inc(&addr3, (hsize_t)1);
-    H5F_low_seteof(lf->u.fam.memb[0], &addr3);	/*prevent a warning */
+    H5F_low_seteof(lf->u.fam.memb[0], addr3);	/*prevent a warning */
     if (H5F_low_read(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
-		     &H5F_xfer_dflt, &addr1, 1, buf) < 0) {
+		     &H5F_xfer_dflt, addr1, 1, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "can't read from first family member");
     }
     if (H5F_low_write(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
-		      &H5F_xfer_dflt, &addr1, 1, buf) < 0) {
+		      &H5F_xfer_dflt, addr1, 1, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "can't write to first family member");
     }
-    H5F_low_seteof(lf->u.fam.memb[0], &addr2);	/*reset old eof */
+    H5F_low_seteof(lf->u.fam.memb[0], addr2);	/*reset old eof */
 
     /*
      * Flush each member file.	Don't return an error status until we've

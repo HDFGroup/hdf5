@@ -316,7 +316,7 @@ herr_t H5T_vlen_disk_write(const H5F_xfer_t UNUSED *xfer_parms, H5F_t *f, void *
         HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
 
     /* Get the heap information */
-    H5F_addr_encode(f,&vl,&hobjid.addr);
+    H5F_addr_encode(f,&vl,hobjid.addr);
     INT32ENCODE(vl,hobjid.idx);
 
     FUNC_LEAVE (SUCCEED);

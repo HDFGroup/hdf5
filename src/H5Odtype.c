@@ -898,8 +898,8 @@ H5O_dtype_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_get_share (H5F_t UNUSED *f, const void *_mesg,
-		     H5O_shared_t *sh/*out*/)
+H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
+		    H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     
@@ -907,7 +907,7 @@ H5O_dtype_get_share (H5F_t UNUSED *f, const void *_mesg,
     assert (dt);
     assert (sh);
 
-    if (H5F_addr_defined (&(dt->ent.header))) {
+    if (H5F_addr_defined (dt->ent.header)) {
 	assert (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state);
 	sh->in_gh = FALSE;
 	sh->u.ent = dt->ent;

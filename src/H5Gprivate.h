@@ -155,8 +155,8 @@ __DLL__ herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 /*
  * These functions operate on symbol table nodes.
  */
-__DLL__ herr_t H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
-			      intn indent, intn fwidth, const haddr_t *heap);
+__DLL__ herr_t H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream,
+			      intn indent, intn fwidth, haddr_t heap);
 
 /*
  * These functions operate on symbol table entries.  They're used primarily
@@ -166,5 +166,5 @@ __DLL__ herr_t H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 __DLL__ H5G_cache_t *H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type);
 __DLL__ herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 __DLL__ herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent, FILE * stream,
-			     intn indent, intn fwidth, const haddr_t *heap);
+			     intn indent, intn fwidth, haddr_t heap);
 #endif

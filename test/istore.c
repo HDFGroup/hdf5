@@ -562,8 +562,8 @@ main(int argc, char *argv[])
      */
     if (H5F_LOW_FAMILY==H5Pget_driver(fapl)) {
 	haddr_t addr;
-	addr.offset = 8 * ((uint64_t)1<<30);	/*8 GB */
-	H5F_low_seteof(f->shared->lf, &addr);
+	addr = 8 * ((uint64_t)1<<30);	/*8 GB */
+	H5F_low_seteof(f->shared->lf, addr);
     }
 
     /*

@@ -63,7 +63,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
     if (H5HL_create(f, init, &(stab.heap_addr)/*out*/)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap");
     }
-    name = H5HL_insert(f, &(stab.heap_addr), 1, "");
+    name = H5HL_insert(f, stab.heap_addr, 1, "");
     if ((size_t)(-1)==name) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
     }
@@ -75,7 +75,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
     assert(0 == name);
 
     /* Create the B-tree */
-    if (H5B_create(f, H5B_SNODE, NULL, &(stab.btree_addr) /*out */ ) < 0) {
+    if (H5B_create(f, H5B_SNODE, NULL, &(stab.btree_addr)/*out*/) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree");
     }
 
@@ -84,7 +84,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
      * since nothing refers to it yet.	The link count will be
      * incremented if the object is added to the group directed graph.
      */
-    if (H5O_create(f, 4 + 2 * H5F_SIZEOF_ADDR(f), self /*out */ ) < 0) {
+    if (H5O_create(f, 4 + 2 * H5F_SIZEOF_ADDR(f), self/*out*/) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header");
     }
 
@@ -146,7 +146,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     udata.heap_addr = stab.heap_addr;
 
     /* search the B-tree */
-    if (H5B_find(grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata) < 0) {
+    if (H5B_find(grp_ent->file, H5B_SNODE, stab.btree_addr, &udata) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
     }
     if (obj_ent) *obj_ent = udata.ent;
@@ -200,7 +200,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     udata.ent = *obj_ent;
 
     /* insert */
-    if (H5B_insert(grp_ent->file, H5B_SNODE, &(stab.btree_addr), split_ratios,
+    if (H5B_insert(grp_ent->file, H5B_SNODE, stab.btree_addr, split_ratios,
 		   &udata) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
     }
@@ -245,7 +245,7 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name)
     HDmemset(&(udata.ent), 0, sizeof(udata.ent));
 
     /* remove */
-    if (H5B_remove(grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
+    if (H5B_remove(grp_ent->file, H5B_SNODE, stab.btree_addr, &udata)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
     }
 

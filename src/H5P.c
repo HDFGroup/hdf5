@@ -1833,7 +1833,7 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
 
     /* Output args */
     if (memb_size) {
-	*memb_size = plist->u.fam.memb_size.offset;
+	*memb_size = plist->u.fam.memb_size;
     }
     if (memb_plist_id) {
 	assert (plist->u.fam.memb_access);

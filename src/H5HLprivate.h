@@ -51,15 +51,14 @@
  * Library prototypes...
  */
 __DLL__ herr_t H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr/*out*/);
-__DLL__ void *H5HL_read(H5F_t *f, const haddr_t *addr, size_t offset,
-			size_t size, void *buf);
-__DLL__ const void *H5HL_peek(H5F_t *f, const haddr_t *addr, size_t offset);
-__DLL__ size_t H5HL_insert(H5F_t *f, const haddr_t *addr, size_t size,
+__DLL__ void *H5HL_read(H5F_t *f, haddr_t addr, size_t offset, size_t size,
+			void *buf);
+__DLL__ const void *H5HL_peek(H5F_t *f, haddr_t addr, size_t offset);
+__DLL__ size_t H5HL_insert(H5F_t *f, haddr_t addr, size_t size,
 			   const void *buf);
-__DLL__ herr_t H5HL_write(H5F_t *f, const haddr_t *addr, size_t offset,
-			  size_t size, const void *buf);
-__DLL__ herr_t H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset,
-			   size_t size);
-__DLL__ herr_t H5HL_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
-			  intn indent, intn fwidth);
+__DLL__ herr_t H5HL_write(H5F_t *f, haddr_t addr, size_t offset, size_t size,
+			  const void *buf);
+__DLL__ herr_t H5HL_remove(H5F_t *f, haddr_t addr, size_t offset, size_t size);
+__DLL__ herr_t H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
+			  intn fwidth);
 #endif

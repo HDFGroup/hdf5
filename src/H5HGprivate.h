@@ -104,7 +104,7 @@ __DLL__ void *H5HG_peek(H5F_t *f, H5HG_t *hobj);
 __DLL__ void *H5HG_read(H5F_t *f, H5HG_t *hobj, void *object);
 __DLL__ intn H5HG_link(H5F_t *f, H5HG_t *hobj, intn adjust);
 __DLL__ herr_t H5HG_remove(H5F_t *f, H5HG_t *hobj);
-__DLL__ herr_t H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream,
-			  intn indent, intn fwidth);
+__DLL__ herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent,
+			  intn fwidth);
 
 #endif

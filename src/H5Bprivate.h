@@ -70,26 +70,25 @@ typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     size_t	(*get_sizeof_rkey)(H5F_t*, const void*);    /*raw key size   */
-    herr_t	(*new_node) (H5F_t*, H5B_ins_t, void*, void*, void*, haddr_t*);
+    herr_t	(*new_node)(H5F_t*, H5B_ins_t, void*, void*, void*, haddr_t*);
     intn	(*cmp2)(H5F_t*, void*, void*, void*);	    /*compare 2 keys */
     intn	(*cmp3)(H5F_t*, void*, void*, void*);	    /*compare 3 keys */
-    herr_t	(*found)(H5F_t*, const haddr_t*, const void*, void*,
-			 const void*);
+    herr_t	(*found)(H5F_t*, haddr_t, const void*, void*, const void*);
     
     /* insert new data */
-    H5B_ins_t	(*insert)(H5F_t*, const haddr_t*, void*, hbool_t*,
-			  void*, void*, void*, hbool_t*, haddr_t*);
+    H5B_ins_t	(*insert)(H5F_t*, haddr_t, void*, hbool_t*, void*, void*,
+			  void*, hbool_t*, haddr_t*);
 
     /* min insert uses min leaf, not new(), similarily for max insert */
     hbool_t	follow_min;
     hbool_t	follow_max;
     
     /* remove existing data */
-    H5B_ins_t	(*remove)(H5F_t*, const haddr_t*, void*, hbool_t*,
-			  void*, void*, hbool_t*);
+    H5B_ins_t	(*remove)(H5F_t*, haddr_t, void*, hbool_t*, void*, void*,
+			  hbool_t*);
 
     /* iterate through the leaf nodes */
-    herr_t	(*list)(H5F_t*, void*, const haddr_t*, void*, void*);
+    herr_t	(*list)(H5F_t*, void*, haddr_t, void*, void*);
 
     /* encode, decode, debug key values */
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
@@ -124,18 +123,17 @@ typedef struct H5B_t {
 /*
  * Library prototypes.
  */
-__DLL__ herr_t H5B_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5B_debug (H5F_t *f, haddr_t addr, FILE * stream,
 			  intn indent, intn fwidth, const H5B_class_t *type,
 			  void *udata);
 __DLL__ herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata,
-			   haddr_t *);
-__DLL__ herr_t H5B_find (H5F_t *f, const H5B_class_t *type,
-			 const haddr_t *addr, void *udata);
-__DLL__ herr_t H5B_insert (H5F_t *f, const H5B_class_t *type,
-			   const haddr_t *addr, const double split_ratios[],
-			   void *udata);
-__DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type,
-			  const haddr_t *addr, void *udata);
-__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type,
-			    const haddr_t *addr, void *udata);
+			   haddr_t *addr_p/*out*/);
+__DLL__ herr_t H5B_find (H5F_t *f, const H5B_class_t *type, haddr_t addr,
+			 void *udata);
+__DLL__ herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, haddr_t addr,
+			   const double split_ratios[], void *udata);
+__DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr,
+			  void *udata);
+__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr,
+			    void *udata);
 #endif

@@ -1055,8 +1055,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	for (i=0; i<efl->nused; i++) {
 	    heap_size += H5HL_ALIGN (HDstrlen (efl->slot[i].name)+1);
 	}
-	if (H5HL_create (f, heap_size, &(efl->heap_addr))<0 ||
-	    (size_t)(-1)==H5HL_insert (f, &(efl->heap_addr), 1, "")) {
+	if (H5HL_create (f, heap_size, &(efl->heap_addr)/*out*/)<0 ||
+	    (size_t)(-1)==H5HL_insert(f, efl->heap_addr, 1, "")) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 			 "unable to create external file list name heap");
 	}
@@ -1088,7 +1088,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	    H5P_close (H5P_DATASET_CREATE, new_dset->create_parms);
 	    new_dset->create_parms = NULL;
 	}
-	if (H5F_addr_defined(&(new_dset->ent.header))) {
+	if (H5F_addr_defined(new_dset->ent.header)) {
 	    H5O_close(&(new_dset->ent));
 	}
 	new_dset->ent.file = NULL;
@@ -1314,7 +1314,7 @@ H5D_open_oid(H5G_entry_t *ent)
     /* Get the external file list message, which might not exist */
     if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
 			&(dataset->create_parms->efl)) &&
-	!H5F_addr_defined (&(dataset->layout.addr))) {
+	!H5F_addr_defined (dataset->layout.addr)) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "storage address is undefined an no external file list");
     }
@@ -1338,7 +1338,7 @@ H5D_open_oid(H5G_entry_t *ent)
 done:
     if (space) H5S_close(space);
     if (ret_value==NULL && dataset) {
-        if (H5F_addr_defined(&(dataset->ent.header))) {
+        if (H5F_addr_defined(dataset->ent.header)) {
             H5O_close(&(dataset->ent));
         }
         if (dataset->type) {
@@ -2453,12 +2453,12 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 		if (dset->create_parms->efl.nused) {
 		    if (H5O_efl_write(dset->ent.file,
 				      &(dset->create_parms->efl),
-				      &addr, size, buf)<0) {
+				      addr, size, buf)<0) {
 			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 				    "unable to write fill value to dataset");
 		    }
 		} else {
-		    if (H5F_block_write(dset->ent.file, &addr, size,
+		    if (H5F_block_write(dset->ent.file, addr, size,
 					&H5F_xfer_dflt, buf)<0) {
 			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 				    "unable to write fill value to dataset");
@@ -2578,7 +2578,7 @@ H5D_get_storage_size(H5D_t *dset)
 
     if (H5D_CHUNKED==dset->layout.type) {
 	size = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
-				    &(dset->layout.addr));
+				    dset->layout.addr);
     } else {
 	for (i=0, size=1; i<dset->layout.ndims; i++) {
 	    size *= dset->layout.dim[i];
@@ -2719,7 +2719,8 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     }
 
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,(void *)xfer_parms);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,
+			 (void*)xfer_parms);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */
@@ -2759,10 +2760,10 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
     /* Print B-tree information */
     if (H5D_CHUNKED==dset->layout.type) {
 	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
-			      &(dset->layout.addr));
+			      dset->layout.addr);
     } else if (H5D_CONTIGUOUS==dset->layout.type) {
 	HDfprintf(stdout, "    %-10s %a\n", "Address:",
-		  &(dset->layout.addr));
+		  dset->layout.addr);
     }
     
     FUNC_LEAVE(SUCCEED);

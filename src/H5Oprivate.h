@@ -288,14 +288,14 @@ __DLL__ void *H5O_free(const H5O_class_t *type, void *mesg);
 __DLL__ void *H5O_copy(const H5O_class_t *type, const void *mesg, void *dst);
 __DLL__ herr_t H5O_share(H5F_t *f, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
-__DLL__ herr_t H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
-			 intn indent, intn fwidth);
+__DLL__ herr_t H5O_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
+			 intn fwidth);
 
 /* EFL operators */
 __DLL__ hsize_t H5O_efl_total_size(H5O_efl_t *efl);
-__DLL__ herr_t H5O_efl_read(H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+__DLL__ herr_t H5O_efl_read(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
 			    hsize_t size, uint8_t *buf);
-__DLL__ herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+__DLL__ herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
 			     hsize_t size, const uint8_t *buf);
 
 /* Fill value operators */

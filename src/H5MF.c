@@ -55,7 +55,7 @@ static intn             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
+H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr_p/*out*/)
 {
     haddr_t             tmp_addr;
     intn		i, found, status=-1;
@@ -70,7 +70,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
     assert(f);
     assert(H5MF_META == op || H5MF_RAW == op);
     assert(size > 0);
-    assert(addr);
+    assert(addr_p);
     
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR)) {
@@ -84,7 +84,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
      */
     for (i=0, found=-1; i<f->shared->fl_nfree; i++) {
 	if ((status=H5F_low_alloc(f->shared->lf, op, align, thresh, size,
-				  f->shared->fl_free+i, addr/*out*/))>0) {
+				  f->shared->fl_free+i, addr_p/*out*/))>0) {
 	    /* Exact match found */
 	    found = i;
 	    break;
@@ -96,7 +96,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 
     if (found>=0 &&
 	(status=H5F_low_alloc (f->shared->lf, op, align, thresh, size, 
-			       f->shared->fl_free+found, addr/*out*/))>0) {
+			       f->shared->fl_free+found, addr_p/*out*/))>0) {
 	/*
 	 * We found an exact match.  Remove that block from the free list and
 	 * use it to satisfy the request.
@@ -114,11 +114,11 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	--f->shared->fl_nfree;
 	HDmemmove (f->shared->fl_free+found, f->shared->fl_free+found+1,
 		   (f->shared->fl_nfree-found) * sizeof(H5MF_free_t));
-	if (H5F_addr_gt (addr, &(blk.addr))) {
+	if (H5F_addr_gt (*addr_p, blk.addr)) {
 	    /* Free the first part of the free block */
-	    n = addr->offset - blk.addr.offset;
-	    H5MF_xfree (f, &(blk.addr), n);
-	    blk.addr = *addr;
+	    n = *addr_p - blk.addr;
+	    H5MF_xfree (f, blk.addr, n);
+	    blk.addr = *addr_p;
 	    blk.size -= n;
 	}
 	
@@ -126,7 +126,7 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	    /* Free the second part of the free block */
 	    H5F_addr_inc (&(blk.addr), size);
 	    blk.size -= size;
-	    H5MF_xfree (f, &(blk.addr), blk.size);
+	    H5MF_xfree (f, blk.addr, blk.size);
 	}
 	
     } else {
@@ -147,30 +147,30 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 	}
 	
 	/* Convert from absolute to relative */
-	blk.addr.offset -= f->shared->base_addr.offset;
+	blk.addr -= f->shared->base_addr;
 
 	/* Did we extend the size of the hdf5 data? */
 	tmp_addr = blk.addr;
 	H5F_addr_inc(&tmp_addr, blk.size);
-	if (H5F_addr_gt(&tmp_addr, &(f->shared->hdf5_eof))) {
+	if (H5F_addr_gt(tmp_addr, f->shared->hdf5_eof)) {
 	    f->shared->hdf5_eof = tmp_addr;
 	}
 
 	if ((status=H5F_low_alloc (f->shared->lf, op, align, thresh, size,
-				   &blk, addr/*out*/))>0) {
+				   &blk, addr_p/*out*/))>0) {
 	    /* Exact match */
 	} else if (0==status) {
 	    /* Partial match */
-	    if (H5F_addr_gt (addr, &(blk.addr))) {
-		n = addr->offset - blk.addr.offset;
-		H5MF_xfree (f, &(blk.addr), n);
-		blk.addr = *addr;
+	    if (H5F_addr_gt (*addr_p, blk.addr)) {
+		n = *addr_p - blk.addr;
+		H5MF_xfree (f, blk.addr, n);
+		blk.addr = *addr_p;
 		blk.size -= n;
 	    }
 	    if (blk.size > size) {
 		H5F_addr_inc (&(blk.addr), size);
 		blk.size -= size;
-		H5MF_xfree (f, &(blk.addr), blk.size);
+		H5MF_xfree (f, blk.addr, blk.size);
 	    }
 	}
     }
@@ -193,11 +193,12 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
  *              Jul 17 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
+H5MF_xfree(H5F_t *f, haddr_t addr, hsize_t size)
 {
     int		i;
     
@@ -205,7 +206,7 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
 
     /* check arguments */
     assert(f);
-    if (!addr || !H5F_addr_defined(addr) || 0 == size) {
+    if (!H5F_addr_defined(addr) || 0 == size) {
         HRETURN(SUCCEED);
     }
     assert(!H5F_addr_zerop(addr));
@@ -225,14 +226,14 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
 			    (unsigned long) f->shared->fl_free[i].size);
 		}
 #endif
-		f->shared->fl_free[i].addr = *addr;
+		f->shared->fl_free[i].addr = addr;
 		f->shared->fl_free[i].size = size;
 		break;
 	    }
 	}
     } else {
 	i = f->shared->fl_nfree++;
-	f->shared->fl_free[i].addr = *addr;
+	f->shared->fl_free[i].addr = addr;
 	f->shared->fl_free[i].size = size;
     }
     FUNC_LEAVE(SUCCEED);
@@ -246,9 +247,9 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
  *		a new address.  The chunk to change is at address ORIG_ADDR
  *		and is exactly ORIG_SIZE bytes (if these are zero and undef
  *		then this function acts like H5MF_alloc).  The new size will
- *		be NEW_SIZE and its address is returned though NEW_ADDR (if
+ *		be NEW_SIZE and its address is returned though NEW_ADDR_P (if
  *		NEW_SIZE is zero then this function acts like H5MF_free and
- *		an undefined address is returned for NEW_ADDR).
+ *		an undefined address is returned for NEW_ADDR_P).
  *
  *		If the new size is less than the old size then the new
  *		address will be the same as the old address (except for the
@@ -264,12 +265,14 @@ H5MF_xfree(H5F_t *f, const haddr_t *addr, hsize_t size)
  *              Thursday, April 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ORIG_ADDR is passed by value. The name of NEW_ADDR has
+ *		been changed to NEW_ADDR_P
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
-	      hsize_t new_size, haddr_t *new_addr/*out*/)
+H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, haddr_t orig_addr,
+	      hsize_t new_size, haddr_t *new_addr_p/*out*/)
 {
     FUNC_ENTER (H5MF_realloc, FAIL);
 
@@ -277,12 +280,12 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
 	/* Degenerate to H5MF_alloc() */
 	assert (!H5F_addr_defined (orig_addr));
 	if (new_size>0) {
-	    if (H5MF_alloc (f, op, new_size, new_addr/*out*/)<0) {
+	    if (H5MF_alloc (f, op, new_size, new_addr_p/*out*/)<0) {
 		HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			       "unable to allocate new file memory");
 	    }
 	} else {
-	    H5F_addr_undef (new_addr);
+	    H5F_addr_undef (new_addr_p);
 	}
 	
     } else if (0==new_size) {
@@ -292,11 +295,11 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			   "unable to free old file memory");
 	}
-	H5F_addr_undef (new_addr);
+	H5F_addr_undef (new_addr_p);
 	
     } else if (new_size > orig_size) {
 	/* Size is getting larger */
-	if (H5MF_alloc (f, op, new_size, new_addr/*out*/)<0) {
+	if (H5MF_alloc (f, op, new_size, new_addr_p/*out*/)<0) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL,
 			   "unable to allocate new file memory");
 	}
@@ -313,7 +316,7 @@ H5MF_realloc (H5F_t *f, intn op, hsize_t orig_size, const haddr_t *orig_addr,
 		       orig_size-new_size);
 	}
 #endif
-	*new_addr = *orig_addr;
+	*new_addr_p = orig_addr;
     }
 
     FUNC_LEAVE (SUCCEED);

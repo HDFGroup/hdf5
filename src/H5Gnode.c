@@ -41,35 +41,34 @@ static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 static size_t H5G_node_size(H5F_t *f);
 static herr_t H5G_node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
-			      haddr_t *addr/*out*/);
-static herr_t H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
+			      haddr_t *addr_p/*out*/);
+static herr_t H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
-static H5G_node_t *H5G_node_load(H5F_t *f, const haddr_t *addr,
-				 const void *_udata1, void *_udata2);
+static H5G_node_t *H5G_node_load(H5F_t *f, haddr_t addr, const void *_udata1,
+				 void *_udata2);
 static intn H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
 static intn H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
-static herr_t H5G_node_found(H5F_t *f, const haddr_t *addr,
-			     const void *_lt_key, void *_udata,
-			     const void *_rt_key);
-static H5B_ins_t H5G_node_insert(H5F_t *f, const haddr_t *addr,
-				 void *_lt_key, hbool_t *lt_key_changed,
-				 void *_md_key, void *_udata,
-				 void *_rt_key, hbool_t *rt_key_changed,
-				 haddr_t *new_node/*out*/);
-static H5B_ins_t H5G_node_remove(H5F_t *f, const haddr_t *addr, void *lt_key,
+static herr_t H5G_node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
+			     void *_udata, const void *_rt_key);
+static H5B_ins_t H5G_node_insert(H5F_t *f, haddr_t addr, void *_lt_key,
+				 hbool_t *lt_key_changed, void *_md_key,
+				 void *_udata, void *_rt_key,
+				 hbool_t *rt_key_changed,
+				 haddr_t *new_node_p/*out*/);
+static H5B_ins_t H5G_node_remove(H5F_t *f, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_iterate(H5F_t *f, void *_lt_key, const haddr_t *addr,
+static herr_t H5G_node_iterate(H5F_t *f, void *_lt_key, haddr_t addr,
 			       void *_rt_key, void *_udata);
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 
 /* H5G inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SNODE[1] = {{
     H5AC_SNODE_ID,
-    (void *(*)(H5F_t*, const haddr_t*, const void*, void*))H5G_node_load,
-    (herr_t (*)(H5F_t*, hbool_t, const haddr_t*, void*))H5G_node_flush,
+    (void *(*)(H5F_t*, haddr_t, const void*, void*))H5G_node_load,
+    (herr_t (*)(H5F_t*, hbool_t, haddr_t, void*))H5G_node_flush,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -218,8 +217,8 @@ H5G_node_size(H5F_t *f)
  *		is also called internally to split a symbol node with LT_KEY
  *		and RT_KEY null pointers.
  *
- * Return:	Success:	Non-negative.  The address of symbol table node is
- *				returned through the ADDR argument.
+ * Return:	Success:	Non-negative.  The address of symbol table
+ *				node is returned through the ADDR_P argument.
  *
  *		Failure:	Negative
  *
@@ -233,7 +232,7 @@ H5G_node_size(H5F_t *f)
  */
 static herr_t
 H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
-		void UNUSED *_udata, void *_rt_key, haddr_t *addr/*out*/)
+		void UNUSED *_udata, void *_rt_key, haddr_t *addr_p/*out*/)
 {
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
@@ -253,7 +252,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
 		       "memory allocation failed");
     }
     size = H5G_node_size(f);
-    if (H5MF_alloc(f, H5MF_META, size, addr/*out*/) < 0) {
+    if (H5MF_alloc(f, H5MF_META, size, addr_p/*out*/) < 0) {
 	H5MM_xfree(sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to allocate file space");
@@ -265,7 +264,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
-    if (H5AC_set(f, H5AC_SNODE, addr, sym) < 0) {
+    if (H5AC_set(f, H5AC_SNODE, *addr_p, sym) < 0) {
 	H5MM_xfree(sym->entry);
 	H5MM_xfree(sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
@@ -296,13 +295,15 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
  *		Jun 23 1997
  *
  * Modifications:
- *              rky 980828 Only p0 writes metadata to disk.
+ *              rky, 1998-08-28
+ *		Only p0 writes metadata to disk.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
-	       H5G_node_t *sym)
+H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 {
     uint8_t	*buf = NULL, *p = NULL;
     size_t	size;
@@ -315,7 +316,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(sym);
 
     /*
@@ -387,11 +388,12 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
  *		Jun 23 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, const haddr_t *addr, const void UNUSED *_udata1,
+H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	      void UNUSED *_udata2)
 {
     H5G_node_t		   *sym = NULL;
@@ -406,7 +408,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void UNUSED *_udata1,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(!_udata1);
     assert(NULL == _udata2);
 
@@ -504,11 +506,11 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     assert(lt_key);
     assert(rt_key);
 
-    if (NULL == (s1 = H5HL_peek(f, &(udata->heap_addr), lt_key->offset))) {
+    if (NULL == (s1 = H5HL_peek(f, udata->heap_addr, lt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
-    if (NULL == (s2 = H5HL_peek(f, &(udata->heap_addr), rt_key->offset))) {
+    if (NULL == (s2 = H5HL_peek(f, udata->heap_addr, rt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -556,7 +558,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     FUNC_ENTER(H5G_node_cmp3, FAIL);
 
     /* left side */
-    if (NULL == (s = H5HL_peek(f, &(udata->heap_addr), lt_key->offset))) {
+    if (NULL == (s = H5HL_peek(f, udata->heap_addr, lt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -564,7 +566,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 	HRETURN(-1);
 
     /* right side */
-    if (NULL == (s = H5HL_peek(f, &(udata->heap_addr), rt_key->offset))) {
+    if (NULL == (s = H5HL_peek(f, udata->heap_addr, rt_key->offset))) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 		      "unable to read symbol name");
     }
@@ -600,11 +602,12 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		Jun 23 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_found(H5F_t *f, const haddr_t *addr, const void UNUSED *_lt_key,
+H5G_node_found(H5F_t *f, haddr_t addr, const void UNUSED *_lt_key,
 	       void *_udata, const void UNUSED *_rt_key)
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
@@ -619,7 +622,7 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void UNUSED *_lt_key,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(bt_udata);
 
     /*
@@ -636,7 +639,7 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void UNUSED *_lt_key,
     rt = sn->nsyms;
     while (lt < rt && cmp) {
 	idx = (lt + rt) / 2;
-	if (NULL == (s = H5HL_peek(f, &(bt_udata->heap_addr),
+	if (NULL == (s = H5HL_peek(f, bt_udata->heap_addr,
 				  sn->entry[idx].name_off))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
 			"unable to read symbol name");
@@ -696,11 +699,11 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void UNUSED *_lt_key,
  * Return:	Success:	An insertion command for the caller, one of
  *				the H5B_INS_* constants.  The address of the
  *				new node, if any, is returned through the
- *				NEW_NODE argument.  NEW_NODE might not be
+ *				NEW_NODE_P argument.  NEW_NODE_P might not be
  *				initialized if the return value is
  *				H5B_INS_NOOP.
  *
- *		Failure:	H5B_INS_ERROR, NEW_NODE might not be
+ *		Failure:	H5B_INS_ERROR, NEW_NODE_P might not be
  *				initialized.
  *
  * Programmer:	Robb Matzke
@@ -708,14 +711,15 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void UNUSED *_lt_key,
  *		Jun 24 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
+H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
 		hbool_t UNUSED *lt_key_changed, void *_md_key,
-		void *_udata, void *_rt_key,
-		hbool_t UNUSED *rt_key_changed, haddr_t *new_node)
+		void *_udata, void *_rt_key, hbool_t UNUSED *rt_key_changed,
+		haddr_t *new_node_p)
 {
     H5G_node_key_t	*md_key = (H5G_node_key_t *) _md_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t *) _rt_key;
@@ -735,11 +739,11 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(md_key);
     assert(rt_key);
     assert(bt_udata);
-    assert(new_node);
+    assert(new_node_p);
 
     /*
      * Load the symbol node.
@@ -755,7 +759,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
     rt = sn->nsyms;
     while (lt < rt) {
 	idx = (lt + rt) / 2;
-	if (NULL == (s = H5HL_peek(f, &(bt_udata->heap_addr),
+	if (NULL == (s = H5HL_peek(f, bt_udata->heap_addr,
 				  sn->entry[idx].name_off))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR,
 			"unable to read symbol name");
@@ -776,7 +780,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
     /*
      * Add the new name to the heap.
      */
-    offset = H5HL_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
+    offset = H5HL_insert(f, bt_udata->heap_addr, HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
     bt_udata->ent.name_off = offset;
     if (0==offset || (size_t)(-1)==offset) {
@@ -793,11 +797,11 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
 
 	/* The right node */
 	if (H5G_node_create(f, H5B_INS_FIRST, NULL, NULL, NULL,
-			    new_node/*out*/)<0) {
+			    new_node_p/*out*/)<0) {
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR,
 			"unable to split symbol table node");
 	}
-	if (NULL == (snrt = H5AC_find(f, H5AC_SNODE, new_node, NULL, NULL))) {
+	if (NULL==(snrt=H5AC_find(f, H5AC_SNODE, *new_node_p, NULL, NULL))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
 			"unable to split symbol table node");
 	}
@@ -876,11 +880,12 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr, void UNUSED *_lt_key,
  *              Thursday, September 24, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
+H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
 		hbool_t UNUSED *lt_key_changed/*out*/,
 		void *_udata/*in,out*/, void *_rt_key/*in,out*/,
 		hbool_t *rt_key_changed/*out*/)
@@ -897,7 +902,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
 
     /* Check arguments */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(lt_key);
     assert(rt_key);
     assert(bt_udata);
@@ -912,7 +917,7 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
     rt = sn->nsyms;
     while (lt<rt && cmp) {
 	idx = (lt+rt)/2;
-	if (NULL==(s=H5HL_peek(f, &(bt_udata->heap_addr),
+	if (NULL==(s=H5HL_peek(f, bt_udata->heap_addr,
 			       sn->entry[idx].name_off))) {
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR,
 			"unable to read symbol name");
@@ -928,16 +933,16 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
 
     if (H5G_CACHED_SLINK==sn->entry[idx].type) {
 	/* Remove the symbolic link value */
-	if ((s=H5HL_peek(f, &(bt_udata->heap_addr),
+	if ((s=H5HL_peek(f, bt_udata->heap_addr,
 			 sn->entry[idx].cache.slink.lval_offset))) {
-	    H5HL_remove(f, &(bt_udata->heap_addr),
+	    H5HL_remove(f, bt_udata->heap_addr,
 			sn->entry[idx].cache.slink.lval_offset,
 			HDstrlen(s)+1);
 	}
 	H5E_clear(); /*no big deal*/
     } else {
 	/* Decrement the reference count */
-	assert(H5F_addr_defined(&(sn->entry[idx].header)));
+	assert(H5F_addr_defined(sn->entry[idx].header));
 	if (H5O_link(sn->entry+idx, -1)<0) {
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR,
 			"unable to decrement object link count");
@@ -945,8 +950,8 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
     }
     
     /* Remove the name from the local heap */
-    if ((s=H5HL_peek(f, &(bt_udata->heap_addr), sn->entry[idx].name_off))) {
-	H5HL_remove(f, &(bt_udata->heap_addr), sn->entry[idx].name_off,
+    if ((s=H5HL_peek(f, bt_udata->heap_addr, sn->entry[idx].name_off))) {
+	H5HL_remove(f, bt_udata->heap_addr, sn->entry[idx].name_off,
 		    HDstrlen(s)+1);
     }
     H5E_clear(); /*no big deal*/
@@ -1031,11 +1036,12 @@ H5G_node_remove(H5F_t *f, const haddr_t *addr, void *_lt_key/*in,out*/,
  *		Jun 24 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, const haddr_t *addr,
+H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
@@ -1052,7 +1058,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, const haddr_t *addr,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(bt_udata);
 
     /*
@@ -1078,7 +1084,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, const haddr_t *addr,
 	if (bt_udata->skip>0) {
 	    --bt_udata->skip;
 	} else {
-	    name = H5HL_peek (f, &(bt_udata->group->ent.cache.stab.heap_addr),
+	    name = H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr,
 			     name_off[i]);
 	    assert (name);
 	    n = HDstrlen (name);
@@ -1119,12 +1125,13 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, const haddr_t *addr,
  *		Aug  4 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR and HEAP arguments are passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
-	       intn fwidth, const haddr_t *heap)
+H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
+	       intn fwidth, haddr_t heap)
 {
     int			    i;
     H5G_node_t		   *sn = NULL;
@@ -1137,7 +1144,7 @@ H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
      * Check arguments.
      */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);

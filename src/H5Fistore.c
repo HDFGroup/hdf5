@@ -95,31 +95,31 @@ typedef struct H5F_rdcc_ent_t {
 /* Private prototypes */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, H5B_ins_t, void *_lt_key,
-				  void *_udata, void *_rt_key, haddr_t *);
+				  void *_udata, void *_rt_key,
+				  haddr_t*/*out*/);
 static intn H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static intn H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
-static herr_t H5F_istore_found(H5F_t *f, const haddr_t *addr,
-			       const void *_lt_key, void *_udata,
-			       const void *_rt_key);
-static H5B_ins_t H5F_istore_insert(H5F_t *f, const haddr_t *addr,
-				   void *_lt_key, hbool_t *lt_key_changed,
-				   void *_md_key, void *_udata,
-				   void *_rt_key, hbool_t *rt_key_changed,
+static herr_t H5F_istore_found(H5F_t *f, haddr_t addr, const void *_lt_key,
+			       void *_udata, const void *_rt_key);
+static H5B_ins_t H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
+				   hbool_t *lt_key_changed, void *_md_key,
+				   void *_udata, void *_rt_key,
+				   hbool_t *rt_key_changed,
 				   haddr_t *new_node/*out*/);
-static herr_t H5F_istore_iterate (H5F_t *f, void *left_key,
-				  const haddr_t *addr, void *right_key,
-				  void *_udata);
+static herr_t H5F_istore_iterate(H5F_t *f, void *left_key, haddr_t addr,
+				 void *right_key, void *_udata);
 static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
-static herr_t H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
-				    const void *key, const void *udata);
+static herr_t H5F_istore_debug_key(FILE *stream, intn indent, intn fwidth,
+				   const void *key, const void *udata);
 #ifdef HAVE_PARALLEL
-static herr_t H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
-				const hssize_t offset[], void *_udata/*out*/);
+static herr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
+				  const hssize_t offset[],
+				  void *_udata/*out*/);
 #endif
 
 /*
@@ -463,7 +463,7 @@ H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
 static herr_t
 H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 		    void *_lt_key, void *_udata, void *_rt_key,
-		    haddr_t *addr/*out*/)
+		    haddr_t *addr_p/*out*/)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
@@ -480,18 +480,18 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     assert(rt_key);
     assert(udata);
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims < H5O_LAYOUT_NDIMS);
-    assert(addr);
+    assert(addr_p);
 
     /* Allocate new storage */
     assert (udata->key.nbytes > 0);
 #ifdef AKC
     printf("calling H5MF_alloc for new chunk\n");
 #endif
-    if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr /*out */ ) < 0) {
+    if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr_p/*out*/) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
 		      "couldn't allocate new file storage");
     }
-    udata->addr = *addr;
+    udata->addr = *addr_p;
 
     /*
      * The left key describes the storage of the UDATA chunk being
@@ -546,13 +546,13 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  *		Thursday, October  9, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_found(H5F_t UNUSED *f, const haddr_t *addr,
-		 const void *_lt_key, void *_udata,
-		 const void UNUSED *_rt_key)
+H5F_istore_found(H5F_t UNUSED *f, haddr_t addr, const void *_lt_key,
+		 void *_udata, const void UNUSED *_rt_key)
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;
@@ -562,7 +562,7 @@ H5F_istore_found(H5F_t UNUSED *f, const haddr_t *addr,
 
     /* Check arguments */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(udata);
     assert(lt_key);
 
@@ -575,7 +575,7 @@ H5F_istore_found(H5F_t UNUSED *f, const haddr_t *addr,
     }
 
     /* Initialize return values */
-    udata->addr = *addr;
+    udata->addr = addr;
     udata->key.nbytes = lt_key->nbytes;
     udata->key.filter_mask = lt_key->filter_mask;
     assert (lt_key->nbytes>0);
@@ -614,15 +614,17 @@ H5F_istore_found(H5F_t UNUSED *f, const haddr_t *addr,
  *		Thursday, October  9, 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value. The NEW_NODE argument
+ *		is renamed NEW_NODE_P.
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
+H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 		  hbool_t UNUSED *lt_key_changed,
 		  void *_md_key, void *_udata, void *_rt_key,
 		  hbool_t UNUSED *rt_key_changed,
-		  haddr_t *new_node/*out*/)
+		  haddr_t *new_node_p/*out*/)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*md_key = (H5F_istore_key_t *) _md_key;
@@ -638,14 +640,14 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 
     /* check args */
     assert(f);
-    assert(addr && H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
     assert(lt_key);
     assert(lt_key_changed);
     assert(md_key);
     assert(udata);
     assert(rt_key);
     assert(rt_key_changed);
-    assert(new_node);
+    assert(new_node_p);
 
     cmp = H5F_istore_cmp3(f, lt_key, udata, rt_key);
     assert(cmp <= 0);
@@ -668,17 +670,17 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	    printf("calling H5MF_realloc for new chunk\n");
 #endif
 	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
-			      udata->key.nbytes, new_node/*out*/)<0) {
+			      udata->key.nbytes, new_node_p/*out*/)<0) {
 		HRETURN_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR,
 			       "unable to reallocate chunk storage");
 	    }
 	    lt_key->nbytes = udata->key.nbytes;
 	    lt_key->filter_mask = udata->key.filter_mask;
 	    *lt_key_changed = TRUE;
-	    udata->addr = *new_node;
+	    udata->addr = *new_node_p;
 	    ret_value = H5B_INS_CHANGE;
 	} else {
-	    udata->addr = *addr;
+	    udata->addr = addr;
 	    ret_value = H5B_INS_NOOP;
 	}
 
@@ -705,11 +707,11 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 #ifdef AKC
 	printf("calling H5MF_alloc for new chunk\n");
 #endif
-	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node/*out*/)<0) {
+	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node_p/*out*/)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
 			  "file allocation failed");
 	}
-	udata->addr = *new_node;
+	udata->addr = *new_node_p;
 	ret_value = H5B_INS_RIGHT;
 
     } else {
@@ -737,12 +739,12 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
  *              Wednesday, April 21, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key,
-		    const haddr_t UNUSED *addr,
+H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 		    void UNUSED *_rt_key, void *_udata)
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
@@ -889,12 +891,12 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 	 * Create the chunk it if it doesn't exist, or reallocate the chunk if
 	 * its size changed.  Then write the data into the file.
 	 */
-	if (H5B_insert(f, H5B_ISTORE, &(ent->layout->addr), ent->split_ratios,
+	if (H5B_insert(f, H5B_ISTORE, ent->layout->addr, ent->split_ratios,
 		       &udata)<0) {
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			 "unable to allocate chunk");
 	}
-	if (H5F_block_write (f, &(udata.addr), udata.key.nbytes,
+	if (H5F_block_write (f, udata.addr, udata.key.nbytes,
 			     &H5F_xfer_dflt, buf)<0) {
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			 "unable to write raw data to file");
@@ -1238,7 +1240,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 
     if (rdcc->nslots>0) {
 	/* We don't care about loss of precision in the following statement. */
-	idx = (uintn)(layout->addr.offset);
+	idx = (uintn)(layout->addr);
 	H5F_MIXUP(idx);
 	for (i=0; i<layout->ndims; i++) {
 	    idx += offset[i];
@@ -1249,7 +1251,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     
 	if (ent &&
 	    layout->ndims==ent->layout->ndims &&
-	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
+	    H5F_addr_eq(layout->addr, ent->layout->addr)) {
 	    for (i=0, found=TRUE; i<ent->layout->ndims; i++) {
 		if (offset[i]!=ent->offset[i]) {
 		    found = FALSE;
@@ -1298,17 +1300,17 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	chunk_alloc = chunk_size;
 	udata.mesg = *layout;
 	H5F_addr_undef (&(udata.addr));
-	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
+	status = H5B_find (f, H5B_ISTORE, layout->addr, &udata);
 	H5E_clear ();
 	if (NULL==(chunk = H5MM_malloc (chunk_alloc))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed for raw data chunk");
 	}
-	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
+	if (status>=0 && H5F_addr_defined(udata.addr)) {
 	    /*
 	     * The chunk exists on disk.
 	     */
-	    if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
+	    if (H5F_block_read(f, udata.addr, udata.key.nbytes,
 	        &H5F_xfer_dflt, chunk)<0) {
 		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
 			     "unable to read raw data chunk");
@@ -1356,11 +1358,11 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 #endif
 #if 0
 	    HDfprintf(stderr, "\ncollision %3d %10a {",
-		      idx, &(ent->layout->addr));
+		      idx, ent->layout->addr);
 	    for (i=0; i<layout->ndims; i++) {
 		HDfprintf(stderr, "%s%Zu", i?",":"", ent->offset[i]);
 	    }
-	    HDfprintf(stderr, "}\n              %10a {", &(layout->addr));
+	    HDfprintf(stderr, "}\n              %10a {", layout->addr);
 	    for (i=0; i<layout->ndims; i++) {
 		HDfprintf(stderr, "%s%Zu", i?",":"", offset[i]);
 	    }
@@ -1593,7 +1595,7 @@ H5F_istore_read(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
     assert (f);
     assert (layout && H5D_CHUNKED==layout->type);
     assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert (H5F_addr_defined(&(layout->addr)));
+    assert (H5F_addr_defined(layout->addr));
     assert (offset_f);
     assert (size);
     assert (buf);
@@ -1764,7 +1766,7 @@ H5F_istore_write(H5F_t *f, const H5F_xfer_t *xfer, const H5O_layout_t *layout,
     assert(f);
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert(H5F_addr_defined(&(layout->addr)));
+    assert(H5F_addr_defined(layout->addr));
     assert(offset_f);
     assert(size);
     assert(buf);
@@ -1965,11 +1967,12 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
  *              Wednesday, April 21, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr)
+H5F_istore_allocated(H5F_t *f, int ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
@@ -1998,11 +2001,12 @@ H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr)
  *              Wednesday, April 28, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims, haddr_t *addr)
+H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
@@ -2090,11 +2094,12 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
  *              Thursday, April 16, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
+H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
 		 intn fwidth, int ndims)
 {
     H5F_istore_ud1_t	udata;
@@ -2147,9 +2152,9 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
     }
     udata->mesg = *layout;
     H5F_addr_undef (&(udata->addr));
-    status = H5B_find (f, H5B_ISTORE, &(layout->addr), udata);
+    status = H5B_find (f, H5B_ISTORE, layout->addr, udata);
     H5E_clear ();
-    if (status>=0 && H5F_addr_defined (&(udata->addr)))
+    if (status>=0 && H5F_addr_defined(udata->addr))
 	HRETURN(SUCCEED);
 
     FUNC_LEAVE (FAIL);
@@ -2211,7 +2216,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
     assert(pline);
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert(H5F_addr_defined(&(layout->addr)));
+    assert(H5F_addr_defined(layout->addr));
 
     /*
      * Setup indice to go through all chunks. (Future improvement
@@ -2281,7 +2286,7 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	} else {
 #ifdef AKC
 	    printf("NO need for allocation\n");
-	    printf("udata.addr.offset=%d\n", udata.addr.offset);
+	    HDfprintf(stdout, "udata.addr=%a\n", udata.addr);
 #endif
 	}
 #endif

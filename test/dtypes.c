@@ -1585,7 +1585,7 @@ test_conv_bitfield(void)
 static herr_t
 convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
 	       size_t UNUSED nelmts, size_t UNUSED stride, void UNUSED *_buf,
-	       void UNUSED *bkg, hid_t dset_xfer_plid)
+	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid)
 {
     if (H5T_CONV_CONV==cdata->command) num_opaque_conversions_g++;
     return 0;

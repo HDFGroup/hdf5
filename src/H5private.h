@@ -396,11 +396,7 @@ typedef unsigned uintn;
 /*
  * File addresses.
  */
-typedef struct {
-    uint64_t		offset;	    /*offset within an HDF5 file    */
-} haddr_t;
-
-#define H5F_ADDR_UNDEF {((uint64_t)(-1L))}
+typedef uint64_t haddr_t;
 
 /*
  * Maximum and minimum values.	These should be defined in <limits.h> for the

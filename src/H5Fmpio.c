@@ -104,16 +104,15 @@ static H5F_low_t *H5F_mpio_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
-			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    const H5F_xfer_t *xfer_parms, haddr_t addr,
 			    size_t size, uint8_t *buf/*out*/);
 htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 static herr_t H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
-			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     const H5F_xfer_t *xfer_parms, haddr_t addr,
 			     size_t size, const uint8_t *buf);
 static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
-static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr/*out*/);
-static herr_t H5F_haddr_to_MPIOff(const haddr_t *addr,
-				  MPI_Offset *mpi_off/*out*/);
+static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr_p/*out*/);
+static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
 
 const H5F_low_class_t	H5F_LOW_MPIO_g[1] = {{
     H5F_mpio_access,		/*access method				*/
@@ -125,8 +124,8 @@ const H5F_low_class_t	H5F_LOW_MPIO_g[1] = {{
      * in the parameter list of the write function in H5F_low_class_t
      * would propagate to a lot of functions that don't change that param */
     (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
-	    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-	    size_t size, uint8_t *buf))
+	    const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	    uint8_t *buf))
     H5F_mpio_read,		/*read method				*/
 
     /* rky 980816
@@ -134,8 +133,8 @@ const H5F_low_class_t	H5F_LOW_MPIO_g[1] = {{
      * in the parameter list of the write function in H5F_low_class_t
      * would propagate to a lot of functions that don't change that param */
     (int(*)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
-	    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
-	    size_t size, const uint8_t *buf))
+	    const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	    const uint8_t *buf))
     H5F_mpio_write,		/*write method				*/
 
     H5F_mpio_flush,		/*flush method				*/
@@ -509,15 +508,17 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
  *	The guts of H5F_mpio_read and H5F_mpio_write
  *	should be replaced by a single dual-purpose routine.
  *
- * 	Robb Matzke, 19990421
+ * 	Robb Matzke, 1999-04-21
  *	Changed xfer_mode to xfer_parms for all H5F_*_read() callbacks.
  *
+ * 	Robb Matzke, 1999-07-28
+ *	The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
-	      const H5F_xfer_t *xfer_parms,
-	      const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
+	      const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	      uint8_t *buf/*out*/)
 {
     MPI_Offset  mpi_off, mpi_disp;
     MPI_Status  mpi_stat;
@@ -761,15 +762,17 @@ H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
  * 	rky, 980828
  *	Added allsame parameter to make all but proc 0 skip the actual write.
  *
- * 	Robb Matzke, 19990421
- *	Changed xfer_mode to xfer_parms for all H5F_*_write() callbacks.
+ * 	Robb Matzke, 1999-04-21
+ *	Changed XFER_MODE to XFER_PARMS for all H5F_*_write() callbacks.
  *
+ * 	Robb Matzke, 1999-07-28
+ *	The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
-	       const H5F_xfer_t *xfer_parms,
-	       const haddr_t *addr, size_t size, const uint8_t *buf)
+	       const H5F_xfer_t *xfer_parms, haddr_t addr, size_t size,
+	       const uint8_t *buf)
 {
     MPI_Offset  mpi_off, mpi_disp;
     MPI_Status  mpi_stat;
@@ -989,11 +992,11 @@ H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr/*out*/)
+H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr_p/*out*/)
 {
     FUNC_ENTER(H5F_MPIOff_to_haddr, FAIL);
 
-    if (addr) addr->offset = (uint64_t) mpi_off;
+    if (addr_p) *addr_p = (uint64_t) mpi_off;
     if (mpi_off != (MPI_Offset)(uint64_t)mpi_off) {
 	HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "bad MPI address");
     }
@@ -1020,15 +1023,17 @@ H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr/*out*/)
  *		An error is reported for address overflows. The ADDR output
  *		argument is optional.
  *
+ * 		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_haddr_to_MPIOff(const haddr_t *addr, MPI_Offset *mpi_off/*out*/)
+H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 {
     FUNC_ENTER(H5F_haddr_to_MPIOff, FAIL);
 
-    if (mpi_off) *mpi_off = (MPI_Offset)addr->offset;
-    if (addr->offset != (uint64_t)(MPI_Offset)(addr->offset)) {
+    if (mpi_off) *mpi_off = (MPI_Offset)addr;
+    if (addr != (uint64_t)(MPI_Offset)(addr)) {
 	HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL,
 		      "hdf5 address overflows MPI address");
     }

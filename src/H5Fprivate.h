@@ -361,11 +361,11 @@ typedef struct H5F_low_class_t {
     herr_t	(*close)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
     herr_t	(*read)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
-    			const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+    			const H5F_xfer_t *xfer_parms, haddr_t addr,
 			size_t size, uint8_t *buf);
     herr_t	(*write)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms,
-			 const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			 const H5F_xfer_t *xfer_parms, haddr_t addr,
 			 size_t size, const uint8_t *buf);
     herr_t	(*flush)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
@@ -611,9 +611,9 @@ __DLL__ H5F_t *H5F_open(const char *name, uintn flags,
 __DLL__ herr_t H5F_close(H5F_t *f);
 __DLL__ herr_t H5F_close_all(void);
 __DLL__ herr_t H5F_flush_all(hbool_t invalidate);
-__DLL__ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5F_debug(H5F_t *f, haddr_t addr, FILE * stream,
 			 intn indent, intn fwidth);
-__DLL__ herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream,
 				intn indent, intn fwidth, int ndims);
 __DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
@@ -643,7 +643,7 @@ __DLL__ herr_t H5F_arr_write (H5F_t *f, const struct H5F_xfer_t *xfer,
 __DLL__ herr_t H5F_istore_init (H5F_t *f);
 __DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
 __DLL__ herr_t H5F_istore_dest (H5F_t *f);
-__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr);
+__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t addr);
 __DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 __DLL__ herr_t H5F_istore_create(H5F_t *f,
 				 struct H5O_layout_t *layout/*in,out*/);
@@ -666,19 +666,19 @@ __DLL__ herr_t H5F_istore_allocate (H5F_t *f,
 				    const struct H5O_pline_t *pline,
 				    const struct H5O_fill_t *fill);
 __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
-				     haddr_t *addr);
+				     haddr_t addr);
 
 /* Functions that operate on contiguous storage wrt boot block */
-__DLL__ herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
+__DLL__ herr_t H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
 			      const H5F_xfer_t *xfer_parms, void *buf);
-__DLL__ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
+__DLL__ herr_t H5F_block_write(H5F_t *f, haddr_t addr, hsize_t size,
 			       const H5F_xfer_t *xfer_parms, const void *buf);
 
 /* Functions that operate directly on low-level files */
 __DLL__ const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
 __DLL__ herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 			      intn op, hsize_t size, haddr_t *addr/*out*/);
-__DLL__ herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
+__DLL__ herr_t H5F_low_seteof(H5F_low_t *lf, haddr_t addr);
 __DLL__ intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
 			    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 			    haddr_t *addr/*out*/);
@@ -692,35 +692,45 @@ __DLL__ H5F_low_t *H5F_low_close(H5F_low_t *lf,
 				 const H5F_access_t *access_parms);
 __DLL__ hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 __DLL__ herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			    const H5F_xfer_t *xfer_parms, haddr_t addr,
 			    size_t size, uint8_t *buf);
 __DLL__ herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			     const H5F_xfer_t *xfer_parms, const haddr_t *addr,
+			     const H5F_xfer_t *xfer_parms, haddr_t addr,
 			     size_t size, const uint8_t *buf);
 __DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
-/* Functions that operate on addresses */
-#define H5F_addr_eq(A1,A2) (H5F_addr_cmp(A1,A2)==0)
-#define H5F_addr_ne(A1,A2) (H5F_addr_cmp(A1,A2)!=0)
-#define H5F_addr_lt(A1,A2) (H5F_addr_cmp(A1,A2)<0)
-#define H5F_addr_le(A1,A2) (H5F_addr_cmp(A1,A2)<=0)
-#define H5F_addr_gt(A1,A2) (H5F_addr_cmp(A1,A2)>0)
-#define H5F_addr_ge(A1,A2) (H5F_addr_cmp(A1,A2)>=0)
-
-__DLL__ intn H5F_addr_cmp(const haddr_t *, const haddr_t *);
-__DLL__ htri_t H5F_addr_defined(const haddr_t *);
-__DLL__ void H5F_addr_undef(haddr_t *);
-__DLL__ void H5F_addr_reset(haddr_t *);
-__DLL__ htri_t H5F_addr_zerop(const haddr_t *);
-__DLL__ void H5F_addr_encode(H5F_t *, uint8_t **, const haddr_t *);
-__DLL__ void H5F_addr_decode(H5F_t *, const uint8_t **, haddr_t *);
-__DLL__ void H5F_addr_print(FILE *, const haddr_t *);
-__DLL__ void H5F_addr_pow2(uintn, haddr_t *);
+/* Address-related macros and functions */
+#define H5F_ADDR_UNDEF ((uint64_t)(-1L))
+#define H5F_addr_defined(X)	(X!=H5F_ADDR_UNDEF)
+#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
+#define H5F_addr_eq(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
+				 (Y)!=H5F_ADDR_UNDEF &&			      \
+				 (X)==(Y))
+#define H5F_addr_ne(X,Y)	(!H5F_addr_eq((X),(Y)))
+#define H5F_addr_lt(X,Y) 	((X)!=H5F_ADDR_UNDEF &&			      \
+				 (Y)!=H5F_ADDR_UNDEF &&			      \
+				 (X)<(Y))
+#define H5F_addr_le(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
+				 (Y)!=H5F_ADDR_UNDEF &&			      \
+				 (X)<=(Y))
+#define H5F_addr_gt(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
+				 (Y)!=H5F_ADDR_UNDEF &&			      \
+				 (X)>(Y))
+#define H5F_addr_ge(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
+				 (Y)!=H5F_ADDR_UNDEF &&			      \
+				 (X)>=(Y))
+#define H5F_addr_undef(XP)	(*(XP)=H5F_ADDR_UNDEF)
+#define H5F_addr_reset(XP)	(*(XP)=0)
+#define H5F_addr_zerop(X)	((X)==0)
 __DLL__ void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
-__DLL__ void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
-__DLL__ void H5F_addr_add(haddr_t *, const haddr_t *);
-__DLL__ uintn H5F_addr_hash(const haddr_t *, uintn mod);
-__DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr,
+__DLL__ void H5F_addr_encode(H5F_t *, uint8_t**/*in,out*/, haddr_t);
+__DLL__ void H5F_addr_decode(H5F_t *, const uint8_t**/*in,out*/,
+			     haddr_t*/*out*/);
+__DLL__ void H5F_addr_pow2(uintn n, haddr_t *addr/*out*/);
+__DLL__ void H5F_addr_add(haddr_t *a1/*in,out*/, haddr_t a2);
+__DLL__ intn H5F_addr_cmp(haddr_t a1, haddr_t a2);
+__DLL__ void H5F_addr_adj(haddr_t *addr/*in,out */, hssize_t adj);
+__DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 			     const unsigned long objno[2]);
 
 /* Functions for MPI-IO */

@@ -101,8 +101,8 @@ H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* Heap address */
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
 #ifndef NDEBUG
-    assert (H5F_addr_defined (&(mesg->heap_addr)));
-    s = H5HL_peek (f, &(mesg->heap_addr), 0);
+    assert (H5F_addr_defined(mesg->heap_addr));
+    s = H5HL_peek (f, mesg->heap_addr, 0);
     assert (s && !*s);
 #endif
 
@@ -116,7 +116,7 @@ H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     for (i=0; i<mesg->nused; i++) {
 	/* Name */
 	H5F_decode_length (f, p, mesg->slot[i].name_offset);
-	s = H5HL_peek (f, &(mesg->heap_addr), mesg->slot[i].name_offset);
+	s = H5HL_peek(f, mesg->heap_addr, mesg->slot[i].name_offset);
 	assert (s && *s);
 	mesg->slot[i].name = H5MM_xstrdup (s);
 	
@@ -177,8 +177,8 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     UINT16ENCODE(p, mesg->nused);
 
     /* Heap address */
-    assert (H5F_addr_defined (&(mesg->heap_addr)));
-    H5F_addr_encode(f, &p, &(mesg->heap_addr));
+    assert (H5F_addr_defined(mesg->heap_addr));
+    H5F_addr_encode(f, &p, mesg->heap_addr);
 
     /* Encode file list */
     for (i=0; i<mesg->nused; i++) {
@@ -186,7 +186,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 	 * If the name has not been added to the heap yet then do so now.
 	 */
 	if (0==mesg->slot[i].name_offset) {
-	    offset = H5HL_insert (f, &(mesg->heap_addr),
+	    offset = H5HL_insert (f, mesg->heap_addr,
 				  HDstrlen (mesg->slot[i].name)+1,
 				  mesg->slot[i].name);
 	    if ((size_t)(-1)==offset) {
@@ -401,11 +401,12 @@ H5O_efl_total_size (H5O_efl_t *efl)
  *              Wednesday, March  4, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
+H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	      hsize_t size, uint8_t *buf)
 {
     int		i, fd=-1;
@@ -417,15 +418,15 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
 
     /* Check args */
     assert (efl && efl->nused>0);
-    assert (addr && H5F_addr_defined (addr));
+    assert (H5F_addr_defined (addr));
     assert (size < SIZET_MAX);
     assert (buf || 0==size);
 
     /* Find the first efl member from which to read */
     for (i=0, cur=0; i<efl->nused; i++) {
 	if (H5O_EFL_UNLIMITED==efl->slot[i].size ||
-	    addr->offset < cur+efl->slot[i].size) {
-	    skip = addr->offset - cur;
+	    addr < cur+efl->slot[i].size) {
+	    skip = addr - cur;
 	    break;
 	}
 	cur += efl->slot[i].size;
@@ -485,11 +486,12 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
  *              Wednesday, March  4, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-07-28
+ *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
+H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 	       hsize_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
@@ -500,15 +502,15 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
 
     /* Check args */
     assert (efl && efl->nused>0);
-    assert (addr && H5F_addr_defined (addr));
+    assert (H5F_addr_defined (addr));
     assert (size < SIZET_MAX);
     assert (buf || 0==size);
 
     /* Find the first efl member in which to write */
     for (i=0, cur=0; i<efl->nused; i++) {
 	if (H5O_EFL_UNLIMITED==efl->slot[i].size ||
-	    addr->offset < cur+efl->slot[i].size) {
-	    skip = addr->offset - cur;
+	    addr < cur+efl->slot[i].size) {
+	    skip = addr - cur;
 	    break;
 	}
 	cur += efl->slot[i].size;
@@ -588,34 +590,32 @@ H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth,
-	    "Heap address:");
-    H5F_addr_print(stream, &(mesg->heap_addr));
-    fprintf(stream, "\n");
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	      "Heap address:", mesg->heap_addr);
 
-    fprintf(stream, "%*s%-*s %u/%u\n", indent, "", fwidth,
-	    "Slots used/allocated:",
-	    mesg->nused, mesg->nalloc);
+    HDfprintf(stream, "%*s%-*s %u/%u\n", indent, "", fwidth,
+	      "Slots used/allocated:",
+	      mesg->nused, mesg->nalloc);
 
     for (i = 0; i < mesg->nused; i++) {
 	sprintf (buf, "File %d", i);
-	fprintf (stream, "%*s%s:\n", indent, "", buf);
+	HDfprintf (stream, "%*s%s:\n", indent, "", buf);
 	
-	fprintf(stream, "%*s%-*s \"%s\"\n", indent+3, "", MAX (fwidth-3, 0),
-		"Name:",
-		mesg->slot[i].name);
+	HDfprintf(stream, "%*s%-*s \"%s\"\n", indent+3, "", MAX (fwidth-3, 0),
+		  "Name:",
+		  mesg->slot[i].name);
 	
-	fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
-		"Name offset:",
-		(unsigned long)(mesg->slot[i].name_offset));
+	HDfprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
+		  "Name offset:",
+		  (unsigned long)(mesg->slot[i].name_offset));
 
-	fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
-		 "Offset of data in file:",
-		 (unsigned long)(mesg->slot[i].offset));
+	HDfprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
+		   "Offset of data in file:",
+		   (unsigned long)(mesg->slot[i].offset));
 
-	fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
-		 "Bytes reserved for data:",
-		 (unsigned long)(mesg->slot[i].size));
+	HDfprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX (fwidth-3, 0),
+		   "Bytes reserved for data:",
+		   (unsigned long)(mesg->slot[i].size));
     }
 
     FUNC_LEAVE(SUCCEED);

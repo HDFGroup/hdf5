@@ -4781,7 +4781,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	 * Return a transient type (locked or unlocked) or an opened named
 	 * type.
 	 */
-	if (H5F_addr_defined (&(new_dt->ent.header))) {
+	if (H5F_addr_defined(new_dt->ent.header)) {
 	    if (H5O_open (&(new_dt->ent))<0) {
 		H5MM_xfree (new_dt);
 		HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
@@ -4939,7 +4939,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 
  done:
     if (ret_value<0) {
-	if (H5F_addr_defined (&(type->ent.header))) {
+	if (H5F_addr_defined(type->ent.header)) {
 	    H5O_close(&(type->ent));
 	    H5F_addr_undef (&(type->ent.header));
 	}
@@ -5023,7 +5023,7 @@ H5T_close(H5T_t *dt)
      * If a named type is being closed then close the object header also.
      */
     if (H5T_STATE_OPEN==dt->state) {
-	assert (H5F_addr_defined (&(dt->ent.header)));
+	assert (H5F_addr_defined(dt->ent.header));
 	if (H5O_close(&(dt->ent))<0) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			  "unable to close data type object header");
