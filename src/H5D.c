@@ -423,7 +423,7 @@ H5Dget_type (hid_t dataset_id)
     }
     if (H5T_lock (copied_type, FALSE)<0) {
 	H5T_close (copied_type);
-	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to lock transient data type");
     }
     
@@ -793,36 +793,31 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 			"unable to initialize contiguous storage");
 	}
 
-	/* Don't go through all these checks for scalar dataspaces */
-	if(ndims>0) {
-	    for (i=1; i<ndims; i++) {
-		if (max_dim[i]>new_dset->layout.dim[i]) {
-		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-				 "only the first dimension can be extendible");
-		}
+	for (i=1; i<ndims; i++) {
+	    if (max_dim[i]>new_dset->layout.dim[i]) {
+		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+			     "only the first dimension can be extendible");
 	    }
-	    if (efl->nused>0) {
-		hsize_t max_points = H5S_get_npoints_max (space);
-		hsize_t max_storage = H5O_efl_total_size (efl);
+	}
+	if (efl->nused>0) {
+	    hsize_t max_points = H5S_get_npoints_max (space);
+	    hsize_t max_storage = H5O_efl_total_size (efl);
 
-		if (H5S_UNLIMITED==max_points) {
-		    if (H5O_EFL_UNLIMITED!=max_storage) {
-			HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-				     "unlimited data space but finite "
-				     "storage");
-		    }
-		} else if (max_points * H5T_get_size (type) < max_points) {
+	    if (H5S_UNLIMITED==max_points) {
+		if (H5O_EFL_UNLIMITED!=max_storage) {
 		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-				 "data space * type size overflowed");
-		} else if (max_points * H5T_get_size (type) > max_storage) {
-		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-				 "data space size exceeds external storage "
-				 "size");
+				 "unlimited data space but finite storage");
 		}
-	    } else if (max_dim[0]>new_dset->layout.dim[0]) {
-		HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
-			     "extendible contiguous non-external dataset");
+	    } else if (max_points * H5T_get_size (type) < max_points) {
+		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+			     "data space * type size overflowed");
+	    } else if (max_points * H5T_get_size (type) > max_storage) {
+		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+			     "data space size exceeds external storage size");
 	    }
+	} else if (ndims>0 && max_dim[0]>new_dset->layout.dim[0]) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+			 "extendible contiguous non-external dataset");
 	}
 	break;
 

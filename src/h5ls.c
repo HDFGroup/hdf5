@@ -28,6 +28,46 @@ usage (const char *progname)
     exit (1);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	list_attr
+ *
+ * Purpose:	Prints information about attributes.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, June  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+list_attr (hid_t obj, const char *attr_name, void __unused__ *op_data)
+{
+    hid_t	attr;
+    int		i;
+    
+    printf ("%*s%s", 26, "", attr_name);
+    if ((attr = H5Aopen_name (obj, attr_name))) {
+	hid_t space = H5Aget_space (attr);
+	hsize_t size[64];
+	int ndims = H5Sget_dims (space, size);
+	H5Sclose (space);
+	printf (" {");
+	for (i=0; i<ndims; i++) {
+	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
+	}
+	putchar ('}');
+	H5Aclose (attr);
+    }
+    
+    putchar ('\n');
+    return 0;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -80,9 +120,11 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	}
 	printf ("}\n");
 	H5Dclose (space);
+	H5Aiterate (obj, NULL, list_attr, NULL);
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf ("Group\n");
+	H5Aiterate (obj, NULL, list_attr, NULL);
 	H5Gclose (obj);
     } else if (H5Gget_linkval (group, name, sizeof(buf), buf)>=0) {
 	if (NULL==HDmemchr (buf, 0, sizeof(buf))) {
@@ -91,6 +133,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf (" -> %s\n", buf);
     } else if ((obj=H5Topen (group, name))>=0) {
 	printf ("Data type\n");
+	H5Aiterate (obj, NULL, list_attr, NULL);
 	H5Tclose (obj);
     } else {
 	printf ("Unknown Type\n");

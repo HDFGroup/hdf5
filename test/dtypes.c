@@ -9,7 +9,17 @@
  */
 #include <hdf5.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+
+#include <H5config.h>
+#ifndef HAVE_ATTRIBUTE
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#   define __unused__ /*void*/
+#else
+#   define __unused__ __attribute__((unused))
+#endif
 
 #define FILE_NAME_1	"dtypes1.h5"
 #define FILE_NAME_2	"dtypes2.h5"
@@ -21,7 +31,7 @@ typedef struct complex_t {
 
 
 /*-------------------------------------------------------------------------
- * Function:	clean
+ * Function:	cleanup
  *
  * Purpose:	Removes test files
  *
@@ -35,10 +45,12 @@ typedef struct complex_t {
  *-------------------------------------------------------------------------
  */
 static void
-clean (void)
+cleanup (void)
 {
-    remove (FILE_NAME_1);
-    remove (FILE_NAME_2);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove (FILE_NAME_1);
+	remove (FILE_NAME_2);
+    }
 }
 
 
@@ -59,7 +71,7 @@ clean (void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void *client_data)
+display_error_cb (void __unused__ *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);
@@ -214,7 +226,7 @@ test_compound(void)
 static herr_t
 test_transient (void)
 {
-    static hsize_t	ds_size[2] = {100, 200};
+    static hsize_t	ds_size[2] = {10, 20};
     hid_t		file, type, space, dset, t2;
     
     printf ("%-70s", "Testing transient data types");
@@ -239,9 +251,18 @@ test_transient (void)
     /* Copying a predefined type results in a modifiable copy */
     if ((type=H5Tcopy (H5T_NATIVE_INT))<0) goto error;
     if (H5Tset_precision (type, 256)<0) goto error;
-    if (H5Tclose (type)<0) goto error;
+
+    /* It should not be possible to create an attribute for a transient type */
+    H5E_BEGIN_TRY {
+	if (H5Acreate (type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT)>=0) {
+	    puts ("*FAILED*");
+	    puts ("   Attributes should not be allowed for transient types!");
+	    goto error;
+	}
+    } H5E_END_TRY;
 
     /* Create a dataset from a transient data type */
+    if (H5Tclose (type)<0) goto error;
     if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
     if ((dset=H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0) {
 	goto error;
@@ -321,9 +342,9 @@ test_transient (void)
 static herr_t
 test_named (void)
 {
-    hid_t		file, type, space, dset, t2;
+    hid_t		file, type, space, dset, t2, attr1;
     herr_t		status;
-    static hsize_t	ds_size[2] = {100, 200};
+    static hsize_t	ds_size[2] = {10, 20};
     
     printf ("%-70s", "Testing named data types");
     if ((file=H5Fcreate (FILE_NAME_2, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
@@ -367,6 +388,11 @@ test_named (void)
 	    goto error;
 	}
     } H5E_END_TRY;
+
+    /* It should be possible to define an attribute for the named type */
+    if ((attr1=H5Acreate (type, "attr1", H5T_NATIVE_INT, space,
+			  H5P_DEFAULT))<0) goto error;
+    if (H5Aclose (attr1)<0) goto error;
 
     /*
      * Copying a committed type should result in a transient type which is
@@ -509,6 +535,6 @@ main(void)
         exit(1);
     }
     printf("All data type tests passed.\n");
-    clean ();
+    cleanup ();
     return 0;
 }

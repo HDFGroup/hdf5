@@ -9,6 +9,7 @@
  */
 #include <assert.h>
 #include <hdf5.h>
+#include <stdlib.h>
 
 #define TEST_FILE_NAME	"extend.h5"
 #define NX	100		/* USE AN EVEN NUMBER!*/
@@ -32,8 +33,11 @@
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

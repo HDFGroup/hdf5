@@ -8,6 +8,7 @@
  * Purpose:	Tests hard and soft (symbolic) links.
  */
 #include <hdf5.h>
+#include <stdlib.h>
 
 #define TEST_FILE_NAME	"links.h5"
 
@@ -29,8 +30,11 @@
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

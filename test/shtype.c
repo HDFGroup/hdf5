@@ -9,6 +9,7 @@
  */
 #include <assert.h>
 #include <hdf5.h>
+#include <stdlib.h>
 
 #include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
@@ -286,12 +287,15 @@ test_3 (void)
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME0);
-    remove(TEST_FILE_NAME1);
-    remove(TEST_FILE_NAME2A);
-    remove(TEST_FILE_NAME2B);
-    remove(TEST_FILE_NAME3);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME0);
+	remove(TEST_FILE_NAME1);
+	remove(TEST_FILE_NAME2A);
+	remove(TEST_FILE_NAME2B);
+	remove(TEST_FILE_NAME3);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

@@ -81,8 +81,11 @@ typedef struct s5_t {
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

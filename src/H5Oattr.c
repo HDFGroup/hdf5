@@ -76,9 +76,9 @@ static hbool_t          interface_initialize_g = FALSE;
 static void *
 H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 {
-    H5A_t                  *attr = NULL;
-	H5S_simple_t	*simple;		/*simple dimensionality information  */
-    size_t          name_len;   /* Attribute name length */
+    H5A_t		*attr = NULL;
+    H5S_simple_t	*simple;	/*simple dimensionality information  */
+    size_t		name_len;   	/*attribute name length */
 
     FUNC_ENTER(H5O_attr_decode, NULL);
 

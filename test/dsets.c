@@ -688,8 +688,11 @@ test_compression(hid_t file)
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

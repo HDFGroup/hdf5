@@ -60,6 +60,7 @@ herr_t H5T_pack (H5T_t *dt);
 herr_t H5T_debug (H5T_t *dt, FILE * stream);
 H5T_conv_t H5T_find (const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 		     H5T_cdata_t **pcdata/*out*/);
+H5G_entry_t *H5T_entof (H5T_t *dt);
 void H5T_timer_begin (H5_timer_t *timer, H5T_cdata_t *cdata);
 void H5T_timer_end (H5_timer_t *timer, H5T_cdata_t *cdata, size_t nelmts);
 

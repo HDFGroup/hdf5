@@ -543,8 +543,11 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 static void
 cleanup(void)
 {
-    remove(FILENAME);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(FILENAME);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

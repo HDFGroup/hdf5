@@ -386,12 +386,15 @@ test_4 (void)
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME0);
-    remove(TEST_FILE_NAME1);
-    remove(TEST_FILE_NAME2);
-    remove(TEST_FILE_NAME3);
-    remove(TEST_FILE_NAME4);
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME0);
+	remove(TEST_FILE_NAME1);
+	remove(TEST_FILE_NAME2);
+	remove(TEST_FILE_NAME3);
+	remove(TEST_FILE_NAME4);
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main

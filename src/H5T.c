@@ -3775,6 +3775,46 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_entof
+ *
+ * Purpose:	Returns a pointer to the entry for a named data type.
+ *
+ * Return:	Success:	Ptr directly into named data type
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, June  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_entry_t *
+H5T_entof (H5T_t *dt)
+{
+    H5G_entry_t		*ret_value = NULL;
+    
+    FUNC_ENTER (H5T_entof, NULL);
+    assert (dt);
+
+    switch (dt->state) {
+    case H5T_STATE_TRANSIENT:
+    case H5T_STATE_RDONLY:
+    case H5T_STATE_IMMUTABLE:
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+		       "not a named data type");
+    case H5T_STATE_NAMED:
+    case H5T_STATE_OPEN:
+	ret_value = &(dt->ent);
+	break;
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_timer_begin
  *
  * Purpose:	Start a timer for a data type conversion.

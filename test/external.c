@@ -787,21 +787,24 @@ test_3 (void)
 static void
 cleanup(void)
 {
-    remove(TEST_FILE_NAME1);
-    remove(TEST_FILE_NAME2);
-    remove(TEST_FILE_NAME3);
-    /* not sure if the following file names can be #defined */
-    /* because some of them are created during runtime. */
-    /* List them out this way for now. */
-    remove("extern_1.raw");
-    remove("extern_1b.raw");
-    remove("extern_2.raw");
-    remove("extern_2b.raw");
-    remove("extern_3.raw");
-    remove("extern_3b.raw");
-    remove("extern_4.raw");
-    remove("extern_4b.raw");
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	remove(TEST_FILE_NAME1);
+	remove(TEST_FILE_NAME2);
+	remove(TEST_FILE_NAME3);
+	/* not sure if the following file names can be #defined */
+	/* because some of them are created during runtime. */
+	/* List them out this way for now. */
+	remove("extern_1.raw");
+	remove("extern_1b.raw");
+	remove("extern_2.raw");
+	remove("extern_2b.raw");
+	remove("extern_3.raw");
+	remove("extern_3b.raw");
+	remove("extern_4.raw");
+	remove("extern_4b.raw");
+    }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
