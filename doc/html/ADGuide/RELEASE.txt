@@ -1,4 +1,4 @@
-HDF5 version 1.7.25 released on Sun May  9 04:09:54 CDT 2004
+HDF5 version 1.7.26 released on Sun May 16 09:00:53 CDT 2004
 ================================================================================
 
 
@@ -42,6 +42,7 @@ New Features
 
     Library:
     --------
+	- New Feature of Data transformation is added.  AKC - 2004/05/03.
         - New exception handler for datatype conversion is put in to 
             replace the old overflow callback function.  This exception
             handler is set through H5Pset_type_conv_cb function.
