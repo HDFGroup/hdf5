@@ -14,7 +14,9 @@
 #include <stdlib.h>
 
 #include "hdf5.h"
+#ifdef QAK
 #include "H5private.h"          /* library function  */
+#endif /* QAK */
 
 /*
  * Define H5FD_MULTI_DEBUG if you want the ability to print debugging
@@ -402,7 +404,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     H5Eclear();
 
     /* Check arguments and supply default values */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+    if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "not an access list", -1);
     if (!memb_map) {
@@ -499,7 +501,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
     /* Clear the error stack */
     H5Eclear();
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+    if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))   
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not an access list", -1);
     if (H5FD_MULTI!=H5Pget_driver(fapl_id))

@@ -14,6 +14,7 @@
 #include "H5Eprivate.h"         /* error handling    */
 #include "H5FDprivate.h"	/*file driver	     */
 #include "H5FDdpss.h"
+#include "H5Iprivate.h"		/*object IDs	     */
 #include "H5MMprivate.h"        /* memory management */
 
 #ifdef COALESCE_READS

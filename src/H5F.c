@@ -1034,7 +1034,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*f=NULL, *ret_value=NULL;
     int		n;
+#ifdef H5_HAVE_PARALLEL
     hid_t       driver_id = -1;
+#endif /* H5_HAVE_PARALLEL */
  
     FUNC_ENTER(H5F_new, NULL);
 
@@ -1774,9 +1776,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value = FAIL;	/*return value			*/
-    size_t      meta_block_size = 0;
-    hid_t       driver_id=-1;
-
  
     FUNC_ENTER(H5Fcreate, FAIL);
     H5TRACE4("i","sIuii",filename,flags,fcpl_id,fapl_id);

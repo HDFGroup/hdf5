@@ -63,7 +63,8 @@ test_file_create(void)
     hsize_t		ublock;		/*sizeof userblock		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-    int			iparm, iparm2;
+    int			iparm;
+    unsigned		iparm2;
     herr_t		ret;		/*generic return value		*/
 
     /* Output message about test being performed */
@@ -295,7 +296,8 @@ test_file_open(void)
     hsize_t		ublock;		/*sizeof user block		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-    int			iparm, iparm2;
+    int			iparm;
+    unsigned		iparm2;
     herr_t		ret;		/*generic return value		*/
 
     /* Output message about test being performed */

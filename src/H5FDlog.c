@@ -18,9 +18,10 @@
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver				  */
-#include "H5FDlog.h"        /* logging file driver */
+#include "H5FDlog.h"            /* logging file driver */
 #include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Iprivate.h"		/*object IDs				  */
+#include "H5MMprivate.h"        /* Memory allocation */
 #include "H5Pprivate.h"		/*property lists			*/
 
 

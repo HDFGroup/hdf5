@@ -16,9 +16,10 @@
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver				  */
-#include "H5FDsec2.h"       /* Sec2 file driver */
+#include "H5FDsec2.h"           /* Sec2 file driver */
 #include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Iprivate.h"		/*object IDs				  */
+#include "H5MMprivate.h"        /* Memory allocation */
 #include "H5Pprivate.h"		/*property lists			*/
 
 #ifdef MAX
@@ -204,7 +205,7 @@ H5FD_sec2_init(void)
 {
     FUNC_ENTER(H5FD_sec2_init, FAIL);
 
-    if (H5I_VFL!=H5Iget_type(H5FD_SEC2_g))
+    if (H5I_VFL!=H5I_get_type(H5FD_SEC2_g))
         H5FD_SEC2_g = H5FDregister(&H5FD_sec2_g);
 
     FUNC_LEAVE(H5FD_SEC2_g);

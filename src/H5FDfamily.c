@@ -25,8 +25,9 @@
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver				  */
-#include "H5FDfamily.h"     /* Family file driver */
-#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5FDfamily.h"         /* Family file driver */
+#include "H5Iprivate.h"		/*object IDs				  */
+#include "H5MMprivate.h"        /* Memory allocation */
 #include "H5Pprivate.h"		/*property lists			*/
 
 
@@ -181,7 +182,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
     
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+    if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
                       "not a file access property list");
@@ -233,7 +234,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     FUNC_ENTER(H5Pget_fapl_family, FAIL);
     H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+    if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list"); 
     if (H5FD_FAMILY!=H5P_get_driver(fapl_id))

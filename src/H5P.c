@@ -158,16 +158,13 @@ H5P_init_interface(void)
 {
     H5P_genclass_t  *root_class;    /* Pointer to root property list class created */
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
-    herr_t		    ret_value = SUCCEED;
-    int		    i;
-    herr_t		    status;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER(H5P_init_interface, FAIL);
 
-    if (ret_value < 0) {
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
-		      "unable to initialize atom group");
-    }
+    /* Make certain IDs are initialized */
+    if (ret_value < 0)
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize atom group");
     
     /*
      * Initialize the Generic Property class & object groups.
@@ -231,7 +228,6 @@ H5P_init_interface(void)
     if ((H5P_CLS_MOUNT_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
-
     FUNC_LEAVE(ret_value);
 }
 
@@ -255,7 +251,7 @@ H5P_init_interface(void)
 int
 H5P_term_interface(void)
 {
-    int	i, n=0;
+    int	n=0;
 
     if (interface_initialize_g) {
         /* Destroy HDF5 library property classes & lists */

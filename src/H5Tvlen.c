@@ -449,7 +449,7 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_write(hid_t plist_id, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;

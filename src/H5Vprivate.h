@@ -95,10 +95,10 @@ __DLL__ hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline hsize_t UNUSED
+static H5_inline hsize_t 
 H5V_vector_reduce_product(unsigned n, const hsize_t *v)
 {
-    size_t                  ans = 1;
+    hsize_t                  ans = 1;
 
     if (n && !v) return 0;
     while (n--) ans *= *v++;

@@ -436,9 +436,9 @@ __DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr_p /*out*/,
 			     const unsigned long objno[2]);
 
 /* callback Functions for file access class */
-__DLL__ herr_t H5F_acs_create(hid_t fapl_id, void UNUSED *close_data);
-__DLL__ herr_t H5F_acs_close(hid_t fapl_id, void UNUSED *close_data);
+__DLL__ herr_t H5F_acs_create(hid_t fapl_id, void *close_data);
+__DLL__ herr_t H5F_acs_close(hid_t fapl_id, void *close_data);
 __DLL__ herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, 
-                            void UNUSED *close_data);
+                            void *close_data);
 
 #endif

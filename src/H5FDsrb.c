@@ -12,6 +12,7 @@
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver				  */
 #include "H5FDsrb.h"            /* Core file driver                     */
+#include "H5Iprivate.h"		/*object IDs				  */
 #include "H5MMprivate.h"        /* Memory allocation                    */
 #include "H5Pprivate.h"		/*property lists			*/
 

@@ -140,7 +140,6 @@ __DLL__ herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);
 __DLL__ herr_t H5Pclose_class(hid_t plist_id);
-__DLL__ hid_t H5Pcreate(hid_t type);
 __DLL__ herr_t H5Pclose(hid_t plist_id);
 __DLL__ hid_t H5Pcopy(hid_t plist_id);
 __DLL__ herr_t H5Pget_version(hid_t plist_id, int *boot/*out*/,
