@@ -309,7 +309,6 @@ test_vltypes_vlen_compound(void)
     ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
-
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
@@ -463,7 +462,7 @@ test_vltypes_compound_vlen_atomic(void)
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
@@ -600,7 +599,7 @@ test_vltypes_vlen_vlen_atomic(void)
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */

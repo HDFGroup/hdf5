@@ -367,6 +367,8 @@ main(void)
     nerrors += test_tr1(file);
     nerrors += test_tr2(file);
     
+  	H5Fclose(file);
+  
     if (nerrors) goto error;
     puts("All enum tests passed.");
     h5_cleanup(fapl);
