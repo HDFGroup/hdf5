@@ -1849,16 +1849,62 @@ H5Pget_driver(hid_t plist_id)
  * 		Robb Matzke, 1999-08-05
  *		If the driver ID is H5FD_VFD_DEFAULT then substitute the current value of
  *		H5FD_SEC2.
+ *
+ * 		Quincey Koziol 2000-11-28
+ *		Added internal function..
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Pget_driver(hid_t plist_id)
 {
+    hid_t		ret_value=-1;
+
+    FUNC_ENTER (H5Pget_driver, FAIL);
+    H5TRACE1("i","i",plist_id);
+
+    ret_value = H5P_get_driver(plist_id);
+
+    FUNC_LEAVE(ret_value);
+}
+#endif /* WANT_H5_V1_2_COMPAT */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_driver
+ *
+ * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
+ *		be a file access property list or data transfer propert list.
+ *
+ * Return:	Success:	A low-level driver ID which is the same ID
+ *				used when the driver was set for the property
+ *				list. The driver ID is only valid as long as
+ *				the file driver remains registered.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-08-03
+ *		Rewritten to use the virtual file layer.
+ *
+ * 		Robb Matzke, 1999-08-05
+ *		If the driver ID is H5FD_VFD_DEFAULT then substitute the current value
+ *      of H5FD_SEC2.
+ *
+ * 		Quincey Koziol 2000-11-28
+ *		Added internal function..
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5P_get_driver(hid_t plist_id)
+{
     H5F_access_t	*fapl=NULL;
     H5D_xfer_t		*dxpl=NULL;
     hid_t		ret_value=-1;
 
-    FUNC_ENTER (H5Pget_driver, FAIL);
+    FUNC_ENTER (H5P_get_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
     if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
@@ -1879,8 +1925,6 @@ H5Pget_driver(hid_t plist_id)
 
     FUNC_LEAVE(ret_value);
 }
-#endif /* WANT_H5_V1_2_COMPAT */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_driver_info
@@ -1990,7 +2034,7 @@ H5Pget_stdio(hid_t plist_id)
 
     /* Check arguments and test driver */
     if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
-            (H5FD_STDIO == H5Pget_driver(plist_id))) {
+            (H5FD_STDIO == H5P_get_driver(plist_id))) {
         ret_value=SUCCEED;
     }
     else {
@@ -2062,7 +2106,7 @@ H5Pget_sec2(hid_t plist_id)
 
     /* Check arguments and test driver */
     if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
-            (H5FD_SEC2 == H5Pget_driver(plist_id))) {
+            (H5FD_SEC2 == H5P_get_driver(plist_id))) {
         ret_value=SUCCEED;
     }
     else {
@@ -2144,7 +2188,7 @@ H5Pget_core(hid_t plist_id, size_t *increment/*out*/)
 
     /* Check arguments */
     if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
-            (H5FD_CORE == H5Pget_driver(plist_id)) &&
+            (H5FD_CORE == H5P_get_driver(plist_id)) &&
             H5Pget_fapl_core(plist_id,increment,NULL)>=0) {
         ret_value=SUCCEED;
     }
@@ -2251,7 +2295,7 @@ H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5FD_MULTI != H5Pget_driver(plist_id)) {
+    if (H5FD_MULTI != H5P_get_driver(plist_id)) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the split driver is not set");
     }
@@ -2381,7 +2425,7 @@ H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5FD_FAMILY == H5Pget_driver(plist_id)) {
+    if (H5FD_FAMILY == H5P_get_driver(plist_id)) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the family driver is not set");
     }
@@ -2494,7 +2538,7 @@ H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5FD_MPIO == H5Pget_driver(plist_id)) {
+    if (H5FD_MPIO == H5P_get_driver(plist_id)) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the mpi driver is not set");
     }

@@ -213,7 +213,7 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
 
     if(H5P_FILE_ACCESS != H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-    if(H5FD_SRB != H5Pget_driver(fapl_id))
+    if(H5FD_SRB != H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if(NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
@@ -262,7 +262,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (ADDR_OVERFLOW(maxaddr))
         HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
 
-    if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5Pget_driver(fapl_id)) {
+    if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(fapl_id)) {
         memset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        
         fa = &_fa;
     }

@@ -223,7 +223,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-    if (H5FD_FAMILY!=H5Pget_driver(fapl_id))
+    if (H5FD_FAMILY!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
@@ -828,7 +828,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hs
      * Get the member data transfer property list. If the transfer property
      * list does not belong to this driver then assume defaults
      */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
+    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
         assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));
@@ -891,7 +891,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, h
      * Get the member data transfer property list. If the transfer property
      * list does not belong to this driver then assume defaults.
      */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
+    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
         assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));

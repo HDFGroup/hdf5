@@ -316,7 +316,7 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
   }
-  if (H5FD_STREAM != H5Pget_driver (fapl_id))
+  if (H5FD_STREAM != H5P_get_driver (fapl_id))
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
   }

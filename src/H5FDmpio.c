@@ -293,7 +293,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-    if (H5FD_MPIO!=H5Pget_driver(fapl_id))
+    if (H5FD_MPIO!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
@@ -386,7 +386,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
 
     if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id)) 
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
-    if (H5FD_MPIO!=H5Pget_driver(dxpl_id))
+    if (H5FD_MPIO!=H5P_get_driver(dxpl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
@@ -715,7 +715,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /* Obtain a pointer to mpio-specific file access properties */
-    if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5Pget_driver(fapl_id)) {
+    if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(fapl_id)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	_fa.info = MPI_INFO_NULL; /*default*/
 	fa = &_fa;
@@ -1098,7 +1098,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5Pget_driver(dxpl_id)) {
+    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {
@@ -1340,7 +1340,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
 #endif
 
     /* Obtain the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5Pget_driver(dxpl_id)) {
+    if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5P_get_driver(dxpl_id)) {
         _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
         dx = &_dx;
     } else {

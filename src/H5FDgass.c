@@ -263,7 +263,7 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-    if (H5FD_GASS!=H5Pget_driver(fapl_id))
+    if (H5FD_GASS!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
@@ -324,7 +324,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     strcpy (filename, name);
     
     /* Obtain a pointer to gass-specific file access properties */
-    if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5Pget_driver(fapl_id)) {
+    if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5P_get_driver(fapl_id)) {
         GASS_INFO_NULL (_fa.info);
         /* _fa.info = GASS_INFO_NULL; */
         /* _fa.info = {0,0}; */ /*default*/
