@@ -201,6 +201,7 @@ static void gent_dataset(void)
     hsize_t dims[2];
     int dset1[10][20];
     double dset2[30][20];
+    int dset3 = 10;
     int i, j;
   
     fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -229,6 +230,15 @@ static void gent_dataset(void)
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* dset3 - null space */
+    space = H5Screate(H5S_NULL);
+    dataset = H5Dcreate(fid, "/dset3", H5T_STD_I32BE, space, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset3);
+
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(fid);
@@ -338,6 +348,13 @@ static void gent_attribute(void)
     H5Tset_size(type, 17);
     attr = H5Acreate (root, "attr5", type, space, H5P_DEFAULT);
     H5Awrite(attr, type, string);
+    H5Sclose(space);
+    H5Aclose(attr);
+   
+    /* attribute 6 - null dataspace */
+    space = H5Screate(H5S_NULL);
+    attr = H5Acreate (root, "attr6", H5T_NATIVE_UINT, space, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
 
     H5Tclose(type);
     H5Sclose(space);

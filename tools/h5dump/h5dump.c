@@ -1025,20 +1025,22 @@ dump_dataspace(hid_t space)
     hsize_t   size[H5DUMP_MAX_RANK];
     hsize_t   maxsize[H5DUMP_MAX_RANK];
     int       ndims = H5Sget_simple_extent_dims(space, size, maxsize);
+    H5S_class_t space_type = H5Sget_simple_extent_type(space);
     int       i;
 
     indentation(indent + COL);
     printf("%s ", dump_header_format->dataspacebegin);
 
-    if (H5Sis_simple(space)) {
-	if (ndims == 0) {
+    switch (space_type) {
+        case H5S_SCALAR:
 	    /* scalar dataspace */
 	    HDfprintf(stdout, "%s %s",
-		      dump_header_format->dataspacedescriptionbegin, SCALAR);
-	} else {
+		      dump_header_format->dataspacedescriptionbegin, S_SCALAR);
+            break;
+        case H5S_SIMPLE:
 	    /* simple dataspace */
 	    HDfprintf(stdout, "%s %s { %s %Hu",
-		      dump_header_format->dataspacedescriptionbegin, SIMPLE,
+		      dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
 		      dump_header_format->dataspacedimbegin, size[0]);
 
 	    for (i = 1; i < ndims; i++)
@@ -1061,9 +1063,19 @@ dump_dataspace(hid_t space)
 		    HDfprintf(stdout, ", %Hu", maxsize[i]);
 
 	    printf(" %s }", dump_header_format->dataspacedimend);
-	}
-    } else {
-	printf("%s not yet implemented %s\n", BEGIN, END);
+
+	    break;
+        case H5S_NULL:
+	    /* nulldataspace */
+	    HDfprintf(stdout, "%s %s",
+		      dump_header_format->dataspacedescriptionbegin, S_NULL);
+            break;
+        case H5S_COMPLEX:
+	    printf("%s not yet implemented %s\n", BEGIN, END);
+            break;
+        case H5S_NO_CLASS:
+        default:
+	    printf("%s unknown dataspace %s\n", BEGIN, END);
     }
 
     end_obj(dump_header_format->dataspaceend,
@@ -1866,6 +1878,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
     int         status = -1;
     void       *buf;
     hid_t       space, type, p_type;
+    H5S_class_t space_type;
     int         ndims, i;
     hsize_t     size[64], nelmts = 1, alloc_size;
     int         depth;
@@ -1934,28 +1947,33 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
         H5Tclose(f_type);
     } else {
         /* need to call h5tools_dump_mem for the attribute data */    
-        type = H5Aget_type(obj_id);
-        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
         space = H5Aget_space(obj_id);
-        ndims = H5Sget_simple_extent_dims(space, size, NULL);
+        space_type = H5Sget_simple_extent_type(space);
+        if(space_type == H5S_NULL || space_type == H5S_NO_CLASS || space_type == H5S_COMPLEX) {
+            status = SUCCEED;
+        } else {
+            type = H5Aget_type(obj_id);
+            p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+            ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
-        for (i = 0; i < ndims; i++)
-            nelmts *= size[i];
+            for (i = 0; i < ndims; i++)
+                nelmts *= size[i];
 
-        alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        
-        buf = malloc((size_t)alloc_size);
-        assert(buf);
+            alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+            assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+            
+            buf = malloc((size_t)alloc_size);
+            assert(buf);
 
-        if (H5Aread(obj_id, p_type, buf) >= 0)
-            status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
-                                    space, buf, depth);
-        
-        free(buf);
-        H5Tclose(p_type); 
+            if (H5Aread(obj_id, p_type, buf) >= 0)
+                status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
+                                        space, buf, depth);
+            
+            free(buf);
+            H5Tclose(p_type); 
+            H5Tclose(type);
+        }
         H5Sclose(space);
-        H5Tclose(type);
     }
 
     if (status == FAIL) {
@@ -4108,17 +4126,20 @@ xml_dump_dataspace(hid_t space)
     hsize_t                 maxsize[H5DUMP_MAX_RANK];
     int                     ndims =
 	H5Sget_simple_extent_dims(space, size, maxsize);
+    H5S_class_t             space_type = H5Sget_simple_extent_type(space);
     int                     i;
 
     indentation(indent + COL);
     printf("<%sDataspace>\n", xmlnsprefix);
-    if (H5Sis_simple(space)) {
-	indentation(indent + COL + COL);
+    indentation(indent + COL + COL);
 
-	if (ndims == 0) {
+    switch (space_type) {
+        case H5S_SCALAR:
 	    /* scalar dataspace (just a tag, no XML attrs. defined */
 	    printf("<%sScalarDataspace />\n",xmlnsprefix);
-	} else {
+            
+            break;
+        case H5S_SIMPLE:
 	    /* simple dataspace */
 	    /* <hdf5:SimpleDataspace Ndims="nd"> */
 	    printf("<%sSimpleDataspace Ndims=\"%d\">\n",xmlnsprefix, ndims);
@@ -4142,14 +4163,24 @@ xml_dump_dataspace(hid_t space)
 	    }
 	    indentation(indent + COL + COL);
 	    printf("</%sSimpleDataspace>\n", xmlnsprefix );
-	}
-    } else {
-	printf("<!-- not yet implemented -->\n");
-    }
+            
+            break;
+        case H5S_NULL:
+	    /* null dataspace (just a tag, no XML attrs. defined */
+	    printf("<%sNullDataspace />\n",xmlnsprefix);
 
+            break;
+        case H5S_COMPLEX:
+	    printf("<!-- not yet implemented -->\n");
+            
+            break;
+        case H5S_NO_CLASS:
+        default:
+	    printf("<!-- unknown dataspace -->\n");
+    }
+    
     indentation(indent + COL);
     printf("</%sDataspace>\n", xmlnsprefix);
-
 }
 
 /*-------------------------------------------------------------------------
@@ -4174,6 +4205,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
     int                     status = -1;
     void                   *buf;
     hid_t                   space, type, p_type;
+    H5S_class_t             space_type;
     int                     ndims, i;
     hsize_t                 size[64], nelmts = 1;
     int                     depth;
@@ -4207,48 +4239,56 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
     } else {
 	/* Attribute data */
 	type = H5Aget_type(obj_id);
+	space = H5Aget_space(obj_id);
+        space_type = H5Sget_simple_extent_type(space);
 
-	if (H5Tget_class(type) == H5T_REFERENCE) {
-	    /* references are done differently than
-	       the standard output:
-	       XML dumps a path to the object
-	       referenced.
-	     */
-	    status = xml_print_refs(obj_id, ATTRIBUTE_DATA);
-	    H5Tclose(type);
-	} else if (H5Tget_class(type) == H5T_STRING) {
-	    status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
-	} else {
-	    /* all other data */
-	    p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
-	    H5Tclose(type);
+        if(space_type == H5S_NULL || space_type == H5S_NO_CLASS || space_type == H5S_COMPLEX) {
+            status = 2;
+        } else {
+            if (H5Tget_class(type) == H5T_REFERENCE) {
+                /* references are done differently than
+                   the standard output:
+                   XML dumps a path to the object
+                   referenced.
+                 */
+                status = xml_print_refs(obj_id, ATTRIBUTE_DATA);
+                H5Tclose(type);
+            } else if (H5Tget_class(type) == H5T_STRING) {
+                status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
+            } else {
+                /* all other data */
+                p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+                H5Tclose(type);
 
-	    space = H5Aget_space(obj_id);
+                ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
-	    ndims = H5Sget_simple_extent_dims(space, size, NULL);
+                for (i = 0; i < ndims; i++)
+                    nelmts *= size[i];
 
-	    for (i = 0; i < ndims; i++)
-		nelmts *= size[i];
+                buf =
+                    malloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
+                assert(buf);
 
-	    buf =
-		malloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
-	    assert(buf);
+                if (H5Aread(obj_id, p_type, buf) >= 0)
+                    status = h5tools_dump_mem(stdout, outputformat, obj_id,
+                                              p_type, space, buf, depth);
 
-	    if (H5Aread(obj_id, p_type, buf) >= 0)
-                status = h5tools_dump_mem(stdout, outputformat, obj_id,
-                                          p_type, space, buf, depth);
-
-	    free(buf);
-	    H5Tclose(p_type);
-	    H5Sclose(space);
-	    H5Tclose(type);
-	}
+                free(buf);
+                H5Tclose(p_type);
+                H5Sclose(space);
+                H5Tclose(type);
+            }
+        }
     }
 
     if (status == FAIL) {
-	indentation(indent + COL);
+	indentation(indent + COL + COL);
 	printf("Unable to print data.\n");
 	status = 1;
+    } else if (status == 2) { /* special value for H5S_NULL */
+	indentation(indent + COL + COL);
+	printf("<%sNoData/>\n",xmlnsprefix);
+        status = 1;
     }
 
     indentation(indent + COL);
@@ -5411,7 +5451,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	/* no data written */
 	indentation(indent);
 	printf("<%sData>\n",xmlnsprefix);
-	indentation(indent);
+	indentation(indent + COL);
 	printf("<%sNoData/>\n",xmlnsprefix);
 	indentation(indent);
 	printf("</%sData>\n",xmlnsprefix);
