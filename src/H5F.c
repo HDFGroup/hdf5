@@ -1075,7 +1075,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
     if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
     }
-    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_EXCL)) {
+    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "mutually exclusive flags for file creation");
     }
@@ -1465,7 +1465,6 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
 
     FUNC_ENTER(H5F_block_read, FAIL);
 
-    if (0==size) return 0;
     assert (size < MAX_SIZET);
 
     /* convert the relative address to an absolute address */
@@ -1510,7 +1509,6 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size, const void *buf)
 
     FUNC_ENTER(H5F_block_write, FAIL);
 
-    if (0==size) return 0;
     assert (size < MAX_SIZET);
 
     if (0 == (f->intent & H5F_ACC_RDWR)) {
