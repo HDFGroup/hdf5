@@ -1,5 +1,6 @@
 /*
  * Example of using the parallel HDF5 library to access datasets.
+ * Last revised: April 24, 2001.
  *
  * This program contains two parts.  In the first part, the mpi processes
  * collectively create a new parallel HDF5 file and create two fixed
@@ -14,9 +15,8 @@
 
 #include <assert.h>
 #include <hdf5.h>
-#include <mpi.h>
-#include <mpio.h>
 
+#ifdef H5_HAVE_PARALLEL
 /* Temporary source code */
 #define FAIL -1
 /* temporary code end */
@@ -231,9 +231,9 @@ phdf5writeInd(char *filename)
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
     assert(ret != FAIL);
-    MESG("H5Pset_mpi succeed");
+    MESG("H5Pset_fapl_mpio succeed");
 
     /* create the file collectively */
     fid1=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl1);
@@ -364,7 +364,7 @@ phdf5readInd(char *filename)
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
     assert(ret != FAIL);
 
 
@@ -490,9 +490,9 @@ phdf5writeAll(char *filename)
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
     assert(ret != FAIL);
-    MESG("H5Pset_mpi succeed");
+    MESG("H5Pset_fapl_mpio succeed");
 
     /* create the file collectively */
     fid1=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl1);
@@ -558,7 +558,7 @@ if (verbose)
     /* set up the collective transfer properties list */
     xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     assert(xfer_plist != FAIL);
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     assert(ret != FAIL);
     MESG("H5Pcreate xfer succeed");
 
@@ -613,7 +613,7 @@ if (verbose)
     /* set up the collective transfer properties list */
     xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     assert(xfer_plist != FAIL);
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     assert(ret != FAIL);
     MESG("H5Pcreate xfer succeed");
 
@@ -694,9 +694,9 @@ phdf5readAll(char *filename)
     assert(acc_tpl1 != FAIL);
     MESG("H5Pcreate access succeed");
     /* set Parallel access with communicator */
-    ret = H5Pset_mpi(acc_tpl1, comm, info);     
+    ret = H5Pset_fapl_mpio(acc_tpl1, comm, info);     
     assert(ret != FAIL);
-    MESG("H5Pset_mpi succeed");
+    MESG("H5Pset_fapl_mpio succeed");
 
     /* open the file collectively */
     fid1=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl1);
@@ -755,7 +755,7 @@ if (verbose)
     /* set up the collective transfer properties list */
     xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     assert(xfer_plist != FAIL);
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     assert(ret != FAIL);
     MESG("H5Pcreate xfer succeed");
 
@@ -806,7 +806,7 @@ if (verbose)
     /* set up the collective transfer properties list */
     xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     assert(xfer_plist != FAIL);
-    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     assert(ret != FAIL);
     MESG("H5Pcreate xfer succeed");
 
@@ -887,7 +887,7 @@ test_split_comm_access(char *filenames[])
 	assert(acc_tpl != FAIL);
 	
 	/* set Parallel access with communicator */
-	ret = H5Pset_mpi(acc_tpl, comm, info);     
+	ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
 	assert(ret != FAIL);
 
 	/* create the file collectively */
@@ -949,6 +949,7 @@ parse_options(int argc, char **argv){
 }
 
 
+int
 main(int argc, char **argv)
 {
     char    *filenames[]={ "ParaEg1.h5f", "ParaEg2.h5f" };
@@ -1006,3 +1007,12 @@ finish:
     return(nerrors);
 }
 
+#else /* H5_HAVE_PARALLEL */
+/* dummy program since H5_HAVE_PARALLE is not configured in */
+int
+main()
+{
+printf("No PHDF5 example because parallel is not configured in\n");
+return(0);
+}
+#endif /* H5_HAVE_PARALLEL */
