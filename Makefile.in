@@ -122,6 +122,9 @@ uninstall-doc:
 ## need to require a proper "make install" has been done.
 check-install:
 	(cd examples && $(MAKE) check) || exit 1;
+	if test -d fortran/examples; then				      \
+	    (cd fortran/examples && $(MAKE) check) || exit 1;		      \
+	fi
 
 ## Number format detection
 H5detect: 
