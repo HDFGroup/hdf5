@@ -10,7 +10,7 @@
 ./INSTALL_TFLOPS
 ./INSTALL_VFL
 ./INSTALL_parallel
-./INSTALL_Windows.txt
+./INSTALL_Windows
 ./HISTORY
 ./MANIFEST
 ./Makefile.dist
