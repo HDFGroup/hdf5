@@ -1011,8 +1011,10 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
     
     /* Check arguments */
-    if ((pixels_per_block%2)==1 || pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
+    if ((pixels_per_block%2)==1)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even");
+    if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large");
    
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
