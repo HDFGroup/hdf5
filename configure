@@ -32461,6 +32461,9 @@ case "X-$enable_production" in
   *)            PRINT "$enable_production" ;;
 esac
 
+PRINT_N "                     C Compiler"
+PRINT "$CC"
+
 PRINT_N "                         CFLAGS"
 PRINT "$CFLAGS"
 
