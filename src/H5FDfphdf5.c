@@ -1240,6 +1240,11 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
              * MPI_File_set_view and reset the address for the read to zero
              */
             mpi_off = 0;
+
+            /* Read the data. */
+            if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
+                                            buf_type, &status)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc)
         } else {
             /* Sanity check that independent I/O must be occuring */
             assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
@@ -1249,17 +1254,11 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
              * btype, ftype, and disp fields are not used.
              */
             buf_type = MPI_BYTE;
-        }
 
-        /* Read the data. */
-        if (!use_view_this_time) {
+            /* Read the data. */
             if ((mrc = MPI_File_read_at(file->f, mpi_off, buf, size_i,
                                         buf_type, &status)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc)
-        } else {
-            if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
-                                            buf_type, &status)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc)
         }
 
         /*
@@ -1503,25 +1502,24 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, int size,
          * MPI_File_set_view and reset the address for the read to zero
          */
         mpi_off = 0;
+
+        /* Write the data. */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if ((mrc = MPI_File_write_at_all(file->f, mpi_off, (void*)buf,
+                                         size, buf_type, &status)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mrc)
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
          * btype and ftype.
          */
         buf_type = MPI_BYTE;
-    }
 
-    /* Write the data. */
-    if (!use_view_this_time) {
+        /* Write the data. */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if ((mrc = MPI_File_write_at(file->f, mpi_off, (void*)buf,
                                      size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mrc)
-    } else {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if ((mrc = MPI_File_write_at_all(file->f, mpi_off, (void*)buf,
-                                         size, buf_type, &status)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mrc)
     }
 
     /* Reset the file view when we used MPI derived types */

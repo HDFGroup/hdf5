@@ -1473,7 +1473,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Offset			mpi_off;
     MPI_Status  		mpi_stat;
     int				mpi_code;	/* mpi return code */
-    MPI_Datatype		buf_type;
+    MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
     int         		size_i, bytes_read, n;
     unsigned			use_view_this_time=0;
     H5P_genplist_t              *plist;      /* Property list pointer */
@@ -1557,33 +1557,20 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         else {
             /* Sanity check that independent I/O must be occuring */
             assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-
-            /*
-             * Prepare for a simple xfer of a contiguous block of bytes. The
-             * btype, ftype, and disp fields are not used.
-             */
-            buf_type = MPI_BYTE;
         } /* end else */
     } /* end if */
-    else {
-        /*
-         * Prepare for a simple xfer of a contiguous block of bytes. The
-         * btype, ftype, and disp fields are not used.
-         */
-        buf_type = MPI_BYTE;
-    } /* end else */
 
     /* Read the data. */
-    if (!use_view_this_time) {
-        if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
-    } else {
+    if (use_view_this_time) {
 #ifdef H5FDmpio_DEBUG
 	if (H5FD_mpio_Debug[(int)'t'])
 	    fprintf(stdout, "H5FD_mpio_read: using MPIO collective mode\n");
 #endif
         if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat )))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+    } else {
+        if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
     }
 
     /* KLUDGE, Robb Matzke, 2000-12-29
@@ -1791,7 +1778,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
     MPI_Offset 		 	mpi_off;
     MPI_Status			mpi_stat;
-    MPI_Datatype		buf_type;
+    MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
     int			        mpi_code;	/* MPI return code */
     int         		size_i, bytes_written;
     unsigned			use_view_this_time=0;
@@ -1875,22 +1862,10 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         else {
             /* Sanity check that independent I/O must occur */
             assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-
-            /*
-             * Prepare for a simple xfer of a contiguous block of bytes.
-             * The btype, ftype, and disp fields are not used.
-             */
-            buf_type = MPI_BYTE;
         } /* end else */
     } /* end if */
     else {
         unsigned		        block_before_meta_write=0;      /* Whether to block before a metadata write */
-
-        /*
-         * Prepare for a simple xfer of a contiguous block of bytes.
-         * The btype, ftype, and disp fields are not used.
-         */
-        buf_type = MPI_BYTE;
 
         /* Check if we need to syncronize all processes before attempting metadata write
          * (Prevents race condition where the process writing the metadata goes ahead
@@ -1926,11 +1901,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     } /* end if */
 
     /* Write the data. */
-    if (!use_view_this_time) {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
-    } else {
+    if (use_view_this_time) {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'t'])
             fprintf(stdout, "H5FD_mpio_write: using MPIO collective mode\n");
@@ -1938,6 +1909,10 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != (mpi_code=MPI_File_write_at_all(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
+    } else {
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
     }
 
     /* KLUDGE, Robb Matzke, 2000-12-29
