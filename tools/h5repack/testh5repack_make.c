@@ -16,12 +16,22 @@
 #include "h5test.h"
 #include "h5repack.h"
 
+#define DIM1  40
+#define DIM2  20
+#define CDIM1 DIM1/2
+#define CDIM2 DIM2/2
+#define RANK  2
 
 int make_all_objects(hid_t loc_id);
 int make_attributes(hid_t loc_id);
 int make_special_objects(hid_t loc_id);
 int make_early(void);
-
+int make_layout(hid_t loc_id);
+int make_szip(hid_t loc_id);
+int make_deflate(hid_t loc_id);
+int make_shuffle(hid_t loc_id);
+int make_fletcher32(hid_t loc_id);
+int make_all(hid_t loc_id);
 
 
 /*-------------------------------------------------------------------------
@@ -70,13 +80,11 @@ int make_testfiles(void)
  if(H5Fclose(loc_id)<0)
   return -1;
 /*-------------------------------------------------------------------------
- * create a file for the filters and layouts test
+ * create a file for layouts test
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- if (make_filters(loc_id)<0)
-  goto out;
  if (make_layout(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
@@ -88,6 +96,61 @@ int make_testfiles(void)
  */
  if (make_early()<0)
   goto out;
+
+/*-------------------------------------------------------------------------
+ * create a file with the SZIP filter
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME7,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_szip(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with the deflate filter
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME8,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_deflate(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with the shuffle filter
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME9,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_shuffle(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with the fletcher32 filter
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME10,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_fletcher32(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with the all filters
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_all(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
  
  
  PASSED();   
@@ -303,6 +366,344 @@ int make_special_objects(hid_t loc_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function: make_szip
+ *
+ * Purpose: make a dataset with the SZIP filter
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_szip(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
+ unsigned szip_pixels_per_block=8;
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dcpl */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * SZIP
+ *-------------------------------------------------------------------------
+ */
+ /* Make sure encoding is enabled */
+#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
+ /* set szip data */
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_deflate
+ *
+ * Purpose: make a dataset with the deflate filter
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_deflate(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ 
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dcpl */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+/*-------------------------------------------------------------------------
+ * GZIP
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ /* set deflate data */
+ if(H5Pset_deflate(dcpl, 9)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_shuffle
+ *
+ * Purpose: make a dataset with the shuffle filter
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_shuffle(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dcpl */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * shuffle
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_SHUFFLE)
+ /* set the shuffle filter */
+ if (H5Pset_shuffle(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: make_fletcher32
+ *
+ * Purpose: make a dataset with the fletcher32 filter
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_fletcher32(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+
+
+/*-------------------------------------------------------------------------
+ * checksum
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the checksum filter */
+ if (H5Pset_fletcher32(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_all
+ *
+ * Purpose: make a dataset with the all filters
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_all(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
+ unsigned szip_pixels_per_block=8;
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+ 
+#if defined (H5_HAVE_FILTER_SHUFFLE)
+ /* set the shuffle filter */
+ if (H5Pset_shuffle(dcpl)<0) 
+  goto out;
+#endif
+
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ /* set the checksum filter */
+ if (H5Pset_fletcher32(dcpl)<0) 
+  goto out;
+#endif
+
+#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
+ /* set szip data */
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+  goto out;
+#endif
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ /* set deflate data */
+ if(H5Pset_deflate(dcpl, 9)<0)
+  goto out;
+#endif
+
+ if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
  * Function: make_early
  *
  * Purpose: create a file for the H5D_ALLOC_TIME_EARLY test 
@@ -396,5 +797,101 @@ out:
  } H5E_END_TRY;
  return -1;
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_layout
+ *
+ * Purpose: make several datasets with several layouts in location LOC_ID
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_layout(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+ char     name[5];
+
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+
+/*-------------------------------------------------------------------------
+ * make several dataset with no filters
+ *-------------------------------------------------------------------------
+ */
+ for (i=0; i<4; i++)
+ {
+  sprintf(name,"dset%d",i+1);
+  if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf)<0)
+   return -1;
+ }
+
+
+/*-------------------------------------------------------------------------
+ * make several dataset with several layout options
+ *-------------------------------------------------------------------------
+ */
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * H5D_COMPACT
+ *-------------------------------------------------------------------------
+ */
+ if(H5Pset_layout (dcpl,H5D_COMPACT)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_compact",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * H5D_COMPACT
+ *-------------------------------------------------------------------------
+ */
+ if(H5Pset_layout (dcpl,H5D_CONTIGUOUS)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_contiguous",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * H5D_CHUNKED
+ *-------------------------------------------------------------------------
+ */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_chunk",sid,dcpl,buf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
 
 

@@ -85,7 +85,7 @@ int check_objects(const char* fname,
  {
   char* name=options->op_tbl->objs[i].path;
   if (options->verbose)
-   printf(PFORMAT1,"","",name);
+   printf(" <%s>",name);
   
   /* the input object names are present in the file and are valid */
   if (h5trav_getindext(name,travt)<0)

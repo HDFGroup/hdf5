@@ -244,9 +244,9 @@ static int check_options(pack_opt_t *options)
  if (options->verbose) 
  {
   printf("\n");
-  printf("Objects to modify are...\n");
+  printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
-   printf("\tApply layout to all\n ");
+   printf(" Apply layout to all\n ");
    if (H5D_CHUNKED==options->layout_g) {
     printf("with dimension [");
     for ( j = 0; j < options->chunk_g.rank; j++)  
@@ -263,7 +263,7 @@ static int check_options(pack_opt_t *options)
   if (options->op_tbl->objs[i].chunk.rank>0)
   {
    if (options->verbose){
-    printf("\t<%s> with chunk size ",name); 
+    printf(" <%s> with chunk size ",name); 
     for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++) 
      printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
     printf("\n");
@@ -273,7 +273,7 @@ static int check_options(pack_opt_t *options)
   else if (options->op_tbl->objs[i].chunk.rank==-2)
   {
    if (options->verbose)
-    printf("\t%s %s\n",name,"NONE"); 
+    printf(" <%s> %s\n",name,"NONE"); 
    has_ck=1;
   }
  }
@@ -285,7 +285,7 @@ static int check_options(pack_opt_t *options)
  }
  
 /*-------------------------------------------------------------------------
- * objects to compress/uncompress
+ * objects to filter
  *-------------------------------------------------------------------------
  */
  
@@ -298,10 +298,10 @@ static int check_options(pack_opt_t *options)
    switch (filtn)
    {
    case H5Z_FILTER_NONE:
-     printf("\tUncompress all %s\n",get_sfilter(filtn));
+     printf(" Uncompress all %s\n",get_sfilter(filtn));
     break;
    case H5Z_FILTER_SZIP:
-     printf("\tCompress all with %s compression\n",get_sfilter(filtn));
+     printf(" Compress all with %s compression\n",get_sfilter(filtn));
     break;
    case H5Z_FILTER_DEFLATE:
      printf("\tCompress all with %s compression, parameter %d\n",
@@ -315,15 +315,16 @@ static int check_options(pack_opt_t *options)
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {
   pack_info_t pack  = options->op_tbl->objs[i];
-  char*       name = pack.path;
+  char*       name  = pack.path;
 
   for ( j=0; j<pack.nfilters; j++)
   {
    if (options->verbose) 
    {
-    printf("\t<%s> with %s filter",
+    printf(" <%s> with %s filter%s",
      name,
-     get_sfilter(pack.filter[j].filtn));
+     get_sfilter(pack.filter[j].filtn),
+     (i==options->op_tbl->nelems-1)? "" : "\n");
    }
 
    has_cp=1;
@@ -356,7 +357,7 @@ static int check_options(pack_opt_t *options)
 
      options->op_tbl->objs[i].filter[j].filtn=-1;
      options->op_tbl->objs[i].chunk.rank=-1;
-     printf("\tObject <%s> cannot be filtered\n",name);
+     printf(" Object <%s> cannot be filtered\n",name);
 
 
     }

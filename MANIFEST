@@ -1366,6 +1366,12 @@
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstr3.h5
 ./tools/testfiles/taindices.h5
+./tools/testfiles/test_all.h5
+./tools/testfiles/test_deflate.h5
+./tools/testfiles/test_fletcher32.h5
+./tools/testfiles/test_shuffle.h5
+./tools/testfiles/test_szip.h5
+
 
 
 # Expected output from h5ls tests
@@ -1546,13 +1552,11 @@
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack_layout.c
 ./tools/h5repack/h5repack_parse.c
-./tools/h5repack/testh5repack_filters.c
 ./tools/h5repack/testh5repack_util.c
 ./tools/h5repack/h5repack_copy.c
 ./tools/h5repack/h5repack_list.c
 ./tools/h5repack/h5repack_refs.c
 ./tools/h5repack/Makefile.in
-./tools/h5repack/testh5repack_layout.c
 ./tools/h5repack/h5repack_filters.c
 ./tools/h5repack/h5repack_main.c
 ./tools/h5repack/h5repack.sh.in

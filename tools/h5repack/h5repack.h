@@ -264,16 +264,26 @@ int         parse_number(char *str);
  */
 
 #define FNAME1     "test1.h5"
-#define FNAME1OUT  "test1out.h5"
+#define FNAME1OUT  "test1.out.h5"
 #define FNAME2     "test2.h5"
-#define FNAME2OUT  "test2out.h5"
+#define FNAME2OUT  "test2.out.h5"
 #define FNAME3     "test3.h5"
-#define FNAME3OUT  "test3out.h5"
+#define FNAME3OUT  "test3.out.h5"
 #define FNAME4     "test4.h5"
-#define FNAME4OUT  "test4out.h5"
+#define FNAME4OUT  "test4.out.h5"
 #define FNAME5     "test5.h5"
-#define FNAME5OUT  "test5out.h5"
+#define FNAME5OUT  "test5.out.h5"
 #define FNAME6     "test6.h5"
+#define FNAME7     "test_szip.h5"
+#define FNAME8     "test_deflate.h5"
+#define FNAME9     "test_shuffle.h5"
+#define FNAME10    "test_fletcher32.h5"
+#define FNAME11    "test_all.h5"
+#define FNAME7OUT     "test_szip.out.h5"
+#define FNAME8OUT     "test_deflate.out.h5"
+#define FNAME9OUT     "test_shuffle.out.h5"
+#define FNAME10OUT    "test_fletcher32.out.h5"
+#define FNAME11OUT    "test_all.out.h5"
 
 int make_testfiles(void);
 
