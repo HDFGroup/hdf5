@@ -76,10 +76,9 @@ typedef struct H5FD_core_fapl_t {
  * REGION_OVERFLOW:	Checks whether an address and size pair describe data
  *			which can be addressed entirely in memory.
  */
-#define MAXADDR 		((haddr_t)(~(size_t)0))
-#define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) ||			      \
-				 ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
+#define MAXADDR 		((haddr_t)((~(size_t)0)-1))
+#define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) || (A) > (haddr_t)MAXADDR)
+#define SIZE_OVERFLOW(Z)	((Z) > (hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
                                  HADDR_UNDEF==(A)+(Z) ||		      \
 				 (size_t)((A)+(Z))<(size_t)(A))
