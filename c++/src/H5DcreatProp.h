@@ -49,10 +49,10 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	void setDeflate( int level ) const;
 
 	// Sets a dataset fill value
-	void setFillValue( DataType& fvalue_type, const void* value ) const;
+	void setFillValue( const DataType& fvalue_type, const void* value ) const;
 
 	// Retrieves a dataset fill value
-	void getFillValue( DataType& fvalue_type, void* value ) const;
+	void getFillValue( const DataType& fvalue_type, void* value ) const;
 
 	// Adds a filter to the filter pipeline
 	void setFilter( H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
