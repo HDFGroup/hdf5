@@ -221,6 +221,9 @@ New Features
     * Added support to read/write portions of chunks directly, if they are
       uncompressed and too large to cache.  This should speed up I/O on chunked
       datasets for a few more cases.  -QAK, 1/31/02
+    * Added new "H5Sget_select_type" API function to determine which type of
+      selection is defined for a dataspace ("all", "none", "hyperslab" or
+      "point"). -QAK, 2/7/02
 
 
 Platforms Tested
