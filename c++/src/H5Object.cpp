@@ -57,7 +57,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
    }
    else
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::createAttribute", "H5Acreate failed");
    }
 }
 
@@ -68,7 +68,7 @@ Attribute H5Object::createAttribute( const string& name, const DataType& data_ty
 }
 
 // Opens an attribute given its name; name is given as char*
-Attribute H5Object::openAttribute( const char* name ) const
+Attribute H5Object::openAttribute( const char name[] ) const
 {
    hid_t attr_id = H5Aopen_name( id, name );
    if( attr_id > 0 )
@@ -78,14 +78,14 @@ Attribute H5Object::openAttribute( const char* name ) const
    }
    else
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::openAttribute", "H5Aopen_name failed");
    }
 }
 
 // Opens an attribute given its name; name is given as string
 Attribute H5Object::openAttribute( const string& name ) const
 {
-   return( openAttribute( name.c_str()) );
+    return( openAttribute( name.c_str()) );
 }
 
 // Opens an attribute given its index.
@@ -99,7 +99,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
    }
    else
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::openAttribute", "H5Aopen_idx failed");
    }
 }
 
@@ -122,7 +122,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
       return( ret_value );
    else  // raise exception when H5Aiterate returns a negative value
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::iterateAttrs", "H5Aiterate failed");
    }
 }
 
@@ -132,7 +132,8 @@ int H5Object::getNumAttrs() const
    int num_attrs = H5Aget_num_attrs( id );
    if( num_attrs < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::getNumAttrs", 
+		"H5Aget_num_attrs failed - returned negative number of attributes");
    }
    else
       return( num_attrs );
@@ -144,7 +145,7 @@ void H5Object::removeAttr( const char* name ) const
    herr_t ret_value = H5Adelete( id, name );
    if( ret_value < 0 )
    {
-      throw AttributeIException();
+      throw AttributeIException("H5Object::removeAttr", "H5Adelete failed");
    }
 }
 void H5Object::removeAttr( const string& name ) const
@@ -158,7 +159,7 @@ void H5Object::flush(H5F_scope_t scope ) const
    herr_t ret_value = H5Fflush( id, scope );
    if( ret_value < 0 )
    {
-      throw FileIException();
+      throw FileIException("H5Object::flush", "H5Fflush failed");
    }
 }
 

@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 // This header file simply serves as a container to hold the
 // header files of all datatypes.  It simplifies the header
 // file including in the code.

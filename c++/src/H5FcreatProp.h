@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5FileCreatPropList_H
 #define _H5FileCreatPropList_H
 

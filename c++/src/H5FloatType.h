@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5FloatType_H
 #define _H5FloatType_H
 

@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 // PredType holds the definition of all the HDF5 predefined datatypes.
 // These types can only be made copy of, not created by H5Tcreate or
 // closed by H5Tclose.  They are treated as constants.

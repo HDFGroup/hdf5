@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 #include "H5Include.h"
 #include "H5RefCounter.h"
@@ -55,8 +56,7 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
    }
    else
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("createGroup", "H5Gcreate failed");
    }
 }
 
@@ -79,8 +79,7 @@ Group CommonFG::openGroup( const char* name ) const
    }
    else
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("openGroup", "H5Gopen failed");
    }
 }
 
@@ -107,8 +106,7 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
    }
    else
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("createDataSet", "H5Dcreate failed");
    }
 }
 
@@ -131,8 +129,7 @@ DataSet CommonFG::openDataSet( const char* name ) const
    }
    else
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("openDataSet", "H5Dopen failed");
    }
 }
 
@@ -147,8 +144,7 @@ void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* ne
    herr_t ret_value = H5Glink( getLocId(), link_type, curr_name, new_name );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("link", "H5Glink failed");
    }
 }
 
@@ -162,8 +158,7 @@ void CommonFG::unlink( const char* name ) const
    herr_t ret_value = H5Gunlink( getLocId(), name );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("unlink", "H5Gunlink failed");
    }
 }
 
@@ -177,8 +172,7 @@ void CommonFG::move( const char* src, const char* dst ) const
    herr_t ret_value = H5Gmove( getLocId(), src, dst );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("move", "H5Gmove failed");
    }
 }
 
@@ -192,8 +186,7 @@ void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& st
    herr_t ret_value = H5Gget_objinfo( getLocId(), name, follow_link, &statbuf );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("getObjinfo", "H5Gget_objinfo failed");
    }
 }
 
@@ -209,8 +202,7 @@ string CommonFG::getLinkval( const char* name, size_t size ) const
    herr_t ret_value = H5Gget_linkval( getLocId(), name, size, value_C );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("getLinkval", "H5Gget_linkval failed");
    }
    string value = string( value_C );
    delete value_C;
@@ -227,8 +219,7 @@ void CommonFG::setComment( const char* name, const char* comment ) const
    herr_t ret_value = H5Gset_comment( getLocId(), name, comment );
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("setComment", "H5Gset_comment failed");
    }
 }
 
@@ -247,8 +238,7 @@ string CommonFG::getComment( const char* name, size_t bufsize ) const
    // if H5Gget_comment returns SUCCEED, return the string comment
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("getComment", "H5Gget_comment failed");
    }
    string comment = string( comment_C );
    delete comment_C;
@@ -272,8 +262,7 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
    // Raise exception if H5Fmount returns negative value
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("mount", "H5Fmount failed");
    }
 }
 
@@ -290,8 +279,7 @@ void CommonFG::unmount( const char* name ) const
    // Raise exception if H5Funmount returns negative value
    if( ret_value < 0 )
    {
-      //throw File_GroupException();
-      throwException();
+      throwException("unmount", "H5Funmount failed");
    }
 }
 
@@ -301,7 +289,7 @@ void CommonFG::unmount( const char* name ) const
 hid_t CommonFG::p_openDataType( const char* name ) const
 { 
    // Call C function H5Topen to open the named datatype in this group,
-   // giving the group id 
+   // giving either the file or group id 
    hid_t datatype_id = H5Topen( getLocId(), name );
    
    // If the datatype id is valid, return it, otherwise, throw an exception.
@@ -309,8 +297,7 @@ hid_t CommonFG::p_openDataType( const char* name ) const
       return( datatype_id );
    else
    { 
-      //throw GroupIException();
-      throwException();
+      throwException("openDataType", "H5Topen failed");
    }  
 }  
 
@@ -395,9 +382,9 @@ int CommonFG::iterateElems( const char* name, int *idx, H5G_iterate_t op , void*
    int ret_value = H5Giterate( getLocId(), name, idx, op, op_data );
    if( ret_value >= 0 )
       return( ret_value );
-   else  // raise exception when H5Aiterate returns a negative value
+   else  // raise exception when H5Giterate returns a negative value
    {
-      throwException();
+      throwException("iterateElems", "H5Giterate failed");
    }
 }
 

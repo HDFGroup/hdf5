@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 // Class CompType inherits from DataType and provides accesses to a compound
 // datatype.
 

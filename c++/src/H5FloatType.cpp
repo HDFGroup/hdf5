@@ -43,7 +43,7 @@ FloatType::FloatType( const DataSet& dataset ) : AtomType()
 
    if( id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("FloatType constructor", "H5Dget_type failed");
    }
 }
 
@@ -53,7 +53,7 @@ void FloatType::getFields( size_t& spos, size_t& epos, size_t& esize, size_t& mp
    herr_t ret_value = H5Tget_fields( id, &spos, &epos, &esize, &mpos, &msize );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::getFields", "H5Tget_fields failed");
    }
 }
 
@@ -63,7 +63,7 @@ void FloatType::setFields( size_t spos, size_t epos, size_t esize, size_t mpos, 
    herr_t ret_value = H5Tset_fields( id, spos, epos, esize, mpos, msize );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::setFields", "H5Tset_fields failed");
    }
 }
 
@@ -74,7 +74,7 @@ size_t FloatType::getEbias() const
    // Returns the bias if successful
    if( ebias == 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::getEbias", "H5Tget_ebias failed - returned exponent bias as 0");
    }
    return( ebias );
 }
@@ -85,7 +85,7 @@ void FloatType::setEbias( size_t ebias ) const
    herr_t ret_value = H5Tset_ebias( id, ebias );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::setEbias", "H5Tset_ebias failed");
    }
 }
 
@@ -96,7 +96,7 @@ H5T_norm_t FloatType::getNorm( string& norm_string ) const
    // Returns a valid normalization type if successful
    if( norm == H5T_NORM_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::getNorm", "H5Tget_norm failed - returned H5T_NORM_ERROR");
    }
    if( norm == H5T_NORM_IMPLIED )
       norm_string = "H5T_NORM_IMPLIED (0)";
@@ -113,7 +113,7 @@ void FloatType::setNorm( H5T_norm_t norm ) const
    herr_t ret_value = H5Tset_norm( id, norm );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::setNorm", "H5Tset_norm failed");
    }
 }
 
@@ -124,7 +124,7 @@ H5T_pad_t FloatType::getInpad( string& pad_string ) const
    // Returns a valid padding type if successful
    if( pad_type == H5T_PAD_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::getInpad", "H5Tget_inpad failed - returned H5T_PAD_ERROR");
    }
    if( pad_type == H5T_PAD_ZERO )
       pad_string = "H5T_PAD_ZERO (0)";
@@ -141,7 +141,7 @@ void FloatType::setInpad( H5T_pad_t inpad ) const
    herr_t ret_value = H5Tset_inpad( id, inpad );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("FloatType::setInpad", "H5Tset_inpad failed");
    }
 }
 

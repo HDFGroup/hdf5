@@ -63,7 +63,11 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 {
    // reset the identifier of this object - resetIdComponent will call the 
    // appropriate H5xclose to close the id
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw IdComponentException("IdComponent::operator=", close_error.getDetailMsg());
+    }
 
    // copy the data members from the rhs object
    id = rhs.id;
@@ -85,7 +89,11 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 void IdComponent::setId( hid_t new_id )
 {
    // reset the identifier of this object, call appropriate H5Xclose
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw IdComponentException("IdComponent::setId", close_error.getDetailMsg());
+    }
 
    id = new_id;
 

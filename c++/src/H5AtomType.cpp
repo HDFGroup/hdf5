@@ -29,7 +29,7 @@ void AtomType::setSize( size_t size ) const
    herr_t ret_value = H5Tset_size( id, size );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::setSize", "H5Tset_size failed");
    }
 }
 
@@ -42,7 +42,8 @@ H5T_order_t AtomType::getOrder( string& order_string ) const
    // return a byte order constant if successful
    if( type_order == H5T_ORDER_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::getOrder", 
+		"H5Tget_order returns H5T_ORDER_ERROR");
    }
    if( type_order == H5T_ORDER_LE )
       order_string = "Little endian byte ordering (0)";
@@ -60,7 +61,7 @@ void AtomType::setOrder( H5T_order_t order ) const
    herr_t ret_value = H5Tset_order( id, order );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::setOrder", "H5Tset_order failed");
    }
 }
 
@@ -72,7 +73,8 @@ size_t AtomType::getPrecision() const
    // returns number of significant bits if successful
    if( num_signi_bits == 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::getPrecision",
+		"H5Tget_precision returns invalid number of significant bits");
    }
    return( num_signi_bits );
 }
@@ -84,7 +86,7 @@ void AtomType::setPrecision( size_t precision ) const
    herr_t ret_value = H5Tset_precision( id, precision );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::setPrecision", "H5Tset_precision failed");
    }
 }
 
@@ -99,7 +101,8 @@ int AtomType::getOffset() const
    // returns a non-negative offset value if successful
    if( offset == -1 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::getOffset",
+		"H5Tget_offset returns a negative offset value");
    }
    return( offset );
 }
@@ -111,7 +114,7 @@ void AtomType::setOffset( size_t offset ) const
    herr_t ret_value = H5Tset_offset( id, offset );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("AtomType::setOffset", "H5Tset_offset failed");
    }
 }
 
@@ -123,7 +126,7 @@ void AtomType::setOffset( size_t offset ) const
    //herr_t ret_value = H5Tget_pad( id, &lsb, &msb );
    //if( ret_value < 0 )
    //{
-      //throw DataTypeIException();
+      //throw DataTypeIException("AtomType::getPad", "H5Tget_pad failed");
    //}
 //}
 
@@ -134,7 +137,7 @@ void AtomType::setOffset( size_t offset ) const
    //herr_t ret_value = H5Tset_pad( id, lsb, msb );
    //if( ret_value < 0 )
    //{
-      //throw DataTypeIException();
+      //throw DataTypeIException("AtomType::setPad", "H5Tset_pad failed");
    //}
 //}
 

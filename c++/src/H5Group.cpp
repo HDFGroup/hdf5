@@ -51,7 +51,7 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
       //return( ret_value );
    //else  // raise exception when H5Aiterate returns a negative value
    //{
-      //throw GroupIException();
+      //throw GroupIException("Group::iterateElems", "H5Giterate failed");
    //}
 //}
 
@@ -61,14 +61,16 @@ void Group::p_close() const
    herr_t ret_value = H5Gclose( id );
    if( ret_value < 0 )
    {
-      throw GroupIException();
+      throw GroupIException(NULL, "H5Gclose failed");
    }
 }
 
 // Throw file exception
-void Group::throwException() const
+void Group::throwException(const string& func_name, const string& msg) const
 {
-   throw GroupIException();
+   string full_name = func_name;
+   full_name.insert(0, "Group::");
+   throw GroupIException(full_name, msg);
 }
 
 // The destructor of this instance calls IdComponent::reset to
@@ -79,7 +81,12 @@ void Group::throwException() const
 Group::~Group()
 {  
    // The group id will be closed properly
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw GroupIException("Group::~Group", close_error.getDetailMsg());
+    }
+
 }  
 
 #ifndef H5_NO_NAMESPACE

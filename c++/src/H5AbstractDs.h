@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 // Class AbstractDs is an abstract base class, from which Attribute and
 // DataSet inherit.  It provides the services that are common to both
 // Attribute and DataSet.  It also inherits from H5Object and passes down

@@ -10,6 +10,7 @@
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
+#include "H5private.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -29,7 +30,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object(), is
    id = H5Tcreate( type_class, size );
    if( id <= 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType constructor", "H5Tcreate failed");
    }
 }
 
@@ -49,28 +50,25 @@ void DataType::copy( const DataType& like_type )
 {
    // reset the identifier of this instance, H5Tclose will be called 
    // if needed 
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+    }
 
    // call C routine to copy the datatype
    id = H5Tcopy( like_type.getId() );
+
+   // new reference counter for this id
    ref_count = new RefCounter;
-
-/*
-id != like_type.id so this object has a different ref_count than
-like_type 
-   ref_count = like_type.ref_count;
-
-   // increment ref counter to indicate additional references to this id
-   ref_count->increment();
-*/
 
    if( id <= 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::copy", "H5Tcopy failed");
    }
 }
 
-// Determines whether two datatypes are the same. ???
+// Determines whether two datatypes refer to the same actual datatype.
 bool DataType::operator==(const DataType& compared_type ) const
 {
    // Call C routine H5Tequal to determines whether two datatype 
@@ -82,18 +80,20 @@ bool DataType::operator==(const DataType& compared_type ) const
       return false;
    else
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::operator==", 
+		"H5Tequal returns negative value");
    }
 }
 
 // Operates a user's function on each attribute of an object - commented
 // out because it should use the one from H5Object; need to check 
-// the parameter list???
+// the parameter list???  - work in progress
 //int DataType::iterate( unsigned * idx, H5A_operator_t op, void *op_data )
 //{
 //}
 
 // Creates a new variable-length datatype - Note: make it inheritance???
+// work in progress
 //DataType DataType::vlenCreate( const DataType& base_type )
 //{
 //}
@@ -111,7 +111,7 @@ void DataType::commit( H5Object& loc, const char* name ) const
    herr_t ret_value = H5Tcommit( loc_id, name, id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::commit", "H5Tcommit failed");
    }
 }
 
@@ -126,7 +126,7 @@ bool DataType::committed() const
       return false;
    else
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::committed", "H5Tcommitted return negative value");
    }
 }
 
@@ -137,7 +137,7 @@ H5T_conv_t DataType::find( const DataType& dest, H5T_cdata_t **pcdata ) const
    H5T_conv_t func = H5Tfind( id, dest.getId(), pcdata );
    if( func == NULL )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::find", "H5Tfind returns a NULL function");
    }
    return( func );
 }
@@ -154,7 +154,7 @@ void DataType::convert( const DataType& dest, size_t nelmts, void *buf, void *ba
    ret_value = H5Tconvert( id, dest_id, nelmts, buf, background, plist_id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::convert", "H5Tconvert failed");
    }
 }
 
@@ -165,7 +165,7 @@ void DataType::setOverflow( H5T_overflow_t func ) const
    herr_t ret_value = H5Tset_overflow( func );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::setOverflow", "H5Tset_overflow failed");
    }
 }
 
@@ -183,7 +183,7 @@ void DataType::lock() const
    herr_t ret_value = H5Tlock( id );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::lock", "H5Tlock failed");
    }
 }
 
@@ -195,7 +195,8 @@ H5T_class_t DataType::getClass() const
    // Return datatype class identifier if successful
    if( type_class == H5T_NO_CLASS )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::getClass", 
+		"H5Tget_class returns H5T_NO_CLASS");
    }
    return( type_class );
 }
@@ -205,9 +206,10 @@ size_t DataType::getSize() const
 {
    // Call C routine to get the datatype size
    size_t type_size = H5Tget_size( id );
-   if( type_size <= 0 ) // Is 0 valid value ???
+   if( type_size <= 0 ) // valid data types are never zero size
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::getSize", 
+		"H5Tget_size returns invalid datatype size");
    }
    return( type_size );
 }
@@ -229,7 +231,7 @@ DataType DataType::getSuper() const
    }
    else
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::getSuper", "H5Tget_super failed");
    }
 }
 
@@ -246,7 +248,7 @@ void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& 
    herr_t ret_value = H5Tregister( pers, name, id, dest_id, func );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::registerFunc", "H5Tregister failed");
    }
 }
 
@@ -263,7 +265,7 @@ void DataType::unregister( H5T_pers_t pers, const char* name, const DataType& de
    herr_t ret_value = H5Tunregister( pers, name, id, dest_id, func );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::unregister", "H5Tunregister failed");
    }
 }
 
@@ -278,7 +280,7 @@ void DataType::setTag( const char* tag ) const
    herr_t ret_value = H5Tset_tag( id, tag );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::setTag", "H5Tset_tag failed");
    }
 }
 
@@ -291,12 +293,14 @@ string DataType::getTag() const
    // and return it, otherwise, raise an exception
    if( tag_Cstr != NULL )
    {
-      string tag = string( tag_Cstr );
-      return( tag );
+      string tag = string(tag_Cstr); // convert C string to string object
+	HDfree(tag_Cstr); // free the C string 
+      return (tag); // return the tag 
    }
    else
    {
-      throw DataTypeIException();
+      throw DataTypeIException("DataType::getTag", 
+		"H5Tget_tag returns NULL for tag");
    }
 }
 
@@ -310,7 +314,7 @@ void DataType::p_close() const
       herr_t ret_value = H5Tclose( id );
       if( ret_value < 0 )
       {
-         throw DataTypeIException();
+         throw DataTypeIException(NULL, "H5Tclose failed");
       }
    }
 }
@@ -323,7 +327,11 @@ void DataType::p_close() const
 DataType::~DataType()
 {  
    // The datatype id will be closed properly
-   resetIdComponent( this );
+    try {
+        resetIdComponent( this ); }
+    catch (Exception close_error) { // thrown by p_close
+        throw DataTypeIException("DataType::~DataType", close_error.getDetailMsg());
+    }
 }  
 
 #ifndef H5_NO_NAMESPACE

@@ -1,5 +1,6 @@
-#ifndef _H5Attribute_H
-#define _H5Attribute_H
+// C++ informative line for the emacs editor: -*- C++ -*-
+#ifndef H5Attribute_H_
+#define H5Attribute_H_
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {

@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 // CommonFG is a protocol class.  Its existence is simply to provide the
 // common services that are provided by H5File and Group.  The file or
 // group in the context of this class is referred to as 'location'.
@@ -101,7 +102,7 @@ class CommonFG {
 	StrType openStrType( const char* name ) const;
 
 	// for H5File and Group to throw appropriate exception
-	virtual void throwException() const = 0;
+	virtual void throwException(const string& func_name, const string& msg) const = 0;
 
 	CommonFG();
 	virtual ~CommonFG();

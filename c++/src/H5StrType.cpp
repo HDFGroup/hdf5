@@ -35,7 +35,7 @@ StrType::StrType( const hid_t existing_id ) : AtomType( existing_id ) {}
 // Copy constructor: makes copy of the original StrType object
 StrType::StrType( const StrType& original ) : AtomType ( original ) {}
 
-// Gets the string datatype of the specified dataset - will reimplement
+// Gets the string datatype of the specified dataset - will reimplement - BMR
 StrType::StrType( const DataSet& dataset ) : AtomType ()
 {
    // Calls C function H5Dget_type to get the id of the datatype
@@ -43,7 +43,7 @@ StrType::StrType( const DataSet& dataset ) : AtomType ()
 
    if( id <= 0 )
    {
-      throw DataSetIException();
+      throw DataSetIException("StrType constructor", "H5Dget_type failed");
    }
 }
 
@@ -55,7 +55,7 @@ H5T_cset_t StrType::getCset() const
    // Returns a valid character set type if successful
    if( cset == H5T_CSET_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("StrType::getCset", "H5Tget_cset failed");
    }
    return( cset );
 }
@@ -67,7 +67,7 @@ void StrType::setCset( H5T_cset_t cset ) const
 
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("StrType::setCset", "H5Tset_cset failed");
    }
 }
 
@@ -79,7 +79,8 @@ H5T_str_t StrType::getStrpad() const
    // Returns a valid string padding type if successful
    if( strpad == H5T_STR_ERROR )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("StrType::getStrpad", 
+		"H5Tget_strpad failed - returned H5T_STR_ERROR");
    }
    return( strpad );
 }
@@ -91,7 +92,7 @@ void StrType::setStrpad( H5T_str_t strpad ) const
 
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("StrType::setStrpad", "H5Tset_strpad failed");
    }
 }
 

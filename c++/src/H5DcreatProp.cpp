@@ -24,7 +24,7 @@ void DSetCreatPropList::setChunk( int ndims, const hsize_t* dim ) const
    herr_t ret_value = H5Pset_chunk( id, ndims, dim );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setChunk", "H5Pset_chunk failed");
    }
 }
 
@@ -35,7 +35,8 @@ H5D_layout_t DSetCreatPropList::getLayout() const
    H5D_layout_t layout = H5Pget_layout( id );
    if( layout == H5D_LAYOUT_ERROR )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getLayout", 
+		"H5Pget_layout returns H5D_LAYOUT_ERROR");
    }
    return( layout );
 }
@@ -46,7 +47,8 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
    int chunk_size = H5Pget_chunk( id, max_ndims, dim );
    if( chunk_size < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getChunk", 
+		"H5Pget_chunk returns negative chunk size");
    }
    return( chunk_size );
 }
@@ -57,7 +59,8 @@ void DSetCreatPropList::setLayout(hid_t plist, H5D_layout_t layout ) const
    herr_t ret_value = H5Pset_layout( id, layout );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setLayout",
+		"H5Pset_layout failed");
    }
 }
 
@@ -67,7 +70,8 @@ void DSetCreatPropList::setDeflate( int level ) const
    herr_t ret_value = H5Pset_deflate( id, level );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setDeflate",
+		"H5Pset_deflate failed");
    }
 }
 
@@ -77,7 +81,8 @@ void DSetCreatPropList::setFillValue( DataType& fvalue_type, const void* value )
    herr_t ret_value = H5Pset_fill_value( id, fvalue_type.getId(), value );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setFillValue",
+                "H5Pset_fill_value failed");
    }
 }
 
@@ -87,7 +92,8 @@ void DSetCreatPropList::getFillValue( DataType& fvalue_type, void* value ) const
    herr_t ret_value = H5Pget_fill_value( id, fvalue_type.getId(), value );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getFillValue",
+                "H5Pget_fill_value failed");
    }
 }
 
@@ -97,7 +103,8 @@ void DSetCreatPropList::setFilter( H5Z_filter_t filter, unsigned int flags, size
    herr_t ret_value = H5Pset_filter( id, filter, flags, cd_nelmts, cd_values );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setFilter",
+                "H5Pset_filter failed");
    }
 }
 
@@ -107,7 +114,8 @@ int DSetCreatPropList::getNfilters() const
    int num_filters = H5Pget_nfilters( id );
    if( num_filters < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getNfilters",
+                "H5Pget_nfilters returned negative number of filters");
    }
    else
       return( num_filters );
@@ -117,10 +125,12 @@ int DSetCreatPropList::getNfilters() const
 H5Z_filter_t DSetCreatPropList::getFilter( int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[] ) const
 {
    H5Z_filter_t filter;
-   filter = H5Pget_filter( id, filter_number, &flags, &cd_nelmts, cd_values, namelen, name );
+   filter = H5Pget_filter( id, filter_number, &flags, &cd_nelmts, 
+				cd_values, namelen, name );
    if( filter == H5Z_FILTER_ERROR )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getFilter",
+                "H5Pget_filter returned H5Z_FILTER_ERROR");
    }
    else
       return( filter );
@@ -132,7 +142,8 @@ void DSetCreatPropList::setExternal( const char* name, off_t offset, hsize_t siz
    herr_t ret_value = H5Pset_external( id, name, offset, size );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::setExternal",
+                "H5Pset_external failed");
    }
 }
 
@@ -142,7 +153,8 @@ int DSetCreatPropList::getExternalCount() const
    int num_ext_files = H5Pget_external_count( id );
    if( num_ext_files < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getExternalCount",
+                "H5Pget_external_count returns negative number of external files");
    }
    else
       return( num_ext_files );
@@ -154,7 +166,8 @@ void DSetCreatPropList::getExternal( int idx, size_t name_size, char* name, off_
    herr_t ret_value = H5Pget_external( id, idx, name_size, name, &offset, &size );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetCreatPropList::getExternal",
+                "H5Pget_external failed");
    }
 }
 

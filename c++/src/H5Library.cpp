@@ -17,7 +17,7 @@ void H5Library::open()
    herr_t ret_value = H5open();
    if( ret_value < 0 )
    {
-      throw LibraryIException();
+      throw LibraryIException("H5Library::open", "H5open failed");
    }
 }
 
@@ -27,7 +27,7 @@ void H5Library::close()
    herr_t ret_value = H5close();
    if( ret_value < 0 )
    {
-      throw LibraryIException();
+      throw LibraryIException("H5Library::close", "H5close failed");
    }
 }
 
@@ -37,7 +37,7 @@ void H5Library::dontAtExit()
    herr_t ret_value = H5dont_atexit();
    if( ret_value < 0 )
    {
-      throw LibraryIException();
+      throw LibraryIException("H5Library::dontAtExit", "H5dont_atexit failed");
    }
 }
 
@@ -47,7 +47,7 @@ void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& rel
    herr_t ret_value = H5get_libversion( &majnum, &minnum, &relnum );
    if( ret_value < 0 )
    {
-      throw LibraryIException();
+      throw LibraryIException("H5Library::getLibVersion", "H5get_libversion failed");
    }
 }
 
@@ -58,7 +58,7 @@ void H5Library::checkVersion( unsigned majnum, unsigned minnum, unsigned relnum 
    herr_t ret_value = H5check_version( majnum, minnum, relnum  );
    if( ret_value < 0 )
    {
-      throw LibraryIException();
+      throw LibraryIException("H5Library::checkVersion", "H5check_version failed");
    }
 }
 

@@ -1,3 +1,4 @@
+// C++ informative line for the emacs editor: -*- C++ -*-
 #ifndef _H5Group_H
 #define _H5Group_H
 
@@ -17,7 +18,8 @@ class Group : public H5Object, public CommonFG {
 	virtual hid_t getLocId() const;
 
         // Throw group exception
-        virtual void throwException() const;
+        virtual void throwException(const string& func_name, const string& msg) const;
+
 
 	// Used by the API to appropriately close a group
 	void p_close() const;

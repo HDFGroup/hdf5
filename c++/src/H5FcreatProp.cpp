@@ -25,7 +25,8 @@ void FileCreatPropList::getVersion(
    herr_t ret_value = H5Pget_version( id, &boot, &freelist, &stab, &shhdr );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::getVersion", 
+		"H5Pget_version failed");
    }
 }
 
@@ -34,7 +35,8 @@ void FileCreatPropList::setUserblock( hsize_t size ) const
    herr_t ret_value = H5Pset_userblock( id, size);
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::setUserblock", 
+		"H5Pset_userblock failed");
    }
 }
 
@@ -44,7 +46,8 @@ hsize_t FileCreatPropList::getUserblock() const
    herr_t ret_value = H5Pget_userblock( id, &userblock_size );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::getUserblock", 
+		"H5Pget_userblock failed");
    }
    return( userblock_size );
 }
@@ -54,7 +57,8 @@ void FileCreatPropList::setSizes( size_t sizeof_addr, size_t sizeof_size ) const
    herr_t ret_value = H5Pset_sizes( id, sizeof_addr, sizeof_size );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::setSizes", 
+		"H5Pset_sizes failed");
    }
 }
 
@@ -63,7 +67,8 @@ void FileCreatPropList::getSizes( size_t& sizeof_addr, size_t& sizeof_size ) con
    herr_t ret_value = H5Pget_sizes( id, &sizeof_addr, &sizeof_size );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::getSizes", 
+		"H5Pget_sizes failed");
    }
 }
 
@@ -72,7 +77,8 @@ void FileCreatPropList::setSymk( int ik, int lk ) const
    herr_t ret_value = H5Pset_sym_k( id, ik, lk );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::setSymk", 
+		"H5Pset_sym_k failed");
    }
 }
 
@@ -81,7 +87,8 @@ void FileCreatPropList::getSymk( int& ik, int& lk ) const
    herr_t ret_value = H5Pget_sym_k( id, &ik, &lk );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::getSymk", 
+		"H5Pget_sym_k failed");
    }
 }
 
@@ -90,7 +97,8 @@ void FileCreatPropList::setIstorek( int ik ) const
    herr_t ret_value = H5Pset_istore_k( id, ik );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::setIstorek", 
+		"H5Pset_istore_k failed");
    }
 }
 int FileCreatPropList::getIstorek() const
@@ -99,7 +107,8 @@ int FileCreatPropList::getIstorek() const
    herr_t ret_value = H5Pget_istore_k( id, &ik );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("FileCreatPropList::getIstorek", 
+		"H5Pget_istore_k failed");
    }
    return( ik );
 }

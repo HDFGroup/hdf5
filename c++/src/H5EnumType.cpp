@@ -41,7 +41,7 @@ EnumType::EnumType( const DataSet& dataset ) : DataType()
    // If the datatype id is not valid, throw an exception
    if( id <= 0 )
    {
-      throw DataSetIException("Getting datatype fails...");
+      throw DataSetIException("EnumType constructor", "H5Dget_type failed");
    }
 }
 
@@ -54,7 +54,7 @@ EnumType::EnumType( const IntType& data_type ) : DataType()
    // If the datatype id is not valid, throw an exception
    if( id <= 0 )
    {
-      throw DataSetIException("Creating enumeration datatype fails...");
+      throw DataSetIException("EnumType constructor", "H5Tenum_create failed");
    }
 }
 
@@ -69,7 +69,7 @@ void EnumType::insert( const char* name, void *value ) const
    herr_t ret_value = H5Tenum_insert( id, name, value );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("EnumType::insert", "H5Tenum_insert failed");
    }
 }
 
@@ -84,7 +84,7 @@ string EnumType::nameOf( void *value, size_t size ) const
    // If H5Tenum_nameof returns a negative value, raise an exception,
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("EnumType::nameOf", "H5Tenum_nameof failed");
    }
    // otherwise, create the string to hold the datatype name and return it
    string name = string( name_C );
@@ -104,7 +104,7 @@ void EnumType::valueOf( const char* name, void *value ) const
    herr_t ret_value = H5Tenum_valueof( id, name, value );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("EnumType::valueOf", "H5Tenum_valueof failed");
    }
 }
 
@@ -116,7 +116,7 @@ void EnumType::getMemberValue( int memb_no, void *value ) const
    hid_t ret_value = H5Tget_member_value( id, memb_no, value );
    if( ret_value < 0 )
    {
-      throw DataTypeIException();
+      throw DataTypeIException("EnumType::getMemberValue", "H5Tget_member_value failed");
    }
 }
 

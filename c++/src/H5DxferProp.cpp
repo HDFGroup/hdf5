@@ -25,7 +25,8 @@ void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
    herr_t ret_value = H5Pset_buffer( id, size, tconv, bkg );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setBuffer",
+		"H5Pset_buffer failed");
    }
 }
 
@@ -35,7 +36,8 @@ size_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
    size_t buffer_size = H5Pget_buffer( id, tconv, bkg );
    if( buffer_size == 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getBuffer",
+		"H5Pget_buffer returned 0 for buffer size - failure");
    }
    return( buffer_size );
 }
@@ -46,7 +48,8 @@ void DSetMemXferPropList::setPreserve( bool status ) const
    herr_t ret_value = H5Pset_preserve( id, (hbool_t) status );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setPreserve",
+		"H5Pset_preserve failed");
    }
 }
 
@@ -60,7 +63,8 @@ bool DSetMemXferPropList::getPreserve() const
       return false;
    else
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getPreserve",
+		"H5Pget_preserve returned negative value for status");
    }
 }
 
@@ -70,7 +74,8 @@ void DSetMemXferPropList::setHyperCache( bool cache, unsigned limit ) const
    herr_t ret_value = H5Pset_hyper_cache( id, cache, limit );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setHyperCache",
+		"H5Pset_hyper_cache failed");
    }
 }
 
@@ -81,7 +86,8 @@ void DSetMemXferPropList::getHyperCache( bool& cache, unsigned& limit ) const
    herr_t ret_value = H5Pget_hyper_cache( id, &temp_cache, &limit );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getHyperCache",
+		"H5Pget_hyper_cache failed");
    }
    if( temp_cache > 0 )
       cache = true;
@@ -95,7 +101,8 @@ void DSetMemXferPropList::setBtreeRatios( double left, double middle, double rig
    herr_t ret_value = H5Pset_btree_ratios( id, left, middle, right );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setBtreeRatios",
+		"H5Pset_btree_ratios failed");
    }
 }
 
@@ -105,7 +112,8 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
    herr_t ret_value = H5Pget_btree_ratios( id, &left, &middle, &right );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getBtreeRatios",
+		"H5Pget_btree_ratios failed");
    }
 }
 
@@ -116,7 +124,8 @@ void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* a
 						free_func, free_info );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setVlenMemManager",
+		"H5Pset_vlen_mem_manager failed");
    }
 }
 
@@ -128,7 +137,8 @@ void DSetMemXferPropList::setVlenMemManager() const
    //herr_t ret_value = H5Pset_vlen_mem_manager( id, NULL, NULL, NULL, NULL );
    //if( ret_value < 0 )
    //{
-      //throw PropListIException();
+      //throw PropListIException("DSetMemXferPropList::setVlenMemManager",
+		//"H5Pset_vlen_mem_manager failed");
    //}
 }
 
@@ -138,7 +148,8 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
    herr_t ret_value = H5Pget_vlen_mem_manager( id, &alloc_func, alloc_info, &free_func, free_info );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getVlenMemManager",
+		"H5Pget_vlen_mem_manager failed");
    }
 }
 
@@ -149,7 +160,8 @@ void DSetMemXferPropList::setXfer( H5D_transfer_t data_xfer_mode = H5D_XFER_INDE
    herr_t ret_value = H5Pset_xfer( ... );
    if( ret_value < 0 )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::setXfer",
+		"H5Pset_xfer failed");
    }
 }
 
@@ -158,10 +170,12 @@ void DSetMemXferPropList::setXfer( H5D_transfer_t data_xfer_mode = H5D_XFER_INDE
 H5D_transfer_t DSetMemXferPropList::getXfer() const
 {
    H5D_transfer_t xfer = H5Pget_xfer( id );
-// remove when done - find out what the value is for ??
+// BMR - need to find out what the value is for ?? when this function 
+// is supported
    if( xfer == ?? )
    {
-      throw PropListIException();
+      throw PropListIException("DSetMemXferPropList::getXfer",
+		"H5Pget_xfer failed");
    }
    return( xfer );
 }
