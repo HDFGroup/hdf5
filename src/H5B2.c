@@ -1706,18 +1706,18 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         /* Descend into child node, if current node is an internal node */
         if(depth>0) {
             if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
         } /* end if */
 
         /* Make callback for current record */
         if ((ret_value = (op)(H5B2_NAT_NREC(native,shared,u), op_data)) <0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed")
     } /* end for */
 
     /* Descend into last child node, if current node is an internal node */
     if(depth>0) {
         if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
     } /* end if */
 
 done:
@@ -1795,7 +1795,7 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     if(root_ptr.node_nrec>0) {
         /* Iterate through nodes */
         if((ret_value=H5B2_iterate_node(f,dxpl_id,bt2_shared,depth,&root_ptr,op,op_data))<0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
     } /* end if */
 
 done:
