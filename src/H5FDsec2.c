@@ -144,7 +144,7 @@ static herr_t H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_sec2_flush(H5FD_t *_file);
+static herr_t H5FD_sec2_flush(H5FD_t *_file, hbool_t closing);
 
 static const H5FD_class_t H5FD_sec2_g = {
     "sec2",					/*name			*/
@@ -347,7 +347,7 @@ H5FD_sec2_close(H5FD_t *_file)
 
     FUNC_ENTER(H5FD_sec2_close, FAIL);
 
-    if (H5FD_sec2_flush(_file)<0)
+    if (H5FD_sec2_flush(_file,TRUE)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
     if (close(file->fd)<0)
         HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
@@ -717,7 +717,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_flush(H5FD_t *_file)
+H5FD_sec2_flush(H5FD_t *_file, hbool_t UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 

@@ -38,7 +38,7 @@ __DLL__ herr_t H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t a
 		 void *buf/*out*/);
 __DLL__ herr_t H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		  const void *buf);
-__DLL__ herr_t H5FD_flush(H5FD_t *file);
+__DLL__ herr_t H5FD_flush(H5FD_t *file, hbool_t closing);
 __DLL__ herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 
 #endif /* !_H5FDprivate_H */

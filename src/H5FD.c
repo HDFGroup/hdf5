@@ -2487,7 +2487,7 @@ H5FDflush(H5FD_t *file)
     }
 
     /* Do the real work */
-    if (H5FD_flush(file)<0) {
+    if (H5FD_flush(file, FALSE)<0) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
 		      "file flush request failed");
     }
@@ -2509,11 +2509,13 @@ H5FDflush(H5FD_t *file)
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Quincey Koziol, 2002-05-10
+ *              Added 'closing' parameter
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_flush(H5FD_t *file)
+H5FD_flush(H5FD_t *file, hbool_t closing)
 {
     FUNC_ENTER(H5FD_flush, FAIL);
     assert(file && file->cls);
@@ -2529,7 +2531,7 @@ H5FD_flush(H5FD_t *file)
         file->accum_dirty=FALSE;
     } /* end if */
 
-    if (file->cls->flush && (file->cls->flush)(file)<0)
+    if (file->cls->flush && (file->cls->flush)(file,closing)<0)
         HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
     FUNC_LEAVE(SUCCEED);

@@ -90,7 +90,7 @@ static herr_t  H5FD_srb_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t  H5FD_srb_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t  H5FD_srb_flush(H5FD_t *_file);
+static herr_t  H5FD_srb_flush(H5FD_t *_file, hbool_t closing);
 
 /* The description of a file belonging to this driver. */ 
 typedef struct H5FD_srb_t {
@@ -662,12 +662,12 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_srb_flush(H5FD_t *_file)
+H5FD_srb_flush(H5FD_t *_file, hbool_t UNUSED closing)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
 
-    /*why H5FD_family_flush?*/ 
-    FUNC_ENTER(H5FD_family_flush, FAIL);
+    FUNC_ENTER(H5FD_srb_flush, FAIL);
+
     if(srbFileSync(file->srb_conn, file->fd) != 0) {
         srbFileClose(file->srb_conn, file->fd);
         clFinish(file->srb_conn);    
