@@ -857,9 +857,9 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
 			"interface initialization failed");		      \
       }									      \
    } else if (interface_initialize_g<0) {				      \
+       assert("interface is closing" && 0);				      \
        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, err,			      \
 		     "interface is closing");				      \
-       assert("interface is closing" && 0);				      \
    }									      \
 									      \
    /* Clear thread error stack entering public functions */		      \
