@@ -41,6 +41,8 @@ PROD_CPPFLAGS=
 PROFILE_CFLAGS=-pg
 PROFILE_CPPFLAGS=
 
+# Turn off shared lib option.  It does not work for TFLOPS yet.
+enable_shared="${enable_shared:-no}"
 
 # Set this to the width required by printf() to print type `long
 # long'.  For instance, if the format would be `%lld' then set it to
