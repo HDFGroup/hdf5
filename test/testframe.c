@@ -197,9 +197,7 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
                                     (HDstrcmp(argv[CLLoop], "-x") == 0))) {
             Loop = CLLoop + 1;
             while ((Loop < argc) && (argv[Loop][0] != '-')) {
-                for (Loop1 = 0; Loop1 < Index; Loop1++)
-                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                        Test[Loop1].SkipFlag = 1;
+		SetTest(argv[Loop], SKIPTEST);
                 Loop++;
             }                   /* end while */
         }                       /* end if */
@@ -207,12 +205,7 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
                                     (HDstrcmp(argv[CLLoop], "-b") == 0))) {
             Loop = CLLoop + 1;
             while ((Loop < argc) && (argv[Loop][0] != '-')) {
-                for (Loop1 = 0; Loop1 < Index; Loop1++) {
-                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) != 0)
-                        Test[Loop1].SkipFlag = 1;
-                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                        Loop1 = Index;
-                }               /* end for */
+		SetTest(argv[Loop], BEGINTEST);
                 Loop++;
             }                   /* end while */
         }                       /* end if */
@@ -223,9 +216,7 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
 
             Loop = CLLoop + 1;
             while ((Loop < argc) && (argv[Loop][0] != '-')) {
-                for (Loop1 = 0; Loop1 < Index; Loop1++)
-                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                        Test[Loop1].SkipFlag = 0;
+		SetTest(argv[Loop], ONLYTEST);
                 Loop++;
             }                   /* end while */
         }                       /* end if */
@@ -380,3 +371,50 @@ TestErrPrintf(const char *format, ...)
     return ret_value;
 }
 
+
+/* 
+ * Set (control) which test will be tested.
+ * SKIPTEST: skip this test
+ * ONLYTEST: do only this test
+ * BEGINETEST: skip all tests before this test
+ *
+ */
+void SetTest(const char *testname, int action)
+{
+    int Loop;
+
+    switch (action){
+	case SKIPTEST:
+	    for (Loop = 0; Loop < Index; Loop++)
+		if (HDstrcmp(testname, Test[Loop].Name) == 0){
+		    Test[Loop].SkipFlag = 1;
+		    break;
+		}
+	    break;
+	case BEGINTEST:
+	    for (Loop = 0; Loop < Index; Loop++) {
+		if (HDstrcmp(testname, Test[Loop].Name) != 0)
+		    Test[Loop].SkipFlag = 1;
+		else
+		    break;
+	    }
+	    break;
+	case ONLYTEST:
+	    for (Loop = 0; Loop < Index; Loop++) {
+		if (HDstrcmp(testname, Test[Loop].Name) != 0)
+		    Test[Loop].SkipFlag = 1;
+		else {
+		    Test[Loop].SkipFlag = 0;
+		    break;
+		}
+	    }
+	    /* skip the rest */
+	    while (++Loop < Index)
+		Test[Loop].SkipFlag = 1;
+	    break;
+	default:
+	    /* error */
+	    printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+	    break;
+    }
+}
