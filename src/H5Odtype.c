@@ -202,10 +202,11 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
 static herr_t
 H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
 {
-    uintn                   flags = 0;
-    uintn                   perm_word;
-    char                   *hdr = (char *)*pp;
-    intn                    i, j, n;
+    uintn               flags = 0;
+    uintn               perm_word;
+    char                *hdr = (char *)*pp;
+    intn                i, j;
+    size_t		n, z;
 
     FUNC_ENTER(H5O_dtype_encode_helper, FAIL);
 
@@ -336,10 +337,14 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         flags |= (dt->u.atomic.u.f.sign << 8) & 0xff00;
         UINT16ENCODE(*pp, dt->u.atomic.offset);
         UINT16ENCODE(*pp, dt->u.atomic.prec);
-        *(*pp)++ = dt->u.atomic.u.f.epos;
-        *(*pp)++ = dt->u.atomic.u.f.esize;
-        *(*pp)++ = dt->u.atomic.u.f.mpos;
-        *(*pp)++ = dt->u.atomic.u.f.msize;
+	assert (dt->u.atomic.u.f.epos<=255);
+        *(*pp)++ = (uint8)(dt->u.atomic.u.f.epos);
+	assert (dt->u.atomic.u.f.esize<=255);
+        *(*pp)++ = (uint8)(dt->u.atomic.u.f.esize);
+	assert (dt->u.atomic.u.f.mpos<=255);
+        *(*pp)++ = (uint8)(dt->u.atomic.u.f.mpos);
+	assert (dt->u.atomic.u.f.msize<=255);
+        *(*pp)++ = (uint8)(dt->u.atomic.u.f.msize);
         UINT32ENCODE(*pp, dt->u.atomic.u.f.ebias);
         break;
 
@@ -349,10 +354,10 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
          */
         flags = dt->u.compnd.nmembs & 0xffff;
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
-	    HDstrcpy (*pp, dt->u.compnd.memb[i].name);
+	    HDstrcpy ((char*)(*pp), dt->u.compnd.memb[i].name);
             n = strlen(dt->u.compnd.memb[i].name);
-	    for (j=n+1; j%8; j++) (*pp)[j] = '\0';
-	    *pp += j;
+	    for (z=n+1; z%8; z++) (*pp)[z] = '\0';
+	    *pp += z;
             UINT32ENCODE(*pp, dt->u.compnd.memb[i].offset);
             *(*pp)++ = dt->u.compnd.memb[i].ndims;
             assert(dt->u.compnd.memb[i].ndims <= 4);
@@ -366,7 +371,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
                 perm_word |= dt->u.compnd.memb[i].perm[j] << (8 * j);
             }
             UINT32ENCODE(*pp, perm_word);
-            if (H5O_dtype_encode_helper(pp, &(dt->u.compnd.memb[i].type)) < 0) {
+            if (H5O_dtype_encode_helper(pp, &(dt->u.compnd.memb[i].type))<0) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL,
                               "can't encode member type");
             }
@@ -423,7 +428,7 @@ H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
                       "can't decode type");
     }
-    assert(raw_size == H5O_dtype_size(f, (void *) dt));
+    assert(raw_size == H5O_ALIGN (H5O_dtype_size(f, (void *) dt)));
 
     FUNC_LEAVE(dt);
 }
@@ -454,7 +459,7 @@ H5O_dtype_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 
     /* check args */
     assert(f);
-    assert(raw_size == H5O_dtype_size(f, mesg));
+    assert(raw_size == H5O_ALIGN (H5O_dtype_size(f, mesg)));
     assert(p);
     assert(dt);
 
@@ -674,22 +679,22 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE * stream,
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                     buf,
                     dt->u.compnd.memb[i].name);
-            fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth - 3),
+            fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth-3),
                     "Byte offset:",
                     (unsigned long) (dt->u.compnd.memb[i].offset));
-            fprintf(stream, "%*s%-*s %d%s\n", indent + 3, "", MAX(0, fwidth - 3),
+            fprintf(stream, "%*s%-*s %d%s\n", indent + 3, "", MAX(0, fwidth-3),
                     "Dimensionality:",
                     dt->u.compnd.memb[i].ndims,
                     0 == dt->u.compnd.memb[i].ndims ? " (scalar)" : "");
             if (dt->u.compnd.memb[i].ndims > 0) {
-                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth - 3),
+                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth-3),
                         "Size:");
                 for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
                     fprintf(stream, "%s%lu", j ? ", " : "",
                             (unsigned long) (dt->u.compnd.memb[i].dim[j]));
                 }
                 fprintf(stream, "}\n");
-                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth - 3),
+                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth-3),
                         "Permutation:");
                 for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
                     fprintf(stream, "%s%lu", j ? ", " : "",

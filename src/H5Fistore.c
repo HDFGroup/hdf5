@@ -155,8 +155,8 @@ static herr_t
 H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t       *key = (H5F_istore_key_t *) _key;
-    int                     i;
-    int                     ndims = bt->sizeof_rkey / 8;
+    intn                   i;
+    intn                   ndims = (intn)(bt->sizeof_rkey / 8);
 
     FUNC_ENTER(H5F_istore_decode_key, FAIL);
 
@@ -199,7 +199,7 @@ static herr_t
 H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t       *key = (H5F_istore_key_t *) _key;
-    intn                    ndims = bt->sizeof_rkey / 8;
+    intn                    ndims = (intn)(bt->sizeof_rkey / 8);
     intn                    i;
 
     FUNC_ENTER(H5F_istore_encode_key, FAIL);
@@ -624,9 +624,6 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
     assert(buf);
 #ifndef NDEBUG
     for (i = 0; i < layout->ndims; i++) {
-        assert(!offset_f || offset_f[i] >= 0);  /*neg domains unsupported    */
-        assert(!offset_m || offset_m[i] >= 0);  /*mem array offset never neg */
-        assert(size[i] >= 0);   /*size may be zero, implies no-op       */
         assert(size_m[i] > 0);  /*destination must exist                */
         /*hyperslab must fit in BUF */
         assert((offset_m ? offset_m[i] : 0) + size[i] <= size_m[i]);

@@ -41,29 +41,28 @@ static hbool_t          interface_initialize_g = FALSE;
 #define H5F_FAM_DFLT_NBITS      26u     /*64MB */
 
 #define H5F_FAM_MASK(N)         (((uint64)1<<(N))-1)
-#define H5F_FAM_OFFSET(ADDR,N)  ((ADDR)->offset & H5F_FAM_MASK(N))
-#define H5F_FAM_MEMBNO(ADDR,N)  ((ADDR)->offset >> N)
+#define H5F_FAM_OFFSET(ADDR,N)  ((off_t)((ADDR)->offset & H5F_FAM_MASK(N)))
+#define H5F_FAM_MEMBNO(ADDR,N)  ((intn)((ADDR)->offset >> N))
 
-static hbool_t          H5F_fam_access(const char *name, int mode, H5F_search_t *key);
-static H5F_low_t       *H5F_fam_open(const char *name, uintn flags, H5F_search_t *);
-static herr_t           H5F_fam_close(H5F_low_t *lf);
-static herr_t           H5F_fam_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
-                                     uint8 *buf);
-static herr_t           H5F_fam_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-                                      const uint8 *buf);
-static herr_t           H5F_fam_flush(H5F_low_t *lf);
+static hbool_t H5F_fam_access(const char *name, int mode, H5F_search_t *key);
+static H5F_low_t *H5F_fam_open(const char *name, uintn flags, H5F_search_t *);
+static herr_t H5F_fam_close(H5F_low_t *lf);
+static herr_t H5F_fam_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
+			   uint8 *buf);
+static herr_t H5F_fam_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
+			    const uint8 *buf);
+static herr_t H5F_fam_flush(H5F_low_t *lf);
 
-const H5F_low_class_t   H5F_LOW_FAM[1] =
-{
-    {
-        H5F_fam_access,         /* access method                        */
-        H5F_fam_open,           /* open method                          */
-        H5F_fam_close,          /* close method                         */
-        H5F_fam_read,           /* read method                          */
-        H5F_fam_write,          /* write method                         */
-        H5F_fam_flush,          /* flush method                         */
-        NULL,                   /* extend method                        */
-    }};
+const H5F_low_class_t H5F_LOW_FAM[1] = {{
+    H5F_fam_access,         /* access method                        */
+    H5F_fam_open,           /* open method                          */
+    H5F_fam_close,          /* close method                         */
+    H5F_fam_read,           /* read method                          */
+    H5F_fam_write,          /* write method                         */
+    H5F_fam_flush,          /* flush method                         */
+    NULL,                   /* extend method                        */
+}};
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_fam_open
@@ -495,13 +494,14 @@ H5F_fam_flush(H5F_low_t *lf)
 static hbool_t
 H5F_fam_access(const char *name, int mode, H5F_search_t *key /*out */ )
 {
-    intn                    membno;
-    char                    member_name[4096];
-    hbool_t                 status;
+    intn        membno;
+    char        member_name[4096];
+    hbool_t     status;
+    hbool_t	ret_value = FALSE;
 
     FUNC_ENTER(H5F_fam_access, FAIL);
 
-    for (membno = 0; /*void */ ; membno++) {
+    for (membno=0; /*void*/; membno++) {
         sprintf(member_name, name, membno);
         status = H5F_low_access(H5F_LOW_DFLT, member_name, mode,
                                 0 == membno ? key : NULL);
@@ -513,18 +513,23 @@ H5F_fam_access(const char *name, int mode, H5F_search_t *key /*out */ )
                  * of the family.  As long as we found the first member(s) the
                  * family exists.
                  */
-                HRETURN(membno > 0 ? TRUE : FALSE);
+                ret_value = membno > 0 ? TRUE : FALSE;
+		break;
+		
             } else if (H5F_low_access(H5F_LOW_DFLT, member_name, F_OK, NULL)) {
                 /*
                  * The file exists but didn't have the write access permissions.
                  */
-                HRETURN(FALSE);
+		ret_value = FALSE;
+		break;
+		
             } else {
                 /*
                  * The file doesn't exist because we got to the end of the
                  * family.
                  */
-                HRETURN(TRUE);
+		ret_value = TRUE;
+		break;
             }
         }
         if (status < 0) {
@@ -533,5 +538,5 @@ H5F_fam_access(const char *name, int mode, H5F_search_t *key /*out */ )
         }
     }
 
-    FUNC_LEAVE(TRUE);
+    FUNC_LEAVE(ret_value);
 }

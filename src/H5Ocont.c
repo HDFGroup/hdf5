@@ -25,26 +25,24 @@
 #define PABLO_MASK      H5O_cont_mask
 
 /* PRIVATE PROTOTYPES */
-static void            *H5O_cont_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t           H5O_cont_encode(H5F_t *f, size_t size, uint8 *p,
+static void *H5O_cont_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_cont_encode(H5F_t *f, size_t size, uint8 *p,
                                         const void *_mesg);
-static herr_t           H5O_cont_debug(H5F_t *f, const void *_mesg, FILE * stream,
-                                       intn indent, intn fwidth);
+static herr_t H5O_cont_debug(H5F_t *f, const void *_mesg, FILE * stream,
+			     intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_CONT[1] =
-{
-    {
-        H5O_CONT_ID,            /*message id number             */
-        "hdr continuation",     /*message name for debugging    */
-        sizeof(H5O_cont_t),     /*native message size           */
-        H5O_cont_decode,        /*decode message                */
-        H5O_cont_encode,        /*encode message                */
-        NULL,                   /*no copy method                */
-        NULL,                   /*no size method                */
-        NULL,                   /*default reset method          */
-        H5O_cont_debug,         /*debugging                     */
-    }};
+const H5O_class_t H5O_CONT[1] = {{
+    H5O_CONT_ID,            /*message id number             */
+    "hdr continuation",     /*message name for debugging    */
+    sizeof(H5O_cont_t),     /*native message size           */
+    H5O_cont_decode,        /*decode message                */
+    H5O_cont_encode,        /*encode message                */
+    NULL,                   /*no copy method                */
+    NULL,                   /*no size method                */
+    NULL,                   /*default reset method          */
+    H5O_cont_debug,         /*debugging                     */
+}};
 
 /* Interface initialization */
 static intn             interface_initialize_g = FALSE;
@@ -76,7 +74,7 @@ H5O_cont_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 
     /* check args */
     assert(f);
-    assert(raw_size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
+    assert(raw_size == H5O_ALIGN (H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f)));
     assert(p);
 
     /* decode */
@@ -113,7 +111,7 @@ H5O_cont_encode(H5F_t *f, size_t size, uint8 *p, const void *_mesg)
 
     /* check args */
     assert(f);
-    assert(size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
+    assert(size == H5O_ALIGN (H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f)));
     assert(p);
     assert(cont);
 

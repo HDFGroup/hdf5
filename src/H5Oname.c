@@ -22,33 +22,32 @@
 #define PABLO_MASK      H5O_name_mask
 
 /* PRIVATE PROTOTYPES */
-static void            *H5O_name_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t           H5O_name_encode(H5F_t *f, size_t raw_size, uint8 *p,
-                                        const void *_mesg);
-static void            *H5O_name_copy(const void *_mesg, void *_dest);
-static size_t           H5O_name_size(H5F_t *f, const void *_mesg);
-static herr_t           H5O_name_reset(void *_mesg);
-static herr_t           H5O_name_debug(H5F_t *f, const void *_mesg, FILE * stream,
-                                       intn indent, intn fwidth);
+static void *H5O_name_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_name_encode(H5F_t *f, size_t raw_size, uint8 *p,
+			      const void *_mesg);
+static void *H5O_name_copy(const void *_mesg, void *_dest);
+static size_t H5O_name_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_name_reset(void *_mesg);
+static herr_t H5O_name_debug(H5F_t *f, const void *_mesg, FILE * stream,
+			     intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_NAME[1] =
-{
-    {
-        H5O_NAME_ID,            /*message id number             */
-        "name",                 /*message name for debugging    */
-        sizeof(H5O_name_t),     /*native message size           */
-        H5O_name_decode,        /*decode message                */
-        H5O_name_encode,        /*encode message                */
-        H5O_name_copy,          /*copy the native value         */
-        H5O_name_size,          /*raw message size              */
-        H5O_name_reset,         /*free internal memory          */
-        H5O_name_debug,         /*debug the message             */
-    }};
+const H5O_class_t H5O_NAME[1] = {{
+    H5O_NAME_ID,            /*message id number             */
+    "name",                 /*message name for debugging    */
+    sizeof(H5O_name_t),     /*native message size           */
+    H5O_name_decode,        /*decode message                */
+    H5O_name_encode,        /*encode message                */
+    H5O_name_copy,          /*copy the native value         */
+    H5O_name_size,          /*raw message size              */
+    H5O_name_reset,         /*free internal memory          */
+    H5O_name_debug,         /*debug the message             */
+}};
 
 /* Interface initialization */
-static hbool_t          interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_name_decode

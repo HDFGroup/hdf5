@@ -742,7 +742,6 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 {
     H5D_t		   *new_dset = NULL;
     H5D_t		   *ret_value = NULL;
-    size_t		    nbytes;
     intn		    i;
 
     FUNC_ENTER(H5D_create, NULL);
@@ -776,7 +775,6 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
     }
 
     /* Total raw data size */
-    nbytes = H5T_get_size(type) * H5P_get_npoints(space);
     new_dset->layout.type = new_dset->create_parms.layout;
     new_dset->layout.ndims = H5P_get_ndims(space) + 1;
     assert(new_dset->layout.ndims <= NELMTS(new_dset->layout.dim));
@@ -1037,7 +1035,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     assert(buf);
     if (!file_space) file_space = dataset->space;
     if (!mem_space) mem_space = file_space;
-    assert (H5P_get_npoints (mem_space)==H5P_get_npoints (file_space));
     
     /*
      * Convert data types to atoms because the conversion functions are
@@ -1068,6 +1065,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 		     "unable to initialize element numbering information");
     } else {
 	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    if (H5P_get_npoints (mem_space)!=H5P_get_npoints (file_space)) {
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "src and dest data spaces have different sizes");
     }
     
     /*
@@ -1177,7 +1178,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     assert(buf);
     if (!file_space) file_space = dataset->space;
     if (!mem_space) mem_space = file_space;
-    assert (H5P_get_npoints (mem_space)==H5P_get_npoints (file_space));
 
     /*
      * Convert data types to atoms because the conversion functions are
@@ -1208,6 +1208,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 		     "unable to initialize element numbering information");
     } else {
 	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    if (H5P_get_npoints (mem_space)!=H5P_get_npoints (file_space)) {
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "src and dest data spaces have different sizes");
     }
     
     /*

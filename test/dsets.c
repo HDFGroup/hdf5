@@ -17,6 +17,7 @@
 
 
 #ifndef HAVE_FUNCTION
+#undef __FUNCTION__
 #define __FUNCTION__ ""
 #endif
 #define AT() printf ("   at %s:%d in %s()...\n",                            \
@@ -398,5 +399,5 @@ main(void)
     status = H5close ();
     assert (status>=0);
     
-    exit(0);
+    return 0;
 }

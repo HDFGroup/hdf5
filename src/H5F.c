@@ -1216,8 +1216,10 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     *p++ = f->shared->create_parms.freespace_ver;
     *p++ = f->shared->create_parms.objectdir_ver;
     *p++ = f->shared->create_parms.sharedheader_ver;
-    *p++ = H5F_SIZEOF_ADDR(f);
-    *p++ = H5F_SIZEOF_SIZE(f);
+    assert (H5F_SIZEOF_ADDR(f)<=255);
+    *p++ = (uint8)H5F_SIZEOF_ADDR(f);
+    assert (H5F_SIZEOF_SIZE(f)<=255);
+    *p++ = (uint8)H5F_SIZEOF_SIZE(f);
     *p++ = 0;                   /*reserved */
     UINT16ENCODE(p, f->shared->create_parms.sym_leaf_k);
     UINT16ENCODE(p, f->shared->create_parms.btree_k[H5B_SNODE_ID]);

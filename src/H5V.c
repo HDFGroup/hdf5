@@ -49,7 +49,7 @@ H5V_stride_optimize1(intn *np, size_t *elmt_size, size_t *size,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    assert(1 == H5V_vector_reduce_product(0, (void *) 1));
+    assert(1 == H5V_vector_reduce_product(0, NULL));
 
     /*
      * Combine adjacent memory accesses
@@ -96,7 +96,7 @@ H5V_stride_optimize2(intn *np, size_t *elmt_size, size_t *size,
      * This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
      */
-    assert(1 == H5V_vector_reduce_product(0, (void *) 1));
+    assert(1 == H5V_vector_reduce_product(0, NULL));
 
     /*
      * Combine adjacent memory accesses
@@ -164,7 +164,9 @@ H5V_hyper_stride(intn n, const size_t *size,
 
     /* others */
     for (i = n - 2, acc = 1; i >= 0; --i) {
-	stride[i] = acc * (total_size[i + 1] - size[i + 1]);
+	size_t tmp = acc * (total_size[i+1] - size[i+1]);
+	assert (tmp<((size_t)1<<(8*sizeof(intn)-1)));
+	stride[i] = (intn)tmp;
 	acc *= total_size[i + 1];
 	skip += acc * (offset ? offset[i] : 0);
     }

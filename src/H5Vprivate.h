@@ -81,10 +81,8 @@ H5V_vector_reduce_product(size_t n, const size_t *v)
 {
     size_t                  ans = 1;
 
-    if (n && !v)
-        return 0;
-    while (n--)
-        ans *= *v++;
+    if (n && !v) return 0;
+    while (n--) ans *= *v++;
     return ans;
 }
 

@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define addr_defined(X) ((-1!=(X)->offset && (X)->offset>=0) ? TRUE : FALSE)
+#define addr_defined(X) (((uint64)(-1)!=(X)->offset) ? TRUE : FALSE)
 
 #define PABLO_MASK      H5F_low
 static hbool_t          interface_initialize_g = FALSE;
@@ -620,7 +620,7 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
     if (addr_defined(addr)) {
         tmp = *addr;
         for (i = 0; i < H5F_SIZEOF_ADDR(f); i++) {
-            *(*pp)++ = tmp.offset & 0xff;
+            *(*pp)++ = (uint8)(tmp.offset & 0xff);
             tmp.offset >>= 8;
         }
         assert("overflow" && 0 == tmp.offset);
@@ -742,7 +742,6 @@ H5F_addr_print(FILE * stream, const haddr_t *addr)
 void
 H5F_addr_pow2(uintn n, haddr_t *addr /*out */ )
 {
-    assert(n >= 0);
     assert(addr);
     assert(n < 8 * sizeof(addr->offset));
 
@@ -817,5 +816,5 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
     assert(addr && addr_defined(addr));
     assert(mod > 0);
 
-    return addr->offset % mod;  /*ignore file number */
+    return (unsigned)(addr->offset % mod);  /*ignore file number */
 }

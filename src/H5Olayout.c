@@ -14,33 +14,32 @@
 #include <H5Oprivate.h>
 
 /* PRIVATE PROTOTYPES */
-static void            *H5O_layout_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t           H5O_layout_encode(H5F_t *f, size_t size, uint8 *p,
-                                          const void *_mesg);
-static void            *H5O_layout_copy(const void *_mesg, void *_dest);
-static size_t           H5O_layout_size(H5F_t *f, const void *_mesg);
-static herr_t           H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream,
-                                         intn indent, intn fwidth);
+static void *H5O_layout_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_layout_encode(H5F_t *f, size_t size, uint8 *p,
+				const void *_mesg);
+static void *H5O_layout_copy(const void *_mesg, void *_dest);
+static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream,
+			       intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_LAYOUT[1] =
-{
-    {
-        H5O_LAYOUT_ID,          /*message id number             */
-        "layout",               /*message name for debugging    */
-        sizeof(H5O_layout_t),   /*native message size           */
-        H5O_layout_decode,      /*decode message                */
-        H5O_layout_encode,      /*encode message                */
-        H5O_layout_copy,        /*copy the native value         */
-        H5O_layout_size,        /*size of message on disk       */
-        NULL,                   /*reset method                  */
-        H5O_layout_debug,       /*debug the message             */
-    }};
+const H5O_class_t H5O_LAYOUT[1] = {{
+    H5O_LAYOUT_ID,          /*message id number             */
+    "layout",               /*message name for debugging    */
+    sizeof(H5O_layout_t),   /*native message size           */
+    H5O_layout_decode,      /*decode message                */
+    H5O_layout_encode,      /*encode message                */
+    H5O_layout_copy,        /*copy the native value         */
+    H5O_layout_size,        /*size of message on disk       */
+    NULL,                   /*reset method                  */
+    H5O_layout_debug,       /*debug the message             */
+}};
 
 /* Interface initialization */
 #define PABLO_MASK      H5O_layout_mask
-static hbool_t          interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_decode
@@ -75,7 +74,7 @@ H5O_layout_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     mesg = H5MM_xcalloc(1, sizeof(H5O_layout_t));
     H5F_addr_decode(f, &p, &(mesg->addr));
     mesg->ndims = *p++;
-    assert(raw_size == H5O_layout_size(f, mesg));
+    assert(raw_size == H5O_ALIGN (H5O_layout_size(f, mesg)));
 
     /* Layout class */
     mesg->type = *p++;
@@ -120,7 +119,7 @@ H5O_layout_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
     assert(f);
     assert(mesg);
     assert(mesg->ndims > 0 && mesg->ndims <= H5O_LAYOUT_NDIMS);
-    assert(raw_size == H5O_layout_size(f, _mesg));
+    assert(raw_size == H5O_ALIGN (H5O_layout_size(f, _mesg)));
     assert(p);
 
     /* data or B-tree address */
@@ -161,7 +160,7 @@ H5O_layout_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-static void            *
+static void *
 H5O_layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
@@ -171,8 +170,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest)
-        dest = H5MM_xcalloc(1, sizeof(H5O_layout_t));
+    if (!dest) dest = H5MM_xcalloc(1, sizeof(H5O_layout_t));
 
     /* copy */
     *dest = *mesg;

@@ -13,32 +13,30 @@
 #define PABLO_MASK      H5O_efl_mask
 
 /* PRIVATE PROTOTYPES */
-static void            *H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t           H5O_efl_encode(H5F_t *f, size_t size, uint8 *p,
-                                       const void *_mesg);
-static void            *H5O_efl_copy(const void *_mesg, void *_dest);
-static size_t           H5O_efl_size(H5F_t *f, const void *_mesg);
-static herr_t           H5O_efl_reset(void *_mesg);
-static herr_t           H5O_efl_debug(H5F_t *f, const void *_mesg, FILE * stream,
-                                      intn indent, intn fwidth);
+static void *H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_efl_encode(H5F_t *f, size_t size, uint8 *p,
+			     const void *_mesg);
+static void *H5O_efl_copy(const void *_mesg, void *_dest);
+static size_t H5O_efl_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_efl_reset(void *_mesg);
+static herr_t H5O_efl_debug(H5F_t *f, const void *_mesg, FILE * stream,
+			    intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_EFL[1] =
-{
-    {
-        H5O_EFL_ID,             /*message id number             */
-        "external file list",   /*message name for debugging    */
-        sizeof(H5O_efl_t),      /*native message size           */
-        H5O_efl_decode,         /*decode message                */
-        H5O_efl_encode,         /*encode message                */
-        H5O_efl_copy,           /*copy native value             */
-        H5O_efl_size,           /*size of message on disk       */
-        H5O_efl_reset,          /*reset method                  */
-        H5O_efl_debug,          /*debug the message             */
-    }};
+const H5O_class_t       H5O_EFL[1] = {{
+    H5O_EFL_ID,             /*message id number             */
+    "external file list",   /*message name for debugging    */
+    sizeof(H5O_efl_t),      /*native message size           */
+    H5O_efl_decode,         /*decode message                */
+    H5O_efl_encode,         /*encode message                */
+    H5O_efl_copy,           /*copy native value             */
+    H5O_efl_size,           /*size of message on disk       */
+    H5O_efl_reset,          /*reset method                  */
+    H5O_efl_debug,          /*debug the message             */
+}};
 
 /* Interface initialization */
-static hbool_t          interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
 
 /*-------------------------------------------------------------------------
@@ -58,7 +56,7 @@ static hbool_t          interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-static void            *
+static void *
 H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 {
     H5O_efl_t              *mesg = NULL;
@@ -113,7 +111,7 @@ H5O_efl_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
     /* check args */
     assert(f);
     assert(mesg);
-    assert(raw_size == H5O_efl_size(f, _mesg));
+    assert(raw_size == H5O_ALIGN (H5O_efl_size(f, _mesg)));
     assert(p);
 
     /* encode */

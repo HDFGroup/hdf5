@@ -51,25 +51,26 @@ static const char *FileHeader = "\n\
  * was detected.
  */
 typedef struct detected_t {
-    const char             *varname;
-    int                     size;
-    int                     padding;
-    int                     perm[32];
-    int                     sign;
-    int                     mpos, msize, imp;
-    int                     epos, esize, bias;
+    const char          *varname;
+    int                 size;
+    int                 padding;
+    int                 perm[32];
+    int                 sign;
+    int                 mpos, msize, imp;
+    int                 epos, esize;
+    unsigned long	bias;
 } detected_t;
 
-static void             print_results(int nd, detected_t *d);
-static void             iprint(detected_t *);
-static void             print_known_formats(detected_t *);
-static int              byte_cmp(int, void *, void *);
-static int              bit_cmp(int, int *, void *, void *);
-static void             fix_order(int, int, int, int *, const char **);
-static void             fix_padding(detected_t *);
-static int              imp_bit(int, int *, void *, void *);
-static int              find_bias(int, int, int, int *, void *);
-static void             print_header(void);
+static void print_results(int nd, detected_t *d);
+static void iprint(detected_t *);
+static void print_known_formats(detected_t *);
+static int byte_cmp(int, void *, void *);
+static int bit_cmp(int, int *, void *, void *);
+static void fix_order(int, int, int, int *, const char **);
+static void fix_padding(detected_t *);
+static int imp_bit(int, int *, void *, void *);
+static unsigned long find_bias(int, int, int, int *, void *);
+static void print_header(void);
 
 /*-------------------------------------------------------------------------
  * For convenience, we place here in a table descriptions of all
@@ -327,7 +328,7 @@ H5T_init (void)\n\
    dt->u.atomic.u.f.sign = %d;\n\
    dt->u.atomic.u.f.epos = %d;\n\
    dt->u.atomic.u.f.esize = %d;\n\
-   dt->u.atomic.u.f.ebias = 0x%08x;\n\
+   dt->u.atomic.u.f.ebias = 0x%08lx;\n\
    dt->u.atomic.u.f.mpos = %d;\n\
    dt->u.atomic.u.f.msize = %d;\n\
    dt->u.atomic.u.f.norm = H5T_NORM_%s;\n\
@@ -335,7 +336,7 @@ H5T_init (void)\n\
                    d[i].sign,   /*sign location */
                    d[i].epos,   /*exponent loc  */
                    d[i].esize,  /*exponent size */
-                   d[i].bias,   /*exponent bias */
+                   (unsigned long)(d[i].bias),   /*exponent bias */
                    d[i].mpos,   /*mantissa loc  */
                    d[i].msize,  /*mantissa size */
                    d[i].imp ? "IMPLIED" : "NONE");      /*normalization */
@@ -768,7 +769,7 @@ imp_bit(int n, int *perm, void *_a, void *_b)
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned long
 find_bias(int epos, int esize, int imp, int *perm, void *_a)
 {
 
@@ -809,18 +810,19 @@ static void
 print_header(void)
 {
 
-    time_t                  now = time(NULL);
-    struct tm              *tm = localtime(&now);
-    struct passwd          *pwd = getpwuid(getuid());
-    char                    real_name[30], *comma;
-    char                    host_name[256];
-    int                     i, n;
-    const char             *s;
-    static const char      *month_name[] =
+    time_t              now = time(NULL);
+    struct tm           *tm = localtime(&now);
+    struct passwd       *pwd = getpwuid(getuid());
+    char                real_name[30], *comma;
+    char                host_name[256];
+    int                 i;
+    size_t		n;
+    const char          *s;
+    static const char   *month_name[] =
     {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    static const char      *purpose = "\
+    static const char   *purpose = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
 floating point numeric formats found on this\n\
@@ -971,5 +973,5 @@ main(int argc, char *argv[])
     nd++;
 
     print_results(nd, d);
-    exit(0);
+    return 0;
 }

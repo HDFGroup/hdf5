@@ -752,14 +752,21 @@ herr_t
 H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
            void *udata)
 {
-    uint8                   lt_key[1024], md_key[1024], rt_key[1024];
-    hbool_t                 lt_key_changed = FALSE, rt_key_changed = FALSE;
-    haddr_t                 child, old_root;
-    intn                    level;
-    H5B_t                  *bt;
-    size_t                  size;
-    uint8                  *buf;
-    H5B_ins_t               my_ins = H5B_INS_ERROR;
+    /*
+     * These are defined this way to satisfy alignment constraints.
+     */
+    uint64	_lt_key[128], _md_key[128], _rt_key[128];
+    uint8	*lt_key=(uint8*)_lt_key;
+    uint8	*md_key=(uint8*)_md_key;
+    uint8	*rt_key=(uint8*)_rt_key;
+
+    hbool_t     lt_key_changed = FALSE, rt_key_changed = FALSE;
+    haddr_t     child, old_root;
+    intn        level;
+    H5B_t       *bt;
+    size_t      size;
+    uint8       *buf;
+    H5B_ins_t   my_ins = H5B_INS_ERROR;
 
     FUNC_ENTER(H5B_insert, FAIL);
 
@@ -768,7 +775,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
      */
     assert(f);
     assert(type);
-    assert(type->sizeof_nkey <= sizeof lt_key);
+    assert(type->sizeof_nkey <= sizeof _lt_key);
     assert(addr && H5F_addr_defined(addr));
 
     if ((my_ins = H5B_insert_helper(f, addr, type, lt_key, &lt_key_changed,

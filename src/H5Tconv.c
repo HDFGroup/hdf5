@@ -100,11 +100,11 @@ herr_t
 H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                void *_buf, void *background)
 {
-    uint8                  *buf = (uint8 *) _buf;
-    uint8                   tmp;
-    H5T_t                  *src = NULL;
-    H5T_t                  *dst = NULL;
-    intn                    i, j, md;
+    uint8       *buf = (uint8 *) _buf;
+    uint8       tmp;
+    H5T_t       *src = NULL;
+    H5T_t       *dst = NULL;
+    size_t	i, j, md;
 
     FUNC_ENTER(H5T_conv_order, FAIL);
 
@@ -161,11 +161,11 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
 	md = src->size / 2;
-	for (i = 0; i < nelmts; i++, buf += src->size) {
-	    for (j = 0; j < md; j++) {
+	for (i=0; i<nelmts; i++, buf+=src->size) {
+	    for (j=0; j<md; j++) {
 		tmp = buf[j];
-		buf[j] = buf[src->size - (j + 1)];
-		buf[src->size - (j + 1)] = tmp;
+		buf[j] = buf[src->size-(j+1)];
+		buf[src->size-(j+1)] = tmp;
 	    }
 	}
 	break;

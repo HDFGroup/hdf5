@@ -122,7 +122,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/
     size_t	elmt_size = 1;			/*bytes per element	*/
-    intn	nelmts;				/*number of elements	*/
+    size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
@@ -173,7 +173,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from disk to
 	 * memory.
 	 */
-	for (i=0; i<nelmts; i++) {
+	for (z=0; z<nelmts; z++) {
 
 	    /* Read from file */
 	    if (H5F_block_read (f, &addr, elmt_size, buf)<0) {
@@ -256,7 +256,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     size_t	idx[H5O_LAYOUT_NDIMS];		/*multi-dim counter	*/
     size_t	mem_start, file_start;		/*byte offsets to start	*/
     size_t	elmt_size = 1;			/*bytes per element	*/
-    intn	nelmts;				/*number of elements	*/
+    size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
@@ -308,7 +308,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	 * Now begin to walk through the array, copying data from memory to
 	 * disk.
 	 */
-	for (i=0; i<nelmts; i++) {
+	for (z=0; z<nelmts; z++) {
 
 	    /* Write to file */
 	    if (H5F_block_write (f, &addr, elmt_size, buf)<0) {

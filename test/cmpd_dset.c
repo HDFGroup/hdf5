@@ -567,5 +567,5 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     H5Dclose (dataset);
     H5Fclose (file);
 
-    exit (0);
+    return 0;
 }

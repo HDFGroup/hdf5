@@ -1894,7 +1894,7 @@ H5Tget_member_offset(hid_t type_id, int membno)
  */
 int
 H5Tget_member_dims(hid_t type_id, int membno,
-		   int dims[] /*out */ , int perm[] /*out */ )
+		   size_t dims[]/*out*/, int perm[]/*out*/)
 {
     H5T_t		   *dt = NULL;
     intn		    ndims, i;
@@ -3312,12 +3312,13 @@ H5T_debug(H5T_t *dt, FILE * stream)
 		    (unsigned long) (dt->u.atomic.u.f.esize));
 	    tmp = dt->u.atomic.u.f.ebias >> 32;
 	    if (tmp) {
-		uintn hi = tmp;
-		uintn lo = dt->u.atomic.u.f.ebias & 0xffffffff;
-		fprintf(stream, " bias=0x%08x%08x", hi, lo);
+		size_t hi = tmp;
+		size_t lo = dt->u.atomic.u.f.ebias & 0xffffffff;
+		fprintf(stream, " bias=0x%08lx%08lx",
+			(unsigned long)hi, (unsigned long)lo);
 	    } else {
-		uintn lo = dt->u.atomic.u.f.ebias & 0xffffffff;
-		fprintf(stream, " bias=0x%08x", lo);
+		size_t lo = dt->u.atomic.u.f.ebias & 0xffffffff;
+		fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
 	    }
 	    break;
 

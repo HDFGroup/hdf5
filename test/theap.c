@@ -72,7 +72,7 @@ test_heap(void)
             buf[j] = '\0';
 
         obj[i] = H5H_insert(f, &heap_addr, strlen(buf) + 1, buf);
-        CHECK_I(obj[i], "H5H_insert");
+	assert ((size_t)(-1)!=obj[i]);
     }
 
     /* Flush the cache and invalidate everything */

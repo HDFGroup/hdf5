@@ -124,7 +124,7 @@ main (void)
     H5Dclose (dataset);
     H5Fclose (file);
     
-    exit (0);
+    return 0;
 }
 
     

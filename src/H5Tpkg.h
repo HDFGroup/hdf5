@@ -75,7 +75,7 @@ typedef struct H5T_member_t {
     size_t              offset;         /*offset from beginning of struct    */
     intn                ndims;          /*member dimensionality              */
     size_t              dim[4];         /*size in each dimension             */
-    size_t              perm[4];        /*index permutation                  */
+    intn		perm[4];        /*index permutation                  */
     struct H5T_t        type;           /*type of this member                */
 } H5T_member_t;
 

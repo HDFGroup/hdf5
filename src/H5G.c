@@ -182,13 +182,11 @@ H5Gopen(hid_t file_id, const char *name)
 herr_t
 H5Gclose(hid_t grp_id)
 {
-    H5G_t		   *grp = NULL;
-
     FUNC_ENTER(H5Gclose, FAIL);
 
     /* Check args */
     if (H5_GROUP != H5A_group(grp_id) ||
-	NULL == (grp = H5A_object(grp_id))) {
+	NULL == H5A_object(grp_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     }
     /*

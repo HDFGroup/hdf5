@@ -473,8 +473,8 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
    }									      \
 									      \
    /* Clear thread error stack entering public functions */		      \
-   if (H5E_clearable_g && '_'!=#func_name[2] && '_'!=#func_name[3] &&	      \
-       (!#func_name[4] || '_'!=#func_name[4])) {			      \
+   if (H5E_clearable_g && '_'!=FUNC[2] && '_'!=FUNC[3] &&	              \
+       (!FUNC[4] || '_'!=FUNC[4])) {			                      \
        PRINT (55, #func_name);						      \
        H5Eclear (H5E_thrdid_g);						      \
    }									      \

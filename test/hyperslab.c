@@ -16,6 +16,7 @@
 #include <H5Vprivate.h>
 
 #ifndef HAVE_FUNCTION
+#undef __FUNCTION__
 #define __FUNCTION__ ""
 #endif
 #define AT() printf ("   at %s:%d in %s()\n",__FILE__,__LINE__,__FUNCTION__);
@@ -147,16 +148,17 @@ test_fill(size_t nx, size_t ny, size_t nz,
           size_t di, size_t dj, size_t dk,
           size_t ddx, size_t ddy, size_t ddz)
 {
-    uint8                  *dst = NULL;         /*destination array             */
-    size_t                  hs_size[3];         /*hyperslab size                */
-    size_t                  dst_size[3];        /*destination total size        */
-    size_t                  dst_offset[3];      /*offset of hyperslab in dest   */
-    uintn                   ref_value;  /*reference value               */
-    uintn                   acc;        /*accumulator                   */
-    int                     i, j, k, dx, dy, dz, u, v, w;       /*counters              */
-    int                     ndims;      /*hyperslab dimensionality      */
-    char                    dim[64], s[256];    /*temp string                   */
-    uintn                   fill_value;         /*fill value                    */
+    uint8               *dst = NULL;         /*destination array             */
+    size_t              hs_size[3];         /*hyperslab size                */
+    size_t              dst_size[3];        /*destination total size        */
+    size_t              dst_offset[3];      /*offset of hyperslab in dest   */
+    uintn               ref_value;  /*reference value               */
+    uintn               acc;        /*accumulator                   */
+    int                 i, j, k, dx, dy, dz;       /*counters              */
+    size_t		u, v, w;
+    int                 ndims;      /*hyperslab dimensionality      */
+    char                dim[64], s[256];    /*temp string                   */
+    uintn               fill_value;         /*fill value                    */
 
     /*
      * Dimensionality.
@@ -311,7 +313,8 @@ test_copy(int mode,
     size_t                  src_offset[3];      /*offset of hyperslab in source */
     uintn                   ref_value;  /*reference value               */
     uintn                   acc;        /*accumulator                   */
-    int                     i, j, k, dx, dy, dz, u, v, w;       /*counters              */
+    int                     i, j, k, dx, dy, dz;       /*counters              */
+    size_t	u, v, w;
     int                     ndims;      /*hyperslab dimensionality      */
     char                    dim[64], s[256];    /*temp string                   */
     const char             *sub;
@@ -761,7 +764,7 @@ test_transpose(size_t nx, size_t ny)
     src = H5MM_xmalloc(nx * ny * sizeof(*src));
     for (i = 0; i < nx; i++) {
         for (j = 0; j < ny; j++) {
-            src[i * ny + j] = i * ny + j;
+            src[i * ny + j] = (intn)(i * ny + j);
         }
     }
     dst = H5MM_xcalloc(nx * ny, sizeof(*dst));
@@ -771,8 +774,8 @@ test_transpose(size_t nx, size_t ny)
     size[1] = ny;
     src_stride[0] = 0;
     src_stride[1] = sizeof(*src);
-    dst_stride[0] = (1 - nx * ny) * sizeof(*src);
-    dst_stride[1] = nx * sizeof(*src);
+    dst_stride[0] = (intn)((1 - nx * ny) * sizeof(*src));
+    dst_stride[1] = (intn)(nx * sizeof(*src));
 
     /* Copy and transpose */
     if (nx == ny) {
@@ -872,7 +875,7 @@ test_sub_super(size_t nx, size_t ny)
     /* Setup */
     size[0] = nx;
     size[1] = ny;
-    src_stride[0] = 2 * ny;
+    src_stride[0] = (intn)(2 * ny);
     src_stride[1] = 2;
     dst_stride[0] = 0;
     dst_stride[1] = 1;
@@ -919,9 +922,9 @@ test_sub_super(size_t nx, size_t ny)
     src_stride[1] = 1;
     src_stride[2] = 0;
     src_stride[3] = 0;
-    dst_stride[0] = 2 * ny;
-    dst_stride[1] = 2 * sizeof(uint8) - 4 * ny;
-    dst_stride[2] = 2 * ny - 2 * sizeof(uint8);
+    dst_stride[0] = (intn)(2 * ny);
+    dst_stride[1] = (intn)(2 * sizeof(uint8) - 4 * ny);
+    dst_stride[2] = (intn)(2 * ny - 2 * sizeof(uint8));
     dst_stride[3] = sizeof(uint8);
 
     /* Copy */
@@ -1161,5 +1164,5 @@ main(int argc, char *argv[])
         exit(1);
     }
     printf("All hyperslab tests passed.\n");
-    exit(0);
+    return 0;
 }

@@ -160,7 +160,7 @@ H5F_sec2_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
     FUNC_ENTER(H5F_sec2_read, FAIL);
 
     /* Check for overflow */
-    offset = addr->offset;
+    offset = addr->offset; /*FIX_ME*/
     assert("address overflowed" && offset == addr->offset);
     assert("overflow" && offset + size >= offset);
 
@@ -242,7 +242,7 @@ H5F_sec2_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
     FUNC_ENTER(H5F_sec2_write, FAIL);
 
     /* Check for overflow */
-    offset = addr->offset;
+    offset = addr->offset; /*FIX_ME*/
     assert("address overflowed" && offset == addr->offset);
     assert("overflow" && offset + size >= offset);
 
@@ -270,7 +270,7 @@ H5F_sec2_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
      * Update the file position.
      */
     lf->u.sec2.op = H5F_OP_WRITE;
-    lf->u.sec2.cur = offset + size;
+    lf->u.sec2.cur = offset + size; /*FIX_ME*/
     assert("address overflowed" && lf->u.sec2.cur >= offset);
 
     FUNC_LEAVE(SUCCEED);

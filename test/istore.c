@@ -33,6 +33,7 @@
 #define TEST_LARGE      0x0004
 
 #ifndef HAVE_FUNCTION
+#undef __FUNCTION__
 #define __FUNCTION__ ""
 #endif
 #define AT() printf ("   at %s:%d in %s()...\n",                            \
@@ -99,7 +100,7 @@ print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
  *-------------------------------------------------------------------------
  */
 static int
-new_object(H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
+new_object(H5F_t *f, const char *name, intn ndims, H5G_entry_t *ent/*out*/)
 {
     H5O_layout_t            layout;
     intn                    i;
@@ -659,5 +660,5 @@ main(int argc, char *argv[])
         exit(1);
     }
     printf("All i-store tests passed.\n");
-    exit(0);
+    return 0;
 }

@@ -25,29 +25,29 @@ static char             RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK      H5O_sdspace_mask
 
 /* PRIVATE PROTOTYPES */
-static void            *H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t           H5O_sdspace_encode(H5F_t *f, size_t size, uint8 *p,
-                                           const void *_mesg);
-static void            *H5O_sdspace_copy(const void *_mesg, void *_dest);
-static size_t           H5O_sdspace_size(H5F_t *f, const void *_mesg);
-static herr_t           H5O_sdspace_debug(H5F_t *f, const void *_mesg,
-                                   FILE * stream, intn indent, intn fwidth);
+static void *H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_sdspace_encode(H5F_t *f, size_t size, uint8 *p,
+				 const void *_mesg);
+static void *H5O_sdspace_copy(const void *_mesg, void *_dest);
+static size_t H5O_sdspace_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_sdspace_debug(H5F_t *f, const void *_mesg,
+				FILE * stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_SDSPACE[1] = {{
-        H5O_SDSPACE_ID,         /* message id number                    */
-        "simple_dspace",        /* message name for debugging           */
-        sizeof(H5P_simple_t),   /* native message size                  */
-        H5O_sdspace_decode,     /* decode message                       */
-        H5O_sdspace_encode,     /* encode message                       */
-        H5O_sdspace_copy,       /* copy the native value                */
-        H5O_sdspace_size,       /* size of symbol table entry           */
-        NULL,                   /* default reset method                 */
-        H5O_sdspace_debug,      /* debug the message                    */
+const H5O_class_t H5O_SDSPACE[1] = {{
+    H5O_SDSPACE_ID,         /* message id number                    */
+    "simple_dspace",        /* message name for debugging           */
+    sizeof(H5P_simple_t),   /* native message size                  */
+    H5O_sdspace_decode,     /* decode message                       */
+    H5O_sdspace_encode,     /* encode message                       */
+    H5O_sdspace_copy,       /* copy the native value                */
+    H5O_sdspace_size,       /* size of symbol table entry           */
+    NULL,                   /* default reset method                 */
+    H5O_sdspace_debug,      /* debug the message                    */
 }};
 
 /* Is the interface initialized? */
-static hbool_t          interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
 /*--------------------------------------------------------------------------
@@ -68,18 +68,18 @@ static hbool_t          interface_initialize_g = FALSE;
     message into a struct in memory native format.  The struct is allocated
     within this function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
-static void            *
+static void *
 H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 {
-    H5P_simple_t        *sdim = NULL;        /* New simple dimensionality structure */
-    uintn               u;  /* local counting variable */
+    H5P_simple_t	*sdim = NULL;/* New simple dimensionality structure */
+    uintn               u;  		/* local counting variable */
     uintn		flags;
     
     FUNC_ENTER(H5O_sdspace_decode, NULL);
 
     /* check args */
     assert(f);
-    assert(raw_size >= 8);      /* at least the rank and flags must be present */
+    assert(raw_size >= 8); /* at least the rank and flags must be present */
     assert(p);
 
     /* decode */
@@ -94,21 +94,21 @@ H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
                 sdim->max = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->max[u]);
-            }                   /* end if */
+            }
             if (flags & 0x02) {
                 sdim->perm = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->perm[u]);
-            }                   /* end if */
-        }                       /* end if */
-    }                           /* end if */
+            }
+        }
+    }
     
 #ifdef LATER
   done:
 #endif /* LATER */
     if (sdim == NULL) {         /* Error condition cleanup */
 
-    }                           /* end if */
+    }
     /* Normal function cleanup */
     FUNC_LEAVE(sdim);
 }
@@ -158,12 +158,12 @@ H5O_sdspace_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
         if (flags & 0x01) {
             for (u = 0; u < sdim->rank; u++)
                 UINT32ENCODE(p, sdim->max[u]);
-        }                       /* end if */
+        }
         if (flags & 0x02) {
             for (u = 0; u < sdim->rank; u++)
                 UINT32ENCODE(p, sdim->perm[u]);
-        }                       /* end if */
-    }                           /* end if */
+        }
+    }
     FUNC_LEAVE(SUCCEED);
 }
 

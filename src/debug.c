@@ -121,7 +121,7 @@ main(int argc, char *argv[])
             HDexit(4);
         }
 
-    } else if (sig[0] == H5O_VERSION && sig[1] == H5O_ALIGNMENT) {
+    } else if (sig[0] == H5O_VERSION) {
         /*
          * This could be an object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
@@ -154,5 +154,5 @@ main(int argc, char *argv[])
         HDexit(5);
     }
     H5Fclose(fid);
-    HDexit(0);
+    return 0;
 }

@@ -15,6 +15,7 @@
 #include <H5Tprivate.h>
 
 #ifndef HAVE_FUNCTION
+#undef __FUNCTION__
 #define __FUNCTION__ ""
 #endif
 #define AT() printf ("   at %s:%d in %s()...\n",                            \
@@ -44,11 +45,9 @@ typedef struct complex_t {
 static herr_t
 test_classes(void)
 {
-    H5T_class_t             type_class;
-
     printf("%-70s", "Testing H5Tget_class()");
 
-    if (H5T_INTEGER != (type_class = H5Tget_class(H5T_NATIVE_INT))) {
+    if (H5T_INTEGER != H5Tget_class(H5T_NATIVE_INT)) {
         puts("*FAILED*");
         if (!isatty(1)) {
             AT();
@@ -56,7 +55,7 @@ test_classes(void)
         }
         goto error;
     }
-    if (H5T_FLOAT != (type_class = H5Tget_class(H5T_NATIVE_DOUBLE))) {
+    if (H5T_FLOAT != H5Tget_class(H5T_NATIVE_DOUBLE)) {
         puts("*FAILED*");
         if (!isatty(1)) {
             AT();
@@ -234,5 +233,5 @@ main(void)
         exit(1);
     }
     printf("All data type tests passed.\n");
-    exit(0);
+    return 0;
 }

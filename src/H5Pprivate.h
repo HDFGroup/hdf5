@@ -30,7 +30,7 @@
 #define H5P_VALID_PERM  0x02
 
 typedef struct H5P_hyperslab_t {
-    size_t      *start;                 /* Location of start of hyperslab */
+    intn        *start;                 /* Location of start of hyperslab */
     size_t      *count;                 /* Number of elements in hyperslab */
     size_t      *stride;                /* Packing of values of hyperslab */
 } H5P_hyperslab_t;

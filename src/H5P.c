@@ -491,7 +491,7 @@ int
 H5Pget_ndims(hid_t space_id)
 {
     H5P_t                  *ds = NULL;
-    size_t                  ret_value = 0;
+    intn                   ret_value = 0;
 
     FUNC_ENTER(H5Pget_ndims, FAIL);
 
@@ -577,7 +577,7 @@ H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
 {
 
     H5P_t                  *ds = NULL;
-    size_t                  ret_value = 0;
+    intn                   ret_value = 0;
 
     FUNC_ENTER(H5Pget_dims, FAIL);
 
@@ -1020,7 +1020,7 @@ herr_t
 H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t *stride)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
-    intn                   *tmp_stride=NULL;    /* temp. copy of stride */
+    size_t                 *tmp_stride=NULL;    /* temp. copy of stride */
     intn                    u;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -1039,39 +1039,38 @@ H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 		    "unknown dataspace type");
 
     /* Set up stride values for later use */
-    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(intn));
+    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(tmp_stride[0]));
     for (u=0; u<space->u.simple.rank; u++) {
         tmp_stride[u] = stride ? stride[u] : 1;
     }
 
     /* Range check arguments */
     for (u=0; u<space->u.simple.rank; u++) {
-        if (start[u]<0 || start[u]>=space->u.simple.size[u])
+        if (start[u]<0 || start[u]>=space->u.simple.size[u]) {
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			"hyperslab bounds out of range");
-        if (start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])<0 ||
-	    (start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])>=
-	     space->u.simple.size[u]))
+	}
+	if (start[u]<0 ||
+	    start[u]+(count[u]*tmp_stride[u])>space->u.simple.size[u]) {
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
 			"hyperslab bounds out of range");
-    } /* end for */
+	}
+    }
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {
-        space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+        space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(intn));
         space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
         space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
     }
 
     /* Build hyperslab */
-    for(u=0; u<space->u.simple.rank; u++)
-      {
-        /* copy "normalized" (i.e. strictly increasing) values for hyperslab parameters */
-        space->h.start[u]=MIN(start[u],start[u]+((ABS(count[u])-1)*tmp_stride[u]));
-        space->h.count[u]=ABS(count[u]);
-        space->h.stride[u]=ABS(tmp_stride[u]);
-      } /* end for */
-      space->hslab_def=TRUE;
+    for(u=0; u<space->u.simple.rank; u++) {
+        space->h.start[u] = start[u];
+        space->h.count[u] = count[u];
+        space->h.stride[u] = tmp_stride[u];
+    }
+    space->hslab_def=TRUE;
 
 done:
     if (ret_value == FAIL) {    /* Error condition cleanup */

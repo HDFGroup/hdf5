@@ -184,7 +184,7 @@ H5F_stdio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
     FUNC_ENTER(H5F_stdio_read, FAIL);
 
     /* Check for overflow */
-    offset = addr->offset;
+    offset = addr->offset; /*FIX_ME*/
     assert("address overflowed" && offset == addr->offset);
     assert("overflow" && offset + size >= offset);
 
@@ -230,7 +230,7 @@ H5F_stdio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
      * Update the file position data.
      */
     lf->u.stdio.op = H5F_OP_READ;
-    lf->u.stdio.cur = offset + n;
+    lf->u.stdio.cur = offset + n; /*FIX_ME*/
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -264,7 +264,7 @@ H5F_stdio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
     FUNC_ENTER(H5F_stdio_write, FAIL);
 
     /* Check for overflow */
-    offset = addr->offset;
+    offset = addr->offset; /*FIX_ME*/
     assert("address overflowed" && offset == addr->offset);
     assert("overflow" && offset + size >= offset);
 
@@ -292,7 +292,7 @@ H5F_stdio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
      * Update seek optimizing data.
      */
     lf->u.stdio.op = H5F_OP_WRITE;
-    lf->u.stdio.cur = offset + size;
+    lf->u.stdio.cur = offset + size; /*FIX_ME*/
     FUNC_LEAVE(SUCCEED);
 }
 

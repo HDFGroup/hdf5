@@ -706,7 +706,6 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     intn		lt = 0, rt;		/*binary search cntrs	*/
     H5B_ins_t		ret_value = H5B_INS_ERROR;
     H5G_node_t		*insert_into = NULL;	/*node that gets new entry*/
-    haddr_t		insert_addr;		/*address of that node	*/
 
     FUNC_ENTER(H5G_node_insert, H5B_INS_ERROR);
 
@@ -796,13 +795,11 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	/* Where to insert the new entry? */
 	if (idx <= H5G_NODE_K(f)) {
 	    insert_into = sn;
-	    insert_addr = *addr;
 	    if (idx == H5G_NODE_K(f))
 		md_key->offset = offset;
 	} else {
 	    idx -= H5G_NODE_K(f);
 	    insert_into = snrt;
-	    insert_addr = *new_node;
 	}
 
     } else {
@@ -810,7 +807,6 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	ret_value = H5B_INS_NOOP;
 	sn->dirty = TRUE;
 	insert_into = sn;
-	insert_addr = *addr;
 	if (idx == sn->nsyms) {
 	    rt_key->offset = offset;
 	    *rt_key_changed = TRUE;

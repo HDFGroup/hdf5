@@ -192,8 +192,10 @@ main(int argc, char *argv[])
             CleanUp = 0;
 
         if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-nocache") == 0) ||
-                                (HDstrcmp(argv[CLLoop], "-n") == 0)))
+                                (HDstrcmp(argv[CLLoop], "-n") == 0))) {
             Cache = 0;
+	    printf ("Cache = %d\n", Cache);
+	}
 
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-exclude") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-x") == 0))) {

@@ -20,16 +20,14 @@
 #define PABLO_MASK      H5O_null_mask
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_NULL[1] =
-{
-    {
-        H5O_NULL_ID,            /*message id number             */
-        "null",                 /*message name for debugging    */
-        0,                      /*native message size           */
-        NULL,                   /*no decode method              */
-        NULL,                   /*no encode method              */
-        NULL,                   /*no copy method                */
-        NULL,                   /*no size method                */
-        NULL,                   /*no reset method               */
-        NULL,                   /*no debug method               */
-    }};
+const H5O_class_t H5O_NULL[1] = {{
+    H5O_NULL_ID,            /*message id number             */
+    "null",                 /*message name for debugging    */
+    0,                      /*native message size           */
+    NULL,                   /*no decode method              */
+    NULL,                   /*no encode method              */
+    NULL,                   /*no copy method                */
+    NULL,                   /*no size method                */
+    NULL,                   /*no reset method               */
+    NULL,                   /*no debug method               */
+}};

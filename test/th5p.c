@@ -63,7 +63,7 @@ test_h5p_basic(void)
     {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3},    /* dataspace dim sizes */
                             dims2[] =
     {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4}, tdims[4];     /* Dimension array to test with */
-    uintn                   n;  /* number of dataspace elements */
+    size_t                   n;  /* number of dataspace elements */
     herr_t                  ret;        /* Generic return value */
 
     /* Output message about test being performed */
