@@ -949,6 +949,13 @@
 ./tools/h4toh5/h4toh5vgroup.c
 ./tools/h4toh5/testh4toh5.sh
 
+./tools/h5dump/Dependencies
+./tools/h5dump/Makefile.in
+./tools/h5dump/h5dump.c
+./tools/h5dump/h5dump.h
+./tools/h5dump/h5dumptst.c
+./tools/h5dump/testh5dump.sh
+
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
