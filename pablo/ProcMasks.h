@@ -16,6 +16,7 @@
 #define H5FD_mpiposix_mask ID_H5FD_mpiposix_c
 #define H5FD_sec2_mask ID_H5FD_sec2_c
 #define H5FD_srb_mask ID_H5FD_srb_c
+#define H5FD_stream_mask ID_H5FD_stream_c
 #define H5FL_mask ID_H5FL_c
 #define H5FO_mask ID_H5FO_c
 #define H5FP_mask ID_H5FP_c
