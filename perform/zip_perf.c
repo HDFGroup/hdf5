@@ -98,6 +98,7 @@
 static const char *prog;
 static const char *option_prefix;
 static char *filename;
+static int compress_percent = 0;
 static int compress_level = Z_DEFAULT_COMPRESSION;
 static int output, random_test = FALSE;
 static int report_once_flag;
@@ -109,9 +110,23 @@ static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
                             uLong sourceLen);
 
 /* commandline options : long and short form */
-static const char *s_opts = "hB:b:p:rs:0123456789";
+static const char *s_opts = "hB:b:c:p:rs:0123456789";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
+    { "compressability", require_arg, 'c' },
+    { "compressabilit", require_arg, 'c' },
+    { "compressabili", require_arg, 'c' },
+    { "compressabil", require_arg, 'c' },
+    { "compressabi", require_arg, 'c' },
+    { "compressab", require_arg, 'c' },
+    { "compressa", require_arg, 'c' },
+    { "compress", require_arg, 'c' },
+    { "compres", require_arg, 'c' },
+    { "compre", require_arg, 'c' },
+    { "compr", require_arg, 'c' },
+    { "comp", require_arg, 'c' },
+    { "com", require_arg, 'c' },
+    { "co", require_arg, 'c' },
     { "file-size", require_arg, 's' },
     { "file-siz", require_arg, 's' },
     { "file-si", require_arg, 's' },
@@ -343,6 +358,8 @@ usage(void)
     printf("  OPTIONS\n");
     printf("     -h, --help                 Print this usage message and exit\n");
     printf("     -1...-9                    Level of compression, from 1 to 9\n");
+    printf("     -c P, --compressability=P  Percentage of compressability of the random\n");
+    printf("                                data you want [default: 0]");
     printf("     -s S, --file-size=S        Maximum size of uncompressed file [default: 64M]\n");
     printf("     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
     printf("     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
@@ -351,6 +368,7 @@ usage(void)
     printf("                                [default: no]\n");
     printf("\n");
     printf("  D  - a directory which exists\n");
+    printf("  P  - a number between 0 and 100\n");
     printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
     printf("\n");
     printf("          K - Kilobyte (%d)\n", ONE_KB);
@@ -417,6 +435,8 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     struct stat buf;
 
     if (stat("/dev/urandom", &buf) == 0) {
+        uLongf len = src_len;
+        Bytef *buf = src;
         int fd = open("/dev/urandom", O_RDONLY);
 
         printf("Using /dev/urandom for random data\n");
@@ -425,22 +445,28 @@ fill_with_random_data(Bytef *src, uLongf src_len)
             error(strerror(errno));
 
         for (;;) {
-            ssize_t rc = read(fd, src, src_len);
+            ssize_t rc = read(fd, buf, src_len);
 
             if (rc == -1)
                 error(strerror(errno));
 
-            if (rc == src_len)
+            if (rc == len)
                 break;
 
-            src += rc;
-            src_len -= rc;
+            buf += rc;
+            len -= rc;
         }
     } else {
         printf("Using random() for random data\n");
 
         for (i = 0; i < src_len; ++i)
             src[i] = 0xff & random();
+    }
+
+    if (compress_percent) {
+        unsigned long s = src_len * compress_percent / 100;
+
+        memset(src, '\0', s);
     }
 }
 
@@ -582,6 +608,15 @@ main(int argc, char **argv)
             break;
         case 'b':
             min_buf_size = parse_size_directive(opt_arg);
+            break;
+        case 'c':
+            compress_percent = strtol(opt_arg, NULL, 10);
+
+            if (compress_percent < 0)
+                compress_percent = 0;
+            else if (compress_percent > 100)
+                compress_percent = 100;
+
             break;
         case 'p':
             option_prefix = opt_arg;
