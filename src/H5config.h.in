@@ -89,10 +89,7 @@
 /* Define if the stream virtual file driver should be compiled */
 #undef HAVE_STREAM
 
-/* Define if <netinet/tcp.h> header file is available */
-#undef HAVE_NETINET_TCP_H
-
-/* Define if 'socklen_t' is available */
+/* Define if `socklen_t' is defined */
 #undef HAVE_SOCKLEN_T
 
 /* The number of bytes in a __int64.  */
@@ -280,6 +277,9 @@
 
 /* Define if you have the <mfhdf.h> header file.  */
 #undef HAVE_MFHDF_H
+
+/* Define if you have the <netinet/tcp.h> header file.  */
+#undef HAVE_NETINET_TCP_H
 
 /* Define if you have the <pdb.h> header file.  */
 #undef HAVE_PDB_H
