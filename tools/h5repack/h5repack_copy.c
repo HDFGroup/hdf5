@@ -37,10 +37,10 @@ int copy_file(const char* fnamein,
               const char* fnameout,
               pack_opt_t *options)
 {
- hid_t       fidin; 
- hid_t       fidout; 
- int         nobjects;
- trav_info_t *travi=NULL;
+ hid_t         fidin; 
+ hid_t         fidout; 
+ int           nobjects=0;
+ trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
  * open the files 
@@ -67,62 +67,63 @@ int copy_file(const char* fnamein,
   printf("Making file <%s>...\n",fnameout);
 
 
-/*-------------------------------------------------------------------------
- * get the number of objects in the file
- *-------------------------------------------------------------------------
- */
+ /* init table */
+ trav_table_init(&travt);
 
- if ((nobjects = h5trav_getinfo(fidin, NULL ))<0) {
-  printf("h5repack: <%s>: Could not obtain object list\n", fnamein );
-  return -1;
- }
+ /* get the list of objects in the file */
+ if (h5trav_gettable(fidin,travt)<0)
+  goto out;
 
-/*-------------------------------------------------------------------------
- * get the list of objects in the file
- *-------------------------------------------------------------------------
- */
-
- if ((travi = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t)))==NULL){
-  printf("h5repack: <%s>: Could not allocate object list\n", fnamein );
-  return -1;
- }
- if (h5trav_getinfo(fidin, travi )<0) {
-  printf("h5repack: <%s>: Could not obtain object list\n", fnamein );
-  return -1;
- }
+#if defined (H5_REPACK_DEBUG)
+ h5trav_printtable(travt);
+#endif
 
 /*-------------------------------------------------------------------------
  * do the copy
  *-------------------------------------------------------------------------
  */
- if(do_copy_file(fidin,fidout,nobjects,travi,options)<0) {
+ if(do_copy_file(fidin,fidout,travt,options)<0) {
   printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
-  return -1;
+  goto out;
  }
 
 /*-------------------------------------------------------------------------
  * do the copy of referenced objects
+ * and create hard links
  *-------------------------------------------------------------------------
  */
- if(do_copy_refobjs(fidin,fidout,nobjects,travi,options)<0) {
+ if(do_copy_refobjs(fidin,fidout,travt,options)<0) {
   printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
-  return -1;
+  goto out;
  }
 
-#if defined (H5_REPACK_DEBUG)
- h5trav_printinfo(nobjects,travi);
-#endif
-
+ /* free table */
+ trav_table_free(travt);
 
 /*-------------------------------------------------------------------------
- * free
+ * close
  *-------------------------------------------------------------------------
  */
+
  H5Fclose(fidin);
  H5Fclose(fidout);
- h5trav_freeinfo(travi,nobjects);
  return 0;
+
+/*-------------------------------------------------------------------------
+ * out
+ *-------------------------------------------------------------------------
+ */
+
+out:
+ H5E_BEGIN_TRY {
+ H5Fclose(fidin);
+ H5Fclose(fidout);
+ trav_table_free(travt);
+ } H5E_END_TRY;
+
+ return -1;
 }
+
 
 
 
@@ -142,8 +143,7 @@ int copy_file(const char* fnamein,
 
 int do_copy_file(hid_t fidin, 
                  hid_t fidout, 
-                 int nobjects,        /* number of objects */
-                 trav_info_t *travi,  /* array of object names */
+                 trav_table_t *travt,
                  pack_opt_t *options) /* repack options */
 {
  hid_t     grp_in;       /* group ID */ 
@@ -168,10 +168,10 @@ int do_copy_file(hid_t fidin,
  *-------------------------------------------------------------------------
  */
 
- for ( i = 0; i < nobjects; i++)
+ for ( i = 0; i < travt->nobjs; i++)
  {
 
-  switch ( travi[i].type )
+  switch ( travt->objs[i].type )
   {
 /*-------------------------------------------------------------------------
  * H5G_GROUP
@@ -179,25 +179,26 @@ int do_copy_file(hid_t fidin,
  */
   case H5G_GROUP:
    if (options->verbose)
-    printf(" %-10s %s\n", "group",travi[i].name );
+    printf(" %-10s %s\n", "group",travt->objs[i].name );
 
-   if ((grp_out=H5Gcreate(fidout,travi[i].name, 0))<0) 
+   if ((grp_out=H5Gcreate(fidout,travt->objs[i].name, 0))<0) 
     goto error;
 
-   if((grp_in = H5Gopen (fidin,travi[i].name))<0) 
+   if((grp_in = H5Gopen (fidin,travt->objs[i].name))<0) 
     goto error;
 
-/*-------------------------------------------------------------------------
- * copy attrs
- *-------------------------------------------------------------------------
- */
-   if (copy_attr(grp_in,grp_out,options,nobjects,travi,fidout)<0) 
+   /*-------------------------------------------------------------------------
+    * copy attrs
+    *-------------------------------------------------------------------------
+    */
+   if (copy_attr(grp_in,grp_out,options,travt,fidout)<0) 
     goto error;
    
    if (H5Gclose(grp_out)<0) 
     goto error;
    if (H5Gclose(grp_in)<0) 
     goto error;
+
 
    break;
 
@@ -207,9 +208,9 @@ int do_copy_file(hid_t fidin,
  */
   case H5G_DATASET:
    if (options->verbose)
-    printf(" %-10s %s\n", "dataset",travi[i].name );
+    printf(" %-10s %s\n", "dataset",travt->objs[i].name );
 
-   if ((dset_in=H5Dopen(fidin,travi[i].name))<0) 
+   if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0) 
     goto error;
    if ((space_id=H5Dget_space(dset_in))<0) 
     goto error;
@@ -256,7 +257,7 @@ int do_copy_file(hid_t fidin,
      * create/write dataset/close
      *-------------------------------------------------------------------------
      */
-    if ((dset_out=H5Dcreate(fidout,travi[i].name,ftype_id,space_id,dcpl_id))<0) 
+    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,ftype_id,space_id,dcpl_id))<0) 
      goto error;
     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
      goto error;
@@ -264,8 +265,8 @@ int do_copy_file(hid_t fidin,
     /*-------------------------------------------------------------------------
      * copy attrs
      *-------------------------------------------------------------------------
-    */
-    if (copy_attr(dset_in,dset_out,options,nobjects,travi,fidout)<0) 
+     */
+    if (copy_attr(dset_in,dset_out,options,travt,fidout)<0) 
      goto error;
     
     /*close */
@@ -274,6 +275,7 @@ int do_copy_file(hid_t fidin,
     
     if (buf)
      free(buf);
+
     
    }/*H5T_STD_REF_OBJ*/
   
@@ -293,8 +295,6 @@ int do_copy_file(hid_t fidin,
     goto error;
    if (H5Dclose(dset_in)<0) 
     goto error;
-  
-
    
    break;
 
@@ -304,20 +304,20 @@ int do_copy_file(hid_t fidin,
  */
   case H5G_TYPE:
 
-   if ((type_in = H5Topen (fidin,travi[i].name))<0) 
+   if ((type_in = H5Topen (fidin,travt->objs[i].name))<0) 
     goto error;
 
    if ((type_out = H5Tcopy(type_in))<0) 
     goto error;
 
-   if ((H5Tcommit(fidout,travi[i].name,type_out))<0) 
+   if ((H5Tcommit(fidout,travt->objs[i].name,type_out))<0) 
     goto error;
 
 /*-------------------------------------------------------------------------
  * copy attrs
  *-------------------------------------------------------------------------
  */
-   if (copy_attr(type_in,type_out,options,nobjects,travi,fidout)<0) 
+   if (copy_attr(type_in,type_out,options,travt,fidout)<0) 
     goto error;
    
    if (H5Tclose(type_in)<0) 
@@ -326,7 +326,7 @@ int do_copy_file(hid_t fidin,
     goto error;
 
    if (options->verbose)
-    printf(" %-10s %s\n","datatype",travi[i].name );
+    printf(" %-10s %s\n","datatype",travt->objs[i].name );
 
    break;
 
@@ -343,32 +343,32 @@ int do_copy_file(hid_t fidin,
     H5G_stat_t  statbuf;
     char        *targbuf=NULL;
     
-    if (H5Gget_objinfo(fidin,travi[i].name,FALSE,&statbuf)<0)
+    if (H5Gget_objinfo(fidin,travt->objs[i].name,FALSE,&statbuf)<0)
      goto error;
     
     targbuf = malloc(statbuf.linklen);
     
-    if (H5Gget_linkval(fidin,travi[i].name,statbuf.linklen,targbuf)<0)
+    if (H5Gget_linkval(fidin,travt->objs[i].name,statbuf.linklen,targbuf)<0)
      goto error;
 
     if (H5Glink(fidout,
      H5G_LINK_SOFT,
      targbuf,        /* current name of object */
-     travi[i].name   /* new name of object */
+     travt->objs[i].name   /* new name of object */
      )<0) 
      goto error;
     
     free(targbuf);
       
     if (options->verbose)
-     printf(" %-10s %s\n","link",travi[i].name );
+     printf(" %-10s %s\n","link",travt->objs[i].name );
 
    }
    break;
 
   default:
    if (options->verbose)
-    printf(" %-10s %s\n","User defined object",travi[i].name);
+    printf(" %-10s %s\n","User defined object",travt->objs[i].name);
    break;
   }
  }
@@ -389,7 +389,7 @@ int do_copy_file(hid_t fidin,
  if ((grp_in  = H5Gopen(fidin,"/"))<0) 
   goto error;
  
- if (copy_attr(grp_in,grp_out,options,nobjects,travi,fidout)<0) 
+ if (copy_attr(grp_in,grp_out,options,travt,fidout)<0) 
   goto error;
  
  if (H5Gclose(grp_out)<0) 
@@ -439,8 +439,7 @@ error:
 int copy_attr(hid_t loc_in, 
               hid_t loc_out, 
               pack_opt_t *options,
-              int nobjects,        /* number of objects */
-              trav_info_t *travi,  /* array of object names */
+              trav_table_t *travt,
               hid_t fidout         /* for saving references */
               )
 {
@@ -576,5 +575,4 @@ error:
  } H5E_END_TRY;
  return -1;
 }
-
 

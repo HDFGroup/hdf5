@@ -42,7 +42,6 @@ test_copy(void)
  memset(&diff_options, 0, sizeof (diff_opt_t));
 
  TESTING("    copy with no filters");
-
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
@@ -51,8 +50,30 @@ test_copy(void)
   TEST_ERROR;
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
+ PASSED(); 
+
+ TESTING("    copy of attributes");
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME2,FNAME2OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ PASSED();      
+
+ TESTING("    copy of hardlinks");
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME3,FNAME3OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME3,FNAME3OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ PASSED();          
  
- PASSED();                                                 
  return 0; 
  
 error:                                                       
@@ -97,11 +118,11 @@ test_filter_deflate(void)
   TEST_ERROR;
  if (h5repack_addchunk("dset_gzip:5x4",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
- if (h5diff(FNAME2,FNAME2OUT,NULL,NULL,&diff_options) == 1)
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
   TEST_ERROR;
  
  PASSED();                                                 

@@ -24,6 +24,7 @@
  * Function: do_copy_refobjs
  *
  * Purpose: duplicate all referenced HDF5 objects in the file 
+ *  and create hard links
  *
  * Return: 0, ok, -1 no
  *
@@ -36,8 +37,7 @@
 
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
-                    int nobjects,        /* number of objects */
-                    trav_info_t *travi,  /* array of object names */
+                    trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
  hid_t     grp_in;       /* group ID */ 
@@ -62,22 +62,32 @@ int do_copy_refobjs(hid_t fidin,
  *-------------------------------------------------------------------------
  */
  
- for ( i = 0; i < nobjects; i++)
+ for ( i = 0; i < travt->nobjs; i++)
  {
 
-  switch ( travi[i].type )
+  switch ( travt->objs[i].type )
   {
  /*-------------------------------------------------------------------------
   * H5G_GROUP
   *-------------------------------------------------------------------------
   */
   case H5G_GROUP:
- 
-   if((grp_in = H5Gopen (fidin,travi[i].name))<0) 
-    goto error;
+    
+   /*-------------------------------------------------------------------------
+    * check for hard links
+    *-------------------------------------------------------------------------
+    */
 
-   if (H5Gclose(grp_in)<0) 
-    goto error;
+   if (travt->objs[i].nlinks)
+   {
+    for ( j=0; j<travt->objs[i].nlinks; j++)
+    {
+      H5Glink(fidout, 
+      H5G_LINK_HARD,
+      travt->objs[i].name,
+      travt->objs[i].links[j].new_name);
+    }
+   }
   
    break;
    
@@ -87,7 +97,7 @@ int do_copy_refobjs(hid_t fidin,
    */
   case H5G_DATASET:
    
-   if ((dset_in=H5Dopen(fidin,travi[i].name))<0) 
+   if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0) 
     goto error;
    if ((space_id=H5Dget_space(dset_in))<0) 
     goto error;
@@ -149,14 +159,14 @@ int do_copy_refobjs(hid_t fidin,
      
       /* get the name. a valid name could only occur in the 
      second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,nobjects,travi,options))!=NULL)
+     if ((refname=MapIdToName(refobj_id,travt,options))!=NULL)
      {
       /* create the reference */
       if (H5Rcreate(&refbuf[j],fidout,refname,H5R_OBJECT,-1)<0)
        goto error;
       
       if (options->verbose)
-       printf("object <%s> reference created to <%s>\n",travi[i].name,refname);
+       printf("object <%s> reference created to <%s>\n",travt->objs[i].name,refname);
      }
      close_obj(obj_type,refobj_id);
     }/*  j */
@@ -167,7 +177,7 @@ int do_copy_refobjs(hid_t fidin,
      * create/write dataset/close
      *-------------------------------------------------------------------------
      */
-    if ((dset_out=H5Dcreate(fidout,travi[i].name,ftype_id,space_id,dcpl_id))<0) 
+    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,ftype_id,space_id,dcpl_id))<0) 
      goto error;
     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
      goto error;
@@ -185,7 +195,7 @@ int do_copy_refobjs(hid_t fidin,
    
    else
    {
-    if ((dset_out=H5Dopen(fidout,travi[i].name))<0) 
+    if ((dset_out=H5Dopen(fidout,travt->objs[i].name))<0) 
      goto error;
    }
    
@@ -194,8 +204,24 @@ int do_copy_refobjs(hid_t fidin,
     *-------------------------------------------------------------------------
     */
    
-   if (do_copy_refobjs_inattr(dset_in,dset_out,options,nobjects,travi,fidout)<0) 
+   if (do_copy_refobjs_inattr(dset_in,dset_out,options,travt,fidout)<0) 
     goto error;
+
+
+   /*-------------------------------------------------------------------------
+    * check for hard links
+    *-------------------------------------------------------------------------
+    */
+   if (travt->objs[i].nlinks)
+   {
+    for ( j=0; j<travt->objs[i].nlinks; j++)
+    {
+      H5Glink(fidout, 
+      H5G_LINK_HARD,
+      travt->objs[i].name,
+      travt->objs[i].links[j].new_name);
+    }
+   }
    
    
    /*-------------------------------------------------------------------------
@@ -225,7 +251,7 @@ int do_copy_refobjs(hid_t fidin,
    */
   case H5G_TYPE:
    
-   if ((type_in = H5Topen (fidin,travi[i].name))<0) 
+   if ((type_in = H5Topen (fidin,travt->objs[i].name))<0) 
     goto error;
   
    if (H5Tclose(type_in)<0) 
@@ -267,7 +293,7 @@ int do_copy_refobjs(hid_t fidin,
  if ((grp_in  = H5Gopen(fidin,"/"))<0) 
   goto error;
  
- if (do_copy_refobjs_inattr(grp_in,grp_out,options,nobjects,travi,fidout)<0) 
+ if (do_copy_refobjs_inattr(grp_in,grp_out,options,travt,fidout)<0) 
   goto error;
  
  if (H5Gclose(grp_out)<0) 
@@ -314,8 +340,7 @@ error:
 int do_copy_refobjs_inattr(hid_t loc_in, 
               hid_t loc_out, 
               pack_opt_t *options,
-              int nobjects,        /* number of objects */
-              trav_info_t *travi,  /* array of object names */
+              trav_table_t *travt,
               hid_t fidout         /* for saving references */
               )
 {
@@ -414,7 +439,7 @@ int do_copy_refobjs_inattr(hid_t loc_in,
      
       /* get the name. a valid name could only occur in the 
      second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,nobjects,travi,options))!=NULL)
+     if ((refname=MapIdToName(refobj_id,travt,options))!=NULL)
      {
       /* create the reference */
       if (H5Rcreate(&refbuf[i],fidout,refname,H5R_OBJECT,-1)<0)
@@ -506,8 +531,7 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
  */
 
 const char* MapIdToName(hid_t refobj_id, 
-                        int nobjects,         /* number of objects */
-                        trav_info_t *travi,   /* array of object names */
+                        trav_table_t *travt,
                         pack_opt_t  *options) /* repack options */
 {
  hid_t id;
@@ -521,9 +545,9 @@ const char* MapIdToName(hid_t refobj_id,
  }
    
 
- for ( i=0; i<nobjects; i++)
+ for ( i=0; i<travt->nobjs; i++)
  {
-  switch ( travi[i].type ) 
+  switch ( travt->objs[i].type ) 
   {
    
  /*-------------------------------------------------------------------------
@@ -543,7 +567,7 @@ const char* MapIdToName(hid_t refobj_id,
    
   case H5G_DATASET:
    
-   if ((id = H5Dopen(fid,travi[i].name))<0)
+   if ((id = H5Dopen(fid,travt->objs[i].name))<0)
    {
     assert(0);
     return NULL;
@@ -558,7 +582,7 @@ const char* MapIdToName(hid_t refobj_id,
    if (id==refobj_id)
    {
     H5Fclose(fid);
-    return travi[i].name;
+    return travt->objs[i].name;
    }
  
    

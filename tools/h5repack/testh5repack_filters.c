@@ -22,12 +22,6 @@
  *
  * Purpose: make a dataset using DEFLATE (GZIP) compression in FID
  *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -81,12 +75,6 @@ error:
  * Function: make_szip
  *
  * Purpose: make a dataset using SZIP compression in FID
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -152,12 +140,6 @@ error:
  * Purpose: make a test file with all types of HDF5 objects, 
  *   datatypes and filters
  *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 int make_testfiles(void)
@@ -167,23 +149,35 @@ int make_testfiles(void)
 
  TESTING("    generating datasets");
 
- /* create a file for the copy test */
+ /* create a file for general copy test */
  if((fid = H5Fcreate(FNAME1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   TEST_ERROR;
- 
  nerrors += make_all_objects(fid);
-
   /* close */
  if(H5Fclose(fid)<0)
   TEST_ERROR;
 
- /* create a file for the filters test */
+ /* create a file for attributes copy test */
  if((fid = H5Fcreate(FNAME2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   TEST_ERROR;
- 
+ nerrors += make_attributes(fid);
+  /* close */
+ if(H5Fclose(fid)<0)
+  TEST_ERROR;
+
+ /* create a file for special items test */
+ if((fid = H5Fcreate(FNAME3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  TEST_ERROR;
+ nerrors += make_special_objects(fid);
+ /* close */
+ if(H5Fclose(fid)<0)
+  TEST_ERROR;
+
+ /* create a file for the filters test */
+ if((fid = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  TEST_ERROR;
  nerrors += make_deflate(fid);
  nerrors += make_szip(fid);
- 
  /* close */
  if(H5Fclose(fid)<0)
   TEST_ERROR;
@@ -199,19 +193,10 @@ error:
 }
 
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: make_all_objects
  *
  * Purpose: make a test file with all types of HDF5 objects, datatypes 
- *
- * Return: Success: zero
- *  Failure: 1
- *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -267,15 +252,6 @@ int make_all_objects(hid_t fid)
  H5Glink(fid, H5G_LINK_SOFT, "dset", "link");
 
 /*-------------------------------------------------------------------------
- * write a series of attributes on the dataset, group, and root group
- *-------------------------------------------------------------------------
- */
-
- write_attr_in(dset_id,"dset_ref",fid,0);
- write_attr_in(group_id,"dset_ref",fid,0);
- write_attr_in(root_id,"dset_ref",fid,0);
-
-/*-------------------------------------------------------------------------
  * write a series of datasetes on the group, and root group
  *-------------------------------------------------------------------------
  */
@@ -288,6 +264,112 @@ int make_all_objects(hid_t fid)
  H5Dclose(dset_id);
  H5Gclose(group_id);
  H5Gclose(root_id);
+
+ return 0;                                                 
+ 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_attributes
+ *
+ * Purpose: make a test file with all types of attributes 
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_attributes(hid_t fid)
+{
+ hid_t   dset_id;
+ hid_t   group_id;
+ hid_t   root_id;
+ hid_t   space_id;
+ hsize_t dims[1]={2};
+ 
+/*-------------------------------------------------------------------------
+ * H5G_DATASET
+ *-------------------------------------------------------------------------
+ */
+
+ space_id = H5Screate_simple(1,dims,NULL);
+ dset_id  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ H5Sclose(space_id);
+
+/*-------------------------------------------------------------------------
+ * H5G_GROUP
+ *-------------------------------------------------------------------------
+ */ 
+ group_id  = H5Gcreate(fid,"g1",0);
+ root_id   = H5Gopen(fid, "/");
+
+/*-------------------------------------------------------------------------
+ * write a series of attributes on the dataset, group, and root group
+ *-------------------------------------------------------------------------
+ */
+
+ write_attr_in(dset_id,"dset",fid,0);
+ write_attr_in(group_id,"dset",fid,0);
+ write_attr_in(root_id,"dset",fid,0);
+
+ /* Close */
+ H5Dclose(dset_id);
+ H5Gclose(group_id);
+ H5Gclose(root_id);
+
+ return 0;                                                 
+ 
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_special_objects
+ *
+ * Purpose: make a test file with non common items  
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_special_objects(hid_t loc_id)
+{
+ hid_t   group1_id;
+ hid_t   group2_id;
+ hid_t   group3_id;
+ hsize_t dims[1]={2};
+ int     buf[2]= {1,2};                 
+
+ 
+/*-------------------------------------------------------------------------
+ * create a dataset and some hard links to it
+ *-------------------------------------------------------------------------
+ */
+
+ if (write_dset(loc_id,1,dims,"dset",H5T_NATIVE_INT,buf)<0)
+  return -1;
+ if (H5Glink(loc_id, H5G_LINK_HARD, "dset", "link1 to dset")<0)
+  return -1;
+ if (H5Glink(loc_id, H5G_LINK_HARD, "dset", "link2 to dset")<0)
+  return -1;
+ if (H5Glink(loc_id, H5G_LINK_HARD, "dset", "link3 to dset")<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a group and some hard links to it
+ *-------------------------------------------------------------------------
+ */ 
+
+ if ((group1_id = H5Gcreate(loc_id,"g1",0))<0)
+  return -1;
+ if ((group2_id = H5Gcreate(group1_id,"g2",0))<0)
+  return -1;
+ if ((group3_id = H5Gcreate(group2_id,"g3",0))<0)
+  return -1;
+ if (H5Glink(loc_id, H5G_LINK_HARD, "g1", "link1 to g1")<0)
+  return -1;
+ if (H5Glink(loc_id, H5G_LINK_HARD, "g1", "link2 to g1")<0)
+  return -1;
+
+
+ H5Gclose(group1_id);
+ H5Gclose(group2_id);
 
  return 0;                                                 
  

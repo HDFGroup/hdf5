@@ -239,7 +239,7 @@ int diff_match( hid_t file1_id,
   {
    c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
    c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
-   printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].objname);
+   printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
   }
   printf("\n");
  }
@@ -254,9 +254,9 @@ int diff_match( hid_t file1_id,
  {
   if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
    nfound+=diff( file1_id, 
-                 table->objs[i].objname, 
+                 table->objs[i].name, 
                  file2_id, 
-                 table->objs[i].objname, 
+                 table->objs[i].name, 
                  options, 
                  table->objs[i].type );
  }

@@ -134,52 +134,39 @@ void print_objlist(const char *filename,
 
 int do_copy_file(hid_t fidin, 
                  hid_t fidout, 
-                 int nobjects, 
-                 trav_info_t *info,
+                 trav_table_t *travt,
                  pack_opt_t *options);
 
 int copy_attr(hid_t loc_in, 
               hid_t loc_out, 
               pack_opt_t *options,
-              int nobjects,        /* number of objects */
-              trav_info_t *travi,  /* array of object names */
-              hid_t fidout         /*for saving references */
+              trav_table_t *travt,
+              hid_t fidout         /* for saving references */
               );
 
-
-void read_info(const char *filename,pack_opt_t *options);
-
-
-void close_obj(H5G_obj_t obj_type, hid_t obj_id);
-
 const char* MapIdToName(hid_t refobj_id, 
-                        int nobjects,         /* number of objects */
-                        trav_info_t *travi,   /* array of object names */
+                        trav_table_t *travt,
                         pack_opt_t  *options) /* repack options */;
-
-
 
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
-                    int nobjects,        /* number of objects */
-                    trav_info_t *travi,  /* array of object names */
+                    trav_table_t *travt,
                     pack_opt_t *options); /* repack options */
 
 int do_copy_refobjs_inattr(hid_t loc_in, 
               hid_t loc_out, 
               pack_opt_t *options,
-              int nobjects,        /* number of objects */
-              trav_info_t *travi,  /* array of object names */
+              trav_table_t *travt,
               hid_t fidout         /* for saving references */
               );
 
+void read_info(const char *filename,pack_opt_t *options);
+void close_obj(H5G_obj_t obj_type, hid_t obj_id);
 
 /*-------------------------------------------------------------------------
  * options table
  *-------------------------------------------------------------------------
  */
-
-
 int          options_table_init( pack_opttbl_t **tbl );
 int          options_table_free( pack_opttbl_t *table );
 int          options_add_chunk ( obj_list_t *obj_list,
@@ -193,9 +180,6 @@ int          options_add_comp  ( obj_list_t *obj_list,
                                  pack_opttbl_t *table );
 pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table);
-
-
-
 
 /*-------------------------------------------------------------------------
  * parse functions
@@ -217,46 +201,36 @@ int         parse_number(char *str);
  *-------------------------------------------------------------------------
  */
 
-
-#define FNAME1     "testcopy.h5"
-#define FNAME1OUT  "testcopyout.h5"
-#define FNAME2     "testfilters.h5"
-#define FNAME2OUT  "testfiltersout.h5"
-
-
-
-#define FNAME1     "testcopy.h5"
-#define FNAME1OUT  "testcopyout.h5"
-#define FNAME2     "testfilters.h5"
-#define FNAME2OUT  "testfiltersout.h5"
-
+#define FNAME1     "test1.h5"
+#define FNAME1OUT  "test1out.h5"
+#define FNAME2     "test2.h5"
+#define FNAME2OUT  "test2out.h5"
+#define FNAME3     "test3.h5"
+#define FNAME3OUT  "test3out.h5"
+#define FNAME4     "test4.h5"
+#define FNAME4OUT  "test4out.h5"
 
 int make_testfiles(void);
-
 int make_all_objects(hid_t fid);
-
+int make_attributes(hid_t fid);
+int make_special_objects(hid_t loc_id);
 int make_attr(hid_t fid);
-
 int write_dset( hid_t loc_id, 
                 int rank, 
                 hsize_t *dims, 
                 const char *dset_name,
                 hid_t type_id, 
                 void *buf );
-
 int write_attr(hid_t loc_id, 
                int rank, 
                hsize_t *dims, 
                const char *attr_name,
                hid_t type_id, 
                void *buf);
-
- 
 void write_attr_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
                    int make_diffs /* flag to modify data buffers */);
-
 void write_dset_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,

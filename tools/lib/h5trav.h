@@ -40,16 +40,28 @@ typedef struct trav_info_t {
 
 
 /*-------------------------------------------------------------------------
+ * keep record of hard link information
+ *-------------------------------------------------------------------------
+ */
+typedef struct trav_link_t {
+	char      *new_name;
+} trav_link_t;
+
+
+/*-------------------------------------------------------------------------
  * struct to store basic info needed for the h5trav table traversal algorythm
  *-------------------------------------------------------------------------
  */
 
 typedef struct trav_obj_t {
-    haddr_t   objno;
-    unsigned  flags[2];
-    char      *objname;
-    int       displayed;
-    H5G_obj_t type;
+    haddr_t     objno;     /* object number from H5Gget_objinfo */
+    unsigned    flags[2];  /* h5diff.object is present or not in both files*/
+    char        *name;     /* name */
+    int         displayed; /* hard link already traversed once */
+    H5G_obj_t   type;      /* type of object */
+    trav_link_t *links;    /* array of possible link names */
+    int         sizelinks; /* size of links array */
+    int         nlinks;    /* number of links */
 } trav_obj_t;
 
 
@@ -78,7 +90,7 @@ int  h5trav_getinfo( hid_t file_id, trav_info_t *info );
 int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
 void h5trav_freeinfo( trav_info_t *info, int nobjs );
 void h5trav_printinfo(int nobjs, trav_info_t *info);
-
+int  h5trav_gettable(hid_t fid, trav_table_t *travt);
 
 
 #ifdef __cplusplus
@@ -107,6 +119,11 @@ void trav_table_addflags(unsigned *flags,
                          H5G_obj_t type, 
                          trav_table_t *table);
 
+void h5trav_printtable(trav_table_t *table);
+
+void trav_table_addlink(trav_table_t *table, 
+                        int j /* the object index */,
+                        char *path );
 
 
 #endif  /* H5TRAV_H__ */

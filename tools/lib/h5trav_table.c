@@ -57,7 +57,7 @@ int trav_table_search(haddr_t objno, trav_table_t *table )
  */
 
 void trav_table_add(haddr_t objno, 
-                    char *objname, 
+                    char *name, 
                     H5G_obj_t type, 
                     trav_table_t *table)
 {
@@ -73,16 +73,21 @@ void trav_table_add(haddr_t objno,
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
-   table->objs[i].objname = NULL;
+   table->objs[i].name = NULL;
+   table->objs[i].links = NULL;
+   table->objs[i].nlinks = 0;
+   table->objs[i].sizelinks = 0;
   }
  }
  
  i = table->nobjs++;
  table->objs[i].objno = objno;
  table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
- HDfree(table->objs[i].objname);
- table->objs[i].objname = (char *)HDstrdup(objname);
+ HDfree(table->objs[i].name);
+ table->objs[i].name = (char *)HDstrdup(name);
  table->objs[i].type = type;
+ table->objs[i].links = NULL;
+ table->objs[i].nlinks = 0;
 }
 
 
@@ -101,7 +106,7 @@ void trav_table_add(haddr_t objno,
  */
 
 void trav_table_addflags(unsigned *flags, 
-                         char *objname, 
+                         char *name, 
                          H5G_obj_t type, 
                          trav_table_t *table)
 {
@@ -117,7 +122,10 @@ void trav_table_addflags(unsigned *flags,
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
-   table->objs[i].objname = NULL;
+   table->objs[i].name = NULL;
+   table->objs[i].links = NULL;
+   table->objs[i].nlinks = 0;
+   table->objs[i].sizelinks = 0;
   }
  }
  
@@ -125,9 +133,11 @@ void trav_table_addflags(unsigned *flags,
  table->objs[i].objno = 0;
  table->objs[i].flags[0] = flags[0];
  table->objs[i].flags[1] = flags[1];
- HDfree(table->objs[i].objname);
- table->objs[i].objname = (char *)HDstrdup(objname);
+ HDfree(table->objs[i].name);
+ table->objs[i].name = (char *)HDstrdup(name);
  table->objs[i].type = type;
+ table->objs[i].links = NULL;
+ table->objs[i].nlinks = 0;
 }
 
 
@@ -160,7 +170,10 @@ void trav_table_init( trav_table_t **tbl )
   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
   table->objs[i].displayed = 0;
   table->objs[i].type = H5G_UNKNOWN;
-  table->objs[i].objname = NULL;
+  table->objs[i].name = NULL;
+  table->objs[i].links = NULL;
+  table->objs[i].nlinks = 0;
+  table->objs[i].sizelinks = 0;
  }
  
  *tbl = table;
@@ -184,14 +197,53 @@ void trav_table_init( trav_table_t **tbl )
 
 void trav_table_free( trav_table_t *table )
 {
- int i;
+ int i, j;
 
  for ( i = 0; i < table->nobjs; i++)
-  HDfree( table->objs[i].objname );
+ {
+  HDfree( table->objs[i].name );
+  if (table->objs[i].nlinks)
+  {
+   for ( j=0; j<table->objs[i].nlinks; j++)
+    HDfree( table->objs[i].links[j].new_name );
 
+   HDfree(table->objs[i].links);
+  }
+ }
  HDfree(table->objs);
  HDfree(table);
 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: trav_table_addlink
+ *
+ * Purpose: Add a hardlink name to the object
+ *
+ * Return: void
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 17, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void trav_table_addlink(trav_table_t *table, 
+                        int j /* the object index */,
+                        char *path )
+{
+ int k;
+ /* store the link information */
+ if (table->objs[j].nlinks == table->objs[j].sizelinks) {
+  table->objs[j].sizelinks += 2;
+  table->objs[j].links = 
+   (trav_link_t*)HDrealloc(table->objs[j].links, 
+   table->objs[j].sizelinks * sizeof(trav_link_t));
+ }
+ k = table->objs[j].nlinks++;
+ table->objs[j].links[k].new_name = (char*)HDstrdup(path);
 }
 
 
