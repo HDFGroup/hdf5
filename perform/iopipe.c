@@ -147,8 +147,8 @@ static void
 synchronize (void)
 {
 #ifdef H5_HAVE_SYSTEM
-#ifdef WIN32
-	flushall();
+#if defined(WIN32) && ! defined(__CYGWIN__)
+	_flushall();
 #else
     HDsystem ("sync");
     HDsystem ("df >/dev/null");
