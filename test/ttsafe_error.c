@@ -40,7 +40,7 @@ static int dummy;	/* just to create a non-empty object file */
 
 /* Having a common dataset name is an error */
 #define DATASETNAME		"commonname"
-#define EXPECTED_ERROR_DEPTH	3
+#define EXPECTED_ERROR_DEPTH	8
 #define WRITE_NUMBER		37
 
 static herr_t error_callback(void *);
@@ -58,7 +58,12 @@ typedef struct err_num_struct {
 err_num_t expected[] = {
 	{H5E_DATASET, H5E_CANTINIT},
 	{H5E_DATASET, H5E_CANTINIT},
-	{H5E_SYM, H5E_EXISTS}
+	{H5E_SYM, H5E_EXISTS},
+	{H5E_SYM, H5E_CANTINSERT},
+	{H5E_SYM, H5E_CANTINSERT},
+	{H5E_BTREE, H5E_CANTINIT},
+	{H5E_BTREE, H5E_CANTINSERT},
+	{H5E_SYM, H5E_CANTINSERT},
 };
 
 int error_flag = 0;
