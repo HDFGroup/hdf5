@@ -41,6 +41,7 @@ void multiple_dset_write(char *filename, int ndatasets)
     int i, j, n, mpi_size, mpi_rank;
     hid_t iof, plist, dataset, memspace, filespace;
     hid_t dcpl;                         /* Dataset creation property list */
+    hbool_t use_gpfs = FALSE;           /* Use GPFS hints */
     hssize_t chunk_origin [DIM];
     hsize_t chunk_dims [DIM], file_dims [DIM];
     hsize_t count[DIM]={1,1};
@@ -54,9 +55,12 @@ void multiple_dset_write(char *filename, int ndatasets)
 
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
+    VRFY((plist>=0), "create_faccess_plist succeeded");
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
-    H5Pclose (plist);
+    VRFY((iof>=0), "H5Fcreate succeeded");
+    ret = H5Pclose (plist);
+    VRFY((ret>=0), "H5Pclose succeeded");
 
     /* decide the hyperslab according to process number. */
     get_slab(chunk_origin, chunk_dims, count, file_dims);  
@@ -106,6 +110,7 @@ void multiple_dset_write(char *filename, int ndatasets)
 void compact_dataset(char *filename)
 {
     int i, j, mpi_size, mpi_rank, err_num=0;
+    hbool_t use_gpfs = FALSE;
     hid_t iof, plist, dcpl, dxpl, dataset, memspace, filespace;
     hssize_t chunk_origin [DIM];
     hsize_t chunk_dims [DIM], file_dims [DIM];
@@ -119,7 +124,7 @@ void compact_dataset(char *filename)
 
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
 
     /* decide the hyperslab according to process number. */
@@ -177,7 +182,7 @@ void compact_dataset(char *filename)
     H5Fclose (iof);
 
     /* Open the file and dataset, read and compare the data. */
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     iof = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     VRFY((iof >= 0), "H5Fopen succeeded");
 
@@ -213,6 +218,7 @@ void collective_group_write(char *filename, int ngroups)
 {
     int mpi_rank, mpi_size;
     int i, j, m;
+    hbool_t use_gpfs = FALSE;
     char gname[64], dname[32];
     hid_t fid, gid, did, plist, dcpl, memspace, filespace;
     DATATYPE outme[SIZE][SIZE];
@@ -224,7 +230,7 @@ void collective_group_write(char *filename, int ngroups)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose(plist);
 
@@ -291,11 +297,12 @@ void independent_group_read(char *filename, int ngroups)
 {
     int      mpi_rank, mpi_size, m;
     hid_t    plist, fid;
+    hbool_t  use_gpfs = FALSE;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     H5Pclose(plist);
 
@@ -382,6 +389,7 @@ void multiple_group_write(char *filename, int ngroups)
 {
     int mpi_rank, mpi_size;
     int m;
+    hbool_t use_gpfs = FALSE;
     char gname[64];
     hid_t fid, gid, plist, memspace, filespace;
     hssize_t chunk_origin[DIM];
@@ -391,7 +399,7 @@ void multiple_group_write(char *filename, int ngroups)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose(plist);
 
@@ -526,6 +534,7 @@ void multiple_group_read(char *filename, int ngroups)
 {
     int      mpi_rank, mpi_size, error_num;
     int      m;
+    hbool_t  use_gpfs = FALSE;
     char     gname[64];
     hid_t    plist, fid, gid, memspace, filespace;
     hssize_t chunk_origin[DIM];
@@ -534,7 +543,7 @@ void multiple_group_read(char *filename, int ngroups)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     H5Pclose(plist);
 

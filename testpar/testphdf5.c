@@ -273,7 +273,8 @@ parse_options(int argc, char **argv)
  * Create the appropriate File access property list
  */
 hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type )
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
+                     hbool_t use_gpfs)
 {
     hid_t ret_pl = -1;
     herr_t ret;                 /* generic return value */
@@ -316,8 +317,8 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type )
 
     if (l_facc_type == FACC_MPIPOSIX) {
 	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpiposix(ret_pl, comm);
-	VRFY((ret >= 0), "");
+	ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
+	VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
 	return(ret_pl);
     }
 

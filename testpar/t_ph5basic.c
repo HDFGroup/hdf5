@@ -219,6 +219,7 @@ test_fapl_mpiposix_dup(void)
     int mpi_size_tmp, mpi_rank_tmp;
     int mrc;			/* MPI return value */
     hid_t acc_pl;		/* File access properties */
+    hbool_t use_gpfs = FALSE;
     herr_t ret;			/* hdf5 return value */
     int nkeys, nkeys_tmp;
 
@@ -244,7 +245,7 @@ test_fapl_mpiposix_dup(void)
     acc_pl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_pl >= 0), "H5P_FILE_ACCESS");
 
-    ret = H5Pset_fapl_mpiposix(acc_pl, comm);
+    ret = H5Pset_fapl_mpiposix(acc_pl, comm, use_gpfs);
     VRFY((ret >= 0), "");
 
     /* Case 1:
@@ -255,7 +256,7 @@ test_fapl_mpiposix_dup(void)
     mrc = MPI_Comm_free(&comm);
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 
-    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp, &use_gpfs);
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
@@ -275,12 +276,12 @@ test_fapl_mpiposix_dup(void)
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 
     /* check NULL argument options. */
-    ret = H5Pget_fapl_mpiposix(acc_pl, NULL);
+    ret = H5Pget_fapl_mpiposix(acc_pl, NULL, NULL);
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix neither");
 
     /* now get it again and check validity too. */
-    /* Donot free the returned object which are used in the next case. */
-    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+    /* Don't free the returned object which is used in the next case. */
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp, &use_gpfs);
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);

@@ -283,6 +283,10 @@ Documentation
 New Features
 ============
 
+    * Added parameter to the MPI/POSIX driver. If GPFS is enabled (by
+      modifying the H5FDmpiposix.c file to uncomment the USE_GPFS_HINTS
+      macro), then this extra parameter will turn GPFS hints on and off
+      during runtime. BW - 2003/05/05
     * Added option to print 1-byte integer datasets as ASCII to h5dump. BW -
       2003/04/30
     * Added a new utility "h5fc". It can be used to compile easily Fortran

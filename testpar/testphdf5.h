@@ -19,6 +19,14 @@
 
 #include "h5test.h"
 
+#ifndef TRUE
+#define TRUE    1
+#endif  /* !TRUE */
+
+#ifndef FALSE
+#define FALSE   (!TRUE)
+#endif  /* !FALSE */
+
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
@@ -114,7 +122,7 @@ extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 
 /* prototypes */
-hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type );
+hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);
 void multiple_dset_write(char *filename, int ndatasets);
 void multiple_group_write(char *filename, int ngroups);
 void multiple_group_read(char *filename, int ngroups);

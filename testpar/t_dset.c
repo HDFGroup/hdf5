@@ -229,6 +229,7 @@ dataset_writeInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
 
@@ -257,7 +258,7 @@ dataset_writeInd(char *filename)
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
      * ---------------------------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
     /* create the file collectively */
@@ -372,6 +373,7 @@ dataset_readInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
@@ -399,7 +401,7 @@ dataset_readInd(char *filename)
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
@@ -495,6 +497,7 @@ dataset_writeAll(char *filename)
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2, dataset3, dataset4;	/* Dataset ID */
     hid_t datatype;		/* Datatype ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
 
@@ -523,7 +526,7 @@ dataset_writeAll(char *filename)
      * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
     /* create the file collectively */
@@ -851,6 +854,7 @@ dataset_readAll(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
@@ -881,7 +885,7 @@ dataset_readAll(char *filename)
      * OPEN AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
@@ -1071,6 +1075,7 @@ extend_writeInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     hsize_t max_dims[RANK] =
 		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
@@ -1108,7 +1113,7 @@ extend_writeInd(char *filename)
      * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
 /* Reduce the number of metadata cache slots, so that there are cache
@@ -1293,6 +1298,7 @@ extend_readInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_array2 = NULL;	/* data buffer */
@@ -1327,7 +1333,7 @@ extend_readInd(char *filename)
      * OPEN AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
     VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
