@@ -52,6 +52,8 @@ typedef struct H5FD_mpio_t {
     MPI_File	f;		/*MPIO file handle			*/
     MPI_Comm	comm;		/*communicator				*/
     MPI_Info	info;		/*file information			*/
+    int         mpi_rank;       /* This process's rank                  */
+    int         mpi_size;       /* Total number of processes            */
     hbool_t	allsame;	/*same data for all procs?		*/
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
@@ -557,22 +559,16 @@ herr_t
 H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    MPI_Comm comm;
     char msgbuf[1];
-    int myid;
     MPI_Status rcvstat;
 
     FUNC_ENTER(H5FD_mpio_wait_for_left_neighbor, FAIL);
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    comm = file->comm;
-    if (MPI_SUCCESS!= MPI_Comm_rank(comm, &myid))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
-
     /* p0 has no left neighbor; all other procs wait for msg */
-    if (myid != 0) {
-        if (MPI_SUCCESS!= MPI_Recv( &msgbuf, 1, MPI_CHAR, myid-1, MPI_ANY_TAG, comm, &rcvstat ))
+    if (file->mpi_rank != 0) {
+        if (MPI_SUCCESS!= MPI_Recv( &msgbuf, 1, MPI_CHAR, file->mpi_rank-1, MPI_ANY_TAG, file->comm, &rcvstat ))
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Recv failed");
     }
     
@@ -610,21 +606,14 @@ herr_t
 H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    MPI_Comm comm;
     char msgbuf[1];
-    int myid, numprocs;
 
     FUNC_ENTER(H5FD_mpio_signal_right_neighbor, FAIL);
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    comm = file->comm;
-    if (MPI_SUCCESS!= MPI_Comm_size( comm, &numprocs ))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
-    if (MPI_SUCCESS!= MPI_Comm_rank( comm, &myid )) 
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
-    if (myid != (numprocs-1)) {
-        if (MPI_SUCCESS!= MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, myid+1, 0, comm))
+    if (file->mpi_rank != (file->mpi_size-1)) {
+        if (MPI_SUCCESS!= MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, file->mpi_rank+1, 0, file->comm))
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
     }
     FUNC_LEAVE(SUCCEED);
@@ -718,7 +707,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_mpio_t			*file=NULL;
     MPI_File			fh;
     int				mpi_amode;
-    int				mpi_rank;
+    int				mpi_rank;       /* MPI rank of this process */
+    int				mpi_size;       /* Total number of MPI processes */
     int				mpi_code;	/* mpi return code */
     MPI_Offset			size;
     const H5FD_mpio_fapl_t	*fa=NULL;
@@ -793,10 +783,13 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 	(mpi_code=MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh)))
 	    HMPI_RETURN_ERROR(NULL, "MPI_File_open failed", mpi_code);
 
-
-/*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
+    /* Get the MPI rank of this process and the total number of processes */
     if (MPI_SUCCESS != MPI_Comm_rank (fa->comm, &mpi_rank))
           HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Comm_rank failed");
+    if (MPI_SUCCESS != MPI_Comm_size (fa->comm, &mpi_size))
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Comm_size failed");
+
+/*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
 
     /* Only processor p0 will get the filesize and broadcast it. */
     if (mpi_rank == 0) {
@@ -833,6 +826,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->f = fh;
     file->comm = fa->comm;
     file->info = fa->info;
+    file->mpi_rank = mpi_rank;
+    file->mpi_size = mpi_size;
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
 
@@ -1352,7 +1347,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     MPI_Status			mpi_stat = {0};
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
-    int				mpi_rank=-1;
     int				use_types_this_time, used_types_last_time;
     hbool_t     		allsame;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -1442,14 +1436,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     /* Only p0 will do the actual write if all procs in comm write same data */
     allsame = H5FD_mpio_tas_allsame(_file, FALSE);
     if (allsame && H5_mpi_1_metawrite_g) {
-        if (MPI_SUCCESS != MPI_Comm_rank(file->comm, &mpi_rank))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
-        if (mpi_rank != 0) {
+        if (file->mpi_rank != 0) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_Debug[(int)'w']) {
                 fprintf(stdout,
 		    "  proc %d: in H5FD_mpio_write (write omitted)\n",
-		    mpi_rank );
+		    file->mpi_rank );
             }
 #endif
             HGOTO_DONE(SUCCEED) /* skip the actual write */
@@ -1518,7 +1510,7 @@ done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
-	    mpi_rank, ret_value );
+	    file->mpi_rank, ret_value );
 #endif
     FUNC_LEAVE(ret_value);
 }
@@ -1552,7 +1544,6 @@ static herr_t
 H5FD_mpio_flush(H5FD_t *_file)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
-    int                 mpi_rank=-1;
     int			mpi_code;	/* mpi return code */
     uint8_t             byte=0;
     MPI_Status          mpi_stat = {0};
@@ -1579,11 +1570,7 @@ H5FD_mpio_flush(H5FD_t *_file)
         HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL,
                       "cannot convert from haddr_t to MPI_Offset");
     }
-    if (MPI_SUCCESS!=MPI_Comm_rank(file->comm, &mpi_rank)) {
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
-                      "MPI_Comm_rank() failed");
-    }
-    if (0==mpi_rank) {
+    if (0==file->mpi_rank) {
         if (MPI_SUCCESS != MPI_File_read_at(file->f, mpi_off, &byte,
                                             1, MPI_BYTE, &mpi_stat)) {
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
