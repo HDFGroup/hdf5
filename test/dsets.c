@@ -23,6 +23,9 @@
 #include <time.h>
 
 #include "h5test.h"
+#ifdef H5_HAVE_SZLIB_H
+#   include "szlib.h"
+#endif
 
 /*
  * This file needs to access private datatypes from the H5Z package.
@@ -1806,17 +1809,18 @@ test_get_filter_info(void)
 #endif
 
 #ifdef H5_HAVE_FILTER_SZIP
-  if(H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0) TEST_ERROR
+    if(H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0) TEST_ERROR
 
-#ifdef H5_SZIP_CAN_ENCODE
-  if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) || 
-         ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
-          TEST_ERROR
-#else
- if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) || 
-     ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
-      TEST_ERROR
-#endif /* H5_SZIP_CAN_ENCODE */
+    if(SZ_encoder_enabled()) {
+        if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) || 
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+            TEST_ERROR
+    } /* end if */
+    else {
+        if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) != 0) || 
+                ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
+            TEST_ERROR
+    } /* end else */
 #endif /* H5_HAVE_FILTER_SZIP */
 
   /* Verify that get_filter_info doesn't throw an error when given a bad filter */
