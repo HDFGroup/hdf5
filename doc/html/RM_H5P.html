@@ -84,6 +84,13 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
     </ul>
 
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>
+||&nbsp;&nbsp;<i>Indicates functions available <br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;only in the parallel HDF5 library.</i>
+
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
     <i>File Access Properties</i>
@@ -93,12 +100,8 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplLog">H5Pset_fapl_log</a>
     <li><a href="#Property-SetFaplMpio">H5Pset_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-GetFaplMpio">H5Pget_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-SetFaplMulti">H5Pset_fapl_multi</a>
     <li><a href="#Property-GetFaplMulti">H5Pget_fapl_multi</a>
-    <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
-    <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
     <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
     <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
     <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
@@ -107,8 +110,6 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetDriver">H5Pset_driver</a>
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
     <li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
     <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
     <li><a href="#Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
@@ -124,21 +125,11 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplDpss">H5Pset_fapl_dpss</a>
     <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
     <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
+    <!--
     <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    -->
     </ul>
-
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>
-||&nbsp;&nbsp;<i>Available only in the parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -164,7 +155,7 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetExternal">H5Pget_external</a>
     </ul>
 
-    <p><i>Dataset Memory and Transfer Properties</i>
+    <p><i>Dataset Access, Memory, and <br> Transfer Properties</i>
     <ul>
     <li><a href="#Property-SetBuffer">H5Pset_buffer</a>
     <li><a href="#Property-GetBuffer">H5Pget_buffer</a>
@@ -174,8 +165,10 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
     <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
     <li><a href="#Property-GetBTreeRatios">H5Pget_btree_ratios</a>
-    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
+    <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
     </ul>
 
 </td></tr>

@@ -106,30 +106,28 @@ of a dataset.
     <li><a href="#Datatype-SetStrpad">H5Tset_strpad</a>
   </td></tr></table>
 <p>
-<i>Variable-length Datatypes</i>
-    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
-<p>
-<i>Array Datatypes</i>
-    <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>
-    <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims</a>
-    <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims</a>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Compound Datatype Properties</i>
-    <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
-    <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
-    <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
-    <li><a href="#Datatype-GetMemberDims">H5Tget_member_dims</a>
-    <li><a href="#Datatype-GetMemberType">H5Tget_member_type</a>
-    <li><a href="#Datatype-Insert">H5Tinsert</a>
-    <li><a href="#Datatype-Pack">H5Tpack</a>
-    <li><a href="#Datatype-InsertArray">H5Tinsert_array</a>
-<p>
 <i>Enumeration Datatypes</i>
     <li><a href="#Datatype-EnumCreate">H5Tenum_create</a>
     <li><a href="#Datatype-EnumInsert">H5Tenum_insert</a>
     <li><a href="#Datatype-EnumNameOf">H5Tenum_nameof</a>
     <li><a href="#Datatype-EnumValueOf">H5Tenum_valueof</a>
     <li><a href="#Datatype-GetMemberValue">H5Tget_member_value</a>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<i>Compound Datatype Properties</i>
+    <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
+    <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
+    <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
+    <li><a href="#Datatype-GetMemberType">H5Tget_member_type</a>
+    <li><a href="#Datatype-Insert">H5Tinsert</a>
+    <li><a href="#Datatype-Pack">H5Tpack</a>
+<p>
+<i>Array Datatypes</i>
+    <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>
+    <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims</a>
+    <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims</a>
+<p>
+<i>Variable-length Datatypes</i>
+    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
 <p>
 <i>Opaque Datatypes</i>
     <li><a href="#Datatype-SetTag">H5Tset_tag</a>
@@ -366,74 +364,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         Otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tcommitted_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Datatype-InsertArray">H5Tinsert_array</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em><code>H5Tinsert_array</code>(<em>hid_t</em> <code>parent_id</code>,
-        <em>const char *</em><code>name</code>,
-        <em>size_t</em> <code>offset</code>,
-        <em>int</em> <code>ndims</code>,
-        <em>const size_t *</em><code>dim</code>,
-        <em>const int *</em><code>perm</code>,
-        <em>hid_t</em> <code>member_id</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Adds an array member to a compound datatype.
-<dt><strong>Description:</strong>
-    <dd><code>H5Tinsert_array</code> adds a new member to the 
-        compound datatype <code>parent_id</code>.  
-        The member is an array with <code>ndims</code> dimensionality 
-        and the size of the array is </em><code>dim</code>.
-        The new member's name, <code>name</code>, must be unique 
-        within the compound datatype.  
-        The <code>offset</code> argument defines the byte offset of the start of the 
-        member in an instance of the compound datatype and
-        <code>member_id</code> is the type identifier of the new member.  
-        The total member size should be relatively small.
-        <p>
-        The functionality of the <code>perm</code> parameter has 
-        not yet been implemented.  
-        Currently, <code>perm</code> is best set to <code>NULL</code>.
-        (When implemented, <code>perm</code> will specify the mapping 
-        of dimensions within a struct.  At that time, a 
-        <code>NULL</code> value for <code>perm</code> will mean 
-        no mappiing change is to take place.  Thus, using a value 
-        of <code>NULL</code> ensures that application behavior will 
-        remain unchanged upon implementation of this functionality.)
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>parent_id</code>
-            <dd>IN: Identifier of the parent compound datatype.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of new member.
-        <dt><em>size_t</em> <code>offset</code>
-            <dd>IN: Offset to start of new member within compound datatype.
-        <dt><em>int</em> <code>ndims</code>
-            <dd>IN: Dimensionality of new member.
-                Valid values are  <code>0</code> (zero) 
-                through <code>4</code> (four).
-        <dt><em>const size_t *</em><code>dim</code>
-            <dd>IN: Size of new member array.
-        <dt><em>const int *</em><code>perm</code>
-            <dd>IN: Pointer to buffer to store the permutation vector of 
-                the field.
-        <dt><em>hid_t</em> <code>member_id</code>
-            <dd>IN: Identifier of the datatype of the new member.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tinsert_array_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -2050,51 +1980,6 @@ zero.
         fails with the same arguments.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_offset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Datatype-GetMemberDims">H5Tget_member_dims</a>
-<dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Tget_member_dims</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>field_idx</code>,
-        <em>size_t *</em><code>dims</code>,
-        <em>int *</em><code>perm</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Returns the dimensionality of the field.  
-<dt><strong>Description:</strong>
-    <dd><code>H5Tget_member_dims</code> returns the dimensionality of 
-        the field.  The dimensions and permuation vector are returned 
-        through arguments <code>dims</code> and <code>perm</code>, 
-        both arrays of at least four elements.  
-        Either (or even both) may be null pointers.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-        <dt><em>int</em> <code>field_idx</code>
-            <dd>Field index (0-based) of the field <code>dims</code> 
-                to retrieve.
-        <dt><em>size_t *</em> <code>dims</code>
-            <dd>Pointer to buffer to store the dimensions of the field.
-        <dt><em>int *</em> <code>perm</code>
-            <dd>Pointer to buffer to store the permutation vector of 
-                the field.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns the number of dimensions, a number from 0 to 4, 
-        if successful.
-        Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_dims_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
