@@ -1,6 +1,6 @@
 /*
- * Copyright © 1998 NCSA
- *                  All rights reserved.
+ * Copyright © 1998, 2001 National Center for Supercomputing Applications
+ *                        All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 23, 1998
@@ -8,6 +8,12 @@
  * Purpose:	A library for displaying the values of a dataset in a human
  *		readable format.
  */
+
+/*
+ * Portions of this work are derived from _Obfuscated C and Other Mysteries_,
+ * by Don Libes, copyright (c) 1993 by John Wiley & Sons, Inc.
+ */
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -20,15 +26,6 @@
 #include "h5dump.h"
 
 /* taken from h5dumputil.c */
-
-int indent;
-int compound_data;
-int nCols = 80;
-FILE *rawdatastream;	/* should initialize to stdout but gcc moans about it */
-
-static int h5tools_init_g = 0;	/* if h5tools lib has been initialized */
-
-int print_data(hid_t oid, hid_t _p_type, int obj_data);
 
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
@@ -50,21 +47,35 @@ int print_data(hid_t oid, hid_t _p_type, int obj_data);
  * largest value suitable for your machine (for testing use a small value).
  */
 #if 1
-#define H5DUMP_BUFSIZE		(1024 * 1024)
+#define H5DUMP_BUFSIZE          (1024 * 1024)
 #else
-#define H5DUMP_BUFSIZE		(1024)
+#define H5DUMP_BUFSIZE          (1024)
 #endif
 
-#define OPT(X,S)		((X) ? (X) : (S))
-#define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
+#define OPT(X,S)                ((X) ? (X) : (S))
+#define ALIGN(A,Z)              ((((A) + (Z) - 1) / (Z)) * (Z))
+
+#define START_OF_DATA           0x0001
+#define END_OF_DATA             0x0002
 
 /* Special strings embedded in the output */
-#define OPTIONAL_LINE_BREAK	"\001"
+#define OPTIONAL_LINE_BREAK     "\001"
 
 /* Variable length string datatype */
-#define STR_INIT_LEN		4096	/*initial length		*/
+#define STR_INIT_LEN            4096    /*initial length               */
+
+/* module-scoped variables */
+static int h5tools_init_g;      /* if h5tools lib has been initialized */
+
+int   indent;
+int   compound_data;
+int   nCols = 80;
+FILE *rawdatastream;	/* should initialize to stdout but gcc moans about it */
+
+/* ``get_option'' variables */
+int         opt_err = 1;    /*get_option prints errors if this is on */
+int         opt_ind = 1;    /*token pointer                          */
+const char *opt_arg;        /*flag argument (or value)               */
 
 typedef struct h5dump_str_t {
     char	*s;		/*allocate string		*/
@@ -94,6 +105,7 @@ typedef struct h5dump_context_t {
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 
+extern int print_data(hid_t oid, hid_t _p_type, int obj_data);
 extern void init_prefix(char **temp, int length);
 extern void init_table(table_t **table);
 extern void free_table(table_t **table);
@@ -104,6 +116,148 @@ extern int get_table_idx(table_t *table, unsigned long *);
 extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
 extern char *get_objectname(table_t*, int);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	get_option
+ *
+ * Purpose:	Determine the command-line options a user specified. We can
+ *		accept both short and long type command-lines.
+ *
+ * Return:	Success:	The short valued "name" of the command line
+ * 				parameter or EOF if there are no more
+ * 				parameters to process.
+ *
+ *		Failure:	A question mark.
+ *
+ * Programmer:	Bill Wendling
+ *              Friday, 5. January 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
+{
+    static int sp = 1;    /* character index in current token */
+    int opt_opt;          /* option character passed back to user */
+
+    if (sp == 1) {
+        /* check for more flag-like tokens */
+        if (opt_ind >= argc || argv[opt_ind][0] != '-' || argv[opt_ind][1] == '\0') {
+            return EOF;
+        } else if (strcmp(argv[opt_ind], "--") == 0) {
+            opt_ind++;
+            return EOF;
+        }
+    }
+
+    if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
+        /* long command line option */
+        const char *arg = &argv[opt_ind][2];
+        register int i;
+
+        for (i = 0; l_opts && l_opts[i].name; i++) {
+            int len = strlen(l_opts[i].name);
+
+            if (strncmp(arg, l_opts[i].name, len) == 0) {
+                /* we've found a matching long command line flag */
+                opt_opt = l_opts[i].shortval;
+
+                if (l_opts[i].has_arg != no_arg) {
+                    if (arg[len] == '=') {
+                        opt_arg = &arg[len + 1];
+                    } else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
+                        opt_arg = argv[++opt_ind];
+                    } else if (l_opts[i].has_arg == require_arg) {
+                        if (opt_err)
+                            fprintf(stderr,
+                                    "%s: option required for \"--%s\" flag\n",
+                                    argv[0], arg);
+
+                        opt_opt = '?';
+                    }
+                } else {
+                    if (arg[len] == '=') {
+                        if (opt_err)
+                            fprintf(stderr,
+                                    "%s: no option required for \"%s\" flag\n",
+                                    argv[0], arg);
+
+                        opt_opt = '?';
+                    }
+
+                    opt_arg = NULL;
+                }
+
+                break;
+            }
+        }
+
+        if (l_opts[i].name == NULL) {
+            /* exhausted all of the l_opts we have and still didn't match */
+            if (opt_err)
+                fprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
+
+            opt_opt = '?';
+        }
+
+        opt_ind++;
+        sp = 1;
+    } else {
+        register char *cp;    /* pointer into current token */
+
+        /* short command line option */
+        opt_opt = argv[opt_ind][sp];
+
+        if (opt_opt == ':' || (cp = strchr(opts, opt_opt)) == 0) {
+            if (opt_err)
+                fprintf(stderr, "%s: unknown option \"%c\"\n",
+                        argv[0], opt_opt);
+
+            /* if no chars left in this token, move to next token */
+            if (argv[opt_ind][++sp] == '\0') {
+                opt_ind++;
+                sp = 1;
+            }
+
+            return '?';
+        }
+
+        if (*++cp == ':') {
+            /* if a value is expected, get it */
+            if (argv[opt_ind][sp + 1] != '\0') {
+                /* flag value is rest of current token */
+                opt_arg = &argv[opt_ind++][sp + 1];
+            } else if (++opt_ind >= argc) {
+                if (opt_err)
+                    fprintf(stderr,
+                            "%s: value expected for option \"%c\"\n",
+                            argv[0], opt_opt);
+
+                opt_opt = '?';
+            } else {
+                /* flag value is next token */
+                opt_arg = argv[opt_ind++];
+            }
+
+            sp = 1;
+        } else {
+            /* set up to look at next char in token, next time */
+            if (argv[opt_ind][++sp] == '\0') {
+                /* no more in current token, so setup next token */
+                opt_ind++;
+                sp = 1;
+            }
+
+            opt_arg = NULL;
+        }
+    }
+
+    /* return the current flag character found */
+    return opt_opt;
+}
 
 /*-------------------------------------------------------------------------
  * Function:	h5tools_init

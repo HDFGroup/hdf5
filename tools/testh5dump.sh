@@ -73,19 +73,19 @@ TOOLTEST()
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups
-TOOLTEST tgroup-2.ddl -g /g2 / /y tgroup.h5
+TOOLTEST tgroup-2.ddl -g /g2 -g / -g /y tgroup.h5
 
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl tdset.h5
 # test for displaying selected datasets
-TOOLTEST tdset-2.ddl -header -d dset1 /dset2 dset3 tdset.h5
+TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
 # test for displaying attributes
 TOOLTEST tattr-1.ddl tattr.h5
 # test for displaying the selected attributes of string type and scalar space
-TOOLTEST tattr-2.ddl -a attr1 attr4 attr5 tattr.h5
+TOOLTEST tattr-2.ddl -a attr1 --attribute attr4 --attribute=attr5 tattr.h5
 # test for header and error messages
-TOOLTEST tattr-3.ddl -header -a attr2 attr tattr.h5
+TOOLTEST tattr-3.ddl --header -a attr2 --attribute=attr tattr.h5
 
 # test for displaying soft links
 TOOLTEST tslink-1.ddl tslink.h5
@@ -94,15 +94,15 @@ TOOLTEST tslink-2.ddl -l slink2 tslink.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ddl thlink.h5
-TOOLTEST thlink-2.ddl -d /g1/dset2 /dset1 /g1/g1.1/dset3 thlink.h5
-TOOLTEST thlink-3.ddl -d /g1/g1.1/dset3 /g1/dset2 /dset1 thlink.h5
+TOOLTEST thlink-2.ddl -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5
+TOOLTEST thlink-3.ddl -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5
 TOOLTEST thlink-4.ddl -g /g1 thlink.h5
 TOOLTEST thlink-5.ddl -d /dset1 -g /g2 -d /g1/dset2 thlink.h5
 
 # tests for compound data types
 TOOLTEST tcomp-1.ddl tcompound.h5
 # test for named data types
-TOOLTEST tcomp-2.ddl -t /type1 /type2 /group1/type3 tcompound.h5
+TOOLTEST tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
 TOOLTEST tcomp-3.ddl -t /#5992:0 -g /group2 tcompound.h5
 
@@ -111,7 +111,7 @@ TOOLTEST tnestcomp-1.ddl tnestedcomp.h5
 
 # test for options
 TOOLTEST tall-1.ddl tall.h5
-TOOLTEST tall-2.ddl -header -g /g1/g1.1 -a attr2 tall.h5
+TOOLTEST tall-2.ddl --header -g /g1/g1.1 -a attr2 tall.h5
 TOOLTEST tall-3.ddl -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
 
 # test for loop detection

@@ -1,26 +1,28 @@
 /*
- * Copyright © 1998 NCSA
- *                  All rights reserved.
+ * Copyright © 1998, 1999, 2000, 2001
+ *        National Center for Supercomputing Applications
+ *        All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 23, 1998
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef _H5TOOLS_H
-#define _H5TOOLS_H
+#ifndef H5TOOLS_H_
+#define H5TOOLS_H_
 
 #include <hdf5.h>
 #include <stdio.h>
-#if H5_VERS_MAJOR == 1
-#if H5_VERS_MINOR == 2
-#define VERSION12
-#elif H5_VERS_MINOR == 3
-#define VERSION13
-#endif
-#endif 
-#define ESCAPE_HTML     1
 
+#if H5_VERS_MAJOR == 1
+#  if H5_VERS_MINOR == 2
+#    define VERSION12
+#  elif H5_VERS_MINOR == 3
+#    define VERSION13
+#  endif	/* H5_VERS_MINOR == 2 */
+#endif	/* H5_VERS_MAJOR = 1 */
+
+#define ESCAPE_HTML     1
 
 /*
  * Information about how to format output.
@@ -366,22 +368,74 @@ typedef struct dump_header{
 
 } dump_header;
 
-hid_t h5dump_fixtype(hid_t f_type);
-int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,
-                int indentlevel);
-int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
-                hid_t space, void *mem, int indentlevel);
-hid_t h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
+/*
+ * begin get_option section
+ */
+extern int         opt_err;     /* getoption prints errors if this is on    */
+extern int         opt_ind;     /* token pointer                            */
+extern const char *opt_arg;     /* flag argument (or value)                 */
+
+enum {
+    no_arg = 0,         /* doesn't take an argument     */
+    require_arg,        /* requires an argument	        */
+    optional_arg        /* argument is optional         */
+};
+
+/*
+ * get_option determines which options are specified on the command line and
+ * returns a pointer to any arguments possibly associated with the option in
+ * the ``opt_arg'' variable. get_option returns the shortname equivalent of
+ * the option. The long options are specified in the following way:
+ *
+ * struct long_options[] = {
+ * 	{ "filename", require_arg, 'f' },
+ * 	{ "append", no_arg, 'a' },
+ * 	{ "width", require_arg, 'w' },
+ * 	{ NULL, 0, 0 }
+ * };
+ *
+ * Long named options can have arguments specified as either:
+ *
+ * 	``--param=arg'' or ``--param arg''
+ *
+ * Short named options can have arguments specified as either:
+ *
+ * 	``-w80'' or ``-w 80''
+ *
+ * and can have more than one short named option specified at one time:
+ *
+ * 	-aw80
+ * 
+ * in which case those options which expect an argument need to come at the
+ * end.
+ */
+typedef struct long_options {
+    const char  *name;          /* name of the long option		*/
+    int          has_arg;       /* whether we should look for an arg	*/
+    char         shortval;      /* the shortname equivalent of long arg
+                                 * this gets returned from get_option   */
+} long_options;
+
+extern int    get_option(int argc, const char **argv, const char *opt,
+                         const struct long_options *l_opt);
+/*
+ * end get_option section
+ */
+
+extern hid_t  h5dump_fixtype(hid_t f_type);
+extern int    h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+		          hid_t p_typ, int indentlevel);
+extern int    h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
+		         hid_t type, hid_t space, void *mem, int indentlevel);
+extern hid_t  h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
 
 
 /*if we get a new program that needs to use the library add its name here*/
 typedef enum {
-    UNKNOWN,
+    UNKNOWN = 0,
     H5LS,
     H5DUMP
 } ProgType;
-
-
 
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
@@ -392,15 +446,12 @@ typedef struct obj_t {
     int objflag;
 } obj_t;
 
-
 /*struct for the tables that the find_objs function uses*/
 typedef struct table_t {
     int size;
     int nobjs;
     obj_t *objs;
 } table_t;
-
-
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
@@ -413,22 +464,22 @@ typedef struct find_objs_t {
     int status;
 } find_objs_t;
 
-herr_t find_objs(hid_t group, const char *name, void *op_data);
-int search_obj (table_t *temp, unsigned long *);
-void init_table(table_t **temp);
-void init_prefix(char **temp, int);
+extern herr_t  find_objs(hid_t group, const char *name, void *op_data);
+extern int     search_obj (table_t *temp, unsigned long *);
+extern void    init_table(table_t **temp);
+extern void    init_prefix(char **temp, int);
 
 /* taken from h5dump.h */
-#define ATTRIBUTE_DATA 0
+#define ATTRIBUTE_DATA  0
 #define DATASET_DATA    1
-#define ENUM_DATA 2
+#define ENUM_DATA       2
 
-#define COL 3
-extern int indent;
-extern void indentation(int);
-extern int nCols;
-extern FILE *rawdatastream;             /* output stream for raw data */
+#define COL             3
 
+extern int     indent;
+extern void    indentation(int);
+extern int     nCols;
+extern FILE   *rawdatastream;		/* output stream for raw data */
 
 /* taken from h5dump.h*/
 #define BOOT_BLOCK      "BOOT_BLOCK"
@@ -460,8 +511,8 @@ extern FILE *rawdatastream;             /* output stream for raw data */
 #define END             "}"
 
 /* Definitions of useful routines */
-void print_version(const char *program_name);
-void h5tools_init(void);
-void h5tools_close(void);
+extern void    print_version(const char *program_name);
+extern void    h5tools_init(void);
+extern void    h5tools_close(void);
 
-#endif
+#endif	/* H5TOOLS_H_ */
