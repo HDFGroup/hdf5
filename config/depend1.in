@@ -20,14 +20,14 @@
 ## otherwise the file is changed and a backup is saved by appending a
 ## tilde to the file name.
 ##
-.PRECIOUS: $(srcdir)/Dependencies
-$(srcdir)/Dependencies: .depend
+.PRECIOUS: Dependencies
+Dependencies: .depend
 	@if test "$(srcdir)" != "."; then				      \
 	    echo '## This file is machine generated on GNU systems.'          \
 		>$@;							      \
 	    echo '## Only temporary changes may be made here.' 		      \
 		>>$@;							      \
-	    echo >>$(srcdir)/Dependencies;				      \
+	    echo >>$@;					      \
 	    perl -p $(top_srcdir)/bin/distdep .depend >>$@;		      \
 	fi
 
@@ -49,11 +49,11 @@ $(srcdir)/Dependencies: .depend
 	done;
 	@if test "$(srcdir)" != "."; then				      \
 	    echo '## This file is machine generated on GNU systems.'          \
-		>$(srcdir)/Dependencies;				      \
+		>Dependencies;				      \
 	    echo '## Only temporary changes may be made here.' 		      \
-		>>$(srcdir)/Dependencies;				      \
-	    echo >>$(srcdir)/Dependencies;				      \
-	    perl -p $(top_srcdir)/bin/distdep .depend>>$(srcdir)/Dependencies;\
+		>>Dependencies;				      \
+	    echo >>Dependencies;				      \
+	    perl -p $(top_srcdir)/bin/distdep .depend>>Dependencies;\
 	fi
 
 -include .depend

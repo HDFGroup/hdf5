@@ -173,6 +173,6 @@ maintainer-clean: distclean
 ## source files and the header files.
 ##-----------------------------------------------------------------------------
 .PHONY: dep depend
-dep depend: $(srcdir)/Dependencies
+dep depend: Dependencies
 
 @DEPEND@
