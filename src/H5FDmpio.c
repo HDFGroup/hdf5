@@ -907,7 +907,6 @@ H5FD_mpio_close(H5FD_t *_file)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
-    assert(file->eoa>0);
 
 #ifdef H5_MPI_FILE_SET_SIZE_BIG
     /* Check if we should truncate the file */
@@ -915,6 +914,7 @@ H5FD_mpio_close(H5FD_t *_file)
         MPI_Offset 	mpi_off;        /* Offset to write test data at */
 
         /* Some numeric conversions */
+        assert(file->eoa>0);
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
 
