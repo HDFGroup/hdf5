@@ -2477,10 +2477,12 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 herr_t
 H5F_close(H5F_t *f)
 {
-    unsigned		i;
-    unsigned		oid_count;
-    hid_t		*oid_list;
-    H5F_close_degree_t	fc_degree;
+    H5F_close_degree_t	fc_degree;      /* What action to take when closing the last file ID for a file */
+    hid_t		*oid_list;      /* List of IDs still open */
+    unsigned		oid_count;      /* Number of IDs still open */
+    unsigned		i;              /* Local index variable */
+    unsigned	        closing=0;      /* Indicate that the file will be closed */
+    herr_t	        ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER(H5F_close, FAIL);
     assert(f->nrefs>0);
@@ -2490,13 +2492,14 @@ H5F_close(H5F_t *f)
      * count, flush the file, and return.
      */
     if (f->nrefs>1) {
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE, FALSE)<0) {
-	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-			  "unable to flush cache");
-	}
-	H5F_dest(f); /*decrement reference counts*/
-	HRETURN(SUCCEED);
-    }
+	/* Decrement reference counts */
+        if (H5F_dest(f)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
+	HGOTO_DONE(SUCCEED);
+    } /* end if */
+
+    /* Double-check that this file should be closed */
+    assert(1==f->nrefs);
     
     /*
      * Unmount and close each child before closing the current file.
@@ -2506,135 +2509,135 @@ H5F_close(H5F_t *f)
 	f->mtab.child[i].file->mtab.parent = NULL;
 	H5G_close(f->mtab.child[i].group);
 	H5F_close(f->mtab.child[i].file);
-    }
+    } /* end if */
     f->mtab.nmounts = 0;
 
-    /*
-     * If this is the last reference to the shared part of the file then
-     * close it also.
-     */
-    assert(1==f->nrefs);
+    /* Only attempt to close the file if this is the last shared file */
     if (1==f->shared->nrefs) {
-	/* Flush and destroy all caches */
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0) {
-	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-			  "unable to flush cache");
-	}
 
-	/* Get the number of opened object in file */
-        if(H5F_get_obj_count(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE,
-	    &oid_count) < 0)
-            HRETURN_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file counts");
+        /* Get the number of opened object in file */
+        if(H5F_get_obj_count(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE, &oid_count) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file counts");
 
-	/* Get the close degree from the file */
+        /* Get the close degree from the file */
         if(f->shared->fc_degree == H5F_CLOSE_DEFAULT)
-	    fc_degree = f->shared->lf->cls->fc_degree;
-	else
-	    fc_degree = f->shared->fc_degree;
+            fc_degree = f->shared->lf->cls->fc_degree;
+        else
+            fc_degree = f->shared->fc_degree;
 
-	/* Close file according to close degree.
-	 * H5F_CLOSE_WEAK:	if there are still objects open, wait until
-	 *			they are all closed.
-	 * H5F_CLOSE_SEMI:	if there are still objects open, return fail;
-	 *			otherwise, close file.
-	 * H5F_CLOSE_STRONG:	if there are still objects open, close them
-	 *			first, then close file. 
-	 */ 
+        /* Close file according to close degree:
+         *  H5F_CLOSE_WEAK:	if there are still objects open, wait until
+         *			they are all closed.
+         *  H5F_CLOSE_SEMI:	if there are still objects open, return fail;
+         *			otherwise, close file.
+         *  H5F_CLOSE_STRONG:	if there are still objects open, close them
+         *			first, then close file. 
+         */ 
         switch(fc_degree) {
-	    case H5F_CLOSE_WEAK:
-	   	/*
-		 * If object headers are still open then delay deletion of 
-		 * resources until they have all been closed.  Flush all 
-		 * caches and update the object eader anyway so that failing toi
-		 * close all objects isn't a major problem. If the file is on 
-		 * the H5I_FILE list then move it to the H5I_FILE_CLOSING list 
-		 * instead.
-		 */ 
-		if (f->nopen_objs>0) {
-		    if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE, FALSE)<0) 
-            		HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-                        		"unable to flush cache");
+            case H5F_CLOSE_WEAK:
+                /*
+                 * If object headers are still open then delay deletion of 
+                 * resources until they have all been closed.  Flush all 
+                 * caches and update the object eader anyway so that failing toi
+                 * close all objects isn't a major problem. If the file is on 
+                 * the H5I_FILE list then move it to the H5I_FILE_CLOSING list 
+                 * instead.
+                 */ 
+                if (f->nopen_objs>0) {
 #ifdef H5F_DEBUG
-        	    if (H5DEBUG(F)) {
-            	    	fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
-                    	"open (file close will complete when %s closed)\n",
-                    	f->name,
-                    	f->nopen_objs,
-                    	1 == f->nopen_objs?" is":"s are",
-                    	1 == f->nopen_objs?"that header is":"those headers are");
-        	    }
+                    if (H5DEBUG(F)) {
+                        fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
+                        "open (file close will complete when %s closed)\n",
+                        f->name,
+                        f->nopen_objs,
+                        1 == f->nopen_objs?" is":"s are",
+                        1 == f->nopen_objs?"that header is":"those headers are");
+                    }
 #endif
-	            if (!f->closing) {
-            		f->closing  = H5I_register(H5I_FILE_CLOSING, f);
-        	    }
-        	    HRETURN(SUCCEED);
-    		} else if (f->closing) {
-#ifdef H5F_DEBUG
-        	    if (H5DEBUG(F)) {
-            	        fprintf(H5DEBUG(F), "H5F: H5F_close: operation completing\n");
-        	    }
-#endif
-    		}
+                    /* Register an ID for closing the file later */
+                    if (!f->closing)
+                        f->closing  = H5I_register(H5I_FILE_CLOSING, f);
+                    HGOTO_DONE(SUCCEED);
+                } else {
+                    if (f->closing) {
 
-		break;
-	    case H5F_CLOSE_SEMI:
-		if(oid_count > 0)
-                    HRETURN_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, 
-                    "can't close file, there are objects still open");
-		break;
-	    case H5F_CLOSE_STRONG:
-		/*forcefully close all opened objects in file*/
-		do {
-		    oid_list = (hid_t*)H5MM_malloc(oid_count*sizeof(hid_t));
-		    if(H5F_get_obj_ids(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-					H5F_OBJ_DATATYPE, oid_list) < 0)
-            		HRETURN_ERROR(H5E_FILE, H5E_CANTGET, FAIL, 
-                                      "can't get object list in file");
+#ifdef H5F_DEBUG
+                        if (H5DEBUG(F)) {
+                            fprintf(H5DEBUG(F), "H5F: H5F_close: operation completing\n");
+                        }
+#endif
+                    } /* end if */
+
+                    /* Indicate that the file will be closing */
+                    closing=1;
+                } /* end else */
+                break;
+
+            case H5F_CLOSE_SEMI:
+                /* Check if we are allowed to close this file handle */
+                if(oid_count > 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open");
+
+                /* Indicate that the file will be closing */
+                closing=1;
+                break;
+
+            case H5F_CLOSE_STRONG:
+                /* Forcefully close all opened objects in file */
+                do {
+                    /* Allocate space for the IDs of objects still currently open */
+                    if((oid_list = H5MM_malloc(oid_count*sizeof(hid_t)))==NULL)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+                    /* Get the list of IDs of open objects */
+                    if(H5F_get_obj_ids(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE, oid_list) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object list in file");
                    
-		    /* Try to close all the open objects */
+                    /* Try to close all the open objects */
                     for(i=0; i<oid_count; i++)
-		    	if(H5I_dec_ref(oid_list[i]) < 0)
-			    HRETURN_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL,
-                            			"can't close object");
+                        if(H5I_dec_ref(oid_list[i]) < 0)
+                            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
 
-		    if(oid_list != NULL)
-			H5MM_xfree(oid_list);
-		    if(H5F_get_obj_count(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-					H5F_OBJ_DATATYPE, &oid_count) < 0)
-		    	HRETURN_ERROR(H5E_FILE, H5E_CANTGET, FAIL, 
-		    			"can't get file counts");
-		} while(oid_count > 0);
-		break;
-	    default:
-		HRETURN_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
-                    "can't close file, unknown file close degree"); 	
-	}
+                    /* Free the ID list */
+                    if(oid_list != NULL)
+                        H5MM_xfree(oid_list);
 
+                    /* Get the revised object count */
+                    if(H5F_get_obj_count(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE, &oid_count) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file counts");
+                } while(oid_count > 0);
+
+                /* Indicate that the file will be closing */
+                closing=1;
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, unknown file close degree"); 	
+        } /* end switch */
+    } /* end if */
+
+    /* Only flush at this point if the file will be closed */
+    if(closing) {
 	/* Dump debugging info */
 	H5AC_debug(f);
 	H5F_istore_stats(f, FALSE);
-    } else {
-	/*
-	 * Flush all caches but do not destroy. As long as all handles for
-	 * this file are closed the flush isn't really necessary, but lets
-	 * just be safe.
-	 */
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0) {
-	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
-			  "unable to flush cache");
-	}
-    }
+
+	/* Flush and destroy all caches */
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
+    } /* end if */
 
     /*
      * Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if (H5F_dest(f)<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file");
-    }
-    FUNC_LEAVE(SUCCEED);
-}
+    if (H5F_dest(f)<0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5F_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -2667,17 +2670,15 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (H5I_FILE != H5I_get_type(file_id) || NULL==H5I_object(file_id)) {
+    if (H5I_FILE != H5I_get_type(file_id) || NULL==H5I_object(file_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
-    }
 
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if (H5I_dec_ref (file_id)<0) {
+    if (H5I_dec_ref (file_id)<0)
 	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
-    }
     
 done:
     FUNC_LEAVE(ret_value < 0 ? FAIL : SUCCEED);
