@@ -201,6 +201,7 @@
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
 ./src/H5.c
+./src/H5api_adpt.h
 ./src/H5A.c
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
@@ -417,4 +418,7 @@
 ./tools/testfiles/tslink.dmp
 ./tools/testfiles/tslink.h5
 ./tools/testfiles/tstr-1.ddl
+./tools/testfiles/tstr.dmp
 ./tools/testfiles/tstr.h5
+./tools/testfiles/tstr2.dmp
+./tools/testfiles/tstr2.h5
