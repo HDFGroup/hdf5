@@ -25,7 +25,7 @@ typedef unsigned int mode_t;
 #ifndef S_ISDIR
 #define S_ISDIR(mode)  (((mode)&0xF000) == S_IFDIR)
 #endif
-extern int PrintOptions_h5toh4(void);
+extern void PrintOptions_h5toh4(void);
 extern char *BuildFilename(char *h5_filename, char *h4_extension);
 extern int test_file(char *filename, int oflag, mode_t mode);
 extern int test_dir(char *);
@@ -76,9 +76,8 @@ static table_t *group_table, *dset_table, *type_table;
 *****************************************************************************/
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
-	char **fargv;
 	char *h5_filename=NULL;
 	char *h4_filename=NULL;
 	char *h4_extension;
@@ -95,19 +94,20 @@ main(int argc, char **argv)
 		return -1;
 	}
 
-	fargv = argv;
-	while ( *fargv != NULL ) {
-		if ( HDstrcmp(*fargv,"-h") == 0 ) {
+	/* take care -h (help) option first */
+	{   int i;
+	    for (i=0; i < argc; i++)
+		if ( HDstrcmp(argv[i],"-h") == 0 ) {
 			PrintOptions_h5toh4();
-			return -1;
+			return 0;
 		}
-		fargv++;
 	}
 
-	fargv = argv;
+	/*fargv = argv; */
 
-	if (argc == 2 && HDstrcmp(*fargv,"-m") == 0) {
-		fargv++;
+	/* Change -m with 1 filename to as 1 filename case */
+	if (argc == 2 && HDstrcmp(argv[0],"-m") == 0) {
+		argv++;
 		argc--;
 	}
 
@@ -119,7 +119,7 @@ main(int argc, char **argv)
 		break;
 
 	case 1:	/* h5toh4 file1 */
-		h5_filename = *fargv;
+		h5_filename = argv[0];
 
 		if (HDstrcmp(h5_filename,"-m") == 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
@@ -165,8 +165,8 @@ main(int argc, char **argv)
 		break;
 
 	case 2:	/* h5toh4 file_in file_out */
-		h5_filename = *fargv++;
-		h4_filename = *fargv++;
+		h5_filename = argv[0];
+		h4_filename = argv[1];
 
 		if (HDstrcmp(h4_filename,"-m") == 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
@@ -204,14 +204,19 @@ main(int argc, char **argv)
 		break;
 
 	default:	/* h5toh4 -m file1 file2 file3 ... */
-		if (HDstrcmp(*fargv++,"-m") != 0) {
+		if (HDstrcmp(argv[0],"-m") != 0) {
 			fprintf(stderr,"\nError: Invalid Arguments\n");
 			PrintOptions_h5toh4();
 			status = -1;
 			break;
 		}
+		argv++;
+		argc--;
 
-		while ( (h5_filename = *fargv++) != NULL ) {
+		while ( argc > 0 ) {
+			h5_filename = argv[0];
+			argv++;
+			argc--;
 
 			if (HDstrcmp(h5_filename,"-m") == 0) {
 				fprintf(stderr,"\nError: Invalid Arguments\n");
@@ -278,13 +283,12 @@ main(int argc, char **argv)
 
 *****************************************************************************/
 
-int PrintOptions_h5toh4(void)
+void PrintOptions_h5toh4(void)
 {
 		fprintf(stderr,"\nh5toh4 -h (gives this print-out)\n");
 		fprintf(stderr,"h5toh4 file.h5 file.hdf\n");
 		fprintf(stderr,"h5toh4 file.h5\n");
 		fprintf(stderr,"h5toh4 -m file1.h5 file2.h5 ...\n\n");
-		return (SUCCEED);
 }
 
 
