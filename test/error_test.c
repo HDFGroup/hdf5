@@ -286,6 +286,95 @@ error_stack(void)
     return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    long_desc_cb
+ *
+ * Purpose:	Callback function to help test long description handling
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *		January 19, 2005
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+long_desc_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
+{
+    char		*real_desc  = (char *)client_data;
+
+    if(err_desc->desc!=NULL && HDstrcmp(err_desc->desc,real_desc)==0)
+        return(0);
+    else
+        return(-1);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_long_desc
+ *
+ * Purpose:	Test long error description handling
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *		January 19, 2005
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+test_long_desc(void)
+{
+    char                *format="Testing very long description string, %s";
+    char                *long_desc;
+    char                *full_desc;
+    size_t              u;
+    const char          *test_FUNC="test_long_desc";
+
+    /* Allocate space for the error description info */
+    if((long_desc=HDmalloc(LONG_DESC_SIZE))==NULL) TEST_ERROR;
+    if((full_desc=HDmalloc(LONG_DESC_SIZE+128))==NULL) TEST_ERROR;
+
+    /* Create the long part of the error description */
+    for(u=0; u<LONG_DESC_SIZE; u++)
+        long_desc[u]='A'+(u%26);
+    long_desc[LONG_DESC_SIZE-1]='\0';
+
+    /* Clear the default error stack */
+    if(H5Eclear_stack(H5E_DEFAULT)<0) TEST_ERROR;
+
+    /* Push an error with a long description */
+    if(H5Epush_stack(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc)<0) TEST_ERROR;
+
+    /* Create the string that should be in the description */
+    HDsnprintf(full_desc,LONG_DESC_SIZE+128,format,long_desc);
+
+    /* Make certain that the description is correct */
+    if(H5Ewalk_stack(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc)<0) TEST_ERROR;
+
+    /* Clear the default error stack again */
+    if(H5Eclear_stack(H5E_DEFAULT)<0) TEST_ERROR;
+
+    HDfree(long_desc);
+    HDfree(full_desc);
+    return(0);
+
+error:
+    if(long_desc) HDfree(long_desc);
+    if(full_desc) HDfree(full_desc);
+    return(-1);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error	
@@ -431,8 +520,6 @@ main(void)
     hid_t		file, fapl;
     hid_t               estack_id;
     char		filename[1024];
-    char                *long_desc;
-    size_t              u;
     const char          *FUNC_main="main";
 
     fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
@@ -476,15 +563,7 @@ main(void)
     }
 
     /* Test pushing a very long error description */
-    if((long_desc=HDmalloc(LONG_DESC_SIZE))==NULL) TEST_ERROR;
-
-    for(u=0; u<LONG_DESC_SIZE; u++)
-        long_desc[u]='A'+(u%26);
-    long_desc[LONG_DESC_SIZE-1]='\0';
-    if(H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
-            "Testing very long description string, %s", long_desc)<0) TEST_ERROR;
-    if(H5Eprint_stack(H5P_DEFAULT, stderr)<0) TEST_ERROR;
-    HDfree(long_desc);
+    if(test_long_desc()<0) TEST_ERROR;
     
     if (H5Fclose(file)<0) TEST_ERROR ;
     h5_cleanup(FILENAME, fapl);
