@@ -34,6 +34,8 @@ TEST_SRC=dsets.cpp testhdf5.cpp tfile.cpp th5s.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 TEST_PROGS=dsets testhdf5
 
+TESTHDF5_OBJ=testhdf5.lo tfile.lo th5s.lo
+
 TEST_SCRIPTS=
 
 DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
@@ -41,7 +43,7 @@ DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
 testhdf5: $(TEST_OBJ)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ testhdf5.lo tfile.lo th5s.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 dsets: dsets.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.lo $(hdf5_builddir)/../test/h5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
