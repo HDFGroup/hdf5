@@ -831,6 +831,7 @@
 ./release_docs/RELEASE.txt
 
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
+./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
 ./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
