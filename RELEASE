@@ -90,6 +90,7 @@ Platforms tested
   AIX 4.3.2.0			xlc 5.0.1.0
   Cray T3E 2.0.5.29             cc 6.3.0.2
                                 mpt.1.3
+  Cray J90 10.0.0.7             cc 6.3.0.2
   FreeBSD 4.0                   gcc 2.95.2
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32
   HP-UX B.11.00                 HP92453-01 A.11.00.13 HP C Compiler 
