@@ -61,7 +61,8 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr><!-- #EndLibraryItem --><center>
+<hr>
+<!-- #EndLibraryItem --><center>
 <h1>H5P: Property List Interface</h1>
 </center>
 <h2>Property List API Functions</h2>
@@ -411,16 +412,9 @@ See further notes in the description of each function.
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font><br>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -617,10 +611,17 @@ facilitate moving easily between them.</i>
     <dd>Returns <code>TRUE</code> if all filters are available
         and <code>FALSE</code> if one or more is not currently available.<br>
         Returns <code>FAIL</code>, a  negative value, on error.
-<!--<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pall_filters_avail_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -649,10 +650,20 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5pclose_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -690,13 +701,24 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pclose_class_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pclose_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pclose_class_f(class, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: class ! Property list class identifier 
+                                      ! to close
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                      ! 0 on success and -1 on failure
+END SUBROUTINE h5pclose_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -734,13 +756,23 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pclose_list_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pclose_list_f
+    <dd>
+	<pre>
+SUBROUTINE h5pclose_list_f(plist, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist  ! Property list identifier to close
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pclose_list_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -766,10 +798,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcopy_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pcopy_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_prp_id  ! Identifier  of property list
+                                             ! copy  
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pcopy_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -834,13 +878,26 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcopy_prop_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pcopy_prop_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
+                                        ! identifier 
+  INTEGER(HID_T), INTENT(IN) :: src_id  ! Source property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Property name
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pcopy_prop_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -896,10 +953,28 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
         otherwise Fail (-1).
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcreate_f(classtype, prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: classtype       ! The type of the property list 
+                                         ! to be created 
+                                         ! Possible values are: 
+                                         !    H5P_FILE_CREATE_F 
+                                         !    H5P_FILE_ACCESS_F
+                                         !    H5P_DATASET_CREATE_F
+                                         !    H5P_DATASET_XFER_F 
+                                         !    H5P_MOUNT_F 
+  INTEGER(HID_T), INTENT(OUT) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1032,13 +1107,33 @@ facilitate moving easily between them.</i>
     <dd>Success: a valid property list class identifier
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcreate_class_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pcreate_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: parent  ! Parent property list class 
+                                        ! identifier
+                                        ! Possible values include:
+                                        !    H5P_NO_CLASS_F
+                                        !    H5P_FILE_CREATE_F
+                                        !    H5P_FILE_ACCESS_F
+                                        !    H5P_DATASET_CREATE_F
+                                        !    H5P_DATASET_XFER_F
+                                        !    H5P_MOUNT_F
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property tocreate 
+  INTEGER(HID_T), INTENT(OUT) :: class  ! Property list class identifier
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pcreate_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1074,15 +1169,20 @@ facilitate moving easily between them.</i>
     <dd>Success: a valid property list identifier
     <dd>Failure: a negative value
 
-  <!--
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1123,13 +1223,27 @@ facilitate moving easily between them.</i>
     <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pequal_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pequal_f
+    <dd>
+	<pre>
+SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier
+  INTEGER(HID_T), INTENT(IN) :: plist2_id ! Property list identifier
+  LOGICAL, INTENET(OUT)      :: flag      ! Flag
+                                          !    .TRUE. if lists are equal 
+                                          !    .FALSE. otherwise 
+  INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pequal_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1167,13 +1281,27 @@ facilitate moving easily between them.</i>
         property object; zero if the property does not exist
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pexist_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pexist_f
+    <dd>
+	<pre>
+SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+  LOGICAL, INTENT(OUT) :: flag          ! Logical flag
+                                        !    .TRUE. if exists 
+                                        !    .FALSE. otherwise
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pexist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1223,10 +1351,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pfill_value_defined_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1286,13 +1421,30 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pget_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_f(plid, name, value, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid    ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to get
+  TYPE,  INTENT(OUT) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1325,10 +1477,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_alignment_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_alignment_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id        ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: threshold  ! Threshold value
+  INTEGER(HSIZE_T), INTENT(OUT) :: alignment  ! Alignment value
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_alignment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1379,7 +1543,6 @@ facilitate moving easily between them.</i>
         with the dataset fill value and fill value write time properties, 
 	set with the functions 
 	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
-	<p>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -1390,10 +1553,28 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_alloc_time_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_alloc_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id   ! Dataset creation
+                                           ! property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: flag    ! Allocation time flag
+                                           ! Possible values are:
+                                           !    H5D_ALLOC_TIME_ERROR_F
+                                           !    H5D_ALLOC_TIME_DEFAULT_F
+                                           !    H5D_ALLOC_TIME_EARLY_F
+                                           !    H5D_ALLOC_TIME_LATE_F
+                                           !    H5D_ALLOC_TIME_INCR_F
+  INTEGER, INTENT(OUT)       :: hdferr     ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_alloc_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1433,10 +1614,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_btree_ratios_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_btree_ratios_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  
+                                  ! Property list identifier
+  REAL, INTENT(OUT) :: left       ! B-tree split ratio for left-most nodes
+  REAL, INTENT(OUT) :: middle     ! B-tree split ratio for all other nodes
+  REAL, INTENT(OUT) :: right      ! The B-tree split ratio for right-most
+                                  ! nodes and lone nodes.
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                  ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_btree_ratios_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1471,10 +1667,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns buffer size, in bytes, if successful;
         otherwise 0 on failure.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_buffer_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_buffer_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: plist_id ! Dataset trasfer 
+                                            ! property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size     ! Conversion buffer size
+  INTEGER, INTENT(OUT)          :: hdferr   ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_buffer_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1518,10 +1726,28 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_cache_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_cache_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
+                          rdcc_w0, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+  INTEGER, INTENT(OUT) :: mdc_nelmts           ! Number of elements (objects)
+                                               ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts  ! Number of elements (objects)
+                                               ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes  ! Total size of the raw data
+                                               ! chunk cache, in bytes
+  REAL, INTENT(OUT) :: rdcc_w0                 ! Preemption policy
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_cache_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1558,10 +1784,26 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns chunk dimensionality successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_chunk_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_chunk_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(IN) :: ndims          ! Number of chunk dimensions 
+                                        ! to return
+  INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(OUT) :: dims    
+                                        ! Array containing sizes of
+                                        ! chunk dimensions
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! chunk rank on success 
+                                        ! and -1 on failure
+END SUBROUTINE h5pget_chunk_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1590,10 +1832,29 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list class if successful.
         Otherwise returns H5P_NO_CLASS (-1).
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_class_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+  INTEGER, INTENT(OUT) :: classtype    ! The type of the property list 
+                                       ! to be created 
+                                       ! Possible values are: 
+                                       !    H5P_NO_CLASS  
+                                       !    H5P_FILE_CREATE_F 
+                                       !    H5P_FILE_ACCESS_F 
+                                       !    H5PE_DATASET_CREATE_F 
+                                       !    H5P_DATASET_XFER_F
+                                       !    H5P_MOUNT_F 
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1629,13 +1890,31 @@ facilitate moving easily between them.</i>
     <dd>Success: a pointer to an allocated string containing the class name
     <dd>Failure: NULL
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_class_name_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pget_class_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_class_name_f(prp_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier to
+                                           ! query 
+  CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retireve class name
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code, possible values:
+                                           ! Success:  Actual lenght of the 
+                                           ! class name
+                                           ! If provided buffer "name" is 
+                                           ! smaller, than name will be 
+                                           ! truncated to fit into
+                                           ! provided user buffer
+                                           ! Failure: -1   
+END SUBROUTINE h5pget_class_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1667,13 +1946,25 @@ facilitate moving easily between them.</i>
     <dd>Success: a valid parent class object identifier
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_class_parent_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pget_class_parent_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
+  INTEGER(HID_T), INTENT(OUT) :: parent_id ! Parent class property list 
+                                           ! identifier
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_class_parent_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1719,10 +2010,21 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid low-level driver identifier if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_driver_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_driver_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: driver       ! Low-level file driver identifier
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_driver_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1805,10 +2107,24 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_dxpl_mpio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_dxpl_mpio_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
+  INTEGER, INTENT(OUT) :: data_xfer_mode  ! Data transfer mode
+                                          ! Possible values are:
+                                          !    H5FD_MPIO_INDEPENDENT_F
+                                          !    H5FD_MPIO_COLLECTIVE_F
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_dxpl_mpio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1841,12 +2157,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1874,10 +2195,24 @@ facilitate moving easily between them.</i>
     <dd>Returns <code>H5P_ENABLE_EDC</code> or <code>H5P_DISABLE_EDC</code> 
         if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_edc_check_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_edc_check_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_edc_check_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Dataset transfer property list 
+                                        ! identifier 
+  INTEGER, INTENT(OUT)       :: flag    ! EDC flag; possible values
+                                        !    H5Z_DISABLE_EDC_F 
+                                        !    H5Z_ENABLE_EDC_F 
+  INTEGER, INTENT(OUT)       :: hdferr  ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_edc_check_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1931,10 +2266,29 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_external_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_external_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
+  INTEGER, INTENT(IN) :: idx             ! External file index.
+  INTEGER, INTENT(IN) :: name_size       ! Maximum length of name array
+  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of an external file
+  INTEGER, INTENT(OUT) :: offset         ! Offset, in bytes, from the 
+                                         ! beginning of the file to the 
+                                         ! location in the file where
+                                         ! the data starts.
+  INTEGER(HSIZE_T), INTENT(OUT) :: bytes ! Number of bytes reserved in 
+                                         ! the file for the data
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_external_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1961,10 +2315,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of external files if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_external_count_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_external_count_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: count        ! Number of external files for 
+                                       ! the specified dataset
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_external_count_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2009,12 +2375,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2049,10 +2420,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_core_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_core_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: prp_id     ! Property list identifier
+  INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes
+  LOGICAL, INTENT(OUT) :: backing_store     ! Flag to indicate that entire
+                                            ! file contents are flushed to 
+                                            ! a file with the same name as 
+                                            ! this core file
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_core_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2088,10 +2474,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_family_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_family_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_family_f(prp_id, imemb_size, memb_plist, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: prp_id    ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: memb_size ! Logical size, in bytes,
+                                             ! of each family member
+  INTEGER(HID_T), INTENT(OUT) :: memb_plist  ! Identifier of the file 
+                                             ! access property list to be
+                                             ! used for each family member
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_family_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2133,12 +2534,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2178,10 +2584,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_mpio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpio_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: comm         ! Buffer to return communicator 
+  INTEGER, INTENT(IN) :: info          ! Buffer to return info object as
+                                       ! defined in MPI_FILE_OPEN of MPI-2
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_mpio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2217,11 +2636,21 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_mpiposix_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT) :: comm          ! Buffer to return communicator
+  LOGICAL, INTENT(OUT) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5pget_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2265,10 +2694,30 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_multi_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_multi_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+                               memb_addr, relax, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)   :: prp_id    ! Property list identifier
+
+  INTEGER,DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT)          :: memb_map
+  INTEGER(HID_T),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT)   :: memb_fapl
+  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT) :: memb_name
+  REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT)           :: memb_addr
+               ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
+               ! real address in the file will be calculated as X*HADDR_MAX 
+
+  LOGICAL, INTENT(OUT) :: relax
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_multi_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2309,12 +2758,16 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2348,12 +2801,16 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2388,10 +2845,26 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful. Otherwise returns a negative 
     value. 
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fclose_degree_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fclose_degree_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+  INTEGER, INTENT(OUT) :: degree        ! Info about file close behavior
+                                        ! Possible values:
+                                        !    H5F_CLOSE_DEFAULT_F
+                                        !    H5F_CLOSE_WEAK_F
+                                        !    H5F_CLOSE_SEMI_F
+                                        !    H5F_CLOSE_STRONG_F
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fclose_degree_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2436,7 +2909,6 @@ facilitate moving easily between them.</i>
         with the dataset fill value and 
 	dataset storage allocation time properties, retrieved with the functions 
 	<code>H5Pget_fill_value</code> and <code>H5Pget_alloc_time</code>.
-	<p>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -2447,10 +2919,26 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fill_time_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fill_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
+                                         ! list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: flag  ! Fill time flag
+                                         ! Possible values are:
+                                         !    H5D_FILL_TIME_ERROR_F
+                                         !    H5D_FILL_TIME_ALLOC_F
+                                         !    H5D_FILL_TIME_NEVER_F
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fill_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2495,7 +2983,7 @@ facilitate moving easily between them.</i>
 	fill value write time properties, which can be retrieved 
 	with the functions <code>H5Pget_alloc_time</code> 
 	and <code>H5Pget_fill_time</code>, respectively.
-	<p>
+
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -2509,10 +2997,24 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fill_value_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fill_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of fill
+                                        ! value datatype (in memory) 
+  TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+ 
+END SUBROUTINE h5pget_fill_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2614,10 +3116,33 @@ facilitate moving easily between them.</i>
 	</table>
 	</center>
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_filter_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
+  INTEGER, INTENT(IN) :: filter_number    ! Sequence number within the filter
+                                          ! pipeline of the filter for which
+                                          ! information is sought
+  INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  
+                                          ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT) :: flags           ! Bit vector specifying certain 
+                                          ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts      
+                                          ! Number of elements in cd_values
+  INTEGER(SIZE_T), INTENT(IN) :: namelen  ! Anticipated number of characters 
+                                          ! in name
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! Name of the filter
+  INTEGER, INTENT(OUT) :: filter_id       ! Filter identification number
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_filter_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2689,13 +3214,34 @@ facilitate moving easily between them.</i>
         <dt><em>char *</em><code>name[]</code>
             <dd>OUT: Name of filter.
     </dl>
- <dt><strong>Returns:</strong>
+  <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-    <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_filter_by_id_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, &
+                                 cd_values, namelen, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+  INTEGER, INTENT(IN)        :: filter_id   ! Filter identifier
+  INTEGER(SIZE_T), INTENT(INOUT)     :: cd_nelmts  
+                                            ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  
+                                            ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT)          :: flags    ! Bit vector specifying certain 
+                                            ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN)   :: namelen  ! Anticipated number of characters 
+                                            ! in name
+  CHARACTER(LEN=*), INTENT(OUT) :: name     ! Name of the filter
+  INTEGER, INTENT(OUT)          :: hdferr   ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_filter_by_id_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2731,10 +3277,76 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_gc_references_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_gc_references_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: gc_reference ! The flag for garbage collecting
+                                       ! references for the file
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_gc_references_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_hyper_vector_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_hyper_vector_size</code>(<em>hid_t</em> <code>dxpl_id</code>,
+        <em>size_t *</em><code>vector_size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves number of I/O vectors to be read/written in hyperslab I/O.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_hyper_vector_size</code> retrieves the number of  
+	I/O vectors to be accumulated in memory before being issued  
+	to the lower levels of the HDF5 library for reading or writing the 
+	actual data.
+        <p>
+	The number of I/O vectors set in the dataset transfer property list 
+	<code>dxpl_id</code> is returned in <code>vector_size</code>.
+	Unless the default value is in use, <code>vector_size</code>
+	was previously set with a call to 
+	<a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dxpl_id</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>size_t *</em><code>vector_size</code>
+            <dd>OUT: Number of I/O vectors to accumulate in memory for I/O operations. 
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_hyper_vector_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(OUT) :: size   ! Vector size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_hyper_vector_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2768,10 +3380,21 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_istore_k_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_istore_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: ik           ! 1/2 rank of chunked storage B-tree
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_istore_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2817,10 +3440,25 @@ facilitate moving easily between them.</i>
             </dl> </ul>	
 	<p>
         Otherwise, returns a negative value indicating faliure.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_layout_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_layout_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: layout       ! Type of storage layout for raw data
+                                       ! possible values are:
+                                       !    H5D_COMPACT_F
+                                       !    H5D_CONTIGUOUS_F
+                                       !    H5D_CHUNKED_F
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_layout_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2858,10 +3496,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_meta_block_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_meta_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Metadata block size
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_meta_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2909,12 +3559,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2955,10 +3610,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_nfilters_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_nfilters_f(prp_id, nfilters, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset creation property 
+                                         ! list identifier 
+  INTEGER, INTENT(OUT) :: nfilters       ! The number of filters in 
+                                         ! the pipeline
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_nfilters_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3001,13 +3669,24 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nprops_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pget_nprops_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
+  INTEGER(SIZE_T), INTENT(OUT) :: nporps  ! Number of properties
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_nprops_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -3030,10 +3709,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_preserve_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_preserve_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset transfer property 
+                                         ! list identifier 
+  LOGICAL, INTENT(OUT)       :: flag     ! Status of for the dataset 
+                                         ! transfer property list 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_preserve_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3071,10 +3763,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_sieve_buf_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_sieve_buf_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(OUT) :: size   ! Sieve buffer size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_sieve_buf_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3122,13 +3826,25 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_size_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pget_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to query
+  INTEGER(SIZE_T), INTENT(OUT) :: size  ! Size in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -3159,10 +3875,24 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_sizes_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_sizes_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_addr
+                                        ! Size of an object address in bytes
+  INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_size 
+                                        ! Size of an object in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_sizes_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3195,10 +3925,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_small_data_block_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>F ortran90 Interface:</strong> h5pget_small_data_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id  ! File access property list 
+                                          ! identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size   ! Small raw data block size
+  INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_small_data_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3237,10 +3979,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_sym_k_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_sym_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT) :: ik            ! Symbol table tree rank
+  INTEGER, INTENT(OUT) :: lk            ! Symbol table node size
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_sym_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3270,10 +4024,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_userblock_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_userblock_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
+  INTEGER(HSIZE_T), DIMENSION(:), INTENT(OUT) ::  block_size 
+                                         ! Size of the user-block in bytes
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_userblock_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3314,10 +4080,30 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_version_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pget_version_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
+                            stab, shhdr, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+  INTEGER, DIMENSION(:), INTENT(OUT) :: boot   ! Array to put boot block 
+                                               ! version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: freelist  
+                                               ! Array to put global
+                                               ! freelist version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: stab   ! Array to put symbol table
+                                               ! version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr  ! Array to put shared object 
+                                               ! header version number
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_version_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3366,11 +4152,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3636,13 +4428,31 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pinsert_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pinsert_f
+    <dd>
+	<pre>
+SUBROUTINE h5pinsert_f
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist   ! Property list class identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
+  INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+  TYPE,   INTENT(IN) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pinsert_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -3678,13 +4488,27 @@ facilitate moving easily between them.</i>
     <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pisa_class_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pisa_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: pclass    ! Class identifier
+  LOGICAL, INTENT(OUT) :: flag            ! Logical flag
+                                          !    .TRUE. if a member
+                                          !    .FALSE. otherwise
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pisa_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -3705,7 +4529,7 @@ facilitate moving easily between them.</i>
 	)
 
   <dt><strong>Description:</strong>
-    <P><code>H5Piterate</code> iterates over the properties in the 
+    <p><code>H5Piterate</code> iterates over the properties in the 
     property object specified in <code>id</code>, which may be either a
     property list or a property class, performing a specified 
     operation on each property in turn.  
@@ -3793,15 +4617,20 @@ facilitate moving easily between them.</i>
     <dd>Failure: a negative value
     </table></ul>
 
-  <!--
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -3850,10 +4679,27 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 
-    <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pmodify_filter_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+    <dt><strong>Fortran90 Interface:</strong> h5pmodify_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, &
+                              cd_values, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+  INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
+  INTEGER, INTENT(IN)        :: flags       ! Bit vector specifying certain 
+                                            ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts  ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  
+                                            ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pmodify_filter_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4139,13 +4985,31 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pregister_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pregister_f
+    <dd>
+	<pre>
+SUBROUTINE h5pregister_f
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
+  INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+  TYPE,   INTENT(IN) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pregister_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -4193,13 +5057,24 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5premove_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5premove_f
+    <dd>
+	<pre>
+SUBROUTINE h5premove_f(plid, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid   ! Property list identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to remove
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5premove_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -4257,13 +5132,30 @@ facilitate moving easily between them.</i>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
 
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5pset_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_f(plid, name, value, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid    ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to set
+  TYPE,   INTENT(IN) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -4312,10 +5204,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_alignment_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_alignment_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: threshold  ! Threshold value
+  INTEGER(HSIZE_T), INTENT(IN) :: alignment  ! Alignment value
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_alignment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4390,10 +5294,28 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_alloc_time_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_alloc_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property
+                                          ! list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: flag    ! Allocation time flag
+                                          ! Possible values are:
+                                          !    H5D_ALLOC_TIME_ERROR_F
+                                          !    H5D_ALLOC_TIME_DEFAULT_F
+                                          !    H5D_ALLOC_TIME_EARLY_F
+                                          !    H5D_ALLOC_TIME_LATE_F
+                                          !    H5D_ALLOC_TIME_INCR_F
+  INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_alloc_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4441,10 +5363,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_btree_ratios_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_btree_ratios_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   
+                                  ! Property list identifier
+  REAL, INTENT(IN) :: left        ! The B-tree split ratio for left-most nodes
+  REAL, INTENT(IN) :: middle      ! The B-tree split ratio for all other nodes
+  REAL, INTENT(IN) :: right       ! The B-tree split ratio for right-most
+                                  ! nodes and lone nodes.
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                  ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_btree_ratios_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4501,10 +5438,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_buffer_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_buffer_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: plist_id ! Dataset transfer property 
+                                           ! list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size     ! Conversion buffer size
+  INTEGER, INTENT(OUT)         :: hdferr   ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_buffer_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4562,10 +5511,27 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_cache_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_cache_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id        ! Property list identifier
+  INTEGER, INTENT(IN) :: mdc_nelmts           ! Number of elements (objects)
+                                              ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(IN) :: rdcc_nelmts  ! Number of elements (objects)
+                                              ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes  ! Total size of the raw data
+                                              ! chunk cache, in bytes
+  REAL, INTENT(IN) :: rdcc_w0                 ! Preemption policy
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_cache_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4604,10 +5570,24 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_chunk_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_chunk_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(IN) :: ndims          ! Number of chunk dimensions
+  INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: dims    
+                                        ! Array containing sizes of
+                                        ! chunk dimensions
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_chunk_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4641,10 +5621,21 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_deflate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_deflate_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+  INTEGER, INTENT(IN)        :: level  ! Compression level 
+  INTEGER, INTENT(OUT)       :: hdferr ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_deflate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4723,7 +5714,7 @@ facilitate moving easily between them.</i>
           <dt><code>H5FD_MPIO_COLLECTIVE</code>
             <dd>Use collective I/O access.
         </dl>
-        </dir>
+        </dir></p>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dxpl_id</code>
@@ -4734,10 +5725,24 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_dxpl_mpio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>
+	<pre>
+SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: data_xfer_mode ! Data transfer mode 
+                                        ! Possible values are:
+                                        !    H5FD_MPIO_INDEPENDENT_F
+                                        !    H5FD_MPIO_COLLECTIVE_F
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_dxpl_mpio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4772,12 +5777,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4828,10 +5838,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_edc_check_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_edc_check_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset transfer property 
+                                         ! list identifier 
+  INTEGER, INTENT(IN)        :: flag     ! EDC flag; possible values
+                                         !    H5Z_DISABLE_EDC_F 
+                                         !    H5Z_ENABLE_EDC_F 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+ 
+END SUBROUTINE h5pset_edc_check_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4881,10 +5906,27 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_external_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_external_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of an external file
+  INTEGER, INTENT(IN) :: offset         ! Offset, in bytes, from the 
+                                        ! beginning of the file to the 
+                                        ! location in the file where 
+                                        ! the data starts
+  INTEGER(HSIZE_T), INTENT(IN) :: bytes ! Number of bytes reserved in 
+                                        ! the file for the data
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_external_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4930,10 +5972,22 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_family_offset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_family_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: prp_id   ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: offset   ! Offset in bytes
+  INTEGER, INTENT(OUT)         :: hdferr   ! Error code
+                                           ! 0 on success and -1 on failure
+ 
+END SUBROUTINE h5pset_family_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4986,10 +6040,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_core_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_core_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: prp_id    ! Property list identifier
+  INTEGER(SIZE_T), INTENT(IN) :: increment ! File block size in bytes
+  LOGICAL, INTENT(IN) :: backing_store     ! Flag to indicate that entire 
+                                           ! file contents are flushed to 
+                                           ! a file with the same name as 
+                                           ! this core file
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_core_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5030,10 +6099,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_family_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_family_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_family_f(prp_id, imemb_size, memb_plist, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: prp_id    ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: memb_size ! Logical size, in bytes,
+                                            ! of each family member
+  INTEGER(HID_T), INTENT(IN) :: memb_plist  ! Identifier of the file 
+                                            ! access property list to be
+                                            ! used for each family member
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_family_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5080,12 +6164,16 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5349,12 +6437,17 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns non-negative if successful.
         Otherwise returns negative.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5410,10 +6503,26 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_mpio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpio_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: comm           ! MPI communicator to be used for 
+                                        ! file open as defined in 
+                                        ! MPI_FILE_OPEN of MPI-2
+  INTEGER, INTENT(IN) :: info           ! MPI info object to be used for 
+                                        ! file open as defined in 
+                                        ! MPI_FILE_OPEN of MPI-2
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_mpio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5458,11 +6567,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-<!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_mpiposix_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: comm           ! MPI communicator to be used 
+                                        ! for file open as defined in 
+                                        ! MPI_FILE_OPEN of MPI-2
+  LOGICAL, INTENT(IN) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5pset_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5606,10 +6727,31 @@ facilitate moving easily between them.</i>
                   H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
                                   memb_name, memb_addr, TRUE);
         </pre>
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_multi_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_multi_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+                               memb_addr, relax, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)  :: prp_id     ! Property list identifier
+
+  INTEGER,DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)          :: memb_map
+  INTEGER(HID_T),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)   :: memb_fapl
+  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN) :: memb_name
+  REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN)           :: memb_addr
+              ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
+              ! real address in the file will be calculated as X*HADDR_MAX 
+
+  LOGICAL, INTENT(IN)  :: relax
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_multi_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5637,10 +6779,20 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_sec2_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_sec2_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_sec2_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT)          :: hdferr  ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_sec2_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5715,7 +6867,7 @@ facilitate moving easily between them.</i>
         Otherwise returns a negative value.
   <dt><strong>Example:</strong>
     <dd>
-<pre>
+    <pre>
 /* Example 1: Both metadata and rawdata files are in the same  */
 /*    directory.   Use Station1-m.h5 and Station1-r.h5 as      */
 /*    the metadata and rawdata files.                          */
@@ -5730,12 +6882,32 @@ fid=H5Fcreate("Station1",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
 hid_t fapl, fid;
 fapl = H5Pcreate(H5P_FILE_ACCESS);
 H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/pfs/%s-r.h5", H5P_DEFAULT);
-fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
-</pre>
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_split_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);</pre>
+  </dt>
+  
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_split_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, &
+                               raw_plist, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)   :: prp_id     ! Property list identifier
+  CHARACTER(LEN=*),INTENT(IN) :: meta_ext   ! Name of the extension for
+                                            ! the metafile filename
+  INTEGER(HID_T),INTENT(IN)   :: meta_plist ! Identifier of the meta file
+                                            ! access property list
+  CHARACTER(LEN=*),INTENT(IN) :: raw_ext    ! Name extension for the raw 
+                                            ! file filename
+  INTEGER(HID_T),INTENT(IN)   :: raw_plist  ! Identifier of the raw file
+                                            ! access property list
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_split_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5777,12 +6949,17 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5810,10 +6987,20 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_stdio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_stdio_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_stdio_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT)          :: hdferr  ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_stdio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5890,12 +7077,17 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5964,10 +7156,26 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful. Otherwise returns a negative 
     value. 
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fclose_degree_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fclose_degree_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: fapl_id  ! File access property list identifier
+  INTEGER, INTENT(IN) :: degree          ! Info about file close behavior 
+                                         ! Possible values:
+                                         !    H5F_CLOSE_DEFAULT_F
+                                         !    H5F_CLOSE_WEAK_F
+                                         !    H5F_CLOSE_SEMI_F
+                                         !    H5F_CLOSE_STRONG_F
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fclose_degree_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6025,10 +7233,26 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fill_time_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fill_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property
+                                         ! list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: flag   ! File time flag
+                                         ! Possible values are:
+                                         !    H5D_FILL_TIME_ERROR_F
+                                         !    H5D_FILL_TIME_ALLOC_F
+                                         !    H5D_FILL_TIME_NEVER_F
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fill_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6102,10 +7326,23 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fill_value_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fill_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of fill
+                                        ! value datatype (in memory)
+  TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fill_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6221,10 +7458,27 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_filter_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: filter         ! Filter to be added to the pipeline
+  INTEGER, INTENT(IN) :: flags          ! Bit vector specifying certain 
+                                        ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts        
+                                        ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  
+                                        ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_filter_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6281,11 +7535,17 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_filter_callback_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
- -->    <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6314,10 +7574,21 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fletcher32_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fletcher32_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Dataset creation property list 
+                                        ! identifier 
+  INTEGER, INTENT(OUT)       :: hdferr  ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fletcher32_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6360,83 +7631,27 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_gc_references_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_gc_references_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: gc_reference  ! Flag for garbage collecting
+                                       ! references for the file
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_gc_references_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pset_hyper_cache" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetHyperCache">H5Pset_hyper_cache</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
-        <em>unsigned</em> <code>cache</code>,
-        <em>unsigned</em> <code>limit</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Indicates whether to cache hyperslab blocks during I/O.
-  <dt><strong>Description:</strong>
-    <dd>[<strong>NOTE:</strong>
-        <span class="1_4_compat">
-	This function is deprecated in HDF5 Release 1.6 
-	and will eventually be removed from the HDF5 distribution.
-        It is provided in this release only to enable backward compatibility
-        with HDF5 Releases 1.4.<i>x</i> 
-	and is enabled only if the HDF5 library is configured 
-	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>;
-        the function is not enabled in the binaries distributed by NCSA.
-        </span>]
-        <p>
-        Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
-        indicates whether to cache hyperslab blocks during I/O, 
-        a process which can significantly increase I/O speeds.  
-        <p>
-        When working with hyperslab selections, it is possible to 
-        significantly speed up I/O operations by retrieving an 
-        entire hyperslab from the file in one operation and 
-        caching it in memory.  
-        The <code>cache</code> parameter specifies whether to turn 
-        caching on for hyperslab I/O operations.
-        If <code>cache</code> is set to <code>1</code>, 
-        caching is turned on; 
-        if set to <code>0</code>, caching is turned off.
-        <p>
-        The parameter <code>limit</code> sets the maximum size of the 
-        hyperslab block to cache.  If a block is smaller than that limit, 
-        it may still not be cached if no memory is available. 
-        Setting <code>limit</code> to <code>0</code> (zero) indicates 
-        no limitation on the size of block to attempt to cache.
-        <p>
-        The default is to cache blocks with no limit on block size 
-        for serial I/O and to not cache blocks for parallel I/O.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset transfer property list identifier.
-        <dt><em>unsigned</em> <code>cache</code>
-            <dd>IN: A flag indicating whether caching is to be 
-                set to on (<code>1</code>) or off (<code>0</code>).
-        <dt><em>unsigned</em> <code>limit</code>
-            <dd>IN: Maximum size of the hyperslab block to cache. 
-                <code>0</code> (zero) indicates no limit.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_hyper_cache_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_hyper_vector_size" -->
@@ -6478,10 +7693,22 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_hyper_vector_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_hyper_vector_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(IN) :: size    ! Vector size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_hyper_vector_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6518,10 +7745,21 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_istore_k_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_istore_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: ik            ! 1/2 rank of chunked storage B-tree
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_istore_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6572,10 +7810,25 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_layout_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: layout        ! Type of storage layout for raw data
+                                       ! Possible values are:
+                                       !    H5D_COMPACT_F
+                                       !    H5D_CONTIGUOUS_F
+                                       !    H5D_CHUNKED_F
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_layout_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6624,10 +7877,22 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_meta_block_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_meta_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size   ! Metadata block size
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_meta_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6709,12 +7974,17 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6751,10 +8021,23 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_preserve_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_preserve_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset transfer property 
+                                         ! list identifier 
+  LOGICAL, INTENT(IN)        :: flag     ! Status for the dataset 
+                                         ! transfer property list 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_preserve_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6798,10 +8081,20 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_shuffle_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_shuffle_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_shuffle_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
+  INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_shuffle_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6843,10 +8136,22 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_sieve_buf_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sieve_buf_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(IN) :: size    ! Sieve buffer size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sieve_buf_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6866,10 +8171,11 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
     <dd>Sets the byte size of the offsets and lengths used to address objects 
         in an HDF5 file.  
   <dt><strong>Description:</strong>
-        <dd><code>H5Pset_sizes</code> sets the byte size of the offsets and lengths used to
-            address objects in an HDF5 file.  This function is only valid for
-            file creation property lists.  Passing in a value of 0 for one of 
-            the <code>sizeof_...</code> parameters retains the current value.  
+        <dd><code>H5Pset_sizes</code> sets the byte size of the offsets 
+            and lengths used to address objects in an HDF5 file.  
+            This function is only valid for file creation property lists.  
+            Passing in a value of 0 for one of the <code>sizeof_...</code> 
+            parameters retains the current value.  
             The default value for both values is the same as 
             <code>sizeof(hsize_t)</code> in the library (normally 8 bytes).  
             Valid values currently are 2, 4, 8 and 16.
@@ -6885,10 +8191,24 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_sizes_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sizes_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier
+  INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr ! Size of an object offset 
+                                             ! in bytes
+  INTEGER(SIZE_T), INTENT(IN) :: sizeof_size ! Size of an object length 
+                                             ! in bytes
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sizes_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6944,10 +8264,22 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_small_data_block_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_small_data_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access
+                                         ! property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size   ! Small raw data block size
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_small_data_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -6995,10 +8327,22 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_sym_k_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sym_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: ik            ! Symbol table tree rank
+  INTEGER, INTENT(IN) :: lk            ! Symbol table node size
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sym_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -7151,10 +8495,37 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_szip_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_szip_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_szip_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     
+                                   ! Dataset creation property list identifier 
+  INTEGER, INTENT(IN) :: options_mask      
+                                   ! A bit-mask conveying the desired
+                                   ! SZIP options
+                                   ! Current valid values in Fortran are:
+                                   !    H5_SZIP_AK13_OM_F
+                                   !    H5_SZIP_CHIP_OM_F
+                                   !    H5_SZIP_EC_OM_F
+                                   !    H5_SZIP_NN_OM_F
+                                   !    Or the sum of any combination
+                                   !    of the above, e.g.,
+                                   !    (H5_SZIP_AK13_OM_F + H5_SZIP_NN_OM_F)
+                                   ! Check C reference manual regarding 
+                                   ! mutually-exclusive options
+  INTEGER, INTENT(IN) :: pixels_per_block  
+                                   ! The number of pixels or data elements 
+                                   ! in each data block
+  INTEGER, INTENT(OUT)  :: hdferr  ! Error code
+                                   ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_szip_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -7240,10 +8611,21 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_userblock_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5pset_userblock_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size  ! Size of the user-block in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_userblock_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -7327,11 +8709,17 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -7375,14 +8763,24 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Success: a non-negative value
     <dd>Failure: a negative value
-
-  <dt><strong>Non-C APIs:</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5punregister_f"
-	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-    <!--
-	<img src="Graphics/Java.gif">
-	<img src="Graphics/C++.gif">
-	-->
+  <dt><strong>Fortran90 Interface:</strong> h5punregister_f
+    <dd>
+	<pre>
+SUBROUTINE h5punregister_f(class, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: class  ! Property list class identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to remove
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5punregister_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -7635,13 +9033,14 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
-Describes HDF5 Release 1.6.0, July 2003
+Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 7 October 2003");
+document.writeln("Last modified: 24 October 2003");
 -->
 </SCRIPT>
  
