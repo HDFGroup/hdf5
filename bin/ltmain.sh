@@ -1656,7 +1656,7 @@ compiler."
 
 	# Check that each of the things are valid numbers.
 	case "$current" in
-	0 | [1-9] | [1-9][0-9]*) ;;
+	[0-9]*) ;;
 	*)
 	  $echo "$modename: CURRENT \`$current' is not a nonnegative integer" 1>&2
 	  $echo "$modename: \`$vinfo' is not valid version information" 1>&2
@@ -1665,7 +1665,7 @@ compiler."
 	esac
 
 	case "$revision" in
-	0 | [1-9] | [1-9][0-9]*) ;;
+	[0-9]*) ;;
 	*)
 	  $echo "$modename: REVISION \`$revision' is not a nonnegative integer" 1>&2
 	  $echo "$modename: \`$vinfo' is not valid version information" 1>&2
@@ -1674,7 +1674,7 @@ compiler."
 	esac
 
 	case "$age" in
-	0 | [1-9] | [1-9][0-9]*) ;;
+	[0-9]*) ;;
 	*)
 	  $echo "$modename: AGE \`$age' is not a nonnegative integer" 1>&2
 	  $echo "$modename: \`$vinfo' is not valid version information" 1>&2
@@ -3462,7 +3462,11 @@ libdir='$install_libdir'\
 	    if test "$finalize" = yes && test -z "$run"; then
 	      tmpdir="/tmp"
 	      test -n "$TMPDIR" && tmpdir="$TMPDIR"
-	      tmpdir="$tmpdir/libtool-$$"
+              tmpdir=`mktemp -d $tmpdir/libtool-XXXXXX 2> /dev/null`
+              if test $? = 0 ; then :
+              else
+                tmpdir="$tmpdir/libtool-$$"
+              fi
 	      if $mkdir -p "$tmpdir" && chmod 700 "$tmpdir"; then :
 	      else
 		$echo "$modename: error: cannot create temporary directory \`$tmpdir'" 1>&2
