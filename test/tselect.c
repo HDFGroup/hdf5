@@ -799,6 +799,7 @@ test_select_combo(void)
         tbuf=wbuf+i;
         tbuf2=rbuf+(i*SPACE3_DIM2);
         if(*tbuf!=*tbuf2) {
+            num_errs++;
             printf("element values don't match!, i=%d\n",i);
         } /* end if */
     } /* end for */
@@ -964,8 +965,9 @@ test_select_hyper_stride(void)
             printf("%d: hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n",__LINE__,i,(int)loc1[i],i,(int)loc2[i]);
 #ifndef QAK
             printf("wbuf=%p, tbuf=%p, rbuf=%p, tbuf2=%p\n",wbuf,tbuf,rbuf,tbuf2);
-            printf("*tbuf=%d, *tbuf2=%d\n",(int)*tbuf,(int)*tbuf2);
+            printf("*tbuf=%u, *tbuf2=%u\n",(unsigned)*tbuf,(unsigned)*tbuf2);
 #endif /* QAK */
+            num_errs++;
         } /* end if */
     } /* end for */
 
@@ -1091,6 +1093,7 @@ test_select_hyper_contig(void)
     /* Compare data read with data written out */
     if(HDmemcmp(rbuf,wbuf,sizeof(uint16_t)*30*12)) {
         printf("hyperslab values don't match!\n");
+        num_errs++;
 #ifdef QAK
         for(i=0, tbuf=wbuf; i<12; i++)
             for(j=0; j<30; j++)
@@ -1239,6 +1242,7 @@ test_select_hyper_copy(void)
     /* Compare data read with data written out */
     if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
         printf("hyperslab values don't match!\n");
+        num_errs++;
     } /* end if */
 
     /* Close memory dataspace */
@@ -1407,7 +1411,8 @@ test_select_point_copy(void)
 
     /* Compare data read with data written out */
     if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
-        printf("hyperslab values don't match!\n");
+        printf("point values don't match!\n");
+        num_errs++;
     } /* end if */
 
     /* Close memory dataspace */
@@ -1576,6 +1581,7 @@ test_select_hyper_offset(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d\n",__LINE__,i,j);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -1748,6 +1754,7 @@ test_select_point_offset(void)
         tbuf2=rbuf+(coord3[i][0]*SPACE3_DIM2)+coord3[i][1];
         if(*tbuf!=*tbuf2) {
             printf("element values don't match!, i=%d\n",i);
+            num_errs++;
         } /* end if */
     } /* end for */
 
@@ -1893,6 +1900,7 @@ test_select_hyper_union(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -1987,6 +1995,7 @@ test_select_hyper_union(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -2077,6 +2086,7 @@ test_select_hyper_union(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -2178,6 +2188,7 @@ test_select_hyper_union(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -2263,6 +2274,7 @@ test_select_hyper_union(void)
         for(j=0; j<(intn)len[i]; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
@@ -2591,6 +2603,7 @@ test_select_hyper_union_3d(void)
         for(j=0; j<(intn)rows[i].l; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
+                num_errs++;
             } /* end if */
         } /* end for */
     } /* end for */
