@@ -190,71 +190,6 @@ CHECK_RSH()
     fi
 }
 
-# Try locate the HDF4 library
-# This is a hack because there is no consistent place to find
-# the valid HDF library.
-LOCATE_HDF4()
-{
-    H4_SW=
-    H4_BIN=
-    OS=`uname -s`
-    # this default is the best guess of locating hdf4 software
-    h4paths_defaults="/usr/ncsa /usr/sdt /usr/local"
-
-    case "$OS" in
-	HP-UX)
-	    h4paths="/afs/ncsa/packages/hdf/HPUX_10.20"
-	    ;;
-	IRIX)
-	    h4paths="/afs/ncsa/packages/hdf/4.1r3_irix"
-	    ;;
-	IRIX64)
-	    case "$CC" in
-	    cc|"")	#default cc
-		abi=`cc -show_defaults 2>&1 | grep 'default abi'`
-		case $abi in
-		*-n32)
-		    h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
-		    ;;
-		*-64)
-		    h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-		    ;;
-		*)
-		    h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-		    ;;
-		esac	# $abi
-		;;
-	    *-n32)
-		h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
-		;;
-	    *)
-		h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-		;;
-	    esac
-	    ;;
-	Linux)
-	    h4paths="/afs/ncsa/packages/hdf/linux"
-	    ;;
-	OSF1)
-	    h4paths="/afs/ncsa/packages/hdf/OSF1_V4.0"
-	    ;;
-	*)
-	    h4paths="$h4paths_defaults"
-	    ;;
-    esac
-
-    # check if the hdf4 software is actually available
-    for h4 in $h4paths; do
-	if [ -f $h4/lib/libdf.a -a -f $h4/include/hdf.h ]; then
-	    H4_SW="$h4/include,$h4/lib"
-	    if [ -f $h4/bin/hdp ]; then
-		H4_BIN=$h4/bin
-	    fi
-	    break
-	fi
-    done
-}
-
 
 # Run one snapshot test
 # $*--Types of test being run
@@ -263,6 +198,8 @@ RUNSNAPTEST()
     SNAPCMD_OPT=""		# snapshot test option
     SRCDIRNAME=""
     CC_SAVED=$CC
+    PATH_SAVED=$PATH
+    export PATH			# DEC OSF1 needs to export PATH explicitly
     TEST_TYPE=$*
     retcode=0
     date
@@ -296,7 +233,9 @@ RUNSNAPTEST()
     [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
 
     # Track down the HDF4 software
-    LOCATE_HDF4
+    ans=`bin/locate_hdf4`
+    H4_SW=`echo $ans | cut -f1 -d' '`
+    H4_BIN=`echo $ans | cut -f2 -s -d' '`
     if [ -n "$H4_SW" ]; then
 	SNAPCMD_OPT="$SNAPCMD_OPT hdf4 $H4_SW"
     fi
@@ -328,8 +267,9 @@ RUNSNAPTEST()
 
     date >> $LOGFILE
 
-    # restore CC
+    # restore CC, PATH
     CC=$CC_SAVED
+    PATH=$PATH_SAVED
 }
 
 # Flush the AFS files if applicable.
