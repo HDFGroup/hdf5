@@ -81,6 +81,17 @@ test_misc(hid_t file)
     if (H5Gclose(g2)<0) goto error;
     if (H5Gclose(g3)<0) goto error;
 
+    /* Check that creating groups with no-op names isn't allowed */
+    H5E_BEGIN_TRY {
+        g1=H5Gcreate(file, "/", 0);
+    } H5E_END_TRY
+    if(g1 >= 0) goto error;
+
+    H5E_BEGIN_TRY {
+        g1=H5Gcreate(file, "./././", 0);
+    } H5E_END_TRY
+    if(g1 >= 0) goto error;
+
     PASSED();
     return 0;
 

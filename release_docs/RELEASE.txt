@@ -44,9 +44,17 @@ New Features
 
     Library:
     --------
+        - Added support for SZIP without encoder.  Added H5Zget_filter_info
+          and changed H5Pget_filter and H5Pget_filter_by_id to support this
+          change.  JL/NF - 2004/06/30
+        - SZIP always uses K13 compression.  This flag no longer needs to
+          be set when calling H5Pset_szip.  If the flag for CHIP
+          compression is set, it will be ignored (since the two are mutually
+          exclusive).  JL/NF - 2004/6/30
         - A new API function H5Fget_name was added.  It returns the name
             of the file by object(file, group, data set, named data type,
             attribute) ID.  SLU - 2004/06/29
+        - Added support for user defined identifier types.  NF/JL - 2004/06/29
         - A new API function H5Fget_filesize was added.  It returns the
             actual file size of the opened file.  SLU - 2004/06/24
 	- New Feature of Data transformation is added.  AKC - 2004/05/03.
@@ -88,10 +96,6 @@ New Features
             field in the H5G_stat_t struct for testing if two objects are the
             same within a file.  QAK - 2003/08/08
         - Switched over to new error API. SLU - 2003/07/25
-        - Added support for user defined identifier types.  NF/JL - 2004/06/29
-        - Added support for SZIP without encoder.  Added H5Zget_filter_info
-          and changed H5Pget_filter and H5Pget_filter_by_id to support this
-          change.
 
     Parallel Library:
     -----------------
@@ -142,6 +146,11 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Calling H5Gcreate() on "/" or "." throws an error instead of
+          failing quietly. JML - 2004/07/19
+        - Fixed bug where setting file address size to be very small could
+          trigger an assert if the file grew to more than 64 KB.  Now throws
+          an error and data can be recovered. JL/NF - 2004/07/14
         - Fixed bug where "resurrecting" a dataset was failing.
             QAK - 2004/07/14
         - Fixed bug where incorrect data could be read from a chunked dataset
