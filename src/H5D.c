@@ -32,6 +32,11 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Vprivate.h>		/* Vector and array functions		*/
 #include <H5Zprivate.h>		/* Data filters				*/
 
+#ifdef HAVE_PARALLEL
+/* Remove this if H5R_DATASET_REGION is no longer used in this file */
+#include <H5Rpublic.h>
+#endif
+
 #define PABLO_MASK	H5D_mask
 
 /*
@@ -1860,7 +1865,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+    if (H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver &&
             H5T_get_class(mem_type)==H5T_VLEN) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support writing VL datatypes yet");
@@ -1870,9 +1875,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no dataset region reference support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+    if (H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
-            H5R_get_ref_type(mem_type)==H5R_DATASET_REGION) {
+            H5T_get_ref_type(mem_type)==H5R_DATASET_REGION) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support writing VL datatypes yet");
     }

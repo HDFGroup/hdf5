@@ -6950,7 +6950,7 @@ H5T_debug(H5T_t *dt, FILE *stream)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5R_get_ref_type
+    H5T_get_ref_type
  PURPOSE
     Retrieves the type of reference for a datatype
  USAGE
