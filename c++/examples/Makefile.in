@@ -46,7 +46,7 @@ TEST_PROGS=$(TEST_SRC:.cpp=)
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
-CLEAN=
+CLEAN=*.h5
 
 ## How to build the programs... they all depend on the Fortran & C hdf5 libraries
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
