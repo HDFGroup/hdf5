@@ -1,4 +1,4 @@
-HDF5 version 1.5.26 released on Sat Apr 20 04:41:56 CDT 2002
+HDF5 version 1.5.27 released on Sat Apr 27 04:28:26 CDT 2002
 ================================================================================
 
 
@@ -159,6 +159,9 @@ Documentation
 New Features
 ============
 
+    * New functions H5Glink2 and H5Gmove2 were added to allow link and move to
+      be in different locations in the same file.  The old functions H5Glink 
+      and H5Gmove remain valid.  SLU - 2002/04/26 
     * Fill-value's behaviors for contiguous dataset have been redefined.  
       Basicly, dataset won't allocate space until it's necessary.  Full details
       are available at http://hdf.ncsa.uiuc.edu/RFC/Fill_Value, at this moment.
@@ -301,6 +304,81 @@ Platforms Tested
   TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
+
+
+Supported Configuration Features Summary
+========================================
+
+    In the tables below
+          y  = tested and supported
+          n  = not supported or not tested in this release
+          x  = not working in this release
+         ( ) = footnote appears below second table
+
+
+    Platform       C  C         F90  F90       C++   Shared     zlib  Tools
+                      parallel       parallel        libraries
+                                                     (5)
+    Solaris2.7     y  y (1)     y    n         y     y          y     y
+    Solaris2.8 64  y  n         y    n         y     y          y     y
+    Solaris2.8 32  y  y (1)     y    n         y     y          y     y
+    IA-64          y  n         n    n         n     n          y     y 
+    IRIX6.5        y  y (1)     n    n         n     y          y     y
+    IRIX64_6.5 64  y  y (2)     y    y         n     y          y     y
+    IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
+    HPUX10.20      y  n         y    n         n     y          y     y
+    HPUX11.00      y  y         y    n         n     y          y     y
+    HPUX11 SysV    y  y         y    n         n     y          y     y
+    DECOSF         y  n         y    n         y     y          y     y
+    T3E            y  y         y    y         n     n          y     y
+    SV1            y  n         y    n         n     n          y     y
+    TFLOPS         y  y (1)     n    n         n     n          y     y (4)
+    AIX-4.3 SP2    y  y         y    y         n     n          y     n
+    AIX-4.3 SP3    y  y         y    y         y     n          y     n
+    Win2000        y  n         y    n         y (6) y          y     y
+    Win98          y  n         y    n         y (6) y          y     y
+    WinNT          y  n         y    n         y (6) y          y     y
+    WinNT CW       y  n         n    n         n     n          y     y
+    FreeBSD        y  n         n    n         y     y          y     y
+    Linux 2.2      y  y (1)     y    n         y     y          y     y
+    Linux 2.4      y  y (1)     n    n         y     y          y     y
+
+
+    Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
+                   compatibility  exec      safe                VFD
+    Solaris2.7     n              x         y        n    n     y
+    Solaris2.8 64  n              y         n        n    n     y
+    Solaris2.8 32  n              x         y        n    n     y
+    IA-64          n              n         n        n    n     y   
+    IRIX6.5        n              x         y        n    n     y
+    IRIX64_6.5 64  n              x         y        n    y     y
+    IRIX64_6.5 32  n              x         y        n    y     y
+    HPUX10.20      n              y         n        n    n     y
+    HPUX11.00      n              x         n        n    n     y
+    HPUX11 SysV    n              x         n        n    n     y
+    DECOSF         n              y         n        n    n     y
+    T3E            n              y         n        n    n     y
+    SV1            n              y         n        n    n     y
+    TFLOPS         n              y         n        n    n     n
+    AIX-4.3 SP2    n              y (3)     n        n    n     y
+    AIX-4.3 SP3    n              y         n        n    n     y
+    Win2000        n              y         n        n    n     n
+    Win98          n              y         n        n    n     n
+    WinNT          n              y         n        n    n     n
+    WinNT CW       n              n         n        n    n     n
+    FreeBSD        n              y         y        n    n     y
+    Linux 2.2      n              y         y        n    n     y
+    Linux 2.4      n              y         y        n    n     y
+
+
+    Footnotes:  (1) Using mpich.
+                (2) Using mpt and mpich.
+                (3) When configured with static-exec enabled, tests fail 
+                    in serial mode.
+                (4) No HDF4-related tools.
+                (5) Shared libraries are provided only for the C library.
+		(6) Exception of (5): DLL is available for C++ API on Windows
+
 
 Known Problems
 ==============
