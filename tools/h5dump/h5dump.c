@@ -2538,10 +2538,6 @@ dump_fcpl(hid_t fid)
  {
   strcpy(dname,"H5FD_FAMILY");
  }
- else if (H5FD_GASS==fdriver)
- {
-  strcpy(dname,"H5FD_GASS");
- }
  else if (H5FD_LOG==fdriver)
  {
   strcpy(dname,"H5FD_LOG");

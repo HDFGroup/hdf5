@@ -37,7 +37,6 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/*temporary in-memory files		*/
 #include "H5FDfamily.h"		/*family of files			*/
-#include "H5FDgass.h"           /*GASS I/O                              */
 #include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */

@@ -30,7 +30,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests     \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
-           fillval mount flush1 flush2 enum gass_write gass_read gass_append \
+           fillval mount flush1 flush2 enum \
            set_extent srb_write srb_append srb_read ttsafe stream_test       \
            getname file_handle ntypes dangle dtransform filename reserved    \
            btree2

@@ -820,8 +820,6 @@
 ./src/H5FDfamily.h
 ./src/H5FDfphdf5.c
 ./src/H5FDfphdf5.h
-./src/H5FDgass.c
-./src/H5FDgass.h
 ./src/H5FDlog.c
 ./src/H5FDlog.h
 ./src/H5FDmpi.c
@@ -997,9 +995,6 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gass_append.c
-./test/gass_read.c
-./test/gass_write.c
 ./test/getname.c
 ./test/gheap.c
 ./test/h5test.c

@@ -203,6 +203,7 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+	- Retired GASS vfd (--with-gass).  AKC - 2005/3/3
         - Fixed a racing condition in MPIPOSIX virtual file drive close
 	  function.  Now all processes must completed the close before any
 	  of them is returned.  This prevents some "faster" processes start
