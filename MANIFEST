@@ -399,8 +399,10 @@
 ./doc/html/cpplus/Makefile.in
 
 ./doc/html/fortran/Dependencies
+./doc/html/fortran/F90Flags.html
 ./doc/html/fortran/F90UserNotes.html
 ./doc/html/fortran/Makefile.in
+./doc/html/fortran/h5_FORTRAN.html
 ./doc/html/fortran/h5a_FORTRAN.html
 ./doc/html/fortran/h5d_FORTRAN.html
 ./doc/html/fortran/h5e_FORTRAN.html
