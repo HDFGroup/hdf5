@@ -3656,11 +3656,11 @@ H5S_hyper_intersect (H5S_t *space1, H5S_t *space2)
     /* Check that the space selections both have span trees */
     if(space1->select.sel_info.hslab.span_lst==NULL ||
             space2->select.sel_info.hslab.span_lst==NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_ARGS, FAIL, "dataspace does not have span tree");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
 
     /* Check that the dataspaces are both the same rank */
     if(space1->extent.u.simple.rank!=space2->extent.u.simple.rank)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_ARGS, FAIL, "dataspace ranks don't match");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "dataspace ranks don't match");
 
     /* Perform the span-by-span intersection check */
     if((ret_value=H5S_hyper_intersect_helper(space1->select.sel_info.hslab.span_lst,space2->select.sel_info.hslab.span_lst))<0)
@@ -5372,7 +5372,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 
             /* Allocate a span info node */
             if((spans = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
 
             /* Set the reference count */
             spans->count=1;
