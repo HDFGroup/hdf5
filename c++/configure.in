@@ -84,8 +84,8 @@ dnl
 dnl If the `OS' ends with a version number then remove it. For instance,
 dnl `freebsd3.1' would become `freebsd'
 case "$host_os" in
-  aix4.*)
-    host_os_novers=aix4.x
+  aix*)
+    host_os_novers=aix
     ;;
   freebsd*)
     host_os_novers=freebsd
