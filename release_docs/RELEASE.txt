@@ -42,6 +42,9 @@ New Features
   =========
     o General
     --------- 
+      * Improved internal metadata caching, which can reduce the number of
+        actual I/O calls made by a substantial amount, improving
+        performance.  QAK - 2002/06/03
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
 	2002/04/11
       * A new query function H5Tget_member_index has been added for compound
