@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post18 released on Sun Jan 18 20:48:18 CST 2004
+HDF5 version 1.6.1-post20 released on Mon Jan 19 13:50:36 CST 2004
 ================================================================================
 
 
@@ -78,6 +78,9 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed several errors in B-tree deletion code which could cause a
+            B-tree (used with groups and chunked datasets) to become corrupt
+            with the right sequence of deleted objects.  QAK - 2004/01/19
         - Fixed small internal memory leaks of fill-value information.
             QAK - 2004/01/13
         - Fixed bug that caused variable-length datatypes (strings or sequences)
