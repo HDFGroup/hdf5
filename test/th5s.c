@@ -204,12 +204,18 @@ static void
 test_h5s_null(void)
 {
     hid_t fid;          /* File ID */
-    hid_t sid, sid2;    /* Dataspace IDs */
+    hid_t sid;          /* Dataspace IDs */
     hid_t dset_sid, dset_sid2;    /* Dataspace IDs */
-    hid_t attr_sid;    /* Dataspace IDs */
+    hid_t attr_sid;     /* Dataspace IDs */
     hid_t did;          /* Dataset ID */
-    hid_t attr;          /*Attribute ID */
+    hid_t attr;         /*Attribute ID */
     H5S_class_t stype;  /* dataspace type */
+    hssize_t nelem;     /* Number of elements */
+    unsigned uval=2;    /* Buffer for writing to dataset */
+    int val=1;          /* Buffer for writing to attribute */
+    H5S_sel_type sel_type;      /* Type of selection currently */
+    hsize_t dims[1]={10};       /* Dimensions for converting null dataspace to simple */
+    H5S_class_t space_type;     /* Type of dataspace */
     herr_t ret;         /* Generic return value */
     
     /* Output message about test being performed */
@@ -222,14 +228,88 @@ test_h5s_null(void)
     sid = H5Screate(H5S_NULL);
     CHECK(sid, FAIL, "H5Screate");
     
+    /* Check that the null dataspace actually has 0 elements */
+    nelem = H5Sget_simple_extent_npoints(sid);
+    VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+
+    /* Check that the dataspace was created with an "all" selection */
+    sel_type = H5Sget_select_type(sid);
+    VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
+
+    /* Check that the null dataspace has 0 elements selected */
+    nelem = H5Sget_select_npoints(sid);
+    VERIFY(nelem, 0, "H5Sget_select_npoints");
+
+    /* Change to "none" selection */
+    ret = H5Sselect_none(sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Check that the null dataspace has 0 elements selected */
+    nelem = H5Sget_select_npoints(sid);
+    VERIFY(nelem, 0, "H5Sget_select_npoints");
+
+    /* Check to be sure we can't set a hyperslab selection on a null dataspace */
+    H5E_BEGIN_TRY {
+        hssize_t start[1]={0};
+        hsize_t count[1]={0};
+
+	ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check to be sure we can't set a point selection on a null dataspace */
+    H5E_BEGIN_TRY {
+        hssize_t	coord[1][1]; /* Coordinates for point selection */
+
+        coord[0][0]=0;
+	ret = H5Sselect_elements(sid, H5S_SELECT_SET, 1, (const hssize_t **)coord);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_elements");
+
     /* Create first dataset */
-    did = H5Dcreate(fid, NULLDATASET, H5T_STD_U32LE, sid, H5P_DEFAULT);
+    did = H5Dcreate(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate");
     
+    /* Write "nothing" to the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &uval);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Write "nothing" to the dataset (with type conversion :-) */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Try reading from the dataset (make certain our buffer is unmodified) */
+    ret = H5Dread(did, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &uval);
+    CHECK(ret, FAIL, "H5Dread");
+    VERIFY(uval, 2, "H5Dread");
+
+    /* Try reading from the dataset (with type conversion :-) (make certain our buffer is unmodified) */
+    ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val);
+    CHECK(ret, FAIL, "H5Dread");
+    VERIFY(val, 1, "H5Dread");
+
     /* Create an attribute for the group */
     attr=H5Acreate(did,NULLATTR,H5T_NATIVE_INT,sid,H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate");
     
+    /* Write "nothing" to the attribute */
+    ret = H5Awrite(attr, H5T_NATIVE_INT, &val);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Write "nothing" to the attribute (with type conversion :-) */
+    ret = H5Awrite(attr, H5T_NATIVE_UINT, &uval);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Try reading from the attribute (make certain our buffer is unmodified) */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &val);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(val, 1, "H5Aread");
+
+    /* Try reading from the attribute (with type conversion :-) (make certain our buffer is unmodified) */
+    ret = H5Aread(attr, H5T_NATIVE_UINT, &uval);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(uval, 2, "H5Aread");
+
     /* Close attribute */
     ret=H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
@@ -237,6 +317,18 @@ test_h5s_null(void)
     /* Close the dataset */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
+
+    /* Verify that we've got the right kind of dataspace */
+    space_type = H5Sget_simple_extent_type(sid);
+    VERIFY(space_type, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Convert the null dataspace to a simple dataspace */
+    ret = H5Sset_extent_simple(sid, 1, dims, NULL);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");
+
+    /* Verify that we've got the right kind of dataspace now */
+    space_type = H5Sget_simple_extent_type(sid);
+    VERIFY(space_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
     /* Close the dataspace */
     ret = H5Sclose(sid);
@@ -273,6 +365,11 @@ test_h5s_null(void)
     ret = H5Sget_simple_extent_npoints(dset_sid2);
     VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
 
+    /* Try reading from the dataset (make certain our buffer is unmodified) */
+    ret = H5Dread(did, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &uval);
+    CHECK(ret, FAIL, "H5Dread");
+    VERIFY(uval, 2, "H5Dread");
+
     /* Close the dataspace */
     ret = H5Sclose(dset_sid);
     CHECK(ret, FAIL, "H5Sclose");
@@ -300,6 +397,11 @@ test_h5s_null(void)
     ret = H5Sclose(attr_sid);
     CHECK(ret, FAIL, "H5Sclose");
  
+    /* Try reading from the attribute (make certain our buffer is unmodified) */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &val);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(val, 1, "H5Aread");
+
     /* Close attribute */
     ret=H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
