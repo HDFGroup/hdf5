@@ -1,0 +1,34 @@
+##
+## HDF5-C++ Library Makefile(.in)
+##
+## Copyright (C) 2000 National Center for Supercomputing Applications.
+##		      All rights reserved.
+##
+top_srcdir=@top_srcdir@
+top_builddir=../..
+srcdir=@srcdir@
+@COMMENCE@
+
+hdf5_srcdir=$(top_srcdir)/../src
+hdf5_builddir=$(top_builddir)/src
+
+TRACE=perl $(top_srcdir)/bin/trace
+
+## Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
+
+## This is our main target
+LIB=hdf5_cpp.la
+
+## Source and object files for the library
+LIB_SRC=H5Exception.C H5RefCounter.C H5IdComponent.C H5Library.C	\
+	H5Attribute.C H5Object.C H5PropList.C H5FaccProp.C		\
+	H5FcreatProp.C H5DcreatProp.C H5DxferProp.C H5DataType.C	\
+	H5DataSpace.C H5AbstractDs.C H5AtomType.C H5PredType.C		\
+	H5EnumType.C H5IntType.C H5FloatType.C H5StrType.C		\
+	H5CompType.C H5DataSet.C H5CommonFG.C H5Group.C H5File.C
+LIB_OBJ=$(LIB_SRC:.C=.lo)
+
+ARFLAGS=rc
+
+@CONCLUDE@

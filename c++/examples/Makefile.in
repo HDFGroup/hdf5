@@ -1,0 +1,59 @@
+## HDF5-C++ test/Makefile(.in)
+##
+## Copyright (C) 2000 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+##
+top_srcdir=@top_srcdir@
+top_builddir=../..
+srcdir=@srcdir@
+@COMMENCE@
+
+hdf5_builddir=$(top_builddir)/src
+
+## Add include directory to the C++ preprocessor flags and the hdf5
+## library to the library list.
+LIB=../src/hdf5_cpp.la
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+LIBHDF5=$(hdf5_builddir)/libhdf5.la
+
+## List all source files here. The list of object files will be
+## created by replacing the `.C' with a `.lo'. This list is necessary
+## for building automatic dependencies.
+TEST_SRC=compound.C h5group.C create.C readdata.C chunks.C extend_ds.C	\
+	 writedata.C
+TEST_OBJ=$(TEST_SRC:.f90=.lo)
+
+## These are the programs that `make all' or `make tests' will build and which
+## `make check' will run. List them in the order they should be run.
+TEST_PROGS=$(TEST_SRC:.C=)
+
+## These are the files that `make clean' (and derivatives) will remove from
+## this directory.
+CLEAN=
+
+## How to build the programs... they all depend on the Fortran & C hdf5 libraries
+$(TEST_PROGS): $(LIB) $(LIBHDF5)
+
+compound: compound.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ compound.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+h5group: h5group.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ h5group.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+create: create.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ create.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+readdata: readdata.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ readdata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+chunks: chunks.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ chunks.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+extend_ds: extend_ds.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ extend_ds.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+writedata: writedata.lo 
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ writedata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+
+@CONCLUDE@

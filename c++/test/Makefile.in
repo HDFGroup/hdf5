@@ -1,0 +1,31 @@
+## HDF5-C++ test/Makefile(.in)
+##
+## Copyright (C) 2000 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+##
+top_srcdir=@top_srcdir@
+top_builddir=../..
+srcdir=@srcdir@
+@COMMENCE@
+
+hdf5_builddir=$(top_builddir)/src
+
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
+LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
+LIB=../src/hdf5_cpp.la
+HDF5LIB=$(hdf5_builddir)/libhdf5.la
+
+TEST_PROGS_SRC=
+TEST_PROGS=
+
+TEST_SRC=
+TEST_OBJ=$(TEST_SRC:.C=.lo)
+
+DISTCLEAN=$(TEST_PROGS_SRC:.C=.lo) $(TEST_PROGS_SRC:.C=.o) *.h5
+
+$(TEST_PROGS): $(LIB)
+	@echo No C++ test as of yet.
+
+@CONCLUDE@
