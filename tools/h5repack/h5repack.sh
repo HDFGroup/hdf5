@@ -66,9 +66,10 @@ TOOLTEST()
    ) 
    RET=$?
    if [ $RET != 0 ] ; then
-    echo "*FAILED*"
+	echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
    else
-    echo " PASSED"
+        echo " PASSED"
    fi
 		  
 }
@@ -87,11 +88,11 @@ DIFFTEST()
 	fi
       )
    RET=$?
-#   echo $RET
    if [ $RET != 0 ] ; then
-    echo "*FAILED*"
+	echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
    else
-    echo " PASSED"
+        echo " PASSED"
    fi
 				    
 }
@@ -130,5 +131,8 @@ DIFFTEST test4.h5 test4.out.h5
 TOOLTEST -i test4.h5 -o test4.out.h5 -e "h5repack_info.txt" 
 DIFFTEST test4.h5 test4.out.h5
 
+if test $nerrors -eq 0 ; then
+   echo "All $H5REPACK tests passed."
+fi
 
 exit $nerrors
