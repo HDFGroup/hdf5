@@ -955,9 +955,9 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    offset = H5Tget_member_offset(type, j);
 	    memb = H5Tget_member_type(type, j);
 
-        ctx->indent_level++;
-        h5dump_sprint(str, info, container, memb, cp_vp + offset , ctx);
-        ctx->indent_level--;
+            ctx->indent_level++;
+            h5dump_sprint(str, info, container, memb, cp_vp + offset , ctx);
+            ctx->indent_level--;
 
 	    H5Tclose(memb);
 	}
@@ -1118,7 +1118,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
         for (i = 0; i < n; i++)
             h5dump_str_append(str, "%02x", ((unsigned char *)vp)[i]);
     }
-	
+
     return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 }
 
@@ -1332,7 +1332,8 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
          * way the dumper did it before
 	 */
 	if (info->arr_linebreak && ctx->cur_elmt){
-            if ((ctx->cur_elmt % ctx->size_last_dim) == 0)
+            if (ctx->size_last_dim &&
+		    (ctx->cur_elmt % ctx->size_last_dim) == 0)
                 ctx->need_prefix = TRUE;
 
             if (elmt_counter == ctx->size_last_dim) {
@@ -1754,12 +1755,10 @@ h5dump_fixtype(hid_t f_type)
 	m_type = H5Tcreate(H5T_COMPOUND, size);
 
 	for (i = 0, offset = 0; i < nmembs; i++) {
-
-        if (offset)
-            offset = ALIGN(offset, H5Tget_size(memb[i]));
+            if (offset)
+                offset = ALIGN(offset, H5Tget_size(memb[i]));
 
 	    H5Tinsert(m_type, name[i], offset, memb[i]);
-
 	    offset += H5Tget_size(memb[i]);
 	}
 
@@ -1767,19 +1766,19 @@ h5dump_fixtype(hid_t f_type)
 
     case H5T_ARRAY:
         /* Get the array information */
-        ndims=H5Tget_array_ndims(f_type);
-        H5Tget_array_dims(f_type,dim,NULL);
+        ndims = H5Tget_array_ndims(f_type);
+        H5Tget_array_dims(f_type, dim, NULL);
 
         /* Get the array's base type and convert it to the printable version */
-        f_memb=H5Tget_super(f_type);
-	    array_base = h5dump_fixtype(f_memb);
+        f_memb = H5Tget_super(f_type);
+        array_base = h5dump_fixtype(f_memb);
 
         /* Copy the array */
-        m_type=H5Tarray_create(array_base,ndims,dim,NULL);
+        m_type = H5Tarray_create(array_base, ndims, dim, NULL);
 
         /* Close the temporary datatypes */
-	    H5Tclose(array_base);
-	    H5Tclose(f_memb);
+        H5Tclose(array_base);
+        H5Tclose(f_memb);
         break;
 
     case H5T_ENUM:
@@ -1915,22 +1914,6 @@ done:
     return status;
 }
 
-static
-void *vlcustom_alloc(size_t size, void *info)
-{
-    void *ret_value = NULL;
-    int *mem_used = (int *)info;
-    size_t extra = MAX(sizeof(void *), sizeof(size_t));
-
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
-        *(size_t *)ret_value = size;
-        *mem_used += size;
-    }
-
-    ret_value = ((unsigned char *)ret_value) + extra;
-    return ret_value;
-}
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_vlen_dset
  *
@@ -1958,6 +1941,7 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hid_t xfer_pid;		/*dataset transfer property list id	*/
     hid_t f_space;		/*file data space			*/
     hsize_t dims[H5S_MAX_RANK];	/*size of the dimensions		*/
+    int ndims;
     hid_t mem_space;
     const char *bad_type;
     herr_t ret;
@@ -1984,56 +1968,64 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	goto free_xfer;
     }
 
-    H5Sget_simple_extent_dims(f_space, dims, NULL);
+    ndims = H5Sget_simple_extent_dims(f_space, dims, NULL);
     ctx.size_last_dim = dims[ctx.ndims - 1];
 
     /* Assume entire data space to be printed */
     for (i = 0; i < (hsize_t)ctx.ndims; i++)
 	ctx.p_min_idx[i] = 0;
 
+    {
+	int been_here = 0;
+
 recheck:
-    switch (H5Tget_class(base_type)) {
-    case H5T_INTEGER:
-    case H5T_FLOAT:
-	/* These are the types we can actually handle */
-	break;
-	
-    case H5T_VLEN: {
-	hid_t tmp_type = base_type;
-
-	base_type = H5Tget_super(base_type);
-	H5Tclose(tmp_type);
-	goto recheck;
-    }
-
-    case H5T_STRING:
-	bad_type = "H5T_STRING";
-    case H5T_COMPOUND:
-	if (!bad_type)
-	    bad_type = "H5T_COMPOUND";
-    case H5T_ENUM:
-	if (!bad_type)
-	    bad_type = "H5T_ENUM";
-    case H5T_REFERENCE:
-	if (!bad_type)
-	    bad_type = "H5T_REFERENCE";
-    case H5T_OPAQUE:
-	if (!bad_type)
-	    bad_type = "H5T_OPAQUE";
-    case H5T_BITFIELD:
-	if (!bad_type)
-	    bad_type = "H5T_BITFIELD";
-    case H5T_TIME:
-	if (!bad_type)
-	    bad_type = "H5T_TIME";
-    case H5T_ARRAY:
-	if (!bad_type)
-	    bad_type = "H5T_ARRAY";
-    default:
-	fprintf(stream,
-		"Dumper doesn't support %s variable length datatype at this time.\n",
-	        OPT(bad_type, "(null)"));
-	goto free_xfer;
+        switch (H5Tget_class(base_type)) {
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+            /* These are the types we can actually handle */
+            break;
+    	
+        case H5T_VLEN: {
+            hid_t tmp_type = base_type;
+    
+            if (been_here) {
+                bad_type = "variable length of";
+                goto bad;
+            } else {
+                been_here++;
+            }
+    
+            base_type = H5Tget_super(base_type);
+            H5Tclose(tmp_type);
+            goto recheck;
+        }
+    
+        case H5T_STRING:
+            bad_type = "H5T_STRING";
+        case H5T_COMPOUND:
+            if (!bad_type)
+                bad_type = "H5T_COMPOUND";
+        case H5T_ENUM:
+            if (!bad_type)
+                bad_type = "H5T_ENUM";
+        case H5T_REFERENCE:
+            if (!bad_type)
+                bad_type = "H5T_REFERENCE";
+        case H5T_OPAQUE:
+            if (!bad_type)
+                bad_type = "H5T_OPAQUE";
+        case H5T_BITFIELD:
+            if (!bad_type)
+                bad_type = "H5T_BITFIELD";
+        case H5T_TIME:
+            if (!bad_type)
+                bad_type = "H5T_TIME";
+        case H5T_ARRAY:
+            if (!bad_type)
+                bad_type = "H5T_ARRAY";
+        default:
+    	    goto bad;
+        }
     }
 
     /* Create a simple memory space so that we can read in the hvl_t object */
@@ -2041,16 +2033,24 @@ recheck:
 
     for (i = 0; i < dims[0]; i++) {
         unsigned char *buffer;
-        hsize_t mem_needed;
+        hsize_t mem_needed = 0;
 	herr_t ret;
 	hvl_t *vldata;
         h5dump_context_t tmp;
 
-	start = i;
-	ret = H5Sselect_hyperslab(f_space, H5S_SELECT_SET, &start, NULL, &count, NULL);
+	if (ndims > 0) {
+	    start = i;
+	    ret = H5Sselect_hyperslab(f_space, H5S_SELECT_SET, &start, NULL,
+			    	      &count, NULL);
 
-	if (ret == FAIL)
-	    goto free_mem;
+	    if (ret == FAIL)
+	        goto free_mem;
+	} else {
+	    ret = H5Sselect_all(f_space);
+
+	    if (ret == FAIL)
+	        goto free_mem;
+	}
 
 	ret = H5Dvlen_get_buf_size(dset, type, f_space, &mem_needed);
 
@@ -2063,8 +2063,8 @@ recheck:
 	if (!buffer) {
 	    indentation(indentlevel);
 	    fprintf(stream,
-	            "Unable to allocate %ld bytes for variable length data.\n",
-	            (long)mem_needed);
+		    "Unable to allocate %ld bytes for variable length data.\n",
+		    (long)mem_needed);
 	    continue;
 	}
 
@@ -2074,8 +2074,6 @@ recheck:
 	    goto free_mem;
 
 	vldata = (hvl_t *)buffer;
-
-	/* I cast, therefore, I think I know what I am doing */
 	tmp = ctx;
 	h5dump_simple_data(stream, info, dset, &ctx,
 			   START_OF_DATA | END_OF_DATA,
@@ -2083,6 +2081,9 @@ recheck:
 	ctx = tmp;
 	fputs("\n", stream);
 	free(buffer);
+
+	if (ndims == 0)
+	    break;
     }
 
 free_mem:
@@ -2092,6 +2093,16 @@ free_xfer:
 free_space:
     H5Sclose(f_space);
     return ret;
+
+bad:
+    H5Pclose(xfer_pid);
+    H5Sclose(f_space);
+    indentation(indentlevel);
+    fprintf(stream,
+            "Dumper doesn't support %s variable length "
+	    "datatype at this time.\n",
+            OPT(bad_type, "(null)"));
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------

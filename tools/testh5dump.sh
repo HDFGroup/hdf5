@@ -123,6 +123,9 @@ TOOLTEST tstr-1.ddl tstr.h5
 # test for file created by Lib SAF team
 TOOLTEST tsaf.ddl tsaf.h5
 
+# test for file with variable length data
+TOOLTEST tvldtypes.ddl tvldtypes.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
 fi
