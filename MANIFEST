@@ -175,8 +175,8 @@
 ./doc/html/TechNotes/Version.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
-./doc/html/TechNotes/openmp-hdf5.html
 ./doc/html/TechNotes/openmp-hdf5.c
+./doc/html/TechNotes/openmp-hdf5.html
 ./doc/html/TechNotes/pipe1.gif
 ./doc/html/TechNotes/pipe1.obj
 ./doc/html/TechNotes/pipe2.gif
