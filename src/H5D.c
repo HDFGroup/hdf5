@@ -1532,6 +1532,10 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
 done:
+    /* Release fill value information */
+    if (H5O_reset(H5O_FILL_ID, &fill) <0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release fill-value info")
+
     /* Release pointer to object header itself */
     if(ent!=NULL && oh!=NULL)
         if(H5O_unprotect(ent,oh, dxpl_id)<0)
