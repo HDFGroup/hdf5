@@ -1172,7 +1172,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* can always be simulated by independent access. */
 	/* Nevertheless, must check driver is MPIO before using those */
 	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
+	if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO){
 	    /* 
 	     * -AKC-
 	     * "plant" the collective access mode into the file information
@@ -1188,8 +1188,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    printf("%s: collective access requested\n", FUNC);
 #endif
 	    access_mode_saved =
-		    dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-	    dataset->ent.file->shared->access_parms.u.mpio.access_mode =
+		    dataset->ent.file->shared->access_parms->u.mpio.access_mode;
+	    dataset->ent.file->shared->access_parms->u.mpio.access_mode =
 		    H5D_XFER_COLLECTIVE;
 	}else{
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1403,7 +1403,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If so, need to restore the access mode.  Shouldnot needed.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	dataset->ent.file->shared->access_parms.u.mpio.access_mode = access_mode_saved;
+	dataset->ent.file->shared->access_parms->u.mpio.access_mode = access_mode_saved;
     }
 #endif /*HAVE_PARALLEL*/
     FUNC_LEAVE(ret_value);
@@ -1476,7 +1476,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* can always be simulated by independent access. */
 	/* Nevertheless, must check driver is MPIO before using those */
 	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms.driver == H5F_LOW_MPIO){
+	if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO){
 	    /* 
 	     * -AKC-
 	     * "plant" the collective access mode into the file information
@@ -1492,8 +1492,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    printf("%s: collective access requested\n", FUNC);
 #endif
 	    access_mode_saved =
-		    dataset->ent.file->shared->access_parms.u.mpio.access_mode;
-	    dataset->ent.file->shared->access_parms.u.mpio.access_mode =
+		    dataset->ent.file->shared->access_parms->u.mpio.access_mode;
+	    dataset->ent.file->shared->access_parms->u.mpio.access_mode =
 		    H5D_XFER_COLLECTIVE;
 	}
 	else{
@@ -1714,7 +1714,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If so, need to restore the access mode.  Shouldnot needed.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	dataset->ent.file->shared->access_parms.u.mpio.access_mode = access_mode_saved;
+	dataset->ent.file->shared->access_parms->u.mpio.access_mode = access_mode_saved;
     }
 #endif /*HAVE_PARALLEL*/
     FUNC_LEAVE(ret_value);

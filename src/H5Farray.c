@@ -149,8 +149,8 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
 
 #ifdef HAVE_PARALLEL
-    is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
-	&& f->shared->access_parms.u.mpio.access_mode==H5D_XFER_COLLECTIVE);
+    is_collective = (f->shared->access_parms->driver==H5F_LOW_MPIO
+	&& f->shared->access_parms->u.mpio.access_mode==H5D_XFER_COLLECTIVE);
     if (is_collective){
 #ifdef AKC
     printf("%s: collective read requested\n", FUNC);
@@ -225,9 +225,9 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	    temp = nelmts;
 	    assert(temp==nelmts);	/* verify no overflow */
 	    MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
-		f->shared->access_parms.u.mpio.comm);
+		f->shared->access_parms->u.mpio.comm);
 	    MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
-		f->shared->access_parms.u.mpio.comm);
+		f->shared->access_parms->u.mpio.comm);
 #ifdef AKC
 printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
@@ -359,8 +359,8 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
 
 #ifdef HAVE_PARALLEL
-    is_collective = (f->shared->access_parms.driver==H5F_LOW_MPIO
-	&& f->shared->access_parms.u.mpio.access_mode==H5D_XFER_COLLECTIVE);
+    is_collective = (f->shared->access_parms->driver==H5F_LOW_MPIO
+	&& f->shared->access_parms->u.mpio.access_mode==H5D_XFER_COLLECTIVE);
     if (is_collective){
 #ifdef AKC
     printf("%s: collective write requested\n", FUNC);
@@ -435,9 +435,9 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	    temp = nelmts;
 	    assert(temp==nelmts);	/* verify no overflow */
 	    MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
-		f->shared->access_parms.u.mpio.comm);
+		f->shared->access_parms->u.mpio.comm);
 	    MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
-		f->shared->access_parms.u.mpio.comm);
+		f->shared->access_parms->u.mpio.comm);
 #ifdef AKC
 printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
