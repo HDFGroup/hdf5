@@ -98,7 +98,8 @@ typedef enum H5E_major_t {
     H5E_EFL,                    /*External file list                         */
     H5E_RAGGED,                 /*Ragged arrays                              */
     H5E_REFERENCE,              /*References                                 */
-    H5E_VFL			/*Virtual File Layer			     */
+    H5E_VFL,			        /*Virtual File Layer			     */
+    H5E_TBBT 		            /*Threaded, Balanced, Binary Trees */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */

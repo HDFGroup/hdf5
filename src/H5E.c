@@ -60,6 +60,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_RAGGED,	"Ragged array layer"},
     {H5E_REFERENCE,	"References layer"},
     {H5E_VFL,		"Virtual File Layer"},
+    {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
