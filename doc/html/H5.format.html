@@ -839,8 +839,8 @@
           <td>Each tree has 2<em>K</em>+1 keys with 2<em>K</em>
             child pointers interleaved between the keys.  The number
             of keys and child pointers actually containing valid
-            values is determined by the <em>Entries Used</em> field.  If
-            that field is <em>N</em> then the B-link tree contains
+            values is determined by the node's <em>Entries Used</em> field.
+            If that field is <em>N</em> then the B-link tree contains
             <em>N</em> child pointers and <em>N</em>+1 keys.</td>
         </tr>
 
@@ -856,30 +856,8 @@
             tree points.
             <p>
             The format of the key depends on the node type.
-            For nodes of node type 1, the key is formatted as follows:
-            <center>
-            <table>
-            <tr valign=top align=left>
-              <td width=40%>Bytes 1-4</td>
-              <td>Size of chunk in bytes.</td>
-            <tr valign=top align=left></tr>
-              <td>Bytes 4-8</td>
-              <td>Filter mask, a 32-bit bitfield indicating which 
-                filters have been applied to that chunk.</td>
-            </tr><tr valign=top align=left>
-              <td><i>N</i> fields of 8 bytes each</td>
-              <td>A 64-bit index indicating the offset of the 
-                chunk within the dataset where <i>N</i> is the number 
-                of dimensions of the dataset.  For example, if 
-                a chunk in a 3-dimensional dataset begins at the
-                position <code>[5,5,5]</code>, there will be three
-                such 8-bit indices, each with the value of 
-                <code>5</code>.</td>
-            </tr>
-            </table>
-            </center>
-            <p>
-            For nodes of node type 0, the key is formatted as follows:
+            For nodes of node type 0 (group nodes), the key is formatted as
+            follows:
             <center>
             <table>
             <tr valign=top align=left>
@@ -891,22 +869,54 @@
             </tr>
             </table>
             </center>
+            <p>
+            For nodes of node type 1 (chunked raw data nodes), the key is
+            formatted as follows:
+            <center>
+            <table>
+            <tr valign=top align=left>
+              <td width=40%>Bytes 1-4</td>
+              <td>Size of chunk in bytes.</td>
+            <tr valign=top align=left></tr>
+              <td>Bytes 4-8</td>
+              <td>Filter mask, a 32-bit bitfield indicating which 
+                filters have been applied to that chunk.</td>
+            </tr><tr valign=top align=left>
+              <td><em>N</em> 64-bit fields</td>
+              <td>A 64-bit index indicating the offset of the 
+                chunk within the dataset where <i>N</i> is the number 
+                of dimensions of the dataset.  For example, if 
+                a chunk in a 3-dimensional dataset begins at the
+                position <code>[5,5,5]</code>, there will be three
+                such 64-bit indices, each with the value of 
+                <code>5</code>.</td>
+            </tr>
+            </table>
+            </center>
             </td>
         </tr>
 
         <tr valign=top>
-          <td>Child Pointers</td>
-          <td>The tree node contains file addresses of subtrees or
+          <td>Child Pointer</td>
+          <td>
+            <P>The tree node contains file addresses of subtrees or
             data depending on the node level.  Nodes at Level 0 point 
-            to data addresses, either data chunk or group nodes.
+            to data addresses, either raw data chunk or group nodes.
             Nodes at non-zero levels point to other nodes of the 
-            same B-tree.</td>
+            same B-tree.
+            </P>
+            <P>For raw data chunk nodes, the child pointer is the address
+            of a single raw data chunk.  For group nodes, the child pointer
+            points to a <A href="#SymbolTable">symbol table</A>, which contains
+            information for multiple symbol table entries.
+            </P>
+          </td>
         </tr>
       </table>
     </center>
 
     <p>
-     Each B-tree node looks like this:
+     Conceptually, each B-tree node looks like this:
 
      <center>
      <table>
@@ -929,7 +939,7 @@
      above Level 0) or to data (at Level 0).  
      Each key[<i>i</i>] describes an <i>item</i> stored by the B-tree 
      (a chunk or an object of a group node).  The range of values 
-     represented by child[<i>i</i>] are indicated by key[<i>i</i>] 
+     represented by child[<i>i</i>] is indicated by key[<i>i</i>] 
      and key[<i>i</i>+1].
 
 
@@ -956,11 +966,12 @@
     <h3><a name="SymbolTable">Disk Format: Level 1B - Group and Symbol Nodes</a></h3>
 
     <p>A group is an object internal to the file that allows
-      arbitrary nesting of objects (including other groups).
-      A group maps a set of names to a set of file
-      address relative to the base address.  Certain meta data
-      for an object to which the group points can be duplicated
-      in the group symbol table in addition to the object header.
+      arbitrary nesting of objects within the file (including other groups).
+      A group maps a set of names in the group to a set of relative
+      file addresses where objects with those names are located in
+      the file.  Certain metadata for an object to which the group points
+      can be cached in the group's symbol table in addition to the
+      object's header.
 
     <p>An HDF5 object name space can be stored hierarchically by
       partitioning the name into components and storing each
@@ -995,7 +1006,7 @@
 
         <tr align=center>
           <td>Version Number</td>
-          <td>Reserved for Future Use</td>
+          <td>Reserved (0)</td>
           <td colspan=2>Number of Symbols</td>
 
         <tr align=center>
@@ -1013,7 +1024,7 @@
 
         <tr valign=top>
           <td>Node Signature</td>
-          <td>The ASCII character string <code>SNOD</code> is 
+          <td>The ASCII character string "<code>SNOD</code>" is 
             used to indicate the
             beginning of a group node.  This gives file
             consistency checking utilities a better chance of
@@ -1023,7 +1034,8 @@
         <tr valign=top>
           <td>Version Number</td>
           <td>The version number for the group node.  This
-            document describes version 1.</td>
+            document describes version 1. (There is no version '0'
+            of the group node)</td>
         </tr>
 
         <tr valign=top>
@@ -1038,8 +1050,13 @@
 
         <tr valign=top>
           <td>Group Entries</td>
-          <td>Each symbol has an entry in the group node.
-            The format of the entry is described below.</td>
+          <td>
+            <P>Each symbol has an entry in the group node.
+            The format of the entry is described below.
+            There are 2<EM>K</EM> entries in each group node, where
+            <EM>K</EM> is the "Group Leaf Node K" value from the
+            <A href="#SuperBlock">super block</A>.
+          </td>
         </tr>
       </table>
     </center>
