@@ -1163,10 +1163,10 @@ hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], start[1], stride[1], count[1], block[1];
 
 
-int i;
+hsize_t i;
 char buf[LENSTR+10];
 char buf2[3*LENSTR2];
-int sdim;
+hsize_t sdim;
 
   fid = H5Fcreate(FILE14, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
