@@ -92,29 +92,35 @@ Section II:
 STEP 1: Building hdf5 libraries and non-hdf4 related tools
 
 
-    1. Unpack all.zip in 'hdf5' and move the zlib.dll from
-       c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system 
-       directory.
-
-       The system directory can usually be found under the path 
-		C:\WINNT\system or C:\WINDOWS\system
       
-    2. Make sure you have your own zlib library(both dll and static)
+    1. Make sure you have your own zlib library(both dll and static)
        stored at your machine. In this document we will use
        c:\zlib114 to represent the top directory of your zlib library.
 
-    3. Invoke Microsoft Visual C++, go to "File" and select 
+       Make sure that zlib.dll has been moved to the system directory
+       C:\WINNT\system
+ 
+
+    2. Invoke Microsoft Visual C++, go to "File" and select 
        the "Open Workspace" option. 
 
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw 
        workspace. 
 
+    3. Select project hdf5dll, right click mouse; choose settings,
+       find "Link", go to the Category box and choose "Input",
+       go to the box "Object/library modules" and go to the end of the line;
+       see whether the zlib dll library path is the same as C:\zlib114\dll
+       or the correct path where you install your dll export library.
+       If not, replace the old zlib dll library path with the correct path.
+
+       You should do this for both Debug and release version.
     4. Go to "Tools" and select "Options", find "Directories";
         4.1 Find the box "Show directories for", choose "Include files",
             If you cannot find C:\zlib114\include at the directory listed,
             add C:\zlib114\include to the included directories.
         4.2 Find the box "Show directories for", choose "Library files",
-            If you cannot find C:\zlib114\old at the directory listed,
+            If you cannot find C:\zlib114\lib at the directory listed,
             add C:\zlib114\lib to the included directories.
 
     5. If you don't want to build and test backward 
