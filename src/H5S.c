@@ -21,21 +21,21 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5Eprivate.h>         /* Error handling                 */
 #include <H5MMprivate.h>        /* Memory Management functions            */
 #include <H5Oprivate.h>         /*object headers                  */
-#include <H5Pprivate.h>         /* Data-space functions                   */
+#include <H5Sprivate.h>         /* Data-space functions                   */
 
 /* Interface initialization */
-#define PABLO_MASK      H5P_mask
-#define INTERFACE_INIT  H5P_init_interface
+#define PABLO_MASK      H5S_mask
+#define INTERFACE_INIT  H5S_init_interface
 static intn             interface_initialize_g = FALSE;
-static herr_t           H5P_init_interface(void);
-static void             H5P_term_interface(void);
+static herr_t           H5S_init_interface(void);
+static void             H5S_term_interface(void);
 
 
 /*--------------------------------------------------------------------------
 NAME
-   H5P_init_interface -- Initialize interface-specific information
+   H5S_init_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5P_init_interface()
+    herr_t H5S_init_interface()
    
 RETURNS
    SUCCEED/FAIL
@@ -44,16 +44,16 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_init_interface(void)
+H5S_init_interface(void)
 {
     herr_t                  ret_value = SUCCEED;
-    FUNC_ENTER(H5P_init_interface, FAIL);
+    FUNC_ENTER(H5S_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
     if ((ret_value = H5A_init_group(H5_DATASPACE, H5A_DATASPACEID_HASHSIZE,
-				    H5P_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5P_close)) != FAIL) {
-        ret_value = H5_add_exit(&H5P_term_interface);
+				    H5S_RESERVED_ATOMS,
+				    (herr_t (*)(void *)) H5S_close)) != FAIL) {
+        ret_value = H5_add_exit(&H5S_term_interface);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -61,11 +61,11 @@ H5P_init_interface(void)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_term_interface
+    H5S_term_interface
  PURPOSE
-    Terminate various H5P objects
+    Terminate various H5S objects
  USAGE
-    void H5P_term_interface()
+    void H5S_term_interface()
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -77,13 +77,13 @@ H5P_init_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static void
-H5P_term_interface(void)
+H5S_term_interface(void)
 {
     H5A_destroy_group(H5_DATASPACE);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pcreate_simple
+ * Function:    H5Screate_simple
  *
  * Purpose:     Creates a new simple data space object and opens it for
  *		access. The DIMS argument is the size of the simple dataset
@@ -108,13 +108,13 @@ H5P_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
+H5Screate_simple(int rank, const size_t *dims, const size_t *maxdims)
 {
-    H5P_t       *ds = NULL;
+    H5S_t       *ds = NULL;
     hid_t       ret_value = FAIL;
     int		i;
 
-    FUNC_ENTER(H5Pcreate, FAIL);
+    FUNC_ENTER(H5Screate, FAIL);
 
     /* Check arguments */
     if (rank<0) {
@@ -135,12 +135,12 @@ H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
     }
 
     /* Create a new data space */
-    ds = H5MM_xcalloc(1, sizeof(H5P_t));
+    ds = H5MM_xcalloc(1, sizeof(H5S_t));
 #ifdef LATER /* QAK */
     if(rank>0)  /* for creating simple dataspace */
       {
 #endif /* LATER */
-        ds->type = H5P_SIMPLE;
+        ds->type = H5S_SIMPLE;
         ds->hslab_def = FALSE;    /* no hyperslab defined currently */
 
         /* Initialize rank and dimensions */
@@ -157,7 +157,7 @@ H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
       } /* end if */
     else /* rank==0, for scalar data space */
       {
-        ds->type = H5P_SCALAR;
+        ds->type = H5S_SCALAR;
       } /* end else */
 #endif /* LATER */
     
@@ -175,7 +175,7 @@ H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pclose
+ * Function:    H5Sclose
  *
  * Purpose:     Release access to a data space object.
  *
@@ -193,9 +193,9 @@ H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pclose(hid_t space_id)
+H5Sclose(hid_t space_id)
 {
-    FUNC_ENTER(H5Pclose, FAIL);
+    FUNC_ENTER(H5Sclose, FAIL);
 
     /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
@@ -210,7 +210,7 @@ H5Pclose(hid_t space_id)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_close
+ * Function:    H5S_close
  *
  * Purpose:     Releases all memory associated with a data space.
  *
@@ -226,24 +226,24 @@ H5Pclose(hid_t space_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_close(H5P_t *ds)
+H5S_close(H5S_t *ds)
 {
-    FUNC_ENTER(H5P_close, FAIL);
+    FUNC_ENTER(H5S_close, FAIL);
 
     assert(ds);
 
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         /*void */
         break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         H5MM_xfree(ds->u.simple.size);
         H5MM_xfree(ds->u.simple.max);
         H5MM_xfree(ds->u.simple.perm);
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         /* nothing */
         break;
 
@@ -262,7 +262,7 @@ H5P_close(H5P_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pcopy
+ * Function:	H5Scopy
  *
  * Purpose:	Copies a dataspace.
  *
@@ -278,13 +278,13 @@ H5P_close(H5P_t *ds)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pcopy (hid_t space_id)
+H5Scopy (hid_t space_id)
 {
-    H5P_t	*src = NULL;
-    H5P_t	*dst = NULL;
+    H5S_t	*src = NULL;
+    H5S_t	*dst = NULL;
     hid_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5Pcopy, FAIL);
+    FUNC_ENTER (H5Scopy, FAIL);
 
     /* Check args */
     if (H5_DATASPACE!=H5A_group (space_id) ||
@@ -293,7 +293,7 @@ H5Pcopy (hid_t space_id)
     }
 
     /* Copy */
-    if (NULL==(dst=H5P_copy (src))) {
+    if (NULL==(dst=H5S_copy (src))) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to copy data space");
     }
@@ -309,7 +309,7 @@ H5Pcopy (hid_t space_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_copy
+ * Function:    H5S_copy
  *
  * Purpose:     Copies a data space.
  *
@@ -324,23 +324,23 @@ H5Pcopy (hid_t space_id)
  *
  *-------------------------------------------------------------------------
  */
-H5P_t *
-H5P_copy(const H5P_t *src)
+H5S_t *
+H5S_copy(const H5S_t *src)
 {
-    H5P_t                  *dst = NULL;
+    H5S_t                  *dst = NULL;
     int                     i;
 
-    FUNC_ENTER(H5P_copy, NULL);
+    FUNC_ENTER(H5S_copy, NULL);
 
-    dst = H5MM_xmalloc(sizeof(H5P_t));
+    dst = H5MM_xmalloc(sizeof(H5S_t));
     *dst = *src;
 
     switch (dst->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         /*void */
         break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         if (dst->u.simple.size) {
             dst->u.simple.size = H5MM_xmalloc(dst->u.simple.rank *
                                               sizeof(dst->u.simple.size[0]));
@@ -364,7 +364,7 @@ H5P_copy(const H5P_t *src)
         }
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         /*void */
         break;
 
@@ -377,7 +377,7 @@ H5P_copy(const H5P_t *src)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_npoints
+ * Function:    H5Sget_npoints
  *
  * Purpose:     Determines how many data points a data set has.
  *
@@ -393,25 +393,25 @@ H5P_copy(const H5P_t *src)
  *-------------------------------------------------------------------------
  */
 size_t
-H5Pget_npoints(hid_t space_id)
+H5Sget_npoints(hid_t space_id)
 {
-    H5P_t                  *ds = NULL;
+    H5S_t                  *ds = NULL;
     size_t                  ret_value = 0;
 
-    FUNC_ENTER(H5Pget_npoints, 0);
+    FUNC_ENTER(H5Sget_npoints, 0);
 
     /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
-    ret_value = H5P_get_npoints(ds);
+    ret_value = H5S_get_npoints(ds);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_get_npoints
+ * Function:    H5S_get_npoints
  *
  * Purpose:     Determines how many data points a data set has.
  *
@@ -427,22 +427,22 @@ H5Pget_npoints(hid_t space_id)
  *-------------------------------------------------------------------------
  */
 size_t
-H5P_get_npoints(const H5P_t *ds)
+H5S_get_npoints(const H5S_t *ds)
 {
     size_t                  ret_value = 0;
     intn                    i;
 
-    FUNC_ENTER(H5P_get_npoints, 0);
+    FUNC_ENTER(H5S_get_npoints, 0);
 
     /* check args */
     assert(ds);
 
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         ret_value = 1;
         break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
 	/*
 	 * Count the elements selected by the hypeslab if there is one,
 	 * otherwise count all the elements.
@@ -458,7 +458,7 @@ H5P_get_npoints(const H5P_t *ds)
         }
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0,
                       "complex data spaces are not supported yet");
 
@@ -472,7 +472,7 @@ H5P_get_npoints(const H5P_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_ndims
+ * Function:    H5Sget_ndims
  *
  * Purpose:     Determines the dimensionality of a data space.
  *
@@ -488,25 +488,25 @@ H5P_get_npoints(const H5P_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_ndims(hid_t space_id)
+H5Sget_ndims(hid_t space_id)
 {
-    H5P_t                  *ds = NULL;
+    H5S_t                  *ds = NULL;
     intn                   ret_value = 0;
 
-    FUNC_ENTER(H5Pget_ndims, FAIL);
+    FUNC_ENTER(H5Sget_ndims, FAIL);
 
     /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    ret_value = H5P_get_ndims(ds);
+    ret_value = H5S_get_ndims(ds);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_get_ndims
+ * Function:    H5S_get_ndims
  *
  * Purpose:     Returns the number of dimensions in a data space.
  *
@@ -523,25 +523,25 @@ H5Pget_ndims(hid_t space_id)
  *-------------------------------------------------------------------------
  */
 intn
-H5P_get_ndims(const H5P_t *ds)
+H5S_get_ndims(const H5S_t *ds)
 {
     intn                    ret_value = FAIL;
 
-    FUNC_ENTER(H5P_get_ndims, FAIL);
+    FUNC_ENTER(H5S_get_ndims, FAIL);
 
     /* check args */
     assert(ds);
 
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         ret_value = 0;
         break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         ret_value = ds->u.simple.rank;
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
                       "complex data spaces are not supported yet");
 
@@ -555,13 +555,13 @@ H5P_get_ndims(const H5P_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_dims
+ * Function:    H5Sget_dims
  *
  * Purpose:     Returns the size in each dimension of a data space DS through
  *              the DIMS argument.
  *
  * Return:      Success:        Number of dimensions, the same value as
- *                              returned by H5Pget_ndims().
+ *                              returned by H5Sget_ndims().
  *
  *              Failure:        FAIL
  *
@@ -573,13 +573,13 @@ H5P_get_ndims(const H5P_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
+H5Sget_dims(hid_t space_id, size_t dims[]/*out*/)
 {
 
-    H5P_t                  *ds = NULL;
+    H5S_t                  *ds = NULL;
     intn                   ret_value = 0;
 
-    FUNC_ENTER(H5Pget_dims, FAIL);
+    FUNC_ENTER(H5Sget_dims, FAIL);
 
     /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
@@ -589,13 +589,13 @@ H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
     if (!dims) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
     }
-    ret_value = H5P_get_dims(ds, dims);
+    ret_value = H5S_get_dims(ds, dims);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_get_dims
+ * Function:    H5S_get_dims
  *
  * Purpose:     Returns the size in each dimension of a data space.  This
  *              function may not be meaningful for all types of data spaces.
@@ -612,30 +612,30 @@ H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
  *-------------------------------------------------------------------------
  */
 intn
-H5P_get_dims(const H5P_t *ds, size_t dims[])
+H5S_get_dims(const H5S_t *ds, size_t dims[])
 {
     intn                    ret_value = FAIL;
     intn                    i;
 
-    FUNC_ENTER(H5P_get_dims, FAIL);
+    FUNC_ENTER(H5S_get_dims, FAIL);
 
     /* check args */
     assert(ds);
     assert(dims);
 
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         ret_value = 0;
         break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         ret_value = ds->u.simple.rank;
         for (i = 0; i < ret_value; i++) {
             dims[i] = ds->u.simple.size[i];
         }
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
                       "complex data spaces are not supported yet");
 
@@ -649,7 +649,7 @@ H5P_get_dims(const H5P_t *ds, size_t dims[])
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_modify
+ * Function:    H5S_modify
  *
  * Purpose:     Updates a data space by writing a message to an object
  *              header.
@@ -666,26 +666,26 @@ H5P_get_dims(const H5P_t *ds, size_t dims[])
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_modify(H5G_entry_t *ent, const H5P_t *ds)
+H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 {
-    FUNC_ENTER(H5P_modify, FAIL);
+    FUNC_ENTER(H5S_modify, FAIL);
 
     assert(ent);
     assert(ds);
 
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
         HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
                       "scalar data spaces are not implemented yet");
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->u.simple)) < 0) {
             HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
                           "can't update simple data space message");
         }
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
                       "complex data spaces are not implemented yet");
 
@@ -698,7 +698,7 @@ H5P_modify(H5G_entry_t *ent, const H5P_t *ds)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_read
+ * Function:    H5S_read
  *
  * Purpose:     Reads the data space from an object header.
  *
@@ -713,31 +713,31 @@ H5P_modify(H5G_entry_t *ent, const H5P_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-H5P_t *
-H5P_read(H5F_t *f, H5G_entry_t *ent)
+H5S_t *
+H5S_read(H5F_t *f, H5G_entry_t *ent)
 {
-    H5P_t                  *ds = NULL;
+    H5S_t                  *ds = NULL;
 
-    FUNC_ENTER(H5P_read, NULL);
+    FUNC_ENTER(H5S_read, NULL);
 
     /* check args */
     assert(f);
     assert(ent);
 
-    ds = H5MM_xcalloc(1, sizeof(H5P_t));
+    ds = H5MM_xcalloc(1, sizeof(H5S_t));
 
     if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->u.simple))) {
-        ds->type = H5P_SIMPLE;
+        ds->type = H5S_SIMPLE;
 
     } else {
-        ds->type = H5P_SCALAR;
+        ds->type = H5S_SCALAR;
     }
 
     FUNC_LEAVE(ds);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_cmp
+ * Function:    H5S_cmp
  *
  * Purpose:     Compares two data spaces.
  *
@@ -755,11 +755,11 @@ H5P_read(H5F_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 intn
-H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
+H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 {
     intn                    i;
 
-    FUNC_ENTER(H5P_cmp, 0);
+    FUNC_ENTER(H5S_cmp, 0);
 
     /* check args */
     assert(ds1);
@@ -772,7 +772,7 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
         HRETURN(1);
 
     switch (ds1->type) {
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
         if (ds1->u.simple.rank < ds2->u.simple.rank)
             HRETURN(-1);
         if (ds1->u.simple.rank > ds2->u.simple.rank)
@@ -829,12 +829,12 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_is_simple
+    H5S_is_simple
  PURPOSE
     Check if a dataspace is simple (internal)
  USAGE
-    hbool_t H5P_is_simple(sdim)
-        H5P_t *sdim;            IN: Pointer to dataspace object to query
+    hbool_t H5S_is_simple(sdim)
+        H5S_t *sdim;            IN: Pointer to dataspace object to query
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -842,15 +842,15 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
 hbool_t
-H5P_is_simple(const H5P_t *sdim)
+H5S_is_simple(const H5S_t *sdim)
 {
     hbool_t                 ret_value = FAIL;
 
-    FUNC_ENTER(H5P_is_simple, FAIL);
+    FUNC_ENTER(H5S_is_simple, FAIL);
 
     /* Check args and all the boring stuff. */
     assert(sdim);
-    ret_value = sdim->type == H5P_SIMPLE ? TRUE : FALSE;      /* Currently all dataspaces are simple, but check anyway */
+    ret_value = sdim->type == H5S_SIMPLE ? TRUE : FALSE;      /* Currently all dataspaces are simple, but check anyway */
 
     FUNC_LEAVE(ret_value);
 }
@@ -858,11 +858,11 @@ H5P_is_simple(const H5P_t *sdim)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pis_simple
+    H5Sis_simple
  PURPOSE
     Check if a dataspace is simple
  USAGE
-    hbool_t H5Pis_simple(sid)
+    hbool_t H5Sis_simple(sid)
         hid_t sid;            IN: ID of dataspace object to query
  RETURNS
     TRUE/FALSE/FAIL
@@ -871,18 +871,18 @@ H5P_is_simple(const H5P_t *sdim)
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
 hbool_t 
-H5Pis_simple(hid_t sid)
+H5Sis_simple(hid_t sid)
 {
-    H5P_t                  *space = NULL;       /* dataspace to modify */
+    H5S_t                  *space = NULL;       /* dataspace to modify */
     hbool_t                 ret_value = FAIL;
 
-    FUNC_ENTER(H5Pis_simple, FAIL);
+    FUNC_ENTER(H5Sis_simple, FAIL);
 
     /* Check args and all the boring stuff. */
     if ((space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
-    ret_value = H5P_is_simple(space);
+    ret_value = H5S_is_simple(space);
 
   done:
     if (ret_value == FAIL) {   /* Error condition cleanup */
@@ -895,11 +895,11 @@ H5Pis_simple(hid_t sid)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pset_space
+    H5Sset_space
  PURPOSE
     Determine the size of a dataspace
  USAGE
-    herr_t H5Pset_space(sid, rank, dims)
+    herr_t H5Sset_space(sid, rank, dims)
         hid_t sid;            IN: Dataspace object to query
         intn rank;            IN: # of dimensions for the dataspace
         const size_t *dims;   IN: Size of each dimension for the dataspace
@@ -915,13 +915,13 @@ H5Pis_simple(hid_t sid)
     be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset_space(hid_t sid, int rank, const size_t *dims)
+H5Sset_space(hid_t sid, int rank, const size_t *dims)
 {
-    H5P_t                  *space = NULL;       /* dataspace to modify */
+    H5S_t                  *space = NULL;       /* dataspace to modify */
     intn                    u;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Pset_space, FAIL);
+    FUNC_ENTER(H5Sset_space, FAIL);
 
     /* Check args */
     if ((space = H5A_object(sid)) == NULL)
@@ -941,12 +941,12 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->type) {
-    case H5P_SCALAR:
-    case H5P_SIMPLE:
+    case H5S_SCALAR:
+    case H5S_SIMPLE:
         /* do nothing */
         break;
 
-    case H5P_COMPLEX:
+    case H5S_COMPLEX:
         /*
          * eventually this will destroy whatever "complex" dataspace info
          * is retained, right now it's an error
@@ -957,7 +957,7 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
         HRETURN_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
 		      "unknown data space class");
     }
-    space->type = H5P_SIMPLE;
+    space->type = H5S_SIMPLE;
 
     /* Reset hyperslab definition, if one is defined */
     if(space->hslab_def==TRUE) {
@@ -968,7 +968,7 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
     }
 
     if (rank == 0) {            /* scalar variable */
-        space->type = H5P_SCALAR;
+        space->type = H5S_SCALAR;
         space->u.simple.rank = 0;       /* set to scalar rank */
         if (space->u.simple.size != NULL)
             space->u.simple.size = H5MM_xfree(space->u.simple.size);
@@ -996,11 +996,11 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pset_hyperslab
+    H5Sset_hyperslab
  PURPOSE
     Select a hyperslab from a simple dataspace
  USAGE
-    herr_t H5Pset_hyperslab(sid, start, count, stride)
+    herr_t H5Sset_hyperslab(sid, start, count, stride)
         hid_t sid;            IN: Dataspace object to select hyperslab from
         const int *start;  IN: Starting location for hyperslab to select
         const size_t *count;  IN: Number of elements in hyperslab
@@ -1017,14 +1017,14 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t *stride)
+H5Sset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t *stride)
 {
-    H5P_t                  *space = NULL;       /* dataspace to modify */
+    H5S_t                  *space = NULL;       /* dataspace to modify */
     size_t                 *tmp_stride=NULL;    /* temp. copy of stride */
     intn                    u;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Pset_hyperslab, FAIL);
+    FUNC_ENTER(H5Sset_hyperslab, FAIL);
 
     /* Get the object */
     if (H5_DATASPACE != H5A_group(sid) || (space = H5A_object(sid)) == NULL)
@@ -1034,7 +1034,7 @@ H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t 
 		    "invalid hyperslab selected");
 
     /* We can't modify other types of dataspaces currently, so error out */
-    if (space->type!=H5P_SIMPLE)
+    if (space->type!=H5S_SIMPLE)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
 		    "unknown dataspace type");
 
@@ -1083,7 +1083,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_hyperslab
+ * Function:	H5Sget_hyperslab
  *
  * Purpose:	Retrieves information about the hyperslab from a simple data
  *		space.  If no hyperslab has been defined then the hyperslab
@@ -1101,13 +1101,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
+H5Sget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
 		  size_t stride[]/*out*/)
 {
-    const H5P_t	*ds = NULL;
+    const H5S_t	*ds = NULL;
     intn	ret_value = FAIL;
     
-    FUNC_ENTER (H5Pget_hyperslab, FAIL);
+    FUNC_ENTER (H5Sget_hyperslab, FAIL);
 
     /* Check args */
     if (H5_DATASPACE!=H5A_group (sid) || NULL==(ds=H5A_object (sid))) {
@@ -1115,7 +1115,7 @@ H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
     }
 
     /* Get hyperslab info */
-    if ((ret_value=H5P_get_hyperslab (ds, offset, size, stride))<0) {
+    if ((ret_value=H5S_get_hyperslab (ds, offset, size, stride))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab information");
     }
@@ -1124,7 +1124,7 @@ H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_get_hyperslab
+ * Function:	H5S_get_hyperslab
  *
  * Purpose:	Retrieves information about the hyperslab from a simple data
  *		space.  If no hyperslab has been defined then the hyperslab
@@ -1142,21 +1142,21 @@ H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
  *-------------------------------------------------------------------------
  */
 intn
-H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
+H5S_get_hyperslab (const H5S_t *ds, int offset[]/*out*/,
 		   size_t size[]/*out*/, size_t stride[]/*out*/)
 {
     intn		i;
     intn		ret_value = FAIL;
     
-    FUNC_ENTER (H5P_get_hyperslab, FAIL);
+    FUNC_ENTER (H5S_get_hyperslab, FAIL);
 
     /* Check args */
     assert (ds);
     switch (ds->type) {
-    case H5P_SCALAR:
+    case H5S_SCALAR:
 	break;
 
-    case H5P_SIMPLE:
+    case H5S_SIMPLE:
 	if (ds->hslab_def) {
 	    for (i=0; i<ds->u.simple.rank; i++) {
 		if (offset) offset[i] = ds->h.start[i];
@@ -1173,7 +1173,7 @@ H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
 	ret_value = ds->u.simple.rank;
 	break;
 
-    case H5P_COMPLEX:	/*fall through*/
+    case H5S_COMPLEX:	/*fall through*/
     default:
 	HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
 		       "hyperslabs not supported for this type of space");
@@ -1184,7 +1184,7 @@ H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_find
+ * Function:	H5S_find
  *
  * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
  *		function locates the data space conversion functions and
@@ -1203,23 +1203,23 @@ H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-const H5P_conv_t *
-H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
+const H5S_conv_t *
+H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 {
-    static H5P_conv_t		_conv;
-    static const H5P_conv_t 	*conv = NULL;
+    static H5S_conv_t		_conv;
+    static const H5S_conv_t 	*conv = NULL;
     
-    FUNC_ENTER (H5P_find, NULL);
+    FUNC_ENTER (H5S_find, NULL);
 
     /* Check args */
-    assert (mem_space && H5P_SIMPLE==mem_space->type);
-    assert (file_space && H5P_SIMPLE==file_space->type);
+    assert (mem_space && H5S_SIMPLE==mem_space->type);
+    assert (file_space && H5S_SIMPLE==file_space->type);
 
     /*
      * We can't do conversion if the source and destination select a
      * different number of data points.
      */
-    if (H5P_get_npoints (mem_space) != H5P_get_npoints (file_space)) {
+    if (H5S_get_npoints (mem_space) != H5S_get_npoints (file_space)) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
 		       "memory and file data spaces are different sizes");
     }
@@ -1230,11 +1230,11 @@ H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
      * for now we only support simple data spaces.
      */
     if (!conv) {
-	_conv.init = H5P_simp_init;
-	_conv.fgath = H5P_simp_fgath;
-	_conv.mscat = H5P_simp_mscat;
-	_conv.mgath = H5P_simp_mgath;
-	_conv.fscat = H5P_simp_fscat;
+	_conv.init = H5S_simp_init;
+	_conv.fgath = H5S_simp_fgath;
+	_conv.mscat = H5S_simp_mscat;
+	_conv.mgath = H5S_simp_mgath;
+	_conv.fscat = H5S_simp_fscat;
 	conv = &_conv;
     }
     
@@ -1242,7 +1242,7 @@ H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_extend
+ * Function:	H5S_extend
  *
  * Purpose:	Extend the dimensions of a data space.
  *
@@ -1258,20 +1258,20 @@ H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
  *-------------------------------------------------------------------------
  */
 intn
-H5P_extend (H5P_t *space, const size_t *size)
+H5S_extend (H5S_t *space, const size_t *size)
 {
     intn		i, ret_value=0;
     
-    FUNC_ENTER (H5P_extend, FAIL);
+    FUNC_ENTER (H5S_extend, FAIL);
 
     /* Check args */
-    assert (space && H5P_SIMPLE==space->type);
+    assert (space && H5S_SIMPLE==space->type);
     assert (size);
 
     for (i=0; i<space->u.simple.rank; i++) {
 	if (space->u.simple.size[i]<size[i]) {
 	    if (space->u.simple.max &&
-		H5P_UNLIMITED!=space->u.simple.max[i] &&
+		H5S_UNLIMITED!=space->u.simple.max[i] &&
 		space->u.simple.max[i]<size[i]) {
 		HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 			       "dimension cannot be increased");

@@ -16,17 +16,17 @@ TESTS=$(PROGS)
 
 # Temporary files
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
-	    tfile3.h5 th5p1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5
+	    tfile3.h5 th5s1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5
 
 # Source and object files for programs...  The PROG_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c dtypes.c  \
+PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c dtypes.c  \
          hyperslab.c istore.c dsets.c cmpd_dset.c extend.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
-TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c
+TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
 TESTHDF5_OBJ=$(TESTHDF5_SRC:.c=.o)
 
 DSETS_SRC=dsets.c

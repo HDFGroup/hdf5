@@ -32,6 +32,6 @@
 #include <H5MFpublic.h>
 #include <H5MMpublic.h>
 #include <H5Opublic.h>
-#include <H5Ppublic.h>
+#include <H5Spublic.h>
 #include <H5Tpublic.h>
 #endif

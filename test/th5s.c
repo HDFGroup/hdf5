@@ -29,7 +29,7 @@ static char             RcsId[] = "$Revision$";
 #include <H5private.h>
 #include <H5Bprivate.h>
 #include <H5Mprivate.h>
-#include <H5Pprivate.h>
+#include <H5Sprivate.h>
 
 #define FILE   "th5p1.h5"
 
@@ -50,7 +50,7 @@ static char             RcsId[] = "$Revision$";
 
 /****************************************************************
 **
-**  test_h5p_basic(): Test basic H5P (dataspace) code.
+**  test_h5p_basic(): Test basic H5S (dataspace) code.
 ** 
 ****************************************************************/
 static void 
@@ -73,35 +73,35 @@ test_h5p_basic(void)
     fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
-    sid1 = H5Pcreate_simple(SPACE1_RANK, dims1, NULL);
-    CHECK(sid1, FAIL, "H5Pcreate_simple");
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Pget_npoints(sid1);
-    CHECK(n, UFAIL, "H5Pget_npoints");
-    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, "H5Pget_npoints");
+    n = H5Sget_npoints(sid1);
+    CHECK(n, UFAIL, "H5Sget_npoints");
+    VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, "H5Sget_npoints");
 
-    rank = H5Pget_ndims(sid1);
-    CHECK(rank, UFAIL, "H5Pget_lrank");
-    VERIFY(rank, SPACE1_RANK, "H5Pget_lrank");
+    rank = H5Sget_ndims(sid1);
+    CHECK(rank, UFAIL, "H5Sget_lrank");
+    VERIFY(rank, SPACE1_RANK, "H5Sget_lrank");
 
-    ret = H5Pget_dims(sid1, tdims);
-    CHECK(ret, FAIL, "H5Pget_ldims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(uint32)), 0, "H5Pget_ldims");
+    ret = H5Sget_dims(sid1, tdims);
+    CHECK(ret, FAIL, "H5Sget_ldims");
+    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(uint32)), 0, "H5Sget_ldims");
 
-    sid2 = H5Pcreate_simple(SPACE2_RANK, dims2, NULL);
-    CHECK(sid2, FAIL, "H5Pcreate_simple");
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
 
-    n = H5Pget_npoints(sid2);
-    CHECK(n, UFAIL, "H5Pnelem");
-    VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4, "H5Pnelem");
+    n = H5Sget_npoints(sid2);
+    CHECK(n, UFAIL, "H5Snelem");
+    VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4, "H5Snelem");
 
-    rank = H5Pget_ndims(sid2);
-    CHECK(rank, UFAIL, "H5Pget_lrank");
-    VERIFY(rank, SPACE2_RANK, "H5Pget_lrank");
+    rank = H5Sget_ndims(sid2);
+    CHECK(rank, UFAIL, "H5Sget_lrank");
+    VERIFY(rank, SPACE2_RANK, "H5Sget_lrank");
 
-    ret = H5Pget_dims(sid2, tdims);
-    CHECK(ret, FAIL, "H5Pget_ldims");
-    VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(uint32)), 0, "H5Pget_ldims");
+    ret = H5Sget_dims(sid2, tdims);
+    CHECK(ret, FAIL, "H5Sget_ldims");
+    VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(uint32)), 0, "H5Sget_ldims");
 
     ret = H5Mclose(sid1);
     CHECK(ret, FAIL, "H5Mrelease");
@@ -116,7 +116,7 @@ test_h5p_basic(void)
 
 /****************************************************************
 **
-**  test_h5p(): Main H5P (dataspace) testing routine.
+**  test_h5p(): Main H5S (dataspace) testing routine.
 ** 
 ****************************************************************/
 void 
@@ -125,5 +125,5 @@ test_h5p(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspaces\n"));
 
-    test_h5p_basic();           /* Test basic H5P code */
+    test_h5p_basic();           /* Test basic H5S code */
 }                               /* test_h5p() */

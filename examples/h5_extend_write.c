@@ -25,7 +25,7 @@ main ()
    size_t      dims2[2] = { 7, 1};            /* data2 dimensions */  
    size_t      dims3[2] = { 2, 2};            /* data3 dimensions */ 
 
-   size_t      maxdims[2] = {H5P_UNLIMITED, H5P_UNLIMITED};
+   size_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
    size_t      chunk_dims[2] ={2, 5};
    size_t      size[2];
    int         offset[2];
@@ -44,7 +44,7 @@ main ()
 /*
  * Create the data space with ulimited dimensions. 
  */
-dataspace = H5Pcreate_simple(RANK, dims, maxdims); 
+dataspace = H5Screate_simple(RANK, dims, maxdims); 
 
 /*
  * Create a new file. If file exists its contents will be overwritten.
@@ -77,7 +77,7 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 0;
 offset[1] = 0;
-status = H5Pset_hyperslab(filespace, offset, dims1, NULL);  
+status = H5Sset_hyperslab(filespace, offset, dims1, NULL);  
 
 /*
  * Write the data to the hyperslab.
@@ -99,12 +99,12 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 3;
 offset[1] = 0;
-status = H5Pset_hyperslab(filespace, offset, dims2, NULL);  
+status = H5Sset_hyperslab(filespace, offset, dims2, NULL);  
 
 /*
  * Define memory space
  */
-dataspace = H5Pcreate_simple(RANK, dims2, NULL); 
+dataspace = H5Screate_simple(RANK, dims2, NULL); 
 
 /*
  * Write the data to the hyperslab.
@@ -126,12 +126,12 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 0;
 offset[1] = 3;
-status = H5Pset_hyperslab(filespace, offset, dims3, NULL);  
+status = H5Sset_hyperslab(filespace, offset, dims3, NULL);  
 
 /*
  * Define memory space.
  */
-dataspace = H5Pcreate_simple(RANK, dims3, NULL); 
+dataspace = H5Screate_simple(RANK, dims3, NULL); 
 
 /*
  * Write the data to the hyperslab.
@@ -157,8 +157,8 @@ status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
  * Close/release resources.
  */
 H5Dclose(dataset);
-H5Pclose(dataspace);
-H5Pclose(filespace);
+H5Sclose(dataspace);
+H5Sclose(filespace);
 H5Fclose(file);
 
 }     

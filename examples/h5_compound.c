@@ -57,7 +57,7 @@ size_t     size;
 /*
  * Create the data space.
  */
-space = H5Pcreate_simple(RANK, dim, NULL);
+space = H5Screate_simple(RANK, dim, NULL);
 
 /*
  * Create the file.
@@ -80,13 +80,13 @@ dataset = H5Dcreate(file, DATASETNAME, s1_tid, space, H5C_DEFAULT);
 /*
  * Wtite data to the dataset; 
  */
-status = H5Dwrite(dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s1);
 
 /*
  * Release resources
  */
 H5Tclose(s1_tid);
-H5Pclose(space);
+H5Sclose(space);
 H5Dclose(dataset);
 H5Fclose(file);
  
@@ -109,7 +109,7 @@ status = H5Tinsert(s2_tid, "a_name", HPOFFSET(s2, a), H5T_NATIVE_INT);
  * Read two fields c and a from s1 dataset. Fields iin the file
  * are found by their names "c_name" and "a_name".
  */
-status = H5Dread(dataset, s2_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s2);
+status = H5Dread(dataset, s2_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s2);
 
 /*
  * Display the fields
@@ -134,7 +134,7 @@ status = H5Tinsert(s3_tid, "b_name", 0, H5T_NATIVE_FLOAT);
 /*
  * Read field b from s1 dataset. Field in the file is found by its name.
  */
-status = H5Dread(dataset, s3_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s3);
+status = H5Dread(dataset, s3_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s3);
 
 /*
  * Display the field
@@ -150,6 +150,6 @@ printf("\n");
 H5Tclose(s2_tid);
 H5Tclose(s3_tid);
 H5Dclose(dataset);
-H5Pclose(space);
+H5Sclose(space);
 H5Fclose(file);
 }

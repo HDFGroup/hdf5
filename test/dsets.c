@@ -57,7 +57,7 @@ test_create(hid_t file)
     /* Create the data space */
     dims[0] = 256;
     dims[1] = 512;
-    space = H5Pcreate_simple(2, dims, NULL);
+    space = H5Screate_simple(2, dims, NULL);
     assert(space != FAIL);
 
     /*
@@ -209,7 +209,7 @@ test_simple_io(hid_t file)
     /* Create the data space */
     dims[0] = 100;
     dims[1] = 200;
-    space = H5Pcreate_simple(2, dims, NULL);
+    space = H5Screate_simple(2, dims, NULL);
     assert(space != FAIL);
 
     /* Create the dataset */
@@ -218,7 +218,7 @@ test_simple_io(hid_t file)
     assert(dataset >= 0);
 
     /* Write the data to the dataset */
-    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                       H5C_DEFAULT, points);
     if (status < 0) {
         puts("*FAILED*");
@@ -229,7 +229,7 @@ test_simple_io(hid_t file)
         goto error;
     }
     /* Read the dataset back */
-    status = H5Dread(dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
+    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                      H5C_DEFAULT, check);
     if (status < 0) {
         puts("*FAILED*");
@@ -301,7 +301,7 @@ test_tconv(hid_t file)
 
     /* Create the data space */
     dims[0] = 1000000;
-    space = H5Pcreate_simple (1, dims, NULL);
+    space = H5Screate_simple (1, dims, NULL);
     assert(space != FAIL);
 
     /* Create the data set */
@@ -310,7 +310,7 @@ test_tconv(hid_t file)
     assert(dataset >= 0);
 
     /* Write the data to the dataset */
-    status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5P_ALL, H5P_ALL,
+    status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
                       H5C_DEFAULT, out);
     if (status<0) H5Eprint (H5E_thrdid_g, stdout);
     assert(status >= 0);
@@ -330,7 +330,7 @@ test_tconv(hid_t file)
     }
 
     /* Read data with byte order conversion */
-    status = H5Dread(dataset, type, H5P_ALL, H5P_ALL, H5C_DEFAULT, in);
+    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5C_DEFAULT, in);
     assert(status >= 0);
 
     /* Check */

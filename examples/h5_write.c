@@ -47,7 +47,7 @@ file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
  */
 dimsf[0] = NX;
 dimsf[1] = NY;
-dataspace = H5Pcreate_simple(RANK, dimsf, NULL); 
+dataspace = H5Screate_simple(RANK, dimsf, NULL); 
 
 /* 
  * Define datatype for the data in the file.
@@ -65,13 +65,13 @@ dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
 /*
  * Write the data to the dataset using default transfer properties.
  */
-status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5P_ALL, H5P_ALL,
+status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
                   H5C_DEFAULT, data);
 
 /*
  * Close/release resources.
  */
-H5Pclose(dataspace);
+H5Sclose(dataspace);
 H5Tclose(datatype);
 H5Dclose(dataset);
 H5Fclose(file);

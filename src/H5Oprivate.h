@@ -24,7 +24,7 @@
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5Tprivate.h>
-#include <H5Pprivate.h>
+#include <H5Sprivate.h>
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -116,7 +116,7 @@ extern const H5O_class_t H5O_NULL[1];
 #define H5O_SDSPACE_ID	0x0001
 extern const H5O_class_t H5O_SDSPACE[1];
 
-/* operates on an H5P_simple_t struct */
+/* operates on an H5S_simple_t struct */
 
 /*
  * Data Type Message.

@@ -48,7 +48,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5Cprivate.h>         /* Template interface */
 #include <H5Dprivate.h>         /* Dataset interface */
 #include <H5Eprivate.h>         /*error handling */
-#include <H5Pprivate.h>         /* Dataspace functions */
+#include <H5Sprivate.h>         /* Dataspace functions */
 #include <H5Tprivate.h>         /* Datatype interface */
 #include <H5Mprivate.h>         /* Meta-object interface */
 #include <H5Cprivate.h>         /* Template interface */
@@ -110,7 +110,7 @@ static meta_func_t      meta_func_arr[] =
         NULL,                   /* Datatype GetFile */
         H5Tclose                /* Datatype Release */
     },
-    {                           /* Dimensionality object meta-functions (defined in H5P.c) */
+    {                           /* Dimensionality object meta-functions (defined in H5S.c) */
         H5_DATASPACE,           /* Dimensionality Type ID */
         NULL,                   /* Dimensionality Create */
         NULL,                   /* Dimensionality Access */
@@ -125,7 +125,7 @@ static meta_func_t      meta_func_arr[] =
         NULL,                   /* Dimensionality Delete */
         NULL,                   /* Dimensionality GetParent */
         NULL,                   /* Dimensionality GetFile */
-        H5Pclose                /* Dimensionality Release */
+        H5Sclose                /* Dimensionality Release */
     },
     {                           /* Dataset object meta-functions (defined in H5D.c) */
         H5_DATASET,             /* Dataset Type ID */

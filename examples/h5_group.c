@@ -38,7 +38,7 @@ status = H5Gclose(dir);
  * Create dataspace for the character string
  */
 size[0] = 80;
-dataspace = H5Pcreate_simple(1, size, NULL);
+dataspace = H5Screate_simple(1, size, NULL);
 
 /*
  * Create dataset "String" in the root group.  
@@ -58,7 +58,7 @@ H5Dclose(dataset);
  */
 dataset = H5Dcreate(file, "/FloatData/String", H5T_NATIVE_CHAR, dataspace,
                     H5C_DEFAULT);
-H5Pclose(dataspace);
+H5Sclose(dataspace);
 H5Dclose(dataset);
 
 /*
@@ -66,10 +66,10 @@ H5Dclose(dataset);
  */
 dims[0] = 2;
 dims[1] = 3;
-dataspace = H5Pcreate_simple(RANK, dims, NULL);
+dataspace = H5Screate_simple(RANK, dims, NULL);
 dataset = H5Dcreate(file, "/IntData/IntArray", H5T_NATIVE_INT, dataspace,
                     H5C_DEFAULT); 
-H5Pclose(dataspace);
+H5Sclose(dataspace);
 H5Dclose(dataset);
 
 /*
@@ -92,17 +92,17 @@ status = H5Gset (file, "/FloatData");
 
 dims[0] = 5;
 dims[1] = 10;
-dataspace = H5Pcreate_simple(RANK, dims, NULL);
+dataspace = H5Screate_simple(RANK, dims, NULL);
 dataset = H5Dcreate(file, "FloatArray", H5T_NATIVE_FLOAT, dataspace, H5C_DEFAULT); 
-H5Pclose(dataspace);
+H5Sclose(dataspace);
 H5Dclose(dataset);
 
 dims[0] = 4;
 dims[1] = 6;
-dataspace = H5Pcreate_simple(RANK, dims, NULL);
+dataspace = H5Screate_simple(RANK, dims, NULL);
 dataset = H5Dcreate(file, "DoubleArray", H5T_NATIVE_DOUBLE, dataspace,
                     H5C_DEFAULT); 
-H5Pclose(dataspace);
+H5Sclose(dataspace);
 H5Dclose(dataset);
 
 /* 

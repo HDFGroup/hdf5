@@ -66,8 +66,8 @@ size  = H5Tget_size(datatype);
 printf(" Data size is %d \n", size);
 
 dataspace = H5Dget_space(dataset);    /* dataspace handle */
-rank      = H5Pget_ndims(dataspace);
-status_n  = H5Pget_dims(dataspace, dims_out);
+rank      = H5Sget_ndims(dataspace);
+status_n  = H5Sget_dims(dataspace, dims_out);
 printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);
 
 /* 
@@ -77,7 +77,7 @@ offset[0] = 1;
 offset[1] = 2;
 count[0]  = NX_SUB;
 count[1]  = NY_SUB;
-status = H5Pset_hyperslab(dataspace, offset, count, NULL);
+status = H5Sset_hyperslab(dataspace, offset, count, NULL);
 
 /*
  * Define the memory dataspace.
@@ -85,7 +85,7 @@ status = H5Pset_hyperslab(dataspace, offset, count, NULL);
 dimsm[0] = NX;
 dimsm[1] = NY;
 dimsm[2] = NZ ;
-memspace = H5Pcreate_simple(RANK_OUT,dimsm,NULL);   
+memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
 
 /* 
  * Define memory hyperslab. 
@@ -96,7 +96,7 @@ offset_out[2] = 0;
 count_out[0]  = NX_SUB;
 count_out[1]  = NY_SUB;
 count_out[2]  = 1;
-status = H5Pset_hyperslab(memspace, offset_out, count_out, NULL);
+status = H5Sset_hyperslab(memspace, offset_out, count_out, NULL);
 
 /*
  * Read data from hyperslab in the file into the hyperslab in 
@@ -121,8 +121,8 @@ for (j = 0; j < NX; j++) {
  */
 H5Tclose(datatype);
 H5Dclose(dataset);
-H5Pclose(dataspace);
-H5Pclose(memspace);
+H5Sclose(dataspace);
+H5Sclose(memspace);
 H5Fclose(file);
 
 }     

@@ -37,7 +37,7 @@ static herr_t H5O_sdspace_debug(H5F_t *f, const void *_mesg,
 const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_SDSPACE_ID,         /* message id number                    */
     "simple_dspace",        /* message name for debugging           */
-    sizeof(H5P_simple_t),   /* native message size                  */
+    sizeof(H5S_simple_t),   /* native message size                  */
     H5O_sdspace_decode,     /* decode message                       */
     H5O_sdspace_encode,     /* encode message                       */
     H5O_sdspace_copy,       /* copy the native value                */
@@ -71,7 +71,7 @@ static hbool_t interface_initialize_g = FALSE;
 static void *
 H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 {
-    H5P_simple_t	*sdim = NULL;/* New simple dimensionality structure */
+    H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     uintn               u;  		/* local counting variable */
     uintn		flags;
     
@@ -83,7 +83,7 @@ H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     assert(p);
 
     /* decode */
-    if ((sdim = H5MM_xcalloc(1, sizeof(H5P_simple_t))) != NULL) {
+    if ((sdim = H5MM_xcalloc(1, sizeof(H5S_simple_t))) != NULL) {
         UINT32DECODE(p, sdim->rank);
         UINT32DECODE(p, flags);
         if (sdim->rank > 0) {
@@ -133,7 +133,7 @@ H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 static herr_t
 H5O_sdspace_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 {
-    const H5P_simple_t  *sdim = (const H5P_simple_t *) mesg;
+    const H5S_simple_t  *sdim = (const H5S_simple_t *) mesg;
     uintn               u;  /* Local counting variable */
     uintn		flags = 0;
 
@@ -185,18 +185,18 @@ H5O_sdspace_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 static void            *
 H5O_sdspace_copy(const void *mesg, void *dest)
 {
-    const H5P_simple_t     *src = (const H5P_simple_t *) mesg;
-    H5P_simple_t           *dst = (H5P_simple_t *) dest;
+    const H5S_simple_t     *src = (const H5S_simple_t *) mesg;
+    H5S_simple_t           *dst = (H5S_simple_t *) dest;
 
     FUNC_ENTER(H5O_sdspace_copy, NULL);
 
     /* check args */
     assert(src);
     if (!dst)
-        dst = H5MM_xcalloc(1, sizeof(H5P_simple_t));
+        dst = H5MM_xcalloc(1, sizeof(H5S_simple_t));
 
     /* deep copy -- pointed-to values are copied also */
-    HDmemcpy(dst, src, sizeof(H5P_simple_t));
+    HDmemcpy(dst, src, sizeof(H5S_simple_t));
     
     if (src->size) {
         dst->size = H5MM_xcalloc(src->rank, sizeof(src->size[0]));
@@ -233,7 +233,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 static size_t
 H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
-    const H5P_simple_t     *sdim = (const H5P_simple_t *) mesg;
+    const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
 
     FUNC_ENTER(H5O_sim_dtype_size, FAIL);
@@ -267,7 +267,7 @@ static herr_t
 H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
                   intn indent, intn fwidth)
 {
-    const H5P_simple_t     *sdim = (const H5P_simple_t *) mesg;
+    const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
     uintn                   u;  /* local counting variable */
 
     FUNC_ENTER(H5O_sdspace_debug, FAIL);
@@ -293,7 +293,7 @@ H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
     if (sdim->max) {
 	fprintf (stream, "{");
         for (u = 0; u < sdim->rank; u++) {
-	    if (H5P_UNLIMITED==sdim->max[u]) {
+	    if (H5S_UNLIMITED==sdim->max[u]) {
 		fprintf (stream, "%sINF", u?", ":"");
 	    } else {
 		fprintf (stream, "%s%lu\n", u?", ":"",

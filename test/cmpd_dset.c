@@ -134,7 +134,7 @@ main (void)
     assert (file>=0);
 
     /* Create the data space */
-    space = H5Pcreate_simple (2, dim, NULL);
+    space = H5Screate_simple (2, dim, NULL);
     assert (space>=0);
 
     
@@ -170,7 +170,7 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
     assert (dataset>=0);
 
     /* Write the data */
-    status = H5Dwrite (dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+    status = H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s1);
     assert (status>=0);
 
     /*
@@ -195,7 +195,7 @@ STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
     assert (s2_tid>=0);
     
     /* Read the data */
-    status = H5Dread (dataset, s2_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s2);
+    status = H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s2);
     assert (status>=0);
 
     /* Compare s2 with s1.  They should be the same */
@@ -227,7 +227,7 @@ STEP  3: Read the dataset again with members in a different order.\n");
     assert (s3_tid>=0);
     
     /* Read the data */
-    status = H5Dread (dataset, s3_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s3);
+    status = H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s3);
     assert (status>=0);
 
     /* Compare s3 with s1.  They should be the same */
@@ -255,7 +255,7 @@ STEP  4: Read a subset of the members.\n");
     assert (s4_tid>=0);
 
     /* Read the data */
-    status = H5Dread (dataset, s4_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s4);
+    status = H5Dread (dataset, s4_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s4);
     assert (status>=0);
 
     /* Compare s4 with s1 */
@@ -291,7 +291,7 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     assert (s5_tid>=0);
 	
     /* Read the data */
-    status = H5Dread (dataset, s5_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s5);
+    status = H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s5);
     assert (status>=0);
 
     /* Check that the data was read properly */
@@ -329,11 +329,11 @@ STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
     }
 
     /* Write the data to file */
-    status = H5Dwrite (dataset, s4_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s4);
+    status = H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s4);
     assert (status>=0);
     
     /* Read the data back */
-    status = H5Dread (dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+    status = H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s1);
     assert (status>=0);
 
     /* Compare */
@@ -356,11 +356,11 @@ STEP  7: Reading original dataset with explicit data space.\n");
     fflush (stdout);
 
     /* Create the data space */
-    s7_sid = H5Pcreate_simple (2, dim, NULL);
+    s7_sid = H5Screate_simple (2, dim, NULL);
     assert (s7_sid>=0);
     
     /* Read the dataset */
-    status = H5Dread (dataset, s2_tid, s7_sid, H5P_ALL, H5C_DEFAULT, s2);
+    status = H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5C_DEFAULT, s2);
     assert (status>=0);
 
     /* Compare */
@@ -391,11 +391,11 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     h_size[1] = 2*NY/3 - f_offset[1];
     h_sample[0] = 1;
     h_sample[1] = 1;
-    status = H5Pset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    status = H5Sset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
     assert (status>=0);
 
     /* Create memory data space */
-    s8_m_sid = H5Pcreate_simple (2, h_size, NULL);
+    s8_m_sid = H5Screate_simple (2, h_size, NULL);
     assert (s8_m_sid>=0);
 
     /* Read the dataset */
@@ -518,7 +518,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     fflush (stdout);
     
     /* Create the memory array and initialize all fields to zero */
-    ndims = H5Pget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    ndims = H5Sget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
     assert (ndims==2);
     s11 = malloc (h_size[0]*h_size[1]*sizeof(s4_t));
     assert (s11);
@@ -529,7 +529,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     assert (status>=0);
 
     /* Read the whole thing */
-    status = H5Dread (dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+    status = H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5C_DEFAULT, s1);
     assert (status>=0);
 
     /* Compare */

@@ -9,16 +9,16 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
-#include <H5Pprivate.h>
+#include <H5Sprivate.h>
 #include <H5Vprivate.h>
 
 /* Interface initialization */
-#define PABLO_MASK      H5P_simp_mask
+#define PABLO_MASK      H5S_simp_mask
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = FALSE;
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_simp_init
+ * Function:	H5S_simp_init
  *
  * Purpose:	Generates element numbering information for the data
  *		spaces involved in a data space conversion.
@@ -36,30 +36,30 @@ static intn             interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 size_t
-H5P_simp_init (const struct H5O_layout_t *layout, const H5P_t *mem_space,
-	       const H5P_t *file_space, H5P_number_t *numbering/*out*/)
+H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
+	       const H5S_t *file_space, H5S_number_t *numbering/*out*/)
 {
     size_t	nelmts;
     
-    FUNC_ENTER (H5P_simp_init, 0);
+    FUNC_ENTER (H5S_simp_init, 0);
 
     /* Check args */
     assert (layout);
-    assert (mem_space && H5P_SIMPLE==mem_space->type);
-    assert (file_space && H5P_SIMPLE==file_space->type);
+    assert (mem_space && H5S_SIMPLE==mem_space->type);
+    assert (file_space && H5S_SIMPLE==file_space->type);
     assert (numbering);
 
     /* Numbering is implied by the hyperslab, C order */
-    HDmemset (numbering, 0, sizeof(H5P_number_t));
+    HDmemset (numbering, 0, sizeof(H5S_number_t));
 
     /* Data can be efficiently copied at any size */
-    nelmts = H5P_get_npoints (file_space);
+    nelmts = H5S_get_npoints (file_space);
     
     FUNC_LEAVE (nelmts);
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_simp_fgath
+ * Function:	H5S_simp_fgath
  *
  * Purpose:	Gathers data points from file F and accumulates them in the
  *		type conversion buffer BUF.  The LAYOUT argument describes
@@ -68,7 +68,7 @@ H5P_simp_init (const struct H5O_layout_t *layout, const H5P_t *mem_space,
  *		FILE_SPACE describes the data space of the dataset on disk
  *		and the elements that have been selected for reading (via
  *		hyperslab, etc) and NUMBERING describes how those elements
- *		are numbered (initialized by the H5P_*_init() call). This
+ *		are numbered (initialized by the H5S_*_init() call). This
  *		function will copy at most NELMTS elements beginning at the
  *		element numbered START.
  *
@@ -84,9 +84,9 @@ H5P_simp_init (const struct H5O_layout_t *layout, const H5P_t *mem_space,
  *-------------------------------------------------------------------------
  */
 size_t
-H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		size_t elmt_size, const H5P_t *file_space,
-		const H5P_number_t *numbering, size_t start, size_t nelmts,
+H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+		size_t elmt_size, const H5S_t *file_space,
+		const H5S_number_t *numbering, size_t start, size_t nelmts,
 		void *buf/*out*/)
 {
     size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
@@ -99,7 +99,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
-    FUNC_ENTER (H5P_simp_fgath, 0);
+    FUNC_ENTER (H5S_simp_fgath, 0);
 
     /* Check args */
     assert (f);
@@ -114,7 +114,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * The prototype doesn't support strip mining.
      */
     assert (0==start);
-    assert (nelmts==H5P_get_npoints (file_space));
+    assert (nelmts==H5S_get_npoints (file_space));
 
     /*
      * Get hyperslab information to determine what elements are being
@@ -124,13 +124,13 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * H5F_istore_read().
      */
 #ifdef LATER
-    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset,
+    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
-    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset_signed,
+    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
@@ -162,7 +162,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 }
     
 /*-------------------------------------------------------------------------
- * Function:	H5P_simp_mscat
+ * Function:	H5S_simp_mscat
  *
  * Purpose:	Scatters data points from the type conversion buffer
  *		TCONV_BUF to the application buffer BUF.  Each element is
@@ -183,8 +183,8 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
-		const H5P_t *mem_space, const H5P_number_t *numbering,
+H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
+		const H5S_t *mem_space, const H5S_number_t *numbering,
 		size_t start, size_t nelmts, void *buf/*out*/)
 {
     size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
@@ -198,12 +198,12 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
-    FUNC_ENTER (H5P_simp_mscat, FAIL);
+    FUNC_ENTER (H5S_simp_mscat, FAIL);
 
     /* Check args */
     assert (tconv_buf);
     assert (elmt_size>0);
-    assert (mem_space && H5P_SIMPLE==mem_space->type);
+    assert (mem_space && H5S_SIMPLE==mem_space->type);
     assert (numbering);
     assert (nelmts>0);
     assert (buf);
@@ -212,7 +212,7 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
      * The prototype doesn't support strip mining.
      */
     assert (0==start);
-    assert (nelmts==H5P_get_npoints (mem_space));
+    assert (nelmts==H5S_get_npoints (mem_space));
 
     /*
      * Retrieve hyperslab information to determine what elements are being
@@ -221,13 +221,13 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
      * way to pass sample information to H5V_hyper_copy().
      */
 #ifdef LATER
-    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset, hsize,
+    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
-    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset_signed,
+    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
@@ -243,7 +243,7 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
-    if (H5P_get_dims (mem_space, mem_size)<0) {
+    if (H5S_get_dims (mem_space, mem_size)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve data space dimensions");
     }
@@ -265,7 +265,7 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_simp_mgath
+ * Function:	H5S_simp_mgath
  *
  * Purpose:	Gathers dataset elements from application memory BUF and
  *		copies them into the data type conversion buffer TCONV_BUF.
@@ -288,8 +288,8 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 size_t
-H5P_simp_mgath (const void *buf, size_t elmt_size,
-		const H5P_t *mem_space, const H5P_number_t *numbering,
+H5S_simp_mgath (const void *buf, size_t elmt_size,
+		const H5S_t *mem_space, const H5S_number_t *numbering,
 		size_t start, size_t nelmts, void *tconv_buf/*out*/)
 {
     size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
@@ -303,12 +303,12 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
     intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
-    FUNC_ENTER (H5P_simp_mgath, 0);
+    FUNC_ENTER (H5S_simp_mgath, 0);
 
     /* Check args */
     assert (buf);
     assert (elmt_size>0);
-    assert (mem_space && H5P_SIMPLE==mem_space->type);
+    assert (mem_space && H5S_SIMPLE==mem_space->type);
     assert (numbering);
     assert (nelmts>0);
     assert (tconv_buf);
@@ -317,7 +317,7 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
      * The prototype doesn't support strip mining.
      */
     assert (0==start);
-    assert (nelmts==H5P_get_npoints (mem_space));
+    assert (nelmts==H5S_get_npoints (mem_space));
 
     /*
      * Retrieve hyperslab information to determine what elements are being
@@ -326,13 +326,13 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
      * way to pass sample information to H5V_hyper_copy().
      */
 #ifdef LATER
-    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset, hsize,
+    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
-    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset_signed,
+    if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
@@ -348,7 +348,7 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
-    if (H5P_get_dims (mem_space, mem_size)<0) {
+    if (H5S_get_dims (mem_space, mem_size)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve data space dimensions");
     }
@@ -370,7 +370,7 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_simp_fscat
+ * Function:	H5S_simp_fscat
  *
  * Purpose:	Scatters dataset elements from the type conversion buffer BUF
  *		to the file F where the data points are arranged according to
@@ -392,9 +392,9 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		size_t elmt_size, const H5P_t *file_space,
-		const H5P_number_t *numbering, size_t start, size_t nelmts,
+H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+		size_t elmt_size, const H5S_t *file_space,
+		const H5S_number_t *numbering, size_t start, size_t nelmts,
 		const void *buf)
 {
     size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
@@ -407,7 +407,7 @@ H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     intn	space_ndims;			/*space dimensionality	*/
     intn	i;				/*counters		*/
 
-    FUNC_ENTER (H5P_simp_fscat, FAIL);
+    FUNC_ENTER (H5S_simp_fscat, FAIL);
 
     /* Check args */
     assert (f);
@@ -422,7 +422,7 @@ H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * The prototype doesn't support strip mining.
      */
     assert (0==start);
-    assert (nelmts==H5P_get_npoints (file_space));
+    assert (nelmts==H5S_get_npoints (file_space));
     
     /*
      * Get hyperslab information to determine what elements are being
@@ -432,13 +432,13 @@ H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * H5F_istore_read().
      */
 #ifdef LATER
-    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset, hsize,
+    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset, hsize,
 					sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
-    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset_signed,
+    if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");

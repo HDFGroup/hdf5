@@ -48,8 +48,8 @@ dataset = H5Dopen(file, DATASETNAME);
  */
  
 filespace = H5Dget_space(dataset);    /* Get filespace handle first. */
-rank      = H5Pget_ndims(filespace);
-status_n  = H5Pget_dims(filespace, dims);
+rank      = H5Sget_ndims(filespace);
+status_n  = H5Sget_dims(filespace, dims);
 printf("dataset rank %d, dimensions %d x %d \n", rank, dims[0], dims[1]);
 
 /*
@@ -73,7 +73,7 @@ printf("chunk rank %d, dimensions %d x %d \n", rank_chunk,
 /*
  * Define the memory space to read dataset.
  */
-memspace = H5Pcreate_simple(RANK,dims,NULL);
+memspace = H5Screate_simple(RANK,dims,NULL);
  
 /*
  * Read dataset back and display.
@@ -110,7 +110,7 @@ for (j = 0; j < dims[0]; j++) {
  * and read it into column array.
  */
 col_dims[0] = 10;
-memspace =  H5Pcreate_simple(RANKC, col_dims, NULL);
+memspace =  H5Screate_simple(RANKC, col_dims, NULL);
 
 /*
  * Define the column (hyperslab) to read.
@@ -119,7 +119,7 @@ offset[0] = 0;
 offset[1] = 2;
 count[0]  = 10;
 count[1]  = 1;
-status = H5Pset_hyperslab(filespace, offset, count, NULL);
+status = H5Sset_hyperslab(filespace, offset, count, NULL);
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
                  H5C_DEFAULT, column);
 printf("\n");
@@ -146,7 +146,7 @@ for (i = 0; i < 10; i++) {
 /*
  * Define the memory space to read a chunk.
  */
-memspace = H5Pcreate_simple(rank_chunk,chunk_dims,NULL);
+memspace = H5Screate_simple(rank_chunk,chunk_dims,NULL);
 
 /*
  * Define chunk in the file (hyperslab) to read.
@@ -155,7 +155,7 @@ offset[0] = 2;
 offset[1] = 0;
 count[0]  = chunk_dims[0];
 count[1]  = chunk_dims[1];
-status = H5Pset_hyperslab(filespace, offset, count, NULL);
+status = H5Sset_hyperslab(filespace, offset, count, NULL);
 
 /*
  * Read chunk back and display.
@@ -179,8 +179,8 @@ for (j = 0; j < chunk_dims[0]; j++) {
  */
 H5Cclose(cparms);
 H5Dclose(dataset);
-H5Pclose(filespace);
-H5Pclose(memspace);
+H5Sclose(filespace);
+H5Sclose(memspace);
 H5Fclose(file);
 
 }     
