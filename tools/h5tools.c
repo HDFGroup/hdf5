@@ -1763,7 +1763,6 @@ struct h5dump_str_t tempstr;
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-	//	h5dump_sprint(&tempstr, &info, -1/*no container*/, p_type, sm_buf+i*p_type_nbytes);
 		h5dump_sprint(&tempstr, &info, container, p_type, sm_buf+i*p_type_nbytes);
 
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
