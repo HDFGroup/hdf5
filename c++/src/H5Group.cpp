@@ -42,7 +42,7 @@ namespace H5 {
 
 //--------------------------------------------------------------------------
 // Function:	Group default constructor
-///\brief	Default constructor: Creates a stub group
+///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group() : H5Object() {}
@@ -70,7 +70,6 @@ hid_t Group::getLocId() const
 // Function:	Group overloaded constructor
 ///\brief	Creates a Group object using the id of an existing group.
 ///\param	group_id - IN: Id of an existing group
-///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
@@ -78,9 +77,9 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 //--------------------------------------------------------------------------
 // Function:	Group::Reference
 ///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	name      - IN: Name of the object to be referenced
+///\param	name - IN: Name of the object to be referenced
 ///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type  - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
 ///\exception	H5::ReferenceIException
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -112,8 +111,8 @@ void* Group::Reference(const char* name) const
 //--------------------------------------------------------------------------
 // Function:	Group::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref      - IN: Reference to query
-///\param	ref_type - IN: Type of reference to query
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
 // Return	An object type, which can be one of the following:
 //			H5G_LINK Object is a symbolic link.  
 //			H5G_GROUP Object is a group.  
@@ -144,7 +143,7 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 
 //--------------------------------------------------------------------------
 // Function:	Group::throwException
-///\brief	Throws group exception - initially implemented for CommonFG
+///\brief	Throws H5::GroupIException.
 ///\param	func_name - Name of the function where failure occurs
 ///\param	msg       - Message describing the failure
 ///\exception	H5::GroupIException
@@ -174,9 +173,10 @@ Group::~Group()
     try {
         decRefCount();
     }
-    catch (Exception close_error) {
+    catch (Exception close_error) { // thrown by p_close
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
+
 }  
 
 #ifndef H5_NO_NAMESPACE

@@ -29,22 +29,16 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default dataspace
+///\brief	Constant for default dataspace.
 //--------------------------------------------------------------------------
 const DataSpace DataSpace::ALL( H5S_ALL );
 
 //--------------------------------------------------------------------------
-// Function:	DataSpace default constructor
-///\brief	Default constructor: Creates a stub datatype
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-DataSpace::DataSpace() : IdComponent() {}
-
-//--------------------------------------------------------------------------
-// Function:	DataSpace overloaded constructor
-///\brief	Creates a dataspace given a dataspace type.
+// Function:	DataSpace constructor
+///\brief	Creates a new dataspace given a dataspace type.
 ///\param	type - IN: Type of the dataspace to be created, which 
-///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE
+///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE;
+///		default to \c H5S_SCALAR.
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -59,7 +53,7 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates a new simple dataspace and opens it for access.
+///\brief	Creates a new simple dataspace.
 ///\param	rank - IN: Number of dimensions of dataspace. 
 ///\param	dims - IN: An array of the size of each dimension. 
 ///\param	maxdims - IN: An array of the maximum size of each dimension. 
@@ -77,7 +71,7 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates an DataSpace object using the id of an existing 
+///\brief	Creates a DataSpace object using the id of an existing 
 ///		dataspace.
 ///\param	existing_id - IN: Id of an existing dataspace
 ///\exception	H5::DataSpaceIException
@@ -88,7 +82,7 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent(existing_id) {}
 //--------------------------------------------------------------------------
 // Function:	DataSpace copy constructor
 ///\brief	Copy constructor: makes a copy of the original DataSpace object.
-///\param	original - IN: DataSpace instance to copy
+///\param	original - IN: DataSpace object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
@@ -102,16 +96,16 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
-   // reset the identifier of this instance - send 'this' in so that
-   // H5Sclose can be called appropriately
-   if( id != H5S_ALL ) { // not a constant, should call H5Sclose
-        try {
-            decRefCount();
-        }
-        catch (Exception close_error) {
-            throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
-        }
-   }
+   // If this object has a valid id, appropriately decrement reference
+   // counter and close the id.
+   if( id != H5S_ALL ) { 
+      try {
+         decRefCount();
+      }
+      catch (Exception close_error) {
+         throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
+      }
+   }  // if
 
    // call C routine to copy the dataspace 
    id = H5Scopy( like_space.getId() );
@@ -122,7 +116,7 @@ void DataSpace::copy( const DataSpace& like_space )
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::operator=
-///\brief	Assignment operator
+///\brief	Assignment operator.
 ///\param	rhs - IN: Reference to the existing dataspace
 ///\return	Reference to DataSpace instance
 ///\exception	H5::DataSpaceIException
@@ -140,7 +134,7 @@ DataSpace& DataSpace::operator=( const DataSpace& rhs )
 //--------------------------------------------------------------------------
 // Function:	DataSpace::isSimple
 ///\brief	Determines whether this dataspace is a simple dataspace.
-///\return	true if the dataspace is a simple dataspace, and false, 
+///\return	\c true if the dataspace is a simple dataspace, and \c false, 
 ///		otherwise
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -203,7 +197,7 @@ int DataSpace::getSimpleExtentDims ( hsize_t *dims, hsize_t *maxdims ) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentNdims
-///\brief	Determines the dimensionality of a dataspace.
+///\brief	Returns the dimensionality of a dataspace.
 ///\return	Number of dimensions
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -221,7 +215,7 @@ int DataSpace::getSimpleExtentNdims () const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentNpoints
-///\brief	Determines the number of elements in a dataspace.
+///\brief	Returns the number of elements in a dataspace.
 ///\return	Number of elements
 ///\exception	H5::DataSpaceIException
 // Modification
@@ -245,7 +239,7 @@ hssize_t DataSpace::getSimpleExtentNpoints () const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentType
-///\brief	Determine the current class of a dataspace.
+///\brief	Returns the current class of a dataspace.
 ///\return	Class of the dataspace
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -264,7 +258,7 @@ H5S_class_t DataSpace::getSimpleExtentType () const
 //--------------------------------------------------------------------------
 // Function:	DataSpace::extentCopy
 ///\brief	Copies the extent of a dataspace.
-///\param	dest_space  - IN: DataSpace to copy from
+///\param	dest_space  - IN: Dataspace to copy from
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -396,7 +390,7 @@ hssize_t DataSpace::getSelectElemNpoints () const
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
-/// http:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectElemPointList
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const
@@ -495,8 +489,8 @@ void DataSpace::selectNone () const
 // Function:	DataSpace::selectValid
 ///\brief	Verifies that the selection is within the extent of the 
 ///		dataspace.
-///\return	true if the selection is within the extent of the
-///		dataspace, and false, otherwise
+///\return	\c true if the selection is within the extent of the
+///		dataspace, and \c false, otherwise
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -525,8 +519,8 @@ bool DataSpace::selectValid () const
 ///\exception	H5::DataSpaceIException
 ///\par Description
 ///		For more information, please refer to the C layer Reference
-///		Manual at:
-/// http:
+///		Manual at: 
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectHyperslab
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride, const hsize_t *block ) const
@@ -547,15 +541,16 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {  
-   // The dataspace id will be closed properly
-   if( id != H5S_ALL ) { // not a constant, should call H5Sclose
-        try {
-            decRefCount();
-        }
-        catch (Exception close_error) {
-            cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
-        }
-   }
+   // If this object has a valid id, appropriately decrement reference
+   // counter and close the id.
+   if( id != H5S_ALL ) { 
+      try {
+         decRefCount();
+      }
+      catch (Exception close_error) {
+         throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
+      }
+   }  // if
 }  
 
 #ifndef H5_NO_NAMESPACE

@@ -41,17 +41,17 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;
 
-	// Default constructor
+	// default constructor
 	Group();
 
-	// Copy constructor: makes a copy of the original object.
+	// Copy constructor: makes a copy of the original object
 	Group(const Group& original);
 
-	// Destructor.
+	// Destructor
 	virtual ~Group();
 
-        // Creates a copy of an existing Group using its id.
-        Group(const hid_t group_id);
+        // Creates a copy of an existing group using its id.
+        Group( const hid_t group_id );
 
 };
 #ifndef H5_NO_NAMESPACE

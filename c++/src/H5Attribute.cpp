@@ -163,7 +163,7 @@ DataSpace Attribute::getSpace() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Attribute::p_getType (private)
+// Function:	Attribute::p_get_type (private)
 // Purpose	Gets the datatype of this attribute.
 // Return	Id of the datatype
 // Exception	H5::AttributeIException
@@ -171,7 +171,7 @@ DataSpace Attribute::getSpace() const
 // 		This private function is used in AbstractDs.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hid_t Attribute::p_getType() const
+hid_t Attribute::p_get_type() const
 {
    hid_t type_id = H5Aget_type( id );
    if( type_id > 0 )
@@ -203,7 +203,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    {
       throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
-   // otherwise, convert the C string attribute name and return 
+   // otherwise, convert the C attribute name and return 
    attr_name = name_C;
    delete name_C;
    return( name_size );
@@ -241,13 +241,40 @@ string Attribute::getName() const
    // Try with 256 characters for the name first, if the name's length 
    // returned is more than that then, read the name again with the 
    // appropriate space allocation
+   char* name_C = new char[256];  // temporary C-string for C API
+   ssize_t name_size = H5Aget_name(id, 255, name_C);
+
    string attr_name;
-   ssize_t name_size = getName(255, attr_name);
    if (name_size >= 256)
       name_size = getName(name_size, attr_name);
+
+   // otherwise, convert the C attribute name and return 
+   else
+      attr_name = name_C;
+
+   delete name_C;
    return( attr_name ); 
-   // let caller catch exception if any
 }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    Attribute::p_close (private)
+// Purpose:     Closes this attribute.
+// Exception    H5::AttributeIException
+// Description
+//              This function will be obsolete because its functionality
+//              is recently handled by the C library layer. - May, 2004
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void Attribute::p_close() const
+{
+   herr_t ret_value = H5Aclose( id );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException(0, "H5Aclose failed");
+   }
+}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Attribute destructor
@@ -257,12 +284,12 @@ string Attribute::getName() const
 Attribute::~Attribute()
 {
    // The attribute id will be closed properly
-    try {
-        decRefCount();
-    }
-    catch (Exception close_error) {
-        cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
-    }
+   try {
+      decRefCount();
+   }
+   catch (Exception close_error) {
+      cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
+   }
 }
 
 #ifndef H5_NO_NAMESPACE

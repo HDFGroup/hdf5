@@ -38,19 +38,29 @@ FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList copy constructor
-///\brief	Copy constructor: makes a copy of the original FileCreatPropList object.
+///\brief	Copy constructor: makes a copy of the original 
+///		FileCreatPropList object.
 ///\param	original - IN: FileCreatPropList instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileCreatPropList::FileCreatPropList( const FileCreatPropList& original ) : PropList( original ) {}
 
 //--------------------------------------------------------------------------
+// Function:	FileCreatPropList overloaded constructor
+///\brief	Creates a file creation property list using the id of an
+///		existing one.
+///\param	plist_id - IN: FileCreatPropList id to use
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+
+//--------------------------------------------------------------------------
 // Function:	FileCreatPropList::getVersion
 ///\brief	Retrieves version information for various parts of a file.
-///\param	super - OUT: The file super block.
+///\param	super    - OUT: The file super block.
 ///\param	freelist - OUT: The global free list.
-///\param	stab - OUT: The root symbol table entry.
-///\param	shhdr - OUT: Shared object headers.
+///\param	stab     - OUT: The root symbol table entry.
+///\param	shhdr    - OUT: Shared object headers.
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Any (or even all) of the output arguments can be null pointers.

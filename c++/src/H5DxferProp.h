@@ -95,10 +95,10 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	H5Z_EDC_t getEDCCheck();
 
 	// Creates a copy of an existing dataset memory and transfer 
-	// property list using the property list id
-	DSetMemXferPropList (const hid_t plist_id) : PropList( plist_id ) {}
+	// property list using the property list id.
+	DSetMemXferPropList (const hid_t plist_id);
 
-	// Default destructor
+	// Noop destructor
 	virtual ~DSetMemXferPropList();
 
 };

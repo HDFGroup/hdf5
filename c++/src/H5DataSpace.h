@@ -26,22 +26,37 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	static const DataSpace ALL;
 
 	// Creates a dataspace object given the space type
-	DataSpace( H5S_class_t type ); // H5Screate
+	DataSpace(H5S_class_t type = H5S_SCALAR);
 
 	// Creates a simple dataspace
-	DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims = NULL); // H5Screate_simple
-
-	// Makes copy of an existing dataspace.
-	void copy( const DataSpace& like_space ); // H5Scopy
+	DataSpace(int rank, const hsize_t * dims, const hsize_t * maxdims = NULL);
 
 	// Assignment operator
 	DataSpace& operator=( const DataSpace& rhs );
 
-	// Determines if this dataspace is a simple one.
-	bool isSimple() const;
+	// Makes copy of an existing dataspace.
+	void copy(const DataSpace& like_space);
 
-	// Sets the offset of this simple dataspace.
-	void offsetSimple( const hssize_t* offset ) const;
+	// Copies the extent of this dataspace.
+	void extentCopy( DataSpace& dest_space ) const;
+
+	// Gets the bounding box containing the current selection.
+	void getSelectBounds( hssize_t* start, hssize_t* end ) const;
+
+	// Gets the number of element points in the current selection.
+	hssize_t getSelectElemNpoints() const;
+
+	// Retrieves the list of element points currently selected.
+	void getSelectElemPointlist( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
+
+	// Gets the list of hyperslab blocks currently selected.
+	void getSelectHyperBlocklist( hsize_t startblock, hsize_t numblocks, hsize_t *buf ) const;
+
+	// Get number of hyperslab blocks.
+	hssize_t getSelectHyperNblocks() const;
+
+	// Gets the number of elements in this dataspace selection.
+	hssize_t getSelectNpoints() const;
 
 	// Retrieves dataspace dimension size and maximum size.
 	int getSimpleExtentDims( hsize_t *dims, hsize_t *maxdims = NULL ) const;
@@ -56,39 +71,21 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Gets the current class of this dataspace.
 	H5S_class_t getSimpleExtentType() const;
 
-	// Copies the extent of this dataspace.
-	void extentCopy( DataSpace& dest_space ) const;
+	// Determines if this dataspace is a simple one.
+	bool isSimple() const;
 
-	// Sets or resets the size of this dataspace.
-	void setExtentSimple( int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL ) const;
+	// Sets the offset of this simple dataspace.
+	void offsetSimple( const hssize_t* offset ) const;
 
-	// Removes the extent from this dataspace.
-	void setExtentNone() const;
-
-	// Gets the number of elements in this dataspace selection.
-	hssize_t getSelectNpoints() const;
-
-	// Get number of hyperslab blocks.
-	hssize_t getSelectHyperNblocks() const;
-
-	// Gets the list of hyperslab blocks currently selected.
-	void getSelectHyperBlocklist( hsize_t startblock, hsize_t numblocks, hsize_t *buf ) const;
-
-	// Gets the number of element points in the current selection.
-	hssize_t getSelectElemNpoints() const;
-
-	// Retrieves the list of element points currently selected.
-	void getSelectElemPointlist( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
-
-	// Gets the bounding box containing the current selection.
-	void getSelectBounds( hssize_t* start, hssize_t* end ) const;
+	// Selects the entire dataspace.
+	void selectAll() const;
 
 	// Selects array elements to be included in the selection for 
 	// this dataspace.
 	void selectElements( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const;
 
-	// Selects the entire dataspace.
-	void selectAll() const;
+	// Selects a hyperslab region to add to the current selected region.
+	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
 
 	// Resets the selection region to include no elements.
 	void selectNone() const;
@@ -96,19 +93,24 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Verifies that the selection is within the extent of the dataspace.
 	bool selectValid() const;
 
-	// Selects a hyperslab region to add to the current selected region.
-	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
+	// Removes the extent from this dataspace.
+	void setExtentNone() const;
 
-	// Uses an existing dataspace identifier to make a DataSpace object
-	// or uses a default id to create a default dataspace object
-	DataSpace( const hid_t space_id );
+	// Sets or resets the size of this dataspace.
+	void setExtentSimple( int rank, const hsize_t *current_size, const hsize_t *maximum_size = NULL ) const;
 
-	// Default constructor
-	DataSpace();
+	// Creates a DataSpace object using an existing dataspace id.
+	DataSpace(const hid_t space_id);
 
 	// Copy constructor: makes a copy of the original DataSpace object.
-	DataSpace( const DataSpace& original );
+	DataSpace(const DataSpace& original);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Used by the API to close the dataspace 
+	void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+	// Destructor: properly terminates access to this dataspace.
 	virtual ~DataSpace();
 };
 #ifndef H5_NO_NAMESPACE

@@ -26,13 +26,6 @@ namespace H5 {
 #endif
 class H5_DLLCPP AbstractDs : public H5Object {
    public:
-	// Gets the dataspace of this abstract dataset - pure virtual
-	virtual DataSpace getSpace() const = 0;
-
-        // Gets the class of the datatype that is used by this abstract 
-	// dataset        
-	H5T_class_t getTypeClass() const;
-
 	// Gets a copy the datatype of that this abstract dataset uses.
 	// Note that this datatype is a generic one and can only be accessed 
 	// via generic member functions, i.e., member functions belong 
@@ -46,6 +39,13 @@ class H5_DLLCPP AbstractDs : public H5Object {
         IntType getIntType() const;
         FloatType getFloatType() const;
         StrType getStrType() const;
+
+	// Gets the dataspace of this abstract dataset - pure virtual
+	virtual DataSpace getSpace() const = 0;
+
+        // Gets the class of the datatype that is used by this abstract 
+	// dataset        
+	H5T_class_t getTypeClass() const;
 
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
@@ -61,7 +61,7 @@ class H5_DLLCPP AbstractDs : public H5Object {
 
    private:
 	// This member function is implemented by DataSet and Attribute
-	virtual hid_t p_getType() const = 0;
+	virtual hid_t p_get_type() const = 0;
 };
 #ifndef H5_NO_NAMESPACE
 }

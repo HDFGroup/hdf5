@@ -22,24 +22,21 @@ namespace H5 {
 
 class H5_DLLCPP Attribute : public AbstractDs {
    public:
-	// Writes data to this attribute.
-	void write(const DataType& mem_type, const void *buf ) const;
-	void write(const DataType& mem_type, const string& strg ) const;
-
-	// Reads data from this attribute.
-	void read( const DataType& mem_type, void *buf ) const;
-	void read( const DataType& mem_type, string& strg ) const;
-
-	// Gets a copy of the dataspace for this attribute.
-	virtual DataSpace getSpace() const;
-
 	// Gets the name of this attribute.
 	ssize_t getName( size_t buf_size, string& attr_name ) const;
 	string getName( size_t buf_size ) const; // returns name, not its length
 	string getName() const; // returns name, no argument
 
-	// do not inherit iterateAttrs from H5Object
-	int iterateAttrs() { return 0; }
+	// Gets a copy of the dataspace for this attribute.
+	virtual DataSpace getSpace() const;
+
+	// Reads data from this attribute.
+	void read( const DataType& mem_type, void *buf ) const;
+	void read( const DataType& mem_type, string& strg ) const;
+
+	// Writes data to this attribute.
+	void write(const DataType& mem_type, const void *buf ) const;
+	void write(const DataType& mem_type, const string& strg ) const;
 
         // Creates a copy of an existing attribute using the attribute id
         Attribute( const hid_t attr_id );
@@ -47,6 +44,12 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Used by the API to appropriately close an attribute
+	virtual void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 
    private:
@@ -54,7 +57,10 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// getTypeClass and various API functions getXxxType 
 	// defined in AbstractDs for generic datatype and specific 
 	// sub-types
-	virtual hid_t p_getType() const;
+	virtual hid_t p_get_type() const;
+
+	// do not inherit iterateAttrs from H5Object
+	int iterateAttrs() { return 0; }
 
 	// Default constructor
 	Attribute();

@@ -28,10 +28,10 @@ class H5_DLLCPP VarLenType : public DataType {
 	// on the specified base type.
 	VarLenType(const DataType* base_type);
 
-	// Copy constructor - makes copy of the original object
+	// Copy constructor: makes copy of the original object.
 	VarLenType( const VarLenType& original );
 
-	// Default destructor
+	// Noop destructor
 	virtual ~VarLenType();
 
    protected:

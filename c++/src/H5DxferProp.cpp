@@ -25,27 +25,37 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default property
+///\brief	Constant for default dataset memory and transfer property list.
 //--------------------------------------------------------------------------
 const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
-// Function	Default constructor
-///\brief	Default constructor - Creates a stub dataset memory and 
+// Function	DSetMemXferPropList default constructor
+///\brief	Default constructor: creates a stub dataset memory and
 ///		transfer property list object.
-// Programmer:	Binh-Minh Ribler
+// Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 
 //--------------------------------------------------------------------------
-// Function	Copy constructor
-///\brief	Copy constructor - makes a copy of the original 
+// Function	DSetMemXferPropList copy constructor
+///\brief	Copy constructor: makes a copy of the original
 ///		DSetMemXferPropList object
 ///\param	orig - IN: The original dataset memory and transfer property 
 ///				list object to copy
-// Programmer:	Binh-Minh Ribler
+// Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}
+
+//--------------------------------------------------------------------------
+// Function	DSetMemXferPropList overloaded constructor
+///\brief	Creates a DSetMemXferPropList object using the id of an
+///		existing DSetMemXferPropList.
+///\param	plist_id - IN: Id of an existing dataset memory and transfer
+///				property list
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setBuffer
@@ -203,7 +213,7 @@ void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setVlenMemManager
 ///\brief	Sets the memory manager for variable-length datatype allocation.
-///\param       alloc_func - IN: User's allocate routine
+///\param	alloc_func - IN: User's allocate routine
 ///\param	alloc_info - IN: User's allocation parameters
 ///\param	free_func  - IN: User's free routine
 ///\param	free_info  - IN: User's free parameters
@@ -236,7 +246,7 @@ void DSetMemXferPropList::setVlenMemManager() const
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getVlenMemManager
 ///\brief	Gets the memory manager for variable-length datatype allocation 
-///\param       alloc_func - OUT: User's allocate routine
+///\param	alloc_func - OUT: User's allocate routine
 ///\param	alloc_info - OUT: User's allocation parameters
 ///\param	free_func  - OUT: User's free routine
 ///\param	free_info  - OUT: User's free parameters
@@ -254,10 +264,10 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::setMulti
-///\brief       Sets the data transfer property list for the multi-file driver.
-///\param       memb_dxpl - OUT: Array of data access property lists
-///\exception   H5::PropListIException
+// Function:	DSetMemXferPropList::setMulti
+///\brief	Sets the data transfer property list for the multi-file driver.
+///\param	memb_dxpl - OUT: Array of data access property lists
+///\exception	H5::PropListIException
 ///\par Description
 ///		This function can only be used after the member map has 
 ///		been set with FileAccPropList::setMulti (not done - BMR.)
@@ -274,10 +284,10 @@ void DSetMemXferPropList::setMulti(const hid_t *memb_dxpl)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::getMulti
-///\brief       Returns multi-file data transfer property list information.
-///\param       memb_dxpl - OUT: Array of data access property lists
-///\exception   H5::PropListIException
+// Function:	DSetMemXferPropList::getMulti
+///\brief	Returns multi-file data transfer property list information.
+///\param	memb_dxpl - OUT: Array of data access property lists
+///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::getMulti(hid_t *memb_dxpl)
@@ -291,10 +301,10 @@ void DSetMemXferPropList::getMulti(hid_t *memb_dxpl)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::setSmallDataBlockSize
-///\brief       Sets the size of a contiguous block reserved for small data.
-///\param       size - IN: Maximum size, in bytes, of the small data block. 
-///\exception   H5::PropListIException
+// Function:	DSetMemXferPropList::setSmallDataBlockSize
+///\brief	Sets the size of a contiguous block reserved for small data.
+///\param	size - IN: Maximum size, in bytes, of the small data block. 
+///\exception	H5::PropListIException
 ///\par Description
 ///		For detail, please refer to the C layer Reference Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetSmallData
@@ -311,7 +321,7 @@ void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::getSmallDataBlockSize
+// Function:	DSetMemXferPropList::getSmallDataBlockSize
 ///\brief	Returns the current small data block size setting.
 ///\return	Size of the small data block, in bytes
 ///\exception   H5::PropListIException
@@ -330,9 +340,9 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize()
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::setHyperVectorSize
+// Function:	DSetMemXferPropList::setHyperVectorSize
 ///\brief	Sets number of I/O vectors to be read/written in hyperslab I/O.
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 ///\par Description
 ///		For information, please refer to the C layer Reference
 ///		Manual at:
@@ -350,11 +360,11 @@ void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::getSmallDataBlockSize
+// Function:	DSetMemXferPropList::getSmallDataBlockSize
 ///\brief	Returns the number of I/O vectors to be read/written in 
 ///		hyperslab I/O.
 ///\return	Number of I/O vectors
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 size_t DSetMemXferPropList::getHyperVectorSize()
@@ -370,12 +380,12 @@ size_t DSetMemXferPropList::getHyperVectorSize()
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::setEDCCheck
+// Function:	DSetMemXferPropList::setEDCCheck
 ///\brief	Enables or disables error-detecting for a dataset reading
 ///		process.
 ///\param	check - IN: Specifies whether error detection is enabled or
 ///				disabled
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 ///\par Description
 ///		The error detection algorithm used is the algorithm previously 
 ///		specified in the corresponding dataset creation property 
@@ -398,10 +408,10 @@ void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check)
 }
 
 //--------------------------------------------------------------------------
-// Function:    DSetMemXferPropList::getEDCCheck
+// Function:	DSetMemXferPropList::getEDCCheck
 ///\brief	Determines whether error-detection is enabled for dataset reads.
 ///\return	\c H5Z_ENABLE_EDC or \c H5Z_DISABLE_EDC
-///\exception   H5::PropListIException
+///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 H5Z_EDC_t DSetMemXferPropList::getEDCCheck()

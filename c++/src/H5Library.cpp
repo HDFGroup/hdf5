@@ -23,8 +23,10 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This static variable will be set to true when dontAtExit is called
 bool H5Library::need_cleanup = false;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::open
@@ -58,7 +60,7 @@ void H5Library::close()
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::dontAtExit
-///\brief	Instructs library not to install atexit cleanup routine
+///\brief	Instructs library not to install \c atexit cleanup routine.
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

@@ -20,15 +20,19 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define NOTATEXIT       (-10)   // just in case the HDF5 library use more
 	// negative constants. Note: the solution used for the atexit/global
 	// destructors is not reliable, and desperately needs improvement 
 	// It is not even working, inifiteloop message still printed when
 	// calling H5close
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 class H5_DLLCPP H5Library {
    public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	static bool need_cleanup; // indicates if H5close should be called
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Initializes the HDF5 library. 
 	static void open(); 

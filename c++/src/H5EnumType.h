@@ -27,6 +27,35 @@ class H5_DLLCPP EnumType : public DataType {
 	// integer type, whose size is given by size.
 	EnumType( size_t size );
 
+	// Gets the enum datatype of the specified dataset
+	EnumType( const DataSet& dataset );  // H5Dget_type
+
+	// Creates a new enum datatype based on an integer datatype
+	EnumType( const IntType& data_type );  // H5Tenum_create
+
+	// Returns the number of members in this enumeration datatype.
+	int getNmembers () const;
+
+	// Returns the index of a member in this enumeration data type.
+	int getMemberIndex(const char* name) const;
+	int getMemberIndex(const string& name) const;
+
+	// Returns the value of an enumeration datatype member
+	void getMemberValue( int memb_no, void *value ) const;
+
+	// Inserts a new member to this enumeration type. 
+	void insert( const char* name, void *value ) const;
+	void insert( const string& name, void *value ) const;
+
+	// Returns the symbol name corresponding to a specified member 
+	// of this enumeration datatype. 
+	string nameOf( void *value, size_t size ) const;
+
+	// Returns the value corresponding to a specified member of this 
+	// enumeration datatype. 
+	void valueOf( const char* name, void *value ) const;
+	void valueOf( const string& name, void *value ) const;
+
 	// Default constructor
 	EnumType();
 
@@ -35,35 +64,6 @@ class H5_DLLCPP EnumType : public DataType {
 
 	// Copy constructor: makes a copy of the original EnumType object.
 	EnumType( const EnumType& original );
-
-	// Gets the enum datatype of the specified dataset
-	EnumType( const DataSet& dataset );  // H5Dget_type
-
-	// Creates a new enum datatype based on an integer datatype
-	EnumType( const IntType& data_type );  // H5Tenum_create
-
-	// Inserts a new member to this enumeration type. 
-	void insert( const string& name, void *value ) const;
-	void insert( const char* name, void *value ) const;
-
-	// Returns the symbol name corresponding to a specified member 
-	// of this enumeration datatype. 
-	string nameOf( void *value, size_t size ) const;
-
-	// Returns the value corresponding to a specified member of this 
-	// enumeration datatype. 
-	void valueOf( const string& name, void *value ) const;
-	void valueOf( const char* name, void *value ) const;
-
-	// Returns the index of a member in this enumeration data type.
-	int getMemberIndex(const char* name) const;
-	int getMemberIndex(const string& name) const;
-
-	// Returns the number of members in this enumeration datatype.
-	int getNmembers () const;
-
-	// Returns the value of an enumeration datatype member
-	void getMemberValue( int memb_no, void *value ) const;
 
 	virtual ~EnumType();
 };

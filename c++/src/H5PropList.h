@@ -26,63 +26,73 @@ class H5_DLLCPP PropList : public IdComponent {
         static const PropList DEFAULT;
 
 	// Creates a property list of a given type or creates a copy of an 
-	// existing property list giving the property list id
-	PropList( const hid_t plist_id );
-
-	// Default constructor: creates a PropList object - this object
-	// does not represent any property list yet.
-	PropList();
-
-	// Copy constructor: creates a copy of a PropList object.
-	PropList( const PropList& original );
-
-	// Makes a copy of the given property list.
-	void copy( const PropList& like_plist );
+	// existing property list giving the property list id.
+	PropList(const hid_t plist_id);
 
 	// Make a copy of the given property list using assignment statement
 	PropList& operator=( const PropList& rhs );
 
+	// Compares this property list or class against the given list or class.
+	bool operator==(const PropList& rhs) const;
+
+	// Close a property list class.
+	void closeClass() const;
+
+	// Makes a copy of the given property list.
+	void copy( const PropList& like_plist );
+
 	// Copies a property from one property list or property class to another
-	void copyProp( PropList& dest, PropList& src, const string& name) const;
 	void copyProp( PropList& dest, PropList& src, const char* name) const;
+	void copyProp( PropList& dest, PropList& src, const string& name) const;
 
 	// Gets the class of this property list, i.e. H5P_FILE_CREATE,
 	// H5P_FILE_ACCESS, ...
 	hid_t getClass() const;
 
-	/// Query the existance of a property in a property object.
-	bool propExist(const char* name) const;
-	bool propExist(const string& name) const;
+	// Return the name of a generic property list class.
+	string getClassName() const;
 
-	void closeClass() const;
+	// Returns the parent class of a generic property class.
+	PropList getClassParent() const;
 
+	// Returns the number of properties in this property list or class.
+	size_t getNumProps() const;
+
+	// Query the value of a property in a property list.
 	void getProperty(const char* name, void* value) const;
 	string getProperty(const char* name) const;
 	void getProperty(const string& name, void* value) const;
 	string getProperty(const string& name) const;
 
-	size_t getPropSize(const char *name) const;
-	size_t getPropSize(const string& name) const;
-
-	string getClassName() const;
-
-	size_t getNumProps() const;
-
+	// Set a property's value in a property list.
 	void setProperty(const char* name, void* charptr) const;
 	void setProperty(const char* name, const char* value) const;
 	void setProperty(const char* name, string& strg) const;
 	void setProperty(const string& name, void* value) const;
 	void setProperty(const string& name, string& strg) const;
 
+	// Query the size of a property in a property list or class.
+	size_t getPropSize(const char *name) const;
+	size_t getPropSize(const string& name) const;
+
+	// Determines whether a property list is a certain class.
 	bool isAClass(const PropList& prop_class) const;
 
+	/// Query the existance of a property in a property object.
+	bool propExist(const char* name) const;
+	bool propExist(const string& name) const;
+
+	// Removes a property from a property list.
 	void removeProp(const char *name) const;
 	void removeProp(const string& name) const;
 
-	bool operator==(const PropList& rhs) const;
+	// Default constructor: creates a stub PropList object.
+	PropList();
 
-	PropList getClassParent() const;
+	// Copy constructor: creates a copy of a PropList object.
+	PropList(const PropList& original);
 
+	// Destructor: properly terminates access to this property list.
 	virtual ~PropList();
 };
 

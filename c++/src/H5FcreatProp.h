@@ -25,12 +25,6 @@ class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	static const FileCreatPropList DEFAULT;
 	
-	// Creates a file create property list.
-	FileCreatPropList();
-
-	// Copy constructor: creates a copy of a FileCreatPropList object
-	FileCreatPropList( const FileCreatPropList& orig );
-
 	// Retrieves version information for various parts of a file.
 	void getVersion( unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
@@ -61,11 +55,17 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// Returns the 1/2 rank of an indexed storage B-tree.
 	unsigned getIstorek() const;
 
-	// Creates a copy of an existing file create property list
-	// using the property list id
-	FileCreatPropList (const hid_t plist_id) : PropList( plist_id ) {}
+	// Creates a file create property list.
+	FileCreatPropList();
 
-	// Default destructor
+	// Copy constructor: creates a copy of a FileCreatPropList object.
+	FileCreatPropList(const FileCreatPropList& orig);
+
+	// Creates a copy of an existing file create property list
+	// using the property list id.
+	FileCreatPropList (const hid_t plist_id);
+
+	// Noop destructor
 	virtual ~FileCreatPropList();
 };
 #ifndef H5_NO_NAMESPACE

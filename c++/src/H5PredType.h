@@ -27,15 +27,17 @@ namespace H5 {
 
 class H5_DLLCPP PredType : public AtomType {
    public:
-	// Default destructor
-	virtual ~PredType();
+	// Makes a copy of the predefined type and stores the new
+	// id in the left hand side object.  
+	PredType& operator=( const PredType& rhs );
 
-	// Copy constructor - makes copy of the original object
-	PredType( const PredType& original );
-
+	// Returns the HDF5 predefined type id.
 	virtual hid_t getId() const;
 
-	// Declaration of predefined types; their definition is in Predtype.C
+	// Noop destructor
+	virtual ~PredType();
+
+	// Declaration of predefined types; their definition is in H5PredType.cpp
 	static const PredType STD_I8BE;
 	static const PredType STD_I8LE;
 	static const PredType STD_I16BE;
@@ -173,11 +175,13 @@ class H5_DLLCPP PredType : public AtomType {
 	static const PredType NATIVE_INT_FAST64;
 	static const PredType NATIVE_UINT_FAST64;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// These dummy functions do not inherit from DataType - they'll
 	// throw a DataTypeIException if invoked.
 	void commit( H5Object& loc, const string& name );
 	void commit( H5Object& loc, const char* name );
 	bool committed();
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
 	// added this to work around the atexit/global destructor problem 
@@ -233,15 +237,18 @@ class H5_DLLCPP PredType : public AtomType {
 	};
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Default constructor
 	PredType();
 
 	// Creates a pre-defined type using an HDF5 pre-defined constant
 	PredType( const hid_t predtype_id );  // used by the library only
 
-	// Makes a copy of the predefined type and stores the new
-	// id in the left hand side object.  
-	PredType& operator=( const PredType& rhs );
+	// Copy constructor - makes copy of the original object
+	PredType( const PredType& original );
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 };
 #ifndef H5_NO_NAMESPACE
 }

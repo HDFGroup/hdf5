@@ -25,12 +25,6 @@ class H5_DLLCPP FileAccPropList : public PropList {
    public:
 	static const FileAccPropList DEFAULT;
 
-	// Creates a file access property list.
-	FileAccPropList();
-
-	// Copy constructor: creates a copy of a FileAccPropList object
-	FileAccPropList( const FileAccPropList& original );
-
 	// Modifies this property list to use the H5FD_STDIO driver
 	void setStdio() const;
 
@@ -125,11 +119,17 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// Returns garbage collecting references setting.
 	unsigned getGcReferences() const;
 
-	// Creates a copy of an existing file access property list
-	// using the property list id
-	FileAccPropList (const hid_t plist_id) : PropList( plist_id ) {}
+	// Creates a file access property list.
+	FileAccPropList();
 
-	// Default destructor
+	// Copy constructor: creates a copy of a FileAccPropList object.
+	FileAccPropList( const FileAccPropList& original );
+
+	// Creates a copy of an existing file access property list
+	// using the property list id.
+	FileAccPropList (const hid_t plist_id);
+
+	// Noop destructor
 	virtual ~FileAccPropList();
 };
 #ifndef H5_NO_NAMESPACE
