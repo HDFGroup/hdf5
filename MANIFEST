@@ -354,6 +354,8 @@
 ./fortran/examples/selectele.f90
 
 ./fortran/src/Dependencies
+./fortran/src/H5f.c
+./fortran/src/H5ff.f90
 ./fortran/src/H5Af.c
 ./fortran/src/H5Aff.f90
 ./fortran/src/H5Df.c
@@ -383,8 +385,6 @@
 ./fortran/src/H5f90global.f90
 ./fortran/src/H5f90i.h
 ./fortran/src/H5f90kit.c
-./fortran/src/H5f90misc.c
-./fortran/src/H5f90miscf.f90
 ./fortran/src/H5f90proto.h
 ./fortran/src/H5fortran_flags.f90
 ./fortran/src/H5fortran_types.f90.in
