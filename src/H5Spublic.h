@@ -24,6 +24,10 @@
 #define H5S_ALL         (-2)
 #define H5S_UNLIMITED	((hsize_t)(hssize_t)(-1))
 
+/* Define user-level maximum number of dimensions */
+/* This is not used internally to the library, see H5O_LAYOUT_NDIMS for the internal constant */
+#define H5S_MAX_RANK    31
+
 /* Different types of dataspaces */
 typedef enum H5S_class_t {
     H5S_NO_CLASS         = -1,  /*error                                      */
