@@ -17,7 +17,7 @@ TESTS=$(PROGS)
 # Temporary files
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    tfile3.h5 th5s1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5 \
-	    extern_1.h5 extern_2.h5 extern_1.raw extern_1b.raw extern_2.raw \
+	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1.raw extern_1b.raw extern_2.raw \
 	    extern_2b.raw extern_3.raw extern_3b.raw extern_4.raw extern_4b.raw
 
 # Source and object files for programs...  The PROG_SRC list contains all the
