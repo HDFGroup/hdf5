@@ -7,7 +7,7 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDS.h5"
+#define H5FILE_NAME        "SDS.h5"
 #define DATASETNAME "IntArray" 
 #define NX_SUB  3           /* hyperslab dimensions */ 
 #define NY_SUB  4 
@@ -51,7 +51,7 @@ main (void)
     /*
      * Open the file and the dataset.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dataset = H5Dopen(file, DATASETNAME);
 
     /*

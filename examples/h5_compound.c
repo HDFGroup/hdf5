@@ -6,7 +6,7 @@
 
 #include "hdf5.h"
 
-#define FILE          "SDScompound.h5"
+#define H5FILE_NAME          "SDScompound.h5"
 #define DATASETNAME   "ArrayOfStructures"
 #define LENGTH        10
 #define RANK          1
@@ -59,7 +59,7 @@ main(void)
     /*
      * Create the file.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create the memory data type. 
@@ -90,7 +90,7 @@ main(void)
     /*
      * Open the file and the dataset.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
  
     dataset = H5Dopen(file, DATASETNAME);
 

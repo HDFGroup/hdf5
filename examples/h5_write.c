@@ -5,7 +5,7 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDS.h5"
+#define H5FILE_NAME        "SDS.h5"
 #define DATASETNAME "IntArray" 
 #define NX     5                      /* dataset dimensions */
 #define NY     6
@@ -41,7 +41,7 @@ main (void)
      * default file creation properties, and default file
      * access properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Describe the size of the array and create the data space for fixed

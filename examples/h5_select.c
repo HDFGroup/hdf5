@@ -11,7 +11,7 @@
  
 #include "hdf5.h"
 
-#define FILE "Select.h5"
+#define H5FILE_NAME "Select.h5"
 
 #define MSPACE1_RANK     1          /* Rank of the first dataset in memory */
 #define MSPACE1_DIM      50         /* Dataset size in memory */ 
@@ -77,7 +77,7 @@ main (void)
    /*
     * Create a file.
     */
-   file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+   file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Create property list for a dataset and set up fill values.
@@ -196,7 +196,7 @@ main (void)
     /*
      * Open the file.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Open the dataset.

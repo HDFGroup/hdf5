@@ -7,7 +7,7 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDSextendible.h5"
+#define H5FILE_NAME        "SDSextendible.h5"
 #define DATASETNAME "ExtendibleArray" 
 #define RANK         2
 #define NX     10
@@ -52,7 +52,7 @@ main (void)
     /*
      * Create a new file. If file exists its contents will be overwritten.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* 
      * Modify dataset creation properties, i.e. enable chunking.

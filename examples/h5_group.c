@@ -10,7 +10,7 @@
 #include "hdf5.h"
 
 
-#define FILE    "group.h5"
+#define H5FILE_NAME    "group.h5"
 #define RANK    2
 
 herr_t file_info(hid_t loc_id, const char *name, void *opdata);
@@ -35,7 +35,7 @@ main(void)
     /*
      * Create a file.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create a group in the file. 
@@ -83,7 +83,7 @@ main(void)
     /*
      * Now reopen the file and group in the file. 
      */
-    file = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
     grp  = H5Gopen(file, "Data");
 
     /* 

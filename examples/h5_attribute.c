@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "hdf5.h"
 
-#define FILE "Attributes.h5"
+#define H5FILE_NAME "Attributes.h5"
 
 #define RANK  1   /* Rank and size of the dataset  */ 
 #define SIZE  7
@@ -66,7 +66,7 @@ main (void)
    /*
     * Create a file.
     */
-   file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+   file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /* 
     * Create the dataspace for the dataset in the file.
@@ -154,7 +154,7 @@ main (void)
    /*
     * Reopen the file.
     */
-   file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+   file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 
    /*
     * Open the dataset.
