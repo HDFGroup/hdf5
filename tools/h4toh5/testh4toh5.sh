@@ -221,6 +221,7 @@ CONVERT gr_typ_test.hdf gr_typ_test.h5
 CONVERT grnameclash_test.hdf grnameclash_test.h5
 CONVERT image_attr_test.hdf image_attr_test.h5
 #CONVERT image_maxsize.hdf image_maxsize.h5
+CONVERT ras24il.hdf ras24il.h5
 CONVERT ras_24_test.hdf ras_24_test.h5
 CONVERT ras_8_test.hdf ras_8_test.h5
 CONVERT sds_attr_test.hdf sds_attr_test.h5
