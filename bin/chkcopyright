@@ -31,11 +31,17 @@ DIRS=.			# default current directory
 USAGE()
 {
     cat <<EOF
-Usage: $PROGNAME [-h | -help] [dir1 dir2 ...]
+Usage: $PROGNAME [-h | -help] [-fname name-patter] [-v | -v9] [dir1 dir2 ...]
     Check copyright notices of files in [dir1 dir2 ...}.
     Default is to check files in current directory.
     -h | -help
 	show this page.
+    -fname name-pattern
+        limit to files of name-pattern
+    -v
+	verbose mode
+    -v9
+	highly verbose
 EOF
 }
 
@@ -49,6 +55,16 @@ PARSE_OPTION()
 	-h | -help )
 	    USAGE
 	    exit 0
+	    ;;
+	-fname )
+	    shift
+	    FNAME="$1"
+	    ;;
+	-v* )
+	    VERBOSE=yes
+	    if test X$1 = X-v9; then
+		set -x
+	    fi
 	    ;;
 	-* )
 	    echo "***Unknown option ($1)"
@@ -227,11 +243,21 @@ EOF
 #
 # Main body
 
-PARSE_OPTION $*
+PARSE_OPTION "$@"
 
-find $DIRS -type f -print |
+# use find to list all those file names and process them
+# one by one.
+(
+if test -z "$FNAME" ; then
+    find $DIRS -type f -print
+else
+    find $DIRS -type f -name "${FNAME}" -print 
+fi
+) |
 while read file; do
-    #echo checking ${file}...
+    if test X-$VERBOSE = X-yes; then
+	echo checking ${file}...
+    fi
     case ${file} in
     *.c | *.h | *.cpp )
 	C_SOURCE ${file}
