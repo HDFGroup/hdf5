@@ -36,4 +36,14 @@ PROFILE_CPPFLAGS=
 # Set this to `yes' or `no' depending on whether the target is big
 # endian or little endian.
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
-
+ac_cv_header_stdc=${ac_cv_header_stdc='yes'}
+ac_cv_sizeof_short=${ac_cv_sizeof_short=2}
+ac_cv_sizeof_int=${ac_cv_sizeof_int=4}
+ac_cv_sizeof_long=${ac_cv_sizeof_long=4}
+ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long=8}
+ac_cv_sizeof_float=${ac_cv_sizeof_float=4}
+ac_cv_sizeof_double=${ac_cv_sizeof_double=8}
+ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=8}
+ac_cv_sizeof_int=${ac_cv_sizeof_int=4}
+ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
+ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
