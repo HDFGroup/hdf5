@@ -26,6 +26,9 @@ PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 PRIVATE_HDR=h5tools.h
 
+# Programs have to be built before they can be tested!
+test: $(PROGS)
+
 # How to build the programs...
 h5debug: h5debug.o $(LIB) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ h5debug.o $(LIBS)

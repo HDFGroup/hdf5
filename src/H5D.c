@@ -28,7 +28,8 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
-#include <H5TBprivate.h>	/* Temporary buffers        */
+#include <H5TBprivate.h>	/* Temporary buffers        		*/
+#include <H5Vprivate.h>		/* Vector and array functions		*/
 #include <H5Zprivate.h>		/* Data filters				*/
 
 #ifdef QAK
@@ -98,9 +99,7 @@ static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static void H5D_term_interface(void);
-#ifdef HAVE_PARALLEL
-static herr_t H5D_allocate (H5D_t *dataset, const H5D_xfer_t *xfer);
-#endif
+static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
 
 
 /*--------------------------------------------------------------------------
@@ -932,7 +931,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	 * Chunked storage allows any type of data space extension, so we
 	 * don't even bother checking.
 	 */
-	if (new_dset->create_parms->chunk_ndims != H5S_get_simple_extent_ndims(space)) {
+	if (new_dset->create_parms->chunk_ndims !=
+	    H5S_get_simple_extent_ndims(space)) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
 		   "dimensionality of chunks doesn't match the data space");
 	}
@@ -1030,24 +1030,16 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	}
     }
 
+    /* Initialize the raw data */
+    if (H5D_init_storage(new_dset, space)<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to initialize storage");
+    }
+    
     /* Give the dataset a name */
     if (H5G_insert(loc, name, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
     }
-
-#ifdef HAVE_PARALLEL
-    /*
-     * If the dataset uses chunk storage and is accessed via
-     * parallel I/O, allocate file space for all chunks now.
-     */
-    if (new_dset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
-	new_dset->layout.type == H5D_CHUNKED){
-	if (H5D_allocate(new_dset, &H5D_xfer_dflt)<0) {
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		"fail in file space allocation for chunks");
-	}
-    }
-#endif /* HAVE_PARALLEL */
 
     /* Success */
     ret_value = new_dset;
@@ -1193,22 +1185,18 @@ H5D_open(H5G_entry_t *loc, const char *name)
 		     "storage address is undefined an no external file list");
     }
 
-#ifdef HAVE_PARALLEL
     /*
-     * If the dataset uses chunk storage and is accessed via
-     * parallel I/O, and file is open writable,
-     * allocate file space for chunks that have not been
-     * allocated in its "previous access".
+     * Make sure all storage is properly initialized for chunked datasets.
+     * This is especially important for parallel I/O where the B-tree must
+     * be fully populated before I/O can happen.
      */
-    if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
-	dataset->layout.type == H5D_CHUNKED &&
-	(dataset->ent.file->intent & H5F_ACC_RDWR)){
-	if (H5D_allocate(dataset, &H5D_xfer_dflt)<0) {
+    if ((dataset->ent.file->intent & H5F_ACC_RDWR) &&
+	H5D_CHUNKED==dataset->layout.type) {
+	if (H5D_init_storage(dataset, space)<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		"fail in file space allocation dataset");
+			"unable to initialize file storage");
 	}
     }
-#endif /* HAVE_PARALLEL */
 
     /* Success */
     ret_value = dataset;
@@ -1505,14 +1493,16 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(tconv_id = H5TB_get_buf (target_size,1,(void **)&tconv_buf))) {
+        if (FAIL==(tconv_id = H5TB_get_buf(target_size, 1,
+					   (void **)&tconv_buf))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(bkg_id = H5TB_get_buf (request_nelmts*dst_type_size,1,(void **)&bkg_buf))) {
+        if (FAIL==(bkg_id = H5TB_get_buf(request_nelmts*dst_type_size, 1,
+					 (void **)&bkg_buf))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
@@ -1873,14 +1863,16 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(tconv_id = H5TB_get_buf (target_size,1,(void **)&tconv_buf))) {
+        if (FAIL==(tconv_id = H5TB_get_buf(target_size, 1,
+					   (void **)&tconv_buf))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if (FAIL==(bkg_id = H5TB_get_buf (request_nelmts*dst_type_size,1,(void **)&bkg_buf))) {
+        if (FAIL==(bkg_id = H5TB_get_buf(request_nelmts*dst_type_size, 1,
+					 (void **)&bkg_buf))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
         }
@@ -2069,7 +2061,6 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
      *	     able to muck things up.
      */
 
-
     /* Increase the size of the data space */
     if (NULL==(space=H5S_read (&(dataset->ent)))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -2080,26 +2071,37 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
 		     "unable to increase size of data space");
     }
 
-    /* Save the new dataspace in the file if necessary */
     if (changed>0){
+	/* Save the new dataspace in the file if necessary */
 	if (H5S_modify (&(dataset->ent), space)<0) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "unable to update file with new dataspace");
 	}
-#ifdef HAVE_PARALLEL
-	/*
-	 * If the dataset uses chunk storage and is accessed via
-	 * parallel I/O, need to allocate file space for all extended
-	 * chunks now.
-	 */
-	if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
-	    dataset->layout.type==H5D_CHUNKED){
-	    if (H5D_allocate(dataset, &H5D_xfer_dflt)<0) {
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		    "fail in file space allocation for chunks");
-	    }
+
+	/* Initialize the new parts of the dataset */
+#ifdef LATER
+	if (H5S_select_all(space)<0 ||
+	    H5S_select_hyperslab(space, H5S_SELECT_DIFF, zero, NULL,
+				 old_dims, NULL)<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			"unable to select new extents for fill value");
 	}
-#endif /* HAVE_PARALLEL */
+#else
+	/*
+	 * We don't have the H5S_SELECT_DIFF operator yet.  We really only
+	 * need it for contiguous datasets because the chunked datasets will
+	 * either fill on demand during I/O or attempt a fill of all chunks.
+	 */
+	if (H5D_CONTIGUOUS==dataset->layout.type &&
+	    dataset->create_parms->fill.buf) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+			"unable to select fill value region");
+	}
+#endif
+	if (H5D_init_storage(dataset, space)<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			"unable to initialize dataset with fill value");
+	}
     }
 
 
@@ -2161,86 +2163,134 @@ H5D_typeof (H5D_t *dset)
 }
 
 
-#ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
- * Function:	H5D_allocate
+ * Function:	H5D_init_storage
  *
- * Purpose:	Allocate file space for the data storage of the dataset.
- *		Return SUCCEED if all needed allocation succeed, otherwise
- *		FAIL.
+ * Purpose:	Initialize the data for a new dataset.  If a selection is
+ *		defined for SPACE then initialize only that part of the
+ *		dataset.
  *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
  *
- * Note:	Current implementation allocates chunked dataset only.
- *
- * Programmer:	Albert Cheng
- *		July 9, 1998
+ * Programmer:	Robb Matzke
+ *              Monday, October  5, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_allocate (H5D_t *dataset, const H5D_xfer_t *xfer)
+H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
-    H5S_t		*space = NULL;
+    intn		ndims;
+    hsize_t		dim[H5O_LAYOUT_NDIMS];
+    hsize_t		npoints, ptsperbuf;
+    size_t		i, size, bufsize=8*1024;
+    hbool_t		all_zero;
+    hid_t		buf_id = -1;
+    haddr_t		addr;
     herr_t		ret_value = FAIL;
-    hsize_t		space_dim[H5O_LAYOUT_NDIMS];
-    intn		space_ndims;
-    H5O_layout_t	*layout;
+    void		*buf = NULL;
     
-    FUNC_ENTER(H5D_allocate, FAIL);
-#ifdef AKC
-    printf("Enter %s:\n", FUNC);
-#endif
+    FUNC_ENTER(H5D_init_storage, FAIL);
+    assert(dset);
+    assert(space);
 
-    /* Check args */
-    assert(dataset);
-    assert(&(dataset->layout));
-    layout = &(dataset->layout);
-    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
-    assert(H5F_addr_defined(&(layout->addr)));
-
-
-    switch (layout->type) {
+    switch (dset->layout.type) {
     case H5D_CONTIGUOUS:
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
-
-    case H5D_CHUNKED:
-	if (NULL==(space=H5S_read (&(dataset->ent)))) {
-	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-			 "unable to read data space info from dataset header");
+	/*
+	 * If the fill value is non-zero then write the fill value to the
+	 * specified selection.
+	 */
+	for (i=0, all_zero=TRUE; i<dset->create_parms->fill.size; i++) {
+	    if (((uint8*)(dset->create_parms->fill.buf))[i]) {
+		all_zero = FALSE;
+		break;
+	    }
 	}
-	/* get current dims of dataset */
-	if ((space_ndims=H5S_get_simple_extent_dims(space, space_dim,
-						    NULL)) <= 0 ||
-	    space_ndims+1 != layout->ndims){
-	    HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-			"unable to allocate chunk storage");
-	}
-	/* copy the element size over */
-	space_dim[space_ndims] = layout->dim[space_ndims];
+	npoints = H5S_get_simple_extent_npoints(space);
 
-	if (H5F_istore_allocate(dataset->ent.file,
-				(layout), space_dim, xfer->split_ratios,
-				&(dataset->create_parms->pline),
-				&(dataset->create_parms->fill))<0) {
-	    HRETURN(FAIL);
+	if (!all_zero && npoints==H5S_get_select_npoints(space)) {
+	    /*
+	     * Fill the entire current extent with the fill value.  We can do
+	     * this quite efficiently by making sure we copy the fill value
+	     * in relatively large pieces.
+	     */
+	    ptsperbuf = MAX(1, bufsize/dset->create_parms->fill.size);
+	    bufsize = ptsperbuf * dset->create_parms->fill.size;
+	    if ((buf_id=H5TB_get_buf(bufsize, TRUE, &buf))<0) {
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			    "unable to get buffer for fill value");
+	    }
+	    H5V_array_fill(buf, dset->create_parms->fill.buf,
+			   dset->create_parms->fill.size, ptsperbuf);
+	    if (dset->create_parms->efl.nused) {
+		H5F_addr_reset(&addr);
+	    } else {
+		addr = dset->layout.addr;
+	    }
+	    
+	    while (npoints>0) {
+		size = MIN(ptsperbuf, npoints) * dset->create_parms->fill.size;
+		if (dset->create_parms->efl.nused) {
+		    if (H5O_efl_write(dset->ent.file,
+				      &(dset->create_parms->efl),
+				      &addr, size, buf)<0) {
+			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+				    "unable to write fill value to dataset");
+		    }
+		} else {
+		    if (H5F_block_write(dset->ent.file, &addr, size,
+					H5D_XFER_DFLT, buf)<0) {
+			HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+				    "unable to write fill value to dataset");
+		    }
+		}
+		npoints -= MIN(ptsperbuf, npoints);
+		H5F_addr_inc(&addr, size);
+	    }
+	} else if (!all_zero) {
+	    /*
+	     * Fill the specified selection with the fill value.
+	     */
+	    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+			"unable to initialize dataset with fill value");
 	}
 	break;
 
-    default:
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
-    }
+    case H5D_CHUNKED:
+	/*
+	 * If the dataset is accessed via parallel I/O, allocate file space
+	 * for all chunks now and initialize each chunk with the fill value.
+	 */
+	if (H5F_LOW_MPIO==dset->ent.file->shared->access_parms->driver) {
+	    /* We only handle simple data spaces so far */
+	    if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0) {
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			    "unable to get simple data space info");
+	    }
+	    dim[ndims] = dset->layout.dim[ndims];
+	    ndims++;
 
+	    if (H5F_istore_allocate(dset->ent.file, &(dset->layout),
+				    dim, H5D_xfer_dflt.split_ratios,
+				    &(dset->create_parms->pline),
+				    &(dset->create_parms->fill))<0) {
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			    "unable to allocate all chunks of dataset");
+	    }
+	}
+	break;
+    }
     ret_value = SUCCEED;
 
-  done:
-    if (space)
-	H5S_close(space);
-
+ done:
+    if (buf_id>=0 && H5TB_release_buf(buf_id)<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		      "unable to release fill value temporary buffer");
+    }
     FUNC_LEAVE(ret_value);
 }
-#endif
+

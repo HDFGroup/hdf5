@@ -289,6 +289,7 @@
 ./test/dtypes.c
 ./test/extend.c
 ./test/external.c
+./test/fillval.c
 ./test/gheap.c
 ./test/hyperslab.c
 ./test/iopipe.c

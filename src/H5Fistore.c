@@ -2001,7 +2001,6 @@ H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 }
 
 
-#ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_get_addr
  *
@@ -2172,20 +2171,21 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	if (carry) break;
     }
 
+#ifdef HAVE_PARALLEL
     /*
      * rky 980923
-     * The following barrier is a temporary fix to prevent overwriting
-     * real data caused by a race between one proc's call of H5F_istore_allocate
-     * (from H5D_allocate, ultimately from H5Dcreate and H5Dextend)
-     * and another proc's call of H5Dwrite.
-     * Eventually, this barrier should be removed,
-     * when H5D_allocate is changed to call H5MF_alloc directly
+     * 
+     * The following barrier is a temporary fix to prevent overwriting real
+     * data caused by a race between one proc's call of H5F_istore_allocate
+     * (from H5D_init_storage, ultimately from H5Dcreate and H5Dextend) and
+     * another proc's call of H5Dwrite.  Eventually, this barrier should be
+     * removed, when H5D_init_storage is changed to call H5MF_alloc directly
      * to allocate space, instead of calling H5F_istore_unlock.
      */
     if (MPI_Barrier( f->shared->access_parms->u.mpio.comm )) {
 	HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Barrier failed");
     }
+#endif
 
     FUNC_LEAVE(SUCCEED);
 }
-#endif

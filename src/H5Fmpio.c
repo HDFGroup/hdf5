@@ -335,7 +335,8 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     }
 #endif
 
-    mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*)name, mpi_amode, access_parms->u.mpio.info, &fh);
+    mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*)name, mpi_amode,
+			   access_parms->u.mpio.info, &fh);
     if (MPI_SUCCESS != mpierr) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, mpierrmsg );
@@ -511,7 +512,7 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 			"couldn't convert addr to MPIOffset" );
     }
     size_i = (int)size;
-    if (size_i != size) {	/* check type conversion */
+    if ((size_t)size_i != size) {	/* check type conversion */
 	HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 			"couldn't convert size to int" );
     }
@@ -764,7 +765,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 			"couldn't convert addr to MPIOffset" );
     }
     size_i = (int)size;
-    if (size_i != size) {	/* check type conversion */
+    if ((size_t)size_i != size) {	/* check type conversion */
 	HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 			"couldn't convert size to int" );
     }
@@ -975,9 +976,11 @@ H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr )
  * Problems and limitations:
  *
  * Return:      Success:        return value is SUCCEED
- *				and the MPIOffset contains the converted value
+ *				and the MPIOffset contains the converted
+ *				value.
  *
- *              Failure:        return value is FAIL, the MPIOffset is undefined
+ *		Failure:        return value is FAIL, the MPIOffset is
+ *				undefined.
  *
  * Programmer:  
  *              January 30, 1998
