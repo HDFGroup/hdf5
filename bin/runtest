@@ -150,15 +150,22 @@ PRINT_BLANK()
     PRINT
 }
 
-# Print trailer summary
-PRINT_TRAILER()
+# Print test trailer
+PRINT_TEST_TRAILER()
 {
-    PRINT "*** finished $TEST_TYPE tests in $HOSTNAME ***"
+    PRINT "*** finished $TEST_TYPE tests for $HOSTNAME ***"
     date; EndTime=`SecOfDay`
     PRINT Total time = `ElapsedTime $StartTime $EndTime`
     PRINT_BLANK
-    # reset StartTime for the next elapsed time report
-    StartTime=`SecOfDay`
+}
+
+# Print trailer summary
+PRINT_TRAILER()
+{
+    PRINT "*** finished tests in $HOSTNAME ***"
+    date; TotalEndTime=`SecOfDay`
+    PRINT Grand total tests time = `ElapsedTime $TotalStartTime $TotalEndTime`
+    PRINT_BLANK
 }
 
 # Figure out which remote command to use to reach a host.
@@ -542,12 +549,13 @@ fi
 trap PRINT_TRAILER 0
 
 #
-StartTime=`SecOfDay`
+TotalStartTime=`SecOfDay`
 
 # Process the configuration
 SNAPTEST_CONFIG
 PRINT STANDARD_OPT=$STANDARD_OPT
 PRINT TEST_TYPES=$TEST_TYPES
+PRINT_BLANK
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
@@ -656,15 +664,18 @@ fi
 n_test=1
 TEST="`echo $TEST_TYPES | cut -f1 -d';'`"
 while [ -n "$TEST" ]; do
+    StartTime=`SecOfDay`
     RUNSNAPTEST $TEST
     REPORT_RESULT
-    PRINT_TRAILER
+    PRINT_TEST_TRAILER
 
     n_test=`expr $n_test + 1`
     TEST="`echo $TEST_TYPES | cut -f$n_test -s -d';'`"
 done
 
 FLUSH_FILES
+
+PRINT_TRAILER
 
 # disable trailer summary printing since all trailers have been
 # printed and we are exiting normally.
