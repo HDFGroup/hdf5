@@ -1,6 +1,6 @@
 
-	Instructions for the Installation of HDF5 Software
-	==================================================
+	Instructions for the Installation of the HDF5 Software
+	======================================================
 
 	CONTENTS
 	--------
@@ -50,9 +50,9 @@
 1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
 	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5.  For Unix platforms, it
-        is available in tar format uncompressed or compressed with
+    is available in tar format uncompressed or compressed with
 	compress, gzip, or bzip2.  For Microsoft Windows, it is in
-        ZIP format.
+    ZIP format.
 
 	The HDF team also makes snapshots of the source code available
 	on a regular basis. These snapshots are unsupported (that is,
@@ -102,8 +102,8 @@
 	library, header files, and support programs.
 
 
-	$ gunzip <hdf5-1.2.1.tar.gz |tar xf -
-	$ cd hdf5-1.21.
+	$ gunzip hdf5-1.2.2.tar.gz | tar xf -
+	$ cd hdf5-1.2.2
 	$ make check
 	$ make install
 
@@ -134,19 +134,19 @@
 5.1. Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats
 	which can be unpacked with the following commands, each of
-	which creates an `hdf5-1.2.1' directory.
+	which creates an `hdf5-1.2.2' directory.
 
 5.1.1. Non-compressed tar archive (*.tar)
-	$ tar xf hdf5-1.2.1.tar
+	$ tar xf hdf5-1.2.2.tar
 
 5.1.2. Compressed tar archive (*.tar.Z)
-	$ uncompress -c <hdf5-1.2.1.tar.Z |tar xf -
+	$ uncompress -c hdf5-1.2.2.tar.Z |tar xf -
 
 5.1.3. Gzip'd tar archive (*.tar.gz)
-	$ gunzip <hdf5-1.2.1.tar.gz |tar xf -
+	$ gunzip hdf5-1.2.2.tar.gz |tar xf -
 
 5.1.4. Bzip'd tar archive (*.tar.bz2)
-	$ bunzip2 <hdf5-1.2.1.tar.gz |tar xf -
+	$ bunzip2 hdf5-1.2.2.tar.gz |tar xf -
 
 5.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than
@@ -212,7 +212,7 @@
 	On Irix64 the default compiler is `cc'. To use an
 	alternate compiler specify it with the CC variable:
 
-	    $ CC='cc -o32' ./configure
+	    $ CC='cc -n32' ./configure
 
 	One may also use various environment variables to change the
 	behavior of the compiler.  E.g., to ask for -n32 ABI:
@@ -249,9 +249,8 @@
 	install program detected automatically by configure. If none
 	is found then the shell script bin/install-sh is
 	used. Configure doesn't check that the install script actually 
-	works, but if a bad install is detected on your system (e.g.,
-	on the ASCI blue machine as of March 2, 1999) you have two
-	choices:
+	works, but if a bad install is detected on your system, you 
+    have two choices:
 
 	    1. Copy the bin/install-sh program to your $HOME/bin
 	       directory, name it `install', and make sure that
@@ -359,7 +358,7 @@
 
 5.3.9. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
-	parallelizm on a distributed multi-processor system.  Read the
+	parallelism on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
 
 
@@ -449,5 +448,5 @@
 	and/or shared hdf5 libraries.
 
 7. Support
-	Support is described in the README file.
+	Support is described in the RELEASE file.
 
