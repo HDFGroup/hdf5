@@ -104,6 +104,30 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
    }
 }
 
+// Sets an exception handling callback for datatype conversion 
+// for a dataset transfer property list
+void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t *op, void *user_data) const
+{
+   herr_t ret_value = H5Pset_type_conv_cb( id, op, user_data);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("DSetMemXferPropList::setTypeConvCB",
+		"H5Pset_type_conv_cb failed");
+   }
+}
+
+// Sets an exception handling callback for datatype conversion 
+// for a dataset transfer property list
+void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t **op, void **user_data) const
+{
+   herr_t ret_value = H5Pget_type_conv_cb( id, op, user_data);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("DSetMemXferPropList::getTypeConvCB",
+		"H5Pget_type_conv_cb failed");
+   }
+}
+
 // Sets the memory manager for variable-length datatype allocation
 void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* alloc_info, H5MM_free_t free_func, void* free_info ) const
 {

@@ -185,24 +185,6 @@ void DataType::convert( const DataType& dest, hsize_t nelmts, void *buf, void *b
    }
 }
 
-// Sets the overflow handler to a specified function. 
-void DataType::setOverflow( H5T_overflow_t func ) const
-{
-   // Call C routine H5Tset_overflow to set the overflow handler
-   herr_t ret_value = H5Tset_overflow( func );
-   if( ret_value < 0 )
-   {
-      throw DataTypeIException("DataType::setOverflow", "H5Tset_overflow failed");
-   }
-}
-
-// Returns a pointer to the current global overflow function. 
-H5T_overflow_t DataType::getOverflow(void) const
-{
-   return( H5Tget_overflow());  // C routine
-   // NULL can be returned as well
-}
-
 // Locks a datatype. 
 void DataType::lock() const
 {
