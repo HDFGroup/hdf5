@@ -142,8 +142,6 @@ typedef struct H5D_istore_ud1_t {
 #define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
 
 /* Private prototypes */
-static haddr_t H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-    const hssize_t offset[], H5D_istore_ud1_t *_udata);
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
 static herr_t H5D_istore_shared_free (void *page);
@@ -2153,7 +2151,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t
+haddr_t
 H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		    const hssize_t offset[], H5D_istore_ud1_t *_udata)
 {

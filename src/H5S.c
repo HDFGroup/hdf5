@@ -1419,7 +1419,12 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_conv_t *
-H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned
+H5S_find (const H5F_t 
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif/* H5_HAVE_PARALLEL*/
+*file,
+const H5S_t *mem_space, const H5S_t *file_space, unsigned
 #ifndef H5_HAVE_PARALLEL
 UNUSED
 #endif /* H5_HAVE_PARALLEL */
@@ -1427,7 +1432,13 @@ flags, hbool_t
 #ifndef H5_HAVE_PARALLEL
 UNUSED
 #endif /* H5_HAVE_PARALLEL */
-*use_par_opt_io)
+*use_par_opt_io,
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif
+const H5O_layout_t *layout
+
+)
 {
     H5S_conv_t	*path=NULL;  /* Space conversion path */
 #ifdef H5_HAVE_PARALLEL
@@ -1459,9 +1470,9 @@ UNUSED
             /*
              * Check if we can set direct MPI-IO read/write functions
              */
-            opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+            opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
             if(opt==FAIL)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
@@ -1501,9 +1512,9 @@ UNUSED
     /*
      * Check if we can set direct MPI-IO read/write functions
      */
-    opt=H5S_mpio_opt_possible(mem_space,file_space,flags);
+    opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
     if(opt==FAIL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {

@@ -193,6 +193,8 @@ typedef struct H5D_dcpl_cache_t {
     H5D_fill_time_t fill_time;  /* Fill time (H5D_CRT_FILL_TIME_NAME) */
 } H5D_dcpl_cache_t;
 
+/* forward reference for collective-chunk IO use */
+struct H5D_istore_ud1_t; /*define at H5Distore.c*/
 /* Library-private functions defined in H5D package */
 H5_DLL herr_t H5D_init(void);
 H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
@@ -262,5 +264,10 @@ H5_DLL ssize_t H5D_istore_writevv(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     const void *buf);
 H5_DLL herr_t H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, int ndims);
+
+/* Functions that obtain the dataset address */
+H5_DLL haddr_t H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, 
+                      const H5O_layout_t *layout,const hssize_t offset[], 
+                      struct H5D_istore_ud1_t *_udata);
 
 #endif
