@@ -35,7 +35,7 @@ int dowrite=1;				/* write test */
 char    *filenames[]={ "ParaEg1.h5f",
 		       "ParaEg2.h5f",
 		       "ParaEg3.h5f",
-                       "Mdset.h5f" };
+                       "ParaMdset.h5f" };
 
 
 
@@ -45,7 +45,8 @@ char    *filenames[]={ "ParaEg1.h5f",
 /* continue. */
 #include <sys/types.h>
 #include <sys/stat.h>
-void pause_proc(MPI_Comm comm, int argc, char **argv)
+
+void pause_proc()
 {
 
     int pid;
@@ -60,11 +61,6 @@ void pause_proc(MPI_Comm comm, int argc, char **argv)
     int  mpi_namelen;		
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
 
-#ifdef DISABLED
-    /* check if an pause interval option is given */
-    if (--argc > 0 && isdigit(*++argv))
-	time_int = atoi(*argv);
-#endif
     pid = getpid();
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -80,7 +76,16 @@ void pause_proc(MPI_Comm comm, int argc, char **argv)
 	    fflush(stdout);
 	    sleep(time_int);
 	}
-    MPI_Barrier(comm);
+    MPI_Barrier(MPI_COMM_WORLD);
+}
+
+/* Use the Profile feature of MPI to call the pause_proc() */
+int MPI_Init(int *argc, char ***argv)
+{
+    int ret_code;
+    ret_code=PMPI_Init(argc, argv);
+    pause_proc();
+    return (ret_code);
 }
 #endif	/* USE_PAUSE */
 
@@ -227,10 +232,6 @@ main(int argc, char **argv)
 	printf("PHDF5 TESTS START\n");
 	printf("===================================\n");
     }
-
-#ifdef USE_PAUSE
-    pause_proc(MPI_COMM_WORLD, argc, argv);
-#endif
 
     if (parse_options(argc, argv) != 0){
 	if (MAINPROCESS)
