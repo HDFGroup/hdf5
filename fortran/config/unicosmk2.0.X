@@ -160,9 +160,11 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
-    FFLAGS="-dp -Wl\"-M 405\""
-    DEBUG_FFLAGS="-dp"
-    PROD_FFLAGS="-dp"
-    PROFILE_FFLAGS="-dp"
+    # -Wl passes flags to the linker and -M# will ignore warnings with
+    # number #. Warning 405 was stopping the executable from being built.
+    FFLAGS="-dp -Wl-M405"
+    DEBUG_FFLAGS=""
+    PROD_FFLAGS=""
+    PROFILE_FFLAGS=""
     f9x_flags_set=yes
 fi
