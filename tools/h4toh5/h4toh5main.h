@@ -57,42 +57,43 @@ int test_dir(char *);
 char *BuildFilename(char *filename, char *ext);
 
 /* subroutines for h4toh5main.c */
-int h4toh5(char*,char*);
+int gen_h4toh5(char*,char*,int);
+int h4toh5(char*,char*,int);
 int get_numof_hdf4obj(char*,int32);
 int set_hashtables(void);
 int set_helpgroups(hid_t,hid_t*,hid_t*);
-int h4toh5lonevds(int32,hid_t);
-int h4toh5lonevgs(int32,int32,hid_t,hid_t,hid_t);
-int h4toh5vgrings(int32,int32,hid_t,hid_t,hid_t);
-int h4toh5unvisitedimages(int32,hid_t,hid_t);
-int h4toh5unvisitedsds(int32,int32,hid_t,hid_t);
+int h4toh5lonevds(int32,hid_t,int);
+int h4toh5lonevgs(int32,int32,hid_t,hid_t,hid_t,int);
+int h4toh5vgrings(int32,int32,hid_t,hid_t,hid_t,int);
+int h4toh5unvisitedimages(int32,hid_t,hid_t,int);
+int h4toh5unvisitedsds(int32,int32,hid_t,hid_t,int);
 void free_allhashmemory(void);
 
 /*subroutines for h4toh5vgroup.c*/
 
-int Vgroup_h4_to_h5(int32,int32,int32,hid_t,hid_t,hid_t);
-int convert_vgroup(int32,int32, int32,char* ,hid_t,hid_t,hid_t);
-int convert_vdata(int32,int32,char*,hid_t);
-int convert_sds(int32,int32,int32,char*,hid_t,hid_t);
-int convert_image(int32,int32,char*,hid_t,hid_t);
+int Vgroup_h4_to_h5(int32,int32,int32,hid_t,hid_t,hid_t,int);
+int convert_vgroup(int32,int32, int32,char* ,hid_t,hid_t,hid_t,int);
+int convert_vdata(int32,int32,char*,hid_t,int);
+int convert_sds(int32,int32,int32,char*,hid_t,hid_t,int);
+int convert_image(int32,int32,char*,hid_t,hid_t,int);
 
 /*subroutines for h4toh5vdata.c*/
 
-int Vdata_h4_to_h5(int32,int32,hid_t);
+int Vdata_h4_to_h5(int32,int32,hid_t,int);
 int vdata_transattrs(int32,hid_t,int,int,char*);
 int gen_h5comptype(int32,int32,size_t *,size_t*,hid_t*,hid_t*,hid_t,hid_t);
 
 /* subroutines for h4toh5sds.c*/
-int Sds_h4_to_h5(int32,int32,hid_t,hid_t);
+int Sds_h4_to_h5(int32,int32,hid_t,hid_t,int);
 int sds_transattrs(int32, hid_t,int,int);
 int sdsdim_to_h5dataset(int32,int32,hid_t,hid_t,int32);
-int convert_sdsfillvalue(int32,int32,hid_t,hid_t);
+int convert_sdsfillvalue(int32,int32,hid_t,hid_t,int);
 uint16 get_SDref(int32,uint16,int32);
 
 /*subroutines for h4toh5image.c*/
-int Image_h4_to_h5(int32,int32,hid_t,hid_t); 
+int Image_h4_to_h5(int32,int32,hid_t,hid_t,int); 
 int gr_tranattrs(int32, hid_t,int,int);
-int gr_palette(int32,int32,hid_t,hid_t);
+int gr_palette(int32,int32,hid_t,hid_t,int);
 int create_pal_objref(hid_t ,hid_t ,char *);
 uint16 get_RIref(int32,uint16,int32,uint16*);
 /*subroutines for h4toh5anno.c*/
@@ -101,7 +102,7 @@ int Annofil_h4_to_h5(int32,hid_t);
 int Annoobj_h4_to_h5(int32,int32,int32,hid_t);
 
 /*subroutines for h4toh5pal.c*/
-int Palette_h4_to_h5(int32,int32 ,hid_t,char *);
+int Palette_h4_to_h5(int32,int32 ,hid_t,char *,int);
 
 
 

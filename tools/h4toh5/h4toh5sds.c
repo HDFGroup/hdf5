@@ -45,7 +45,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
  *-------------------------------------------------------------------------
  */	 
    
-int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
+int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int h4_attr){
 
   int32   sds_dtype;
   int32   sds_rank;
@@ -115,7 +115,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
     return FAIL;
   }
   if(sds_empty !=0) {
-    if(convert_sdsfillvalue(file_id,sds_id,h5_group,h5_dimgroup)==FAIL) {
+    if(convert_sdsfillvalue(file_id,sds_id,h5_group,h5_dimgroup,h4_attr)==FAIL) {
       printf("cannot convert fill value successfully.\n");
       return FAIL;
     }
@@ -530,6 +530,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   /*  handle extra attributes of sds : sds label, object type 
       and reference num */
 
+  if(h4_attr !=0) {
   strcpy(sdslabel,SDSLABEL);
 
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,sdslabel)==FAIL) {
@@ -572,7 +573,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
     printf("unable to transfer sds ref. to HDF5 dataset attribute.\n");
     return FAIL;
   }
-
+  }
   istat = SDendaccess(sds_id);
   ret   = H5Pclose(create_plist);
   ret   = H5Sclose(h5d_sid);
@@ -820,8 +821,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 
   hid_t   h5dim_tid;
   hid_t   h5dim_memtype;
-
-  hid_t   h5dim_nameaid;
+hid_t   h5dim_nameaid;
   hid_t   h5dim_namesid;
 
   hid_t   h5str_dimntype;
@@ -831,6 +831,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   hid_t   attribID;
   hid_t   create_plist;
 
+  int     dim_index;
   hsize_t h5dimscas[1];
   hsize_t max_h5dimscas[1];
   hsize_t h5dim_dims[1];
@@ -842,8 +843,11 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   hobj_ref_t* alldim_refdat;
   
   char*   h5sdsdim_name;
-  char    h5sdsdim_allname[MAX_VAR_DIMS * MAX_DIM_NAME];
-  char    h5newsdsdim_name[MAX_DIM_NAME];
+  /* char    *h5sdsdim_allname[MAX_VAR_DIMS];
+     char    *h5newsdsdim_name; */
+  
+  char    h5sdsdim_allname[MAX_VAR_DIMS*MAX_DIM_NAME];
+   char    h5newsdsdim_name[MAX_DIM_NAME];
   char    h5dimpath_name[MAX_DIM_NAME];
   herr_t  ret;
 
@@ -853,11 +857,12 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     sdsdimempty[i] = 0;
 
   /*zero out memory for h5sdsdim_allname and h5dimpath_name */
+
+  /*** the following line should be erased for variable length HDF5 string.**/
   h4toh5_ZeroMemory(h5sdsdim_allname,(MAX_VAR_DIMS*MAX_DIM_NAME)*sizeof(char));
   h4toh5_ZeroMemory(h5dimpath_name,MAX_DIM_NAME*sizeof(char));
 
   /*check whether the sds is created with unlimited dimension. */
-
   if(SDgetchunkinfo(sds_id,&c_def_out, &c_flags)== FAIL) {
     printf("error in getting chunking information. \n");
     return FAIL;
@@ -887,13 +892,22 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       SDendaccess(sdsdim_id);		
       return FAIL;							      
     }	
+
+    /* Here we have very messy cases for dimensional scale when
+       sdsdim_type is 0(or not set).
+       When sdsdim_type is 0, it means no SDS dimensional scale
+       data for this dimensions. However, users may define SDS dimensional
+       scale name. We want to keep this information.
+       If user doesn't specific the name we will skip this dimension */
+
     if(sdsdim_type == 0) {
       if(strncmp(sdsdim_name,fakeDim,strlen(fakeDim))==0)
 	 continue;
     }
-    /* for unlimited sds dimension, grab the current dimensional size. */
+    /* for unlimited SDS dimension, grab the current dimensional size. */
     if(sds_dimscasize[0] == 0) sds_dimscasize[0] = firstdimsize;
  
+
     /* check whether this dimensional scale dataset is looked up. */	
     check_sdsdim = lookup_name(sdsdim_name,DIM_HASHSIZE,dim_hashtab);	      
       									      
@@ -918,7 +932,11 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     }
     free(cor_sdsdimname);
 
-    strcpy(&h5sdsdim_allname[count_h5attrname*MAX_DIM_NAME],h5sdsdim_name);
+   strncpy(&h5sdsdim_allname[count_h5attrname*MAX_DIM_NAME],h5sdsdim_name,MAX_DIM_NAME);
+
+
+   /*h5sdsdim_allname[count_h5attrname]=HDstrdup(h5sdsdim_name);
+     should be added for variable length HDF5 string. 6/11/2001. */
 
     /* here we should add some comments for fakedim0--name. It seems that
        hdf4(netcdf) will use unique fake dimension name, fakedim + unique 
@@ -932,6 +950,12 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     if (check_sdsdim == 1){/* the dimension is touched, skip this one.*/
       free(h5sdsdim_name);
       SDendaccess(sdsdim_id);	
+      /* here we have to check a special case when the dimension type is 0.
+         We should ignore counting object reference.*/
+      if(sdsdim_type == 0) {
+	count_h5attrname++;
+	continue;
+      }
       count_h5objref = count_h5objref + 1;
       count_h5attrname = count_h5attrname + 1;
       continue;
@@ -944,7 +968,10 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;							      
     }									      
 
+    /* here we want to keep the dimensional scale name without
+       making the object reference. */
     if(sdsdim_type == 0) {
+
 	count_h5attrname = count_h5attrname + 1;
 	sdsdimempty[i] = 1;
 	continue;
@@ -1065,7 +1092,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 
     if (H5Dwrite(h5dim_dset,h5dim_memtype,h5dim_sid,h5dim_sid,	      
 		 H5P_DEFAULT,(void *)dim_scadata)<0) {		      
-      printf("error writing data\n");
+      printf("error writing dimensional scale data\n");
       free(h5sdsdim_name);
       free(dim_scadata);
       SDendaccess(sdsdim_id);	
@@ -1117,12 +1144,16 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;
     }
     k =0;
+
     for(i=0;i<count_h5objref;i++){
-      h4toh5_ZeroMemory(h5newsdsdim_name,MAX_DIM_NAME);
       if(sdsdimempty[i])
 	k = k +1;
-      strcpy(h5newsdsdim_name,&h5sdsdim_allname[k*MAX_DIM_NAME]);
-       
+      h4toh5_ZeroMemory(h5newsdsdim_name,MAX_DIM_NAME);
+       strcpy(h5newsdsdim_name,&h5sdsdim_allname[k*MAX_DIM_NAME]);
+      
+      /*h5newsdsdim_name = HDstrdup(h5sdsdim_allname[k]);
+	for variable length HDF5 string. 6/11/2001; Kent*/
+
       ret              = H5Rcreate(&dim_refdat,sh5_dimgroup,h5newsdsdim_name,
 				   H5R_OBJECT,-1);
       if(ret <0) {
@@ -1134,7 +1165,9 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       }
       alldim_refdat[i] = dim_refdat;
       k = k +1;
-    }
+
+      /*free(h5newsdsdim_name); for variable length HDF5 string 6/11/2001.*/
+     }
 
     attribID      = H5Acreate(sh5dset,DIMSCALE,attr_refType,attr_refSpace,
 			      H5P_DEFAULT);
@@ -1166,13 +1199,21 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;
     }
 
-    h5str_dimntype   = mkstr(MAX_DIM_NAME,H5T_STR_SPACEPAD);	
+    /*h5str_dimntype   = mkstr(MAX_DIM_NAME,H5T_STR_SPACEPAD);	*/
+     
+    h5str_dimntype = mkstr(MAX_DIM_NAME,H5T_STR_NULLTERM);
     if(h5str_dimntype < 0) {
       H5Sclose(h5dim_namesid);
       printf("error in generating H5T_STRING type.\n");
       return FAIL;
-    }
+      }
 
+    /*using variable length, h5dump and h5view do not
+      support this, this will be supported later. 
+    h5str_dimntype = H5Tcopy(H5T_C_S1);
+    ret = H5Tset_size(h5str_dimntype,H5T_VARIABLE);
+    6/11/2001, Kent Yang
+    */
     h5dim_nameaid    = H5Acreate(sh5dset,HDF4_DIMENSION_LIST,h5str_dimntype,
 				 h5dim_namesid,H5P_DEFAULT);		      
 
@@ -1191,15 +1232,22 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;
     }
     
+
     ret = H5Sclose(h5dim_namesid);
     ret = H5Aclose(h5dim_nameaid);
 
+    /*used for variable length HDF5 string.
+    for(dim_index = 0; dim_index <count_h5attrname;dim_index++)
+      free(h5sdsdim_allname[dim_index]);
+    6/11/2001, kent*/
   }
+
+ 
   free(sdsdimempty);
   return SUCCEED;
 }
 
-int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
+int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int h4_attr){
 
 
   int32   sds_dtype;
@@ -1519,6 +1567,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   /*  handle extra attributes of sds : sds label, object type 
       and reference num */
 
+  if(h4_attr !=0) {
   strcpy(sdslabel,SDSLABEL);
 
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,sdslabel)==FAIL) {
@@ -1561,7 +1610,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
     printf("unable to transfer sds ref. to HDF5 dataset attribute.\n");
     return FAIL;
   }
-
+  }
   free(sds_start);
   free(sds_edge);
   free(sds_stride);

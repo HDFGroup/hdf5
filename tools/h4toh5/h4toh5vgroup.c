@@ -54,7 +54,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
  */	
 
 
-int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid_t h5_dimgroup,hid_t h5_palgroup) 
+int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid_t h5_dimgroup,hid_t h5_palgroup,int h4_attr) 
 
 {
 
@@ -138,7 +138,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
    }
 
    /* vgroup attributes into corresponding hdf5 group attributes.*/
-   if(vg_transattrs(vgroup_id,h5_pgroup)==FAIL) {
+   if(vg_transattrs(vgroup_id,h5_pgroup,h4_attr)==FAIL) {
      printf("error in translating vgroup attributes into hdf5 group attr.\n");
      H5Gclose(h5_pgroup);
      free(h5pgroup_name);
@@ -182,7 +182,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
      if (Visvg(vgroup_id,obj_ref)) {
 
 	if(convert_vgroup(file_id,sd_id,obj_ref,h5pgroup_name,h5_pgroup,
-			  h5_dimgroup,h5_palgroup)== FAIL) {
+			  h5_dimgroup,h5_palgroup,h4_attr)== FAIL) {
 	  printf("convert_vgroup routine failed,");
 	  printf("cannot convert vgroup into hdf5 group successfully.\n");
 	  free(h5pgroup_name);
@@ -193,7 +193,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
       }
       /* the object is independent vdata. */
      else if(Visvs(vgroup_id,obj_ref)) {
-       if(convert_vdata(file_id,obj_ref,h5pgroup_name,h5_pgroup)==FAIL){
+       if(convert_vdata(file_id,obj_ref,h5pgroup_name,h5_pgroup,h4_attr)==FAIL){
 	 printf("fail to convert vdata into hdf5 dataset.\n");
 	 free(h5pgroup_name);
 	 H5Gclose(h5_pgroup);
@@ -202,7 +202,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
      }
      else if(obj_tag == DFTAG_NDG || obj_tag == DFTAG_SDG) {
        if(convert_sds(file_id,sd_id,obj_ref,h5pgroup_name,h5_pgroup,
-		      h5_dimgroup)==FAIL){
+		      h5_dimgroup,h4_attr)==FAIL){
 	 printf("fail to convert sds into hdf5 dataset.\n");
 	 H5Gclose(h5_pgroup);
 	 free(h5pgroup_name);
@@ -211,7 +211,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
      }
     else if(obj_tag == DFTAG_RIG) {
       if(convert_image(file_id,obj_ref,h5pgroup_name,
-		       h5_pgroup,h5_palgroup)==FAIL){
+		       h5_pgroup,h5_palgroup,h4_attr)==FAIL){
 	 printf("fail to convert image into hdf5 dataset.\n");
 	 H5Gclose(h5_pgroup);
 	 free(h5pgroup_name);
@@ -250,7 +250,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
 
 int convert_vgroup(int32 file_id,int32 sd_id, int32 obj_ref,
 		   char* h5pgroup_name,hid_t h5_pgroup,hid_t h5_dimgroup,
-		   hid_t h5_palgroup) {
+		   hid_t h5_palgroup,int h4_attr) {
   
   int32   vgroup_cid; 
   int32   istat;
@@ -316,7 +316,7 @@ int convert_vgroup(int32 file_id,int32 sd_id, int32 obj_ref,
       return FAIL;
     }
     if(Vgroup_h4_to_h5(file_id,vgroup_cid,sd_id,h5_pgroup,
-		       h5_dimgroup,h5_palgroup)== FAIL) {
+		       h5_dimgroup,h5_palgroup,h4_attr)== FAIL) {
       printf("error in transferring vgroup into hdf5 group.\n");
       Vdetach(vgroup_cid);
       free(h5cgroup_name);
@@ -390,7 +390,7 @@ int convert_vgroup(int32 file_id,int32 sd_id, int32 obj_ref,
  */	
   
 int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
-		   hid_t h5_pgroup) {
+		   hid_t h5_pgroup,int h4_attr) {
   
   int32 vdata_id;
   int   check_vdata;
@@ -462,7 +462,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
 	return FAIL;
       }
 
-      if(Vdata_h4_to_h5(file_id,vdata_id,h5_pgroup)==FAIL){
+      if(Vdata_h4_to_h5(file_id,vdata_id,h5_pgroup,h4_attr)==FAIL){
 	printf("failed to transfer vdata into hdf5 dataset.\n");
 	VSdetach(vdata_id);
 	free(h5cvdata_name);
@@ -536,7 +536,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
  *-------------------------------------------------------------------------
  */	
 int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
-		   hid_t h5_pgroup,hid_t h5_dimgroup) {
+		   hid_t h5_pgroup,hid_t h5_dimgroup,int h4_attr) {
 
   int32 sd_index;
   int32 sds_id;
@@ -609,7 +609,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
       return FAIL;
     }
     /* convert the sds object into hdf5 dataset.*/
-    if(Sds_h4_to_h5(file_id,sds_id,h5_pgroup,h5_dimgroup)==FAIL){
+    if(Sds_h4_to_h5(file_id,sds_id,h5_pgroup,h5_dimgroup,h4_attr)==FAIL){
       printf("error in translating sds into hdf5 dataset.\n");
       SDendaccess(sds_id);
       free(h5csds_name);
@@ -673,7 +673,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
  *-------------------------------------------------------------------------
  */	
 int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
-		   hid_t h5_pgroup,hid_t h5_palgroup) {
+		   hid_t h5_pgroup,hid_t h5_palgroup,int h4_attr) {
 
   int32   gr_id;
   int32   gr_index;
@@ -754,7 +754,7 @@ int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
       free(h5cimage_name);
       return FAIL;
     }
-    if(Image_h4_to_h5(file_id,ri_id,h5_pgroup,h5_palgroup)==FAIL) {
+    if(Image_h4_to_h5(file_id,ri_id,h5_pgroup,h5_palgroup,h4_attr)==FAIL) {
       printf("error in transferring image name into hdf5 dataset.\n");
       GRendaccess(ri_id);
       free(h5cimage_name);
@@ -805,6 +805,14 @@ int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
 
     return SUCCEED;
 }
+
+
+
+
+
+
+
+
 
 
 

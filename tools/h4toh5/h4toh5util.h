@@ -218,7 +218,7 @@ herr_t h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 /* routines for translating predefined hdf4 attributes into hdf5 attributes*/
 int h4_transpredattrs(hid_t ,const char *,char*data);
 int h4_transnumattr(hid_t h5g,const char *,uint16 group_ref);
-int vg_transattrs(int32,hid_t);
+int vg_transattrs(int32,hid_t,int);
 
 /*string and int conversion routines.*/
 hid_t mkstr(int size, H5T_str_t pad);
