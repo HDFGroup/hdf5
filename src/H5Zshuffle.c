@@ -12,14 +12,10 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Friday, August 27, 1999
- */
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
-#include "H5Zprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Zprivate.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
 
@@ -39,9 +35,8 @@ static int interface_initialize_g = 0;
  *              Usually, the bytes in each byte position are more related to
  *              each other and putting them together will increase compression.
  *
- * Return:	Success:	
- *
- *		Failure:	
+ * Return:	Success: Size of buffer filtered
+ *		Failure: 0	
  *
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
@@ -127,8 +122,10 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             }
         } /* end else */
 
-        /* Set the buffer information to return */
+        /* Free the input buffer */
         H5MM_xfree(*buf);
+
+        /* Set the buffer information to return */
         *buf = dest;
         *buf_size=nbytes;
     } /* end else */
@@ -140,3 +137,4 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /*H5_HAVE_FILTER_SHUFFLE */
+

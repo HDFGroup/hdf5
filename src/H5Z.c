@@ -53,9 +53,6 @@ H5Z_init_interface (void)
 {
     FUNC_ENTER_NOINIT(H5Z_init_interface);
 
-#ifdef H5_HAVE_FILTER_SZIP
-    H5Z_register (H5Z_FILTER_SZIP, "szip", H5Z_filter_szip);
-#endif /* H5_HAVE_FILTER_SZIP */
 #ifdef H5_HAVE_FILTER_DEFLATE
     H5Z_register (H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate);
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -65,6 +62,9 @@ H5Z_init_interface (void)
 #ifdef H5_HAVE_FILTER_FLETCHER32
     H5Z_register (H5Z_FILTER_FLETCHER32, "fletcher32", H5Z_filter_fletcher32);
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
+#ifdef H5_HAVE_FILTER_SZIP
+    H5Z_register (H5Z_FILTER_SZIP, "szip", H5Z_filter_szip);
+#endif /* H5_HAVE_FILTER_SZIP */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
