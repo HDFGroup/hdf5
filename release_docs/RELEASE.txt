@@ -424,3 +424,7 @@ Known Problems
 
 * Information about building with PGI and Intel compilers is available in
   INSTALL file sections 5.7 and 5.8
+
+* On AIX 5.1 when 64-bit parallel C Library is built with zlib configured in,
+  compilation fails for H5Zdeflate.c. To bypass the problem, remove "const"
+  definition in front of H5Z_DEFLATE in H5Zpkg.h line 29.
