@@ -35,6 +35,7 @@
           INTEGER     ::   error ! Error flag
 
           INTEGER     :: i, j    !general purpose integers
+          INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
           INTEGER, DIMENSION(7) :: data_dims
 
           !
@@ -76,9 +77,9 @@
           !
           ! Write the dataset.
           !
-          data_dims(1) = 4
-          data_dims(2) = 6 
-          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
+          data_dims_b(1) = 4
+          data_dims_b(2) = 6 
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims_b, error)
               CALL check("h5dwrite_f", error, total_error)
 
 
