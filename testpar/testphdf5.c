@@ -74,18 +74,18 @@ phdf5write()
 
 
     /* setup file access template */
-    acc_tpl1 = H5Ccreate (H5C_FILE_ACCESS);
+    acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
-    MESG("H5Ccreate access succeed");
+    MESG("H5Pcreate access succeed");
 #ifdef HAVE_PARALLEL
     /* set Independent Parallel access with communicator */
-    ret = H5Cset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
     assert(ret != FAIL);
-    MESG("H5Cset_mpi succeed");
+    MESG("H5Pset_mpi succeed");
 #endif
 
     /* create the file collectively */
-    fid1=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5C_DEFAULT,acc_tpl1);
+    fid1=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl1);
     assert(fid1 != FAIL);
     MESG("H5Fcreate succeed");
 
@@ -95,20 +95,20 @@ phdf5write()
 
 
     /* setup dimensionality object */
-    sid1 = H5Pcreate_simple (SPACE1_RANK, dims1, NULL);
+    sid1 = H5Screate_simple (SPACE1_RANK, dims1, NULL);
     assert (sid1 != FAIL);
-    MESG("H5Pcreate_simple succeed");
+    MESG("H5Screate_simple succeed");
 
     
     /* create a dataset collectively */
     dataset1 = H5Dcreate(fid1, DATASETNAME1, H5T_NATIVE_INT32, sid1,
-			H5C_DEFAULT);
+			H5P_DEFAULT);
     assert(dataset1 != FAIL);
     MESG("H5Dcreate succeed");
 
     /* create another dataset collectively */
     dataset2 = H5Dcreate(fid1, DATASETNAME2, H5T_NATIVE_INT32, sid1,
-			H5C_DEFAULT);
+			H5P_DEFAULT);
     assert(dataset2 != FAIL);
     MESG("H5Dcreate succeed");
 
@@ -136,28 +136,28 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     file_dataspace = H5Dget_space (dataset1);				    
     assert(file_dataspace != FAIL);					    
     MESG("H5Dget_space succeed");
-    ret=H5Pset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
     assert(ret != FAIL);
-    MESG("H5Pset_hyperslab succeed");
+    MESG("H5Sset_hyperslab succeed");
 
     /* create a memory dataspace independently */
-    mem_dataspace = H5Pcreate_simple (SPACE1_RANK, count, NULL);
+    mem_dataspace = H5Screate_simple (SPACE1_RANK, count, NULL);
     assert (mem_dataspace != FAIL);
 
     /* write data independently */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,	    
-	    H5C_DEFAULT, data_array1);					    
+	    H5P_DEFAULT, data_array1);					    
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,	    
-	    H5C_DEFAULT, data_array1);					    
+	    H5P_DEFAULT, data_array1);					    
     assert(ret != FAIL);
     MESG("H5Dwrite succeed");
 
     /* release dataspace ID */
-    H5Pclose(file_dataspace);
+    H5Sclose(file_dataspace);
 
     /* close dataset collectively */					    
     ret=H5Dclose(dataset1);
@@ -166,7 +166,7 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     assert(ret != FAIL);
 
     /* release all IDs created */
-    H5Mclose(sid1);
+    H5Dclose(sid1);
 
     /* close the file collectively */					    
     H5Fclose(fid1);							    
@@ -206,11 +206,11 @@ phdf5read()
 
 
     /* setup file access template */
-    acc_tpl1 = H5Ccreate (H5C_FILE_ACCESS);
+    acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
     assert(acc_tpl1 != FAIL);
 #ifdef HAVE_PARALLEL
     /* set Independent Parallel access with communicator */
-    ret = H5Cset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
+    ret = H5Pset_mpi(acc_tpl1, comm, info, H5ACC_INDEPENDENT);     
     assert(ret != FAIL);
 #endif
 
@@ -245,18 +245,18 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
     assert(file_dataspace != FAIL);
-    ret=H5Pset_hyperslab(file_dataspace, start, count, stride); 
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
     assert(ret != FAIL);
 
     /* create a memory dataspace independently */
-    mem_dataspace = H5Pcreate_simple (SPACE1_RANK, count, NULL);
+    mem_dataspace = H5Screate_simple (SPACE1_RANK, count, NULL);
     assert (mem_dataspace != FAIL);
 
     
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,
-	    H5C_DEFAULT, data_array1);
+	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
 
     /* print the slab read */
@@ -270,7 +270,7 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT32, mem_dataspace, file_dataspace,
-	    H5C_DEFAULT, data_array1);
+	    H5P_DEFAULT, data_array1);
     assert(ret != FAIL);
 
     /* print the slab read */
@@ -289,7 +289,7 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     assert(ret != FAIL);
 
     /* release all IDs created */
-    H5Pclose(file_dataspace);
+    H5Sclose(file_dataspace);
 
     /* close the file collectively */
     H5Fclose(fid1);
