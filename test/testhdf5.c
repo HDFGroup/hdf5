@@ -59,18 +59,19 @@ int                     Verbosity;
 #include <testhdf5.h>
 
 struct TestStruct {
-    int                     NumErrors;
-    char                    Description[64];
-    int                     SkipFlag;
-    char                    Name[16];
-                            void (*Call) (void);
+    int    NumErrors;
+    char   Description[64];
+    int    SkipFlag;
+    char   Name[16];
+    void (*Call) (void);
+    void (*Cleanup) (void);
 } Test[MAXNUMOFTESTS];
 
-static void             InitTest(const char *TheName, void (*TheCall) (void), const char *TheDescr);
+static void             InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr);
 static void             usage(void);
 
 static void 
-InitTest(const char *TheName, void (*TheCall) (void), const char *TheDescr)
+InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
 {
     if (Index >= MAXNUMOFTESTS) {
         print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
@@ -79,6 +80,7 @@ InitTest(const char *TheName, void (*TheCall) (void), const char *TheDescr)
     HDstrcpy(Test[Index].Description, TheDescr);
     HDstrcpy(Test[Index].Name, TheName);
     Test[Index].Call = TheCall;
+    Test[Index].Cleanup = Cleanup;
     Test[Index].NumErrors = -1;
     Test[Index].SkipFlag = 0;
     Index++;
@@ -132,37 +134,6 @@ print_func(const char *format,...)
     return (ret_value);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:	cleanup
- *
- * Purpose:	Cleanup temporary test files
- *
- * Return:	none
- *
- * Programmer:	Albert Cheng
- *              July 2, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-cleanup(void)
-{
-    if (!getenv ("HDF5_NOCLEANUP")) {
-        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
-	/* call individual cleanup routines in each source module */
-	cleanup_metadata();
-	cleanup_file();
-	cleanup_heap();
-	cleanup_ohdr();
-	cleanup_stab();
-	cleanup_h5s();
-	cleanup_attr();
-    }
-}
-
 int 
 main(int argc, char *argv[])
 {
@@ -191,13 +162,13 @@ main(int argc, char *argv[])
     H5Eset_auto (NULL, NULL);
 
     /* Tests are generally arranged from least to most complexity... */
-    InitTest("metadata", test_metadata, "Encode/decode metadata code");
-    InitTest("file", test_file, "Low-Level File I/O");
-    InitTest("heap", test_heap, "Object and Name Heaps");
-    InitTest("ohdr", test_ohdr, "Object Headers");
-    InitTest("stab", test_stab, "Symbol Tables");
-    InitTest("h5s", test_h5s, "Dataspaces");
-    InitTest("attr", test_attr, "Attributes");
+    InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
+    InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
+    InitTest("heap", test_heap, cleanup_heap, "Object and Name Heaps");
+    InitTest("ohdr", test_ohdr, cleanup_ohdr, "Object Headers");
+    InitTest("stab", test_stab, cleanup_stab, "Symbol Tables");
+    InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
+    InitTest("attr", test_attr, cleanup_attr,  "Attributes");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
@@ -313,8 +284,14 @@ main(int argc, char *argv[])
         }                       /* end for */
         print_func("\n\n");
     }                           /* end if */
-    if (CleanUp)
-	cleanup();
+    if (CleanUp && !getenv("HDF5_NOCLEANUP")) {
+        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
+
+        /* call individual cleanup routines in each source module */
+        for (Loop = 0; Loop < Index; Loop++)
+            if (!Test[Loop].SkipFlag && Test[Loop].Cleanup!=NULL)
+                (*Test[Loop].Cleanup) ();
+    }
     exit(0);
     return (0);
 }                               /* end main() */
