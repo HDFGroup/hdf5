@@ -241,6 +241,7 @@ Supported Configuration Features Summary
 
 Known Problems
 ==============
+
     * Datasets or attributes which have a variable-length string datatype are
       not printing correctly with h5dump and h5ls.
 
@@ -276,4 +277,17 @@ Known Problems
       a hang in some cases when chunked storage is used.  This is now set to
       be off by default.  One may turn it on by setting environment variable
       HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
+
+    * On IA64 systems, if you use a compiler other than GCC (such as Intel's
+      ecc compiler), you will need to modify the generated "libtool" program
+      after configuration is finished. On or around line 102 of the libtool
+      file, there are lines which look like:
+
+          # How to pass a linker flag through the compiler.
+          wl=""
+
+      change the lines to this:
+
+          # How to pass a linker flag through the compiler.
+          wl="-Wl,"
 
