@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Improved error assertion for nil VL strings, making it fails with error
+      stack instead of just assertion failure.  SLU - 2002/12/16
     * Added two new API functions: H5Zunregister & H5Zfilter_avail.
       QAK - 2002/11/16
     * Add data shuffle filter(source code H5Zshuffle.c), the combination of the
