@@ -233,11 +233,13 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         able to share the datatype with other datasets in the same file.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt>hid_t</em> <code>type</code>
+        <dt><em>hid_t</em> <code>type</code>
             <dd>Datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>The successful return values are TRUE if committed, else FALSE.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype has been committed, or <code>0</code> (zero), 
+        for <code>FALSE</code>, if the datatype has not been committed.
         Otherwise returns a negative value.
 </dl>
 
@@ -604,8 +606,9 @@ H5Tget_overflow ()
             <dd>Identifier of datatype to compare.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>When successful, returns TRUE if the datatype identifiers
-        refer to the same datatype, else FALSE.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype identifiers refer to the same datatype, 
+        or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
 </dl>
 
@@ -1567,6 +1570,37 @@ zero.
 
 <hr>
 <dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberOffset">H5Tget_member_offset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>size_t</em> <code>H5Tget_member_offset</code>(<em>hid_t </em><code>type_id</code>,
+        <em>int</em> <code>memb_no</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the offset of a field of a compound datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_offset</code> retrieves the 
+        byte offset of the beginning of a field within a 
+        compound datatype with respect to the beginning 
+        of the compound data type datum. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Identifier of datatype to query.
+        <dt><em>int</em> <code>memb_no</code>
+            <dd>Number of the field whose offset is requested.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the byte offset of the field if successful;
+        otherwise returns <code>0</code> (zero).
+        Note that zero is a valid offset and that this function 
+        will fail only if a call to <code>H5Tget_member_dims()</code> 
+        fails with the same arguments.
+</dl>
+
+
+
+<hr>
+<dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberDims">H5Tget_member_dims</a>
 <dt><strong>Signature:</strong>
     <dd><em>int</em> <code>H5Tget_member_dims</code>(<em>hid_t </em><code>type_id</code>,
@@ -1647,9 +1681,8 @@ zero.
         in an instance of the compound datatype, and <code>field_id</code> 
         is the datatype identifier of the new member.
         <P>
-        Note: All members of a compound datatype must be atomic; a
-        compound datatype cannot have a member which is a compound 
-        datatype.
+        Note: Members of a compound datatype do not have to be atomic datatypes; 
+        a compound datatype can have a member which is a compound datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
