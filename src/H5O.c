@@ -318,7 +318,7 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
     oh->mesg[0].chunkno = 0;
 
     /* cache it */
-    if (H5AC_set(f, dxpl_id, H5AC_OHDR, ent->header, oh) < 0)
+    if (H5AC_set(f, dxpl_id, H5AC_OHDR, ent->header, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header");
 
     /* open it */
@@ -1220,7 +1220,10 @@ int
 H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
-    hbool_t deleted=FALSE;      /* Whether the object was deleted as a result of this action */
+    unsigned int flags=H5AC__NO_FLAGS_SET; /* used to indicate whether the 
+                                            * object was deleted as a result 
+                                            * of this action.
+                                            */
     int	ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(H5O_link, FAIL);
@@ -1258,7 +1261,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
 
                 /* Mark the object header as deleted */
-                deleted=TRUE;
+                flags = H5C__DELETED_FLAG;
             } /* end else */
         } /* end if */
     } else if (adjust>0) {
@@ -1280,7 +1283,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
     ret_value = oh->nlink;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, deleted) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, flags) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1379,7 +1382,8 @@ H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
     ret_value=acc;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) != SUCCEED)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) != SUCCEED)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1484,7 +1488,8 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     ret_value=(sequence<0);
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) != SUCCEED)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) != SUCCEED)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1634,7 +1639,8 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
     }
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1904,7 +1910,8 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     ret_value = sequence;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1986,7 +1993,8 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
     assert(H5F_addr_defined(ent->header));
     assert(oh);
 
-    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
+    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                       H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
@@ -2328,7 +2336,8 @@ H5O_touch(H5G_entry_t *ent, hbool_t force, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object modificaton time");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2432,7 +2441,8 @@ H5O_bogus(H5G_entry_t *ent, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE(ret_value);
@@ -2580,7 +2590,8 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)");
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3238,7 +3249,8 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
 
 done:
-    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, TRUE)<0)
+    if (oh && 
+        H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, H5C__DELETED_FLAG)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3421,7 +3433,8 @@ H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id)
     ostat->nchunks=oh->nchunks;
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET)<0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3597,7 +3610,8 @@ H5O_iterate(const H5G_entry_t *ent, unsigned type_id, H5O_operator_t op,
     } /* end for */
 
 done:
-    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, 
+                             H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3825,7 +3839,8 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
 
 done:
-    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, FALSE) < 0)
+    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, 
+                             H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

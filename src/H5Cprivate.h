@@ -153,7 +153,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * out of a hat -- you should be able to change them as necessary.
  *
  * However, if you need a very big cache, you should also increase the
- * size of the hash table (H5C__HASH_TABLE_LEN in H5C.c).  The current 
+ * size of the hash table (H5C__HASH_TABLE_LEN in H5Cpkg.h).  The current 
  * upper bound on cache size is rather large for the current hash table 
  * size.
  */
@@ -234,6 +234,11 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  *              are marked dirty.  However they may remain in the list after
  *              being flushed.
  *
+ * flush_marker:  Boolean flag indicating that the entry is to be flushed
+ *		the next time H5C_flush_cache() is called with the 
+ *		H5AC__FLUSH_MARKED_ENTRIES_FLAG.  The flag is reset when
+ *		the entry is flushed for whatever reason.
+ *
  *
  * Fields supporting the hash table:
  *
@@ -275,7 +280,7 @@ typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
  * clean and dirty LRU lists to the usual LRU list.  When reading in 
  * parallel mode, we evict from the clean LRU list only.  This implies
  * that we must try to ensure that the clean LRU list is reasonably well 
- * stocked.  See the comments on H5C_t in H5C.c for more details.
+ * stocked.  See the comments on H5C_t in H5Cpkg.h for more details.
  * 
  * Note that even if we start with a completely clean cache, a sequence
  * of protects without unprotects can empty the clean LRU list.  In this
@@ -338,6 +343,7 @@ typedef struct H5C_cache_entry_t
     hbool_t		is_dirty;
     hbool_t		is_protected;
     hbool_t		in_slist;
+    hbool_t		flush_marker;
 
     /* fields supporting the hash table: */
 
@@ -475,7 +481,7 @@ typedef struct H5C_cache_entry_t
  *		automatically.
  *
  *		When this increment mode is selected, the remaining fields
- *		in the cache size decrease section ar ignored.
+ *		in the cache size decrease section are ignored.
  *
  *	H5C_decr__threshold: Attempt to decrease the size of the cache 
  *		whenever the average hit rate over the last epoch rises 
@@ -502,7 +508,7 @@ typedef struct H5C_cache_entry_t
  *		ignored.
  *
  *	H5C_decr__threshold:  If the hit rate exceeds this threshold in any 
- *		epoch, attempt todecrement the cache size by size_decrement.
+ *		epoch, attempt to decrement the cache size by size_decrement.
  *
  *		Note that cache size may not be decremented below min_size.
  *
@@ -655,6 +661,26 @@ typedef struct H5C_auto_size_ctl_t
 /*
  * Library prototypes.
  */
+
+/* #defines of flags used in the flags parameters in some of the 
+ * following function calls.  Note that not all flags are applicable
+ * to all function calls.  Flags that don't apply to a particular
+ * function are ignored in that function.
+ */
+
+/* Generic "no flags set" value for all function calls */
+#define H5C__NO_FLAGS_SET		0x0000
+
+/* These flags apply to H5C_insert_entry() & H5C_unprotect() */
+#define H5C__SET_FLUSH_MARKER_FLAG	0x0001
+#define H5C__DELETED_FLAG		0x0002
+
+/* These flags apply to H5C_flush() & H5C_flush_single_entry() */
+#define H5C__FLUSH_INVALIDATE_FLAG	0x0004
+#define H5C__FLUSH_CLEAR_ONLY_FLAG	0x0008
+#define H5C__FLUSH_MARKED_ENTRIES_FLAG	0x0010
+
+
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
                           size_t                     min_clean_size,
                           int                        max_type_id,
@@ -701,7 +727,8 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             addr,
-                               void *              thing);
+                               void *              thing,
+                               unsigned int        flags);
 
 H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
@@ -739,7 +766,7 @@ H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             const H5C_class_t * type,
                             haddr_t             addr,
                             void *              thing,
-                            hbool_t             deleted);
+                            unsigned int        flags);
 
 #endif /* !_H5Cprivate_H */
 

@@ -29,13 +29,25 @@
  *		in an attempt to support re-use.
  *
  *		For a detailed overview of the cache, please see the
- *		header comment for H5C_t in this file.
+ *		header comment for H5C_t in H5Cpkg.h.
  *
  * Modifications:
  *
  *              QAK - 11/27/2004
  *              Switched over to using skip list routines instead of TBBT
  *              routines.
+ *
+ *		JRM - 12/15/04
+ *		Added code supporting manual and automatic cache resizing.
+ *		See the header for H5C_auto_size_ctl_t in H5Cprivate.h for
+ *		an overview.
+ *
+ *		Some elements of the automatic cache resize code depend on
+ *		the LRU list.  Thus if we ever choose to support a new 
+ *		replacement policy, we will either have to disable those
+ *		elements of the auto resize code when running the new 
+ *		policy, or modify them to make use of similar information
+ *		maintained by the new policy code.
  *
  *-------------------------------------------------------------------------
  */
@@ -145,7 +157,7 @@
  *                                                     JRM - 12/9/04
  *
  *
- *    In the H5C__DLL_PRE_INSERT_SC macro, replaced the lines:
+ *  - In the H5C__DLL_PRE_INSERT_SC macro, replaced the lines:
  *
  *    ( ( (len) == 1 ) && 
  *      ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||
@@ -167,6 +179,29 @@
  *    take on negative values, and thus the revised clause "( (Size) < 0 )"
  *    caused compiler warnings.
  *                                                     JRM - 12/22/04
+ *
+ *  - In the H5C__DLL_SC macro, replaced the lines:
+ *
+ *    ( ( (len) == 1 ) &&
+ *      ( ( (head_ptr) != (tail_ptr) ) || ( (cache_ptr)->size <= 0 ) ||
+ *        ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )
+ *      )
+ *    ) ||
+ *
+ *    with 
+ *
+ *    ( ( (len) == 1 ) &&
+ *      ( ( (head_ptr) != (tail_ptr) ) ||
+ *        ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )
+ *      )
+ *    ) ||
+ *
+ *    Epoch markers have size 0, so we can now have a non-empty list with
+ *    zero size.  Hence the "( (Size) <= 0 )" clause cause false failures
+ *    in the sanity check.  Since "Size" is typically a size_t, it can't
+ *    take on negative values, and thus the revised clause "( (Size) < 0 )"
+ *    caused compiler warnings.
+ *                                                     JRM - 1/10/05
  *    
  ****************************************************************************/
 
@@ -200,7 +235,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
      ( (len) < 0 ) ||                                                    \
      ( (Size) < 0 ) ||                                                   \
      ( ( (len) == 1 ) &&                                                 \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (cache_ptr)->size <= 0 ) ||   \
+       ( ( (head_ptr) != (tail_ptr) ) ||                                 \
          ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )        \
        )                                                                 \
      ) ||                                                                \
@@ -1695,7 +1730,7 @@ static herr_t H5C_make_space_in_cache(H5F_t * f,
  ****************************************************************************/
 
 /* Note that H5C__MAX_EPOCH_MARKERS is defined in H5Cpkg.h, not here because
- * it is needed to dimension an array in H5C_t.
+ * it is needed to dimension arrays in H5C_t.
  */
 
 #define H5C__EPOCH_MARKER_TYPE	H5C__MAX_NUM_TYPE_IDS
@@ -2229,7 +2264,7 @@ H5C_dest(H5F_t * f,
     HDassert( cache_ptr->skip_file_checks || f );
 
     if ( H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id, 
-                         cache_ptr, H5F_FLUSH_INVALIDATE) < 0 ) {
+                         cache_ptr, H5C__FLUSH_INVALIDATE_FLAG) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     }
@@ -2341,6 +2376,23 @@ done:
  *		list, never in the index or in the tree.  However, it 
  *		never hurts to tidy up.
  *
+ *		JRM -- 1/6/05
+ *		Reworked code to support the new 
+ *		H5C__FLUSH_MARKED_ENTRIES_FLAG, and for the replacement of
+ *		H5F_FLUSH_INVALIDATE flag with H5C__FLUSH_INVALIDATE_FLAG.
+ *
+ *		Note that the H5C__FLUSH_INVALIDATE_FLAG takes precidence
+ *		over the H5C__FLUSH_MARKED_ENTRIES_FLAG.  Thus if both are
+ *		set, the functions behaves as if just the 
+ *		H5C__FLUSH_INVALIDATE_FLAG was set.
+ *
+ *		The H5C__FLUSH_CLEAR_ONLY_FLAG flag can co-exist with 
+ *		either the H5C__FLUSH_MARKED_ENTRIES_FLAG, or the 
+ *		H5C__FLUSH_INVALIDATE_FLAG.  In all cases, it is simply
+ *		passed along to H5C_flush_single_entry().  In the case of
+ *		H5C__FLUSH_MARKED_ENTRIES_FLAG, it will only apply to 
+ *		the marked entries.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2352,7 +2404,8 @@ H5C_flush_cache(H5F_t *  f,
 {
     herr_t              status;
     herr_t		ret_value = SUCCEED;
-    hbool_t             destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
+    hbool_t             destroy;
+    hbool_t		flush_marked_entries;
     hbool_t		first_flush = TRUE;
     int32_t		protected_entries = 0;
     int32_t		i;
@@ -2369,6 +2422,14 @@ H5C_flush_cache(H5F_t *  f,
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
     HDassert( cache_ptr->slist_ptr );
+
+    destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
+
+    /* note that flush_marked_entries is set to FALSE if destroy is TRUE */
+    flush_marked_entries = ( ( (flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) != 0 )
+                             &&
+                             ( ! destroy )
+                           );
 
     if ( ( destroy ) && ( cache_ptr->epoch_markers_active > 0 ) ) {
 
@@ -2404,31 +2465,34 @@ H5C_flush_cache(H5F_t *  f,
         actual_slist_size += entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
 
-        if ( entry_ptr->is_protected ) {
+        if ( ( ! flush_marked_entries ) || ( entry_ptr->flush_marker ) ) {
 
-            /* we have major problems -- but lets flush everything 
-             * we can before we flag an error.
-             */
-	    protected_entries++;
+            if ( entry_ptr->is_protected ) {
 
-        } else { 
-
-            status = H5C_flush_single_entry(f, 
-                                            primary_dxpl_id, 
-                                            secondary_dxpl_id, 
-                                            cache_ptr,
-                                            NULL, 
-                                            entry_ptr->addr, 
-                                            flags, 
-                                            &first_flush, 
-                                            FALSE);
-            if ( status < 0 ) {
-
-                /* This shouldn't happen -- if it does, we are toast so
-                 * just scream and die.
+                /* we have major problems -- but lets flush everything 
+                 * we can before we flag an error.
                  */
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "Can't flush entry.")
+	        protected_entries++;
+
+            } else { 
+
+                status = H5C_flush_single_entry(f, 
+                                                primary_dxpl_id, 
+                                                secondary_dxpl_id, 
+                                                cache_ptr,
+                                                NULL, 
+                                                entry_ptr->addr, 
+                                                flags, 
+                                                &first_flush, 
+                                                FALSE);
+                if ( status < 0 ) {
+
+                    /* This shouldn't happen -- if it does, we are toast so
+                     * just scream and die.
+                     */
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                "Can't flush entry.")
+                }
             }
         }
 
@@ -2750,9 +2814,14 @@ done:
  *		Added code to set the cache_full flag to TRUE when ever
  *		we need to make space in the cache.
  *
- *		JRM --11/22/04
+ *		JRM -- 11/22/04
  *		Updated function for the addition of the first_flush_ptr
  *		parameter to H5C_make_space_in_cache().
+ *
+ *		JRM -- 1/6/05
+ *		Added the flags parameter, and code supporting
+ *		H5C__SET_FLUSH_MARKER_FLAG.  Note that this flag is 
+ *		ignored unless the new entry is dirty.
  *
  *-------------------------------------------------------------------------
  */
@@ -2764,11 +2833,13 @@ H5C_insert_entry(H5F_t * 	     f,
                  H5C_t *	     cache_ptr,
                  const H5C_class_t * type, 
                  haddr_t 	     addr, 
-                 void *		     thing)
+                 void *		     thing,
+                 unsigned int        flags)
 {
     herr_t		result;
     herr_t		ret_value = SUCCEED;    /* Return value */
     hbool_t		first_flush = TRUE;
+    hbool_t             set_flush_marker;
     hbool_t		write_permitted = TRUE;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
@@ -2783,6 +2854,8 @@ H5C_insert_entry(H5F_t * 	     f,
     HDassert( type->size );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
+
+    set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -2905,7 +2978,12 @@ H5C_insert_entry(H5F_t * 	     f,
 
     if ( entry_ptr->is_dirty ) {
 
+        entry_ptr->flush_marker = set_flush_marker;
         H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+
+    } else {
+
+        entry_ptr->flush_marker = FALSE;
     }
 
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
@@ -4109,6 +4187,13 @@ H5C_stats__reset(H5C_t * cache_ptr)
  *		In particular, we now add dirty entries to the tree if
  *		they aren't in the tree already.
  *
+ *		JRM -- 1/6/05
+ *		Added the flags parameter, and code supporting
+ *		H5C__SET_FLUSH_MARKER_FLAG.  Note that this flag is 
+ *		ignored unless the new entry is dirty.  Also note that 
+ *		once the flush_marker field of an entry is set, the 
+ *		only way it can be reset is by being flushed.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4119,8 +4204,10 @@ H5C_unprotect(H5F_t *		  f,
               const H5C_class_t * type, 
               haddr_t		  addr,
               void *		  thing, 
-              hbool_t		  deleted)
+              unsigned int        flags)
 {
+    hbool_t		deleted;
+    hbool_t             set_flush_marker;
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
@@ -4135,6 +4222,9 @@ H5C_unprotect(H5F_t *		  f,
     HDassert( type->flush );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
+
+    deleted          = ( (flags & H5C__DELETED_FLAG) != 0 );
+    set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -4151,13 +4241,18 @@ H5C_unprotect(H5F_t *		  f,
 
     entry_ptr->is_protected = FALSE;    
 
-    /* add the entry to the tree if it is dirty, and it isn't already in
-     * the tree.
+    /* if the entry is dirty, or its flush_marker with the set flush flag,
+     * and then add it to the skip list if it isn't there already.
      */
 
-    if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_slist) ) ) {
+    if ( entry_ptr->is_dirty ) {
 
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        entry_ptr->flush_marker |= set_flush_marker;
+
+        if ( ! (entry_ptr->in_slist) ) {
+
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr)
+        }
     }
 
     /* this implementation of the "deleted" option is a bit inefficient, as
@@ -4172,9 +4267,9 @@ H5C_unprotect(H5F_t *		  f,
     if ( deleted ) {
 
         /* the following first flush flag will never be used as we are
-         * calling H5C_flush_single_entry with both the H5F_FLUSH_CLEAR_ONLY
-         * and H5F_FLUSH_INVALIDATE flags.  However, it is needed for the
-         * function call.
+         * calling H5C_flush_single_entry with both the 
+         * H5C__FLUSH_CLEAR_ONLY_FLAG and H5C__FLUSH_INVALIDATE_FLAG flags.  
+	 * However, it is needed for the function call.
          */
         hbool_t		dummy_first_flush = TRUE;
 
@@ -4199,7 +4294,8 @@ H5C_unprotect(H5F_t *		  f,
                                     cache_ptr,
                                     type, 
                                     addr, 
-                                    (H5F_FLUSH_CLEAR_ONLY|H5F_FLUSH_INVALIDATE),
+                                    (H5C__FLUSH_CLEAR_ONLY_FLAG | 
+                                     H5C__FLUSH_INVALIDATE_FLAG),
                                     &dummy_first_flush, 
                                     TRUE) < 0 ) {
 
@@ -4906,7 +5002,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                                                 cache_ptr,
                                                 entry_ptr->type,
                                                 entry_ptr->addr,
-                                                (unsigned)0,
+                                                H5C__NO_FLAGS_SET,
                                                 first_flush_ptr,
                                                 FALSE);
             } else {
@@ -4919,7 +5015,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                                                 cache_ptr,
                                                 entry_ptr->type,
                                                 entry_ptr->addr,
-                                                H5F_FLUSH_INVALIDATE,
+                                                H5C__FLUSH_INVALIDATE_FLAG,
                                                 first_flush_ptr,
                                                 TRUE);
             }
@@ -4985,7 +5081,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                                                 cache_ptr,
                                                 entry_ptr->type,
                                                 entry_ptr->addr,
-                                                H5F_FLUSH_INVALIDATE,
+                                                H5C__FLUSH_INVALIDATE_FLAG,
                                                 first_flush_ptr,
                                                 TRUE);
 
@@ -5304,7 +5400,7 @@ done:
  *		secondary_dxpl_id is used in any subsequent flush where 
  *		*first_flush_ptr is FALSE on entry.
  *
- *		If the H5F_FLUSH_CLEAR_ONLY flag is set, the entry will
+ *		If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
  *		be cleared and not flushed -- in the case *first_flush_ptr,
  *		primary_dxpl_id, and secondary_dxpl_id are all irrelevent,
  *		and the call can't be part of a sequence of flushes.
@@ -5332,6 +5428,13 @@ done:
  *		QAK -- 11/26/04
  *		Updated function for the switch from TBBTs to skip lists.
  *
+ *		JRM -- 1/6/05
+ *		Updated function to reset the flush_marker field.
+ *		Also replace references to H5F_FLUSH_INVALIDATE and
+ *		H5F_FLUSH_CLEAR_ONLY with references to 
+ *		H5C__FLUSH_INVALIDATE_FLAG and H5C__FLUSH_CLEAR_ONLY_FLAG
+ *		respectively.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5345,8 +5448,8 @@ H5C_flush_single_entry(H5F_t *		   f,
                        hbool_t *	   first_flush_ptr,
                        hbool_t		   del_entry_from_slist_on_destroy)
 {
-    hbool_t		destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
-    hbool_t		clear_only = ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0);  
+    hbool_t		destroy;
+    hbool_t		clear_only;
     herr_t		ret_value = SUCCEED;      /* Return value */
     herr_t		status;
     H5C_cache_entry_t *	entry_ptr = NULL;
@@ -5359,6 +5462,9 @@ H5C_flush_single_entry(H5F_t *		   f,
     HDassert( H5F_addr_defined(addr) );
     HDassert( first_flush_ptr );
 
+    destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
+    clear_only = ( (flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0);  
+
     /* attempt to find the target entry in the hash table */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
 
@@ -5367,14 +5473,17 @@ H5C_flush_single_entry(H5F_t *		   f,
 
         if ( entry_ptr->in_slist ) {
 
-            if ( entry_ptr->addr != addr ) {
+            if ( ( ( entry_ptr->flush_marker ) && ( ! entry_ptr->is_dirty ) ) ||
+                 ( entry_ptr->addr != addr ) ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "entry in slist failed sanity checks.")
             }
         } else {
 
-            if ( ( entry_ptr->is_dirty ) || ( entry_ptr->addr != addr ) ) {
+            if ( ( entry_ptr->is_dirty ) || 
+                 ( entry_ptr->flush_marker ) ||
+                 ( entry_ptr->addr != addr ) ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "entry failed sanity checks.")
@@ -5448,6 +5557,8 @@ H5C_flush_single_entry(H5F_t *		   f,
 
 #endif /* NDEBUG */
 #endif /* H5_HAVE_PARALLEL */
+
+        entry_ptr->flush_marker = FALSE;
 
         if ( clear_only ) {
             H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
@@ -5527,6 +5638,7 @@ H5C_flush_single_entry(H5F_t *		   f,
         if ( ! destroy ) {
         
             HDassert( !(entry_ptr->is_dirty) );
+            HDassert( !(entry_ptr->flush_marker) );
         }
     }
 
@@ -5727,7 +5839,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                     cache_ptr,
                                                     entry_ptr->type, 
                                                     entry_ptr->addr, 
-                                                    (unsigned)0, 
+                                                    H5C__NO_FLAGS_SET, 
                                                     first_flush_ptr, 
                                                     FALSE);
                 } else {
@@ -5738,7 +5850,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                     cache_ptr,
                                                     entry_ptr->type, 
                                                     entry_ptr->addr, 
-                                                    H5F_FLUSH_INVALIDATE,
+                                                    H5C__FLUSH_INVALIDATE_FLAG,
                                                     first_flush_ptr, 
                                                     TRUE);
                 }
@@ -5781,7 +5893,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                                             cache_ptr,
                                             entry_ptr->type, 
                                             entry_ptr->addr, 
-                                            (unsigned)0, 
+                                            H5C__NO_FLAGS_SET, 
                                             first_flush_ptr, 
                                             FALSE);
 
@@ -5824,7 +5936,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                                             cache_ptr,
                                             entry_ptr->type, 
                                             entry_ptr->addr, 
-                                            H5F_FLUSH_INVALIDATE,
+                                            H5C__FLUSH_INVALIDATE_FLAG,
                                             first_flush_ptr, 
                                             TRUE);
 

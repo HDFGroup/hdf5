@@ -2909,6 +2909,11 @@ done:
  *              Modified the flags being passed in to be one flag instead
  *              of several.
  *
+ *		John Mainzer, 2005-01-07
+ *		H5AC (and H5C) now have their own system of flags.  Hence
+ *		we must now translate between the H5F_FLUSH flags and the 
+ *		H5AC flags.  Added code to handle this detail.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2916,6 +2921,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */
     unsigned		i;              /* Index variable */
+    unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
@@ -3012,7 +3018,16 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      * allocates object headers (calls the H5O_init function...via a
      * lot of other functions first)....
      */
-    if (H5AC_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+
+    H5AC_flags = 0;
+
+    if ( (flags & H5F_FLUSH_INVALIDATE) != 0 )
+        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
+
+    if ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0 )
+        H5AC_flags |= H5AC__FLUSH_CLEAR_ONLY_FLAG;
+
+    if (H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
 
     /* Write the superblock to disk */

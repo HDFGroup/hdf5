@@ -623,10 +623,18 @@ done:
  *		in H5C.c, and then re-wrote the function as a wrapper for 
  *		H5C_insert_entry().
  *
+ *		JRM - 1/6/05
+ *		Added the flags parameter.  At present, this parameter is
+ *		only used to set the new flush_marker field on the new
+ *		entry.  Since this doesn't apply to the SAP code, no change
+ *		is needed there.  Thus the only change to the body of the 
+ *		code is to pass the flags parameter through to 
+ *		H5C_insert_entry().
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing)
+H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
 {
     herr_t		result;
     H5AC_info_t        *info;
@@ -727,7 +735,8 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
                               cache,
                               type,
                               addr,
-                              thing);
+                              thing,
+                              flags);
 
     if ( result < 0 ) {
 
@@ -1085,14 +1094,21 @@ done:
  *		Abstracted the guts of the function to H5C_unprotect() 
  *		in H5C.c, and then re-wrote the function as a wrapper for 
  *		H5C_unprotect().
+ *	
+ *		JRM - 1/6/05
+ *		Replaced the deleted parameter with the new flags parameter.
+ *		Since the deleted parameter is not used by the FPHDF5 code,
+ *		the only change in the body is to replace the deleted 
+ *		parameter with the flags parameter in the call to 
+ *		H5C_unprotect().
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, hbool_t deleted)
+H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
 {
     herr_t		result;
-    herr_t                  ret_value=SUCCEED;      /* Return value */
+    herr_t              ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_unprotect, FAIL)
 
@@ -1132,6 +1148,15 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
              * FIXME: If the metadata is *really* deleted at this point
              * (deleted == TRUE), we need to send a request to the SAP
              * telling it to remove that bit of metadata from its cache.
+             */
+            /* the deleted parameter has been replaced with the flags 
+             * parameter.  The actual value of deleted is still passed
+             * in as a bit in flags.  If it is needed, it can be extracted
+             * as follows:
+             *
+             *      deleted = ( (flags & H5C__DELETED_FLAG) != 0 );
+             *
+             *                                       JRM -- 1/6/05
              */
             if ( H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
                                            TRUE, &req_id, &status) < 0 )
@@ -1173,7 +1198,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                            type,
                            addr,
                            thing,
-                           deleted);
+                           flags);
 
     if ( result < 0 ) {
 
