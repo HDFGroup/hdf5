@@ -43,7 +43,7 @@
 ./bin/missing
 ./bin/mkdirs
 ./bin/mkinstalldirs
-./bin/reconfigure.sh			_DO_NOT_DISTRIBUTE_
+./bin/reconfigure			_DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot

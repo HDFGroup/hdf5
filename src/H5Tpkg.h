@@ -848,13 +848,32 @@ H5_DLL herr_t H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id,
 				     size_t buf_stride, size_t bkg_stride,
                                      void *buf, void *bkg,
                                      hid_t dset_xfer_plist);
-
 H5_DLL herr_t H5T_conv_float_double(hid_t src_id, hid_t dst_id,
 				     H5T_cdata_t *cdata, size_t nelmts,
 				     size_t buf_stride, size_t bkg_stride,
                                      void *buf, void *bkg,
                                      hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_float_ldouble(hid_t src_id, hid_t dst_id,
+				     H5T_cdata_t *cdata, size_t nelmts,
+				     size_t buf_stride, size_t bkg_stride,
+                                     void *buf, void *bkg,
+                                     hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_conv_double_float(hid_t src_id, hid_t dst_id,
+				     H5T_cdata_t *cdata, size_t nelmts,
+				     size_t buf_stride, size_t bkg_stride,
+                                     void *buf, void *bkg,
+                                     hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_double_ldouble(hid_t src_id, hid_t dst_id,
+				     H5T_cdata_t *cdata, size_t nelmts,
+				     size_t buf_stride, size_t bkg_stride,
+                                     void *buf, void *bkg,
+                                     hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_ldouble_float(hid_t src_id, hid_t dst_id,
+				     H5T_cdata_t *cdata, size_t nelmts,
+				     size_t buf_stride, size_t bkg_stride,
+                                     void *buf, void *bkg,
+                                     hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_ldouble_double(hid_t src_id, hid_t dst_id,
 				     H5T_cdata_t *cdata, size_t nelmts,
 				     size_t buf_stride, size_t bkg_stride,
                                      void *buf, void *bkg,
@@ -994,7 +1013,6 @@ H5_DLL herr_t H5T_conv_llong_ldouble(hid_t src_id, hid_t dst_id,
 				     size_t buf_stride, size_t bkg_stride,
                                      void *buf, void *bkg,
                                      hid_t dset_xfer_plist);
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 H5_DLL herr_t H5T_conv_ullong_float(hid_t src_id, hid_t dst_id,
 				     H5T_cdata_t *cdata, size_t nelmts,
 				     size_t buf_stride, size_t bkg_stride,
@@ -1010,7 +1028,6 @@ H5_DLL herr_t H5T_conv_ullong_ldouble(hid_t src_id, hid_t dst_id,
 				     size_t buf_stride, size_t bkg_stride,
                                      void *buf, void *bkg,
                                      hid_t dset_xfer_plist);
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 H5_DLL herr_t H5T_conv_float_schar(hid_t src_id, hid_t dst_id,
 				     H5T_cdata_t *cdata, size_t nelmts,
 				     size_t buf_stride, size_t bkg_stride,

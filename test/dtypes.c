@@ -7966,7 +7966,13 @@ main(void)
     /* Test hardware floating-point conversion functions */
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1("hw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
-    
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
+#endif
+   
     /* Test hardware integer-float conversion functions */
     nerrors += run_int_float_conv("hw");
 

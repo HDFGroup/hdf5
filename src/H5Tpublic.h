@@ -202,7 +202,7 @@ typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       void *bkg, hid_t dset_xfer_plist);
 
 /* Exception handler.  If an exception like overflow happenes during conversion,
- * this function is called if it's registered through H5Tset_type_conv_cb.
+ * this function is called if it's registered through H5Pset_type_conv_cb.
  */
 typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(int except_type, hid_t src_id, 
             hid_t dst_id, void *src_buf, void *dst_buf, void *user_data);

@@ -6984,6 +6984,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_float_ldouble
+ *
+ * Purpose:	Convert native `float' to native `long double' using hardware.
+ *		This is a fast special case.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Feb 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, size_t buf_stride,
+                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
+                       hid_t UNUSED dxpl_id)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_conv_float_ldouble, FAIL);
+
+    H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_double_float
  *
  * Purpose:	Convert native `double' to native `float' using hardware.
@@ -7016,6 +7048,102 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
     H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_double_ldouble
+ *
+ * Purpose:	Convert native `double' to native `long double' using hardware.
+ *		This is a fast special case.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Feb 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, size_t buf_stride,
+                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
+                       hid_t UNUSED dxpl_id)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_conv_double_ldouble, FAIL);
+
+    H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ldouble_float
+ *
+ * Purpose:	Convert native `long double' to native `float' using hardware.
+ *		This is a fast special case.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Feb 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, size_t buf_stride,
+                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
+                       hid_t UNUSED dxpl_id)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_conv_ldouble_float, FAIL);
+
+    H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_ldouble_double
+ *
+ * Purpose:	Convert native `long double' to native `double' using hardware.
+ *		This is a fast special case.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Feb 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, size_t buf_stride,
+                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
+                       hid_t UNUSED dxpl_id)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_conv_ldouble_double, FAIL);
+
+    H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7886,7 +8014,6 @@ done:
 }
 
 
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_float
  *
@@ -7981,7 +8108,6 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 
 
 /*-------------------------------------------------------------------------
