@@ -59,6 +59,8 @@ use strict;
 # the command line) then the first line of the README.txt and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
+# The AC_INIT macro in configure.in will also change in this case to be
+# something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [hdfhelp@ncsa.uiuc.edu])
 ##############################################################################
 
 sub getvers {
@@ -136,8 +138,9 @@ while ($_ = shift) {
 }
 die "mutually exclusive options given\n" if $set && $inc;
 
-# Determine file to use as H5public.h, README.txt and release_docs/RELEASE.txt.
-# The README.txt and release_docs/RELEASE.txt files are always in the
+# Determine file to use as H5public.h, README.txt,
+# release_docs/RELEASE.txt, and configure.in. The README.txt,
+# release_docs/RELEASE.txt, and configure.in files are always in the
 # directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -154,6 +157,18 @@ die "unable to read file: $README\n" unless -r $file;
 my $RELEASE = $file;
 $RELEASE =~ s/[^\/]*$/..\/release_docs\/RELEASE.txt/;
 die "unable to read file: $RELEASE\n" unless -r $file;
+# configure.in
+my $CONFIGURE = $file;
+$CONFIGURE =~ s/[^\/]*$/..\/configure.in/;
+die "unable to read file: $CONFIGURE\n" unless -r $file;
+# fortran/configure.in
+my $FORTRAN_CONFIGURE = $file;
+$FORTRAN_CONFIGURE =~ s/[^\/]*$/..\/fortran\/configure.in/;
+die "unable to read file: $FORTRAN_CONFIGURE\n" unless -r $file;
+# c++/configure.in
+my $CXX_CONFIGURE = $file;
+$CXX_CONFIGURE =~ s/[^\/]*$/..\/c++\/configure.in/;
+die "unable to read file: $CXX_CONFIGURE\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -200,6 +215,9 @@ if ($set) {
   # Nothing to do but print result
   $README = "";
   $RELEASE = "";
+  $CONFIGURE = "";
+  $FORTRAN_CONFIGURE = "";
+  $CXX_CONFIGURE = "";
   @newver = @curver;
 }
 
@@ -249,6 +267,40 @@ if ($RELEASE) {
   print FILE @contents;
   close FILE;
 }
+
+sub gen_configure {
+  my ($name, $conf) = @_;
+
+  open FILE, $conf or die "$conf: $!\n";
+  my @contents = <FILE>;
+  close FILE;
+
+  for (my $i = 0; $i < $#contents; ++$i) {
+    if ($contents[$i] =~ /^AC_INIT/) {
+      $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [hdfhelp\@ncsa.uiuc.edu])\n",
+                              @newver[0,1,2],
+                              $newver[3] eq "" ? "" : "-".$newver[3]);
+      last;
+    }
+  }
+
+  open FILE, ">$conf" or die "$conf: $!\n";
+  print FILE @contents;
+  close FILE;
+
+  $conf =~ /^(.*?)\/?configure.in$/;
+
+  if ($1) {
+    system("cd $1 && autoconf && rm -rf autom4te.cache");
+  } else {
+    system("autoconf && rm -rf autom4te.cache");
+  }
+}
+
+# Update the configure.in files and regenerate them
+gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
+gen_configure("HDF5 Fortran", $FORTRAN_CONFIGURE) if $FORTRAN_CONFIGURE;
+gen_configure("HDF5 C++", $CXX_CONFIGURE) if $CXX_CONFIGURE;
 
 # Print the new version number
 if ($verbose) {
