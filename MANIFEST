@@ -185,6 +185,7 @@
 ./src/hdf5.h
 ./test/.distdep
 ./test/Makefile.in
+./test/big.c
 ./test/cmpd_dset.c
 ./test/dsets.c
 ./test/dspace.c

@@ -12,7 +12,7 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 PROGS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external \
-      shtype iopipe
+      shtype iopipe big
 TESTS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external \
       shtype
 TIMINGS=iopipe
@@ -32,7 +32,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # overlap with other tests.
 PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c dtypes.c  \
          hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c \
-	 iopipe.c gheap.c shtype.c
+	 iopipe.c gheap.c shtype.c big.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
@@ -70,6 +70,9 @@ SHTYPE_OBJ=$(SHTYPE_SRC:.c=.o)
 
 IOPIPE_SRC=iopipe.c
 IOPIPE_OBJ=$(IOPIPE_SRC:.c=.o)
+
+BIG_SRC=big.c
+BIG_OBJ=$(BIG_SRC:.c=.o)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
@@ -120,5 +123,8 @@ iopipe: $(IOPIPE_OBJ) ../src/libhdf5.a
 
 grptime: $(GRPTIME_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(GRPTIME_OBJ) ../src/libhdf5.a $(LIBS)
+
+big: $(BIG_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(BIG_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

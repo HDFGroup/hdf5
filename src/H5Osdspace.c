@@ -67,10 +67,14 @@ static hbool_t interface_initialize_g = FALSE;
         This function decodes the "raw" disk form of a simple dimensionality
     message into a struct in memory native format.  The struct is allocated
     within this function using malloc() and is returned to the caller.
+
+ MODIFICATIONS
+  	Robb Matzke, 1998-04-09
+ 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+ 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t __unused__ *f, const uint8 *p,
-		   H5HG_t __unused__ *hobj)
+H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5HG_t __unused__ *hobj)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     intn                u;  		/* local counting variable */
@@ -89,12 +93,14 @@ H5O_sdspace_decode(H5F_t __unused__ *f, const uint8 *p,
         UINT32DECODE(p, flags);
         if (sdim->rank > 0) {
             sdim->size = H5MM_xmalloc(sizeof(sdim->size[0]) * sdim->rank);
-            for (u = 0; u < sdim->rank; u++)
-                UINT32DECODE(p, sdim->size[u]);
+            for (u = 0; u < sdim->rank; u++) {
+		H5F_decode_length (f, p, sdim->size[u]);
+	    }
             if (flags & 0x01) {
                 sdim->max = H5MM_xmalloc(sizeof(sdim->max[0]) * sdim->rank);
-                for (u = 0; u < sdim->rank; u++)
-                    UINT32DECODE(p, sdim->max[u]);
+                for (u = 0; u < sdim->rank; u++) {
+		    H5F_decode_length (f, p, sdim->max[u]);
+		}
             }
             if (flags & 0x02) {
                 sdim->perm = H5MM_xmalloc(sizeof(sdim->perm[0]) * sdim->rank);
@@ -130,9 +136,14 @@ H5O_sdspace_decode(H5F_t __unused__ *f, const uint8 *p,
  DESCRIPTION
         This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
+
+ MODIFICATIONS
+  	Robb Matzke, 1998-04-09
+ 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+ 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
+H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
 {
     const H5S_simple_t  *sdim = (const H5S_simple_t *) mesg;
     intn                u;  /* Local counting variable */
@@ -153,11 +164,13 @@ H5O_sdspace_encode(H5F_t __unused__ *f, uint8 *p, const void *mesg)
     UINT32ENCODE(p, sdim->rank);
     UINT32ENCODE(p, flags);
     if (sdim->rank > 0) {
-        for (u = 0; u < sdim->rank; u++)
-            UINT32ENCODE(p, sdim->size[u]);
+        for (u = 0; u < sdim->rank; u++) {
+	    H5F_encode_length (f, p, sdim->size[u]);
+	}
         if (flags & 0x01) {
-            for (u = 0; u < sdim->rank; u++)
-                UINT32ENCODE(p, sdim->max[u]);
+            for (u = 0; u < sdim->rank; u++) {
+		H5F_encode_length (f, p, sdim->max[u]);
+	    }
         }
         if (flags & 0x02) {
             for (u = 0; u < sdim->rank; u++)
@@ -229,18 +242,32 @@ H5O_sdspace_copy(const void *mesg, void *dest)
         This function returns the size of the raw simple dimensionality message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
+
+ MODIFICATIONS
+  	Robb Matzke, 1998-04-09
+ 	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+ 	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size(H5F_t __unused__ *f, const void *mesg)
+H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
     const H5S_simple_t     *sdim = (const H5S_simple_t *) mesg;
-    size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
+    /*
+     * all dimensionality messages are at least 8 bytes long (four bytes for
+     * rank and four bytes for flags)
+     */
+    size_t                  ret_value = 8;
 
     FUNC_ENTER(H5O_sim_dtype_size, 0);
 
-    ret_value += sdim->rank * 4;        /* add in the dimension sizes */
-    ret_value += sdim->max ? sdim->rank * 4 : 0;       /* add in the space for the maximum dimensions, if they are present */
-    ret_value += sdim->perm ? sdim->rank * 4 : 0;       /* add in the space for the dimension permutations, if they are present */
+    /* add in the dimension sizes */
+    ret_value += sdim->rank * H5F_SIZEOF_SIZE (f);
+
+    /* add in the space for the maximum dimensions, if they are present */
+    ret_value += sdim->max ? sdim->rank * H5F_SIZEOF_SIZE (f) : 0;
+
+    /* add in the space for the dimension permutations, if they are present */
+    ret_value += sdim->perm ? sdim->rank * 4 : 0;
 
     FUNC_LEAVE(ret_value);
 }
@@ -279,36 +306,35 @@ H5O_sdspace_debug(H5F_t __unused__ *f, const void *mesg,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
             "Rank:",
             (unsigned long) (sdim->rank));
     
-    fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
     for (u = 0; u < sdim->rank; u++) {
-	fprintf (stream, "%s%lu", u?", ":"", (unsigned long)(sdim->size[u]));
+	HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
     }
-    fprintf (stream, "}\n");
+    HDfprintf (stream, "}\n");
     
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
     if (sdim->max) {
-	fprintf (stream, "{");
+	HDfprintf (stream, "{");
         for (u = 0; u < sdim->rank; u++) {
 	    if (H5S_UNLIMITED==sdim->max[u]) {
-		fprintf (stream, "%sINF", u?", ":"");
+		HDfprintf (stream, "%sINF", u?", ":"");
 	    } else {
-		fprintf (stream, "%s%lu", u?", ":"",
-			 (unsigned long) (sdim->max[u]));
+		HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
 	    }
 	}
-	fprintf (stream, "}\n");
+	HDfprintf (stream, "}\n");
     } else {
-	fprintf (stream, "CONSTANT\n");
+	HDfprintf (stream, "CONSTANT\n");
     }
 
     if (sdim->perm) {
-	fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
+	HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
 	for (u = 0; u < sdim->rank; u++) {
-	    fprintf (stream, "%s%lu", u?", ":"",
+	    HDfprintf (stream, "%s%lu", u?", ":"",
 		     (unsigned long) (sdim->perm[u]));
 	}
     }

@@ -248,7 +248,8 @@ typedef struct H5F_access_t {
 
 	/* Properties for file families */
 	struct {
-	    struct H5F_access_t *memb_access; /*plist for the members*/
+	    struct H5F_access_t *memb_access; /*plist for the members	*/
+	    size_t	offset_bits;	/*number of bits in offset	*/
 	} fam;
 
 	/* Properties for the split driver */

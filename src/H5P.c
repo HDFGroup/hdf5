@@ -1576,7 +1576,10 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
  * Function:	H5Pset_family
  *
  * Purpose:	Sets the low-level driver to stripe the hdf5 address space
- *		across a family of files.
+ *		across a family of files.  The OFFSET_BITS argument indicates
+ *		how many of the low-order bits of an address will be used for
+ *		the offset within the file, and is only meaningful when
+ *		creating new files.
  *
  * Return:	Success:	SUCCEED
  *
@@ -1590,7 +1593,7 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_family (hid_t tid, hid_t memb_tid)
+H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
 {
     
     H5F_access_t	*tmpl = NULL;
@@ -1613,6 +1616,7 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
 
     /* Set driver */
     tmpl->driver = H5F_LOW_FAMILY;
+    tmpl->u.fam.offset_bits = offset_bits;
     tmpl->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS, memb_tmpl);
 
     FUNC_LEAVE (SUCCEED);
@@ -1645,7 +1649,7 @@ H5Pset_family (hid_t tid, hid_t memb_tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_family (hid_t tid, hid_t *memb_tid)
+H5Pget_family (hid_t tid, size_t *offset_bits/*out*/, hid_t *memb_tid/*out*/)
 {
     H5F_access_t	*tmpl = NULL;
 
@@ -1670,6 +1674,7 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
     } else if (memb_tid) {
 	*memb_tid = FAIL;
     }
+    if (offset_bits) *offset_bits = tmpl->u.fam.offset_bits;
 	
     FUNC_LEAVE (SUCCEED);
 }

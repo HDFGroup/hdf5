@@ -155,7 +155,7 @@ H5F_init_interface(void)
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
     /* Nothing to initialize */
 #elif (H5F_LOW_DFLT == H5F_LOW_FAMILY)
-    /* Nothing to initialize */
+    H5F_access_dflt.u.fam.offset_bits = 26u; /*64MB members*/
 #else
 #   error "Unknown default file driver"
 #endif
@@ -809,11 +809,16 @@ H5F_open(const char *name, uintn flags,
 
     /*
      * Update the file creation parameters and file access parameters with
-     * default values if this is the first time this file is opened.
+     * default values if this is the first time this file is opened.  Some of
+     * the properties may need to be updated.
      */
     if (1 == f->shared->nrefs) {
 	f->shared->create_parms = *create_parms;
 	f->shared->access_parms = *access_parms;
+	if (H5F_LOW_FAMILY==f->shared->access_parms.driver) {
+	    size_t x = f->shared->lf->u.fam.offset_bits;
+	    f->shared->access_parms.u.fam.offset_bits = x;
+	}
     }
     cp = &(f->shared->create_parms);
 

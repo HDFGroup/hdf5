@@ -6,3 +6,6 @@
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
+
+/* Define if it's safe to use `long long' for hsize_t and hssize_t */
+#undef HAVE_LARGE_HSIZET

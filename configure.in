@@ -136,27 +136,10 @@ AC_CHECK_HEADERS(unistd.h)
 
 
 dnl ----------------------------------------------------------------------
-dnl Data types.
+dnl Data types and their sizes.
 dnl
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-
-
-
-dnl ----------------------------------------------------------------------
-dnl Check for functions.
-dnl
-AC_CHECK_FUNCS(getpwuid gethostname system)
-
-AC_TRY_COMPILE([#include<sys/types.h>],
-	       [off64_t n = 0;],
-	       AC_CHECK_FUNCS(lseek64 fseek64),
-	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
-
-
-dnl ----------------------------------------------------------------------
-dnl Check sizes of various integral data types.
-dnl
 AC_C_BIGENDIAN
 AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int, 4)
@@ -170,6 +153,35 @@ cat >>confdefs.h <<\EOF
 EOF
 AC_CHECK_SIZEOF(off_t, 4)
 
+AC_ARG_ENABLE(hsizet,
+  [--disable-hsizet          Datasets can normally be larger than memory
+                             and/or files but some compilers are unable to
+                             handle this (including versions of GCC before
+                             2.8.0).  Disabling the feature causes dataset
+                             sizes to be restricted to the size of core memory,
+                             or 'size_t'.],
+  HSIZET=$enableval)
+AC_MSG_CHECKING(for sizeof hsize_t and hssize_t)
+case $HSIZET in
+    no|small)
+	AC_MSG_RESULT(small)
+	;;
+    *)
+        AC_MSG_RESULT(large)
+        AC_DEFINE(HAVE_LARGE_HSIZET)
+	;;
+esac
+
+
+dnl ----------------------------------------------------------------------
+dnl Check for functions.
+dnl
+AC_CHECK_FUNCS(getpwuid gethostname system)
+
+AC_TRY_COMPILE([#include<sys/types.h>],
+	       [off64_t n = 0;],
+	       AC_CHECK_FUNCS(lseek64 fseek64),
+	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
 
 
 dnl ----------------------------------------------------------------------

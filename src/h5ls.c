@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <H5config.h>
+#include <H5private.h>
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -57,7 +57,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	int ndims = H5Sget_dims (space, size);
 	printf (" Dataset {");
 	for (i=0; i<ndims; i++) {
-	    printf ("%s%lu", i?", ":"", (unsigned long)size[i]);
+	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
 	}
 	printf ("}\n");
 	H5Dclose (space);
@@ -110,7 +110,7 @@ main (int argc, char *argv[])
      */
     if (strchr (fname, '%')) {
 	plist = H5Pcreate (H5P_FILE_ACCESS);
-	H5Pset_family (plist, H5P_DEFAULT);
+	H5Pset_family (plist, 0, H5P_DEFAULT);
     }
     file = H5Fopen (fname, H5F_ACC_RDONLY, plist);
     assert (file>=0);

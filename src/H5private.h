@@ -272,7 +272,7 @@ typedef struct {
 #define HDfopen(S,M)            fopen(S,M)
 #define HDfork()                fork()
 #define HDfpathconf(F,N)        fpathconf(F,N)
-/* fprintf() variable arguments */
+int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfputc(C,F)            fputc(C,F)
 #define HDfputs(S,F)            fputs(S,F)
 #define HDfread(M,Z,N,F)        fread(M,Z,N,F)
@@ -410,6 +410,7 @@ typedef struct {
 #define HDstrtod(S,R)           strtod(S,R)
 #define HDstrtok(X,Y)           strtok(X,Y)
 #define HDstrtol(S,R,N)         strtol(S,R,N)
+int64 HDstrtoll (const char *s, const char **rest, int base);
 #define HDstrtoul(S,R,N)        strtoul(S,R,N)
 #define HDstrxfrm(X,Y,Z)        strxfrm(X,Y,Z)
 #define HDsysconf(N)            sysconf(N)

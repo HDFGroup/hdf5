@@ -60,7 +60,7 @@ main(int argc, char *argv[])
      */
     if (strchr (argv[1], '%')) {
 	plist = H5Pcreate (H5P_FILE_ACCESS);
-	H5Pset_family (plist, H5P_DEFAULT);
+	H5Pset_family (plist, 0, H5P_DEFAULT);
     }
     if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, plist)) < 0) {
         fprintf(stderr, "cannot open file\n");
@@ -78,10 +78,10 @@ main(int argc, char *argv[])
     H5F_addr_reset(&extra);
     if (argc > 2) {
         printf("New address: %s\n", argv[2]);
-        addr.offset = HDstrtol(argv[2], NULL, 0);
+        addr.offset = HDstrtoll(argv[2], NULL, 0);
     }
     if (argc > 3) {
-        extra.offset = HDstrtol(argv[3], NULL, 0);
+        extra.offset = HDstrtoll(argv[3], NULL, 0);
     }
     /*
      * Read the signature at the specified file position.

@@ -30,16 +30,6 @@
 static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
-/*
- * Number of bits in the member address.  This can be up to (but not
- * including) the number of bits in the `off_t' type, but be warned that some
- * operating systems are not able to write to the last possible address of a
- * file, so a safe maximum is two less than the number of bits in an `off_t'.
- * Smaller values result in files of a more manageable size (from a human
- * perspective) but also limit the total logical size of the hdf5 file.
- */
-#define H5F_FAM_DFLT_NBITS	26u	/*64MB */
-
 #define H5F_FAM_MASK(N)		(((uint64)1<<(N))-1)
 #define H5F_FAM_OFFSET(ADDR,N)	((off_t)((ADDR)->offset & H5F_FAM_MASK(N)))
 #define H5F_FAM_MEMBNO(ADDR,N)	((intn)((ADDR)->offset >> (N)))
@@ -102,7 +92,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
     H5F_low_t	*member = NULL;		/*a family member		*/
     char	member_name[4096];	/*name of family member		*/
     intn	membno;			/*member number (zero-origin)	*/
-    size_t	nbits = H5F_FAM_DFLT_NBITS; /*num bits in an offset     */
+    size_t	nbits; 			/*num bits in an offset     */
     haddr_t	tmp_addr;		/*temporary address		*/
     const H5F_low_class_t *memb_type;	/*type of family member		*/
 
@@ -123,10 +113,10 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 
     /*
      * If we're truncating the file then delete all but the first family
-     * member.	Use the default number of bits for the offset.
+     * member.
      */
     if ((flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
-	for (membno = 1; /*void*/; membno++) {
+	for (membno=1; /*void*/; membno++) {
 	    sprintf(member_name, name, membno);
 	    if (!H5F_low_access(memb_type, member_name,
 				access_parms->u.fam.memb_access,
@@ -174,12 +164,13 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	member = NULL;
     }
 
-    /*
-     * If the first and second files exists then round the first file size up
-     * to the next power of two and use that as the number of bits per family
-     * member.
-     */
+    /* Calculate member size */
     if (lf->u.fam.nmemb >= 2) {
+	/*
+	 * If the first and second files exists then round the first file size
+	 * up to the next power of two and use that as the number of bits per
+	 * family member.
+	 */
 	size_t size = H5F_low_size(lf->u.fam.memb[0], &tmp_addr);
 	for (nbits=8*sizeof(size_t)-1; nbits>0; --nbits) {
 	    size_t mask = (size_t)1 << nbits;
@@ -194,6 +185,23 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 		break;
 	    }
 	}
+    } else {
+	/*
+	 * Typically, the number of bits in the member offset can be up to two
+	 * less than the number of bits in an `off_t'.  On a 32-bit machine,
+	 * for instance, files can be up to 2GB-1byte in size, but since HDF5
+	 * must have a power of two we're restricted to just 1GB.  Smaller
+	 * values result in files of a more manageable size (from a human
+	 * perspective) but also limit the total logical size of the hdf5 file
+	 * since most OS's only allow a certain number of open file
+	 * descriptors (all family members are open at once).
+	 */
+#ifdef H5F_DEBUG
+	if (access_parms->u.fam.offset_bits+2>=8*sizeof(off_t)) {
+	    fprintf (stderr, "H5F: family member size may be too large.\n");
+	}
+#endif
+	nbits = MAX (access_parms->u.fam.offset_bits, 10); /*1K min*/
     }
     lf->u.fam.offset_bits = nbits;
 
