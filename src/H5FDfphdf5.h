@@ -18,11 +18,11 @@
 #include "H5FDmpio.h"
 #include "H5FDpublic.h"         /* for the H5FD_t structure         */
 
-#ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_FPHDF5
 #   define H5FD_FPHDF5      (H5FD_fphdf5_init())
 #else
 #   define H5FD_FPHDF5      (-1)
-#endif  /* H5_HAVE_PARALLEL */
+#endif  /* H5_HAVE_FPHDF5 */
 
 /* Macros */
 
