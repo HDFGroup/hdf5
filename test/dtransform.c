@@ -2,6 +2,7 @@
 
 #define ROWS    12
 #define COLS    18
+#define FLOAT_TOL 0.0001
 
 int init_test(void);
 int test_char(const hid_t dxpl_id_c_to_f);
@@ -20,6 +21,7 @@ int test_ldouble(const hid_t dxpl_id_c_to_f);
 int test_double(const hid_t dxpl_id_c_to_f);
 int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
 int test_trivial(const hid_t dxpl_id_simple);
+int test_getset(const hid_t dxpl_id_simple);
 
 /* These are used everywhere and are init'ed in init_test() */
 hid_t dset_id_int;
@@ -108,6 +110,8 @@ int main(void)
     /* Run all the tests */
     if((err = init_test()) < 0) TEST_ERROR;
 
+
+    
     if((err = test_char(dxpl_id_c_to_f)) < 0) TEST_ERROR;
     if((err = test_schar(dxpl_id_c_to_f)) < 0) TEST_ERROR;
     if((err = test_uchar(dxpl_id_utrans_inv)) < 0) TEST_ERROR;
@@ -125,6 +129,7 @@ int main(void)
 
     if((err = test_copy(dxpl_id_c_to_f_copy, dxpl_id_polynomial_copy)) < 0) TEST_ERROR;
     if((err = test_trivial(dxpl_id_simple)) < 0) TEST_ERROR;
+    if((err = test_getset(dxpl_id_c_to_f)) < 0) TEST_ERROR;
 
     /* Close the objects we opened/created */
    if((err = H5Dclose(dset_id_char))<0) TEST_ERROR;
@@ -726,7 +731,7 @@ int test_trivial(const hid_t dxpl_id_simple)
     {
 	for(col = 0; col<COLS; col++)
 	{
-	    if((windchillFfloatread[row][col] - 4.8) > 0.0001)
+	    if((windchillFfloatread[row][col] - 4.8) > FLOAT_TOL)
 	    {
 		H5_FAILED();
 		fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
@@ -757,6 +762,71 @@ error:
     return -1;
 }
 
+int test_getset(const hid_t dxpl_id_c_to_f)
+{
+    char* ptrgetTest;
+    herr_t err;
+    int row, col;
+    float windchillFfloatread[ROWS][COLS];
+
+    const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */ 
+    const char* c_to_f = "(9/5.0)*x + 32";
+    
+    TESTING("H5Pget_data_transform")
+    H5Pget_data_transform(dxpl_id_c_to_f, &ptrgetTest);
+    if(strcmp(c_to_f, ptrgetTest) != 0)
+    {
+	H5_FAILED();
+	fprintf(stderr, "    ERROR: Data transform failed to match what was set\n");
+	goto error;
+    }
+    else
+	PASSED();
+
+
+    if((err = H5Pset_data_transform(dxpl_id_c_to_f, simple))<0) TEST_ERROR;
+    
+    TESTING("data transform, reseting of transform property")
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread))<0) TEST_ERROR;
+    for(row = 0; row<ROWS; row++)
+    {
+	for(col = 0; col<COLS; col++)
+	{
+	    if((windchillFfloatread[row][col] - 4.8) > FLOAT_TOL)
+	    {
+		H5_FAILED();
+		fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+		goto error;
+	    }
+	}
+    }
+    PASSED();
+
+    free(ptrgetTest);
+
+    TESTING("H5Pget_data_transform, after resetting transform property")
+    H5Pget_data_transform(dxpl_id_c_to_f, &ptrgetTest);
+    if(strcmp(simple, ptrgetTest) != 0)
+    {
+	H5_FAILED();
+	fprintf(stderr, "    ERROR: Data transform failed to match what was set\n");
+	goto error;
+    }
+    else
+	PASSED();
+
+
+    
+    free(ptrgetTest); 
+
+    return 0;
+
+error:
+  return -1;
+}
+
+
+    
 int compare_int(const int* a, const float* b, int tol)
 {
     int i;
