@@ -52,8 +52,8 @@ typedef struct H5D_chunk_info_t {
 typedef struct fm_map {
     H5TB_TREE *fsel;            /* TBBT containing file dataspaces for all chunks */
     hsize_t last_index;         /* Index of last chunk operated on */
-    H5S_t *file_space;          /* Pointer to the file dataspace */
-    H5S_t *mem_space;           /* Pointer to the memory dataspace */
+    const H5S_t *file_space;    /* Pointer to the file dataspace */
+    const H5S_t *mem_space;     /* Pointer to the memory dataspace */
     hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
     H5S_t *last_chunk;          /* Pointer to last memory chunk's dataspace */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
@@ -2377,9 +2377,8 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     fm->last_index=(hsize_t)-1;
     fm->last_chunk=NULL;
 
-    /* Copy the dataspaces */
-    if((fm->file_space = H5S_copy(file_space))==NULL)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file dataspace")
+    /* Point at the dataspaces */
+    fm->file_space=file_space;
     fm->mem_space=equiv_mspace;
 
     /* Get type of selection on disk & in memory */
@@ -2403,14 +2402,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         fm->last_chunk=NULL;
     } /* end if */
     else {
-        /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-        if(H5S_hyper_convert(fm->file_space)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
-       
-        /* Normalize the hyperslab selections by adjusting them by the offset */
-        if(H5S_hyper_normalize_offset(fm->file_space)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
-       
 #ifdef QAK
     {
         int mpi_rank;
@@ -2534,7 +2525,10 @@ done:
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping");
     } /* end if */
 
+    /* Reset the global dataspace info */
+    fm->file_space=NULL;
     fm->mem_space=NULL;
+
     if(equiv_mspace_init && equiv_mspace) {
         if(H5S_close(equiv_mspace)<0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
@@ -2626,11 +2620,6 @@ H5D_destroy_chunk_map(fm_map *fm)
     if(fm->fsel)
         H5TB_dfree(fm->fsel,H5D_free_chunk_info,NULL);
 
-    /* Free the file dataspace */
-    if(fm->file_space)
-        if(H5S_close(fm->file_space)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace");
-
     /* Free the memory chunk dataspace template */
     if(fm->mchunk_tmpl)
         if(H5S_close(fm->mchunk_tmpl)<0)
@@ -2707,6 +2696,14 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             /* Create "temporary" chunk for selection operations (copy file space) */
             if((tmp_fchunk = H5S_copy(fm->file_space))==NULL)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+
+            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+            if(H5S_hyper_convert(tmp_fchunk)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+
+            /* Normalize hyperslab selections by adjusting them by the offset */
+            if(H5S_hyper_normalize_offset(tmp_fchunk)<0)
+                HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
 
             /* "AND" temporary chunk and current chunk */
             if(H5S_select_hyperslab(tmp_fchunk,H5S_SELECT_AND,coords,NULL,count,NULL)<0) {
