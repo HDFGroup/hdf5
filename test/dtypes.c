@@ -2799,6 +2799,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     unsigned char	dst_bits[32];		/*dest value in LE order*/
     size_t		src_nbits;		/*source length in bits	*/
     size_t		dst_nbits;		/*dst length in bits	*/
+    H5T_sign_t          src_sign;               /*source sign type      */
+    H5T_sign_t          dst_sign;               /*dst sign type         */
     void		*aligned=NULL;		/*aligned temp buffer	*/
     signed char		hw_char;
     unsigned char	hw_uchar;
@@ -2900,6 +2902,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
+    src_sign = H5Tget_sign(src); /* not 8*src_size, esp on J90 - QAK */
+    dst_sign = H5Tget_sign(dst); /* not 8*dst_size, esp on J90 - QAK */
     buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(sizeof(long_long));
@@ -3428,7 +3432,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * hardware conversion result during overflows is usually garbage
 	     * so we must handle those cases differetly when checking results.
 	     */
-	    if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+	    if (H5T_SGN_2==src_sign && H5T_SGN_2==dst_sign) {
             if (src_nbits>dst_nbits) {
                 if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
                     H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
@@ -3481,7 +3485,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                     }
                 }
             }
-	    } else if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_NONE==H5Tget_sign(dst)) {
+	    } else if (H5T_SGN_2==src_sign && H5T_SGN_NONE==dst_sign) {
             if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
                 /*
                  * The source is negative so the result should be zero.
@@ -3504,7 +3508,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 }
             }
             
-	    } else if (H5T_SGN_NONE==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+	    } else if (H5T_SGN_NONE==src_sign && H5T_SGN_2==dst_sign) {
             if (src_nbits>=dst_nbits &&
                     H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
                         H5T_BIT_LSB, 1)>=0) {
