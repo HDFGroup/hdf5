@@ -301,7 +301,7 @@ H5Gopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
 
     /* Open the group */
-    if ((grp = H5G_open(&ent, H5AC_dxpl_id)) <0)
+    if ((grp = H5G_open(&ent, H5AC_dxpl_id))==NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     /* Register an atom for the group */
     if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
