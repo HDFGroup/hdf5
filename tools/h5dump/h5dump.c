@@ -2071,7 +2071,6 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  void              *buf=NULL;
  int               nelmts=1;
  h5dump_t          *outputformat = &dataformat;
- herr_t            ret;
  hid_t             n_type;
 
  memset(&ctx, 0, sizeof(ctx));
@@ -2081,7 +2080,7 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
 
  n_type = H5Tget_native_type(type_id,H5T_DIR_DEFAULT);
 
- ret=H5Pget_fill_value(dcpl, n_type, buf);
+ H5Pget_fill_value(dcpl, n_type, buf);
     
  h5tools_dump_simple_data(stdout, outputformat, obj_id, &ctx,
   START_OF_DATA | END_OF_DATA, nelmts, n_type, buf);
@@ -2222,10 +2221,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    printf("%s\n",END);
   }
  }
-
-  
-
-
 /*-------------------------------------------------------------------------
  * FILTERS	   
  *-------------------------------------------------------------------------
@@ -2237,8 +2232,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
   indentation(indent + COL);
   printf("%s %s\n", FILTERS, BEGIN);
   indent += COL;
-  
-  
+   
   for (i=0; i<nfilters; i++) 
   {
    cd_nelmts = NELMTS(cd_values);
@@ -2438,7 +2432,6 @@ dump_fcpl(hid_t fid)
  unsigned stab;      /* symbol table entry version # */
  unsigned shhdr;     /* shared object header version # */
 #endif 
- herr_t   ret;       /* generic return value */
  hid_t    fdriver;    /* file driver */
  char     dname[15]; /* buffer to store driver name */
  unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
@@ -2450,19 +2443,16 @@ dump_fcpl(hid_t fid)
  unsigned istore_ik; /* indexed storage B-tree initial 'K' value */
 #endif 
 
-
-
  fcpl=H5Fget_create_plist(fid);
- ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
- ret=H5Pget_userblock(fcpl,&userblock);
- ret=H5Pget_sizes(fcpl,&off_size,&len_size);
- ret=H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
- ret=H5Pget_istore_k(fcpl,&istore_ik);
- ret=H5Pclose(fcpl);
- fapl   = h5_fileaccess();
- fdriver = H5Pget_driver(fapl);
+ H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+ H5Pget_userblock(fcpl,&userblock);
+ H5Pget_sizes(fcpl,&off_size,&len_size);
+ H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
+ H5Pget_istore_k(fcpl,&istore_ik);
+ H5Pclose(fcpl);
+ fapl=h5_fileaccess();
+ fdriver=H5Pget_driver(fapl);
  H5Pclose(fapl);
- 
  
  printf("%s %s\n",SUPER_BLOCK, BEGIN);
  indentation(indent + COL);
@@ -2476,9 +2466,9 @@ dump_fcpl(hid_t fid)
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hu\n","USERBLOCK_VERSION", userblock);
  indentation(indent + COL);
- printf("%s %d\n","OFFSET_SIZE", off_size);
+ HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long_long)off_size);
  indentation(indent + COL);
- printf("%s %d\n","LENGTH_SIZE", len_size);
+ HDfprintf(stdout,"%s %Hd\n","LENGTH_SIZE", (long_long)len_size);
  indentation(indent + COL);
  printf("%s %d\n","BTREE_RANK", sym_ik); 
  indentation(indent + COL);
@@ -2488,12 +2478,6 @@ dump_fcpl(hid_t fid)
  {
   strcpy(dname,"H5FD_CORE");
  }
-#if 0
- else if (H5FD_DPSS==fdriver)
- {
-  strcpy(dname,"H5FD_DPSS");
- }
-#endif
  else if (H5FD_FAMILY==fdriver)
  {
   strcpy(dname,"H5FD_FAMILY");
