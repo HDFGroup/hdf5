@@ -19,41 +19,40 @@ Layer</a> design document and in the source code.
 
 hid_t <font color=red>H5FDregister</font>(const H5FD_class_t *cls);
 
-herr_t H5FDunregister(hid_t driver_id);
+herr_t <font color=red>H5FDunregister</font>(hid_t driver_id);
 
-H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id,
+H5FD_t *<font color=red>H5FDopen</font>(const char *name, unsigned flags, hid_t fapl_id,
 		haddr_t maxaddr);
 
-herr_t H5FDclose(H5FD_t *file);
+herr_t <font color=red>H5FDclose</font>(H5FD_t *file);
 
-int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
+int <font color=red>H5FDcmp</font>(const H5FD_t *f1, const H5FD_t *f2);
 
-int H5FDquery(const H5FD_t *f, unsigned long *flags);
+int <font color=red>H5FDquery</font>(const H5FD_t *f, unsigned long *flags);
 
-haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size);
+haddr_t <font color=red>H5FDalloc</font>(H5FD_t *file, H5FD_mem_t type, hsize_t size);
 
-herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, 
-		hsize_t size);
+herr_t <font color=red>H5FDfree</font>(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
 
-haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
+haddr_t <font color=red>H5FDrealloc</font>(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
 		hsize_t old_size, hsize_t new_size);
 
-haddr_t H5FDget_eoa(H5FD_t *file);
+haddr_t <font color=red>H5FDget_eoa</font>(H5FD_t *file);
 
-herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
+herr_t <font color=red>H5FDset_eoa</font>(H5FD_t *file, haddr_t eof);
 
-haddr_t H5FDget_eof(H5FD_t *file);
+haddr_t <font color=red>H5FDget_eof</font>(H5FD_t *file);
 
-herr_t H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, 
-		hsize_t size, void *buf/*out*/);
+herr_t <font color=red>H5FDread</font>(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size, 
+		void *buf/*out*/);
 
-herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
+herr_t <font color=red>H5FDwrite</font>(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
 		haddr_t addr, hsize_t size, const void *buf);
 
-herr_t H5FDflush(H5FD_t *file);
+herr_t <font color=red>H5FDflush</font></font>(H5FD_t *file);
 
 ===========================================
-Last Modified:  19 October 2000
+Last Modified:  30 October 2000
 HDF Help Desk:  hdfhelp@ncsa.uiuc.edu
 
 </pre>
