@@ -269,6 +269,15 @@
 	platforms the main HDF5 library supports. Also, the Fortran
 	interface supports parallel HDF5 while the C++ interface does
 	not.
+          
+        Note:  On T3E and J90 the following files should be modified before
+               building the Fortran Library:
+                 fortran/src/H5Dff.f90
+                 fortran/src/H5Aff.f90
+                 fortran/src/H5Pff.f90
+               Check for "On T3E ..." comment and comment out specified
+               lines.       
+          
 
 5.3.5. Specifying other programs
 	The build system has been tuned for use with GNU make but works
