@@ -290,16 +290,13 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "disagreement about data type size");		      \
 	}								      \
-	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {	      \
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,		      \
-			  "memory allocation failed");			      \
-	}								      \
+    CI_ALLOC_PRIV           \
 	break;								      \
 									      \
     case H5T_CONV_FREE:							      \
 	/* Print and free statistics */					      \
 	CI_PRINT_STATS(STYPE,DTYPE);					      \
-	cdata->priv = H5MM_xfree(cdata->priv);				      \
+    CI_FREE_PRIV                                        \
 	break;								      \
 									      \
     case H5T_CONV_CONV:							      \
@@ -328,8 +325,8 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 	d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g>1 &&			      \
                ((size_t)buf%H5T_NATIVE_##DTYPE##_ALIGN_g ||		      \
                 d_stride%H5T_NATIVE_##DTYPE##_ALIGN_g);			      \
-	if (s_mv) priv->s_aligned += nelmts;				      \
-	if (d_mv) priv->d_aligned += nelmts;				      \
+    CI_INC_SRC(s_mv)                                     \
+    CI_INC_DST(d_mv)                                     \
 									      \
 	for (elmtno=0; elmtno<nelmts; elmtno++) {			      \
 	    /* Alignment */						      \
@@ -361,8 +358,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
     }									      \
 }
 
-/* Print alignment statistics */
 #ifdef H5T_DEBUG
+
+/* Print alignment statistics */
 #   define CI_PRINT_STATS(STYPE,DTYPE) {				      \
     if (H5DEBUG(T) && priv->s_aligned) {				      \
 	HDfprintf(H5DEBUG(T),						      \
@@ -377,8 +375,30 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 		  (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
     }									      \
 }
+
+/* Allocate private alignment structure for atomic types */
+#   define CI_ALLOC_PRIV \
+	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {	      \
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,		      \
+			  "memory allocation failed");			      \
+	}
+
+/* Free private alignment structure for atomic types */
+#   define CI_FREE_PRIV                                 \
+    if(cdata->priv!=NULL)                               \
+        cdata->priv = H5MM_xfree(cdata->priv);
+
+/* Increment source alignment counter */
+#   define CI_INC_SRC(s)   if (s) priv->s_aligned += nelmts;
+
+/* Increment destination alignment counter */
+#   define CI_INC_DST(d)   if (d) priv->d_aligned += nelmts;
 #else
 #   define CI_PRINT_STATS(STYPE,DTYPE) /*void*/
+#   define CI_ALLOC_PRIV cdata->priv=NULL;
+#   define CI_FREE_PRIV  /* void */
+#   define CI_INC_SRC(s) /* void */
+#   define CI_INC_DST(d) /* void */
 #endif
 
 /*-------------------------------------------------------------------------
@@ -5822,15 +5842,12 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			  "disagreement about data type size");
 	}
-	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
+    CI_ALLOC_PRIV
 	break;
 
     case H5T_CONV_FREE:
 	CI_PRINT_STATS(FLOAT, DOUBLE);
-	cdata->priv = H5MM_xfree(cdata->priv);
+    CI_FREE_PRIV
 	break;
 
     case H5T_CONV_CONV:
@@ -5856,8 +5873,8 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	} else {
 	    dst_mv = FALSE;
 	}
-	if (src_mv) priv->s_aligned += nelmts;
-	if (dst_mv) priv->d_aligned += nelmts;
+    CI_INC_SRC(src_mv)
+    CI_INC_DST(dst_mv)
 	
 	for (elmtno=0; elmtno<nelmts; elmtno++) {
 	    /* Align source and/or destination */
@@ -5946,15 +5963,12 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			  "disagreement about data type size");
 	}
-	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
+    CI_ALLOC_PRIV
 	break;
 
     case H5T_CONV_FREE:
 	CI_PRINT_STATS(DOUBLE, FLOAT);
-	cdata->priv = H5MM_xfree(cdata->priv);
+    CI_FREE_PRIV
 	break;
 
     case H5T_CONV_CONV:
@@ -5976,8 +5990,8 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	} else {
 	    dst_mv = FALSE;
 	}
-	if (src_mv) priv->s_aligned += nelmts;
-	if (dst_mv) priv->d_aligned += nelmts;
+    CI_INC_SRC(src_mv)
+    CI_INC_DST(dst_mv)
 	
 	for (elmtno=0; elmtno<nelmts; elmtno++) {
 	    /* Align source and/or destination */
