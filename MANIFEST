@@ -1314,6 +1314,8 @@
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
+./tools/testfiles/tattr2.h5
+./tools/testfiles/tall-2A.ddl
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1386,6 +1388,18 @@
 ./tools/testfiles/tempty-nons-2.h5.xml
 ./tools/testfiles/tempty-ns-2.h5.xml
 ./tools/testfiles/tall-2A.h5.xml
+./tools/testfiles/tname-amp.h5
+./tools/testfiles/tname-apos.h5
+./tools/testfiles/tname-gt.h5
+./tools/testfiles/tname-lt.h5
+./tools/testfiles/tname-quot.h5
+./tools/testfiles/tname-sp.h5
+./tools/testfiles/tnodata.h5
+./tools/testfiles/tref-escapes-at.h5
+./tools/testfiles/tref-escapes.h5
+./tools/testfiles/tref.h5
+./tools/testfiles/tstring-at.h5
+./tools/testfiles/tstring.h5
 
 #test files for h5diff
 ./tools/testfiles/file1.h5
