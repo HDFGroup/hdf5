@@ -59,14 +59,19 @@ typedef int (*H5TB_cmp_t)(const void *k1, const void *k2, int cmparg);
 # define  HasChild(n,s) ( Cnt(n,s)>0 )
 # define  Heavy(n,s)    ( (s) & (LeftCnt(n)>RightCnt(n) ? LEFT : \
                  LeftCnt(n)==RightCnt(n) ? 0 : RIGHT))
+# define  HeavyCnt(l,r,s) ( (s) & ((l)>(r) ? LEFT : (l)==(r) ? 0 : RIGHT))
 # define  Intern(n)     ( LeftCnt(n) && RightCnt(n) )
 # define  UnBal(n)      ( LeftCnt(n)>RightCnt(n) ? LEFT : \
                  LeftCnt(n)==RightCnt(n) ? 0 : RIGHT)
-# define  UnBalanced(n) ( LeftCnt(n)!=RightCnt(n) ? 1 : 0)
+# define  UnBalanced(n) ( LeftCnt(n)!=RightCnt(n) )
+# define  UnBalancedCnt(l,r) ( (l)!=(r) )
 # define  Double(n)     ( H5TB_DOUBLE & (n)->flags )
 # define  Other(side)   ( LEFT + RIGHT - (side) )
 # define  Weight(n)     ( Double(n) ? 2 : UnBalanced(n) )
+# define  WeightCnt(l,r,d) ( (d) ? 2 : UnBalancedCnt(l,r) )
 # define  Delta(n,s)    ( Heavy(n,s) ? Weight(n) : -Weight(n) )
+# define  DeltaCnt(l,r,d,s) ( HeavyCnt(l,r,s) ? WeightCnt(l,r,d) : \
+                -WeightCnt(l,r,d) )
 # define  SetFlags(n,s,b,i)   (  ( -2<(b) && (b)<2 ? 0 : H5TB_DOUBLE )   \
     |  ( 0>(b) ? H5TB_HEAVY(s) : (b)>0 ? H5TB_HEAVY(Other(s)) : 0 )        \
     |  ( (i) ? H5TB_INTERN : 0 )  )
