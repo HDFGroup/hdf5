@@ -27,20 +27,21 @@
 #include "hdf5.h"
 
 #define DATAFILE   "ttime.h5"
+#define DATASETNAME   "Dataset"
 
 /****************************************************************
 **
-**  test_time(): Main time datatype testing routine.
-** 
+**  test_time_commit(): Test committing time datatypes to a file
+**
 ****************************************************************/
-void 
-test_time(void)
+static void
+test_time_commit(void)
 {
     hid_t       file_id, tid;  /* identifiers */
     herr_t      status;
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Time Datatypes\n"));
+    MESSAGE(5, ("Testing Committing Time Datatypes\n"));
 
     /* Create a new file using default properties. */
     file_id = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -128,7 +129,100 @@ test_time(void)
     status = H5Fclose(file_id);
     CHECK(status, FAIL, "H5Fclose");
  
-}   /* test_reference() */
+}
+
+#ifdef NOT_YET
+/****************************************************************
+**
+**  test_time_io(): Test writing time data to a dataset
+**
+****************************************************************/
+static void
+test_time_io(void)
+{
+    hid_t       fid;            /* File identifier */
+    hid_t       dsid;           /* Dataset identifier */
+    hid_t       tid;            /* Datatype identifier */
+    hid_t       sid;            /* Dataspace identifier */
+    time_t      timenow, timethen;      /* Times */
+    herr_t      status;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Committing Time Datatypes\n"));
+
+    /* Create a new file using default properties. */
+    fid = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+ 
+    /* Create a scalar dataspace */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset with a time datatype */
+    dsid = H5Dcreate(fid, DATASETNAME, H5T_UNIX_D32LE, sid, H5P_DEFAULT);
+    CHECK(dsid, FAIL, "H5Dcreate");
+
+    /* Initialize time data value */
+    timenow = HDtime(NULL);
+
+    /* Write time to dataset */
+    status = H5Dwrite (dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timenow);
+    CHECK(status, FAIL, "H5Dwrite");
+
+    /* Close objects */
+    status = H5Dclose(dsid);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Sclose(sid);
+    CHECK(status, FAIL, "H5Sclose");
+
+    status = H5Fclose (fid);
+    CHECK(status, FAIL, "H5Fclose");
+
+    /* Open file and dataset, read time back and print it in calendar format */
+    fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    dsid = H5Dopen(fid, DATASETNAME);
+    CHECK(dsid, FAIL, "H5Dopen");
+
+tid = H5Dget_type(dsid);
+CHECK(tid, FAIL, "H5Dget_type");
+if( H5Tget_class (tid) == H5T_TIME)
+    fprintf(stderr,"datatype class is H5T_TIME\n");
+status = H5Tclose (tid);
+CHECK(status, FAIL, "H5Tclose");
+
+    status = H5Dread (dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timethen);
+    CHECK(status, FAIL, "H5Dread");
+fprintf(stderr,"time written was: %s\n", HDctime(&timethen));
+
+    status = H5Dclose(dsid);
+    CHECK(status, FAIL, "H5Dclose");
+
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+ 
+}
+#endif /* NOT_YET */
+
+/****************************************************************
+**
+**  test_time(): Main time datatype testing routine.
+** 
+****************************************************************/
+void 
+test_time(void)
+{
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Time Datatypes\n"));
+
+    test_time_commit();         /* Test committing time datatypes to a file */
+#ifdef NOT_YET
+    test_time_io();             /* Test writing time data to a dataset */
+#endif /* NOT_YET */
+ 
+}   /* test_time() */
 
 
 /*-------------------------------------------------------------------------
