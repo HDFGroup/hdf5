@@ -430,7 +430,7 @@ facilitate moving easily between them.</i>
   <dt><strong>Name:</strong> <a name="Property-GetVersion">H5Pget_version</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>boot</code>,
+            <em>int *</em> <code>super</code>,
             <em>int *</em> <code>freelist</code>,
             <em>int *</em> <code>stab</code>,
             <em>int *</em> <code>shhdr</code>
@@ -446,8 +446,8 @@ facilitate moving easily between them.</i>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier of the file creation property list.
-        <dt><em>int *</em> <code>boot</code>
-            <dd>OUT: Pointer to location to return boot block version number.
+        <dt><em>int *</em> <code>super</code>
+            <dd>OUT: Pointer to location to return super block version number.
         <dt><em>int *</em> <code>freelist</code>
             <dd>OUT: Pointer to location to return global freelist version number.
         <dt><em>int *</em> <code>stab</code>

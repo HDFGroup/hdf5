@@ -93,13 +93,13 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 <dir>
 <pre>
-&lt;file&gt; ::= HDF5 &lt;file_name&gt; { &lt;file_boot_block&gt;<FONT SIZE=1.7>opt</FONT> &lt;root_group&gt; }
+&lt;file&gt; ::= HDF5 &lt;file_name&gt; { &lt;file_super_block&gt;<FONT SIZE=1.7>opt</FONT> &lt;root_group&gt; }
 
 &lt;file_name&gt; ::= &lt;identifier&gt;
 
-&lt;file_boot_block&gt; ::= BOOT_BLOCK { &lt;boot_block_content&gt; }
+&lt;file_super_block&gt; ::= BOOT_BLOCK { &lt;super_block_content&gt; }
 
-&lt;boot_block_content&gt; ::= TBD
+&lt;super_block_content&gt; ::= TBD
 
 &lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 

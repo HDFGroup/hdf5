@@ -211,11 +211,11 @@
 	  </tr>
 	  <tr>
 	    <td>User-defined block which is truncated by the size of the
-	      HDF4 file header so that the HDF5 boot block file address
+	      HDF4 file header so that the HDF5 super block file address
 	      doesn't change.</td>
 	  </tr>
 	  <tr>
-	    <td>The HDF5 boot block and data, unmodified by adding the
+	    <td>The HDF5 super block and data, unmodified by adding the
 	      HDF4 wrapper.</td>
 	  </tr>
 	  <tr>
@@ -234,9 +234,9 @@
       an out of date wrapper.
 
     <p>If there is no user block then we have a problem.  The HDF5
-      boot block must be moved to make room for the HDF4 file header.
-      But moving just the boot block causes problems because all file
-      addresses stored in the file are relative to the boot block
+      super block must be moved to make room for the HDF4 file header.
+      But moving just the super block causes problems because all file
+      addresses stored in the file are relative to the super block
       address.  The only option is to shift the entire file contents
       by 512 bytes to open up a user block (too bad we don't have
       hooks into the Unix i-node stuff so we could shift the entire

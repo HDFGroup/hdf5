@@ -13,7 +13,7 @@
       a directed graph with a single entry point into the graph which
       is the <i>Root Object</i>. The root object is usually a
       group. All objects have at least one predecessor (the <i>Root
-      Object</i> always has the HDF5 file boot block as a
+      Object</i> always has the HDF5 file super block as a
       predecessor).  The number of predecessors of a group is also
       known as the <i>hard link count</i> or just <i>link count</i>.
       Unlike Unix directories, HDF5 groups have no ".."  entry since
@@ -23,7 +23,7 @@
 
     <p>A special optimization is that a file may contain a single
       non-group object and no group(s).  The object has one
-      predecessor which is the file boot block.  However, once a root
+      predecessor which is the file super block.  However, once a root
       group is created it never dissappears (although I suppose it
       could if we wanted).
 

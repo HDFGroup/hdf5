@@ -64,10 +64,10 @@
     <h3>Single Address Space</h3>
 
     <p>The simplest form of hdf5 file is a single file containing only
-      hdf5 data. The file begins with the boot block, which is
+      hdf5 data. The file begins with the super block, which is
       followed until the end of the file by hdf5 data.  The next most
       complicated file allows non-hdf5 data (user defined data or
-      internal wrappers) to appear before the boot block and after the
+      internal wrappers) to appear before the super block and after the
       end of the hdf5 data.  The hdf5 data is treated as a single
       linear address space in both cases.
 
