@@ -78,6 +78,10 @@ install-doc:
 uninstall-doc:
 	(cd doc && $(MAKE) $@) || exit 1;
 
+## need to require a proper "make install" has been done.
+check-install:
+	(cd examples && $(MAKE) check) || exit 1;
+
 ## Number format detection
 H5detect: 
 	(cd src && $(MAKE) $@)
