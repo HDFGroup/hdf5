@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "H5CppDoc.h"   // included only for Doxygen to generate part of RM
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"

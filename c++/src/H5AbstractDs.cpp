@@ -20,6 +20,8 @@
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
+#include "H5DcreatProp.h"
+#include "H5CommonFG.h"
 #include "H5Alltypes.h"
 
 #ifndef H5_NO_NAMESPACE

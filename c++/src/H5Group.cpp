@@ -76,95 +76,11 @@ hid_t Group::getLocId() const
 Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 
 //--------------------------------------------------------------------------
-// Function:	Group::getNumObjs
-///\brief	Returns the number of objects in this group.
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hsize_t Group::getNumObjs() const
-{
-   hsize_t num_objs;
-   herr_t ret_value = H5Gget_num_objs(id, &num_objs);
-   if(ret_value < 0)
-   {
-      throwException("getNumObjs", "H5Gget_num_objs failed");
-   }
-   return (num_objs);
-}
-
-//--------------------------------------------------------------------------
-// Function:	Group::getObjnameByIdx
-///\brief	Retrieves the name of an object in this group by giving the
-///		object's index.
-///\return	Object name
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-ssize_t Group::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
-{
-   char* name_C = new char[size];
-   ssize_t name_len = H5Gget_objname_by_idx(id, idx, name_C, size);
-   if(name_len < 0)
-   {
-      throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
-   }
-   name = string( name_C );
-   delete [] name_C;
-   return (name_len);
-}
-
-//--------------------------------------------------------------------------
-// Function:	Group::getObjTypeByIdx
-///\brief	Returns the type of an object in this group by giving the
-///		object's index.
-///\return	Object type
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-int Group::getObjTypeByIdx(hsize_t idx) const
-{
-   int obj_type = H5Gget_objtype_by_idx(id, idx);
-   if (obj_type == H5G_UNKNOWN)
-   {
-	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-   }
-   return (obj_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	Group::getObjTypeByIdx
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function because it also provides 
-///		the returned object type in text.
-///\param	idx - IN: Index of the object
-///\param	type_name - IN: Object type in text
-///\return	Object type
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
-{
-   int obj_type = H5Gget_objtype_by_idx(id, idx);
-   switch (obj_type)
-   {
-	case H5G_GROUP: type_name = string("group"); break;
-	case H5G_DATASET: type_name = string("dataset"); break;
-	case H5G_TYPE: type_name = string("datatype"); break;
-	case H5G_UNKNOWN:
-	default:
-   	{
-	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-	}
-   }
-   return (obj_type);
-}
-
-//--------------------------------------------------------------------------
 // Function:	Group::Reference
 ///\brief	Creates a reference to an HDF5 object or a dataset region.
-///\param	name - IN: Name of the object to be referenced
+///\param	name      - IN: Name of the object to be referenced
 ///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\param	ref_type  - IN: Type of reference; default to \c H5R_DATASET_REGION
 ///\return	A reference
 ///\exception	H5::ReferenceIException
 // Programmer	Binh-Minh Ribler - May, 2004
@@ -196,8 +112,8 @@ void* Group::Reference(const char* name) const
 //--------------------------------------------------------------------------
 // Function:	Group::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
+///\param	ref      - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query
 // Return	An object type, which can be one of the following:
 //			H5G_LINK Object is a symbolic link.  
 //			H5G_GROUP Object is a group.  

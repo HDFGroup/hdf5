@@ -514,7 +514,7 @@ void CommonFG::unmount( const string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CommonFG::p_openDataType (private)
+// Function:	CommonFG::p_open_data_type (private)
 // Purpose	Opens the named datatype and returns the datatype's identifier.
 // Return	Id of the datatype
 // Exception	H5::FileIException or H5::GroupIException
@@ -524,7 +524,7 @@ void CommonFG::unmount( const string& name ) const
 //		datatypes.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hid_t CommonFG::p_openDataType( const char* name ) const
+hid_t CommonFG::p_open_data_type( const char* name ) const
 { 
    // Call C function H5Topen to open the named datatype in this group,
    // giving either the file or group id 
@@ -542,7 +542,7 @@ hid_t CommonFG::p_openDataType( const char* name ) const
 
 //
 // The following member functions use the private function
-// p_openDataType to open a named datatype in this location
+// p_open_data_type to open a named datatype in this location
 //
 
 //--------------------------------------------------------------------------
@@ -555,7 +555,7 @@ hid_t CommonFG::p_openDataType( const char* name ) const
 //--------------------------------------------------------------------------
 DataType CommonFG::openDataType( const char* name ) const
 {
-   DataType data_type( p_openDataType( name ));
+   DataType data_type( p_open_data_type( name ));
    return( data_type );
 }
 
@@ -581,7 +581,7 @@ DataType CommonFG::openDataType( const string& name ) const
 //--------------------------------------------------------------------------
 EnumType CommonFG::openEnumType( const char* name ) const
 {
-   EnumType enum_type( p_openDataType( name ));
+   EnumType enum_type( p_open_data_type( name ));
    return( enum_type );
 }  
 
@@ -607,7 +607,7 @@ EnumType CommonFG::openEnumType( const string& name ) const
 //--------------------------------------------------------------------------
 CompType CommonFG::openCompType( const char* name ) const
 {
-   CompType comp_type( p_openDataType( name ));
+   CompType comp_type( p_open_data_type( name ));
    return( comp_type );
 }
 
@@ -633,7 +633,7 @@ CompType CommonFG::openCompType( const string& name ) const
 //--------------------------------------------------------------------------
 IntType CommonFG::openIntType( const char* name ) const
 {  
-   IntType int_type( p_openDataType( name ));
+   IntType int_type( p_open_data_type( name ));
    return( int_type );
 }
 
@@ -659,7 +659,7 @@ IntType CommonFG::openIntType( const string& name ) const
 //--------------------------------------------------------------------------
 FloatType CommonFG::openFloatType( const char* name ) const
 {  
-   FloatType float_type( p_openDataType( name ));
+   FloatType float_type( p_open_data_type( name ));
    return( float_type );
 }
 
@@ -685,7 +685,7 @@ FloatType CommonFG::openFloatType( const string& name ) const
 //--------------------------------------------------------------------------
 StrType CommonFG::openStrType( const char* name ) const
 {
-   StrType str_type( p_openDataType( name ));
+   StrType str_type( p_open_data_type( name ));
    return( str_type );
 }
 
