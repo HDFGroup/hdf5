@@ -394,7 +394,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
         default:
             HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
-            break;
     } /* end switch */
 
     /* Add new blocks to current selection */

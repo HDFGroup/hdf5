@@ -1705,7 +1705,6 @@ H5G_loc (hid_t loc_id)
 #endif
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of property list");
-	break;
 
     case H5I_GROUP:
 	if (NULL==(group=H5I_object (loc_id))) {

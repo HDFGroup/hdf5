@@ -2161,7 +2161,7 @@ H5Tget_sign(hid_t type_id)
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_INTEGER!=dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR,
 		      "operation not defined for data type class");
     }
     
@@ -2486,7 +2486,7 @@ H5Tget_norm(hid_t type_id)
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR,
 		      "operation not defined for data type class");
     }
     

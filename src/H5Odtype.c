@@ -256,7 +256,7 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 	dt->u.atomic.offset = 0;
 	dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
 	dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-	dt->u.atomic.u.r.rtype = flags & 0x0f;
+	dt->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
 	break;
 
     default:
