@@ -1727,6 +1727,10 @@
 ./windows/hl/test/hl_test_table/hl_test_table.dsp
 ./windows/hl/test/test_hdf5_hl.BAT
 
+#windows misc
+./windows/misc/typegen/typegen.dsw
+./windows/misc/typegen/h5tinit/h5tinit.dsp
+
 #windows hl proj
 ./windows/proj/all/all.dsp
 ./windows/proj/all/all.dsw
@@ -1750,6 +1754,10 @@
 ./windows/test/bigdll/bigdll.dsp
 ./windows/test/bittests/bittests.dsp
 ./windows/test/bittestsdll/bittestsdll.dsp
+./windows/test/blocktrack/blocktrack.dsp
+./windows/test/blocktrackdll/blocktrackdll.dsp
+./windows/test/btree2/btree2.dsp
+./windows/test/btree2dll/btree2dll.dsp
 ./windows/test/cache/cache.dsp
 ./windows/test/cachedll/cachedll.dsp
 ./windows/test/chunk/chunk.dsp
@@ -1811,6 +1819,8 @@
 ./windows/test/reserveddll/reserveddll.dsp
 ./windows/test/set_extent/set_extent.dsp
 ./windows/test/set_extentdll/set_extentdll.dsp
+./windows/test/sheap/sheap.dsp
+./windows/test/sheapdll/sheapdll.dsp
 ./windows/test/stab/stab.dsp
 ./windows/test/stabdll/stabdll.dsp
 ./windows/test/tellub/tellub.dsp
