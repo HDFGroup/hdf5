@@ -22,7 +22,7 @@
  * size of that temporary buffer in bytes.  For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
-#define H5DUMP_BUFSIZE	1024
+#define H5DUMP_BUFSIZE	(1024*1024)
 
 #define OPT(X,S)	((X)?(X):(S))
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
@@ -103,10 +103,10 @@ h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
 static void
 h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 {
-    size_t	i, n, offset;
+    size_t	i, n, offset, size, dims[4], nelmts;
     char	temp[1024], *name;
     hid_t	memb;
-    int		nmembs, j;
+    int		nmembs, j, k, ndims;
     
     if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
 	sprintf(temp, "%g", *((double*)vp));
@@ -115,6 +115,9 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
     } else if (H5Tequal(type, H5T_NATIVE_CHAR) ||
 	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
 	switch (*((char*)vp)) {
+	case '"':
+	    strcpy(temp, "\\\"");
+	    break;
 	case '\\':
 	    strcpy(temp, "\\\\");
 	    break;
@@ -164,7 +167,18 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    /* The value */
 	    offset = H5Tget_member_offset(type, j);
 	    memb = H5Tget_member_type(type, j);
-	    h5dump_sprint(temp+strlen(temp), info, memb, (char*)vp+offset);
+	    size = H5Tget_size(memb);
+	    ndims = H5Tget_member_dims(type, j, dims, NULL);
+	    assert(ndims>=0 && ndims<=4);
+	    for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
+
+	    if (nelmts>1) strcat(temp, OPT(info->arr_pre, "["));
+	    for (i=0; i<nelmts; i++) {
+		if (i) strcat(temp, OPT(info->arr_sep, ","));
+		h5dump_sprint(temp+strlen(temp), info, memb,
+			      (char*)vp+offset+i*size);
+	    }
+	    if (nelmts>1) strcat(temp, OPT(info->arr_suf, "]"));
 	    H5Tclose(memb);
 	}
 	strcat(temp, OPT(info->cmpd_suf, "}"));
@@ -361,8 +375,8 @@ h5dump_fixtype(hid_t f_type)
     hid_t	m_type=-1, f_memb;
     hid_t	*memb=NULL;
     char	**name=NULL;
-    int		nmembs, i;
-    size_t	size;
+    int		nmembs, i, j, *ndims=NULL;
+    size_t	size, offset, *dims=NULL, nelmts;
 
     size = H5Tget_size(f_type);
     switch (H5Tget_class(f_type)) {
@@ -385,7 +399,7 @@ h5dump_fixtype(hid_t f_type)
 	} else {
 	    m_type = H5Tcopy(H5T_NATIVE_LLONG);
 	}
-	H5Tset_sign(m_type, H5Tget_size(f_type));
+	H5Tset_sign(m_type, H5Tget_sign(f_type));
 	break;
 	
     case H5T_FLOAT:
@@ -404,23 +418,51 @@ h5dump_fixtype(hid_t f_type)
 	break;
 
     case H5T_COMPOUND:
+	/*
+	 * We have to do this in two steps.  The first step scans the file
+	 * type and converts the members to native types and remembers all
+	 * their names and sizes, computing the size of the memory compound
+	 * type at the same time.  Then we create the memory compound type
+	 * and add the members.
+	 */
 	nmembs = H5Tget_nmembers(f_type);
 	memb = calloc(nmembs, sizeof(hid_t));
 	name = calloc(nmembs, sizeof(char*));
+	ndims = calloc(nmembs, sizeof(int));
+	dims = calloc(nmembs*4, sizeof(size_t));
 	
 	for (i=0, size=0; i<nmembs; i++) {
+
+	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
 	    memb[i] = h5dump_fixtype(f_memb);
-	    size = ALIGN(size, H5Tget_size(memb[i])) + H5Tget_size(memb[i]);
 	    H5Tclose(f_memb);
+	    if (memb[i]<0) goto done;
+
+	    /* Get the member dimensions */
+	    ndims[i] = H5Tget_member_dims(f_type, i, dims+i*4, NULL);
+	    assert(ndims[i]>=0 && ndims[i]<=4);
+	    for (j=0, nelmts=1; j<ndims[i]; j++) nelmts *= dims[i*4+j];
+
+	    /* Get the member name */
 	    name[i] = H5Tget_member_name(f_type, i);
-	    if (memb[i]<0 || NULL==name[i]) goto done;
+	    if (NULL==name[i]) goto done;
+
+	    /*
+	     * Compute the new offset so each member is aligned on a byte
+	     * boundary which is the same as the member size.
+	     */
+	    size = ALIGN(size, H5Tget_size(memb[i])) +
+		     nelmts * H5Tget_size(memb[i]);
 	}
 
 	m_type = H5Tcreate(H5T_COMPOUND, size);
-	for (i=0, size=0; i<nmembs; i++) {
-	    H5Tinsert(m_type, name[i], size, memb[i]);
-	    size = ALIGN(size, H5Tget_size(memb[i])) + H5Tget_size(memb[i]);
+	for (i=0, offset=0; i<nmembs; i++) {
+	    H5Tinsert_array(m_type, name[i], offset, ndims[i], dims+i*4,
+			    NULL, memb[i]);
+	    for (j=0, nelmts=1; j<ndims[i]; j++) nelmts *= dims[i*4+j];
+	    offset = ALIGN(offset, H5Tget_size(memb[i])) +
+		     nelmts * H5Tget_size(memb[i]);
 	}
 	break;
 
@@ -440,13 +482,15 @@ h5dump_fixtype(hid_t f_type)
 
  done:
     /* Clean up temp buffers */
-    if (memb && name) {
+    if (memb && name && ndims && dims) {
 	for (i=0; i<nmembs; i++) {
 	    if (memb[i]>=0) H5Tclose(memb[i]);
 	    if (name[i]) free(name[i]);
 	}
 	free(memb);
 	free(name);
+	free(ndims);
+	free(dims);
     }
     
     return m_type;
@@ -456,9 +500,10 @@ h5dump_fixtype(hid_t f_type)
 /*-------------------------------------------------------------------------
  * Function:	h5dump
  *
- * Purpose:	Print some values from a dataset.  The values to print are
- *		determined by the P_SPACE argument and the format to use to
- *		print them is determined by the P_TYPE argument.
+ * Purpose:	Print some values from a dataset DSET to the file STREAM
+ *		after converting all types to P_TYPE (which should be a
+ *		native type).  If P_TYPE is a negative value then it will be
+ *		computed from the dataset type using only native types.
  *
  * Return:	Success:	0
  *
@@ -478,22 +523,25 @@ h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     hid_t	p_type = _p_type;
     hid_t	f_type;
     int		status;
+    h5dump_t	info_dflt;
 
-    /* Check the data space */
-    f_space = H5Dget_space(dset);
-    if (H5Sis_simple(f_space)<=0) return -1;
-    H5Sclose(f_space);
-
-    /*
-     * Check the data type.  If the caller didn't supply a data type then
-     * use an appropriate native data type.
-     */
+    /* Use default values */
+    if (!stream) stream = stdout;
+    if (!info) {
+	memset(&info_dflt, 0, sizeof info_dflt);
+	info = &info_dflt;
+    }
     if (p_type<0) {
 	f_type = H5Dget_type(dset);
 	p_type = h5dump_fixtype(f_type);
 	H5Tclose(f_type);
 	if (p_type<0) return -1;
     }
+
+    /* Check the data space */
+    f_space = H5Dget_space(dset);
+    if (H5Sis_simple(f_space)<=0) return -1;
+    H5Sclose(f_space);
 
     /* Print the data */
     status = h5dump_simple(stream, info, dset, p_type);

@@ -86,6 +86,7 @@ dump_dataset_values(hid_t dset)
     memset(&info, 0, sizeof info);
     info.idx_fmt = "        (%s) ";
     info.line_ncols = width_g;
+    if (verbose_g) info.cmpd_name = "%s=";
 
     /*
      * If the dataset is a 1-byte integer type then format it as an ASCI
@@ -177,6 +178,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     int		i;
     char	buf[512], comment[50];
     H5G_stat_t	statbuf;
+    struct tm	*tm;
     
     /* Disable error reporting */
     H5Eget_auto (&func, &edata);
@@ -184,13 +186,6 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 
     /* Print info about each name */
     printf ("%-25s ", name);
-
-    if (H5Gstat (group, name, TRUE, &statbuf)>=0) {
-	sprintf (buf, "%lu:%lu:%lu:%lu",
-		 statbuf.fileno[1], statbuf.fileno[0],
-		 statbuf.objno[1], statbuf.objno[0]);
-	printf ("%-20s ", buf);
-    }
 
     if ((obj=H5Dopen (group, name))>=0) {
 	hsize_t size[64];
@@ -209,7 +204,6 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf ("}\n");
 	H5Dclose (space);
 	H5Aiterate (obj, NULL, list_attr, NULL);
-	if (dump_g) dump_dataset_values(obj);
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf ("Group\n");
@@ -228,11 +222,30 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf ("Unknown Type\n");
     }
 
-    /* Display the comment if the object has one */
-    comment[0] = '\0';
-    H5Gget_comment(group, name, sizeof(comment), comment);
-    strcpy(comment+sizeof(comment)-4, "...");
-    if (comment[0]) printf("%26s%s\n", "", comment);
+    if (verbose_g>0) {
+	if (H5Gstat(group, name, TRUE, &statbuf)>=0) {
+	    printf("    %-10s %lu:%lu:%lu:%lu\n",
+		   "Location:", statbuf.fileno[1], statbuf.fileno[0],
+		   statbuf.objno[1], statbuf.objno[0]);
+	    if (statbuf.mtime>0 && NULL!=(tm = localtime(&(statbuf.mtime)))) {
+		strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+		printf("    %-10s %s\n", "Modtime:", buf);
+	    }
+	}
+
+	/* Display the comment if the object has one */
+	comment[0] = '\0';
+	H5Gget_comment(group, name, sizeof(comment), comment);
+	strcpy(comment+sizeof(comment)-4, "...");
+	if (comment[0]) printf("    %-10s %s\n", "Comment:", comment);
+    }
+    
+    if (dump_g && (obj=H5Dopen(group, name))) {
+	/* Turn on error reporting before dumping the data */
+	H5Eset_auto(func, edata);
+	dump_dataset_values(obj);
+	H5Dclose(obj);
+    }
 
     /* Restore error reporting */
     H5Eset_auto (func, edata);

@@ -42,11 +42,12 @@ typedef enum H5G_link_t {
 
 /* Information about an object */
 typedef struct H5G_stat_t {
-    unsigned long fileno[2];
-    unsigned long objno[2];
-    unsigned nlink;
-    int type;
-    size_t linklen;
+    unsigned long 	fileno[2];	/*file number			*/
+    unsigned long 	objno[2];	/*object number			*/
+    unsigned 		nlink;		/*number of hard links to object*/
+    int 		type;		/*basic object type		*/
+    time_t		mtime;		/*modification time		*/
+    size_t		linklen;	/*symbolic link value length	*/
 } H5G_stat_t;
     
 

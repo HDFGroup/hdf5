@@ -18,6 +18,22 @@
  */
 typedef struct h5dump_t {
     /*
+     * Fields associated with compound array members.
+     *
+     *	 pre:	    A string to print at the beginning of each array. The
+     *		    default value is the left square bracket `['.
+     *
+     *	 sep:	    A string to print between array values.  The default
+     *		    value is a comma.
+     *
+     *	 suf:	    A strint to print at the end of each array.  The default
+     *		    value is a right square bracket `]'.
+     */
+    const char	*arr_pre;
+    const char	*arr_sep;
+    const char	*arr_suf;
+    
+    /*
      * Fields associated with compound data types.
      *
      *	 name:      How the name of the struct member is printed in the

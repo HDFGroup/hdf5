@@ -211,6 +211,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Olayout.c
+./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
 ./src/H5Oprivate.h

@@ -1982,10 +1982,16 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
     if (statbuf) {
 	if (H5G_CACHED_SLINK!=obj_ent.type) {
 	    statbuf->objno[0] = (unsigned long)(obj_ent.header.offset);
-	    statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
-						8*sizeof(long));
+	    if (sizeof(obj_ent.header.offset)>sizeof(long)) {
+		statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
+						    8*sizeof(long));
+	    }
 	    statbuf->nlink = H5O_link (&obj_ent, 0);
 	    statbuf->type = H5G_LINK;
+	    if (NULL==H5O_read(&obj_ent, H5O_MTIME, 0, &(statbuf->mtime))) {
+		H5E_clear();
+		statbuf->mtime = 0;
+	    }
 	} else {
 	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
 		NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr), 

@@ -200,6 +200,12 @@ typedef struct H5O_name_t {
 } H5O_name_t;
 
 /*
+ * Modification time message.  The message is just a `time_t'.
+ */
+#define H5O_MTIME_ID	0x000e
+extern const H5O_class_t H5O_MTIME[1];
+
+/*
  * Shared object message.  This message ID never really appears in an object
  * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
  * will be the ID of the pointed-to message.
@@ -253,6 +259,7 @@ void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,
 		void *mesg);
 intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 uintn flags, const void *mesg);
+herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
 herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 void *H5O_free (const H5O_class_t *type, void *mesg);

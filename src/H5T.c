@@ -2639,8 +2639,8 @@ H5Tget_member_dims (hid_t type_id, int membno,
     /* Value */
     ndims = dt->u.compnd.memb[membno].ndims;
     for (i = 0; i < ndims; i++) {
-	if (dims[i]) dims[i] = dt->u.compnd.memb[membno].dim[i];
-	if (perm[i]) perm[i] = dt->u.compnd.memb[membno].perm[i];
+	if (dims) dims[i] = dt->u.compnd.memb[membno].dim[i];
+	if (perm) perm[i] = dt->u.compnd.memb[membno].perm[i];
     }
 
     FUNC_LEAVE(ndims);
@@ -2816,10 +2816,10 @@ H5Tinsert_array (hid_t parent_id, const char *name, size_t offset,
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
     }
-    if (ndims<1 || ndims>4) {
+    if (ndims<0 || ndims>4) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimensionality");
     }
-    if (!dim) {
+    if (ndims>0 && !dim) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     }
     for (i=0; i<ndims; i++) {

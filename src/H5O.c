@@ -35,6 +35,7 @@ static intn H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
 static intn H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size);
 static intn H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
+static herr_t H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -64,7 +65,7 @@ static const H5O_class_t *const message_type_g[] = {
     H5O_COMPRESS,	/*0x000B Data storage -- compressed object	*/
     H5O_ATTR,		/*0x000C Attribute list				*/
     H5O_NAME,		/*0x000D Object name				*/
-    NULL,		/*0x000E Object modification date and time	*/
+    H5O_MTIME,		/*0x000E Object modification date and time	*/
     NULL,		/*0x000F Shared header message			*/
     H5O_CONT,		/*0x0010 Object header continuation		*/
     H5O_STAB,		/*0x0011 Symbol table				*/
@@ -1235,6 +1236,9 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 			"unable to copy message to object header");
 	}
     }
+
+    /* Update the modification time message if any */
+    H5O_touch_oh(ent->file, oh, FALSE);
     
     oh->mesg[idx].flags = flags;
     oh->mesg[idx].dirty = TRUE;
@@ -1247,6 +1251,126 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		      "unable to release object header");
     }
     
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_touch_oh
+ *
+ * Purpose:	If FORCE is non-zero then create a modification time message
+ *		unless one already exists.  Then update any existing
+ *		modification time message with the current time.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
+{
+    intn	idx;
+    time_t	now = time(NULL);
+    size_t	size;
+    
+    FUNC_ENTER(H5O_touch_oh, FAIL);
+    assert(oh);
+
+    /* Look for existing message */
+    for (idx=0; idx<oh->nmesgs; idx++) {
+	if (H5O_MTIME==oh->mesg[idx].type) break;
+    }
+
+    /* Create a new message */
+    if (idx==oh->nmesgs) {
+	if (!force) HRETURN(SUCCEED); /*nothing to do*/
+	size = (H5O_MTIME->raw_size)(f, &now);
+	size = H5O_ALIGN(size);
+	if ((idx=H5O_alloc(f, oh, H5O_MTIME, size))<0) {
+	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+			  "unable to allocate space for modification time "
+			  "message");
+	}
+    }
+
+    /* Update the native part */
+    if (NULL==oh->mesg[idx].native) {
+	if (NULL==(oh->mesg[idx].native = H5MM_malloc(sizeof(time_t)))) {
+	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+			  "memory allocation failed for modification time "
+			  "message");
+	}
+    }
+    *((time_t*)(oh->mesg[idx].native)) = now;
+    oh->mesg[idx].dirty = TRUE;
+    oh->dirty = TRUE;
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_touch
+ *
+ * Purpose:	Touch an object by setting the modification time to the
+ *		current time and marking the object as dirty.  Unless FORCE
+ *		is non-zero, nothing happens if there is no MTIME message in
+ *		the object header.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_touch(H5G_entry_t *ent, hbool_t force)
+{
+    H5O_t	*oh = NULL;
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER(H5O_touch, FAIL);
+
+    /* check args */
+    assert(ent);
+    assert(ent->file);
+    assert(H5F_addr_defined(&(ent->header)));
+    if (0==(ent->file->intent & H5F_ACC_RDWR)) {
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
+		    "no write intent on file");
+    }
+
+    /* Get the object header */
+    if (NULL==(oh=H5AC_protect(ent->file, H5AC_OHDR, &(ent->header),
+			       NULL, NULL))) {
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
+		    "unable to load object header");
+    }
+
+    /* Create/Update the modification time message */
+    if (H5O_touch_oh(ent->file, oh, force)<0) {
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+		    "unable to update object modificaton time");
+    }
+    ret_value = SUCCEED;
+
+ done:
+    if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, &(ent->header), oh)<0) {
+	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, FAIL,
+		      "unable to release object header");
+    }
     FUNC_LEAVE(ret_value);
 }
 
@@ -1347,6 +1471,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 	    oh->mesg[i].native = H5O_free (type, oh->mesg[i].native);
 	    oh->mesg[i].dirty = TRUE;
 	    oh->dirty = TRUE;
+	    H5O_touch_oh(ent->file, oh, FALSE);
 	}
     }
 
@@ -1789,6 +1914,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	oh->mesg[null_idx].chunkno = oh->mesg[idx].chunkno;
 	oh->mesg[idx].raw_size = size;
     }
+
     /* initialize the new message */
     oh->mesg[idx].type = type;
     oh->mesg[idx].dirty = TRUE;
@@ -1996,16 +2122,17 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	}
 	
 	/* decode the message */
-	if (NULL == oh->mesg[i].native && oh->mesg[i].type->decode) {
-	    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
-		decode = H5O_SHARED->decode;
-		debug = H5O_SHARED->debug;
-	    } else {
-		decode = oh->mesg[i].type->decode;
-		debug = oh->mesg[i].type->debug;
-	    }
-	    oh->mesg[i].native = (decode)(f, oh->mesg[i].raw, NULL);
+	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+	    decode = H5O_SHARED->decode;
+	    debug = H5O_SHARED->debug;
 	} else {
+	    decode = oh->mesg[i].type->decode;
+	    debug = oh->mesg[i].type->debug;
+	}
+	if (NULL==oh->mesg[i].native && oh->mesg[i].type->decode) {
+	    oh->mesg[i].native = (decode)(f, oh->mesg[i].raw, NULL);
+	}
+	if (NULL==oh->mesg[i].native) {
 	    debug = NULL;
 	}
 	

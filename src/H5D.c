@@ -753,7 +753,8 @@ H5Dextend (hid_t dset_id, const hsize_t *size)
  * Errors:
  *		DATASET	  CANTINIT	Can't update dataset header. 
  *		DATASET	  CANTINIT	Problem with the dataset name. 
- *		DATASET	  CANTINIT	Fail in file space allocation for chunks");
+ *		DATASET	  CANTINIT	Fail in file space allocation for
+ *					chunks
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -761,6 +762,9 @@ H5Dextend (hid_t dset_id, const hsize_t *size)
  * Modifications:
  *	Robb Matzke, 9 Jun 1998
  *	The data space message is no longer cached in the dataset struct.
+ *
+ * 	Robb Matzke, 27 Jul 1998
+ *	Added the MTIME message to the dataset object header.
  *
  *-------------------------------------------------------------------------
  */
@@ -895,6 +899,14 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 		    &(new_dset->create_parms->compress))<0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "unable to update compression header message");
+    }
+
+    /*
+     * Add a modification time message.
+     */
+    if (H5O_touch(&(new_dset->ent), TRUE)<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to update modification time message");
     }
     
     /*
@@ -1597,6 +1609,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
 
+    if (0==(dataset->ent.file->intent & H5F_ACC_RDWR)) {
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
+		    "no write intent on file");
+    }
+
     if (!file_space) {
 	if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1849,6 +1866,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         }
     }
 
+    /*
+     * Update modification time.  We have to do this explicitly because
+     * writing to a dataset doesn't necessarily change the object header.
+     */
+    if (H5O_touch(&(dataset->ent), FALSE)<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		    "unable to update modification time");
+    }
 
  succeed:
     ret_value = SUCCEED;

@@ -2716,8 +2716,6 @@
       associated with any type of object which has an object header
       (groups, datasets, named types and spaces, etc.).
 
-    <p><b>Format of Data:</b>
-    
     <p>
     <center>
       <table border align=center cellpadding=4 width="80%">
@@ -2838,36 +2836,153 @@
     
     <hr>
     <h3><a name="NameMessage">Name: Object Name</a></h3>
-    <b>Type:</b> 0x000D<BR>
-    <b>Length:</b> varies<BR>
-    <b>Status:</b> Optional [required?], may not be repeated.<BR>
-    <b>Purpose and Description:</b>  The object name is designed to be a short
-    description of the instance of the data object (the class may be a short
-    description of the "type" of the object).  An object name is a sequence of
-    non-zero ('\0') ASCII characters with no other formatting included by the
-    library.<BR>
-    <b>Format of Data:</b>The data for the object name is just a sequence of ASCII
-    characters with no special formatting.
+
+    <p><b>Type:</b> 0x000D<br>
+      <b>Length:</b> varies<br>
+      <b>Status:</b> Optional, may not be repeated.
+
+    <p><b>Purpose and Description:</b> The object name or comment is
+      designed to be a short description of an object.  An object name
+      is a sequence of non-zero ('\0') ASCII characters with no other
+      formatting included by the library.
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Name Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Name<br><br></td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Name</td>
+	  <td>A null terminated ASCII character string.</td>
+	</tr>
+      </table>
+    </center>
     
     <hr>
-    <h3><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h3>
-    <b>Type:</b> 0x000E<BR>
-    <b>Length:</b> fixed<BR>
-    <b>Status:</b> Required?, may not be repeated.<BR>
-    <b>Purpose and Description:</b>  The object modification date and time is a
-    timestamp which indicates (using ISO8601 date and time format) the last
-    modification of a data object.<BR>
-    <b>Format of Data:</b>
-    The date is represented as a fixed length ASCII string according to the
-    "complete calendar date representation, without hyphens" listed in the ISO8601
-    standard.<br>
-    The time of day is represented as a fixed length ASCII string according
-    to the "complete local time of day representation, without hyphens"
-    listed in the ISO8601 standard.
-    
-    <h4><a name="ModifiedExample">Examples:</a></h4>
-    "February 14, 1993, 1:10pm and 30 seconds" is represented as "19930214131030" in
-    the ISO standard format.
+    <h3><a name="ModifiedMessage">Name: Object Modification Date &amp;
+	Time</a></h3>
+
+    <p><b>Type:</b> 0x000E<br>
+      <b>Length:</b> fixed<br>
+      <b>Status:</b> Optional, may not be repeated.
+
+    <p><b>Purpose and Description:</b>  The object modification date
+      and time is a timestamp which indicates (using ISO-8601 date and
+      time format) the last modification of an object.  The time is
+      updated when any object header message changes according to the
+      system clock where the change was posted.
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Modification Time Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Year</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Month</td>
+	  <td colspan=2>Day of Month</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Hour</td>
+	  <td colspan=2>Minute</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=2>Second</td>
+	  <td colspan=2>Reserved</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Year</td>
+	  <td>The four-digit year as an ASCII string. For example,
+	    "1998".  All fields of this message should be interpreted
+	    as coordinated universal time (UTC)</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Month</td>
+	  <td>The month number as a two digit ASCII string where
+	    January is "01" and December is "12".</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Day of Month</td>
+	  <td>The day number within the month as a two digit ASCII
+	    string. The first day of the month is "01".</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Hour</td>
+	  <td>The hour of the day as a two digit ASCII string where
+	    midnight is "00" and 11:00pm is "23".</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Minute</td>
+	  <td>The minute of the hour as a two digit ASCII string where
+	    the first minute of the hour is "00" and the last is
+	    "59".</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Second</td>
+	  <td>The second of the minute as a two digit ASCII string
+	    where the first second of the minute is "00" and the last
+	    is "59".</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>This field is reserved and should always be zero.</td>
+	</tr>
+      </table>
+    </center>
     
     <hr>
     <h3><a name="SharedMessage">Name: Shared Object Message</a></h3>
@@ -3140,7 +3255,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Mon Jul 20 13:49:08 EDT 1998
+Last modified: Fri Jul 24 15:10:57 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

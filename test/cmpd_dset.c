@@ -182,7 +182,7 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
     /* Initialize the dataset */
     for (i=0; i<NX*NY; i++) {
 	s1[i].a = 8*i+0;
-	s1[i].b = 2000*2*i;
+	s1[i].b = 2000+2*i;
 	s1[i].c[0] = 8*i+2;
 	s1[i].c[1] = 8*i+3;
 	s1[i].c[2] = 8*i+4;

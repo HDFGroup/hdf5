@@ -23,7 +23,8 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    extern_4.raw extern_4b.raw iopipe.raw iopipe.h5 gheap0.h5        \
 	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 shtype0.h5 shtype1.h5    \
 	    shtype2a.h5 shtype2b.h5 shtype3.h5 links.h5 chunk.h5 big.data    \
-	    big[0-9][0-9][0-9][0-9][0-9].h5
+	    big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5 tattr.h5   \
+	    tselect.h5
 
 # Source and object files for programs...  The TEST_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The

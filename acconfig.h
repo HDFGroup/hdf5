@@ -12,3 +12,12 @@
 
 /* The width parameter for printf formats for type `long long', us. `ll' */
 #undef PRINTF_LL_WIDTH
+
+/* Define if `tm_gmtoff' is a member of `struct tm' */
+#undef HAVE_TM_GMTOFF
+
+/* Define if `timezone' is a global variable */
+#undef HAVE_TIMEZONE
+
+/* Define if `struct timezone' is defined */
+#undef HAVE_STRUCT_TIMEZONE
