@@ -93,7 +93,7 @@ void DSetCreatPropList::setDeflate( int level ) const
 }
 
 // Sets a dataset fill value
-void DSetCreatPropList::setFillValue( DataType& fvalue_type, const void* value ) const
+void DSetCreatPropList::setFillValue( const DataType& fvalue_type, const void* value ) const
 {
    herr_t ret_value = H5Pset_fill_value( id, fvalue_type.getId(), value );
    if( ret_value < 0 )
@@ -104,7 +104,7 @@ void DSetCreatPropList::setFillValue( DataType& fvalue_type, const void* value )
 }
 
 // Retrieves a dataset fill value
-void DSetCreatPropList::getFillValue( DataType& fvalue_type, void* value ) const
+void DSetCreatPropList::getFillValue( const DataType& fvalue_type, void* value ) const
 {
    herr_t ret_value = H5Pget_fill_value( id, fvalue_type.getId(), value );
    if( ret_value < 0 )
