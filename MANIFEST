@@ -740,6 +740,13 @@
 ./pablo/ProcTrace.h
 ./pablo/READ_ME
 
+./perform/Makefile.in
+./perform/chunk.c
+./perform/iopipe.c
+./perform/mpi-perf.c
+./perform/overhead.c
+./perform/perf.c
+
 ./release_docs/INSTALL
 ./release_docs/INSTALL_TFLOPS
 ./release_docs/INSTALL_VFL
