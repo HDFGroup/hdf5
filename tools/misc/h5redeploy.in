@@ -41,9 +41,9 @@ show_action()
     echo "Update the following tools because they are now installed at a new directory"
     for t in $h5tools; do
 	echo "${t}:"
-	echo -n "   current directory="
+	echo -n "   current setting="
 	sed -e "/^prefix=/s/prefix=//p" -e d $t
-	echo    "   new     directory="\""$prefix"\"
+	echo    "   new     setting="\""$prefix"\"
     done
 }
 
