@@ -1070,6 +1070,12 @@ H5FD_mpio_get_eof(H5FD_t *_file)
  *		
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ *		Quincey Koziol,  2002-05-14
+ *		Only call MPI_Get_count if we can use MPI_BYTE for the MPI type
+ *              for the I/O transfer.  Someday we might include code to decode
+ *              the MPI type used for more complicated transfers and call
+ *              MPI_Get_count all the time.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1191,24 +1197,37 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * Many systems don't support MPI_Get_count so we need to do a
      * configure thingy to fix this. */
 
-    /* How many bytes were actually read? */
-    if (MPI_SUCCESS != MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+    /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
+     * had the 'buf_type' set to MPI_BYTE -QAK
+     */
+    if(use_types_this_time) {
+        /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
+         * If this gets fixed (and MPI_Get_count() is reliable), the
+         * kludge below where the 'bytes_read' value from MPI_Get_count() is
+         * overwritten with the 'size_i' parameter can be removed. -QAK
+         */
+    } /* end if */
+    else {
+        /* How many bytes were actually read? */
+        if (MPI_SUCCESS != MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read))
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+    } /* end else */
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'c'])
     	fprintf(stdout,
 	    "In H5FD_mpio_read after Get_count size_i=%d bytes_read=%d\n",
 	    size_i, bytes_read );
 #endif
-#endif /*Robb's kludge*/
-#if 1
+#endif /* H5_HAVE_MPI_GET_COUNT */
+
     /*
      * KLUGE rky 1998-02-02
      * MPI_Get_count incorrectly returns negative count; fake a complete
      * read.
      */
     bytes_read = size_i;
-#endif
+
+    /* Check for read failure */
     if (bytes_read<0 || bytes_read>size_i)
         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
@@ -1227,11 +1246,6 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
             memset((char*)buf+bytes_read, 0, (size_t)n);
         }
     }
-
-#ifdef NO
-    /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
-    file->eof = HADDR_UNDEF;
-#endif
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1334,6 +1348,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
  *
  *		Quincey Koziol,  2002-05-10
  *		Removed allsame code, keying off the type parameter instead.
+ *
+ *		Quincey Koziol,  2002-05-14
+ *		Only call MPI_Get_count if we can use MPI_BYTE for the MPI type
+ *              for the I/O transfer.  Someday we might include code to decode
+ *              the MPI type used for more complicated transfers and call
+ *              MPI_Get_count all the time.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1474,24 +1494,37 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * Many systems don't support MPI_Get_count so we need to do a
      * configure thingy to fix this. */
 
-    /* How many bytes were actually written? */
-    if (MPI_SUCCESS!= MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+    /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
+     * had the 'buf_type' set to MPI_BYTE -QAK
+     */
+    if(use_types_this_time) {
+        /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
+         * If this gets fixed (and MPI_Get_count() is reliable), the
+         * kludge below where the 'bytes_written' value from MPI_Get_count() is
+         * overwritten with the 'size_i' parameter can be removed. -QAK
+         */
+    } /* end if */
+    else {
+        /* How many bytes were actually written? */
+        if (MPI_SUCCESS!= MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+    } /* end else */
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'c'])
     	fprintf(stdout,
 	    "In H5FD_mpio_write after Get_count size_i=%d bytes_written=%d\n",
 	    size_i, bytes_written );
 #endif
-#endif /*Robb's kludge*/
-#if 1
+#endif /* H5_HAVE_MPI_GET_COUNT */
+
     /*
      * KLUGE rky, 1998-02-02
      * MPI_Get_count incorrectly returns negative count; fake a complete
      * write.
      */
     bytes_written = size_i;
-#endif
+
+    /* Check for write failure */
     if (bytes_written<0 || bytes_written>size_i)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
 
