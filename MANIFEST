@@ -143,7 +143,6 @@
 ./doc/html/Performance.html
 ./doc/html/PredefDTypes.html
 ./doc/html/Properties.html
-./doc/html/Ragged.html
 ./doc/html/References.html
 ./doc/html/RM_H5.html
 ./doc/html/RM_H5A.html
@@ -155,7 +154,6 @@
 ./doc/html/RM_H5I.html
 ./doc/html/RM_H5P.html
 ./doc/html/RM_H5R.html
-./doc/html/RM_H5RA.html
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
