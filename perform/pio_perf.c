@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001
+ * Copyright (C) 2001, 2002
  *     National Center for Supercomputing Applications
  *     All rights reserved.
  *
@@ -78,14 +78,10 @@
 
 #define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
 
-#define MIN_HDF5_BUF_SIZE   (ONE_MB >> 1)
-#define MAX_HDF5_BUF_SIZE   (ONE_GB / 2)
-
 /* global variables */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int	        pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
-
 
 /* local variables */
 static const char  *progname = "pio_perf";
@@ -348,7 +344,9 @@ run_test_loop(FILE *output, struct options *opts)
             parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
             print_indent(output, TAB_SPACE * 1);
-            output_report(output, "Transfer Buffer Size: %ld\n", buf_size);
+            output_report(output, "Transfer Buffer Size: %.2f KBs, File size: %.2f MBs\n",
+                          ((double)buf_size) / ONE_KB,
+                          ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
             print_indent(output, TAB_SPACE * 1);
             output_report(output,
                           "  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
@@ -453,7 +451,7 @@ run_test(FILE *output, iotype iot, parameters parms)
     total_mm = accumulate_minmax_stuff(write_mm_table, parms.num_iters);
 
     print_indent(output, TAB_SPACE * 3);
-    output_report(output, "Write (%d iterations):\n", parms.num_iters);
+    output_report(output, "Write (%d iteration(s)):\n", parms.num_iters);
 
     print_indent(output, TAB_SPACE * 4);
     output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
@@ -471,7 +469,7 @@ run_test(FILE *output, iotype iot, parameters parms)
     total_mm = accumulate_minmax_stuff(read_mm_table, parms.num_iters);
 
     print_indent(output, TAB_SPACE * 3);
-    output_report(output, "Read (%d iterations):\n", parms.num_iters);
+    output_report(output, "Read (%d iteration(s)):\n", parms.num_iters);
 
     print_indent(output, TAB_SPACE * 4);
     output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
