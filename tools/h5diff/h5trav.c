@@ -37,11 +37,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
 herr_t get_nobjects( hid_t loc_id, const char *group_name );
 herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name, int *type );
 
-/* table methods */
-void table_init( table_t **table );
-void table_free( table_t *table );
-int  table_search(unsigned long *objno, table_t *table );
-void table_add(unsigned long *objno, char *objname, table_t *table );
+
 
 
 /*-------------------------------------------------------------------------
@@ -296,7 +292,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    if (statbuf.nlink > 0  && table_search(statbuf.objno, table ) == FAIL)
    {
     /* add object to table */
-    table_add(statbuf.objno, path, table );
+    table_add(statbuf.objno, path, H5G_GROUP, table );
     
     /* recurse with the absolute name */
     inserted_objs += traverse( loc_id, path, table, info, idx );
@@ -336,8 +332,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    if (statbuf.nlink > 0  && table_search(statbuf.objno, table ) == FAIL)
    {
     /* add object to table */
-    table_add(statbuf.objno, path, table );
-
+    table_add(statbuf.objno, path, H5G_DATASET, table );
    }
 
     /* search table
@@ -375,8 +370,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    if (statbuf.nlink > 0  && table_search(statbuf.objno, table ) == FAIL)
    {
     /* add object to table */
-    table_add(statbuf.objno, path, table );
-
+    table_add(statbuf.objno, path, H5G_TYPE, table );
    }
    
    break;
@@ -468,7 +462,7 @@ int table_search(unsigned long *objno, table_t *table )
  *-------------------------------------------------------------------------
  */
 
-void table_add(unsigned long *objno, char *objname, table_t *table)
+void table_add(unsigned long *objno, char *objname, int type, table_t *table)
 {
  int i;
  
@@ -479,7 +473,7 @@ void table_add(unsigned long *objno, char *objname, table_t *table)
   for (i = table->nobjs; i < table->size; i++) {
    table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
    table->objs[i].displayed = 0;
-   table->objs[i].recorded = 0;
+   table->objs[i].type = H5G_UNKNOWN;
    table->objs[i].objname = NULL;
   }
  }
@@ -489,8 +483,7 @@ void table_add(unsigned long *objno, char *objname, table_t *table)
  table->objs[i].objno[1] = objno[1];
  free(table->objs[i].objname);
  table->objs[i].objname = (char *)HDstrdup(objname);
-
-
+	table->objs[i].type = type;
 }
 
 
@@ -524,7 +517,7 @@ void table_init( table_t **tbl )
  for (i = 0; i < table->size; i++) {
   table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
   table->objs[i].displayed = 0;
-  table->objs[i].recorded = 0;
+  table->objs[i].type = H5G_UNKNOWN;
   table->objs[i].objname = NULL;
  }
  
@@ -536,7 +529,7 @@ void table_init( table_t **tbl )
 /*-------------------------------------------------------------------------
  * Function: table_free
  *
- * Purpose: 
+ * Purpose: free table memory
  *
  * Return: 
  *
@@ -553,7 +546,6 @@ void table_init( table_t **tbl )
 
 void table_free( table_t *table )
 {
-
  int i;
 
  for ( i = 0; i < table->nobjs; i++)
@@ -563,3 +555,28 @@ void table_free( table_t *table )
  free(table);
 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: info_free
+ *
+ * Purpose: free info memory
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void info_free( info_t *info, int nobjs )
+{
+ int i;
+	if ( info )
+	{
+		for ( i = 0; i < nobjs; i++)
+		{
+			if (info[i].name)
+		 	free( info[i].name );
+		}
+		free(info);
+	}
+
+}
+

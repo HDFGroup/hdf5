@@ -90,350 +90,244 @@ TOOLTEST() {
 ##############################################################################
 ##############################################################################
 
-##############################################################################
-# tests 0., Check for individual options
-##############################################################################
+# ##############################################################################
+# # Common usage
+# ##############################################################################
 
-# test 0.1: Check if the command line number of arguments is less than 3
-TOOLTEST h5diff_01.txt h5diff_test1.h5 
 
-# test 0.2: Check for invalid options
-TOOLTEST h5diff_02.txt -x h5diff_test1.h5 h5diff_test2.h5
+# 1.0
+TOOLTEST h5diff_10.txt -h
 
-# test 0.3.1: Check for -h option
-TOOLTEST h5diff_031.txt -h h5diff_test1.h5 h5diff_test2.h5
+# 1.1
+TOOLTEST h5diff_11.txt file6.h5 file6.h5 dset3a dset3b
 
-# test 0.3.3: Check for -r option
-TOOLTEST h5diff_033.txt -r h5diff_test1.h5 h5diff_test2.h5
+# 1.2
+TOOLTEST h5diff_12.txt file1.h5 file2.h5 -n 2 g1/dset1 g1/dset2
 
-##############################################################################
-# Test -d option
-##############################################################################
+# 1.3
+TOOLTEST h5diff_13.txt file1.h5 file2.h5 -d 5 g1/dset3 g1/dset4
 
+# 1.4
+TOOLTEST h5diff_14.txt file1.h5 file2.h5 -p 0.05 g1/dset3 g1/dset4
 
-# test 0.4.1: no value
-TOOLTEST h5diff_041.txt -d h5diff_test1.h5 h5diff_test2.h5
+# 1.5
+TOOLTEST h5diff_15.txt file1.h5 file2.h5 -r g1/dset1 g1/dset2
 
-# test 0.4.2: negative value
-TOOLTEST h5diff_042.txt -d -4 h5diff_test1.h5 h5diff_test2.h5
+# 1.6
+TOOLTEST h5diff_16.txt file6.h5 file6.h5 
 
-# test 0.4.3: zero
-TOOLTEST h5diff_043.txt -d 0 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # not comparable types
+# ##############################################################################
 
-# test 0.4.4: non number
-TOOLTEST h5diff_044.txt -d u h5diff_test1.h5 h5diff_test2.h5
+# 2.0
+TOOLTEST h5diff_20.txt file3.h5 file3.h5 dset group
 
-# test 0.4.5: hexadecimal
-TOOLTEST h5diff_045.txt -d 0x1 h5diff_test1.h5 h5diff_test2.h5
+# 2.1
+TOOLTEST h5diff_21.txt file3.h5 file3.h5 dset link
 
-# test 0.4.6: string
-TOOLTEST h5diff_046.txt -d "1" h5diff_test1.h5 h5diff_test2.h5
+# 2.2
+TOOLTEST h5diff_22.txt file3.h5 file3.h5 dset type
 
-# test 0.4.7: repeated value
-TOOLTEST h5diff_047.txt -d 1 -d 2 h5diff_test1.h5 h5diff_test2.h5
+# 2.3
+TOOLTEST h5diff_23.txt file3.h5 file3.h5 group group
 
-# test 0.4.8: number larger than biggest difference
-TOOLTEST h5diff_048.txt dset2.1a dset2.1b -d 7 h5diff_test1.h5 h5diff_test2.h5
+# 2.4
+TOOLTEST h5diff_24.txt file3.h5 file3.h5 type type
 
-# test 0.4.9: number smaller than smallest difference
-TOOLTEST h5diff_049.txt dset2.1a dset2.1b -d 1 h5diff_test1.h5 h5diff_test2.h5
+# 2.5
+TOOLTEST h5diff_25.txt file3.h5 file3.h5 link link
 
-# test 0.4.10: non-integer
-TOOLTEST h5diff_0410.txt dset2.1a dset2.1b -d 2.3 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # Class issues
+# ##############################################################################
 
-##############################################################################
-# Test -p option
-##############################################################################
 
+# 3.0
+TOOLTEST h5diff_30.txt file4.h5 file4.h5 string 
 
-# test 0.5.1: no value
-TOOLTEST h5diff_051.txt -p  h5diff_test1.h5 h5diff_test2.h5
+# 3.1
+TOOLTEST h5diff_31.txt file4.h5 file4.h5 bitfield 
 
-# test 0.5.2: negative value
-TOOLTEST h5diff_052.txt -p -4 h5diff_test1.h5 h5diff_test2.h5
+# 3.2
+TOOLTEST h5diff_32.txt file4.h5 file4.h5 opaque
 
-# test 0.5.3: zero
-TOOLTEST h5diff_053.txt -p 0 h5diff_test1.h5 h5diff_test2.h5
+# 3.3
+TOOLTEST h5diff_33.txt file4.h5 file4.h5 compound
 
-# test 0.5.4: non number
-TOOLTEST h5diff_054.txt -p u h5diff_test1.h5 h5diff_test2.h5
+# 3.4
+TOOLTEST h5diff_34.txt file4.h5 file4.h5 ref
 
-# test 0.5.5: hexadecimal
-TOOLTEST h5diff_055.txt -p 0x1 h5diff_test1.h5 h5diff_test2.h5
+# 3.5
+TOOLTEST h5diff_35.txt file4.h5 file4.h5 enum
 
-# test 0.5.6: string
-TOOLTEST h5diff_056.txt -p "1" h5diff_test1.h5 h5diff_test2.h5
+# 3.6
+TOOLTEST h5diff_36.txt file4.h5 file4.h5 vlen
 
-# test 0.5.7: repeated value
-TOOLTEST h5diff_057.txt -p 1 -p 2 h5diff_test1.h5 h5diff_test2.h5
+# 3.7
+TOOLTEST h5diff_37.txt file4.h5 file4.h5 array
 
-# test 0.5.8: number larger than biggest difference
-TOOLTEST h5diff_058.txt dset2.1a dset2.1b -p 7 h5diff_test1.h5 h5diff_test2.h5
+# 3.8
+TOOLTEST h5diff_38.txt file4.h5 file4.h5 integer float
 
-# test 0.5.9: number smaller than smallest difference
-TOOLTEST h5diff_059.txt dset2.1a dset2.1b -p 1 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # Dimensions
+# ##############################################################################
 
-# test 0.5.10: non-integer
-TOOLTEST h5diff_0510.txt dset2.1a dset2.1b -p 2.3 h5diff_test1.h5 h5diff_test2.h5
+# 4.0
+TOOLTEST h5diff_40.txt file5.h5 file5.h5 dset1 dset2
 
-##############################################################################
-# Test -n option
-##############################################################################
+# 4.1
+TOOLTEST h5diff_41.txt file5.h5 file5.h5 dset3 dset4
 
+# 4.2
+TOOLTEST h5diff_42.txt file5.h5 file5.h5 dset5 dset6
 
-# test 0.6.1: no value
-TOOLTEST h5diff_061.txt -n  h5diff_test1.h5 h5diff_test2.h5
 
-# test 0.6.2: negative value
-TOOLTEST h5diff_062.txt -n -4 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # Dataset types
+# ##############################################################################
 
-# test 0.6.3: zero
-TOOLTEST h5diff_063.txt -n 0 h5diff_test1.h5 h5diff_test2.h5
+# 5.0
+TOOLTEST h5diff_50.txt file6.h5 file6.h5 dset0a dset0b
 
-# test 0.6.4: non number
-TOOLTEST h5diff_064.txt -n u h5diff_test1.h5 h5diff_test2.h5
+# 5.1
+TOOLTEST h5diff_51.txt file6.h5 file6.h5 dset1a dset1b
 
-# test 0.6.5: hexadecimal
-TOOLTEST h5diff_065.txt -n 0x1 h5diff_test1.h5 h5diff_test2.h5
+# 5.2
+TOOLTEST h5diff_52.txt file6.h5 file6.h5 dset2a dset2b
 
-# test 0.6.6: string
-TOOLTEST h5diff_066.txt -n "1" h5diff_test1.h5 h5diff_test2.h5
+# 5.3
+TOOLTEST h5diff_53.txt file6.h5 file6.h5 dset3a dset4b
 
-# test 0.6.7: repeated value
-TOOLTEST h5diff_067.txt -n 1 -n 2 h5diff_test1.h5 h5diff_test2.h5
+# 5.4
+TOOLTEST h5diff_54.txt file6.h5 file6.h5 dset4a dset4b
 
-# test 0.6.8: number larger than biggest difference
-TOOLTEST h5diff_068.txt dset2.1a dset2.1b -n 7 h5diff_test1.h5 h5diff_test2.h5
+# 5.5
+TOOLTEST h5diff_55.txt file6.h5 file6.h5 dset5a dset5b
 
-# test 0.6.9: number smaller than smallest difference
-TOOLTEST h5diff_069.txt dset2.1a dset2.1b -n 1 h5diff_test1.h5 h5diff_test2.h5
+# 5.6
+TOOLTEST h5diff_56.txt file6.h5 file6.h5 dset6a dset6b
 
-# test 0.6.10: non-integer
-TOOLTEST h5diff_0610.txt dset2.1a dset2.1b -n 2.3 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # Error messages
+# ##############################################################################
 
-##############################################################################
-# Test valid files
-##############################################################################
 
-# test 0.7: Check if the file names supplied are valid files
-TOOLTEST h5diff_07.txt h5diff_test1.h6 h5diff_test2.h6
+# 6.0: Check if the command line number of arguments is less than 3
+TOOLTEST h5diff_600.txt file1.h5 
 
+# 6.1: Check for invalid options
+TOOLTEST h5diff_601.txt file1.h5 file2.h5 -x 
 
-##############################################################################
-# Check for not comparable issues
-##############################################################################
+# ##############################################################################
+# # -d 
+# ##############################################################################
 
-##############################################################################
-# Different types
-##############################################################################
+# 6.2: no value
+TOOLTEST h5diff_602.txt file1.h5 file2.h5 -d g1/dset3 g1/dset4
 
-# test 1.1.1: Compare a dataset with a group
-TOOLTEST h5diff_111.txt dset1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+# 6.3: negative value
+TOOLTEST h5diff_603.txt file1.h5 file2.h5 -d -4 g1/dset3 g1/dset4
 
-# test 1.1.2 Dataset vs Link
-TOOLTEST h5diff_112.txt dset1.1 soft h5diff_test1.h5 h5diff_test1.h5
+# 6.4: zero
+TOOLTEST h5diff_604.txt file1.h5 file2.h5 -d 0 g1/dset3 g1/dset4
 
-# test 1.1.3 Dataset vs Named type
-TOOLTEST h5diff_113.txt dset1.1 compound h5diff_test1.h5 h5diff_test1.h5
+# 6.5: non number
+TOOLTEST h5diff_605.txt file1.h5 file2.h5 -d u g1/dset3 g1/dset4
 
-##############################################################################
-# not comparable types
-##############################################################################
+# 6.6: hexadecimal
+TOOLTEST h5diff_606.txt file1.h5 file2.h5 -d 0x1 g1/dset3 g1/dset4
 
-# test 1.2.1: Group vs Group
-TOOLTEST h5diff_121.txt g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+# 6.7: string
+TOOLTEST h5diff_607.txt file1.h5 file2.h5 -d "1" g1/dset3 g1/dset4
 
-# test 1.2.2: Type vs Type
-TOOLTEST h5diff_122.txt compound h5diff_test1.h5 h5diff_test2.h5
+# 6.8: repeated option
+TOOLTEST h5diff_608.txt file1.h5 file2.h5 -d 1 -d 2 g1/dset3 g1/dset4
 
-# test 1.2.3: Link vs Link
-TOOLTEST h5diff_123.txt soft soft h5diff_test1.h5 h5diff_test1.h5
+# 6.9: number larger than biggest difference
+TOOLTEST h5diff_609.txt file1.h5 file2.h5 -d 200 g1/dset3 g1/dset4
 
+# 6.10: number smaller than smallest difference
+TOOLTEST h5diff_610.txt file1.h5 file2.h5 -d 1 g1/dset3 g1/dset4
 
-##############################################################################
-# Class issues
-##############################################################################
 
-# test 1.3.1: H5T_STRING
-TOOLTEST h5diff_131.txt dset1.3.1 h5diff_test1.h5 h5diff_test1.h5
+# ##############################################################################
+# # -p
+# ##############################################################################
 
-# test 1.3.2: H5T_BITFIELD
-TOOLTEST h5diff_132.txt dset1.3.2 h5diff_test1.h5 h5diff_test1.h5
 
-# test 1.3.3: H5T_OPAQUE
-TOOLTEST h5diff_133.txt dset1.3.3 h5diff_test1.h5 h5diff_test1.h5
+# 6.11: no value
+TOOLTEST h5diff_611.txt file1.h5 file2.h5 -p g1/dset3 g1/dset4
 
-# test 1.3.4: H5T_COMPOUND
-TOOLTEST h5diff_134.txt dset1.3.4 h5diff_test1.h5 h5diff_test1.h5
+# 6.12: negative value
+TOOLTEST h5diff_612.txt file1.h5 file2.h5 -p -4 g1/dset3 g1/dset4
 
-# test 1.3.5: H5T_REFERENCE
-TOOLTEST h5diff_135.txt dset1.3.5 h5diff_test1.h5 h5diff_test1.h5
+# 6.13: zero
+TOOLTEST h5diff_613.txt file1.h5 file2.h5 -p 0 g1/dset3 g1/dset4
 
-# test 1.3.6: H5T_ENUM
-TOOLTEST h5diff_136.txt dset1.3.6 h5diff_test1.h5 h5diff_test1.h5
+# 6.14: non number
+TOOLTEST h5diff_614.txt file1.h5 file2.h5 -p u g1/dset3 g1/dset4
 
-# test 1.3.7: H5T_VLEN
-TOOLTEST h5diff_137.txt dset1.3.7 h5diff_test1.h5 h5diff_test1.h5
+# 6.15: hexadecimal
+TOOLTEST h5diff_615.txt file1.h5 file2.h5 -p 0x1 g1/dset3 g1/dset4
 
-# test 1.3.8: H5T_ARRAY
-TOOLTEST h5diff_138.txt dset1.3.8 h5diff_test1.h5 h5diff_test1.h5
+# 6.16: string
+TOOLTEST h5diff_616.txt file1.h5 file2.h5 -p "0.21" g1/dset3 g1/dset4
 
+# 6.17: repeated option
+TOOLTEST h5diff_617.txt file1.h5 file2.h5 -p 0.21 -p 0.22 g1/dset3 g1/dset4
 
-# test 1.4: Compare integer with float
-TOOLTEST h5diff_14.txt dset1.1 dset1.4 h5diff_test1.h5 h5diff_test2.h5
+# 6.18: number larger than biggest difference
+TOOLTEST h5diff_618.txt file1.h5 file2.h5 -p 2 g1/dset3 g1/dset4
 
-# test 1.5 : Check for the same rank, for datasets
-TOOLTEST h5diff_15.txt dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
+# 6.19: number smaller than smallest difference
+TOOLTEST h5diff_619.txt file1.h5 file2.h5 -p 0.005 g1/dset3 g1/dset4
 
-# test 1.6: Check for the same current dimensions. Only compare if they are the same.
-TOOLTEST h5diff_16.txt dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.7: Check for the same maximum dimensions. Give a warning if they are different. 
-TOOLTEST h5diff_17.txt dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
 
-# test 1.8: Check for the same storage datatype. Give a warning if they are different. 
-TOOLTEST h5diff_18.txt dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # -n
+# ##############################################################################
 
 
-##############################################################################
-# tests 2., Different datatype sizes and different mix of options 
-##############################################################################
+# 6.20: no value
+TOOLTEST h5diff_620.txt file1.h5 file2.h5 -n g1/dset3 g1/dset4
 
-##############################################################################
-# H5T_INTEGER size 1 
-##############################################################################
+# 6.21: negative value
+TOOLTEST h5diff_621.txt file1.h5 file2.h5 -n -4 g1/dset3 g1/dset4
 
-# test 2.1.0
-TOOLTEST h5diff_210.txt dset2.1 dset2.2 h5diff_test1.h5 h5diff_test2.h5
+# 6.22: zero
+TOOLTEST h5diff_622.txt file1.h5 file2.h5 -n 0 g1/dset3 g1/dset4
 
-# test 2.1.1
-TOOLTEST h5diff_211.txt dset2.1 dset2.2 -n 2 h5diff_test1.h5 h5diff_test2.h5
+# 6.23: non number
+TOOLTEST h5diff_623.txt file1.h5 file2.h5 -n u g1/dset3 g1/dset4
 
-# test 2.1.2
-TOOLTEST h5diff_212.txt dset2.1 dset2.2 -d 3 h5diff_test1.h5 h5diff_test2.h5
+# 6.24: hexadecimal
+TOOLTEST h5diff_624.txt file1.h5 file2.h5 -n 0x1 g1/dset3 g1/dset4
 
-# test 2.1.3
-TOOLTEST h5diff_213.txt dset2.1a dset2.1b -p 3 h5diff_test1.h5 h5diff_test2.h5
+# 6.25: string
+TOOLTEST h5diff_625.txt file1.h5 file2.h5 -n "2" g1/dset3 g1/dset4
 
-##############################################################################
-# H5T_INTEGER size 2
-##############################################################################
+# 6.26: repeated option
+TOOLTEST h5diff_626.txt file1.h5 file2.h5 -n 2 -n 3 g1/dset3 g1/dset4
 
-# test 2.2.0
-TOOLTEST h5diff_220.txt dset2.2a dset2.2b h5diff_test1.h5 h5diff_test2.h5
-# test 2.2.1
-TOOLTEST h5diff_221.txt dset2.2a dset2.2b -n 2 h5diff_test1.h5 h5diff_test2.h5
-# test 2.2.2
-TOOLTEST h5diff_222.txt dset2.2a dset2.2b -d 3 h5diff_test1.h5 h5diff_test2.h5
-# test 2.2.3
-TOOLTEST h5diff_223.txt dset2.2a dset2.2b -p 3 h5diff_test1.h5 h5diff_test2.h5
+# 6.27: number larger than biggest difference
+TOOLTEST h5diff_627.txt file1.h5 file2.h5 -n 200 g1/dset3 g1/dset4
 
-##############################################################################
-# H5T_INTEGER size 4
-##############################################################################
+# 6.28: number smaller than smallest difference
+TOOLTEST h5diff_628.txt file1.h5 file2.h5 -n 1 g1/dset3 g1/dset4
 
-# test 2.3.0
-TOOLTEST h5diff_230.txt dset2.3a dset2.3b h5diff_test1.h5 h5diff_test2.h5
-# test 2.3.1
-TOOLTEST h5diff_231.txt dset2.3a dset2.3b -n 2 h5diff_test1.h5 h5diff_test2.h5
-# test 2.3.2
-TOOLTEST h5diff_232.txt dset2.3a dset2.3b -d 3 h5diff_test1.h5 h5diff_test2.h5
-# test 2.3.3
-TOOLTEST h5diff_233.txt dset2.3a dset2.3b -p 3 h5diff_test1.h5 h5diff_test2.h5
+# ##############################################################################
+# # non valid files
+# ##############################################################################
 
-##############################################################################
-# H5T_INTEGER size 8
-##############################################################################
+TOOLTEST h5diff_629.txt file1.h6 file2.h6
 
-# test 2.4.0
-TOOLTEST h5diff_240.txt dset2.4a dset2.4b h5diff_test1.h5 h5diff_test2.h5
-# test 2.4.1
-TOOLTEST h5diff_241.txt dset2.4a dset2.4b -n 2 h5diff_test1.h5 h5diff_test2.h5
-# test 2.4.2
-TOOLTEST h5diff_242.txt dset2.4a dset2.4b -d 3 h5diff_test1.h5 h5diff_test2.h5
-# test 2.4.3
-TOOLTEST h5diff_243.txt dset2.4a dset2.4b -p 3 h5diff_test1.h5 h5diff_test2.h5
 
-##############################################################################
-# H5T_FLOAT size 4
-##############################################################################
-
-# test 2.5.0
-TOOLTEST h5diff_250.txt dset2.5a dset2.5b h5diff_test1.h5 h5diff_test2.h5
-# test 2.5.1
-TOOLTEST h5diff_251.txt dset2.5a dset2.5b -n 2 h5diff_test1.h5 h5diff_test2.h5
-# test 2.5.2
-TOOLTEST h5diff_252.txt dset2.5a dset2.5b -d 3 h5diff_test1.h5 h5diff_test2.h5
-# test 2.5.3
-TOOLTEST h5diff_253.txt dset2.5a dset2.5b -p 3 h5diff_test1.h5 h5diff_test2.h5
-
-##############################################################################
-# H5T_FLOAT size 8
-##############################################################################
-
-# test 2.6.0
-TOOLTEST h5diff_260.txt dset2.6a dset2.6b h5diff_test1.h5 h5diff_test2.h5
-# test 2.6.1
-TOOLTEST h5diff_261.txt dset2.6a dset2.6b -n 2 h5diff_test1.h5 h5diff_test2.h5
-# test 2.6.2
-TOOLTEST h5diff_262.txt dset2.6a dset2.6b -d 3 h5diff_test1.h5 h5diff_test2.h5
-# test 2.6.3
-TOOLTEST h5diff_263.txt dset2.6a dset2.6b -p 3 h5diff_test1.h5 h5diff_test2.h5
-
-
-#######################################################
-# Different combination of objects
-#######################################################
-
-# test 3.0
-TOOLTEST h5diff_30.txt h5diff_test3.h5 h5diff_test4.h5
-
-# test 3.1
-TOOLTEST h5diff_31.txt dset_A dset_A h5diff_test3.h5 h5diff_test4.h5
-
-# test 3.2
-TOOLTEST h5diff_32.txt dset_A dset_B h5diff_test3.h5 h5diff_test4.h5
-
-# test 3.3
-TOOLTEST h5diff_33.txt dset_C dset_A h5diff_test3.h5 h5diff_test4.h5
-
-# test 3.4
-TOOLTEST h5diff_34.txt dset_C dset_C h5diff_test3.h5 h5diff_test4.h5
-
-#######################################################
-# reverse direction
-#######################################################
-
-# test 3.5
-TOOLTEST h5diff_35.txt h5diff_test4.h5 h5diff_test3.h5
-
-#######################################################
-# Different paths
-#######################################################
-
-# test 4.0: should find
-TOOLTEST h5diff_40.txt g1/dset1 g2/dset1 h5diff_test5.h5 h5diff_test6.h5
-
-# test 4.1.1: should NOT find
-TOOLTEST h5diff_411.txt dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
-
-# test 4.1.2: should NOT find
-TOOLTEST h5diff_412.txt /g1/dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
-
-# test 4.1.3: should NOT find
-TOOLTEST h5diff_413.txt /g1/dset1 /g1/dset1 h5diff_test5.h5 h5diff_test6.h5
-
-#######################################################
-# paths with several components
-#######################################################
-
-# test 4.2.1: 
-TOOLTEST h5diff_421.txt /a/b/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
-
-# test 4.2.2: 
-TOOLTEST h5diff_422.txt /x/a/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
-
-
+# ##############################################################################
+# # END
+# ##############################################################################
 
 
 
