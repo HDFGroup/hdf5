@@ -205,7 +205,7 @@ done:
         H5FL_FREE(H5O_fphdf5_t, fmeta);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -305,7 +305,7 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -354,7 +354,7 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
     ret_value = dst;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -395,7 +395,7 @@ H5O_fphdf5_size(H5F_t *f, const void *mesg)
     ret_value += H5O_PLIST[0].raw_size(f, fmeta->plist);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -445,7 +445,7 @@ H5O_fphdf5_reset(void *mesg)
         ret_value = H5O_PLIST[0].reset(fmeta->plist);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -492,7 +492,7 @@ H5O_fphdf5_free(void *mesg)
     H5FL_FREE(H5O_fphdf5_t, fmeta);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -547,7 +547,7 @@ H5O_fphdf5_debug(H5F_t UNUSED *f, const void *mesg,
     HDfprintf(stream, "}\n");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_FPHDF5 */
