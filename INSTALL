@@ -99,20 +99,20 @@ INSTALL.ascired for instructions.
 ** Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
 	detects various features of the host system and creates the
-	various Makefiles.  On most systems it should be sufficient to 
-	say:
+	Makefiles.  On most systems it should be sufficient to say:
 
+	    $ ./configure		OR
 	    $ sh configure
 
     	The configuration process can be controlled through
 	environment variables, command-line switches, and host
-	configuration files. For a complete list of switches say `sh
-	configure --help'. The host configuration files are located in
-	the `config' directory and are based on architecture name,
+	configuration files. For a complete list of switches say
+	`./configure --help'. The host configuration files are located
+	in the `config' directory and are based on architecture name,
 	vendor name, and/or operating system which are displayed near
 	the beginning of the `configure' output. The host config file
-	influences the behavior of configure by setting shell
-	variables.
+	influences the behavior of configure by setting or augmenting
+	shell variables.
 
 *** Specifying the installation directories
 	Typing `make install' will install the HDF5 library, header
@@ -122,6 +122,10 @@ INSTALL.ascired for instructions.
 	switch:
 
 	    $ ./configure --prefix=/home/robb
+
+	If shared libraries are being built (the default) then the
+	final home of the shared library must be specified with this
+	switch before the library and executables are built.
 
 *** Using an alternate C compiler
 	By default, configure will look for the C compiler by trying
@@ -141,9 +145,8 @@ INSTALL.ascired for instructions.
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-	On Irix 6.x systems the default compiler is `cc -n32' and on
-	Irix64 it is `cc -64'. To use an alternate compiler specify it 
-	with the CC variable:
+	On Irix64 the default compiler is `cc -64'. To use an
+	alternate compiler specify it with the CC variable:
 
 	    $ CC='cc -o32' ./configure
 
@@ -155,7 +158,7 @@ INSTALL.ascired for instructions.
 
 	    $ CFLAGS=-g ./confgure --enable-production
 
-*** Speicifying other programs
+*** Specifying other programs
 	The build system has been tuned for use with GNU make but
 	works also with other versions of make.  If the `make' command 
 	runs a non-GNU version but a GNU version is available under a
@@ -170,6 +173,27 @@ INSTALL.ascired for instructions.
 	The `AR' and `RANLIB' variables can also be set to the names
 	of the `ar' and `ranlib' (or `:') commands to override values
 	detected by configure.
+
+	The HDF5 library, include files, and utilities are installed
+	during `make install' (described below) with a BSD-compatible
+	install program detected automatically by configure. If none
+	is found then the shell script bin/install-sh is
+	used. Configure doesn't check that the install script actually 
+	works, but if a bad install is detected on your system (e.g.,
+	on the ASCI blue machine as of March 2, 1999) you have two
+	choices:
+
+	    1. Copy the bin/install-sh program to your $HOME/bin
+	       directory, name it `install', and make sure that
+	       $HOME/bin is searched before the system bin
+	       directories.
+
+	    2. Specify the full path name of the `install-sh' program
+	       as the value of the INSTALL environment variable. Note:
+	       do not use `cp' or some other program in place of
+	       install because the HDF5 makefiles also use the install
+	       program to also change file ownership and/or access
+	       permissions.
 
 *** Specifying other libraries and headers
 	Configure searches the standard places (those places known by
@@ -188,15 +212,22 @@ INSTALL.ascired for instructions.
 	CPPFLAGS and LDFLAGS variables) for the zlib headers and
 	library. The search can be disabled by specifying
 	`--without-zlib' or alternate directories can be specified
-	with `--with-zlib=INCDIR,LIBDIR'.
+	with `--with-zlib=INCDIR,LIBDIR' or through the CPPFLAGS and
+	LDFLAGS variables:
 
 	    $ ./configure --with-zlib=/usr/unsup/include,/usr/unsup/lib
+
+	    $ CPPFLAGS=-I/usr/unsup/include \
+	      LDFLAGS=-L/usr/unsup/lib \
+	      ./configure
 
         The HDF5-to-HDF4 conversion tool requires the HDF4 library and 
         header files which are detected the same way as zlib. The
         switch to give to configure is `--with-hdf4'.  Note that HDF5
         requires a newer version of zlib than the one shipped with
-        some versions of HDF4.
+        some versions of HDF4. Also, unless you have the "correct"
+        version of hdf4 the confidence testing will fail in the tools
+        directory.
 
 *** Static versus shared linking
 	The build process will create static libraries on all systems
@@ -217,7 +248,9 @@ INSTALL.ascired for instructions.
 	be compiled for profiling with gprof by saying
 	`--enable-production=profile'.
 
-	    $ ./configure --enable-production
+	    $ ./configure --disable-production         #symbolic debugging
+	    $ ./configure --enable-production          #optimized code
+	    $ ./configure --enable-production=profile  #for use with gprof
 
 	Regardless of whether support for symbolic debugging is
 	enabled, the library also is able to perform runtime debugging
@@ -231,13 +264,17 @@ INSTALL.ascired for instructions.
 	supported releases is no debugging (debugging can incur a
 	significant runtime penalty).
 
-	    $ ./configure --enable-debug=s,t
+	    $ ./configure --enable-debug=s,t  #debug only H5S and H5T
+	    $ ./configure --enable-debug      #debug normal packages
+	    $ ./configure --enable-debug=all  #debug all packages
+	    $ ./configure --disable-debug     #no debugging
 
 	HDF5 is also able to print a trace of all API function calls,
 	their arguments, and the return values. To enable or disable
-	the ability to trace the API say `--enable-trace' or
-	`--disable-trace'. The tracing must also be enabled at runtime 
-	to see any output (see Debugging.html).
+	the ability to trace the API say `--enable-trace' (the default
+	for snapthots) or `--disable-trace' (the default for public
+	releases). The tracing must also be enabled at runtime to see
+	any output (see Debugging.html).
 
 *** Large (>2GB) vs. small (<2GB) file capability
 	In order to read or write files that could potentially be
@@ -249,6 +286,45 @@ INSTALL.ascired for instructions.
 	say:
 
 	    $ ./configure --disable-hsizet
+
+*** Parallel vs. serial library
+	The HDF5 library can be configured to use MPI and MPI-IO for
+	parallelizm on a distributed multi-processor system. The easy
+	way to do this is to have a properly installed parallel
+	compiler (e.g., MPICH's mpicc or IBM's mpcc) and supply that
+	executable as the value of the CC environment variable:
+
+	    $ CC=mpcc ./configure
+	    $ CC=/usr/local/mpi/bin/mpicc ./configure
+
+	If no such wrapper script is available then you must specify
+	your normal C compiler along with the distribution of
+	MPI/MPI-IO which is to be used (values other than `mpich' will 
+	be added at a later date):
+
+	    $ ./configure --enable-parallel=mpich
+
+	If the MPI/MPI-IO include files and/or libraries cannot be
+	found by the compiler then their directories must be given as
+	arguments to CPPFLAGS and/or LDFLAGS:
+
+	    $ CPPFLAGS=-I/usr/local/mpi/include \
+	      LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
+	      ./configure --enable-parallel=mpich
+
+	If a parallel library is being built then configure attempts
+	to determine how to run a parallel application on one
+	processor and on many processors.  If the compiler is mpicc
+	and the user hasn't specified values for RUNSERIAL and
+	RUNPARALLEL then configure chooses `mpirun' from the same
+	directory as `mpicc':
+
+	    RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
+	    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=2}
+
+	The `$${NPROCS:=2}' will be substituted with the value of the
+	NPROCS environment variable at the time `make check' is run
+	(or the value 2).
 
 ** Building
 	The library, confidence tests, and programs can be build by

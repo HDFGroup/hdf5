@@ -37,7 +37,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 # Shared libraries
-LT=@top_srcdir@/libtool
+LT=$(top_srcdir)/libtool
 LT_COMPILE=$(LT) --mode=compile $(CC)
 LT_LINK_LIB=$(LT) --mode=link $(CC) -rpath $(libdir)
 LT_LINK_EXE=$(LT) --mode=link $(CC)

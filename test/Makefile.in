@@ -5,6 +5,7 @@
 #
 # 
 @COMMENCE@
+top_srcdir=@top_srcdir@
 
 # Add include directory to the C preprocessor flags and the h5test and hdf5
 # libraries to the library list.

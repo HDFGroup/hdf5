@@ -9,6 +9,7 @@
 # each subdirectory manually.
 #
 @COMMENCE@
+top_srcdir=@top_srcdir@
 
 # Subdirectories in build-order
 SUBDIRS=src test tools @TESTPARALLEL@
@@ -62,10 +63,16 @@ SUBDIRS=src test tools @TESTPARALLEL@
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-lib progs tests check test _test install uninstall TAGS dep depend:
+lib progs tests check test _test uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
+
+install:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+	@$(LT) --mode=finish $(libdir);
 
 # Number format detection
 H5detect: 
@@ -99,3 +106,4 @@ maintainer-clean:
 	done
 	-$(RM) config.cache config.log config.status src/H5config.h
 	-$(RM) configure src/H5config.h.in
+

@@ -423,13 +423,13 @@ AC_C_CONST
 AC_C_INLINE
 
 AC_MSG_CHECKING(for __attribute__ extension)
-AC_TRY_COMPILE(,[int __attribute__((unused)) f(void){return 1;}],
+AC_TRY_COMPILE(,[int __attribute__((unused)) x],
 		     AC_DEFINE(HAVE_ATTRIBUTE)
 		     AC_MSG_RESULT(yes),
 		     AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(for __FUNCTION__ extension)
-AC_TRY_COMPILE(,[int f(void){return __FUNCTION__;}],
+AC_TRY_COMPILE(,[(void)__FUNCTION__],
 		     AC_DEFINE(HAVE_FUNCTION)
 		     AC_MSG_RESULT(yes),
 		     AC_MSG_RESULT(no))
@@ -506,60 +506,163 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Check for parallel support.  If the base name of the compiler is `mpicc'
-dnl then assume parallel support is `mpio' unless specified otherwise by
-dnl the user.
+dnl The following variables are used to distinguish between building a
+dnl serial and parallel library.
 dnl
-AC_ARG_ENABLE(parallel,
-  [  --enable-parallel=mpio  Enable parallel support with MPIO],
-  PARALLEL=$enableval)
-AC_MSG_CHECKING(for parallel support);
+dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
+dnl			   a parallel library even if configure wasn't
+dnl			   able to find some header file or library that
+dnl			   might be required. This is defined if the
+dnl			   compiler looks like a parallel compiler (e.g.,
+dnl			   mpicc or mpcc) or if the user explicitly states
+dnl			   that a parallel library is being built by supplying
+dnl			   the `--enable-parallel' configure switch.
+dnl
+dnl    PARALLEL		-- This variable is set to a non-null value if
+dnl			   configure thinks we're compiling a parallel
+dnl			   version of the library.
+dnl
+dnl    RUNSERIAL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable using
+dnl			   a single process. For serial versions of the
+dnl			   library this will normally be empty. For parallel
+dnl			   versions it might be something like `mpirun -np 1'.
+dnl			   The value of this variable is substituted in *.in
+dnl			   files.
+dnl
+dnl    RUNPARALLEL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable on
+dnl			   multiple processors. For the serial library the
+dnl			   value will normally be the empty string. For
+dnl			   parallel library it should be something like
+dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
+dnl			   contain the number of processors on which to run
+dnl			   the executable (the double dollarsigns are to
+dnl			   protect the expansion until make executes the
+dnl			   command).  The value of this variable is
+dnl			   substituted in *.in files.
+dnl
 AC_SUBST(RUNSERIAL)
 AC_SUBST(RUNPARALLEL)
 AC_SUBST(TESTPARALLEL)
 
-if test "mpicc" = "$CC_BASENAME" -a "X-" = "X-$PARALLEL"; then
-    PARALLEL=mpio
-fi
+dnl ----------------------------------------------------------------------
+dnl If the compiler is obviously a parallel compiler then we're building
+dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
+dnl the name of the compiler might tell us how to run the resulting
+dnl executable. For `mpicc' the executable should be run with `mpirun' from
+dnl the same directory as mpicc if it exists.
+dnl
+case "$CC_BASENAME" in
+    mpicc)
+	# The mpich compiler. Use mpirun from the same directory if it
+	# exists.
+	PARALLEL=yes
+	AC_MSG_CHECKING(for mpirun)
+	CC_path=`type -path $CC`
+	CC_path=`echo $CC_path |sed -e 's/\/mpicc$//'`
+	if test -x $CC_path/mpirun; then
+	    AC_MSG_RESULT($CC_path/mpirun)
+	    if test "X-" = "X-$RUNSERIAL"; then
+	        RUNSERIAL="$CC_path/mpirun -np 1"
+            fi
+	    if test "X-" = "X-$RUNPARALLEL"; then
+	        RUNPARALLEL="$CC_path/mpirun -np \$\${NPROCS:=2}"
+	    fi
+	else
+	    AC_MSG_RESULT(none)
+        fi
+	;;
 
-case "X-$PARALLEL" in
-
-    X-|X-no)
-        # Parallel support is not enabled
-        AC_MSG_RESULT(disabled)
-        ;;
-
-    X-mpio|X-yes)
-        # Use MPIO.  Define HAVE_PARALLEL in src/H5config.h (comes from
-        # ./acconfig.h) and augment the include and library search paths
-        # (it doesn't hurt to have extra paths).  Then check for header
-        # files and libraries. Some extra source files are added to the
-        # list also so we don't have to ifdef out the whole file.
-        AC_MSG_RESULT(mpio)
-        AC_DEFINE(HAVE_PARALLEL)
-        AC_CHECK_LIB(mpi,MPI_Init)
-        AC_CHECK_LIB(mpio,MPI_File_open)
-	if test "X-" = "X-$RUNSERIAL" -o "X-none" = "X-$RUNSERIAL"; then
-	    RUNSERIAL=
-	fi
-	if test "X-" = "X-$RUNPARALLEL"; then
-	    RUNPARALLEL="mpirun -np 2"
-	elif test "X-none" = "X-$RUNPARALLEL"; then
-	    RUNPARALLEL=
-	fi
-	if test "X-" = "X-$TESTPARALLEL"; then
-	    TESTPARALLEL="testpar"
-	elif test "X-none" = "X-$TESTPARALLEL"; then
-	    TESTPARALLEL=
-	fi
-        ;;
+    mpcc)
+	# The IBM compiler
+	PARALLEL=yes
+	;;
 
     *)
-        AC_MSG_ERROR(unknown parallel support: $PARALLEL)
-        ;;
+	# Probably not a parallel compiler, but if `--enable-parallel'
+	# is defined below then we're still building a parallel hdf5.
+	;;
 esac
-        
 
+dnl ----------------------------------------------------------------------
+dnl What header files and libraries do we have to look for for parallel
+dnl support?  For the most part, search paths are already specified with
+dnl CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
+dnl `--disable-parallel' but specifies a known parallel compiler (like mpicc
+dnl or mpcc) then parallel support is enabled but configure doesn't search
+dnl for any parallel header files or libraries.
+dnl
+AC_ARG_ENABLE(parallel,
+  [  --enable-parallel=TYPE  Search for MPI-IO and MPI support files])
+
+AC_MSG_CHECKING(for parallel support files)
+case "X-$enable_parallel" in
+    X-|X-no|X-none)
+	# Either we are not compiling for parallel or the header and library
+	# files and locations are known to the compiler (this is the case
+	# for a correct installation of mpicc for instance).
+	AC_MSG_RESULT(skipped)
+	;;
+
+    X-yes|X-mpich)
+	# For normal mpich installation the compiler, mpicc, should know
+	# where the MPI and MPI-IO header files are located and know which
+	# extra libraries need to be linked and will supply appropriate
+	# flags to the underlying compiler.
+	AC_MSG_RESULT(mpich)
+	AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
+
+	# Apparently mpicc isn't installed correctly so configure must search
+	# for the header files and libraries. Actually we only have to search
+	# for the libraries in order to get the onto the link line, the user
+	# will have already told us about the locations. Fail if something
+	# is missing.
+	PARALLEL=yes
+	AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
+	;;
+
+    *)
+	AC_MSG_RESULT(error)
+	AC_MSG_ERROR(\"$enable_parallel\" is not a valid parallel search type)
+	;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl Should the `testpar' directory participate in the build?
+dnl
+if test "X-" != "X-$PARALLEL"; then
+    TESTPARALLEL=testpar
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Print some other parallel information and do some sanity checks.
+dnl
+if test "X-" != "X-$PARALLEL"; then
+    # We are building a parallel library
+    AC_DEFINE(HAVE_PARALLEL)
+
+    # Display what we found about running programs
+    AC_MSG_CHECKING(how to run on one processor)
+    AC_MSG_RESULT($RUNSERIAL)
+    AC_MSG_CHECKING(how to run in parallel)
+    AC_MSG_RESULT($RUNPARALLEL)
+
+    # There *must* be some way to run in parallel even if it's just the
+    # word `none'.
+    if test "X-" = "X-$RUNPARALLEL"; then
+	AC_MSG_ERROR(no way to run a parallel program)
+    fi
+
+    # If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
+    # the empty string.
+    if test "X-none" = "X-$RUNSERIAL"; then
+	RUNSERIAL=
+    fi
+    if test "X-none" = "X-$RUNPARALLEL"; then
+	RUNPARALLEL=
+    fi
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
