@@ -201,10 +201,14 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 #define DOWN(F)								      \
-    (((n=H5##F##_term_interface()) && at+5<sizeof loop)?		      \
+    (((n=H5##F##_term_interface()) && at+8<sizeof loop)?		      \
      (sprintf(loop+at, "%s%s", at?",":"", #F),				      \
       at += HDstrlen(loop+at),						      \
-      n):0)
+      n):                                                                     \
+     ((n>0 && at+5<sizeof loop)?		      \
+     (sprintf(loop+at, "..."),				      \
+      at += HDstrlen(loop+at),						      \
+     n):n))
     
     do {
 	pending = 0;
@@ -228,7 +232,7 @@ H5_term_library(void)
         /* Only display the error message if the user is interested in them. */
         if (func) {
             fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s...\n", loop);
+            fprintf(stderr, "      %s\n", loop);
         }
     }
 
