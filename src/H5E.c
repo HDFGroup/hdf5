@@ -780,7 +780,7 @@ H5Eget_major(H5E_major_t maj)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one");
 
     /* Don't know who is going to free it */
-    msg_str = (char*)HDmalloc((++size)*sizeof(char));
+    msg_str = (char*)H5MM_malloc((++size)*sizeof(char));
 
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
@@ -830,7 +830,7 @@ H5Eget_minor(H5E_minor_t min)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one");
     
     /* Don't know who is going to free it */
-    msg_str = (char*)HDmalloc((++size)*sizeof(char));
+    msg_str = (char*)H5MM_malloc((++size)*sizeof(char));
 
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")

@@ -30994,67 +30994,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-echo "$as_me:$LINENO: checking if malloc of zero bytes returns valid pointer" >&5
-echo $ECHO_N "checking if malloc of zero bytes returns valid pointer... $ECHO_C" >&6
-if test "${hdf5_cv_malloc_works+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
-  cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-
-#if STDC_HEADERS
-#include <stdlib.h>
-#endif
-
-int main(void)
-{
-    exit(malloc (0) ? 0 : 1);
-}
-
-_ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  hdf5_cv_malloc_works=yes
-else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-( exit $ac_status )
-hdf5_cv_malloc_works=no
-fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
-fi
-
-
-if test ${hdf5_cv_malloc_works} = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define MALLOC_WORKS 1
-_ACEOF
-
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
 echo "$as_me:$LINENO: checking Threads support system scope" >&5
 echo $ECHO_N "checking Threads support system scope... $ECHO_C" >&6
 if test "${hdf5_cv_system_scope_threads+set}" = set; then

@@ -33,6 +33,73 @@
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
+#ifndef NDEBUG
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_malloc
+ *
+ * Purpose:	Just like the POSIX version of malloc(3). This routine
+ *		specifically checks for allocations of 0 bytes and fails
+ *              in that case.  This routine is not called when NDEBUG is
+ *		defined.
+ *
+ * Return:	Success:	Ptr to new memory
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov  8 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_malloc(size_t size)
+{
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5MM_malloc);
+
+    assert(size);
+
+    FUNC_LEAVE_NOAPI(HDmalloc(size));
+} /* end H5MM_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_calloc
+ *
+ * Purpose:	Similar to the POSIX version of calloc(3), except this routine
+ *              just takes a 'size' parameter. This routine
+ *		specifically checks for allocations of 0 bytes and fails
+ *              in that case.  This routine is not called when NDEBUG is
+ *		defined.
+ *
+ * Return:	Success:	Ptr to new memory
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov  8 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_calloc(size_t size)
+{
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5MM_calloc);
+
+    assert(size);
+
+    FUNC_LEAVE_NOAPI(HDcalloc(1,size));
+} /* end H5MM_calloc() */
+#endif /* NDEBUG */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5MM_realloc
