@@ -414,6 +414,7 @@ static herr_t
 H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
 		     haddr_t *addr/*out*/)
 {
+    herr_t          ret_value=FAIL;
     haddr_t		    max_addr;
     uint8		    buf[H5F_SIGNATURE_LEN];
     uintn		    n = 9;
@@ -423,16 +424,18 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     H5F_low_size(f_handle, &max_addr);
     H5F_addr_reset(addr);
     while (H5F_addr_lt(addr, &max_addr)) {
-	if (H5F_low_read(f_handle, access_parms, H5D_XFER_DFLT, addr,
-			 H5F_SIGNATURE_LEN, buf) < 0) {
-	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read file");
-	}
-	if (!HDmemcmp(buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN))
-	    break;
-	H5F_addr_pow2(n++, addr);
+        if (H5F_low_read(f_handle, access_parms, H5D_XFER_DFLT, addr,
+                 H5F_SIGNATURE_LEN, buf) < 0) {
+            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read file");
+        }
+        if (!HDmemcmp(buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) {
+            ret_value=SUCCEED;
+            break;
+        }
+        H5F_addr_pow2(n++, addr);
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
