@@ -1,4 +1,4 @@
-HDF5 version 1.6.0-post2 released on Sun Aug 31 20:53:21 CDT 2003
+HDF5 version 1.6.0-post3 released on Wed Sep  3 21:11:06 CDT 2003
 ================================================================================
 
 
@@ -56,6 +56,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected bug in repeated calls to H5Pget_access_plist() which would
+            incorrectly manage reference counts of internal information and
+            eventually blow up.  QAK - 2003/09/02
         - Return rank of the array datatype on successful call to
             H5Tget_array_dims().  QAK - 2003/08/30
         - Corrected bug in H5Tdetect_class which was not correctly detecting
