@@ -24,7 +24,7 @@
 
 int indent = 0;
 int compound_data=0;
-int nCols = 10;
+int nCols = 80;
 ProgType programtype = UNKNOWN;
 static void display_numeric_data(hsize_t hs_nelmts, hid_t p_type,
 				 unsigned char *sm_buf, size_t p_type_nbytes,
