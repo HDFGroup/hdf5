@@ -218,6 +218,8 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
 	test -d ${TESTDIR} || mkdir ${TESTDIR}
     fi
+    INSTALLDIR=${TESTDIR}/installdir
+    test -d $INSTALLDIR || mkdir $INSTALLDIR
     # Make sure current version exists and is clean
     if [ -d ${TESTDIR} ]; then
 	(cd ${TESTDIR} && ${MAKE} distclean)
@@ -233,20 +235,27 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 	if (${DIFF} -c ${PREVIOUS}/MANIFEST ${CURRENT}/MANIFEST); then
 	    snapshot=no
 	    for src in `grep '^\.' ${CURRENT}/MANIFEST|expand|cut -f1 -d' '`; do
-		${DIFF} -I H5_VERS_RELEASE -I " released on " \
+		if ${DIFF} -I H5_VERS_RELEASE -I " released on " \
 		    -I " currently under development" \
-		    ${PREVIOUS}/$src ${CURRENT}/$src || \
+		    ${PREVIOUS}/$src ${CURRENT}/$src
+		then
+		    :	#continue
+		else
 		    snapshot=yes
 		    # Don't break because we want to see all the diffs.
+		    break
+		fi
 	    done
 	fi
     fi
 
     # Make sure all the serial tests work.
     if [ "$snapshot" = "yes" ]; then
-	if (cd ${TESTDIR}; \
-	    ${srcdir:+${CURRENT}/}${CONFIGURE}; \
-	    ${MAKE} check); then
+	if (cd ${TESTDIR} && \
+	    ${srcdir:+${CURRENT}/}${CONFIGURE} --prefix=$INSTALLDIR && \
+	    ${MAKE} check && \
+	    ${MAKE} install install-doc && \
+	    ${MAKE} uninstall uninstall-doc); then
 	    :
 	else
 	    errcode=$?
@@ -262,7 +271,7 @@ fi # Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
-	(cd ${CURRENT}; ${MAKE} distclean)
+	(cd ${CURRENT} && ${MAKE} distclean)
 	(
 	    # Turn on exit on error in the sub-shell so that it does not
 	    # cvs commit if errors encounter here.
