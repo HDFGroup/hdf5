@@ -507,7 +507,7 @@ h5dump_is_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 static int
-h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, h5dump_t *info)
+h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
 {
     hssize_t	nblocks, npoints, i;
     hsize_t	*ptdata;
