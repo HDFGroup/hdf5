@@ -5904,12 +5904,12 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    if (*((double*)s) > FLT_MAX) {
 		if (!H5T_overflow_g ||
 		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-		    *((float*)d) = HUGE_VAL;
+		    *((float*)d) = FLT_MAX;
 		}
 	    } else if (*((double*)s) < -FLT_MAX) {
 		if (!H5T_overflow_g ||
 		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-		    *((float*)d) = -HUGE_VAL;
+		    *((float*)d) = -FLT_MAX;
 		}
 	    } else {
 		*((float*)d) = *((double*)s);
