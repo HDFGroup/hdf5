@@ -16,7 +16,7 @@ VPATH=.:@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=src test tools @TESTPARALLEL@
+SUBDIRS=src test tools doc @TESTPARALLEL@
 
 ##############################################################################
 ##		    T A R G E T S

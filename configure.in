@@ -929,7 +929,8 @@ saved_no_create=$no_create
 no_create=yes
 AC_OUTPUT(src/libhdf5.settings config/depend config/commence config/conclude \
           Makefile src/Makefile pablo/Makefile test/Makefile \
-          testpar/Makefile tools/Makefile examples/Makefile)
+          testpar/Makefile tools/Makefile examples/Makefile \
+	  doc/Makefile doc/html/Makefile doc/html/Tutor/Makefile)
 no_create=$saved_no_create
 
 # Then the stamp2 file for H5config.h
