@@ -27,13 +27,14 @@
 #include <iostream>
 #endif
 
-#include "testhdf5.h"
-#include "H5Cpp.h"
-#include "h5cpputil.h"
+#include "testhdf5.h"	// C test header file
+#include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif  /* !H5_NO_NAMESPACE */
+#endif
+
+#include "h5cpputil.h"	// C++ utilility header file
 
 const string    TESTFILE("th5s.h5");
 const string    DATAFILE("th5s1.h5");
@@ -579,7 +580,7 @@ test_h5s_compound_scalar_read(void)
  *  
  * Function:	test_h5s
  *
- * Purpose:	Main H5S (dataspace) testing routine
+ * Purpose:	Main dataspace testing routine
  *
  * Return:	none
  *

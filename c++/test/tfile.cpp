@@ -30,13 +30,14 @@
 #include <iostream>
 #endif
 
-#include "H5Cpp.h"
-#include "testhdf5.h"
-#include "h5cpputil.h"
+#include "testhdf5.h"	// C test header file
+#include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif
+
+#include "h5cpputil.h"	// C++ utilility header file
 
 const hsize_t F1_USERBLOCK_SIZE = (hsize_t)0;
 const size_t F1_OFFSET_SIZE = sizeof(haddr_t);
@@ -475,7 +476,7 @@ test_file_name()
 /*-------------------------------------------------------------------------
  * Function:    test_file
  *
- * Purpose:     Main program
+ * Purpose:     Main file testing routine
  *
  * Return:      None
  *

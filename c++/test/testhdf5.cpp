@@ -17,21 +17,28 @@
    testhdf5.cpp - HDF5 testing framework main file.
 
    REMARKS
-   General test wrapper for HDF5 base library test programs
+   General test wrapper for HDF5 C++ library test programs
 
    DESIGN
    Each test function should be implemented as function having no
    parameters and returning void (i.e. no return value).  They should be put
-   into the list of InitTest() calls in main() below.  Functions which depend
-   on other functionality should be placed below the InitTest() call for the
+   into the list of AddTest() calls in main() below.  Functions which depend
+   on other functionality should be placed below the AddTest() call for the
    base functionality testing.
    Each test module should include testhdf5.h and define a unique set of
    names for test files they create.
 
-   BUGS/LIMITATIONS
-
-   EXPORTED ROUTINES/VARIABLES:
-   Two variables are exported: num_errs, and Verbosity.
+   EXTERNAL ROUTINES/VARIABLES:
+	TestInit(...) -- Initialize testing framework
+	TestInfo(...) -- Print test info
+	AddTest(...)  -- Setup a test function and add it to the list of tests
+	TestParseCmdLine(...) -- Parse command line arguments
+	PerformTests() -- Perform requested testing
+	GetTestSummary() -- Retrieve Summary request value
+	TestSummary() -- Display test summary
+	GetTestCleanup() -- Retrieve Cleanup request value
+	TestCleanup() -- Clean up files from testing
+	GetTestNumErrs() -- Retrieve the number of testing errors
 
  ***************************************************************************/
 
@@ -54,9 +61,9 @@ main(int argc, char *argv[])
     AddTest("file", test_file, cleanup_file, "File I/O Operations", NULL);
     // testing dataspace functionalities in th5s.cpp
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
-
-/* Comment out tests that are not done yet. - BMR, Feb 2001
+    // testing attribute functionalities in tattr.cpp
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
+/* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
     AddTest("reference", test_reference, cleanup_reference,  "References", NULL);

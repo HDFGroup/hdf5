@@ -32,14 +32,14 @@
 #include <iostream>
 #endif
 
-#include "testhdf5.h"
-#include "H5Cpp.h"
+#include "testhdf5.h"	// C test header file
+#include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
 #endif
 
-#include "h5cpputil.h"
+#include "h5cpputil.h"	// C++ utilility header file
 
 const string	FILE1("dataset.h5");
 const string	DSET_DEFAULT_NAME("default");
@@ -98,9 +98,8 @@ test_create( H5File& file)
 	delete dataset;
 
 	// Try creating a dataset that already exists.  This should fail since a
-	// dataset can only be created once.  If an exception is not thrown
-	// for this action by createDataSet, then display failure information
-	// and throw an exception.
+	// dataset can only be created once.  If an exception is not thrown for
+	// this action by createDataSet, then throw an invalid action exception.
 	try {
 	    dataset = new DataSet (file.createDataSet 
 			(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
@@ -202,7 +201,6 @@ check_values (hsize_t i, hsize_t j, int apoint, int acheck)
 {
     if (apoint != acheck)
     {
-	H5_FAILED();
 	cerr << "    Read different values than written.\n" << endl;
 	cerr << "    At index " << (unsigned long)i << "," << 
    	(unsigned long)j << endl;
