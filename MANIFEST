@@ -1039,6 +1039,7 @@
 ./test/unlink.c
 ./test/test_filters_le.hdf5
 ./test/test_filters_be.hdf5
+./test/gen_filters.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
