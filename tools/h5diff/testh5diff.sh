@@ -106,13 +106,23 @@ TOOLTEST() {
 	    eval $RUNCMD $H5DIFF_BIN "$@"
 	fi
     ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
+    # In parallel mode and if MPE library is used, it prints the following
+    # two message lines.
+    #    Writing logfile.
+    #    Finished writing logfile.
+    # They interfere with the expected output.  Filter them out.
+    if test -n "$pmode"; then
+	sed -e '/^Writing logfile./d' -e '/^Finished writing logfile./d' \
+	    < $actual_err >> $actual
+    else
+	cat $actual_err >> $actual
+    fi
 
     if $CMP $expect $actual; then
 	echo " PASSED"
     elif test -z "$pmode"; then
 	echo "*FAILED*"
-	echo "    Expected result (*.txt) differs from actual result (*.out)"
+	echo "    Expected result ($expect) differs from actual result ($actual)"
 	nerrors="`expr $nerrors + 1`"
 	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     else
@@ -129,8 +139,12 @@ TOOLTEST() {
 	    echo "*FAILED*"
 	    nerrors="`expr $nerrors + 1`"
 	    if test yes = "$verbose"; then
-		echo "    Expected result (*.txt) differs from actual result (*.out)"
+		echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
 		$DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
+		echo "====The actual result ($actual)"
+		sed 's/^/    /' < $actual 
+		echo "====The part that is actual stderr ($actual_err)"
+		sed 's/^/    /' < $actual_err 
 	    fi
 	fi
     fi
