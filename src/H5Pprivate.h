@@ -41,9 +41,10 @@ typedef struct H5P_sdim_t {
 /* Private functions */
 herr_t H5P_init(void);
 hid_t H5P_create(hid_t owner_id, hobjtype_t type, const char *name);
-uint32 H5P_get_lrank(H5P_sdim_t *sdim);
-hbool_t H5P_is_simple(H5P_dim_t *sdim);
-uintn H5P_nelem(H5P_dim_t *space);
+uint32 H5P_get_lrank(const H5P_sdim_t *sdim);
+herr_t H5P_get_ldims(const H5P_sdim_t *sdim, uint32 *dims);
+hbool_t H5P_is_simple(const H5P_dim_t *sdim);
+uintn H5P_nelem(const H5P_dim_t *space);
 herr_t H5P_release(hid_t oid);
 
 #endif

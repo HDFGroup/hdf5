@@ -178,7 +178,7 @@ done:
     dataspace, not the dimensionality of the space its embedded in.
     UFAIL is returned on an error, otherwise the rank is returned.
 --------------------------------------------------------------------------*/
-uint32 H5P_get_lrank(H5P_sdim_t *sdim)
+uint32 H5P_get_lrank(const H5P_sdim_t *sdim)
 {
     uint32 ret_value = UFAIL;
 
@@ -205,6 +205,136 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Pget_lrank
+ PURPOSE
+    Return the logical rank of a dataspace
+ USAGE
+    uint32 H5P_get_lrank(sid)
+        hid_t sid;            IN: ID of dataspace object to query
+ RETURNS
+    The logical rank of a dataspace on success, UFAIL on failure
+ DESCRIPTION
+        This function determines the number of logical dimensions in a 
+    dataspace.  The logical rank is the actual number of dimensions of the
+    dataspace, not the dimensionality of the space its embedded in.
+    UFAIL is returned on an error, otherwise the rank is returned.
+--------------------------------------------------------------------------*/
+uint32 H5Pget_lrank(hid_t sid)
+{
+    H5P_dim_t *space=NULL;      /* dataspace to modify */
+    uint32        ret_value = UFAIL;
+
+    FUNC_ENTER(H5Pget_lrank, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    if((space=H5Aatom_object(sid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+    ret_value=H5P_get_lrank(space->s);
+
+done:
+  if(ret_value == UFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Pget_lrank() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_ldims
+ PURPOSE
+    Return the logical dimensions of a dataspace (internal)
+ USAGE
+    herr_t H5P_get_ldims(sdim, dims)
+        H5P_sdim_t *sdim;            IN: Pointer to dataspace object to query
+        uint32 *dims;                OUT: Pointer to array to store dimensions in
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function determines the sizes of the logical dimensions in a 
+    dataspace.  The logical dimensions are the actual sizes of the
+    dataspace, not the size of the space it is embedded in.
+--------------------------------------------------------------------------*/
+herr_t H5P_get_ldims(const H5P_sdim_t *sdim, uint32 *dims)
+{
+    herr_t ret_value = FAIL;
+
+    FUNC_ENTER(H5P_get_ldims, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(sdim);
+    assert(dims);
+    HDmemcpy(dims, sdim->size,sdim->rank*sizeof(uint32));
+    ret_value=SUCCEED;
+
+#ifdef LATER
+done:
+#endif /* LATER */
+  if(ret_value == FAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_get_ldims() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_ldims
+ PURPOSE
+    Return the logical dimensions of a dataspace
+ USAGE
+    herr_t H5P_get_ldims(sdim, dims)
+        hid_t sid;            IN: ID of dataspace object to query
+        uint32 *dims;         OUT: Pointer to array to store dimensions in
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function determines the sizes of the logical dimensions in a 
+    dataspace.  The logical dimensions are the actual sizes of the
+    dataspace, not the size of the space it is embedded in.
+--------------------------------------------------------------------------*/
+herr_t H5Pget_ldims(hid_t sid, uint32 *dims)
+{
+    H5P_dim_t *space=NULL;      /* dataspace to modify */
+    uint32        ret_value = UFAIL;
+
+    FUNC_ENTER(H5Pget_lrank, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    if((space=H5Aatom_object(sid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+    if(dims==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
+
+    ret_value=H5P_get_ldims(space->s,dims);
+
+done:
+  if(ret_value == FAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Pget_ldims() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_is_simple
  PURPOSE
     Check if a dataspace is simple (internal)
@@ -217,7 +347,7 @@ done:
         This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-hbool_t H5P_is_simple(H5P_dim_t *sdim)
+hbool_t H5P_is_simple(const H5P_dim_t *sdim)
 {
     hbool_t ret_value = BFAIL;
 
@@ -294,7 +424,7 @@ done:
     herr_t H5Pset_space(sid, rank, dims)
         hid_t sid;            IN: Dataspace object to query
         uint32 rank;            IN: # of dimensions for the dataspace
-        uint32 *dims;           IN: Size of each dimension for the dataspace
+        const uint32 *dims;     IN: Size of each dimension for the dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -306,7 +436,7 @@ done:
     expand.  Currently, only the first dimension in the array (the slowest) may
     be unlimited in size.
 --------------------------------------------------------------------------*/
-herr_t H5Pset_space(hid_t sid, uint32 rank, uint32 *dims)
+herr_t H5Pset_space(hid_t sid, uint32 rank, const uint32 *dims)
 {
     H5P_dim_t *space=NULL;      /* dataspace to modify */
     uintn u;                    /* local counting variable */
@@ -406,7 +536,7 @@ done:
     Return the number of elements in a dataspace (internal)
  USAGE
     uintn H5P_nelem(space)
-        H5P_dim_t *space;            IN: Pointer to the dataspace object to query
+        const H5P_dim_t *space;        IN: Pointer to the dataspace object to query
  RETURNS
     The number of elements in a dataspace on success, UFAIL on failure
  DESCRIPTION
@@ -415,7 +545,7 @@ done:
     2, 3 and 4 would have 24 elements.
     UFAIL is returned on an error, otherwise the number of elements is returned.
 --------------------------------------------------------------------------*/
-uintn H5P_nelem(H5P_dim_t *space)
+uintn H5P_nelem(const H5P_dim_t *space)
 {
     uintn u;                    /* local counting variable */
     uintn        ret_value = UFAIL;
