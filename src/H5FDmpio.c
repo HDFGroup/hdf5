@@ -538,7 +538,7 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_size, FAIL);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
