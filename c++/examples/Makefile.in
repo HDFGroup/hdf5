@@ -29,7 +29,7 @@ TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 ## `make check' will run. List them in the order they should be run.
 PROGS=$(TEST_SRC:.cpp=)
 
-TEST_SCRIPTS=testexamples.sh
+TEST_SCRIPTS=$(srcdir)/testexamples.sh
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.

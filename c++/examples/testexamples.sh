@@ -6,13 +6,13 @@ DIFF='diff -c'
 nerrors=0
 verbose=yes
 
-actual=sample.out
-expect=expected.out
-
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.
 fi
+
+actual=sample.out
+expect=$srcdir/expected.out
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
