@@ -190,16 +190,16 @@ static void test_iter_group(void)
         CHECK(ret, FAIL, "H5Gget_num_objs");
         VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
-        for(i=0; i< num_membs; i++) {
-            ret = H5Gget_objname_by_idx(root_group, i, dataset_name, 32);
+        for(i=0; i< (int)num_membs; i++) {
+            ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
             CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
             
-            ret = H5Gget_objtype_by_idx(root_group, i);
+            ret = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
             CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
         }
     
         H5E_BEGIN_TRY {
-            ret = H5Gget_objname_by_idx(root_group, NDATASETS+3, dataset_name, 16);
+            ret = H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
         } H5E_END_TRY;   
         VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
 
@@ -584,12 +584,10 @@ static void test_grp_memb_funcs(void)
     hid_t filespace;        /* Common dataspace ID */
     hid_t root_group,grp;   /* Root group ID */
     int i;                  /* counting variable */
-    int idx;                /* Index in the group */
     char name[NAMELEN];     /* temporary name buffer */
     char *dnames[NDATASETS+2];/* Names of the datasets created */
     char *obj_names[NDATASETS+2];/* Names of the objects in group */
     char dataset_name[16];  /* dataset name */
-    iter_info info;         /* Custom iteration information */
     hsize_t num_membs;      /* Number of group members */
     herr_t ret;		    /* Generic return value */
 
@@ -665,15 +663,15 @@ static void test_grp_memb_funcs(void)
     CHECK(ret, FAIL, "H5Gget_num_objs");
     VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
-    for(i=0; i< num_membs; i++) {
-        ret = H5Gget_objname_by_idx(root_group, i, dataset_name, 32);
+    for(i=0; i< (int)num_membs; i++) {
+        ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
         CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
         
         /* Keep a copy of the dataset names around for later */
         obj_names[i]=HDstrdup(dataset_name);
         CHECK(dnames[i], NULL, "strdup");           
         
-        ret = H5Gget_objtype_by_idx(root_group, i);
+        ret = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
         CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
 
         if(!HDstrcmp(dataset_name, "grp"))
@@ -685,7 +683,7 @@ static void test_grp_memb_funcs(void)
     }
     
     H5E_BEGIN_TRY {
-        ret = H5Gget_objname_by_idx(root_group, NDATASETS+3, dataset_name, 16);
+        ret = H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
     } H5E_END_TRY;   
     VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
 
@@ -693,7 +691,7 @@ static void test_grp_memb_funcs(void)
     qsort(obj_names,NDATASETS+2,sizeof(char *),iter_strcmp);
    
     /* Compare object names */
-    for(i=0; i< num_membs; i++) {
+    for(i=0; i< (int)num_membs; i++) {
         ret = HDstrcmp(dnames[i], obj_names[i]);
         VERIFY(ret, 0, "HDstrcmp");
     }
