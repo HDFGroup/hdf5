@@ -2471,7 +2471,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tconvert, FAIL);
-    H5TRACE6("e","iihxxi",src_id,dst_id,nelmts,buf,background,dxpl_id);
+    H5TRACE6("e","iizxxi",src_id,dst_id,nelmts,buf,background,dxpl_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)) ||
