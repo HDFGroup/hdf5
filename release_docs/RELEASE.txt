@@ -50,6 +50,10 @@ New Features
 
     Library:
     --------
+        - Compound datatype has been enhanced with a new feature of size 
+            adjustment.  The size can be increased and decreased(without
+            cutting the last member).  No API change is involved.  SLU - 
+            2004/10/1
         - Put back 6 old error API functions to be backward compatible with
             version 1.6.  They are H5Epush, H5Eprint, H5Ewalk, H5Eclear,
             H5Eset_auto, H5Eget_auto.  Their new equivalent functions are
