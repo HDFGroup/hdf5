@@ -584,7 +584,6 @@
 ./fortran/examples/mountexample.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
-./fortran/examples/run_examples.sh
 ./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
 
