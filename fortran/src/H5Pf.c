@@ -1656,8 +1656,10 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
       * Call H5Pset_hyper_cache function.
       */
      c_prp_id = *prp_id;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pset_hyper_cache(c_prp_id, c_cache, c_limit);
      if (ret < 0) return ret_value;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
      ret_value = 0;
      return ret_value;
 } 
@@ -1686,10 +1688,12 @@ nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit)
       * Call H5Pget__hyper_cache function.
       */
      c_prp_id = *prp_id;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pget_hyper_cache(c_prp_id, &c_cache, &c_limit);
      if (ret < 0) return ret_value;
      *cache = (int_f)c_cache;
      *limit = (int_f)c_limit;   
+#endif /* H5_WANT_H5_V1_4_COMPAT */
      ret_value = 0;
      return ret_value;
 } 
