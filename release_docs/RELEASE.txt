@@ -27,6 +27,7 @@ CONTENTS
 - New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.6.0
+- Documentation
 - Platforms Tested
 - Known Problems
 
@@ -176,6 +177,24 @@ Bug Fixes since HDF5-1.6.0 release
 
     Documentation 
     ------------- 
+        - Added two missing Fortran APIs (h5pget_fapl_mpiposix_f and 
+            h5pset_fapl_mpiposix_f) to the reference manual.
+            FMB - 2003/10/15
+        - Corrected the reference manual descriptions of H5open/h5open_f and 
+            H5close/h5close_f to indicate that these calls are required in 
+            Fortran90 applications.   FMB - 2003/10/15
+
+
+Documentation
+=============
+
+    Fortran90 APIs are being integrated into the main body of the 
+    HDF5 Reference Manual (RM).  This process is complete in all RM sections
+    except H5P.
+
+    A PDF version of the RM will be posted on the HDF5 website
+    (at http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/) approximately one week
+    after the release.
 
 
 Platforms Tested
