@@ -5374,6 +5374,7 @@ test_select_none(void)
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
     uint8_t    *wbuf,           /* buffer to write to disk */
+               *rbuf,           /* buffer to read from disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j;            /* Counters */
     herr_t	ret;		/* Generic return value	*/
@@ -5383,6 +5384,7 @@ test_select_none(void)
 
     /* Allocate write & read buffers */
     wbuf=malloc(sizeof(uint8_t)*SPACE7_DIM1*SPACE7_DIM2);
+    rbuf=malloc(sizeof(uint8_t)*SPACE7_DIM1*SPACE7_DIM2);
 
     /* Initialize write buffer */
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
@@ -5411,6 +5413,10 @@ test_select_none(void)
 
     ret = H5Sselect_none(sid2);
     CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Attempt to read "nothing" from disk (before space is allocated) */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
 
     /* Write "nothing" to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -5446,6 +5452,7 @@ test_select_none(void)
 
     /* Free memory buffers */
     free(wbuf);
+    free(rbuf);
 }   /* test_select_none() */
 
 /****************************************************************
