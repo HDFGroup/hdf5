@@ -29,15 +29,19 @@
 #define FILENAME   "tvltypes.h5"
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
 #define SPACE1_RANK	1
-#define SPACE1_DIM1	4
+#define SPACE1_DIM1     4 
 
 /* 2-D dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
 #define SPACE2_RANK	2
 #define SPACE2_DIM1	10
 #define SPACE2_DIM2	10
+
+/* 1-D dataset with fixed dimensions */
+#define SPACE3_RANK	1
+#define SPACE3_DIM1     128
+#define L1_INCM         16
+#define L2_INCM         8 
 
 void *test_vltypes_alloc_custom(size_t size, void *info);
 void test_vltypes_free_custom(void *mem, void *info);
@@ -936,6 +940,177 @@ rewrite_vltypes_vlen_compound(void)
 
 /****************************************************************
 **
+**  test_vltypes_compound_vlen_vlen(): Test basic VL datatype code.
+**      Tests compound datatypes with VL datatypes of VL datatypes.
+** 
+****************************************************************/
+static void 
+test_vltypes_compound_vlen_vlen(void)
+{
+    typedef struct {                    /* Struct that the compound type are composed of */
+        int i;
+        float f;
+        hvl_t v;
+    } s1;
+    s1 wdata[SPACE3_DIM1];              /* data to write */
+    s1 rdata[SPACE3_DIM1];              /* data to read */
+    hid_t	fid1;		        /* HDF5 File IDs		*/
+    hid_t	dataset;	        /* Dataset ID			*/
+    hid_t	sid1;                   /* Dataspace ID			*/
+    hid_t	tid1, tid2, tid3;       /* Datatype IDs         */
+    hid_t       xfer_pid;               /* Dataset transfer property list ID */
+    hid_t       dcpl_pid;               /* Dataset creation property list ID */
+    hsize_t	dims1[] = {SPACE3_DIM1};
+    hsize_t     size;                   /* Number of bytes which will be used */
+    unsigned    i,j,k;                  /* counting variables */
+    size_t      mem_used=0;             /* Memory used during allocation */
+    hvl_t       *t1, *t2;               /* Temporary pointer to VL information */
+    herr_t	ret;		        /* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
+
+    /* Allocate and initialize VL data to write */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        wdata[i].i=i*10;
+        wdata[i].f=(float)((i*20)/3.0);
+        wdata[i].v.p=malloc((i+L1_INCM)*sizeof(hvl_t));
+        wdata[i].v.len=i+L1_INCM;
+        for(t1=(wdata[i].v).p,j=0; j<(i+L1_INCM); j++, t1++) {
+            t1->p=malloc((j+L2_INCM)*sizeof(unsigned int));
+            t1->len=j+L2_INCM;
+            for(k=0; k<j+L2_INCM; k++)
+                ((unsigned int*)t1->p)[k] = i*100 + j*10 + k;
+        }
+    } /* end for */
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE3_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a VL datatype to refer to */
+    tid3 = H5Tvlen_create (H5T_NATIVE_UINT);
+    CHECK(tid3, FAIL, "H5Tvlen_create");
+
+    /* Create a VL datatype to refer to */
+    tid1 = H5Tvlen_create (tid3);
+    CHECK(tid1, FAIL, "H5Tvlen_create");
+
+    /* Create the base compound type */
+    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s1));
+    CHECK(tid2, FAIL, "H5Tcreate");
+
+    /* Insert fields */
+    ret=H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+    ret=H5Tinsert(tid2, "f", HOFFSET(s1, f), H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert");
+    ret=H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open a dataset */
+    dataset=H5Dopen(fid1,"Dataset1");
+    CHECK(dataset, FAIL, "H5Dopen");
+    
+    /* Read dataset from disk */
+    ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE3_DIM1; i++) {
+        if(wdata[i].i!=rdata[i].i) {
+            num_errs++;
+            printf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
+            continue;
+        } /* end if */
+        if(wdata[i].f!=rdata[i].f) {
+            num_errs++;
+            printf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
+            continue;
+        } /* end if */
+        
+        if(wdata[i].v.len!=rdata[i].v.len) {
+            num_errs++;
+            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            continue;
+        } /* end if */
+
+        for(t1=wdata[i].v.p, t2=rdata[i].v.p, j=0; j<rdata[i].v.len; j++, t1++, t2++) {
+            if(t1->len!=t2->len) {
+                num_errs++;
+                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
+                continue;
+            } /* end if */
+            for(k=0; k<t2->len; k++) {
+                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
+                    num_errs++;
+                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                    continue;
+                } /* end if */
+            } /* end for */
+        } /* end for */
+    } /* end for */
+
+    /* Reclaim the VL data */
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    
+    /* Close datatype */
+    ret = H5Tclose(tid3);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_vltypes_compound_vlen_vlen() */
+
+/****************************************************************
+**
 **  test_vltypes_compound_vlen_atomic(): Test basic VL datatype code.
 **      Tests compound datatypes with VL datatypes of atomic datatypes.
 ** 
@@ -1324,7 +1499,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
 
 /****************************************************************
 **
-**  test_vltypes_vlen_vlen_atomic(): Test basic VL datatype code.
+**  vlen_size_func(): Test basic VL datatype code.
 **      Tests VL datatype with VL datatypes of atomic datatypes.
 ** 
 ****************************************************************/
@@ -1434,7 +1609,7 @@ test_vltypes_vlen_vlen_atomic(void)
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Create file */
+    /* Open file */
     fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
@@ -1923,6 +2098,7 @@ test_vltypes(void)
     test_vltypes_vlen_vlen_atomic();  	   /* Test VL datatype with VL atomic components */
     rewrite_longer_vltypes_vlen_vlen_atomic();  /*overwrite with VL data of longer sequence*/
     rewrite_shorter_vltypes_vlen_vlen_atomic();  /*overwrite with VL data of shorted sequence*/
+    test_vltypes_compound_vlen_vlen(); /* Test compound datatypes with VL atomic components */
 }   /* test_vltypes() */
 
 
