@@ -153,6 +153,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Performance
     -------------
+        - Hoisted invariant 'if/else's out of inner datatype conversion loop for
+            integer and floating-point values, giving about a 20% speedup.
+            QAK - 2003/10/20
 
     Tools
     -----
