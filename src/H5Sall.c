@@ -708,6 +708,10 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
 
     /* Check args */
     assert(space);
+    
+    /* Not valid for H5S_NULL dataspace */
+    if (space->extent.type == H5S_NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid data space");
 
     /* Remove current selection first */
     if(rel_prev)
@@ -763,6 +767,7 @@ herr_t H5Sselect_all (hid_t spaceid)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
+    /* Not valid for H5S_NULL dataspace */
     if (space->extent.type == H5S_NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid data space");
 

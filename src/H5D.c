@@ -1905,8 +1905,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
 
     /* Set the dataset's dataspace to 'all' selection */
-    if(H5S_select_all(new_dset->space,1)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
+    if(H5S_NULL != H5S_get_simple_extent_type(new_dset->space)) {
+        if(H5S_select_all(new_dset->space,1)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
+    }
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->dcpl_id!=H5P_DATASET_CREATE_DEFAULT) {

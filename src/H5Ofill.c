@@ -85,7 +85,7 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
     H5O_fill_new_debug,		/*debug the message			*/
 }};
 
-/* Initial version of the "new" fill value information */
+/* Initial version of the "old" fill value information */
 #define H5O_FILL_VERSION 	1
 /* Revised version of the "new" fill value information */
 #define H5O_FILL_VERSION_2 	2	

@@ -104,8 +104,8 @@ static herr_t H5O_init_interface(void);
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
     H5O_NULL,		/*0x0000 Null					*/
-    H5O_SDSPACE,	/*0x0001 Simple Dimensionality			*/
-    NULL,		/*0x0002 Data space (fiber bundle?)		*/
+    H5O_SDSPACE,	/*0x0001 Simple Dimensionality (old)		*/
+    H5O_SDSPACE_NEW,	/*0x0002 Extent Dimensionality (new)		*/
     H5O_DTYPE,		/*0x0003 Data Type				*/
     H5O_FILL,       	/*0x0004 Old data storage -- fill value         */
     H5O_FILL_NEW,	/*0x0005 New Data storage -- fill value 	*/

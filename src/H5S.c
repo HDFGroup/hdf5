@@ -56,6 +56,9 @@ hbool_t H5S_mpi_opt_types_g = TRUE;
 /* Declare a free list to manage the H5S_simple_t struct */
 H5FL_DEFINE(H5S_simple_t);
 
+/* Declare a free list to manage the H5S_extent_t struct */
+H5FL_DEFINE(H5S_extent_t);
+
 /* Declare a free list to manage the H5S_t struct */
 H5FL_DEFINE(H5S_t);
 
@@ -541,6 +544,45 @@ H5S_release_simple(H5S_simple_t *simple)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_release_extent
+ *
+ * Purpose:	Releases all memory associated with an extent data space.
+ *              (but doesn't free the extent space itself)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Wednesday, March 31, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_release_extent(H5S_extent_t *extent)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_release_extent, FAIL);
+
+    assert(extent);
+
+    if(extent->u.simple.size)
+        H5FL_ARR_FREE(hsize_t,extent->u.simple.size);
+    if(extent->u.simple.max)
+        H5FL_ARR_FREE(hsize_t,extent->u.simple.max);
+#ifdef LATER
+    if(extent->u.simple.perm)
+        H5FL_ARR_FREE(hsize_t,extent->u.simple.perm);
+#endif /* LATER */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Scopy
@@ -1096,7 +1138,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_modify(ent, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent.u.simple), dxpl_id)<0)
+            if (H5O_modify(ent, H5O_SDSPACE_NEW_ID, 0, 0, update_time, &(ds->extent), dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
@@ -1143,7 +1185,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent.u.simple))<0)
+            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_NEW_ID, 0, &(ds->extent))<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
@@ -1192,38 +1234,76 @@ H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
     if (NULL==(ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    if (H5O_read(ent, H5O_SDSPACE_ID, 0, &(ds->extent.u.simple), dxpl_id) == NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
+    if (H5O_read(ent, H5O_SDSPACE_NEW_ID, 0, &(ds->extent), dxpl_id) != NULL) { /* New data space header message */
+        switch(ds->extent.type) {
+            case H5S_NULL:
+                ds->extent.nelem = 0;
+                if(H5S_select_none(ds)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set none selection");
+                ds->select.offset = NULL;
+                break;
 
-    if(ds->extent.u.simple.rank != 0) {
-        hsize_t nelem;  /* Number of elements in extent */
-        unsigned u;     /* Local index variable */
+            case H5S_SCALAR:
+                ds->extent.nelem = 1;
+                /* Default to entire dataspace being selected */
+                if(H5S_select_all(ds,0)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+                ds->select.offset = NULL;
+                break;
+                
+            case H5S_SIMPLE: {
+                hsize_t nelem;  /* Number of elements in extent */
+                unsigned u;     /* Local index variable */
 
-        ds->extent.type = H5S_SIMPLE;
+                /* Compute the number of elements in the extent */
+                for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
+                    nelem*=ds->extent.u.simple.size[u];
+                ds->extent.nelem = nelem;
+                
+                /* Default to entire dataspace being selected */
+                if(H5S_select_all(ds,0)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+                
+                /* Allocate space for the offset and set it to zeros */
+                if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-        /* Compute the number of elements in the extent */
-        for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
-            nelem*=ds->extent.u.simple.size[u];
-        ds->extent.nelem = nelem;
+                break; }
+                
+            default:
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unknown data space type");
+        }
+    } else { /* For backward compatibility, if file is created by version 1.6 or before. */
+        if (H5O_read(ent, H5O_SDSPACE_ID, 0, &(ds->extent.u.simple), dxpl_id) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
+
+        if(ds->extent.u.simple.rank != 0) {
+            hsize_t nelem;  /* Number of elements in extent */
+            unsigned u;     /* Local index variable */
+
+            ds->extent.type = H5S_SIMPLE;
+
+            /* Compute the number of elements in the extent */
+            for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
+                nelem*=ds->extent.u.simple.size[u];
+            ds->extent.nelem = nelem;
+        } else {  
+            ds->extent.type = H5S_SCALAR;
+            ds->extent.nelem = 1;
+        } /* end if */
+
+        /* Default to entire dataspace being selected */
+        if(H5S_select_all(ds,0)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+
+        /* Allocate space for the offset and set it to zeros */
+        if(ds->extent.u.simple.rank>0) {
+            if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        } else
+            ds->select.offset = NULL;
     } /* end if */
-/* How to distinguish between H5S_SCALAR and H5S_NULL? */
-    else {  
-        ds->extent.type = H5S_SCALAR;
-        ds->extent.nelem = 1;
-    } /* end else */
-
-    /* Default to entire dataspace being selected */
-    if(H5S_select_all(ds,0)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-
-    /* Allocate space for the offset and set it to zeros */
-    if(ds->extent.u.simple.rank>0) {
-        if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    } /* end if */
-    else
-        ds->select.offset = NULL;
-
+    
     /* Set the value for successful return */
     ret_value=ds;
 
@@ -1415,7 +1495,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     else
         space->select.offset = NULL;
 
-    /* shift out of the previous state to a "simple" dataspace */
+    /* shift out of the previous state to a "simple" dataspace.  Not valid for H5S_NULL */
     switch (space->extent.type) {
         case H5S_SCALAR:
             /* do nothing */
@@ -2085,7 +2165,9 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
         case H5S_SIMPLE:
             fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
                     "Space class:");
-            H5O_debug_id(H5O_SDSPACE_ID, f, dxpl_id, &(mesg->extent.u.simple), stream,
+            /*H5O_debug_id(H5O_SDSPACE_ID, f, dxpl_id, &(mesg->extent.u.simple), stream,
+                                 indent+3, MAX(0, fwidth-3));*/
+            H5O_debug_id(H5O_SDSPACE_NEW_ID, f, dxpl_id, &(mesg->extent), stream,
                                  indent+3, MAX(0, fwidth-3));
             break;
             

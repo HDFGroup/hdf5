@@ -174,13 +174,14 @@ typedef struct {
 
 /* Main dataspace structure (typedef'd in H5Sprivate.h) */
 struct H5S_t {
-    H5S_extent_t extent;        /* Dataspace extent */
+    H5S_extent_t extent;                /* Dataspace extent */
     H5S_select_t select;		/* Dataspace selection */
 };
 
 /* Extent functions */
 H5_DLL herr_t H5S_close_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_release_simple(H5S_simple_t *simple);
+H5_DLL herr_t H5S_release_extent(H5S_extent_t *extent);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
 /* Operations on selections */
