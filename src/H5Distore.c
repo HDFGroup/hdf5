@@ -80,7 +80,7 @@ typedef struct H5F_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     H5O_layout_t *layout;	/*the layout message			*/
-    double	split_ratios[3];/*B-tree node splitting ratios		*/
+    float	split_ratios[3];/*B-tree node splitting ratios		*/
     H5O_pline_t	*pline;		/*filter pipeline message		*/
     hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     size_t	rd_count;	/*bytes remaining to be read		*/
@@ -1316,7 +1316,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
  */
 static void *
 H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
-		 const double split_ratios[], const H5O_pline_t *pline,
+		 const float split_ratios[], const H5O_pline_t *pline,
 		 const H5O_fill_t *fill, const hssize_t offset[],
 		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
@@ -1587,7 +1587,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
  */
 static herr_t
 H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
-		   const double split_ratios[],
+		   const float split_ratios[],
 		   const H5O_pline_t *pline, hbool_t dirty,
 		   const hssize_t offset[], intn *idx_hint,
 		   uint8_t *chunk, size_t naccessed)
@@ -2289,7 +2289,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
-		     const hsize_t *space_dim, const double split_ratios[],
+		     const hsize_t *space_dim, const float split_ratios[],
 		     const H5O_pline_t *pline, const H5O_fill_t *fill)
 {
 

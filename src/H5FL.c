@@ -58,7 +58,7 @@ static H5FL_gc_list_t *H5FL_gc_head=NULL;
 static H5FL_gc_arr_list_t *H5FL_gc_arr_head=NULL;
 
 /* Macros for turning off free lists in the library */
-#define NO_FREE_LISTS
+/* #define NO_FREE_LISTS */
 #ifdef NO_FREE_LISTS
 #define NO_REG_FREE_LISTS
 #define NO_ARR_FREE_LISTS
@@ -130,10 +130,15 @@ H5FL_free(H5FL_head_t *head, void *obj)
 
     FUNC_ENTER (H5FL_free, NULL);
 
-#ifdef NO_REG_FREE_LISTS
+    /* Double check parameters */
+    assert(head);
+    assert(obj);
+
 #ifdef H5FL_DEBUG
     HDmemset(obj,255,head->size);
 #endif /* H5FL_DEBUG */
+
+#ifdef NO_REG_FREE_LISTS
     H5MM_xfree(obj);
 #else /* NO_REG_FREE_LISTS */
     /* Make certain that the free list is initialized */
@@ -183,6 +188,9 @@ H5FL_alloc(H5FL_head_t *head, uintn clear)
     void *ret_value;        /* Pointer to object to return */
 
     FUNC_ENTER (H5FL_alloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
 
 #ifdef NO_REG_FREE_LISTS
     if(clear)
@@ -531,6 +539,9 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
 
     FUNC_ENTER(H5FL_blk_alloc, NULL);
 
+    /* Double check parameters */
+    assert(head);
+
 #ifdef NO_BLK_FREE_LISTS
     if(clear)
         ret_value=H5MM_calloc(size);
@@ -604,6 +615,10 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     FUNC_ENTER(H5FL_blk_free, NULL);
 
+    /* Double check parameters */
+    assert(head);
+    assert(block);
+
 #ifdef NO_BLK_FREE_LISTS
     H5MM_xfree(block);
 #else /* NO_BLK_FREE_LISTS */
@@ -654,6 +669,9 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
     void *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER(H5FL_blk_realloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
 
 #ifdef NO_BLK_FREE_LISTS
     ret_value=H5MM_realloc(block,new_size);
@@ -917,6 +935,10 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     FUNC_ENTER (H5FL_arr_free, NULL);
 
+    /* Double check parameters */
+    assert(head);
+    assert(obj);
+
 #ifdef NO_ARR_FREE_LISTS
     H5MM_xfree(obj);
 #else /* NO_ARR_FREE_LISTS */
@@ -972,6 +994,9 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
     void *ret_value;        /* Pointer to object to return */
 
     FUNC_ENTER (H5FL_arr_alloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
 
 #ifdef NO_ARR_FREE_LISTS
     if(clear)
@@ -1048,6 +1073,9 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, uintn new_elem)
     void *ret_value;        /* Pointer to object to return */
 
     FUNC_ENTER (H5FL_arr_realloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
 
 #ifdef NO_ARR_FREE_LISTS
     ret_value=H5MM_realloc(obj,new_elem*head->size);
