@@ -16,6 +16,7 @@ DOCDIR=$(docdir)/hdf5/fortran
 
 # Public doc files (to be installed)...
 PUB_DOCS=F90UserNotes.html h5a_FORTRAN.html h5d_FORTRAN.html        \
+	 F90Flags.html h5_FORTRAN.html				    \
          h5e_FORTRAN.html h5f_FORTRAN.html h5g_FORTRAN.html         \
          h5i_FORTRAN.html h5p_FORTRAN.html h5r_FORTRAN.html         \
          h5s_FORTRAN.html h5t_FORTRAN.html 
