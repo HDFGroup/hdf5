@@ -717,6 +717,11 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   char    h5dimpath_name[MAX_DIM_NAME];
   herr_t  ret;
 
+  
+  /*zero out memory for h5sdsdim_allname and h5dimpath_name */
+  h4toh5_ZeroMemory(h5sdsdim_allname,(MAX_VAR_DIMS*MAX_DIM_NAME)*sizeof(char));
+  h4toh5_ZeroMemory(h5dimpath_name,MAX_DIM_NAME*sizeof(char));
+
   /*check whether the sds is created with unlimited dimension. */
 
   if(SDgetchunkinfo(sds_id,&c_def_out, &c_flags)== FAIL) {
@@ -781,7 +786,8 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     /* here we should add some comments for fakedim0--name. It seems that
        hdf4(netcdf) will use unique fake dimension name, fakedim + unique 
        number, so check_sdsdim will never be 1 if the dimension name is fake
-       name. Under this case, j will not increase if this dimension doesnot
+       name. Under this case, count_h5objref and count_h5attrname
+        will not increase if this dimension doesnot
        have dimensional scale data. That assures the object reference of sds is
        correct. */
       
