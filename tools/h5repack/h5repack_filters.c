@@ -158,7 +158,7 @@ int print_filters(hid_t dcpl_id)
  *  do extra checking in the case of SZIP; delete all filters in the case
  *  of H5Z_FILTER_NONE present in the PACK_INFO_T filter array
  *
- * Return: 0, ok, -1 no
+ * Return: 0 success, -1 an error occured
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -194,11 +194,9 @@ int apply_filters(hid_t dcpl_id,
   {
    if (nfilters && H5Pdelete_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
     return -1;
-
-   return 1;
+   return 0;
   }
  }
-
 
 /*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
@@ -217,65 +215,67 @@ int apply_filters(hid_t dcpl_id,
   {
   default:
    break;
-   
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ *-------------------------------------------------------------------------
+ */
   case H5Z_FILTER_DEFLATE:
-   
    aggression=obj->filter[i].cd_values[0];
-   
    /* set up for deflated data */
    if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
     return -1;
    if(H5Pset_deflate(dcpl_id,aggression)<0)
     return -1;
-   
    break;
-   
-   
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SZIP       4 , szip compression 
+ *-------------------------------------------------------------------------
+ */
   case H5Z_FILTER_SZIP:
-   
    szip_pixels_per_block=obj->filter[i].cd_values[0];
-   
    /* check szip parameters */
    if (check_szip(obj->chunk.rank,
     obj->chunk.chunk_lengths,
     size,
     szip_options_mask,
-    szip_pixels_per_block)==1)
+    &szip_pixels_per_block,
+    options)==1)
    {
     /* set up for szip data */
     if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
      return -1;
     if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
      return -1;
-    
    }
    else
    {
-    printf("SZIP filter cannot be applied\n");
+    printf("Warning: SZIP filter cannot be applied\n");
    }
-   
    break;
-   
-   
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SHUFFLE    2 , shuffle the data
+ *-------------------------------------------------------------------------
+ */
   case H5Z_FILTER_SHUFFLE:
-   
    if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
     return -1;
    if (H5Pset_shuffle(dcpl_id)<0) 
     return -1;
-   
    break;
-   
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
+ *-------------------------------------------------------------------------
+ */
   case H5Z_FILTER_FLETCHER32:
-   
    if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
     return -1;
    if (H5Pset_fletcher32(dcpl_id)<0) 
     return -1;
-   
    break;
-
-   
   } /* switch */
  }/*i*/
 
@@ -309,11 +309,13 @@ int apply_filters(hid_t dcpl_id,
 int check_szip(int rank,        /* chunk rank */
                hsize_t *dims,   /* chunk dims */
                size_t size,     /* size of datatype in bytes */
-               unsigned szip_options_mask,
-               unsigned szip_pixels_per_block)
+               unsigned szip_options_mask /*IN*/,
+               unsigned *szip_pixels_per_block /*IN,OUT*/,
+               pack_opt_t *options)
 {
  szip_comp_t szip;
  int         i;
+ unsigned    ppb=*szip_pixels_per_block;
 
  /*
  pixels_per_scanline = size of the fastest-changing dimension 
@@ -337,15 +339,28 @@ int check_szip(int rank,        /* chunk rank */
   pixels_per_block must be an even number, and <= pixels_per_scanline 
   and <= MAX_PIXELS_PER_BLOCK
   */
- szip.pixels_per_block=szip_pixels_per_block;
 
- if (szip.pixels_per_block > szip.pixels_per_scanline)
+ if (ppb > szip.pixels_per_scanline)
  {
-  printf("\n\tWarning: in SZIP setting, pixels per block <%d>, \
-   cannot be greater than pixels per scanline<%d>\n",
-   szip.pixels_per_block, szip.pixels_per_scanline);
-  return 0;
+  /* set ppb to pixels per scanline and try to make it an even number */
+  ppb=szip.pixels_per_scanline;
+  if (ppb%2!=0)
+   ppb--;
+  if (ppb<=1 )
+  {
+   printf("Warning: in SZIP settings, pixels per block <%d>,\
+    cannot be set with pixels per scanline <%d>\n",
+    ppb, szip.pixels_per_scanline);
+   return 0;
+  }
+  else
+  {
+   if (options->verbose)
+    printf("Warning: In SZIP settings, pixels per block was set to <%d>\n", ppb);
+  }
  }
+ szip.pixels_per_block  = ppb;
+ *szip_pixels_per_block = ppb;
 
  szip.options_mask = szip_options_mask;
  szip.compression_mode = NN_MODE;
@@ -373,7 +388,7 @@ int check_szip(int rank,        /* chunk rank */
   szip.bits_per_pixel = 64;
   break;
  default:
-  printf("Error: Bad numeric type of size <%d> in SZIP\n",size);
+  printf("Warning: Invalid numeric type of size <%d> for SZIP\n",size);
   return 0;
  }
 

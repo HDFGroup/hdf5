@@ -183,7 +183,7 @@ int filter_this(const char* name,
 int apply_filters(hid_t dcpl_id,
                   size_t size,         /* size of datatype in bytes */
                   pack_opt_t *options, /* repack options */
-                  pack_info_t *pack);   /* info about object to filter */
+                  pack_info_t *pack);  /* info about object to filter */
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
@@ -197,7 +197,8 @@ int check_szip(int rank,        /* chunk rank */
                hsize_t *dims,   /* chunk dims */
                size_t size,     /* size of datatype in bytes */
                unsigned szip_options_mask,
-               unsigned szip_pixels_per_block);
+               unsigned *szip_pixels_per_block /*IN,OUT*/,
+               pack_opt_t *options);
 
 
 /*-------------------------------------------------------------------------

@@ -342,7 +342,8 @@ static int check_options(pack_opt_t *options)
      pack.chunk.chunk_lengths,
      0, /* do not test size */
      szip_options_mask,
-     szip_pixels_per_block)==0)
+     &szip_pixels_per_block,
+     options)==0)
     {
      /* Return: 1=can apply the filter
                 0=cannot apply the filter 

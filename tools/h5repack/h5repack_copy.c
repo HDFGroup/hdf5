@@ -244,7 +244,7 @@ int do_copy_objects(hid_t fidin,
     /* the information about the object to be filtered/"layouted" */
     pack_info_t obj;
     init_packobject(&obj);
-
+   
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
   
@@ -264,17 +264,15 @@ int do_copy_objects(hid_t fidin,
      
      /*-------------------------------------------------------------------------
       * apply the layout; check first if the object is to be modified.
-      * if the layout could not be applied, continue
       *-------------------------------------------------------------------------
       */
      if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
      {
       if (apply_layout(dcpl_id,&obj)<0)
-       continue;
+       goto error;
      }
     /*-------------------------------------------------------------------------
      * apply the filter; check first if the object is to be filtered.
-     * if the filter could not be applied, continue
      *-------------------------------------------------------------------------
      */
      if (filter_this(travt->objs[i].name,options,&obj))
@@ -288,16 +286,16 @@ int do_copy_objects(hid_t fidin,
         for (j=0; j<rank; j++) 
          obj.chunk.chunk_lengths[j] = dims[j];
        }
-       if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
-        continue;
+       if (apply_filters(dcpl_id,msize,options,&obj)<0)
+        goto error;
       }
       else
       {
        if (options->verbose)
         printf("Warning: Filter could not be applied to <%s>\n",
         travt->objs[i].name);
-      }
-     }
+      }/*rank*/
+     }/*filter_this*/
     }/*nelmts*/
     
     /*-------------------------------------------------------------------------
@@ -389,9 +387,7 @@ int do_copy_objects(hid_t fidin,
  */
 
   case H5G_LINK:
-
    {
-
     H5G_stat_t  statbuf;
     char        *targbuf=NULL;
     
