@@ -7442,6 +7442,17 @@ case "X-$enable_production" in
     enable_production="yes"
     echo "$as_me:$LINENO: result: production" >&5
 echo "${ECHO_T}production" >&6
+
+            CFLAGS_temp=""
+    if test -n "$CFLAGS"; then
+      for d in $CFLAGS ; do
+        if test "X$d" != "X-g"; then
+          CFLAGS_temp="$CFLAGS_temp $d"
+        fi
+      done
+      CFLAGS=$CFLAGS_temp
+    fi
+
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"

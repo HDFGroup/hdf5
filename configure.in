@@ -442,6 +442,19 @@ case "X-$enable_production" in
   X-yes)
     enable_production="yes"
     AC_MSG_RESULT([production])
+
+    dnl Remove the "-g" flag from CFLAGS if it's in there.
+    dnl
+    CFLAGS_temp=""
+    if test -n "$CFLAGS"; then
+      for d in $CFLAGS ; do
+        if test "X$d" != "X-g"; then
+          CFLAGS_temp="$CFLAGS_temp $d"
+        fi
+      done
+      CFLAGS=$CFLAGS_temp
+    fi
+
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"

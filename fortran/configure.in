@@ -264,6 +264,53 @@ EOF
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Production flags?  Save the value in $CONFIG_MODE so we have it for
+dnl the record.
+dnl
+AC_MSG_CHECKING([for production mode])
+AC_ARG_ENABLE([production],
+              [AC_HELP_STRING([--enable-production],
+                              [Determines how to run the compiler.])])
+
+case "X-$enable_production" in
+  X-yes)
+    AC_MSG_RESULT("production")
+
+    dnl Remove the "-g" flag from CFLAGS if it's in there.
+    dnl
+    CFLAGS_temp=""
+    if test -n "$CFLAGS"; then
+      for d in $CFLAGS ; do
+        if test "X$d" != "X-g"; then
+          CFLAGS_temp="$CFLAGS_temp $d"
+        fi
+      done
+      CFLAGS=$CFLAGS_temp
+    fi
+
+    CONFIG_MODE=production
+    CFLAGS="$CFLAGS $PROD_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
+    ;;
+  X-|X-no)
+    AC_MSG_RESULT("development")
+    CONFIG_MODE=development
+    CFLAGS="$CFLAGS $DEBUG_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
+    ;;
+  X-pg|X-profile)
+    AC_MSG_RESULT("profile")
+    CONFIG_MODE=profile
+    CFLAGS="$CXXFLAGS $PROFILE_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
+    ;;
+  *)
+    AC_MSG_RESULT("user-defined")
+    CONFIG_MODE="$X-enableval"
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
 dnl
 AC_MSG_CHECKING(if should build only statically linked executables)
@@ -280,34 +327,38 @@ else
 fi
 AC_SUBST(LT_STATIC_EXEC)
 
+dnl ----------------------------------------------------------------------
+dnl Test for 64bit stuff before the data types and their sizes. The
+dnl result could effect the outcome of the sizeof macros below.
+dnl
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
     dnl ----------------------------------------------------------------------
     dnl Enable large file support on linux? Store the result in the LINUX_LFS
     dnl variable for posterity
-    AC_ARG_ENABLE(linux-lfs,
+    AC_ARG_ENABLE([linux-lfs],
                   [AC_HELP_STRING([--enable-linux-lfs],
                                   [Enable support for large (64-bit)
                                    files on Linux. [default=check]])])
 
+    LINUX_LFS="no"
     case "X-$enable_linux_lfs" in
       X-yes)
         LINUX_LFS=yes
         ;;
       X-no)
-        LINUX_LFS=no
         ;;
       X-|*)
-        LINUX_LFS=no
-        AC_CHECK_FUNCS([getdents64],
-            dnl Add the large file support flags to the CPPFLAGS macro if
-            dnl we're on a Linux system which austensibly supports LFS. (We
-            dnl think it does if it has the `getdents64' syscall).
-            [LINUX_LFS=yes])
+        MAJOR_VER="`uname -r | cut -d '.' -f1`"
+        MINOR_VER="`uname -r | cut -d '.' -f2`"
+
+        if test ${MAJOR_VER} -gt 2 -o ${MAJOR_VER} -eq 2 -a ${MINOR_VER} -ge 4; then
+          LINUX_LFS="yes"
+        fi
         ;;
     esac
 
-    AC_MSG_CHECKING([for large file support on linux mode])
+    AC_MSG_CHECKING([for large file support mode on Linux])
     if test "X$LINUX_LFS" = "Xyes"; then
       AC_MSG_RESULT([enabled])
       CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
