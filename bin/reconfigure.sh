@@ -14,8 +14,8 @@
 
 
   # Run commands in order
-  echo /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool-1.4.2/Linux_2.4/share/aclocal
-  /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool-1.4.2/Linux_2.4/share/aclocal
+  echo /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+  /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
