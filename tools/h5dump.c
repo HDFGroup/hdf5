@@ -53,9 +53,10 @@ fprintf(stderr,
 "\nUsage of HDF5 Dumper:\n\n  \
 h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
        [-l <names>] [-t <names>] <file>\n\n\
-  -h            Print information on this command.\n\
+  -h            Print information on this command and exit.\n\
   -bb           Display the conent of the boot block. The default is not to display.\n\
   -header       Display header only; no data is displayed.\n\
+  -V            Display version information and exit.\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
@@ -1311,8 +1312,14 @@ H5Eset_auto (NULL, NULL);
                  usage();
                  free(opts);
                  exit(0);
+             }
+	     else if (!strcmp(argv[curr_arg],"-V")){
+		print_version("h5dump");
+                free(opts);
+                exit(0);
+	    }
 
-             } else if (!strcmp(argv[curr_arg],"-bb"))
+             else if (!strcmp(argv[curr_arg],"-bb"))
 
                  display_bb = 1;
 
