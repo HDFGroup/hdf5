@@ -132,9 +132,9 @@ facilitate moving easily between them.</i>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Dcreate</code>(<em>hid_t </em><code>loc_id</code>,
         <em>const char *</em><code>name</code>,
-        <em>hid_t</em><code>type_id</code>,
-        <em>hid_t</em><code>space_id</code>,
-        <em>hid_t</em><code>create_plist_id</code>
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hid_t</em> <code>space_id</code>,
+        <em>hid_t</em> <code>create_plist_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Creates a dataset at the specified location.
@@ -643,7 +643,7 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-Close">H5Dclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Dclose</code>(<em>hid_t </em><code>dataset_id</code>
+    <dd><em>herr_t </em><code>H5Dclose</code>(<em>hid_t </em><code>dataset_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Closes the specified dataset.

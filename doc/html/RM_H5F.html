@@ -429,9 +429,19 @@ facilitate moving easily between them.</i>
         <dd>Terminates access to an HDF5 file.  
 <dt><strong>Description:</strong>
         <dd><code>H5Fclose</code> terminates access to an HDF5 file.  
-            If this is the last file identifier open for a file 
-            and if access identifiers are still in use, 
-            this function will fail.
+            <p>
+            If this is the last file identifier open for the file 
+            and no other access identifier is open (e.g., a dataset 
+            identifier, group identifier, or shared datatype identifier),
+            the file will be fully closed and access will end.
+            <p>
+            If this is the last file identifier open for the file 
+            and other access identifiers are still in use, 
+            those access identifiers remain valid until separately 
+            closed and can still be used.
+            (But the file identifier is no longer valid and cannot be used.)
+            Once all of the remaining access identifiers are closed,
+            the file will be fully closed and access will end.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>

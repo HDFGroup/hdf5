@@ -244,6 +244,30 @@ errors within the H5E package.
         regardless of stack traversal direction), an error stack entry, 
         and the <code>client_data</code> pointer passed to 
         <code>H5E_print</code>.
+        The <code>H5E_walk_t</code> prototype is as follows:
+        <dir>
+        <p>
+        <code>typedef</code> <em>herr_t</em> <code>(*H5E_walk_t)(</code><em>int</em> <code>n,</code> 
+            <em>H5E_error_t *</em><code>err_desc,</code> 
+            <em>void *</em><code>client_data)</code>
+        <p>
+        where the parameters have the following meanings:
+            <dl>
+            <dt><em>int</em> <code>n</code>
+                <dd>Indexed position of the error in the stack.
+            <dt><em>H5E_error_t *</em><code>err_desc</code>
+                <dd>Pointer to a data structure describing the error.
+                    <em>(This structure is currently described only in the
+                        source code file </em><code>hdf5/src/H5Epublic.h</code><em>.  
+                        That file also contains the definitive list of major 
+                        and minor error codes.  That information will 
+                        eventually be presented as an appendix to this 
+                        <cite>Reference Manual</cite>.)</em>
+            <dt><em>void *</em><code>client_data</code>
+                <dd>Pointer to client data in the format expected by 
+                    the user-defined function.
+            </dl>
+        </dir>
         <p>
         <code>H5Ewalk</code> can fail if there are problems initializing 
         the library.
