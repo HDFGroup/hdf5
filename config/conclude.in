@@ -21,7 +21,7 @@ TAGS: $(LIB_SRC)
 ## Runs each test in order, passing $(TEST_FLAGS) to the program.
 ## Since tests are done in a shell loop, "make -i" does apply inside it.
 ## Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
-tests: $(TEST_PROGS) $(LIB)
+tests: $(TEST_PROGS) $(TEST_PROGS_PARA) $(LIB)
 check test _test: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
@@ -30,6 +30,19 @@ check test _test: tests
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
 		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
+	      echo "";							      \
+	   fi;								      \
+	done;								      \
+	test $$test = dummy || false
+	@for test in $(TEST_PROGS_PARA) dummy; do                             \
+	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
+	      srcdir="$(srcdir)"					      \
+		 $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||		      \
 		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 		 break;							      \
 	      echo "";							      \
@@ -158,7 +171,7 @@ clean: mostlyclean
 		(set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
 	    fi;                                                               \
 	done
-	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	-$(RM) $(LIB) $(TEST_PROGS) $(TEST_PROGS_PARA) $(PROGS) $(CLEAN)
 	-$(RM) -r .libs
 
 ## Like `clean' except it also removes files that were created by running

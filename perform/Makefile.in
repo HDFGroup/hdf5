@@ -17,8 +17,7 @@ LIBH5TEST=../test/libh5test.la
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=mpi-perf perf
-TEST_PROGS=iopipe chunk overhead \
-	$(TEST_PROGS_PARA)
+TEST_PROGS=iopipe chunk overhead
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
@@ -33,7 +32,7 @@ TEST_SRC=iopipe.c chunk.c overhead.c \
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5)
+$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 
 perf: perf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) \
