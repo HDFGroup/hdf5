@@ -64,6 +64,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - After compound datatype with variable-length string in the fields
+          is committed to file, the size is messed up when it's read back.
+          Fixed.  SLU - 2004/06/11
         - Fixed potential file corruption bug when a block of metadata could
           overlap the end of the internal metadata accumulator buffer and
           the buffer would be extended correctly, but would incorrectly 
