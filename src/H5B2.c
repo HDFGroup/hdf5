@@ -372,7 +372,16 @@ H5B2_locate_record(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 static herr_t
 H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
 {
+    const H5AC_class_t *child_class;    /* Pointer to child node's class info */
+    H5B2_internal_t *new_root;          /* Pointer to new root node */
+    haddr_t left_addr, right_addr;      /* Addresses of left & right child nodes */
+    void *left_child, *right_child;     /* Pointers to child nodes */
+    unsigned *left_nrec, *right_nrec;   /* Pointers to child # of records */
+    uint8_t *left_native, *right_native;/* Pointers to childs' native records */
+    H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
+    unsigned mid_record;                /* Index of "middle" record in current node */
+    unsigned old_root_nrec;             /* Number of records in root node */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split_root)
@@ -385,88 +394,152 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     shared=H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
-    if(bt2->depth==0) {
-        H5B2_internal_t *new_int=NULL;  /* Pointer to new internal node */
-        H5B2_leaf_t *old_leaf=NULL, *new_leaf=NULL;       /* Pointers to old & new leaf nodes */
-        H5B2_node_ptr_t new_int_ptr;    /* Node pointer to manage new internal node */
-        H5B2_node_ptr_t new_leaf_ptr;   /* Node pointer to manage new leaf node */
-        H5B2_node_ptr_t old_leaf_ptr;   /* Node pointer to manage old leaf node */
-        unsigned mid_record;            /* Index of "middle" record in current node */
-
-        /* Create new leaf node */
-        new_leaf_ptr.all_nrec=new_leaf_ptr.node_nrec=0;
-        if(H5B2_create_leaf(f, dxpl_id, bt2_shared, &new_leaf_ptr)<0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create new leaf node")
-
-        /* Determine "middle" record to promote to new root */
-        mid_record = shared->split_leaf_nrec/2;
-
-        /* Set "old" leaf pointer to root node */
-        old_leaf_ptr = bt2->root;
-
-        /* Protect both leafs */
-        if (NULL == (old_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, old_leaf_ptr.addr, &(old_leaf_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (new_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, new_leaf_ptr.addr, &(new_leaf_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
-
-        /* Copy "upper half" of records to new leaf */
-        HDmemcpy(new_leaf->leaf_native,H5B2_LEAF_NREC(old_leaf,shared,mid_record+1),shared->type->nrec_size*(shared->split_leaf_nrec-(mid_record+1)));
+    if(bt2->depth>0) {
+        H5B2_internal_t *old_int=NULL, *new_int=NULL;       /* Pointers to old & new internal nodes */
+        H5B2_node_ptr_t new_int_ptr;   /* Node pointer to manage new internal node */
 
         /* Create new internal node */
         new_int_ptr.all_nrec=new_int_ptr.node_nrec=0;
         if(H5B2_create_internal(f, dxpl_id, bt2_shared, &new_int_ptr)<0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create new internal node")
 
-        /* Protect new internal node */
-        if (NULL == (new_int = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, new_int_ptr.addr, &(new_int_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
+        /* Setup information for unlocking child nodes */
+        child_class = H5AC_BT2_INT;
+        left_addr = bt2->root.addr;
+        right_addr = new_int_ptr.addr;
+
+        /* Protect both leafs */
+        if (NULL == (old_int = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, left_addr, &(bt2->root.node_nrec), bt2_shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
+        if (NULL == (new_int = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, right_addr, &(new_int_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
-        /* Copy "middle" record to new internal node */
-        HDmemcpy(new_int->int_native,H5B2_LEAF_NREC(old_leaf,shared,mid_record),shared->type->nrec_size);
+        /* More setup for child nodes */
+        left_child = old_int;
+        right_child = new_int;
+        left_nrec = &(old_int->nrec);
+        right_nrec = &(new_int->nrec);
+        left_native = old_int->int_native;
+        right_native = new_int->int_native;
+        left_node_ptrs = old_int->node_ptrs;
+        right_node_ptrs = new_int->node_ptrs;
 
-        /* Update record counts in leaf nodes */
-        old_leaf_ptr.all_nrec = old_leaf_ptr.node_nrec = old_leaf->nrec = mid_record;
-        new_leaf_ptr.all_nrec = new_leaf_ptr.node_nrec = new_leaf->nrec = shared->split_leaf_nrec-(mid_record+1);
-
-        /* Mark leaf nodes as dirty */
-        old_leaf->cache_info.is_dirty = TRUE;
-        new_leaf->cache_info.is_dirty = TRUE;
-
-        /* Release leaf nodes */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, old_leaf_ptr.addr, old_leaf, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, new_leaf_ptr.addr, new_leaf, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
-
-        /* Set internal node pointers to leaf nodes */
-        new_int->node_ptrs[0] = old_leaf_ptr;
-        new_int->node_ptrs[1] = new_leaf_ptr;
-
-        /* Update record count in new internal node */
-        new_int->nrec = 1;
-
-        /* Mark new internal node as dirty */
+        /* Mark child nodes as dirty now */
+        old_int->cache_info.is_dirty = TRUE;
         new_int->cache_info.is_dirty = TRUE;
-
-        /* Release new internal node */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, new_int_ptr.addr, new_int, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
-
-        /* Update depth of B-tree */
-        bt2->depth++;
-
-        /* Update pointer to B-tree's root node to pointer to new internal node */
-        bt2->root.addr = new_int_ptr.addr;
-        bt2->root.node_nrec = 1;
-
-        /* Mark B-tree header as dirty */
-        bt2->cache_info.is_dirty = TRUE;
     } /* end if */
     else {
-HDfprintf(stderr,"%s: Need to split internal root! shared->split_int_nrec=%Zu\n",FUNC,shared->split_int_nrec);
-HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split internal root node yet")
+        H5B2_leaf_t *old_leaf=NULL, *new_leaf=NULL;       /* Pointers to old & new leaf nodes */
+        H5B2_node_ptr_t new_leaf_ptr;   /* Node pointer to manage new leaf node */
+
+        /* Create new leaf node */
+        new_leaf_ptr.all_nrec=new_leaf_ptr.node_nrec=0;
+        if(H5B2_create_leaf(f, dxpl_id, bt2_shared, &new_leaf_ptr)<0)
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create new leaf node")
+
+        /* Setup information for unlocking child nodes */
+        child_class = H5AC_BT2_LEAF;
+        left_addr = bt2->root.addr;
+        right_addr = new_leaf_ptr.addr;
+
+        /* Protect both leafs */
+        if (NULL == (old_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, left_addr, &(bt2->root.node_nrec), bt2_shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
+        if (NULL == (new_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, right_addr, &(new_leaf_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
+
+        /* More setup for child nodes */
+        left_child = old_leaf;
+        right_child = new_leaf;
+        left_nrec = &(old_leaf->nrec);
+        right_nrec = &(new_leaf->nrec);
+        left_native = old_leaf->leaf_native;
+        right_native = new_leaf->leaf_native;
+
+        /* Mark child nodes as dirty now */
+        old_leaf->cache_info.is_dirty = TRUE;
+        new_leaf->cache_info.is_dirty = TRUE;
+    } /* end if */
+
+    /* Set the old number of records in root node */
+    old_root_nrec = bt2->root.node_nrec;
+
+    /* Determine "middle" record to promote to new root */
+    mid_record = old_root_nrec/2;
+
+    /* Copy "upper half" of records to new child */
+    HDmemcpy(H5B2_NAT_NREC(right_native,shared,0),H5B2_NAT_NREC(left_native,shared,mid_record+1),shared->type->nrec_size*(old_root_nrec-(mid_record+1)));
+
+    /* Copy "upper half" of format root's node pointers, if the children of the root are internal nodes */
+    if(bt2->depth>0)
+        HDmemcpy(&(right_node_ptrs[0]),&(left_node_ptrs[mid_record+1]),sizeof(H5B2_node_ptr_t)*(old_root_nrec-mid_record));
+
+    /* Create new internal node to use as root */
+    if(H5B2_create_internal(f, dxpl_id, bt2_shared, &(bt2->root))<0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create new internal node")
+
+    /* Protect new internal node */
+    if (NULL == (new_root = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, &(bt2->root.node_nrec), bt2_shared, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
+
+    /* Copy "middle" record to new internal node */
+    HDmemcpy(H5B2_INT_NREC(new_root,shared,0),H5B2_NAT_NREC(left_native,shared,mid_record),shared->type->nrec_size);
+
+    /* Set internal node pointers to child nodes */
+    new_root->node_ptrs[0].addr = left_addr;
+    new_root->node_ptrs[1].addr = right_addr;
+
+    /* Update record counts in child nodes */
+    new_root->node_ptrs[0].node_nrec = *left_nrec = mid_record;
+    new_root->node_ptrs[1].node_nrec = *right_nrec = old_root_nrec-(mid_record+1);
+
+    /* Determine total number of records in new child nodes */
+    if(bt2->depth>0) {
+        unsigned u;             /* Local index variable */
+        unsigned new_left_all_nrec;     /* New total number of records in left child */
+        unsigned new_right_all_nrec;    /* New total number of records in right child */
+
+        /* Compute total of all records in each child node */
+        new_left_all_nrec = new_root->node_ptrs[0].node_nrec;
+        for(u=0; u<(*left_nrec+1); u++)
+            new_left_all_nrec += left_node_ptrs[u].all_nrec;
+
+        new_right_all_nrec = new_root->node_ptrs[1].node_nrec;
+        for(u=0; u<(*right_nrec+1); u++)
+            new_right_all_nrec += right_node_ptrs[u].all_nrec;
+
+        new_root->node_ptrs[0].all_nrec = new_left_all_nrec;
+        new_root->node_ptrs[1].all_nrec = new_right_all_nrec;
+    } /* end if */
+    else {
+        new_root->node_ptrs[0].all_nrec = new_root->node_ptrs[0].node_nrec;
+        new_root->node_ptrs[1].all_nrec = new_root->node_ptrs[1].node_nrec;
     } /* end else */
+
+    /* Update record count in new internal node */
+    new_root->nrec = 1;
+
+    /* Mark new internal node as dirty */
+    new_root->cache_info.is_dirty = TRUE;
+
+    /* Release new internal node */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, new_root, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
+
+    /* Release child nodes */
+    if (H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
+    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
+
+    /* Update depth of B-tree */
+    bt2->depth++;
+
+    /* Update pointer to B-tree's root node to pointer to new internal node */
+    bt2->root.node_nrec = 1;
+
+    /* Mark B-tree header as dirty */
+    bt2->cache_info.is_dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -556,7 +629,7 @@ HGOTO_ERROR(H5E_BTREE, H5E_CANTREDISTRIBUTE, FAIL, "unable to redistribute recor
             HDmemcpy(H5B2_NAT_NREC(left_native,shared,(*left_nrec+1)),H5B2_NAT_NREC(right_native,shared,0),shared->type->nrec_size*(move_nrec-1));
 
         /* Move record from right node into parent node */
-        HDmemcpy(H5B2_INT_NREC(internal,shared,idx),H5B2_NAT_NREC(right_native,shared,move_nrec),shared->type->nrec_size);
+        HDmemcpy(H5B2_INT_NREC(internal,shared,idx),H5B2_NAT_NREC(right_native,shared,(move_nrec-1)),shared->type->nrec_size);
 
         /* Slide records in right node down */
         HDmemmove(H5B2_NAT_NREC(right_native,shared,0),H5B2_NAT_NREC(right_native,shared,move_nrec),shared->type->nrec_size*new_right_nrec);
@@ -1245,7 +1318,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             if((depth==1 && child_node_ptr->node_nrec==shared->split_leaf_nrec) ||
                     (depth>1 && child_node_ptr->node_nrec==shared->split_int_nrec)) {
                 /* Attempt to redistribute records among children */
-                if(idx==0) {
+                if(idx==0) {    /* Left-most child */
                     if((depth==1 && internal->node_ptrs[idx+1].node_nrec<shared->split_leaf_nrec) ||
                             (depth>1 && internal->node_ptrs[idx+1].node_nrec<shared->split_int_nrec)) {
                         if(H5B2_redistribute2(f,dxpl_id,depth,internal,(unsigned)idx)<0)
@@ -1256,7 +1329,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
                     } /* end else */
                 } /* end if */
-                else if((unsigned)idx==internal->nrec) {
+                else if((unsigned)idx==internal->nrec) { /* Right-most child */
                     if((depth==1 && internal->node_ptrs[idx-1].node_nrec<shared->split_leaf_nrec) ||
                             (depth>1 && internal->node_ptrs[idx-1].node_nrec<shared->split_int_nrec)) {
                         if(H5B2_redistribute2(f,dxpl_id,depth,internal,(unsigned)(idx-1))<0)
@@ -1267,7 +1340,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node")
                     } /* end else */
                 } /* end if */
-                else {
+                else { /* Middle child */
                     if((depth==1 &&
                                 ((internal->node_ptrs[idx+1].node_nrec<shared->split_leaf_nrec) ||
                                 (internal->node_ptrs[idx-1].node_nrec<shared->split_leaf_nrec))) ||
