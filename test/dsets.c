@@ -155,6 +155,9 @@ test_create(hid_t file)
     if (dataset < 0) goto error;
     H5Pclose (create_parms);
 
+    /* Test dataset address.  Should be undefined. */
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    
     /*
      * Close the chunked dataset.
      */
@@ -234,10 +237,16 @@ test_simple_io(hid_t file)
     if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
 			     H5P_DEFAULT))<0) goto error;
 
+    /* Test dataset address.  Should be undefined. */
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
 	goto error;
 
+    /* Test dataset address.  Should be valid. */
+    if(H5Dget_offset(dataset)==HADDR_UNDEF) goto error;
+    
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
 	goto error;
@@ -327,9 +336,16 @@ test_compact_io(hid_t fapl)
     if((dataset = H5Dcreate(file, DSET_COMPACT_IO_NAME, H5T_NATIVE_INT, space, 
                         plist))<0)
         goto error;
+
+    /* Test dataset address.  Should be undefined. */
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    
     if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
         goto error;
 
+    /* Test dataset address.  Should be undefined. */
+    if(H5Dget_offset(dataset)!=HADDR_UNDEF) goto error;
+    
     /* Close file */
     H5Sclose(space);
     H5Pclose(plist);

@@ -230,6 +230,8 @@ Documentation
 New Features
 ============
 
+    * H5Dget_offset is added to return the offset of a dataset's data relative
+      to the beginning of the file.  SLU - 2002/11/7
     * Functions H5Tget_native_type and H5Tis_variable_str are added.  The first
       one reconstructs a datatype based on native memory datatype.  The second
       one checks if a datatype is variable string.  SLU - 2002/11/6

@@ -109,6 +109,10 @@ test_1a(hid_t file)
 
     /* Read dataset creation information */
     if ((dset = H5Dopen (file, "dset1"))<0) goto error;
+
+    /* Test dataset address.  Should be undefined. */
+    if (H5Dget_offset(dset)!=HADDR_UNDEF) goto error;
+        
     if ((dcpl = H5Dget_create_plist (dset))<0) goto error;
     if ((n=H5Pget_external_count (dcpl))<0) goto error;
     if (1!=n) {

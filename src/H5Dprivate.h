@@ -173,6 +173,7 @@ H5_DLL H5S_t *H5D_get_space(H5D_t *dset);
 H5_DLL H5D_t * H5D_open_oid(H5G_entry_t *ent);
 H5_DLL H5F_t * H5D_get_file(const H5D_t *dset);
 H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset);
+H5_DLL haddr_t H5D_get_offset(H5D_t *dset);
 H5_DLL void *H5D_vlen_get_buf_size_alloc(size_t size, void *info);
 H5_DLL herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, hsize_t ndim, 
                                      hssize_t *point, void *op_data);

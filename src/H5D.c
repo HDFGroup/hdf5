@@ -3689,6 +3689,88 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Dget_offset
+ *
+ * Purpose:	Returns the address of dataset in file.
+ *
+ * Return:	Success:        the address of dataset	
+ *
+ *		Failure:	Zero
+ *
+ * Programmer:  Raymond Lu	
+ *              November 6, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5Dget_offset(hid_t dset_id)
+{
+    H5D_t	*dset=NULL;
+    haddr_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_API(H5Dget_offset, 0);
+    H5TRACE1("h","i",dset_id);
+
+    /* Check args */
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
+
+    /* Set return value */
+    ret_value = H5D_get_offset(dset);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_get_offset
+ *
+ * Purpose:	Private function for H5D_get_offset.  Returns the address 
+ *              of dataset in file.
+ *
+ * Return:	Success:        the address of dataset	
+ *
+ *		Failure:	Zero
+ *
+ * Programmer:  Raymond Lu	
+ *              November 6, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5D_get_offset(H5D_t *dset)
+{
+    haddr_t	ret_value;
+    
+    FUNC_ENTER_NOAPI(H5D_get_offset, HADDR_UNDEF);
+
+    switch(dset->layout.type) {
+        case H5D_CHUNKED:
+        case H5D_COMPACT:
+            ret_value = HADDR_UNDEF;
+            break;
+
+        case H5D_CONTIGUOUS:
+            /* If dataspace hasn't been allocated or dataset is stored in 
+             * an external file, the value will be HADDR_UNDEF. */
+            ret_value = dset->layout.addr;
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a dataset type");
+    }
+     
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Diterate
  *
  * Purpose:	This routine iterates over all the elements selected in a memory

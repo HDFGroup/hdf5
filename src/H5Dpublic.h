@@ -80,6 +80,7 @@ H5_DLL herr_t H5Dget_space_status(hid_t dset_id,
 H5_DLL hid_t H5Dget_type (hid_t dset_id);
 H5_DLL hid_t H5Dget_create_plist (hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
+H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
 H5_DLL herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
