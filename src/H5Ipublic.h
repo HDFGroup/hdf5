@@ -93,7 +93,7 @@ H5_DLL int H5Iinc_type_ref(H5I_type_t type);
 H5_DLL int H5Idec_type_ref(H5I_type_t type);
 H5_DLL int H5Iget_type_ref(H5I_type_t type);
 H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
-H5_DLL herr_t H5Inmembers(H5I_type_t type, int *num_members);
+H5_DLL herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members);
 H5_DLL htri_t H5Itype_exists(H5I_type_t type);
 
 

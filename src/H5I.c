@@ -432,7 +432,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5Inmembers(H5I_type_t type, int *num_members)
+herr_t H5Inmembers(H5I_type_t type, hsize_t *num_members)
 {
     int ret_value = SUCCEED;                      /* Return value */
 
