@@ -107,8 +107,9 @@ static int num_opaque_conversions_g = 0;
 #define aligned_free(M)		free((char*)(M)-ALIGNMENT)
 
 void some_dummy_func(float x);
-hbool_t overflows(unsigned char *origin_bits, dtype_t src_dtype, 
+static hbool_t overflows(unsigned char *origin_bits, dtype_t src_dtype, 
             size_t src_size_bytes, size_t dst_num_bits);
+static int my_isnan(dtype_t type, void *val);
 
 
 /*-------------------------------------------------------------------------
@@ -2971,10 +2972,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_char = (char)(*((unsigned long_long*)aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_UCHAR==dst_type) {
@@ -3028,10 +3026,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		    hw_uchar = (unsigned char)(*((unsigned long_long*)
 						 aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_SHORT==dst_type) {
@@ -3084,10 +3079,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		    hw_short = (short)(*((unsigned long_long*)aligned));
 		    break;
 
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_USHORT==dst_type) {
@@ -3140,10 +3132,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		    hw_ushort = (unsigned short)(*((unsigned long_long*)
 						   aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_INT==dst_type) {
@@ -3195,10 +3184,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_int = (int)(*((unsigned long_long*)aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_UINT==dst_type) {
@@ -3251,10 +3237,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_uint = (unsigned int)(*((unsigned long_long*)aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_LONG==dst_type) {
@@ -3307,10 +3290,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_long = (long int)(*((unsigned long_long*)aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_ULONG==dst_type) {
@@ -3364,10 +3344,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		    hw_ulong = (unsigned long)(*((unsigned long_long*)
 						 aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_LLONG==dst_type) {
@@ -3420,10 +3397,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_llong = (long_long)(*((unsigned long_long*)aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    } else if (INT_ULLONG==dst_type) {
@@ -3481,10 +3455,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		    hw_ullong = (unsigned long_long)(*((unsigned long_long*)
 						       aligned));
 		    break;
-                case FLT_FLOAT:
-                case FLT_DOUBLE:
-                case FLT_LDOUBLE:
-		case OTHER:
+                default:
 		    break;
 		}
 	    }
@@ -3680,7 +3651,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n",
 		       *((unsigned long_long*)aligned));
 		break;
-	    case OTHER:
+	    default:
 		break;
 	    }
 	    
@@ -3733,7 +3704,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n",
 		       *((unsigned long_long*)aligned));
 		break;
-	    case OTHER:
+	    default:
 		break;
 	    }
 	    
@@ -3774,7 +3745,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    case INT_ULLONG:
 		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
 		break;
-	    case OTHER:
+	    default:
 		break;
 	    }
 
@@ -4083,7 +4054,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	/*
 	 * Initialize the source buffers to random bits.  The `buf' buffer
 	 * will be used for the conversion while the `saved' buffer will be
-	 * sed for the comparison later.
+	 * used for the comparison later.
 	 */
 	for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
 
@@ -4092,11 +4063,9 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 
 	/* Check the results from the library against hardware */
 	for (j=0; j<nelmts; j++) {
-            /* There's a bug in my_isnan.  I suspect it'll trigger some failures
-             * in float-float tests 
-             * if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
-             *   if(my_isnan(src_type, saved+j*src_size))
-             *       continue;*/
+             if(FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
+                if(my_isnan(src_type, saved+j*src_size))
+                    continue;
 
 	    if (FLT_FLOAT==dst_type) {
 		hw = (unsigned char*)&hw_float;
@@ -4146,7 +4115,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_float = (float)(*((unsigned long_long*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (FLT_DOUBLE==dst_type) {
@@ -4198,7 +4167,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 			   sizeof(unsigned long_long));
 		    hw_double = (double)(*((unsigned long_long*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (FLT_LDOUBLE==dst_type) {
@@ -4256,7 +4225,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    hw_ldouble = (long double)(*((unsigned long_long*)
 						       aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_CHAR==dst_type) {
@@ -4275,7 +4244,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_char = (char)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_UCHAR==dst_type) {
@@ -4294,7 +4263,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_uchar = (unsigned char)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_SHORT==dst_type) {
@@ -4313,7 +4282,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_short = (short)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_USHORT==dst_type) {
@@ -4332,7 +4301,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_ushort = (unsigned short)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_INT==dst_type) {
@@ -4351,7 +4320,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_int = (int)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_UINT==dst_type) {
@@ -4370,7 +4339,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_uint = (unsigned int)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_LONG==dst_type) {
@@ -4389,7 +4358,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_long = (long)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_ULONG==dst_type) {
@@ -4408,7 +4377,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                             sizeof(long double));
 		    hw_ulong = (unsigned long)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_LLONG==dst_type) {
@@ -4426,7 +4395,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    memcpy(aligned, saved+j*sizeof(long double), sizeof(double));
 		    hw_llong = (long long)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
 	    } else if (INT_ULLONG==dst_type) {
@@ -4444,17 +4413,17 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    memcpy(aligned, saved+j*sizeof(long double), sizeof(double));
 		    hw_ullong = (unsigned long long)(*((long double*)aligned));
 		    break;
-		case OTHER:
+		default:
 		    break;
 		}
             }
 
-        /* Make certain that there isn't some weird number of destination bits */
-        assert(dst_nbits%8==0);
+            /* Make certain that there isn't some weird number of destination bits */
+            assert(dst_nbits%8==0);
 
-	/* Are the two results the same */
-        for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++) {
-            if (buf[j*dst_size+k]!=hw[k]) break;
+            /* Are the two results the same */
+            for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++) {
+                if (buf[j*dst_size+k]!=hw[k]) break;
 	    }
 	    if (k==dst_size) continue; /*no error*/
            
@@ -4768,7 +4737,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+static hbool_t
 overflows(unsigned char *origin_bits, dtype_t src_dtype, size_t src_size_bytes, size_t dst_num_bits)
 {
     hbool_t     ret_value=FALSE;
@@ -4779,15 +4748,14 @@ overflows(unsigned char *origin_bits, dtype_t src_dtype, size_t src_size_bytes, 
 
     memcpy(bits, origin_bits, src_size_bytes);
 
-    if(src_size_bytes==4) {
-        frct_digits = 23;
-        expt_digits = 8;
-        bias = 0x7f;
-    } else if(src_size_bytes==8) {
-        frct_digits = 52;
-        expt_digits = 11;
-        bias = 0x3ff;
+    if(src_dtype==FLT_FLOAT) {
+        frct_digits = (FLT_MANT_DIG-1);
+        expt_digits = (sizeof(float)*8)-(frct_digits+1);
+    } else if(src_dtype==FLT_DOUBLE) {
+        frct_digits = (DBL_MANT_DIG-1);
+        expt_digits = (sizeof(double)*8)-(frct_digits+1);
     }
+    bias = (1<<(expt_digits-2)) - 1;
    
     /* get exponent */
     expt = H5T_bit_get_d(bits, frct_digits, expt_digits) - bias;
@@ -4813,8 +4781,6 @@ overflows(unsigned char *origin_bits, dtype_t src_dtype, size_t src_size_bytes, 
 
     if(indx>=dst_num_bits)
         ret_value=TRUE;
-
-    free(bits);
 
 done:
     return ret_value; 
@@ -4881,12 +4847,8 @@ my_isnan(dtype_t type, void *val)
 	} else {
 	    return 0;
 	}
-        /* Bug here.  Ought to be  
-	 * if (strstr(s, "NaN") || strstr(s, "NAN") || strstr(s, "nan")) 
-         */
-	if (!strstr(s, "NaN") || !strstr(s, "NAN") || !strstr(s, "nan")) {
+	 if (strstr(s, "NaN") || strstr(s, "NAN") || strstr(s, "nan")) 
 	    retval = 1;
-	}
     }
 
     return retval;

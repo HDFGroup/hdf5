@@ -69,6 +69,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define to 1 if you have the `get_fpc_csr' function. */
+#undef HAVE_GET_FPC_CSR
+
 /* Define to 1 if you have the <globus_common.h> header file. */
 #undef HAVE_GLOBUS_COMMON_H
 
@@ -271,6 +274,9 @@
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #undef HAVE_SYS_FILIO_H
+
+/* Define to 1 if you have the <sys/fpu.h> header file. */
+#undef HAVE_SYS_FPU_H
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H

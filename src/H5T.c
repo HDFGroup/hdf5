@@ -35,6 +35,11 @@
 #include "H5Pprivate.h"		/* Property Lists			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
+/* Check for header needed for SGI floating-point code */
+#ifdef H5_HAVE_SYS_FPU_H
+#include <sys/fpu.h>
+#endif /* H5_HAVE_SYS_FPU_H */
+
 /* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5T_init_interface
@@ -214,6 +219,13 @@ size_t H5T_NATIVE_INT_LEAST64_ALIGN_g	= 0;
 size_t H5T_NATIVE_UINT_LEAST64_ALIGN_g	= 0;
 size_t H5T_NATIVE_INT_FAST64_ALIGN_g	= 0;
 size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
+
+/* Useful floating-point values for conversion routines */
+/* (+/- Inf for all floating-point types) */
+float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0;
+float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0;
+double H5T_NATIVE_DOUBLE_POS_INF_g      = 0.0;
+double H5T_NATIVE_DOUBLE_NEG_INF_g      = 0.0;
 
 
 /*
@@ -467,6 +479,165 @@ done:
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5T_init_inf
+ *
+ * Purpose:	Initialize the +/- Infinity floating-poing values for type
+ *              conversion.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, November 22, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_init_inf(void)
+{
+    H5T_t	*dst_p;		/* Datatype type operate on */
+    H5T_atomic_t *dst;		/* Datatype's atomic info */
+    uint8_t	*d;             /* Pointer to value to set */
+    size_t	half_size;	/* Half the type size */
+    size_t      u;              /* Local index value */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOINIT(H5T_init_inf);
+
+    /* Get the float datatype */
+    if (NULL==(dst_p=H5I_object(H5T_NATIVE_FLOAT_g)))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    dst = &dst_p->u.atomic;
+
+    /* Check that we can re-order the bytes correctly */
+    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+        HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+
+    /* +Inf */
+    d=(uint8_t *)&H5T_NATIVE_FLOAT_POS_INF_g;
+    H5T_bit_set (d, dst->u.f.sign, 1, FALSE);
+    H5T_bit_set (d, dst->u.f.epos, dst->u.f.esize, TRUE);
+    H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE==dst->order) {
+        half_size = dst_p->size/2;
+        for (u=0; u<half_size; u++) {
+            uint8_t tmp = d[dst_p->size-(u+1)];
+            d[dst_p->size-(u+1)] = d[u];
+            d[u] = tmp;
+        }
+    }
+
+    /* -Inf */
+    d=(uint8_t *)&H5T_NATIVE_FLOAT_NEG_INF_g;
+    H5T_bit_set (d, dst->u.f.sign, 1, TRUE);
+    H5T_bit_set (d, dst->u.f.epos, dst->u.f.esize, TRUE);
+    H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE==dst->order) {
+        half_size = dst_p->size/2;
+        for (u=0; u<half_size; u++) {
+            uint8_t tmp = d[dst_p->size-(u+1)];
+            d[dst_p->size-(u+1)] = d[u];
+            d[u] = tmp;
+        }
+    }
+
+    /* Get the double datatype */
+    if (NULL==(dst_p=H5I_object(H5T_NATIVE_DOUBLE_g)))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    dst = &dst_p->u.atomic;
+
+    /* Check that we can re-order the bytes correctly */
+    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+        HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+
+    /* +Inf */
+    d=(uint8_t *)&H5T_NATIVE_DOUBLE_POS_INF_g;
+    H5T_bit_set (d, dst->u.f.sign, 1, FALSE);
+    H5T_bit_set (d, dst->u.f.epos, dst->u.f.esize, TRUE);
+    H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE==dst->order) {
+        half_size = dst_p->size/2;
+        for (u=0; u<half_size; u++) {
+            uint8_t tmp = d[dst_p->size-(u+1)];
+            d[dst_p->size-(u+1)] = d[u];
+            d[u] = tmp;
+        }
+    }
+
+    /* -Inf */
+    d=(uint8_t *)&H5T_NATIVE_DOUBLE_NEG_INF_g;
+    H5T_bit_set (d, dst->u.f.sign, 1, TRUE);
+    H5T_bit_set (d, dst->u.f.epos, dst->u.f.esize, TRUE);
+    H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE==dst->order) {
+        half_size = dst_p->size/2;
+        for (u=0; u<half_size; u++) {
+            uint8_t tmp = d[dst_p->size-(u+1)];
+            d[dst_p->size-(u+1)] = d[u];
+            d[u] = tmp;
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_init_hw
+ *
+ * Purpose:	Perform hardware specific [floating-point] initialization
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November 24, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_init_hw(void)
+{
+#ifdef H5_HAVE_GET_FPC_CSR
+    union fpc_csr csr;          /* Union to hold results of floating-point status register query */
+#endif /* H5_HAVE_GET_FPC_CSR */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOINIT(H5T_init_hw);
+
+#ifdef H5_HAVE_GET_FPC_CSR
+    /* [This code is specific to SGI machines] */
+
+    /* Get the floating-point status register */
+    csr.fc_word=get_fpc_csr();
+
+    /* If the "flush denormalized values to zero" flag is set, unset it */
+    if(csr.fc_struct.flush) {
+        csr.fc_struct.flush=0;
+        set_fpc_csr(csr.fc_word);
+    } /* end if */
+#endif /* H5_HAVE_GET_FPC_CSR */
+
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_interface -- Initialize interface-specific information
@@ -528,6 +699,10 @@ H5T_init_interface(void)
     /* Make certain there aren't too many classes of datatypes defined */
     /* Only 16 (numbered 0-15) are supported in the current file format */
     assert(H5T_NCLASSES<16);
+
+    /* Perform any necessary hardware initializations */
+    if(H5T_init_hw()<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /*
      * Initialize pre-defined native data types from code generated during
@@ -992,6 +1167,9 @@ H5T_init_interface(void)
      * destination are equal.
      */
     status |= H5T_register(H5T_PERS_HARD, "no-op", native_int, native_int, H5T_conv_noop, H5AC_dxpl_id);
+
+    /* Initialize the +/- Infinity values for floating-point types */
+    status |= H5T_init_inf();
 
     if (status<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
