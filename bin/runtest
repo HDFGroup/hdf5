@@ -220,6 +220,11 @@ RUNSNAPTEST()
 	    standard) # standard test
 		shift
 		;;
+	    op-configure)
+		# option for configure
+		SNAPCMD_OPT="$SNAPCMD_OPT $1 $2"
+		shift; shift
+		;;
 	    *) # unknown test
 		echo "$0: unknown type of test ($1)"
 		retcode=1
