@@ -188,10 +188,10 @@ static const H5FD_class_t H5FD_log_g = {
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
-    sizeof(H5FD_log_fapl_t), /*fapl_size		*/
-    H5FD_log_fapl_get,		/*fapl_get		*/
-    H5FD_log_fapl_copy,		/*fapl_copy		*/
-    H5FD_log_fapl_free,		/*fapl_free		*/
+    sizeof(H5FD_log_fapl_t),                    /*fapl_size		*/
+    H5FD_log_fapl_get,		                /*fapl_get		*/
+    H5FD_log_fapl_copy,		                /*fapl_copy		*/
+    H5FD_log_fapl_free,		                /*fapl_free		*/
     0,						/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
@@ -624,7 +624,7 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  * Function:	H5FD_log_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -646,10 +646,11 @@ H5FD_log_query(const H5FD_t UNUSED *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flags = 0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-    } /* end if */
+    }
 
     FUNC_LEAVE(ret_value);
 }
