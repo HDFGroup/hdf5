@@ -1878,6 +1878,8 @@ get_width(void)
 	width = w[0];
     }
 #elif defined(H5_HAVE_TIOCGWINSZ) && defined(H5_HAVE_IOCTL)
+#ifndef __PUMAGON__
+/* the ioctl() call coredump on TFLOPS.  Turn it off for now. */
     {
 	/* Unix with ioctl(TIOCGWINSZ) */
 	struct winsize w;
@@ -1885,6 +1887,7 @@ get_width(void)
 	    width = w.ws_col;
 	}
     }
+#endif
 #elif defined(H5_HAVE_TIOCGETD) && defined(H5_HAVE_IOCTL)
     {
 	/* Unix with ioctl(TIOCGETD) */
