@@ -118,6 +118,57 @@ static int num_opaque_conversions_g = 0;
 #define aligned_malloc(Z)	((void*)((char*)HDmalloc(ALIGNMENT+Z)+ALIGNMENT))
 #define aligned_free(M)		HDfree((char*)(M)-ALIGNMENT)
 
+/* Initialize source buffer of integer for integer->integer conversion test.
+ * This algorithm is mainly to avoid any casting and comparison between source and destination types
+ * for compiler, because we're testing conversions. */
+#define INIT_INTEGER(TYPE, SRC_MAX, SRC_MIN, SRC_SIZE, DST_SIZE, SRC_PREC, BUF, SAVED, NELMTS)  \
+{                                                                                               \
+    unsigned char *buf_p, *saved_p;                                                             \
+    int i;                                                                                      \
+    TYPE value1 = 1;                                                                            \
+    TYPE value2 = 0;                                                                            \
+                                                                                                \
+    /* Allocate buffers */                                                                      \
+    NELMTS=(SRC_PREC-1)*3+1;                                                                    \
+    BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
+    SAVED = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                     \
+                                                                                                \
+    buf_p = BUF;                                                                                \
+    saved_p = SAVED;                                                                            \
+                                                                                                \
+    /*positive values, ascending order. VALUE1 starts from 00000001, to 00000010, until 10000000*/ \
+    /*VALUE2 ascends from 00000000, to 00000011, 00000111,...,  until 11111111.*/               \
+    for(i=0; i<SRC_PREC-1; i++) {                                                               \
+        if(value1<=SRC_MAX && value1>=SRC_MIN) {                                                \
+            memcpy(buf_p, &value1, SRC_SIZE);                                                   \
+            memcpy(saved_p, &value1, SRC_SIZE);                                                 \
+            buf_p += SRC_SIZE;                                                                  \
+            saved_p += SRC_SIZE;                                                                \
+        }                                                                                       \
+        if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
+            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
+            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
+            buf_p += SRC_SIZE;                                                                  \
+            saved_p += SRC_SIZE;                                                                \
+        }                                                                                       \
+                                                                                                \
+        value1 <<= 1;                                                                           \
+        value2 = (value1 - 1) | value1;                                                         \
+    }                                                                                           \
+                                                                                                \
+    /* negative values for signed; descending positive values for unsigned */                   \
+    /* VALUE2 descends from 11111111 to 11111110, 11111100, ..., until 10000000. */             \
+    for(i=0; i<SRC_PREC; i++) {                                                                 \
+        if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
+            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
+            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
+            buf_p += SRC_SIZE;                                                                  \
+            saved_p += SRC_SIZE;                                                                \
+        }                                                                                       \
+        value2 <<= 1;                                                                           \
+    }                                                                                           \
+}
+
 void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
@@ -2965,7 +3016,7 @@ test_derived_integer(void)
     hid_t       file=-1, tid1=-1, tid2=-1;
     hid_t       dxpl_id=-1;
     char        filename[1024];
-    size_t      precision, spos, epos, esize, mpos, msize, size, ebias;
+    size_t      precision, size;
     int         offset;
     H5T_order_t order;
     H5T_sign_t  sign;
@@ -4454,7 +4505,7 @@ static int
 test_conv_int_1(const char *name, hid_t src, hid_t dst)
 {
     const size_t	ntests=NTESTS;		/*number of tests	*/
-    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
+    size_t	        nelmts=0;		/*num values per test	*/
     const size_t	max_fails=8;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/
@@ -4485,8 +4536,6 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     unsigned long	hw_ulong;
     long_long		hw_llong;
     unsigned long_long	hw_ullong;
-    
-    
     
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_SCHAR)) {
@@ -4569,6 +4618,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	goto error;
     }
 
+    
     /* Allocate buffers */
     endian = H5Tget_order(H5T_NATIVE_INT);
     src_size = H5Tget_size(src);
@@ -4577,12 +4627,37 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     src_sign = H5Tget_sign(src);
     dst_sign = H5Tget_sign(dst);
-    buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(sizeof(long_long));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
+
+    /* Initialize the source buffer through macro INIT_INTEGER.  The BUF
+     * will be used for the conversion while the SAVED buffer will be
+     * used for the comparison later.
+     */
+    if(src_type == INT_SCHAR) {
+        INIT_INTEGER(signed char, SCHAR_MAX, SCHAR_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_UCHAR) {
+        INIT_INTEGER(unsigned char, UCHAR_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_SHORT) {
+        INIT_INTEGER(short, SHRT_MAX, SHRT_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_USHORT) {
+        INIT_INTEGER(unsigned short, USHRT_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_INT) {
+        INIT_INTEGER(int, INT_MAX, INT_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_UINT) {
+        INIT_INTEGER(unsigned int, UINT_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_LONG) {
+        INIT_INTEGER(long, LONG_MAX, LONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_ULONG) {
+        INIT_INTEGER(unsigned long, ULONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_LLONG) {
+        INIT_INTEGER(long long, LLONG_MAX, LLONG_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else if(src_type == INT_ULLONG) {
+        INIT_INTEGER(unsigned long long, ULLONG_MAX, 0, src_size, dst_size, src_nbits, buf, saved, nelmts);
+    } else
+        goto error;
 
     /* The tests */
     for (i=0; i<ntests; i++) {
@@ -4596,14 +4671,6 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	printf("%-70s", str);
 	HDfflush(stdout);
 	fails_this_test=0;
-
-	/*
-	 * Initialize the source buffers to random bits.  The `buf' buffer
-	 * will be used for the conversion while the `saved' buffer will be
-	 * sed for the comparison later.
-	 */
-	for (j=0; j<nelmts*src_size; j++)
-            buf[j] = saved[j] = HDrand();
 
 	/* Perform the conversion */
 	if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT)<0)
