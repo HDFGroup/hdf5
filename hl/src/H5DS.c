@@ -1280,7 +1280,7 @@ ssize_t H5DSget_label(hid_t did,
   copy_len = MIN(size-1, nbytes);
   
   /* copy all/some of the name */
-  if( label && copy_len>0) {
+  if( label ) {
    HDmemcpy(label, buf[idx], copy_len);
    
    /* terminate the string */
@@ -1404,7 +1404,7 @@ ssize_t H5DSget_scale_name(hid_t did,
  copy_len = MIN(size-1, nbytes);
  
  /* copy all/some of the name */
- if (name && copy_len>0) {
+ if (name) {
   HDmemcpy(name, buf, copy_len);
   
   /* terminate the string */
