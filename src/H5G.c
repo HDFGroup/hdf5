@@ -331,6 +331,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
       }
       H5O_reset (H5O_NAME, &name);
    }
+   f->root_type=H5F_ROOT_DIRECTORY; /* set the root symbol type be a directory */
 
    FUNC_LEAVE (SUCCEED);
 }

@@ -96,7 +96,10 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     
     /* Initialize the dimensionality object */
-    /* new_dset->file=? */
+    if(H5Aatom_group(owner_id)==H5_FILE)
+        new_dset->file=owner_id;
+    else
+        new_dset->file=owner_id;
     new_dset->parent=owner_id;      /* set the owner's ID */
     new_dset->name=HDstrdup(name);  /* make a copy of the dataset name */
     new_dset->modified=BTRUE;       /* Yep, we're new... */
@@ -235,6 +238,67 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5D_flush
+ PURPOSE
+    Flush an an HDF5 dataset object to disk.
+ USAGE
+    herr_t H5D_flush(oid)
+        hatom_t oid;       IN: Object to flush to disk
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function flushes a dataset to disk.  (i.e. makes the disk version
+    agree with what's in memory, it does _not_ update the memory version with
+    any changes on disk)
+--------------------------------------------------------------------------*/
+herr_t H5D_flush(hatom_t oid)
+{
+    H5D_dataset_t *dataset;         /* dataset object to release */
+    H5F_
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5D_flush, H5D_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Get the object */
+    if((dataset=H5Aatom_object(oid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    /* Check if we have information to flush to the file... */
+    if(dataset->modified==BTRUE)
+      {
+        /* Check if we need to create the dataset header and insert the dataset in the file's hierarchy */
+        if(dataset->header==0)
+          {
+            H5F_root_symtype_t root_type=H5F_root_type(dataset->file);
+
+            /* Flush object header, etc. to the file... */
+            if(root_type==H5F_ROOT_ERROR)
+                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL);
+            if(root_type==H5F_ROOT_DATASET || H5F_ROOT_UNKNOWN)
+              {
+              } /* end if */
+            else
+              {
+                if(root_type
+              } /* end if */
+          } /* end if */
+      } /* end if */
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5D_flush() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5D_release
  PURPOSE
     Release access to an HDF5 dataset object.
@@ -256,17 +320,22 @@ herr_t H5D_release(hatom_t oid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
-    /* Chuck the object! :-) */
-    if((dataset=H5Aremove_atom(oid))==NULL)
+    /* Get the dataset so we can check for changes and release it */
+    if((dataset=H5Aatom_object(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
     /* Check if we have information to flush to the file... */
     if(dataset->modified==BTRUE)
-      {
-          /* Flush object header, etc. to the file... */
-      } /* end if */
+        H5D_flush(oid);
+
+    /* relase the memory used for the dataset */
     if(dataset->name!=NULL)
         HDfree(dataset->name);
     HDfree(dataset);
+
+    /* Delete the dataset from the atom group */
+    if(H5Aatom_object(oid)==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
 done:
   if(ret_value == FAIL)   

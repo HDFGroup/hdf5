@@ -338,6 +338,7 @@ H5F_new (void)
    /* Create a root symbol slot */
    f->root_sym = H5MM_xcalloc (1, sizeof (H5G_entry_t));
    f->root_sym->type = H5G_NOTHING_CACHED;
+   f->root_type=H5F_ROOT_NONE;
    
    return f;
 }
@@ -670,7 +671,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
         else
             curr_off*=2;
       } /* end while */
-    if(curr_off>file_len)
+    if(curr_off>file_len)   /* Why didn't H5Fis_hdf5 catch this? */
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
     
     /* Read in the fixed-size part of the boot-block */
@@ -709,6 +710,8 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     if (H5G_decode (new_file, &p, new_file->root_sym)<0) {
        HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
     }
+    /* Set the initial type of the root symbol-entry */
+    new_file->root_type= (new_file->root_sym->addr>=0) ? H5F_ROOT_UNKNOWN : H5F_NONE;
 
     /* Get an atom for the file */
     if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)
@@ -771,12 +774,12 @@ herr_t H5Fclose(hatom_t fid)
       {
         H5AC_flush (file, NULL, 0, TRUE);
         if(file->file_handle!=H5F_INVALID_FILE) {
-	   H5F_CLOSE(file->file_handle);
-	}
-	H5F_dest (file);
+           H5F_CLOSE(file->file_handle);
+        }
+        H5F_dest (file);
         if(H5Aremove_atom(fid)==NULL) {
-	   HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-	}
+           HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+        }
       } /* end if */
 
 done:
@@ -788,6 +791,63 @@ done:
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 } /* end H5Fclose() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5F_root_type
+ PURPOSE
+    Check the type of the root symbol-entry for a file.
+ USAGE
+    H5F_root_symtype_t_ H5F_root_type(fid)
+        int32 fid;      IN: File ID of file to query
+ RETURNS
+    Returns root symbol type on success, H5F_ROOT_ERROR on failure.
+ DESCRIPTION
+        This function retrieves the type of symbol-entry the root object in the
+    file describes.  Legimate values are:
+        H5F_ROOT_NONE      - Root-symbol table is empty, neither a dataset nor a directory is the root object
+        H5F_ROOT_UNKNOWN   - Don't know (yet) if the root object is a dataset or a directory
+        H5F_ROOT_DATASET   - Root object is a dataset
+        H5F_ROOT_DIRECTORY - Root object is a directory
+
+        This function is designed for internal use and should be modified to
+    not return H5F_ROOT_UNKNOWN if it is made part of the public API.
+
+ ERRORS
+    H5E_ARGS - H5E_BADTYPE      - Argument checking
+    H5E_ATOM - H5E_BADATOM      - Can't get the object for an atom
+ MODIFICATIONS:
+    Quincey Koziol, 13 Aug 1997
+--------------------------------------------------------------------------*/
+H5F_root_symtype_t H5F_root_type(hatom_t fid)
+{
+    hdf5_file_t *f=NULL;        /* file struct for new file */
+    H5F_root_symtype_t ret_value = H5F_ROOT_ERROR;
+
+    FUNC_ENTER(H5F_root_type, H5F_init_interface, H5F_ROOT_ERROR);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+    if(H5Aatom_group(fid)!=H5_FILE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+
+    /* Get the file handle to close */
+    if((f=H5Aatom_object(fid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+    ret_value=f->root_type;
+
+done:
+    if(ret_value == H5F_ROOT_ERROR)   
+      { /* Error condition cleanup */
+ 
+      }
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5F_root_type() */
+
 
 
 /*-------------------------------------------------------------------------

@@ -23,6 +23,15 @@
 #define H5ACC_WRITE         0x0001  /* User in H5Fopen to open a file with write access */
 #define H5ACC_OVERWRITE     0x0002  /* User in H5Fcreate truncate an existing file */
 
+/* Type of root rymbol-table entry */
+typedef enum {
+    H5F_ROOT_NONE=0,         /* Root-symbol table is empty, neither a dataset nor a directory is the root object */
+    H5F_ROOT_UNKNOWN,        /* Don't know if the root object is a dataset or a directory */
+    H5F_ROOT_DATASET,        /* Root object is a dataset */
+    H5F_ROOT_DIRECTORY,      /* Root object is a directory */
+    H5F_ROOT_ERROR           /* Error value */
+  } H5F_root_symtype_t;
+
 /*
  * If we're using POSIXUNBUFIO and lseek64() is available, then use
  * 64-bit file offsets.  Otherwise use whatever `off_t' is.

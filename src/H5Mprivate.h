@@ -93,6 +93,22 @@ meta_func_t meta_func_arr[]={
         NULL,                   /* Dimensionality Delete */
         NULL,                   /* Dimensionality GetParent */
         H5P_release             /* Dimensionality Release */
+    },
+    {   /* Dataset object meta-functions (defined in H5D.c) */
+        H5_DATASPACE,           /* Dataset Type ID */
+        H5D_create,             /* Dataset Create */
+        NULL,                   /* Dataset Access */
+        NULL,                   /* Dataset Copy */
+        NULL,                   /* Dataset FindName */
+        NULL,                   /* Dataset NameLen */
+        NULL,                   /* Dataset GetName */
+        NULL,                   /* Dataset SetName */
+        NULL,                   /* Dataset Search */
+        NULL,                   /* Dataset Index */
+        H5D_flush,              /* Dataset Flush */
+        NULL,                   /* Dataset Delete */
+        NULL,                   /* Dataset GetParent */
+        H5D_release             /* Dataset Release */
     }
   };
 
