@@ -1,0 +1,340 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Creating a Dataset
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating a Dataset</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI> <A HREF="#def">What is a Dataset</A>?
+    <LI> Programming Example 
+    <UL>
+      <LI> <A HREF="#desc">Description</A> 
+      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#fc">File Contents</A>
+      <LI> <A HREF="#ddl">Dataset Definition in DDL</A>
+    </UL>
+</UL>
+<HR>
+<A NAME="def">
+<H2>What is a Dataset?</h2>
+<P>
+A dataset is a multidimensional array of data elements, together with
+supporting metadata. To create a dataset, the application program must specify
+the location to create the dataset, the dataset name, the data type and space
+of the data array, and the dataset creation properties.
+<P>
+  <H3> Data Types</H3>
+    A data type is a collection of data type properties, all of which can
+    be stored on disk, and which when taken as a whole, provide complete
+    information for data conversion to or from that data type.
+<P>
+    There are two categories of data types in HDF5: atomic and compound data
+    types. An atomic type is a type which cannot be decomposed into smaller
+    units at the API level. A compound data type is a collection of one or more
+    atomic types or small arrays of such types.
+<P>
+    Atomic types include integer, float, date and time, string, bit field, and
+    opaque. Figure 5.1 shows the HDF5 data types. Some of the HDF5 predefined
+    atomic data types are listed in Figure 5.2. In this tutorial, we consider 
+    only
+    HDF5 predefined integers. For information on data types, see the HDF5 
+    User's Guide.
+<P>
+    <B>Fig 5.1</B> &nbsp;  <I>HDF5 data types</I>
+<PRE>
+
+                                          +--  integer
+                                          +--  floating point
+                        +---- atomic  ----+--  date and time
+                        |                 +--  character string
+       HDF5 datatypes --|                 +--  bit field
+                        |                 +--  opaque
+                        |
+                        +---- compound
+
+</PRE>
+    <B>Fig. 5.2</B> &nbsp;  <I>Examples of HDF5 predefined data types</I>
+<table width="52%" border="1" cellpadding="4">
+  <tr bgcolor="#ffcc99" bordercolor="#FFFFFF"> 
+    <td width="20%"><b>Data Type</b></td>
+    <td width="80%"><b>Description</b></td>
+  </tr>
+  <tr bordercolor="#FFFFFF"> 
+    <td bgcolor="#99cccc" width="20%">H5T_STD_I32LE</td>
+    <td width="80%">Four-byte, little-endian, signed two's complement integer</td>
+  </tr>
+  <tr bordercolor="#FFFFFF"> 
+    <td bgcolor="#99cccc" width="20%">H5T_STD_U16BE</td>
+    <td width="80%">Two-byte, big-endian, unsigned integer</td>
+  </tr>
+  <tr bordercolor="#FFFFFF"> 
+    <td bgcolor="#99cccc" width="20%">H5T_IEEE_F32BE</td>
+    <td width="80%">Four-byte, big-endian, IEEE floating point</td>
+  </tr>
+  <tr bordercolor="#FFFFFF"> 
+    <td bgcolor="#99cccc" width="20%">H5T_IEEE_F64LE</td>
+    <td width="80%">Eight-byte, little-endian, IEEE floating point</td>
+  </tr>
+  <tr bordercolor="#FFFFFF"> 
+    <td bgcolor="#99cccc" width="20%">H5T_C_S1</td>
+    <td width="80%">One-byte, null-terminated string of eight-bit characters</td>
+  </tr>
+</table>
+
+  <H3>Dataspaces</H3>
+
+    A dataspace describes the dimensionality of the data array. A dataspace
+    is either a regular N-dimensional array of data points, called a simple
+    dataspace, or a more general collection of data points organized in
+    another manner, called a complex dataspace. Figure 5.3 shows HDF5 dataspaces.
+    In this tutorial, we only consider simple dataspaces.
+<P>
+    <B>Fig 5.3</B> &nbsp;  <I>HDF5 dataspaces</I>
+<PRE>
+
+                         +-- simple
+       HDF5 dataspaces --|
+                         +-- complex
+
+</PRE>
+    The dimensions of a dataset can be fixed (unchanging), or they may be
+    unlimited, which means that they are extendible. A dataspace can also
+    describe portions of a dataset, making it possible to do partial I/O
+    operations on selections.
+
+ <h3>Dataset creation properties</H3>
+
+    When creating a dataset, HDF5 allows users to specify how raw data is
+    organized on disk and how the raw data is compressed. This information is 
+    stored in a dataset creation property list and passed to the dataset
+    interface. The raw data on disk can be stored contiguously (in the same 
+    linear way that it is organized in memory), partitioned into chunks and 
+    stored externally, etc. In this tutorial, we use the default creation 
+    property list; that is, no compression and
+    contiguous storage layout is used. For more information about the creation
+    properties, see the HDF5 User's Guide.
+
+<P>
+In HDF5, data types and spaces are independent objects, which are created
+separately from any dataset that they might be attached to. Because of this the
+creation of a dataset requires definitions of data type and dataspace.
+In this tutorial, we use HDF5 predefined data types (integer) and consider
+only simple dataspaces. Hence, only the creation of dataspace objects is
+needed.
+<P>
+
+To create an empty dataset (no data written) the following steps need to be
+taken:
+<OL>
+<LI> Obtain the location id where the dataset is to be created.
+<LI> Define the dataset characteristics and creation properties.
+ <UL>
+   <LI> define a data type
+   <LI> define a dataspace
+   <LI> specify dataset creation properties
+</UL>
+<LI> Create the dataset.
+<LI> Close the data type, dataspace, and the property list if necessary.
+<LI> Close the dataset.
+</OL>
+To create a simple dataspace, the calling program must contain the following
+calls:
+<PRE>
+   dataspace_id = H5Screate_simple(rank, dims, maxdims);
+   H5Sclose(dataspace_id );
+</PRE>
+
+To create a dataset, the calling program must contain the following calls:
+<PRE>
+   dataset_id = H5Dcreate(hid_t loc_id, const char *name, hid_t type_id,
+                          hid_t space_id, hid_t create_plist_id);
+   H5Dclose (dataset_id);
+</PRE>
+
+
+<P>
+<H2> Programming Example</H2>
+<A NAME="desc">
+<H3><U>Description</U></H3>      
+The following example shows how to create an empty dataset.
+It creates a file called 'dset.h5', defines the dataset dataspace, creates a
+dataset which is a 4x6 integer array, and then closes the dataspace,
+the dataset, and the file. <BR>
+[ <A HREF="examples/h5_crtdat.c">Download h5_crtdat.c</A> ]
+<PRE>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#include &lt;hdf5.h&gt;
+#define FILE "dset.h5"
+
+main() {
+
+   hid_t       file_id, dataset_id, dataspace_id;  /* identifiers */
+   hsize_t     dims[2];
+   herr_t      status;
+
+   /* Create a new file using default properties. */
+   file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /* Create the data 
+                space for the dataset. */
+   dims[0] = 4;
+   dims[1] = 6;
+   dataspace_id = H5Screate_simple(2, dims, NULL);
+
+   /* Create the dataset. */
+   dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id, 
+                H5P_DEFAULT);
+
+   /* End access to the dataset and release resources used by it. */
+   status = H5Dclose(dataset_id);
+
+   /* Terminate access to the data space. */
+   status = H5Sclose(dataspace_id);
+
+   /* Close the file. */
+   status = H5Fclose(file_id);
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+
+<A NAME="rem">
+<H3><U>Remarks</U></H3>
+<UL>
+<LI> H5Screate_simple creates a new simple data space and returns a data space
+   identifier.
+<PRE>
+  hid_t H5Screate_simple (int rank, const hsize_t * dims, 
+                          const hsize_t * maxdims)
+</PRE>
+<UL>
+   <LI> The first parameter specifies the rank of the dataset.
+
+   <LI> The second parameter specifies the size of the dataset.
+
+   <LI> The third parameter is for the upper limit on the size of the dataset.
+      If it is NULL, the upper limit is the same as the dimension
+      sizes specified by the second parameter.
+</UL>
+<P>
+<LI> H5Dcreate creates a dataset at the specified location and returns a 
+     dataset identifier.
+<PRE>
+  hid_t H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, 
+                   hid_t space_id, hid_t create_plist_id) 
+</PRE>
+<UL>
+   <LI> The first parameter is the location identifier.
+
+   <LI> The second parameter is the name of the dataset to create.
+
+   <LI> The third parameter is the data type identifier. H5T_STD_I32BE, a 
+        32-bit Big Endian integer, is an HDF atomic data type.
+
+   <LI> The fourth parameter is the data space identifier.
+
+   <LI> The last parameter specifies the dataset creation property list.
+      H5P_DEFAULT specifies the default dataset creation property list.
+</UL>
+<P>
+<LI>H5Dcreate creates an empty array and initializes the data to 0.
+<P>
+<LI> When a dataset is no longer accessed by a program, H5Dclose must be 
+called to release the resource used by the dataset. This call is mandatory.
+<PRE>
+  hid_t H5Dclose (hid_t dataset_id)
+</PRE>
+</UL>
+
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+The file contents of 'dset.h5' are shown is <B>Figure 5.4</B> and <B>Figure 5.5</B>.
+<table width="73%" border="1" cellspacing="4" bordercolor="#FFFFFF">
+  <tr bordercolor="#FFFFFF"> 
+    <td width="37%"><b>Figure 5.4</b> &nbsp; <i>The Contents of 'dset.h5'</i> 
+    </td>
+    <td width="63%"><b>Figure 5.5</b> &nbsp; <i>'dset.h5' in DDL</i> </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+<!--    <td width="37%"><IMG src="dseth5.jpg" width="206" height="333"></td> -->
+    <td width="37%"><IMG src="img002.gif"></td>
+    <td width="63%"> 
+      <pre>      HDF5 "dset.h5" {
+      GROUP "/" {
+         DATASET "dset" {
+            DATATYPE { H5T_STD_I32BE }
+            DATASPACE { SIMPLE ( 4, 6 ) / ( 4, 6 ) }
+            DATA {
+               0, 0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0, 0
+            }
+         }
+      }
+      }
+</pre>
+    </td>
+  </tr>
+</table>
+
+
+
+<A NAME="ddl">
+<h3><U>Dataset Definition in DDL</U></H3>
+The following is the simplified DDL dataset definition:
+<P>
+     <B>Fig. 5.6</B> &nbsp;  <I>HDF5 Dataset Definition</I>
+<PRE>
+      &lt;dataset&gt ::= DATASET "&lt;dataset_name&gt;" { &lt;data type&gt
+                                               &lt;dataspace&gt
+                                               &lt;data&gt
+                                               &lt;dataset_attribute&gt;* }
+
+      &lt;data type&gt ::= DATATYPE { &lt;atomic_type&gt }
+
+      &lt;dataspace&gt ::= DATASPACE { SIMPLE &lt;current_dims&gt / &lt;max_dims&gt }
+
+      &lt;dataset_attribute&gt ::= &lt;attribute&gt
+</PRE>
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@@ncsa.uiuc.edu">
+hdfhelp@@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
