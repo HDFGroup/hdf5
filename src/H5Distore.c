@@ -2327,7 +2327,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                         if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
                     } /* end if */
-                    mpi_round = (mpi_round+1)%file->mpi_size;
+                    mpi_round = (mpi_round+1)%mpi_size;
 
                     /* Indicate that blocks are being written */
                     blocks_written=1;
