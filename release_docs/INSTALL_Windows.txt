@@ -10,18 +10,18 @@ Please read CAREFULLY about the following preconditions and notes first
 
 Preconditions 
 
-   1. Installed MicroSoft Visual C++ 6.0 or Intel C compiler and WinZip.
+   1. Installed Microsoft Visual C++ 6.0 or Intel C compiler and WinZip.
        
       1.1 Installed DEC Visual Fortran compiler(6.0 or higher version), 
           or Intel Fortran compiler if you want to build HDF5 Fortran
           libraries.    
 
-      Note: By default, WinZip will convert the unix end of line format
+      Note: By default, WinZip will convert the Unix end of line format
             when extracting .tar file.  This conversion will cause
             "false" failure in some HDF5 tools testings.
  
             Please uncheck the "TAR file smart CR/LF conversion" option
-            in your WinZip to prevent the vonversion when extracting
+            in your WinZip to prevent the conversion when extracting
             .tar file.
 
             To uncheck the "TAR file smart CR/LF conversion" option:
@@ -80,7 +80,7 @@ Preconditions
       Click "Start", click "Control Panel", and then double-click
       "System".  On the "Advanced" tab, click "Environment Variables".
       
-      If you are logged on as administrtor to the local computer AND
+      If you are logged on as administrator to the local computer AND
       want to let all other users use these two environment variables,
       click "New" under "System Variables" box; otherwise, click "New"
       under "User Variables" box.
@@ -144,7 +144,7 @@ Preconditions
           library directories.
       
       Similarly, you should set up these external libraries and
-      headers pathes for DEC Visual Fortran if you use it to build
+      headers paths for DEC Visual Fortran if you use it to build
       HDF5 Fortran libraries. 
 
 Notes
@@ -276,19 +276,19 @@ STEP 1: Building HDF5 libraries and tools
           
       3.3 Skip this step if you are not using Intel compilers
     
-          a. intel c compiler
+          a. Intel C Compiler
              Go to Tools-->Select Compiler
              Check Intel box and click OK button.
           
-          b. intel fortran compiler
+          b. Intel Fortran Compiler
              Go to Tools-->Select Compiler
              Check Intel box and click OK button.
              Go to Tools-->Customize-->Add-ins and Macro Files
              and check Intel Fortran Compiler Build Tool
            
-          Note: szip library is different when using intel compiler.
-                You should build szip source codes with intel
-                compiler or download binaries for intel compiler
+          Note: szip library is different when using Intel compiler.
+                You should build szip source codes with Intel
+                compiler or download binaries for Intel compiler
                 from ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows.
                 The szip library and header path should also be 
                 set up accordingly (refer to precondition 6).
@@ -464,7 +464,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
    Option 2: Step-by-step HDF5 libraries and tools testings
 
    You can also test HDF5 libraries and tools one by one.  There are
-   possibily four versions of HDF5 libraries and tools testings. 
+   possibly four versions of HDF5 libraries and tools testings. 
 
    They are:
 
@@ -475,7 +475,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
    We strongly suggest you to redirect your testing results into an
    output file so that you can easily check the testing results. You
-   may use either NotePad or WordPad or whatever other windows word
+   may use either Notepad or WordPad or whatever other windows word
    processor to check the results.  For the purpose of printing,  
    please choose font less than 14 for better alignment of the text.
 
@@ -534,7 +534,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
                 hdf5timingtest debug dll >"Your output filename"
 
 
-      Use notepad or wordpad to check results. You should 
+      Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
 
    2. HDF5 tools testing
@@ -566,7 +566,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
             testhdf5tools debug dll
          output file: toolstest_debugdll.txt 
                
-      Use notepad or wordpad to check results. You should 
+      Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
     
    3. HDF5 C++ library test
@@ -590,7 +590,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
          hdf5cpptest debug >"Your output filename"
          hdf5cpptest debug dll >"Your output filename"
 
-      Use notepad or wordpad to check results. You should 
+      Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
      
      
@@ -604,7 +604,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
          testhdf5_fortran release >"Your output filename"
          testhdf5_fortran debug >"Your output filename"
 
-      Use notepad or wordpad to check results. You should 
+      Use Notepad or WordPad to check results. You should 
       not find any FAILED marks in your output files.
      
       Note: Now we only support Fortran static libraries.
@@ -677,7 +677,7 @@ STEP 4: Building the C examples (Optional)
 
    4. We provide a batch file named testExamples.bat and an expected
       examples tests output file named testExamples_exp_output.txt
-      in c:\MyHDFstuff\hdf5\examples diectory for you to test the
+      in c:\MyHDFstuff\hdf5\examples directory for you to test the
       examples.
       
       testExamples.bat batch file has two options:
@@ -760,7 +760,7 @@ choose one of the following two methods.
 
 To use the DLL:
 
-    1. Follow the steps for specifing the location of the header files
+    1. Follow the steps for specifying the location of the header files
        as shown above.
 
     2. Follow the steps for linking the HDF5 library as shown above
@@ -838,7 +838,7 @@ DLL... hints:
                      PreProcessor
 
          Find PreProcessor definations and Add _HDF5USEDLL_ at the
-         end of the PreProcessor definations
+         end of the PreProcessor definitions.
 
 ************************************************************************
 
@@ -950,7 +950,7 @@ Section VI: How to build HDF5 in VS 7.0(.NET)
 
 We just briefly introduce you how to build HDF5 in VS 7.0(.NET);
 
-1. Open the old dataspace file with the "Open solution" option,
+1. Open the old workspace file with the "Open solution" option,
    .NET will automatically convert the data space file to solution file.
 2. Then find  "Build" and go to "Configuration Manager"; choose
    "release" or "debug", then choose "build all".
