@@ -92,7 +92,6 @@
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
-./doc/html/Ragged.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
@@ -161,6 +160,7 @@
 ./doc/tgif/IOPipe.obj			_DO_NOT_DISTRIBUTE_
 ./doc/tgif/RobbPipe.obj			_DO_NOT_DISTRIBUTE_
 ./doc/tgif/UserView.obj			_DO_NOT_DISTRIBUTE_
+
 ./examples/Attributes.txt
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c

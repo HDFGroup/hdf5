@@ -703,7 +703,7 @@ test_multiopen (hid_t file)
     if ((space=H5Screate_simple (1, cur_size, max_size))<0) goto error;
     if ((dset1=H5Dcreate (file, "multiopen", H5T_NATIVE_INT, space,
 			  dcpl))<0) goto error;
-    if ((dset2=H5Dopen (file, "multiopen"))<0) goto error;
+    if ((dset2=H5Dopen (dset1, "."))<0) goto error;
     if (H5Sclose (space)<0) goto error;
 
     /* Extend with the first handle */
