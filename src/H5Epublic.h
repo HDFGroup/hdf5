@@ -36,7 +36,7 @@
  * Warning: don't break, return, or longjmp() from the body of the loop or
  *	    the error reporting won't be properly restored!
  */
-#define H5E_BEGIN_TRY do {						      \
+#define H5E_BEGIN_TRY {							      \
     herr_t (*H5E_saved_efunc)(void*);					      \
     void *H5E_saved_edata;						      \
     H5Eget_auto (&H5E_saved_efunc, &H5E_saved_edata);			      \
@@ -44,7 +44,7 @@
 
 #define H5E_END_TRY							      \
     H5Eset_auto (H5E_saved_efunc, H5E_saved_edata);			      \
-} while(0)
+}
 
 /*
  * Public API Convenience Macros for Error reporting - Documented
