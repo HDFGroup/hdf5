@@ -37,6 +37,9 @@ $(srcdir)/Dependencies: .depend
 	      sed '\%$$obj%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		      \
 	      $(TRACE) $$dep;						      \
 	      $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |		      \
+                  sed 's% $(srcdir)/% $$(srcdir)/%g' |                        \
+                  sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |                \
+                  sed 's% $(top_builddir)/% $$(top_builddir)/%g' |            \
 	          sed 's/\.o/.lo/' >>$@;	      			      \
 	   fi;								      \
 	done;

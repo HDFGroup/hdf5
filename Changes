@@ -1,11 +1,17 @@
-							-*- indented-text -*-
+-*- outline -*-
 ==============================================================================
+* In Progress
+
+
+Changes since 19991101
+----------------------
 
 Changes since 19991019
 ----------------------
 
 ./MANIFEST
 ./configure.in
+./configure			[REGENERATED]
 	Added more checking for `make' features.
 
 ./Makefile.in
