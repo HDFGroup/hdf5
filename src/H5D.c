@@ -100,7 +100,7 @@ H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
 herr_t
 H5D_init(void)
 {
-    FUNC_ENTER(H5D_init, FAIL);
+    FUNC_ENTER_NOAPI(H5D_init, FAIL);
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE(SUCCEED);
 }
@@ -400,7 +400,7 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
     H5P_genplist_t *new_plist;
     herr_t         ret_value=SUCCEED;
 
-    FUNC_ENTER(H5D_crt_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5D_crt_copy, FAIL);
 
     /* Verify property list ID */
     if (TRUE!=H5P_isa_class(new_plist_id,H5P_DATASET_CREATE) || NULL == (new_plist = H5I_object(new_plist_id)))
@@ -477,7 +477,7 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
     H5P_genplist_t *plist;      /* Property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER(H5D_crt_close, FAIL);
+    FUNC_ENTER_NOAPI(H5D_crt_close, FAIL);
 
     /* Check arguments */
     if (TRUE!=H5P_isa_class(dcpl_id,H5P_DATASET_CREATE) || NULL == (plist = H5I_object(dcpl_id)))
@@ -536,7 +536,7 @@ H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
     H5P_genplist_t *plist;      /* Property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER(H5D_xfer_create, FAIL);
+    FUNC_ENTER_NOAPI(H5D_xfer_create, FAIL);
 
     /* Check arguments */
     if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -592,7 +592,7 @@ H5D_xfer_copy(hid_t new_plist_id, hid_t UNUSED old_plist_id,
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER(H5D_xfer_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5D_xfer_copy, FAIL);
 
     if(H5D_xfer_create(new_plist_id, copy_data) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy property list");
@@ -630,7 +630,7 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
     H5P_genplist_t *plist;      /* Property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER(H5D_xfer_close, FAIL);
+    FUNC_ENTER_NOAPI(H5D_xfer_close, FAIL);
 
     /* Check arguments */
     if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -702,7 +702,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5D_t		   *new_dset = NULL;
     hid_t		    ret_value = FAIL;
 
-    FUNC_ENTER(H5Dcreate, FAIL);
+    FUNC_ENTER_API(H5Dcreate, FAIL);
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* Check arguments */
@@ -769,7 +769,7 @@ H5Dopen(hid_t loc_id, const char *name)
     H5D_t	*dataset = NULL;	/*the dataset			*/
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Dopen, FAIL);
+    FUNC_ENTER_API(H5Dopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
@@ -819,7 +819,7 @@ H5Dclose(hid_t dset_id)
 {
     H5D_t		   *dset = NULL;	/* dataset object to release */
 
-    FUNC_ENTER(H5Dclose, FAIL);
+    FUNC_ENTER_API(H5Dclose, FAIL);
     H5TRACE1("e","i",dset_id);
 
     /* Check args */
@@ -865,7 +865,7 @@ H5Dget_space(hid_t dset_id)
     H5S_t	*space = NULL;
     hid_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5Dget_space, FAIL);
+    FUNC_ENTER_API(H5Dget_space, FAIL);
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
@@ -912,7 +912,7 @@ H5D_get_space(H5D_t *dset)
 {
     H5S_t	*space = NULL;
     
-    FUNC_ENTER(H5D_get_space, NULL);
+    FUNC_ENTER_NOAPI(H5D_get_space, NULL);
     assert(dset);
 
     if (NULL==(space=H5S_read(&(dset->ent)))) {
@@ -945,7 +945,7 @@ herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     H5D_t 	*dset = NULL;
     herr_t 	ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Dget_space_status, FAIL);
+    FUNC_ENTER_API(H5Dget_space_status, FAIL);
 
     /* Check arguments */
     if(H5I_DATASET != H5I_get_type(dset_id) || NULL==(dset=H5I_object(dset_id)))
@@ -1056,7 +1056,7 @@ H5Dget_type(hid_t dset_id)
     H5T_t	*copied_type = NULL;
     hid_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5Dget_type, FAIL);
+    FUNC_ENTER_API(H5Dget_type, FAIL);
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
@@ -1123,7 +1123,7 @@ H5Dget_create_plist(hid_t dset_id)
     H5P_genplist_t      *new_plist;
     hid_t		ret_value = FAIL;
     
-    FUNC_ENTER (H5Dget_create_plist, FAIL);
+    FUNC_ENTER_API(H5Dget_create_plist, FAIL);
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
@@ -1204,7 +1204,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
 
-    FUNC_ENTER(H5Dread, FAIL);
+    FUNC_ENTER_API(H5Dread, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
              plist_id,buf);
 
@@ -1302,7 +1302,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
 
-    FUNC_ENTER(H5Dwrite, FAIL);
+    FUNC_ENTER_API(H5Dwrite, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
              plist_id,buf);
 
@@ -1377,7 +1377,7 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
 {
     H5D_t	*dset = NULL;
     
-    FUNC_ENTER (H5Dextend, FAIL);
+    FUNC_ENTER_API(H5Dextend, FAIL);
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
@@ -1397,11 +1397,6 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
 
     FUNC_LEAVE (SUCCEED);
 }
-
-
-
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -1433,7 +1428,7 @@ H5D_new(hid_t dcpl_id)
     H5P_genplist_t	*plist;    /* Property list created */
     H5D_t	*ret_value = NULL;	/*return value			*/
     
-    FUNC_ENTER(H5D_new, NULL);
+    FUNC_ENTER_NOAPI(H5D_new, NULL);
 
     /* check args */
     /* Nothing to check */
@@ -1530,7 +1525,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     H5P_genplist_t 	*plist;      /* Property list */
     H5P_genplist_t 	*new_plist;  /* New Property list */
 
-    FUNC_ENTER(H5D_create, NULL);
+    FUNC_ENTER_NOAPI(H5D_create, NULL);
 
     /* check args */
     assert (loc);
@@ -1836,7 +1831,8 @@ H5D_isa(H5G_entry_t *ent)
 {
     htri_t	exists;
     
-    FUNC_ENTER(H5D_isa, FAIL);
+    FUNC_ENTER_NOAPI(H5D_isa, FAIL);
+
     assert(ent);
 
     /* Data type */
@@ -1892,7 +1888,7 @@ H5D_open(H5G_entry_t *loc, const char *name)
     H5D_t	*ret_value = NULL;	/*return value			*/
     H5G_entry_t ent;            	/*dataset symbol table entry	*/
     
-    FUNC_ENTER(H5D_open, NULL);
+    FUNC_ENTER_NOAPI(H5D_open, NULL);
 
     /* check args */
     assert (loc);
@@ -1952,7 +1948,7 @@ H5D_open_oid(H5G_entry_t *ent)
     int         chunk_ndims;
     H5P_genplist_t *plist;      /* Property list */
     
-    FUNC_ENTER(H5D_open_oid, NULL);
+    FUNC_ENTER_NOAPI(H5D_open_oid, NULL);
 
     /* check args */
     assert (ent);
@@ -2125,7 +2121,7 @@ H5D_close(H5D_t *dataset)
 {
     unsigned		    free_failed;
 
-    FUNC_ENTER(H5D_close, FAIL);
+    FUNC_ENTER_NOAPI(H5D_close, FAIL);
 
     /* check args */
     assert(dataset && dataset->ent.file);
@@ -2243,7 +2239,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
 
-    FUNC_ENTER(H5D_read, FAIL);
+    FUNC_ENTER_NOAPI(H5D_read, FAIL);
 
     /* check args */
     assert(dataset && dataset->ent.file);
@@ -2657,7 +2653,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
 
-    FUNC_ENTER(H5D_write, FAIL);
+    FUNC_ENTER_NOAPI(H5D_write, FAIL);
 
     /* check args */
     assert(dataset && dataset->ent.file);
@@ -3036,7 +3032,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     H5O_fill_t  fill;
     H5P_genplist_t *plist;      /* Property list */
 
-    FUNC_ENTER (H5D_extend, FAIL);
+    FUNC_ENTER_NOAPI(H5D_extend, FAIL);
 
     /* Check args */
     assert (dataset);
@@ -3135,9 +3131,12 @@ H5D_entof (H5D_t *dataset)
 H5T_t *
 H5D_typeof (H5D_t *dset)
 {
-    FUNC_ENTER (H5D_typeof, NULL);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5D_typeof);
+
     assert (dset);
     assert (dset->type);
+
     FUNC_LEAVE (dset->type);
 }
 
@@ -3161,9 +3160,12 @@ H5D_typeof (H5D_t *dset)
 H5F_t *
 H5D_get_file (const H5D_t *dset)
 {
-    FUNC_ENTER (H5D_get_file, NULL);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5D_get_file);
+
     assert (dset);
     assert (dset->ent.file);
+
     FUNC_LEAVE (dset->ent.file);
 }
 
@@ -3312,7 +3314,7 @@ H5Dget_storage_size(hid_t dset_id)
     H5D_t	*dset=NULL;
     hsize_t	size;
     
-    FUNC_ENTER(H5Dget_storage_size, 0);
+    FUNC_ENTER_API(H5Dget_storage_size, 0);
     H5TRACE1("h","i",dset_id);
 
     /* Check args */
@@ -3348,7 +3350,7 @@ H5D_get_storage_size(H5D_t *dset)
     unsigned	u;              /* Index variable */
     hsize_t	ret_value=0;
     
-    FUNC_ENTER(H5D_get_storage_size, 0);
+    FUNC_ENTER_NOAPI(H5D_get_storage_size, 0);
 
     if (H5D_CHUNKED==dset->layout.type) {
         ret_value = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
@@ -3438,7 +3440,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     H5S_t		   *space = NULL;
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5Diterate, FAIL);
+    FUNC_ENTER_API(H5Diterate, FAIL);
     H5TRACE5("e","xiixx",buf,type_id,space_id,op,operator_data);
 
     /* Check args */
@@ -3480,7 +3482,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5Dvlen_reclaim, FAIL);
+    FUNC_ENTER_API(H5Dvlen_reclaim, FAIL);
     H5TRACE4("e","iiix",type_id,space_id,plist_id,buf);
 
     /* Check args */
@@ -3519,11 +3521,12 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
  *
  *-------------------------------------------------------------------------
  */
-void *H5D_vlen_get_buf_size_alloc(size_t size, void *info)
+void *
+H5D_vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)info;
 
-    FUNC_ENTER(H5D_vlen_get_buf_size_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5D_vlen_get_buf_size_alloc, NULL);
 
     /* Get a temporary pointer to space for the VL data */
     if ((vlen_bufsize->vl_tbuf=H5FL_BLK_REALLOC(vlen_vl_buf,vlen_bufsize->vl_tbuf,size))!=NULL)
@@ -3567,7 +3570,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
     H5T_t	*dt = NULL;
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5D_vlen_get_buf_size, FAIL);
+    FUNC_ENTER_NOAPI(H5D_vlen_get_buf_size, FAIL);
 
     assert(op_data);
     assert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -3633,7 +3636,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5P_genplist_t  *plist;     /* Property list */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5Dvlen_get_buf_size, FAIL);
+    FUNC_ENTER_API(H5Dvlen_get_buf_size, FAIL);
     H5TRACE4("e","iii*h",dataset_id,type_id,space_id,size);
 
     /* Check args */
@@ -3821,7 +3824,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     H5T_t *buf_type;            /* Buffer datatype */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER (H5Dfill, FAIL);
+    FUNC_ENTER_API(H5Dfill, FAIL);
     H5TRACE5("e","xixii",fill,fill_type_id,buf,buf_type_id,space_id);
 
     /* Check args */
@@ -3867,7 +3870,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
 {
     H5D_t                  *dset = NULL;
 
-    FUNC_ENTER(H5Dset_extent, FAIL);
+    FUNC_ENTER_API(H5Dset_extent, FAIL);
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
@@ -3915,7 +3918,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
     int                     u;
     int                     shrink = 0;
 
-    FUNC_ENTER(H5D_set_extent, FAIL);
+    FUNC_ENTER_NOAPI(H5D_set_extent, FAIL);
 
     /* Check args */
     assert(dset);
@@ -4022,7 +4025,7 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
 {
     H5D_t	*dset=NULL;
 
-    FUNC_ENTER(H5Ddebug, FAIL);
+    FUNC_ENTER_API(H5Ddebug, FAIL);
     H5TRACE2("e","iIu",dset_id,flags);
 
     /* Check args */

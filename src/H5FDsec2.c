@@ -203,7 +203,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 hid_t
 H5FD_sec2_init(void)
 {
-    FUNC_ENTER(H5FD_sec2_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_init, FAIL);
 
     if (H5I_VFL!=H5I_get_type(H5FD_SEC2_g))
         H5FD_SEC2_g = H5FDregister(&H5FD_sec2_g);
@@ -234,7 +234,7 @@ H5Pset_fapl_sec2(hid_t fapl_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5Pset_fapl_sec2, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_sec2, FAIL);
     H5TRACE1("e","i",fapl_id);
     
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -278,7 +278,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 #endif
     h5_stat_t	sb;
 
-    FUNC_ENTER(H5FD_sec2_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_open, NULL);
 
     /* Check arguments */
     if (!name || !*name)
@@ -344,7 +344,7 @@ H5FD_sec2_close(H5FD_t *_file)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 
-    FUNC_ENTER(H5FD_sec2_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_close, FAIL);
 
     if (H5FD_sec2_flush(_file,TRUE)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
@@ -382,7 +382,7 @@ H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_sec2_t	*f2 = (const H5FD_sec2_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER(H5FD_sec2_cmp, H5FD_VFD_DEFAULT);
+    FUNC_ENTER_NOAPI(H5FD_sec2_cmp, H5FD_VFD_DEFAULT);
 
 #ifdef WIN32
     if (f1->fileindexhi < f2->fileindexhi) ret_value= -1;
@@ -434,7 +434,7 @@ H5FD_sec2_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_sec2_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_query, FAIL);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -471,7 +471,7 @@ H5FD_sec2_get_eoa(H5FD_t *_file)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 
-    FUNC_ENTER(H5FD_sec2_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_sec2_get_eoa, HADDR_UNDEF);
 
     FUNC_LEAVE(file->eoa);
 }
@@ -500,7 +500,7 @@ H5FD_sec2_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 
-    FUNC_ENTER(H5FD_sec2_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_set_eoa, FAIL);
 
     file->eoa = addr;
 
@@ -533,7 +533,7 @@ H5FD_sec2_get_eof(H5FD_t *_file)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 
-    FUNC_ENTER(H5FD_get_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_get_get_eof, HADDR_UNDEF);
 
     FUNC_LEAVE(MAX(file->eof, file->eoa));
 }
@@ -565,7 +565,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
     
-    FUNC_ENTER(H5FD_sec2_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_read, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -645,7 +645,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
     
-    FUNC_ENTER(H5FD_sec2_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_write, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -720,7 +720,7 @@ H5FD_sec2_flush(H5FD_t *_file, unsigned UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 
-    FUNC_ENTER(H5FD_sec2_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sec2_flush, FAIL);
 
     if (file->eoa>file->eof) {
         if (-1==file_seek(file->fd, (file_offset_t)(file->eoa-1), SEEK_SET))

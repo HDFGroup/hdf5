@@ -184,7 +184,7 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_gass_init(void)
 {
-    FUNC_ENTER(H5FD_gass_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_init, FAIL);
 
     if (!H5FD_GASS_g)
         H5FD_GASS_g = H5FDregister(&H5FD_gass_g);
@@ -231,7 +231,7 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
     
-    FUNC_ENTER(H5Pset_fapl_gass, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_gass, FAIL);
     /*NO TRACE*/
     
     /* Check arguments */
@@ -282,7 +282,7 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
     H5FD_gass_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5Pget_fapl_gass, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_gass, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -334,7 +334,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist;      /* Property list pointer */
     h5_stat_t sb;
     
-    FUNC_ENTER(H5FD_gass_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_gass_open, NULL);
 
     /* fprintf(stdout, "Entering H5FD_gass_open name=%s flags=0x%x\n", name, flags); */
 
@@ -446,13 +446,13 @@ H5FD_gass_close (H5FD_t *_file)
 {
     H5FD_gass_t *file = (H5FD_gass_t *)_file;
 
-    FUNC_ENTER(H5FD_gass_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_close, FAIL);
 
-	if (file == NULL)
-	  HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle");
-	
-	if (globus_gass_close (file->fd) < 0)
-	  HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "can't close GASS file");
+    if (file == NULL)
+      HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle");
+    
+    if (globus_gass_close (file->fd) < 0)
+      HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "can't close GASS file");
 
     H5MM_xfree(file);
 
@@ -483,7 +483,7 @@ H5FD_gass_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_gass_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_query, FAIL);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -516,9 +516,9 @@ H5FD_gass_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 static haddr_t
 H5FD_gass_get_eoa(H5FD_t *_file)
 {
-	H5FD_gass_t *file = (H5FD_gass_t *)_file;
+    H5FD_gass_t *file = (H5FD_gass_t *)_file;
 
-    FUNC_ENTER(H5FD_gass_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_gass_get_eoa, HADDR_UNDEF);
 
     FUNC_LEAVE(file->eoa);
 }
@@ -545,7 +545,7 @@ H5FD_gass_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_gass_t *file = (H5FD_gass_t *)_file;
 
-    FUNC_ENTER(H5FD_gass_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_set_eoa, FAIL);
 
     file->eoa = addr;
 
@@ -578,7 +578,7 @@ H5FD_gass_get_eof(H5FD_t *_file)
 {
     H5FD_gass_t *file = (H5FD_gass_t*)_file;
 
-    FUNC_ENTER(H5FD_gass_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_gass_get_eof, HADDR_UNDEF);
 
     FUNC_LEAVE(MAX(file->eof, file->eoa));
 }
@@ -608,7 +608,7 @@ H5FD_gass_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, h
     H5FD_gass_t         *file = (H5FD_gass_t*)_file;
     ssize_t             nbytes;
 
-    FUNC_ENTER(H5FD_gass_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_read, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -686,7 +686,7 @@ H5FD_gass_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
     H5FD_gass_t         *file = (H5FD_gass_t*)_file;
     ssize_t             nbytes;
 
-    FUNC_ENTER(H5FD_gass_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_gass_write, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);

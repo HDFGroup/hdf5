@@ -159,7 +159,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5S_t		*space = NULL;
     hid_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5Acreate, FAIL);
+    FUNC_ENTER_API(H5Acreate, FAIL);
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
@@ -386,7 +386,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     int            	idx=0;
     hid_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5Aopen_name, FAIL);
+    FUNC_ENTER_API(H5Aopen_name, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* check arguments */
@@ -449,7 +449,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     H5G_entry_t	*ent = NULL;	/*Symtab entry of object to attribute */
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Aopen_idx, FAIL);
+    FUNC_ENTER_API(H5Aopen_idx, FAIL);
     H5TRACE2("i","iIu",loc_id,idx);
 
     /* check arguments */
@@ -557,7 +557,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     const H5T_t    *mem_type = NULL;
     herr_t		    ret_value = FAIL;
 
-    FUNC_ENTER(H5Awrite, FAIL);
+    FUNC_ENTER_API(H5Awrite, FAIL);
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
@@ -711,7 +711,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     const H5T_t    	*mem_type = NULL;
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5Aread, FAIL);
+    FUNC_ENTER_API(H5Aread, FAIL);
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
@@ -856,7 +856,7 @@ H5Aget_space(hid_t attr_id)
     H5S_t	*dst = NULL;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Aget_space, FAIL);
+    FUNC_ENTER_API(H5Aget_space, FAIL);
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
@@ -913,7 +913,7 @@ H5Aget_type(hid_t attr_id)
     H5T_t	*dst = NULL;
     hid_t		        ret_value = FAIL;
 
-    FUNC_ENTER(H5Aget_type, FAIL);
+    FUNC_ENTER_API(H5Aget_type, FAIL);
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
@@ -983,7 +983,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     size_t              copy_len, nbytes;
     ssize_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5Aget_name, FAIL);
+    FUNC_ENTER_API(H5Aget_name, FAIL);
     H5TRACE3("Zs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
@@ -1041,7 +1041,7 @@ H5Aget_num_attrs(hid_t loc_id)
     void           	*obj = NULL;
     int			ret_value = 0;
 
-    FUNC_ENTER(H5Aget_num_attrs, FAIL);
+    FUNC_ENTER_API(H5Aget_num_attrs, FAIL);
     H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
@@ -1132,7 +1132,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     herr_t	        ret_value = 0;
     int		idx;
 
-    FUNC_ENTER(H5Aiterate, FAIL);
+    FUNC_ENTER_API(H5Aiterate, FAIL);
     H5TRACE4("e","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
@@ -1203,7 +1203,7 @@ H5Adelete(hid_t loc_id, const char *name)
     int        idx=0, found=-1;
     herr_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Aopen_name, FAIL);
+    FUNC_ENTER_API(H5Aopen_name, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */
@@ -1269,7 +1269,7 @@ H5Adelete(hid_t loc_id, const char *name)
 herr_t
 H5Aclose(hid_t attr_id)
 {
-    FUNC_ENTER(H5Aclose, FAIL);
+    FUNC_ENTER_API(H5Aclose, FAIL);
     H5TRACE1("e","i",attr_id);
 
     /* check arguments */
@@ -1304,7 +1304,7 @@ H5A_copy(const H5A_t *old_attr)
 {
     H5A_t	*new_attr=NULL;
 
-    FUNC_ENTER(H5A_copy, NULL);
+    FUNC_ENTER_NOAPI(H5A_copy, NULL);
 
     /* check args */
     assert(old_attr);
@@ -1358,7 +1358,7 @@ H5A_copy(const H5A_t *old_attr)
 herr_t
 H5A_close(H5A_t *attr)
 {
-    FUNC_ENTER(H5A_close, FAIL);
+    FUNC_ENTER_NOAPI(H5A_close, FAIL);
 
     assert(attr);
 
@@ -1421,7 +1421,7 @@ H5A_close(H5A_t *attr)
 H5G_entry_t *
 H5A_entof(H5A_t *attr)
 {
-    FUNC_ENTER(H5A_entof, NULL);
+    FUNC_ENTER_NOAPI(H5A_entof, NULL);
     assert(attr);
     FUNC_LEAVE(&(attr->ent));
 }

@@ -57,7 +57,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 {
     herr_t ret_value=SUCCEED;     /* return value */
 
-    FUNC_ENTER (H5S_select_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_copy, FAIL);
 
     /* Check args */
     assert(dst);
@@ -138,7 +138,7 @@ H5S_select_release (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;     /* return value */
 
-    FUNC_ENTER (H5S_select_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_release, FAIL);
 
     /* Check args */
     assert (space);
@@ -194,7 +194,7 @@ H5Sget_select_npoints(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hssize_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_npoints, 0);
+    FUNC_ENTER_API(H5Sget_select_npoints, 0);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
@@ -230,7 +230,7 @@ H5S_get_select_npoints (const H5S_t *space)
 {
     hssize_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_get_select_npoints, FAIL);
+    FUNC_ENTER_NOAPI(H5S_get_select_npoints, FAIL);
 
     assert(space);
 
@@ -282,7 +282,7 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
     herr_t ret_value=SUCCEED;     /* Return value */
 
-    FUNC_ENTER (H5S_sel_iter_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_sel_iter_release, FAIL);
 
     /* Check args */
     assert (sel_iter);
@@ -335,7 +335,7 @@ H5Sselect_valid(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     htri_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5Sselect_valid, 0);
+    FUNC_ENTER_API(H5Sselect_valid, 0);
     H5TRACE1("b","i",spaceid);
 
     /* Check args */
@@ -374,7 +374,7 @@ H5S_select_valid (const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_valid, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_valid, FAIL);
 
     assert(space);
 
@@ -425,7 +425,7 @@ H5S_select_serial_size (const H5S_t *space)
 {
     hssize_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_serial_size, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_serial_size, FAIL);
 
     assert(space);
 
@@ -483,7 +483,7 @@ H5S_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_serialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_serialize, FAIL);
 
     assert(space);
 
@@ -541,7 +541,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
     uint32_t sel_type;       /* Pointer to the selection type */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_deserialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_deserialize, FAIL);
 
     assert(space);
 
@@ -635,7 +635,7 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hssize_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_hyper_nblocks, FAIL);
+    FUNC_ENTER_API(H5Sget_select_hyper_nblocks, FAIL);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
@@ -707,7 +707,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hssize_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_elem_npoints, FAIL);
+    FUNC_ENTER_API(H5Sget_select_elem_npoints, FAIL);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
@@ -903,7 +903,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_hyper_blocklist, FAIL);
+    FUNC_ENTER_API(H5Sget_select_hyper_blocklist, FAIL);
     H5TRACE4("e","ihh*h",spaceid,startblock,numblocks,buf);
 
     /* Check args */
@@ -1026,7 +1026,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_elem_pointlist, FAIL);
+    FUNC_ENTER_API(H5Sget_select_elem_pointlist, FAIL);
     H5TRACE4("e","ihh*h",spaceid,startpoint,numpoints,buf);
 
     /* Check args */
@@ -1148,7 +1148,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;        /* return value */
 
-    FUNC_ENTER (H5Sget_select_bounds, FAIL);
+    FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
     H5TRACE3("e","i*h*h",spaceid,start,end);
 
     /* Check args */
@@ -1188,7 +1188,7 @@ H5S_select_contiguous(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_contiguous, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_contiguous, FAIL);
 
     assert(space);
 
@@ -1252,7 +1252,7 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5S_select_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_iterate, FAIL);
 
     /* Check args */
     assert(buf);
@@ -1306,7 +1306,7 @@ H5Sget_select_type(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
 
-    FUNC_ENTER(H5Sget_select_type, H5S_SEL_ERROR);
+    FUNC_ENTER_API(H5Sget_select_type, H5S_SEL_ERROR);
     H5TRACE1("St","i",space_id);
 
     /* Check args */
@@ -1340,7 +1340,7 @@ H5S_select_single(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_single, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_single, FAIL);
 
     /* Check args */
     assert(space);
@@ -1400,7 +1400,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     unsigned	u;                              /* Index variable */
     htri_t ret_value=TRUE;  /* return value */
 
-    FUNC_ENTER (H5S_select_shape_same, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_shape_same, FAIL);
 
     /* Check args */
     assert(space1);
@@ -1507,7 +1507,7 @@ H5S_select_regular(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_regular, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_regular, FAIL);
 
     /* Check args */
     assert(space);
@@ -1570,7 +1570,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *buf)
     void *fill=_fill;           /* Alias for fill-value buffer */
     herr_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5S_select_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_fill, FAIL);
 
     /* Check args */
     assert(fill_size>0);

@@ -98,7 +98,8 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     int			version;
     void		*ret_value = NULL;
     
-    FUNC_ENTER(H5O_fill_new_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_fill_new_decode, NULL);
+
     assert(f);
     assert(p);
     assert(!sh);
@@ -170,7 +171,8 @@ H5O_fill_decode(H5F_t UNUSED *f, const uint8_t *p,
     H5O_fill_t  *mesg=NULL;
     void        *ret_value = NULL;
     
-    FUNC_ENTER(H5O_fill_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_fill_decode, NULL);
+
     assert(f);
     assert(p);
     assert(!sh);
@@ -221,7 +223,8 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     
-    FUNC_ENTER(H5O_fill_new_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_new_encode, FAIL);
+
     assert(f);
     assert(p);
     assert(mesg && NULL==mesg->type);
@@ -266,7 +269,8 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
     
-    FUNC_ENTER(H5O_fill_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_encode, FAIL);
+
     assert(f);
     assert(p);
     assert(mesg && NULL==mesg->type);
@@ -305,7 +309,8 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
     H5O_fill_new_t		*dest = (H5O_fill_new_t *)_dest;
     void		*ret_value = NULL;
 
-    FUNC_ENTER(H5O_fill_new_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_fill_new_copy, NULL);
+
     assert(mesg);
 
     if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_new_t)))) {
@@ -373,7 +378,8 @@ H5O_fill_copy(const void *_mesg, void *_dest)
     H5O_fill_t          *dest = (H5O_fill_t *)_dest;
     void                *ret_value = NULL;
 
-    FUNC_ENTER(H5O_fill_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_fill_copy, NULL);
+
     assert(mesg);
 
     if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_t)))) {
@@ -434,7 +440,8 @@ H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     size_t			ret_value = 0;
  
-    FUNC_ENTER(H5O_fill_new_size, 0);
+    FUNC_ENTER_NOAPI(H5O_fill_new_size, 0);
+
     assert(f);
     assert(mesg);
 
@@ -471,7 +478,8 @@ H5O_fill_size(H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
     
-    FUNC_ENTER(H5O_fill_size, 0);
+    FUNC_ENTER_NOAPI(H5O_fill_size, 0);
+
     assert(f);
     assert(mesg);
 
@@ -500,7 +508,8 @@ H5O_fill_new_reset(void *_mesg)
 {
     H5O_fill_new_t	*mesg = (H5O_fill_new_t *)_mesg;
 
-    FUNC_ENTER(H5O_fill_new_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_new_reset, FAIL);
+
     assert(mesg);
     
     if(mesg->buf) 
@@ -536,7 +545,8 @@ H5O_fill_reset(void *_mesg)
 {
     H5O_fill_t  *mesg = (H5O_fill_t *)_mesg;
 
-    FUNC_ENTER(H5O_fill_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_reset, FAIL);
+
     assert(mesg);
     
     if(mesg->buf) 
@@ -571,7 +581,8 @@ H5O_fill_new_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     
-    FUNC_ENTER(H5O_fill_new_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_new_debug, FAIL);
+
     assert(f);
     assert(mesg);
     assert(stream);
@@ -612,7 +623,8 @@ H5O_fill_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
     
-    FUNC_ENTER(H5O_fill_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_debug, FAIL);
+
     assert(f);
     assert(mesg);
     assert(stream);
@@ -659,7 +671,8 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     hid_t		src_id=-1, dst_id=-1;	/*data type identifiers	*/
     herr_t		ret_value=FAIL;		/*return value		*/
 
-    FUNC_ENTER(H5O_fill_convert, FAIL);
+    FUNC_ENTER_NOAPI(H5O_fill_convert, FAIL);
+
     assert(fill);
     assert(dset_type);
 

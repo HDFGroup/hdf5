@@ -153,7 +153,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
-    FUNC_ENTER(H5G_node_decode_key, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_decode_key, FAIL);
 
     assert(f);
     assert(raw);
@@ -185,7 +185,7 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
-    FUNC_ENTER(H5G_node_encode_key, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_encode_key, FAIL);
 
     assert(f);
     assert(raw);
@@ -254,7 +254,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
     H5G_node_t		   *sym = NULL;
     hsize_t		    size = 0;
 
-    FUNC_ENTER(H5G_node_create, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_create, FAIL);
 
     /*
      * Check arguments.
@@ -325,7 +325,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
     herr_t	status;
     int		i;
 
-    FUNC_ENTER(H5G_node_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_flush, FAIL);
 
     /*
      * Check arguments.
@@ -417,7 +417,7 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
     const uint8_t	   *p = NULL;
     H5G_node_t		   *ret_value = NULL;	/*for error handling */
 
-    FUNC_ENTER(H5G_node_load, NULL);
+    FUNC_ENTER_NOAPI(H5G_node_load, NULL);
 
     /*
      * Check arguments.
@@ -515,7 +515,7 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     const char		   *s1, *s2;
     int		    cmp;
 
-    FUNC_ENTER(H5G_node_cmp2, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_cmp2, FAIL);
 
     assert(udata);
     assert(lt_key);
@@ -570,7 +570,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
     const char		   *s;
 
-    FUNC_ENTER(H5G_node_cmp3, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_cmp3, FAIL);
 
     /* left side */
     if (NULL == (s = H5HL_peek(f, udata->heap_addr, lt_key->offset))) {
@@ -631,7 +631,7 @@ H5G_node_found(H5F_t *f, haddr_t addr, const void UNUSED *_lt_key,
     const char		*s;
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5G_node_found, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_found, FAIL);
 
     /*
      * Check arguments.
@@ -748,7 +748,7 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
     H5B_ins_t		ret_value = H5B_INS_ERROR;
     H5G_node_t		*insert_into = NULL;	/*node that gets new entry*/
 
-    FUNC_ENTER(H5G_node_insert, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_insert, H5B_INS_ERROR);
 
     /*
      * Check arguments.
@@ -913,7 +913,7 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
     int		lt=0, rt, idx=0, cmp=1;
     const char		*s = NULL;
 
-    FUNC_ENTER(H5G_node_remove, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_remove, H5B_INS_ERROR);
 
     /* Check arguments */
     assert(f);
@@ -1070,7 +1070,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     char		buf[1024], *s;
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5G_node_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_iterate, FAIL);
 
     /*
      * Check arguments.
@@ -1162,7 +1162,7 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
     herr_t		    status;
     const char		   *s;
 
-    FUNC_ENTER(H5G_node_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_debug, FAIL);
 
     /*
      * Check arguments.
@@ -1240,7 +1240,7 @@ unsigned H5G_node_k(const H5F_t *f)
     unsigned sym_leaf_k;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5G_node_k, UFAIL);
+    FUNC_ENTER_NOAPI(H5G_node_k, UFAIL);
 
     assert(f);
 

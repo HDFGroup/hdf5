@@ -96,7 +96,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     size_t		name_len;   	/*attribute name length */
     int		        version;	/*message version number*/
 
-    FUNC_ENTER(H5O_attr_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_attr_decode, NULL);
 
     /* check args */
     assert(f);
@@ -194,7 +194,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     const H5A_t    *attr = (const H5A_t *) mesg;
     size_t          name_len;   /* Attribute name length */
 
-    FUNC_ENTER(H5O_attr_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_attr_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -268,7 +268,7 @@ H5O_attr_copy(const void *_src, void *_dst)
     const H5A_t            *src = (const H5A_t *) _src;
     H5A_t                  *dst = NULL;
 
-    FUNC_ENTER(H5O_attr_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_attr_copy, NULL);
 
     /* check args */
     assert(src);
@@ -313,7 +313,7 @@ H5O_attr_size(H5F_t UNUSED *f, const void *mesg)
     size_t		name_len;
     const H5A_t         *attr = (const H5A_t *) mesg;
 
-    FUNC_ENTER(H5O_attr_size, 0);
+    FUNC_ENTER_NOAPI(H5O_attr_size, 0);
 
     assert(attr);
 
@@ -353,7 +353,7 @@ H5O_attr_reset(void *_mesg)
     H5A_t                  *attr = (H5A_t *) _mesg;
     H5A_t                  *tmp = NULL;
 
-    FUNC_ENTER(H5O_attr_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_attr_reset, FAIL);
 
     if (attr) {
         if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t)))) {
@@ -391,7 +391,7 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
 
-    FUNC_ENTER(H5O_attr_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_attr_debug, FAIL);
 
     /* check args */
     assert(f);

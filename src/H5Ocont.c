@@ -73,7 +73,7 @@ H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_cont_t             *cont = NULL;
 
-    FUNC_ENTER(H5O_cont_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_cont_decode, NULL);
 
     /* check args */
     assert(f);
@@ -111,7 +111,7 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 
-    FUNC_ENTER(H5O_cont_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_cont_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -146,7 +146,7 @@ H5O_cont_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 {
     const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 
-    FUNC_ENTER(H5O_cont_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_cont_debug, FAIL);
 
     /* check args */
     assert(f);

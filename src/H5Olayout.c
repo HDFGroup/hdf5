@@ -83,7 +83,7 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     int                    version;
     unsigned                   u;
 
-    FUNC_ENTER(H5O_layout_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_layout_decode, NULL);
 
     /* check args */
     assert(f);
@@ -155,7 +155,7 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                     u;
 
-    FUNC_ENTER(H5O_layout_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_layout_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -216,7 +216,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
 
-    FUNC_ENTER(H5O_layout_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_layout_copy, NULL);
 
     /* check args */
     assert(mesg);
@@ -255,7 +255,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value = 0;
 
-    FUNC_ENTER(H5O_layout_size, 0);
+    FUNC_ENTER_NOAPI(H5O_layout_size, 0);
 
     /* check args */
     assert(f);
@@ -289,7 +289,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
 static herr_t
 H5O_layout_free (void *mesg)
 {
-    FUNC_ENTER (H5O_layout_free, FAIL);
+    FUNC_ENTER_NOAPI(H5O_layout_free, FAIL);
 
     assert (mesg);
 
@@ -320,7 +320,7 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                    u;
 
-    FUNC_ENTER(H5O_layout_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_layout_debug, FAIL);
 
     /* check args */
     assert(f);

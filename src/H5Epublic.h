@@ -220,7 +220,6 @@ __DLL__ herr_t H5Eclear (void);
 __DLL__ herr_t H5Eprint (FILE *stream);
 __DLL__ herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func,
 			void *client_data);
-__DLL__ herr_t H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data);
 __DLL__ const char *H5Eget_major (H5E_major_t major_number);
 __DLL__ const char *H5Eget_minor (H5E_minor_t minor_number);
 __DLL__ herr_t H5Epush(const char *file, const char *func,

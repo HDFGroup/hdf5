@@ -706,7 +706,7 @@ H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
 {
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER (H5S_mpio_spaces_read, FAIL);
+    FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
 
     ret_value = H5S_mpio_spaces_xfer(f, layout, dc_plist, elmt_size,
 				     file_space, mem_space, dxpl_id,
@@ -744,7 +744,7 @@ H5S_mpio_spaces_write(H5F_t *f, const H5O_layout_t *layout,
 {
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER (H5S_mpio_spaces_write, FAIL);
+    FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
 
     ret_value = H5S_mpio_spaces_xfer(f, layout, dc_plist, elmt_size,
 				     file_space, mem_space, dxpl_id,
@@ -776,7 +776,7 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     htri_t c1,c2;               /* Flags whether a selection is optimizable */
     htri_t ret_value=TRUE;
 
-    FUNC_ENTER(H5S_all_opt_possible, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_opt_possible, FAIL);
 
     /* Check args */
     assert(mem_space);

@@ -75,7 +75,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
     unsigned		version;
     size_t		i, j, n, name_length;
 
-    FUNC_ENTER(H5O_pline_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_pline_decode, NULL);
 
     /* check args */
     assert(p);
@@ -178,7 +178,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     const char		*name=NULL;
     H5Z_class_t		*cls=NULL;
     
-    FUNC_ENTER (H5O_pline_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_pline_encode, FAIL);
 
     /* Check args */
     assert (p);
@@ -253,7 +253,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
     size_t		i;
     H5O_pline_t		*ret_value = NULL;
     
-    FUNC_ENTER (H5O_pline_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_pline_copy, NULL);
 
     if (!dst && NULL==(dst = H5FL_ALLOC (H5O_pline_t,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -330,7 +330,7 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
     const char		*name = NULL;
     H5Z_class_t		*cls = NULL;
         
-    FUNC_ENTER (H5O_pline_size, 0);
+    FUNC_ENTER_NOAPI(H5O_pline_size, 0);
 
     /* Message header */
     size = 1 +				/*version			*/
@@ -381,7 +381,7 @@ H5O_pline_reset (void *mesg)
     H5O_pline_t	*pline = (H5O_pline_t*)mesg;
     size_t	i;
     
-    FUNC_ENTER (H5O_pline_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_pline_reset, FAIL);
 
     assert (pline);
     for (i=0; i<pline->nfilters; i++) {
@@ -412,7 +412,7 @@ H5O_pline_reset (void *mesg)
 static herr_t
 H5O_pline_free (void *mesg)
 {
-    FUNC_ENTER (H5O_pline_free, FAIL);
+    FUNC_ENTER_NOAPI(H5O_pline_free, FAIL);
 
     assert (mesg);
 
@@ -445,7 +445,7 @@ H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;
     size_t		i, j;
 
-    FUNC_ENTER(H5O_pline_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_pline_debug, FAIL);
 
     /* check args */
     assert(f);

@@ -62,7 +62,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         const H5S_t *file_space, size_t elmt_size,
         size_t seq_len, hsize_t file_offset, void *buf/*out*/)
 {
-    FUNC_ENTER(H5F_seq_read, FAIL);
+    FUNC_ENTER_NOAPI(H5F_seq_read, FAIL);
 
     /* Check args */
     assert(f);
@@ -103,7 +103,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         const H5S_t *file_space, size_t elmt_size,
         size_t seq_len, hsize_t file_offset, const void *buf)
 {
-    FUNC_ENTER(H5F_seq_write, FAIL);
+    FUNC_ENTER_NOAPI(H5F_seq_write, FAIL);
 
     /* Check args */
     assert(f);
@@ -170,7 +170,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #endif
     herr_t      ret_value = SUCCEED;            /* Return value */
    
-    FUNC_ENTER(H5F_seq_readv, FAIL);
+    FUNC_ENTER_NOAPI(H5F_seq_readv, FAIL);
 
     /* Check args */
     assert(f);
@@ -552,7 +552,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #endif
     herr_t      ret_value = SUCCEED;            /* Return value */
    
-    FUNC_ENTER(H5F_seq_writev, FAIL);
+    FUNC_ENTER_NOAPI(H5F_seq_writev, FAIL);
 
     /* Check args */
     assert(f);

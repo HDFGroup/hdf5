@@ -196,7 +196,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     int		i;
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5B_create, FAIL);
+    FUNC_ENTER_NOAPI(H5B_create, FAIL);
 
     /*
      * Check arguments.
@@ -311,7 +311,7 @@ H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
     int btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;
 
-    FUNC_ENTER(H5B_Kvalue, FAIL);
+    FUNC_ENTER_NOAPI(H5B_Kvalue, FAIL);
 
     assert(f);
     assert(type);
@@ -356,7 +356,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
     uint8_t		*p;
     H5B_t		*ret_value = NULL;
 
-    FUNC_ENTER(H5B_load, NULL);
+    FUNC_ENTER_NOAPI(H5B_load, NULL);
 
     /* Check arguments */
     assert(f);
@@ -465,7 +465,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
     size_t	size = 0;
     uint8_t	*p = bt->page;
 
-    FUNC_ENTER(H5B_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5B_flush, FAIL);
 
     /*
      * Check arguments.
@@ -576,7 +576,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     int	idx = -1, lt = 0, rt, cmp = 1;
     int		ret_value = FAIL;
 
-    FUNC_ENTER(H5B_find, FAIL);
+    FUNC_ENTER_NOAPI(H5B_find, FAIL);
 
     /*
      * Check arguments.
@@ -926,7 +926,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5B_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5B_insert, FAIL);
 
     /*
      * Check arguments.
@@ -1579,7 +1579,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
     int		i, nchildren;
     herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5B_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5B_iterate, FAIL);
 
     /*
      * Check arguments.
@@ -1698,7 +1698,8 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
     size_t	sizeof_rkey, sizeof_rec;
     hsize_t	sizeof_node;
     
-    FUNC_ENTER(H5B_remove_helper, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI(H5B_remove_helper, H5B_INS_ERROR);
+
     assert(f);
     assert(H5F_addr_defined(addr));
     assert(type);
@@ -1980,8 +1981,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     hbool_t	rt_key_changed = FALSE;		/*right key changed?*/
     H5B_t	*bt = NULL;			/*btree node */
     
-    
-    FUNC_ENTER(H5B_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5B_remove, FAIL);
 
     /* Check args */
     assert(f);
@@ -2046,7 +2046,7 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 {
     size_t	size;
 
-    FUNC_ENTER(H5B_nodesize, (size_t) 0);
+    FUNC_ENTER_NOAPI(H5B_nodesize, (size_t) 0);
 
     /*
      * Check arguments.
@@ -2099,7 +2099,7 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
     size_t              nkeys;
     size_t		u;
 
-    FUNC_ENTER(H5B_copy, NULL);
+    FUNC_ENTER_NOAPI(H5B_copy, NULL);
 
     /*
      * Check arguments.
@@ -2173,7 +2173,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     H5B_t	*bt = NULL;
     int		i;
 
-    FUNC_ENTER(H5B_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5B_debug, FAIL);
 
     /*
      * Check arguments.
@@ -2280,7 +2280,8 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
-    FUNC_ENTER(H5B_assert, FAIL);
+    FUNC_ENTER_NOAPI(H5B_assert, FAIL);
+
     if (0==ncalls++) {
 	if (H5DEBUG(B)) {
 	    fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");

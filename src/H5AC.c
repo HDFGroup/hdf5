@@ -89,7 +89,8 @@ int
 H5AC_create(H5F_t *f, int size_hint)
 {
     H5AC_t                 *cache = NULL;
-    FUNC_ENTER(H5AC_create, FAIL);
+
+    FUNC_ENTER_NOAPI(H5AC_create, FAIL);
 
     assert(f);
     assert(NULL == f->shared->cache);
@@ -137,7 +138,8 @@ herr_t
 H5AC_dest(H5F_t *f)
 {
     H5AC_t                 *cache = NULL;
-    FUNC_ENTER(H5AC_dest, FAIL);
+
+    FUNC_ENTER_NOAPI(H5AC_dest, FAIL);
 
     assert(f);
     assert(f->shared->cache);
@@ -221,7 +223,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     H5AC_info_t           **info = NULL;
     H5AC_t                 *cache = NULL;
 
-    FUNC_ENTER(H5AC_find, NULL);
+    FUNC_ENTER_NOAPI(H5AC_find, NULL);
 
     assert(f);
     assert(f->shared->cache);
@@ -404,7 +406,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
     unsigned                   nslots;
     H5AC_t                 *cache = NULL;
 
-    FUNC_ENTER(H5AC_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_flush, FAIL);
 
     assert(f);
     assert(f->shared->cache);
@@ -536,7 +538,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     H5AC_info_t           **info = NULL;
     H5AC_t                 *cache = NULL;
 
-    FUNC_ENTER(H5AC_set, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_set, FAIL);
 
     assert(f);
     assert(f->shared->cache);
@@ -610,7 +612,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
     herr_t                  status;
     H5AC_t                 *cache = NULL;
 
-    FUNC_ENTER(H5AC_rename, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_rename, FAIL);
 
     assert(f);
     assert(f->shared->cache);
@@ -720,7 +722,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     }
 #endif
 
-    FUNC_ENTER(H5AC_protect, NULL);
+    FUNC_ENTER_NOAPI(H5AC_protect, NULL);
 
     /* check args */
     assert(f);
@@ -836,7 +838,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     H5AC_t                 *cache = NULL;
     H5AC_info_t           **info = NULL;
 
-    FUNC_ENTER(H5AC_unprotect, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_unprotect, FAIL);
 
     /* check args */
     assert(f);
@@ -923,7 +925,7 @@ H5AC_debug(H5F_t UNUSED *f)
     double                  miss_rate;
 #endif
 
-    FUNC_ENTER(H5AC_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5AC_debug, FAIL);
 
 #ifdef H5AC_DEBUG
     if (H5DEBUG(AC)) {

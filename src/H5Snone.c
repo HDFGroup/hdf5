@@ -47,7 +47,7 @@ H5S_none_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_none_select_serialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_none_select_serialize, FAIL);
 
     assert(space);
 
@@ -87,7 +87,7 @@ H5S_none_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_none_select_deserialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_none_select_deserialize, FAIL);
 
     assert(space);
 
@@ -122,7 +122,7 @@ herr_t H5S_select_none (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_select_none, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_none, FAIL);
 
     /* Check args */
     assert(space);
@@ -163,7 +163,7 @@ herr_t H5Sselect_none (hid_t spaceid)
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5Sselect_none, FAIL);
+    FUNC_ENTER_API(H5Sselect_none, FAIL);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) ||
@@ -211,7 +211,7 @@ H5S_none_select_iterate(void * UNUSED buf, hid_t UNUSED type_id, H5S_t * UNUSED 
 {
     herr_t ret_value=SUCCEED;      /* return value */
 
-    FUNC_ENTER (H5S_none_select_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5S_none_select_iterate, FAIL);
 
     assert(buf);
     assert(space);

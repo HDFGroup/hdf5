@@ -161,7 +161,7 @@ static int interface_initialize_g = 0;
 hid_t 
 H5FD_srb_init(void)
 {
-    FUNC_ENTER(H5FD_srb_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_init, FAIL);
 
     if(H5I_VFL != H5Iget_type(H5FD_SRB_g))
         H5FD_SRB_g = H5FDregister(&H5FD_srb_g);  
@@ -199,7 +199,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5Pset_fapl_srb, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_srb, FAIL);
     /*NO TRACE*/
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -247,7 +247,7 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_srb_fapl_t *fa;
 
-    FUNC_ENTER(H5Pget_fapl_srb, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_srb, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -292,7 +292,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     int srb_fid;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_srb_open, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_open, FAIL);
 
     /* Check arguments */
     if (!name || !*name)
@@ -396,12 +396,14 @@ static herr_t
 H5FD_srb_close(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
-    FUNC_ENTER(H5FD_srb_close, FAIL);
+
+    FUNC_ENTER_NOAPI(H5FD_srb_close, FAIL);
 
     srbFileClose(file->srb_conn, file->fd);
     clFinish(file->srb_conn);
 
     H5MM_xfree(file);
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -428,7 +430,7 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_srb_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_query, FAIL);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -460,7 +462,9 @@ static haddr_t
 H5FD_srb_get_eoa(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
-    FUNC_ENTER(H5FD_srb_get_eoa, HADDR_UNDEF);
+
+    FUNC_ENTER_NOAPI(H5FD_srb_get_eoa, HADDR_UNDEF);
+
     FUNC_LEAVE(file->eoa);
 }
 
@@ -486,8 +490,11 @@ static herr_t
 H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
-    FUNC_ENTER(H5FD_srb_set_eoa, FAIL);
+
+    FUNC_ENTER_NOAPI(H5FD_srb_set_eoa, FAIL);
+
     file->eoa = addr;
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -511,7 +518,9 @@ static haddr_t
 H5FD_srb_get_eof(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
-    FUNC_ENTER(H5FD_srb_get_eof, HADDR_UNDEF);
+
+    FUNC_ENTER_NOAPI(H5FD_srb_get_eof, HADDR_UNDEF);
+
     FUNC_LEAVE(file->eof); 
 }
 
@@ -536,7 +545,7 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
     ssize_t    nbytes;
 
-    FUNC_ENTER(H5FD_srb_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_read, FAIL);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
@@ -606,7 +615,7 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
     ssize_t    nbytes;
 
-    FUNC_ENTER(H5FD_srb_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_write, FAIL);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
@@ -665,7 +674,7 @@ H5FD_srb_flush(H5FD_t *_file, unsigned UNUSED closing)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
 
-    FUNC_ENTER(H5FD_srb_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_flush, FAIL);
 
     if(srbFileSync(file->srb_conn, file->fd) != 0) {
         srbFileClose(file->srb_conn, file->fd);

@@ -42,7 +42,8 @@ static int          	interface_initialize_g = 0;
 H5G_cache_t            *
 H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
 {
-    FUNC_ENTER(H5G_ent_cache, NULL);
+    FUNC_ENTER_NOAPI(H5G_ent_cache, NULL);
+
     if (!ent) {
         HRETURN_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "no entry");
     }
@@ -73,10 +74,13 @@ H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
 herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
-    FUNC_ENTER(H5G_ent_modified, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_modified, FAIL);
+
     assert(ent);
+
     if (H5G_NO_CHANGE != ent->type) ent->type = cache_type;
     ent->dirty = TRUE;
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -107,7 +111,7 @@ H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
 {
     int                    i;
 
-    FUNC_ENTER(H5G_ent_decode_vec, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_decode_vec, FAIL);
 
     /* check arguments */
     assert(f);
@@ -153,7 +157,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
 
-    FUNC_ENTER(H5G_ent_decode, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_decode, FAIL);
 
     /* check arguments */
     assert(f);
@@ -219,7 +223,7 @@ H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
 {
     int                    i;
 
-    FUNC_ENTER(H5G_ent_encode_vec, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_encode_vec, FAIL);
 
     /* check arguments */
     assert(f);
@@ -267,7 +271,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
-    FUNC_ENTER(H5G_ent_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_encode, FAIL);
 
     /* check arguments */
     assert(f);
@@ -336,7 +340,7 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
 {
     const char		*lval = NULL;
     
-    FUNC_ENTER(H5G_ent_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5G_ent_debug, FAIL);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Name offset into private heap:",

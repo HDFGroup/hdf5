@@ -152,7 +152,7 @@ H5Z_term_interface (void)
 herr_t
 H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
-    FUNC_ENTER (H5Zregister, FAIL);
+    FUNC_ENTER_API(H5Zregister, FAIL);
     H5TRACE3("e","Zfsx",id,comment,func);
 
     /* Check args */
@@ -199,7 +199,7 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 {
     size_t		i;
     
-    FUNC_ENTER (H5Z_register, FAIL);
+    FUNC_ENTER_NOAPI(H5Z_register, FAIL);
 
     assert (id>=0 && id<=H5Z_FILTER_MAX);
 
@@ -257,7 +257,8 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
 {
     size_t	idx, i;
     
-    FUNC_ENTER(H5Z_append, FAIL);
+    FUNC_ENTER_NOAPI(H5Z_append, FAIL);
+
     assert(pline);
     assert(filter>=0 && filter<=H5Z_FILTER_MAX);
     assert(0==(flags & ~((unsigned)H5Z_FLAG_DEFMASK)));
@@ -331,7 +332,7 @@ H5Z_find(H5Z_filter_t id)
 {
     size_t	i;
 
-    FUNC_ENTER(H5Z_find, NULL);
+    FUNC_ENTER_NOAPI(H5Z_find, NULL);
 
     for (i=0; i<H5Z_table_used_g; i++) {
 	if (H5Z_table_g[i].id == id) {
@@ -383,7 +384,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
     H5_timer_t	timer;
 #endif
     
-    FUNC_ENTER(H5Z_pipeline, FAIL);
+    FUNC_ENTER_NOAPI(H5Z_pipeline, FAIL);
     
     assert(f);
     assert(0==(flags & ~((unsigned)H5Z_FLAG_INVMASK)));

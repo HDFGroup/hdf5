@@ -224,7 +224,7 @@ H5F_istore_chunk_alloc(size_t chunk_size)
 {
     void *ret_value;                    /* Pointer to the chunk to return to the user */
 
-    FUNC_ENTER(H5F_istore_chunk_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5F_istore_chunk_alloc, NULL);
 
     ret_value=H5FL_BLK_ALLOC(istore_chunk,chunk_size,0);
 
@@ -253,7 +253,7 @@ H5F_istore_chunk_alloc(size_t chunk_size)
 void *
 H5F_istore_chunk_free(void *chunk)
 {
-    FUNC_ENTER(H5F_istore_chunk_free, NULL);
+    FUNC_ENTER_NOAPI(H5F_istore_chunk_free, NULL);
 
     H5FL_BLK_FREE(istore_chunk,chunk);
 
@@ -284,7 +284,7 @@ H5F_istore_chunk_realloc(void *chunk, size_t new_size)
 {
     void *ret_value=NULL;               /* Return value */
 
-    FUNC_ENTER(H5F_istore_chunk_realloc, NULL);
+    FUNC_ENTER_NOAPI(H5F_istore_chunk_realloc, NULL);
 
     ret_value=H5FL_BLK_REALLOC(istore_chunk,chunk,new_size);
 
@@ -352,7 +352,7 @@ H5F_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     int		i;
     int		ndims = H5F_ISTORE_NDIMS(bt);
 
-    FUNC_ENTER(H5F_istore_decode_key, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_decode_key, FAIL);
 
     /* check args */
     assert(f);
@@ -393,7 +393,7 @@ H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     int		ndims = H5F_ISTORE_NDIMS(bt);
     int		i;
 
-    FUNC_ENTER(H5F_istore_encode_key, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_encode_key, FAIL);
 
     /* check args */
     assert(f);
@@ -435,7 +435,8 @@ H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
     const H5F_istore_ud1_t	*udata = (const H5F_istore_ud1_t *)_udata;
     unsigned		u;
     
-    FUNC_ENTER (H5F_istore_debug_key, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_debug_key, FAIL);
+
     assert (key);
 
     HDfprintf(stream, "%*s%-*s %Zd bytes\n", indent, "", fwidth,
@@ -483,7 +484,7 @@ H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     int		cmp;
 
-    FUNC_ENTER(H5F_istore_cmp2, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_cmp2, FAIL);
 
     assert(lt_key);
     assert(rt_key);
@@ -535,7 +536,7 @@ H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     int		cmp = 0;
 
-    FUNC_ENTER(H5F_istore_cmp3, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_cmp3, FAIL);
 
     assert(lt_key);
     assert(rt_key);
@@ -583,7 +584,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     unsigned		u;
 
-    FUNC_ENTER(H5F_istore_new_node, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_new_node, FAIL);
 #ifdef AKC
     printf("%s: Called\n", FUNC);
 #endif
@@ -671,7 +672,7 @@ H5F_istore_found(H5F_t UNUSED *f, haddr_t addr, const void *_lt_key,
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;
     unsigned		u;
 
-    FUNC_ENTER(H5F_istore_found, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_found, FAIL);
 
     /* Check arguments */
     assert(f);
@@ -746,7 +747,7 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     unsigned		u;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI(H5F_istore_insert, H5B_INS_ERROR);
 #ifdef AKC
     printf("%s: Called\n", FUNC);
 #endif
@@ -946,7 +947,7 @@ H5F_istore_init (H5F_t *f)
 {
     H5F_rdcc_t	*rdcc = &(f->shared->rdcc);
     
-    FUNC_ENTER (H5F_istore_init, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_init, FAIL);
 
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
     if (f->shared->rdcc_nbytes>0 && f->shared->rdcc_nelmts>0) {
@@ -1186,7 +1187,7 @@ H5F_istore_flush (H5F_t *f, hbool_t preempt)
     int		nerrors=0;
     H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
     
-    FUNC_ENTER (H5F_istore_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_flush, FAIL);
 
     for (ent=rdcc->head; ent; ent=next) {
 	next = ent->next;
@@ -1233,7 +1234,7 @@ H5F_istore_dest (H5F_t *f)
     int		nerrors=0;
     H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
     
-    FUNC_ENTER (H5F_istore_dest, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_dest, FAIL);
 
     for (ent=rdcc->head; ent; ent=next) {
 #ifdef H5F_ISTORE_DEBUG
@@ -1795,7 +1796,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5O_fill_t          fill;           /* Fill value information */
     herr_t              ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER(H5F_istore_read, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_read, FAIL);
 
     /* Check args */
     assert(f);
@@ -1977,7 +1978,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5O_fill_t          fill;           /* Fill value information */
     herr_t              ret_value = SUCCEED;            /* Return value */
     
-    FUNC_ENTER(H5F_istore_write, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_write, FAIL);
 
     /* Check args */
     assert(f);
@@ -2144,7 +2145,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
     unsigned			u;
 #endif
 
-    FUNC_ENTER(H5F_istore_create, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_create, FAIL);
 
     /* Check args */
     assert(f);
@@ -2189,7 +2190,7 @@ H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
-    FUNC_ENTER(H5F_istore_nchunks, 0);
+    FUNC_ENTER_NOAPI(H5F_istore_nchunks, 0);
 
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
@@ -2224,7 +2225,7 @@ H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
-    FUNC_ENTER(H5F_istore_dump_btree, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_dump_btree, FAIL);
 
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
@@ -2260,7 +2261,8 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
     double	miss_rate;
     char	ascii[32];
     
-    FUNC_ENTER (H5F_istore_stats, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_stats, FAIL);
+
     if (!H5DEBUG(AC)) HRETURN(SUCCEED);
 
     if (headers) {
@@ -2319,7 +2321,7 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 {
     H5F_istore_ud1_t	udata;
     
-    FUNC_ENTER (H5F_istore_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_debug, FAIL);
 
     HDmemset (&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
@@ -2445,7 +2447,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned	u;              /* Local index variable */
     herr_t	ret_value=SUCCEED;	/* Return value */
     
-    FUNC_ENTER(H5F_istore_allocate, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_allocate, FAIL);
 
     /* Check args */
     assert(f);
@@ -2683,7 +2685,7 @@ H5F_istore_prune_by_extent(H5F_t *f, const H5O_layout_t *layout, const H5S_t * s
     H5F_istore_ud1_t        udata;	/*B-tree pass-through */
     hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
 
-    FUNC_ENTER(H5F_istore_prune_by_extent, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_prune_by_extent, FAIL);
 
     /* Check args */
     assert(f);
@@ -2837,7 +2839,7 @@ H5F_istore_remove(H5F_t *f, haddr_t addr, void *_lt_key /*in,out */ ,
 {
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
 
-    FUNC_ENTER(H5F_istore_remove,H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI(H5F_istore_remove,H5B_INS_ERROR);
 
     H5FD_free(f->shared->lf, H5FD_MEM_DRAW, addr, (hsize_t)lt_key->nbytes);
     *lt_key_changed = FALSE;
@@ -2898,7 +2900,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const H5O_layout_t *layout,
     H5O_fill_t              fill;       /* Fill value information */
     herr_t	            ret_value=SUCCEED;	/* Return value */
 
-    FUNC_ENTER(H5F_istore_initialize_by_extent, FAIL);
+    FUNC_ENTER_NOAPI(H5F_istore_initialize_by_extent, FAIL);
 
     /* Check args */
     assert(f);

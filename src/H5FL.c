@@ -127,7 +127,7 @@ H5FL_malloc(size_t mem_size)
 {
     void *ret_value=NULL;   /* return value*/
 
-    FUNC_ENTER (H5FL_malloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_malloc, NULL);
 
     /* Attempt to allocate the memory requested */
     if(NULL==(ret_value=H5MM_malloc(mem_size))) {
@@ -210,7 +210,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 {
     H5FL_reg_node_t *temp;      /* Temp. ptr to the new free list node allocated */
 
-    FUNC_ENTER (H5FL_reg_free, NULL);
+    FUNC_ENTER_NOAPI(H5FL_reg_free, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -277,7 +277,7 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
 {
     void *ret_value;        /* Pointer to object to return */
 
-    FUNC_ENTER (H5FL_reg_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_reg_alloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -672,7 +672,7 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
     H5FL_blk_list_t *temp;  /* Temp. ptr to the new native list allocated */
     void *ret_value;    /* Pointer to the block to return to the user */
 
-    FUNC_ENTER(H5FL_blk_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_blk_alloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -760,7 +760,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     H5FL_blk_list_t *temp;      /* Temp. ptr to the new free list node allocated */
     size_t free_size;           /* Size of the block freed */
 
-    FUNC_ENTER(H5FL_blk_free, NULL);
+    FUNC_ENTER_NOAPI(H5FL_blk_free, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -833,7 +833,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
     H5FL_blk_list_t *temp;      /* Temp. ptr to the new block node allocated */
     void *ret_value=NULL;       /* Return value */
 
-    FUNC_ENTER(H5FL_blk_realloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_blk_realloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -1111,7 +1111,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     size_t mem_size;        /* Size of memory being freed */
     size_t free_nelem;      /* Number of elements in node being free'd */
 
-    FUNC_ENTER (H5FL_arr_free, NULL);
+    FUNC_ENTER_NOAPI(H5FL_arr_free, NULL);
 
 #ifdef NO_ARR_FREE_LISTS
     H5MM_xfree(obj);
@@ -1195,7 +1195,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
     void *ret_value;        /* Pointer to object to return */
     size_t mem_size;        /* Size of memory block being recycled */
 
-    FUNC_ENTER (H5FL_arr_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_arr_alloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -1288,7 +1288,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
 
-    FUNC_ENTER (H5FL_arr_realloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_arr_realloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -1599,7 +1599,7 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5FL_set_free_list_limits, FAIL);
+    FUNC_ENTER_NOAPI(H5FL_set_free_list_limits, FAIL);
 
     /* Set the limit variables */
     /* limit on all regular free lists */

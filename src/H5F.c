@@ -104,7 +104,7 @@ H5FL_EXTERN(H5G_t);
 herr_t
 H5F_init(void)
 {
-    FUNC_ENTER(H5F_init, FAIL);
+    FUNC_ENTER_NOAPI(H5F_init, FAIL);
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE(SUCCEED);
 }
@@ -480,7 +480,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
     H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_acs_create, FAIL);
+    FUNC_ENTER_NOAPI(H5F_acs_create, FAIL);
 
     /* Check argument */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -535,7 +535,7 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
     H5P_genplist_t *plist;              /* Property list */
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_acs_close, FAIL);
+    FUNC_ENTER_NOAPI(H5F_acs_close, FAIL);
 
     /* Check argument */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -588,7 +588,7 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
     H5P_genplist_t *old_plist;              /* Old property list */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_acs_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5F_acs_copy, FAIL);
 
     if(H5I_GENPROP_LST != H5I_get_type(new_fapl_id) || H5I_GENPROP_LST != H5I_get_type(old_fapl_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
@@ -662,7 +662,7 @@ H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 herr_t
 H5F_flush_all(hbool_t invalidate)
 {
-    FUNC_ENTER(H5F_flush_all, FAIL);
+    FUNC_ENTER_NOAPI(H5F_flush_all, FAIL);
 
     H5I_search(H5I_FILE,(H5I_search_func_t)H5F_flush_all_cb,(void*)&invalidate);
 
@@ -691,7 +691,7 @@ H5F_flush_all(hbool_t invalidate)
 herr_t
 H5F_close_all(void)
 {
-    FUNC_ENTER(H5F_close_all, FAIL);
+    FUNC_ENTER_NOAPI(H5F_close_all, FAIL);
 
     if (H5I_clear_group(H5I_FILE, FALSE)<0)
 	HRETURN_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to close one or more files");
@@ -766,7 +766,7 @@ H5Fget_create_plist(hid_t file_id)
     H5P_genplist_t *plist;              /* Property list */
     hid_t		ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Fget_create_plist, FAIL);
+    FUNC_ENTER_API(H5Fget_create_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* check args */
@@ -814,7 +814,7 @@ H5Fget_access_plist(hid_t file_id)
     hid_t		ret_value = SUCCEED;
     void		*driver_info=NULL;   
  
-    FUNC_ENTER(H5Fget_access_plist, FAIL);
+    FUNC_ENTER_API(H5Fget_access_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* Check args */
@@ -890,7 +890,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types, unsigned *obj_id_count)
     H5F_t    *f=NULL;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Fget_obj_counts, FAIL);
+    FUNC_ENTER_API(H5Fget_obj_counts, FAIL);
     H5TRACE3("e","iIu*Iu",file_id,types,obj_id_count);
 
     if( file_id != H5F_OBJ_ALL && (H5I_FILE != H5I_get_type(file_id) || 
@@ -959,7 +959,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *oid_list)
     herr_t   ret_value = SUCCEED;
     H5F_t    *f=NULL;
 
-    FUNC_ENTER(H5Fget_obj_ids, FAIL);
+    FUNC_ENTER_API(H5Fget_obj_ids, FAIL);
     H5TRACE3("e","iIu*i",file_id,types,oid_list);
     if( file_id != H5F_OBJ_ALL && (H5I_FILE != H5I_get_type(file_id) || 
 	NULL==(f=H5I_object(file_id))) )
@@ -1273,7 +1273,7 @@ H5Fis_hdf5(const char *name)
     H5FD_t	*file = NULL;
     htri_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Fis_hdf5, FAIL);
+    FUNC_ENTER_API(H5Fis_hdf5, FAIL);
     H5TRACE1("b","s",name);
 
     /* Check args and all the boring stuff. */
@@ -1635,7 +1635,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5P_genplist_t      *a_plist;            /* Property list */
     H5F_close_degree_t  fc_degree;
 
-    FUNC_ENTER(H5F_open, NULL);
+    FUNC_ENTER_NOAPI(H5F_open, NULL);
 
     /*
      * If the driver has a `cmp' method then the driver is capable of
@@ -2017,7 +2017,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value = FAIL;	/*return value			*/
  
-    FUNC_ENTER(H5Fcreate, FAIL);
+    FUNC_ENTER_API(H5Fcreate, FAIL);
     H5TRACE4("i","sIuii",filename,flags,fcpl_id,fapl_id);
 
     /* Check/fix arguments */
@@ -2113,7 +2113,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value = FAIL;	/*return value			*/
 
-    FUNC_ENTER(H5Fopen, FAIL);
+    FUNC_ENTER_API(H5Fopen, FAIL);
     H5TRACE3("i","sIui",filename,flags,fapl_id);
 
     /* Check/fix arguments. */
@@ -2171,7 +2171,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     H5A_t	*attr = NULL;
     H5G_entry_t	*ent = NULL;
     
-    FUNC_ENTER(H5Fflush, FAIL);
+    FUNC_ENTER_API(H5Fflush, FAIL);
     H5TRACE2("e","iFs",object_id,scope);
 
     switch (H5I_get_type(object_id)) {
@@ -2497,7 +2497,8 @@ H5F_close(H5F_t *f)
     unsigned	        closing=0;      /* Indicate that the file will be closed */
     herr_t	        ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER(H5F_close, FAIL);
+    FUNC_ENTER_NOAPI(H5F_close, FAIL);
+
     assert(f->nrefs>0);
 
     /*
@@ -2679,7 +2680,7 @@ H5Fclose(hid_t file_id)
 {
     herr_t	ret_value = SUCCEED;
  
-    FUNC_ENTER(H5Fclose, FAIL);
+    FUNC_ENTER_API(H5Fclose, FAIL);
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
@@ -2947,7 +2948,8 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
     int	lt, rt, md=(-1), cmp;
     H5G_entry_t	*ent = NULL;
     
-    FUNC_ENTER(H5F_mountpoint, FAIL);
+    FUNC_ENTER_NOAPI(H5F_mountpoint, FAIL);
+
     assert(find);
 
     /*
@@ -3006,7 +3008,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5G_entry_t		*loc = NULL;
     H5F_t		*child = NULL;
     
-    FUNC_ENTER(H5Fmount, FAIL);
+    FUNC_ENTER_API(H5Fmount, FAIL);
     H5TRACE4("e","isii",loc_id,name,child_id,plist_id);
 
     /* Check arguments */
@@ -3055,7 +3057,7 @@ H5Funmount(hid_t loc_id, const char *name)
 {
     H5G_entry_t		*loc = NULL;
     
-    FUNC_ENTER(H5Funmount, FAIL);
+    FUNC_ENTER_API(H5Funmount, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
     /* Check args */
@@ -3105,7 +3107,7 @@ H5Freopen(hid_t file_id)
     H5F_t	*new_file=NULL;
     hid_t	ret_value = -1;
     
-    FUNC_ENTER(H5Freopen, FAIL);
+    FUNC_ENTER_API(H5Freopen, FAIL);
     H5TRACE1("i","i",file_id);
 
     if (H5I_FILE!=H5I_get_type(file_id) || NULL==(old_file=H5I_object(file_id)))
@@ -3147,7 +3149,8 @@ done:
 unsigned
 H5F_get_intent(const H5F_t *f)
 {
-    FUNC_ENTER(H5F_get_intent, 0);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_get_intent);
 
     assert(f);
 
@@ -3180,7 +3183,7 @@ H5F_sizeof_addr(const H5F_t *f)
     size_t sizeof_addr = 0;
     H5P_genplist_t *plist;              /* Property list */
 
-    FUNC_ENTER(H5F_sizeof_addr, 0);
+    FUNC_ENTER_NOAPI(H5F_sizeof_addr, 0);
 
     assert(f);
     assert(f->shared);
@@ -3221,7 +3224,7 @@ H5F_sizeof_size(const H5F_t *f)
     size_t   sizeof_size = 0;
     H5P_genplist_t *plist;              /* Property list */
 
-    FUNC_ENTER(H5F_sizeof_size, 0);
+    FUNC_ENTER_NOAPI(H5F_sizeof_size, 0);
 
     assert(f);
     assert(f->shared);
@@ -3256,7 +3259,8 @@ H5F_sizeof_size(const H5F_t *f)
 hid_t
 H5F_get_driver_id(const H5F_t *f)
 {
-    FUNC_ENTER(H5F_get_driver_id, 0);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_get_driver_id);
 
     assert(f);
     assert(f->shared);
@@ -3287,7 +3291,7 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 {
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_get_fileno, FAIL);
+    FUNC_ENTER_NOAPI(H5F_get_fileno, FAIL);
 
     assert(f);
     assert(f->shared);
@@ -3338,7 +3342,7 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_
 {
     haddr_t		    abs_addr;
 
-    FUNC_ENTER(H5F_block_read, FAIL);
+    FUNC_ENTER_NOAPI(H5F_block_read, FAIL);
 
     assert (f);
     assert (f->shared);
@@ -3392,7 +3396,7 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     haddr_t		    abs_addr;
 
-    FUNC_ENTER(H5F_block_write, FAIL);
+    FUNC_ENTER_NOAPI(H5F_block_write, FAIL);
 
     assert (f);
     assert (f->shared);
@@ -3578,7 +3582,7 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     int     boot_vers, freespace_vers, obj_dir_vers, share_head_vers;
     H5P_genplist_t *plist;              /* Property list */
 
-    FUNC_ENTER(H5F_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5F_debug, FAIL);
 
     /* check args */
     assert(f);

@@ -431,7 +431,7 @@ H5TN_init_interface(void)\n\
 {\n\
    H5T_t	*dt = NULL;\n\
 \n\
-   FUNC_ENTER (H5TN_init_interface, FAIL);\n");
+   FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
 
     for (i = 0; i < nd; i++) {
 

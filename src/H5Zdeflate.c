@@ -57,7 +57,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
     int		status;
 #endif
     
-    FUNC_ENTER (H5Z_filter_deflate, 0);
+    FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0);
 
     /* Check arguments */
     if (cd_nelmts!=1 || cd_values[0]>9) {

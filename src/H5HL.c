@@ -113,7 +113,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
     hsize_t	total_size;		/*total heap size on disk	*/
     herr_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5HL_create, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_create, FAIL);
 
     /* check arguments */
     assert(f);
@@ -208,7 +208,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void * UNUSED udata1,
     size_t		free_block = H5HL_FREE_NULL;
     H5HL_t		*ret_value = NULL;
 
-    FUNC_ENTER(H5HL_load, NULL);
+    FUNC_ENTER_NOAPI(H5HL_load, NULL);
 
     /* check arguments */
     assert(f);
@@ -332,7 +332,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
     H5HL_free_t	*fl = heap->freelist;
     haddr_t	hdr_end_addr;
 
-    FUNC_ENTER(H5HL_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_flush, FAIL);
 
     /* check arguments */
     assert(f);
@@ -462,7 +462,7 @@ H5HL_read(H5F_t *f, haddr_t addr, size_t offset, size_t size, void *buf)
 {
     H5HL_t	*heap = NULL;
 
-    FUNC_ENTER(H5HL_read, NULL);
+    FUNC_ENTER_NOAPI(H5HL_read, NULL);
 
     /* check arguments */
     assert(f);
@@ -521,7 +521,7 @@ H5HL_peek(H5F_t *f, haddr_t addr, size_t offset)
     H5HL_t		*heap = NULL;
     const void		*retval = NULL;
 
-    FUNC_ENTER(H5HL_peek, NULL);
+    FUNC_ENTER_NOAPI(H5HL_peek, NULL);
 
     /* check arguments */
     assert(f);
@@ -592,7 +592,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     size_t	need_size, old_size, need_more;
     hbool_t	found;
 
-    FUNC_ENTER(H5HL_insert, (size_t)(-1));
+    FUNC_ENTER_NOAPI(H5HL_insert, (size_t)(-1));
 
     /* check arguments */
     assert(f);
@@ -754,7 +754,7 @@ H5HL_write(H5F_t *f, haddr_t addr, size_t offset, size_t size, const void *buf)
 {
     H5HL_t *heap = NULL;
 
-    FUNC_ENTER(H5HL_write, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_write, FAIL);
 
     /* check arguments */
     assert(f);
@@ -812,7 +812,7 @@ H5HL_remove(H5F_t *f, haddr_t addr, size_t offset, size_t size)
     H5HL_t		*heap = NULL;
     H5HL_free_t		*fl = NULL, *fl2 = NULL;
 
-    FUNC_ENTER(H5HL_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_remove, FAIL);
 
     /* check arguments */
     assert(f);
@@ -937,7 +937,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent, int fwidth)
     uint8_t		*marker = NULL;
     size_t		amount_free = 0;
 
-    FUNC_ENTER(H5HL_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_debug, FAIL);
 
     /* check arguments */
     assert(f);

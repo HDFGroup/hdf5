@@ -66,8 +66,8 @@ typedef struct H5FD_mpio_t {
 } H5FD_mpio_t;
 
 /* Prototypes */
-static haddr_t MPIOff_to_haddr(MPI_Offset mpi_off);
-static herr_t haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
+static haddr_t H5FD_mpio_MPIOff_to_haddr(MPI_Offset mpi_off);
+static herr_t H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
 
 /* Callbacks */
 static void *H5FD_mpio_fapl_get(H5FD_t *_file);
@@ -175,7 +175,7 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_mpio_init(void)
 {
-    FUNC_ENTER(H5FD_mpio_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_MPIO_g))
         H5FD_MPIO_g = H5FDregister(&H5FD_mpio_g);
@@ -244,7 +244,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
     
-    FUNC_ENTER(H5Pset_fapl_mpio, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL);
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
     /* Check arguments */
@@ -305,7 +305,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     H5FD_mpio_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5Pget_fapl_mpio, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL);
     H5TRACE3("e","ixx",fapl_id,comm,info);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -357,7 +357,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5Pset_dxpl_mpio, FAIL);
+    FUNC_ENTER_API(H5Pset_dxpl_mpio, FAIL);
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
     /* Check arguments */
@@ -401,7 +401,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     H5FD_mpio_dxpl_t	*dx;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5Pget_dxpl_mpio, FAIL);
+    FUNC_ENTER_API(H5Pget_dxpl_mpio, FAIL);
     H5TRACE2("e","ix",dxpl_id,xfer_mode);
 
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
@@ -439,7 +439,8 @@ H5FD_mpio_communicator(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_communicator, NULL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_communicator, NULL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -467,7 +468,8 @@ H5FD_mpio_mpi_rank(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_mpi_rank, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -495,7 +497,8 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_mpi_rank, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -529,7 +532,8 @@ H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype ftype,
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_setup, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_setup, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -575,7 +579,8 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     char msgbuf[1];
     MPI_Status rcvstat;
 
-    FUNC_ENTER(H5FD_mpio_wait_for_left_neighbor, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_wait_for_left_neighbor, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -621,7 +626,8 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
     char msgbuf[1];
 
-    FUNC_ENTER(H5FD_mpio_signal_right_neighbor, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_signal_right_neighbor, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -657,7 +663,8 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     H5FD_mpio_fapl_t	*fa = NULL;
 
-    FUNC_ENTER(H5FD_mpio_fapl_get, NULL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_get, NULL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -728,7 +735,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_mpio_fapl_t		_fa;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_mpio_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t']) {
@@ -841,7 +848,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->info = fa->info;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
-    file->eof = MPIOff_to_haddr(size);
+    file->eof = H5FD_mpio_MPIOff_to_haddr(size);
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
 
@@ -880,7 +887,7 @@ H5FD_mpio_close(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_close, FAIL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -928,7 +935,8 @@ H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_mpio_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_query, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -965,7 +973,8 @@ H5FD_mpio_get_eoa(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_mpio_get_eoa, HADDR_UNDEF);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -996,7 +1005,8 @@ H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_set_eoa, FAIL);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -1036,7 +1046,8 @@ H5FD_mpio_get_eof(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_mpio_get_eof, HADDR_UNDEF);
+
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -1112,7 +1123,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_mpio_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_read, FAIL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1125,7 +1136,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* some numeric conversions */
-    if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
+    if (H5FD_mpio_haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
     if ((hsize_t)size_i != size)
@@ -1159,7 +1170,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = file->btype;
         file_type = file->ftype;
-        if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
+        if (H5FD_mpio_haddr_to_MPIOff(file->disp, &mpi_disp)<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     } else {
         /*
@@ -1392,7 +1403,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_mpio_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_write, FAIL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1405,9 +1416,9 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* some numeric conversions */
-    if (haddr_to_MPIOff(addr, &mpi_off)<0)
+    if (H5FD_mpio_haddr_to_MPIOff(addr, &mpi_off)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
-    if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
+    if (H5FD_mpio_haddr_to_MPIOff(file->disp, &mpi_disp)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
     if ((hsize_t)size_i != size)
@@ -1441,7 +1452,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = file->btype;
         file_type = file->ftype;
-        if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
+        if (H5FD_mpio_haddr_to_MPIOff(file->disp, &mpi_disp)<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     } else {
         /*
@@ -1621,7 +1632,7 @@ H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
     MPI_Offset          mpi_off;
     herr_t              ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_mpio_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_flush, FAIL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1637,7 +1648,7 @@ H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
     if(file->eoa>file->last_eoa) {
 #ifdef OLD_WAY
         if (0==file->mpi_rank) {
-            if (haddr_to_MPIOff(file->eoa-1, &mpi_off)<0)
+            if (H5FD_mpio_haddr_to_MPIOff(file->eoa-1, &mpi_off)<0)
                 HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
             if (MPI_SUCCESS != MPI_File_read_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat))
                 HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at() failed");
@@ -1645,7 +1656,7 @@ H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
                 HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at() failed");
         } /* end if */
 #else /* OLD_WAY */
-        if (haddr_to_MPIOff(file->eoa, &mpi_off)<0)
+        if (H5FD_mpio_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
             HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
 
         /* Extend the file's size */
@@ -1683,7 +1694,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    MPIOff_to_haddr
+ * Function:    H5FD_mpio_MPIOff_to_haddr
  *
  * Purpose:     Convert an MPI_Offset value to haddr_t.
  *
@@ -1705,11 +1716,11 @@ done:
  *------------------------------------------------------------------------- 
  */
 static haddr_t
-MPIOff_to_haddr(MPI_Offset mpi_off)
+H5FD_mpio_MPIOff_to_haddr(MPI_Offset mpi_off)
 {
     haddr_t ret_value=HADDR_UNDEF;
 
-    FUNC_ENTER_NOINIT(MPIOff_to_haddr);
+    FUNC_ENTER_NOINIT(H5FD_mpio_MPIOff_to_haddr);
 
     if (mpi_off != (MPI_Offset)(haddr_t)mpi_off)
         ret_value=HADDR_UNDEF;
@@ -1721,7 +1732,7 @@ MPIOff_to_haddr(MPI_Offset mpi_off)
 
 
 /*-------------------------------------------------------------------------
- * Function:    haddr_to_MPIOff
+ * Function:    H5FD_mpio_haddr_to_MPIOff
  *
  * Purpose:     Convert an haddr_t value to MPI_Offset.
  *
@@ -1746,11 +1757,11 @@ MPIOff_to_haddr(MPI_Offset mpi_off)
  *-------------------------------------------------------------------------
  */
 static herr_t
-haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
+H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER_NOINIT(haddr_to_MPIOff);
+    FUNC_ENTER_NOINIT(H5FD_mpio_haddr_to_MPIOff);
 
     if (mpi_off)
         *mpi_off = (MPI_Offset)addr;

@@ -219,7 +219,7 @@ static int interface_initialize_g = 0;
  */
 hid_t H5FD_stream_init (void)
 {
-  FUNC_ENTER (H5FD_stream_init, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_init, FAIL);
 
   if (H5I_VFL != H5Iget_type (H5FD_STREAM_g))
   {
@@ -266,7 +266,7 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
   H5P_genplist_t *plist;      /* Property list pointer */
   herr_t             result;
 
-  FUNC_ENTER (H5Pset_fapl_stream, FAIL);
+  FUNC_ENTER_API(H5Pset_fapl_stream, FAIL);
   H5TRACE2 ("e", "ix", fapl_id, fapl);
 
   if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -317,7 +317,7 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
   H5FD_stream_fapl_t *this_fapl;
   H5P_genplist_t *plist;      /* Property list pointer */
 
-  FUNC_ENTER (H5Pget_fapl_stream, FAIL);
+  FUNC_ENTER_API(H5Pget_fapl_stream, FAIL);
   H5TRACE2("e","ix",fapl_id,fapl);
 
   if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -364,7 +364,7 @@ H5FD_stream_fapl_get (H5FD_t *_stream)
   H5FD_stream_fapl_t *fapl;
 
 
-  FUNC_ENTER (H5FD_stream_fapl_get, NULL);
+  FUNC_ENTER_NOAPI(H5FD_stream_fapl_get, NULL);
 
   if ((fapl = H5MM_calloc (sizeof (H5FD_stream_fapl_t))) == NULL)
   {
@@ -618,7 +618,7 @@ H5FD_stream_open (const char *filename,
   H5P_genplist_t *plist;        /* Property list pointer */
   H5FD_t *ret_value=NULL;       /* Function return value */
 
-  FUNC_ENTER (H5FD_stream_open, NULL);
+  FUNC_ENTER_NOAPI(H5FD_stream_open, NULL);
 
   /* Check arguments */
   if (filename == NULL|| *filename == '\0')
@@ -785,7 +785,7 @@ H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
   socklen_t fromlen;
   H5FD_STREAM_SOCKET_TYPE sock;
 
-  FUNC_ENTER (H5FD_stream_flush, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_flush, FAIL);
 
   /* Write to backing store */
   if (stream->dirty && ! H5FD_STREAM_ERROR_CHECK (stream->socket))
@@ -855,7 +855,7 @@ H5FD_stream_close (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
 
-  FUNC_ENTER (H5FD_stream_close, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_close, FAIL);
 
   /* Flush */
   if (H5FD_stream_flush (_stream,TRUE) != SUCCEED)
@@ -900,7 +900,7 @@ static herr_t
 H5FD_stream_query(const H5FD_t * UNUSED _f,
                   unsigned long *flags/*out*/)
 {
-    FUNC_ENTER (H5FD_stream_query, SUCCEED);
+    FUNC_ENTER_NOAPI(H5FD_stream_query, SUCCEED);
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -935,7 +935,7 @@ H5FD_stream_get_eoa (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
 
-  FUNC_ENTER (H5FD_stream_get_eoa, HADDR_UNDEF);
+  FUNC_ENTER_NOAPI(H5FD_stream_get_eoa, HADDR_UNDEF);
 
   FUNC_LEAVE (stream->eoa);
 }
@@ -963,7 +963,7 @@ H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
 
-  FUNC_ENTER (H5FD_stream_set_eoa, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_set_eoa, FAIL);
 
   if (ADDR_OVERFLOW (addr))
   {
@@ -1000,7 +1000,7 @@ H5FD_stream_get_eof (H5FD_t *_stream)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
 
-  FUNC_ENTER (H5FD_stream_get_eof, HADDR_UNDEF);
+  FUNC_ENTER_NOAPI(H5FD_stream_get_eof, HADDR_UNDEF);
 
   FUNC_LEAVE (MAX (stream->eof, stream->eoa));
 }
@@ -1036,7 +1036,7 @@ H5FD_stream_read (H5FD_t *_stream,
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   size_t        nbytes;
 
-  FUNC_ENTER (H5FD_stream_read, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_read, FAIL);
 
   assert (stream && stream->pub.cls);
   assert (buf);
@@ -1102,7 +1102,7 @@ H5FD_stream_write (H5FD_t *_stream,
 {
   H5FD_stream_t                *stream = (H5FD_stream_t *) _stream;
 
-  FUNC_ENTER (H5FD_stream_write, FAIL);
+  FUNC_ENTER_NOAPI(H5FD_stream_write, FAIL);
 
   assert (stream && stream->pub.cls);
   assert (buf);

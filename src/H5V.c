@@ -41,7 +41,7 @@ herr_t
 H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     hsize_t *size, hssize_t *stride1)
 {
-    FUNC_ENTER(H5V_stride_optimize1, FAIL);
+    FUNC_ENTER_NOAPI(H5V_stride_optimize1, FAIL);
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -90,7 +90,7 @@ herr_t
 H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     hsize_t *size, hssize_t *stride1, hssize_t *stride2)
 {
-    FUNC_ENTER(H5V_stride_optimize2, FAIL);
+    FUNC_ENTER_NOAPI(H5V_stride_optimize2, FAIL);
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -243,7 +243,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
     hsize_t     tmp;
     int		i;		/*counter				*/
 
-    FUNC_ENTER(H5V_hyper_stride, (HDabort(), 0));
+    FUNC_ENTER_NOAPI(H5V_hyper_stride, (HDabort(), 0));
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(size);
@@ -446,7 +446,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER(H5V_hyper_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5V_hyper_fill, FAIL);
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -534,7 +534,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER(H5V_hyper_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5V_hyper_copy, FAIL);
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -700,7 +700,7 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
     int	j;			/*counter			*/
     hbool_t	carry;			/*subtraction carray value	*/
 
-    FUNC_ENTER(H5V_stride_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5V_stride_fill, FAIL);
     assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(n, idx, size);
@@ -757,7 +757,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     int	j;				/*counters		*/
     hbool_t	carry;				/*carray for subtraction*/
 
-    FUNC_ENTER(H5V_stride_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5V_stride_copy, FAIL);
     assert (elmt_size<SIZET_MAX);
 
     if (n) {
@@ -828,7 +828,8 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     int	j;
     hbool_t	carry;
 
-    FUNC_ENTER(H5V_stride_copy2, FAIL);
+    FUNC_ENTER_NOAPI(H5V_stride_copy2, FAIL);
+
     assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(dst_n, dst_idx, dst_size);
@@ -879,7 +880,8 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
     size_t      items_left;         /* number of items left to copy 	*/
     uint8_t     *dst=(uint8_t*)_dst;/* alias for pointer arithmetic	*/
 
-    FUNC_ENTER(H5V_array_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5V_array_fill, FAIL);
+
     assert (dst);
     assert (src);
     assert (size < SIZET_MAX && size > 0);
@@ -937,7 +939,7 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
     hsize_t	    acc;	/*accumulator				*/
     int	    i;		/*counter				*/
 
-    FUNC_ENTER(H5V_array_offset, (HDabort(), 0));
+    FUNC_ENTER_NOAPI(H5V_array_offset, (HDabort(), 0));
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(total_size);

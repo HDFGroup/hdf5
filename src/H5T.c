@@ -231,7 +231,7 @@ static H5T_t * H5T_vlen_create(H5T_t *base);
 herr_t
 H5T_init(void)
 {
-    FUNC_ENTER(H5T_init, FAIL);
+    FUNC_ENTER_NOAPI(H5T_init, FAIL);
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE(SUCCEED);
 }
@@ -2137,7 +2137,7 @@ H5Tcreate(H5T_class_t type, size_t size)
     H5T_t	*dt = NULL;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Tcreate, FAIL);
+    FUNC_ENTER_API(H5Tcreate, FAIL);
     H5TRACE2("i","Ttz",type,size);
 
     /* check args */
@@ -2179,7 +2179,7 @@ H5Topen(hid_t loc_id, const char *name)
     H5T_t	*type = NULL;
     hid_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5Topen, FAIL);
+    FUNC_ENTER_API(H5Topen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
@@ -2228,7 +2228,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     
-    FUNC_ENTER (H5Tcommit, FAIL);
+    FUNC_ENTER_API(H5Tcommit, FAIL);
     H5TRACE3("e","isi",loc_id,name,type_id);
 
     /* Check arguments */
@@ -2274,7 +2274,7 @@ H5Tcommitted(hid_t type_id)
 {
     H5T_t	*type = NULL;
     
-    FUNC_ENTER (H5Tcommitted, FAIL);
+    FUNC_ENTER_API(H5Tcommitted, FAIL);
     H5TRACE1("b","i",type_id);
 
     /* Check arguments */
@@ -2319,7 +2319,7 @@ H5Tcopy(hid_t type_id)
     H5D_t	*dset = NULL;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Tcopy, FAIL);
+    FUNC_ENTER_API(H5Tcopy, FAIL);
     H5TRACE1("i","i",type_id);
 
     switch (H5I_get_type (type_id)) {
@@ -2374,7 +2374,7 @@ H5Tclose(hid_t type_id)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tclose, FAIL);
+    FUNC_ENTER_API(H5Tclose, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
@@ -2420,7 +2420,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     const H5T_t		*dt2 = NULL;
     htri_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5Tequal, FAIL);
+    FUNC_ENTER_API(H5Tequal, FAIL);
     H5TRACE2("b","ii",type1_id,type2_id);
 
     /* check args */
@@ -2465,7 +2465,7 @@ H5Tlock(hid_t type_id)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tlock, FAIL);
+    FUNC_ENTER_API(H5Tlock, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
@@ -2508,7 +2508,7 @@ H5Tget_class(hid_t type_id)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tget_class, H5T_NO_CLASS);
+    FUNC_ENTER_API(H5Tget_class, H5T_NO_CLASS);
     H5TRACE1("Tt","i",type_id);
 
     /* Check args */
@@ -2544,7 +2544,7 @@ H5T_get_class(const H5T_t *dt)
 {
     H5T_class_t ret_value;
 
-    FUNC_ENTER(H5T_get_class, H5T_NO_CLASS);
+    FUNC_ENTER_NOAPI(H5T_get_class, H5T_NO_CLASS);
 
     assert(dt);
     
@@ -2578,7 +2578,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER (H5Tdetect_class, FAIL);
+    FUNC_ENTER_API(H5Tdetect_class, FAIL);
     H5TRACE2("b","iTt",type,cls);
     
     /* Check args */
@@ -2614,7 +2614,7 @@ H5T_detect_class (H5T_t *dt, H5T_class_t cls)
 {
     int		i;
 
-    FUNC_ENTER (H5T_detect_class, FAIL);
+    FUNC_ENTER_NOAPI(H5T_detect_class, FAIL);
     
     assert(dt);
     assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
@@ -2674,7 +2674,7 @@ H5Tget_size(hid_t type_id)
     H5T_t	*dt = NULL;
     size_t	size;
 
-    FUNC_ENTER(H5Tget_size, 0);
+    FUNC_ENTER_API(H5Tget_size, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
@@ -2721,7 +2721,7 @@ H5Tset_size(hid_t type_id, size_t size)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_size, FAIL);
+    FUNC_ENTER_API(H5Tset_size, FAIL);
     H5TRACE2("e","iz",type_id,size);
 
     /* Check args */
@@ -2781,7 +2781,7 @@ H5Tget_order(hid_t type_id)
     H5T_t		*dt = NULL;
     H5T_order_t		order;
 
-    FUNC_ENTER(H5Tget_order, H5T_ORDER_ERROR);
+    FUNC_ENTER_API(H5Tget_order, H5T_ORDER_ERROR);
     H5TRACE1("To","i",type_id);
 
     /* Check args */
@@ -2825,7 +2825,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_order, FAIL);
+    FUNC_ENTER_API(H5Tset_order, FAIL);
     H5TRACE2("e","iTo",type_id,order);
 
     /* Check args */
@@ -2884,7 +2884,7 @@ H5Tget_precision(hid_t type_id)
     H5T_t	*dt = NULL;
     size_t	prec;
 
-    FUNC_ENTER(H5Tget_precision, 0);
+    FUNC_ENTER_API(H5Tget_precision, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
@@ -2940,7 +2940,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_precision, FAIL);
+    FUNC_ENTER_API(H5Tset_precision, FAIL);
     H5TRACE2("e","iz",type_id,prec);
 
     /* Check args */
@@ -3010,7 +3010,7 @@ H5Tget_offset(hid_t type_id)
     H5T_t	*dt = NULL;
     int	offset;
 
-    FUNC_ENTER(H5Tget_offset, -1);
+    FUNC_ENTER_API(H5Tget_offset, -1);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
@@ -3076,7 +3076,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_offset, FAIL);
+    FUNC_ENTER_API(H5Tset_offset, FAIL);
     H5TRACE2("e","iz",type_id,offset);
 
     /* Check args */
@@ -3129,7 +3129,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tget_pad, FAIL);
+    FUNC_ENTER_API(H5Tget_pad, FAIL);
     H5TRACE3("e","ixx",type_id,lsb,msb);
 
     /* Check args */
@@ -3173,7 +3173,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 {
     H5T_t *dt = NULL;
 
-    FUNC_ENTER(H5Tset_pad, FAIL);
+    FUNC_ENTER_API(H5Tset_pad, FAIL);
     H5TRACE3("e","iTpTp",type_id,lsb,msb);
 
     /* Check args */
@@ -3229,7 +3229,7 @@ H5Tget_sign(hid_t type_id)
     H5T_t		*dt = NULL;
     H5T_sign_t		sign;
 
-    FUNC_ENTER(H5Tget_sign, H5T_SGN_ERROR);
+    FUNC_ENTER_API(H5Tget_sign, H5T_SGN_ERROR);
     H5TRACE1("Ts","i",type_id);
 
     /* Check args */
@@ -3272,7 +3272,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_sign, FAIL);
+    FUNC_ENTER_API(H5Tset_sign, FAIL);
     H5TRACE2("e","iTs",type_id,sign);
 
     /* Check args */
@@ -3332,7 +3332,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tget_fields, FAIL);
+    FUNC_ENTER_API(H5Tget_fields, FAIL);
     H5TRACE6("e","ixxxxx",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
@@ -3385,7 +3385,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_fields, FAIL);
+    FUNC_ENTER_API(H5Tset_fields, FAIL);
     H5TRACE6("e","izzzzz",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
@@ -3463,7 +3463,7 @@ H5Tget_ebias(hid_t type_id)
     H5T_t	*dt = NULL;
     size_t	ebias;
 
-    FUNC_ENTER(H5Tget_ebias, 0);
+    FUNC_ENTER_API(H5Tget_ebias, 0);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
@@ -3505,7 +3505,7 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_ebias, FAIL);
+    FUNC_ENTER_API(H5Tset_ebias, FAIL);
     H5TRACE2("e","iz",type_id,ebias);
 
     /* Check args */
@@ -3554,7 +3554,7 @@ H5Tget_norm(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_norm_t	norm;
 
-    FUNC_ENTER(H5Tget_norm, H5T_NORM_ERROR);
+    FUNC_ENTER_API(H5Tget_norm, H5T_NORM_ERROR);
     H5TRACE1("Tn","i",type_id);
 
     /* Check args */
@@ -3598,7 +3598,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_norm, FAIL);
+    FUNC_ENTER_API(H5Tset_norm, FAIL);
     H5TRACE2("e","iTn",type_id,norm);
 
     /* Check args */
@@ -3651,7 +3651,7 @@ H5Tget_inpad(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_pad_t	pad;
 
-    FUNC_ENTER(H5Tget_inpad, H5T_PAD_ERROR);
+    FUNC_ENTER_API(H5Tget_inpad, H5T_PAD_ERROR);
     H5TRACE1("Tp","i",type_id);
 
     /* Check args */
@@ -3697,7 +3697,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_inpad, FAIL);
+    FUNC_ENTER_API(H5Tset_inpad, FAIL);
     H5TRACE2("e","iTp",type_id,pad);
 
     /* Check args */
@@ -3750,7 +3750,7 @@ H5Tget_cset(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_cset_t	cset;
 
-    FUNC_ENTER(H5Tget_cset, H5T_CSET_ERROR);
+    FUNC_ENTER_API(H5Tget_cset, H5T_CSET_ERROR);
     H5TRACE1("Tc","i",type_id);
 
     /* Check args */
@@ -3804,7 +3804,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_cset, FAIL);
+    FUNC_ENTER_API(H5Tset_cset, FAIL);
     H5TRACE2("e","iTc",type_id,cset);
 
     /* Check args */
@@ -3868,7 +3868,7 @@ H5Tget_strpad(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_str_t	strpad;
 
-    FUNC_ENTER(H5Tget_strpad, H5T_STR_ERROR);
+    FUNC_ENTER_API(H5Tget_strpad, H5T_STR_ERROR);
     H5TRACE1("Tz","i",type_id);
 
     /* Check args */
@@ -3932,7 +3932,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tset_strpad, FAIL);
+    FUNC_ENTER_API(H5Tset_strpad, FAIL);
     H5TRACE2("e","iTz",type_id,strpad);
 
     /* Check args */
@@ -3994,7 +3994,7 @@ H5Tget_nmembers(hid_t type_id)
     H5T_t	*dt = NULL;
     int	ret_value = FAIL;
 
-    FUNC_ENTER(H5Tget_num_members, FAIL);
+    FUNC_ENTER_API(H5Tget_num_members, FAIL);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
@@ -4043,7 +4043,7 @@ H5Tget_member_name(hid_t type_id, int membno)
     H5T_t	*dt = NULL;
     char	*ret_value = NULL;
 
-    FUNC_ENTER(H5Tget_member_name, NULL);
+    FUNC_ENTER_API(H5Tget_member_name, NULL);
 
     /* Check args */
     if (H5I_DATATYPE != H5I_get_type(type_id) ||
@@ -4103,7 +4103,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     int         ret_value = FAIL;
     int         nmembs, i;
 
-    FUNC_ENTER(H5Tget_member_index, FAIL);
+    FUNC_ENTER_API(H5Tget_member_index, FAIL);
     H5TRACE2("Is","is",type_id,name);
 
     /* Check arguments */
@@ -4163,7 +4163,7 @@ H5Tget_member_offset(hid_t type_id, int membno)
     H5T_t	*dt = NULL;
     size_t	offset = 0;
 
-    FUNC_ENTER(H5Tget_member_offset, 0);
+    FUNC_ENTER_API(H5Tget_member_offset, 0);
     H5TRACE2("z","iIs",type_id,membno);
 
     /* Check args */
@@ -4205,7 +4205,7 @@ H5Tget_member_class(hid_t type_id, int membno)
     H5T_t	*dt = NULL;
     H5T_class_t	ret_value = H5T_NO_CLASS;
 
-    FUNC_ENTER(H5Tget_member_class, H5T_NO_CLASS);
+    FUNC_ENTER_API(H5Tget_member_class, H5T_NO_CLASS);
     H5TRACE2("Tt","iIs",type_id,membno);
 
     /* Check args */
@@ -4252,7 +4252,7 @@ H5Tget_member_type(hid_t type_id, int membno)
     H5T_t	*dt = NULL, *memb_dt = NULL;
     hid_t	memb_type_id;
 
-    FUNC_ENTER(H5Tget_member_type, FAIL);
+    FUNC_ENTER_API(H5Tget_member_type, FAIL);
     H5TRACE2("i","iIs",type_id,membno);
 
     /* Check args */
@@ -4311,7 +4311,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     H5T_t	*parent = NULL;		/*the compound parent data type */
     H5T_t	*member = NULL;		/*the atomic member type	*/
 
-    FUNC_ENTER(H5Tinsert, FAIL);
+    FUNC_ENTER_API(H5Tinsert, FAIL);
     H5TRACE4("e","iszi",parent_id,name,offset,member_id);
 
     /* Check args */
@@ -4361,7 +4361,7 @@ H5Tpack(hid_t type_id)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tpack, FAIL);
+    FUNC_ENTER_API(H5Tpack, FAIL);
     H5TRACE1("e","i",type_id);
 
     /* Check args */
@@ -4408,7 +4408,7 @@ H5Tenum_create(hid_t parent_id)
     H5T_t	*dt = NULL;		/*new enumeration data type	*/
     hid_t	ret_value = FAIL;	/*return value			*/
     
-    FUNC_ENTER(H5Tenum_create, FAIL);
+    FUNC_ENTER_API(H5Tenum_create, FAIL);
     H5TRACE1("i","i",parent_id);
 
     /* Check args */
@@ -4464,7 +4464,7 @@ H5Tenum_insert(hid_t type, const char *name, void *value)
 {
     H5T_t	*dt=NULL;
     
-    FUNC_ENTER(H5Tenum_insert, FAIL);
+    FUNC_ENTER_API(H5Tenum_insert, FAIL);
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
@@ -4516,7 +4516,7 @@ H5Tget_super(hid_t type)
     H5T_t	*dt=NULL, *super=NULL;
     hid_t	ret_value=FAIL;
     
-    FUNC_ENTER(H5Tget_super, FAIL);
+    FUNC_ENTER_API(H5Tget_super, FAIL);
     H5TRACE1("i","i",type);
 
     if (H5I_DATATYPE!=H5I_get_type(type) ||
@@ -4562,7 +4562,7 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
 {
     H5T_t	*dt=NULL;
     
-    FUNC_ENTER(H5Tget_member_value, FAIL);
+    FUNC_ENTER_API(H5Tget_member_value, FAIL);
     H5TRACE3("i","iIsx",type,membno,value);
 
     if (H5I_DATATYPE!=H5I_get_type(type) ||
@@ -4613,7 +4613,7 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tenum_nameof, FAIL);
+    FUNC_ENTER_API(H5Tenum_nameof, FAIL);
     H5TRACE4("e","ixxz",type,value,name,size);
 
     /* Check args */
@@ -4663,7 +4663,7 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
 {
     H5T_t	*dt = NULL;
 
-    FUNC_ENTER(H5Tenum_valueof, FAIL);
+    FUNC_ENTER_API(H5Tenum_valueof, FAIL);
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
@@ -4769,7 +4769,7 @@ H5Tvlen_create(hid_t base_id)
     H5T_t	*dt = NULL;		/*new data type	*/
     hid_t	ret_value = FAIL;	/*return value			*/
     
-    FUNC_ENTER(H5Tvlen_create, FAIL);
+    FUNC_ENTER_API(H5Tvlen_create, FAIL);
     H5TRACE1("i","i",base_id);
 
     /* Check args */
@@ -4807,7 +4807,7 @@ H5Tset_tag(hid_t type_id, const char *tag)
 {
     H5T_t	*dt=NULL;
 
-    FUNC_ENTER(H5Tset_tag, FAIL);
+    FUNC_ENTER_API(H5Tset_tag, FAIL);
     H5TRACE2("e","is",type_id,tag);
 
     /* Check args */
@@ -4853,7 +4853,7 @@ H5Tget_tag(hid_t type_id)
     H5T_t	*dt=NULL;
     char	*ret_value=NULL;
 
-    FUNC_ENTER(H5Tget_tag, NULL);
+    FUNC_ENTER_API(H5Tget_tag, NULL);
 
     /* Check args */
     if (H5I_DATATYPE != H5I_get_type(type_id) || NULL == (dt = H5I_object(type_id)))
@@ -5067,7 +5067,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_t	*dst;		        /*destination data type desc	*/
     herr_t	ret_value=SUCCEED;	/*return value			*/
 
-    FUNC_ENTER(H5Tregister, FAIL);
+    FUNC_ENTER_API(H5Tregister, FAIL);
     H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
 
     /* Check args */
@@ -5118,7 +5118,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	nprint=0;		/*number of paths shut down	*/
     int	i;			/*counter			*/
 
-    FUNC_ENTER(H5T_unregister, FAIL);
+    FUNC_ENTER_NOAPI(H5T_unregister, FAIL);
 
     /* Remove matching entries from the soft list */
     if (H5T_PERS_DONTCARE==pers || H5T_PERS_SOFT==pers) {
@@ -5199,7 +5199,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 {
     H5T_t	*src=NULL, *dst=NULL;	/*data type descriptors		*/
 
-    FUNC_ENTER(H5Tunregister, FAIL);
+    FUNC_ENTER_API(H5Tunregister, FAIL);
     H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
 
     /* Check arguments */
@@ -5246,7 +5246,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5T_t	*src = NULL, *dst = NULL;
     H5T_path_t	*path = NULL;
 
-    FUNC_ENTER(H5Tfind, NULL);
+    FUNC_ENTER_API(H5Tfind, NULL);
     H5TRACE3("x","iix",src_id,dst_id,pcdata);
 
     /* Check args */
@@ -5307,7 +5307,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
     H5T_t		*src=NULL, *dst=NULL;	/*unatomized types	*/
     
-    FUNC_ENTER (H5Tconvert, FAIL);
+    FUNC_ENTER_API(H5Tconvert, FAIL);
     H5TRACE6("e","iihxxi",src_id,dst_id,nelmts,buf,background,plist_id);
 
     /* Check args */
@@ -5355,7 +5355,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
 H5T_overflow_t
 H5Tget_overflow(void)
 {
-    FUNC_ENTER(H5Tget_overflow, NULL);
+    FUNC_ENTER_API(H5Tget_overflow, NULL);
     H5TRACE0("x","");
 
     if (NULL==H5T_overflow_g) {
@@ -5388,9 +5388,11 @@ H5Tget_overflow(void)
 herr_t
 H5Tset_overflow(H5T_overflow_t func)
 {
-    FUNC_ENTER(H5Tset_overflow, FAIL);
+    FUNC_ENTER_API(H5Tset_overflow, FAIL);
     H5TRACE1("e","x",func);
+
     H5T_overflow_g = func;
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -5424,7 +5426,7 @@ H5T_create(H5T_class_t type, size_t size)
     H5T_t	*dt = NULL;
     hid_t	subtype;
 
-    FUNC_ENTER(H5T_create, NULL);
+    FUNC_ENTER_NOAPI(H5T_create, NULL);
 
     assert(size > 0);
 
@@ -5517,7 +5519,7 @@ H5T_isa(H5G_entry_t *ent)
 {
     htri_t	exists;
     
-    FUNC_ENTER(H5T_isa, FAIL);
+    FUNC_ENTER_NOAPI(H5T_isa, FAIL);
     assert(ent);
 
     if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
@@ -5551,7 +5553,8 @@ H5T_open (H5G_entry_t *loc, const char *name)
     H5T_t	*dt = NULL;
     H5G_entry_t	ent;
     
-    FUNC_ENTER (H5T_open, NULL);
+    FUNC_ENTER_NOAPI(H5T_open, NULL);
+
     assert (loc);
     assert (name && *name);
 
@@ -5592,7 +5595,8 @@ H5T_open_oid (H5G_entry_t *ent)
 {
     H5T_t	*dt = NULL;
     
-    FUNC_ENTER (H5T_open_oid, NULL);
+    FUNC_ENTER_NOAPI(H5T_open_oid, NULL);
+
     assert (ent);
 
     if (H5O_open (ent)<0) {
@@ -5653,7 +5657,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     int	i;
     char	*s;
 
-    FUNC_ENTER(H5T_copy, NULL);
+    FUNC_ENTER_NOAPI(H5T_copy, NULL);
 
     /* check args */
     assert(old_dt);
@@ -5843,7 +5847,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
     herr_t	ret_value = FAIL;
     H5F_t	*file = NULL;
     
-    FUNC_ENTER (H5T_commit, FAIL);
+    FUNC_ENTER_NOAPI(H5T_commit, FAIL);
 
     /*
      * Check arguments.  We cannot commit an immutable type because H5Tclose()
@@ -5920,7 +5924,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 herr_t
 H5T_lock (H5T_t *dt, hbool_t immutable)
 {
-    FUNC_ENTER (H5T_lock, FAIL);
+    FUNC_ENTER_NOAPI(H5T_lock, FAIL);
     assert (dt);
 
     switch (dt->state) {
@@ -5966,7 +5970,8 @@ H5T_close(H5T_t *dt)
     int	i;
     H5T_t	*parent = dt->parent;
 
-    FUNC_ENTER(H5T_close, FAIL);
+    FUNC_ENTER_NOAPI(H5T_close, FAIL);
+
     assert(dt);
 
     /*
@@ -6048,9 +6053,10 @@ H5T_is_atomic(const H5T_t *dt)
 {
     htri_t	ret_value = FAIL;
     
-    FUNC_ENTER(H5T_is_atomic, FAIL);
+    FUNC_ENTER_NOAPI(H5T_is_atomic, FAIL);
 
     assert(dt);
+
     if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_VLEN!=dt->type && H5T_OPAQUE!=dt->type && H5T_ARRAY!=dt->type) {
 	ret_value = TRUE;
     } else {
@@ -6096,7 +6102,7 @@ H5T_set_size(H5T_t *dt, size_t size)
 {
     size_t	prec, offset;
 
-    FUNC_ENTER(H5T_set_size, FAIL);
+    FUNC_ENTER_NOAPI(H5T_set_size, FAIL);
 
     /* Check args */
     assert(dt);
@@ -6236,7 +6242,8 @@ H5T_set_size(H5T_t *dt, size_t size)
 size_t
 H5T_get_size(const H5T_t *dt)
 {
-    FUNC_ENTER(H5T_get_size, 0);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5T_get_size);
 
     /* check args */
     assert(dt);
@@ -6279,7 +6286,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 {
     size_t	offset, size;
 
-    FUNC_ENTER(H5T_set_precision, FAIL);
+    FUNC_ENTER_NOAPI(H5T_set_precision, FAIL);
 
     /* Check args */
     assert(dt);
@@ -6394,7 +6401,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 herr_t
 H5T_set_offset(H5T_t *dt, size_t offset)
 {
-    FUNC_ENTER(H5T_set_offset, FAIL);
+    FUNC_ENTER_NOAPI(H5T_set_offset, FAIL);
 
     /* Check args */
     assert(dt);
@@ -6449,7 +6456,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     int		idx, i;
     size_t		total_size;
     
-    FUNC_ENTER(H5T_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5T_insert, FAIL);
 
     /* check args */
     assert(parent && H5T_COMPOUND == parent->type);
@@ -6542,7 +6549,7 @@ H5T_pack(H5T_t *dt)
     int		i;
     size_t	offset;
 
-    FUNC_ENTER(H5T_pack, FAIL);
+    FUNC_ENTER_NOAPI(H5T_pack, FAIL);
 
     assert(dt);
 
@@ -6598,7 +6605,7 @@ H5T_sort_value(H5T_t *dt, int *map)
     hbool_t	swapped;
     uint8_t	tbuf[32];
 
-    FUNC_ENTER(H5T_sort_value, FAIL);
+    FUNC_ENTER_NOAPI(H5T_sort_value, FAIL);
 
     /* Check args */
     assert(dt);
@@ -6707,7 +6714,7 @@ H5T_sort_name(H5T_t *dt, int *map)
     hbool_t	swapped;
     uint8_t	tbuf[32];
 
-    FUNC_ENTER(H5T_sort_name, FAIL);
+    FUNC_ENTER_NOAPI(H5T_sort_name, FAIL);
 
     /* Check args */
     assert(dt);
@@ -6814,7 +6821,8 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
     char	**names=NULL;
     uint8_t	*values=NULL;
     
-    FUNC_ENTER(H5T_enum_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5T_enum_insert, FAIL);
+
     assert(dt);
     assert(name && *name);
     assert(value);
@@ -6889,7 +6897,7 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     int	lt, md, rt;		/*indices for binary search	*/
     int	cmp;			/*comparison result		*/
     
-    FUNC_ENTER(H5T_enum_nameof, NULL);
+    FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL);
 
     /* Check args */
     assert(dt && H5T_ENUM==dt->type);
@@ -6958,7 +6966,7 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     int	lt, md, rt;		/*indices for binary search	*/
     int	cmp;			/*comparison result		*/
     
-    FUNC_ENTER(H5T_enum_nameof, FAIL);
+    FUNC_ENTER_NOAPI(H5T_enum_nameof, FAIL);
 
     /* Check args */
     assert(dt && H5T_ENUM==dt->type);
@@ -7023,7 +7031,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
     hbool_t	swapped;
     size_t	base_size;
 
-    FUNC_ENTER(H5T_cmp, 0);
+    FUNC_ENTER_NOAPI(H5T_cmp, 0);
 
     /* the easy case */
     if (dt1 == dt2) HGOTO_DONE(0);
@@ -7433,7 +7441,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     int	i;			/*counter			*/
     int	nprint=0;		/*lines of output printed	*/
 
-    FUNC_ENTER(H5T_path_find, NULL);
+    FUNC_ENTER_NOAPI(H5T_path_find, NULL);
+
     assert((!src && !dst) || (src && dst));
 
     /*
@@ -7730,7 +7739,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
     H5_timer_t		timer;
 #endif
 
-    FUNC_ENTER(H5T_convert, FAIL);
+    FUNC_ENTER_NOAPI(H5T_convert, FAIL);
 
 #ifdef H5T_DEBUG
     if (H5DEBUG(T)) H5_timer_begin(&timer);
@@ -7774,7 +7783,8 @@ H5T_entof (H5T_t *dt)
 {
     H5G_entry_t		*ret_value = NULL;
     
-    FUNC_ENTER (H5T_entof, NULL);
+    FUNC_ENTER_NOAPI(H5T_entof, NULL);
+
     assert (dt);
 
     switch (dt->state) {
@@ -7814,7 +7824,8 @@ H5T_is_immutable(H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER(H5T_is_immutable, FAIL);
+    FUNC_ENTER_NOAPI(H5T_is_immutable, FAIL);
+
     assert(dt);
 
     if(dt->state == H5T_STATE_IMMUTABLE)
@@ -7849,7 +7860,7 @@ H5T_get_ref_type(const H5T_t *dt)
 {
     H5R_type_t ret_value = H5R_BADTYPE;
 
-    FUNC_ENTER(H5T_get_ref_type, H5R_BADTYPE);
+    FUNC_ENTER_NOAPI(H5T_get_ref_type, H5R_BADTYPE);
 
     assert(dt);
 
@@ -7896,7 +7907,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     int    i;                  /* local index variable */
     hid_t	ret_value = FAIL;	/* return value			*/
     
-    FUNC_ENTER(H5Tarray_create, FAIL);
+    FUNC_ENTER_API(H5Tarray_create, FAIL);
     H5TRACE4("i","iIs*h*Is",base_id,ndims,dim,perm);
 
     /* Check args */
@@ -7950,7 +7961,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     H5T_t	*ret_value = NULL;		/*new array data type	*/
     int    i;                  /* local index variable */
 
-    FUNC_ENTER(H5T_array_create, NULL);
+    FUNC_ENTER_NOAPI(H5T_array_create, NULL);
 
     assert(base);
     assert(ndims>0 && ndims<=H5S_MAX_RANK);
@@ -8014,7 +8025,7 @@ H5Tget_array_ndims(hid_t type_id)
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
     int	ret_value = FAIL;	    /* return value			*/
     
-    FUNC_ENTER(H5Tget_array_ndims, FAIL);
+    FUNC_ENTER_API(H5Tget_array_ndims, FAIL);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
@@ -8052,7 +8063,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     herr_t	ret_value = SUCCEED;	/* return value			*/
     int    i;                  /* Local index variable */
     
-    FUNC_ENTER(H5Tget_array_dims, FAIL);
+    FUNC_ENTER_API(H5Tget_array_dims, FAIL);
     H5TRACE3("e","i*h*Is",type_id,dims,perm);
 
     /* Check args */
@@ -8162,7 +8173,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     size_t	k, base_size;
     uint64_t	tmp;
 
-    FUNC_ENTER(H5T_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5T_debug, FAIL);
 
     /* Check args */
     assert(dt);

@@ -71,7 +71,7 @@ static int          	interface_initialize_g = 0;
 herr_t 
 H5_init_library(void)
 {
-    FUNC_ENTER(H5_init_library, FAIL);
+    FUNC_ENTER_NOAPI(H5_init_library, FAIL);
 
     /*
      * Make sure the package information is updated.
@@ -291,7 +291,7 @@ H5garbage_collect(void)
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5garbage_collect, FAIL);
+    FUNC_ENTER_API(H5garbage_collect, FAIL);
 
     /* Call the garbage collection routines in the library */
     H5FL_garbage_coll();
@@ -335,7 +335,7 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5set_free_list_limits, FAIL);
+    FUNC_ENTER_API(H5set_free_list_limits, FAIL);
 
     /* Call the free list function to actually set the limits */
     H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
@@ -455,7 +455,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5get_libversion, FAIL);
+    FUNC_ENTER_API(H5get_libversion, FAIL);
 
     /* Set the version information */
     if (majnum) *majnum = H5_VERS_MAJOR;
@@ -495,7 +495,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;
 
-    FUNC_ENTER_NOINIT(H5check_version);
+    FUNC_ENTER_API_NOINIT(H5check_version);
     
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
 	H5_VERS_RELEASE!=relnum) {
@@ -562,7 +562,7 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 herr_t
 H5open(void)
 {
-    FUNC_ENTER(H5open, FAIL);
+    FUNC_ENTER_API(H5open, FAIL);
     /* all work is done by FUNC_ENTER() */
     FUNC_LEAVE(SUCCEED);
 }
@@ -590,7 +590,7 @@ H5close (void)
      * thing just to release it all right away.  It is safe to call this
      * function for an uninitialized library.
      */
-    FUNC_ENTER_NOINIT(H5close);
+    FUNC_ENTER_API_NOINIT(H5close);
 
     H5_term_library();
 

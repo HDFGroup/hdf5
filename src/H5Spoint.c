@@ -82,7 +82,7 @@ const H5S_mconv_t	H5S_POINT_MCONV[1] = {{
 static herr_t
 H5S_point_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
 {
-    FUNC_ENTER (H5S_point_init, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_init, FAIL);
 
     /* Check args */
     assert (space && H5S_SEL_POINTS==space->select.type);
@@ -124,7 +124,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
     unsigned i;                 /* Counter */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_add, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_add, FAIL);
 
     assert(space);
     assert(num_elem>0);
@@ -203,7 +203,7 @@ static hsize_t
 H5S_point_favail (const H5S_t * UNUSED space,
 		  const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
-    FUNC_ENTER (H5S_point_favail, 0);
+    FUNC_ENTER_NOAPI(H5S_point_favail, 0);
 
     /* Check args */
     assert (space && H5S_SEL_POINTS==space->select.type);
@@ -257,7 +257,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     unsigned	    u;				/*counters		*/
     hsize_t  	num_read;       /* number of elements read into buffer */
 
-    FUNC_ENTER (H5S_point_fgath, 0);
+    FUNC_ENTER_NOAPI(H5S_point_fgath, 0);
 
     /* Check args */
     assert (f);
@@ -347,7 +347,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     unsigned	u;				/*counters		*/
     hsize_t  num_written;    /* number of elements written from buffer */
 
-    FUNC_ENTER (H5S_point_fscat, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_fscat, FAIL);
 
     /* Check args */
     assert (f);
@@ -434,7 +434,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
     int	i;				/*counters		*/
     hsize_t num_gath;        /* number of elements gathered */
 
-    FUNC_ENTER (H5S_point_mgath, 0);
+    FUNC_ENTER_NOAPI(H5S_point_mgath, 0);
 
     /* Check args */
     assert (buf);
@@ -504,7 +504,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
     int	i;				/*counters		*/
     hsize_t num_scat;        /* Number of elements scattered */
 
-    FUNC_ENTER (H5S_point_mscat, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_mscat, FAIL);
 
     /* Check args */
     assert (tconv_buf);
@@ -564,7 +564,8 @@ herr_t
 H5S_point_release (H5S_t *space)
 {
     H5S_pnt_node_t *curr, *next;        /* Point selection nodes */
-    FUNC_ENTER (H5S_point_release, FAIL);
+
+    FUNC_ENTER_NOAPI(H5S_point_release, FAIL);
 
     /* Check args */
     assert (space);
@@ -608,7 +609,7 @@ H5S_point_release (H5S_t *space)
 hsize_t
 H5S_point_npoints (const H5S_t *space)
 {
-    FUNC_ENTER (H5S_point_npoints, 0);
+    FUNC_ENTER_NOAPI(H5S_point_npoints, 0);
 
     /* Check args */
     assert (space);
@@ -641,7 +642,7 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
     H5S_pnt_node_t *curr, *new_node, *new_head;    /* Point information nodes */
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_point_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_copy, FAIL);
 
     assert(src);
     assert(dst);
@@ -706,7 +707,7 @@ H5S_point_select_valid (const H5S_t *space)
     unsigned u;                   /* Counter */
     htri_t ret_value=TRUE;     /* return value */
 
-    FUNC_ENTER (H5S_point_select_valid, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_valid, FAIL);
 
     assert(space);
 
@@ -755,7 +756,7 @@ H5S_point_select_serial_size (const H5S_t *space)
     H5S_pnt_node_t *curr;       /* Point information nodes */
     hssize_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_point_select_serial_size, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_serial_size, FAIL);
 
     assert(space);
 
@@ -804,7 +805,7 @@ H5S_point_select_serialize (const H5S_t *space, uint8_t *buf)
     unsigned u;                /* local counting variable */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_select_serialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_serialize, FAIL);
 
     assert(space);
 
@@ -874,7 +875,7 @@ H5S_point_select_deserialize (H5S_t *space, const uint8_t *buf)
     unsigned i,j;              /* local counting variables */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_select_deserialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_deserialize, FAIL);
 
     /* Check args */
     assert(space);
@@ -943,7 +944,7 @@ H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
     int i;                     /* index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_point_bounds, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_bounds, FAIL);
 
     assert(space);
     assert(start);
@@ -994,7 +995,7 @@ H5S_point_select_contiguous(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_select_contiguous, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_contiguous, FAIL);
 
     assert(space);
 
@@ -1031,7 +1032,7 @@ H5S_point_select_single(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_select_single, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_single, FAIL);
 
     assert(space);
 
@@ -1071,7 +1072,7 @@ H5S_point_select_regular(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_point_select_regular, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_regular, FAIL);
 
     /* Check args */
     assert(space);
@@ -1121,7 +1122,7 @@ herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_select_elements, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_elements, FAIL);
 
     /* Check args */
     assert(space);
@@ -1194,7 +1195,7 @@ herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5Sselect_elements, FAIL);
+    FUNC_ENTER_API(H5Sselect_elements, FAIL);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) ||
@@ -1267,7 +1268,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     unsigned u;             /* Local index variable */
     herr_t ret_value=0;     /* return value */
 
-    FUNC_ENTER (H5S_point_select_iterate, 0);
+    FUNC_ENTER_NOAPI(H5S_point_select_iterate, 0);
 
     assert(buf);
     assert(space);
@@ -1345,7 +1346,7 @@ H5S_point_select_fill(const void *fill, size_t fill_size, const H5S_t *space, vo
     int i;                  /* Index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_point_select_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5S_point_select_fill, FAIL);
 
     /* Check args */
     assert(fill);

@@ -149,7 +149,7 @@ hssize_t H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     hssize_t	ret_value = FAIL;	/*return value			*/
 
-    FUNC_ENTER (H5T_vlen_seq_mem_getlen, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_getlen, FAIL);
 
     /* check parameters */
     assert(vl);
@@ -178,7 +178,7 @@ herr_t H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER (H5T_vlen_seq_mem_read, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_read, FAIL);
 
     /* check parameters */
     assert(vl && vl->p);
@@ -212,7 +212,7 @@ herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     size_t len;
     H5P_genplist_t *plist;      /* Property list */
 
-    FUNC_ENTER (H5T_vlen_seq_mem_write, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_write, FAIL);
 
     /* check parameters */
     assert(vl);
@@ -277,7 +277,7 @@ hssize_t H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     hssize_t	ret_value = FAIL;	/*return value			*/
 
-    FUNC_ENTER (H5T_vlen_str_mem_getlen, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_str_mem_getlen, FAIL);
 
     /* check parameters */
     assert(s);
@@ -306,7 +306,7 @@ herr_t H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER (H5T_vlen_str_mem_read, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_str_mem_read, FAIL);
 
     /* check parameters */
     assert(s);
@@ -340,7 +340,7 @@ herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, vo
     size_t len;
     H5P_genplist_t *plist;      /* Property list */
 
-    FUNC_ENTER (H5T_vlen_str_mem_write, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_str_mem_write, FAIL);
 
     /* check parameters */
     assert(buf);
@@ -396,7 +396,7 @@ hssize_t H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the disk VL information */
     hssize_t	ret_value = FAIL;	/*return value			*/
 
-    FUNC_ENTER (H5T_vlen_disk_getlen, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_disk_getlen, FAIL);
 
     /* check parameters */
     assert(vl);
@@ -427,7 +427,7 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
     H5HG_t hobjid;
     uint32_t seq_len;
 
-    FUNC_ENTER (H5T_vlen_disk_read, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_disk_read, FAIL);
 
     /* check parameters */
     assert(vl);
@@ -472,7 +472,7 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     H5HG_t hobjid;
     size_t len;
 
-    FUNC_ENTER (H5T_vlen_disk_write, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_disk_write, FAIL);
 
     /* check parameters */
     assert(vl);
@@ -645,7 +645,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     H5P_genplist_t *plist;      /* Property list */
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5T_vlen_reclaim, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_reclaim, FAIL);
 
     assert(elem);
     assert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -709,7 +709,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
     int accum_change=0;    /* Amount of change in the offset of the fields */
     size_t old_size;        /* Previous size of a field */
 
-    FUNC_ENTER(H5T_vlen_mark, FAIL);
+    FUNC_ENTER_NOAPI(H5T_vlen_mark, FAIL);
 
     assert(dt);
     assert(loc>H5T_VLEN_BADLOC && loc<H5T_VLEN_MAXLOC);

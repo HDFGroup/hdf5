@@ -139,7 +139,7 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_family_init(void)
 {
-    FUNC_ENTER(H5FD_family_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FDregister(&H5FD_family_g);
@@ -180,7 +180,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     H5FD_family_fapl_t	fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5Pset_fapl_family, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_family, FAIL);
     H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
     
     /* Check arguments */
@@ -233,7 +233,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     H5FD_family_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5Pget_fapl_family, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_family, FAIL);
     H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -278,7 +278,7 @@ H5FD_family_fapl_get(H5FD_t *_file)
     H5FD_family_fapl_t	*fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_family_fapl_get, NULL);
+    FUNC_ENTER_NOAPI(H5FD_family_fapl_get, NULL);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_family_fapl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -315,7 +315,7 @@ H5FD_family_fapl_copy(const void *_old_fa)
     H5FD_family_fapl_t *new_fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_family_fapl_copy, NULL);
+    FUNC_ENTER_NOAPI(H5FD_family_fapl_copy, NULL);
 
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_family_fapl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -357,7 +357,7 @@ H5FD_family_fapl_free(void *_fa)
 {
     H5FD_family_fapl_t	*fa = (H5FD_family_fapl_t*)_fa;
 
-    FUNC_ENTER(H5FD_family_fapl_free, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_fapl_free, FAIL);
 
     H5I_dec_ref(fa->memb_fapl_id);
     H5MM_xfree(fa);
@@ -389,7 +389,7 @@ H5FD_family_dxpl_copy(const void *_old_dx)
     H5FD_family_dxpl_t *new_dx = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_family_dxpl_copy, NULL);
+    FUNC_ENTER_NOAPI(H5FD_family_dxpl_copy, NULL);
 
     if (NULL==(new_dx=H5MM_malloc(sizeof(H5FD_family_dxpl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -424,7 +424,7 @@ H5FD_family_dxpl_free(void *_dx)
 {
     H5FD_family_dxpl_t	*dx = (H5FD_family_dxpl_t*)_dx;
 
-    FUNC_ENTER(H5FD_family_dxpl_free, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_dxpl_free, FAIL);
 
     H5I_dec_ref(dx->memb_dxpl_id);
     H5MM_xfree(dx);
@@ -462,7 +462,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5FD_family_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_family_open, NULL);
 
     /* Check arguments */
     if (!name || !*name)
@@ -588,7 +588,7 @@ H5FD_family_close(H5FD_t *_file)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     int			i, nerrors=0;
 
-    FUNC_ENTER(H5FD_family_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_close, FAIL);
 
     /* Close as many members as possible */
     for (i=0; i<file->nmembs; i++) {
@@ -641,7 +641,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
     int ret_value=(H5FD_VFD_DEFAULT);
 
-    FUNC_ENTER(H5FD_family_cmp, H5FD_VFD_DEFAULT);
+    FUNC_ENTER_NOAPI(H5FD_family_cmp, H5FD_VFD_DEFAULT);
 
     assert(f1->nmembs>=1 && f1->memb[0]);
     assert(f2->nmembs>=1 && f2->memb[0]);
@@ -674,7 +674,7 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER(H5FD_family_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_query, FAIL);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -711,7 +711,7 @@ H5FD_family_get_eoa(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
 
-    FUNC_ENTER(H5FD_family_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_family_get_eoa, HADDR_UNDEF);
 
     FUNC_LEAVE(file->eoa);
 }
@@ -741,7 +741,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
     int			i;
     char		memb_name[4096];
 
-    FUNC_ENTER(H5FD_family_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_set_eoa, FAIL);
 
     for (i=0; addr || i<file->nmembs; i++) {
 
@@ -811,7 +811,7 @@ H5FD_family_get_eof(H5FD_t *_file)
     haddr_t		eof=0;
     int			i;
 
-    FUNC_ENTER(H5FD_family_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_family_get_eof, HADDR_UNDEF);
 
     /*
      * Find the last member that has a non-zero EOF and break out of the loop
@@ -869,7 +869,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 #endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_family_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_read, FAIL);
 
     /*
      * Get the member data transfer property list. If the transfer property
@@ -947,7 +947,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 #endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5FD_family_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_write, FAIL);
 
     /*
      * Get the member data transfer property list. If the transfer property
@@ -1014,7 +1014,7 @@ H5FD_family_flush(H5FD_t *_file, unsigned closing)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     int			i, nerrors=0;
 
-    FUNC_ENTER(H5FD_family_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_family_flush, FAIL);
 
     for (i=0; i<file->nmembs; i++)
         if (file->memb[i] && H5FDflush(file->memb[i],closing)<0)

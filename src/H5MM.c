@@ -129,7 +129,7 @@ H5MM_strdup(const char *s)
 {
     char	*mem;
 
-    FUNC_ENTER (H5MM_strdup, NULL);
+    FUNC_ENTER_NOAPI(H5MM_strdup, NULL);
 
     if (!s) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,

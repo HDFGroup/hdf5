@@ -154,7 +154,7 @@ H5S_hyper_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_iter)
     H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
     unsigned u;                    /* Index variable */
 
-    FUNC_ENTER (H5S_hyper_init, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_init, FAIL);
 
     /* Check args */
     assert(space && H5S_SEL_HYPERSLABS==space->select.type);
@@ -226,7 +226,7 @@ H5S_hyper_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_iter)
 herr_t
 H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter)
 {
-    FUNC_ENTER (H5S_hyper_sel_iter_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_sel_iter_release, FAIL);
 
     /* Check args */
     assert (sel_iter);
@@ -266,7 +266,7 @@ static hsize_t
 H5S_hyper_favail (const H5S_t * UNUSED space,
 		  const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
-    FUNC_ENTER (H5S_hyper_favail, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_favail, 0);
 
     /* Check args */
     assert (space && H5S_SEL_HYPERSLABS==space->select.type);
@@ -1369,7 +1369,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t  num_read=0;       /* number of elements read into buffer */
     herr_t  ret_value=SUCCEED;
 
-    FUNC_ENTER (H5S_hyper_fgath, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_fgath, 0);
 
     /* Check args */
     assert (f);
@@ -2388,7 +2388,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t  num_written=0;       /* number of elements read into buffer */
     herr_t  ret_value=SUCCEED;
 
-    FUNC_ENTER (H5S_hyper_fscat, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_fscat, 0);
 
     /* Check args */
     assert (f);
@@ -3218,7 +3218,7 @@ H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 {
     hsize_t  num_read;       /* number of elements read into buffer */
 
-    FUNC_ENTER (H5S_hyper_mgath, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_mgath, 0);
 
     /* Check args */
     assert (elmt_size>0);
@@ -4044,7 +4044,7 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 {
     hsize_t  num_written;            /* number of elements written into buffer */
 
-    FUNC_ENTER (H5S_hyper_mscat, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_mscat, 0);
 
     /* Check args */
     assert (elmt_size>0);
@@ -4088,7 +4088,7 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 hsize_t
 H5S_hyper_npoints (const H5S_t *space)
 {
-    FUNC_ENTER (H5S_hyper_npoints, 0);
+    FUNC_ENTER_NOAPI(H5S_hyper_npoints, 0);
 
     /* Check args */
     assert (space);
@@ -4661,7 +4661,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     unsigned u;                    /* Counters */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_hyper_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_copy, FAIL);
 
     assert(src);
     assert(dst);
@@ -4802,7 +4802,7 @@ H5S_hyper_select_valid (const H5S_t *space)
     unsigned u;                    /* Counter */
     htri_t ret_value=TRUE;      /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_valid, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_valid, FAIL);
 
     assert(space);
 
@@ -4866,7 +4866,7 @@ H5S_hyper_span_nblocks (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_t *span;     /* Hyperslab span */
     hssize_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_span_nblocks, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_span_nblocks, FAIL);
 
     /* Count the number of elements in the span tree */
     if(spans==NULL)
@@ -4920,7 +4920,7 @@ H5S_hyper_select_serial_size (const H5S_t *space)
     hssize_t block_count;       /* block counter for regular hyperslabs */
     hssize_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_serial_size, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_serial_size, FAIL);
 
     assert(space);
 
@@ -5063,7 +5063,7 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
     int done;          /* Whether we are done with the iteration */
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_serialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_serialize, FAIL);
 
     assert(space);
 
@@ -5220,7 +5220,7 @@ H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
     unsigned i,j;              	/* local counting variables */
     herr_t ret_value=FAIL;  	/* return value */
 
-    FUNC_ENTER (H5S_hyper_select_deserialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_deserialize, FAIL);
 
     /* Check args */
     assert(space);
@@ -5317,7 +5317,7 @@ H5S_hyper_span_blocklist(H5S_hyper_span_info_t *spans, hssize_t start[], hssize_
     hsize_t u;                  /* Index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_hyper_span_blocklist, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_span_blocklist, FAIL);
 
     /* Sanity checks */
     assert(spans);
@@ -5479,7 +5479,7 @@ H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_hyper_bounds, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_bounds, FAIL);
 
     assert(space);
     assert(start);
@@ -5540,7 +5540,7 @@ H5S_hyper_select_contiguous(const H5S_t *space)
         large_contiguous;           /* Flag for large contiguous block */
     htri_t ret_value=FALSE;         /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_contiguous, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_contiguous, FAIL);
 
     assert(space);
 
@@ -5712,7 +5712,7 @@ H5S_hyper_select_single(const H5S_t *space)
     unsigned u;                     /* index variable */
     htri_t ret_value=FALSE;         /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_single, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_single, FAIL);
 
     assert(space);
 
@@ -5789,7 +5789,7 @@ H5S_hyper_select_regular(const H5S_t *space)
 {
     htri_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_regular, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_regular, FAIL);
 
     /* Check args */
     assert(space);
@@ -6225,7 +6225,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     H5T_t *dt;                  /* Datatype structure */
     herr_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_iterate, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_iterate, FAIL);
 
     assert(buf);
     assert(space);
@@ -6300,7 +6300,7 @@ H5S_hyper_release (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;
 
-    FUNC_ENTER (H5S_hyper_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_release, FAIL);
 
     /* Check args */
     assert (space && H5S_SEL_HYPERSLABS==space->select.type);
@@ -6702,7 +6702,7 @@ H5S_hyper_select_fill(const void *fill, size_t fill_size, const H5S_t *space, vo
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_hyper_select_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_select_fill, FAIL);
 
     /* Check args */
     assert(fill);
@@ -8153,7 +8153,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_select_hyperslab, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_hyperslab, FAIL);
 
     /* Check args */
     assert(space);
@@ -8387,7 +8387,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
 
-    FUNC_ENTER (H5Sselect_hyperslab, FAIL);
+    FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
 
     /* Check args */
@@ -8681,7 +8681,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t ret_value=FAIL;    /* return value */
 
-    FUNC_ENTER (H5S_select_hyperslab, FAIL);
+    FUNC_ENTER_NOAPI (H5S_select_hyperslab, FAIL);
 
     /* Check args */
     assert(space);
@@ -8913,7 +8913,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
 
-    FUNC_ENTER (H5Sselect_hyperslab, FAIL);
+    FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
 
     /* Check args */
@@ -8971,7 +8971,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
     H5S_t	*new_space = NULL;  /* New dataspace created */
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER (H5Scombine_hyperslab, FAIL);
+    FUNC_ENTER_API(H5Scombine_hyperslab, FAIL);
     H5TRACE6("i","iSs*Hs*h*h*h",space_id,op,start,stride,count,block);
 
     /* Check args */
@@ -9081,7 +9081,7 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5S_t	*new_space = NULL;      /* New Dataspace */
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER (H5Scombine_select, FAIL);
+    FUNC_ENTER_API(H5Scombine_select, FAIL);
     H5TRACE3("i","iSsi",space1_id,op,space2_id);
 
     /* Check args */
@@ -9195,7 +9195,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     H5S_t	*space2;                /* Second Dataspace */
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER (H5Sselect_select, FAIL);
+    FUNC_ENTER_API(H5Sselect_select, FAIL);
     H5TRACE3("e","iSsi",space1_id,op,space2_id);
 
     /* Check args */

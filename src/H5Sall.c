@@ -78,7 +78,7 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
 static herr_t
 H5S_all_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
 {
-    FUNC_ENTER (H5S_all_init, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_init, FAIL);
 
     /* Check args */
     assert (space && H5S_SEL_ALL==space->select.type);
@@ -113,7 +113,7 @@ H5S_all_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_i
 static hsize_t
 H5S_all_favail (const H5S_t * UNUSED space, const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
-    FUNC_ENTER (H5S_all_favail, 0);
+    FUNC_ENTER_NOAPI(H5S_all_favail, 0);
 
     /* Check args */
     assert (space && H5S_SEL_ALL==space->select.type);
@@ -159,7 +159,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t     actual_bytes; /* The actual number of bytes to read */
     hsize_t	buf_off;            /* Dataset offset for copying memory */
 
-    FUNC_ENTER (H5S_all_fgath, 0);
+    FUNC_ENTER_NOAPI(H5S_all_fgath, 0);
 
     /* Check args */
     assert (f);
@@ -220,7 +220,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t     actual_bytes;       /* The actual number of bytes to write */
     hsize_t	buf_off;            /* Dataset offset for copying memory */
 
-    FUNC_ENTER (H5S_all_fscat, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_fscat, FAIL);
 
     /* Check args */
     assert (f);
@@ -280,7 +280,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
     const uint8_t *buf=(const uint8_t*)_buf;   /* Get local copies for address arithmetic */
     hsize_t      actual_bytes;       /* The actual number of bytes to read */
 
-    FUNC_ENTER (H5S_all_mgath, 0);
+    FUNC_ENTER_NOAPI(H5S_all_mgath, 0);
 
     /* Check args */
     assert (buf);
@@ -331,7 +331,7 @@ H5S_all_mscat (const void *tconv_buf, size_t elmt_size,
     uint8_t *buf=(uint8_t *)_buf;
     hsize_t      actual_bytes;       /* The actual number of bytes to write */
 
-    FUNC_ENTER (H5S_all_mscat, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_mscat, FAIL);
 
     /* Check args */
     assert (tconv_buf);
@@ -379,7 +379,7 @@ H5S_all_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const uns
     htri_t c1,c2;               /* Flags whether a selection is optimizable */
     htri_t ret_value=TRUE;
 
-    FUNC_ENTER(H5S_all_opt_possible, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_opt_possible, FAIL);
 
     /* Check args */
     assert(mem_space);
@@ -449,7 +449,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     unsigned	u;                              /* Index variable */
     herr_t      ret_value=SUCCEED;
 
-    FUNC_ENTER(H5S_all_read, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_read, FAIL);
 
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
@@ -569,7 +569,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout, H5P_genplist_t *dc_pl
     unsigned	u;                              /* Index variable */
     herr_t      ret_value=SUCCEED;
     
-    FUNC_ENTER(H5S_all_write, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_write, FAIL);
 
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
@@ -669,7 +669,7 @@ done:
 herr_t
 H5S_all_release (H5S_t * UNUSED space)
 {
-    FUNC_ENTER (H5S_all_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_release, FAIL);
 
     /* Check args */
     assert (space);
@@ -702,7 +702,7 @@ H5S_all_npoints (const H5S_t *space)
     unsigned u;     /* Counters */
     hsize_t ret_value;
 
-    FUNC_ENTER (H5S_all_npoints, 0);
+    FUNC_ENTER_NOAPI(H5S_all_npoints, 0);
 
     /* Check args */
     assert (space);
@@ -738,7 +738,7 @@ H5S_all_select_serialize (const H5S_t *space, uint8_t *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_all_select_serialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_select_serialize, FAIL);
 
     assert(space);
 
@@ -779,7 +779,7 @@ H5S_all_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_all_select_deserialize, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_select_deserialize, FAIL);
 
     assert(space);
 
@@ -825,7 +825,7 @@ H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
     int i;                     /* index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER (H5S_all_bounds, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_bounds, FAIL);
 
     assert(space);
     assert(start);
@@ -866,7 +866,7 @@ H5S_select_all (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_select_all, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_all, FAIL);
 
     /* Check args */
     assert(space);
@@ -906,7 +906,7 @@ herr_t H5Sselect_all (hid_t spaceid)
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5Sselect_all, FAIL);
+    FUNC_ENTER_API(H5Sselect_all, FAIL);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid))) {
@@ -970,7 +970,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     H5T_t *dt;                  /* Datatype structure */
     herr_t ret_value=0;         /* return value */
 
-    FUNC_ENTER (H5S_all_select_iterate, 0);
+    FUNC_ENTER_NOAPI(H5S_all_select_iterate, 0);
 
     assert(buf);
     assert(space);
@@ -1047,7 +1047,7 @@ H5S_all_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void
     hssize_t nelemts;          /* Number of elements in dataspace */
     herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER (H5S_all_select_fill, FAIL);
+    FUNC_ENTER_NOAPI(H5S_all_select_fill, FAIL);
 
     /* Check args */
     assert(fill);

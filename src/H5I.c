@@ -186,7 +186,7 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the atomic group*/
     int		ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER(H5I_init_group, FAIL);
+    FUNC_ENTER_NOAPI(H5I_init_group, FAIL);
 
     /* Check arguments */
     if ((grp <= H5I_BADID || grp >= H5I_NGROUPS) && hash_size > 0) {
@@ -265,7 +265,7 @@ H5I_nmembers(H5I_type_t grp)
     int		n=0;
     unsigned		i;
 
-    FUNC_ENTER(H5I_nmembers, FAIL);
+    FUNC_ENTER_NOAPI(H5I_nmembers, FAIL);
 
     if (grp<=H5I_BADID || grp>=H5I_NGROUPS) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
@@ -323,7 +323,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
     unsigned    delete_node;            /* Flag to indicate node should be removed from linked list */
     unsigned	i,j;
 
-    FUNC_ENTER(H5I_clear_group, FAIL);
+    FUNC_ENTER_NOAPI(H5I_clear_group, FAIL);
 
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
 	HGOTO_DONE(FAIL);
@@ -468,7 +468,7 @@ H5I_destroy_group(H5I_type_t grp)
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
     int		ret_value = SUCCEED;
 
-    FUNC_ENTER(H5I_destroy_group, FAIL);
+    FUNC_ENTER_NOAPI(H5I_destroy_group, FAIL);
 
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
         HGOTO_DONE(FAIL);
@@ -531,7 +531,7 @@ H5I_register(H5I_type_t grp, void *object)
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
     unsigned		i;		/*counter			*/
     
-    FUNC_ENTER(H5I_register, FAIL);
+    FUNC_ENTER_NOAPI(H5I_register, FAIL);
 
     /* Check arguments */
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
@@ -638,7 +638,7 @@ H5I_object(hid_t id)
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
     void		*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER(H5I_object, NULL);
+    FUNC_ENTER_NOAPI(H5I_object, NULL);
 
     /* General lookup of the ID */
     if (NULL==(id_ptr = H5I_find_id(id))) HGOTO_DONE(NULL);
@@ -675,7 +675,7 @@ H5I_get_type(hid_t id)
 {
     H5I_type_t		ret_value = H5I_BADID;
 
-    FUNC_ENTER(H5I_get_type, H5I_BADID);
+    FUNC_ENTER_NOAPI(H5I_get_type, H5I_BADID);
 
     if (id>0) ret_value = H5I_GROUP(id);
     assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
@@ -709,7 +709,7 @@ H5Iget_type(hid_t id)
 {
     H5I_type_t		ret_value = H5I_BADID;
 
-    FUNC_ENTER(H5Iget_type, H5I_BADID);
+    FUNC_ENTER_API(H5Iget_type, H5I_BADID);
     H5TRACE1("It","i",id);
 
     ret_value = H5I_get_type(id);
@@ -754,7 +754,7 @@ H5I_remove(hid_t id)
 #endif
     void *	      ret_value = NULL;	/*return value			*/
 
-    FUNC_ENTER(H5I_remove, NULL);
+    FUNC_ENTER_NOAPI(H5I_remove, NULL);
 
     /* Check arguments */
     grp = H5I_GROUP(id);
@@ -855,7 +855,7 @@ H5I_dec_ref(hid_t id)
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
     int		ret_value = FAIL;	/*return value		*/
 
-    FUNC_ENTER(H5I_dec_ref, FAIL);
+    FUNC_ENTER_NOAPI(H5I_dec_ref, FAIL);
 
     /* Check arguments */
     grp_ptr = H5I_id_group_list_g[grp];
@@ -914,7 +914,7 @@ H5I_inc_ref(hid_t id)
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the ID		*/
 
-    FUNC_ENTER(H5I_inc_ref, FAIL);
+    FUNC_ENTER_NOAPI(H5I_inc_ref, FAIL);
 
     /* Check arguments */
     if (id<0) HRETURN(FAIL);
@@ -962,7 +962,7 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
     unsigned		i;			/*counter		*/
     void		*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER(H5I_search, NULL);
+    FUNC_ENTER_NOAPI(H5I_search, NULL);
 
     /* Check arguments */
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
@@ -1102,7 +1102,7 @@ H5I_debug(H5I_type_t grp)
     int			is, js;
     unsigned int	iu;
 
-    FUNC_ENTER(H5I_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5I_debug, FAIL);
     
     fprintf(stderr, "Dumping group %d\n", (int)grp);
     grp_ptr = H5I_id_group_list_g[grp];

@@ -284,7 +284,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     H5S_t	*space = NULL;          /* Pointer to dataspace containing region */
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5Rcreate, FAIL);
+    FUNC_ENTER_API(H5Rcreate, FAIL);
     H5TRACE5("e","xisRti",ref,loc_id,name,ref_type,space_id);
 
     /* Check args */
@@ -490,7 +490,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, void *_ref)
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = FAIL;
 
-    FUNC_ENTER(H5Rdereference, FAIL);
+    FUNC_ENTER_API(H5Rdereference, FAIL);
     H5TRACE3("i","iRtx",id,ref_type,_ref);
 
     /* Check args */
@@ -630,7 +630,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, void *_ref)
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = FAIL;
 
-    FUNC_ENTER(H5Rget_region, FAIL);
+    FUNC_ENTER_API(H5Rget_region, FAIL);
     H5TRACE3("i","iRtx",id,ref_type,_ref);
 
     /* Check args */
@@ -739,7 +739,7 @@ H5Rget_object_type(hid_t id, void *_ref)
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5Rget_object_type, H5G_UNKNOWN);
+    FUNC_ENTER_API(H5Rget_object_type, H5G_UNKNOWN);
     H5TRACE2("Is","ix",id,_ref);
 
     /* Check args */
@@ -892,7 +892,7 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = H5G_UNKNOWN;
 
-    FUNC_ENTER(H5Rget_obj_type, H5G_UNKNOWN);
+    FUNC_ENTER_API(H5Rget_obj_type, H5G_UNKNOWN);
     H5TRACE3("Is","iRtx",id,ref_type,_ref);
 
     /* Check args */

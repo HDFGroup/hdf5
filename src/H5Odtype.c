@@ -821,7 +821,7 @@ H5O_dtype_decode(H5F_t *f, const uint8_t *p,
 {
     H5T_t		   *dt = NULL;
 
-    FUNC_ENTER(H5O_dtype_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_dtype_decode, NULL);
 
     /* check args */
     assert(p);
@@ -862,7 +862,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
 {
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
-    FUNC_ENTER(H5O_dtype_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -900,7 +900,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     const H5T_t		   *src = (const H5T_t *) _src;
     H5T_t		   *dst = NULL;
 
-    FUNC_ENTER(H5O_dtype_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_dtype_copy, NULL);
 
     /* check args */
     assert(src);
@@ -941,7 +941,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     size_t		    ret_value = 8;
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
-    FUNC_ENTER(H5O_dtype_size, 0);
+    FUNC_ENTER_NOAPI(H5O_dtype_size, 0);
 
     assert(mesg);
 
@@ -1027,7 +1027,7 @@ H5O_dtype_reset(void *_mesg)
     H5T_t		   *dt = (H5T_t *) _mesg;
     H5T_t		   *tmp = NULL;
 
-    FUNC_ENTER(H5O_dtype_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_reset, FAIL);
 
     if (dt) {
         if (NULL==(tmp = H5FL_ALLOC(H5T_t,0))) {
@@ -1059,7 +1059,7 @@ H5O_dtype_reset(void *_mesg)
 static herr_t
 H5O_dtype_free (void *mesg)
 {
-    FUNC_ENTER (H5O_dtype_free, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_free, FAIL);
 
     assert (mesg);
 
@@ -1090,7 +1090,8 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     
-    FUNC_ENTER (H5O_dtype_get_share, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_get_share, FAIL);
+
     assert (dt);
     assert (sh);
 
@@ -1127,7 +1128,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 {
     H5T_t	*dt = (H5T_t *)_mesg;
     
-    FUNC_ENTER (H5O_dtype_set_share, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_set_share, FAIL);
+
     assert (dt);
     assert (sh);
     assert (!sh->in_gh);
@@ -1167,8 +1169,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     int		i;
     size_t		k;
     
-
-    FUNC_ENTER(H5O_dtype_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_dtype_debug, FAIL);
 
     /* check args */
     assert(f);

@@ -57,7 +57,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
     hsize_t	nbytes;
     herr_t      ret_value = SUCCEED;            /* Return value */
    
-    FUNC_ENTER (H5F_arr_create, FAIL);
+    FUNC_ENTER_NOAPI(H5F_arr_create, FAIL);
 
     /* check args */
     assert (f);
@@ -155,7 +155,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #endif
     herr_t      ret_value = SUCCEED;            /* Return value */
    
-    FUNC_ENTER(H5F_arr_read, FAIL);
+    FUNC_ENTER_NOAPI(H5F_arr_read, FAIL);
 
     /* Check args */
     assert(f);
@@ -405,7 +405,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #endif
     herr_t      ret_value = SUCCEED;            /* Return value */
    
-    FUNC_ENTER(H5F_arr_write, FAIL);
+    FUNC_ENTER_NOAPI(H5F_arr_write, FAIL);
 
     /* Check args */
     assert(f);

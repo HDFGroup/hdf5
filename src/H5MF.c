@@ -61,7 +61,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size)
 {
     haddr_t	ret_value=HADDR_UNDEF;
     
-    FUNC_ENTER(H5MF_alloc, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF);
 
     /* check arguments */
     assert(f);
@@ -109,7 +109,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size)
 herr_t
 H5MF_xfree(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size)
 {
-    FUNC_ENTER(H5MF_xfree, FAIL);
+    FUNC_ENTER_NOAPI(H5MF_xfree, FAIL);
 
     /* check arguments */
     assert(f);
@@ -177,7 +177,7 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
 {
     haddr_t	ret_value=HADDR_UNDEF;
     
-    FUNC_ENTER (H5MF_realloc, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5MF_realloc, HADDR_UNDEF);
 
     /* Convert old relative address to absolute address */
     old_addr += f->shared->base_addr;

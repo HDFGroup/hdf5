@@ -144,7 +144,7 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_core_init(void)
 {
-    FUNC_ENTER(H5FD_core_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FDregister(&H5FD_core_g);
@@ -183,7 +183,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER(H5FD_set_fapl_core, FAIL);
+    FUNC_ENTER_API(H5FD_set_fapl_core, FAIL);
     H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
     /* Check argument */
@@ -228,7 +228,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     H5FD_core_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
 
-    FUNC_ENTER(H5Pget_fapl_core, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_core, FAIL);
     H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
@@ -270,7 +270,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     H5FD_core_fapl_t	*fa = NULL;
 
-    FUNC_ENTER(H5FD_core_fapl_get, NULL);
+    FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_core_fapl_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -311,7 +311,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     H5P_genplist_t *plist;      /* Property list pointer */
     int			fd=-1;
 
-    FUNC_ENTER(H5FD_core_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_core_open, NULL);
     
     /* Check arguments */
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
@@ -369,7 +369,7 @@ H5FD_core_flush(H5FD_t *_file, unsigned UNUSED closing)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
-    FUNC_ENTER(H5FD_core_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL);
 
     /* Write to backing store */
     if (file->dirty && file->fd>=0) {
@@ -422,7 +422,7 @@ H5FD_core_close(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
-    FUNC_ENTER(H5FD_core_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_close, FAIL);
 
     /* Flush */
     if (H5FD_core_flush(_file,TRUE)<0)
@@ -465,7 +465,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
     int			ret_value;
 
-    FUNC_ENTER(H5FD_core_cmp, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL);
 
     if (NULL==f1->name && NULL==f2->name) {
         if (f1<f2) HRETURN(-1);
@@ -504,7 +504,7 @@ H5FD_core_get_eoa(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
-    FUNC_ENTER(H5FD_core_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF);
 
     FUNC_LEAVE(file->eoa);
 }
@@ -533,7 +533,7 @@ H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
-    FUNC_ENTER(H5FD_core_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL);
 
     if (ADDR_OVERFLOW(addr))
         HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow");
@@ -568,7 +568,7 @@ H5FD_core_get_eof(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
-    FUNC_ENTER(H5FD_core_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF);
 
     FUNC_LEAVE(MAX(file->eof, file->eoa));
 }
@@ -599,7 +599,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
-    FUNC_ENTER(H5FD_core_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_read, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -664,7 +664,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     
-    FUNC_ENTER(H5FD_core_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_write, FAIL);
 
     assert(file && file->pub.cls);
     assert(buf);

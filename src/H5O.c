@@ -157,7 +157,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     H5O_t	*oh = NULL;
     haddr_t	tmp_addr;
 
-    FUNC_ENTER(H5O_create, FAIL);
+    FUNC_ENTER_NOAPI(H5O_create, FAIL);
 
     /* check args */
     assert(f);
@@ -246,7 +246,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 herr_t
 H5O_open(H5G_entry_t *obj_ent)
 {
-    FUNC_ENTER(H5O_open, FAIL);
+    FUNC_ENTER_NOAPI(H5O_open, FAIL);
 
     /* Check args */
     assert(obj_ent);
@@ -281,7 +281,7 @@ H5O_open(H5G_entry_t *obj_ent)
 herr_t
 H5O_close(H5G_entry_t *obj_ent)
 {
-    FUNC_ENTER(H5O_close, FAIL);
+    FUNC_ENTER_NOAPI(H5O_close, FAIL);
 
     /* Check args */
     assert(obj_ent);
@@ -359,7 +359,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
     H5O_cont_t	*cont = NULL;
     uint8_t	flags;
 
-    FUNC_ENTER(H5O_load, NULL);
+    FUNC_ENTER_NOAPI(H5O_load, NULL);
 
     /* check args */
     assert(f);
@@ -549,7 +549,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
     unsigned combine=0;        /* Whether to combine the object header prefix & the first chunk */
 
-    FUNC_ENTER(H5O_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5O_flush, FAIL);
 
     /* check args */
     assert(f);
@@ -741,7 +741,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 herr_t
 H5O_reset(const H5O_class_t *type, void *native)
 {
-    FUNC_ENTER(H5O_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_reset, FAIL);
 
     if (native) {
 	if (type->reset) {
@@ -777,7 +777,7 @@ H5O_reset(const H5O_class_t *type, void *native)
 void *
 H5O_free (const H5O_class_t *type, void *mesg)
 {
-    FUNC_ENTER (H5O_free, NULL);
+    FUNC_ENTER_NOAPI(H5O_free, NULL);
     
     if (mesg) {
         H5O_reset (type, mesg);
@@ -813,7 +813,7 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
 {
     void	*ret_value = NULL;
     
-    FUNC_ENTER (H5O_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_copy, NULL);
 
     assert (type);
     assert (type->copy);
@@ -859,7 +859,7 @@ H5O_link(H5G_entry_t *ent, int adjust)
     H5O_t	*oh = NULL;
     int	ret_value = FAIL;
 
-    FUNC_ENTER(H5O_link, FAIL);
+    FUNC_ENTER_NOAPI(H5O_link, FAIL);
 
     /* check args */
     assert(ent);
@@ -924,7 +924,7 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
     int	acc;
     unsigned	u;
     
-    FUNC_ENTER (H5O_count, FAIL);
+    FUNC_ENTER_NOAPI(H5O_count, FAIL);
 
     /* Check args */
     assert (ent);
@@ -973,7 +973,8 @@ H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, int sequence)
     H5O_t	*oh=NULL;
     unsigned	u;
     
-    FUNC_ENTER(H5O_exists, FAIL);
+    FUNC_ENTER_NOAPI(H5O_exists, FAIL);
+
     assert(ent);
     assert(ent->file);
     assert(type);
@@ -1031,7 +1032,7 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg)
     H5G_cache_t		*cache = NULL;
     H5G_type_t		cache_type;
 
-    FUNC_ENTER(H5O_read, NULL);
+    FUNC_ENTER_NOAPI(H5O_read, NULL);
 
     /* check args */
     assert(ent);
@@ -1248,7 +1249,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     size_t		size = 0;
     H5O_shared_t	sh_mesg = {0,{{0,0}}};
 
-    FUNC_ENTER(H5O_modify, FAIL);
+    FUNC_ENTER_NOAPI(H5O_modify, FAIL);
 
     /* check args */
     assert(ent);
@@ -1412,6 +1413,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     size_t	size;
     
     FUNC_ENTER_NOINIT(H5O_touch_oh);
+
     assert(oh);
 
     /* Look for existing message */
@@ -1470,7 +1472,7 @@ H5O_touch(H5G_entry_t *ent, hbool_t force)
     H5O_t	*oh = NULL;
     herr_t	ret_value = FAIL;
     
-    FUNC_ENTER(H5O_touch, FAIL);
+    FUNC_ENTER_NOAPI(H5O_touch, FAIL);
 
     /* check args */
     assert(ent);
@@ -1538,7 +1540,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, int sequence)
     herr_t		ret_value = FAIL;
     H5O_shared_t	*sh_mesg = NULL;
 
-    FUNC_ENTER(H5O_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5O_remove, FAIL);
 
     /* check args */
     assert(ent);
@@ -2093,7 +2095,7 @@ H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
     void	*buf = NULL;
     herr_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5O_share, FAIL);
+    FUNC_ENTER_NOAPI(H5O_share, FAIL);
 
     /* Check args */
     assert (f);
@@ -2152,7 +2154,7 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     void	*(*decode)(H5F_t*, const uint8_t*, H5O_shared_t*);
     herr_t      (*debug)(H5F_t*, const void*, FILE*, int, int)=NULL;
 
-    FUNC_ENTER(H5O_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_debug, FAIL);
 
     /* check args */
     assert(f);

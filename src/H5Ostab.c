@@ -79,7 +79,7 @@ H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_stab_t             *stab;
 
-    FUNC_ENTER(H5O_stab_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_stab_decode, NULL);
 
     /* check args */
     assert(f);
@@ -117,7 +117,7 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
-    FUNC_ENTER(H5O_stab_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_stab_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -155,7 +155,7 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
 {
     H5O_stab_t             *stab = NULL;
 
-    FUNC_ENTER(H5O_stab_fast, NULL);
+    FUNC_ENTER_NOAPI(H5O_stab_fast, NULL);
 
     /* check args */
     assert(cache);
@@ -198,7 +198,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
 
-    FUNC_ENTER(H5O_stab_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_stab_copy, NULL);
 
     /* check args */
     assert(stab);
@@ -235,7 +235,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
 static size_t
 H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
 {
-    FUNC_ENTER(H5O_stab_size, 0);
+    FUNC_ENTER_NOAPI(H5O_stab_size, 0);
     FUNC_LEAVE(2 * H5F_SIZEOF_ADDR(f));
 }
 
@@ -257,7 +257,7 @@ H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
 static herr_t
 H5O_stab_free (void *mesg)
 {
-    FUNC_ENTER (H5O_stab_free, FAIL);
+    FUNC_ENTER_NOAPI(H5O_stab_free, FAIL);
 
     assert (mesg);
 
@@ -288,7 +288,7 @@ H5O_stab_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
-    FUNC_ENTER(H5O_stab_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_stab_debug, FAIL);
 
     /* check args */
     assert(f);

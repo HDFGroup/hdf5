@@ -49,7 +49,7 @@ H5F_contig_read(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
 {
     hsize_t offset=0;   /* Offset for vector call */
    
-    FUNC_ENTER(H5F_contig_read, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_read, FAIL);
 
     /* Check args */
     assert(f);
@@ -85,7 +85,7 @@ H5F_contig_write(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr, size
 {
     hsize_t offset=0;   /* Offset for vector call */
 
-    FUNC_ENTER(H5F_contig_write, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_write, FAIL);
 
     assert (f);
     assert (buf);
@@ -139,7 +139,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
     hsize_t *offset_arr_p; /* Pointer into the offset array */
 #endif /* SLOW_WAY */
    
-    FUNC_ENTER(H5F_contig_readv, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_readv, FAIL);
 
     /* Check args */
     assert(f);
@@ -579,7 +579,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
     hsize_t *offset_arr_p; /* Pointer into the offset array */
 #endif /* SLOW_WAY */
    
-    FUNC_ENTER(H5F_contig_writev, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_writev, FAIL);
 
     /* Check args */
     assert(f);

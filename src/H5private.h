@@ -958,6 +958,10 @@ __DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
  *
  *	Robb Matzke, 17 Jun 1998
  *	Added auto variable RTYPE which is initialized by the tracing macros.
+ *
+ *	Quincey Koziol, 28 May 2002
+ *	Split FUNC_ENTER macro into FUNC_ENTER_API, FUNC_ENTER_NOAPI and
+ *      FUNC_ENTER_NOINIT.
  *-------------------------------------------------------------------------
  */
 
@@ -1033,10 +1037,13 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
-#define FUNC_ENTER_COMMON(func_name)                               	      \
+#define FUNC_ENTER_COMMON(func_name,asrt)                                     \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name)  					      \
    H5TRACE_DECL;							      \
+									      \
+   /* Check API status */               				      \
+   assert(asrt);				                              \
 									      \
    /* Start tracing */                  				      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
@@ -1048,21 +1055,54 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
    H5_API_UNSET_CANCEL                                                        \
    H5_API_LOCK                                                                 
 
-#define FUNC_ENTER(func_name,err) {                                           \
-    FUNC_ENTER_COMMON(func_name);                                             \
-    FUNC_ENTER_API_INIT(func_name,INTERFACE_INIT,err)
-
-#define FUNC_ENTER_NOAPI(func_name,err) {                                     \
-    FUNC_ENTER_COMMON(func_name);                                             \
-    FUNC_ENTER_NOAPI_INIT(func_name,INTERFACE_INIT,err)
-
-#define FUNC_ENTER_NOINIT(func_name) {                                        \
-    FUNC_ENTER_COMMON(func_name);                                             \
+/* Use this macro for all "normal" API functions */
+#define FUNC_ENTER_API(func_name,err) {                                       \
+    FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err)                       \
+                                                                              \
+    /* Clear thread error stack entering public functions */		      \
+    H5E_clear();						              \
     {
 
-#define FUNC_ENTER_API_INIT(func_name,interface_init_func,err)       	      \
+/*
+ * Use this macro for API functions that shouldn't clear the error stack
+ *      like H5Eprint and H5Ewalk.
+ */
+#define FUNC_ENTER_API_NOCLEAR(func_name,err) {                               \
+    FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err)                       \
+    {
+
+/*
+ * Use this macro for API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, just perform tracing, etc.  Examples
+ *      are: H5close, H5check_version, H5Eget_major, H5Eget_minor.
+ */
+#define FUNC_ENTER_API_NOINIT(func_name) {                                    \
+    FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
+    {
+
+/* Use this macro for all "normal" non-API functions */
+#define FUNC_ENTER_NOAPI(func_name,err) {                                     \
+    FUNC_ENTER_COMMON(func_name,!H5_IS_API(FUNC));                            \
+    FUNC_ENTER_NOAPI_INIT(func_name,INTERFACE_INIT,err)                       \
+    {
+
+/*
+ * Use this macro for non-API functions which fall into two categories:
+ *      - static functions, since they must be called from a function in the
+ *              interface, the library and interface must already be
+ *              initialized.
+ *      - functions which are called during library shutdown, since we don't
+ *              want to re-initialize the library.
+ */
+#define FUNC_ENTER_NOINIT(func_name) {                                        \
+    FUNC_ENTER_COMMON(func_name,!H5_IS_API(FUNC));                            \
+    {
+
+#define FUNC_ENTER_API_COMMON(func_name,interface_init_func,err)       	      \
    /* Initialize the library */           				      \
-   if (H5_IS_API(FUNC) && !(H5_INIT_GLOBAL)) {                                \
+   if (!(H5_INIT_GLOBAL)) {                                                   \
        H5_INIT_GLOBAL = TRUE;                                                 \
        if (H5_init_library()<0) {					      \
           HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
@@ -1079,13 +1119,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "interface initialization failed");		                      \
       }								              \
-   }								              \
-                                                                              \
-   /* Clear thread error stack entering public functions */		      \
-   if (H5_IS_API(FUNC) && H5E_clearable_g) {			              \
-       H5E_clear ();						              \
-   }								              \
-   {
+   }
 
 #define FUNC_ENTER_NOAPI_INIT(func_name,interface_init_func,err)       	      \
    /* Initialize this interface or bust */				      \
@@ -1097,8 +1131,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "interface initialization failed");		                      \
       }								              \
-   }								              \
-   {
+   }
 
 /*-------------------------------------------------------------------------
  * Purpose:	Register function exit for code profiling.  This should be

@@ -51,7 +51,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
     size_t		    name;	/*offset of "" name	*/
     H5O_stab_t		    stab;	/*symbol table message	*/
 
-    FUNC_ENTER(H5G_stab_create, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_create, FAIL);
 
     /*
      * Check arguments.
@@ -131,7 +131,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     H5O_stab_t		stab;		/*symbol table message		*/
 
-    FUNC_ENTER(H5G_stab_find, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_find, FAIL);
 
     /* Check arguments */
     assert(grp_ent);
@@ -180,7 +180,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     static double	split_ratios[3] = {0.1, 0.5, 0.9};
 
-    FUNC_ENTER(H5G_stab_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_insert, FAIL);
 
     /* check arguments */
     assert(grp_ent && grp_ent->file);
@@ -232,7 +232,8 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name)
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
     
-    FUNC_ENTER(H5G_stab_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL);
+
     assert(grp_ent && grp_ent->file);
     assert(name && *name);
 

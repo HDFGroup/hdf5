@@ -303,7 +303,7 @@ herr_t
 H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
 	     const H5S_mconv_t *mconv)
 {
-    FUNC_ENTER(H5S_register, FAIL);
+    FUNC_ENTER_NOAPI(H5S_register, FAIL);
 
     assert(cls>=0 && cls<H5S_SEL_N);
     assert(fconv);
@@ -339,7 +339,7 @@ H5S_create(H5S_class_t type)
 {
     H5S_t *ret_value = NULL;
 
-    FUNC_ENTER(H5S_create, NULL);
+    FUNC_ENTER_NOAPI(H5S_create, NULL);
 
     /* Create a new data space */
     if((ret_value = H5FL_ALLOC(H5S_t,1))!=NULL)
@@ -378,7 +378,7 @@ H5Screate(H5S_class_t type)
     H5S_t  *new_ds=NULL;
     hid_t	ret_value = FAIL;
 
-    FUNC_ENTER(H5Screate, FAIL);
+    FUNC_ENTER_API(H5Screate, FAIL);
     H5TRACE1("i","Sc",type);
 
     /* Check args */
@@ -418,7 +418,7 @@ done:
 herr_t
 H5S_extent_release(H5S_t *ds)
 {
-    FUNC_ENTER(H5S_extent_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_extent_release, FAIL);
 
     assert(ds);
 
@@ -464,7 +464,7 @@ H5S_extent_release(H5S_t *ds)
 herr_t
 H5S_close(H5S_t *ds)
 {
-    FUNC_ENTER(H5S_close, FAIL);
+    FUNC_ENTER_NOAPI(H5S_close, FAIL);
 
     assert(ds);
 
@@ -503,7 +503,7 @@ H5S_close(H5S_t *ds)
 herr_t
 H5Sclose(hid_t space_id)
 {
-    FUNC_ENTER(H5Sclose, FAIL);
+    FUNC_ENTER_API(H5Sclose, FAIL);
     H5TRACE1("e","i",space_id);
 
     /* Check args */
@@ -536,7 +536,7 @@ H5Sclose(hid_t space_id)
 herr_t
 H5S_release_simple(H5S_simple_t *simple)
 {
-    FUNC_ENTER(H5S_release_simple, FAIL);
+    FUNC_ENTER_NOAPI(H5S_release_simple, FAIL);
 
     assert(simple);
 
@@ -575,7 +575,7 @@ H5Scopy(hid_t space_id)
     H5S_t	*dst = NULL;
     hid_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5Scopy, FAIL);
+    FUNC_ENTER_API(H5Scopy, FAIL);
     H5TRACE1("i","i",space_id);
 
     /* Check args */
@@ -618,7 +618,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5S_t	*dst = NULL;
     hid_t	ret_value = SUCCEED;
     
-    FUNC_ENTER (H5Scopy, FAIL);
+    FUNC_ENTER_API(H5Sextent_copy, FAIL);
     H5TRACE2("e","ii",dst_id,src_id);
 
     /* Check args */
@@ -656,7 +656,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
     unsigned u;
 
-    FUNC_ENTER(H5S_extent_copy, FAIL);
+    FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL);
 
     /* Copy the regular fields */
     *dst=*src;
@@ -715,7 +715,7 @@ H5S_copy(const H5S_t *src)
 {
     H5S_t		   *dst = NULL;
 
-    FUNC_ENTER(H5S_copy, NULL);
+    FUNC_ENTER_NOAPI(H5S_copy, NULL);
 
     if (NULL==(dst = H5FL_ALLOC(H5S_t,0))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -757,7 +757,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
     hssize_t    ret_value = -1;
     unsigned		u;
 
-    FUNC_ENTER(H5S_get_simple_extent_npoints, -1);
+    FUNC_ENTER_NOAPI(H5S_get_simple_extent_npoints, -1);
 
     /* check args */
     assert(ds);
@@ -810,7 +810,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     H5S_t		   *ds = NULL;
     hssize_t		    ret_value = -1;
 
-    FUNC_ENTER(H5Sget_simple_extent_npoints, -1);
+    FUNC_ENTER_API(H5Sget_simple_extent_npoints, -1);
     H5TRACE1("Hs","i",space_id);
 
     /* Check args */
@@ -849,7 +849,7 @@ H5S_get_npoints_max(const H5S_t *ds)
     hsize_t	    ret_value = 0;
     unsigned	    u;
 
-    FUNC_ENTER(H5S_get_npoints_max, 0);
+    FUNC_ENTER_NOAPI(H5S_get_npoints_max, 0);
 
     /* check args */
     assert(ds);
@@ -912,7 +912,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     H5S_t		   *ds = NULL;
     int		   ret_value = 0;
 
-    FUNC_ENTER(H5Sget_simple_extent_ndims, FAIL);
+    FUNC_ENTER_API(H5Sget_simple_extent_ndims, FAIL);
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
@@ -947,7 +947,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
     int		    ret_value = FAIL;
 
-    FUNC_ENTER(H5S_get_simple_extent_ndims, FAIL);
+    FUNC_ENTER_NOAPI(H5S_get_simple_extent_ndims, FAIL);
 
     /* check args */
     assert(ds);
@@ -1003,7 +1003,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     H5S_t		   *ds = NULL;
     int		   ret_value = 0;
 
-    FUNC_ENTER(H5Sget_simple_extent_dims, FAIL);
+    FUNC_ENTER_API(H5Sget_simple_extent_dims, FAIL);
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
@@ -1039,7 +1039,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     int	ret_value = FAIL;
     int	i;
 
-    FUNC_ENTER(H5S_get_simple_extent_dims, FAIL);
+    FUNC_ENTER_NOAPI(H5S_get_simple_extent_dims, FAIL);
 
     /* check args */
     assert(ds);
@@ -1095,7 +1095,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 herr_t
 H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 {
-    FUNC_ENTER(H5S_modify, FAIL);
+    FUNC_ENTER_NOAPI(H5S_modify, FAIL);
 
     assert(ent);
     assert(ds);
@@ -1144,7 +1144,7 @@ H5S_read(H5G_entry_t *ent)
 {
     H5S_t		   *ds = NULL;
 
-    FUNC_ENTER(H5S_read, NULL);
+    FUNC_ENTER_NOAPI(H5S_read, NULL);
 
     /* check args */
     assert(ent);
@@ -1195,7 +1195,7 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 {
     unsigned    u;
 
-    FUNC_ENTER(H5S_cmp, 0);
+    FUNC_ENTER_NOAPI(H5S_cmp, 0);
 
     /* check args */
     assert(ds1);
@@ -1263,7 +1263,7 @@ H5S_is_simple(const H5S_t *sdim)
 {
     htri_t		    ret_value = FAIL;
 
-    FUNC_ENTER(H5S_is_simple, FAIL);
+    FUNC_ENTER_NOAPI(H5S_is_simple, FAIL);
 
     /* Check args and all the boring stuff. */
     assert(sdim);
@@ -1293,7 +1293,7 @@ H5Sis_simple(hid_t space_id)
     H5S_t		   *space = NULL;	/* dataspace to modify */
     htri_t		    ret_value = FAIL;
 
-    FUNC_ENTER(H5Sis_simple, FAIL);
+    FUNC_ENTER_API(H5Sis_simple, FAIL);
     H5TRACE1("b","i",space_id);
 
     /* Check args and all the boring stuff. */
@@ -1339,7 +1339,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     H5S_t	*space = NULL;	/* dataspace to modify */
     int	u;	/* local counting variable */
 
-    FUNC_ENTER(H5Sset_extent_simple, FAIL);
+    FUNC_ENTER_API(H5Sset_extent_simple, FAIL);
     H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
 
     /* Check args */
@@ -1404,7 +1404,7 @@ herr_t
 H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
-    FUNC_ENTER(H5S_set_extent_simple, FAIL);
+    FUNC_ENTER_NOAPI(H5S_set_extent_simple, FAIL);
 
     /* Check args */
     assert(rank<=H5S_MAX_RANK);
@@ -1500,7 +1500,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     htri_t opt;         /* Flag whether a selection is optimizable */
     size_t	i;      /* Index variable */
     
-    FUNC_ENTER (H5S_find, NULL);
+    FUNC_ENTER_NOAPI(H5S_find, NULL);
 
     /* Check args */
     assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
@@ -1654,7 +1654,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
     int	ret_value=0;
     unsigned	u;
     
-    FUNC_ENTER (H5S_extend, FAIL);
+    FUNC_ENTER_NOAPI(H5S_extend, FAIL);
 
     /* Check args */
     assert (space && H5S_SIMPLE==space->extent.type);
@@ -1720,7 +1720,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     H5S_t	*space = NULL;
     int		i;
 
-    FUNC_ENTER(H5Screate_simple, FAIL);
+    FUNC_ENTER_API(H5Screate_simple, FAIL);
     H5TRACE3("i","Is*[a0]h*[a0]h",rank,dims,maxdims);
 
     /* Check arguments */
@@ -1801,7 +1801,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 {
     H5S_class_t	ret_value = H5S_NO_CLASS;
 
-    FUNC_ENTER(H5S_get_simple_extent_type, H5S_NO_CLASS);
+    FUNC_ENTER_NOAPI(H5S_get_simple_extent_type, H5S_NO_CLASS);
 
     assert(space);
 
@@ -1835,7 +1835,7 @@ H5Sget_simple_extent_type(hid_t sid)
     H5S_class_t	ret_value = H5S_NO_CLASS;
     H5S_t	*space = NULL;
 
-    FUNC_ENTER(H5Sget_simple_extent_type, H5S_NO_CLASS);
+    FUNC_ENTER_API(H5Sget_simple_extent_type, H5S_NO_CLASS);
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */
@@ -1868,7 +1868,7 @@ H5Sset_extent_none(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
 
-    FUNC_ENTER(H5Sset_extent_none, FAIL);
+    FUNC_ENTER_API(H5Sset_extent_none, FAIL);
     H5TRACE1("e","i",space_id);
 
     /* Check args */
@@ -1906,7 +1906,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
 
-    FUNC_ENTER(H5Soffset_simple, FAIL);
+    FUNC_ENTER_API(H5Soffset_simple, FAIL);
     H5TRACE2("e","i*Hs",space_id,offset);
 
     /* Check args */
@@ -1953,7 +1953,7 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     herr_t ret_value=SUCCEED;
     unsigned u;
        
-    FUNC_ENTER( H5S_set_extent, FAIL );
+    FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
 
     /* Check args */
     assert( space && H5S_SIMPLE==space->extent.type );
@@ -1996,7 +1996,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
     
-    FUNC_ENTER(H5S_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5S_debug, FAIL);
     
     switch (mesg->extent.type) {
     case H5S_SCALAR:

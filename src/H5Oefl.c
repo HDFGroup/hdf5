@@ -74,7 +74,7 @@ H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     int		i, version;
     const char		*s = NULL;
 
-    FUNC_ENTER(H5O_efl_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_efl_decode, NULL);
 
     /* Check args */
     assert(f);
@@ -162,7 +162,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     int			i;
 
-    FUNC_ENTER(H5O_efl_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_efl_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -227,7 +227,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     H5O_efl_t		*dest = (H5O_efl_t *) _dest;
     int			i;
 
-    FUNC_ENTER(H5O_efl_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_efl_copy, NULL);
 
     /* check args */
     assert(mesg);
@@ -285,7 +285,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     size_t		ret_value = 0;
 
-    FUNC_ENTER(H5O_efl_size, 0);
+    FUNC_ENTER_NOAPI(H5O_efl_size, 0);
 
     /* check args */
     assert(f);
@@ -324,8 +324,7 @@ H5O_efl_reset(void *_mesg)
     H5O_efl_t	*mesg = (H5O_efl_t *) _mesg;
     int		i;
     
-
-    FUNC_ENTER(H5O_efl_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_efl_reset, FAIL);
 
     /* check args */
     assert(mesg);
@@ -365,7 +364,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
     int		i;
     hsize_t	ret_value = 0, tmp;
     
-    FUNC_ENTER (H5O_efl_total_size, 0);
+    FUNC_ENTER_NOAPI(H5O_efl_total_size, 0);
 
     if (efl->nused>0 &&
 	H5O_EFL_UNLIMITED==efl->slot[efl->nused-1].size) {
@@ -416,7 +415,7 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
     ssize_t	n;
     herr_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5O_efl_read, FAIL);
+    FUNC_ENTER_NOAPI(H5O_efl_read, FAIL);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -511,7 +510,7 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
     hsize_t     skip=0;
     herr_t	ret_value = FAIL;
     
-    FUNC_ENTER (H5O_efl_write, FAIL);
+    FUNC_ENTER_NOAPI(H5O_efl_write, FAIL);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -600,7 +599,7 @@ H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     char		    buf[64];
     int		    i;
 
-    FUNC_ENTER(H5O_efl_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_efl_debug, FAIL);
 
     /* check args */
     assert(f);

@@ -114,7 +114,7 @@ H5HG_create (H5F_t *f, size_t size)
     haddr_t	addr;
     size_t	n;
     
-    FUNC_ENTER (H5HG_create, NULL);
+    FUNC_ENTER_NOAPI(H5HG_create, NULL);
 
     /* Check args */
     assert (f);
@@ -233,7 +233,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void * UNUSED udata1,
     int	i;
     size_t	nalloc, need;
     
-    FUNC_ENTER (H5HG_load, NULL);
+    FUNC_ENTER_NOAPI(H5HG_load, NULL);
 
     /* check arguments */
     assert (f);
@@ -404,7 +404,7 @@ H5HG_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
 {
     int		i;
     
-    FUNC_ENTER (H5HG_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_flush, FAIL);
 
     /* Check arguments */
     assert (f);
@@ -567,7 +567,7 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     unsigned	idx;
     H5HG_heap_t	*heap = NULL;
     
-    FUNC_ENTER (H5HG_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_insert, FAIL);
 
     /* Check args */
     assert (f);
@@ -661,7 +661,7 @@ H5HG_peek (H5F_t *f, H5HG_t *hobj)
     void	*retval = NULL;
     int	i;
     
-    FUNC_ENTER (H5HG_peek, NULL);
+    FUNC_ENTER_NOAPI(H5HG_peek, NULL);
 
     /* Check args */
     assert (f);
@@ -722,7 +722,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
     size_t	size;
     uint8_t	*p = NULL;
     
-    FUNC_ENTER (H5HG_read, NULL);
+    FUNC_ENTER_NOAPI(H5HG_read, NULL);
 
     /* Check args */
     assert (f);
@@ -787,7 +787,7 @@ H5HG_link (H5F_t *f, H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
     
-    FUNC_ENTER (H5HG_link, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_link, FAIL);
     
     /* Check args */
     assert (f);
@@ -841,7 +841,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     int	i;
     unsigned	u;
     
-    FUNC_ENTER (H5HG_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_remove, FAIL);
 
     /* Check args */
     assert (f);
@@ -948,7 +948,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
     size_t		size;
     uint8_t		*p = NULL;
 
-    FUNC_ENTER(H5HG_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_debug, FAIL);
 
     /* check arguments */
     assert(f);

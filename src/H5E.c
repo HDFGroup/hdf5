@@ -154,7 +154,6 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5E_init_interface
 static herr_t H5E_init_interface (void);
-const hbool_t H5E_clearable_g = TRUE;	/* DO NOT CHANGE */
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -193,6 +192,10 @@ int	H5E_mpi_error_str_len;
 herr_t (*H5E_auto_g)(void*) = (herr_t(*)(void*))H5Eprint;
 void *H5E_auto_data_g = NULL;
 
+
+/* Static function declarations */
+static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
+
 
 #ifdef H5_HAVE_THREADSAFE
 /*-------------------------------------------------------------------------
@@ -217,7 +220,7 @@ H5E_get_stack(void)
 {
     H5E_t *estack;
 
-    FUNC_ENTER(H5E_get_stack,NULL);
+    FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
 
     estack = pthread_getspecific(H5TS_errstk_key_g);
     if (!estack) {
@@ -289,7 +292,7 @@ H5E_init_interface (void)
 herr_t
 H5Eset_auto(H5E_auto_t func, void *client_data)
 {
-    FUNC_ENTER (H5Eset_auto, FAIL);
+    FUNC_ENTER_API(H5Eset_auto, FAIL);
     H5TRACE2("e","xx",func,client_data);
     
     H5E_auto_g = func;
@@ -318,7 +321,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
 herr_t
 H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
-    FUNC_ENTER (H5Eget_auto, FAIL);
+    FUNC_ENTER_API(H5Eget_auto, FAIL);
     H5TRACE2("e","*x*x",func,client_data);
 
     if (func) *func = H5E_auto_g;
@@ -346,7 +349,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
 herr_t
 H5Eclear(void)
 {
-    FUNC_ENTER (H5Eclear, FAIL);
+    FUNC_ENTER_API(H5Eclear, FAIL);
     H5TRACE0("e","");
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE (SUCCEED);
@@ -378,10 +381,10 @@ herr_t
 H5Eprint(FILE *stream)
 {
     H5E_t	*estack = H5E_get_my_stack ();
-    hbool_t	H5E_clearable_g = FALSE; /*override global*/
     herr_t	status = FAIL;
     
-    FUNC_ENTER (H5Eprint, FAIL);
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
@@ -403,7 +406,7 @@ H5Eprint(FILE *stream)
 #endif
     if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");
     HDfputc ('\n', stream);
-    status = H5E_walk (H5E_WALK_DOWNWARD, H5Ewalk_cb, (void*)stream);
+    status = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
     
     FUNC_LEAVE (status);
 }
@@ -427,18 +430,20 @@ H5Eprint(FILE *stream)
 herr_t
 H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
-    hbool_t	H5E_clearable_g = FALSE; /*override global*/
     herr_t	status = FAIL;
 
-    FUNC_ENTER (H5Ewalk, FAIL);
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(H5Ewalk, FAIL);
     H5TRACE3("e","Edxx",direction,func,client_data);
+
     status = H5E_walk (direction, func, client_data);
+
     FUNC_LEAVE (status);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Ewalk_cb
+ * Function:	H5E_walk_cb
  *
  * Purpose:	This is a default error stack traversal callback function
  *		that prints error messages to the specified output stream.
@@ -470,15 +475,15 @@ H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
+static herr_t
+H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
 {
     FILE		*stream = (FILE *)client_data;
     const char		*maj_str = NULL;
     const char		*min_str = NULL;
     const int		indent = 2;
 
-    FUNC_ENTER_NOINIT(H5Ewalk_cb);
+    FUNC_ENTER_NOINIT(H5E_walk_cb);
     /*NO TRACE*/
 
     /* Check arguments */
@@ -531,7 +536,7 @@ H5Eget_major (H5E_major_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
-    FUNC_ENTER_NOINIT(H5Eget_major);
+    FUNC_ENTER_API_NOINIT(H5Eget_major);
 
     for (i=0; i<NELMTS (H5E_major_mesg_g); i++) {
 	if (H5E_major_mesg_g[i].error_code==n)
@@ -571,7 +576,7 @@ H5Eget_minor (H5E_minor_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
-    FUNC_ENTER_NOINIT(H5Eget_minor);
+    FUNC_ENTER_API_NOINIT(H5Eget_minor);
 
     for (i=0; i<NELMTS (H5E_minor_mesg_g); i++) {
 	if (H5E_minor_mesg_g[i].error_code==n)
@@ -617,6 +622,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
+    FUNC_ENTER_NOINIT(H5E_push);
 
     /*
      * Don't fail if arguments are bad.  Instead, substitute some default
@@ -640,7 +646,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 	estack->nused++;
     }
     
-    return SUCCEED; /*don't use FUNC_LEAVE() here */
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -672,9 +678,11 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
 {
     herr_t	ret_value;
     
-    FUNC_ENTER(H5Epush, FAIL);
+    FUNC_ENTER_API(H5Epush, FAIL);
     H5TRACE6("e","ssIuEjEns",file,func,line,maj,min,str);
+
     ret_value = H5E_push(maj, min, func, file, line, str);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -698,8 +706,10 @@ H5E_clear(void)
 {
     H5E_t	*estack = H5E_get_my_stack ();
 
-    FUNC_ENTER(H5E_clear, FAIL);
+    FUNC_ENTER_NOAPI(H5E_clear, FAIL);
+
     if (estack) estack->nused = 0;
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -737,7 +747,7 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     int		i;
     herr_t	status;
 
-    FUNC_ENTER(H5E_walk, FAIL);
+    FUNC_ENTER_NOAPI(H5E_walk, FAIL);
 
     /* check args, but rather than failing use some default value */
     if (direction!=H5E_WALK_UPWARD && direction!=H5E_WALK_DOWNWARD) {

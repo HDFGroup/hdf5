@@ -71,7 +71,7 @@ H5O_shared_decode (H5F_t *f, const uint8_t *buf, H5O_shared_t UNUSED *sh)
     H5O_shared_t	*mesg;
     unsigned		flags, version;
     
-    FUNC_ENTER (H5O_shared_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_shared_decode, NULL);
 
     /* Check args */
     assert (f);
@@ -132,7 +132,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
     unsigned		flags;
     
-    FUNC_ENTER (H5O_shared_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_shared_encode, FAIL);
 
     /* Check args */
     assert (f);
@@ -182,7 +182,7 @@ H5O_shared_size (H5F_t *f, const void UNUSED *_mesg)
 {
     size_t	size;
     
-    FUNC_ENTER (H5O_shared_size, 0);
+    FUNC_ENTER_NOAPI(H5O_shared_size, 0);
 
     size = 1 +				/*the flags field		*/
 	   7 +				/*reserved			*/
@@ -213,7 +213,7 @@ H5O_shared_debug (H5F_t UNUSED *f, const void *_mesg,
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
 
-    FUNC_ENTER (H5O_shared_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_shared_debug, FAIL);
 
     /* Check args */
     assert (f);

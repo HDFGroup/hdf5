@@ -79,7 +79,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     struct tm	tm;
     static int	ncalls=0;
 
-    FUNC_ENTER(H5O_mtime_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_mtime_decode, NULL);
 
     /* check args */
     assert(f);
@@ -205,8 +205,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
     
-
-    FUNC_ENTER(H5O_mtime_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_mtime_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -247,7 +246,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
     const time_t	*mesg = (const time_t *) _mesg;
     time_t		*dest = (time_t *) _dest;
 
-    FUNC_ENTER(H5O_mtime_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_mtime_copy, NULL);
 
     /* check args */
     assert(mesg);
@@ -285,7 +284,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 static size_t
 H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
 {
-    FUNC_ENTER(H5O_mtime_size, 0);
+    FUNC_ENTER_NOAPI(H5O_mtime_size, 0);
 
     /* check args */
     assert(f);
@@ -312,7 +311,7 @@ H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
 static herr_t
 H5O_mtime_free (void *mesg)
 {
-    FUNC_ENTER (H5O_mtime_free, FAIL);
+    FUNC_ENTER_NOAPI(H5O_mtime_free, FAIL);
 
     assert (mesg);
 
@@ -345,7 +344,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
     struct tm		*tm;
     char		buf[128];
     
-    FUNC_ENTER(H5O_mtime_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_mtime_debug, FAIL);
 
     /* check args */
     assert(f);

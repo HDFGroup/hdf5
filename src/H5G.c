@@ -144,7 +144,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     H5G_t		   *grp = NULL;
     hid_t		    ret_value = FAIL;
 
-    FUNC_ENTER(H5Gcreate, FAIL);
+    FUNC_ENTER_API(H5Gcreate, FAIL);
     H5TRACE3("i","isz",loc_id,name,size_hint);
 
     /* Check arguments */
@@ -194,7 +194,7 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_t	*grp = NULL;
     H5G_entry_t	*loc = NULL;
 
-    FUNC_ENTER(H5Gopen, FAIL);
+    FUNC_ENTER_API(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
@@ -237,7 +237,7 @@ H5Gopen(hid_t loc_id, const char *name)
 herr_t
 H5Gclose(hid_t group_id)
 {
-    FUNC_ENTER(H5Gclose, FAIL);
+    FUNC_ENTER_API(H5Gclose, FAIL);
     H5TRACE1("e","i",group_id);
 
     /* Check args */
@@ -292,7 +292,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     herr_t		ret_value = FAIL;
     H5G_entry_t		*loc = NULL;
     
-    FUNC_ENTER (H5Giterate, FAIL);
+    FUNC_ENTER_API(H5Giterate, FAIL);
     H5TRACE5("e","is*Isxx",loc_id,name,idx,op,op_data);
 
     /* Check args */
@@ -370,7 +370,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_entry_t		*src_loc=NULL;
     H5G_entry_t		*dst_loc=NULL;
 
-    FUNC_ENTER (H5Gmove2, FAIL);
+    FUNC_ENTER_API(H5Gmove2, FAIL);
     H5TRACE4("e","isis",src_loc_id,src_name,dst_loc_id,dst_name);
 
     if (src_loc_id != H5G_SAME_LOC && NULL==(src_loc=H5G_loc(src_loc_id))) {
@@ -446,7 +446,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     H5G_entry_t	*cur_loc = NULL;
     H5G_entry_t *new_loc = NULL;
 
-    FUNC_ENTER (H5Glink2, FAIL);
+    FUNC_ENTER_API(H5Glink2, FAIL);
     H5TRACE5("e","isGlis",cur_loc_id,cur_name,type,new_loc_id,new_name);
 
     /* Check arguments */
@@ -516,7 +516,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER (H5Gunlink, FAIL);
+    FUNC_ENTER_API(H5Gunlink, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
     /* Check arguments */
@@ -559,7 +559,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER (H5Gget_objinfo, FAIL);
+    FUNC_ENTER_API(H5Gget_objinfo, FAIL);
     H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
 
     /* Check arguments */
@@ -602,7 +602,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER (H5Gget_linkval, FAIL);
+    FUNC_ENTER_API(H5Gget_linkval, FAIL);
     H5TRACE4("e","iszx",loc_id,name,size,buf);
 
     /* Check arguments */
@@ -645,7 +645,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER(H5Gset_comment, FAIL);
+    FUNC_ENTER_API(H5Gset_comment, FAIL);
     H5TRACE3("e","iss",loc_id,name,comment);
 
     if (NULL==(loc=H5G_loc(loc_id))) {
@@ -693,7 +693,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     H5G_entry_t	*loc = NULL;
     int	retval = FAIL;
     
-    FUNC_ENTER(H5Gget_comment, FAIL);
+    FUNC_ENTER_API(H5Gget_comment, FAIL);
     H5TRACE4("Is","iszs",loc_id,name,bufsize,buf);
 
     if (NULL==(loc=H5G_loc(loc_id))) {
@@ -842,7 +842,8 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
     size_t	i;
     herr_t	ret_value = FAIL;
     
-    FUNC_ENTER(H5G_register_type, FAIL);
+    FUNC_ENTER_NOAPI(H5G_register_type, FAIL);
+
     assert(type>=0);
     assert(isa);
     assert(_desc);
@@ -1200,7 +1201,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     char		*linkval = NULL;	/*the copied link value	*/
     herr_t		ret_value = FAIL;	/*return value		*/
     
-    FUNC_ENTER (H5G_traverse_slink, FAIL);
+    FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
 
     /* Get the link value */
     if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg)) {
@@ -1254,7 +1255,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
     H5G_entry_t	new_root;		/*new root object		*/
     H5O_stab_t	stab;			/*symbol table message		*/
 
-    FUNC_ENTER(H5G_mkroot, FAIL);
+    FUNC_ENTER_NOAPI(H5G_mkroot, FAIL);
 
     /* check args */
     assert(f);
@@ -1339,7 +1340,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     size_t	nchars;			/*number of characters in compon*/
     H5G_t	*grp = NULL;		/*new group			*/
 
-    FUNC_ENTER(H5G_create, NULL);
+    FUNC_ENTER_NOAPI(H5G_create, NULL);
 
     /* check args */
     assert(loc);
@@ -1418,7 +1419,8 @@ H5G_isa(H5G_entry_t *ent)
 {
     htri_t	exists;
     
-    FUNC_ENTER(H5G_isa, FAIL);
+    FUNC_ENTER_NOAPI(H5G_isa, FAIL);
+
     assert(ent);
 
     if ((exists=H5O_exists(ent, H5O_STAB, 0))<0) {
@@ -1454,7 +1456,7 @@ H5G_open(H5G_entry_t *loc, const char *name)
     H5G_t		*ret_value = NULL;
     H5G_entry_t ent;            	/*dataset symbol table entry	*/
 
-    FUNC_ENTER(H5G_open, NULL);
+    FUNC_ENTER_NOAPI(H5G_open, NULL);
 
     /* Check args */
     assert(loc);
@@ -1502,7 +1504,7 @@ H5G_open_oid(H5G_entry_t *ent)
     H5G_t		*ret_value = NULL;
     H5O_stab_t		mesg;
 
-    FUNC_ENTER(H5G_open_oid, NULL);
+    FUNC_ENTER_NOAPI(H5G_open_oid, NULL);
 
     /* Check args */
     assert(ent);
@@ -1554,7 +1556,7 @@ H5G_open_oid(H5G_entry_t *ent)
 H5G_t *
 H5G_reopen(H5G_t *grp)
 {
-    FUNC_ENTER(H5G_reopen, NULL);
+    FUNC_ENTER_NOAPI(H5G_reopen, NULL);
 
     assert(grp);
     assert(grp->nref > 0);
@@ -1582,7 +1584,7 @@ H5G_reopen(H5G_t *grp)
 herr_t
 H5G_close(H5G_t *grp)
 {
-    FUNC_ENTER(H5G_close, FAIL);
+    FUNC_ENTER_NOAPI(H5G_close, FAIL);
 
     /* Check args */
     assert(grp);
@@ -1626,7 +1628,7 @@ H5G_close(H5G_t *grp)
 H5G_t *
 H5G_rootof(H5F_t *f)
 {
-    FUNC_ENTER(H5G_rootof, NULL);
+    FUNC_ENTER_NOAPI(H5G_rootof, NULL);
     while (f->mtab.parent) f = f->mtab.parent;
     FUNC_LEAVE(f->shared->root_grp);
 }
@@ -1656,7 +1658,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     size_t	nchars;		/*number of characters in name	*/
     char	_comp[1024];	/*name component		*/
 
-    FUNC_ENTER(H5G_insert, FAIL);
+    FUNC_ENTER_NOAPI(H5G_insert, FAIL);
 
     /* Check args. */
     assert (loc);
@@ -1735,7 +1737,7 @@ herr_t
 H5G_find(H5G_entry_t *loc, const char *name,
 	 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/)
 {
-    FUNC_ENTER(H5G_find, FAIL);
+    FUNC_ENTER_NOAPI(H5G_find, FAIL);
 
     /* check args */
     assert (loc);
@@ -1830,7 +1832,7 @@ H5G_loc (hid_t loc_id)
     H5D_t	*dset=NULL;
     H5A_t	*attr=NULL;
 
-    FUNC_ENTER (H5G_loc, NULL);
+    FUNC_ENTER_NOAPI(H5G_loc, NULL);
 
     switch (H5I_get_type(loc_id)) {
     case H5I_FILE:
@@ -1936,7 +1938,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
     size_t		nchars;		/*characters in component	*/
     size_t		offset;		/*offset to sym-link value	*/
     
-    FUNC_ENTER (H5G_link, FAIL);
+    FUNC_ENTER_NOAPI(H5G_link, FAIL);
 
     /* Check args */
     assert (cur_loc);
@@ -2058,7 +2060,7 @@ H5G_get_type(H5G_entry_t *ent)
     htri_t	isa;
     size_t	i;
     
-    FUNC_ENTER(H5G_get_type, H5G_UNKNOWN);
+    FUNC_ENTER_NOAPI(H5G_get_type, H5G_UNKNOWN);
 
     for (i=H5G_ntypes_g; i>0; --i) {
 	if ((isa=(H5G_type_g[i-1].isa)(ent))<0) {
@@ -2103,7 +2105,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     H5G_entry_t		grp_ent, obj_ent;
     const char		*s = NULL;
     
-    FUNC_ENTER (H5G_get_objinfo, FAIL);
+    FUNC_ENTER_NOAPI(H5G_get_objinfo, FAIL);
 
     assert (loc);
     assert (name && *name);
@@ -2190,7 +2192,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
     
-    FUNC_ENTER (H5G_linkval, FAIL);
+    FUNC_ENTER_NOAPI(H5G_linkval, FAIL);
 
     /*
      * Get the symbol table entry for the link head and the symbol table
@@ -2249,7 +2251,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
     H5G_entry_t	obj_ent;
     H5O_name_t	comment;
     
-    FUNC_ENTER(H5G_set_comment, FAIL);
+    FUNC_ENTER_NOAPI(H5G_set_comment, FAIL);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
@@ -2299,7 +2301,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
     H5G_entry_t	obj_ent;
     int	retval = FAIL;
     
-    FUNC_ENTER(H5G_get_comment, FAIL);
+    FUNC_ENTER_NOAPI(H5G_get_comment, FAIL);
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
@@ -2343,7 +2345,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
     size_t		len;
     const char		*base=NULL;
     
-    FUNC_ENTER(H5G_unlink, FAIL);
+    FUNC_ENTER_NOAPI(H5G_unlink, FAIL);
     assert(loc);
     assert(name && *name);
 
@@ -2396,7 +2398,7 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     char		*linkval=NULL;
     size_t		lv_size=32;
     
-    FUNC_ENTER(H5G_move, FAIL);
+    FUNC_ENTER_NOAPI(H5G_move, FAIL);
     assert(src_loc);
     assert(dst_loc);
     assert(src_name && *src_name);
@@ -2475,7 +2477,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name)
     H5G_entry_t	grp_ent;
     size_t	size;
 
-    FUNC_ENTER(H5G_insertion_file, NULL);
+    FUNC_ENTER_NOAPI(H5G_insertion_file, NULL);
     assert(loc);
     assert(name && *name);
 

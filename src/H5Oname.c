@@ -75,7 +75,7 @@ H5O_name_decode(H5F_t UNUSED *f, const uint8_t *p,
 {
     H5O_name_t             *mesg;
 
-    FUNC_ENTER(H5O_name_decode, NULL);
+    FUNC_ENTER_NOAPI(H5O_name_decode, NULL);
 
     /* check args */
     assert(f);
@@ -114,7 +114,7 @@ H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
 
-    FUNC_ENTER(H5O_name_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5O_name_encode, FAIL);
 
     /* check args */
     assert(f);
@@ -150,7 +150,7 @@ H5O_name_copy(const void *_mesg, void *_dest)
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     H5O_name_t             *dest = (H5O_name_t *) _dest;
 
-    FUNC_ENTER(H5O_name_copy, NULL);
+    FUNC_ENTER_NOAPI(H5O_name_copy, NULL);
 
     /* check args */
     assert(mesg);
@@ -192,7 +192,7 @@ H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  size;
 
-    FUNC_ENTER(H5O_name_size, 0);
+    FUNC_ENTER_NOAPI(H5O_name_size, 0);
 
     /* check args */
     assert(f);
@@ -223,7 +223,7 @@ H5O_name_reset(void *_mesg)
 {
     H5O_name_t             *mesg = (H5O_name_t *) _mesg;
 
-    FUNC_ENTER(H5O_name_reset, FAIL);
+    FUNC_ENTER_NOAPI(H5O_name_reset, FAIL);
 
     /* check args */
     assert(mesg);
@@ -255,7 +255,7 @@ H5O_name_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 {
     const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER(H5O_name_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5O_name_debug, FAIL);
 
     /* check args */
     assert(f);

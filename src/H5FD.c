@@ -184,7 +184,7 @@ H5FDregister(const H5FD_class_t *cls)
     H5FD_class_t	*saved;
     H5FD_mem_t		type;
 
-    FUNC_ENTER(H5FDregister, FAIL);
+    FUNC_ENTER_API(H5FDregister, FAIL);
     H5TRACE1("i","x",cls);
 
     /* Check arguments */
@@ -259,7 +259,7 @@ H5FDregister(const H5FD_class_t *cls)
 herr_t
 H5FDunregister(hid_t driver_id)
 {
-    FUNC_ENTER(H5FDunregister, FAIL);
+    FUNC_ENTER_API(H5FDunregister, FAIL);
     H5TRACE1("e","i",driver_id);
 
     /* Check arguments */
@@ -313,7 +313,7 @@ H5FD_get_class(hid_t id)
     H5FD_class_t	*ret_value=NULL;
     hid_t               driver_id = -1;
 
-    FUNC_ENTER(H5FD_get_class, NULL);
+    FUNC_ENTER_NOAPI(H5FD_get_class, NULL);
 
     if (H5I_VFL==H5I_get_type(id)) {
 	ret_value = H5I_object(id);
@@ -362,7 +362,7 @@ H5FD_sb_size(H5FD_t *file)
 {
     hsize_t	ret_value=0;
     
-    FUNC_ENTER(H5FD_sb_size, 0);
+    FUNC_ENTER_NOAPI(H5FD_sb_size, 0);
 
     assert(file && file->cls);
     if (file->cls->sb_size) {
@@ -397,7 +397,7 @@ H5FD_sb_size(H5FD_t *file)
 herr_t
 H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 {
-    FUNC_ENTER(H5FD_sb_encode, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sb_encode, FAIL);
 
     assert(file && file->cls);
     if (file->cls->sb_encode &&
@@ -429,7 +429,7 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 herr_t
 H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 {
-    FUNC_ENTER(H5FD_sb_decode, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_sb_decode, FAIL);
 
     assert(file && file->cls);
     if (file->cls->sb_decode &&
@@ -473,7 +473,8 @@ H5FD_fapl_get(H5FD_t *file)
 {
     void	*ret_value=NULL;
     
-    FUNC_ENTER(H5FD_fapl_get, NULL);
+    FUNC_ENTER_NOAPI(H5FD_fapl_get, NULL);
+
     assert(file);
 
     if (file->cls->fapl_get) {
@@ -510,7 +511,7 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
     void		*new_fapl = NULL;
     H5FD_class_t	*driver=NULL;
     
-    FUNC_ENTER(H5FD_fapl_copy, NULL);
+    FUNC_ENTER_NOAPI(H5FD_fapl_copy, NULL);
 
     /* Check args */
     if (H5I_VFL!=H5I_get_type(driver_id) ||
@@ -555,8 +556,7 @@ H5FD_fapl_free(hid_t driver_id, void *fapl)
 {
     H5FD_class_t	*driver=NULL;
 
-    FUNC_ENTER(H5FD_fapl_free, FAIL);
-    H5TRACE2("e","ix",driver_id,fapl);
+    FUNC_ENTER_NOAPI(H5FD_fapl_free, FAIL);
 
     /* Check args */
     if (H5I_VFL!=H5I_get_type(driver_id) ||
@@ -604,7 +604,7 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
     void		*new_dxpl = NULL;
     H5FD_class_t	*driver=NULL;
     
-    FUNC_ENTER(H5FD_dxpl_copy, NULL);
+    FUNC_ENTER_NOAPI(H5FD_dxpl_copy, NULL);
 
     /* Check args */
     if (H5I_VFL!=H5I_get_type(driver_id) ||
@@ -650,8 +650,7 @@ H5FD_dxpl_free(hid_t driver_id, void *dxpl)
 {
     H5FD_class_t	*driver=NULL;
 
-    FUNC_ENTER(H5FD_dxpl_free, FAIL);
-    H5TRACE2("e","ix",driver_id,dxpl);
+    FUNC_ENTER_NOAPI(H5FD_dxpl_free, FAIL);
 
     /* Check args */
     if (H5I_VFL!=H5I_get_type(driver_id) ||
@@ -733,7 +732,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_t	*ret_value=NULL;
 
-    FUNC_ENTER(H5FDopen, NULL);
+    FUNC_ENTER_API(H5FDopen, NULL);
 
     if (NULL==(ret_value=H5FD_open(name, flags, fapl_id, maxaddr))) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL,
@@ -774,7 +773,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     size_t              meta_block_size=0;    
     H5P_genplist_t *plist;      /* Property list pointer */
     
-    FUNC_ENTER(H5FD_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_open, NULL);
 
     /* Check arguments */
     if(H5P_DEFAULT == fapl_id)
@@ -857,7 +856,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 herr_t
 H5FDclose(H5FD_t *file)
 {
-    FUNC_ENTER(H5FDclose, FAIL);
+    FUNC_ENTER_API(H5FDclose, FAIL);
     H5TRACE1("e","x",file);
 
     if (!file || !file->cls) {
@@ -902,7 +901,8 @@ H5FD_close(H5FD_t *file)
     hsize_t		nbytes=0;
 #endif
     
-    FUNC_ENTER(H5FD_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_close, FAIL);
+
     assert(file && file->cls);
 
     /* Free all free-lists, leaking any memory thus described. Also leaks
@@ -984,7 +984,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int	ret_value;
     
-    FUNC_ENTER(H5FDcmp, -1); /*return value is arbitrary*/
+    FUNC_ENTER_API(H5FDcmp, -1); /*return value is arbitrary*/
     H5TRACE2("Is","xx",f1,f2);
     
     ret_value = H5FD_cmp(f1, f2);
@@ -1013,7 +1013,7 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int	ret_value;
 
-    FUNC_ENTER(H5FD_cmp, -1); /*return value is arbitrary*/
+    FUNC_ENTER_NOAPI(H5FD_cmp, -1); /*return value is arbitrary*/
 
     if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HRETURN(0);
     if (!f1 || !f1->cls) HRETURN(-1);
@@ -1055,7 +1055,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
 {
     int	ret_value;
 
-    FUNC_ENTER(H5FDquery, FAIL);
+    FUNC_ENTER_API(H5FDquery, FAIL);
     H5TRACE2("Is","xx",f,flags);
     
     assert(f);
@@ -1088,7 +1088,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 {
     int	ret_value=0;
 
-    FUNC_ENTER(H5FD_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_query, FAIL);
 
     assert(f);
     assert(flags);
@@ -1149,7 +1149,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 {
     haddr_t	ret_value = HADDR_UNDEF;
     
-    FUNC_ENTER(H5FDalloc, HADDR_UNDEF);
+    FUNC_ENTER_API(H5FDalloc, HADDR_UNDEF);
     H5TRACE3("a","xMth",file,type,size);
 
     /* Check args */
@@ -1200,7 +1200,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     haddr_t	ret_value = HADDR_UNDEF;
     H5FD_mem_t	mapped_type;
 
-    FUNC_ENTER(H5FD_alloc, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_alloc, HADDR_UNDEF);
 
     /* Check args */
     assert(file && file->cls);
@@ -1587,7 +1587,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 herr_t
 H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 {
-    FUNC_ENTER(H5FDfree, FAIL);
+    FUNC_ENTER_API(H5FDfree, FAIL);
     H5TRACE4("e","xMtah",file,type,addr,size);
     
     /* Check args */
@@ -1629,7 +1629,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 {
     H5FD_mem_t		mapped_type;
     
-    FUNC_ENTER(H5FD_free, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_free, FAIL);
 
     /* Check args */
     assert(file && file->cls);
@@ -1696,7 +1696,7 @@ H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
 {
     haddr_t	ret_value=HADDR_UNDEF;
 
-    FUNC_ENTER(H5FDrealloc, HADDR_UNDEF);
+    FUNC_ENTER_API(H5FDrealloc, HADDR_UNDEF);
     H5TRACE5("a","xMtahh",file,type,old_addr,old_size,new_size);
 
     if (HADDR_UNDEF==(ret_value=H5FD_realloc(file, type, old_addr, old_size,
@@ -1734,7 +1734,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     uint8_t	_buf[8192];
     uint8_t	*buf=_buf;
     
-    FUNC_ENTER(H5FD_realloc, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_realloc, HADDR_UNDEF);
 
     if (new_size==old_size) {
         /*nothing to do*/
@@ -1812,7 +1812,7 @@ H5FDget_eoa(H5FD_t *file)
 {
     haddr_t	addr;
 
-    FUNC_ENTER(H5FDget_eoa, HADDR_UNDEF);
+    FUNC_ENTER_API(H5FDget_eoa, HADDR_UNDEF);
     H5TRACE1("a","x",file);
 
     /* Check args */
@@ -1852,7 +1852,7 @@ H5FD_get_eoa(H5FD_t *file)
 {
     haddr_t	addr;
     
-    FUNC_ENTER(H5FD_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_get_eoa, HADDR_UNDEF);
     assert(file && file->cls);
     
     /* Dispatch to driver */
@@ -1895,7 +1895,7 @@ H5FD_get_eoa(H5FD_t *file)
 herr_t
 H5FDset_eoa(H5FD_t *file, haddr_t addr)
 {
-    FUNC_ENTER(H5FDset_eoa, FAIL);
+    FUNC_ENTER_API(H5FDset_eoa, FAIL);
     H5TRACE2("e","xa",file,addr);
 
     /* Check args */
@@ -1936,7 +1936,8 @@ H5FDset_eoa(H5FD_t *file, haddr_t addr)
 herr_t
 H5FD_set_eoa(H5FD_t *file, haddr_t addr)
 {
-    FUNC_ENTER(H5FD_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_set_eoa, FAIL);
+
     assert(file && file->cls);
     assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
     
@@ -1981,7 +1982,7 @@ H5FDget_eof(H5FD_t *file)
 {
     haddr_t	addr;
     
-    FUNC_ENTER(H5FDget_eof, HADDR_UNDEF);
+    FUNC_ENTER_API(H5FDget_eof, HADDR_UNDEF);
     H5TRACE1("a","x",file);
 
     /* Check arguments */
@@ -2021,7 +2022,8 @@ H5FD_get_eof(H5FD_t *file)
 {
     haddr_t	addr=HADDR_UNDEF;
 
-    FUNC_ENTER(H5FD_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_get_eof, HADDR_UNDEF);
+
     assert(file && file->cls);
     
     /* Dispatch to driver */
@@ -2063,7 +2065,7 @@ herr_t
 H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	 void *buf/*out*/)
 {
-    FUNC_ENTER(H5FDread, FAIL);
+    FUNC_ENTER_API(H5FDread, FAIL);
     H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
@@ -2110,7 +2112,8 @@ herr_t
 H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  void *buf/*out*/)
 {
-    FUNC_ENTER(H5FD_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_read, FAIL);
+
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
@@ -2223,7 +2226,7 @@ herr_t
 H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  const void *buf)
 {
-    FUNC_ENTER(H5FDwrite, FAIL);
+    FUNC_ENTER_API(H5FDwrite, FAIL);
     H5TRACE6("e","xMtiazx",file,type,dxpl_id,addr,size,buf);
 
     /* Check args */
@@ -2273,7 +2276,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     size_t new_size;    /* New size of the accumulator buffer */
     size_t old_offset;  /* Offset of old data within the accumulator buffer */
 
-    FUNC_ENTER(H5FD_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_write, FAIL);
+
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
@@ -2484,7 +2488,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 herr_t
 H5FDflush(H5FD_t *file, unsigned closing)
 {
-    FUNC_ENTER(H5FDflush, FAIL);
+    FUNC_ENTER_API(H5FDflush, FAIL);
     H5TRACE2("e","xIu",file,closing);
 
     /* Check args */
@@ -2523,7 +2527,8 @@ H5FDflush(H5FD_t *file, unsigned closing)
 herr_t
 H5FD_flush(H5FD_t *file, unsigned closing)
 {
-    FUNC_ENTER(H5FD_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_flush, FAIL);
+
     assert(file && file->cls);
 
     /* Check if we need to flush out the metadata accumulator */
@@ -2563,7 +2568,7 @@ H5FD_flush(H5FD_t *file, unsigned closing)
 herr_t
 H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
 {
-    FUNC_ENTER(H5FD_get_fileno, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_get_fileno, FAIL);
 
     assert(file);
     assert(filenum);
