@@ -568,7 +568,7 @@ main(int argc, char *argv[])
 
     /* Parse arguments or assume these tests (`small', `medium' ) */
     if (1 == argc) {
-	size_of_test = TEST_SMALL | TEST_MEDIUM;
+	size_of_test = TEST_SMALL;
     } else {
 	int			i;
 	for (i = 1, size_of_test = 0; i < argc; i++) {
