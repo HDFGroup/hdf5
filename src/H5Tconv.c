@@ -3547,7 +3547,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE);
+                        /*H5T_bit_set(s, src.u.f.mpos, 1, FALSE);  - Why do this? */
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -8868,7 +8868,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /*
                  * Find the sign bit value of the source.
                  */
-                sign = H5T_bit_get_d(s, src.prec-1, 1);
+                sign = H5T_bit_get_d(s, src.u.f.sign, 1);
 
                 /*
                  * Check for special cases: +0, -0, +Inf, -Inf, NaN

@@ -2385,9 +2385,19 @@ static int
 test_derived_flt(void)
 {
     hid_t       file=-1, tid1=-1, tid2=-1;
+    hid_t       dxpl_id=-1;
     char        filename[1024];
     size_t      precision, spos, epos, esize, mpos, msize, size, ebias;
     int         offset;
+    size_t      src_size, dst_size;
+    unsigned char        *buf=NULL, *saved_buf=NULL;
+    int         *aligned=NULL;
+    int		endian;			/*endianess	        */
+    size_t      nelmts = NTESTELEM;
+    int         fails_this_test = 0;
+    const size_t	max_fails=40;	/*max number of failures*/
+    char	str[256];		/*message string	*/
+    int         i, j, k;
 
     TESTING("user-define and query functions of floating-point types");
 
@@ -2396,6 +2406,12 @@ test_derived_flt(void)
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
         H5_FAILED();
         printf("Can't create file\n");
+        goto error; 
+    }
+
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) {
+        H5_FAILED();
+        printf("Can't create data transfer property list\n");
         goto error; 
     }
 
@@ -2508,6 +2524,76 @@ test_derived_flt(void)
         goto error; 
     }
 
+    /* Convert data from native integer to the 1st derived floating-point type.
+     * Then convert data from the floating-point type back to native integer.
+     * Compare the final data with the original data.
+     */
+    src_size = H5Tget_size(H5T_NATIVE_INT);
+    endian = H5Tget_order(H5T_NATIVE_INT);
+    buf = (unsigned char*)malloc(nelmts*(MAX(src_size, size)));
+    saved_buf = (unsigned char*)malloc(nelmts*src_size);
+    aligned = (int*)malloc(src_size);
+
+    for(i=0; i<nelmts*src_size; i++)
+        buf[i] = saved_buf[i] = HDrand();
+
+    /* Convert data from native integer to derived floating-point type.
+     * The mantissa is big enough to retain the integer's precision. */
+    if(H5Tconvert(H5T_NATIVE_INT, tid1, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+    /* Convert data from the derived floating-point type back to native integer. */
+    if(H5Tconvert(tid1, H5T_NATIVE_INT, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+
+    /* Are the values still the same?*/
+    for(i=0; i<nelmts; i++) {
+        for(j=0; j<src_size; j++)
+            if(buf[i*src_size+j]!=saved_buf[i*src_size+j])
+               break;
+        if(j==src_size)
+           continue; /*no error*/ 
+
+        /* Print errors */
+        if (0==fails_this_test++) {
+	    sprintf(str, "\nTesting random sw int -> derived floating-point conversions");
+	    printf("%-70s", str);
+	    HDfflush(stdout);
+            H5_FAILED();
+        }
+        printf("    test %u elmt %u: \n", 1, (unsigned)i);
+
+        printf("        src = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+
+        HDmemcpy(aligned, saved_buf+i*sizeof(int), sizeof(int));
+        printf(" %29d\n", *aligned);
+
+        printf("        dst = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+
+        HDmemcpy(aligned, buf+i*sizeof(int), sizeof(int));
+        printf(" %29d\n", *aligned);
+
+        if (fails_this_test>=max_fails) {
+            HDputs("    maximum failures reached, aborting test...");
+            goto error;
+        }
+    }
+
+    fails_this_test = 0;
+    if(buf) free(buf);
+    if(saved_buf) free(saved_buf);
+    if(aligned) free(aligned);
+    buf = saved_buf = aligned = NULL;
+
     /*--------------------------------------------------------------------------
      *                   2nd floating-point type
      * size=3 byte, precision=24 bits, offset=0 bits, mantissa size=16 bits, 
@@ -2596,9 +2682,93 @@ test_derived_flt(void)
         goto error; 
     }
 
+    /* Convert data from the 2nd to the 1st derived floating-point type.
+     * Then convert data from the 1st type back to the 2nd type.
+     * Compare the final data with the original data.
+     */
+    src_size = H5Tget_size(tid2);
+    dst_size = H5Tget_size(tid1);
+    endian = H5Tget_order(tid2);
+    buf = (unsigned char*)malloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char*)malloc(nelmts*src_size);
+
+    for(i=0; i<nelmts*src_size; i++)
+        buf[i] = saved_buf[i] = HDrand();
+
+    /* Convert data from the 2nd to the 1st derived floating-point type.
+     * The mantissa and exponent of the 2nd type are big enough to retain 
+     * the precision and exponent power. */
+    if(H5Tconvert(tid2, tid1, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+    /* Convert data from the 1st back to the 2nd derived floating-point type. */
+    if(H5Tconvert(tid1, tid2, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+
+    /* Are the values still the same?*/
+    for(i=0; i<nelmts; i++) {
+        for(j=0; j<src_size; j++)
+            if(buf[i*src_size+j]!=saved_buf[i*src_size+j])
+               break;
+        if(j==src_size)
+           continue; /*no error*/ 
+
+        /* If original value is NaN(exponent bits are all ones, 11..11), 
+         * the library simply sets all mantissa bits to ones.  So don't 
+         * compare values in this case.
+         */
+        if((buf[i*src_size+2]==0x7f && saved_buf[i*src_size+2]==0x7f) ||
+            (buf[i*src_size+2]==0xff && saved_buf[i*src_size+2]==0xff))
+            continue;
+
+        /* Print errors */
+        if (0==fails_this_test++) {
+	    sprintf(str, "\nTesting random sw derived floating-point -> derived floating-point conversions");
+	    printf("%-70s", str);
+	    HDfflush(stdout);
+            H5_FAILED();
+        }
+        printf("    test %u elmt %u: \n", 1, (unsigned)i);
+
+        printf("        src = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        printf("        dst = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        if (fails_this_test>=max_fails) {
+            HDputs("    maximum failures reached, aborting test...");
+            goto error;
+        }
+    }
+
+    if (buf) free(buf);
+    if (saved_buf) free(saved_buf);
+
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
     if(H5Tclose(tid2)<0) {
         H5_FAILED();
         printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if(H5Pclose(dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't close property list\n");
         goto error;
     }
 
@@ -2614,13 +2784,18 @@ test_derived_flt(void)
     return 0;
 
  error:
+    if (buf) free(buf);
+    if (saved_buf) free(saved_buf);
+    if (aligned) free(aligned);
+    HDfflush(stdout);
     H5E_BEGIN_TRY {
         H5Tclose (tid1);
         H5Tclose (tid2);
+        H5Pclose (dxpl_id);
         H5Fclose (file);
     } H5E_END_TRY;
     reset_hdf5(); /*print statistics*/
-    return 1;
+    return MAX((int)fails_this_test, 1);
 }
 
 
@@ -6658,7 +6833,7 @@ run_int_float_conv(const char *name)
         nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
 #if H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
         nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_ULLONG_TO_FP_CAST_WORKS */
+#else /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS */
         {
             char		str[256];		/*hello string		*/
 
@@ -6668,7 +6843,7 @@ run_int_float_conv(const char *name)
             SKIPPED();
             HDputs("    Test skipped due to compiler not handling conversion.");
         }
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS */
 #endif
 #endif
 #else /*H5_SW_INTEGER_TO_LDOUBLE_WORKS*/
@@ -7337,7 +7512,7 @@ main(void)
     
     /* Test software integer-float conversion functions */
     nerrors += run_int_float_conv("sw");
-
+    
     reset_hdf5();
     
     if (nerrors) {
