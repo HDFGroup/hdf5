@@ -156,29 +156,22 @@ corresponding tests.
 
 STEP III:   TESTING THE BUILD
 
-
-
 In a command prompt window run the test batch file which 
 resides in the hdf5\test directory to make sure that the library
 was built correctly.
 
-The hdf5testDBG.bat file tests the debug version of the library and 
-hdf5testREL.bat tests the release version of the library.
+To test, cd into the hdf5\test directory.  Then type:
+"hdf5test [debug or release] [dll]" depending on which version you would 
+like to test.
 
-The hdf5testdllDBG.bat file tests the debug version of the dll and 
-hdf5testdllREL.bat tests the release version of the dll.  The debug dll or
-the release dll should be placed in the Windows\system directory before the dll
-tests are run.  Both the release and the debug dlls have the same name so 
-only one may be used at a time.
-
-In the hdf5\tools directory, there are 4 batch files that can be used to test
-h5dump.  The file dumptestDBG.bat tests the debug version of the dump utility
-and the dumptestREL.bat tests the release version.  The dumptestDLLDBG.bat
-tests the debug dll version of the dumper and the dumptestDLLREL.bat tests
-the release dll version.  Some differences are expected in the output of these
-4 tests (dimensions of the dataspace).
+To test the h5dump utility, cd into hdf5\tools.  Then type:
+"dumptest [debug or release] [dll]" depending on which version you would like
+to test. Some differences are expected in the output of these 4 tests (the 
+errors are in the dimensions of the dataspace).
 
 
+NOTE: the appropriate dll should be placed in the Windows\system directory
+before using the dlls.
 
 NOTE: The debug dll tests on the Alpha platform currently are not completely
       working.  The release dll is fine though.
