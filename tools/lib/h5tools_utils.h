@@ -79,7 +79,7 @@ extern int    get_option(int argc, const char **argv, const char *opt,
 
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
-    unsigned long objno[2];
+    haddr_t objno;
     char *objname;
     int displayed;
     int recorded;
@@ -113,12 +113,12 @@ extern void     error_msg(const char *progname, const char *fmt, ...);
 extern void     warn_msg(const char *progname, const char *fmt, ...);
 extern void     free_table(table_t **table);
 extern void     dump_table(char *name, table_t *table);
-extern int      get_table_idx(table_t *table, unsigned long *);
+extern int      get_table_idx(table_t *table, haddr_t objno);
 extern int      get_tableflag(table_t*, int);
 extern int      set_tableflag(table_t*, int);
 extern char    *get_objectname(table_t*, int);
 extern herr_t   find_objs(hid_t group, const char *name, void *op_data);
-extern int      search_obj(table_t *temp, unsigned long *);
+extern int      search_obj(table_t *temp, haddr_t objno);
 extern void     init_table(table_t **tbl);
 extern void     init_prefix(char **temp, size_t);
 

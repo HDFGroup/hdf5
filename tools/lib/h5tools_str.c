@@ -769,10 +769,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             H5Gget_objinfo(obj, ".", FALSE, &sb);
 
             if (info->dset_hidefileno)
-                h5tools_str_append(str, info->dset_format, sb.objno[1], sb.objno[0]);
+                h5tools_str_append(str, info->dset_format, sb.objno);
             else
-                h5tools_str_append(str, info->dset_format,
-                      sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
+                h5tools_str_append(str, info->dset_format, sb.fileno, sb.objno);
 
             h5tools_str_dump_region(str, region, info);
             H5Sclose(region);
@@ -810,12 +809,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             }
 
             /* Print OID */
-            if (info->obj_hidefileno) {
-                h5tools_str_append(str, info->obj_format, sb.objno[1], sb.objno[0]);
-            } else {
-                h5tools_str_append(str, info->obj_format,
-                          sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
-            }
+            if (info->obj_hidefileno)
+                h5tools_str_append(str, info->obj_format, sb.objno);
+            else
+                h5tools_str_append(str, info->obj_format, sb.fileno,sb.objno);
         }
     } else if (H5Tget_class(type) == H5T_ARRAY) {
         int k, ndims;

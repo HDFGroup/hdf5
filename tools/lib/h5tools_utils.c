@@ -39,7 +39,7 @@ int         opt_ind = 1;    /*token pointer                          */
 const char *opt_arg;        /*flag argument (or value)               */
 
 /* local functions */
-static void add_obj(table_t *table, unsigned long *objno, char *objname);
+static void add_obj(table_t *table, haddr_t objno, char *objname);
 
 
 /*-------------------------------------------------------------------------
@@ -325,7 +325,7 @@ init_table(table_t **tbl)
     table->objs = HDmalloc(table->size * sizeof(obj_t));
 
     for (i = 0; i < table->size; i++) {
-        table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+        table->objs[i].objno = 0;
         table->objs[i].displayed = 0;
         table->objs[i].recorded = 0;
         table->objs[i].objflag = 0;
@@ -392,12 +392,12 @@ free_table(table_t **table)
  *-------------------------------------------------------------------------
  */
 int 
-search_obj(table_t *table, unsigned long *objno)
+search_obj(table_t *table, haddr_t objno)
 {
     int i;
 
     for (i = 0; i < table->nobjs; i++)
-        if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
+        if (table->objs[i].objno == objno)
 	    return i;
   
     return FAIL;
@@ -547,9 +547,8 @@ dump_table(char* tablename, table_t *table)
     printf("%s: # of entries = %d\n", tablename,table->nobjs);
 
     for (i = 0; i < table->nobjs; i++)
-        printf("\t%lu %lu %s %d\n",
-               table->objs[i].objno[0],
-               table->objs[i].objno[1],
+        HDfprintf(stdout,"\t%a %s %d\n",
+               table->objs[i].objno,
                table->objs[i].objname,
                table->objs[i].objflag);
 }
@@ -569,7 +568,7 @@ dump_table(char* tablename, table_t *table)
  *-------------------------------------------------------------------------
  */
 int
-get_table_idx(table_t *table, unsigned long *objno)
+get_table_idx(table_t *table, haddr_t objno)
 {
     return search_obj(table, objno);
 }
@@ -649,7 +648,7 @@ get_objectname(table_t *table, int idx)
  *-------------------------------------------------------------------------
  */
 static void
-add_obj(table_t *table, unsigned long *objno, char *objname)
+add_obj(table_t *table, haddr_t objno, char *objname)
 {
     int i;
 
@@ -658,7 +657,7 @@ add_obj(table_t *table, unsigned long *objno, char *objname)
         table->objs = HDrealloc(table->objs, table->size * sizeof(obj_t));
 
         for (i = table->nobjs; i < table->size; i++) {
-            table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+            table->objs[i].objno = 0;
             table->objs[i].displayed = 0;
             table->objs[i].recorded = 0;
             table->objs[i].objflag = 0;
@@ -667,8 +666,7 @@ add_obj(table_t *table, unsigned long *objno, char *objname)
     }
 
     i = table->nobjs++;
-    table->objs[i].objno[0] = objno[0];
-    table->objs[i].objno[1] = objno[1];
+    table->objs[i].objno = objno;
     free(table->objs[i].objname);
     table->objs[i].objname = HDstrdup(objname);
 }
