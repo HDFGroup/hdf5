@@ -255,6 +255,7 @@ precision (detected_t *d)
         fflush(stderr);							      \
 	if (0==(_child=fork())) {					      \
             _buf = malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
+	    *((TYPE*)(_buf+align_g[_ano])) = _val;			      \
 	    _val = *((TYPE*)(_buf+align_g[_ano]));			      \
             free(_buf);							      \
 	    exit(0);							      \
