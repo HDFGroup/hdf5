@@ -507,7 +507,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
         /* do uncompressed data write */
         gettimeofday(&timer_start, NULL);
-        output = open(filename, O_RDWR | O_CREAT);
+        output = open(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
             error(strerror(errno));
