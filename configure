@@ -30899,7 +30899,6 @@ echo "$as_me: error: no way to run a parallel program" >&2;}
     RUNPARALLEL=""
   fi
 
-
                MPE=yes
 
 # Check whether --with-mpe or --without-mpe was given.
