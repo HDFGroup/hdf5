@@ -22,8 +22,8 @@
 /* Private headers needed by this file */
 #include <H5private.h>
 
-#define H5MM_malloc(Z)	HDmalloc(Z)
-#define H5MM_calloc(Z)	HDcalloc(1,Z)
+#define H5MM_malloc(Z)	HDmalloc(MAX(1,Z))
+#define H5MM_calloc(Z)	HDcalloc(1,MAX(1,Z))
 
 /*
  * Library prototypes...

@@ -171,6 +171,8 @@ H5O_pline_encode (H5F_t __unused__ *f, uint8 *p/*out*/, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;
     size_t		i, j, name_length;
+    const char		*name=NULL;
+    H5Z_class_t		*cls=NULL;
     
     FUNC_ENTER (H5O_pline_encode, FAIL);
 
@@ -188,17 +190,24 @@ H5O_pline_encode (H5F_t __unused__ *f, uint8 *p/*out*/, const void *mesg)
     *p++ = 0;	/*reserved 6*/
 
     for (i=0; i<pline->nfilters; i++) {
-	if (pline->filter[i].name) {
-	    name_length = strlen(pline->filter[i].name)+1;
-	} else {
-	    name_length = 0;
+	/*
+	 * Get the filter name.  If the pipeline message has a name in it then
+	 * use that one.  Otherwise try to look up the filter and get the name
+	 * as it was registered.
+	 */
+	if (NULL==(name=pline->filter[i].name) &&
+	    (cls=H5Z_find(pline->filter[i].id))) {
+	    name = cls->name;
 	}
+	name_length = name ? strlen(name)+1 : 0;
+
+	/* Encode the filter */
 	UINT16ENCODE(p, pline->filter[i].id);
 	UINT16ENCODE(p, H5O_ALIGN(name_length));
 	UINT16ENCODE(p, pline->filter[i].flags);
 	UINT16ENCODE(p, pline->filter[i].cd_nelmts);
 	if (name_length>0) {
-	    memcpy(p, pline->filter[i].name, name_length);
+	    memcpy(p, name, name_length);
 	    p += name_length;
 	    while (name_length++ % 8) *p++ = 0;
 	}
@@ -313,23 +322,32 @@ static size_t
 H5O_pline_size (H5F_t __unused__ *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;
-    size_t		i, size;
+    size_t		i, size, name_len;
+    const char		*name = NULL;
+    H5Z_class_t		*cls = NULL;
         
     FUNC_ENTER (H5O_pline_size, 0);
 
+    /* Message header */
     size = 1 +				/*version			*/
 	   1 +				/*number of filters		*/
 	   6;				/*reserved			*/
 
     for (i=0; i<pline->nfilters; i++) {
+	/* Get the name of the filter, same as done with H5O_pline_encode() */
+	if (NULL==(name=pline->filter[i].name) &&
+	    (cls=H5Z_find(pline->filter[i].id))) {
+	    name = cls->name;
+	}
+	name_len = name ? strlen(name)+1 : 0;
+	
+
 	size += 2 +			/*filter identification number	*/
 		2 +			/*name length			*/
 		2 +			/*flags				*/
-		2;			/*number of client data values	*/
-	if (pline->filter[i].name) {
-	    size_t n = strlen(pline->filter[i].name) + 1;
-	    size += H5O_ALIGN(n);
-	}
+		2 +			/*number of client data values	*/
+		H5O_ALIGN(name_len);	/*length of the filter name	*/
+	
 	size += pline->filter[i].cd_nelmts * 4;
 	if (pline->filter[i].cd_nelmts % 2) size += 4;
     }

@@ -742,7 +742,7 @@ H5O_free (const H5O_class_t *type, void *mesg)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_copy (const H5O_class_t *type, const void *mesg)
+H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
 {
     void	*ret_value = NULL;
     
@@ -752,7 +752,7 @@ H5O_copy (const H5O_class_t *type, const void *mesg)
     assert (type->copy);
 
     if (mesg) {
-	if (NULL==(ret_value=(type->copy)(mesg, NULL))) {
+	if (NULL==(ret_value=(type->copy)(mesg, dst))) {
 	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
 			   "unable to copy object header message");
 	}

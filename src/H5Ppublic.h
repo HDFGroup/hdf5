@@ -98,7 +98,8 @@ int H5Pget_nfilters(hid_t plist_id);
 H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
 			   unsigned int *flags/*out*/,
 			   size_t *cd_nelmts/*out*/,
-			   unsigned cd_values[]/*out*/);
+			   unsigned cd_values[]/*out*/,
+			   size_t namelen, char name[]);
 herr_t H5Pset_deflate (hid_t plist_id, unsigned aggression);
 herr_t H5Pset_cache (hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 		     double rdcc_w0);

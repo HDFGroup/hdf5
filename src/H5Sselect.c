@@ -108,7 +108,8 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 
     /* Copy offset information */
     if (NULL==(dst->select.offset = H5MM_calloc(src->extent.u.simple.rank*sizeof(hssize_t)))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
     }
     if(src->select.offset!=NULL)
         HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));

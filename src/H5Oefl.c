@@ -244,7 +244,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
 			   "memory allocation failed");
 	}
 	
-    } else if (NULL==dest->slot || dest->nalloc<mesg->nalloc) {
+    } else if (dest->nalloc<mesg->nalloc) {
 	H5MM_xfree(dest->slot);
 	if (NULL==(dest->slot = H5MM_malloc(mesg->nalloc*
 					    sizeof(H5O_efl_entry_t)))) {

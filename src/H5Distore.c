@@ -1163,8 +1163,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	ent->dirty = FALSE;
 	ent->chunk_size = chunk_size;
 	ent->alloc_size = chunk_alloc;
-	ent->layout = H5O_copy (H5O_LAYOUT, layout);
-	ent->pline = H5O_copy (H5O_PLINE, pline);
+	ent->layout = H5O_copy (H5O_LAYOUT, layout, NULL);
+	ent->pline = H5O_copy (H5O_PLINE, pline, NULL);
 	for (i=0; i<layout->ndims; i++) {
 	    ent->offset[i] = offset[i];
 	}
@@ -1268,8 +1268,8 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 	    H5F_rdcc_ent_t x;
 	    HDmemset (&x, 0, sizeof x);
 	    x.dirty = TRUE;
-	    x.layout = H5O_copy (H5O_LAYOUT, layout);
-	    x.pline = H5O_copy (H5O_PLINE, pline);
+	    x.layout = H5O_copy (H5O_LAYOUT, layout, NULL);
+	    x.pline = H5O_copy (H5O_PLINE, pline, NULL);
 	    for (i=0, x.chunk_size=1; i<layout->ndims; i++) {
 		x.offset[i] = offset[i];
 		x.chunk_size *= layout->dim[i];

@@ -346,7 +346,8 @@ H5P_close (H5P_class_t type, void *plist)
 	break;
 	
     case H5P_DATASET_CREATE:
-	H5O_reset (H5O_EFL, &(dc_list->efl));
+	H5O_reset(H5O_EFL, &(dc_list->efl));
+	H5O_reset(H5O_PLINE, &(dc_list->pline));
 	break;
 
     case H5P_DATASET_XFER:
@@ -2302,13 +2303,15 @@ H5Pget_nfilters (hid_t plist_id)
  */
 H5Z_filter_t
 H5Pget_filter (hid_t plist_id, int idx, unsigned int *flags/*out*/,
-	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/)
+	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
+	       size_t namelen, char name[]/*out*/)
 {
     H5D_create_t	*plist = NULL;
     size_t		i;
     
     FUNC_ENTER (H5Pget_filter, FAIL);
-    H5TRACE5("Zf","iIsx*zx",plist_id,idx,flags,cd_nelmts,cd_values);
+    H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
+             name);
     
     /* Check arguments */
     if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
@@ -2355,6 +2358,16 @@ H5Pget_filter (hid_t plist_id, int idx, unsigned int *flags/*out*/,
     }
     if (cd_nelmts) *cd_nelmts = plist->pline.filter[idx].cd_nelmts;
 
+    if (namelen>0 && name) {
+	const char *s = plist->pline.filter[idx].name;
+	if (!s) {
+	    H5Z_class_t *cls = H5Z_find(plist->pline.filter[idx].id);
+	    if (cls) s = cls->name;
+	}
+	if (s) strncpy(name, s, namelen);
+	else name[0] = '\0';
+    }
+    
     FUNC_LEAVE (plist->pline.filter[idx].id);
 }
 
@@ -2737,7 +2750,6 @@ H5P_copy (H5P_class_t type, const void *src)
 {
     size_t		size;
     void		*dst = NULL;
-    int			i;
     const H5D_create_t	*dc_src = NULL;
     H5D_create_t	*dc_dst = NULL;
     const H5F_access_t	*fa_src = NULL;
@@ -2809,20 +2821,21 @@ H5P_copy (H5P_class_t type, const void *src)
     case H5P_DATASET_CREATE:
 	dc_src = (const H5D_create_t*)src;
 	dc_dst = (H5D_create_t*)dst;
-	
-	if (dc_src->efl.nalloc>0) {
-	    dc_dst->efl.slot = H5MM_malloc (dc_dst->efl.nalloc *
-					    sizeof(H5O_efl_entry_t));
-	    if (NULL==dc_dst->efl.slot) {
-		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			       "memory allocation failed");
-	    }
-	    for (i=0; i<dc_src->efl.nused; i++) {
-		char *s = H5MM_xstrdup (dc_src->efl.slot[i].name);
-		dc_dst->efl.slot[i] = dc_src->efl.slot[i];
-		dc_dst->efl.slot[i].name = s;
-	    }
+
+	/* Copy the external file list */
+	HDmemset(&(dc_dst->efl), 0, sizeof(dc_dst->efl));
+	if (NULL==H5O_copy(H5O_EFL, &(dc_src->efl), &(dc_dst->efl))) {
+	    HRETURN_ERROR(H5E_TEMPLATE, H5E_CANTINIT, NULL,
+			  "unable to copy external file list message");
 	}
+
+	/* Copy the filter pipeline */
+	if (NULL==H5O_copy(H5O_PLINE, &(dc_src->pline), &(dc_dst->pline))) {
+	    HRETURN_ERROR(H5E_TEMPLATE, H5E_CANTINIT, NULL,
+			  "unable to copy filter pipeline message");
+	}
+	
+
 	break;
 	
     case H5P_DATASET_XFER:

@@ -1471,10 +1471,6 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	    if (NULL==(bt=H5AC_find (f, H5AC_BT, cur_addr, type, udata))) {
 		HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node");
 	    }
-	    if (NULL==(child=H5MM_malloc (bt->nchildren*sizeof(haddr_t)))) {
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			     "memory allocation failed");
-	    }
 	    for (i=0; i<bt->nchildren; i++) {
 		child[i] = bt->child[i];
 	    }

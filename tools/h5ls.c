@@ -215,10 +215,14 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 		    unsigned cd_values[20];
 		    size_t cd_nelmts = NELMTS(cd_values);
 		    size_t cd_num;
+		    char f_name[32];
 		    filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
-					    cd_values);
+					    cd_values, sizeof(f_name), f_name);
+		    f_name[sizeof(f_name)-1] = '\0';
 		    sprintf(comment, "Filter-%d:", i);
-		    printf("    %-10s %u %s {", comment, (unsigned)filt_id,
+		    printf("    %-10s %s-%u %s {", comment,
+			   f_name[0]?f_name:"method",
+			   (unsigned)filt_id,
 			   filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
 		    for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
 			printf("%s%u", cd_num?", ":"", cd_values[cd_num]);

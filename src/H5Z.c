@@ -24,29 +24,9 @@ static intn interface_initialize_g = FALSE;
 static herr_t H5Z_init_interface (void);
 static void H5Z_term_interface (void);
 
-/*
- * The filter table maps filter identification numbers to structs that
- * contain a pointers to the filter function and timing statistics.
- */
-typedef struct H5Z_class_t {
-    H5Z_filter_t id;		/*filter ID number			*/
-    char	*comment;	/*comment for debugging			*/
-    H5Z_func_t	func;		/*the filter function			*/
-
-#ifdef H5Z_DEBUG
-    struct {
-	hsize_t	total;		/*total number of bytes processed	*/
-	hsize_t	errors;		/*bytes of total attributable to errors	*/
-	H5_timer_t timer;	/*execution time including errors	*/
-    } stats[2];			/*0=output, 1=input			*/
-#endif
-} H5Z_class_t;
-
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
 static H5Z_class_t	*H5Z_table_g = NULL;
-
-static H5Z_class_t *H5Z_find(H5Z_filter_t id);
 
 /* Predefined filters */
 static size_t H5Z_filter_deflate(uintn flags, size_t cd_nelmts,
@@ -123,7 +103,7 @@ H5Z_term_interface (void)
 	    }
 
 	    /* Truncate the comment to fit in the field */
-	    strncpy(comment, H5Z_table_g[i].comment, sizeof comment);
+	    strncpy(comment, H5Z_table_g[i].name, sizeof comment);
 	    comment[sizeof(comment)-1] = '\0';
 
 	    /*
@@ -151,7 +131,7 @@ H5Z_term_interface (void)
 
     /* Free the table */
     for (i=0; i<H5Z_table_used_g; i++) {
-	H5MM_xfree(H5Z_table_g[i].comment);
+	H5MM_xfree(H5Z_table_g[i].name);
     }
     H5Z_table_g = H5MM_xfree(H5Z_table_g);
     H5Z_table_used_g = H5Z_table_alloc_g = 0;
@@ -252,12 +232,12 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 	i = H5Z_table_used_g++;
 	HDmemset(H5Z_table_g+i, 0, sizeof(H5Z_class_t));
 	H5Z_table_g[i].id = id;
-	H5Z_table_g[i].comment = H5MM_xstrdup(comment);
+	H5Z_table_g[i].name = H5MM_xstrdup(comment);
 	H5Z_table_g[i].func = func;
     } else {
 	/* Replace old contents */
-	H5MM_xfree(H5Z_table_g[i].comment);
-	H5Z_table_g[i].comment = H5MM_xstrdup(comment);
+	H5MM_xfree(H5Z_table_g[i].name);
+	H5Z_table_g[i].name = H5MM_xstrdup(comment);
 	H5Z_table_g[i].func = func;
     }
 
@@ -354,7 +334,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
  *
  *-------------------------------------------------------------------------
  */
-static H5Z_class_t *
+H5Z_class_t *
 H5Z_find(H5Z_filter_t id)
 {
     size_t	i;
@@ -544,7 +524,10 @@ H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
 	z_stream	z_strm;
 	size_t		nalloc = *buf_size;
 
-	outbuf = H5MM_malloc(nalloc);
+	if (NULL==(outbuf = H5MM_malloc(nalloc))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
+			"memory allocation failed for deflate uncompression");
+	}
 	HDmemset(&z_strm, 0, sizeof(z_strm));
 	z_strm.next_in = *buf;
 	z_strm.avail_in = nbytes;
@@ -562,7 +545,12 @@ H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
 	    }
 	    if (Z_OK==status && 0==z_strm.avail_out) {
 		nalloc *= 2;
-		outbuf = H5MM_realloc(outbuf, nalloc);
+		if (NULL==(outbuf = H5MM_realloc(outbuf, nalloc))) {
+		    inflateEnd(&z_strm);
+		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
+				"memory allocation failed for deflate "
+				"uncompression");
+		}
 		z_strm.next_out = (char*)outbuf + z_strm.total_out;
 		z_strm.avail_out = nalloc - z_strm.total_out;
 	    }

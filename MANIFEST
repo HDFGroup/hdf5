@@ -48,13 +48,13 @@
 ./doc/html/Caching.html
 ./doc/html/CodeReview.html
 ./doc/html/Coding.html
-./doc/html/Compression.html
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/Errors.html
 ./doc/html/ExternalFiles.html
 ./doc/html/Files.html
+./doc/html/Filters.html
 ./doc/html/Glossary.html
 ./doc/html/Groups.html
 ./doc/html/H5.api.html

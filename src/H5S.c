@@ -1195,7 +1195,8 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 
     /* Allocate space for the offset and set it to zeros */
     if (NULL==(space->select.offset = H5MM_calloc(rank*sizeof(hssize_t)))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		       "memory allocation failed");
     }
 
     /* shift out of the previous state to a "simple" dataspace */
@@ -1632,7 +1633,8 @@ H5Soffset_simple (hid_t space_id, const hssize_t *offset)
     /* Allocate space for new offset */
     if(space->select.offset==NULL) {
         if (NULL==(space->select.offset = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))) {
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			   "memory allocation failed");
         }
     }
 
