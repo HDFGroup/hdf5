@@ -1220,7 +1220,7 @@ H5S_select_contiguous(const H5S_t *space)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_iterate
+    H5S_select_iterate
  PURPOSE
     Iterate over the selected elements in a memory buffer.
  USAGE
@@ -1536,7 +1536,72 @@ H5S_select_regular(const H5S_t *space)
             break;
     } /* end switch */
 
-done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_regular() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_fill
+ PURPOSE
+    Fill a selection in memory with a value
+ USAGE
+    herr_t H5S_select_fill(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+{
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_fill, FAIL);
+
+    /* Check args */
+    assert(fill);
+    assert(fill_size>0);
+    assert(space);
+    assert(buf);
+
+    /* Fill the selection in the memory buffer */
+    /* [Defer (mostly) to the selection routines] */
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_fill(fill,fill_size,space,buf);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_fill(fill,fill_size,space,buf);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_select_fill(fill,fill_size,space,buf);
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=SUCCEED;
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            assert(0 && "Invalid selection type!");
+            break;
+    } /* end switch */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_fill() */
 

@@ -1057,3 +1057,57 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_select_iterate() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_select_fill
+ PURPOSE
+    Fill an "all" selection in memory with a value
+ USAGE
+    herr_t H5S_all_select_fill(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+{
+    hssize_t nelemts;          /* Number of elements in dataspace */
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_all_select_fill, FAIL);
+
+    /* Check args */
+    assert(fill);
+    assert(fill_size>0);
+    assert(space);
+    assert(buf);
+
+    /* Fill the selection in the memory buffer */
+
+    /* Get the number of elements to iterate through */
+    if((nelemts=H5S_get_simple_extent_npoints(space))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements");
+
+    /* Fill the elements in the buffer */
+    H5_CHECK_OVERFLOW(nelemts,hssize_t,size_t);
+    H5V_array_fill(buf, fill, fill_size, (size_t)nelemts);
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_all_select_fill() */
+

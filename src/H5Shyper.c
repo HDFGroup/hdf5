@@ -6047,18 +6047,17 @@ H5S_hyper_select_regular(const H5S_t *space)
     else
         ret_value=FALSE;
 
-done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_regular() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_select_iterate_helper
+    H5S_hyper_select_iterate_mem_gen
  PURPOSE
     Internal routine to iterate over the elements of a span tree hyperslab selection
  USAGE
-    herr_t H5S_iterate_hyperslab_io(iter_info)
+    herr_t H5S_hyper_select_iterate_mem_gen(iter_info)
         H5S_hyper_iter_info_t *iter_info;   IN/OUT: Block of iteration parameters to pass into recursive calls
  RETURNS
     Non-negative on success, negative on failure
@@ -6071,7 +6070,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_select_iterate_helper(H5S_hyper_iter_info_t *iter_info)
+H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
 {
     const H5S_t *space; /* Dataspace operating with */
     H5S_sel_iter_t *iter;   /* Selection iterator */
@@ -6090,7 +6089,7 @@ H5S_hyper_select_iterate_helper(H5S_hyper_iter_info_t *iter_info)
     unsigned u;            /* Index variable */
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5S_hyper_select_iterate_helper, FAIL);
+    FUNC_ENTER (H5S_hyper_select_iterate_mem_gen, FAIL);
 
     /* Check args */
     assert(iter_info);
@@ -6244,7 +6243,7 @@ H5S_hyper_select_iterate_helper(H5S_hyper_iter_info_t *iter_info)
 done:
 #endif /* LATER */
     FUNC_LEAVE (ret_value);
-} /* end H5S_hyper_select_iterate_helper() */
+} /* end H5S_hyper_select_iterate_mem_gen() */
 
 
 /*--------------------------------------------------------------------------
@@ -6503,7 +6502,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
         iter_info.op_data=operator_data;
 
         /* Call the recursive iterator routine */
-        ret_value=H5S_hyper_select_iterate_helper(&iter_info);
+        ret_value=H5S_hyper_select_iterate_mem_gen(&iter_info);
     } /* end else */
 
     /* Release selection iterator */
@@ -6567,6 +6566,402 @@ H5S_hyper_release (H5S_t *space)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_release() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_fill_gen
+ PURPOSE
+    Fill a hyperslab selection in memory with a value
+ USAGE
+    herr_t H5S_hyper_select_fill_gen(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_select_fill_gen(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+{
+    H5S_hyper_span_info_t *spans=NULL;      /* Pointer to copy of the span tree */
+    H5S_hyper_span_info_t *tmp_spans;       /* Temporary pointer to a span tree */
+    H5S_hyper_span_t *span[H5O_LAYOUT_NDIMS];   /* Array of pointers to span nodes */
+    H5S_hyper_span_t *curr_span;    /* Current hyperslab span node */
+    hsize_t slab[H5O_LAYOUT_NDIMS]; /* Cumulative size of each dimension in bytes */
+    hssize_t abs_arr[H5O_LAYOUT_NDIMS];  /* Absolute hyperslab span position */
+    hssize_t *off_arr;  /* Offset within the dataspace extent */
+    hsize_t acc;        /* Accumulator for computing cumulative sizes */
+    int fast_dim;       /* Rank of the fastest changing dimension for the dataspace */
+    int curr_dim;       /* Current dimension being operated on */
+    int ndims;          /* Number of dimensions of dataset */
+    hsize_t span_io;    /* Number of elements in current span to actually process */
+    hsize_t num_elem;   /* Number of elements in the selection */
+    uint8_t *loc;       /* Current element location pointer */
+    int i;              /* Index variable */
+    unsigned u;         /* Index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER (H5S_hyper_select_fill_gen, FAIL);
+
+    /* Set the rank of the fastest changing dimension */
+    ndims=space->extent.u.simple.rank;
+    fast_dim=(ndims-1);
+
+    /* Set the pointer to the selection offset in the dataspace */
+    off_arr=space->select.offset;
+
+    /* Make a copy of the span tree to iterate over */
+    spans=H5S_hyper_copy_span(space->select.sel_info.hslab.span_lst);
+
+    /* Set the nelem & pstride values according to the element size */
+    H5S_hyper_span_precompute(spans,fill_size);
+
+    /* Build arrays of span heads & offsets in each dimension */
+    for(u=0, tmp_spans=spans; u<space->extent.u.simple.rank; u++) {
+        /* Set the pointers to the initial span in each dimension */
+        assert(tmp_spans);
+        assert(tmp_spans->head);
+
+        /* Set the pointer to the first span in the list for this node */
+        span[u] = tmp_spans->head;
+
+        /* Set the initial offset to low bound of span */
+        abs_arr[u]=span[u]->low;
+
+        /* Get the pointer to the next level down */
+        tmp_spans=tmp_spans->head->down;
+    } /* end for */
+
+    /* Compute sizes of "slab" in each dimension */
+    for(i=fast_dim, acc=fill_size; i>=0; i--) {
+        slab[i]=acc;
+        acc*=space->extent.u.simple.size[i];
+    } /* end for */
+
+    /* Set the offset of the first element iterated on */
+    for(i=0, loc=buf; i<ndims; i++)
+        /* Compute the sequential element offset */
+        loc+=(abs_arr[i]+off_arr[i])*slab[i];
+
+    /* Get the number of elements in selection */
+    num_elem=space->select.num_elem;
+
+    /* Get the pointer to the current span nodes */
+    curr_span=span[fast_dim];
+
+    /* Go iterate over the hyperslabs */
+    while(num_elem>0) {
+        /* Loop through the fastest dim's spans */
+        while(curr_span!=NULL) {
+            /* Compute the number of elements to attempt in this span */
+            span_io=(curr_span->high-curr_span->low)+1;
+
+            /* Double check that things haven't gotten out of sync */
+            assert(num_elem>0);
+
+            /* Fill the elements in the current block */
+            H5_CHECK_OVERFLOW(span_io,hsize_t,size_t);
+            H5V_array_fill(loc, fill, fill_size, (size_t)span_io);
+
+            /* Increment the buffer offset */
+            loc+=curr_span->pstride;
+
+            /* Decrement the number of elements left */
+            num_elem-=span_io;
+
+            /* Advance span in fastest dimension */
+            curr_span=curr_span->next;
+        } /* end while */
+
+        /* Check if there are more elements left */
+        if(num_elem>0) {
+            /* Recursively advance to next offset (not necessarily span) in next dimension up */
+
+            /* Start at the fastest dim */
+            curr_dim=fast_dim-1;
+
+            /* Get the pointer to the correct dimension */
+            curr_span=span[curr_dim];
+
+            /* Work back up through the dimensions */
+            while(curr_dim>=0) {
+                /* Increment position in span */
+                abs_arr[curr_dim]++;
+
+                /* Check if we are still within the span */
+                if(abs_arr[curr_dim]<=curr_span->high) {
+                    break;
+                } /* end if */
+                /* If we walked off that span, advance to the next span */
+                else {
+                    /* Advance span in this dimension */
+                    curr_span=curr_span->next;
+
+                    /* Check if we have a valid span in this dimension still */
+                    if(curr_span!=NULL) {
+                        /* Reset the offset for the dim */
+                        abs_arr[curr_dim]=curr_span->low;
+
+                        break;
+                    } /* end if */
+                    else {
+                        /* If we finished the span list in this dimension, decrement the dimension worked on and loop again */
+                        curr_dim--;
+
+                        /* Reset the curr_span to the next dim */
+                        if(curr_dim>=0)
+                            curr_span=span[curr_dim];
+                    } /* end else */
+                } /* end else */
+            } /* end while */
+
+            /* Reset the span in the current dimension */
+            span[curr_dim]=curr_span;
+
+            /* Walk back down the iterator positions, reseting them */
+            while(curr_dim<fast_dim) {
+                assert(curr_span);
+                assert(curr_span->down);
+                assert(curr_span->down->head);
+
+                /* Set the new span for this dimension */
+                span[curr_dim+1]=curr_span->down->head;
+
+                /* Advance span down the tree */
+                curr_span=curr_span->down->head;
+
+                /* Reset the offset for the dim */
+                abs_arr[curr_dim+1]=curr_span->low;
+
+                /* Increment current dimension */
+                curr_dim++;
+            } /* end while */
+
+            /* Verify that the curr_span points to the fastest dim */
+            assert(curr_span==span[fast_dim]);
+
+            /* Verify that the offset is correct for the fastest dim */
+            assert(abs_arr[fast_dim]==curr_span->low);
+
+            /* Recompute offset in buffer */
+            for(i=0, loc=buf; i<ndims; i++)
+                loc+=(abs_arr[i]+off_arr[i])*slab[i];
+        } /* end if */
+    } /* end while */
+
+#ifdef LATER
+done:
+#endif /* LATER */
+    /* Free the copy of the selections span tree */
+    if(spans!=NULL)
+        H5S_hyper_free_span_info(spans);
+
+    FUNC_LEAVE (ret_value);
+} /* end H5S_hyper_select_fill_gen() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_fill_opt
+ PURPOSE
+    Fill a hyperslab selection in memory with a value
+ USAGE
+    herr_t H5S_hyper_select_fill_opt(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_select_fill_opt(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+{
+    H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
+    hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
+    hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab blocks */
+    hsize_t slab[H5O_LAYOUT_NDIMS];         /* Size of objects in buffer */
+    hsize_t acc;                /* Size accumulator */
+    hsize_t num_elem;           /* Number of elements in the selection */
+    hsize_t fast_elem;          /* Block size in the fastest dimension */
+    hsize_t fast_stride;        /* Stride in the fastest dimension */
+    hssize_t temp_off;          /* Offset in a given dimension */
+    uint8_t *loc;               /* Current element location */
+    int i;                      /* Counter */
+    unsigned u;                 /* Counter */
+    int fast_dim;               /* Rank of the fastest changing dimension for the dataspace */
+    int temp_dim;               /* Temporary rank holder */
+    unsigned ndims;             /* Rank of the dataspace */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER (H5S_hyper_select_fill_opt, FAIL);
+
+    /* Set some convienence values */
+    ndims=space->extent.u.simple.rank;
+    fast_dim=ndims-1;
+    diminfo=space->select.sel_info.hslab.diminfo;
+
+    /* Build the table of next-dimension down 'element' sizes */
+    for(i=fast_dim, acc=fill_size; i>=0; i--) {
+        slab[i]=acc;
+        acc*=space->extent.u.simple.size[i];
+    } /* end for */
+
+    /* Build the tables of count & block sizes as well as the initial starting location */
+    for(u=0, loc=buf; u<ndims; u++) {
+        tmp_count[u]=diminfo[u].count;
+        tmp_block[u]=diminfo[u].block;
+        loc+=(diminfo[u].start+space->select.offset[u])*slab[u];
+    } /* end for */
+
+    /* Get the number of elements in selection */
+    num_elem=space->select.num_elem;
+
+    /* Get the number of elements in the fastest dimension of the selection */
+    fast_elem=tmp_block[fast_dim];
+    fast_stride=diminfo[fast_dim].stride;
+
+    /* Go iterate over the hyperslabs */
+    while(num_elem>0) {
+        /* Iterate over the blocks in the fastest dimension */
+        while(tmp_count[fast_dim]>0) {
+            /* Double check that things haven't gotten out of sync */
+            assert(num_elem>0);
+
+            /* Fill the elements in the current block */
+            H5_CHECK_OVERFLOW(fast_elem,hsize_t,size_t);
+            H5V_array_fill(loc, fill, fill_size, (size_t)fast_elem);
+
+            /* Advance the pointer in the memory buffer */
+            loc+=(fast_stride*fill_size);
+
+            /* Decrement the block count */
+            tmp_count[fast_dim]--;
+
+            /* Decrement the number of elements to process */
+            num_elem-=fast_elem;
+        } /* end while */
+
+        /* Work on other dimensions if necessary */
+        if(num_elem>0) {
+            /* Reset the sequence and block counts */
+            tmp_count[fast_dim]=diminfo[fast_dim].count;
+
+            /* Bubble up the decrement to the slower changing dimensions */
+            temp_dim=fast_dim-1;
+            while(temp_dim>=0) {
+                /* Decrement the sequence count in this dimension */
+                tmp_block[temp_dim]--;
+
+                /* Check if we are still in the sequence */
+                if(tmp_block[temp_dim]>0)
+                    break;
+
+                /* Reset the sequence count in this dimension */
+                tmp_block[temp_dim]=diminfo[temp_dim].block;
+
+                /* Decrement the block count */
+                tmp_count[temp_dim]--;
+
+                /* Check if we have more blocks left */
+                if(tmp_count[temp_dim]>0)
+                    break;
+
+                /* Reset the block count in this dimension */
+                tmp_count[temp_dim]=diminfo[temp_dim].count;
+            
+                /* Wrapped a dimension, go up to next dimension */
+                temp_dim--;
+            } /* end while */
+
+            /* Re-compute buffer location */
+            for(loc=buf,u=0; u<ndims; u++) {
+                temp_off=(diminfo[u].start+space->select.offset[u])
+                    +diminfo[u].stride*(diminfo[u].count-tmp_count[u])
+                        +(diminfo[u].block-tmp_block[u]);
+                loc+=temp_off*slab[u];
+            } /* end for */
+        } /* end if */
+    } /* end while */
+
+#ifdef LATER
+done:
+#endif /* LATER */
+    FUNC_LEAVE (ret_value);
+} /* end H5S_hyper_select_fill_opt() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_fill
+ PURPOSE
+    Fill a hyperslab selection in memory with a value
+ USAGE
+    herr_t H5S_hyper_select_fill(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+{
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_hyper_select_fill, FAIL);
+
+    /* Check args */
+    assert(fill);
+    assert(fill_size>0);
+    assert(space);
+    assert(buf);
+
+    /* Fill the selection in the memory buffer */
+
+    /* Check for the special case of just one H5Sselect_hyperslab call made */
+    if(space->select.sel_info.hslab.diminfo!=NULL)
+        /* Use optimized call to fill regular hyperslab */
+        ret_value=H5S_hyper_select_fill_opt(fill, fill_size, space, buf);
+    else
+        /* Call the general fill routine */
+        ret_value=H5S_hyper_select_fill_gen(fill, fill_size, space, buf);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_fill() */
 
 
 /*--------------------------------------------------------------------------
@@ -6703,7 +7098,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
                 } /* end if */
             } /* end if */
 
-            /* Indicate elements to previous span */
+            /* Indicate elements from previous span */
             new_span->pstride=low-(*prev_span)->low;
 
             /* Append to end of merged spans list */

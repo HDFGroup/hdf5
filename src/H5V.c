@@ -80,6 +80,9 @@ H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
  *		Saturday, October 11, 1997
  *
  * Modifications:
+ *              Unrolled loops for common cases
+ *              Quincey Koziol
+ *		?, ? ?, 2001?
  *
  *-------------------------------------------------------------------------
  */
@@ -224,6 +227,9 @@ H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
  *		Saturday, October 11, 1997
  *
  * Modifications:
+ *              Unrolled loops for common cases
+ *              Quincey Koziol
+ *		?, ? ?, 2001?
  *
  *-------------------------------------------------------------------------
  */
@@ -491,6 +497,9 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
  *		Friday, October 10, 1997
  *
  * Modifications:
+ *              Unrolled loops for common cases
+ *              Quincey Koziol
+ *		?, ? ?, 2001?
  *
  *-------------------------------------------------------------------------
  */
@@ -901,13 +910,11 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
  * Purpose:	Given a coordinate description of a location in an array, this
  *      function returns the byte offset of the coordinate.
  *
- *		The dimensionality of the whole array, the hyperslab, and the
- *		returned stride array is N.  The whole array dimensions are
- *		TOTAL_SIZE and the coordinate is at offset OFFSET.
+ *		The dimensionality of the whole array, and the offset is N.
+ *              The whole array dimensions are TOTAL_SIZE and the coordinate
+ *              is at offset OFFSET.
  *
- * Return:	Success: Byte offset from beginning of array to start
- *				of striding.
- *
+ * Return:	Success: Byte offset from beginning of array to element offset
  *		Failure: abort() -- should never fail
  *
  * Programmer:	Quincey Koziol
@@ -924,7 +931,7 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
     hsize_t	    acc;	/*accumulator				*/
     int	    i;		/*counter				*/
 
-    FUNC_ENTER(H5V_array_stride, (HDabort(), 0));
+    FUNC_ENTER(H5V_array_offset, (HDabort(), 0));
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(total_size);
@@ -934,8 +941,8 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
     for (i=(int)(n-1), acc=1, skip=0; i>=0; --i) {
         skip += acc * offset[i];
         acc *= total_size[i];
-    }
+    } /* end for */
 
     FUNC_LEAVE(skip);
-}
+} /* end H5V_array_offset() */
 

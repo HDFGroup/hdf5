@@ -520,11 +520,11 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
-    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve data space dimensions");
-    }
+    /* Get the dataspace dimensions */
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0)
+        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0, "unable to retrieve data space dimensions");
 
+    /* Loop through all the points selected */
     for(num_gath=0; num_gath<nelmts; num_gath++) {
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
@@ -596,17 +596,11 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
-    /*
-     * Retrieve hyperslab information to determine what elements are being
-     * selected (there might be other selection methods in the future).  We
-     * only handle hyperslabs with unit sample because there's currently no
-     * way to pass sample information to H5V_hyper_copy().
-     */
-    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve data space dimensions");
-    }
+    /* Get the dataspace dimensions */
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0)
+        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve data space dimensions");
 
+    /* Loop through all the points selected */
     for(num_scat=0; num_scat<nelmts; num_scat++) {
         if(mem_iter->pnt.elmt_left>0) {
             /* Compute the location of the point to get */
@@ -1202,7 +1196,6 @@ H5S_point_select_regular(const H5S_t *space)
     else
     	ret_value=FALSE;
 
-done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_select_regular() */
 
@@ -1384,18 +1377,21 @@ done:
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
+    QAK - 2002/4/5 - Wasn't using selection offset in calculation, corrected.
 --------------------------------------------------------------------------*/
 herr_t
 H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void *operator_data)
 {
-    hsize_t	mem_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
-    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];   /* Point offset */
-    hsize_t offset;             /* offset of region in buffer */
-    void *tmp_buf;              /* temporary location of the element in the buffer */
+    hsize_t mem_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
+    hsize_t acc;            /* Size accumulator */
+    hsize_t offset;         /* Offset of region in buffer */
+    hsize_t elmt_size;      /* Size of datatype */
+    void *tmp_buf;          /* Temporary location of the element in the buffer */
     H5S_pnt_node_t *node;   /* Point node */
-    unsigned rank;             /* Dataspace rank */
-    H5T_t *dt;                  /* Datatype structure */
+    unsigned rank;          /* Dataspace rank */
+    H5T_t *dt;              /* Datatype structure */
+    int i;                  /* Index variable */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_point_select_iterate, 0);
@@ -1414,17 +1410,18 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     /* Set the size of the datatype */
     if (NULL==(dt=H5I_object(type_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
-    mem_size[rank]=H5T_get_size(dt);
+    mem_size[rank]=elmt_size=H5T_get_size(dt);
 
     /* Iterate through the node, checking the bounds on each element */
     node=space->select.sel_info.pnt_lst->head;
     while(node!=NULL && ret_value==0) {
-        /* Set up the location of the point */
-        HDmemcpy(mem_offset, node->pnt, rank*sizeof(hssize_t));
-        mem_offset[rank]=0;
+        /* Compute the offset of each selected point in the buffer */
+        for(i=rank-1,acc=elmt_size,offset=0; i>=0; i--) {
+            offset+=(node->pnt[i]+space->select.offset[i])*acc;
+            acc*=mem_size[i];
+        } /* end for */
 
         /* Get the offset in the memory buffer */
-        offset=H5V_array_offset(rank+1,mem_size,(const hssize_t *)mem_offset);
         tmp_buf=((char *)buf+offset);
 
         ret_value=(*op)(tmp_buf,type_id,(hsize_t)rank,node->pnt,operator_data);
@@ -1434,3 +1431,75 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_select_iterate() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_fill
+ PURPOSE
+    Fill a point selection in memory with a value
+ USAGE
+    herr_t H5S_point_select_fill(fill,fill_size,space,buf)
+        const void *fill;       IN: Pointer to fill value to use
+        size_t fill_size;       IN: Size of elements in memory buffer & size of
+                                    fill value
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        void *buf;              IN/OUT: Memory buffer to fill selection in
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    The memory buffer elements are assumed to have the same datatype as the
+    fill value being placed into them.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
+{
+    hsize_t size[H5O_LAYOUT_NDIMS];     /* Total size of memory buf */
+    uint8_t *buf=(uint8_t *)_buf;   /* Alias for memory buffer */
+    hsize_t	acc;            /* Coordinate accumulator */
+    hsize_t	off;            /* Coordinate offset */
+    H5S_pnt_node_t *node;       /* Point node */
+    int	ndims;                  /* Dimensionality of space*/
+    int i;                  /* Index variable */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_point_select_fill, FAIL);
+
+    /* Check args */
+    assert(fill);
+    assert(fill_size>0);
+    assert(space);
+    assert(buf);
+
+    /* Fill the selection in the memory buffer */
+
+    /* Get the dataspace dimensions */
+    if ((ndims=H5S_get_simple_extent_dims (space, size, NULL))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to retrieve data space dimensions");
+
+    /* Loop through all the points selected */
+    node=space->select.sel_info.pnt_lst->head;
+    while(node!=NULL) {
+        /* Compute the offset of each selected point in the buffer */
+        for(i=ndims-1,acc=fill_size,off=0; i>=0; i--) {
+            off+=(node->pnt[i]+space->select.offset[i])*acc;
+            acc*=size[i];
+        } /* end for */
+
+        /* Set the selected point to the fill value */
+        HDmemcpy(buf+off,fill,fill_size);
+
+        /* Advance to the next point */
+        node=node->next;
+      } /* end while */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_select_fill() */
+

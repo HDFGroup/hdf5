@@ -57,6 +57,8 @@ __DLL__ herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 __DLL__ herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
+__DLL__ herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
+        hid_t buf_type, hid_t space);
 __DLL__ herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
 
 #ifdef __cplusplus

@@ -3597,6 +3597,90 @@ done:
 }   /* end H5Dvlen_get_buf_size() */
 
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5Dfill
+ PURPOSE
+    Fill a selection in memory with a value
+ USAGE
+    herr_t H5Dfill(fill, fill_type, space, buf, buf_type)
+        const void *fill;       IN: Pointer to fill value to use
+        hid_t fill_type_id;     IN: Datatype of the fill value
+        void *buf;              IN/OUT: Memory buffer to fill selection within
+        hid_t buf_type_id;      IN: Datatype of the elements in buffer
+        hid_t space_id;         IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id)
+{
+    H5S_t *space;               /* Dataspace */
+    H5T_t *fill_type;           /* Fill-value datatype */
+    H5T_t *buf_type;            /* Buffer datatype */
+    H5T_path_t *tpath = NULL;   /* Conversion information*/
+    uint8_t *tconv_buf = NULL;  /* Data type conv buffer */
+    uint8_t *bkg_buf = NULL;    /* Temp conversion buffer */
+    size_t src_type_size;       /* Size of source type	*/
+    size_t dst_type_size;       /* Size of destination type*/
+    size_t buf_size;            /* Desired buffer size	*/
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER (H5Dfill, FAIL);
+
+    /* Check args */
+    if (fill==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fill value");
+    if (buf==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
+    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space=H5I_object(space_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace");
+    if (H5I_DATATYPE != H5I_get_type(fill_type_id) || NULL == (fill_type=H5I_object(fill_type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+    if (H5I_DATATYPE != H5I_get_type(buf_type_id) || NULL == (buf_type=H5I_object(buf_type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+
+    /* Get the memory and file datatype sizes */
+    src_type_size = H5T_get_size(fill_type);
+    dst_type_size = H5T_get_size(buf_type);
+
+    /* Get the maximum buffer size needed and allocate it */
+    buf_size=MAX(src_type_size,dst_type_size);
+    if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* Copy the user's data into the buffer for conversion */
+    HDmemcpy(tconv_buf,fill,src_type_size);
+
+    /* Convert memory buffer into disk buffer */
+    /* Set up type conversion function */
+    if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL)))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
+
+    /* Perform data type conversion */
+    if (H5T_convert(tpath, fill_type_id, buf_type_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
+
+    /* Fill the selection in the memory buffer */
+    if(H5S_select_fill(tconv_buf, dst_type_size, space, buf)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
+
+done:
+    if (tconv_buf)
+        H5MM_xfree(tconv_buf);
+    if (bkg_buf)
+        H5MM_xfree(bkg_buf);
+    FUNC_LEAVE (ret_value);
+}   /* H5Dfill() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Ddebug
  *

@@ -223,6 +223,8 @@ __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				  H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
 				    H5S_sel_iter_t *sel_iter);
+__DLL__ herr_t H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space,
+                                    void *buf);
 
 #ifdef H5_HAVE_PARALLEL
 

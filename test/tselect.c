@@ -4075,6 +4075,9 @@ test_select_combine(void)
     hsize_t blocks[128][2][SPACE7_RANK];    /* List of blocks */
     herr_t error;
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Selection Combinations\n"));
+
     /* Create dataspace for dataset on disk */
     base_id = H5Screate_simple(SPACE7_RANK, dims, NULL);
     CHECK(base_id, FAIL, "H5Screate_simple");
@@ -4409,6 +4412,423 @@ test_select_combine(void)
 
 /****************************************************************
 **
+**  test_select_fill_all(): Test basic H5S (dataspace) selection code.
+**      Tests filling "all" selections
+** 
+****************************************************************/
+static void 
+test_select_fill_all(void)
+{
+    hid_t	sid1;           /* Dataspace ID */
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    int         fill_value;     /* Fill value */
+    unsigned short *wbuf,       /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j;            /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Filling 'all' Selections\n"));
+
+    /* Allocate memory buffer */
+    wbuf=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(unsigned short)(i*SPACE7_DIM2)+j;
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Space defaults to "all" selection */
+
+    /* Set fill value */
+    fill_value=254;
+
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Verify memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            if(*tbuf!=(unsigned short)fill_value) {
+                num_errs++;
+                printf("Error! j=%d, i=%d, *tbuf=%x, fill_value=%x\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
+            } /* end if */
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_select_fill_all() */
+
+/****************************************************************
+**
+**  test_select_fill_point(): Test basic H5S (dataspace) selection code.
+**      Tests filling "point" selections
+** 
+****************************************************************/
+static void 
+test_select_fill_point(hssize_t *offset)
+{
+    hid_t	sid1;           /* Dataspace ID */
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
+    hssize_t    points[5][SPACE7_RANK] = {{2,4}, {3,8}, {8,4}, {7,5}, {7,7}};
+    size_t      num_points=5;   /* Number of points selected */
+    int         fill_value;     /* Fill value */
+    unsigned short *wbuf,       /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j,k;          /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Filling 'point' Selections\n"));
+
+    /* Allocate memory buffer */
+    wbuf=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(unsigned short)(i*SPACE7_DIM2)+j;
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Select "point" selection */
+    ret = H5Sselect_elements(sid1, H5S_SELECT_SET,num_points,(const hssize_t **)points);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    if(offset!=NULL)
+        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
+    else
+        HDmemset(real_offset,0,2*sizeof(hssize_t));
+
+    /* Set offset */
+    ret = H5Soffset_simple(sid1,real_offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set fill value */
+    fill_value=254;
+
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Verify memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
+            for(k=0; k<(int)num_points; k++) {
+                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                    if(*tbuf!=(unsigned short)fill_value) {
+                        num_errs++;
+                        printf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
+                    } /* end if */
+                    break;
+                } /* end if */
+            } /* end for */
+            if(k==(int)num_points && *tbuf!=((unsigned short)(i*SPACE7_DIM2)+j)) {
+                num_errs++;
+                printf("Error! j=%d, i=%d, *tbuf=%u, should be: %u\n",j,i,(unsigned)*tbuf,(unsigned)((i*SPACE7_DIM2)+j));
+            } /* end if */
+        } /* end for */
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_select_fill_point() */
+
+/****************************************************************
+**
+**  test_select_fill_hyper_simple(): Test basic H5S (dataspace) selection code.
+**      Tests filling "simple" (i.e. one block) hyperslab selections
+** 
+****************************************************************/
+static void 
+test_select_fill_hyper_simple(hssize_t *offset)
+{
+    hid_t	sid1;           /* Dataspace ID */
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
+    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     count[SPACE7_RANK];     /* Hyperslab block size */
+    int         fill_value;     /* Fill value */
+    unsigned short *wbuf,       /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j;            /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Filling Simple 'hyperslab' Selections\n"));
+
+    /* Allocate memory buffer */
+    wbuf=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(unsigned short)(i*SPACE7_DIM2)+j;
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Select "hyperslab" selection */
+    start[0]=3; start[1]=3;
+    count[0]=4; count[1]=4;
+    ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    if(offset!=NULL)
+        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
+    else
+        HDmemset(real_offset,0,2*sizeof(hssize_t));
+
+    /* Set offset */
+    ret = H5Soffset_simple(sid1,real_offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set fill value */
+    fill_value=254;
+
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Verify memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
+            if((i>=(int)(start[0]+real_offset[0]) && i<(int)(start[0]+count[0]+real_offset[0]))
+                && (j>=(int)(start[1]+real_offset[1]) && j<(int)(start[1]+count[1]+real_offset[1]))) {
+                    if(*tbuf!=(unsigned short)fill_value) {
+                        num_errs++;
+                        printf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
+                    } /* end if */
+                } /* end if */
+            else {
+                if(*tbuf!=((unsigned short)(i*SPACE7_DIM2)+j)) {
+                    num_errs++;
+                    printf("Error! j=%d, i=%d, *tbuf=%u, should be: %u\n",j,i,(unsigned)*tbuf,(unsigned)((i*SPACE7_DIM2)+j));
+                } /* end if */
+            } /* end else */
+        } /* end for */
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_select_fill_hyper_simple() */
+
+/****************************************************************
+**
+**  test_select_fill_hyper_regular(): Test basic H5S (dataspace) selection code.
+**      Tests filling "regular" (i.e. strided block) hyperslab selections
+** 
+****************************************************************/
+static void 
+test_select_fill_hyper_regular(hssize_t *offset)
+{
+    hid_t	sid1;           /* Dataspace ID */
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
+    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     stride[SPACE7_RANK];    /* Hyperslab stride size */
+    hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
+    hsize_t     block[SPACE7_RANK];     /* Hyperslab block size */
+    hssize_t    points[16][SPACE7_RANK] = {
+        {2,2}, {2,3}, {3,2}, {3,3},
+        {2,6}, {2,7}, {3,6}, {3,7},
+        {6,2}, {6,3}, {7,2}, {7,3},
+        {6,6}, {6,7}, {7,6}, {7,7},
+        };
+    size_t      num_points=16;  /* Number of points selected */
+    int         fill_value;     /* Fill value */
+    unsigned short *wbuf,       /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j,k;          /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Filling Regular 'hyperslab' Selections\n"));
+
+    /* Allocate memory buffer */
+    wbuf=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(unsigned short)(i*SPACE7_DIM2)+j;
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Select "hyperslab" selection */
+    start[0]=2; start[1]=2;
+    stride[0]=4; stride[1]=4;
+    count[0]=2; count[1]=2;
+    block[0]=2; block[1]=2;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    if(offset!=NULL)
+        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
+    else
+        HDmemset(real_offset,0,2*sizeof(hssize_t));
+
+    /* Set offset */
+    ret = H5Soffset_simple(sid1,real_offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set fill value */
+    fill_value=254;
+
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Verify memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
+            for(k=0; k<(int)num_points; k++) {
+                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                    if(*tbuf!=(unsigned short)fill_value) {
+                        num_errs++;
+                        printf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
+                    } /* end if */
+                    break;
+                } /* end if */
+            } /* end for */
+            if(k==(int)num_points && *tbuf!=((unsigned short)(i*SPACE7_DIM2)+j)) {
+                num_errs++;
+                printf("Error! j=%d, i=%d, *tbuf=%u, should be: %u\n",j,i,(unsigned)*tbuf,(unsigned)((i*SPACE7_DIM2)+j));
+            } /* end if */
+        } /* end for */
+
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_select_fill_hyper_regular() */
+
+/****************************************************************
+**
+**  test_select_fill_hyper_irregular(): Test basic H5S (dataspace) selection code.
+**      Tests filling "irregular" (i.e. combined blocks) hyperslab selections
+** 
+****************************************************************/
+static void 
+test_select_fill_hyper_irregular(hssize_t *offset)
+{
+    hid_t	sid1;           /* Dataspace ID */
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
+    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
+    hssize_t    points[32][SPACE7_RANK] = { /* Yes, some of the are duplicated.. */
+        {2,2}, {2,3}, {2,4}, {2,5},
+        {3,2}, {3,3}, {3,4}, {3,5},
+        {4,2}, {4,3}, {4,4}, {4,5},
+        {5,2}, {5,3}, {5,4}, {5,5},
+        {4,4}, {4,5}, {4,6}, {4,7},
+        {5,4}, {5,5}, {5,6}, {5,7},
+        {6,4}, {6,5}, {6,6}, {6,7},
+        {7,4}, {7,5}, {7,6}, {7,7},
+        };
+    size_t      num_points=32;  /* Number of points selected */
+    int         fill_value;     /* Fill value */
+    unsigned short *wbuf,       /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j,k;          /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Filling Irregular 'hyperslab' Selections\n"));
+
+    /* Allocate memory buffer */
+    wbuf=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(unsigned short)(i*SPACE7_DIM2)+j;
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Select first "hyperslab" selection */
+    start[0]=2; start[1]=2;
+    count[0]=4; count[1]=4;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Combine with second "hyperslab" selection */
+    start[0]=4; start[1]=4;
+    count[0]=4; count[1]=4;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_OR,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    if(offset!=NULL)
+        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
+    else
+        HDmemset(real_offset,0,2*sizeof(hssize_t));
+
+    /* Set offset */
+    ret = H5Soffset_simple(sid1,real_offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set fill value */
+    fill_value=254;
+
+    /* Fill selection in memory */
+    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
+    CHECK(ret, FAIL, "H5Dfill");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Verify memory buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
+            for(k=0; k<(int)num_points; k++) {
+                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                    if(*tbuf!=(unsigned short)fill_value) {
+                        num_errs++;
+                        printf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
+                    } /* end if */
+                    break;
+                } /* end if */
+            } /* end for */
+            if(k==(int)num_points && *tbuf!=((unsigned short)(i*SPACE7_DIM2)+j)) {
+                num_errs++;
+                printf("Error! j=%d, i=%d, *tbuf=%u, should be: %u\n",j,i,(unsigned)*tbuf,(unsigned)((i*SPACE7_DIM2)+j));
+            } /* end if */
+        } /* end for */
+
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_select_fill_hyper_irregular() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -4425,6 +4845,7 @@ test_select(void)
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
+    hssize_t offset[SPACE7_RANK]={1,1}; /* Offset for testing selection offsets */
     herr_t	ret;	/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -4514,6 +4935,17 @@ test_select(void)
 
     /* Tests for combining "all" and "none" selections with hyperslabs */
     test_select_combine();
+
+    /* Test filling selections */
+    test_select_fill_all();
+    test_select_fill_point(NULL);
+    test_select_fill_point(offset);
+    test_select_fill_hyper_simple(NULL);
+    test_select_fill_hyper_simple(offset);
+    test_select_fill_hyper_regular(NULL);
+    test_select_fill_hyper_regular(offset);
+    test_select_fill_hyper_irregular(NULL);
+    test_select_fill_hyper_irregular(offset);
 }   /* test_select() */
 
 

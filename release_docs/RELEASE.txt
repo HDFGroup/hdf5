@@ -156,6 +156,8 @@ Documentation
 New Features
 ============
 
+    * Added new routine "H5Dfill" to fill a selection with a particular value
+      in memory.  QAK - 2002/04/09
     * A new query function H5Tget_member_index has been added for compound
       and enumeration data types, to retrieve member's index by name.
       SLU - 2002/04/05
