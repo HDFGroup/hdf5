@@ -483,7 +483,7 @@ __DLL__ H5T_class_t H5Tget_class(hid_t type_id);
 __DLL__ size_t H5Tget_size(hid_t type_id);
 __DLL__ H5T_order_t H5Tget_order(hid_t type_id);
 __DLL__ size_t H5Tget_precision(hid_t type_id);
-__DLL__ size_t H5Tget_offset(hid_t type_id);
+__DLL__ int H5Tget_offset(hid_t type_id);
 __DLL__ herr_t H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/,
 			  H5T_pad_t *msb/*out*/);
 __DLL__ H5T_sign_t H5Tget_sign(hid_t type_id);

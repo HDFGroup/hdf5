@@ -2212,9 +2212,9 @@ H5Tset_precision(hid_t type_id, size_t prec)
  *		2:  [0x11]   [ pad]    [ pad]	[0x22]
  *		3:  [0x22]   [ pad]    [ pad]	[0x11]
  *
- * Return:	Success:	The offset
+ * Return:	Success:	The offset (non-negative)
  *
- *		Failure:	0
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
@@ -2225,19 +2225,19 @@ H5Tset_precision(hid_t type_id, size_t prec)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+int
 H5Tget_offset(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    size_t	offset;
+    int	offset;
 
-    FUNC_ENTER(H5Tget_offset, 0);
+    FUNC_ENTER(H5Tget_offset, -1);
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (H5I_DATATYPE != H5I_get_type(type_id) ||
 	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type) {
@@ -2247,7 +2247,7 @@ H5Tget_offset(hid_t type_id)
     
     /* Offset */
     assert(H5T_is_atomic(dt));
-    offset = dt->u.atomic.offset;
+    offset = (int)dt->u.atomic.offset;
 
     FUNC_LEAVE(offset);
 }
