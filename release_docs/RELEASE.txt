@@ -60,12 +60,18 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Avoid metadata cache from preempting current dataset object header
+            when looking up information about the named datatype that the
+            dataset uses.  QAK - 2003/10/20
 
     Configuration
     -------------
 
     Performance
     -------------
+        - Hoisted invariant 'if/else's out of inner datatype conversion loop for
+            integer and floating-point values, giving about a 20% speedup.
+            QAK - 2003/10/20
 
     Tools
     -----
