@@ -541,6 +541,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Eget_class
+ *
+ * Purpose:	Retrieves error class name.
+ *
+ * Return:      Non-negative for name length if succeeds(zero means no name);
+ *              otherwise returns negative value.	
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Eget_class(hid_t class_id, char *name, size_t size)
+{
+    ssize_t      ret_value;   /* Return value */
+    H5E_cls_t    *cls;
+
+    FUNC_ENTER_API(H5Eget_class, FAIL);
+    H5TRACE3("Zs","isz",class_id,name,size);
+    
+    /* Need to check for errors */
+    cls = H5I_object_verify(class_id, H5I_ERROR_CLASS);
+
+    ret_value = H5E_get_class(cls, name, size);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_class
+ *
+ * Purpose:	Private function to retrieve error class name.
+ * 
+ * Return:      Non-negative for name length if succeeds(zero means no name);
+ *              otherwise returns negative value.	
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5E_get_class(H5E_cls_t *cls, char *name, size_t size)
+{
+    ssize_t       ret_value;   /* Return value */
+    ssize_t       len;
+    
+    FUNC_ENTER_NOAPI(H5E_get_class, FAIL);
+
+    len = HDstrlen(cls->cls_name);
+
+    if(name) {
+       HDstrncpy(name, cls->cls_name, MIN(len+1, size));
+       if(len >= size)
+          name[size-1]='\0';
+    } 
+    
+    ret_value = len;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5E_close_msg_cb
  *
  * Purpose:     H5I_search callback function to close error messages in the
@@ -707,6 +780,80 @@ done:
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Eget_msg
+ *
+ * Purpose:	Retrieves an error message.
+ *
+ * Return:      Non-negative for message length if succeeds(zero means no message);
+ *              otherwise returns negative value.	
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size)
+{
+    ssize_t      ret_value;   /* Return value */
+    H5E_msg_t    *msg_ptr;
+
+    FUNC_ENTER_API(H5Eget_msg, FAIL);
+    
+    /* Need to check for errors */
+    msg_ptr = H5I_object_verify(msg_id, H5I_ERROR_MSG);
+
+    ret_value = H5E_get_msg(msg_ptr, type, msg, size);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_msg
+ *
+ * Purpose:	Private function to retrieve an error message.
+ * 
+ * Return:      Non-negative for name length if succeeds(zero means no name);
+ *              otherwise returns negative value.	
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size)
+{
+    ssize_t       ret_value;   /* Return value */
+    ssize_t       len;
+    
+    FUNC_ENTER_NOAPI(H5E_get_msg, FAIL);
+
+    len = HDstrlen(msg_ptr->msg);
+
+    if(msg) {
+       HDstrncpy(msg, msg_ptr->msg, MIN(len+1, size));
+       if(len >= size)
+          msg[size-1]='\0';
+    } 
+    
+    if(type)
+        *type = msg_ptr->type;
+
+    ret_value = len;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
 #ifdef H5_HAVE_THREADSAFE
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_stack_new
@@ -798,13 +945,45 @@ hid_t
 H5E_get_current_stack(void)
 {
     hid_t       ret_value;   /* Return value */
-    H5E_t_new	*estack = H5E_get_my_stack_new ();
+    H5E_t_new	*current_stack = H5E_get_my_stack_new ();
+    H5E_t_new   *estack_copy = H5MM_malloc(sizeof(H5E_t_new));
+    H5E_error_t_new     *current_error, *new_error;
+    int         i;
     
     FUNC_ENTER_NOAPI(H5E_get_current_stack, FAIL);
 
+    /* Make a copy of current error stack */
+    estack_copy->nused = current_stack->nused; 
+    for(i=0; i<current_stack->nused; i++) {
+        current_error = &(current_stack->slot[i]);
+        new_error = &(estack_copy->slot[i]);
+       
+        /* Should we make copies of these IDs? */ 
+        new_error->cls_id = current_error->cls_id;       
+        new_error->maj_id = current_error->maj_id;       
+        new_error->min_id = current_error->min_id;       
+        new_error->func_name = HDstrdup(current_error->func_name);       
+        new_error->file_name = HDstrdup(current_error->file_name);       
+        new_error->line = current_error->line;
+        new_error->desc = HDstrdup(current_error->desc);       
+    }
+   
+    /* Empty current error stack */ 
+    for(i=0; i<current_stack->nused; i++) {
+        current_error = &(current_stack->slot[i]);
+        if(current_error->func_name)
+            H5MM_xfree(current_error->func_name);
+        if(current_error->file_name)
+            H5MM_xfree(current_error->file_name);
+        if(current_error->desc)
+            H5MM_xfree(current_error->desc);
+    }
+    HDmemset(current_stack->slot, 0, sizeof(H5E_error_t_new)*current_stack->nused);
+    current_stack->nused = 0;
+   
     /* Register the error stack to get an ID for it */
     /* Need to check for error */
-    ret_value = H5I_register(H5I_ERROR_STACK, estack);
+    ret_value = H5I_register(H5I_ERROR_STACK, estack_copy);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -873,12 +1052,13 @@ H5E_close_stack(H5E_t_new *err_stack)
     herr_t       ret_value = SUCCEED;   /* Return value */
     H5E_error_t_new     *error;
     int          i;
-    
+
     FUNC_ENTER_NOAPI(H5E_close_stack, FAIL);
     
     if(err_stack) {
         for(i=0; i<err_stack->nused; i++) {
             error = &(err_stack->slot[i]);
+
             if(error->func_name)
                 H5MM_xfree(error->func_name);
             if(error->file_name)
