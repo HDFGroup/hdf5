@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post3 released on Sun Nov 30 20:47:54 CST 2003
+HDF5 version 1.6.1-post4 released on Sun Dec  7 20:47:29 CST 2003
 ================================================================================
 
 
@@ -37,6 +37,9 @@ New Features
 
     Configuration:
     --------------
+        - Default of $prefix is changed to $PWD/hdf5 so that multiple
+	  builds using --srcdir is possible in the same machine.
+	  AKC - 2003/12/1
 
     Library:
     --------
@@ -65,6 +68,9 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed H5Giterate to avoid re-using index parameter after iteration
+            callback has been called (allows iteration callback to modify the
+            index parameter itself).  QAK - 2003/12/06
         - Fixed various floating-point conversion problems, including a
             change which could corrupt data when converting from double->float.
             QAK - 2003/11/24
