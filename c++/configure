@@ -1665,6 +1665,7 @@ rm -f confcache
 # Actually configure libtool.  ac_aux_dir is where install-sh is found.
 CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
 LD="$LD" LDFLAGS="$LDFLAGS" LIBS="$LIBS" \
+#LD="$LD" LDFLAGS="$LDFLAGS" LIBS="$LIBS" DEFAULT_LIBS="$DEFAULT_LIBS" \
 LN_S="$LN_S" NM="$NM" RANLIB="$RANLIB" \
 DLLTOOL="$DLLTOOL" AS="$AS" OBJDUMP="$OBJDUMP" \
 ${CONFIG_SHELL-/bin/sh} $ac_aux_dir/ltconfig --no-reexec \
@@ -2320,6 +2321,7 @@ s%@FFLAGS@%$FFLAGS%g
 s%@DEFS@%$DEFS%g
 s%@LDFLAGS@%$LDFLAGS%g
 s%@LIBS@%$LIBS%g
+s%@DEFAULT_LIBS@%$DEFAULT_LIBS%g
 s%@exec_prefix@%$exec_prefix%g
 s%@prefix@%$prefix%g
 s%@program_transform_name@%$program_transform_name%g
