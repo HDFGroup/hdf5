@@ -1,7 +1,8 @@
 ## Top-level HDF5-Fortran Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000, 2002
+##     National Center for Supercomputing Applications.
+##     All rights reserved.
 ##
 ## 
 ## This makefile mostly just reinvokes make in the various subdirectories
@@ -97,7 +98,7 @@ distclean:
 	-$(RM) config/commence config/conclude
 	-$(RM) config/stamp1 config/stamp2 config/depend?
 	-$(RM) config.cache config.log config.status
-	-$(RM) src/H5config_fortran.h
+	-$(RM) src/H5config_fortran.h src/H5pubconf_fortran.h
 	-$(RM) libtool Makefile
 
 maintainer-clean:
