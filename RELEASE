@@ -242,6 +242,11 @@ Library
      of data. (A.K.A. prematured collective return when zero amount data
      requested.) Collective calls that may cause hanging is done via the
      corresponding MPI-IO independent calls.
+   * If configure with --enable-debug=all, couple functions would issue
+     warning messages to "stderr" that the operation is expensive time-wise.
+     This messed up applications (like testings) that did not expect the
+     extra output. It is changed so that the warning will be printed only
+     if the corresponding Debug key is set.
 
 Configuration
 -------------
