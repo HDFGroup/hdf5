@@ -227,13 +227,6 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 -->
 
 
-    <h3>Changed Library Configuration</h3>
-	<dl>
-	  <dt>HDF5 Library configuration has been upgraded from 
-              GNU autoconf 2.53 to autoconf 2.59.  
-	</dl>
-
-
 <!--
     <h3>Functions with Changed Syntax</h3>
 
@@ -272,6 +265,27 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 -->
 
 
+    <h3>Deleted Constants</h3>
+    
+        The following constants have been removed from the HDF5 Library:
+        <ul>
+        <li>Error codes
+        <ul>
+          <li><code>H5E_CANTALLOC</code>
+          <li><code>H5E_CANTCHANGE</code>
+          <li><code>H5E_CANTRECV</code>
+          <li><code>H5E_CANTSENDMDATA</code>
+          <li><code>H5E_FPHDF5</code>
+        </ul>
+        <li>An internal identifier category
+        <ul>
+          <li><code>H5I_TEMPBUF</code>
+        </ul>
+        </ul>
+        <cite>(This list of deleted constants was added on 21 March 2005,
+          shortly after Release 1.6.4.)</cite>
+
+
 <!--
     <h3>Constants with Changed Values</h3>
     
@@ -293,6 +307,13 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
                 </ul>
             <p>
 -->
+
+
+    <h3>Changed Library Configuration</h3>
+	<dl>
+	  <dt>HDF5 Library configuration has been upgraded from 
+              GNU autoconf 2.53 to autoconf 2.59.  
+	</dl>
 
 
 
@@ -1937,7 +1958,7 @@ Describes HDF5 Release 1.6.4, March 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 15 March 2005 
+Last modified: 21 March 2005 
 <!-- hhmts end -->
 
 </body>
