@@ -38,31 +38,6 @@
 static hid_t H5FD_FPHDF5_g = 0;
 
 /*
- * The description of a file belonging to this driver.
- *
- * The FILE_ID field is an SAP defined value. When reading/writing to the
- * SAP, this value should be sent.
- *
- * The EOF field is only used just after the file is opened in order for
- * the library to determine whether the file is empty, truncated, or
- * okay. The FPHDF5 driver doesn't bother to keep it updated since it's
- * an expensive operation.
- */
-typedef struct H5FD_fphdf5_t {
-    H5FD_t      pub;            /*Public stuff, must be first (ick!)    */
-    unsigned    file_id;        /*ID used by the SAP                    */
-    MPI_File    f;              /*MPIO file handle                      */
-    MPI_Comm    comm;           /*Communicator                          */
-    MPI_Comm    barrier_comm;   /*Barrier communicator                  */
-    MPI_Info    info;           /*File information                      */
-    int         mpi_rank;       /*This process's rank                   */
-    int         mpi_size;       /*Total number of processes             */
-    haddr_t     eof;            /*End-of-file marker                    */
-    haddr_t     eoa;            /*End-of-address marker                 */
-    haddr_t     last_eoa;       /*Last known end-of-address marker      */
-} H5FD_fphdf5_t;
-
-/*
  * Prototypes
  */
 static haddr_t  H5FD_fphdf5_MPIOff_to_haddr(MPI_Offset mpi_off);
@@ -128,7 +103,9 @@ const H5FD_class_t H5FD_fphdf5_g = {
     H5FD_fphdf5_read,                           /*read                  */
     H5FD_fphdf5_write,                          /*write                 */
     H5FD_fphdf5_flush,                          /*flush                 */
-    H5FD_FLMAP_SINGLE,                          /*fl_map                */
+    NULL,                                       /*lock                  */
+    NULL,                                       /*unlock                */
+    H5FD_FLMAP_SINGLE                           /*fl_map                */
 };
 
 /* Interface initialization */
@@ -220,7 +197,7 @@ done:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-herr_t
+hid_t
 H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Comm barrier_comm,
                    MPI_Info info, unsigned sap_rank)
 {
@@ -230,7 +207,7 @@ H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Comm barrier_comm,
     herr_t              ret_value;
     
     FUNC_ENTER_API(H5Pset_fapl_fphdf5, FAIL);
-    H5TRACE5("e","iMcMcMiIu",fapl_id,comm,barrier_comm,info,sap_rank);
+    H5TRACE5("i","iMcMcMiIu",fapl_id,comm,barrier_comm,info,sap_rank);
 
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
@@ -498,6 +475,65 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD_fphdf5_is_captain
+ * Purpose:     Asks the question "Is this process the captain?".
+ * Return:      Success:    Non-zero if it is, 0 otherwise
+ *              Failure:    Doesn't fails
+ * Programmer:  Bill Wendling
+ *              19. February 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5FD_fphdf5_is_captain(H5FD_t *_file)
+{
+    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    hbool_t         ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_is_sap, FALSE);
+
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* Set return value */
+    ret_value = ((unsigned)file->mpi_rank == H5FP_capt_rank);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_is_fphdf5_driver
+ * Purpose:     Asks the question "Is this an FPHDF5 driver?".
+ * Return:      Success:    Non-zero if it is, 0 otherwise
+ *              Failure:    Doesn't fails
+ * Programmer:  Bill Wendling
+ *              26. February 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5FD_is_fphdf5_driver(H5FD_t *_file)
+{
+    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    hbool_t         ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(H5FD_is_fphdf5_driver, FALSE);
+
+    /* check args */
+    assert(file);
+
+    /* Set return value */
+    ret_value = file->pub.driver_id == H5FD_FPHDF5;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_fphdf5_setup
  * Purpose:     Set the buffer type BTYPE, file type FTYPE for a data
  *              transfer. Also request an MPI type transfer.
@@ -738,7 +774,6 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     int                         mpi_size;
     int                         mrc;
     MPI_Offset                  size;
-    MPI_Offset                  mpi_off;
     H5FD_fphdf5_fapl_t          _fa;
     const H5FD_fphdf5_fapl_t   *fa = NULL;
     H5P_genplist_t             *plist;
@@ -774,11 +809,6 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         assert(fa);
     }
 
-    /* Some numeric conversions */
-    if (H5FD_fphdf5_haddr_to_MPIOff(maxaddr, &mpi_off) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, NULL,
-                    "can't convert from haddr_t to MPI offset");
-
     /*
      * Convert HDF5 flags to MPI-IO flags. Some combinations are illegal;
      * let MPI-IO figure it out
@@ -789,7 +819,7 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     if (flags & H5F_ACC_EXCL)   mpi_amode |= MPI_MODE_EXCL;
 
     /* OKAY: CAST DISCARDS CONST */
-    if ((mrc = MPI_File_open(H5FP_SAP_COMM, (char *)name, mpi_amode,
+    if ((mrc = MPI_File_open(H5FP_SAP_BARRIER_COMM, (char *)name, mpi_amode,
                              fa->info, &fh)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mrc);
 
@@ -808,11 +838,10 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
 
     /* Retrieve the VFL driver feature flags */
-    if (H5FD_query((H5FD_t *)file, &feature_flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
+    H5FD_fphdf5_query(NULL, &feature_flags);    /* doesn't fail */
 
     /* Inform the SAP that the file was opened */
-    if (H5FP_request_open(H5FP_OBJ_FILE, mpi_off, feature_flags,
+    if (H5FP_request_open(H5FP_OBJ_FILE, maxaddr, feature_flags,
                           meta_block_size, sdata_block_size, threshold,
                           alignment, &file_id, &req_id) == FAIL)
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENFILE, NULL,
@@ -824,16 +853,10 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 
     HDmemset(&status, 0, sizeof(status));
 
-    /* Get the file ID from the SAP */
-    if ((unsigned)mpi_rank == H5FP_capt_rank)
-        if ((mrc = MPI_Recv(&file_id, 1, MPI_UNSIGNED, (int)H5FP_sap_rank,
-                            H5FP_TAG_FILE_ID, H5FP_SAP_COMM,
-                            &status)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(NULL, "MPI_Recv failed", mrc);
-
     /* Broadcast the file ID */
     if ((mrc = MPI_Bcast(&file_id, 1, MPI_UNSIGNED,
-                         (int)H5FP_capt_rank, H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+                         (int)H5FP_capt_barrier_rank,
+                         H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc);
 
     /* The captain rank will get the filesize and broadcast it. */
@@ -844,7 +867,8 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 
     /* Broadcast file size */
     if ((mrc = MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE,
-                         (int)H5FP_capt_rank, H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+                         (int)H5FP_capt_barrier_rank,
+                         H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc);
 
     /* Only if size > 0, truncate the file - if requested */
@@ -932,7 +956,7 @@ done:
  * Purpose:     Set the flags that this VFL driver is capable of
  *              supporting. (listed in H5FDpublic.h)
  * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ *              Failure:    Doesn't fail.
  * Programmer:  Bill Wendling
  *              07. February 2003
  * Modifications:
@@ -944,6 +968,9 @@ H5FD_fphdf5_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_query, FAIL);
+
+    /* check args */
+    assert(flags);
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -1369,12 +1396,14 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
     MPI_Offset      mpi_off;
     int             size_i;
-    int             bytes_written;
     unsigned        dumping = 0;
     H5P_genplist_t *plist;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write, FAIL);
+
+HDfprintf(stderr, "%s: Entering: rank==%d, addr==%Hd, size==%d\n",
+          FUNC, file->mpi_rank, addr, size);
 
     /* check args */
     assert(file);
@@ -1399,6 +1428,7 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     if ((plist = H5I_object(dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
+#if 0
     /* Metadata specific actions */
     if (mem_type != H5FD_MEM_DRAW) {
         unsigned block_before_meta_write = 0;
@@ -1413,13 +1443,18 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
          * -QAK )
          */
         if (H5P_exist_plist(plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME) > 0)
-            if (H5P_get(plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME, &block_before_meta_write) < 0)
+            if (H5P_get(plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME,
+                        &block_before_meta_write) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get H5AC property");
+
+HDfprintf(stderr, "%s: %d: block_before_meta_write == %d\n", FUNC,
+          H5FD_fphdf5_mpi_rank(_file), block_before_meta_write);
 
         if (block_before_meta_write)
             if ((mrc = MPI_Barrier(file->barrier_comm)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
     }
+#endif  /* 0 */
 
     if (H5P_exist_plist(plist, H5FD_FPHDF5_XFER_DUMPING_METADATA) > 0)
         if (H5P_get(plist, H5FD_FPHDF5_XFER_DUMPING_METADATA, &dumping) < 0)
@@ -1443,23 +1478,21 @@ HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
 
         switch (sap_status) {
         case H5FP_STATUS_OK:
+HDfprintf(stderr, "%s: %d: Wrote the data to the SAP\n", FUNC,
+          H5FD_fphdf5_mpi_rank(_file));
             /* WAH-HOO! We've written it! We can leave now */
-
-            /* Check for write failure */
-            if (bytes_written < 0 || bytes_written > size_i)
-                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
-
             /* Forget the EOF value (see H5FD_fphdf5_get_eof()) */
             file->eof = HADDR_UNDEF;
             HGOTO_DONE(ret_value);
-        case H5FP_STATUS_DUMPING_FAILED:
         case H5FP_STATUS_FILE_CLOSING:
+            HGOTO_DONE(ret_value);
+        case H5FP_STATUS_DUMPING_FAILED:
         case H5FP_STATUS_OOM:
         case H5FP_STATUS_BAD_FILE_ID:
         default:
             /* FIXME: Something bad happened */
-HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
-          FUNC, __LINE__, sap_status);
+HDfprintf(stderr, "%s: Couldn't write metadata to SAP (%d)\n",
+          FUNC, sap_status);
             break;
         }
     }
@@ -1468,6 +1501,7 @@ HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
     ret_value = H5FD_fphdf5_write_real(_file, dxpl_id, mpi_off, size_i, buf);
 
 done:
+HDfprintf(stderr, "%s: Leaving\n", FUNC);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1501,6 +1535,9 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write_real, FAIL);
+
+HDfprintf(stderr, "%s: %d: Entering: addr=%Hd, size=%d\n", FUNC,
+          H5FD_fphdf5_mpi_rank(_file), (haddr_t)mpi_off, size);
 
     /* check args */
     assert(file);
@@ -1565,6 +1602,22 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
  
     /* Write the data. */
     assert(xfer_mode == H5FD_MPIO_INDEPENDENT || xfer_mode == H5FD_MPIO_COLLECTIVE);
+
+    {
+        int i;
+
+        sleep(3);
+        HDfprintf(stderr, "%s: writing at %Hd\n", FUNC, (haddr_t)mpi_off);
+
+        for (i = 0; i < size; ++i) {
+            if (i % 7 == 0)
+                HDfprintf(stderr, "\n");
+
+            HDfprintf(stderr, "\t0x%02x", 0xff & ((char*)buf)[i]);
+        }
+
+        HDfprintf(stderr, "\n");
+    }
 
     if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
@@ -1635,6 +1688,7 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
     file->eof = HADDR_UNDEF;
 
 done:
+HDfprintf(stderr, "%s: %d: Leaving (%d)\n", FUNC, H5FD_fphdf5_mpi_rank(_file), ret_value);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1660,6 +1714,9 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_flush, FAIL);
+
+HDfprintf(stderr, "%s: %d: Entering\n",
+          FUNC, H5FD_fphdf5_mpi_rank(_file));
 
     /* check args */
     assert(file);
@@ -1688,6 +1745,7 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
          * finished making it the shorter length, potentially truncating
          * the file and dropping the new data written)
          */
+HDfprintf(stderr, "%s: %d: MPI_Barrier==%d\n", FUNC, file->mpi_rank, file->barrier_comm);
         if ((mrc = MPI_Barrier(file->barrier_comm)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
 
@@ -1707,6 +1765,9 @@ HDfprintf(stderr, "%s:%d: Flush failed (%d)\n", FUNC, __LINE__, status);
             HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mrc);
 
 done:
+HDfprintf(stderr, "%s: %d: Leaving\n",
+          FUNC, H5FD_fphdf5_mpi_rank(_file));
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
