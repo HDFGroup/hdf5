@@ -2048,6 +2048,93 @@ test_conv_enum_1(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_conv_enum_2
+ *
+ * Purpose:     Tests enumeration conversions where source isn't a native type.
+ *
+ * Return:      Success:        0
+ *      
+ *              Failure:        number of errors
+ *
+ * Programmer:  Robb Matzke, LLNL, 2003-06-09
+ *  
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_enum_2(void)
+{
+    hid_t       srctype=-1, dsttype=-1, oddsize=-1;
+    int         *data=NULL, i, nerrors=0;
+    const char  *mname[] = { "RED",
+                             "GREEN",
+                             "BLUE",
+                             "YELLOW",
+                             "PINK",
+                             "PURPLE",
+                             "ORANGE",
+                             "WHITE" };
+
+    TESTING("non-native enumeration type conversion");
+
+    /* Source enum type */
+    oddsize = H5Tcopy(H5T_STD_I32BE);
+    H5Tset_size(oddsize, 3); /*reduce to 24 bits, not corresponding to any native size*/
+    srctype = H5Tenum_create(oddsize);
+    for (i=7; i>=0; --i) {
+        char pattern[3];
+        pattern[2] = i;
+        pattern[0] = pattern[1] = 0;
+        H5Tenum_insert(srctype, mname[i], pattern);
+    }
+
+    /* Destination enum type */
+    dsttype = H5Tenum_create(H5T_NATIVE_INT);
+    assert(H5Tget_size(dsttype)>H5Tget_size(srctype));
+    for (i=0; i<8; i++)
+        H5Tenum_insert(dsttype, mname[i], &i);
+
+    /* Source data */
+    data = malloc(NTESTELEM*sizeof(int));
+    for (i=0; i<NTESTELEM; i++) {
+        ((char*)data)[i*3+2] = i % 8;
+        ((char*)data)[i*3+0] = 0;
+        ((char*)data)[i*3+1] = 0;
+    }
+
+    /* Convert to destination type */
+    H5Tconvert(srctype, dsttype, (hsize_t)NTESTELEM, data, NULL, H5P_DEFAULT);
+
+    /* Check results */
+    for (i=0; i<NTESTELEM; i++) {
+        if (data[i] != i%8) {
+            if (!nerrors++) {
+                H5_FAILED();
+                printf("element %d is %d but should have been  %d\n",
+                       i, data[i], i%8);
+            }
+        }
+    }
+
+    /* Cleanup */
+    free(data);
+    H5Tclose(srctype);
+    H5Tclose(dsttype);
+    H5Tclose(oddsize);
+
+    /* Failure */
+    if (nerrors) {
+        printf("total of %d conversion errors out of %d elements for enums\n",
+               nerrors, NTESTELEM);
+        return 1;
+    }
+    
+    PASSED();
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_bitfield
  *
  * Purpose:	Test bitfield conversions.
@@ -4146,6 +4233,7 @@ main(void)
     nerrors += test_compound_7();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
+    nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();
     nerrors += test_opaque();
 

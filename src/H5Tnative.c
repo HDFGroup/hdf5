@@ -22,6 +22,7 @@
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
+#include "H5Pprivate.h"		/*property list		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
@@ -212,9 +213,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
 
                 } else { 
-                    /*size_t          char_size;*/
-
-                    if(NULL==(dt=H5I_object(H5T_NATIVE_UCHAR)))
+                    if(NULL==(dt=H5I_object(H5T_C_S1)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
                     if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
@@ -346,8 +345,9 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
         case H5T_ENUM:
             {
                 char        *memb_name;         /* Enum's member name */
-                void        *memb_value;        /* Enum's member value */
-               
+                void        *memb_value, *tmp_memb_value;        /* Enum's member value */
+                hid_t       super_type_id, nat_super_type_id;
+                 
                 /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer. */
 
                 /* Retrieve base type for enumarate type */
@@ -356,14 +356,17 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 if((nat_super_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
 
+                if((super_type_id=H5I_register(H5I_DATATYPE, super_type))<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype"); 
+                if((nat_super_type_id=H5I_register(H5I_DATATYPE, nat_super_type))<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype"); 
+                   
                 /* Allocate room for the enum values */
-                if((memb_value = H5MM_malloc(H5T_get_size(super_type)))==NULL)
+                if((tmp_memb_value = H5MM_calloc(H5T_get_size(super_type)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+                if((memb_value = H5MM_calloc(H5T_get_size(nat_super_type)))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
 
-                /* Close super type */
-                if(H5T_close(super_type)<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-                 
                 /* Construct new enum type based on native type */   
                 if((new_type=H5T_enum_create(nat_super_type))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type");
@@ -374,18 +377,27 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 for(i=0; i<nmemb; i++) {
                     if((memb_name=H5T_get_member_name(dtype, i))==NULL)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name");
-                    if(H5T_get_member_value(dtype, i, memb_value)<0)
+                    if(H5T_get_member_value(dtype, i, tmp_memb_value)<0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
+                    HDmemcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
+                    
+                    if(H5Tconvert(super_type_id, nat_super_type_id, 1, memb_value, NULL, H5P_DEFAULT)<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
+                                        
                     if(H5T_enum_insert(new_type, memb_name, memb_value)<0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member");
                     H5MM_xfree(memb_name);
                 }
                 H5MM_xfree(memb_value);
+                H5MM_xfree(tmp_memb_value);
 
                 /* Close base type */
-                if(H5T_close(nat_super_type)<0)
+                if(H5Tclose(nat_super_type_id)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-               
+                 /* Close super type */
+                if(H5Tclose(super_type_id)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+              
                 ret_value = new_type;
             }
             break;
@@ -584,9 +596,8 @@ H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction,
         case H5T_NATIVE_INT_MATCH_SHORT:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_SHORT;
-            else
+            else 
                 tid = H5T_NATIVE_USHORT;
-
             align = H5T_NATIVE_SHORT_COMP_ALIGN_g; 
             break;
             

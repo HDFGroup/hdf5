@@ -1885,11 +1885,11 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	    H5MM_xfree(priv->src2dst);
 	    priv->src2dst = map;
 	    HGOTO_DONE(SUCCEED);
-	} else {
-	    /* Sort source type by value and adjust src2dst[] appropriately */
-	    H5T_sort_value(src, priv->src2dst);
 	}
     }
+
+    /* Sort source type by value and adjust src2dst[] appropriately */
+    H5T_sort_value(src, priv->src2dst);
 
 done:
     if (ret_value<0 && priv) {
@@ -1976,15 +1976,12 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             assert (H5T_ENUM==src->type);
             assert (H5T_ENUM==dst->type);
 
-            if (priv->length) {
-                /* Use O(1) lookup */
-                H5T_sort_name(src, NULL);
-                H5T_sort_name(dst, NULL);
-            } else {
-                /* Use O(log N) lookup */
-                H5T_sort_value(src, NULL); /*yes, by value*/
-                H5T_sort_name(dst, NULL); /*yes, by name*/
-            }
+            /* priv->src2dst map was computed for certain sort keys. Make sure those same
+             * sort keys are used here during conversion. See H5T_conv_enum_init(). But
+             * we actually don't care about the source type's order when doing the O(1)
+             * conversion algorithm, which is turned on by non-zero priv->length */
+            H5T_sort_name(dst, NULL);
+            if (!priv->length) H5T_sort_value(src, NULL);
             
             /*
              * Direction of conversion.

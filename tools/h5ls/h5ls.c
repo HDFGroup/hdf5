@@ -914,11 +914,11 @@ display_string_type(hid_t type, int UNUSED ind)
     }
 
     if (H5Tis_variable_str(type)) {
-        printf("variable-length ");
+        printf("variable-length");
     } else {
-        printf("%lu-byte ", (unsigned long)H5Tget_size(type));
+        printf("%lu-byte", (unsigned long)H5Tget_size(type));
     }
-    printf("%s %s string", pad_s, cset_s);
+    printf(" %s %s string", pad_s, cset_s);
     return TRUE;
 }
 
