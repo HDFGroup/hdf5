@@ -2238,11 +2238,13 @@ printf("%s: check 1.1, \n",FUNC);
 #endif
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
+        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->read)(dataset->ent.file, &(dataset->layout), &pline, 
-                               &efl, H5T_get_size(dataset->type), file_space, 
-                               mem_space, dxpl_id, buf/*out*/, &must_convert);
+                       &fill, &efl, H5T_get_size(dataset->type), file_space, 
+                       mem_space, dxpl_id, buf/*out*/, &must_convert);
 
         /* Supports only no conversion, type or space, for now. */
         if (status<0)
@@ -2725,11 +2727,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
+        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->write)(dataset->ent.file, &(dataset->layout), &pline, 
-                                &efl, H5T_get_size(dataset->type), file_space,
-                                mem_space, dxpl_id, buf/*out*/, &must_convert);
+                        &fill, &efl, H5T_get_size(dataset->type), file_space,
+                        mem_space, dxpl_id, buf/*out*/, &must_convert);
+
         /* Supports only no conversion, type or space, for now. */
         if (status<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed");

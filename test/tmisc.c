@@ -41,6 +41,16 @@ typedef struct {
       char *string;
 } misc2_struct;
 
+/* Definitions for misc. test #3 */
+#define MISC3_FILE              "tmisc3.h5"
+#define MISC3_RANK              2
+#define MISC3_DIM1              6
+#define MISC3_DIM2              6
+#define MISC3_CHUNK_DIM1        2
+#define MISC3_CHUNK_DIM2        2
+#define MISC3_FILL_VALUE        2
+#define MISC3_DSET_NAME         "/chunked"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -252,7 +262,7 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     free(data_check.string);
 
     ret = H5Aclose(att);
-    CHECK(ret, FAIL, "HAclose");
+    CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Tclose(type);
     CHECK(ret, FAIL, "H5Tclose");
@@ -285,6 +295,73 @@ test_misc2(void)
 
 /****************************************************************
 **
+**  test_misc3(): Test reading from chunked dataset with non-zero
+**      fill value
+**
+****************************************************************/
+static void
+test_misc3(void)
+{
+    hid_t file, dataspace, dataset, dcpl;
+    int rank=MISC3_RANK;
+    hsize_t dims[MISC3_RANK]={MISC3_DIM1,MISC3_DIM2};
+    hsize_t chunk_dims[MISC3_RANK]={MISC3_CHUNK_DIM1,MISC3_CHUNK_DIM2};
+    int fill=MISC3_FILL_VALUE;
+    int read_buf[MISC3_DIM1][MISC3_DIM2];
+    int i,j;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing reading from chunked dataset with non-zero fill-value\n"));
+
+    file = H5Fcreate(MISC3_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create a simple dataspace */
+    dataspace = H5Screate_simple(rank,dims,NULL);
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate"); 
+
+    /* Set the chunk information */
+    ret = H5Pset_chunk(dcpl,rank,chunk_dims);
+    CHECK(dcpl, FAIL, "H5Pset_chunk"); 
+
+    /* Set the fill-value information */
+    ret = H5Pset_fill_value(dcpl,H5T_NATIVE_INT,&fill);
+    CHECK(dcpl, FAIL, "H5Pset_fill_value"); 
+
+    /* Create the dataset */
+    dataset = H5Dcreate(file, MISC3_DSET_NAME, H5T_NATIVE_INT, dataspace, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Read from the dataset (should be fill-values) */
+    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &read_buf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    for(i=0; i<MISC3_DIM1; i++)
+        for(j=0; j<MISC3_DIM2; j++)
+            VERIFY(read_buf[i][j],fill,"H5Dread");
+
+    /* Release resources */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    ret = H5Sclose(dataspace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc3() */
+
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -296,6 +373,7 @@ test_misc(void)
 
     test_misc1();       /* Test unlinking a dataset & immediately re-using name */
     test_misc2();       /* Test storing a VL-derived datatype in two different files */
+    test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
 
 } /* test_misc() */
 
@@ -320,4 +398,5 @@ cleanup_misc(void)
     remove(MISC1_FILE);
     remove(MISC2_FILE_1);
     remove(MISC2_FILE_2);
+    remove(MISC3_FILE);
 }

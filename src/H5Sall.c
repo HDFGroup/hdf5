@@ -393,6 +393,7 @@ H5S_all_mscat (const void *tconv_buf, size_t elmt_size,
  */
 herr_t
 H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
+             const struct H5O_fill_t *fill,
 	     const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
 	     const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/,
 	     hbool_t *must_convert/*out*/)
@@ -623,7 +624,7 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
     printf("file_offset[%u]=%lu\n",u,(unsigned long)file_offset[u]);
 #endif /* QAK */
     /* Read data from the file */
-    if (H5F_arr_read(f, dxpl_id, layout, pline, NULL, efl, size,
+    if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, size,
 		     size, mem_offset, file_offset, buf/*out*/)<0) {
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "unable to read data from the file");
@@ -661,10 +662,12 @@ done:
  */
 herr_t
 H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
-	      const H5O_pline_t *pline, const H5O_efl_t *efl,
-	      size_t elmt_size, const H5S_t *file_space,
-	      const H5S_t *mem_space, hid_t dxpl_id, const void *_buf,
-	      hbool_t *must_convert/*out*/)
+	     const H5O_pline_t *pline,
+             const struct H5O_fill_t *fill,
+             const H5O_efl_t *efl,
+	     size_t elmt_size, const H5S_t *file_space,
+	     const H5S_t *mem_space, hid_t dxpl_id, const void *_buf,
+	     hbool_t *must_convert/*out*/)
 {
     H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     const char *buf=(const char*)_buf;  /* Get pointer to buffer */
@@ -880,7 +883,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     } /* end if */
 
     /* Write data to the file */
-    if (H5F_arr_write(f, dxpl_id, layout, pline, NULL, efl, size,
+    if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, size,
 		      size, mem_offset, file_offset, buf)<0) {
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "unable to write data to the file");
