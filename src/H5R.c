@@ -331,6 +331,7 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
+    intn oid_type;              /* type of object being dereferenced */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5R_dereference, FAIL);
@@ -396,16 +397,32 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     } /* end switch */
 
     /* Open the dataset object */
-    if ((dataset=H5D_open_oid(&ent)) == NULL) {
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
-    }
+    oid_type=H5G_get_type(&ent);
+    switch(oid_type) {
+        case H5G_GROUP:
+            break;
 
-    /* Create an atom for the dataset */
-    if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0) {
-        H5D_close(dataset);
-        HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-		      "can't register dataset");
-    }
+        case H5G_TYPE:
+            break;
+
+        case H5G_DATASET:
+            if ((dataset=H5D_open_oid(&ent)) == NULL) {
+                HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
+            }
+
+            /* Create an atom for the dataset */
+            if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0) {
+                H5D_close(dataset);
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
+                      "can't register dataset");
+            }
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_REFERENCE, H5E_BADTYPE, FAIL,
+                  "can't identify type of object referenced");
+            break;
+     } /* end switch */
 
 done:
     FUNC_LEAVE(ret_value);

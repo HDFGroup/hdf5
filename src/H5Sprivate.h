@@ -333,7 +333,6 @@ __DLL__ herr_t H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
 __DLL__ hssize_t H5S_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ herr_t H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 /* Point select functions */
 __DLL__ herr_t H5S_point_add(H5S_t *space, size_t num_elemn,

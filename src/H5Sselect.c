@@ -23,8 +23,9 @@ static intn             interface_initialize_g = 0;
 
 static hssize_t H5S_get_select_hyper_nblocks(H5S_t *space);
 static hssize_t H5S_get_select_elem_npoints(H5S_t *space);
-static herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf);
-static herr_t H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf);
+static herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblocks, hsize_t *buf);
+static herr_t H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf);
+static herr_t H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 
 
 /*--------------------------------------------------------------------------
@@ -231,8 +232,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     }
 
     /*
-     * Check for overlapping blocks (remove when real block-merging algorithm
-     * is in place?).
+     * Check for overlapping hyperslab blocks in new selection (remove when
+     *  real block-merging algorithm is in place? -QAK).
      */
     if(op==H5S_SELECT_SET && block!=NULL) {
         for(i=0; i<space->extent.u.simple.rank; i++) {
@@ -1278,6 +1279,8 @@ H5Sget_select_elem_npoints(hid_t spaceid)
  USAGE
     herr_t H5S_get_select_hyper_blocklist(space, hsize_t *buf)
         H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t startblock;     IN: Hyperslab block to start with
+        hsize_t numblocks;      IN: Number of hyperslab blocks to get
         hsize_t *buf;           OUT: List of hyperslab blocks selected
  RETURNS
     Non-negative on success, negative on failure
@@ -1295,7 +1298,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf)
+H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
 {
     H5S_hyper_node_t *node;     /* Hyperslab node */
     intn rank;                  /* Dataspace rank */
@@ -1309,13 +1312,22 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf)
     /* Get the dataspace extent rank */
     rank=space->extent.u.simple.rank;
 
-    /* Iterate through the node, copying each hyperslab's information */
+    /* Get the head of the hyperslab list */
     node=space->select.sel_info.hslab.hyper_lst->head;
-    while(node!=NULL) {
+
+    /* Get to the correct first node to give back to the user */
+    while(node!=NULL && startblock>0) {
+        startblock--;
+        node=node->next;
+      } /* end while */
+    
+    /* Iterate through the node, copying each hyperslab's information */
+    while(node!=NULL && numblocks>0) {
         HDmemcpy(buf,node->start,sizeof(hsize_t)*rank);
         buf+=rank;
         HDmemcpy(buf,node->end,sizeof(hsize_t)*rank);
         buf+=rank;
+        numblocks--;
         node=node->next;
       } /* end while */
 
@@ -1330,6 +1342,8 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf)
  USAGE
     herr_t H5Sget_select_hyper_blocklist(dsid, hsize_t *buf)
         hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t startblock;     IN: Hyperslab block to start with
+        hsize_t numblocks;      IN: Number of hyperslab blocks to get
         hsize_t *buf;           OUT: List of hyperslab blocks selected
  RETURNS
     Non-negative on success, negative on failure
@@ -1347,7 +1361,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf)
+H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;        /* return value */
@@ -1364,7 +1378,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf)
     if(space->select.type!=H5S_SEL_HYPERSLABS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
 
-    ret_value = H5S_get_select_hyper_blocklist(space,buf);
+    ret_value = H5S_get_select_hyper_blocklist(space,startblock,numblocks,buf);
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_blocklist() */
@@ -1377,6 +1391,8 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf)
  USAGE
     herr_t H5S_get_select_elem_pointlist(space, hsize_t *buf)
         H5S_t *space;           IN: Dataspace pointer of selection to query
+        hsize_t startpoint;     IN: Element point to start with
+        hsize_t numpoints;      IN: Number of element points to get
         hsize_t *buf;           OUT: List of element points selected
  RETURNS
     Non-negative on success, negative on failure
@@ -1393,7 +1409,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf)
+H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
 {
     H5S_pnt_node_t *node;       /* Point node */
     intn rank;                  /* Dataspace rank */
@@ -1407,11 +1423,21 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf)
     /* Get the dataspace extent rank */
     rank=space->extent.u.simple.rank;
 
+    /* Get the head of the point list */
+    node=space->select.sel_info.pnt_lst->head;
+
+    /* Iterate to the first point to return */
+    while(node!=NULL && startpoint>0) {
+        startpoint--;
+        node=node->next;
+      } /* end while */
+
     /* Iterate through the node, copying each hyperslab's information */
     node=space->select.sel_info.pnt_lst->head;
-    while(node!=NULL) {
+    while(node!=NULL && numpoints>0) {
         HDmemcpy(buf,node->pnt,sizeof(hsize_t)*rank);
         buf+=rank;
+        numpoints--;
         node=node->next;
       } /* end while */
 
@@ -1426,6 +1452,8 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf)
  USAGE
     herr_t H5Sget_select_elem_pointlist(dsid, hsize_t *buf)
         hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t startpoint;     IN: Element point to start with
+        hsize_t numpoints;      IN: Number of element points to get
         hsize_t *buf;           OUT: List of element points selected
  RETURNS
     Non-negative on success, negative on failure
@@ -1442,7 +1470,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t *buf)
+H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;        /* return value */
@@ -1459,7 +1487,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t *buf)
     if(space->select.type!=H5S_SEL_POINTS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection");
 
-    ret_value = H5S_get_select_elem_pointlist(space,buf);
+    ret_value = H5S_get_select_elem_pointlist(space,startpoint,numpoints,buf);
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_elem_pointlist() */
@@ -1531,7 +1559,7 @@ H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
     }
 
     FUNC_LEAVE (ret_value);
-}   /* H5Sget_select_bounds() */
+}   /* H5S_get_select_bounds() */
 
 /*--------------------------------------------------------------------------
  NAME

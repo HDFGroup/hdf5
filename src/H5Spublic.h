@@ -84,8 +84,8 @@ __DLL__ herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
 __DLL__ htri_t H5Sselect_valid(hid_t spaceid);
 __DLL__ hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 __DLL__ hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
-__DLL__ herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t *buf);
-__DLL__ herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t *buf);
+__DLL__ herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t *buf);
+__DLL__ herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t *buf);
 __DLL__ herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end);
 
 #ifdef __cplusplus
