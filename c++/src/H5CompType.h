@@ -23,6 +23,10 @@ class __DLLCPP__ CompType : public DataType {
 	// Returns the name of a member of this compound datatype. 
 	string getMemberName( int member_num ) const;
 
+	// Returns the index of a member in this compound data type.
+	int getMemberIndex(const char* name) const;
+	int getMemberIndex(const string& name) const;
+
 	// Returns the offset of a member of this compound datatype. 
 	size_t getMemberOffset( int memb_no ) const;
 
