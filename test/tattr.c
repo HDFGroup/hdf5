@@ -21,6 +21,7 @@
 *************************************************************/
 
 #include "testhdf5.h"
+#include "h5test.h"
 #include "hdf5.h"
 
 #define FILENAME   "tattr.h5"
@@ -41,6 +42,9 @@
 
 /* Group Information */
 #define GROUP1_NAME "/Group1"
+
+/* Named Datatype Information */
+#define TYPE1_NAME "/Type"
 
 /* Attribute Rank & Dimensions */
 #define ATTR1_NAME  "Attr1"
@@ -1360,6 +1364,182 @@ test_attr_delete(void)
 
 /****************************************************************
 **
+**  test_attr_dtype_shared(): Test H5A (attribute) code for using
+**                              shared datatypes in attributes.
+** 
+****************************************************************/
+static void 
+test_attr_dtype_shared(void)
+{
+    hid_t file_id;              /* File ID */
+    hid_t dset_id;              /* Dataset ID */
+    hid_t space_id;             /* Dataspace ID for dataset & attribute */
+    hid_t type_id;              /* Datatype ID for named datatype */
+    hid_t attr_id;              /* Attribute ID */
+    int data=8;                 /* Data to write */
+    int rdata=0;                /* Read read in */
+    H5G_stat_t statbuf;         /* Object's information */
+    off_t empty_filesize;       /* Size of empty file */
+    off_t filesize;             /* Size of file after modifications */
+    herr_t  ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
+
+    /* Create a file */
+    file_id=H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+
+    /* Close file */
+    ret=H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Get size of file */
+    empty_filesize=h5_get_file_size(FILENAME);
+    if(empty_filesize==0) {
+        printf("Line %d: file size wrong!\n",__LINE__);
+        num_errs++;
+    } /* end if */
+
+    /* Re-open file */
+    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+
+    /* Create a datatype to commit and use */
+    type_id=H5Tcopy(H5T_NATIVE_INT);
+    CHECK(type_id, FAIL, "H5Tcopy");
+
+    /* Commit datatype to file */
+    ret=H5Tcommit(file_id,TYPE1_NAME,type_id);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 1, "H5Tcommit");
+
+    /* Create dataspace for dataset */
+    space_id=H5Screate(H5S_SCALAR);
+    CHECK(space_id, FAIL, "H5Screate");
+
+    /* Create dataset */
+    dset_id=H5Dcreate(file_id,DSET1_NAME,type_id,space_id,H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 2, "H5Dcreate");
+
+    /* Create attribute on dataset */
+    attr_id=H5Acreate(dset_id,ATTR1_NAME,type_id,space_id,H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Acreate");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 3, "H5Acreate");
+
+    /* Close attribute */
+    ret=H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Delete attribute */
+    ret=H5Adelete(dset_id,ATTR1_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 2, "H5Adelete");
+
+    /* Create attribute on dataset */
+    attr_id=H5Acreate(dset_id,ATTR1_NAME,type_id,space_id,H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Acreate");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 3, "H5Acreate");
+
+    /* Write data into the attribute */
+    ret=H5Awrite(attr_id,H5T_NATIVE_INT,&data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attribute */
+    ret=H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close dataset */
+    ret=H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret=H5Tclose(type_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close file */
+    ret=H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open file */
+    file_id=H5Fopen(FILENAME,H5F_ACC_RDWR,H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+
+    /* Open dataset */
+    dset_id=H5Dopen(file_id,DSET1_NAME);
+    CHECK(dset_id, FAIL, "H5Dopen");
+
+    /* Open attribute */
+    attr_id=H5Aopen_name(dset_id,ATTR1_NAME);
+    CHECK(attr_id, FAIL, "H5Aopen_name");
+
+    /* Read data from the attribute */
+    ret=H5Aread(attr_id,H5T_NATIVE_INT,&rdata);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(data, rdata, "H5Aread");
+
+    /* Close attribute */
+    ret=H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close dataset */
+    ret=H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 3, "H5Aopen_name");
+
+    /* Unlink the dataset */
+    ret=H5Gunlink(file_id,DSET1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Check reference count on named datatype */
+    ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.nlink, 1, "H5Gunlink");
+
+    /* Unlink the named datatype */
+    ret=H5Gunlink(file_id,TYPE1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close file */
+    ret=H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Check size of file */
+    filesize=h5_get_file_size(FILENAME);
+    VERIFY(filesize, empty_filesize, "H5Fclose");
+}   /* test_attr_dtype_shared() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 ** 
 ****************************************************************/
@@ -1386,6 +1566,9 @@ test_attr(void)
     test_attr_mult_read();      /* Test H5A reading code for multiple attributes */
     test_attr_iterate();        /* Test H5A iterator code */
     test_attr_delete();         /* Test H5A code for deleting attributes */
+
+    /* This next test use the same file information */
+    test_attr_dtype_shared();   /* Test using shared dataypes in attributes */
 }   /* test_attr() */
 
 
