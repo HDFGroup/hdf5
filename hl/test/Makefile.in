@@ -51,7 +51,7 @@ PRIVATE_HDR=
 
 ## How to build the tests...  They all depend on the hdf5_hl and hdf5
 ## libraries.
-$(TEST_PROGS): $(LIBHDF5_HL) $(LIBHDF5)
+$(TEST_PROGS): $(LIBHDF5_HL)
 
 test_lite: test_lite.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_lite.lo $(LIBHDF5_HL) $(LIBHDF5) $(LDFLAGS) $(LIBS)
