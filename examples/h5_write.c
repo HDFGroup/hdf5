@@ -39,7 +39,7 @@ for (j = 0; j < NX; j++) {
  * default file creation properties, and default file
  * access properties.
  */
-file = H5Fcreate(FILE, H5ACC_DEFAULT, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5ACC_OVERWRITE, H5C_DEFAULT, H5C_DEFAULT);
 
 /*
  * Describe the size of the array and create the data space for fixed
