@@ -7440,7 +7440,7 @@ if test "${enable_production+set}" = set; then
 fi;
 
 case "X-$enable_production" in
-  X-|X-yes)
+  X-yes)
     enable_production="yes"
     echo "$as_me:$LINENO: result: production" >&5
 echo "${ECHO_T}production" >&6
@@ -7459,7 +7459,7 @@ echo "${ECHO_T}production" >&6
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
-  X-no)
+  X-|X-no)
     enable_production="no"
     echo "$as_me:$LINENO: result: development" >&5
 echo "${ECHO_T}development" >&6
@@ -30180,7 +30180,7 @@ fi;
 
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
-  X-yes)
+  X-|X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
     CPPFLAGS="$CPPFLAGS -UNDEBUG"
     echo "$as_me:$LINENO: result: default ($DEBUG_PKG)" >&5
@@ -30192,7 +30192,7 @@ echo "${ECHO_T}default ($DEBUG_PKG)" >&6
     echo "$as_me:$LINENO: result: all ($DEBUG_PKG)" >&5
 echo "${ECHO_T}all ($DEBUG_PKG)" >&6
     ;;
-  X-|X-no|X-none)
+  X-no|X-none)
     echo "$as_me:$LINENO: result: none" >&5
 echo "${ECHO_T}none" >&6
     DEBUG_PKG=
