@@ -12,6 +12,7 @@
 ./INSTALL_MAINT
 ./INSTALL_parallel
 ./INSTALL_parallel.ascired
+./INSTALL_Windows.txt
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.in
