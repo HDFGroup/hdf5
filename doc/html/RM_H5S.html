@@ -51,9 +51,12 @@ H5S&nbsp;&nbsp;
 These functions create and manipulate the dataspace in which to store the
 elements of a dataset.
 
+
+<p>
+<strong>The C Interfaces:</strong>
+
 <table border=0>
 <tr><td valign=top>
-<ul>
     <li><a href="#Dataspace-Create">H5Screate</a>
     <li><a href="#Dataspace-Copy">H5Scopy</a>
     <li><a href="#Dataspace-Close">H5Sclose</a>
@@ -62,11 +65,10 @@ elements of a dataset.
     <li><a href="#Dataspace-OffsetSimple">H5Soffset_simple</a>
     <li><a href="#Dataspace-ExtentDims">H5Sget_simple_extent_dims</a>
     <li><a href="#Dataspace-ExtentNdims">H5Sget_simple_extent_ndims</a>
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-ExtentNpoints">H5Sget_simple_extent_npoints</a>
     <li><a href="#Dataspace-ExtentType">H5Sget_simple_extent_type</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
 <!--		NOT YET IMPLEMENTED (R1.2 -- 9908)
     <li><a href="#Dataspace-ExtentClass">H5Sextent_class</a>
 -->
@@ -76,20 +78,66 @@ elements of a dataset.
     <li><a href="#Dataspace-SelectNpoints">H5Sget_select_npoints</a>
     <li><a href="#Dataspace-SelectHyperNBlocks">H5Sget_select_hyper_nblocks</a>
     <li><a href="#Dataspace-SelectHyperBlockList">H5Sget_select_hyper_blocklist</a>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-SelectElemNPoints">H5Sget_select_elem_npoints</a>
     <li><a href="#Dataspace-SelectElemPointList">H5Sget_select_elem_pointlist</a>
     <li><a href="#Dataspace-SelectBounds">H5Sget_select_bounds</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
     <li><a href="#Dataspace-SelectElements">H5Sselect_elements</a>
     <li><a href="#Dataspace-SelectAll">H5Sselect_all</a>
     <li><a href="#Dataspace-SelectNone">H5Sselect_none</a>
     <li><a href="#Dataspace-SelectValid">H5Sselect_valid</a>
     <li><a href="#Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
-</ul>
 </td></tr>
 </table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+    <li><a href="#Dataspace-Create">h5screate_f</a>
+    <li><a href="#Dataspace-Copy">h5scopy_f</a>
+    <li><a href="#Dataspace-Close">h5sclose_f</a>
+    <li><a href="#Dataspace-CreateSimple">h5screate_simple_f</a>
+    <li><a href="#Dataspace-IsSimple">h5sis_simple_f</a>
+    <li><a href="#Dataspace-OffsetSimple">h5soffset_simple_f</a>
+    <li><a href="#Dataspace-ExtentDims">h5sget_simple_extent_dims_f</a>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+    <li><a href="#Dataspace-ExtentNdims">h5sget_simple_extent_ndims_f</a>
+    <li><a href="#Dataspace-ExtentNpoints">h5sget_simple_extent_npoints_f</a>
+    <li><a href="#Dataspace-ExtentType">h5sget_simple_extent_type_f</a>
+<!--		NOT YET IMPLEMENTED (R1.2 -- 9908)
+    <li><a href="#Dataspace-ExtentClass">h5sextent_class_f</a>                            -->
+    <li><a href="#Dataspace-ExtentCopy">h5sextent_copy_f</a>
+    <li><a href="#Dataspace-SetExtentSimple">h5sset_extent_simple_f</a>
+    <li><a href="#Dataspace-SetExtentNone">h5sset_extent_none_f</a>
+    <li><a href="#Dataspace-SelectNpoints">h5sget_select_npoints_f</a>
+<!--<li><a href="#Dataspace-SelectHyperNBlocks">h5sget_select_hyper_nblocks_f</a>         -->
+<!--<li><a href="#Dataspace-SelectHyperBlockList">h5sget_select_hyper_blocklist_f</a>     -->
+<!--<li><a href="#Dataspace-SelectElemNPoints">h5sget_select_elem_npoints_f</a>           -->
+<!--<li><a href="#Dataspace-SelectElemPointList">h5sget_select_elem_pointlist_f</a>       -->
+<!--<li><a href="#Dataspace-SelectBounds">h5sget_select_bounds_f</a>                      -->
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+    <li><a href="#Dataspace-SelectElements">h5sselect_elements_f</a>
+    <li><a href="#Dataspace-SelectAll">h5sselect_all_f</a>
+    <li><a href="#Dataspace-SelectNone">h5sselect_none_f</a>
+    <li><a href="#Dataspace-SelectValid">h5sselect_valid_f</a>
+    <li><a href="#Dataspace-SelectHyperslab">h5sselect_hyperslab_f</a>
+</td></tr>
+</table>
+
 
 <p>
 The following H5S functions are included in the HDF5 specification, 
@@ -140,6 +188,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5screate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -179,6 +234,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5screate_simple_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -203,6 +265,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5scopy_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -266,6 +335,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_elements_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -293,6 +369,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_all_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -315,6 +398,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_none_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -341,6 +431,13 @@ of the <cite>HDF5 User's Guide.</cite>.
         or <code>0</code> (zero), for <code>FALSE</code>, if it is not.
         Returns a negative value on error conditions 
         such as the selection or extent not being defined.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_valid_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -363,6 +460,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements in the dataspace if successful; 
         otherwise returns 0.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_simple_extent_npoints_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -384,6 +488,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements in the selection if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_npoints_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -405,6 +516,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_simple_extent_ndims_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -434,6 +552,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_simple_extent_dims_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -460,6 +585,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace class name if successful; 
         otherwise H5S_NO_CLASS (-1).
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_simple_extent_type_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -504,6 +636,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sset_extent_simple_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -527,6 +666,13 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dd>When successful, returns a positive value, for <code>TRUE</code>,
         or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sis_simple_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -560,6 +706,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5soffset_simple_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -587,6 +740,11 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace class name if successful; 
         otherwise H5S_NO_CLASS (-1).
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sextent_class_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -617,6 +775,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sextent_copy_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -639,6 +804,13 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sset_extent_none_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -745,6 +917,13 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_hyperslab_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -768,6 +947,14 @@ I/O is performed.
     <dd>Returns the number of hyperslab blocks in 
         the current dataspace selection if successful.
         Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_hyper_nblocks_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -820,6 +1007,14 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_hyper_blocklist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -843,6 +1038,14 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns the number of element points in the current dataspace selection if successful.
         Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_elem_npoints_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -894,6 +1097,14 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_elem_pointlist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -939,6 +1150,14 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns a negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_bounds_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -963,6 +1182,13 @@ I/O is performed.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5s_FORTRAN.html#h5sclose_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1006,7 +1232,7 @@ H5S&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  20 October 1999
 
 </body>
 </html>
