@@ -90,8 +90,8 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 ## Install the documents.
 install-doc: $(PUB_DOCS)
 	@if test -d $(DOCDIR) ; then                                          \
-       :;                                                                 \
-    else                                                                  \
+	    :;                                                                \
+	else                                                                  \
 	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
@@ -102,10 +102,10 @@ install-doc: $(PUB_DOCS)
 	@for f in X $(PUB_DOCS); do                                           \
 	   if test $$f != X; then                                             \
 	      if test -f $$f; then                                            \
-		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);             \
+		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
 	      else                                                            \
 	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
-		    exit 1);                                                      \
+		    exit 1);                                                  \
 	      fi;                                                             \
 	   fi;                                                                \
 	done
@@ -139,6 +139,11 @@ uninstall-doc:
 ## remove things like object files but not libraries or executables.
 ##
 mostlyclean:
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+		(set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o)
 	-$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o)
 	-$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN)
@@ -148,6 +153,11 @@ mostlyclean:
 ## is part of the HDF5 distribution.
 ##
 clean: mostlyclean
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+		(set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
 	-$(RM) -r .libs
 
@@ -158,6 +168,11 @@ clean: mostlyclean
 ##
 distclean: clean
 	-$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+		(set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	@if test -f $(srcdir)/Makefile.in; then				      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
@@ -167,9 +182,15 @@ distclean: clean
 ## the makefile, including those generated from autoheader and autoconf.
 ##
 maintainer-clean: distclean
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
+		(set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
+	    fi;                                                               \
+	done
 	-$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
 ## Implicit rules
+##
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
