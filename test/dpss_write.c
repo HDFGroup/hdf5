@@ -15,7 +15,7 @@
    3. Create a local memory buffer to hold the data.
    4. Write the local data to the remote dataset.
 */
-#include <h5test.h>
+#include "h5test.h"
 
 #ifndef H5_HAVE_GRIDSTORAGE
 int main(void)

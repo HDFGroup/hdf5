@@ -11,15 +11,15 @@
 #define _H5TEST_H
 
 #undef NDEBUG
-#include <hdf5.h>
+#include "hdf5.h"
 
-#include <H5private.h>
+#include "H5private.h"
 #ifdef STDC_HEADERS
 #   include <signal.h>
 #endif
 
 #define H5T_PACKAGE
-#include <H5Tpkg.h>		/*to turn off hardware conversions*/
+#include "H5Tpkg.h"		/*to turn off hardware conversions*/
 
 
 /*

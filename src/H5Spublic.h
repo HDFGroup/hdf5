@@ -17,8 +17,8 @@
 #define _H5Spublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 /* Define atomic datatypes */
 #define H5S_ALL         0

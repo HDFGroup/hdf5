@@ -14,15 +14,14 @@
  *          With custom modifications...
  */
 
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDlog.h>        /* logging file driver */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
-
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver			        */
+#include "H5FDlog.h"            /*logging file driver                   */
+#include "H5FLprivate.h"	/*free Lists	                        */
+#include "H5MMprivate.h"        /*memory allocation                     */
+#include "H5Pprivate.h"		/*property lists			*/
 
 #ifdef MAX
 #undef MAX

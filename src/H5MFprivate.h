@@ -18,9 +18,9 @@
 #define _H5MFprivate_H
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Fprivate.h>
-#include <H5FDprivate.h>	/*file driver				  */
+#include "H5private.h"
+#include "H5Fprivate.h"
+#include "H5FDprivate.h"	/*file driver				  */
 
 /*
  * Feature: Define H5MF_DEBUG on the compiler command line if you want to

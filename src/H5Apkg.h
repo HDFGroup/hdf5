@@ -23,9 +23,9 @@
 #  undef H5A_DEBUG
 #endif
 
-#include <H5Aprivate.h>
-#include <H5HGprivate.h>
-#include <H5Sprivate.h>
+#include "H5Aprivate.h"
+#include "H5HGprivate.h"
+#include "H5Sprivate.h"
 
 struct H5A_t {
     uintn       initialized;/* Indicate whether the attribute has been modified */

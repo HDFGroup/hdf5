@@ -10,7 +10,7 @@
 #ifndef H5FDlog_H
 #define H5FDlog_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_LOG	(H5FD_log_init())
 
@@ -25,4 +25,3 @@ __DLL__ herr_t H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity);
 #endif
 
 #endif
-

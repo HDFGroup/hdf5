@@ -7,7 +7,7 @@
  *
  * Purpose:	Tests hard and soft (symbolic) links.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "links",

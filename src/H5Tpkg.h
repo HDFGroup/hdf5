@@ -23,11 +23,11 @@
 #  undef H5T_DEBUG
 #endif
 
-#include <H5HGprivate.h>
-#include <H5Dprivate.h>
-#include <H5Fprivate.h>
-#include <H5Rprivate.h>
-#include <H5Tprivate.h>
+#include "H5HGprivate.h"
+#include "H5Dprivate.h"
+#include "H5Fprivate.h"
+#include "H5Rprivate.h"
+#include "H5Tprivate.h"
 
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */

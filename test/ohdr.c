@@ -5,15 +5,15 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, November 24, 1998
  */
-#include <h5test.h>
-#include <H5Iprivate.h>
-#include <H5Oprivate.h>
+#include "h5test.h"
+#include "H5Iprivate.h"
+#include "H5Oprivate.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
 #define H5G_PACKAGE
-#include <H5Gpkg.h>
+#include "H5Gpkg.h"
 
 const char *FILENAME[] = {
     "ohdr",

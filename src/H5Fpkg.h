@@ -16,10 +16,10 @@
 #ifndef _H5Fpkg_H
 #define _H5Fpkg_H
 
-#include <H5Fprivate.h>
+#include "H5Fprivate.h"
 
 /* This is a near top-level header! Try not to include much! */
-#include <H5private.h>
+#include "H5private.h"
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code

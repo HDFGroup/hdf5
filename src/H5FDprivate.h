@@ -8,7 +8,7 @@
 #ifndef _H5FDprivate_H
 #define _H5FDprivate_H
 
-#include <H5FDpublic.h>
+#include "H5FDpublic.h"
 
 #define H5FD_has_cmp(id) (NULL!=H5FD_get_class(id)->cmp)
 

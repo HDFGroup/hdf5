@@ -14,11 +14,11 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5MMprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fcontig_mask

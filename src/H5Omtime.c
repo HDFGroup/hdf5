@@ -7,11 +7,11 @@
  *
  * Purpose:	The object modification time message.
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 #if defined WIN32
 #include <sys/types.h>

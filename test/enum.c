@@ -5,7 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, December 22, 1998
  */
-#include <h5test.h>
+#include "h5test.h"
 #define CPTR(VAR,CONST)	((VAR)=(CONST),&(VAR))
 
 const char *FILENAME[] = {

@@ -10,7 +10,9 @@
  */
 
 #undef NDEBUG			/*override -DNDEBUG			*/
-#include <h5test.h>
+
+#include "h5test.h"
+
 #ifdef WIN32
 #include <process.h>
 #endif

@@ -10,10 +10,10 @@
  *		the bytes are in little-endian order.
  */
 #define H5T_PACKAGE
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Iprivate.h>
-#include <H5Tpkg.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Iprivate.h"
+#include "H5Tpkg.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Tbit_mask

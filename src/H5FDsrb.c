@@ -7,14 +7,13 @@
  *
  * Purpose:    SRB I/O driver.
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDsrb.h>            /* Core file driver                     */
-#include <H5MMprivate.h>        /* Memory allocation                    */
-#include <H5Pprivate.h>		/*property lists			*/
-
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver			        */
+#include "H5FDsrb.h"            /*core file driver                      */
+#include "H5MMprivate.h"        /*memory allocation                     */
+#include "H5Pprivate.h"		/*property lists			*/
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SRB_g = 0;

@@ -15,7 +15,7 @@
    3. Read the dataset into the memory buffer.
    4. Get some information about the dataset from the file.
 */
-#include <h5test.h>
+#include "h5test.h"
 #include <strings.h>
 
 #ifndef H5_HAVE_GASS

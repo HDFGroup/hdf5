@@ -19,7 +19,7 @@
 
 /* Public headers needed by this file */
 #ifdef LATER
-#include <H5TBpublic.h>		/*Public API prototypes */
+#include "H5TBpublic.h"		/*Public API prototypes */
 #endif /* LATER */
 
 /* Typedef for key comparison function */

@@ -9,16 +9,16 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <h5test.h>
-#include <H5private.h>
-#include <H5Dprivate.h>
-#include <H5Iprivate.h>
-#include <H5Pprivate.h>
-#include <H5Fpkg.h>
-#include <H5Gprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
-#include <H5Vprivate.h>
+#include "h5test.h"
+#include "H5private.h"
+#include "H5Dprivate.h"
+#include "H5Iprivate.h"
+#include "H5Pprivate.h"
+#include "H5Fpkg.h"
+#include "H5Gprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
+#include "H5Vprivate.h"
 
 const char *FILENAME[] = {
     "istore",

@@ -10,8 +10,8 @@
 #ifndef H5FDgass_H
 #define H5FDgass_H
 
-#include <H5FDpublic.h>
-#include <H5Ipublic.h>
+#include "H5FDpublic.h"
+#include "H5Ipublic.h"
 
 #include <string.h>
 

@@ -2,7 +2,7 @@
  *   Creating and closing a dataset.
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #define FILE "dset.h5"
 
 main() {

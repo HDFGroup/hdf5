@@ -11,9 +11,9 @@
  *		because testing general dimensionalities would require us to
  *		rewrite much of the hyperslab stuff.
  */
-#include <H5private.h>
-#include <H5MMprivate.h>
-#include <H5Vprivate.h>
+#include "H5private.h"
+#include "H5MMprivate.h"
+#include "H5Vprivate.h"
 
 #ifndef H5_HAVE_FUNCTION
 #undef __FUNCTION__

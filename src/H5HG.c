@@ -24,17 +24,17 @@
  *		for a new object based on object size, amount of free space
  *		in the collection, and temporal locality.
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg */
 
-#include <H5private.h>		/*library		  		*/
-#include <H5ACprivate.h>	/*caching				*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fpkg.h>         /*file access                             */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5HGprivate.h>	/*global heaps				*/
-#include <H5MFprivate.h>	/*file memory management		*/
-#include <H5MMprivate.h>	/*core memory management		*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library		  		*/
+#include "H5ACprivate.h"	/*caching				*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"             /*file access                           */
+#include "H5FLprivate.h"	/*free lists                            */
+#include "H5HGprivate.h"	/*global heaps				*/
+#include "H5MFprivate.h"	/*file memory management		*/
+#include "H5MMprivate.h"	/*core memory management		*/
+#include "H5Pprivate.h"		/*property lists			*/
 
 #define PABLO_MASK	H5HG_mask
 

@@ -20,9 +20,9 @@
 *
 *************************************************************/
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define FILENAME   "tarray1.h5"
 #define TESTFILE   "tarrold.h5"

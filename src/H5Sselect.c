@@ -10,13 +10,13 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>
-#include <H5MMprivate.h>
-#include <H5Spkg.h>
-#include <H5Vprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"
+#include "H5MMprivate.h"
+#include "H5Spkg.h"
+#include "H5Vprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK      H5Sselect_mask

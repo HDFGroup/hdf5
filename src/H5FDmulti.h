@@ -10,7 +10,7 @@
 #ifndef H5FDmulti_H
 #define H5FDmulti_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_MULTI	(H5FD_multi_init())
 

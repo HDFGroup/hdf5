@@ -1,14 +1,12 @@
-/* #include <hdf.h> */
+/* #include "hdf.h" */
 #include "gif.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 int
-main(argv , argc)
-int argv;
-char *argc[];
+main(int argv , char *argc[])
 {
-	
 	GIFTOMEM GifMemoryStruct;
 	GIFIMAGEDESC gifImageDesc;
 

@@ -7,11 +7,11 @@
  *
  * Purpose:	Data filter pipeline message.
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5O_pline_mask

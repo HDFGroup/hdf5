@@ -2,7 +2,7 @@
  *  Create two datasets within groups.
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #define FILE "groups.h5"
 
 main() {

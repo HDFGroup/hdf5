@@ -19,7 +19,7 @@
 #define _H5MMpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
+#include "H5public.h"
 
 /* These typedefs are currently used for VL datatype allocation/freeing */
 typedef void *(* H5MM_allocate_t)(size_t size,void *info);

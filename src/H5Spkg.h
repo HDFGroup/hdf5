@@ -16,7 +16,7 @@
 #ifndef _H5Spkg_H
 #define _H5Spkg_H
 
-#include <H5Sprivate.h>
+#include "H5Sprivate.h"
 
 /* 
  * Dataspace extent information

@@ -11,7 +11,7 @@ Appendix A: OpenMP-HDF5 Programs
  *  it is safe to use HDF.
  */
  
-#include <hdf5.h>
+#include "hdf5.h"
 #include <omp.h>
 #include <math.h>
 
@@ -142,7 +142,7 @@ void CalcWriteData(hid_t fid, hid_t dataspace, hid_t datatype)
  *  
  */
  
-#include <hdf5.h>
+#include "hdf5.h"
 #include <omp.h>
 
 #define FILE        "SDS.h5"
@@ -232,7 +232,7 @@ main (void)
  *  the HDF5 file in parallel.  This program only works occasionally.
  */
  
-#include <hdf5.h>
+#include "hdf5.h"
 #include <omp.h>
 
 #define FILE   "SDS.h5"
@@ -328,7 +328,7 @@ void writeData(int id, hid_t file, hid_t dataspace, hid_t datatype, char *dname)
  * parallel.  It also only works occasionally.      
  */
  
-#include <hdf5.h>
+#include "hdf5.h"
 #include <omp.h>
 
 #define FILE        "SDS.h5"

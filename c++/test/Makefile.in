@@ -38,7 +38,7 @@ TESTHDF5_OBJ=testhdf5.lo tfile.lo th5s.lo
 
 TEST_SCRIPTS=
 
-DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
+DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o)
 
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 

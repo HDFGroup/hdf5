@@ -8,7 +8,7 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 
-#include <h5test.h>
+#include "h5test.h"
 
 /* Number of times to run each test */
 #define NTESTS	1
@@ -35,7 +35,7 @@
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
 #define H5T_PACKAGE
-#include <H5Tpkg.h>
+#include "H5Tpkg.h"
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)

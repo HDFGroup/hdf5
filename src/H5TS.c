@@ -13,9 +13,9 @@
 /* $Id$ */
 
 /* private headers */
-#include <H5private.h>		/*library                 		*/
-#include <H5Eprivate.h>		/*error handling          		*/
-#include <H5MMprivate.h>	/*memory management functions		*/
+#include "H5private.h"		/*library                 		*/
+#include "H5Eprivate.h"		/*error handling          		*/
+#include "H5MMprivate.h"	/*memory management functions		*/
 
 #ifdef H5_HAVE_THREADSAFE
 

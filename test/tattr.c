@@ -20,9 +20,9 @@
 *
 *************************************************************/
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define FILENAME   "tattr.h5"
 #define ATTR_NAME_LEN   16

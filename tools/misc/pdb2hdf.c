@@ -10,7 +10,7 @@
  *		meta data that points into the PDB file.
  */
 #include <assert.h>
-#include <hdf5.h>
+#include "hdf5.h"
 #include <pdb.h>
 #include <score.h>
 #include <stdio.h>

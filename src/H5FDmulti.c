@@ -11,8 +11,9 @@
  *		place in one file while all raw data goes to some other file.
  */
 #include <assert.h>
-#include <hdf5.h>
 #include <stdlib.h>
+
+#include "hdf5.h"
 
 /*
  * Define H5FD_MULTI_DEBUG if you want the ability to print debugging

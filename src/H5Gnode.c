@@ -21,20 +21,20 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file... */
-#include <H5private.h>		/*library				*/
-#include <H5ACprivate.h>	/*cache					*/
-#include <H5Bprivate.h>		/*B-link trees				*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fpkg.h>		/*file access				*/
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Gpkg.h>		/*me					*/
-#include <H5HLprivate.h>	/*local heap				*/
-#include <H5MFprivate.h>	/*file memory management		*/
-#include <H5MMprivate.h>	/*core memory management		*/
-#include <H5Oprivate.h>		/*header messages			*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library				*/
+#include "H5ACprivate.h"	/*cache					*/
+#include "H5Bprivate.h"		/*B-link trees				*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"		/*file access				*/
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Gpkg.h"		/*me					*/
+#include "H5HLprivate.h"	/*local heap				*/
+#include "H5MFprivate.h"	/*file memory management		*/
+#include "H5MMprivate.h"	/*core memory management		*/
+#include "H5Oprivate.h"		/*header messages			*/
+#include "H5Pprivate.h"		/*property lists			*/
 
-#include <H5FDmpio.h>		/*the MPIO file driver			*/
+#include "H5FDmpio.h"		/*the MPIO file driver			*/
 
 #define PABLO_MASK	H5G_node_mask
 

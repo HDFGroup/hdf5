@@ -9,13 +9,13 @@
 #define H5G_PACKAGE
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>         /*file access                             */
-#include <H5Gpkg.h>
-#include <H5HLprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"         /*file access                             */
+#include "H5Gpkg.h"
+#include "H5HLprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 #define PABLO_MASK	H5G_stab_mask
 static intn		interface_initialize_g = 0;

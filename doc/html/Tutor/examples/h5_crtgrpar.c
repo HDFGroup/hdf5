@@ -2,7 +2,7 @@
  *   Creating groups using absolute and relative names.
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #define FILE "groups.h5"
 
 main() {

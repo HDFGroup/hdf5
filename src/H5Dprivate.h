@@ -16,16 +16,16 @@
 #ifndef _H5Dprivate_H
 #define _H5Dprivate_H
 
-#include <H5Dpublic.h>
+#include "H5Dpublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Fprivate.h>		/*for the H5F_t type			     */
-#include <H5Gprivate.h>		/*symbol tables				     */
-#include <H5MMpublic.h>		/*for H5MM_allocate_t and H5MM_free_t types  */
-#include <H5Oprivate.h>		/*object Headers			     */
-#include <H5Sprivate.h>		/*for the H5S_t type			     */
-#include <H5Tprivate.h>		/*for the H5T_t type			     */
+#include "H5private.h"
+#include "H5Fprivate.h"		/*for the H5F_t type			     */
+#include "H5Gprivate.h"		/*symbol tables				     */
+#include "H5MMpublic.h"		/*for H5MM_allocate_t and H5MM_free_t types  */
+#include "H5Oprivate.h"		/*object Headers			     */
+#include "H5Sprivate.h"		/*for the H5S_t type			     */
+#include "H5Tprivate.h"		/*for the H5T_t type			     */
 
 /*
  * Feature: Define H5D_DEBUG on the compiler command line if you want to

@@ -14,9 +14,9 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
 
 /* Interface initialization? */
 #define PABLO_MASK H5MM_mask

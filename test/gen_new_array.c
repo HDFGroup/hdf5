@@ -16,7 +16,7 @@
  *      The test file should be generated on a little-endian machine with
  *      16-bit shorts, 32-bit floats, 32-bit ints and 64-bit doubles.
  */
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define TESTFILE   "tarrnew.h5"
 

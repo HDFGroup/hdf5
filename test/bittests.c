@@ -7,10 +7,10 @@
  *
  * Purpose:	Tests functions in H5Tbit.c
  */
-#include <h5test.h>
+#include "h5test.h"
 
 #define H5T_PACKAGE
-#include <H5Tpkg.h>
+#include "H5Tpkg.h"
 
 #define NTESTS	100000
 

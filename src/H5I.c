@@ -31,11 +31,11 @@
  *	1/7/96	- Finished coding prototype
  *	6/10/97 - Moved into HDF5 library
  */
-#include <H5private.h>
-#include <H5Iprivate.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5Iprivate.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"
 
 /* Interface initialialization? */
 #define PABLO_MASK	H5I_mask

@@ -14,10 +14,10 @@
  *		the global heap.
  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 static void *H5O_shared_decode (H5F_t*, const uint8_t*, H5O_shared_t *sh);
 static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);

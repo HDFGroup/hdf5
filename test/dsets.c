@@ -8,7 +8,7 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "dataset",

@@ -13,7 +13,8 @@
  */
 
 /* See H5private.h for how to include system headers */
-#include <hdf5.h>
+#include "hdf5.h"
+
 #ifdef H5_STDC_HEADERS
 #   include <ctype.h>
 #   include <errno.h>
@@ -33,23 +34,23 @@
 #endif
 
 #ifdef WIN32
-#include <io.h>
+#   include <io.h>
 #endif
 
 #ifndef FALSE
-#define FALSE	0
+#   define FALSE	0
 #endif
 #ifndef TRUE
-#define TRUE	1
+#   define TRUE 	1
 #endif
-#define NAMELEN	4096
+#   define NAMELEN	4096
 #define GB	*1024*1024*1024
 
 #ifndef MIN
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
+#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
 #endif
 #ifndef MIN3
-#define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
+#   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
 #endif
 
 

@@ -1,6 +1,6 @@
 /*
- * Copyright <A9> 1999 NCSA
- *                  All rights reserved.
+ * Copyright (c) 1999 NCSA
+ *               All rights reserved.
  *
  * Programmer: Raymond Lu <slu@ncsa.uiuc.edu>
  *             Wednesday, April 12, 2000
@@ -9,8 +9,8 @@
 #ifndef H5FDsrb_H
 #define H5FDsrb_H
 
-#include <H5FDpublic.h>
-#include <H5Ipublic.h>
+#include "H5FDpublic.h"
+#include "H5Ipublic.h"
 
 #ifdef H5_HAVE_SRB
 

@@ -5,10 +5,10 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, August 27, 1999
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
-#include <H5Zprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
+#include "H5Zprivate.h"
 
 #ifdef H5_HAVE_ZLIB_H
 #   include <zlib.h>

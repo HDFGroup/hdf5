@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define FILE2	"trefer2.h5"
 #define SPACE1_NAME  "Space1"

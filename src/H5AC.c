@@ -26,12 +26,12 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5ACprivate.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5ACprivate.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FLprivate.h"	/*Free Lists                              */
+#include "H5MMprivate.h"
 
 /*
  * Sorting the cache by address before flushing is sometimes faster

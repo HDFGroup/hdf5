@@ -21,12 +21,12 @@
 #define H5P_DEFAULT     0
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
-#include <H5Dpublic.h>
-#include <H5Fpublic.h>
-#include <H5MMpublic.h>
-#include <H5Zpublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
+#include "H5Dpublic.h"
+#include "H5Fpublic.h"
+#include "H5MMpublic.h"
+#include "H5Zpublic.h"
 
 /* Property list classes */
 typedef enum H5P_class_t {

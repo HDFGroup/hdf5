@@ -8,9 +8,8 @@
 #ifndef _H5HGprivate_H
 #define _H5HGprivate_H
 
-#include <H5HGpublic.h>
-
-#include <H5Fprivate.h>
+#include "H5HGpublic.h"
+#include "H5Fprivate.h"
 
 /*
  * Each collection has a magic number for some redundancy.

@@ -20,17 +20,17 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>			/*library		  	*/
-#include <H5ACprivate.h>		/*cache				*/
-#include <H5Eprivate.h>			/*error handling	  	*/
-#include <H5Fpkg.h>			/*file access                   */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5HLprivate.h>		/*self				*/
-#include <H5MFprivate.h>		/*file memory management	*/
-#include <H5MMprivate.h>		/*core memory management  	*/
-#include <H5Pprivate.h>			/*property lists		*/
+#include "H5private.h"			/*library		  	*/
+#include "H5ACprivate.h"		/*cache				*/
+#include "H5Eprivate.h"			/*error handling	  	*/
+#include "H5Fpkg.h"			/*file access                   */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5HLprivate.h"		/*self				*/
+#include "H5MFprivate.h"		/*file memory management	*/
+#include "H5MMprivate.h"		/*core memory management  	*/
+#include "H5Pprivate.h"			/*property lists		*/
 
-#include <H5FDmpio.h>			/*for H5FD_mpio_tas_allsame()	*/
+#include "H5FDmpio.h"			/*for H5FD_mpio_tas_allsame()	*/
 
 #define H5HL_FREE_NULL	1		/*end of free list on disk	*/
 #define PABLO_MASK	H5HL_mask

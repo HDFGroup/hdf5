@@ -12,7 +12,7 @@
     and selected elements data from the integer dataset.
 */
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define filename "REF_REG.h5"
 #define dsetnamev "MATRIX"

@@ -12,7 +12,8 @@
  */
 #ifndef _H5private_H
 #define _H5private_H
-#include <H5public.h>		/* Include Public Definitions		*/
+
+#include "H5public.h"		/* Include Public Definitions		*/
 /*
  * Since H5config.h is a generated header file, it is messy to try
  * to put a #ifndef _H5config_H ... #endif guard in it.
@@ -21,7 +22,7 @@
  * it via H5private.h.  The #ifndef _H5private_H guard above would
  * prevent repeated include.
  */
-#include <H5config.h>		/* Include all configuration info	*/
+#include "H5config.h"		/* Include all configuration info	*/
 
 /* include the pthread library */
 #ifdef H5_HAVE_THREADSAFE
@@ -136,13 +137,13 @@
 #   include <io.h>
 #endif
 #ifdef H5_HAVE_WINDOWS_H
-#include <windows.h>
+#   include <windows.h>
 #endif
 
 #ifdef WIN32
-#include <io.h>
-#include <process.h>
-#include <windows.h>
+#   include <io.h>
+#   include <process.h>
+#   include <windows.h>
 #endif
 #ifndef F_OK
 #   define F_OK	00
@@ -923,7 +924,7 @@ extern char	H5_lib_vers_info_g[];
 #ifdef H5_HAVE_THREADSAFE
 
 /* Include required thread-safety header */
-#include <H5TSprivate.h>
+#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {

@@ -7,7 +7,7 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "extern_1",

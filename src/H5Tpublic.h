@@ -17,8 +17,8 @@
 #define _H5Tpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 #define HOFFSET(S,M)    (offsetof(S,M))
 

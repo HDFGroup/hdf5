@@ -8,8 +8,8 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <hdf5.h>
-#include <H5private.h>
+#include "hdf5.h"
+#include "H5private.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <assert.h>
@@ -38,11 +38,11 @@
 #endif
 
 #ifdef H5_HAVE_WINSOCK_H
-#include <Winsock.h>
+#   include <Winsock.h>
 #endif
 
 #ifdef H5_HAVE_SYS_TIMEB 
-#include <sys/timeb.h>
+#   include <sys/timeb.h>
 #endif
 
 

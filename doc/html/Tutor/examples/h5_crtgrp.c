@@ -2,7 +2,7 @@
  *    Creating and closing a group.
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #define FILE "group.h5"
 
 main() {

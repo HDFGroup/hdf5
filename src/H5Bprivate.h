@@ -17,12 +17,12 @@
 #ifndef _H5Bprivate_H
 #define _H5Bprivate_H
 
-#include <H5Bpublic.h>		/*API prototypes			     */
+#include "H5Bpublic.h"		/*API prototypes			     */
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Fprivate.h>
-#include <H5ACprivate.h>	/*cache					*/
+#include "H5private.h"
+#include "H5Fprivate.h"
+#include "H5ACprivate.h"	/*cache                                      */
 
 /*
  * Feature: Define this constant if you want to check B-tree consistency

@@ -12,8 +12,8 @@
  * programming environment it declares.  Other than that, h5ls only calls
  * HDF5 API functions (except for H5G_basename())
  */
-#include <H5private.h>
-#include <h5tools.h>
+#include "H5private.h"
+#include "h5tools.h"
 
 /*
  * If defined then include the file name as part of the object name when

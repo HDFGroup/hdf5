@@ -19,7 +19,7 @@
 
 /* Public headers needed by this file */
 #ifdef LATER
-#include <H5TSpublic.h>		/*Public API prototypes */
+#include "H5TSpublic.h"		/*Public API prototypes */
 #endif /* LATER */
 
 /* Library level data structures */

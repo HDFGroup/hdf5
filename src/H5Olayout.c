@@ -7,12 +7,12 @@
  *
  * Purpose:     Messages related to data layout.
  */
-#include <H5private.h>
-#include <H5Dprivate.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Dprivate.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);

@@ -10,8 +10,8 @@
 #ifndef H5FDmpio_H
 #define H5FDmpio_H
 
-#include <H5FDpublic.h>
-#include <H5Ipublic.h>
+#include "H5FDpublic.h"
+#include "H5Ipublic.h"
 
 #ifdef H5_HAVE_PARALLEL
 #   define H5FD_MPIO	(H5FD_mpio_init())

@@ -2,7 +2,7 @@
  *    Creating and closing a file.
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #define FILE "file.h5"
 
 main() {

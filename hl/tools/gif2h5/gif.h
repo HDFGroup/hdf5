@@ -6,7 +6,7 @@
 #ifndef GIF_H
 #define GIF_H   1
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #include <stdio.h>
 #include <stdlib.h>

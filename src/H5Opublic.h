@@ -19,7 +19,7 @@
 #define _H5Opublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
+#include "H5public.h"
 
 #ifdef __cplusplus
 extern "C" {

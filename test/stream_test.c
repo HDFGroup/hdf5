@@ -33,7 +33,7 @@
  */
 
 #include <stdio.h>
-#include <hdf5.h>
+#include "hdf5.h"
 
 #ifndef H5_HAVE_STREAM
 

@@ -20,8 +20,9 @@
 
 /* Public headers needed by this file */
 #include <sys/types.h>
-#include <H5public.h>
-#include <H5Ipublic.h>
+
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 #ifdef __cplusplus
 extern "C" {

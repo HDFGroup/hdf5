@@ -20,11 +20,11 @@
 *
 *************************************************************/
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <H5private.h>
-#include <H5Bprivate.h>
-#include <H5Pprivate.h>
+#include "H5private.h"
+#include "H5Bprivate.h"
+#include "H5Pprivate.h"
 
 #define F1_USERBLOCK_SIZE  (hsize_t)0
 #define F1_OFFSET_SIZE	   sizeof(haddr_t)

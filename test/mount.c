@@ -7,7 +7,7 @@
  *
  * Purpose:	Tests file mounting.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "mount_1",

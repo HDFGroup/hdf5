@@ -28,7 +28,7 @@
  * it via H5public.h.  The #ifndef _H5public_H guard above would
  * prevent repeated include.
  */
-#include <H5pubconf.h>		/*from configure                             */
+#include "H5pubconf.h"		/*from configure                             */
 #include <sys/types.h>
 #ifdef H5_STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
@@ -55,7 +55,7 @@
 #include <srbClient.h>
 #endif
 
-#include <H5api_adpt.h>
+#include "H5api_adpt.h"
 
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */

@@ -48,8 +48,7 @@
  *             absolute path.  It you use SDSC server(ghidorah.sdsc.edu), your 
  *             home directory is possibly in /projects/mdas/srb/SRBVault/. 
  */
-
-#include <h5test.h>
+#include "h5test.h"
 
 #ifndef H5_HAVE_SRB
 int main(void)

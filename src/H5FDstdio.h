@@ -10,7 +10,7 @@
 #ifndef H5FDstdio_H
 #define H5FDstdio_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_STDIO	(H5FD_stdio_init())
 

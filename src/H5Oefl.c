@@ -7,12 +7,12 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5HLprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5HLprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 #define PABLO_MASK	H5O_efl_mask
 

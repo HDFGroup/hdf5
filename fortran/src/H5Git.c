@@ -5,8 +5,9 @@
  *-------------------------------------------------------------------------
  */
 
-#include <hdf5.h>
+#include "hdf5.h"
 #include "H5Git.h"
+
 #define FALSE 0
 
 herr_t count_elems(hid_t loc_id, const char *name, void *opdata);
@@ -49,7 +50,7 @@ typedef struct retval {
  *
  *-------------------------------------------------------------------------
  */
-int 
+int
 H5Gn_members( hid_t loc_id, char *group_name )
 {
 	int res;
@@ -100,7 +101,7 @@ H5Gn_members( hid_t loc_id, char *group_name )
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5Gget_obj_info_idx( hid_t loc_id, char *group_name, int idx, char **objname, int *type )
 {
 	int res;

@@ -9,7 +9,7 @@
  *  memory dataset preserving the shape of the selection.
  */ 
  
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define FILE "Select.h5"
 
