@@ -96,6 +96,7 @@ static hbool_t interface_initialize_g = FALSE;
 static herr_t H5D_init_interface(void);
 static void H5D_term_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
+H5D_t * H5D_new(const H5D_create_t *create_parms);
 
 
 /*--------------------------------------------------------------------------
@@ -1137,6 +1138,7 @@ H5D_open(H5G_entry_t *loc, const char *name)
 {
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
+    H5G_entry_t ent;            /* Dataset symbol table entry */
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -1144,17 +1146,12 @@ H5D_open(H5G_entry_t *loc, const char *name)
     assert (loc);
     assert (name && *name);
     
-    if (NULL==(dataset = H5D_new(NULL))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		     "memory allocation failed");
-    }
-
     /* Find the dataset object */
-    if (H5G_find(loc, name, NULL, &(dataset->ent)) < 0) {
+    if (H5G_find(loc, name, NULL, &ent) < 0) {
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
     }
     /* Open the dataset object */
-    if (H5D_open_oid(dataset, NULL) < 0) {
+    if ((dataset=H5D_open_oid(&ent)) ==NULL) {
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
     }
 
@@ -1181,34 +1178,40 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
+H5D_t *
+H5D_open_oid(H5G_entry_t *ent)
 {
-    herr_t	ret_value = FAIL;	/*return value			*/
+    H5D_t *dataset = NULL;      /* New dataset struct */
+    H5D_t *ret_value = NULL;	/*return value			*/
     intn	i;
     H5S_t	*space = NULL;
     
-    FUNC_ENTER(H5D_open_oid, FAIL);
+    FUNC_ENTER(H5D_open_oid, NULL);
 
     /* check args */
-    assert (dataset);
+    assert (ent);
     
+    /* Allocate the dataset structure */
+    if (NULL==(dataset = H5D_new(NULL))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
+
     /* Copy over the symbol table information if it's provided */
-    if(ent!=NULL)
-        HDmemcpy(&(dataset->ent),ent,sizeof(H5G_entry_t));
+    HDmemcpy(&(dataset->ent),ent,sizeof(H5G_entry_t));
 
     /* Find the dataset object */
     if (H5O_open(&(dataset->ent)) < 0) {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
     }
     
     /* Get the type and space */
     if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL))) {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to load type info from dataset header");
     }
     if (NULL==(space=H5S_read (&(dataset->ent)))) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "unable to read data space info from dataset header");
     }
 
@@ -1232,7 +1235,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
     /* If MPIO is used, no filter support yet. */
     if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
             dataset->create_parms->pline.nfilters>0){
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
     }
 #endif
@@ -1244,7 +1247,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
      * them.
      */
     if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout))) {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
                 "unable to read data layout message");
     }
     switch (dataset->layout.type) {
@@ -1266,7 +1269,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
             break;
 
         default:
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL,
 			"not implemented yet");
     }
 
@@ -1274,7 +1277,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
     if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
 			&(dataset->create_parms->efl)) &&
 	!H5F_addr_defined (&(dataset->layout.addr))) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "storage address is undefined an no external file list");
     }
 
@@ -1286,18 +1289,18 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
     if ((dataset->ent.file->intent & H5F_ACC_RDWR) &&
 	H5D_CHUNKED==dataset->layout.type) {
         if (H5D_init_storage(dataset, space)<0) {
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
                 "unable to initialize file storage");
         }
     }
 
     /* Success */
-    ret_value = SUCCEED;
+    ret_value = dataset;
 
 done:
     if (space)
         H5S_close (space);
-    if (ret_value<0 && dataset) {
+    if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(&(dataset->ent.header))) {
             H5O_close(&(dataset->ent));
         }

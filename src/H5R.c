@@ -267,12 +267,6 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
      * Switch on object type, when we implement that feature, always try to
      *  open a dataset for now
      */
-    /* Allocate the dataset structure */
-    if (NULL==(dataset = H5D_new(NULL))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		     "memory allocation failed");
-    }
-
     /* Initialize the symbol table entry */
     HDmemset(&ent,0,sizeof(H5G_entry_t));
     ent.type=H5G_NOTHING_CACHED;
@@ -281,7 +275,7 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     H5F_addr_decode(ent.file,(const uint8 **)&p,&(ent.header));
 
     /* Open the dataset object */
-    if (H5D_open_oid(dataset, &ent) < 0) {
+    if ((dataset=H5D_open_oid(&ent)) == NULL) {
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
     }
 
