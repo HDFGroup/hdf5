@@ -14,6 +14,18 @@
 #include <H5Eprivate.h>
 #include <H5Sprivate.h>
 
+#ifndef HAVE_PARALLEL
+/* 
+ * The H5S_mpio_xxxx functions are for parallel I/O only and are
+ * valid only when HAVE_PARALLEL is #defined.  This empty #ifndef
+ * body is used to allow this source file be included in the serial
+ * distribution.
+ * Some compilers/linkers may complain about "empty" object file.
+ * If that happens, uncomment the following statement to pacify
+ * them.
+ */
+/* const hbool_t H5S_mpio_avail = FALSE; */
+#else	/* HAVE_PARALLEL */
 /* Interface initialization */
 #define PABLO_MASK      H5S_all_mask
 #define INTERFACE_INIT  NULL
@@ -555,3 +567,5 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_write() */
+
+#endif	/* HAVE_PARALLEL */
