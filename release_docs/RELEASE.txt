@@ -37,7 +37,7 @@ New Features
 ============
   o Configuration
   ================
-    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+    * Can use just enable-threadsafe if the C compiler has built-in pthreads
       support.
 
   o Library
@@ -137,6 +137,8 @@ Bug Fixes since HDF5-1.4.2 Release
 Documentation
 =============
     * Documentation was updated for the hdf5-1.4.3 release.
+    * A new "HDF5 User's Guide" is under development.  See 
+      http://hdf.ncsa.uiuc.edu/HDF5/doc_dev_snapshot/H5_NewUG/current/.
     * Parallel Tutorial is available at http://hdf.ncsa.uiuc.edu/HDF5/doc/Tutor/
 
 
