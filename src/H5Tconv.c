@@ -14,6 +14,15 @@
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
 
+/* Conversion data for H5T_conv_struct() */
+typedef struct H5T_conv_struct_t {
+    intn	*src2dst;		/*mapping from src to dst memb ID    */
+    hid_t	*src_memb_id;		/*source member type ID's	     */
+    hid_t	*dst_memb_id;		/*destination member type ID's	     */
+    H5T_conv_t	*memb_conv;		/*array of membr conversion functions*/
+    H5T_cdata_t	**memb_cdata;		/*array of member cdata pointers     */
+} H5T_conv_struct_t;
+
 /* Interface initialization */
 static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
@@ -36,7 +45,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_noop(hid_t src_id, hid_t dst_id, void **pcdata, size_t nelmts,
+H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
               void *buf, void *background)
 {
     FUNC_ENTER(H5T_conv_noop, FAIL);
@@ -63,7 +72,7 @@ H5T_conv_noop(hid_t src_id, hid_t dst_id, void **pcdata, size_t nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_order(hid_t src_id, hid_t dst_id, void **pcdata, size_t nelmts,
+H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                void *_buf, void *background)
 {
     uint8                  *buf = (uint8 *) _buf;
@@ -134,6 +143,127 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, void **pcdata, size_t nelmts,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_struct_init
+ *
+ * Purpose:	Initialize the `priv' field of `cdata' with conversion
+ *		information that is relatively constant.  If `priv' is
+ *		already initialized then the member conversion functions
+ *		are recalculated.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, January 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+{
+    H5T_conv_struct_t	*priv = (H5T_conv_struct_t*)(cdata->priv);
+    intn		i, j, *src2dst = NULL;
+    H5T_t		*type = NULL;
+    hid_t		tid;
+    
+    FUNC_ENTER (H5T_conv_struct_init, FAIL);
+    
+    if (!priv) {
+	/*
+	 * Notice: the thing marked with `!' below really is `dst' and not
+	 *	   `src' because we're only interested in the members of the
+	 * 	   source type that are also in the destination type.
+	 */
+	cdata->priv = priv = H5MM_xcalloc (1, sizeof(H5T_conv_struct_t));
+	priv->src2dst = H5MM_xmalloc (src->u.compnd.nmembs * sizeof(intn));
+	priv->src_memb_id = H5MM_xmalloc (/*!*/dst->u.compnd.nmembs *
+					  sizeof(hid_t));
+	priv->dst_memb_id = H5MM_xmalloc (dst->u.compnd.nmembs *
+					  sizeof(hid_t));
+
+	/*
+	 * Insure that members are sorted.
+	 */
+	H5T_sort_by_offset (src);
+	H5T_sort_by_offset (dst);
+
+	/*
+	 * Build a mapping from source member number to destination member
+	 * number. If some source member is not a destination member then that
+	 * mapping element will be negative.  Also create atoms for each
+	 * source and destination member data type so we can look up the
+	 * member data type conversion functions later.
+	 */
+	for (i=0; i<src->u.compnd.nmembs; i++) {
+	    priv->src2dst[i] = -1;
+	    for (j=0; j<dst->u.compnd.nmembs; j++) {
+		if (!HDstrcmp (src->u.compnd.memb[i].name,
+			   dst->u.compnd.memb[j].name)) {
+		    priv->src2dst[i] = j;
+		    break;
+		}
+	    }
+	    if (priv->src2dst[i]>=0) {
+		type = &(src->u.compnd.memb[i].type);
+		tid = H5A_register (H5_DATATYPE, type);
+		assert (tid>=0);
+		priv->src_memb_id[priv->src2dst[i]] = tid;
+
+		type = &(dst->u.compnd.memb[priv->src2dst[i]].type);
+		tid = H5A_register (H5_DATATYPE, type);
+		assert (tid>=0);
+		priv->dst_memb_id[priv->src2dst[i]] = tid;
+	    }
+	}
+    }
+
+    /*
+     * (Re)build the cache of member conversion functions and pointers to
+     * their cdata entries.
+     */
+    priv->memb_conv = H5MM_xfree (priv->memb_conv);
+    priv->memb_cdata = H5MM_xfree (priv->memb_cdata);
+    priv->memb_conv = H5MM_xmalloc (dst->u.compnd.nmembs *
+				    sizeof(H5T_conv_t));
+    priv->memb_cdata = H5MM_xcalloc (dst->u.compnd.nmembs,
+				     sizeof(H5T_cdata_t*));
+    src2dst = priv->src2dst;
+
+    for (i=0; i<src->u.compnd.nmembs; i++) {
+	if (priv->src2dst[i]>=0) {
+	    H5T_conv_t tconv_func = H5Tfind (priv->src_memb_id[src2dst[i]],
+					     priv->dst_memb_id[src2dst[i]],
+					     priv->memb_cdata+src2dst[i]);
+	    if (!tconv_func) {
+		H5MM_xfree (priv->src2dst);
+		H5MM_xfree (priv->src_memb_id);
+		H5MM_xfree (priv->dst_memb_id);
+		H5MM_xfree (priv->memb_conv);
+		cdata->priv = priv = H5MM_xfree (priv);
+		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			       "unable to convert member data type");
+	    }
+	    priv->memb_conv[src2dst[i]] = tconv_func;
+	}
+    }
+
+#ifndef LATER
+    /*
+     * Always use an initialized background buffer.  Actually, we usually
+     * won't need it initialized but we'll almost always need a buffer to
+     * move the members around.
+     */
+    cdata->need_bkg = H5T_BKG_YES;
+#endif
+
+    cdata->recalc = FALSE;
+    FUNC_LEAVE (SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_struct
  *
  * Purpose:	Converts between compound data types.  This is a soft
@@ -163,38 +293,37 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, void **pcdata, size_t nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_struct(hid_t src_id, hid_t dst_id, void **_pcdata, size_t nelmts,
+H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		void *_buf, void *_bkg)
 {
-    H5T_conv_struct_t **pcdata = (H5T_conv_struct_t **)_pcdata;
     uint8	*buf = (uint8 *)_buf;	/*cast for pointer arithmetic	*/
     uint8	*bkg = (uint8 *)_bkg;	/*background pointer arithmetic	*/
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
-    H5T_t	*type = NULL;		/*temporary type pointer	*/
-    hid_t	tid;			/*temporary type ID		*/
     intn	*src2dst = NULL;	/*maps src member to dst member	*/
     H5T_member_t *src_memb = NULL;	/*source struct member descript.*/
     H5T_member_t *dst_memb = NULL;	/*destination struct memb desc.	*/
-    H5T_conv_t	tconv_func = NULL;	/*member data type conv. func.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	src_delta, dst_delta;	/*source & destination stride	*/
-    intn	elmtno, i, j;		/*counters			*/
-    void	*memb_cdata = NULL;	/*member conversion data	*/
+    intn	elmtno, i;		/*counters			*/
     herr_t	ret_value = FAIL;
+    H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
 
     FUNC_ENTER (H5T_conv_struct, FAIL);
 
-    /* Check args */
-    if (H5_DATATYPE != H5A_group(src_id) ||
-        NULL == (src = H5A_object(src_id)) ||
-        H5_DATATYPE != H5A_group(dst_id) ||
-        NULL == (dst = H5A_object(dst_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-
-    /* Capability query? */
-    if (!buf) {
+    if (!buf && H5T_CONV_INIT==nelmts) {
+	/*
+	 * First, determine if this conversion function applies to the
+	 * conversion path SRC_ID-->DST_ID.  If not, return failure;
+	 * otherwise initialize the `priv' field of `cdata' with information
+	 * that remains (almost) constant for this conversion path.
+	 */
+	if (H5_DATATYPE != H5A_group(src_id) ||
+	    NULL == (src = H5A_object(src_id)) ||
+	    H5_DATATYPE != H5A_group(dst_id) ||
+	    NULL == (dst = H5A_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
 	assert (H5T_COMPOUND==src->type);
 	assert (H5T_COMPOUND==dst->type);
 
@@ -203,84 +332,66 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, void **_pcdata, size_t nelmts,
 	 * Struct members must be scalar for now.
 	 */
 	for (i=0; i<src->u.compnd.nmembs; i++) {
-	    assert (0==src->u.compnd.memb[i].ndims);
+	    if (src->u.compnd.memb[i].ndims>0) {
+		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			       "array members are not supported yet");
+	    }
 	}
 	for (i=0; i<dst->u.compnd.nmembs; i++) {
-	    assert (0==dst->u.compnd.memb[i].ndims);
+	    if (dst->u.compnd.memb[i].ndims>0) {
+		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			       "array members are not supported yet");
+	    }
 	}
 #endif
 
-	/*
-	 * Okay, we've determined that this conversion function applies to
-	 * the data types supplied as arguments.  Now we build information
-	 * which is expensive to calculate but is constant for all
-	 * conversions from SRC_ID to DST_ID. Notice: the thing marked with
-	 * `!' really is `dst' and not `src' because we're only interested in
-	 * the members of the source type that are also in the destination
-	 * type.
-	 */
-	assert (pcdata);
-	*pcdata = H5MM_xcalloc (1, sizeof(H5T_conv_struct_t));
-	src2dst = H5MM_xmalloc (src->u.compnd.nmembs * sizeof(intn));
-	(*pcdata)->src2dst = src2dst;
-	(*pcdata)->src_memb_id = H5MM_xmalloc (/*!*/dst->u.compnd.nmembs *
-					       sizeof(hid_t));
-	(*pcdata)->dst_memb_id = H5MM_xmalloc (dst->u.compnd.nmembs *
-					       sizeof(hid_t));
-
-	/*
-	 * Insure that members are sorted.
-	 */
-	H5T_sort_by_offset (src);
-	H5T_sort_by_offset (dst);
-
-	/*
-	 * Build a mapping from source member number to destination member
-	 * number. If some source member is not a destination member then that
-	 * mapping element will be negative.  Also create atoms for each
-	 * source and destination member data type so we can look up the
-	 * member data type conversion functions later.
-	 */
-	for (i=0; i<src->u.compnd.nmembs; i++) {
-	    src2dst[i] = -1;
-	    for (j=0; j<dst->u.compnd.nmembs; j++) {
-		if (!HDstrcmp (src->u.compnd.memb[i].name,
-			   dst->u.compnd.memb[j].name)) {
-		    src2dst[i] = j;
-		    break;
-		}
-	    }
-	    if (src2dst[i]>=0) {
-		type = &(src->u.compnd.memb[i].type);
-		tid = H5A_register (H5_DATATYPE, type);
-		assert (tid>=0);
-		(*pcdata)->src_memb_id[i] = tid;
-
-		type = &(dst->u.compnd.memb[src2dst[i]].type);
-		tid = H5A_register (H5_DATATYPE, type);
-		assert (tid>=0);
-		(*pcdata)->dst_memb_id[i] = tid;
-	    }
+	if (H5T_conv_struct_init (src, dst, cdata)<0) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			   "unable to initialize conversion data");
 	}
-
-	
 	HRETURN (SUCCEED);
+	
+    } else if (!buf && H5T_CONV_FREE==nelmts) {
+	/*
+	 * Free the private conversion data.
+	 */
+	H5MM_xfree (priv->src2dst);
+	H5MM_xfree (priv->src_memb_id);
+	H5MM_xfree (priv->dst_memb_id);
+	H5MM_xfree (priv->memb_conv);
+	cdata->priv = priv = H5MM_xfree (priv);
+	HRETURN (SUCCEED);
+	
+    } else if (!buf) {
+	/* Some other command we don't know about yet.*/
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
     }
+    
+	
+    /* Check args */
+    if (H5_DATATYPE != H5A_group(src_id) ||
+        NULL == (src = H5A_object(src_id)) ||
+        H5_DATATYPE != H5A_group(dst_id) ||
+        NULL == (dst = H5A_object(dst_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+    assert (priv);
+    assert (bkg && cdata->need_bkg>=H5T_BKG_TEMP);
 
-    /*
-     * Here comes the real conversion...
-     */
-    assert (pcdata && *pcdata);
-    assert ((*pcdata)->src2dst);
-    assert ((*pcdata)->src_memb_id);
-    assert ((*pcdata)->dst_memb_id);
+    if (cdata->recalc &&
+	H5T_conv_struct_init (src, dst, cdata)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to initialize conversion data");
+    }
+    
 
     /*
      * Insure that members are sorted.
      */
     H5T_sort_by_offset (src);
     H5T_sort_by_offset (dst);
-    src2dst = (*pcdata)->src2dst;
+    src2dst = priv->src2dst;
 
     /*
      * Direction of conversion.
@@ -309,15 +420,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, void **_pcdata, size_t nelmts,
 	    dst_memb = dst->u.compnd.memb + src2dst[i];
 	    
 	    if (dst_memb->type.size <= src_memb->type.size) {
-		tconv_func = H5T_find (&(dst_memb->type), &(src_memb->type),
-				       &memb_cdata);
-		if (!tconv_func) {
-		    HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-				 "unable to convert member data type");
-		}
-
-		(tconv_func)((*pcdata)->src_memb_id[i],
-			     (*pcdata)->dst_memb_id[i], &memb_cdata, 1,
+		H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
+		H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
+		(tconv_func)(priv->src_memb_id[src2dst[i]],
+			     priv->dst_memb_id[src2dst[i]], memb_cdata, 1,
 			     buf + src_memb->offset, bkg + dst_memb->offset);
 
 		HDmemmove (buf + offset, buf + src_memb->offset,
@@ -343,15 +449,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, void **_pcdata, size_t nelmts,
 	    offset -= dst_memb->type.size;
 
 	    if (dst_memb->type.size > src_memb->type.size) {
-		tconv_func = H5T_find (&(src_memb->type), &(dst_memb->type),
-				       &memb_cdata);
-		if (!tconv_func) {
-		    HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-				 "unable to convert member data type");
-		}
-
-		(tconv_func)((*pcdata)->src_memb_id[i],
-			     (*pcdata)->dst_memb_id[i], &memb_cdata, 1,
+		H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
+		H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
+		(tconv_func)(priv->src_memb_id[src2dst[i]],
+			     priv->dst_memb_id[src2dst[i]], memb_cdata, 1,
 			     buf + offset, bkg + dst_memb->offset);
 	    }
 	    HDmemmove (bkg+dst_memb->offset, buf+offset, dst_memb->type.size);
@@ -371,7 +472,6 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, void **_pcdata, size_t nelmts,
     HDmemcpy (_buf, _bkg, nelmts*dst->size);
     ret_value = SUCCEED;
 
- done:
     FUNC_LEAVE (ret_value);
 }
 

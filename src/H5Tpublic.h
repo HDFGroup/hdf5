@@ -23,6 +23,9 @@
 #define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
 #define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)
 
+#define H5T_CONV_INIT	0
+#define H5T_CONV_FREE	1
+
 /* These are the various classes of data types */
 typedef enum H5T_class_t {
     H5T_NO_CLASS         = -1,  /*error                                      */
@@ -92,8 +95,22 @@ typedef enum H5T_pad_t {
     H5T_NPAD             = 3    /*THIS MUST BE LAST                          */
 } H5T_pad_t;
 
+/* How is the `bkg' buffer used by the conversion function? */
+typedef enum H5T_bkg_t {
+    H5T_BKG_NONE	= 0, 	/*background buffer is not needed, send NULL */
+    H5T_BKG_TEMP	= 1, 	/*bkg buffer used as temp storage only	     */
+    H5T_BKG_YES		= 2,	/*init bkg buf with data before conversion   */
+} H5T_bkg_t;
+
+/* Type conversion client data */
+typedef struct H5T_cdata_t {
+    H5T_bkg_t		need_bkg;/*is the background buffer needed?	     */
+    hbool_t		recalc;	/*recalculate private data		     */
+    void		*priv;	/*private data				     */
+} H5T_cdata_t;
+
 /* All data type conversion functions are... */
-typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, void **pcdata,
+typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void *bkg);
 
 /* The predefined types */
@@ -209,7 +226,7 @@ herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
 herr_t H5Tregister_hard (hid_t src_id, hid_t dst_id, H5T_conv_t func);
 herr_t H5Tregister_soft (H5T_class_t src, H5T_class_t dst, H5T_conv_t func);
 herr_t H5Tunregister (H5T_conv_t func);
-H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, void **pcdata);
+H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 
 #ifdef __cplusplus
 }

@@ -78,7 +78,7 @@ typedef struct H5T_path_t {
     H5T_t       *dst;                   /*destination data type ID           */
     H5T_conv_t  hard;                   /*hard conversion function or null   */
     H5T_conv_t  soft;                   /*soft conversion function or null   */
-    void	*cdata;			/*extra conversion data		     */
+    H5T_cdata_t	*cdata;			/*extra conversion data		     */
 } H5T_path_t;
 
 /* The master list of soft conversion functions */
@@ -88,23 +88,16 @@ typedef struct H5T_soft_t {
     H5T_conv_t  func;                   /*the conversion function            */
 } H5T_soft_t;
 
-/* Conversion data for H5T_conv_struct() */
-typedef struct H5T_conv_struct_t {
-    intn	*src2dst;		/*mapping from src to dst memb ID    */
-    hid_t	*src_memb_id;		/*source member type ID's	     */
-    hid_t	*dst_memb_id;		/*destination member type ID's	     */
-} H5T_conv_struct_t;
-
 /* Function prototypes for H5T package scope */
 H5T_path_t *H5T_path_find (const H5T_t *src, const H5T_t *dst, 
                            hbool_t create);
 
 /* Conversion functions */
-herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, void **pcdata,
+herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void *bkg);
-herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, void **pcdata,
+herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *_buf, void *bkg);
-herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, void **pcdata,
+herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
 
 

@@ -50,8 +50,8 @@ typedef struct s5_t {
 } s5_t;
 
 
-#define NX	10
-#define NY	200
+#define NX	100
+#define NY	2000
 
 
 static hid_t
@@ -278,6 +278,7 @@ STEP 5: Read members into a superset which is partially initialized.\n");
 	
     /* Read the data */
     status = H5Dread (dataset, s5_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s5);
+    assert (status>=0);
 
     /* Check that the data was read properly */
     for (i=0; i<NX*NY; i++) {
@@ -295,6 +296,46 @@ STEP 5: Read members into a superset which is partially initialized.\n");
 	assert (s5[i].mid2 == 1002+4*i);
 	assert (s5[i].post == 1003+4*i);
     }
+
+    /*
+     *######################################################################
+     * STEP 6: Update fields `b' and `d' on the file leaving the other
+     *         fields unchanged.  This tests member alignment and background
+     *	       buffers.
+     */
+    printf ("\
+STEP 6: Update fields `b' and `d' on the file, leaving the other fields\n\
+        unchanged.\n");
+    fflush (stdout);
+
+    /* Initialize `s4' with new values */
+    for (i=0; i<NX*NY; i++) {
+	s4[i].b = 2000+2*i;
+	s4[i].d = 2001+2*i;
+    }
+
+    /* Write the data to file */
+    status = H5Dwrite (dataset, s4_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s4);
+    assert (status>=0);
+    
+    /* Read the data back */
+    status = H5Dread (dataset, s2_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s2);
+    assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<NX*NY; i++) {
+	assert (s2[i].a == s1[i].a);
+	assert (s2[i].b == s4[i].b);
+	assert (s2[i].c == s1[i].c);
+	assert (s2[i].d == s4[i].d);
+	assert (s2[i].e == s1[i].e);
+    }
+    
+
+
+
+
+
     
 
     /*
