@@ -114,7 +114,7 @@ uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
             $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
-	@if test "X$(PUB_HDR)" != X; then				      \
+	@if test -n "$(PUB_HDR)"; then   				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
@@ -130,7 +130,7 @@ uninstall-doc:
 	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
 	    fi;								      \
 	done
-	@if test "X$(PUB_DOCS)" != X; then				      \
+	@if test -n "$(PUB_DOCS)"; then 				      \
 	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
 
@@ -138,16 +138,24 @@ uninstall-doc:
 ## remove things like object files but not libraries or executables.
 ##
 mostlyclean:
-	-$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o)
-	-$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o)
-	-$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN)
+	@if test -n "$(LIB_OBJ)"; then                                        \
+	    -$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o);                              \
+	fi
+	@if test -n "$(TEST_OBJ)"; then                                       \
+	    -$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o);                            \
+	fi
+	@if test -n "$(PROG_OBJ)" -o -n "$(MOSTLYCLEAN)"; then                \
+	    -$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN);             \
+	fi
 
 ## Like `mostlyclean' except it also removes the final targets: things like
 ## libraries and executables.  This target doesn't remove any file that
 ## is part of the HDF5 distribution.
 ##
 clean: mostlyclean
-	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	@if test -n "$(LIB)" -o -n "$(TEST_PROGS)" -o -n "$(PROGS)" -o -n "$(CLEAN)"; then \
+	    -$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN);                    \
+	fi
 	-$(RM) -r .libs
 
 ## Like `clean' except it also removes files that were created by running
@@ -160,7 +168,6 @@ distclean: clean
 	@if test -f $(srcdir)/Makefile.in; then				      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
-
 
 ## Like `distclean' except it deletes all files that can be regenerated from
 ## the makefile, including those generated from autoheader and autoconf.
