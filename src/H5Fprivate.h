@@ -405,7 +405,6 @@ typedef struct H5F_t {
 struct H5O_layout_t;
 struct H5O_efl_t;
 struct H5O_pline_t;
-struct H5F_xfer_t;
 struct H5O_fill_t;
 struct H5G_entry_t;
 

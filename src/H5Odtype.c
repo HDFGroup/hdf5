@@ -301,7 +301,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
             /* Decode base type of VL information */
             if (NULL==(dt->parent = H5MM_calloc(sizeof(H5T_t))))
-                HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
             if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
