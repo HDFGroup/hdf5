@@ -59,7 +59,7 @@ slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	count[1] = 1;
 	start[0] = mpi_rank*block[0];
 	start[1] = 0;
-if (verbose) printf("slab_set BYROW\n");
+if (VERBOSE_MED) printf("slab_set BYROW\n");
 	break;
     case BYCOL:
 	/* Each process takes a block of columns. */
@@ -71,7 +71,7 @@ if (verbose) printf("slab_set BYROW\n");
 	count[1] = 1;
 	start[0] = 0;
 	start[1] = mpi_rank*block[1];
-if (verbose) printf("slab_set BYCOL\n");
+if (VERBOSE_MED) printf("slab_set BYCOL\n");
 	break;
     case ZROW:
 	/* Similar to BYROW except process 0 gets 0 row */
@@ -83,7 +83,7 @@ if (verbose) printf("slab_set BYCOL\n");
 	count[1] = 1;
 	start[0] = (mpi_rank? mpi_rank*block[0] : 0);
 	start[1] = 0;
-if (verbose) printf("slab_set ZROW\n");
+if (VERBOSE_MED) printf("slab_set ZROW\n");
 	break;
     case ZCOL:
 	/* Similar to BYCOL except process 0 gets 0 column */
@@ -95,7 +95,7 @@ if (verbose) printf("slab_set ZROW\n");
 	count[1] = 1;
 	start[0] = 0;
 	start[1] = (mpi_rank? mpi_rank*block[1] : 0);
-if (verbose) printf("slab_set ZCOL\n");
+if (VERBOSE_MED) printf("slab_set ZCOL\n");
 	break;
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
@@ -108,10 +108,10 @@ if (verbose) printf("slab_set ZCOL\n");
 	count[1] = 1;
 	start[0] = 0;
 	start[1] = 0;
-if (verbose) printf("slab_set wholeset\n");
+if (VERBOSE_MED) printf("slab_set wholeset\n");
 	break;
     }
-if (verbose){
+if (VERBOSE_MED){
     printf("start[]=(%ld,%ld), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
 	(long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
@@ -175,8 +175,8 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
     hsize_t i, j;
     int vrfyerrs;
 
-    /* print it if verbose */
-    if (verbose) {
+    /* print it if VERBOSE_MED */
+    if (VERBOSE_MED) {
 	printf("dataset_vrfy dumping:::\n");
 	printf("start(%ld, %ld), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
 	    (long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
@@ -191,7 +191,7 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
     for (i=0; i < block[0]; i++){
 	for (j=0; j < block[1]; j++){
 	    if (*dataset != *original){
-		if (vrfyerrs++ < MAX_ERR_REPORT || verbose){
+		if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
 		    printf("Dataset Verify failed at [%ld][%ld](row %ld, col %ld): expect %d, got %d\n",
 			(long)i, (long)j,
 			(long)(i+start[0]), (long)(j+start[1]),
@@ -202,7 +202,7 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
 	    }
 	}
     }
-    if (vrfyerrs > MAX_ERR_REPORT && !verbose)
+    if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 	printf("[more errors ...]\n");
     if (vrfyerrs)
 	printf("%d errors found in dataset_vrfy\n", vrfyerrs);
@@ -245,7 +245,7 @@ dataset_writeInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -327,7 +327,7 @@ dataset_writeInd(char *filename)
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to write with zero rows for process 0 */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("writeInd by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -389,7 +389,7 @@ dataset_readInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -513,7 +513,7 @@ dataset_writeAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Collective write test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -601,7 +601,7 @@ dataset_writeAll(char *filename)
     /* fill the local slab with some trivial data */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -619,7 +619,7 @@ dataset_writeAll(char *filename)
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
 
     /* setup dimensions again to writeAll with zero rows for process 0 */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("writeAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -647,7 +647,7 @@ dataset_writeAll(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -665,7 +665,7 @@ dataset_writeAll(char *filename)
     /* fill the local slab with some trivial data */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -682,7 +682,7 @@ dataset_writeAll(char *filename)
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to writeAll with zero columns for process 0 */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("writeAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -731,7 +731,7 @@ dataset_writeAll(char *filename)
     /* fill the local slab with some trivial data */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose) {
+    if (VERBOSE_MED) {
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     } /* end if */
@@ -791,7 +791,7 @@ dataset_writeAll(char *filename)
     /* fill the local slab with some trivial data */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose) {
+    if (VERBOSE_MED) {
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     } /* end if */
@@ -870,7 +870,7 @@ dataset_readAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Collective read test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -930,7 +930,7 @@ dataset_readAll(char *filename)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_origin1);
     }
@@ -951,7 +951,7 @@ dataset_readAll(char *filename)
     if (ret) nerrors++;
 
     /* setup dimensions again to readAll with zero columns for process 0 */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("readAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -993,7 +993,7 @@ dataset_readAll(char *filename)
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_origin1);
     }
@@ -1014,7 +1014,7 @@ dataset_readAll(char *filename)
     if (ret) nerrors++;
 
     /* setup dimensions again to readAll with zero rows for process 0 */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("readAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
@@ -1096,7 +1096,7 @@ extend_writeInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -1153,7 +1153,7 @@ extend_writeInd(char *filename)
      * ------------------------------------------------------------- */
 
     /* set up dataset storage chunk sizes and creation property list */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
@@ -1189,7 +1189,7 @@ extend_writeInd(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1229,7 +1229,7 @@ extend_writeInd(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1320,7 +1320,7 @@ extend_readInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -1392,7 +1392,7 @@ extend_readInd(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1427,7 +1427,7 @@ extend_readInd(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1502,7 +1502,7 @@ extend_writeAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -1559,7 +1559,7 @@ extend_writeAll(char *filename)
      * ------------------------------------------------------------- */
 
     /* set up dataset storage chunk sizes and creation property list */
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
@@ -1595,7 +1595,7 @@ extend_writeAll(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1642,7 +1642,7 @@ extend_writeAll(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1742,7 +1742,7 @@ extend_readAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
@@ -1814,7 +1814,7 @@ extend_readAll(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }
@@ -1856,7 +1856,7 @@ extend_readAll(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, block, data_origin1);
-    if (verbose){
+    if (VERBOSE_MED){
 	MESG("data_array created");
 	dataset_print(start, block, data_array1);
     }

@@ -51,13 +51,13 @@ test_fapl_mpio_dup(void)
     herr_t ret;			/* hdf5 return value */
     int nkeys, nkeys_tmp;
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Verify fapl_mpio duplicates communicator and INFO objects\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
@@ -67,7 +67,7 @@ test_fapl_mpio_dup(void)
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_split");
     MPI_Comm_size(comm,&mpi_size_old);
     MPI_Comm_rank(comm,&mpi_rank_old);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("rank/size of comm are %d/%d\n", mpi_rank_old, mpi_size_old);
 
     /* create a new INFO object with some trivial information. */
@@ -79,7 +79,7 @@ test_fapl_mpio_dup(void)
 	mrc=MPI_Info_get_nkeys(info, &nkeys);
 	VRFY((mrc==MPI_SUCCESS), "MPI_Info_get_nkeys");
     }
-    if (verbose)
+    if (VERBOSE_MED)
 	h5_dump_info_object(info);
 
     acc_pl = H5Pcreate (H5P_FILE_ACCESS);
@@ -104,7 +104,7 @@ test_fapl_mpio_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After H5Pget_fapl_mpio: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
@@ -114,7 +114,7 @@ test_fapl_mpio_dup(void)
 	VRFY((mrc==MPI_SUCCESS), "MPI_Info_get_nkeys");
 	VRFY((nkeys_tmp==nkeys), "new and old nkeys equal");
     }
-    if (verbose)
+    if (VERBOSE_MED)
 	h5_dump_info_object(info_tmp);
 
     /* Case 2:
@@ -152,7 +152,7 @@ test_fapl_mpio_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After second H5Pget_fapl_mpio: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
@@ -162,7 +162,7 @@ test_fapl_mpio_dup(void)
 	VRFY((mrc==MPI_SUCCESS), "MPI_Info_get_nkeys");
 	VRFY((nkeys_tmp==nkeys), "new and old nkeys equal");
     }
-    if (verbose)
+    if (VERBOSE_MED)
 	h5_dump_info_object(info_tmp);
 
     /* Case 3:
@@ -172,14 +172,14 @@ test_fapl_mpio_dup(void)
     H5Pclose(acc_pl);
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After Property list closed: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
     if (MPI_INFO_NULL != info_tmp){
 	mrc=MPI_Info_get_nkeys(info_tmp, &nkeys_tmp);
 	VRFY((mrc==MPI_SUCCESS), "MPI_Info_get_nkeys");
     }
-    if (verbose)
+    if (VERBOSE_MED)
 	h5_dump_info_object(info_tmp);
 
     /* clean up */
@@ -224,13 +224,13 @@ test_fapl_mpiposix_dup(void)
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     herr_t ret;			/* hdf5 return value */
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("Verify fapl_mpiposix duplicates communicator object\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
@@ -240,7 +240,7 @@ test_fapl_mpiposix_dup(void)
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_split");
     MPI_Comm_size(comm,&mpi_size_old);
     MPI_Comm_rank(comm,&mpi_rank_old);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("rank/size of comm are %d/%d\n", mpi_rank_old, mpi_size_old);
 
     acc_pl = H5Pcreate (H5P_FILE_ACCESS);
@@ -269,7 +269,7 @@ test_fapl_mpiposix_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After H5Pget_fapl_mpiposix: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
@@ -302,7 +302,7 @@ test_fapl_mpiposix_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After second H5Pget_fapl_mpiposix: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
@@ -315,7 +315,7 @@ test_fapl_mpiposix_dup(void)
     H5Pclose(acc_pl);
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("After Property list closed: rank/size of comm are %d/%d\n",
 	mpi_rank_tmp, mpi_size_tmp);
 

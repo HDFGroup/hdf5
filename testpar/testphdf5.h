@@ -31,7 +31,7 @@
 /* debugging tools */
 
 #define MESG(x)                                                         \
-	if (verbose) printf("%s\n", x);                                 \
+	if (VERBOSE_MED) printf("%s\n", x);                                 \
 
 #define VRFY(val, mesg) do {                                            \
     if (val) {                                                          \
@@ -45,7 +45,7 @@
                mesg, (int)__LINE__, __FILE__);                          \
         ++nerrors;                                                      \
         fflush(stdout);                                                 \
-        if (!verbose) {                                                 \
+        if (!VERBOSE_MED) {                                                 \
             printf("aborting MPI process\n");                           \
             MPI_Finalize();                                             \
             exit(nerrors);                                              \
@@ -119,7 +119,6 @@ typedef int DATATYPE;
 extern int dim0, dim1;				/*Dataset dimensions */
 extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
 extern int nerrors;				/*errors count */
-extern int verbose;				/*verbose, default as no. */
 extern H5E_auto_t old_func;		        /* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */

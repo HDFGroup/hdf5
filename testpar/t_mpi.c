@@ -34,7 +34,6 @@ const char *FILENAME[2]={
 	    NULL};
 char	filenames[2][200];
 int	nerrors = 0;
-int	verbose = 0;
 hid_t	fapl;				/* file access property list */
 
 /* protocols */
@@ -62,7 +61,7 @@ test_mpio_overlap_writes(char *filename)
     MPI_Status  mpi_stat;
 
 
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("MPIO independent overlapping writes test on file %s\n",
 	    filename);
 
@@ -147,11 +146,11 @@ test_mpio_overlap_writes(char *filename)
 		char expected;
 		expected = (mpi_off+i) & 0x7f;
 		if ((buf[i] != expected) &&
-		    (vrfyerrs++ < MAX_ERR_REPORT || verbose))
+		    (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
 			printf("proc %d: found data error at [%ld], expect %d, got %d\n",
 			    mpi_rank, (long)(mpi_off+i), expected, buf[i]);
 	    }
-	    if (vrfyerrs > MAX_ERR_REPORT && !verbose)
+	    if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 		printf("proc %d: [more errors ...]\n", mpi_rank);
 	}
 
@@ -209,7 +208,7 @@ test_mpio_gb_file(char *filename)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    if (verbose)
+    if (VERBOSE_MED)
         printf("MPI_Offset range test\n");
 
     /* figure out the signness and sizeof MPI_Offset */
@@ -264,7 +263,7 @@ test_mpio_gb_file(char *filename)
     }
 
     /*================================*/
-    if (verbose)
+    if (VERBOSE_MED)
 	printf("MPIO GB file test %s\n", filename);
 
     if (sizeof_mpi_offset <= 4){
@@ -294,13 +293,13 @@ test_mpio_gb_file(char *filename)
 	    ntimes = GB/MB*n/mpi_size + 1;
 	    for (i=ntimes-2; i <= ntimes; i++){
 		mpi_off = (i*mpi_size + mpi_rank)*(MPI_Offset)MB;
-		if (verbose)
+		if (VERBOSE_MED)
 		    HDfprintf(stdout,"proc %d: write to mpi_off=%016llx, %lld\n",
 			mpi_rank, mpi_off, mpi_off);
 		/* set data to some trivial pattern for easy verification */
 		for (j=0; j<MB; j++)
 		    *(buf+j) = i*mpi_size + mpi_rank;
-		if (verbose)
+		if (VERBOSE_MED)
 		    HDfprintf(stdout,"proc %d: writing %d bytes at offset %lld\n",
 			mpi_rank, MB, mpi_off);
 		mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
@@ -333,7 +332,7 @@ test_mpio_gb_file(char *filename)
 	    ntimes = GB/MB*n/mpi_size + 1;
 	    for (i=ntimes-2; i <= ntimes; i++){
 		mpi_off = (i*mpi_size + (mpi_size - mpi_rank - 1))*(MPI_Offset)MB;
-		if (verbose)
+		if (VERBOSE_MED)
 		    HDfprintf(stdout,"proc %d: read from mpi_off=%016llx, %lld\n",
 			mpi_rank, mpi_off, mpi_off);
 		mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
@@ -342,11 +341,11 @@ test_mpio_gb_file(char *filename)
 		vrfyerrs=0;
 		for (j=0; j<MB; j++){
 		    if ((*(buf+j) != expected) &&
-			(vrfyerrs++ < MAX_ERR_REPORT || verbose))
+			(vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
 			    printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n",
 				mpi_rank, (long)mpi_off, j, expected, *(buf+j));
 		}
-		if (vrfyerrs > MAX_ERR_REPORT && !verbose)
+		if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 		    printf("proc %d: [more errors ...]\n", mpi_rank);
 
 	    }
@@ -580,7 +579,7 @@ parse_options(int argc, char **argv)
 	    break;
 	}else{
 	    switch(*(*argv+1)){
-		case 'v':   verbose = 1;
+		case 'v':   SetTestVerbosity(VERBO_MED);
 			    break;
 		case 'f':   if (--argc < 1) {
 				nerrors++;
