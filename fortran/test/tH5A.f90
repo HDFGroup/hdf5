@@ -60,11 +60,11 @@
      INTEGER(HID_T) :: attr4_type      !Returned REAL Attribute Datatype identifier
      INTEGER(HID_T) :: attr5_type      !Returned INTEGER Attribute Datatype identifier
      INTEGER        :: num_attrs      !number of attributes 
-     CHARACTER*256 :: attr_name    !buffer to put attr_name
+     CHARACTER(LEN=256) :: attr_name    !buffer to put attr_name
      INTEGER(SIZE_T)    ::  name_size = 80 !attribute name length
 
-     CHARACTER*35, DIMENSION(2) ::  attr_data  ! String attribute data
-     CHARACTER*35, DIMENSION(2) ::  aread_data ! Buffer to put read back 
+     CHARACTER(LEN=35), DIMENSION(2) ::  attr_data  ! String attribute data
+     CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back 
                                                ! string attr data
      CHARACTER ::  attr_character_data = 'A'
      DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459

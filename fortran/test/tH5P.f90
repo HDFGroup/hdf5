@@ -16,7 +16,7 @@
      INTEGER(HID_T) :: dataset_id
      INTEGER(HSIZE_T), DIMENSION(1) :: cur_size !data space current size
      INTEGER(HSIZE_T), DIMENSION(1) :: max_size !data space maximum size
-     CHARACTER*256 :: name !external file name
+     CHARACTER(LEN=256) :: name !external file name
      INTEGER :: file_offset !external file offset
      INTEGER(HSIZE_T) :: file_size   !sizeof external file segment
      INTEGER :: error !error code
