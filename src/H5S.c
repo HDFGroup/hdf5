@@ -813,18 +813,19 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
  *		Tuesday, December  9, 1997
  *
  * Modifications:
- *
+ *	Robb Matzke, 9 Jun 1998
+ *	Removed the unused file argument since the file is now part of the
+ *	ENT argument.
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_read(H5F_t __unused__ *f, H5G_entry_t *ent)
+H5S_read(H5G_entry_t *ent)
 {
     H5S_t		   *ds = NULL;
 
     FUNC_ENTER(H5S_read, NULL);
 
     /* check args */
-    assert(f);
     assert(ent);
 
     ds = H5MM_xcalloc(1, sizeof(H5S_t));

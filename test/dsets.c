@@ -670,6 +670,77 @@ test_compression(hid_t file)
   error:
     return -1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_multiopen
+ *
+ * Purpose:	Tests that a bug no longer exists.  If a dataset is opened
+ *		twice and one of the handles is used to extend the dataset,
+ *		then the other handle should return the new size when
+ *		queried.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_multiopen (hid_t file)
+{
+    hid_t		dcpl, space, dset1, dset2;
+    hsize_t		cur_size[1] = {10};
+    static hsize_t	max_size[1] = {H5S_UNLIMITED};
+    hsize_t		tmp_size[1];
+
+    printf ("%-70s", "Testing multi-open with extending");
+
+    /* Create the dataset and open it twice */
+    if ((dcpl=H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dcpl, 1, cur_size)<0) goto error;
+    if ((space=H5Screate_simple (1, cur_size, max_size))<0) goto error;
+    if ((dset1=H5Dcreate (file, "multiopen", H5T_NATIVE_INT, space,
+			  dcpl))<0) goto error;
+    if ((dset2=H5Dopen (file, "multiopen"))<0) goto error;
+    if (H5Sclose (space)<0) goto error;
+
+    /* Extend with the first handle */
+    cur_size[0] = 20;
+    if (H5Dextend (dset1, cur_size)<0) goto error;
+
+    /* Get the size from the second handle */
+    if ((space = H5Dget_space (dset2))<0) goto error;
+    if (H5Sget_dims (space, tmp_size)<0) goto error;
+    if (cur_size[0]!=tmp_size[0]) {
+	puts ("*FAILED*");
+	printf ("   Got %d instead of %d!\n",
+		(int)tmp_size[0], (int)cur_size[0]);
+	goto error;
+    }
+    
+    if (H5Dclose (dset1)<0) goto error;
+    if (H5Dclose (dset2)<0) goto error;
+    if (H5Sclose (space)<0) goto error;
+    if (H5Pclose (dcpl)<0) goto error;
+    puts (" PASSED");
+    return 0;
+    
+ error:
+    H5E_BEGIN_TRY {
+	H5Dclose (dset1);
+	H5Dclose (dset2);
+	H5Sclose (space);
+	H5Pclose (dcpl);
+    } H5E_END_TRY;
+    return -1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	cleanup
@@ -742,6 +813,9 @@ main(void)
     nerrors += status < 0 ? 1 : 0;
     
     status = test_compression(file);
+    nerrors += status < 0 ? 1 : 0;
+
+    status = test_multiopen (file);
     nerrors += status < 0 ? 1 : 0;
 
     status = H5Fclose(file);

@@ -52,13 +52,14 @@ static herr_t H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 static herr_t H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 const H5F_low_class_t H5F_LOW_FAMILY_g[1] = {{
-    H5F_fam_access,	    /* access method			    */
-    H5F_fam_open,	    /* open method			    */
-    H5F_fam_close,	    /* close method			    */
-    H5F_fam_read,	    /* read method			    */
-    H5F_fam_write,	    /* write method			    */
-    H5F_fam_flush,	    /* flush method			    */
-    NULL,		    /* extend method			    */
+    H5F_fam_access,		/*access method				*/
+    H5F_fam_open,		/*open method				*/
+    H5F_fam_close,		/*close method				*/
+    H5F_fam_read,		/*read method				*/
+    H5F_fam_write,		/*write method				*/
+    H5F_fam_flush,		/*flush method				*/
+    NULL,			/*extend method				*/
+    NULL,			/*alloc method				*/
 }};
 
 

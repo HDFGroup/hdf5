@@ -11,9 +11,12 @@
  * Purpose:             File memory management functions.
  *
  * Modifications:
- *
  *      Robb Matzke, 5 Aug 1997
  *      Added calls to H5E.
+ *
+ * 	Robb Matzke, 8 Jun 1998
+ *	Implemented a very simple free list which is not persistent and which
+ *	is lossy.
  *
  *-------------------------------------------------------------------------
  */
@@ -27,6 +30,7 @@
 /* Is the interface initialized? */
 static intn             interface_initialize_g = FALSE;
 #define INTERFACE_INIT  NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_alloc
@@ -53,7 +57,12 @@ static intn             interface_initialize_g = FALSE;
 herr_t
 H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
 {
-    haddr_t                 tmp_addr;
+    haddr_t             tmp_addr;
+    intn		i, found, status;
+    hsize_t		n;
+    H5MF_free_t		blk;
+    hsize_t		thresh = f->shared->access_parms->threshold;
+    hsize_t		align = f->shared->access_parms->alignment;
 
     FUNC_ENTER(H5MF_alloc, FAIL);
 
@@ -63,30 +72,114 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
     assert(size > 0);
     assert(addr);
 
+#if 0
+    HDfprintf (stderr, "A %Hu\n", size);
+#endif
+    
+
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR)) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_CANTINIT, FAIL, "file is read-only");
     }
 
     /*
-     * Eventually we'll maintain a free list(s) and try to satisfy requests
-     * from there.  But for now we just allocate more memory from the end of
-     * the file.
+     * Try to satisfy the request from the free list. We prefer exact matches
+     * to partial matches, so if we find an exact match then we break out of
+     * the loop immediately, otherwise we keep looking for an exact match.
      */
-    if (H5F_low_extend(f->shared->lf, f->shared->access_parms, op,
-		       size, addr/*out*/) < 0) {
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                      "low level mem management failed");
+    for (i=0, found=-1; i<f->shared->fl_nfree; i++) {
+	if ((status=H5F_low_alloc(f->shared->lf, op, align, thresh, size,
+				  f->shared->fl_free+i, addr/*out*/))>0) {
+	    /* Exact match found */
+	    found = i;
+	    break;
+	} else if (0==status) {
+	    /* Partial match */
+	    found = i;
+	}
     }
-    /* Convert from absolute to relative */
-    addr->offset -= f->shared->base_addr.offset;
 
-    /* Did we extend the size of the hdf5 data? */
-    tmp_addr = *addr;
-    H5F_addr_inc(&tmp_addr, size);
-    if (H5F_addr_gt(&tmp_addr, &(f->shared->hdf5_eof))) {
-        f->shared->hdf5_eof = tmp_addr;
+    if (found>=0 &&
+	(status=H5F_low_alloc (f->shared->lf, op, align, thresh, size, 
+			       f->shared->fl_free+found, addr/*out*/))>0) {
+	/*
+	 * We found an exact match.  Remove that block from the free list and
+	 * use it to satisfy the request.
+	 */
+	--(f->shared->fl_nfree);
+	HDmemmove (f->shared->fl_free+found, f->shared->fl_free+found+1,
+		   (f->shared->fl_nfree-found) * sizeof(H5MF_free_t));
+	
+    } else if (found>=0 && status==0) {
+	/*
+	 * We found a free block which is larger than the requested size.
+	 * Return the unused parts of the free block to the free list.
+	 */
+	blk = f->shared->fl_free[found];
+	--f->shared->fl_nfree;
+	HDmemmove (f->shared->fl_free+found, f->shared->fl_free+found+1,
+		   (f->shared->fl_nfree-found) * sizeof(H5MF_free_t));
+	if (H5F_addr_gt (addr, &(blk.addr))) {
+	    /* Free the first part of the free block */
+	    n = addr->offset - blk.addr.offset;
+	    H5MF_free (f, &(blk.addr), n);
+	    blk.addr = *addr;
+	    blk.size -= n;
+	}
+	
+	if (blk.size > size) {
+	    /* Free the second part of the free block */
+	    H5F_addr_inc (&(blk.addr), size);
+	    blk.size -= size;
+	    H5MF_free (f, &(blk.addr), blk.size);
+	}
+	
+    } else {
+	/*
+	 * No suitable free block was found.  Allocate space from the end of
+	 * the file.  We don't know about alignment at this point, so we
+	 * allocate enough space to align the data also.
+	 */
+	if (size>=thresh) {
+	    blk.size = size + align - 1;
+	} else {
+	    blk.size = size;
+	}
+	if (H5F_low_extend(f->shared->lf, f->shared->access_parms, op,
+			   blk.size, &(blk.addr)/*out*/) < 0) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "low level mem management failed");
+	}
+	
+	/* Convert from absolute to relative */
+	blk.addr.offset -= f->shared->base_addr.offset;
+
+	/* Did we extend the size of the hdf5 data? */
+	tmp_addr = blk.addr;
+	H5F_addr_inc(&tmp_addr, blk.size);
+	if (H5F_addr_gt(&tmp_addr, &(f->shared->hdf5_eof))) {
+	    f->shared->hdf5_eof = tmp_addr;
+	}
+
+	if ((status=H5F_low_alloc (f->shared->lf, op, align, thresh, size,
+				   &blk, addr/*out*/))>0) {
+	    /* Exact match */
+	} else if (0==status) {
+	    /* Partial match */
+	    if (H5F_addr_gt (addr, &(blk.addr))) {
+		n = addr->offset - blk.addr.offset;
+		H5MF_free (f, &(blk.addr), n);
+		blk.addr = *addr;
+		blk.size -= n;
+	    }
+	    if (blk.size > size) {
+		H5F_addr_inc (&(blk.addr), size);
+		blk.size -= size;
+		H5MF_free (f, &(blk.addr), blk.size);
+	    }
+	}
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -111,8 +204,10 @@ H5MF_alloc(H5F_t *f, intn op, hsize_t size, haddr_t *addr/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free(H5F_t __unused__ *f, const haddr_t *addr, hsize_t size)
+H5MF_free(H5F_t *f, const haddr_t *addr, hsize_t size)
 {
+    int		i;
+    
     FUNC_ENTER(H5MF_free, FAIL);
 
     /* check arguments */
@@ -121,11 +216,29 @@ H5MF_free(H5F_t __unused__ *f, const haddr_t *addr, hsize_t size)
         HRETURN(SUCCEED);
     assert(!H5F_addr_zerop(addr));
 
+    /*
+     * Insert this free block into the free list without attempting to
+     * combine it with other free blocks.  If the list is overfull then
+     * remove the smallest free block.
+     */
+    if (f->shared->fl_nfree>=H5MF_NFREE) {
+	for (i=0; i<H5MF_NFREE; i++) {
+	    if (f->shared->fl_free[i].size<size) {
 #ifdef H5MF_DEBUG
-    fprintf(stderr, "H5MF_free: lost %lu bytes of file storage\n",
-            (unsigned long) size);
+		fprintf(stderr, "H5MF_free: lost %lu bytes of file storage\n",
+			(unsigned long) f->shared->fl_free[i].size);
 #endif
-
+		f->shared->fl_free[i].addr = *addr;
+		f->shared->fl_free[i].size = size;
+		break;
+	    }
+	}
+    } else {
+	i = f->shared->fl_nfree++;
+	f->shared->fl_free[i].addr = *addr;
+	f->shared->fl_free[i].size = size;
+    }
+    
     FUNC_LEAVE(SUCCEED);
 }
 

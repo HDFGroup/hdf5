@@ -51,6 +51,9 @@ herr_t H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
 		       int *stab/*out*/, int *shhdr/*out*/);
 herr_t H5Pset_userblock (hid_t tid, hsize_t size);
 herr_t H5Pget_userblock (hid_t tid, hsize_t *size);
+herr_t H5Pset_alignment (hid_t fapl_id, hsize_t threshold, hsize_t alignment);
+herr_t H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
+			 hsize_t *alignment/*out*/);
 herr_t H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size);
 herr_t H5Pget_sizes (hid_t tid, size_t *sizeof_addr/*out*/,
                      size_t *sizeof_size/*out*/);

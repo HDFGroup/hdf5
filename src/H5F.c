@@ -145,6 +145,8 @@ H5F_init_interface(void)
     H5F_access_dflt.mdc_nelmts = H5AC_NSLOTS;
     H5F_access_dflt.rdcc_nbytes = 1024*1024; /*1MB*/
     H5F_access_dflt.rdcc_w0 = 0.75; /*preempt fully read chunks*/
+    H5F_access_dflt.threshold = 1; /*alignment applies to everything*/
+    H5F_access_dflt.alignment = 1; /*no alignment*/
     H5F_access_dflt.driver = H5F_LOW_DFLT;
 #if (H5F_LOW_DFLT == H5F_LOW_SEC2)
     /* Nothing to initialize */

@@ -89,14 +89,15 @@ static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr);
 static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
 
-const H5F_low_class_t   H5F_LOW_MPIO_g[1] = {{
-    H5F_mpio_access,       /* access method                        */
-    H5F_mpio_open,         /* open method                          */
-    H5F_mpio_close,        /* close method                         */
-    H5F_mpio_read,         /* read method                          */
-    H5F_mpio_write,        /* write method                         */
-    H5F_mpio_flush,        /* flush method                         */
-    NULL                   /* extend method                        */
+const H5F_low_class_t	H5F_LOW_MPIO_g[1] = {{
+    H5F_mpio_access,		/*access method				*/
+    H5F_mpio_open,		/*open method				*/
+    H5F_mpio_close,		/*close method				*/
+    H5F_mpio_read,		/*read method				*/
+    H5F_mpio_write,		/*write method				*/
+    H5F_mpio_flush,		/*flush method				*/
+    NULL,			/*extend method				*/
+    NULL,			/*alloc method				*/
 }};
 
 ino_t mpio_inode_num = 0;      /* fake "inode" number */
@@ -347,7 +348,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
+H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
@@ -404,7 +405,7 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
@@ -448,7 +449,7 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	break;
 
     default:
-	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
+	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "invalid file access mode");
     }
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
@@ -528,7 +529,7 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+H5F_mpio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	       const H5D_transfer_t xfer_mode,
 	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
@@ -570,7 +571,7 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	break;
 
     default:
-	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
+	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "invalid file access mode");
     }
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
@@ -606,7 +607,7 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
+H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];

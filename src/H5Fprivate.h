@@ -242,6 +242,8 @@ typedef struct H5F_access_t {
     intn	mdc_nelmts;	/* Size of meta data cache (nelmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    hsize_t	threshold;	/* Threshold for alignment		*/
+    hsize_t	alignment;	/* Alignment				*/
     H5F_driver_t driver;	/* Low level file driver		*/
     union {
 
@@ -291,6 +293,13 @@ typedef enum {
     H5F_OP_READ			/* Last operation was a read		*/
 } H5F_fileop_t;
 
+/* A free-list entry */
+#define H5MF_NFREE 32		/*size of free block array		*/
+typedef struct H5MF_free_t {
+    haddr_t	addr;		/*file address				*/
+    hsize_t	size;		/*size of free area			*/
+} H5MF_free_t;
+
 /*
  * Define the low-level file interface.
  */
@@ -312,7 +321,10 @@ typedef struct H5F_low_class_t {
 			 const H5F_access_t *access_parms);
     herr_t	(*extend)(struct H5F_low_t *lf,
 			  const H5F_access_t *access_parms,
-			  intn op, hsize_t size, haddr_t *addr);
+			  intn op, hsize_t size, haddr_t *addr/*out*/);
+    intn        (*alloc)(struct H5F_low_t *lf, intn op, hsize_t alignment,
+			 hsize_t threshold, size_t size, H5MF_free_t *blk,
+			 haddr_t *addr/*out*/);
 } H5F_low_class_t;
 
 typedef struct H5F_low_t {
@@ -423,6 +435,8 @@ typedef struct H5F_file_t {
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
+    intn	fl_nfree;	/*number of free blocks in array	*/
+    H5MF_free_t fl_free[H5MF_NFREE]; /*free block array			*/
 } H5F_file_t;
 
 /*
@@ -536,8 +550,11 @@ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
 /* Functions that operate directly on low-level files */
 const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
 herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
-		      intn op, hsize_t size, haddr_t *addr);
+		      intn op, hsize_t size, haddr_t *addr/*out*/);
 herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
+intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
+		    hsize_t threshold, size_t size, H5MF_free_t *blk,
+		    haddr_t *addr/*out*/);
 hbool_t H5F_low_access(const H5F_low_class_t *type, const char *name,
 		       const H5F_access_t *access_parms, int mode,
 		       H5F_search_t *key);

@@ -42,6 +42,7 @@ const H5F_low_class_t H5F_LOW_STDIO_g[1] = {{
     H5F_stdio_write,		/* write method				*/
     H5F_stdio_flush,		/* flush method				*/
     NULL,			/* extend method			*/
+    NULL,			/* alloc method				*/
 }};
 
 
@@ -186,7 +187,7 @@ H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  */
 static herr_t
 H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
-	       const H5D_transfer_t xfer_mode,
+	       const H5D_transfer_t __unused__ xfer_mode,
 	       const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     size_t		n;
@@ -297,7 +298,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  */
 static herr_t
 H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
-	        const H5D_transfer_t xfer_mode,
+	        const H5D_transfer_t __unused__ xfer_mode,
 		const haddr_t *addr, size_t size, const uint8 *buf)
 {
     uint64		mask;

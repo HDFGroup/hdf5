@@ -515,6 +515,102 @@ H5Pget_userblock(hid_t tid, hsize_t *size)
 
     FUNC_LEAVE(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_alignment
+ *
+ * Purpose:	Sets the alignment properties of a file access property list
+ *		so that any file object >= THRESHOLD bytes will be aligned on
+ *		an address which is a multiple of ALIGNMENT.  The addresses
+ *		are relative to the end of the user block; the alignment is
+ *		calculated by subtracting the user block size from the
+ *		absolute file address and then adjusting the address to be a
+ *		multiple of ALIGNMENT.
+ *
+ *		Default values for THRESHOLD and ALIGNMENT are one, implying
+ *		no alignment.  Generally the default values will result in
+ *		the best performance for single-process access to the file.
+ *		For MPI-IO and other parallel systems, choose an alignment
+ *		which is a multiple of the disk block size.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_alignment (hid_t fapl_id, hsize_t threshold, hsize_t alignment)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pset_alignment, FAIL);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5Pget_class (fapl_id) ||
+	NULL == (fapl = H5I_object (fapl_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (alignment<1) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "alignment must be positive");
+    }
+
+    /* Set values */
+    fapl->threshold = threshold;
+    fapl->alignment = alignment;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_alignment
+ *
+ * Purpose:	Returns the current settings for alignment properties from a
+ *		file access property list.  The THRESHOLD and/or ALIGNMENT
+ *		pointers may be null pointers.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
+		  hsize_t *alignment/*out*/)
+{
+    H5F_access_t	*fapl = NULL;
+
+    FUNC_ENTER (H5Pget_alignment, FAIL);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5Pget_class (fapl_id) ||
+	NULL == (fapl = H5I_object (fapl_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Get values */
+    if (threshold) *threshold = fapl->threshold;
+    if (alignment) *alignment = fapl->alignment;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sizes
@@ -2211,8 +2307,6 @@ herr_t
 H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
 {
     H5F_access_t	   *tmpl = NULL;
-    MPI_Comm		    lcomm;
-    int			    mrc;		/* MPI return code */
 
     FUNC_ENTER(H5Pset_mpi, FAIL);
 

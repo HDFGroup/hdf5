@@ -43,15 +43,19 @@ static herr_t H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 static herr_t H5F_split_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 			       intn op, hsize_t size, haddr_t *addr/*out*/);
+static intn H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
+			     hsize_t threshold, size_t size, H5MF_free_t *blk,
+			     haddr_t *addr/*out*/);
 
-const H5F_low_class_t   H5F_LOW_SPLIT_g[1] = {{
-    H5F_split_access,       /* access method                        */
-    H5F_split_open,         /* open method                          */
-    H5F_split_close,        /* close method                         */
-    H5F_split_read,         /* read method                          */
-    H5F_split_write,        /* write method                         */
-    H5F_split_flush,        /* flush method                         */
-    H5F_split_extend,       /* extend method                        */
+const H5F_low_class_t	H5F_LOW_SPLIT_g[1] = {{
+    H5F_split_access,		/*access method				*/
+    H5F_split_open,		/*open method				*/
+    H5F_split_close,		/*close method				*/
+    H5F_split_read,		/*read method				*/
+    H5F_split_write,		/*write method				*/
+    H5F_split_flush,		/*flush method				*/
+    H5F_split_extend,		/*extend method				*/
+    H5F_split_alloc,		/*alloc method				*/
 }};
 
 /*
@@ -450,4 +454,72 @@ H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
     }
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_split_alloc
+ *
+ * Purpose:	Determines if free block BLK in file LF can be used to
+ *		satisfy the request for SIZE bytes.  This function is
+ *		actually the same as H5F_low_alloc() except it returns
+ *		failure if the OP is not compatible with the block address,
+ *		insuring that meta data is allocated from one half of the
+ *		address space and raw data from the other half.
+ *
+ * Return:	Success:	Positive if the free block satisfies the
+ *				request exactly, zero if the free block
+ *				over-satisfies the request.  The ADDR will
+ *				contain the address within the free block
+ *				where the request starts.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static intn
+H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
+		 size_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
+{
+    intn	ret_value = FAIL;
+    hsize_t	wasted;
+
+    FUNC_ENTER (H5F_split_alloc, FAIL);
+    assert (lf);
+    assert (alignment>0);
+    assert (size>0);
+    assert (blk);
+    assert (addr);
+
+    switch (op) {
+    case H5MF_META:
+	if (blk->addr.offset & lf->u.split.mask) return FAIL;
+	break;
+    case H5MF_RAW:
+	if (0==(blk->addr.offset & lf->u.split.mask)) return FAIL;
+	break;
+    }
+
+    if (size>=threshold) {
+	wasted = blk->addr.offset % alignment;
+    } else {
+	wasted = 0;
+    }
+    if (0==wasted && size==blk->size) {
+	/* exact match */
+	*addr = blk->addr;
+	ret_value = 1;
+    } else if (blk->size>wasted && blk->size-wasted>=size) {
+	/* over-satisfied */
+	*addr = blk->addr;
+	H5F_addr_inc (addr, wasted);
+	ret_value = 0;
+    }
+    
+    FUNC_LEAVE (ret_value);
 }

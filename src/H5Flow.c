@@ -515,6 +515,72 @@ H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
 
     FUNC_LEAVE(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_low_alloc
+ *
+ * Purpose:	Determines if a free block BLK can satisfy a request for SIZE
+ *		bytes of memory from file F.  If SIZE >= THRESH then the
+ *		memory must be aligned on an ALIGN-byte boundary.  Alignment
+ *		is wrt the relative file addresses (that is, the size of the
+ *		user-defined block at the beginning of the file is subtracted
+ *		from the addresses before aligning them).
+ *
+ * Return:	Success:	Positive if the free block exactly satisfies
+ *				the request; zero if the free block
+ *				over-satisfies the request.  In either case,
+ *				ADDR will be the address within the free
+ *				block where the request can be satisfied.
+ *
+ *		Failure:	FAIL with the output value of ADDR
+ *				undefined.
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
+	       size_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
+{
+    intn	ret_value = FAIL;
+    hsize_t	wasted;
+    
+    FUNC_ENTER (H5MF_acceptable, FAIL);
+    assert (lf);
+    assert (alignment>0);
+    assert (size>0);
+    assert (blk);
+    assert (addr);
+
+    if (lf->type->alloc) {
+	ret_value = (lf->type->alloc)(lf, op, alignment, threshold, size, blk,
+				      addr/*out*/);
+    } else {
+	if (size>=threshold) {
+	    wasted = blk->addr.offset % alignment;
+	} else {
+	    wasted = 0;
+	}
+	if (0==wasted && size==blk->size) {
+	    /* exact match */
+	    *addr = blk->addr;
+	    ret_value = 1;
+	} else if (blk->size>wasted && blk->size-wasted>=size) {
+	    /* over-satisfied */
+	    *addr = blk->addr;
+	    H5F_addr_inc (addr, wasted);
+	    ret_value = 0;
+	}
+    }
+    
+    FUNC_LEAVE (ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_low_seteof

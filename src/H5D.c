@@ -43,7 +43,6 @@ static char		RcsId[] = "@(#)$Revision$";
 struct H5D_t {
     H5G_entry_t		ent;		/*cached object header stuff	*/
     H5T_t		*type;		/*datatype of this dataset	*/
-    H5S_t		*space;		/*dataspace of this dataset	*/
     H5D_create_t	*create_parms;	/*creation parameters		*/
     H5O_layout_t	layout;		/*data layout			*/
 };
@@ -343,14 +342,16 @@ H5Dclose(hid_t dataset_id)
  *		Wednesday, January 28, 1998
  *
  * Modifications:
- *
+ *	Robb Matzke, 9 Jun 1998
+ *	The data space is not constant and is no longer cached by the dataset
+ *	struct.
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Dget_space (hid_t dataset_id)
 {
     H5D_t	*dataset = NULL;
-    H5S_t	*copied_space = NULL;
+    H5S_t	*space = NULL;
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_space, FAIL);
@@ -361,14 +362,15 @@ H5Dget_space (hid_t dataset_id)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
 
-    /* Copy the data space */
-    if (NULL==(copied_space=H5S_copy (dataset->space))) {
+    /* Read the data space message and return a data space object */
+    if (NULL==(space=H5S_read (&(dataset->ent)))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to copy the data space");
+		       "unable to load space info from dataset header");
     }
 
     /* Create an atom */
-    if ((ret_value=H5I_register (H5_DATASPACE, copied_space))<0) {
+    if ((ret_value=H5I_register (H5_DATASPACE, space))<0) {
+	H5S_close (space);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data space");
     }
@@ -738,6 +740,8 @@ H5Dextend (hid_t dataset_id, const hsize_t *size)
  *		Thursday, December  4, 1997
  *
  * Modifications:
+ *	Robb Matzke, 9 Jun 1998
+ *	The data space message is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -771,7 +775,6 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     new_dset = H5MM_xcalloc(1, sizeof(H5D_t));
     H5F_addr_undef(&(new_dset->ent.header));
     new_dset->type = H5T_copy(type, H5T_COPY_ALL);
-    new_dset->space = H5S_copy(space);
     new_dset->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
     efl = &(new_dset->create_parms->efl);
 
@@ -852,7 +855,7 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     /* Update the type and space header messages */
     if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
 		   H5O_FLAG_CONSTANT|H5O_FLAG_SHARED, new_dset->type)<0 ||
-	H5S_modify(&(new_dset->ent), new_dset->space) < 0) {
+	H5S_modify(&(new_dset->ent), space) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to update type or space header messages");
     }
@@ -915,7 +918,6 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
   done:
     if (!ret_value && new_dset) {
 	if (new_dset->type) H5T_close(new_dset->type);
-	if (new_dset->space) H5S_close(new_dset->space);
 	if (new_dset->create_parms) {
 	    H5P_close (H5P_DATASET_CREATE, new_dset->create_parms);
 	    new_dset->create_parms = NULL;
@@ -945,6 +947,8 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
  *		Thursday, December  4, 1997
  *
  * Modifications:
+ * 	Robb Matzke, 9 Jun 1998
+ *	The data space message is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -976,10 +980,9 @@ H5D_open(H5G_t *loc, const char *name)
     }
     
     /* Get the type and space */
-    if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL)) ||
-	NULL==(dataset->space=H5S_read(f, &(dataset->ent)))) {
+    if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		    "unable to load type or space info from dataset header");
+		    "unable to load type info from dataset header");
     }
 
     /* Get the optional compression message */
@@ -1041,9 +1044,6 @@ H5D_open(H5G_t *loc, const char *name)
 	if (dataset->type) {
 	    H5T_close(dataset->type);
 	}
-	if (dataset->space) {
-	    H5S_close(dataset->space);
-	}
 	if (dataset->create_parms) {
 	    H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
 	}
@@ -1072,6 +1072,8 @@ H5D_open(H5G_t *loc, const char *name)
  *		Thursday, December  4, 1997
  *
  * Modifications:
+ *	Robb Matzke, 9 Jun 1998
+ *	The data space message is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -1086,11 +1088,10 @@ H5D_close(H5D_t *dataset)
     assert(dataset && dataset->ent.file);
 
     /*
-     * Release dataset type and space - there isn't much we can do if one of
-     * these fails, so we just continue.
+     * Release data type and creation property list -- there isn't much we
+     * can do if one of these fails, so we just continue.
      */
     free_failed = (H5T_close(dataset->type) < 0 ||
-		   H5S_close(dataset->space) < 0 ||
 		   H5P_close (H5P_DATASET_CREATE, dataset->create_parms)); 
 
     /* Close the dataset object */
@@ -1107,8 +1108,8 @@ H5D_close(H5D_t *dataset)
 
     if (free_failed) {
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "couldn't free the type or space, but the dataset was "
-		      "freed anyway.");
+		      "couldn't free the type or creation property list, "
+		      "but the dataset was freed anyway.");
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -1127,6 +1128,8 @@ H5D_close(H5D_t *dataset)
  *		Thursday, December  4, 1997
  *
  * Modifications:
+ *	Robb Matzke, 9 Jun 1998
+ *	The data space is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -1152,6 +1155,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
+    H5S_t		*free_this_space=NULL;	/*data space to free	*/
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1163,7 +1167,13 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
-    if (!file_space) file_space = dataset->space;
+    if (!file_space) {
+	if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			 "unable to read data space from dataset header");
+	}
+	file_space = free_this_space;
+    }
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_npoints(mem_space);
 
@@ -1387,6 +1397,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
+    if (free_this_space) H5S_close (free_this_space);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1405,6 +1416,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  *		Thursday, December  4, 1997
  *
  * Modifications:
+ * 	Robb Matzke, 9 Jun 1998
+ *	The data space is no longer cached in the dataset struct.
  *
  *-------------------------------------------------------------------------
  */
@@ -1429,6 +1442,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
+    H5S_t		*free_this_space=NULL;	/*data space to free	*/
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1440,7 +1454,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
-    if (!file_space) file_space = dataset->space;
+    if (!file_space) {
+	if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			 "unable to read data space from dataset header");
+	}
+	file_space = free_this_space;
+    }
     if (!mem_space) mem_space = file_space;
     nelmts = H5S_get_npoints(mem_space);
 
@@ -1666,6 +1686,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
+    if (free_this_space) H5S_close (free_this_space);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1689,7 +1710,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 herr_t
 H5D_extend (H5D_t *dataset, const hsize_t *size)
 {
-    herr_t	changed;
+    herr_t	changed, ret_value=FAIL;
+    H5S_t	*space = NULL;
 
     FUNC_ENTER (H5D_extend, FAIL);
 
@@ -1698,26 +1720,33 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     assert (size);
 
     /*
-     * Restrictions on extensions were checked when the dataset was created.
-     * All extensions are allowed here since none should be able to muck
-     * things up.
+     * NOTE: Restrictions on extensions were checked when the dataset was
+     *	     created.  All extensions are allowed here since none should be
+     *	     able to muck things up.
      */
-    /*void*/
+
 
     /* Increase the size of the data space */
-    if ((changed=H5S_extend (dataset->space, size))<0) {
-	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to increase size of data space");
+    if (NULL==(space=H5S_read (&(dataset->ent)))) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to read data space info from dataset header");
+    }
+    if ((changed=H5S_extend (space, size))<0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to increase size of data space");
     }
 
     /* Save the new dataspace in the file if necessary */
     if (changed>0 &&
-	H5S_modify (&(dataset->ent), dataset->space)<0) {
-	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
+	H5S_modify (&(dataset->ent), space)<0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "unable to update file with new dataspace");
     }
+    ret_value = SUCCEED;
 
-    FUNC_LEAVE (SUCCEED);
+ done:
+    H5S_close (space);
+    FUNC_LEAVE (ret_value);
 }
     
 

@@ -41,8 +41,8 @@ tfile.o: \
    ../src/H5Bpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
-   ../src/H5Pprivate.h \
-   ../src/H5Ppublic.h
+   ../src/H5Dpublic.h \
+   ../src/H5Pprivate.h
 theap.o: \
    theap.c \
    testhdf5.h \
@@ -57,9 +57,9 @@ theap.o: \
    ../src/H5ACpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Pprivate.h \
    ../src/H5Ppublic.h \
-   ../src/H5Dpublic.h \
    ../src/H5Zpublic.h
 tmeta.o: \
    tmeta.c \
@@ -84,9 +84,9 @@ tohdr.o: \
    ../src/H5ACpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Pprivate.h \
    ../src/H5Ppublic.h \
-   ../src/H5Dpublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Gprivate.h \
    ../src/H5Gpublic.h \
@@ -114,9 +114,9 @@ tstab.o: \
    ../src/H5ACpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Pprivate.h \
    ../src/H5Ppublic.h \
-   ../src/H5Dpublic.h \
    ../src/H5Zpublic.h \
    ../src/H5Gprivate.h \
    ../src/H5Gpublic.h \
@@ -143,6 +143,7 @@ th5s.o: \
    ../src/H5Bpublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Sprivate.h \
    ../src/H5Spublic.h \
    ../src/H5Gprivate.h \
@@ -155,8 +156,7 @@ th5s.o: \
    ../src/H5Tpublic.h \
    ../src/H5Zprivate.h \
    ../src/H5Zpublic.h \
-   ../src/H5Pprivate.h \
-   ../src/H5Ppublic.h
+   ../src/H5Pprivate.h
 dtypes.o: \
    dtypes.c \
    ../src/hdf5.h \
@@ -328,13 +328,13 @@ gheap.o: \
    ../src/H5Ipublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
+   ../src/H5Dpublic.h \
    ../src/H5Gprivate.h \
    ../src/H5Gpublic.h \
    ../src/H5Bprivate.h \
    ../src/H5Bpublic.h \
    ../src/H5HGprivate.h \
-   ../src/H5HGpublic.h \
-   ../src/H5Pprivate.h
+   ../src/H5HGpublic.h
 shtype.o: \
    shtype.c \
    ../src/hdf5.h \
@@ -397,7 +397,10 @@ links.o: \
    ../src/H5MFpublic.h \
    ../src/H5MMpublic.h \
    ../src/H5Opublic.h \
-   ../src/H5Ppublic.h
+   ../src/H5Ppublic.h \
+   ../src/H5Zpublic.h \
+   ../src/H5Spublic.h \
+   ../src/H5Tpublic.h
 chunk.o: \
    chunk.c \
    ../src/hdf5.h \
