@@ -93,17 +93,16 @@ typedef struct H5FD_sec2_t {
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
 #   define file_seek		lseek64
-#elif defined (WIN32)
-#   ifdef __MWERKS__
-#       define file_offset_t off_t
-#       define file_seek lseek
-#   else /*MSVC*/
-#       define file_offset_t __int64
-#       define file_seek _lseeki64
-#   endif
+#   define file_truncate	ftruncate64
+#elif defined (WIN32) && !defined(__MWERKS__)
+# /*MSVC*/
+#   define file_offset_t __int64
+#   define file_seek _lseeki64
+#   define file_truncate	_ftruncatei64
 #else
 #   define file_offset_t	off_t
 #   define file_seek		lseek
+#   define file_truncate	HDftruncate
 #endif
 
 /*
@@ -298,7 +297,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if ((fd=HDopen(name, o_flags, 0666))<0)
         HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
     if (HDfstat(fd, &sb)<0) {
-        close(fd);
+        HDclose(fd);
         HRETURN_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
     }
 
@@ -346,9 +345,7 @@ H5FD_sec2_close(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(H5FD_sec2_close, FAIL);
 
-    if (H5FD_sec2_flush(_file,TRUE)<0)
-        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
-    if (close(file->fd)<0)
+    if (HDclose(file->fd)<0)
         HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     H5FL_FREE(H5FD_sec2_t,file);
@@ -720,18 +717,38 @@ static herr_t
 H5FD_sec2_flush(H5FD_t *_file, unsigned UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
+#ifdef WIN32
+    HFILE filehandle;   /* Windows file handle */
+    LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
+#endif /* WIN32 */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_flush, FAIL);
 
+    assert(file);
+
+    /* Extend the file to make sure it's large enough */
     if (file->eoa>file->eof) {
-        if (-1==file_seek(file->fd, (file_offset_t)(file->eoa-1), SEEK_SET))
-            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
-			  "unable to seek to proper position");
-        if (write(file->fd, "", 1)!=1)
-            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
+#ifdef WIN32
+        /* Map the posix file handle to a Windows file handle */
+        filehandle = _get_osfhandle(fd);
+
+        /* Translate 64-bit integers into form Windows wants */
+        /* [This algorithm is from the Windows documentation for SetFilePointer()] */
+        li.QuadPart = file->eoa;
+        SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
+        if(SetEndOfFile((HANDLE)filehandle)==0)
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
+#else /* WIN32 */
+        if (-1==file_truncate(file->fd, (file_offset_t)file->eoa))
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
+#endif /* WIN32 */
+
+        /* Update the eof value */
         file->eof = file->eoa;
-        file->pos = file->eoa;
-        file->op = OP_WRITE;
+
+        /* Reset last file I/O information */
+        file->pos = HADDR_UNDEF;
+        file->op = OP_UNKNOWN;
     }
 
     FUNC_LEAVE(SUCCEED);
