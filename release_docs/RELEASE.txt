@@ -213,7 +213,12 @@ Platforms Tested
 
 Known Problems
 ==============
-* DLLs do not work on Windows 98 (and probably on NT and 2000 too)
+* DLLs do not work on Windows 98 
+
+* RELEASE DLLs will fail on some tests on Windows 2000 with Microsoft visual 
+  studio 6.0 due to memory allocation problems caused by compiler.  
+  Users are encouraged to go to microsoft site  to find and install
+  visual studio 6.0 service pack 5. After that, release dlls will work.
 
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
@@ -242,12 +247,6 @@ Known Problems
 
 * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
-
-* When building hdf5 tools and applications on windows platform, a linking
-  warning: defaultlib "LIBC" conflicts with use of other libs will appear
-  on debug version when running VC++6.0. This warning doesn't affect
-  building and testing hdf5 applications. We will continue investigating
-  this.
 
 * h5toh4 converter fails two cases (tstr.h5 and tmany.h5) for release dll
   version on windows 2000 and NT. The reason is possibly due to windows
@@ -286,14 +285,4 @@ Known Problems
 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
 
-* The h4toh5 utility produces images that do not correctly conform
-  to the HDF5 Image and Palette Specification. 
-
-     http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
-
-  Several required HDF5 attributes are omitted, and the dataspace is
-  reversed (i.e., the ht. and width of the image dataset is incorrectly
-  described.)  For more information, please see:
-
-     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
 
