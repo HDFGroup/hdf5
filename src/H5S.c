@@ -1582,16 +1582,16 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
     if (c1==TRUE && c2==TRUE) {
 #ifdef H5_HAVE_PARALLEL
         if(flags&H5S_CONV_PAR_IO_POSSIBLE) {
-            H5S_conv_g[i]->read = H5S_mpio_spaces_read;
-            H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+            path->read = H5S_mpio_spaces_read;
+            path->write = H5S_mpio_spaces_write;
         } /* end if */
         else {
-            H5S_conv_g[i]->read = H5S_all_read;
-            H5S_conv_g[i]->write = H5S_all_write;
+            path->read = H5S_all_read;
+            path->write = H5S_all_write;
         } /* end else */
 #else /* H5_HAVE_PARALLEL */
-        H5S_conv_g[i]->read = H5S_all_read;
-        H5S_conv_g[i]->write = H5S_all_write;
+        path->read = H5S_all_read;
+        path->write = H5S_all_write;
 #endif /* H5_HAVE_PARALLEL */
     } /* end if */
     
