@@ -53,7 +53,139 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
-<h2>Release 1.6.0 (current release) versus Release 1.4.5</h2> 
+<h2>Release 1.6.1 (current release) versus Release 1.6.0</h2> 
+
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.0 to Release 1.6.1.
+
+
+    <h3>New Functions and Tools</h3>
+        <dl>
+	  <dt>C functions:
+          <dd>The following C function is new for Release 1.6.1 and is documented in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+	
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>H5Fget_freespace</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>hssize_t</em> <code>H5Fget_freespace</code> 
+                    (<em>hid_t </em><code>file_id</code>)<br>
+                    See <a href="../RM_H5F.html#File-GetFreespace">entry</a>.</td>
+              </tr>
+              </table>    
+	      
+          <dd>&nbsp;
+	  <dt>Fortran subroutines
+          <dd>The following Fortran90 subroutines were new for Release 1.6.0 
+	      but were not documented.  They are now included in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>h5get_fapl_mpiposix_f</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"> 
+                    <code>h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)</code><br>
+                    See <a href="../RM_H5P.html#Property-GetFaplMpiPosix">entry</a>.</td>
+              </tr><tr>
+                <td align="left" valign="top"><code>h5set_fapl_mpiposix_f</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"> 
+                    <code>h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)</code><br>
+                    See <a href="../RM_H5P.html#Property-SetFaplMpiPosix">entry</a>.</td>
+              </tr>
+              </table>    
+	  
+          <dd>&nbsp;
+	  <dt>Tools:
+          <dd>Release 1.6.1 contains no new tools.
+	  <!--
+          <dd>The following tools are new for Release X.X.x and are included in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <dd><code>new tool</code>
+	  -->
+        </dl>
+
+
+    <h3>Deleted Functions</h3>
+        None.
+	<!--
+	The following functions are deprecated in HDF5 Release X.X.x.
+        A backward compatibility mode is provided in this release,
+        enabling these functions and other Release 1.4.x compatibility
+        features, but is available only when the HDF5 library is 
+        configured with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>.
+        The backward compatibility mode is not enabled in the 
+        binaries distributed by NCSA.
+
+        <dir>
+        <table border=0>
+        <tr valign="top" align="left"><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>&nbsp;
+
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+        <p>
+	The above functions will eventually be removed from the HDF5 
+        distribution and from the <cite>HDF5 Reference Manual</cite>.
+	-->
+
+
+    <h3>Functions with Changed Syntax</h3>
+        The following functions have changed as noted.
+	
+        <dl>
+        <dt>C functions:
+        <dt><code>H5Gget_obj_info</code>
+          <dd>The <code>H5G_stat_t</code> struct contains two new fields.<br>
+              This change will be transparent to existing applications, 
+              though those calling <code>H5Gget_obj_info</code> will have 
+              to be recompiled before linking with the updated library.
+	
+        <dd>&nbsp;
+        <dt>Fortran90 subroutines:
+        <dt><code>h5pset_cache_f</code>
+          <dd>The <code>rdcc_nbytes</code> parameter has changed from
+              <code><em>INTEGER</em></code> to <code><em>INTEGER(SIZE_T)</em></code> 
+              to better match the C API and the <code>h5pget_cache_f</code> 
+	      subroutine.
+        </dl>
+
+
+    <h3>Constants with Changed Values</h3>
+    
+        None.
+        
+
+    </dir>
+<p>&nbsp;
+
+
+
+
+
+
+
+
+<h2>Release 1.6.0 versus Release 1.4.5</h2> 
 
 <dir>
 
@@ -348,7 +480,7 @@ transition from the HDF5 Release 1.4.<i>x</i> series to Release 1.6.0.
     <dd>&nbsp;</dd>
 
   </dt>
-  <dt>The following tools are new for Release 1.5 and are included in the
+  <dt>The following tools are new for Release 1.6.0 and are included in the
         <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
     <dd><code>h5diff</code>
     <dd><code>h5import</code>
@@ -1048,7 +1180,7 @@ V1.4.0
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 2 July 2003 
+Last modified: 16 October 2003 
 <!-- hhmts end -->
 
 </body>
