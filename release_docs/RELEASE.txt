@@ -1,4 +1,4 @@
-HDF5 version 1.4.2-pre4 currently under development
+HDF5 version 1.4.2 currently under development
 ================================================================================
 
 
@@ -73,9 +73,6 @@ Bug Fixes since HDF5-1.4.1 Release
       got dropped in some 1.3.x version. Re-implemented it with "new and
       improved" algorithm.  It keeps track of "wasted" file-fragment in
       the free-list too.
-    * H5 <-> GIF convertor has been added. This is available under
-      tools/gifconv. The convertor supports the ability to create animated
-      gifs as well.
     * Removed limitation that the data transfer buffer size needed to be
       set for datasets whose dimensions were too large for the 'all' selection
       code to handle.  Any size dimensioned datasets should be handled
@@ -203,8 +200,6 @@ Known Problems
 
     * The executable are always dynamic on IRIX64 6.5(64 and n32) and 
       IRIX 6.5 even if they are configured with --enable-static-exec.
-
-    * The shared library failed compilation on IRIX 6.5.
     
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
