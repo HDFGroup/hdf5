@@ -27,7 +27,7 @@
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface changes    	     */
 #define H5_VERS_MINOR	0       /* For minor interface changes    	     */
-#define H5_VERS_RELEASE	23       /* For interface tweaks & bug-fixes	     */
+#define H5_VERS_RELEASE	24       /* For interface tweaks & bug-fixes	     */
 #define H5_VERS_PATCH	0       /* For small groups of bug fixes	     */
 
 #define H5check()	H5vers_check(H5_VERS_MAJOR,H5_VERS_MINOR,\
@@ -41,18 +41,29 @@
  * proper way to detect failure is something like:
  *
  * 	if ((dset = H5Dopen (file, name))<0) {
- *	   fprintf (stderr, "unable to open the requested dataset\n");
+ *	    fprintf (stderr, "unable to open the requested dataset\n");
  *	}
  */
 typedef int herr_t;
 
 /*
- * Boolean type.
+ * Boolean type.  Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.  Boolean
+ * functions can also fail, returning a negative value as described above.
+ * The proper way to test for truth is:
+ *
+ * 	if ((retval = H5Tcommitted(type))>0) {
+ *	    printf("data type is committed\n");
+ *	} else if (!retval) {
+ * 	    printf("data type is not committed\n");
+ *	} else {
+ * 	    printf("error determining whether data type is committed\n");
+ *	}
  */
 typedef int hbool_t;
 
 /*
- * The sizes of file-objects in hdf5 have there own types defined here.  On
+ * The sizes of file-objects in hdf5 have their own types defined here.  On
  * most systems, these are the same as size_t and ssize_t, but on systems
  * with small address spaces these are defined to be larger.
  */

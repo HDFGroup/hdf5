@@ -1,5 +1,5 @@
 Release information for hdf5-1.0.23a
------------------------------------
+------------------------------------
 
 		    CHANGES SINCE THE FIRST ALPHA
 
@@ -37,12 +37,12 @@ Release information for hdf5-1.0.23a
   which correspond to the standard C types like H5T_NATIVE_INT.
 
 * More debugging support was added.  If tracing is enabled at
-  configuration time and the HDF5_TRACE environment variable is set to 
-  a file descriptor then all API calls will emit the function name,
-  argument names and values, and return value on that file number.
-  There is an html document that describes this.  If appropriate
-  debugging options are enabled at configuration time, some packages
-  will display performance information on stderr.
+  configuration time (the default) and the HDF5_TRACE environment
+  variable is set to a file descriptor then all API calls will emit
+  the function name, argument names and values, and return value on
+  that file number.  There is an html document that describes this.
+  If appropriate debugging options are enabled at configuration time,
+  some packages will display performance information on stderr.
 
 * Data types can be stored in the file as independent objects and
   multiple datasets can share a data type.
@@ -60,7 +60,7 @@ Release information for hdf5-1.0.23a
   HDF5.
 
 * Hard and soft (symbolic) links are implemented which allow groups to 
-  share objects.
+  share objects. Dangling and recursive symbolic links are supported.
 
 * User-defined data compression is implemented although we may
   generalize the interface to allow arbitrary user-defined filters

@@ -19,13 +19,39 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+/* Verbosity level */
+static int verbose_g = 0;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	usage
+ *
+ * Purpose:	Prints a usage message on stderr and then returns.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 usage (const char *progname)
 {
-    fprintf (stderr, "usage: %s FILE [GROUP]\n", progname);
-    fprintf (stderr, "   The file name may contain a printf integer format "
-	     "to open a file family.\n");
-    exit (1);
+    fprintf(stderr, "\
+usage: %s [OPTIONS] FILE [GROUP]\n\
+   OPTIONS\n\
+      -h, -?, --help   Print a usage message and exit\n\
+      -v, --verbose    Generate more verbose output\n\
+      --version        Print version number and exit\n\
+   FILE\n\
+      The file name may include a printf(3C) integer format such as\n\
+      \"%%05d\" to open a file family.\n\
+   GROUP\n\
+      If a group name is not specified then the contents of the root group\n\
+      \"/\" are displayed.\n", progname);
 }
 
 
@@ -117,11 +143,12 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	int ndims = H5Sextent_dims(space, size, maxsize);
 	printf ("Dataset {");
 	for (i=0; i<ndims; i++) {
-		HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
-	    if (maxsize[i]==H5S_UNLIMITED)
+	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
+	    if (maxsize[i]==H5S_UNLIMITED) {
 		HDfprintf (stdout, "/%s", "Inf");
-	    else
-		HDfprintf (stdout, "/%Hu", maxsize[i]);
+	    } else if (maxsize[i]!=size[i] || verbose_g>0) {
+		HDfprintf(stdout, "/%Hu", maxsize[i]);
+	    }
 	}
 	printf ("}\n");
 	H5Dclose (space);
@@ -174,14 +201,68 @@ main (int argc, char *argv[])
     const char	*fname = NULL;
     const char	*gname = "/";
     const char	*progname;
+    const char	*s;
+    int		argno;
 
-    /* Arguments */
+    /* Name of this program without the path */
     if ((progname=strrchr (argv[0], '/'))) progname++;
     else progname = argv[0];
-    if (argc<2 || argc>3) usage (progname);
-    fname = argv[1];
-    if (argc>=3) gname = argv[2];
+    
+    /* Switches come before non-switch arguments */
+    for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) {
+	if (!strcmp(argv[argno], "--")) {
+	    /* Last switch */
+	    argno++;
+	    break;
+	} else if (!strcmp(argv[argno], "--help")) {
+	    usage(progname);
+	    exit(0);
+	} else if (!strcmp(argv[argno], "--verbose")) {
+	    verbose_g++;
+	} else if (!strcmp(argv[argno], "--version")) {
+	    printf("This is %s version %u.%u release %u\n",
+		   progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+	    exit(0);
+	} else if ('-'!=argv[argno][1]) {
+	    /* Single-letter switches */
+	    for (s=argv[argno]+1; *s; s++) {
+		switch (*s) {
+		case '?':
+		case 'h':	/* --help */
+		    usage(progname);
+		    exit(0);
+		case 'v':	/* --verbose */
+		    verbose_g++;
+		    break;
+		case 'V':	/* --version */
+		    printf("This is %s version %u.%u release %u\n",
+			   progname, H5_VERS_MAJOR, H5_VERS_MINOR,
+			   H5_VERS_RELEASE);
+		    exit(0);
+		default:
+		    usage(progname);
+		    exit(1);
+		}
+	    }
+	} else {
+	    usage(progname);
+	    exit(1);
+	}
+    }
 
+    /* Non-switch arguments */
+    if (argno<argc) {
+	fname = argv[argno++];
+    } else {
+	usage(progname);
+	exit(1);
+    }
+    if (argno<argc) gname = argv[argno++];
+    if (argno<argc) {
+	usage(progname);
+	exit(1);
+    }
+	
     /*
      * Open the file.  If the file name contains a `%' then assume that a
      * file family is being opened.

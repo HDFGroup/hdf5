@@ -2,6 +2,9 @@
 require 5.003;
 use Text::Tabs;
 
+# NOTE: THE FORMAT OF HRETURN_ERROR AND HGOTO_ERROR MACROS HAS
+# CHANGED. THIS SCRIPT NO LONGER WORKS! --rpm
+
 # Copyright (C) 1997 National Center for Supercomputing Applications.
 #		All rights reserved.
 #

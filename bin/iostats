@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+
+# Usage: pipe the output of Linux's `strace' program into the stdin of
+# this command, and the output of this command into gnuplot.
+
+$filename = shift || "tstab2.h5";
+$total = 0;
+
+while (<>) {
+   if (!defined $fd) {
+      if (/^open\("(.*?)".*=\s+(\d+)/ && $1 eq $filename) {
+	 $fd = $2;
+	 $pos = 0;
+      }
+   } elsif (/^close\((\d+)/ && $1==$fd) {
+      $fd = undef;
+   } elsif (/^lseek\((\d+), -?\d+,.*= (\d+)/ &&
+	    $1==$fd && $2>=0) {
+      $pos = $2;
+   } elsif (/^lseek\((\d+),/ && $1==$fd) {
+      die $_;
+   } elsif (/^write\((\d+), ".*?"(\.\.\.)?, \d+\)\s*= (\d+)/ &&
+	    $1==$fd && $3>=0) {
+      my $nbytes = $3;
+      printf "%d %d\n", $total, $pos;
+      $pos += $nbytes;
+      $total += $nbytes;
+   } elsif (/^write\((\d+),/ && $1==$fd) {
+      die $_;
+   } elsif (/^read\((\d+), ".*?"(\.\.\.)?, \d+\)\s*= (\d+)/ &&
+	    $1==$fd && $3>=0) {
+      my $nbytes = $3;
+      printf "%d %d\n", $total, $pos;
+      $pos += $nbytes;
+      $total += $nbytes;
+   } elsif (/^read\((\d+),/ && $1==$fd) {
+      die $_;
+   }
+}
+      

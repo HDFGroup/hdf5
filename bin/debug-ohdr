@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+require 5.003;
+
+# Looks for lines emitted by H5O_open() and H5O_close() and tries to
+# determine which objects were not properly closed.
+
+while (<>) {
+   next unless /^([<>])(0x[\da-f]+|\d+)$/;
+   my ($op, $addr) = ($1, $2);
+
+   if ($op eq ">") {
+      # Open object
+      $obj{$addr} += 1;
+   } else {
+      # Close object
+      die unless $obj{$addr}>0;
+      $obj{$addr} -= 1;
+      delete $obj{$addr} unless $obj{$addr};
+   }
+}
+
+for (sort keys %obj) {
+   printf "%3d %s\n", $obj{$_}, $_;
+}
+
+exit 0;

@@ -11,12 +11,16 @@
 ./README
 ./RELEASE
 ./acconfig.h
+./bin/checkapi
 ./bin/checkposix
 ./bin/config.guess
 ./bin/config.sub
+./bin/debug-ohdr
 ./bin/distdep
 ./bin/errors
+./bin/h5vers
 ./bin/install-sh
+./bin/iostats
 ./bin/release
 ./bin/trace
 ./bin/versinc

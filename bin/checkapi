@@ -1,0 +1,35 @@
+#!/usr/bin/perl -w
+require 5.003;
+
+# Purpose: insures that API functions aren't called internally.
+# Usage:   checkapi H5*.c
+my $comment = 0;
+while (<>) {
+
+  # Remove comments within the line.
+  s/\/\*.*?\*\///g;
+
+  # Process comment begin and end tokens on this line.
+  $comment-- if /\*\//;		# count comment ends
+  next if $comment;		# skip line if in comment
+  $comment++ if /\/\*/;		# count comment starts
+  s/(.*)\/\*.*/$1/;		# remove comments that begin on this line
+
+  # Remove character strings
+  s/\\.//g;			# remove escaped characters
+  s/\".*?\"//g;			# remove string constants
+
+  # Disregard the following hits
+  next if /^H5/;
+  next if /^\#/;
+  next if /FUNC_ENTER/;
+
+  next unless /(H5[A-Z]{1,2}[a-z]\w*)/;
+  print "$ARGV:$.: $1\n";
+} continue {
+  if (eof) {
+    print "$ARGV:$.: bad comment nesting\n" if $comment;
+    $comment = 0;
+    close ARGV;		# reset line number
+  }
+}

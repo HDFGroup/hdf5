@@ -35,6 +35,8 @@ while (<>) {
    # Get rid of string constants if they begin and end on this line.
    s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
 
+   # Get rid of preprocessor directives
+   s/^\#.*//;
 
    # Now find all function calls on this line
    while (($name)=/\b([a-gi-z_A-GI-Z]\w*)\s*\(/) {

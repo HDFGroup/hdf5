@@ -1,0 +1,154 @@
+#!/usr/bin/perl -w
+require 5.003;
+
+### Copyright © 1998 NCSA.
+# Robb Matzke <matzke@llnl.gov>
+# 17 July 1998
+
+### Purpose
+# Increments the hdf5 version number by changing the value of
+# constants in the src/H5public.h file.  The new version number is
+# printed on the standard output. An alternate source file name can be
+# specified as an argument.  In any case, the original file is saved
+# by appending a tilde `~' to the name.
+
+### Usage:
+# h5vers [OPTIONS] [FILE]
+
+# Without options this program only displays the current version and
+# doesn't modify any files or create backups.  The default is to print
+# the version number as a dotted triple like `1.0.24' but with the
+# `-v' option the version will be printed as `version 1.0 release 24'.
+#
+# The `-s VERSION' switch will set the version as specified.  If the
+# string contains a dotted triple then it will be used as the version
+# number, otherwise up to three numbers will be read from the end of
+# the string and used as the major version, minor version, and release
+# number.  If any numbers are missing then zero is assumed.  This
+# allows versions to be specified like `-s "version 2.1 release 8"' or
+# `-s hdf5-2.1.8.tar.bz2'.  If the new version is less than the old
+# version then a warning message is generated on standard error.
+#
+# The `-i [major|minor|release]' option increments the major, minor,
+# or release (the default) number.  If the minor number is incremented
+# then the release number is set to zero; if the major number is
+# incremented then the minor and release numbers are set to zero.
+#
+# If a file is specified then that file is used instead of
+# ./H5public.h or ./src/H5public.h.
+##############################################################################
+
+sub getvers {
+  local ($_) = @_;
+  my (@vers);
+
+  ($vers[0]) = /^\#\s*define\s+H5_VERS_MAJOR\s+(\d+)/m;
+  ($vers[1]) = /^\#\s*define\s+H5_VERS_MINOR\s+(\d+)/m;
+  ($vers[2]) = /^\#\s*define\s+H5_VERS_RELEASE\s+(\d+)/m;
+  return @vers;
+}
+
+sub setvers {
+  my ($contents, @vers) = @_;
+  $_[0] =~ s/^(\#\s*define\s+H5_VERS_MAJOR\s+)\d+/$1$vers[0]/m;
+  $_[0] =~ s/^(\#\s*define\s+H5_VERS_MINOR\s+)\d+/$1$vers[1]/m;
+  $_[0] =~ s/^(\#\s*define\s+H5_VERS_RELEASE\s+)\d+/$1$vers[2]/m;
+}
+
+# Parse arguments
+my ($verbose, $set, $inc, $file);
+my (@files) = ("H5public.h", "src/H5public.h", "../src/H5public.h");
+while ($_ = shift) {
+  $_ eq "-s" && do {
+    die "-s switch needs a version number\n" unless @ARGV;
+    $set = shift;
+    next;
+  };
+
+  $_ eq "-i" && do {
+    die "-i switch needs a value\n" unless @ARGV;
+    $inc = shift;
+    next;
+  };
+
+  $_ eq "-v" && do {
+    $verbose = 1;
+    next;
+  };
+    
+
+  /^-/ && die "unrecognized option: $ARGV[0]\n";
+  die "only one file name can be specified\n" if $file;
+  $file = _;
+}
+die "mutually exclusive options given\n" if $set && $inc;
+
+# Determine file to use
+unless ($file) {
+  for (@files) {
+    ($file=$_,last) if -f $_;
+  }
+}
+die "unable to read file: $file\n" unless -r $file;
+
+# Get the current version number.
+open FILE, $file or die "unable to open $file: $!\n";
+my ($contents) = join "", <FILE>;
+close FILE;
+my (@curver) = getvers $contents;
+
+# Determine the new version number.
+if ($set) {
+  if ($set =~ /(\d+)\.(\d+)\.(\d+)/) {
+    @newver = ($1, $2, $3);
+  } elsif ($set =~ /(\d+)\D+(\d+)\D+(\d+)\D*$/) {
+    @newver = ($1, $2, $3);
+  } elsif ($set =~ /(\d+)\D+(\d+)\D*$/) {
+    @newver = ($1, $2, 0);
+  } elsif ($set =~ /(\d+)\D*$/) {
+    @newver = ($1, 0, 0);
+  } else {
+    die "illegal version number specified: $set\n";
+  }
+} elsif ($inc && $inc eq "major") {
+  $newver[0] = $curver[0]+1;
+  @newver[1,2] = (0,0);
+} elsif ($inc && $inc eq "minor") {
+  $newver[0] = $curver[0];
+  $newver[1] = $curver[1]+1;
+  $newver[2] = 0;
+} elsif ($inc && $inc eq "release") {
+  @newver[0,1] = @curver[0,1];
+  $newver[2] = $curver[2]+1;
+} elsif ($inc) {
+  die "unknown increment field: $inc\n";
+} else {
+  @newver = @curver;
+}
+
+# Print a warning if the version got smaller.
+if ($newver[0]*1000000 + $newver[1]*1000 + $newver[2] <
+    $curver[0]*1000000 + $curver[1]*1000 + $curver[2]) {
+  printf STDERR "Warning: version decreased from %d.%d.%d to %d.%d.%d\n",
+    @curver, @newver;
+}
+
+# Update the version number if it changed.
+if ($newver[0]!=$curver[0] ||
+    $newver[1]!=$curver[1] ||
+    $newver[2]!=$curver[2]) {
+  setvers $contents, @newver or die "unable to set version\n";
+  rename $file, "$file~" or die "unable to save backup file\n";
+  open FILE, ">$file" or die "unable to open $file but backup saved!\n";
+  print FILE $contents;
+  close FILE;
+}
+
+# Print the new version number
+if ($verbose) {
+  printf "version %d.%d release %d\n", @newver;
+} else {
+  printf "%d.%d.%d\n", @newver;
+}
+
+exit 0;
