@@ -904,7 +904,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
   }
 
   /* Release resources */
-  if (H5FD_STREAM_ERROR_CHECK (stream->socket) && stream->internal_socket)
+  if (! H5FD_STREAM_ERROR_CHECK (stream->socket) && stream->internal_socket)
   {
     H5FD_STREAM_CLOSE_SOCKET (stream->socket);
   }
