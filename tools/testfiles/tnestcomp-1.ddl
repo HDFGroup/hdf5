@@ -14,7 +14,7 @@ GROUP "/" {
               CSET H5T_CSET_ASCII;
               CTYPE H5T_C_S1;
             } "char_name";
-            H5T_IEEE_F32LE "array_name"[2];
+            H5T_ARRAY [2] of H5T_IEEE_F32LE "array_name";
          } "d_name";
       } 
       DATASPACE { SIMPLE ( 10 ) / ( 10 ) } 

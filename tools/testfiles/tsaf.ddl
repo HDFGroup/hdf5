@@ -1569,13 +1569,13 @@ GROUP "/" {
       DATATYPE {
          H5T_STD_I32BE "ndims";
          {
-            H5T_STD_I32BE "_"[8];
+            H5T_ARRAY [8] of H5T_STD_I32BE "_";
          } "origins";
          {
-            H5T_STD_I32BE "_"[8];
+            H5T_ARRAY [8] of H5T_STD_I32BE "_";
          } "sizes";
          {
-            H5T_STD_I32BE "_"[8];
+            H5T_ARRAY [8] of H5T_STD_I32BE "_";
          } "order";
          H5T_ENUM
          { H5T_STD_I32BE;
@@ -2318,7 +2318,7 @@ GROUP "/" {
           "UNKNOWN"          -4;
          } "srole";
          {
-            H5T_STD_I32BE "_"[16];
+            H5T_ARRAY [16] of H5T_STD_I32BE "_";
          } "coll_ids";
          H5T_STD_I32BE "is_top";
          H5T_STD_I32BE "is_extendible";
