@@ -215,7 +215,7 @@ usage(void)
 Usage of HDF5 Dumper:\n\
 \n\
 h5dump [-h] [-bb] [-header] [-v] [-V] [-a <names>] [-d <names>] [-g <names>]\n\
-       [-l <names>] [-t <names>] [-w <number>] <file>\n\
+       [-l <names>] [-o <fname>] [-t <names>] [-w <number>] <file>\n\
 \n\
   -h            Print information on this command and exit.\n\
   -bb           Display the conent of the boot block. [Default: don't display]\n\
@@ -1295,10 +1295,10 @@ dump_data(hid_t obj_id, int obj_data)
  * Function:    set_output_file
  *
  * Purpose:     Open fname as the output file for dataset raw data.
- *        Set rawdatastream as its file stream.
+ *		Set rawdatastream as its file stream.
  *
  * Return:      0 -- succeeded
- *        negative -- failed
+ *		negative -- failed
  *
  * Programmer:  Albert Cheng, 2000/09/30
  *
@@ -1358,6 +1358,9 @@ main(int argc, char *argv[])
     /* Disable error reporting */
     H5Eget_auto(&func, &edata);
     H5Eset_auto(NULL, NULL);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     opts = malloc((argc / 2) * sizeof(int));
     opts[0] = -1;
@@ -1712,16 +1715,8 @@ main(int argc, char *argv[])
     end_obj(dump_header_format->fileend, dump_header_format->fileblockend);
 
 done:
-    H5Eset_auto(func, edata);
-    free(opts);
-
     if (H5Fclose(fid) < 0)
         d_status = 1;
-
-    if (rawdatastream && rawdatastream != stdout)
-        if (fclose(rawdatastream))
-            perror("fclose");
-
 
     free(group_table->objs);
     free(dset_table->objs);
@@ -1729,6 +1724,11 @@ done:
     free(prefix);
     free(info->prefix);
     free(info);
+    free(opts);
+
+    h5tools_close();
+    H5Eset_auto(func, edata);
+
     return d_status;
 }
 

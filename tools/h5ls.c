@@ -1923,6 +1923,9 @@ main (int argc, char *argv[])
     static char	root_name[] = "/";
     char        drivername[50];
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
 	     dataset_list1, dataset_list2);
@@ -2154,6 +2157,7 @@ main (int argc, char *argv[])
 	}
 	H5Fclose(file);
     }
+    h5tools_close();
     
     return 0;
 }

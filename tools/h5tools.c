@@ -26,6 +26,8 @@ int compound_data;
 int nCols = 80;
 FILE *rawdatastream;	/* should initialize to stdout but gcc moans about it */
 
+static int h5tools_init_g = 0;		/* if h5tools lib has been initialized */
+
 int print_data(hid_t oid, hid_t _p_type, int obj_data);
 
 /*
@@ -105,6 +107,61 @@ extern char *get_objectname(table_t*, int);
 
 /* local functions */
 static int h5dump_vlen_dset(FILE *, const h5dump_t *, hid_t, hid_t, int);
+
+/*-------------------------------------------------------------------------
+ * Function:	h5tools_init
+ *
+ * Purpose:	Initialize the H5 Tools library.
+ *		This should be called before any other h5tools function is
+ *		called.  Effect of any h5tools function called before this
+ *		has been called is undetermined.
+ *
+ * Return:	None
+ *
+ * Programmer:	Albert Cheng, 2000-10-31
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+void
+h5tools_init(void)
+{
+    if (!h5tools_init_g){
+	if (!rawdatastream)
+	    rawdatastream = stdout;
+	h5tools_init_g++;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	h5tools_close
+ *
+ * Purpose:	Close the H5 Tools library by closing or releasing resources
+ *		such as files opened by the library.
+ *		This should be called after all other h5tools functions have
+ *		been called.  Effect of any h5tools function called after this
+ *		has been called is undetermined.
+ *
+ * Return:	None
+ *
+ * Programmer:	Albert Cheng, 2000-10-31
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+void
+h5tools_close(void)
+{
+    if (h5tools_init_g){
+	if (rawdatastream && rawdatastream != stdout){
+	    if (fclose(rawdatastream))
+		perror("closing rawdatastream");
+	    else
+		rawdatastream = NULL;
+	}
+	h5tools_init_g = 0;
+    }
+}
 
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_close
@@ -1814,10 +1871,6 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
     f_space = H5Dget_space(dset);
 
     /* Print the data */
-    /* a kludge because gcc does not accept the initialization with sdtout */
-    if (!rawdatastream)
-	rawdatastream = stdout;
-
     if (H5Sis_simple(f_space) > 0) {
 	/* Probably a compound datatype or something... */
 	if (H5Tget_class(p_type) == H5T_VLEN) {

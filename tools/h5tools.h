@@ -436,4 +436,6 @@ extern FILE *rawdatastream;             /* output stream for raw data */
 
 /* Definitions of useful routines */
 void print_version(const char *program_name);
+void h5tools_init(void);
+void h5tools_close(void);
 
