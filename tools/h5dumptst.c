@@ -1163,7 +1163,7 @@ hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], start[1], stride[1], count[1], block[1];
 
 
-hsize_t i;
+int i;
 char buf[LENSTR+10];
 char buf2[3*LENSTR2];
 hsize_t sdim;
@@ -1214,7 +1214,7 @@ hsize_t sdim;
   count[0]=1;
   block[0]=1;
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0; (hsize_t)i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_NULLTERM of",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
@@ -1227,7 +1227,7 @@ hsize_t sdim;
   group = H5Gcreate (fid, "/g2", 0);
   dataset = H5Dcreate(group, "dset2", fxdlenstr, space, H5P_DEFAULT);
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0; (hsize_t)i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_NULLTERM of string array",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
@@ -1247,7 +1247,7 @@ hsize_t sdim;
   group = H5Gcreate (fid, "/g3", 0);
   dataset = H5Dcreate(group, "dset3", fxdlenstr, space, H5P_DEFAULT);
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0;(hsize_t) i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_NULLPAD of",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
@@ -1261,7 +1261,7 @@ hsize_t sdim;
   group = H5Gcreate (fid, "/g4", 0);
   dataset = H5Dcreate(group, "dset4", fxdlenstr, space, H5P_DEFAULT);
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0; (hsize_t)i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_NULLPAD of string array",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
@@ -1280,7 +1280,7 @@ hsize_t sdim;
   group = H5Gcreate (fid, "/g5", 0);
   dataset = H5Dcreate(group, "dset5", fxdlenstr, space, H5P_DEFAULT);
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0; (hsize_t)i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_SPACEPAD of",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
@@ -1294,7 +1294,7 @@ hsize_t sdim;
   group = H5Gcreate (fid, "/g6", 0);
   dataset = H5Dcreate(group, "dset6", fxdlenstr, space, H5P_DEFAULT);
 
-  for (i = 0; i < sdim; i++) {
+  for (i = 0; (hsize_t)i < sdim; i++) {
 	start[0] = i;
 	sprintf(buf,"This is row %1d of type H5T_STR_SPACEPAD of string array",i);
   	H5Tset_size(memtype, HDstrlen(buf)+1);
