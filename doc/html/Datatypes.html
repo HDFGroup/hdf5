@@ -2431,13 +2431,13 @@ in the HDF5 distribution.
 
     <h2>10. Sharing Datatypes among Datasets</h2>
 
-    <p>If a file has lots of datasets which have a common datatype
+    <p>If a file has lots of datasets which have a common datatype,
       then the file could be made smaller by having all the datasets
       share a single datatype.  Instead of storing a copy of the 
       datatype in each dataset object header, a single datatype is stored
       and the object headers point to it.  The space savings is
-      probably only significant for datasets with a compound datatype
-      since the simple datatypes can be described with just a few
+      probably only significant for datasets with a compound datatype,
+      since the atomic datatypes can be described with just a few
       bytes anyway.
 
     <p>To create a bunch of datasets that share a single datatype
