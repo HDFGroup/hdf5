@@ -119,12 +119,15 @@ uninstall-doc:
 	@$(MAKE) uninstall-examples
 	(cd doc && $(MAKE) $@) || exit 1;
 
-## need to require a proper "make install" has been done.
+## Check if installation is correct by checking if examples can be built.
+## This requires a proper "make install" has been done.
 check-install:
-	(cd examples && $(MAKE) check) || exit 1;
-	if test -d fortran/examples; then				      \
-	    (cd fortran/examples && $(MAKE) check) || exit 1;		      \
-	fi
+	(cd examples && $(MAKE) check) || exit 1
+	@@SETX@; for d in dummy @subdirs@; do				      \
+	  if test $$d != "dummy"; then					      \
+	    (cd $$d && $(MAKE) $@) || exit 1;				      \
+	  fi;								      \
+	done
 
 ## Number format detection
 H5detect: 

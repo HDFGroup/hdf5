@@ -99,6 +99,11 @@ install-examples:
 uninstall-examples:
 	(cd examples && $(MAKE) $@) || exit 1;
 
+## Check if installation is correct by checking if examples can be built.
+## This requires a proper "make install" has been done.
+check-install:
+	(cd examples && $(MAKE) check) || exit 1
+
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
