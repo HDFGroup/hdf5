@@ -11,6 +11,7 @@
 ./INSTALL_TFLOPS
 ./INSTALL_parallel
 ./INSTALL_Windows.txt
+./HISTORY
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.in
