@@ -33,10 +33,6 @@ test_mpio_overlap_writes(char *filename)
     MPI_Info info = MPI_INFO_NULL;
     int color, mrc;
     MPI_File	fh;
-    int newrank, newprocs;
-    hid_t fid;			/* file IDs */
-    hid_t acc_tpl;		/* File access properties */
-    herr_t ret;			/* generic return value */
     int i;
     int vrfyerrs;
     char  buf[4093];		/* use some prime number for size */
@@ -165,7 +161,7 @@ test_mpio_overlap_writes(char *filename)
  * won't abort the remaining test or other separated tests.
  */
 void
-test_mpio_offset()
+test_mpio_offset(void)
 {
     int mpi_size, mpi_rank;
     MPI_Offset  mpi_off;
@@ -224,22 +220,15 @@ void
 test_mpio_gb_file(char *filename)
 {
     int mpi_size, mpi_rank;
-    MPI_Comm comm;
     MPI_Info info = MPI_INFO_NULL;
-    int color, mrc;
+    int mrc;
     MPI_File	fh;
-    int newrank, newprocs;
-    hid_t fid;			/* file IDs */
-    hid_t acc_tpl;		/* File access properties */
-    herr_t ret;			/* generic return value */
     int i, j, n;
     int vrfyerrs;
     int writerrs;		/* write errors */
     int ntimes;			/* how many times */
     char  *buf;
     char  expected;
-    int bufsize = MB;
-    int stride;
     MPI_Offset  mpi_off;
     MPI_Status  mpi_stat;
 
@@ -415,6 +404,7 @@ usage(void)
 }
 
 
+int
 main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
