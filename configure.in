@@ -175,7 +175,8 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 dnl Unix
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
-AC_CHECK_HEADERS(stddef.h setjmp.h stdint.h)
+AC_CHECK_HEADERS(stddef.h setjmp.h)
+AC_CHECK_HEADERS(stdint.h, C9x=yes)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
 
@@ -210,6 +211,12 @@ dnl Posix.1g types (C9x)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h>
 EOF
+if test "Xyes" = "X$C9x"; then
+    cat >>confdefs.h <<\EOF
+#include <stdint.h>
+EOF
+fi
+
 AC_CHECK_SIZEOF(        int8_t, 1)
 AC_CHECK_SIZEOF(       uint8_t, 1)
 AC_CHECK_SIZEOF(  int_least8_t, 1)
