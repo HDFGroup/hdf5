@@ -347,19 +347,32 @@ create or access function.
         <em>const char *</em><code>name</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Removes the specified <code>name</code> from the group graph and
-        decrements the link count for the object to which <code>name</code> points
+    <dd>Removes the link to an object from a group. 
   <dt><strong>Description:</strong>
-    <dd><code>H5Gunlink</code> removes an association between a name and an object. 
-        Object headers keep track of how many hard links refer to the object;  
-        when the hard link count reaches zero, the object can be removed  
+    <dd><code>H5Gunlink</code> removes the object specified by 
+        <code>name</code> from the group graph and decrements the 
+        link count for the object to which <code>name</code> points.
+        This action eliminates any association between <code>name</code>
+        and the object to which <code>name</code> pointed.
+        <p>
+        Object headers keep track of how many hard links refer to an object;
+        when the link count reaches zero, the object can be removed  
         from the file.  Objects which are open are not removed until all  
         identifiers to the object are closed.
         <p>
-        If the link count reaches zero, all file-space associated with 
-        the object will be reclaimed.  If the object is open, the 
-        reclamation of the file space is delayed until all handles to the
-        object are closed.
+        If the link count reaches zero, all file space associated with 
+        the object will be released, i.e., identified in memory as freespace.
+        If the any object identifier is open for the object, the space
+        will not be released until after the object identifier is closed.
+        <p>
+        <!-- editingcomment: freespace and file packing -->
+        Note that space identified as freespace is available for re-use 
+        only as long as the file remains open; once a file has been 
+        closed, the HDF5 library loses track of freespace. 
+        Identifying freespace does not imply that the file
+        will be packed or that, if the file is closed and later reopened,
+        that the space will be available for re-use.  
+        Such functionality has not yet been implemented in the HDF5 library.
   <dt><strong>Warning:</strong>
     <dd>Exercise care in unlinking groups as it is possible to render data in 
         a file inaccessible with <code>H5Gunlink</code>.  
