@@ -31,6 +31,8 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
 #include <H5FDstdio.h>		/* Standard C buffered I/O		  */
 
+#include <H5FDqak.h>		/* Custom unbuffered I/O			  */
+
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*attributes				  */
@@ -727,13 +729,13 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * new file handle.  We do this early because some values might need
 	 * to change as the file is being opened.
 	 */
-	fcpl = (H5P_DEFAULT==fcpl_id)? &H5F_create_dflt : H5I_object(fcpl_id);
+	fcpl = (H5P_DEFAULT==fcpl_id)? &H5F_create_dflt : (const H5F_create_t *)H5I_object(fcpl_id);
 	if (NULL==(f->shared->fcpl=H5P_copy(H5P_FILE_CREATE, fcpl))) {
 	    HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
 			  "unable to copy file creation property list");
 	}
 
-	fapl = (H5P_DEFAULT==fapl_id)? &H5F_access_dflt : H5I_object(fapl_id);
+	fapl = (H5P_DEFAULT==fapl_id)? &H5F_access_dflt : (const H5F_access_t *)H5I_object(fapl_id);
 	f->shared->mdc_nelmts = fapl->mdc_nelmts;
 	f->shared->rdcc_nelmts = fapl->rdcc_nelmts;
 	f->shared->rdcc_nbytes = fapl->rdcc_nbytes;

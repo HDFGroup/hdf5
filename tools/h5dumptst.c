@@ -58,6 +58,7 @@ typedef struct s1_t {
 void test_enum(void);
 void test_objref(void);
 void test_datareg(void);
+void test_nestcomp(void);
 
 
 
@@ -1574,7 +1575,7 @@ void test_datareg(void){
 void test_nestcomp(){
 
 	hid_t file,space,type,type2,dataset;
-	int i, maxdim = 5, status = 0;
+	int i, maxdim = 5, status;
 	hsize_t dim = 5;
 	int y = 1;
 

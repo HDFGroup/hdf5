@@ -1365,7 +1365,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
 
+#if 0
     hsize_t		dim_n_size;
+#endif
 
     /*
      * Check that everything looks okay.  The dimensionality must not be too
@@ -1419,12 +1421,16 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 				hs_size, NULL);
 	    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
 				&hs_nelmts, NULL);
+#if 0
 	    dim_n_size = total_size[ctx.ndims-1];
+#endif
 	} else {
 	    H5Sselect_all(f_space);
 	    H5Sselect_all(sm_space);
 	    hs_nelmts = 1;
+#if 0
 	    dim_n_size = 1;
+#endif
 	}
 	
 	/* Read the data */

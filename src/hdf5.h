@@ -50,4 +50,6 @@
 #include <H5FDdpss.h>           /* Remote access using Storage Client API */
 #include <H5FDmulti.h>		/* Usage-partitioned file family	*/
 
+#include <H5FDqak.h>		/* Custom POSIX unbuffered file I/O		*/
+
 #endif
