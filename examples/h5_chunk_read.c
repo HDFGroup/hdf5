@@ -48,8 +48,8 @@ dataset = H5Dopen(file, DATASETNAME);
  */
  
 filespace = H5Dget_space(dataset);    /* Get filespace handle first. */
-rank      = H5Sget_ndims(filespace);
-status_n  = H5Sget_dims(filespace, dims, NULL);
+rank      = H5Sextent_ndims(filespace);
+status_n  = H5Sextent_dims(filespace, dims, NULL);
 printf("dataset rank %d, dimensions %d x %d \n", rank, dims[0], dims[1]);
 
 /*
