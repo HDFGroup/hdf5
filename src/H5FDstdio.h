@@ -14,7 +14,15 @@
 
 #define H5FD_STDIO	(H5FD_stdio_init())
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 __DLL__ hid_t H5FD_stdio_init(void);
 __DLL__ herr_t H5Pset_fapl_stdio(hid_t fapl_id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
