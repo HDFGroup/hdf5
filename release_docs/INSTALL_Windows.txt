@@ -67,7 +67,7 @@ Preconditions
 
         HDF5_EXT_ZLIB
         HDF5_EXT_SZIP
-        H5_SZIP_CAN_ENCODE
+        HDF5_SZIP_ENCODE
         HDF5_EXT_ZLIB_DLL
         HDF5_EXT_SZIP_DLL
       
@@ -91,19 +91,27 @@ Preconditions
       Similarly, you can set:
 
       HDF5_EXT_SZIP environment variable as szlib.lib
-      H5_SZIP_CAN_ENCODE environment variable as 1
+      HDF5_SZIP_ENCODE environment variable as 1
       HDF5_EXT_ZLIB_DLL environment variable as c:\zlib114\dll\zlib.lib
       HDF5_EXT_SZIP_DLL environment variable as szlibdll.lib.
 
       Notes:
-         a. If the zlib DLL library path is not C:\zlib114\dll, replace
+
+         a. When setting environment variables, only include path for
+            the zlib DLL library, as the zlib static and DLL libraries
+            share the same name --  zlib.lib.  For all other
+            environment variables, you MUST NOT include the path.
+            Otherwise, some of HDF5 tools tests will get unexpected
+            results.
+
+         b. If the zlib DLL library path is not C:\zlib114\dll, replace
             it with the correct path in the HDF5_EXT_ZLIB_DLL
             environment variable.
-      
-         b. You might have to close and reopen running programs for
+
+         c. You might have to close and reopen running programs for
             the new environment variable settings to take effect. 
 
-         c. By default, c:\zlib114\dll\zlib.dll and 
+         d. By default, c:\zlib114\dll\zlib.dll and 
             c:\szlib\dll\szibdll.dll should be copied into the location
             that the application can find, one suggestion is to use the 
             C:\WINNT\system or C:\WINDOWS\system directory before
@@ -235,7 +243,7 @@ STEP 1: Building HDF5 libraries and tools
       You should find windows project files listed as "all files, 
       big files etc." on the left.        
 
-   3. (Optional) HDF5 C++, Fortran libraries and intel compiler
+   3. (Optional) HDF5 C++, Fortran libraries and Intel compiler
     
       3.1 Skip this step if you do not want to build HDF5 C++ libraries
         
@@ -257,16 +265,14 @@ STEP 1: Building HDF5 libraries and tools
           Select "all" in the "Select project to modify:" box,
               
              flush1_fortran
-             flush1_fortrandll
              flush2_fortran
-             flush2_fortrandll
              hdf5_f90cstub
-             hdf5_f90cstubdll
              hdf5_fortran
-             hdf5_fortrandll
              libtest_fortran
              testhdf5_fortran
-             testhdf5_fortrandll
+          
+          Note: HDF5 Fortran DLL currently does not work with
+                DEC Fortran 6.0 and Intel compiler.
           
       3.3 Skip this step if you are not using Intel compilers
     
@@ -407,10 +413,6 @@ STEP 1: Building HDF5 libraries and tools
                libtest_fortran.lib- the HDF5 Fortran test static
                                     library
        
-       Note: 
-             HDF5 Fortran DLLs of the current release do not work
-             with DEC Fortran 6.0.
-          
 
 STEP 2: Testing HDF5 libraries and tools
 
@@ -597,16 +599,6 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Skip this step UNLESS you have built HDF5 Fortran libraries     
       and want to test them.
 
-      DLLs listed below should be placed into to the Windows system
-      directory.  A batch file named install_f90dll.bat is included in
-      c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
-      following HDF5 Fortran DLLs will be copied to the system directory.
-       
-         hdf5\proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.dll
-         hdf5\proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll
-         hdf5\proj\hdf5_fortrandll\release\hdf5_fortrandll.dll
-         hdf5\proj\hdf5_fortrandll\debug\hdf5_fortranddll.dll
-              
       Run testhdf5_fortran.bat at the command prompt as below:
 
          testhdf5_fortran release >"Your output filename"
@@ -675,17 +667,31 @@ STEP 4: Building the C examples (Optional)
 
           writetest 
 
-   3. Run the batch file "InstallExamples.bat" which resides in the top 
-      level directory (C:\MyHDFSTUFF\hdf5).  This file creates 2 new
-      directories, examplesREL and examplesDBG, in the examples
-      directory and places all the executables in it.  Both the release
-      and debug versions of the examples should be built before this
-      step is done.  The examples should be tested in these 2 new
-      directories due to some dependencies between the examples.
-      Especially writetest.exe and extendwritetest.exe should be 
-      executed before chunkread.exe and readtest.exe due to 
-      dependencies among these files.
-     
+   3. Invoke a command prompt window and run the batch file 
+      "InstallExamples.bat" which resides in the top level directory
+      (C:\MyHDFstuff\hdf5).  This file creates 2 new directories, 
+      examplesREL and examplesDBG, in the C:\MyHDFstuff\examples
+      directory and places all the executables in it.  Both the
+      release and debug versions of the examples should be built 
+      before this step is done.
+
+   4. We provide a batch file named testExamples.bat and an expected
+      examples tests output file named testExamples_exp_output.txt
+      in c:\MyHDFstuff\hdf5\examples diectory for you to test the
+      examples.
+      
+      testExamples.bat batch file has two options:
+
+         testExamples release -- test release version of the examples
+
+         testExamples debug   -- test debug version of the examples
+
+      Invoke a command prompt window and run testExamples with
+      appropriate options.  You should get "All HDF5 C examples tests
+      passed." when the C examples are built successfully.  Otherwise,
+      the difference between the expected outputs and actual outputs
+      will be given.
+
 ************************************************************************
 
 
@@ -839,6 +845,10 @@ DLL... hints:
 
 Section V: How to disable gzip(zlib)/szip compression
 
+Warning: When you modify the H5pubconf.h file as described below,
+         DO NOT just change the values of these macros from 1 to 0.
+         Please DO remove(or comment out) appropriate lines.
+         
    1. Disable gzip compression 
 
       If you would like to remove gzip compression from the HDF5
@@ -851,7 +861,7 @@ Section V: How to disable gzip(zlib)/szip compression
              #define H5_HAVE_FILTER_DEFLATE 1
 
           then save the file.
-	
+	  
       1.2 Delete HDF5_EXT_ZLIB environment variable if you have
           set it in preconditions.
    
@@ -927,7 +937,8 @@ Section V: How to disable gzip(zlib)/szip compression
 		   
           then save the file.
 	
-      3.3 Set H5_SZIP_CAN_ENCODE environment variable as 0.
+      3.3 Delete HDF5_SZIP_ENCODE environment variable if you have
+          set it in preconditions.
 
       3.4 Run-compile HDF5 library according to section II.
 
