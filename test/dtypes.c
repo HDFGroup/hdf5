@@ -31,6 +31,9 @@
 /* Define if you want to see a count of overflows */
 #undef SHOW_OVERFLOWS
 
+/* Epsilon for floating-point comparisons */
+#define FP_EPSILON 0.000001
+
 /*
  * Offset from alinged memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
@@ -3944,6 +3947,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     size_t		i, j, k;		/*counters		*/
     int			endian;			/*machine endianess	*/
+    size_t		dst_ebias;		/* Destination type's exponent bias */
+    size_t		dst_msize;		/* Destination type's mantissa size */
 
 #ifdef HANDLE_SIGFPE
     pid_t		child_pid;		/*process ID of child	*/
@@ -4036,6 +4041,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
+
+    /* Get "interesting" values */
+    dst_ebias=H5Tget_ebias(dst);
+    H5Tget_fields(dst,NULL,NULL,NULL,NULL,&dst_msize);
 
     for (i=0; i<ntests; i++) {
 
@@ -4217,10 +4226,29 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		    check_mant[1] = frexp(((long double*)hw)[0], check_expo+1);
 #endif
 		}
-		if (check_expo[0]==check_expo[1] &&
-		    fabs(check_mant[0]-check_mant[1])<0.000001) {
-		    continue;
-		}
+		/* Special check for denormalized values */
+		if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
+		    int expo_diff=check_expo[0]-check_expo[1];
+		    int valid_bits=((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
+		    double epsilon=1.0;
+
+		    /* Re-scale the mantissas based on any exponent difference */
+		    if(expo_diff!=0)
+		        check_mant[0] = ldexp(check_mant[0],(double)expo_diff);
+
+		    /* Compute the proper epsilon */
+		    epsilon=ldexp(epsilon,-valid_bits);
+
+		    /* Check for "close enough" fit with scaled epsilon value */
+		    if (fabs(check_mant[0]-check_mant[1])<=epsilon)
+		        continue;
+		} /* end if */
+		else {
+		    if (check_expo[0]==check_expo[1] &&
+		        fabs(check_mant[0]-check_mant[1])<FP_EPSILON) {
+		        continue;
+		    }
+		} /* end else */
 	    }
 #endif
 
