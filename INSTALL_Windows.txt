@@ -2,11 +2,11 @@ HDF5 Install Instructions for Windows NT/95/98.
 -------------------------------------------------------------------------
 
 The instructions which follow assume that you will be using the the source
-code release 'zip' file (hdf5-1_2_0.zip).
+code release 'zip' file (hdf5-1_2_1.zip).
 
 The following sections discuss in detail installation procedures. 
 
-Building from Source Code Release (hdf5-1_2_0.zip)
+Building from Source Code Release (hdf5-1_2_1.zip)
 ===============================================
 
 STEP I:  Preconditions
@@ -24,7 +24,7 @@ To build the HDF5 and tests, it is assumed that you have done the following:
       and unpacked it using the appropriate archiver options to
       create a directory hierarchy.
         
-      Run WinZip on hdf5-1_2_0.zip (the entire source tree).
+      Run WinZip on hdf5-1_2_1.zip (the entire source tree).
       This creates a directory called 'hdf5' which 
       contains several files and directories.
 
@@ -269,7 +269,7 @@ with using the Visual C++ Development Environment.
 Project name and location issues: 
        
     The files in all.zip must end up in the hdf5\ directory
-    installed by hdf5-1_2_0.zip
+    installed by hdf5-1_2_1.zip
 
     If you must install all.dsw and all.dsp in another directory, relative 
     to hdf5\ , you will be asked to locate the sub-project files, 

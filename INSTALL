@@ -102,8 +102,8 @@
 	library, header files, and support programs.
 
 
-	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
-	$ cd hdf5-1.2.0
+	$ gunzip <hdf5-1.2.1.tar.gz |tar xf -
+	$ cd hdf5-1.21.
 	$ make check
 	$ make install
 
@@ -134,19 +134,19 @@
 5.1. Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats
 	which can be unpacked with the following commands, each of
-	which creates an `hdf5-1.2.0' directory.
+	which creates an `hdf5-1.2.1' directory.
 
 5.1.1. Non-compressed tar archive (*.tar)
-	$ tar xf hdf5-1.2.0.tar
+	$ tar xf hdf5-1.2.1.tar
 
 5.1.2. Compressed tar archive (*.tar.Z)
-	$ uncompress -c <hdf5-1.2.0.tar.Z |tar xf -
+	$ uncompress -c <hdf5-1.2.1.tar.Z |tar xf -
 
 5.1.3. Gzip'd tar archive (*.tar.gz)
-	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
+	$ gunzip <hdf5-1.2.1.tar.gz |tar xf -
 
 5.1.4. Bzip'd tar archive (*.tar.bz2)
-	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
+	$ bunzip2 <hdf5-1.2.1.tar.gz |tar xf -
 
 5.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than
