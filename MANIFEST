@@ -51,6 +51,7 @@
 ./config/freebsd
 ./config/gnu-flags
 ./config/hpux10.20
+./config/hpux11.00
 ./config/hpux9.03
 ./config/intel-osf1
 ./config/irix5.x
