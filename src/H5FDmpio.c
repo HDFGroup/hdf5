@@ -71,7 +71,6 @@ typedef struct H5FD_mpio_t {
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
     MPI_Datatype btype;		/*buffer type for xfers			*/
     MPI_Datatype ftype;		/*file type for xfers			*/
-    haddr_t	 disp;		/*displacement for set_view in xfers	*/
     int		 use_types;	/*if !0, use btype, ftype, disp.else do
 				 * simple byteblk xfer		
 				 */
@@ -500,9 +499,8 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_setup
  *
- * Purpose:	Set the buffer type BTYPE, file type FTYPE, and absolute base
- *		address DISP (i.e., the file view displacement) for a data
- *		transfer. Also request a dataspace transfer or an elementary
+ * Purpose:	Set the buffer type BTYPE, file type FTYPE for a data
+ *		transfer. Also request a MPI type transfer or an elementary
  *		byteblock transfer depending on whether USE_TYPES is non-zero
  *		or zero, respectively.
  *
@@ -515,11 +513,16 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
  *
  * Modifications:
  *
+ *              Quincey Koziol - 2002/06/17
+ *              Removed 'disp' parameter, read & write routines will use
+ *              the address of the dataset in MPI_File_set_view() calls, as
+ *              necessary.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype ftype,
-		haddr_t disp, hbool_t use_types)
+		hbool_t use_types)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
@@ -529,7 +532,6 @@ H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype ftype,
 
     file->btype = btype;
     file->ftype = ftype;
-    file->disp = disp;
     file->use_types = use_types;
 
     FUNC_LEAVE(SUCCEED);
@@ -1132,6 +1134,12 @@ H5FD_mpio_get_eof(H5FD_t *_file)
  *              for the I/O transfer.  Someday we might include code to decode
  *              the MPI type used for more complicated transfers and call
  *              MPI_Get_count all the time.
+ *
+ *              Quincey Koziol - 2002/06/17
+ *              Removed 'disp' parameter from H5FD_mpio_setup routine and use
+ *              the address of the dataset in MPI_File_set_view() calls, as
+ *              necessary.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1142,7 +1150,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset			mpi_off, mpi_disp;
-    MPI_Status  		mpi_stat = {0};
+    MPI_Status  		mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
     int				use_types_this_time, used_types_last_time;
@@ -1156,6 +1164,9 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+
+    /* Portably initialize MPI status variable */
+    HDmemset(&mpi_stat,0,sizeof(MPI_Status));
 
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
@@ -1190,8 +1201,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = file->btype;
         file_type = file->ftype;
-        if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+
+        /* When using types, use the address as the displacement for
+         * MPI_File_set_view and reset the address for the read to zero
+         */
+        mpi_disp=mpi_off;
+        mpi_off=0;
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
@@ -1199,7 +1214,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
          */
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
-        mpi_disp = 0;		/* mpi_off is sufficient */
+        mpi_disp = 0;		/* mpi_off is already set */
     }
 
     /*
@@ -1405,6 +1420,12 @@ done:
  *              for the I/O transfer.  Someday we might include code to decode
  *              the MPI type used for more complicated transfers and call
  *              MPI_Get_count all the time.
+ *
+ *              Quincey Koziol - 2002/06/17
+ *              Removed 'disp' parameter from H5FD_mpio_setup routine and use
+ *              the address of the dataset in MPI_File_set_view() calls, as
+ *              necessary.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1415,7 +1436,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset 		 	mpi_off, mpi_disp;
-    MPI_Status			mpi_stat = {0};
+    MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
     int				use_types_this_time, used_types_last_time;
@@ -1430,10 +1451,11 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
+    /* Portably initialize MPI status variable */
+    HDmemset(&mpi_stat,0,sizeof(MPI_Status));
+
     /* some numeric conversions */
     if (haddr_to_MPIOff(addr, &mpi_off)<0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
-    if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
     if ((hsize_t)size_i != size)
@@ -1465,8 +1487,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         buf_type = file->btype;
         file_type = file->ftype;
-        if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+
+        /* When using types, use the address as the displacement for
+         * MPI_File_set_view and reset the address for the read to zero
+         */
+        mpi_disp=mpi_off;
+        mpi_off=0;
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes.
@@ -1474,7 +1500,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
          */
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
-        mpi_disp = 0;		/* mpi_off is sufficient */
+        mpi_disp = 0;		/* mpi_off is already set */
     }
 
     /*
@@ -1628,6 +1654,11 @@ done:
  *              Robb Matzke, 2000-12-29
  *              Make sure file size is at least as large as the last
  *              allocated byte.
+ *
+ *              Quincey Koziol, 2002-06-??
+ *              Changed file extension method to use MPI_File_set_size instead 
+ *              read->write method.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1635,8 +1666,10 @@ H5FD_mpio_flush(H5FD_t *_file)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */
+#ifdef OLD_WAY
     uint8_t             byte=0;
-    MPI_Status          mpi_stat = {0};
+    MPI_Status          mpi_stat;
+#endif /* OLD_WAY */
     MPI_Offset          mpi_off;
     herr_t              ret_value=SUCCEED;
 
@@ -1648,6 +1681,11 @@ H5FD_mpio_flush(H5FD_t *_file)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+
+#ifdef OLD_WAY
+    /* Portably initialize MPI status variable */
+    HDmemset(&mpi_stat,0,sizeof(MPI_Status));
+#endif /* OLD_WAY */
 
     /* Extend the file to make sure it's large enough, then sync.
      * Unfortunately, keeping track of EOF is an expensive operation, so
