@@ -11,6 +11,8 @@
  * Modifications:
  *          Thomas Radke, Thursday, October 26, 2000
  *          Made it compiling under Windows.
+ *          Thomas Radke, Wednesday, November 8, 2000
+ *          Use _exit(2) instead of return() in the sender and receiver.
  *
  */
 
@@ -84,7 +86,7 @@ static int sender (void)
   if (fapl < 0)
   {
     fprintf (stderr, "sender: couldn't create file access property list\n");
-    return (-1);
+    _exit (-1);
   }
 
   status = H5Pset_fapl_stream (fapl, NULL);
@@ -93,7 +95,7 @@ static int sender (void)
     fprintf (stderr, "sender: couldn't set file access property list "
                      "for Stream VFD\n");
     H5Pclose (fapl);
-    return (-2);
+    _exit (-2);
   }
 
   /*
@@ -108,7 +110,7 @@ static int sender (void)
   {
     fprintf (stderr, "sender: couldn't create dataspace\n");
     H5Pclose (fapl);
-    return (-3);
+    _exit (-3);
   }
 
   /*
@@ -122,7 +124,7 @@ static int sender (void)
                      "%d integers\n", i);
     H5Sclose (dataspace);
     H5Pclose (fapl);
-    return (-4);
+    _exit (-4);
   }
   while (--i >= 0)
   {
@@ -142,7 +144,7 @@ static int sender (void)
     free (data);
     H5Sclose (dataspace);
     H5Pclose (fapl);
-    return (-5);
+    _exit (-5);
   }
 
   /*
@@ -158,7 +160,7 @@ static int sender (void)
     H5Fclose (file);
     H5Sclose (dataspace);
     H5Pclose (fapl);
-    return (-6);
+    _exit (-6);
   }
 
   /*
@@ -176,7 +178,7 @@ static int sender (void)
     H5Sclose (dataspace);
     H5Pclose (fapl);
     fprintf (stderr, "sender: couldn't write dataset\n");
-    return (-7);
+    _exit (-7);
   }
 
   /*
@@ -192,6 +194,12 @@ static int sender (void)
   H5Pclose (fapl);
   free (data);
 
+  _exit (0);
+
+  /*
+   * This is just to get rid of the compiler warning
+   * 'function does not return a value.
+   */
   return (0);
 }
 
@@ -219,7 +227,7 @@ static int receiver (void)
   if (fapl < 0)
   {
     fprintf (stderr, "receiver: couldn't create file access property list\n");
-    return (-1);
+    _exit (-1);
   }
 
   status = H5Pset_fapl_stream (fapl, NULL);
@@ -227,7 +235,7 @@ static int receiver (void)
   {
     fprintf (stderr, "receiver: couldn't set file access property list "
                      "for Stream VFD\n");
-    return (-2);
+    _exit (-2);
   }
 
   /*
@@ -241,7 +249,7 @@ static int receiver (void)
   if (file < 0)
   {
     fprintf (stderr, "receiver: couldn't open file from '%s'\n", FILENAME);
-    return (-3);
+    _exit (-3);
   }
 
   /*
@@ -252,7 +260,7 @@ static int receiver (void)
   if (dataset < 0)
   {
     fprintf (stderr, "receiver: couldn't open dataset '%s'\n", DATASETNAME);
-    return (-4);
+    _exit (-4);
   }
 
   /*
@@ -319,7 +327,13 @@ static int receiver (void)
 
   free (data);
 
-  return (-nerrors);
+  _exit (-nerrors);
+
+  /*
+   * This is just to get rid of the compiler warning
+   * 'function does not return a value.
+   */
+  return (0);
 }
 
 
