@@ -17,6 +17,7 @@
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"         /* Ugly, but necessary for the MPIO I/O accesses */
 #include "H5FDprivate.h"    /* Necessary for the H5FD_write & H5FD_read prototypes.. */
+#include "H5Iprivate.h"		/* Object IDs */
 #include "H5Pprivate.h"		/* Property Lists */
 #include "H5Spkg.h"
 
@@ -562,7 +563,9 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
     MPI_Datatype mpi_buf_type, mpi_file_type;
     hbool_t	 mbt_is_derived=0,
 		 mft_is_derived=0;
+#if 0
     H5P_genplist_t *plist;      /* Property list pointer */
+#endif  /* 0 */
 
     FUNC_ENTER_NOINIT(H5S_mpio_spaces_xfer);
 

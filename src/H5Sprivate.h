@@ -228,7 +228,8 @@ __DLL__ herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssiz
 
 #ifdef H5_HAVE_PARALLEL
 
-/* MPI-IO function to check whether its possible to transfer directly from app buffer to file */
+/* MPI-IO function to check whether its possible to transfer directly
+ * from app buffer to file */
 __DLL__ htri_t H5S_all_opt_possible(const H5S_t *mem_space,
                             const H5S_t *file_space, const unsigned flags);
 
@@ -247,6 +248,12 @@ __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
 				    const void *buf);
+
+/* MPI-IO function to check if a direct I/O transfer is possible between
+ * memory and the file */
+__DLL__ htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
+                                     const H5S_t *file_space, const unsigned flags);
+
 #ifndef _H5S_IN_H5S_C
 /* Global var whose value comes from environment variable */
 __DLLVAR__ hbool_t		H5_mpi_opt_types_g;

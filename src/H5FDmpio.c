@@ -439,7 +439,7 @@ H5FD_mpio_communicator(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_communicator, NULL);
+    FUNC_ENTER_NOAPI(H5FD_mpio_communicator, MPI_COMM_NULL);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
@@ -1627,10 +1627,12 @@ H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */
-    uint8_t             byte=0;
-    MPI_Status          mpi_stat = {0};
     MPI_Offset          mpi_off;
     herr_t              ret_value=SUCCEED;
+#ifdef OLD_WAY
+    uint8_t             byte=0;
+    MPI_Status          mpi_stat = {0};
+#endif  /* OLD_WAY */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_flush, FAIL);
 

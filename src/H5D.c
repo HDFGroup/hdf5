@@ -12,10 +12,14 @@
 
 /* $Id$ */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File access                          */
+#include "H5Fprivate.h"		/* Files                                */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gprivate.h"		/* Group headers		  	*/
@@ -2274,10 +2278,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==H5P_peek_hid_t(dx_plist,H5D_XFER_VFL_ID_NAME)) {
 	doing_mpio++;
-	if (dx=H5P_peek_voidp(dx_plist,H5D_XFER_VFL_INFO_NAME))
-	    xfer_mode = dx->xfer_mode;
-	else
+	if (NULL == (dx=H5P_peek_voidp(dx_plist,H5D_XFER_VFL_INFO_NAME))) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to retrieve data xfer info");
+        } else {
+	    xfer_mode = dx->xfer_mode;
+        }
     } /* end if */
     /* Collective access is not permissible without the MPIO driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
@@ -2708,10 +2713,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==H5P_peek_hid_t(dx_plist,H5D_XFER_VFL_ID_NAME)) {
 	doing_mpio++;
-	if (dx=H5P_peek_voidp(dx_plist,H5D_XFER_VFL_INFO_NAME))
-	    xfer_mode = dx->xfer_mode;
-	else
+	if (NULL==(dx=H5P_peek_voidp(dx_plist,H5D_XFER_VFL_INFO_NAME))) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to retrieve data xfer info");
+        } else {
+	    xfer_mode = dx->xfer_mode;
+        }
     } /* end if */
     /* Collective access is not permissible without the MPIO driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&

@@ -180,7 +180,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
         /* Get the driver ID */
         if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
@@ -430,7 +430,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
         /* Get the driver ID */
         if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
