@@ -52,6 +52,7 @@ int options_table_init( pack_opttbl_t **tbl )
     table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
    table->objs[i].refobj_id = -1;
+   table->objs[i].layout = -1;
   }
  
  *tbl = table;
@@ -76,9 +77,9 @@ int options_table_free( pack_opttbl_t *table )
 }
 
 /*-------------------------------------------------------------------------
- * Function: options_add_chunk
+ * Function: options_add_layout
  *
- * Purpose: add a chunking -c option to the option list
+ * Purpose: add a layout option to the option list
  *
  * Return: 0, ok, -1, fail
  *
@@ -86,11 +87,10 @@ int options_table_free( pack_opttbl_t *table )
  */
 
 
-int options_add_chunk( obj_list_t *obj_list,
-                       int n_objs,
-                       hsize_t *chunk_lengths,
-                       int chunk_rank,
-                       pack_opttbl_t *table )
+int options_add_layout( obj_list_t *obj_list,
+                        int n_objs,
+                        pack_info_t *pack,
+                        pack_opttbl_t *table )
 {
  int i, j, k, I, added=0, found=0;
  
@@ -108,8 +108,10 @@ int options_add_chunk( obj_list_t *obj_list,
     table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
    table->objs[i].refobj_id = -1;
+   table->objs[i].layout = -1;
   }
  }
+
  
  /* search if this object is already in the table; "path" is the key */
  if (table->nelems>0)
@@ -129,12 +131,15 @@ int options_add_chunk( obj_list_t *obj_list,
       printf("Input Error: chunk information already inserted for <%s>\n",obj_list[j].obj);
       exit(1);
      }
-     /* insert the chunk info */
+     /* insert the layout info */
      else
      {
-      table->objs[i].chunk.rank = chunk_rank;
-      for (k = 0; k < chunk_rank; k++) 
-       table->objs[i].chunk.chunk_lengths[k] = chunk_lengths[k];
+      table->objs[i].layout = pack->layout;
+      if (H5D_CHUNKED==pack->layout) {
+       table->objs[i].chunk.rank = pack->chunk.rank;
+       for (k = 0; k < pack->chunk.rank; k++) 
+        table->objs[i].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+      }
       found=1;
       break;
      }
@@ -147,9 +152,12 @@ int options_add_chunk( obj_list_t *obj_list,
     I = table->nelems + added;  
     added++;
     strcpy(table->objs[I].path,obj_list[j].obj);
-    table->objs[I].chunk.rank = chunk_rank;
-    for (k = 0; k < chunk_rank; k++) 
-     table->objs[I].chunk.chunk_lengths[k] = chunk_lengths[k];
+    table->objs[I].layout = pack->layout;
+    if (H5D_CHUNKED==pack->layout) {
+     table->objs[I].chunk.rank = pack->chunk.rank;
+     for (k = 0; k < pack->chunk.rank; k++) 
+      table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+    }
    }
   } /* j */ 
  }
@@ -163,9 +171,12 @@ int options_add_chunk( obj_list_t *obj_list,
    I = table->nelems + added;  
    added++;
    strcpy(table->objs[I].path,obj_list[j].obj);
-   table->objs[I].chunk.rank = chunk_rank;
-   for (k = 0; k < chunk_rank; k++) 
-    table->objs[I].chunk.chunk_lengths[k] = chunk_lengths[k];
+   table->objs[I].layout = pack->layout;
+   if (H5D_CHUNKED==pack->layout) {
+    table->objs[I].chunk.rank = pack->chunk.rank;
+    for (k = 0; k < pack->chunk.rank; k++) 
+     table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+   }
   }
  }
  
@@ -208,6 +219,7 @@ int options_add_filter(obj_list_t *obj_list,
     table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
    table->objs[i].refobj_id = -1;
+   table->objs[i].layout = -1;
   }
  }
  

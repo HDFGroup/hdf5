@@ -43,9 +43,6 @@ int has_filter(hid_t dcpl_id,
  size_t       cd_nelmts;      /* filter client number of values */
  char         f_name[256];    /* filter name */
  int          have=0;         /* flag, filter is present */
- hsize_t      chsize[64];     /* chunk size in elements */
- H5D_layout_t layout;         /* layout */
- int          rank;           /* rank */
  int          i;              /* index */
  
  /* if no information about the input filter is requested return exit */
@@ -55,18 +52,6 @@ int has_filter(hid_t dcpl_id,
  /* get information about filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
-
-/* 
-  H5D_COMPACT	  	= 0
-  H5D_CONTIGUOUS	= 1
-  H5D_CHUNKED		  = 2
- */
- layout = H5Pget_layout(dcpl_id);
- if (layout==H5D_CHUNKED)
- {
-  if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
-   return -1;
- }
  
  for (i=0; i<nfilters; i++) 
  {
@@ -88,12 +73,62 @@ int has_filter(hid_t dcpl_id,
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: has_layout
+ *
+ * Purpose: verify which layout is present in the property list DCPL_ID
+ * 
+ *  H5D_COMPACT	  	= 0
+ *  H5D_CONTIGUOUS	= 1
+ *  H5D_CHUNKED		  = 2
+ *
+ * Return: 1 has, 0 does not, -1 error
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 30, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int has_layout(hid_t dcpl_id,
+               pack_info_t *obj) 
+{
+ hsize_t      chsize[64];     /* chunk size in elements */
+ H5D_layout_t layout;         /* layout */
+ int          rank;           /* rank */
+ int          i;              /* index */
+ 
+ /* if no information about the input layout is requested return exit */
+ if (obj==NULL)
+  return 1;
+
+ layout = H5Pget_layout(dcpl_id);
+ if (obj->layout != layout)
+  return 0;
+
+ if (layout==H5D_CHUNKED)
+ {
+  if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
+   return -1;
+  if (obj->chunk.rank != rank)
+   return 0;
+  for ( i=0; i<rank; i++) 
+   if (chsize[i] != obj->chunk.chunk_lengths[i])
+    return 0;
+ }
+ 
+
+
+ return 1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_verify
  *
  * Purpose: verify if the filters specified in the options list are
- *  present on the output file
+ *  present on the OUTPUT file
  *
  * Return: 1=filter present, 0=filter not present, -1=error
  *
@@ -142,6 +177,13 @@ int h5repack_verify(const char *fname,
    ret=0;
 
 /*-------------------------------------------------------------------------
+ * layout check
+ *-------------------------------------------------------------------------
+ */
+  if (has_layout(dcpl_id,&obj)==0)
+   ret=0;
+
+/*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
@@ -160,7 +202,7 @@ int h5repack_verify(const char *fname,
  *-------------------------------------------------------------------------
  */
 
- if (options->all_filter==1)
+ if (options->all_filter==1 || options->all_layout==1)
  {
   
   /* init table */
@@ -193,8 +235,23 @@ int h5repack_verify(const char *fname,
   * filter check
   *-------------------------------------------------------------------------
   */
-    if (has_filter(dcpl_id,options->filter_g.filtn)==0)
-     ret=0;
+    if (options->all_filter==1){
+     if (has_filter(dcpl_id,options->filter_g.filtn)==0)
+      ret=0;
+    }
+
+ /*-------------------------------------------------------------------------
+  * layout check
+  *-------------------------------------------------------------------------
+  */
+    if (options->all_layout==1){
+     pack_info_t pack;
+     pack.layout=options->layout_g;
+     pack.chunk=options->chunk_g;
+     if (has_layout(dcpl_id,&pack)==0)
+      ret=0;
+    }
+    
     
   /*-------------------------------------------------------------------------
    * close

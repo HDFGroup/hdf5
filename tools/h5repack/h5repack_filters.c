@@ -16,6 +16,63 @@
 #include "h5test.h"
 #include "h5repack.h"
 
+/*-------------------------------------------------------------------------
+ * Function: filter_this
+ *
+ * Purpose: find the object name NAME (got from the traverse list)
+ *  in the repack options list; assign the filter information OBJ
+ *
+ * Return: 0 not found, 1 found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 19, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int filter_this(const char* name,    /* object name from traverse list */
+                pack_opt_t *options, /* repack options */
+                pack_info_t *obj)    /* info about object to filter */
+{
+ char *pdest;
+ int  result;
+ int  i;
+
+ /* if we are applying to all objects just return true */
+ if (options->all_filter)
+ {
+  /* assign the global filter and chunk info to the OBJ info */
+  obj->filter=options->filter_g;
+  obj->chunk=options->chunk_g;
+  return 1;
+ }
+
+ for ( i=0; i<options->op_tbl->nelems; i++) 
+ {
+  if (options->op_tbl->objs[i].filter.filtn != -1 )
+  {
+   if (strcmp(options->op_tbl->objs[i].path,name)==0)
+   {
+    *obj=options->op_tbl->objs[i];
+    return 1;
+   }
+   
+   pdest  = strstr(name,options->op_tbl->objs[i].path);
+   result = (int)(pdest - name);
+   
+   /* found at position 1, meaning without '/' */
+   if( pdest != NULL && result==1 )
+   {
+    *obj=options->op_tbl->objs[i];
+    return 1;
+   }
+  }
+ }
+
+ return 0;
+}
+
 
 
 /*-------------------------------------------------------------------------

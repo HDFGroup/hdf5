@@ -59,7 +59,7 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-c") == 0) {       
    
    /* parse the -c option */
-   h5repack_addchunk(argv[i+1],&options);
+   h5repack_addlayout(argv[i+1],&options);
    
    /* jump to next */
    ++i;

@@ -142,10 +142,9 @@ int h5repack_addfilter(const char* str,
 
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_addchunk
+ * Function: h5repack_addlayout
  *
- * Purpose: add a chunk -c option to table 
- *   Example: -c "*:2x2" , STR = "*:2x2"
+ * Purpose: add a layout option
  *
  * Return: 0, ok, -1, fail
  *
@@ -153,36 +152,43 @@ int h5repack_addfilter(const char* str,
  */
 
 
-int h5repack_addchunk(const char* str, 
-                      pack_opt_t *options)
+int h5repack_addlayout(const char* str, 
+                       pack_opt_t *options)
 {
   
  obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
  int         n_objs;             /*number of objects in the current -t or -c option entry */
- hsize_t     chunk_lengths[MAX_VAR_DIMS]; /* chunk lengths along each dimension */
- int         chunk_rank;         /*global rank for chunks */
  int         j;
+ pack_info_t pack;               /*info about layout to extract from parse */
 
- if (options->all_chunk==1){
-  printf("Error: Invalid chunking input: '*' is present with other objects <%s>\n",str);
+ if (options->all_layout==1){
+  printf("Error: Invalid layout input: all option \
+   is present with other objects <%s>\n",str);
   return -1;
  }
  
- /* parse the -c option */
- obj_list=parse_chunk(str,&n_objs,chunk_lengths,&chunk_rank,options);
+ /* parse the layout option */
+ obj_list=parse_layout(str,&n_objs,&pack,options);
  if (obj_list==NULL)
   return -1;
 
- if (options->all_chunk==1)
+ /* set global layout option */
+ if (options->all_layout==1 )
  {
-  /* if we are chunking all set the global chunking type */
-  options->chunk_g.rank=chunk_rank;
-  for (j = 0; j < chunk_rank; j++) 
-   options->chunk_g.chunk_lengths[j] = chunk_lengths[j];
+  options->layout_g=pack.layout;
+  if (pack.layout==H5D_CHUNKED) {
+   /* if we are chunking all set the global chunking type */
+   options->chunk_g.rank=pack.chunk.rank;
+   for (j = 0; j < pack.chunk.rank; j++) 
+    options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+  }
  }
 
- if (options->all_chunk==0)
-  options_add_chunk(obj_list,n_objs,chunk_lengths,chunk_rank,options->op_tbl);
+ if (options->all_layout==0)
+  options_add_layout(obj_list,
+   n_objs,
+   &pack,
+   options->op_tbl);
 
  free(obj_list);
  return 0;
@@ -210,18 +216,21 @@ static int check_options(pack_opt_t *options)
  unsigned szip_pixels_per_block;
 
 /*-------------------------------------------------------------------------
- * objects to chunk
+ * objects to layout
  *-------------------------------------------------------------------------
  */
  if (options->verbose) 
  {
   printf("\n");
-  printf("Objects to chunk are...\n");
-  if (options->all_chunk==1)  {
-   printf("\tChunk all with dimension [");
-   for ( j = 0; j < options->chunk_g.rank; j++)  
-    printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
-   printf("]\n");
+  printf("Objects to modify are...\n");
+  if (options->all_layout==1)  {
+   printf("\tApply layout to all\n ");
+   if (H5D_CHUNKED==options->layout_g) {
+    printf("with dimension [");
+    for ( j = 0; j < options->chunk_g.rank; j++)  
+     printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
+    printf("]\n");
+   }
   }
  }/* verbose */
 
@@ -247,7 +256,7 @@ static int check_options(pack_opt_t *options)
   }
  }
  
- if (options->all_chunk==1 && has_ck){
+ if (options->all_layout==1 && has_ck){
   printf("Error: Invalid chunking input: all option\
    is present with other objects\n");
   return -1;
@@ -283,30 +292,30 @@ static int check_options(pack_opt_t *options)
 
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {
-  pack_info_t obj  = options->op_tbl->objs[i];
-  char*       name = obj.path;
-  if (obj.filter.filtn>0)
+  pack_info_t pack  = options->op_tbl->objs[i];
+  char*       name = pack.path;
+  if (pack.filter.filtn>0)
   {
    if (options->verbose) 
    {
     printf("\t<%s> with %s filter",
      name,
-     get_sfilter(obj.filter.filtn));
+     get_sfilter(pack.filter.filtn));
    }
    has_cp=1;
    
    /*check for invalid combination of options */
-   switch (obj.filter.filtn)
+   switch (pack.filter.filtn)
    {
    default:
     break;
    case H5Z_FILTER_SZIP:
     
-    szip_pixels_per_block=obj.filter.cd_values[0];
+    szip_pixels_per_block=pack.filter.cd_values[0];
     
     /* check szip parameters */
-    if (check_szip(obj.chunk.rank,
-     obj.chunk.chunk_lengths,
+    if (check_szip(pack.chunk.rank,
+     pack.chunk.chunk_lengths,
      0, /* do not test size */
      szip_options_mask,
      szip_pixels_per_block)==0)
@@ -422,7 +431,7 @@ void read_info(const char *filename,
    }
    comp_info[i-1]='\0'; /*cut the last " */    
 
-   if (h5repack_addchunk(comp_info,options)==-1){
+   if (h5repack_addlayout(comp_info,options)==-1){
     printf( "Could not add chunck option. Exiting\n");
     exit(1);
    }

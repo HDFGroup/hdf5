@@ -26,6 +26,13 @@
  *
  * Return: a list of names, the number of names and its compression type
  *
+ * <name of filter> can be:
+ *  GZIP, to apply the HDF5 GZIP filter (GZIP compression)
+ *  SZIP, to apply the HDF5 SZIP filter (SZIP compression)
+ *  SHUF, to apply the HDF5 shuffle filter
+ *  FLET, to apply the HDF5 checksum filter
+ *  NONE, to remove the filter 
+ *
  * Examples: 
  * "GZIP 6"
  * "A,B:NONE"
@@ -47,7 +54,7 @@ obj_list_t* parse_filter(const char *str,
  char        c;
  size_t      len=strlen(str);
  int         j, m, n, k, end_obj=-1, no_param=0;
- char        obj[MAX_NC_NAME]; 
+ char        sobj[MAX_NC_NAME]; 
  char        scomp[10];
  char        stype[5];
  obj_list_t* obj_list=NULL;
@@ -88,12 +95,12 @@ obj_list_t* parse_filter(const char *str,
  for ( j=0, k=0, n=0; j<end_obj; j++,k++)
  {
   c = str[j];
-  obj[k]=c;
+  sobj[k]=c;
   if ( c==',' || j==end_obj-1) 
   {
-   if ( c==',') obj[k]='\0'; else obj[k+1]='\0';
-   strcpy(obj_list[n].obj,obj);
-   memset(obj,0,sizeof(obj));
+   if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
+   strcpy(obj_list[n].obj,sobj);
+   memset(sobj,0,sizeof(sobj));
    n++;
    k=-1;
   }
@@ -273,38 +280,42 @@ const char* get_sfilter(H5Z_filter_t filtn)
 
 
 /*-------------------------------------------------------------------------
- * Function: parse_chunk
+ * Function: parse_layout
  *
- * Purpose: read chunkink info
+ * Purpose: read layout info
  *
- * Return: a list of names, the number of names and its chunking info
- *  NULL, on error
+ * Return: a list of names, the number of names and its chunking info for 
+ *  chunked. NULL, on error
+ * the layout type can be:
+ *  CHUNK, to apply chunking layout
+ *  CONTI, to apply continuous layout
+ *  COMPA, to apply compact layout
  *
- * Examples: 
- * "AA,B,CDE:10X10 
- * "10X10"
+ * Example: 
+ * "AA,B,CDE:CHUNK 10X10"
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: September, 23, 2003
+ * Date: December 30, 2003
  *
  *-------------------------------------------------------------------------
  */
 
 
-obj_list_t* parse_chunk(const char *str, 
-                        int *n_objs, 
-                        hsize_t *chunk_lengths, 
-                        int *chunk_rank,
-                        pack_opt_t *options)
+
+obj_list_t* parse_layout(const char *str, 
+                         int *n_objs, 
+                         pack_info_t *pack,    /* info about layout needed */
+                         pack_opt_t *options)
 {
  obj_list_t* obj_list=NULL;
  unsigned    i;
  char        c;
  size_t      len=strlen(str);
  int         j, n, k, end_obj=-1, c_index;
- char        obj[MAX_NC_NAME]; 
+ char        sobj[MAX_NC_NAME]; 
  char        sdim[10];
+ char        slayout[10];
  
  /* check for the end of object list and number of objects */
  for ( i=0, n=0; i<len; i++)
@@ -321,7 +332,7 @@ obj_list_t* parse_chunk(const char *str,
  }
 
  if (end_obj==-1) { /* missing : chunk all */
-  options->all_chunk=1;
+  options->all_layout=1;
  }
   
  n++;
@@ -337,12 +348,12 @@ obj_list_t* parse_chunk(const char *str,
  for ( j=0, k=0, n=0; j<end_obj; j++,k++)
  {
   c = str[j];
-  obj[k]=c;
+  sobj[k]=c;
   if ( c==',' || j==end_obj-1) 
   {
-   if ( c==',') obj[k]='\0'; else obj[k+1]='\0';
-   strcpy(obj_list[n].obj,obj);
-   memset(obj,0,sizeof(obj));
+   if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
+   strcpy(obj_list[n].obj,sobj);
+   memset(sobj,0,sizeof(sobj));
    n++;
    k=-1;
   }
@@ -352,58 +363,99 @@ obj_list_t* parse_chunk(const char *str,
  if (end_obj+1==(int)len)
  {
   if (obj_list) free(obj_list);
-  printf("Input Error: Invalid chunking in <%s>\n",str);
+  printf("Parse layout error: No characters after : in <%s>\n",str);
   exit(1);
  }
 
- /* get chunk info */
- k=0; 
- for ( i=end_obj+1, c_index=0; i<len; i++)
+ /* get layout info */
+ for ( j=end_obj+1, n=0; n<=5; j++,n++)
  {
-  c = str[i];
-  sdim[k]=c;
-  k++; /*increment sdim index */
-
-  if (!isdigit(c) && c!='x' && c!='N' && c!='O' && c!='N' && c!='E'){
-   if (obj_list) free(obj_list);
-   printf("Input Error: Invalid chunking in <%s>\n",str);
-   exit(1);
-  }
-
-  if ( c=='x' || i==len-1) 
+  if (n==5) 
   {
-   if ( c=='x') {  
-    sdim[k-1]='\0';  
-    k=0;
-    chunk_lengths[c_index]=atoi(sdim);
-    if (chunk_lengths[c_index]==0) {
-      if (obj_list) free(obj_list);
-      printf("Input Error: Invalid chunking in <%s>\n",str);
-      exit(1);
-     }
-    c_index++;
+   slayout[n]='\0';  /*cut string */
+   if (strcmp(slayout,"COMPA")==0)
+    pack->layout=H5D_COMPACT;  
+   else if (strcmp(slayout,"CONTI")==0)
+    pack->layout=H5D_CONTIGUOUS;
+   else if (strcmp(slayout,"CHUNK")==0)
+    pack->layout=H5D_CHUNKED;
+   else {
+    printf("Parse layout error: Not a valid layout in <%s>\n",str);
    }
-   else if (i==len-1) { /*no more parameters */
-    sdim[k]='\0';  
-    k=0;
-    if (strcmp(sdim,"NONE")==0)
-    {
-     *chunk_rank=-2;
-    }
-    else
-    {
-     chunk_lengths[c_index]=atoi(sdim);
-     if (chunk_lengths[c_index]==0){
-      if (obj_list) free(obj_list);
-      printf("Input Error: Invalid chunking in <%s>\n",str);
-      exit(1);
-     }
-     *chunk_rank=c_index+1;
-    }
-   } /*if */
-  } /*if c=='x' || i==len-1 */
- } /*i*/
+  }
+  else
+  {
+   c = str[j];
+   slayout[n]=c;
+  }
+ } /* j */
+ 
 
+ if ( pack->layout=H5D_CHUNKED )
+ {
+
+/*-------------------------------------------------------------------------
+ * get chunk info
+ *-------------------------------------------------------------------------
+ */
+   k=0; 
+   for ( i=j, c_index=0; i<len; i++)
+   {
+    c = str[i];
+    sdim[k]=c;
+    k++; /*increment sdim index */
+
+#if defined PARSE_DEBUG
+    printf (" i=%d c=%c ",i, c);
+#endif
+    
+    if (!isdigit(c) && c!='x' && c!='N' && c!='O' && c!='N' && c!='E'){
+     if (obj_list) free(obj_list);
+     printf("Parse layout error: <%s> Not a valid character in <%s>\n",
+      sdim,str);
+     exit(1);
+    }
+    
+    if ( c=='x' || i==len-1) 
+    {
+     if ( c=='x') {  
+      sdim[k-1]='\0';  
+      k=0;
+      pack->chunk.chunk_lengths[c_index]=atoi(sdim);
+      if (pack->chunk.chunk_lengths[c_index]==0) {
+       if (obj_list) free(obj_list);
+       printf("Parse layout error: <%s> Conversion to number in <%s>\n",
+        sdim,str);
+       exit(1);
+      }
+      c_index++;
+     }
+     else if (i==len-1) { /*no more parameters */
+      sdim[k]='\0';  
+      k=0;
+      if (strcmp(sdim,"NONE")==0)
+      {
+       pack->chunk.rank=-2;
+      }
+      else
+      {
+       pack->chunk.chunk_lengths[c_index]=atoi(sdim);
+       if (pack->chunk.chunk_lengths[c_index]==0){
+        if (obj_list) free(obj_list);
+        printf("Parse layout error: <%s> Conversion to number in <%s>\n",
+         sdim,str);
+        exit(1);
+       }
+       pack->chunk.rank=c_index+1;
+      }
+     } /*if */
+    } /*if c=='x' || i==len-1 */
+   } /*i*/
+
+  
+ } /*H5D_CHUNKED*/
+
+ 
  return obj_list;
 }
 

@@ -19,11 +19,6 @@
 #include "H5private.h"
 #include "h5repack.h"
 
-static int filter_this(const char* name,
-                       pack_opt_t *options,
-                       pack_info_t *obj); /* info about object to filter */
-
-
 /*-------------------------------------------------------------------------
  * Function: copy_file
  *
@@ -246,8 +241,8 @@ int do_copy_file(hid_t fidin,
    if ( ! H5Tequal(mtype_id, H5T_STD_REF_OBJ) ) 
    {
 
-    /* the information about the object to be filtered */
-    pack_info_t filt_obj;
+    /* the information about the object to be filtered/"layouted" */
+    pack_info_t pack;
 
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
@@ -264,15 +259,26 @@ int do_copy_file(hid_t fidin,
     }
     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
      goto error;
+
+    /*-------------------------------------------------------------------------
+     * apply the layout; check first if the object is to be modified.
+     * if the layout could not be applied, continue
+     *-------------------------------------------------------------------------
+     */
+    if (layout_this(travt->objs[i].name,options,&pack))
+    {
+     if (apply_layout(dcpl_id,options,&pack)<0)
+      continue;
+    }
     
     /*-------------------------------------------------------------------------
      * apply the filter; check first if the object is to be filtered.
      * if the filter could not be applied, continue
      *-------------------------------------------------------------------------
      */
-    if (filter_this(travt->objs[i].name,options,&filt_obj))
+    if (filter_this(travt->objs[i].name,options,&pack))
     {
-     if (apply_filter(dcpl_id,H5Tget_size(mtype_id),options,&filt_obj)<0)
+     if (apply_filter(dcpl_id,H5Tget_size(mtype_id),options,&pack)<0)
       continue;
     }
     
@@ -601,63 +607,5 @@ error:
     free(buf);
  } H5E_END_TRY;
  return -1;
-}
-
-
-
-
-/*-------------------------------------------------------------------------
- * Function: filter_this
- *
- * Purpose: find the object name NAME (got from the traverse list)
- *  in the repack options list; assign the filter information OBJ
- *
- * Return: 0 not found, 1 found
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 19, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-static 
-int filter_this(const char* name,    /* object name from traverse list */
-                pack_opt_t *options, /* repack options */
-                pack_info_t *obj)    /* info about object to filter */
-{
- char *pdest;
- int  result;
- int  i;
-
- /* if we are applying to all objects just return true */
- if (options->all_filter)
- {
-  /* assign the global filter and chunk info to the OBJ info */
-  obj->filter=options->filter_g;
-  obj->chunk=options->chunk_g;
-  return 1;
- }
-
- for ( i=0; i<options->op_tbl->nelems; i++) 
- {
-  if (strcmp(options->op_tbl->objs[i].path,name)==0)
-  {
-   *obj=options->op_tbl->objs[i];
-   return 1;
-  }
- 
-  pdest  = strstr(name,options->op_tbl->objs[i].path);
-  result = (int)(pdest - name);
-
-  /* found at position 1, meaning without '/' */
-  if( pdest != NULL && result==1 )
-  {
-   *obj=options->op_tbl->objs[i];
-   return 1;
-  }
- }
-
- return 0;
 }
 

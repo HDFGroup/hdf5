@@ -68,6 +68,7 @@ typedef struct {
 typedef struct {
  char          path[MAX_NC_NAME]; /* name of object */
  filter_info_t filter;            /* filter information */
+ H5D_layout_t  layout;            /* layout information */
  chunk_info_t  chunk;             /* chunk information */
  hid_t         refobj_id;         /* object ID, references */
 } pack_info_t;
@@ -88,10 +89,11 @@ typedef struct {
 /* all the above, ready to go to the hrepack call */
 typedef struct {
  pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
- int             all_chunk;   /*chunk all objects */
- int             all_filter;  /*filter all objects */
+ int             all_layout;  /*apply the layout to all objects */
+ int             all_filter;  /*apply the filter to all objects */
  filter_info_t   filter_g;    /*global filter INFO for the ALL case */
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
+ H5D_layout_t    layout_g;    /*global layout information for the ALL case */
  int verbose;                 /*verbose mode */
 	int threshold;               /*minimum size to compress, in bytes */
 } pack_opt_t;
@@ -109,7 +111,7 @@ extern "C" {
 
 int h5repack           (const char* infile, const char* outfile, pack_opt_t *options);
 int h5repack_addfilter (const char* str, pack_opt_t *options);
-int h5repack_addchunk  (const char* str, pack_opt_t *options);
+int h5repack_addlayout (const char* str, pack_opt_t *options);
 int h5repack_init      (pack_opt_t *options, int verbose);
 int h5repack_end       (pack_opt_t *options);
 int h5repack_verify    (const char *fname,pack_opt_t *options);
@@ -171,10 +173,14 @@ void close_obj(H5G_obj_t obj_type, hid_t obj_id);
  *-------------------------------------------------------------------------
  */
 
+int filter_this(const char* name,
+                pack_opt_t *options,
+                pack_info_t *pack); /* info about object to filter */
+
 int apply_filter(hid_t dcpl_id,
                  size_t size,         /* size of datatype in bytes */
                  pack_opt_t *options, /* repack options */
-                 pack_info_t *obj);   /* info about object to filter */
+                 pack_info_t *pack);   /* info about object to filter */
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
@@ -191,6 +197,21 @@ int check_szip(int rank,        /* chunk rank */
                unsigned szip_pixels_per_block);
 
 
+/*-------------------------------------------------------------------------
+ * layout functions
+ *-------------------------------------------------------------------------
+ */
+
+int has_layout(hid_t dcpl_id,
+               pack_info_t *obj);
+
+int layout_this(const char* name,    /* object name from traverse list */
+                pack_opt_t *options, /* repack options */
+                pack_info_t *pack);  /* info about object to apply layout */
+
+int apply_layout(hid_t dcpl_id,
+                 pack_opt_t *options, /* repack options */
+                 pack_info_t *pack);  /* info about object  */
 
 
 /*-------------------------------------------------------------------------
@@ -199,10 +220,9 @@ int check_szip(int rank,        /* chunk rank */
  */
 int          options_table_init( pack_opttbl_t **tbl );
 int          options_table_free( pack_opttbl_t *table );
-int          options_add_chunk ( obj_list_t *obj_list,
+int          options_add_layout( obj_list_t *obj_list,
                                  int n_objs,
-                                 hsize_t *chunk_lengths,
-                                 int chunk_rank,
+                                 pack_info_t *pack,
                                  pack_opttbl_t *table );
 int          options_add_filter ( obj_list_t *obj_list,
                                  int n_objs,
@@ -220,11 +240,12 @@ obj_list_t* parse_filter(const char *str,
                          int *n_objs, 
                          filter_info_t *filt,
                          pack_opt_t *options);
-obj_list_t* parse_chunk (const char *str, 
+
+obj_list_t* parse_layout(const char *str, 
                          int *n_objs, 
-                         hsize_t *chunk_lengths, 
-                         int *chunk_rank,
+                         pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
+
 const char* get_sfilter (H5Z_filter_t filtn);
 int         parse_number(char *str);
 
