@@ -183,14 +183,12 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     hsize_t	val=0;
     size_t	i, hs;
     hsize_t	ret_value;      /* Return value */
-    void        *pt;
     
     FUNC_ENTER_NOAPI(H5T_bit_get_d, 0);
 
     assert (8*sizeof(val)>=size);
 
     H5T_bit_copy ((uint8_t*)&val, 0, buf, offset, size);
-
     switch (((H5T_t*)(H5I_object(H5T_NATIVE_INT_g)))->u.atomic.order) {
         case H5T_ORDER_LE:
             break;

@@ -117,6 +117,7 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
+static hid_t H5I_get_file_id(hid_t obj_id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -842,7 +843,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5I_get_file_id(hid_t obj_id)
 {
     H5G_entry_t         *ent;
@@ -1175,11 +1176,8 @@ H5I_find_id(hid_t id)
 
     /* Check arguments */
     grp = H5I_GRP(id);
-
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
-    }
-
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
