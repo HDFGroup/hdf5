@@ -255,6 +255,9 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     fi
 
     # Replace the previous version with the current version.
+    # Should check if the errcode of the release process but there
+    # are other failures after release was done (e.g. h5vers or cvs failures)
+    # that should allow the replacement to occure.
     rm -rf ${PREVIOUS}
     mv ${CURRENT} ${PREVIOUS}
 fi #Release snapshot
