@@ -1131,13 +1131,11 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 
 #define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)                              \
-									      \
    /* Check API status */               				      \
    assert(asrt);				                              \
 									      \
    /* Check function name */               				      \
-   H5_CHECK_FUNCNAME(func_name);					      \
-									      \
+   H5_CHECK_FUNCNAME(func_name);
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \
