@@ -158,6 +158,25 @@ These tools enable the user to examine HDF5 files interactively.
         <dt><em>file</em>
             <dd>The file to be examined.
     </dl>
+<dt><strong>Examples:</strong>
+		<ol>
+			<li>Dumping the group <code>/GroupFoo/GroupBar</code> in the file
+			    <code>quux.h5</code>:
+					<blockquote>
+						<code>h5dump -g /GroupFoo/GroupBar quux.h5</code>
+					</blockquote></li>
+			<li>Dumping the dataset <code>Fnord</code> in the group
+			    <code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
+					<blockquote>
+						<code>h5dump -d /GroupFoo/GroupBar/Fnord quux.h5</code>
+					</blockquote></li>
+		  <li>Dumping the attribute <code>metadata</code> of the dataset
+			  	<code>Fnord</code> which is in group
+			  	<code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
+			  	<blockquote>
+			  		<code>h5dump -a /GroupFoo/GroupBar/Fnord/metadata quux.h5</code>
+			  	</blockquote></li>
+		</ol>
 <dt><strong>Current Status:</strong>
     <dd>The current version of <code>h5dump</code> displays the
         following information:
