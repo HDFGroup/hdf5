@@ -62,7 +62,7 @@ typedef struct {
 /* Dataset Region reference structure for user's code */
 typedef struct {
     unsigned char heapid[H5R_DSET_REG_REF_BUF_SIZE];    /* Buffer to store heap ID and index */
-                                /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int (4 bytes typically, but could be 8 bytes) */
+/* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
 } hdset_reg_ref_t;
 
 /* Publicly visible datastructures */
