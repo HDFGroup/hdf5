@@ -58,6 +58,16 @@
 #define VERBO_HI   9     /* High    */
 
 /*
+ * Verbose queries
+ * Only None needs an exact match.  The rest are at least as much.
+ */
+#define VERBOSE_NONE	(GetTestVerbosity()==VERBO_NONE)
+#define VERBOSE_DEF	(GetTestVerbosity()>=VERBO_DEF)
+#define VERBOSE_LO	(GetTestVerbosity()>=VERBO_LO)
+#define VERBOSE_MED	(GetTestVerbosity()>=VERBO_MED)
+#define VERBOSE_HI	(GetTestVerbosity()>=VERBO_HI)
+
+/*
  * This contains the filename prefix specificied as command line option for
  * the parallel test files. 
  */
