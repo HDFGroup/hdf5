@@ -563,7 +563,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
 
   h4slab_count = -1;
 
-  /* total number of hyperslab is equal to pow(NUM_HSLAB_PERD,sds_rank)-1, 
+  /* total number of hyperslab is equal to h4toh5pow(NUM_HSLAB_PERD,sds_rank)-1, 
      At first, all other dimensions are fixed, only the first dimension
      (the most frequently changing dimension) changes its starting point
      and ending point.
@@ -571,12 +571,12 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
      the second dimension starts to change. So we use "mod fuction" to check the which 
      dimension we are heading to. */  
 
-  while(h4slab_count != pow(NUM_HSLAB_PERD,sds_rank)-1){
+  while(h4slab_count != h4toh5pow(NUM_HSLAB_PERD,sds_rank)-1){
     h4slab_count++;
     h4slab_index = -1;
     for (i=0;i<sds_rank;i++){
       /* check the current location of the slab. */
-      if((h4slab_count%pow(NUM_HSLAB_PERD,(i+1)))==0){
+      if((h4slab_count%h4toh5pow(NUM_HSLAB_PERD,(i+1)))==0){
         h4slab_index = i;
       }
     }
@@ -2309,7 +2309,7 @@ int h5ceil(int32 m,int32 n){
 }
 
 
-int pow(int num,int h4index) {
+int h4toh5pow(int num,int h4index) {
   int i;
   int total;
   total = 1;

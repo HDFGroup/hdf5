@@ -244,7 +244,7 @@ char* correct_name(char*);
 /* routines for handling memory allocation of huge SDS dataset */
 int get_numslab_perD(int32,int,int);
 int h5ceil(int32,int32);
-int pow(int,int);
+int h4toh5pow(int,int);
 #endif
 
 
