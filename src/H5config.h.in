@@ -47,6 +47,9 @@
 /* Define if it's safe to use `long long' for hsize_t and hssize_t */
 #undef HAVE_LARGE_HSIZET
 
+/* Define if it's safe to use `long long' for hsize_t and hssize_t */
+#undef DEV_T_IS_SCALAR
+
 /* Define if the HDF5 v1.2 compatibility functions are to be compiled in */
 #undef WANT_H5_V1_2_COMPAT
 
