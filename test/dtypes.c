@@ -853,9 +853,7 @@ test_compound_5(void)
     H5Tclose(short_array);
     H5Tclose(int_array);
 
-    /* Free memory buffers */
-    free(buf);
-    free(bkg);
+   
     
     /* Check results */
     if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) ||
@@ -867,6 +865,10 @@ test_compound_5(void)
         FAILED();
         return 1;
     }
+
+    /* Free memory buffers */
+    free(buf);
+    free(bkg);
     PASSED();
     return 0;
 }
