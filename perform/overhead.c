@@ -43,8 +43,12 @@
 #endif
 
 #define FILE_NAME_1	"overhead.h5"
+#ifndef FALSE
 #define FALSE		0
+#endif /* FALSE */
+#ifndef TRUE
 #define TRUE		1
+#endif /* TRUE */
  
 typedef enum fill_t {
     FILL_ALL,
@@ -175,15 +179,15 @@ static int
 test(fill_t fill_style, const double splits[],
      hbool_t verbose, hbool_t use_rdcc)
 {
-    hid_t	file, fapl, dcpl, xfer, mspace, fspace, dset;
+    hid_t	file = (-1), fapl = (-1), dcpl = (-1), xfer = (-1), mspace = (-1), fspace = (-1), dset = (-1);
     hsize_t	ch_size[1] = {1};		/*chunk size		*/
     hsize_t	cur_size[1] = {1000};		/*current dataset size	*/
     hsize_t	max_size[1] = {H5S_UNLIMITED};	/*maximum dataset size	*/
     hssize_t	hs_start[1];			/*hyperslab start offset*/
     hsize_t	hs_count[1] = {1};		/*hyperslab nelmts	*/
-    int		fd;				/*h5 file direct	*/
+    int		fd = (-1);			/*h5 file direct	*/
     static int	*had = NULL;			/*for random filling	*/
-    const char	*sname;				/*fill style nam	*/
+    const char	*sname=NULL;			/*fill style nam	*/
     int		mdc_nelmts;			/*num meta objs to cache*/
     hsize_t	i;
     int		j;
@@ -209,13 +213,13 @@ test(fill_t fill_style, const double splits[],
     if ((dset=H5Dcreate(file, "chunked", H5T_NATIVE_INT,
 			fspace, dcpl))<0) goto error;
 
-#if !defined( __MWERKS__)
+#if !defined( __MWERKS__)	
+
  /* 
-  workaround for a bug in the Metrowerks open function
-  pvn
+  workaround for a bug in the Metrowerks version 6.0 open function
   */		
     if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
-#endif
+#endif  
 
     for (i=1; i<=cur_size[0]; i++) {
 
@@ -231,8 +235,8 @@ test(fill_t fill_style, const double splits[],
 	    hs_start[0] = i%2 ? i/2 : cur_size[0]-i/2;
 	    break;
 	case FILL_OUTWARD:
-	    j = ((size_t)cur_size[0]-i)+1;
-	    hs_start[0] = j%2 ? j/2 : cur_size[0]-j/2;
+	    j = (cur_size[0]-i)+1;
+	    hs_start[0] = j%2 ? j/2 : (hssize_t)cur_size[0]-j/2;
 	    break;
 	case FILL_RANDOM:
 	    for (j=rand()%cur_size[0]; had[j]; j=(j+1)%cur_size[0]) /*void*/;
@@ -250,23 +254,32 @@ test(fill_t fill_style, const double splits[],
 	    goto error;
 	}
 
+
+#if !defined( __MWERKS__)			
+
 	/* Determine overhead */
-#if !defined( __MWERKS__)
 	if (verbose) {
 	    if (H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
 	    if (HDfstat(fd, &sb)<0) goto error;
-	  
+	    /*
+	     * The extra cast in the following statement is a bug workaround
+	     * for the Win32 version 5.0 compiler.
+	     * 1998-11-06 ptl
+	     */
 	    printf("%4lu %8.3f ***\n",
 		   (unsigned long)i,
 		   (double)(hssize_t)(sb.st_size-i*sizeof(int))/(hssize_t)i);
 	}
-#endif
+#endif    
+	
+	
     }
 
     H5Dclose(dset);
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
+    H5Pclose(xfer);
     H5Fclose(file);
 
     if (!verbose) {
@@ -289,16 +302,17 @@ test(fill_t fill_style, const double splits[],
 	case FILL_ALL:
 	    abort();
 	}
-
+	
 #if !defined( __MWERKS__)
+	
 	if (HDfstat(fd, &sb)<0) goto error;
-
-	printf("%-7s %8.3f\n", sname,
+		printf("%-7s %8.3f\n", sname,
 	       (double)(hssize_t)(sb.st_size-cur_size[0]*sizeof(int))/
 	           (hssize_t)cur_size[0]);
 #endif
-
+	          
     }
+
 
 #if !defined( __MWERKS__)
     close(fd);
@@ -311,13 +325,10 @@ test(fill_t fill_style, const double splits[],
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
+    H5Pclose(xfer);
     H5Fclose(file);
     free(had);
-   
-#if !defined( __MWERKS__)
     close(fd);
-#endif   
-   
     return 1;
 }
 
