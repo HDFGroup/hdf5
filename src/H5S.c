@@ -1148,26 +1148,23 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 H5S_t *
 H5S_read(H5G_entry_t *ent)
 {
-    H5S_t		   *ds = NULL;
+    H5S_t		   *ds = NULL;          /* Dataspace to return */
+    H5S_t		   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_read, NULL);
 
     /* check args */
     assert(ent);
 
-    if (NULL==(ds = H5FL_ALLOC(H5S_t,1))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    if (NULL==(ds = H5FL_ALLOC(H5S_t,1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple)) == NULL) {
-	  HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL,
-			"unable to load dataspace info from dataset header");
-    }
+    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple)) == NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
 
     if(ds->extent.u.simple.rank != 0) {
          ds->extent.type = H5S_SIMPLE;
-     } else {
+    } else {
          ds->extent.type = H5S_SCALAR;
     }
 
@@ -1175,11 +1172,19 @@ H5S_read(H5G_entry_t *ent)
     ds->select.type=H5S_SEL_ALL;
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,ds->extent.u.simple.rank,1))) {
-        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    }
+    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,ds->extent.u.simple.rank,1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    FUNC_LEAVE(ds);
+    /* Set the value for successful return */
+    ret_value=ds;
+
+done:
+    if(ret_value==NULL) {
+        if(ds!=NULL)
+            H5FL_FREE(H5S_t,ds);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
