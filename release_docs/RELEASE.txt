@@ -85,6 +85,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Changed "single process" metadata writing in library to collective
+            I/O by all processes, in order to guarantee correct data being
+            written with MPI-I/O.  QAK - 2003/11/20
         - Fixed problems with fill values and variable-length types and also
             I/O on VL values that were set to NULL.  QAK - 2003/11/08
         - Fixed problems with MPI datatypes that caused ASCI Q machine to
