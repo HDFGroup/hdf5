@@ -55,13 +55,13 @@
 } while(0)
 
 
-/* Raw I/O macros */
-#define RAWCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
-#define RAWOPEN(fn, F)          HDopen(fn, F, 0600)
-#define RAWCLOSE(F)             HDclose(F)
-#define RAWSEEK(F,L)            HDlseek(F, L, SEEK_SET)
-#define RAWWRITE(F,B,S)         HDwrite(F,B,S)
-#define RAWREAD(F,B,S)          HDread(F,B,S)
+/* POSIX I/O macros */
+#define POSIXCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
+#define POSIXOPEN(fn, F)          HDopen(fn, F, 0600)
+#define POSIXCLOSE(F)             HDclose(F)
+#define POSIXSEEK(F,L)            HDlseek(F, L, SEEK_SET)
+#define POSIXWRITE(F,B,S)         HDwrite(F,B,S)
+#define POSIXREAD(F,B,S)          HDread(F,B,S)
 
 enum {
     PIO_CREATE = 1,
@@ -97,7 +97,7 @@ static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
 
 /* the different types of file descriptors we can expect */
 typedef union _file_descr {
-    int         rawfd;      /* raw/Unix file    */
+    int         posixfd;    /* POSIX file handle*/
     MPI_File    mpifd;      /* MPI file         */
     hid_t       h5fd;       /* HDF5 file        */
 } file_descr;
@@ -157,8 +157,8 @@ do_pio(parameters param)
         fd.mpifd = MPI_FILE_NULL;
         res.timers = pio_time_new(MPI_TIMER);
         break;
-    case RAWIO:
-        fd.rawfd = -1;
+    case POSIXIO:
+        fd.posixfd = -1;
         res.timers = pio_time_new(MPI_TIMER);
         break;
     case PHDF5:
@@ -311,8 +311,8 @@ done:
     /* close any opened files */
     /* no remove(fname) because that should have happened normally. */
     switch (iot) {
-    case RAWIO:
-        if (fd.rawfd != -1)
+    case POSIXIO:
+        if (fd.posixfd != -1)
             hrc = do_fclose(iot, &fd);
         break;
     case MPIO:
@@ -354,8 +354,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     memset(fullname, 0, size);
 
     switch (iot) {
-    case RAWIO:
-        suffix = ".raw";
+    case POSIXIO:
+        suffix = ".posix";
         break;
     case MPIO:
         suffix = ".mpio";
@@ -505,9 +505,9 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
 
         /* create dataset */
         switch (iot) {
-        case RAWIO:
+        case POSIXIO:
         case MPIO:
-            /* both raw and mpi io just need dataset offset in file*/
+            /* both posix and mpi io just need dataset offset in file*/
             dset_offset = (ndset - 1) * dset_size;
             break;
 
@@ -569,7 +569,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* Write */
             /* Calculate offset of write within a dataset/file */
             switch (iot) {
-            case RAWIO:
+            case POSIXIO:
 		/* need to (off_t) the elmnts_begin expression because they */
 		/* may be of smaller sized integer types */
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_written)*ELMT_SIZE;
@@ -579,10 +579,10 @@ fprintf(stderr, "proc %d: writes %ld bytes at file-offset %ld\n",
         pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, file_offset);
 #endif
 
-                rc = RAWSEEK(fd->rawfd, file_offset);
-                VRFY((rc>=0), "RAWSEEK");
-                rc = RAWWRITE(fd->rawfd, buffer, (size_t)(nelmts_towrite * ELMT_SIZE));
-                VRFY((rc == (nelmts_towrite*ELMT_SIZE)), "RAWWRITE");
+                rc = POSIXSEEK(fd->posixfd, file_offset);
+                VRFY((rc>=0), "POSIXSEEK");
+                rc = POSIXWRITE(fd->posixfd, buffer, (size_t)(nelmts_towrite * ELMT_SIZE));
+                VRFY((rc == (nelmts_towrite*ELMT_SIZE)), "POSIXWRITE");
                 break;
 
             case MPIO:
@@ -730,9 +730,9 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
 
         /* create dataset */
         switch (iot) {
-        case RAWIO:
+        case POSIXIO:
         case MPIO:
-            /* both raw and mpi io just need dataset offset in file*/
+            /* both posix and mpi io just need dataset offset in file*/
             dset_offset = (ndset - 1) * dset_size;
             break;
 
@@ -781,7 +781,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* read */
             /* Calculate offset of read within a dataset/file */
             switch (iot){
-            case RAWIO:
+            case POSIXIO:
 		/* need to (off_t) the elmnts_begin expression because they */
 		/* may be of smaller sized integer types */
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_read)*ELMT_SIZE;
@@ -791,10 +791,10 @@ fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",
         pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, file_offset);
 #endif
 
-                rc = RAWSEEK(fd->rawfd, file_offset);
-                VRFY((rc>=0), "RAWSEEK");
-                rc = RAWREAD(fd->rawfd, buffer, (size_t)(nelmts_toread*ELMT_SIZE));
-                VRFY((rc==(nelmts_toread*ELMT_SIZE)), "RAWREAD");
+                rc = POSIXSEEK(fd->posixfd, file_offset);
+                VRFY((rc>=0), "POSIXSEEK");
+                rc = POSIXREAD(fd->posixfd, buffer, (size_t)(nelmts_toread*ELMT_SIZE));
+                VRFY((rc==(nelmts_toread*ELMT_SIZE)), "POSIXREAD");
                 break;
 
             case MPIO:
@@ -908,19 +908,19 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
     hid_t acc_tpl = -1;     /* file access templates */
 
     switch (iot) {
-    case RAWIO:
+    case POSIXIO:
         if (flags & (PIO_CREATE | PIO_WRITE))
-            fd->rawfd = RAWCREATE(fname);
+            fd->posixfd = POSIXCREATE(fname);
         else
-            fd->rawfd = RAWOPEN(fname, O_RDONLY);
+            fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
-        if (fd->rawfd < 0 ) {
-            fprintf(stderr, "Raw File Open failed(%s)\n", fname);
+        if (fd->posixfd < 0 ) {
+            fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
 
          
-        /* The perils of raw I/O in a parallel environment. The problem is:
+        /* The perils of POSIX I/O API in a parallel environment. The problem is:
          *
          *      - Process n opens a file with truncation and then starts
          *        writing to the file.
@@ -1019,15 +1019,15 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
     int mrc = 0, rc = 0;
 
     switch (iot) {
-    case RAWIO:
-        rc = RAWCLOSE(fd->rawfd);
+    case POSIXIO:
+        rc = POSIXCLOSE(fd->posixfd);
 
         if (rc != 0){
-            fprintf(stderr, "Raw File Close failed\n");
+            fprintf(stderr, "POSIX File Close failed\n");
             GOTOERROR(FAIL);
         }
 
-        fd->rawfd = -1;
+        fd->posixfd = -1;
         break;
 
     case MPIO:
@@ -1078,7 +1078,7 @@ do_cleanupfile(iotype iot, char *fname)
     
     if (clean_file_g){
         switch (iot){
-        case RAWIO:
+        case POSIXIO:
             remove(fname);
             break;
         case MPIO:

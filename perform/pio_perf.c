@@ -13,7 +13,7 @@
  * This is what the report should look like:
  *
  *  nprocs = Max#Procs
- *      IO Type = RAWIO
+ *      IO API = POSIXIO
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -23,7 +23,7 @@
  *
  *          . . .
  *
- *      IO Type = MPIO
+ *      IO API = MPIO
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -33,7 +33,7 @@
  *
  *          . . .
  *
- *      IO Type = PHDF5
+ *      IO API = PHDF5
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -72,7 +72,7 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define PIO_RAW             0x10
+#define PIO_POSIX           0x10
 #define PIO_MPI             0x20
 #define PIO_HDF5            0x40
 
@@ -315,8 +315,8 @@ finish:
  *              processors to use. For each loop iteration, we divide that
  *              number by 2 and rerun the test.
  *
- *            - The second slowest is what type of IO to perform. We have
- *              three choices: RAWIO, MPI-IO, and PHDF5.
+ *            - The second slowest is what type of IO API to perform. We have
+ *              three choices: POSIXIO, MPI-IO, and PHDF5.
  *
  *            - Then we change the size of the buffer. This information is
  *              inferred from the number of datasets to create and the number
@@ -333,7 +333,7 @@ run_test_loop(struct options *opts)
     parameters parms;
     long num_procs;
     int		doing_pio;		/* if this process is doing PIO */
-    int io_runs = PIO_HDF5 | PIO_MPI | PIO_RAW; /* default to run all tests */
+    int io_runs = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* default to run all tests */
 
     if (opts->io_types & ~0x7) {
         /* we want to run only a select subset of these tests */
@@ -345,8 +345,8 @@ run_test_loop(struct options *opts)
         if (opts->io_types & PIO_MPI)
             io_runs |= PIO_MPI;
 
-        if (opts->io_types & PIO_RAW)
-            io_runs |= PIO_RAW;
+        if (opts->io_types & PIO_POSIX)
+            io_runs |= PIO_POSIX;
     }
 
     parms.num_files = opts->num_files;
@@ -383,8 +383,8 @@ run_test_loop(struct options *opts)
                 output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
-                if (io_runs & PIO_RAW)
-                    run_test(RAWIO, parms);
+                if (io_runs & PIO_POSIX)
+                    run_test(POSIXIO, parms);
 
                 if (io_runs & PIO_MPI)
                     run_test(MPIO, parms);
@@ -431,11 +431,11 @@ run_test(iotype iot, parameters parms)
     raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
     parms.io_type = iot;
     print_indent(2);
-    output_report("Type of IO = ");
+    output_report("IO API = ");
 
     switch (iot) {
-    case RAWIO:
-        output_report("Raw\n");
+    case POSIXIO:
+        output_report("POSIX\n");
         break;
     case MPIO:
         output_report("MPIO\n");
@@ -920,7 +920,7 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'r':
             cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_RAW;
+            cl_opts->io_types |= PIO_POSIX;
             break;
         case 'x':
             cl_opts->min_xfer_size = parse_size_directive(opt_arg);
@@ -1018,7 +1018,7 @@ usage(const char *prog)
         fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
         fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
         fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
+        fprintf(stdout, "     -r, --raw                   Run raw (POSIX) performance test\n");
         fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
         fprintf(stdout, "\n");
