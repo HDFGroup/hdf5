@@ -1,68 +1,69 @@
 ## HDF5 Library Makefile(.in)
 ##
-## Copyright (C) 1997 National Center for Supercomputing Applications.
-##                    All rights reserved.
-##
+## Copyright (C) 1997, 2001, 2002
+##     National Center for Supercomputing Applications.
+##     All rights reserved.
 ## 
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
+
 @COMMENCE@
-TRACE=perl ../bin/trace
+
+TRACE=$(PERL) $(top_srcdir)/bin/trace
 .SUFFIXES: .c .o .lo .x
+
 ###############################################################################
 ## MODIFICATONS FOR CREATING THE PABLO INSTRUMENTED LIBRARY libhdf5-inst.a
 ## For Pablo instrumenation of parallel code, remove the # from in front of
 ## PABLO_MPIO_FLAGS.
-## Set PABLO_INC equal to the path of the include directory for the Pablo
-## TraceLibrary.  This can be done by setting the environment variable
-## PABLO_TRACELIB to the path where the Pablo Trace Library ins installed.
 ###############################################################################
-#PABLO_MPIO_FLAGS = -DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE	
-PABLO_INC = $(PABLO_TRACELIB)/include
-PABLO_FLAGS = -I../src -I$(PABLO_INC) -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
-CPPFLAGS=-I. -I. -I../src -DH5_DEBUG_API -DNDEBUG  $(PABLO_FLAGS) -D$(PABLO_BLD)_BUILD
+PARALLEL_PABLO=@PARALLEL_PABLO@
+PABLO_MPIO_FLAGS=${PARALLEL_PABLO:yes=-DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE}
+PABLO_FLAGS=-I$(top_srcdir)/src -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
+
+CPPFLAGS=-I. -I$(top_srcdir)/src -DH5_DEBUG_API -DNDEBUG $(PABLO_FLAGS)  \
+         -D$(PABLO_BLD)_BUILD
 
 ## This is our main target:
 LIB=libhdf5-inst.a
 
-SRCDIRS = ./. ../src/.
+SRCDIRS=./. ../src/.
+
 # Took out the GNU'isms for the SRCFILES and LIB_SRC variables.
-#  This may cause problems in two ways: any changes to the SRCDIRS variable
-#  should be make to the SRCFILES macro also and the LIB_SRC variable now has
-#  directory paths included in it (which may cause problems somewhere). - QAK
-LIB_SRC= \
-    H5.c H5FDmulti.c H5HG.c H5Oname.c H5T.c \
-    H5A.c H5FDsec2.c H5HL.c H5Onull.c H5TB.c \
-    H5AC.c H5FDsrb.c H5I.c H5Osdspace.c H5TS.c \
-    H5B.c H5FDstdio.c H5MF.c H5Oshared.c H5Tbit.c \
-    H5D.c H5FDstream.c H5MM.c H5Ostab.c H5Tconv.c \
-    H5E.c H5FL.c H5O.c H5P.c H5Tinit.c \
-    H5F.c H5Farray.c H5Oattr.c H5R.c H5Tvlen.c \
-    H5FD.c H5Fcontig.c H5Ocomp.c H5S.c H5V.c \
-    H5FDcore.c H5Fistore.c H5Ocont.c H5Sall.c H5Z.c \
-    H5Fseq.c H5Odtype.c H5Shyper.c H5Zdeflate.c \
-    H5FDfamily.c H5G.c H5Oefl.c H5Smpio.c H5detect.c \
-    H5FDgass.c H5Gent.c H5Ofill.c H5Snone.c \
-    H5FDlog.c H5Gnode.c H5Olayout.c H5Spoint.c \
-    H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
+#
+# This may cause problems in two ways: any changes to the SRCDIRS
+# variable should be make to the SRCFILES macro also and the LIB_SRC
+# variable now has directory paths included in it (which may cause
+# problems somewhere). - QAK
+#
+LIB_SRC=H5.c H5FDmulti.c H5HG.c H5Oname.c H5T.c H5A.c H5FDsec2.c H5HL.c  \
+        H5Onull.c H5TB.c H5AC.c H5FDsrb.c H5I.c H5Osdspace.c H5TS.c      \
+        H5B.c H5FDstdio.c H5MF.c H5Oshared.c H5Tbit.c H5D.c H5FDstream.c \
+        H5MM.c H5Ostab.c H5Tconv.c H5E.c H5FL.c H5O.c H5P.c H5Tinit.c    \
+        H5F.c H5Farray.c H5Oattr.c H5R.c H5Tvlen.c H5FD.c H5Fcontig.c    \
+        H5Ocomp.c H5S.c H5V.c H5FDcore.c H5Fistore.c H5Ocont.c H5Sall.c  \
+        H5Z.c H5FDdpss.c H5Fseq.c H5Odtype.c H5Shyper.c H5Zdeflate.c     \
+        H5FDfamily.c H5G.c H5Oefl.c H5Smpio.c H5detect.c H5FDgass.c      \
+        H5Gent.c H5Ofill.c H5Snone.c H5FDlog.c H5Gnode.c H5Olayout.c     \
+        H5Spoint.c H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
 
-PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDF_MPIO.o
+PABLO_OBJ=PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDF_MPIO.o
 
-LIB_XOBJ = $(LIB_SRC:.c=.x)
-LIB_COBJ = $(LIB_XOBJ:.x=.o)
-LIB_OBJ  = $(PABLO_OBJ) $(LIB_COBJ)
+LIB_XOBJ=$(LIB_SRC:.c=.x)
+LIB_COBJ=$(LIB_XOBJ:.x=.o)
+LIB_OBJ=$(PABLO_OBJ) $(LIB_COBJ)
 
 .c.x:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c -o $*.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c -o $*.o
 	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
 #vpath %.c   $(shell echo $(SRCDIRS) | sed 's/ /:/g')
 
 ## Pablo header files (to be installed)...
-PABLO_HDR = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
-            ProcTrace.inc
+PABLO_HDR=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
+          ProcTrace.inc
 
 ##------------------------------------------------------------ -*- makefile -*-
 ## The following section of this makefile comes from the
@@ -95,23 +96,24 @@ tests:
 ## Install the library, the public header files, and programs.
 install: $(LIB) 
 	@test -d $(libdir) || mkdir $(libdir)
-	@for f in X $(LIB); do						      \
-	   if test $$f != X; then					      \
-	      (set -x; $(INSTALL_DATA) $$f $(libdir)/. || exit 1);	      \
-	   fi;								      \
+	@for f in X $(LIB); do                                                 \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL_DATA) $$f $(libdir)/. || exit 1);               \
+	  fi;                                                                  \
 	done
 	@test -d $(includedir) || mkdir $(includedir)
-	@for f in X $(PABLO_HDR); do                                          \
-	    if test $$f != X; then                                            \
-	      (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);        \
-	    fi                                                                \
+	@for f in X $(PABLO_HDR); do                                           \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);           \
+	  fi                                                                   \
 	done
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
-	@if test "X$(LIB)" != X; then					      \
-           set -x; cd $(libdir) && $(RM) $(LIB);			      \
+	@if test "X$(LIB)" != X; then                                          \
+	  set -x; cd $(libdir) && $(RM) $(LIB);                                \
 	fi
+
 ## Removes temporary files without removing the final target files.  That is,
 ## remove things like object files but not libraries or executables.
 ##
@@ -132,8 +134,8 @@ clean: mostlyclean
 ##
 distclean: clean
 	$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
-	@if test -f $(srcdir)/Makefile.in; then				      \
-	   (set -x; $(RM) Makefile);					      \
+	@if test -f $(top_srcdir)/src/Makefile.in; then                       \
+	  (set -x; $(RM) Makefile);                                           \
 	fi
 
 ## Like `distclean' except it deletes all files that can be regenerated from
@@ -144,18 +146,18 @@ maintainer-clean: distclean
 
 
 .c.lo:
-	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c $<
+	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c $<
 
 
-PABLO_INCLUDES = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
-                 ProcTrace.inc
+PABLO_INCLUDES=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
+               ProcTrace.inc
 
-PABLO_CLEAN = HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt \
-	      ProcTrace.inc
+PABLO_CLEAN=HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt            \
+            ProcTrace.inc
 
-HDFentries.txt: ../src/*.c
-	grep "FUNC_ENTER[_INIT ]*(" ../src/*.c | \
-	sed "s/.*FUNC_ENTER[_INIT ]*(//;s/[,)].*//" | sort -u > $@
+HDFentries.txt: $(top_srcdir)/src/*.c
+	grep "FUNC_ENTER[_INIT ]*(" $(top_srcdir)/src/*.c |                   \
+	   sed "s/.*FUNC_ENTER[_INIT ]*(//;s/[,)].*//" | sort -u > $@
 
 HDFentryNames.h: HDFentries.txt
 	sed "s/.*/\"&\",/" $? > $@
@@ -163,12 +165,12 @@ HDFentryNames.h: HDFentries.txt
 HDFidList.h: HDFentries.txt
 	sed "s/.*/ID_&,/" $? > $@
 	echo ID_ALLHDF, >> $@
-	grep "#define[ 	]*PABLO_MASK" ../src/*.c | \
-	sed "s/.*H5/ID_H5/;s/mask.*/c,/" | sort -u >> $@
+	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
+           sed "s/.*H5/ID_H5/;s/mask.*/c,/" | sort -u >> $@
 
-ProcMasks.h: ../src/*.c
-	grep "#define[ 	]*PABLO_MASK" ../src/*.c | \
-	sed "s/.*[ 	]H5/H5/;s/_mask.*//;s/.*/#define &_mask ID_&_c/" >$@
+ProcMasks.h: $(top_srcdir)/src/*.c
+	grep "#define[ 	]*PABLO_MASK" $(top_srcdir)/src/*.c |                 \
+           sed "s/.*[ 	]H5/H5/;s/_mask.*//;s/.*/#define &_mask ID_&_c/" >$@
 
 ProcIDs.h: HDFidList.h ProcMasks.h
 
@@ -190,69 +192,70 @@ PabloHDF_MPIO.o: PabloHDF_MPIO.c $(PABLO_INCLUDES)
 PabloHDFff.o: PabloHDFff.f $(PABLO_INCLUDES) 
 	$(F77) $(FFLAGS) -O -c PabloHDFff.f
 
-H5.c: ../src/H5.c
-H5A.c: ../src/H5A.c
-H5AC.c: ../src/H5AC.c
-H5B.c: ../src/H5B.c
-H5D.c: ../src/H5D.c
-H5E.c: ../src/H5E.c
-H5F.c: ../src/H5F.c
-H5FD.c: ../src/H5FD.c
-H5FDcore.c: ../src/H5FDcore.c
-H5FDfamily.c: ../src/H5FDfamily.c
-H5FDgass.c: ../src/H5FDgass.c
-H5FDlog.c: ../src/H5FDlog.c
-H5FDmpio.c: ../src/H5FDmpio.c
-H5FDmulti.c: ../src/H5FDmulti.c
-H5FDsec2.c: ../src/H5FDsec2.c
-H5FDsrb.c: ../src/H5FDsrb.c
-H5FDstdio.c: ../src/H5FDstdio.c
-H5FDstream.c: ../src/H5FDstream.c
-H5FL.c: ../src/H5FL.c
-H5Farray.c: ../src/H5Farray.c
-H5Fcontig.c: ../src/H5Fcontig.c
-H5Fistore.c: ../src/H5Fistore.c
-H5Fseq.c: ../src/H5Fseq.c
-H5G.c: ../src/H5G.c
-H5Gent.c: ../src/H5Gent.c
-H5Gnode.c: ../src/H5Gnode.c
-H5Gstab.c: ../src/H5Gstab.c
-H5HG.c: ../src/H5HG.c
-H5HL.c: ../src/H5HL.c
-H5I.c: ../src/H5I.c
-H5MF.c: ../src/H5MF.c
-H5MM.c: ../src/H5MM.c
-H5O.c: ../src/H5O.c
-H5Oattr.c: ../src/H5Oattr.c
-H5Ocomp.c: ../src/H5Ocomp.c
-H5Ocont.c: ../src/H5Ocont.c
-H5Odtype.c: ../src/H5Odtype.c
-H5Oefl.c: ../src/H5Oefl.c
-H5Ofill.c: ../src/H5Ofill.c
-H5Olayout.c: ../src/H5Olayout.c
-H5Omtime.c: ../src/H5Omtime.c
-H5Oname.c: ../src/H5Oname.c
-H5Onull.c: ../src/H5Onull.c
-H5Osdspace.c: ../src/H5Osdspace.c
-H5Oshared.c: ../src/H5Oshared.c
-H5Ostab.c: ../src/H5Ostab.c
-H5P.c: ../src/H5P.c
-H5R.c: ../src/H5R.c
-H5S.c: ../src/H5S.c
-H5Sall.c: ../src/H5Sall.c
-H5Shyper.c: ../src/H5Shyper.c
-H5Smpio.c: ../src/H5Smpio.c
-H5Snone.c: ../src/H5Snone.c
-H5Spoint.c: ../src/H5Spoint.c
-H5Sselect.c: ../src/H5Sselect.c
-H5T.c: ../src/H5T.c
-H5TB.c: ../src/H5TB.c
-H5TS.c: ../src/H5TS.c
-H5Tbit.c: ../src/H5Tbit.c
-H5Tconv.c: ../src/H5Tconv.c
-H5Tinit.c: ../src/H5Tinit.c
-H5Tvlen.c: ../src/H5Tvlen.c
-H5V.c: ../src/H5V.c
-H5Z.c: ../src/H5Z.c
-H5Zdeflate.c: ../src/H5Zdeflate.c
-H5detect.c: ../src/H5detect.c
+H5.c: $(top_srcdir)/src/H5.c
+H5A.c: $(top_srcdir)/src/H5A.c
+H5AC.c: $(top_srcdir)/src/H5AC.c
+H5B.c: $(top_srcdir)/src/H5B.c
+H5D.c: $(top_srcdir)/src/H5D.c
+H5E.c: $(top_srcdir)/src/H5E.c
+H5F.c: $(top_srcdir)/src/H5F.c
+H5FD.c: $(top_srcdir)/src/H5FD.c
+H5FDcore.c: $(top_srcdir)/src/H5FDcore.c
+H5FDdpss.c: $(top_srcdir)/src/H5FDdpss.c
+H5FDfamily.c: $(top_srcdir)/src/H5FDfamily.c
+H5FDgass.c: $(top_srcdir)/src/H5FDgass.c
+H5FDlog.c: $(top_srcdir)/src/H5FDlog.c
+H5FDmpio.c: $(top_srcdir)/src/H5FDmpio.c
+H5FDmulti.c: $(top_srcdir)/src/H5FDmulti.c
+H5FDsec2.c: $(top_srcdir)/src/H5FDsec2.c
+H5FDsrb.c: $(top_srcdir)/src/H5FDsrb.c
+H5FDstdio.c: $(top_srcdir)/src/H5FDstdio.c
+H5FDstream.c: $(top_srcdir)/src/H5FDstream.c
+H5FL.c: $(top_srcdir)/src/H5FL.c
+H5Farray.c: $(top_srcdir)/src/H5Farray.c
+H5Fcontig.c: $(top_srcdir)/src/H5Fcontig.c
+H5Fistore.c: $(top_srcdir)/src/H5Fistore.c
+H5Fseq.c: $(top_srcdir)/src/H5Fseq.c
+H5G.c: $(top_srcdir)/src/H5G.c
+H5Gent.c: $(top_srcdir)/src/H5Gent.c
+H5Gnode.c: $(top_srcdir)/src/H5Gnode.c
+H5Gstab.c: $(top_srcdir)/src/H5Gstab.c
+H5HG.c: $(top_srcdir)/src/H5HG.c
+H5HL.c: $(top_srcdir)/src/H5HL.c
+H5I.c: $(top_srcdir)/src/H5I.c
+H5MF.c: $(top_srcdir)/src/H5MF.c
+H5MM.c: $(top_srcdir)/src/H5MM.c
+H5O.c: $(top_srcdir)/src/H5O.c
+H5Oattr.c: $(top_srcdir)/src/H5Oattr.c
+H5Ocomp.c: $(top_srcdir)/src/H5Ocomp.c
+H5Ocont.c: $(top_srcdir)/src/H5Ocont.c
+H5Odtype.c: $(top_srcdir)/src/H5Odtype.c
+H5Oefl.c: $(top_srcdir)/src/H5Oefl.c
+H5Ofill.c: $(top_srcdir)/src/H5Ofill.c
+H5Olayout.c: $(top_srcdir)/src/H5Olayout.c
+H5Omtime.c: $(top_srcdir)/src/H5Omtime.c
+H5Oname.c: $(top_srcdir)/src/H5Oname.c
+H5Onull.c: $(top_srcdir)/src/H5Onull.c
+H5Osdspace.c: $(top_srcdir)/src/H5Osdspace.c
+H5Oshared.c: $(top_srcdir)/src/H5Oshared.c
+H5Ostab.c: $(top_srcdir)/src/H5Ostab.c
+H5P.c: $(top_srcdir)/src/H5P.c
+H5R.c: $(top_srcdir)/src/H5R.c
+H5S.c: $(top_srcdir)/src/H5S.c
+H5Sall.c: $(top_srcdir)/src/H5Sall.c
+H5Shyper.c: $(top_srcdir)/src/H5Shyper.c
+H5Smpio.c: $(top_srcdir)/src/H5Smpio.c
+H5Snone.c: $(top_srcdir)/src/H5Snone.c
+H5Spoint.c: $(top_srcdir)/src/H5Spoint.c
+H5Sselect.c: $(top_srcdir)/src/H5Sselect.c
+H5T.c: $(top_srcdir)/src/H5T.c
+H5TB.c: $(top_srcdir)/src/H5TB.c
+H5TS.c: $(top_srcdir)/src/H5TS.c
+H5Tbit.c: $(top_srcdir)/src/H5Tbit.c
+H5Tconv.c: $(top_srcdir)/src/H5Tconv.c
+H5Tinit.c: $(top_srcdir)/src/H5Tinit.c
+H5Tvlen.c: $(top_srcdir)/src/H5Tvlen.c
+H5V.c: $(top_srcdir)/src/H5V.c
+H5Z.c: $(top_srcdir)/src/H5Z.c
+H5Zdeflate.c: $(top_srcdir)/src/H5Zdeflate.c
+H5detect.c: $(top_srcdir)/src/H5detect.c
