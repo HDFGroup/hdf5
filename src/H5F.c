@@ -85,6 +85,9 @@ H5FL_DEFINE_STATIC(H5F_file_t);
 /* Declare the external free list for the H5G_t struct */
 H5FL_EXTERN(H5G_t);
 
+/* Declare the external PQ free list for the sieve buffer information */
+H5FL_BLK_EXTERN(sieve_buf);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_init
@@ -1478,7 +1481,7 @@ H5F_dest(H5F_t *f)
             /* Free the data sieve buffer, if it's been allocated */
             if(f->shared->sieve_buf) {
                 assert(f->shared->sieve_dirty==0);    /* The buffer had better be flushed... */
-                f->shared->sieve_buf = H5MM_xfree (f->shared->sieve_buf);
+                f->shared->sieve_buf = H5FL_BLK_FREE (sieve_buf,f->shared->sieve_buf);
             } /* end if */
 
 	    /* Destroy file creation properties */
