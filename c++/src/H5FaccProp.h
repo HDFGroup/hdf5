@@ -61,12 +61,21 @@ class FileAccPropList : public PropList {
 	// family driver and retrieves the member's file access property list.
 	// bool getFamily( hsize_t& memb_size, FileAccPropList& memb_plist ) const;
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
 	// Sets the meta data cache and raw data chunk cache parameters.
 	void setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
 
 	// Retrieves maximum sizes of data caches and the preemption 
 	// policy value.
+	void getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+	// Sets the meta data cache and raw data chunk cache parameters.
+	void setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
+
+	// Retrieves maximum sizes of data caches and the preemption 
+	// policy value.
 	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 	// Sets the low-level driver to split meta data from raw data.
 	// void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 

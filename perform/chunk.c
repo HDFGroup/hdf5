@@ -162,13 +162,18 @@ create_dataset (void)
  *-------------------------------------------------------------------------
  */
 static double
-test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
+test_rowmaj (int op, size_t cache_size, hsize_t io_size)
 {
     hid_t	file, dset, mem_space, file_space;
     signed char	*buf = calloc (1, SQUARE(io_size));
     hsize_t	i, j, hs_size[2];
     hssize_t	hs_offset[2];
+#ifdef H5_WANT_H5_V1_4_COMPAT
     int		mdc_nelmts, rdcc_nelmts;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    int		mdc_nelmts;
+    size_t	rdcc_nelmts;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     double	w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
@@ -237,14 +242,19 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
  *-------------------------------------------------------------------------
  */
 static double
-test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
+test_diag (int op, size_t cache_size, hsize_t io_size, hsize_t offset)
 {
     hid_t	file, dset, mem_space, file_space;
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
     hssize_t	hs_offset[2];
     signed char	*buf = calloc (1, SQUARE (io_size));
+#ifdef H5_WANT_H5_V1_4_COMPAT
     int		mdc_nelmts, rdcc_nelmts;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    int		mdc_nelmts;
+    size_t	rdcc_nelmts;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     double	w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
@@ -315,7 +325,7 @@ main (void)
     hsize_t	io_size;
     double	effic, io_percent;
     FILE	*f, *d;
-    int		cache_size;
+    size_t	cache_size;
     double	w0;
 
     /*

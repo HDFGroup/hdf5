@@ -189,7 +189,26 @@ void FileAccPropList::getMpi( MPI_Comm& comm, MPI_Info& info ) const
 }
 */
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
 void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
+{
+   herr_t ret_value = H5Pset_cache( id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0 );
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::setCache", "H5Pset_cache failed");
+   }
+}
+
+void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const
+{
+   herr_t ret_value = H5Pget_cache( id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0 );
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileAccPropList::getCache", "H5Pget_cache failed");
+   }
+}
+#else /* H5_WANT_H5_V1_4_COMPAT */
+void FileAccPropList::setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const
 {
    herr_t ret_value = H5Pset_cache( id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0 );
    if( ret_value < 0 )
@@ -206,6 +225,7 @@ void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rd
       throw PropListIException("FileAccPropList::getCache", "H5Pget_cache failed");
    }
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 void FileAccPropList::setGcReferences( unsigned gc_ref ) const
 {

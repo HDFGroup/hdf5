@@ -3710,7 +3710,11 @@ test_select(void)
     hid_t plist_id;     /* Property list for reading random hyperslabs */
     hid_t fapl;         /* Property list accessing the file */
     int mdc_nelmts;     /* Metadata number of elements */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int rdcc_nelmts;   /* Raw data number of elements */
+#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nelmts;   /* Raw data number of elements */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
     herr_t	ret;	/* Generic return value		*/
