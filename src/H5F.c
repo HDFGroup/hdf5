@@ -490,10 +490,18 @@ H5F_compare_files(void * _obj, const void * _key)
     int			ret_value = FALSE;
 
     FUNC_ENTER(H5F_compare_files, FALSE);
-
+#if WIN32
+	ret_value = stricmp(key->path, obj->shared->key.path);
+	if (ret_value){
+		ret_value = FALSE;
+	}
+	else {
+		ret_value = TRUE;
+	}
+#else
     ret_value = (obj->shared->key.dev == key->dev &&
-		 obj->shared->key.ino == key->ino);
-
+		 obj->shared->key.ino == key->ino);	
+#endif
     FUNC_LEAVE(ret_value);
 }
 
@@ -945,6 +953,7 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
 			  "file is not writable");
 	}
+
 	if ((old = H5I_search(H5I_FILE, H5F_compare_files, &search)) ||
 	    (old = H5I_search(H5I_FILE_CLOSING, H5F_compare_files, &search))) {
 	    if (flags & H5F_ACC_TRUNC) {
@@ -965,7 +974,9 @@ H5F_open(const char *name, uintn flags,
 	    }
 	    f = H5F_new(old->shared, NULL, NULL);
 
-	} else if (flags & H5F_ACC_TRUNC) {
+	}
+
+	else if (flags & H5F_ACC_TRUNC) {
 	    /* Truncate existing file */
 	    if (0 == (flags & H5F_ACC_RDWR)) {
 		HRETURN_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
