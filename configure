@@ -9177,7 +9177,18 @@ PARALLEL=${PARALLEL:-no}
 if test "X-$cc_vendor" != "X-" && test "X-$cc_version" != "X-"; then
     CC_VERSION="$CC ($cc_vendor-$cc_version)"
 else
-    CC_VERSION="$CC"
+    # If $CC contains directory component, take it as is;
+    # else search it among PATH components.
+    if `echo $CC | grep / 2>&1 /dev/null`; then
+        CC_VERSION="$CC"	
+    else
+        for x in `echo $PATH | sed -e 's/:/ /g'`; do
+           if test -x $x/$CC; then
+               CC_VERSION="$x/$CC"
+               break
+           fi
+       done
+    fi
 fi
 
 
