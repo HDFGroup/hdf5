@@ -1496,9 +1496,9 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     }
 
     /* Update layout message */
-    /* (Don't make layout message constant yet, since space may not be allocated) */
+    /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
     /* Note: this is relying on H5D_alloc_storage not calling H5O_modify during dataset creation */
-    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, 0, layout) < 0)
+    if (H5D_COMPACT != layout->type && H5O_append(file, dxpl_id, oh, H5O_LAYOUT_ID, (alloc_time == H5D_ALLOC_TIME_EARLY ? H5O_FLAG_CONSTANT : 0), layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout"); 
 
 #ifdef H5O_ENABLE_BOGUS
@@ -2410,7 +2410,8 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
     hbool_t update_time, hbool_t full_overwrite)
 {
     struct H5O_layout_t *layout;        /* The dataset's layout information */
-    unsigned space_allocated=0;         /* Flag to indicate that space was allocated */
+    unsigned init_space=0;              /* Flag to indicate that space should be initialized */
+    unsigned addr_set=0;                /* Flag to indicate that the dataset's storage address was set */
     herr_t      ret_value = SUCCEED;    /* Return value */
    
     FUNC_ENTER_NOINIT(H5D_alloc_storage);
@@ -2434,8 +2435,11 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     if (H5F_contig_create (f, dxpl_id, layout/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage");
 
-                    /* Indicate that we allocated space */
-                    space_allocated=1;
+                    /* Indicate that we set the storage addr */
+                    addr_set=1;
+
+                    /* Indicate that we should initialize storage space */
+                    init_space=1;
                 } /* end if */
                 break;
 
@@ -2445,13 +2449,19 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     if (H5F_istore_create (f, dxpl_id, layout/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
 
-                    /* Indicate that we allocated space */
-                    space_allocated=1;
+                    /* Indicate that we set the storage addr */
+                    addr_set=1;
+
+                    /* Indicate that we should initialize storage space */
+                    init_space=1;
                 } /* end if */
 
-                /* If MPIO, MPIPOSIX, or FPHDF5 is used, indicate that space was allocated, so the B-tree gets expanded */
-                if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f))
-                    space_allocated=1;
+                /* If space allocation is set to 'early' and we are extending
+                 *  the dataset, indicate that space was allocated, so the
+                 * B-tree gets expanded. -QAK
+                 */
+                if(dset->alloc_time==H5D_ALLOC_TIME_EARLY && time_alloc==H5D_ALLOC_EXTEND)
+                    init_space=1;
 
                 break;
 
@@ -2464,8 +2474,11 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset");
                     layout->dirty = TRUE;
 
-                    /* Indicate that we allocated space */
-                    space_allocated=1;
+                    /* Indicate that we set the storage addr */
+                    addr_set=1;
+
+                    /* Indicate that we should initialize storage space */
+                    init_space=1;
                 } /* end if */
                 break;
                 
@@ -2475,7 +2488,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
         } /* end switch */
 
         /* Check if we actually allocated space before performing other actions */
-        if(space_allocated) {
+        if(init_space || addr_set) {
             /* If we are filling the dataset on allocation, do that now */
             if(dset->fill_time==H5D_FILL_TIME_ALLOC
                     && !(dset->alloc_time==H5D_ALLOC_TIME_INCR && time_alloc==H5D_ALLOC_WRITE)) {
@@ -2483,10 +2496,10 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
             } /* end if */
 
-            /* Also update header message for layout with new address
-              * (this is only for forward compatibility).
-              */
-            if(time_alloc!=H5D_ALLOC_CREATE)
+            /* Also update header message for layout with new address, if we
+             * set the address.  (this is mainly for forward compatibility).
+             */
+            if(time_alloc!=H5D_ALLOC_CREATE && addr_set)
                 if (H5O_modify (&(dset->ent), H5O_LAYOUT_ID, 0, H5O_FLAG_CONSTANT, update_time, &(dset->layout), dxpl_id) < 0)
                     HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
         } /* end if */
