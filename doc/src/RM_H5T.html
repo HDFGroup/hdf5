@@ -17,6 +17,17 @@ of a dataset.
 <table border=0>
 <tr><td valign=top>
 <ul>
+    <li><a href="#Datatype-Open">H5Topen</a>
+    <li><a href="#Datatype-Commit">H5Tcommit</a>
+    <li><a href="#Datatype-Committed">H5Tcommitted</a>
+    <li><a href="#Datatype-InsertArray">H5Tinsert_array</a>
+    <li><a href="#Datatype-Share">H5Tshare</a>
+    <li><a href="#Datatype-Find">H5Tfind</a>
+    <li><a href="#Datatype-Convert">H5Tconvert</a>
+    <li><a href="#Datatype-SetOverflow">H5Tset_overflow</a>
+    <li><a href="#Datatype-GetOverflow">H5Tget_overflow</a>
+    <li>
+
     <li><a href="#Datatype-Create">H5Tcreate</a>
     <li><a href="#Datatype-Copy">H5Tcopy</a>
     <li><a href="#Datatype-Equal">H5Tequal</a>
@@ -67,16 +78,321 @@ of a dataset.
 </td></tr>
 </table>
 
-<hr>
+<p>
+The Datatype interface, H5T, provides a mechanism to describe the
+      storage format of individual data points of a data set and is
+      hopefully designed in such a way as to allow new features to be
+      easily added without disrupting applications that use the data
+      type interface.  A dataset (the H5D interface) is composed of a
+      collection or raw data points of homogeneous type organized
+      according to the data space (the H5S interface).
 
+<p>
+A data type is a collection of data type properties, all of
+      which can be stored on disk, and which when taken as a whole,
+      provide complete information for data conversion to or from that
+      data type.  The interface provides functions to set and query
+      properties of a data type.
+      
+<p>
+A <em>data point</em> is an instance of a <em>datatype</em>,
+      which is an instance of a <em>type class</em>.  We have defined
+      a set of type classes and properties which can be extended at a
+      later time.  The atomic type classes are those which describe
+      types which cannot be decomposed at the data type interface
+      level; all other classes are compound.
+
+<p>
+See <a href="Datatypes.html"><cite>The Datatype Interface (H5T)</cite></a>
+in the <cite>HDF5 User's Guide</cite> for further information.
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Open">H5Topen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em><code>H5Topen</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em> <code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Opens a named datatype.
+<dt><strong>Description:</strong>
+    <dd><b>From UG:</b> <code>H5Topen</code> opens a named datatype at the location
+      specified by <code>loc_id</code> and returns an identifier 
+	for the data type.  The identifier should eventually be closed 
+	by calling <code>H5Tclose()</code> to release resources.    
+      <code>loc_id</code> is either a file or group identifier.
+        <p>
+        <b>From SC:</b> Opens a named datatype.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>A file or group identifier.
+        <dt><em>const char *</em> <code>name</code>
+            <dd>A datatype name.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a named datatype identifier if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Commit">H5Tcommit</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em><code>H5Tcommit</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em> <code>name</code>,
+        <em>hid_t</em> <code>type</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Commits a transient datatype to a file, creating a new named datatype.
+<dt><strong>Description:</strong>
+    <dd><b>From UG:</b> <code>H5Tcommit</code> commits a transient datatype (not immutable) 
+      to a file, turned it into a named datatype.  The <code>loc_id</code> 
+      is either a file or group identifier which, when combined with 
+      <code>name</code>, refers to a new named data type.
+           <p>
+           <b>From SC:</b> Saves a transient data type to a file and turns
+            the type identifier into a named, immutable type.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>A file or group identifier.
+        <dt><em>const char *</em> <code>name</code>
+            <dd>A datatype name.
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>A datatype identifier.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Committed">H5Tcommitted</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hbool_t</em><code>H5Tcommitted</code>(<em>hid_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether a datatype is a named type or a transient type.  
+<dt><strong>Description:</strong>
+    <dd><b>From UG:</b> <code>H5Tcommitted</code> queries a type to determine whether 
+        it is a named type or a transient type.  If this function returns 
+        a positive value, then the type is named (that is, it has been 
+        committed, perhaps by some other application).  Datasets which
+        return committed data types with <code>H5Dget_type()</code> are 
+        able to share the data type with other datasets in the same file.
+           <p>
+           <b>From SC:</b>  Determines whether a data type is committed.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>hid_t</em> <code>type</code>
+            <dd>Datatype identifier.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd><b>From UG:</b> Returns a datatype identifier if successful;
+        otherwise FAIL (-1).
+    <dd><b>From SC:</b> The successful returns values are TRUE if committed, 
+        else FALSE.  Otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-InsertArray">H5Tinsert_array</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em><code>H5Tinsert_array</code>(<em>hid_t</em> <code>parent_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>offset</code>,
+        <em>int</em> <code>ndims</code>,
+        <em>const size_t *</em><code>dim</code>,
+        <em>const int *</em><code>perm</code>,
+        <em>hid_t</em> <code>member_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Adds a new member to a compound data type.
+<dt><strong>Description:</strong>
+    <dd><b>From SC:</b> <code>H5Tinsert_array</code> adds a new member to the 
+        compound data type <code>parent_id</code>.  The new member's name, 
+        <code>name</code>, must be unique within the compound data type.  
+        The <code>offset</code> argument defines the start of
+        the member in an instance of the compound data type and
+        <code>member_id</code> is the type of the new member.  
+        The member is an array with <code>ndims</code> dimensionality 
+        and the size of the array is </em><code>dim</code>.
+        The total member size should be relatively small
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>hid_t</em> <code>parent_id</code>
+            <dd>
+        <dt><em>const char *</em><code>name</code>
+            <dd>
+        <dt><em>size_t</em> <code>offset</code>
+            <dd>
+        <dt><em>int</em> <code>ndims</code>
+            <dd>
+        <dt><em>const size_t *</em><code>dim</code>
+            <dd>
+        <dt><em>const int *</em><code>perm</code>
+            <dd>
+        <dt><em>hid_t</em> <code>member_id</code>
+            <dd>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Find">H5Tfind</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_conv_t</em> <code>H5Tfind</code>(<em>hid_t</em> <code>src_id</code>,
+        <em>hid_t</em> <code>dst_id</code>,
+        <em>H5T_cdata_t **</em><code>pcdata</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Finds a conversion function.
+<dt><strong>Description:</strong>
+    <dd><b>From SC:</b>  <code>H5Tfind</code> finds a conversion function 
+           that can handle a conversion from type <code>src_id</code> to 
+           type <code>dst_id</code>.  
+           The <code>pcdata</code> argument is a pointer
+           to a pointer to type conversion data which was created and
+           initialized by the soft type conversion function of this path
+           when the conversion function was installed on the path.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>src_id</code>
+            <dd>
+        <dt><em>hid_t</em> <code>dst_id</code>
+            <dd>
+        <dt><em>H5T_cdata_t **</em><code>pcdata</code>
+            <dd>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to a suitable conversion function if successful.
+        Otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Convert">H5Tconvert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tconvert</code>(<em>hid_t</em> <code>src_id</code>,
+        <em>hid_t</em> <code>dst_id</code>,
+        <em>size_t</em> <code>nelmts</code>,
+        <em>void *</em><code>buf</code>,
+        <em>void *</em><code>background</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Converts data from between specified datatypes.
+<dt><strong>Description:</strong>
+    <dd><b>From SC:</b>  Convert <code>nelmts</code> elements from type 
+        <code>src_id</code> to type <code>dst_id</code>.  
+        The source elements are packed in <code>buf</code> and on return 
+        the destination will be packed in <code>buf</code>.  
+        That is, the conversion is performed in place.  
+        The optional background buffer is an array of <code>nelmts</code> 
+        values of destination type which are merged with the converted 
+        values to fill in cracks (for instance, <code>background</code> 
+        might be an array of structs with the <code>a</code> and 
+        <code>b</code> fields already initialized and the conversion  
+        of <code>buf</code> supplies the <code>c</code> and <code>d</code> 
+        field values).
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>src_id</code>
+            <dd>
+        <dt><em>hid_t</em> <code>dst_id</code>
+            <dd>
+        <dt><em>size_t</em> <code>nelmts</code>
+            <dd>
+        <dt><em>void *</em><code>buf</code>
+            <dd>
+        <dt><em>void *</em><code>background</code>
+            <dd>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetOverflow">H5Tset_overflow</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tset_overflow</code>(<em>H5T_overflow_t</em> <code>func</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Sets the overflow handler to a specified function. 
+<dt><strong>Description:</strong>
+    <dd><b>From SC:</b>  <code>H5Tset_overflow</code> sets the overflow handler 
+        to be the function specified by <code>func</code>.
+        <code>func</code> will be called for all data type conversions that 
+        result in an overflow.  
+        <p>
+        See the definition of <code>H5T_overflow_t</code> in 
+        <code>H5Tpublic.h</code> for documentation  
+        of arguments and return values.  
+        The prototype for <code>H5T_overflow_t</code> is as follows:<br>
+              <code>herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
+                                 void *src_buf, void *dst_buf);
+              </code>
+        <p>
+        The NULL pointer may be passed to remove the overflow handler.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5T_overflow_t</em> <code>func</code>
+            <dd>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetOverflow">H5Tget_overflow</a>
+<dt><strong>Signature:</strong>
+
+
+H5Tget_overflow ()
+    <dd><em>H5T_overflow_t</em> <code>H5Tget_overflow</code>(<code>void</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a pointer to the current global overflow function.
+<dt><strong>Description:</strong>
+    <dd><b>From SC:</b> <code>H5Tset_overflow</code> returns a pointer 
+        to the current global overflow function.
+        This is an application-defined function that is called whenever a 
+        data type conversion causes an overflow. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to an application-defined function if successful.
+        Otherwise returns NULL; this can happen if no overflow handling
+        function is registered.  
+</dl>
+
+
+<hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Create">H5Tcreate</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Tcreate</code>(<em>H5T_class_t </em><code>class</code>,
         <em>size_t</em><code>size</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new dataype.
 <dt><strong>Description:</strong>
-    <dd>This function creates a new dataype of the specified class with the
+    <dd><code>H5Tcreate</code> creates a new dataype of the specified class with the
         specified number of bytes.  Currently, only the <code>H5T_COMPOUND</code>
         datatype class is supported with this function, use <code>H5Tcopy</code>
         to create integer or floating-point datatypes.  The datatype ID
@@ -93,14 +409,17 @@ of a dataset.
     <dd>Datatype ID on success, negative on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Copy">H5Tcopy</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Tcopy</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Copies an existing datatype.  
 <dt><strong>Description:</strong>
-    <dd>This function copies an existing datatype.  The datatype ID returned
+    <dd><code>H5Tcopy</code> copies an existing datatype.  The datatype ID returned
         should be released with H5Tclose or resource leaks will occur.  Native
         datatypes supported by the library are:
         <ul> <dl>
@@ -154,6 +473,7 @@ of a dataset.
     <dd>Datatype ID on success, negative on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Equal">H5Tequal</a>
@@ -161,9 +481,11 @@ of a dataset.
     <dd><em>hbool_t </em><code>H5Tequal</code>(<em>hid_t </em><code>type_id1</code>,
         <em>hid_t</em><code>type_id2</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether two datatype identifiers refer to the same datatype.
 <dt><strong>Description:</strong>
-    <dd>This function determines if two datatype IDs refer to the same 
-        datatype.
+    <dd><code>H5Tequal</code> determines whether two datatype identifiers 
+        refer to the same datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id1</code>
@@ -175,14 +497,17 @@ of a dataset.
     <dd>TRUE/FALSE/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Lock">H5Tlock</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Tlock</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Locks a type.
 <dt><strong>Description:</strong>
-    <dd>This function locks a type, making it read-only and non-destrucible.
+    <dd><code>H5Tlock</code> locks a type, making it read-only and non-destrucible.
         This is normally done by the library for predefined data types so the
         application doesn't inadvertently change or delete a predefined type.
         Once a data type is locked it can never be unlocked.
@@ -195,14 +520,17 @@ of a dataset.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetClass">H5Tget_class</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_class_t </em><code>H5Tget_class</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the base class of a datatype.
 <dt><strong>Description:</strong>
-    <dd>This function returns the base class of a datatype.
+    <dd><code>H5Tget_class</code> returns the base class of a datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -212,14 +540,17 @@ of a dataset.
     <dd>Non-negative type class on success, negative on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetSize">H5Tget_size</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t </em><code>H5Tget_size</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the size of a datatype.
 <dt><strong>Description:</strong>
-    <dd>This function returns the size of a datatype in bytes.
+    <dd><code>H5Tget_size</code> returns the size of a datatype in bytes.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -229,6 +560,7 @@ of a dataset.
     <dd>Positve size in bytes on success, 0 on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetSize">H5Tset_size</a>
@@ -236,8 +568,11 @@ of a dataset.
     <dd><em>herr_t </em><code>H5Tset_size</code>(<em>hid_t </em><code>type_id</code>,
         <em>size_t</em><code>size</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the total size for an atomic data type.
 <dt><strong>Description:</strong>
-    <dd>This function sets the total size in bytes for an atomic data type (this
+    <dd><code>H5Tset_size</code> sets the total size in bytes for an 
+        atomic data type (this
          operation is not permitted on compound data types).  If the size is
          decreased so that the significant bits of the data type extend beyond
          the edge of the new size, then the `offset' property is decreased
@@ -257,14 +592,17 @@ of a dataset.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetOrder">H5Tget_order</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_order_t </em><code>H5Tget_order</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the byte order of an atomic datatype.
 <dt><strong>Description:</strong>
-    <dd>This function returns the byte order of an atomic datatype.
+    <dd><code>H5Tget_order</code> returns the byte order of an atomic datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -274,6 +612,7 @@ of a dataset.
     <dd>Byte order constant on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetOrder">H5Tset_order</a>
@@ -281,8 +620,10 @@ of a dataset.
     <dd><em>herr_t </em><code>H5Tset_order</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_order_t</em><code>order</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the byte ordering of an atomic datatype.
 <dt><strong>Description:</strong>
-    <dd>This function sets the byte ordering of an atomic datatype.
+    <dd><code>H5Tset_order</code> sets the byte ordering of an atomic datatype.
         Byte orderings currently supported are:
         <ul> <dl>
             <dt>H5T_ORDER_LE
@@ -303,14 +644,17 @@ of a dataset.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetPrecision">H5Tget_precision</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t </em><code>H5Tget_precision</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the precision of an atomic data type.
 <dt><strong>Description:</strong>
-    <dd>This function returns the precision of an atomic data type.  The
+    <dd><code>H5Tget_precision</code> returns the precision of an atomic data type.  The
         precision is the number of significant bits which, unless padding is
         present, is 8 times larger than the value returned by H5Tget_size().
 <dt><strong>Parameters:</strong>
@@ -322,6 +666,7 @@ of a dataset.
     <dd>Number of significant bits on success, 0 on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetPrecision">H5Tset_precision</a>
@@ -329,10 +674,12 @@ of a dataset.
     <dd><em>herr_t </em><code>H5Tset_precision</code>(<em>hid_t </em><code>type_id</code>,
         <em>size_t</em><code>precision</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the precision of an atomic data type.  
 <dt><strong>Description:</strong>
-    <dd>This function sets the precision of an atomic data type.  The precision
-        is the number of significant bits which, unless padding is present, is 8
-        times larger than the value returned by H5Tget_size().
+    <dd><code>H5Tset_precision</code> sets the precision of an atomic data type.  
+        The precision is the number of significant bits which, unless padding 
+        is present, is 8 times larger than the value returned by H5Tget_size().
         <P>If the precision is increased then the offset is decreased and then
             the size is increased to insure that significant bits do not "hang
             over" the edge of the data type.
@@ -352,14 +699,17 @@ of a dataset.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetOffset">H5Tget_offset</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t </em><code>H5Tget_offset</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the bit offset of the first significant bit.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the bit offset of the first significant bit.
+    <dd><code>H5Tget_offset</code> retrieves the bit offset of the first significant bit.
         The signficant bits of an atomic datum can be offset from the beginning
         of the memory for that datum by an amount of padding. The `offset'
         property specifies the number of bits of padding that appear to the
@@ -415,6 +765,7 @@ of a dataset.
     <dd>Positive offset value on success, 0 on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetOffset">H5Tset_offset</a>
@@ -422,8 +773,10 @@ of a dataset.
     <dd><em>herr_t </em><code>H5Tset_offset</code>(<em>hid_t </em><code>type_id</code>,
         <em>size_t</em> <code>offset</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the bit offset of the first significant bit.
 <dt><strong>Description:</strong>
-    <dd>This function sets the bit offset of the first significant bit.  The
+    <dd><code>H5Tset_offset</code> sets the bit offset of the first significant bit.  The
         signficant bits of an atomic datum can be offset from the beginning of
         the memory for that datum by an amount of padding. The `offset'
         property specifies the number of bits of padding that appear to the
@@ -488,6 +841,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetPad">H5Tget_pad</a>
@@ -496,8 +850,10 @@ zero.
         <em>H5T_pad_t *</em> <code>lsb</code>,
         <em>H5T_pad_t *</em> <code>msb</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the padding type of the least and most-significant bit padding.  
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the padding type of the least and most-significant
+    <dd><code>H5Tget_pad</code> retrieves the padding type of the least and most-significant
         bit padding.  Valid types are:
         <ul> <dl>
             <dt>H5T_PAD_ZERO
@@ -520,6 +876,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetPad">H5Tset_pad</a>
@@ -528,8 +885,10 @@ zero.
         <em>H5T_pad_t</em> <code>lsb</code>,
         <em>H5T_pad_t</em> <code>msb</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the least and most-significant bits padding types.
 <dt><strong>Description:</strong>
-    <dd>This function sets the least and most-significant bits padding types.
+    <dd><code>H5Tset_pad</code> sets the least and most-significant bits padding types.
         <ul> <dl>
             <dt>H5T_PAD_ZERO
                <dd>Set background to zeros.
@@ -551,14 +910,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetSign">H5Tget_sign</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_sign_t </em><code>H5Tget_sign</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the sign type for an integer type.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the sign type for an integer type.
+    <dd><code>H5Tget_sign</code> retrieves the sign type for an integer type.
         Valid types are:
         <ul> <dl>
             <dt>H5T_SGN_NONE
@@ -575,6 +937,7 @@ zero.
     <dd>Non-negative sign type on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetSign">H5Tset_sign</a>
@@ -582,8 +945,10 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_sign</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_sign_t</em> <code>sign</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the sign proprety for an integer type.
 <dt><strong>Description:</strong>
-    <dd>This function sets the sign proprety for an integer type.
+    <dd><code>H5Tset_sign</code> sets the sign proprety for an integer type.
         <ul> <dl>
             <dt>H5T_SGN_NONE
                <dd>Unsigned integer type.
@@ -601,6 +966,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetFields">H5Tget_fields</a>
@@ -611,8 +977,10 @@ zero.
         <em>size_t *</em> <code>mpos</code>,
         <em>size_t *</em> <code>msize</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves floating point data type bit field information.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves information about the locations of the various
+    <dd><code>H5Tget_fields</code> retrieves information about the locations of the various
         bit fields of a floating point data type.  The field positions are bit
         positions in the significant region of the data type.  Bits are
         numbered with the least significant bit number zero.
@@ -634,6 +1002,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetFields">H5Tset_fields</a>
@@ -644,8 +1013,10 @@ zero.
         <em>size_t</em> <code>mpos</code>,
         <em>size_t</em> <code>msize</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets locations and sizes of floating point bit fields.  
 <dt><strong>Description:</strong>
-    <dd>This function sets the locations and sizes of the various floating
+    <dd><code>H5Tset_fields</code> sets the locations and sizes of the various floating
         point bit fields.  The field positions are bit positions in the
         significant region of the data type.  Bits are numbered with the least
         significant bit number zero.
@@ -669,14 +1040,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetEbias">H5Tget_ebias</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t </em><code>H5Tget_ebias</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the exponent bias of a floating-point type.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the exponent bias of a floating-point type.
+    <dd><code>H5Tget_ebias</code> retrieves the exponent bias of a floating-point type.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -686,6 +1060,7 @@ zero.
     <dd>Positive value on success, 0 on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetEbias">H5Tset_ebias</a>
@@ -693,8 +1068,10 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_ebias</code>(<em>hid_t </em><code>type_id</code>,
         <em>size_t</em> <code>ebias</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the exponent bias of a floating-point type.
 <dt><strong>Description:</strong>
-    <dd>This function sets the exponent bias of a floating-point type.
+    <dd><code>H5Tset_ebias</code> sets the exponent bias of a floating-point type.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -706,14 +1083,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetNorm">H5Tget_norm</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_norm_t </em><code>H5Tget_norm</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves mantissa normalization of a floating-point datatype.  
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the mantissa normalization of a floating-point
+    <dd><code>H5Tget_norm</code> retrieves the mantissa normalization of a floating-point
         datatype.  Valid normalization values are:
         <ul> <dl>
             <dt>H5T_NORM_IMPLIED
@@ -732,6 +1112,7 @@ zero.
     <dd>Non-negative normalization type on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetNorm">H5Tset_norm</a>
@@ -739,8 +1120,10 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_norm</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_norm_t</em> <code>norm</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the mantissa normalization of a floating-point datatype.  
 <dt><strong>Description:</strong>
-    <dd>This function sets the mantissa normalization of a floating-point
+    <dd><code>H5Tset_norm</code> sets the mantissa normalization of a floating-point
         datatype.  Valid normalization values are:
         <ul> <dl>
             <dt>H5T_NORM_IMPLIED
@@ -761,15 +1144,18 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetInpad">H5Tget_inpad</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_pad_t </em><code>H5Tget_inpad</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the internal padding type for unused bits in floating-point datatypes.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the internal padding type for unused bits in
-        floating-point datatypes.
+    <dd><code>H5Tget_inpad</code> retrieves the internal padding type for 
+        unused bits in floating-point datatypes.
         Valid padding values are:
         <ul> <dl>
             <dt>H5T_PAD_ZERO
@@ -788,6 +1174,7 @@ zero.
     <dd>Non-negative padding type on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetInpad">H5Tset_inpad</a>
@@ -795,11 +1182,13 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_inpad</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_pad_t</em> <code>inpad</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Fills unused internal floating point bits.
 <dt><strong>Description:</strong>
     <dd>If any internal bits of a floating point type are unused
         (that is, those significant bits which are not part of the
-        sign, exponent, or mantissa) then they will be filled
-        according to the value of this property.
+        sign, exponent, or mantissa), then <code>H5Tset_inpad</code> will be filled
+        according to the value of the padding value property <code>inpad</code>.
         Valid padding values are:
         <ul> <dl>
             <dt>H5T_PAD_ZERO
@@ -820,14 +1209,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetCset">H5Tget_cset</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_cset_t </em><code>H5Tget_cset</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the character set type of a string datatype.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the character set type of a string datatype.
+    <dd><code>H5Tget_cset</code> retrieves the character set type of a string datatype.
         Valid character set values are:
         <ul> <dl>
             <dt>H5T_CSET_ASCII
@@ -842,6 +1234,7 @@ zero.
     <dd>Non-negative character set type on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetCset">H5Tset_cset</a>
@@ -849,6 +1242,8 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_cset</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_cset_t</em> <code>cset</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>
 <dt><strong>Description:</strong>
     <dd>HDF5 is able to distinguish between character sets of different
         nationalities and to convert between them to the extent possible.
@@ -868,14 +1263,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetStrpad">H5Tget_strpad</a>
 <dt><strong>Signature:</strong>
     <dd><em>H5T_str_t </em><code>H5Tget_strpad</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the string padding method for a string datatype.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the string padding method for a string datatype.
+    <dd><code>H5Tget_strpad</code> retrieves the string padding method for a string datatype.
         Valid string padding values are:
         <ul> <dl>
             <dt>H5T_STR_NULL
@@ -892,6 +1290,7 @@ zero.
     <dd>Non-negative string padding type on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-SetStrpad">H5Tset_strpad</a>
@@ -899,11 +1298,13 @@ zero.
     <dd><em>herr_t </em><code>H5Tset_strpad</code>(<em>hid_t </em><code>type_id</code>,
         <em>H5T_str_t</em> <code>strpad</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Defines the storage mechanism for character strings.
 <dt><strong>Description:</strong>
-    <dd>The method used to store character strings differs with the programming
-        language: C usually null terminates strings while Fortran
-        left-justifies and space-pads strings.  This property defines the
-        storage mechanism for the string.
+    <dd>The method used to store character strings differs with the 
+        programming language: C usually null terminates strings while 
+        Fortran left-justifies and space-pads strings.  
+        <code>H5Tset_strpad</code> defines the storage mechanism for the string.
         Valid string padding values are:
         <ul> <dl>
             <dt>H5T_STR_NULL
@@ -922,14 +1323,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetNmembers">H5Tget_nmembers</a>
 <dt><strong>Signature:</strong>
     <dd><em>intn </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the number of fields in a compound datatype.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the number of fields a compound datatype has.
+    <dd><code>H5Tget_nmembers</code> retrieves the number of fields a compound datatype has.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -939,6 +1343,7 @@ zero.
     <dd>Number of members datatype has on success, negative on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberName">H5Tget_member_name</a>
@@ -946,8 +1351,10 @@ zero.
     <dd><em>char *</em> <code>H5Tget_member_name</code>(<em>hid_t </em><code>type_id</code>,
         <em>intn</em> <code>fieldno</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the name of a field of a compound data type.
 <dt><strong>Description:</strong>
-    <dd>This function retrieves the name of a field of a compound data type.
+    <dd><code>H5Tget_member_name</code> retrieves the name of a field of a compound data type.
         Fields are stored in no particular order with numbers 0 through N-1
         where N is the value returned by H5Tget_nmembers().  The name of the
         field is allocated with malloc() and the caller is responsible for
@@ -963,6 +1370,7 @@ zero.
     <dd>Valid pointer on success, NULL on failure
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberDims">H5Tget_member_dims</a>
@@ -972,8 +1380,10 @@ zero.
         <em>size_t *</em> <code>dims</code>,
         <em>int *</em> <code>perm</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the dimensionality of the field.  
 <dt><strong>Description:</strong>
-    <dd>This function returns the dimensionality of the field.  The dimensions
+    <dd><code>H5Tget_member_dims</code> returns the dimensionality of the field.  The dimensions
         and permuation vector are returned through arguments <code>dims</code>
         and <code>perm</code>, both arrays of at least four elements.  Either
         (or even both) may be null pointers.
@@ -992,6 +1402,7 @@ zero.
     <dd>Number of dimensions on success, negative on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberType">H5Tget_member_type</a>
@@ -999,8 +1410,10 @@ zero.
     <dd><em>hid_t</em> <code>H5Tget_member_type</code>(<em>hid_t </em><code>type_id</code>,
         <em>intn</em> <code>fieldno</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the data type of the specified member.
 <dt><strong>Description:</strong>
-    <dd>This function returns the data type of the specified member.  The caller
+    <dd><code>H5Tget_member_type</code> returns the data type of the specified member.  The caller
         should invoke H5Tclose() to release resources associated with the type.
 <dt><strong>Parameters:</strong>
     <dl>
@@ -1013,6 +1426,7 @@ zero.
     <dd>The ID of a copy of the datatype of the field, negative on failure.
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Insert">H5Tinsert</a>
@@ -1022,8 +1436,10 @@ zero.
         <em>off_t</em> <code>offset</code>,
         <em>hid_t</em> <code>field_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Adds a new member to a compound data type.
 <dt><strong>Description:</strong>
-    <dd>This function adds another member to the compound data type
+    <dd><code>H5Tinsert</code> adds another member to the compound data type
         <code>type_id</code>.  The new member has a <code>name</code> which
         must be unique within the compound data type. The <code>offset</code>
         argument defines the start of the member in an instance of the compound
@@ -1047,14 +1463,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Pack">H5Tpack</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tpack</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Recursively removes padding from within a compound datatype.
 <dt><strong>Description:</strong>
-    <dd>This function recursively removes padding from within a compound
+    <dd><code>H5Tpack</code> recursively removes padding from within a compound
         datatype to make it more efficient (space-wise) to store that data.
 <dt><strong>Parameters:</strong>
     <dl>
@@ -1065,6 +1484,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-RegisterHard">H5Tregister_hard</a>
@@ -1074,8 +1494,10 @@ zero.
         <em>hid_t</em> <code>dst_id</code>,
         <em>H5T_conv_t</em> <code>func</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Registers a hard conversion function.  
 <dt><strong>Description:</strong>
-    <dd>This function registers a hard conversion function for a data type
+    <dd><code>H5Tregister_hard</code> registers a hard conversion function for a data type
         conversion path.  The path is specified by the source and destination
         datatypes <code>src_id</code> and <code>dst_id</code>.  A conversion
         path can only have one hard function, so <code>func</code> replaces any
@@ -1103,6 +1525,7 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-RegisterSoft">H5Tregister_soft</a>
@@ -1112,8 +1535,10 @@ zero.
         <em>hid_t</em> <code>dst_id</code>,
         <em>H5T_conv_t</em> <code>func</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Registers a soft conversion function.
 <dt><strong>Description:</strong>
-    <dd>This function registers a soft conversion function by adding it to the
+    <dd><code>H5Tregister_soft</code> registers a soft conversion function by adding it to the
         end of the master soft list and replacing the soft function in all
         applicable existing conversion paths.  The <code>name</code>
         is used only for debugging and should be a short identifier
@@ -1136,14 +1561,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Unregister">H5Tunregister</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tunregister</code>(<em>H5T_conv_t</em> <code>func</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Removes a conversion function from all conversion paths.
 <dt><strong>Description:</strong>
-    <dd>This function removes a conversion function from all conversion paths.
+    <dd><code>H5Tunregister</code> removes a conversion function from all conversion paths.
         <P>The type of the conversion function pointer is declared as:
             typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                           size_t nelmts, void *buf, void *bkg);
@@ -1156,14 +1584,17 @@ zero.
     <dd>zero/negative
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Close">H5Tclose</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Tclose</code>(<em>hid_t </em><code>type_id</code>
     )
+<dt><strong>Purpose:</strong>
+    <dd>Releases a datatype.  
 <dt><strong>Description:</strong>
-    <dd>This function releases a datatype.  Further access through the datatype
+    <dd><code>H5Tclose</code> releases a datatype.  Further access through the datatype
         ID is illegal.  Failure to release a datatype with this call will
         result in resource leaks.
 <dt><strong>Parameters:</strong>
@@ -1176,6 +1607,15 @@ zero.
 </dl>
 
 
+<hr>
+<hr>
+
+<b>Aha!! And here is the reference to sharing and that command that had us 
+so buffaloed, <code>H5Tshare</code>!</b><br>  
+To quote Quincy: "The H5Tshare() and H5Tis_shared() will be removed.  Data types
+will not be stored in the global heap.  A new type of shared
+message header will be added to the object headers that points to 
+another object header instead of the global heap..."
 
 <hr>
 <hr>
@@ -1317,7 +1757,7 @@ Quincey>
 <a href="mailto:h5docs@ncsa.uiuc.edu">HDF5 Documentation</a>
 
 <br>
-Last modified:  29 June 1998
+Last modified:  9 July 1998
 
 </body>
 </html>

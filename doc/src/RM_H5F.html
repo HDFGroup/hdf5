@@ -24,11 +24,12 @@ documented below.
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
-    <li><a href="#File-GetCreateTemplate">H5Fget_create_template</a>
+    <li><a href="#File-Close">H5Fclose</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#File-Close">H5Fclose</a>
+    <li><a href="#File-GetCreateTemplate">H5Fget_create_template</a>
+    <li><a href="#File-GetAccessTemplate">H5Fget_access_template</a>
 </ul>
 </td></tr>
 </table>
@@ -70,8 +71,8 @@ documented below.
                 access_template.  Use 0 for default access template.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>An ID (of type <em>hid_t</em>) for the file upon success,
-        otherwise negative
+    <dd>A file identifier if successful;
+        otherwise FAIL (-1).
 </dl>
 
 <hr>
