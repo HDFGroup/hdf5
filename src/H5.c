@@ -821,14 +821,6 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
-                case 'l':
-                    /* takes care of "long long (ll)" modifiers */
-                    if (*(s + 1) == 'l') {
-                        HDstrcpy(modifier, "ll");
-                        s++;
-                        break;
-                    }
-                    /* FALL THROUGH */
 		default:
                     /* Handle 'll' for long long types */
                     if(*s=='l' && *(s+1)=='l') {
