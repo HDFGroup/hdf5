@@ -44,6 +44,10 @@
      INTEGER :: count !number of external files for the
                       !specified dataset
      INTEGER(SIZE_T) :: namesize
+     INTEGER(HSIZE_T) :: size, buf_size
+
+     buf_size = 4*1024*1024
+
 
 
      !
@@ -56,6 +60,20 @@
           endif
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f",error,total_error)
+
+
+     CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
+         CALL check("h5pcreate_f", error, total_error)
+     CALL h5pset_buffer_f(plist_id, buf_size, error)
+         CALL check("h5pset_buffer_f", error, total_error)
+     CALL h5pget_buffer_f(plist_id, size, error)
+         CALL check("h5pget_buffer_f", error, total_error)
+     if (size .ne.buf_size) then
+         total_error = total_error + 1
+         write(*,*) "h5pget_buffer_f returned wrong size, error"
+      endif
+     CALL h5pclose_f(plist_id, error)
+         CALL check("h5pclose_f", error, total_error)
 
      CALL h5pcreate_f(H5P_DATASET_CREATE_F, plist_id, error)
      CALL check("h5pcreate_f",error,total_error)

@@ -657,6 +657,8 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_dxpl_mpio_c        FNAME(H5PGET_DXPL_MPIO_C)
 #   define nh5pget_fclose_degree_c    FNAME(H5PGET_FCLOSE_DEGREE_C)
 #   define nh5pset_fclose_degree_c    FNAME(H5PSET_FCLOSE_DEGREE_C)
+#   define nh5pset_buffer_c    FNAME(H5PSET_BUFFER_C)
+#   define nh5pget_buffer_c    FNAME(H5PGET_BUFFER_C)
 
 #else
 #   define nh5pcreate_c       FNAME(h5pcreate_c)
@@ -717,6 +719,8 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_dxpl_mpio_c        FNAME(h5pget_dxpl_mpio_c)
 #   define nh5pget_fclose_degree_c    FNAME(h5pget_fclose_degree_c)
 #   define nh5pset_fclose_degree_c    FNAME(h5pset_fclose_degree_c)
+#   define nh5pset_buffer_c    FNAME(h5pset_buffer_c)
+#   define nh5pget_buffer_c    FNAME(h5pget_buffer_c)
 
 
 #endif
@@ -841,6 +845,8 @@ H5_DLL int_f
 nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_DLL int_f nh5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);
 H5_DLL int_f nh5pget_fclose_degree_c(hid_t_f *fapl, int_f *degree);
+H5_DLL int_f nh5pget_buffer_c(hid_t_f *plist, hsize_t_f *size);
+H5_DLL int_f nh5pset_buffer_c(hid_t_f *plist, hsize_t_f *size);
 /*
  * Functions frome H5Rf.c 
  */

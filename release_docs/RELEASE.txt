@@ -403,6 +403,7 @@ New Features
               H5P APIs:
                       h5pequal_f 
                       h5pget(set)_fclose_degree_f
+                      h5pget(set)_buffer_f
 
               H5T APIs:
                       h5tget_member_index_f

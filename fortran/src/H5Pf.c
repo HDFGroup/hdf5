@@ -1886,3 +1886,54 @@ nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
   ret_value = 0;
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_buffer_c
+ * Purpose:     Call H5Pset_buffer to set size of conversion buffer 
+ * Inputs:      prp_id - t`dataset trasfer property list identifier
+ *              size   - size of the buffer
+ * Outputs:     NONE 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, October 2, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  hsize_t c_size;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_size = (hsize_t)*size;
+  if ( H5Pset_buffer(c_prp_id, c_size, NULL, NULL) < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_buffer_c
+ * Purpose:     Call H5Pget_buffer to get size of conversion buffer 
+ * Inputs:      prp_id - t`dataset trasfer property list identifier
+ * Outputs:     size - size of conversion buffer 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, October 2, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  hsize_t c_size;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_size = H5Pget_buffer(c_prp_id, NULL, NULL);
+  if ( c_size < 0  ) return ret_value;
+  *size = (hsize_t)c_size;
+  ret_value = 0;
+  return ret_value;
+}

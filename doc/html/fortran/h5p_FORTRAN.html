@@ -1395,6 +1395,54 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_buffer_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_buffer_f</strong>
+<pre>
+
+         SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id !  Dataset trasfer 
+                                                   !  property list identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: size   !  Conversion buffer size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+          END SUBROUTINE h5pset_buffer_f 
+
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_buffer_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_buffer_f</strong>
+<pre>
+
+         SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id !  Dataset trasfer 
+                                                   !  property list identifier
+            INTEGER(HSIZE_T), INTENT(OUT) :: size  !  Conversion buffer size
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+          END SUBROUTINE h5pget_buffer_f 
+
+</pre>
+
+
+
+
 
 </dl>
 

@@ -3327,4 +3327,107 @@
             if (c_flag .GT. 0) flag = .TRUE.
           END SUBROUTINE h5pequal_f
 
+!----------------------------------------------------------------------
+! Name:		h5pset_buffer_f 
+!
+! Purpose: 	Sets sixe for conversion buffer
+!
+! Inputs:  
+!		plist_id	- data transfer property list identifier
+!               size		- buffer size 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 2, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_buffer_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
+            INTEGER(HSIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
+                                                   ! buffer is allocated and freed by 
+                                                   ! the library.
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_buffer_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_BUFFER_C'::h5pset_buffer_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(IN) :: size
+              END FUNCTION h5pset_buffer_c
+            END INTERFACE
+
+            hdferr = h5pset_buffer_c(plist_id, size) 
+          END SUBROUTINE h5pset_buffer_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_buffer_f 
+!
+! Purpose: 	Gets size for conversion buffer
+!
+! Inputs:  
+!		plist_id	- data transfer property list identifier
+! Outputs:  
+!               size		- buffer size 
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        October 2, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_buffer_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
+            INTEGER(HSIZE_T), INTENT(OUT) :: size ! Buffer size in bytes; 
+                                                   ! buffer is allocated and freed by 
+                                                   ! the library.
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pget_buffer_c(plist_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_BUFFER_C'::h5pget_buffer_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist_id
+              INTEGER(HSIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5pget_buffer_c
+            END INTERFACE
+
+            hdferr = h5pget_buffer_c(plist_id, size) 
+          END SUBROUTINE h5pget_buffer_f
+
+
      END MODULE H5P
