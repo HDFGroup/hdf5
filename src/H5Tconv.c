@@ -131,14 +131,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *              at least as wide as the destination.  Overflow can occur 
  *              when the source magnitude is too large for the destination.
  *
- * xL:          Integers to float-point(long double) values where the desination is
- *              at least as wide as the source.  This case cannot generate 
- *              overflows.
- *
- * Lx:          Float-point(long double) values to integer where the source is
- *              at least as wide as the destination.  Overflow can occur 
- *              when the source magnitude is too large for the destination.
-             
  * The macros take a subset of these arguments in the order listed here:
  *
  * CDATA:	A pointer to the H5T_cdata_t structure that was passed to the
@@ -460,19 +452,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 }
 
 #define H5T_CONV_xF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
+    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
 }
 
 #define H5T_CONV_Fx(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
-}
-
-#define H5T_CONV_xL(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_xX, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
-}
-
-#define H5T_CONV_Lx(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    H5T_CONV(H5T_CONV_Xx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
+    H5T_CONV(H5T_CONV_Xx, long double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)    \
 }
 
 /* The main part of every integer hardware conversion macro */
@@ -7127,7 +7111,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_schar_ldouble, FAIL);
 
-    H5T_CONV_xL(SCHAR, LDOUBLE, signed char, long double, -, -);
+    H5T_CONV_xF(SCHAR, LDOUBLE, signed char, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7223,7 +7207,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ldouble, FAIL);
 
-    H5T_CONV_xL(UCHAR, LDOUBLE, unsigned char, long double, -, -);
+    H5T_CONV_xF(UCHAR, LDOUBLE, unsigned char, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7319,7 +7303,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_short_ldouble, FAIL);
 
-    H5T_CONV_xL(SHORT, LDOUBLE, short, long double, -, -);
+    H5T_CONV_xF(SHORT, LDOUBLE, short, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7415,7 +7399,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ldouble, FAIL);
 
-    H5T_CONV_xL(USHORT, LDOUBLE, unsigned short, long double, -, -);
+    H5T_CONV_xF(USHORT, LDOUBLE, unsigned short, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7511,7 +7495,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_int_ldouble, FAIL);
 
-    H5T_CONV_xL(INT, LDOUBLE, int, long double, -, -);
+    H5T_CONV_xF(INT, LDOUBLE, int, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7607,7 +7591,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_uint_ldouble, FAIL);
 
-    H5T_CONV_xL(UINT, LDOUBLE, unsigned int, long double, -, -);
+    H5T_CONV_xF(UINT, LDOUBLE, unsigned int, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7703,7 +7687,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_long_ldouble, FAIL);
 
-    H5T_CONV_xL(LONG, LDOUBLE, long, long double, -, -);
+    H5T_CONV_xF(LONG, LDOUBLE, long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7799,7 +7783,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ldouble, FAIL);
 
-    H5T_CONV_xL(ULONG, LDOUBLE, unsigned long, long double, -, -);
+    H5T_CONV_xF(ULONG, LDOUBLE, unsigned long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7895,7 +7879,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_llong_ldouble, FAIL);
 
-    H5T_CONV_xL(LLONG, LDOUBLE, long_long, long double, -, -);
+    H5T_CONV_xF(LLONG, LDOUBLE, long_long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -7992,7 +7976,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ldouble, FAIL);
 
-    H5T_CONV_xL(ULLONG, LDOUBLE, unsigned long_long, long double, -, -);
+    H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long_long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8153,7 +8137,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_schar, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8185,7 +8169,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_uchar, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
+    H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8345,7 +8329,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_short, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8377,7 +8361,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ushort, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
+    H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8537,7 +8521,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_int, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
+    H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8569,7 +8553,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_uint, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
+    H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8729,7 +8713,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_long, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8761,7 +8745,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ulong, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8921,7 +8905,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_llong, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, LLONG, long double, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, LLONG, long double, long_long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -8953,7 +8937,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ullong, FAIL);
 
-    H5T_CONV_Lx(LDOUBLE, ULLONG, long double, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long_long, 0, ULLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
