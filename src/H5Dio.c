@@ -1627,10 +1627,6 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
                 bkg_iter_init=0;
             } /* end if */
         } /* end if */
-
-        /*close file space and memory space for each chunk*/
-        /*H5S_close(fm_struct.mspace[h]);
-        H5S_close(fm_struct.fspace[h]);*/
     } /* end for */
      
 done:
@@ -1930,10 +1926,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
                 bkg_iter_init=0;
             } /* end if */
         } /* end if */
-
-        /*close file space and memory space for each chunk*/
-        /*H5S_close(fm_struct.mspace[h]);
-        H5S_close(fm_struct.fspace[h]);*/
     } /* end for */
 
 done:

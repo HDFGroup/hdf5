@@ -1890,7 +1890,7 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
 int
 H5T_term_interface(void)
 {
-    int	i, j, nprint=0, n=0;
+    int	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
     FUNC_ENTER_NOINIT(H5T_term_interface);
