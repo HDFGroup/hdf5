@@ -218,6 +218,35 @@ facilitate moving easily between them.</i>
         or a negative value for failure. 
 	The dataset identifier should eventually be closed by 
         calling <code>H5Dclose</code> to release resources it uses.
+	<p>
+	<strong>Fill values and space allocation:</strong><br>
+	The HDF5 library provides flexible means 
+	of specifying a fill value, 
+	of specifying when space will be allocated for a dataset, and
+	of specifying when fill values will be written to a dataset.
+	For further information on these topics, see the document 
+	<a href="http://hdf.ncsa.uiuc.edu/RFC/Fill_Value/FillValue.html"> 
+	<cite>Fill Value and Dataset Storage Allocation Issues in HDF5</a></cite> 
+	and the descriptions of the following HDF5 functions in this 
+	<cite>HDF5 Reference Manual</cite>:
+	<table width=80% border="0">
+	<tr valign="top" align="left"><td width=10%>&nbsp;
+	  </td><td width=45%>
+            <a href="#Dataset-Fill">H5Dfill</a><br>
+            <a href="RM_H5P.html#Property-SetFillValue">H5Pset_fill_value</a><br>
+            <a href="RM_H5P.html#Property-GetFillValue">H5Pget_fill_value</a><br>
+            <a href="RM_H5P.html#Property-FillValueDefined">H5Pfill_value_defined</a>
+	  </td><td width=45%>
+            <a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a><br>
+            <a href="RM_H5P.html#Property-GetFillTime">H5Pget_fill_time</a><br>
+            <a href="RM_H5P.html#Property-SetAllocTime">H5Pset_alloc_time</a><br>
+            <a href="RM_H5P.html#Property-GetAllocTime">H5Pget_alloc_time</a>
+	  </td></tr>
+	</table>
+	This information is also included in the 
+	&ldquo;HDF5 Datasets&rdquo; chapter of 
+	the new <cite>HDF5 User's Guide</cite>, 
+	which is being prepared for release.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
@@ -435,7 +464,7 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataset-GetOffset">H5Dget_offset</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hsize_t </em><code>H5Dget_offset</code>(<em>hid_t </em><code>dset_id</code>)
+    <dd><em>haddr_t </em><code>H5Dget_offset</code>(<em>hid_t </em><code>dset_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Returns dataset address in file.
 <dt><strong>Description:</strong>
@@ -1096,11 +1125,13 @@ facilitate moving easily between them.</i>
 	<span class="termEmphasis">fill value</span>.  
 	See <a href="RM_H5P.html#Property-SetFillValue">H5Pset_fill_value</a>
 	for further discussion.  
-	Related functions include
-	<a href="RM_H5P.html#Property-SetFillValue">H5Pset_fill_value</a>,
+	Other related functions include
 	<a href="RM_H5P.html#Property-GetFillValue">H5Pget_fill_value</a>,
+	<a href="RM_H5P.html#Property-FillValueDefined">H5Pfill_value_defined</a>,
+	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>,
+	<a href="RM_H5P.html#Property-GetFillTime">H5Pget_fill_time</a>,
 	and
-	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>.
+	<a href="#Dataset-Create">H5Dcreate</a>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>const void *</em><code>fill</code>
@@ -1169,7 +1200,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 6 June 2003
+Last modified: 10 June 2003
  
 </body>
 </html>
