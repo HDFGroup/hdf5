@@ -215,6 +215,31 @@ static void test_iter_group(void)
         CHECK(ret, FAIL, "H5Gclose");
     }
 
+    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+     * iterate through B-tree for group members in internal library design.
+     *  (Same as test above, but with the file ID instead of opening the root group)
+     */
+    {
+        ret = H5Gget_num_objs(file, &num_membs);
+        CHECK(ret, FAIL, "H5Gget_num_objs");
+        VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
+  
+        for(i=0; i< (int)num_membs; i++) {
+            H5G_obj_t obj_type;         /* Type of object in file */
+
+            ret = H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, 32);
+            CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
+            
+            obj_type = H5Gget_objtype_by_idx(file, (hsize_t)i);
+            CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
+        }
+    
+        H5E_BEGIN_TRY {
+            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)(NDATASETS+3), dataset_name, 16);
+        } H5E_END_TRY;   
+        VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
+    }
+
     /* Test invalid indices for starting iteration */
     info.command=RET_ZERO;
     idx=-1;

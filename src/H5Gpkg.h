@@ -89,13 +89,13 @@ typedef struct H5G_bt_ud1_t {
 typedef struct H5G_bt_ud2_t {
     /* downward */
     hid_t	group_id;	/*group id to pass to iteration operator     */
-    struct H5G_t *group;	/*the group to which group_id points	     */
+    H5G_entry_t *ent;           /*the entry to which group_id points         */
     int		skip;		/*initial entries to skip		     */
     H5G_iterate_t op;		/*iteration operator			     */
     void	*op_data;	/*user-defined operator data		     */
 
     /* upward */
-    int		final_ent;  /*final entry looked at */
+    int		final_ent;	/*final entry looked at                      */
     
 } H5G_bt_ud2_t;
 
@@ -104,10 +104,13 @@ typedef struct H5G_bt_ud2_t {
  * H5B_iterate function.
  */
 typedef struct H5G_bt_ud3_t {
-    struct H5G_t *group;	/*the group to which group_id points	     */
-    hsize_t      idx;           /*index of group member to be querried       */
-    char         *name;         /*member name to be returned                 */
+    /* downward */
+    H5G_entry_t *ent;           /*the entry of group being queried           */
+    hsize_t      idx;           /*index of group member to be queried        */
     hsize_t      num_objs;      /*the number of objects having been traversed*/
+
+    /* upward */
+    char         *name;         /*member name to be returned                 */
     H5G_obj_t    type;          /*member type to be returned                 */
 } H5G_bt_ud3_t;
 
