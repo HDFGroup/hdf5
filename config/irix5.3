@@ -1,0 +1,13 @@
+#!/bin/sh
+# Site configuration -- do not distribute this file.
+
+CC="cc"
+
+# -woff 799	about long long type non-standard
+
+RANLIB=:		# SGI does not use ranlib
+
+# Don't set CFLAGS if the user already did.
+if test -z "$CFLAGS"; then
+   CFLAGS="-ansi -fullwarn -woff 799"
+fi
