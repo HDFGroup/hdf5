@@ -115,7 +115,7 @@ static meta_func_t meta_func_arr[]={
     {   /* Dataset object meta-functions (defined in H5D.c) */
         H5_DATASET,             /* Dataset Type ID */
         H5D_create,             /* Dataset Create */
-        H5D_access,             /* Dataset Access */
+        NULL,                   /* Dataset Access */
         NULL,                   /* Dataset Copy */
         H5D_find_name,          /* Dataset FindName */
         NULL,                   /* Dataset NameLen */
@@ -129,23 +129,6 @@ static meta_func_t meta_func_arr[]={
         NULL,                   /* Dataset GetFile */
         H5D_release             /* Dataset Release */
     },
-    {   /* Dataset object meta-functions (defined in H5D.c) */
-        H5_OID,                 /* OID Type ID */
-        NULL,                   /* OID Create */
-        H5D_access,             /* OID Access (calls dataset access routine) */
-        NULL,                   /* OID Copy */
-        NULL,                   /* OID FindName */
-        NULL,                   /* OID NameLen */
-        NULL,                   /* OID GetName */
-        NULL,                   /* OID SetName */
-        NULL,                   /* OID Search */
-        NULL,                   /* OID Index */
-        NULL,                   /* OID Flush */
-        NULL,                   /* OID Delete */
-        NULL,                   /* OID GetParent */
-        NULL,                   /* OID GetFile */
-        NULL                    /* OID Release */
-    }
   };
 
 /*------------------_-- Local function prototypes ----------------------------*/
