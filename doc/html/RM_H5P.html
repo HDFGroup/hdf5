@@ -3,7 +3,8 @@
 HDF5/H5P API Specification
 </title>
 
-<!-- #BeginLibraryItem "/ed_libs/styles_RM.lbi" --><link href="ed_styles/RMelect.css" rel="stylesheet" type="text/css"><!-- #EndLibraryItem --></head>
+<!-- #BeginLibraryItem "/ed_libs/styles_RM.lbi" --><link href="ed_styles/RMelect.css" rel="stylesheet" type="text/css"><!-- #EndLibraryItem -->
+</head>
 
 <body bgcolor="#FFFFFF">
 
@@ -42,13 +43,15 @@ And in this document, the
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><center>
+<!-- #EndLibraryItem -->
+
+<center>
 <h1>H5P: Property List Interface</h1>
 </center>
 <h2>Property List API Functions</h2>
 
-These functions manipulate property list objects to allow objects which require
-many different parameters to be easily manipulated.
+These functions manipulate property list objects to allow objects 
+which require many different parameters to be easily manipulated.
 
 
 <p>
@@ -170,6 +173,8 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetFilter">H5Pset_filter</a>
     <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
     <li><a href="#Property-GetFilter">H5Pget_filter</a>
+    <li><a href="#Property-SetFletcher32">H5Pset_fletcher32</a>
+    <li><a href="#Property-SetShuffle">H5Pset_shuffle</a>
     <li><a href="#Property-SetExternal">H5Pset_external</a>
     <li><a href="#Property-GetExternalCount">H5Pget_external_count</a>
     <li><a href="#Property-GetExternal">H5Pget_external</a>
@@ -181,6 +186,9 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetBuffer">H5Pget_buffer</a>
     <li><a href="#Property-SetPreserve">H5Pset_preserve</a>
     <li><a href="#Property-GetPreserve">H5Pget_preserve</a>
+    <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
+    <li><a href="#Property-GetEdcCheck">H5Pget_edc_check</a>
+    <li><a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>
     <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>
     <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
     <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
@@ -2427,24 +2435,25 @@ facilitate moving easily between them.</i>
             <em>H5D_layout_t</em> <code>layout</code>
         )
   <dt><strong>Purpose:</strong>
-    <dd>Sets the type of storage used store the raw data for a dataset.
+    <dd>Sets the type of storage used to store the raw data for a dataset.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_layout</code> sets the type of storage used store the 
+    <dd><code>H5Pset_layout</code> sets the type of storage used to store the 
         raw data for a dataset.  
         This function is only valid for dataset creation property lists.
-        Valid parameters for <code>layout</code> are:
+        <p>
+	Valid values for <code>layout</code> are:
             <ul><dl>
-                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
-                    <dd>Store raw data and object header contiguously in file.
+                <dt>H5D_COMPACT  
+                    <dd>Store raw data in the dataset object header in file.
                         This should only be used for very small amounts of raw
-                        data (suggested less than 1KB).
+                        data.  
+			The current limit is approximately 64K (HDF5 Release 1.6).
                 <dt>H5D_CONTIGUOUS
-                    <dd>Store raw data separately from object header in one
+                    <dd>Store raw data separately from the object header in one
                         large chunk in the file.
                 <dt>H5D_CHUNKED
-                    <dd>Store raw data separately from object header in one
-                        large chunk in the file and store chunks of the raw
-                        data in separate locations in the file.
+                    <dd>Store raw data separately from the object header as 
+                        chunks of data in separate locations in the file.
             </dl></ul>
   <dt><strong>Parameters:</strong>
     <dl>
@@ -2476,26 +2485,29 @@ facilitate moving easily between them.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_layout</code> returns the layout of the raw data for 
         a dataset.  This function is only valid for dataset creation 
-        property lists.  Valid types for <code>layout</code> are:
-            <ul> <dl>
-                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
-                    <dd>Raw data and object header stored contiguously in file.
-                <dt>H5D_CONTIGUOUS
-                    <dd>Raw data stored separately from object header in one
-                        large chunk in the file.
-                <dt>H5D_CHUNKED
-                    <dd>Raw data stored separately from object header in 
-                        chunks in separate locations in the file.
-            </dl> </ul>
+        property lists.  
+	
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for property list to query.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns the layout type of a a dataset creation property list 
-        if successful.
-        Otherwise returns H5D_LAYOUT_ERROR (-1).
+    <dd>Returns the layout type (a non-negative value)  
+        of a dataset creation property list if successful.  
+	Valid return values are:
+            <ul> <dl>
+                <dt>H5D_COMPACT 
+                    <dd>Raw data is stored in the object header in the file.
+                <dt>H5D_CONTIGUOUS
+                    <dd>Raw data is stored separately from the object header in 
+                        one contiguous chunk in the file.
+                <dt>H5D_CHUNKED
+                    <dd>Raw data is stored separately from the object header in 
+                        chunks in separate locations in the file.
+            </dl> </ul>	
+	<p>
+        Otherwise, returns a negative value indicating faliure.
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pget_layout_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
@@ -2941,10 +2953,9 @@ facilitate moving easily between them.</i>
         the following fields specifying certain general properties 
         of the filter:  
         <center>
-        <table align=center width="80%">
+        <table align=center width="75%">
           <tr valign=top>
-            <td valign=top><code>H5Z_FLAG_OPTIONAL</code></td>
-            <td>&nbsp;&nbsp;</td>
+            <td valign=top><code>H5Z_FLAG_OPTIONAL</code>&nbsp;&nbsp;</td>
             <td valign=top>If this bit is set then the filter is 
               optional.  If the filter fails (see below) during an
               <code>H5Dwrite</code> operation then the filter is
@@ -2952,17 +2963,43 @@ facilitate moving easily between them.</i>
               it failed; the filter will not participate in the
               pipeline during an <code>H5Dread</code> of the chunk.
               This is commonly used for compression filters: if the
-              compression result would be larger than the input then
+              filter result would be larger than the input, then
               the compression filter returns failure and the
               uncompressed data is stored in the file.  If this bit is
-              clear and a filter fails then <code>H5Dwrite</code> 
-              or <code>H5Dread</code> also fails.</td>
+              clear and a filter fails, then <code>H5Dwrite</code> 
+              or <code>H5Dread</code> also fails.
+	      <p>
+	      This flag is mandatory for the Fletcher32 checksum filter.</td>
           </tr>
         </table>
         </center>
+	<p>
+	The <code>filter</code> parameter specifies the filter to be set.  
+	Valid values are as follows:
+
+        <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+	</table>
+	</center>
+	
   <dt><strong>Note:</strong>
     <dd>This function currently supports only the permanent filter
-        pipeline; <code>plist_id</code> must be a dataset creation 
+        pipeline; <code>plist</code> must be a dataset creation 
         property list.
   <dt><strong>Parameters:</strong>
     <dl>
@@ -3103,8 +3140,27 @@ facilitate moving easily between them.</i>
             <dd>OUT: Name of the filter.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns the filter identification number if successful.
-        Otherwise returns H5Z_FILTER_ERROR (-1).
+    <dd>Returns the filter identifier if successful:
+         <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+	</table>
+	</center>
+        Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pget_filter_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
@@ -3113,6 +3169,248 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+
+
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetShuffle">H5Pset_shuffle</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_shuffle</code>(<em>hid_t</em> <code>plist</code>,
+                                        <em>unsigned int</em> <code>bytes_in_type</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the shuffle filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_shuffle</code> sets the shuffle filter,
+        <code>H5Z_FILTER_SHUFFLE</code>,
+        in the dataset creation property list <code>plist</code>.  
+	<p>
+	The parameter <code>bytes_in_type</code>indicates the size 
+	in bytes of the dataset's datatype.
+	If the datatype is a struct, <code>bytes_in_type</code> 
+	specifies the size in bytes of the entire struct.
+	<p>
+	The shuffle filter <span class=termEmphasis>de-interlaces</span> 
+        a block of data by reordering the bytes.  
+	All the bytes from one consistent byte position of 
+        each data element are placed together in one block;
+	all bytes from a second consistent byte position of 
+        each data element are placed together in one block; etc.
+	For example, given three data elements of a 4-byte datatype 
+	stored as <code>012301230123</code>, 
+        shuffling will re-order data as <code>000111222333</code>.
+        This can be a valuable step in an effective compression
+	algorithm because the bytes in each byte position are often 
+	closely related to each other and putting them together 
+        can increase the compression ratio.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>unsigned int</em> <code>bytes_in_type</code>
+            <dd>IN: Size of datatype in bytes.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFletcher32">H5Pset_fletcher32</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fletcher32</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the Fletcher32 checksum filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fletcher32</code> sets the Fletcher32 checksum filter
+        in the dataset creation property list <code>plist</code>.  
+  <dt><strong>Note:</strong>
+    <dd>The initial error detection implementation supports 
+        error detection for chunked datasets only.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset creation property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetEdcCheck">H5Pset_edc_check</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_edc_check</code>(<em>hid_t</em> <code>plist</code>,
+                         <em>H5Z_EDC_t</em> <code>check</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets whether to enable error-detection when reading a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_edc_check</code> sets the dataset transfer property 
+        list <code>plist</code> to enable or disable error detection 
+        when reading data. 
+	<p>
+	Whether error detection is enabled or disabled is specified
+	in the <code>check</code> parameter.  
+	Valid values are as follows:
+	<table border="0">
+	<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	<code>H5Z_ENABLE_EDC</code>
+	<br>
+	<code>H5Z_DISABLE_EDC</code> &nbsp; (default)
+	</td></tr>
+	</table>
+	<p>
+	The error detection algorithm used is the algorithm previously  
+	specified in the corresponding dataset creation property list.  
+	<p>
+	This function does not affect the use of error detection when 
+	writing data.  
+  <dt><strong>Note:</strong>
+    <dd>The initial error detection implementation, Fletcher32 checksum, 
+        supports error detection for chunked datasets only.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>H5Z_EDC_t</em> <code>check</code>
+            <dd>IN: Specifies whether error checking is enabled or disabled 
+	        for dataset read operations.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetEdcCheck">H5Pget_edc_check</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>H5Z_EDC_t</em> <code>H5Pget_edc_check</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether error-detection is enabled for dataset reads.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_edc_check</code> queries the dataset transfer property 
+        list <code>plist</code> to determine whether error detection 
+        is enabled for data read operations. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns <code>H5P_ENABLE_EDC</code> or <code>H5P_DISABLE_EDC</code> 
+        if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFilterCallback">H5Pset_filter_callback</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_filter_callback</code>(<em>hid_t</em> <code>plist</code>,
+                         <em>H5Z_filter_func_t</em> <code>func</code>,
+                         <em>void *</em><code>op_data</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets user-defined filter callback function.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_filter_callback</code> sets the user-defined 
+        filter callback function <code>func</code> in the 
+	dataset transfer property list <code>plist</code>.
+	<p>
+	The parameter <code>op_data</code> is a pointer to user-defined
+	input data for the callback function and will be passed through 
+	to the callback function.
+	<p>
+	The callback function <code>func</code> defines the actions 
+	an application is to take when a filter fails.  
+	The function prototype is as follows:
+	<dir>
+	<code>typedef</code> <em>H5Z_cb_return_t</em> (<code>H5Z_filter_func_t</code>)
+	                (<em>H5Z_filter_t</em> <code>filter</code>,
+                         <em>void *</em><code>buf</code>,
+                         <em>size_t</em> <code>buf_size</code>,
+                         <em>void *</em><code>op_data</code>)
+	</dir>
+	<p>
+	where <code>filter</code> indicates which filter has failed,
+	<code>buf</code> and <code>buf_size</code> are used to pass in 
+	the failed data,
+	and <code>op_data</code> is the required input data for this 
+	callback function.
+	<p>
+	Valid callback function return values are 
+	<code>H5Z_CB_FAIL</code> and <code>H5Z_CB_CONT</code>.  
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>H5Z_filter_func_t</em> <code>func</code>
+            <dd>IN: User-defined filter callback function.
+        <dt><em>void *</em><code>op_data</code>
+            <dd>IN: User-defined input data for the callback function.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <hr>
@@ -4346,8 +4644,9 @@ facilitate moving easily between them.</i>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_fapl_log</code>(
                         <em>hid_t</em> <code>fapl_id</code>,
-                        <em>char *</em><code>logfile</code>,
-                        <em>int</em> <code>verbosity</code>
+                        <em>const char *</em><code>logfile</code>,
+                        <em>unsigned int</em> <code>flags</code>,
+                        <em>size_t</em> <code>buf_size</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Sets up the use of the logging driver.
@@ -4355,35 +4654,231 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pset_fapl_log</code> modifies the 
         file access property list to use the logging driver 
         <code>H5FD_LOG</code>.
-        There are no driver-specific properties.
         <p>
         <code>logfile</code> is the name of the file in which the 
         logging entries are to be recorded.
         <p>
-        <code>verbosity</code> indicates the extent of the logging 
-        activity intended.  Valid values are as follows:
+	The actions to be logged are specified in the parameter <code>flags</code> 
+	using the pre-defined constants described in the following table.
+	Multiple flags can be set through the use of an logical OR contained 
+	in parentheses.  For example, logging read and write locations would 
+	be specified as <code>(H5FD_LOG_LOC_READ|H5FD_LOG_LOC_WRITE)</code>.
+        <!--The <code>flags</code> parameter contains a 2-byte hexadecimal value 
+	which is computed from the following elements:-->
         <center>
-        <table width=75%>
+        <table width=100%>
         <tr valign=top align=left><td>
-            <code>0</code>&nbsp;&nbsp; 
+            <hr>
+            <b>Flag</b>
+            <!--</td><td width="20%">
+            <hr>
+            <b>Hex value</b>-->
             </td><td>
-            Performs no logging.
+            <hr>
+            <b>Description</b>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_LOC_READ</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td rowspan="3">
+            <hr>
+            Track the location and length of every read, write, or seek operation. 
         </td></tr>
         <tr valign=top align=left><td>
-            <code>1</code>&nbsp;&nbsp; 
-            </td><td>
-            Records where writes and reads occur in the file.
+            <code>H5FD_LOG_LOC_WRITE&nbsp;&nbsp;</code> 
+            <!--</td><td>
+            <code>0x0002&nbsp;&nbsp;</code>-->
         </td></tr>
         <tr valign=top align=left><td>
-            <code>2</code>&nbsp;&nbsp; 
-            </td><td>
-            Records where writes and reads occur in the file and what 
-            kind of data is written at each location: raw data or any of 
-            several types of metadata (object headers, superblock,
-            B-tree data, local headers, or global headers).
+            <code>H5FD_LOG_LOC_SEEK</code> 
+            <!--</td><td>
+            <code>0x0004</code>-->
         </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_LOC_IO</code> 
+            <!--</td><td>
+            <code>0x0007</code>-->
+            </td><td>
+            Track all I/O locations and lengths.  
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_LOC_READ | H5FD_LOG_LOC_WRITE | H5FD_LOG_LOC_SEEK)</code>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_FILE_READ</code> 
+            <!--</td><td>
+            <code>0x0008</code>-->
+            </td><td rowspan="2">
+            <hr>
+            Track the number of times each byte is read or written. 
+        </td></tr>
+	<tr valign=top align=left><td>
+            <code>H5FD_LOG_FILE_WRITE&nbsp;&nbsp;</code> 
+            <!--</td><td>
+            <code>0x0010</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_FILE_IO</code> 
+            <!--</td><td>
+            <code>0x0018</code>-->
+            </td><td>
+            Track the number of times each byte is read and written.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_FILE_READ | H5FD_LOG_FILE_WRITE)</code>
+        </td></tr>
+	
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_FLAVOR</code> 
+            <!--</td><td>
+            <code>0x0020</code>-->
+            </td><td>
+            <hr>
+            Track the type, or flavor, of information stored at each byte. 
+        </td></tr>	
+	
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_NUM_READ</code> 
+            <!--</td><td>
+            <code>0x0040</code>-->
+            </td><td rowspan="3">
+            <hr>
+            Track the total number of read, write, or seek operations that occur. 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_WRITE</code> 
+            <!--</td><td>
+            <code>0x0080</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_SEEK</code> 
+            <!--</td><td>
+            <code>0x0100</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_IO</code> 
+            <!--</td><td>
+            <code>0x01C0</code>-->
+            </td><td>
+            Track the total number of all types of I/O operations.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_NUM_READ | H5FD_LOG_NUM_WRITE | H5FD_LOG_NUM_SEEK)</code>
+        </td></tr>
+	
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_TIME_OPEN</code> 
+            <!--</td><td>
+            <code>0x0200</code>-->
+            </td><td rowspan="5">
+            <hr>
+            Track the time spent in open, read, write, seek, or close operations. 
+	    <dir>
+	    <span class="termEmphasis"><i>
+	    Not implemented in this release: open and read
+	    <br> 
+	    Partially implemented: write and seek
+	    <br> 
+	    Fully implemented: close</i></span>
+	    </dir>
+        </td></tr>
+        <tr valign=top align=left><td>
+	    <code>H5FD_LOG_TIME_READ</code> 
+            <!--</td><td>
+            <code>0x0400</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_WRITE</code> 
+            <!--</td><td>
+            <code>0x0800</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_SEEK</code> 
+            <!--</td><td>
+            <code>0x1000</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_CLOSE</code> 
+            <!--</td><td>
+            <code>0x2000</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_IO</code> 
+            <!--</td><td>
+            <code>0x3E00</code>-->
+            </td><td>
+	    Track the time spent in each of the above operations.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_TIME_OPEN | H5FD_LOG_TIME_READ | H5FD_LOG_TIME_WRITE 
+	                              | H5FD_LOG_TIME_SEEK | H5FD_LOG_TIME_CLOSE)</code>
+        </td></tr>
+
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_ALLOC</code> 
+            <!--</td><td>
+            <code>0x4000</code>-->
+            </td><td>
+            <hr>
+            Track the allocation of space in the file.
+        </td></tr>
+
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_ALL</code> 
+            <!--</td><td>
+            <code>0xFFFF -- all possible
+	      <br>0x8FFF -- all current at r1.6</code>-->
+            </td><td>
+            <hr>
+            Track everything.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_ALLOC | H5FD_LOG_TIME_IO | H5FD_LOG_NUM_IO | H5FD_LOG_FLAVOR 
+	                          |H5FD_LOG_FILE_IO | H5FD_LOG_LOC_IO)</code>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            </td><td>
+            <hr>
+        </td></tr>
+	
         </table>
         </center>
+
+	<p>
+	The logging driver can track the number of times 
+	each byte in the file is read from or written to 
+	(using <code>H5FD_LOG_FILE_READ</code> and <code>H5FD_LOG_FILE_WRITE</code>)
+	and what kind of data is at that location 
+	(e.g., meta data, raw data; using <code>H5FD_LOG_FLAVOR</code>).  
+	This information is tracked in a buffer of size <code>buf_size</code>,
+	which must be at least the size in bytes of the file to be logged.
  
   <dt><strong>Parameters:</strong>
     <dl>
@@ -4391,8 +4886,10 @@ facilitate moving easily between them.</i>
             <dd>IN: File access property list identifier.
         <dt><em>char *</em><code>logfile</code>
             <dd>IN: Name of the log file.
-        <dt><em>int</em> <code>verbosity</code>
-            <dd>IN: The extent of logging activity intended.
+        <dt><em>unsigned int</em> <code>flags</code>
+            <dd>IN: Flags specifying the types of logging activity.
+        <dt><em>size_t</em> <code>buf_size</code>
+            <dd>IN: The size of the logging buffer.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns non-negative if successful.
@@ -5802,13 +6299,15 @@ And in this document, the
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<!-- #EndLibraryItem -->
+
+<!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 1 October 2002
+Last modified: 20 March 2003
  
 </body>
 </html>
