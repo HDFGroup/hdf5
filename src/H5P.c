@@ -1007,23 +1007,28 @@ H5Pset_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size
     /* Set up stride values for later use */
     tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(size_t));
     for (u=0; u<space->u.simple.rank; u++) {
-	tmp_stride[u] = stride ? stride[u] : 1;
+        tmp_stride[u] = stride ? stride[u] : 1;
     }
+
+    /* Range check arguments */
+    for(u=0; u<space->u.simple.rank; u++)
+      {
+        if(start[u]<0 || start[u]>=space->u.simple.size[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
+        if(start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])<0 || start[u]+(SIGN(count[u])*(ABS(count[u])-1)*tmp_stride[u])>=space->u.simple.size[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
+      } /* end for */
 
     /* Allocate space for the hyperslab information */
     if (NULL==space->h.start) {
-	space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
-	space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
-	space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+        space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+        space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+        space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
     }
 
     /* Build hyperslab */
     for(u=0; u<space->u.simple.rank; u++)
       {
-        /* Range checking arguments */
-        if(start[u]+(count[u]*tmp_stride[u])<=0 || start[u]+(count[u]*tmp_stride[u])>=space->u.simple.size[u])
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
-        
         /* copy "normalized" (i.e. strictly increasing) values for hyperslab parameters */
         space->h.start[u]=MIN(start[u],start[u]+((ABS(count[u])-1)*tmp_stride[u]));
         space->h.count[u]=ABS(count[u]);
@@ -1033,11 +1038,7 @@ H5Pset_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size
 
 done:
     if (ret_value == FAIL) {    /* Error condition cleanup */
-        /* Free hyperslab arrays if we encounter an error */
-	H5MM_xfree(space->h.start);
-	H5MM_xfree(space->h.count);
-	H5MM_xfree(space->h.stride);
-	space->hslab_def = FALSE;
+
     }                           /* end if */
 
     /* Normal function cleanup */
