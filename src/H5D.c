@@ -12,14 +12,10 @@
 
 /* $Id$ */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access                          */
-#include "H5Fprivate.h"		/* Files                                */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gprivate.h"		/* Group headers		  	*/
