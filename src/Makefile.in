@@ -31,7 +31,7 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fistore.c \
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 
 ## Temporary files
-MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
+MOSTLYCLEAN=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 
 ## Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h \
