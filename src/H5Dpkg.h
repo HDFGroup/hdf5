@@ -50,6 +50,29 @@
 /* Package Private Typedefs */
 /****************************/
 
+/* The raw data chunk cache */
+typedef struct H5D_rdcc_t {
+    unsigned		ninits;	/* Number of chunk creations		*/
+    unsigned		nhits;	/* Number of cache hits			*/
+    unsigned		nmisses;/* Number of cache misses		*/
+    unsigned		nflushes;/* Number of cache flushes		*/
+    size_t		nbytes;	/* Current cached raw data in bytes	*/
+    size_t		nslots;	/* Number of chunk slots allocated	*/
+    struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
+    struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
+    int		nused;	/* Number of chunk slots in use		*/
+    struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
+} H5D_rdcc_t;
+
+/* The raw data contiguous data cache */
+typedef struct H5D_rdcdc_t {
+    unsigned char *sieve_buf;   /* Buffer to hold data sieve buffer */
+    haddr_t sieve_loc;          /* File location (offset) of the data sieve buffer */
+    size_t sieve_size;          /* Size of the data sieve buffer used (in bytes) */
+    size_t sieve_buf_size;      /* Size of the data sieve buffer allocated (in bytes) */
+    unsigned sieve_dirty;       /* Flag to indicate that the data sieve buffer is dirty */
+} H5D_rdcdc_t;
+
 /*
  * A dataset is the following struct.
  */
@@ -60,11 +83,18 @@ struct H5D_t {
     hid_t               dcpl_id;        /* dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* data layout                  */
+
     /* Cache some frequently accessed values from the DCPL */
     H5O_efl_t           efl;            /* External file list information */
     H5D_alloc_time_t    alloc_time;     /* Dataset allocation time      */
     H5D_fill_time_t	fill_time;	/* Dataset fill value writing time */
     H5O_fill_t          fill;           /* Dataset fill value information */
+
+    /* Buffered/cached information for types of raw data storage*/
+    union {
+        H5D_rdcdc_t     contig;         /* Information about contiguous data */
+        H5D_rdcc_t      chunk;          /* Information about chunked data */
+    }cache;
 };
 
 /* Enumerated type for allocating dataset's storage */
@@ -86,6 +116,30 @@ extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
                         hbool_t update_time, hbool_t full_overwrite);
+
+/* Functions that operate on contiguous storage */
+H5_DLL herr_t H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_contig_fill(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+
+/* Functions that operate on indexed storage */
+H5_DLL herr_t H5D_istore_init (H5F_t *f, H5D_t *dset);
+H5_DLL herr_t H5D_istore_flush (H5F_t *f, hid_t dxpl_id, H5D_t *dset, unsigned flags);
+H5_DLL herr_t H5D_istore_create(H5F_t *f, hid_t dxpl_id,
+				 H5O_layout_t *layout/*in,out*/);
+H5_DLL herr_t H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_allocate (H5F_t *f, hid_t dxpl_id,
+    const H5D_t *dset, hbool_t full_overwrite);
+H5_DLL hsize_t H5D_istore_allocated(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_prune_by_extent( H5F_t *f,
+        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_initialize_by_extent( H5F_t *f,
+        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_update_cache(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
+        haddr_t addr);
+#ifdef H5D_ISTORE_DEBUG
+H5_DLL herr_t H5D_istore_stats (H5D_t *dset, hbool_t headers);
+#endif /* H5D_ISTORE_DEBUG */
 
 /* Testing functions */
 #ifdef H5D_TESTING

@@ -589,13 +589,13 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 
         case H5D_CONTIGUOUS:    /* Contiguous block on disk */
             /* Free the file space for the raw data */
-            if (H5F_contig_delete(f, dxpl_id, mesg)<0)
+            if (H5D_contig_delete(f, dxpl_id, mesg)<0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the raw data */
-            if (H5F_istore_delete(f, dxpl_id, mesg)<0)
+            if (H5D_istore_delete(f, dxpl_id, mesg)<0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data");
             break;
 

@@ -204,11 +204,21 @@ typedef struct H5F_t H5F_t;
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sym_leaf_k)
 /* B-tree key value size */
 #define H5F_KVALUE(F,T)         ((F)->shared->btree_k[(T)->id])
+/* Raw data cache values */
+#define H5F_RDCC_NELMTS(F)      ((F)->shared->rdcc_nelmts)
+#define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
+#define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
+/* Check for file driver feature enabled */
+#define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags&(FL))
 #else /* H5F_PACKAGE */
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
 #define H5F_SYM_LEAF_K(F)       (H5F_sym_leaf_k(F))
 #define H5F_KVALUE(F,T)         (H5F_Kvalue(F,T))
+#define H5F_RDCC_NELMTS(F)      (H5F_rdcc_nelmts(F))
+#define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
+#define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
+#define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #endif /* H5F_PACKAGE */
 
 
@@ -374,13 +384,6 @@ typedef struct H5F_t H5F_t;
 
 /* Forward declarations for prototype arguments */
 struct H5B_class_t;
-union H5D_storage_t;
-struct H5O_fill_t;
-struct H5O_layout_t;
-struct H5P_genplist_t;
-struct H5S_t;
-struct H5D_dxpl_cache_t;
-struct H5D_dcpl_cache_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5F_init(void);
@@ -391,6 +394,12 @@ H5_DLL hid_t H5F_get_id(H5F_t *file);
 H5_DLL int H5F_get_obj_count(const H5F_t *f, unsigned types);
 H5_DLL int H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
+H5_DLL haddr_t H5F_get_eoa(const H5F_t *f);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
+H5_DLL int H5F_mpi_get_size(const H5F_t *f);
+H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Functions than check file mounting information */
 H5_DLL htri_t H5F_is_mount(const H5F_t *file);
@@ -401,66 +410,16 @@ H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
+H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
+H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
+H5_DLL size_t H5F_rdcc_nelmts(const H5F_t *f);
+H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, void *buf/*out*/);
 H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
-
-/* Functions that operate on byte sequences */
-H5_DLL herr_t H5F_seq_read(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, const struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, 
-    size_t seq_len, hsize_t file_offset, void *_buf/*out*/);
-H5_DLL herr_t H5F_seq_write (H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, 
-    size_t seq_len, hsize_t file_offset, const void *_buf);
-
-/* Functions that operate on byte sequences in memory and on disk */
-H5_DLL ssize_t H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, const struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, 
-    size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    void *buf);
-H5_DLL ssize_t H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, 
-    size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    const void *buf);
-
-/* Functions that operate on contiguous storage */
-H5_DLL herr_t H5F_contig_create(H5F_t *f, hid_t dxpl_id,
-        struct H5O_layout_t *layout);
-H5_DLL herr_t H5F_contig_fill(H5F_t *f, hid_t dxpl_id,
-        struct H5O_layout_t *layout, const struct H5S_t *space,
-        const struct H5O_fill_t *fill, size_t elmt_size);
-H5_DLL herr_t H5F_contig_delete(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout);
-
-/* Functions that operate on indexed storage */
-H5_DLL herr_t H5F_istore_create(H5F_t *f, hid_t dxpl_id,
-				 struct H5O_layout_t *layout/*in,out*/);
-H5_DLL herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
-    const struct H5O_layout_t *layout, const hsize_t *space_dim,
-    struct H5P_genplist_t *dc_plist, hbool_t full_overwrite);
-H5_DLL hsize_t H5F_istore_allocated(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout);
-H5_DLL herr_t H5F_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
-        haddr_t addr);
-H5_DLL herr_t H5F_istore_prune_by_extent( H5F_t *f,
-        const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, const struct H5S_t *space);
-H5_DLL herr_t H5F_istore_initialize_by_extent( H5F_t *f,
-        const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
-        const struct H5S_t *space );
-H5_DLL herr_t H5F_istore_delete(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout);
-H5_DLL herr_t H5F_istore_update_cache(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
-        const struct H5S_t * space);
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);

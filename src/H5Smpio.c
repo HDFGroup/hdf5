@@ -68,7 +68,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
 		     hsize_t *extra_offset,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
+H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      hid_t dxpl_id, void *buf/*out*/, hbool_t do_write);
 
@@ -627,7 +627,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
+H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
      const H5S_t *file_space, const H5S_t *mem_space,
      hid_t dxpl_id, void *_buf /*out*/,
      hbool_t do_write )
@@ -647,7 +647,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
 
     /* Check args */
     assert (f);
-    assert (layout);
+    assert (dset);
     assert (file_space);
     assert (mem_space);
     assert (buf);
@@ -673,14 +673,9 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
 			       &mft_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
-    /* Use the absolute base address of the dataset (or chunk, eventually) as
-     * the address to read from.  This should be used as the diplacement for
-     * a call to MPI_File_set_view() in the read or write call.
-     */
-    assert(layout->type==H5D_CONTIGUOUS);
-    addr = f->shared->base_addr + layout->u.contig.addr + mpi_file_offset;
+    addr = H5D_contig_get_addr(dset) + mpi_file_offset;
 #ifdef H5Smpi_DEBUG
-    HDfprintf(stderr, "spaces_xfer: addr=%a\n", addr );
+    HDfprintf(stderr, "spaces_xfer: relative addr=%a\n", addr );
 #endif
 
     /*
@@ -696,10 +691,10 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
 
     /* transfer the data */
     if (do_write) {
-    	if (H5FD_write(f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf) <0)
+    	if (H5F_block_write(f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,"MPI write failed");
     } else {
-    	if ( H5FD_read (f->shared->lf, H5FD_MEM_DRAW, dxpl_id, addr, mpi_buf_count, buf) <0)
+    	if (H5F_block_read (f, H5FD_MEM_DRAW, addr, mpi_buf_count, dxpl_id, buf) <0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,"MPI read failed");
     }
 
@@ -721,7 +716,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5S_mpio_spaces_xfer() */
 
 
 /*-------------------------------------------------------------------------
@@ -745,22 +740,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+H5S_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t UNUSED *store,
     size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
-    hid_t dxpl_id, void *buf/*out*/)
+    const H5S_t *file_space, const H5S_t *mem_space,
+    void *buf/*out*/)
 {
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size, file_space,
+    ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, buf, 0/*read*/);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5S_mpio_spaces_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -784,23 +779,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+H5S_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t UNUSED *store,
     size_t UNUSED nelmts, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
-    hid_t dxpl_id, const void *buf)
+    const H5S_t *file_space, const H5S_t *mem_space,
+    const void *buf)
 {
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size, file_space,
+    ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, (void*)buf, 1/*write*/);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5S_mpio_spaces_write() */
 
 
 /*-------------------------------------------------------------------------

@@ -39,27 +39,23 @@ static int interface_initialize_g = 0;
 /* Local functions */
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
-static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
-static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
 static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
            const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
 static H5D_t * H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id);
-static herr_t H5D_get_space_status(const H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
-static hsize_t H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id);
+static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
+static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 static haddr_t H5D_get_offset(const H5D_t *dset);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_close(H5D_t *dataset);
-
+static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5D_xfer_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5D_xfer_xform_copy(const char* name, size_t size, void* value);
 static herr_t H5D_xfer_xform_close(const char* name, size_t size, void* value);
     
-
-
-
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
     hid_t dataset_id;   /* ID of the dataset we are working on */
@@ -79,6 +75,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_vl_buf);
 
 /* Declare a free list to manage other blocks of VL data */
 H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
+
+/* Declare the external PQ free list for the sieve buffer information */
+H5FL_BLK_EXTERN(sieve_buf);
 
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_t H5D_def_dset;
@@ -1425,7 +1424,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_get_space_status(const H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
+H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
 {
     H5S_t      *space;              /* Dataset's dataspace */
     hsize_t     space_allocated;    /* The number of bytes allocated for chunks */
@@ -1963,7 +1962,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_update_entry_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -2035,6 +2034,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     unsigned            chunk_ndims = 0;        /* Dimensionality of chunk */
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
     hbool_t             has_vl_type=FALSE;      /* Flag to indicate a VL-type for dataset */
+    hbool_t             chunk_init=FALSE;       /* Flag to indicate that chunk information was initialized */
     H5D_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL)
@@ -2238,6 +2238,13 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 /* Compute the total size of a chunk */
                 for (u=1, new_dset->layout.u.chunk.size=new_dset->layout.u.chunk.dim[0]; u<new_dset->layout.u.chunk.ndims; u++)
                     new_dset->layout.u.chunk.size *= new_dset->layout.u.chunk.dim[u];
+
+                /* Initialize the chunk cache for the dataset */
+                if(H5D_istore_init(file,new_dset)<0)
+                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize chunk cache")
+
+                /* Indicate that the chunk information was initialized */
+                chunk_init=TRUE;
             } /* end case */
             break;
 
@@ -2288,6 +2295,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
 
 done:
     if (!ret_value && new_dset) {
+        if(new_dset->layout.type==H5D_CHUNKED && chunk_init) {
+            if(H5D_istore_dest(new_dset->ent.file,H5AC_dxpl_id,new_dset)<0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy chunk cache")
+        } /* end if */
         if (new_dset->space) {
             if(H5S_close(new_dset->space)<0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
@@ -2313,7 +2324,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -2538,11 +2549,11 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             break;
 
         case H5D_CHUNKED:
-        /*
-         * Chunked storage.  The creation plist's dimension is one less than
-         * the chunk dimension because the chunk includes a dimension for the
-         * individual bytes of the data type.
-         */
+            /*
+             * Chunked storage.  The creation plist's dimension is one less than
+             * the chunk dimension because the chunk includes a dimension for the
+             * individual bytes of the data type.
+             */
             {
                 unsigned     chunk_ndims;           /* Dimensionality of chunk */
 
@@ -2552,6 +2563,10 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set chunk dimensions")
                 if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, dataset->layout.u.chunk.dim) < 0)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set chunk size")
+
+                /* Initialize the chunk cache for the dataset */
+                if(H5D_istore_init(dataset->ent.file,dataset)<0)
+                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize chunk cache")
             }
             break;
             
@@ -2711,19 +2726,52 @@ H5D_close(H5D_t *dataset)
     /* check args */
     assert(dataset && dataset->ent.file);
 
+    /* Dump debugging info */
+#ifdef H5D_ISTORE_DEBUG
+    H5D_istore_stats(dataset, FALSE);
+#endif /* H5F_ISTORE_DEBUG */
+
+    /* Free cached information for each kind of dataset */
+    switch(dataset->layout.type) {
+        case H5D_CONTIGUOUS:
+            /* Free the data sieve buffer, if it's been allocated */
+            if(dataset->cache.contig.sieve_buf) {
+                assert(dataset->cache.contig.sieve_dirty==0);    /* The buffer had better be flushed... */
+                dataset->cache.contig.sieve_buf = H5FL_BLK_FREE (sieve_buf,dataset->cache.contig.sieve_buf);
+            } /* end if */
+            break;
+
+        case H5D_CHUNKED:
+            /* Flush and destroy chunks in the cache */
+            if(H5D_istore_dest(dataset->ent.file,H5AC_dxpl_id,dataset)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
+            break;
+
+        case H5D_COMPACT:               
+            /* Update header message of layout for compact dataset. */
+            if(dataset->layout.u.compact.dirty) {
+                if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), H5AC_dxpl_id)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to update layout message")
+                dataset->layout.u.compact.dirty = FALSE;
+            } /* end if */
+
+            /* Free the buffer for the raw data for compact datasets */
+            dataset->layout.u.compact.buf=H5MM_xfree(dataset->layout.u.compact.buf);
+            break;
+            
+        default:
+            assert ("not implemented yet" && 0);
+#ifdef NDEBUG
+            HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
+#endif /* NDEBUG */
+    } /* end switch */
+
     /*
      * Release datatype, dataspace and creation property list -- there isn't
      * much we can do if one of these fails, so we just continue.
      */
     free_failed=(H5T_close(dataset->type)<0 || H5S_close(dataset->space)<0 ||
 			H5I_dec_ref(dataset->dcpl_id) < 0);
-
-    /* Update header message of layout for compact dataset. */
-    if(dataset->layout.type==H5D_COMPACT && dataset->layout.u.compact.dirty) {
-        if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), H5AC_dxpl_id)<0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
-        dataset->layout.u.compact.dirty = FALSE;
-    } /* end if */
 
     /* Remove the dataset from the list of opened objects in the file */
     if(H5FO_delete(dataset->ent.file, H5AC_dxpl_id, dataset->ent.header)<0)
@@ -2741,9 +2789,7 @@ H5D_close(H5D_t *dataset)
      * above).
      */
     dataset->ent.file = NULL;
-    /* Free the buffer for the raw data for compact datasets */
-    if(dataset->layout.type==H5D_COMPACT)
-        dataset->layout.u.compact.buf=H5MM_xfree(dataset->layout.u.compact.buf);
+
     H5FL_FREE(H5D_t,dataset);
 
     if (free_failed)
@@ -2804,7 +2850,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dataset->layout.type)
-            if(H5F_istore_update_cache(dataset->ent.file, dxpl_id, &dataset->layout, space) < 0)
+            if(H5D_istore_update_cache(dataset->ent.file, dxpl_id, dataset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
@@ -2948,7 +2994,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
             case H5D_CONTIGUOUS:
                 if(layout->u.contig.addr==HADDR_UNDEF) {
                     /* Reserve space in the file for the entire array */
-                    if (H5F_contig_create (f, dxpl_id, layout/*out*/)<0)
+                    if (H5D_contig_create (f, dxpl_id, dset/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
 
                     /* Indicate that we set the storage addr */
@@ -2962,7 +3008,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
             case H5D_CHUNKED:
                 if(layout->u.chunk.addr==HADDR_UNDEF) {
                     /* Create the root of the B-tree that describes chunked storage */
-                    if (H5F_istore_create (f, dxpl_id, layout/*out*/)<0)
+                    if (H5D_istore_create (f, dxpl_id, layout/*out*/)<0)
                         HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
                     /* Indicate that we set the storage addr */
@@ -3076,42 +3122,40 @@ done:
 static herr_t
 H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
 {
-    hssize_t            snpoints;       /* Number of points in space (for error checking) */
-    size_t              npoints;        /* Number of points in space */
-    H5S_t	       *space;          /* Dataset's dataspace */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_storage)
 
     assert(dset);
 
-    /* Get the dataset's dataspace */
-    space=dset->space;
-
-    /* Get the number of elements in the dataset's dataspace */
-    snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(space);
-    assert(snpoints>=0);
-    H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
-
     switch (dset->layout.type) {
         case H5D_COMPACT:
-            /* If we will be immediately overwriting the values, don't bother to clear them */
-            if(!full_overwrite) {
-                /* If the fill value is defined, initialize the data buffer with it */
-                if(dset->fill.buf)
-                    /* Initialize the cached data buffer with the fill value */
-                    H5V_array_fill(dset->layout.u.compact.buf, dset->fill.buf, dset->fill.size, npoints);
-                else /* If the fill value is default, zero set data buf. */
-                    HDmemset(dset->layout.u.compact.buf, 0, dset->layout.u.compact.size);
-            } /* end if */
+            {
+                hssize_t            snpoints;       /* Number of points in space (for error checking) */
+                size_t              npoints;        /* Number of points in space */
+
+                /* Get the number of elements in the dataset's dataspace */
+                snpoints = H5S_GET_SIMPLE_EXTENT_NPOINTS(dset->space);
+                assert(snpoints>=0);
+                H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
+
+                /* If we will be immediately overwriting the values, don't bother to clear them */
+                if(!full_overwrite) {
+                    /* If the fill value is defined, initialize the data buffer with it */
+                    if(dset->fill.buf)
+                        /* Initialize the cached data buffer with the fill value */
+                        H5V_array_fill(dset->layout.u.compact.buf, dset->fill.buf, dset->fill.size, npoints);
+                    else /* If the fill value is default, zero set data buf. */
+                        HDmemset(dset->layout.u.compact.buf, 0, dset->layout.u.compact.size);
+                } /* end if */
+            }
             break;
 
         case H5D_CONTIGUOUS:
             /* Don't write default fill values to external files */
             /* If we will be immediately overwriting the values, don't bother to clear them */
             if((dset->efl.nused==0 || dset->fill.buf) && !full_overwrite) {
-                if (H5F_contig_fill(dset->ent.file, dxpl_id, &(dset->layout),
-                        space, &dset->fill, H5T_get_size(dset->type))<0)
+                if (H5D_contig_fill(dset->ent.file, dxpl_id, dset)<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
             } /* end if */
             break;
@@ -3121,23 +3165,8 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
              * Allocate file space                    
              * for all chunks now and initialize each chunk with the fill value.                                 
              */
-            {
-                H5P_genplist_t     *plist;          /* Property list */
-                int             ndims;
-                hsize_t         dim[H5O_LAYOUT_NDIMS];
-
-                /* Get dataset's creation property list */
-                if (NULL == (plist = H5I_object(dset->dcpl_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
-                /* We only handle simple data spaces so far */
-                if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0)
-                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple data space info")
-                dim[ndims] = dset->layout.u.chunk.dim[ndims];
-
-                if (H5F_istore_allocate(dset->ent.file, dxpl_id, &(dset->layout), dim, plist, full_overwrite)<0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
-            } /* end if */
+            if (H5D_istore_allocate(dset->ent.file, dxpl_id, dset, full_overwrite)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
             break;
 
         default:
@@ -3149,7 +3178,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_init_storage() */
 
 
 /*-------------------------------------------------------------------------
@@ -3211,7 +3240,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id)
+H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
 {
     hsize_t	ret_value;
     
@@ -3222,7 +3251,7 @@ H5D_get_storage_size(const H5D_t *dset, hid_t dxpl_id)
             if(dset->layout.u.chunk.addr == HADDR_UNDEF)
                 ret_value=0;
             else
-                ret_value = H5F_istore_allocated(dset->ent.file, dxpl_id, &dset->layout);
+                ret_value = H5D_istore_allocated(dset->ent.file, dxpl_id, dset);
             break;
 
         case H5D_CONTIGUOUS:
@@ -3808,7 +3837,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->layout.type)
-            if(H5F_istore_update_cache(dset->ent.file, dxpl_id, &dset->layout, space) < 0)
+            if(H5D_istore_update_cache(dset->ent.file, dxpl_id, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
@@ -3823,23 +3852,18 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
       *-------------------------------------------------------------------------
       */
         if(shrink && H5D_CHUNKED == dset->layout.type) {
-            H5P_genplist_t         *plist;
             H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
     
-            /* Get the dataset creation property list */
-            if(NULL == (plist = H5I_object(dset->dcpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list")
-
             /* Fill the DXPL cache values for later use */
             if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
             /* Remove excess chunks */
-            if(H5F_istore_prune_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, &dset->layout, space) < 0)
+            if(H5D_istore_prune_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
 
             /* Reset the elements outsize the new dimensions, but in existing chunks */
-            if(H5F_istore_initialize_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, &dset->layout, plist, space) < 0)
+            if(H5D_istore_initialize_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
         } /* end if */
     } /* end if */
@@ -3869,7 +3893,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush(const H5F_t *f, hid_t dxpl_id)
+H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
     int         num_dsets;      /* Number of datasets in file   */
     hid_t       *id_list=NULL;  /* list of dataset IDs          */
@@ -3896,11 +3920,43 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id)
         for(j=0; j<num_dsets; j++) {
             if(NULL==(dataset=H5I_object_verify(id_list[j], H5I_DATASET)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to get dataset object")
-            if(dataset->layout.type==H5D_COMPACT && dataset->layout.u.compact.dirty) {
-                if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-                dataset->layout.u.compact.dirty = FALSE;
-            } /* end if */
+
+            /* Flush cached information for each kind of dataset */
+            switch(dataset->layout.type) {
+                case H5D_CONTIGUOUS:
+                    /* flush the raw data buffer, if we have a dirty one */
+                    if (dataset->cache.contig.sieve_buf && dataset->cache.contig.sieve_dirty) {
+                        /* Write dirty data sieve buffer to file */
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, dataset->cache.contig.sieve_loc,
+                                dataset->cache.contig.sieve_size, dxpl_id, dataset->cache.contig.sieve_buf) < 0)
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
+
+                        /* Reset sieve buffer dirty flag */
+                        dataset->cache.contig.sieve_dirty=0;
+                    } /* end if */
+                    break;
+
+                case H5D_CHUNKED:
+                    /* Flush the raw data cache */
+                    if (H5D_istore_flush(f, dxpl_id, dataset, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
+                    break;
+
+                case H5D_COMPACT:               
+                    if(dataset->layout.u.compact.dirty) {
+                        if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->layout), dxpl_id)<0)
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
+                        dataset->layout.u.compact.dirty = FALSE;
+                    } /* end if */
+                    break;
+                    
+                default:
+                    assert ("not implemented yet" && 0);
+#ifdef NDEBUG
+                    HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
+#endif /* NDEBUG */
+            } /* end switch */
+
         }
     } /* end if */
 
@@ -3943,7 +3999,7 @@ H5Ddebug(hid_t dset_id)
 
     /* Print B-tree information */
     if (H5D_CHUNKED==dset->layout.type) {
-	(void)H5F_istore_dump_btree(dset->ent.file, H5AC_dxpl_id, stdout, dset->layout.u.chunk.ndims, dset->layout.u.chunk.addr);
+	(void)H5D_istore_dump_btree(dset->ent.file, H5AC_dxpl_id, stdout, dset->layout.u.chunk.ndims, dset->layout.u.chunk.addr);
     } else if (H5D_CONTIGUOUS==dset->layout.type) {
 	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->layout.u.contig.addr);
     }

@@ -260,6 +260,9 @@ H5_term_library(void)
         if (func) {
             fprintf(stderr, "HDF5: infinite loop closing library\n");
             fprintf(stderr, "      %s\n", loop);
+#ifndef NDEBUG
+            HDabort();
+#endif /* NDEBUG */
         }
     }
 

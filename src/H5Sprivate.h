@@ -137,19 +137,19 @@ typedef struct H5S_conv_t {
      */
     
     /* Read from file to application w/o intermediate scratch buffer */
-    herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
-           const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store,
-           size_t nelmts, size_t elmt_size, const H5S_t *file_space,
-           const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache,
-           hid_t dxpl_id, void *buf/*out*/);
+    herr_t (*read)(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+           H5D_t *dset, const H5D_storage_t *store,
+           size_t nelmts, size_t elmt_size,
+           const H5S_t *file_space, const H5S_t *mem_space,
+           void *buf/*out*/);
 
 
     /* Write directly from app buffer to file */
-    herr_t (*write)(H5F_t *f, struct H5O_layout_t *layout,
-           const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, 
-           size_t nelmts, size_t elmt_size, const H5S_t *file_space,
-           const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache,
-           hid_t dxpl_id, const void *buf);
+    herr_t (*write)(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+           H5D_t *dset, const H5D_storage_t *store,
+           size_t nelmts, size_t elmt_size,
+           const H5S_t *file_space, const H5S_t *mem_space,
+           const void *buf);
     
 #ifdef H5S_DEBUG
     struct {
@@ -250,28 +250,30 @@ H5_DLL herr_t H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space,
 				H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5S_select_fill(void *fill, size_t fill_size,
                                 const H5S_t *space, void *buf);
-H5_DLL herr_t H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
-        const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store,
-        const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
-        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, const void *_buf);
-H5_DLL hsize_t H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-        const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store,
-        const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
-        const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, void *buf);
+H5_DLL herr_t H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
+    const void *_buf);
+H5_DLL hsize_t H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    const H5S_t *file_space, H5S_sel_iter_t *file_iter, hsize_t nelmts,
+    void *buf);
 H5_DLL herr_t H5S_select_mscat (const void *_tscat_buf,
         const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
         const H5D_dxpl_cache_t *dxpl_cache, void *_buf/*out*/);
 H5_DLL hsize_t H5S_select_mgath (const void *_buf,
         const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
         const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
-H5_DLL herr_t H5S_select_read(H5F_t *f, const struct H5O_layout_t *layout,
-        const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, size_t nelmts, size_t elmt_size,
-        const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache,
-        hid_t dxpl_id, void *buf/*out*/);
-H5_DLL herr_t H5S_select_write(H5F_t *f, struct H5O_layout_t *layout,
-        const H5D_dcpl_cache_t *dcpl_cache, const union H5D_storage_t *store, size_t nelmts, size_t elmt_size,
-        const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache,
-        hid_t dxpl_id, const void *buf/*out*/);
+H5_DLL herr_t H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+        H5D_t *dset, const H5D_storage_t *store,
+        size_t nelmts, size_t elmt_size,
+        const H5S_t *file_space, const H5S_t *mem_space,
+        void *buf/*out*/);
+H5_DLL herr_t H5S_select_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+        H5D_t *dset, const H5D_storage_t *store,
+        size_t nelmts, size_t elmt_size,
+        const H5S_t *file_space, const H5S_t *mem_space,
+        const void *buf/*out*/);
 H5_DLL htri_t H5S_select_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);

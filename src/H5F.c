@@ -92,9 +92,6 @@ H5FL_DEFINE_STATIC(H5F_file_t);
 /* Declare the external free list for the H5G_t struct */
 H5FL_EXTERN(H5G_t);
 
-/* Declare the external PQ free list for the sieve buffer information */
-H5FL_BLK_EXTERN(sieve_buf);
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_init
@@ -1523,10 +1520,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 
 	f->shared->mdc_nelmts = n;
 
-	/* Create the chunk cache */
-	if(H5F_istore_init(f)<0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to initialize indexed storage routines")
-
         /* Create the file's "open object" information */
         if(H5FO_create(f)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object TBBT")
@@ -1611,21 +1604,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
-	    if (H5F_istore_dest (f, dxpl_id)<0) {
-		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
-		ret_value = FAIL; /*but keep going*/
-	    }
 	    if (H5FO_dest(f)<0) {
                 HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
                 ret_value = FAIL; /*but keep going*/
 	    } /* end if */
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
-
-            /* Free the data sieve buffer, if it's been allocated */
-            if(f->shared->sieve_buf) {
-                assert(f->shared->sieve_dirty==0);    /* The buffer had better be flushed... */
-                f->shared->sieve_buf = H5FL_BLK_FREE (sieve_buf,f->shared->sieve_buf);
-            } /* end if */
 
 	    /* Destroy file creation properties */
             if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id)) 
@@ -3012,8 +2995,8 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
             if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
                 nerrors++;
 
-    /* flush any cached compact storage raw data */
-    if (H5D_flush(f, dxpl_id) < 0)
+    /* Flush any cached dataset storage raw data */
+    if (H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /*
@@ -3071,21 +3054,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 #endif  /* H5_HAVE_FPHDF5 */
     } /* end if */
 
-    /* flush the data sieve buffer, if we have a dirty one */
-    if (f->shared->sieve_buf && f->shared->sieve_dirty) {
-        /* Write dirty data sieve buffer to file */
-        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc,
-                f->shared->sieve_size, dxpl_id, f->shared->sieve_buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
-
-        /* Reset sieve buffer dirty flag */
-        f->shared->sieve_dirty=0;
-    } /* end if */
-
-    /* flush the entire raw data cache */
-    if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLEAR_ONLY)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
-    
     /* flush (and invalidate) the entire meta data cache */
     /*
      * FIXME: This should be CLEAR_ONLY for non-captain processes.
@@ -3340,9 +3308,6 @@ H5F_close(H5F_t *f)
 #ifdef H5AC_DEBUG
     H5AC_stats(f);
 #endif /* H5AC_DEBUG */
-#ifdef H5F_ISTORE_DEBUG
-    H5F_istore_stats(f, FALSE);
-#endif /* H5F_ISTORE_DEBUG */
 
     /* Only try to flush the file if it was opened with write access */
     if(f->intent&H5F_ACC_RDWR) {
@@ -4126,6 +4091,130 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_rdcc_nelmts
+ *
+ * Purpose:	Replaced a macro to retrieve the raw data cache number of elments,
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-negative, and the raw data cache number of
+ *                              of elemnts is returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jun  1 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t H5F_rdcc_nelmts(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nelmts)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->rdcc_nelmts)
+} /* end H5F_rdcc_nelmts() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_rdcc_nbytes
+ *
+ * Purpose:	Replaced a macro to retrieve the raw data cache number of bytes,
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-negative, and the raw data cache number of
+ *                              of bytes is returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jun  1 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t H5F_rdcc_nbytes(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nbytes)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->rdcc_nbytes)
+} /* end H5F_rdcc_nbytes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_rdcc_w0
+ *
+ * Purpose:	Replaced a macro to retrieve the raw data cache 'w0' value
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-negative, and the raw data cache 'w0' value
+ *                              is returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jun  2 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+double H5F_rdcc_w0(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_w0)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->rdcc_w0)
+} /* end H5F_rdcc_w0() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_has_feature
+ *
+ * Purpose:	Check if a file has a particular feature enabled
+ *
+ * Return:	Success:	Non-negative - TRUE or FALSE
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 31 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t H5F_has_feature(const H5F_t *f, unsigned feature)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_has_feature)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->lf->feature_flags&feature);
+} /* end H5F_has_feature() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_driver_id
  *
  * Purpose:	Quick and dirty routine to retrieve the file's 'driver_id' value
@@ -4265,6 +4354,144 @@ H5F_get_base_addr(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->base_addr)
 } /* end H5F_get_base_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_eoa
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'eoa' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		June 1, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t 
+H5F_get_eoa(const H5F_t *f)
+{
+    haddr_t	ret_value;
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI(H5F_get_eoa, HADDR_UNDEF)
+
+    assert(f);
+    assert(f->shared);
+
+    /* Dispatch to driver */
+    if (HADDR_UNDEF==(ret_value=H5FD_get_eoa(f->shared->lf)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_base_addr() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mpi_get_rank
+ *
+ * Purpose:	Retrieves the rank of an MPI process.
+ *
+ * Return:	Success:	The rank (non-negative)
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, January 30, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_mpi_get_rank(const H5F_t *f)
+{
+    int	ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_mpi_get_rank, FAIL)
+
+    assert(f && f->shared);
+    
+    /* Dispatch to driver */
+    if ((ret_value=H5FD_mpi_get_rank(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_rank() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mpi_get_size
+ *
+ * Purpose:	Retrieves the size of the communicator used for the file
+ *
+ * Return:	Success:	The communicator size (non-negative)
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, January 30, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_mpi_get_size(const H5F_t *f)
+{
+    int	ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_mpi_get_size, FAIL)
+
+    assert(f && f->shared);
+    
+    /* Dispatch to driver */
+    if ((ret_value=H5FD_mpi_get_size(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mpi_get_comm
+ *
+ * Purpose:	Retrieves the file's communicator
+ *
+ * Return:	Success:	The communicator (non-negative)
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, January 30, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+MPI_Comm
+H5F_mpi_get_comm(const H5F_t *f)
+{
+    MPI_Comm	ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_mpi_get_comm, MPI_COMM_NULL)
+
+    assert(f && f->shared);
+    
+    /* Dispatch to driver */
+    if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_comm() */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -4471,89 +4698,6 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
     if (all_zero)
         *addr_p = HADDR_UNDEF;
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sieve_overlap_clear
- *
- * Purpose:	Checks for an address range's overlap with the sieve buffer
- *              and resets the sieve buffer if it overlaps.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March  19, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_sieve_overlap_clear(const H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size)
-{
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_sieve_overlap_clear,FAIL)
-
-    /* Sanity check arguments */
-    assert(f);
-
-    /* Check for the address range overlapping with the sieve buffer */
-    if(H5F_addr_overlap(f->shared->sieve_loc,f->shared->sieve_size,addr,size)) {
-        /* Check if only part of the sieve buffer is being invalidated */
-        if(size<f->shared->sieve_size) {
-            /* Check if the portion to invalidate is at the end */
-            if((f->shared->sieve_loc+f->shared->sieve_size)==(addr+size)) {
-                /* Just shorten the buffer */
-                f->shared->sieve_size-=size;
-            } /* end if */
-            /* Check if the portion to invalidate is at the beginning */
-            else if(f->shared->sieve_loc==addr) {
-                /* Advance the start of the sieve buffer (on disk) and shorten the buffer */
-                f->shared->sieve_loc+=size;
-                f->shared->sieve_size-=size;
-
-                /* Move the retained information in the buffer down */
-                HDmemcpy(f->shared->sieve_buf,f->shared->sieve_buf+size,f->shared->sieve_size);
-            } /* end elif */
-            /* Portion to invalidate is in middle */
-            else {
-                size_t invalid_size;  /* Portion of sieve buffer to invalidate */
-
-                /* Write out portion at the beginning of the buffer, if buffer is dirty */
-                if(f->shared->sieve_dirty) {
-                    size_t start_size;  /* Portion of sieve buffer to write */
-
-                    /* Compute size of block at beginning of buffer */
-                    start_size=(addr-f->shared->sieve_loc);
-
-                    /* Write to file */
-                    if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, start_size, dxpl_id, f->shared->sieve_buf)<0)
-                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
-                } /* end if */
-
-                /* Compute size of block to invalidate */
-                invalid_size=((addr+size)-f->shared->sieve_loc);
-
-                /* Advance the start of the sieve buffer (on disk) and shorten the buffer */
-                f->shared->sieve_loc+=invalid_size;
-                f->shared->sieve_size-=invalid_size;
-
-                /* Move the retained information in the buffer down */
-                HDmemcpy(f->shared->sieve_buf,f->shared->sieve_buf+invalid_size,f->shared->sieve_size);
-            } /* end else */
-        } /* end if */
-        else {
-            /* Reset sieve information */
-            f->shared->sieve_loc=HADDR_UNDEF;
-            f->shared->sieve_size=0;
-            f->shared->sieve_dirty=0;
-        } /* end else */
-    } /* end if */
-    
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_sieve_overlap_clear() */
 
 
 /*-------------------------------------------------------------------------
