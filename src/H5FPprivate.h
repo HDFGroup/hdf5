@@ -241,6 +241,19 @@ typedef struct {
 
 extern MPI_Datatype H5FP_alloc; /* MPI datatype for the H5FP_alloc obj      */
 
+/*===----------------------------------------------------------------------===
+ *                              H5FP_super
+ *===----------------------------------------------------------------------===
+ *
+ * The message broadcast from the captain on creating a new file.
+ */
+typedef struct {
+    haddr_t         addr;       /* Address of the superblock                */
+    hsize_t         size;       /* Size of superblock                       */
+} H5FP_super_t;
+
+extern MPI_Datatype H5FP_super; /* MPI datatype for the H5FP_super obj      */
+
 /* SAP specific variables */
 extern MPI_Comm H5FP_SAP_COMM;  /* Comm we use: Supplied by user            */
 extern MPI_Comm H5FP_SAP_BARRIER_COMM; /* Comm if you want to do a barrier  */

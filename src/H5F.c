@@ -81,9 +81,9 @@ static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 #endif /* NOT_YET */
 
-static herr_t H5F_init_superblock(H5F_t *f, hid_t dxpl_id);
+static hsize_t H5F_init_superblock(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id, uint8_t *buf);
-static herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf);
+static herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf, size_t buf_size);
 
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
@@ -1795,7 +1795,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     hbool_t             driver_has_cmp;     /*`cmp' callback defined?       */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
-    uint8_t             buf[256];           /*some buffer                   */
     int                 mrc;                /*MPI return code               */
     H5F_t              *ret_value = NULL;   /*actual return value           */
 
@@ -1920,6 +1919,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * empty or not.
      */
     if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+        hsize_t buf_size;       /* Size of buffer needed to hold superblock info */
+        void *buf=NULL;         /* Buffer to hold superblock info */
+
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
@@ -1928,7 +1930,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if (!H5FD_is_fphdf5_driver(lf) || H5FD_fphdf5_is_captain(lf)) {
 #endif  /* H5_HAVE_FPHDF5 */
             /* Initialize information about the superblock and allocate space for it */
-            if (H5F_init_superblock(file, dxpl_id) < 0)
+            if ((buf_size=H5F_init_superblock(file, dxpl_id)) == 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
             /* Create and open the root group */
@@ -1938,42 +1940,74 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
             if (H5G_mkroot(file, dxpl_id, NULL)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
+#ifdef H5_HAVE_FPHDF5
+            if (H5FD_is_fphdf5_driver(lf)) {
+                /* Allocate room for the superblock buffer */
+                H5_CHECK_OVERFLOW(buf_size, hsize_t, size_t);
+                if((buf=H5MM_malloc((size_t)buf_size))==NULL)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for superblock buffer")
+            } /* end if */
+#endif  /* H5_HAVE_FPHDF5 */
+
             /* Write the superblock to the file */
             /* (This must be after the root group is created, since the root
              *      group's symbol table entry is part of the superblock)
              */
-            if (H5F_write_superblock(file, dxpl_id, &buf[H5F_sizeof_addr(file)]) < 0)
+            if (H5F_write_superblock(file, dxpl_id, buf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
 
 #ifdef H5_HAVE_FPHDF5
-            HDmemcpy(buf, &shared->super_addr, H5F_sizeof_addr(file));
-        }
+        } /* end if */
 
+        /* If this file is using the FPHDF5 driver, broadcast the superblock
+         * from the captain to the other clients
+         */
         if (H5FD_is_fphdf5_driver(lf)) {
-            if ((mrc = MPI_Bcast(buf, sizeof(buf), MPI_BYTE, (int)H5FP_capt_barrier_rank,
+            H5FP_super_t super_info;    /* Superblock information */
+
+            /* Captain sets up the information */
+            if (H5FD_fphdf5_is_captain(lf)) {
+                super_info.addr=shared->super_addr;
+                super_info.size=buf_size;
+            } /* end if */
+
+            /* Broadcast the superblock information */
+            if ((mrc = MPI_Bcast(&super_info, 1, H5FP_super, (int)H5FP_capt_barrier_rank,
+                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc)
+
+            /* Non-captain clients allocate the buffer now */
+            if (!H5FD_fphdf5_is_captain(lf)) {
+                /* Allocate room for the superblock buffer */
+                H5_CHECK_OVERFLOW(super_info.size, hsize_t, size_t);
+                if((buf=H5MM_malloc((size_t)super_info.size))==NULL)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for superblock buffer")
+            } /* end if */
+
+            /* Broadcast the actual superblock */
+            if ((mrc = MPI_Bcast(buf, super_info.size, MPI_BYTE, (int)H5FP_capt_barrier_rank,
                                  H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mrc)
 
             if (!H5FD_fphdf5_is_captain(lf)) {
-                haddr_t super_addr;
-
-                HDmemcpy(&super_addr, buf, H5F_sizeof_addr(file));
-
-                if (H5F_read_superblock(file, dxpl_id, &root_ent, super_addr,
-                                        &buf[H5F_sizeof_addr(file)]) < 0)
+                if (H5F_read_superblock(file, dxpl_id, &root_ent, super_info.addr,
+                                        buf, super_info.size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
                 if (H5G_mkroot(file, dxpl_id, &root_ent) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-            }
-        }
+            } /* end if */
+
+            /* All clients free the buffer used for broadcasting the superblock */
+            buf = H5MM_xfree (buf);
+        } /* end if */
 #endif  /* H5_HAVE_FPHDF5 */
     } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
 	if (HADDR_UNDEF == (shared->super_addr = H5F_locate_signature(lf,dxpl_id)))
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "unable to find file signature")
 
-        if (H5F_read_superblock(file, dxpl_id, &root_ent, shared->super_addr, NULL) < 0)
+        if (H5F_read_superblock(file, dxpl_id, &root_ent, shared->super_addr, NULL, 0) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 	/* Make sure we can open the root group */
@@ -2312,7 +2346,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf)
+H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr, uint8_t *buf, size_t buf_size)
 {
     haddr_t             stored_eoa;         /*relative end-of-addr in file  */
     haddr_t             eof;                /*end of file address           */
@@ -2335,7 +2369,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     unsigned            freespace_vers;     /* Freespace info version       */
     unsigned            obj_dir_vers;       /* Object header info version   */
     unsigned            share_head_vers;    /* Shared header info version   */
-    uint8_t             local_buf[256];     /* Local buffer                 */
+    uint8_t             sbuf[H5F_SUPERBLOCK_SIZE];     /* Local buffer                 */
     H5P_genplist_t     *c_plist;            /* File creation property list  */
     herr_t              ret_value = SUCCEED;
 
@@ -2359,7 +2393,8 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     }
 
     if (!buf) {
-        start_p = p = local_buf;
+        start_p = p = sbuf;
+        buf_size=sizeof(sbuf);
 
         if (H5FD_set_eoa(lf, shared->super_addr + fixed_size) < 0 ||
                 H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr, fixed_size, p) < 0)
@@ -2472,7 +2507,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
                     H5F_SIZEOF_ADDR(f) +        /*end-of-address*/
                     H5F_SIZEOF_ADDR(f) +        /*reserved address*/
                     H5G_SIZEOF_ENTRY(f);        /*root group ptr*/
-    assert(fixed_size + variable_size <= sizeof(local_buf));
+    assert(fixed_size + variable_size <= buf_size);
 
     /* The buffer (buf) is either passed in or the "local_buf" variable now */
     if(!buf) {
@@ -2534,13 +2569,22 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
     /* Decode the optional driver information block */
     if (H5F_addr_defined(shared->driver_addr)) {
         haddr_t drv_addr = shared->base_addr + shared->driver_addr;
-        const uint8_t *driver_p=p;        /* Remember beginning of driver info block */
+        uint8_t dbuf[H5F_DRVINFOBLOCK_SIZE];     /* Local buffer                 */
+        size_t dbuf_size;               /* Size available for driver info */
+        const uint8_t *driver_p;        /* Remember beginning of driver info block */
 
         if(!buf) {
+            driver_p = p = dbuf;
+            dbuf_size=sizeof(dbuf);
+
             if (H5FD_set_eoa(lf, drv_addr + 16) < 0 ||
                     H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr, 16, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read driver information block")
         } /* end if */
+        else {
+            driver_p = p;
+            dbuf_size=buf_size-(p-start_p);
+        } /* end else */
 
         /* Version number */
         if (HDF5_DRIVERINFO_VERSION != *p++)
@@ -2554,17 +2598,18 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_entry_t *root_ent, haddr_t addr
         /* Driver name and/or version */
         HDstrncpy(driver_name, (const char *)p, 8);
         driver_name[8] = '\0';
+        p += 8; /* advance past name/version */
 
         /* Read driver information and decode */
-        assert((driver_size + 16) <= sizeof(local_buf));
+        assert((driver_size + 16) <= dbuf_size);
 
         if(!buf) {
             if (H5FD_set_eoa(lf, drv_addr + 16 + driver_size) < 0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, &driver_p[16]) < 0)
+                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read file driver information")
         } /* end if */
 
-        if (H5FD_sb_decode(lf, driver_name, &driver_p[16]) < 0)
+        if (H5FD_sb_decode(lf, driver_name, p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
 
         /* Compute driver info block checksum */
@@ -2628,7 +2673,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static hsize_t
 H5F_init_superblock(H5F_t *f, hid_t dxpl_id)
 {
     hsize_t         userblock_size = 0;         /* Size of userblock, in bytes */
@@ -2637,7 +2682,7 @@ H5F_init_superblock(H5F_t *f, hid_t dxpl_id)
     unsigned        super_vers;                 /* Super block version              */
     haddr_t         addr;                       /* Address of superblock            */
     H5P_genplist_t *plist;                      /* Property list                    */
-    herr_t          ret_value = SUCCEED;
+    hsize_t         ret_value;
 
     /* Encoding */
     FUNC_ENTER_NOAPI(H5F_init_superblock, FAIL)
@@ -2700,6 +2745,9 @@ H5F_init_superblock(H5F_t *f, hid_t dxpl_id)
      */
     if (driver_size > 0)
         f->shared->driver_addr = superblock_size;
+
+    /* Return the size of the super block+driver info block */
+    ret_value=superblock_size+driver_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
