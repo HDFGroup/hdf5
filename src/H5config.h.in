@@ -7,6 +7,14 @@
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
+/* Define if your system roundup accurately convert floating-point to unsigned
+   long long values. */
+#undef FP_TO_ULLONG_BOTTOM_BIT_WORKS
+
+/* Define if your system has right maximum convert floating-point to unsigned
+   long long values. */
+#undef FP_TO_ULLONG_RIGHT_MAXIMUM
+
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
@@ -504,14 +512,6 @@
 /* Define if your system can accurately convert unsigned long long values to
    floating-point values. */
 #undef SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
-
-/* Define if your system can roundup accurately convert unsigned long long values to
-   floating-point values. */
-#undef FP_TO_ULLONG_BOTTOM_BIT_WORKS
-
-/* Define if the maximal number is right on your system convert unsigned long long values to
-   floating-point values. */
-#undef FP_TO_ULLONG_RIGHT_MAXIMUM
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
