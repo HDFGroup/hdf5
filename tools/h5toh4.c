@@ -128,6 +128,7 @@ main(int argc, char *argv[])
 			status = -1;
 			break;
 		}
+#ifndef WIN32
 		if (test_file(h5_filename,O_EXCL,292) != 0 ) { /* 292 Decimal - 0444 Octal, a+r */
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 			status = -1;
@@ -139,7 +140,7 @@ main(int argc, char *argv[])
 			status = -1;
 			break;
 		}
-
+#endif
 		h4_extension = HDstrdup("hdf");
 
 		h4_filename = BuildFilename(h5_filename,h4_extension);
@@ -148,13 +149,13 @@ main(int argc, char *argv[])
 			status = -1;
 			break;
 		}
-
+#ifndef WIN32
 		if (test_file(h4_filename,O_CREAT|O_EXCL,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 			status = -1;
 			break;
 		}
-
+#endif
 		status = h5toh4(h5_filename, h4_filename);
 		if ( status != 0 ) {
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
@@ -175,6 +176,7 @@ main(int argc, char *argv[])
 			status = -1;
 			break;
 		}
+#ifndef WIN32
 		if (test_file(h5_filename,O_EXCL,292) != 0 ) { /* 292 Decimal - 0444 Octal, a+r */
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 			status = -1;
@@ -197,7 +199,7 @@ main(int argc, char *argv[])
 			status = -1;
 			break;
 		}
-
+#endif
 		status = h5toh4(h5_filename, h4_filename);
 		if ( status != 0 ) {
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
@@ -225,6 +227,7 @@ main(int argc, char *argv[])
 				status2 = -1;
 				break;
 			}
+#ifndef WIN32
 			if (test_file(h5_filename,O_EXCL,292) != 0 ) { /* 292 Decimal - 0444 Octal, a+r */
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 				status2 = -1;
@@ -236,7 +239,7 @@ main(int argc, char *argv[])
 				status2 = -1;
 				continue;
 			}
-
+#endif
 			h4_extension = HDstrdup("hdf");
 
 			h4_filename = BuildFilename(h5_filename,h4_extension);
@@ -245,13 +248,13 @@ main(int argc, char *argv[])
 				status2 = -1;
 				continue;
 			}
-
+#ifndef WIN32
 			if (test_file(h4_filename,O_CREAT|O_EXCL,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 				status2 = -1;
 				continue;
 			}
-
+#endif
 			status = h5toh4(h5_filename, h4_filename);
 			if ( status != 0 ) {
 				fprintf(stderr,"Error: Problem with %s\n",h5_filename);
