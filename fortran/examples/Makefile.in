@@ -9,7 +9,7 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
-hdf5_builddir=$(top_builddir)/../src
+hdf5_builddir=$(top_builddir)/src
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.

@@ -9,8 +9,8 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
-hdf5_builddir=$(top_builddir)/../src
-hdf5_srcdir=$(top_srcdir)/src
+hdf5_srcdir=$(top_srcdir)/../src
+hdf5_builddir=$(top_builddir)/src
 
 TRACE=perl $(top_srcdir)/bin/trace
 
