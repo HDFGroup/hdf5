@@ -16,9 +16,8 @@
 #ifndef _H5f90proto_H
 #define _H5f90proto_H
 
-H5_DLL int HD5c2fstr(char *str, int len);
-H5_DLL char * HD5f2cstring (_fcd fdesc, int len);
-H5_DLL int HD5packFstring(char *src, char *dest, int len);
+H5_DLL char * HD5f2cstring (_fcd fdesc, size_t len);
+H5_DLL void HD5packFstring(char *src, char *dest, size_t len);
 
 /*
  *  Functions from H5Ff.c
@@ -463,12 +462,8 @@ H5_DLL int_f nh5gget_comment_c
 #   define nh5aopen_name_c   FNAME(H5AOPEN_NAME_C)
 #   define nh5awrite_c       FNAME(H5AWRITE_C)
 #   define nh5awritec_c      FNAME(H5AWRITEC_C)
-#   define nh5awrite_c_b     FNAME(H5AWRITE_C_B)
-#   define nh5awritec_c_b    FNAME(H5AWRITEC_C_B)
 #   define nh5aread_c        FNAME(H5AREAD_C)
 #   define nh5areadc_c       FNAME(H5AREADC_C)
-#   define nh5aread_c_b      FNAME(H5AREAD_C_B)
-#   define nh5areadc_c_b     FNAME(H5AREADC_C_B)
 #   define nh5aget_name_c    FNAME(H5AGET_NAME_C)
 #   define nh5aopen_idx_c    FNAME(H5AOPEN_IDX_C)
 #   define nh5aget_space_c   FNAME(H5AGET_SPACE_C)
@@ -481,12 +476,8 @@ H5_DLL int_f nh5gget_comment_c
 #   define nh5aopen_name_c   FNAME(h5aopen_name_c)
 #   define nh5awrite_c       FNAME(h5awrite_c)
 #   define nh5awritec_c      FNAME(h5awritec_c)
-#   define nh5awrite_c_b     FNAME(h5awrite_c_b)
-#   define nh5awritec_c_b    FNAME(h5awritec_c_b)
 #   define nh5aread_c        FNAME(h5aread_c)
 #   define nh5areadc_c       FNAME(h5areadc_c)
-#   define nh5aread_c_b      FNAME(h5aread_c_b)
-#   define nh5areadc_c_b     FNAME(h5areadc_c_b)
 #   define nh5aget_name_c    FNAME(h5aget_name_c)
 #   define nh5aopen_idx_c    FNAME(h5aopen_idx_c)
 #   define nh5aget_space_c   FNAME(h5aget_space_c)
@@ -497,30 +488,22 @@ H5_DLL int_f nh5gget_comment_c
 #endif
 
 
-H5_DLL int_f nh5acreate_c (hid_t_f *obj_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp,  hid_t_f *attr_id);
+H5_DLL int_f nh5acreate_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp,  hid_t_f *attr_id);
 
 H5_DLL int_f 
-nh5aopen_name_c (hid_t_f *obj_id, _fcd name, int_f *namelen, hid_t_f *attr_id);
+nh5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id);
 
-H5_DLL int_f nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims);
+H5_DLL int_f nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims);
 
-H5_DLL int_f nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims);
+H5_DLL int_f nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void *dims);
 
-H5_DLL int_f nh5awritec_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims);
+H5_DLL int_f nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims);
 
-H5_DLL int_f nh5awrite_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims);
-
-H5_DLL int_f nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims);
-
-H5_DLL int_f nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims);
-
-H5_DLL int_f nh5areadc_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims);
-
-H5_DLL int_f nh5aread_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims);
+H5_DLL int_f nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void *dims);
 
 H5_DLL int_f nh5aclose_c ( hid_t_f *attr_id );
 
-H5_DLL int_f nh5adelete_c (hid_t_f *obj_id, _fcd name, int_f *namelen); 
+H5_DLL int_f nh5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen); 
 
 H5_DLL int_f nh5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id);
 
