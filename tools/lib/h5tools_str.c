@@ -925,8 +925,14 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                 h5tools_str_append(str, "%s", "\n");
 
                 /*need to indent some more here*/
-                if (ctx->indent_level >= 0)
-                    h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
+                if (ctx->indent_level >= 0 )
+                {
+                 if (info->pindex)
+                  h5tools_str_append(str, "%s", "          ");
+                 else
+                  h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
+                }
+
 
                 for (x = 0; x < ctx->indent_level + 1; x++)
                     h5tools_str_append(str,"%s",OPT(info->line_indent,""));
