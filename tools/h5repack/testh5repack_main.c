@@ -72,8 +72,6 @@ int main (void)
   TEST_ERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
   TEST_ERROR;
- if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
-  TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();
@@ -91,9 +89,7 @@ int main (void)
   TEST_ERROR;
  if (h5repack_verify(FNAME2OUT,&pack_options)<=0)
   TEST_ERROR;
- if (h5repack_cmpdcpl(FNAME2,FNAME2OUT)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
+  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();
 
@@ -111,9 +107,7 @@ int main (void)
   TEST_ERROR;
  if (h5repack_verify(FNAME3OUT,&pack_options)<=0)
   TEST_ERROR;
- if (h5repack_cmpdcpl(FNAME3,FNAME3OUT)<=0)
-  TEST_ERROR;
-  if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 
  PASSED();

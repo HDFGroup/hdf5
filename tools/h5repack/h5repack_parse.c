@@ -383,6 +383,11 @@ obj_list_t* parse_layout(const char *str,
  char        sobj[MAX_NC_NAME]; 
  char        sdim[10];
  char        slayout[10];
+
+
+ memset(sdim, '\0', sizeof(sdim));
+ memset(sobj, '\0', sizeof(sobj));
+ memset(slayout, '\0', sizeof(slayout));
  
  /* check for the end of object list and number of objects */
  for ( i=0, n=0; i<len; i++)
@@ -481,7 +486,9 @@ obj_list_t* parse_layout(const char *str,
     sdim[k]=c;
     k++; /*increment sdim index */
     
-    if (!isdigit(c) && c!='x' && c!='N' && c!='O' && c!='N' && c!='E'){
+    if (!isdigit(c) && c!='x' 
+     && c!='N' && c!='O' && c!='N' && c!='E'
+     ){
      if (obj_list) free(obj_list);
      printf("Parse layout error: <%s> Not a valid character in <%s>\n",
       sdim,str);

@@ -1,4 +1,4 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -90,10 +90,22 @@ static void aux_tblinsert_layout(pack_opttbl_t *table,
  int k;
  
  table->objs[I].layout = pack->layout;
- if (H5D_CHUNKED==pack->layout) {
-  table->objs[I].chunk.rank = pack->chunk.rank;
-  for (k = 0; k < pack->chunk.rank; k++) 
-   table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+ if (H5D_CHUNKED==pack->layout) 
+ {
+ /* -2 means the NONE option, remove chunking
+  and set the layout to contiguous */
+  if (pack->chunk.rank==-2)
+  {
+   table->objs[I].layout = H5D_CONTIGUOUS;
+   table->objs[I].chunk.rank = -2;
+  }
+  /* otherwise set the chunking type */
+  else
+  {
+   table->objs[I].chunk.rank = pack->chunk.rank;
+   for (k = 0; k < pack->chunk.rank; k++) 
+    table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+  }
  }
 }
 

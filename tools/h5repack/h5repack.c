@@ -198,11 +198,21 @@ int h5repack_addlayout(const char* str,
  if (options->all_layout==1 )
  {
   options->layout_g=pack.layout;
-  if (pack.layout==H5D_CHUNKED) {
-   /* if we are chunking all set the global chunking type */
-   options->chunk_g.rank=pack.chunk.rank;
-   for (j = 0; j < pack.chunk.rank; j++) 
-    options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+  if (pack.layout==H5D_CHUNKED) 
+  {
+   /* -2 means the NONE option, remove chunking
+      and set the global layout to contiguous */
+   if (pack.chunk.rank==-2)
+   {
+    options->layout_g = H5D_CONTIGUOUS;
+   }
+   /* otherwise set the global chunking type */
+   else
+   {
+    options->chunk_g.rank=pack.chunk.rank;
+    for (j = 0; j < pack.chunk.rank; j++) 
+     options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+   }
   }
  }
 
@@ -269,7 +279,7 @@ static int check_options(pack_opt_t *options)
   else if (options->op_tbl->objs[i].chunk.rank==-2)
   {
    if (options->verbose)
-    printf(" <%s> %s\n",name,"NONE"); 
+    printf(" <%s> %s\n",name,"NONE (contigous)"); 
    has_ck=1;
   }
  }
