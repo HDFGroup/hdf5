@@ -339,6 +339,7 @@ Platforms Tested
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
                                   F90 MIPSpro 7.3.1.3m (64 only)
                                   C++ MIPSpro cc 7.3.1.3m
+				  mpt 1.6
     Linux 2.4.18                  gcc 2.96, 3.3.2
                                   g++ 3.3.2
                                   Intel(R) C++ Version 7.1
@@ -351,6 +352,10 @@ Platforms Tested
                                   MPIch 1.2.4
     Linux 2.4.21-2.9.5ws #3       gcc 3.2.3 (Red Hat Linux 3.2.3-16)
           SMP x86_64              g++ 3.2.3
+    Linux 2.4.21-4.ELsmp	  Intel(R) C++ 32-bit Version 8.0
+    				  Intel(R) Fortran 32-bit Version 8.0
+				  gcc 3.4.0
+				  MPICH 1..5.2 Inmel 8.0
     Linux 2.4.19-SMP  x86_64      gcc (GCC) 3.2.2 (SuSE Linux)
                                   g++ 3.2.2
     Linux 2.6.4-52smp x86_64      gcc 3.3.3 (SuSE Linux 9.1 AMD64))
