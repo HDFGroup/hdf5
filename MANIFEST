@@ -1001,6 +1001,8 @@
 ./tools/lib/h5tools.h
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h
+./tools/lib/h5tools_utils.c
+./tools/lib/h5tools_utils.h
 ./tools/lib/talign.c
 
 ./tools/misc/Dependencies
