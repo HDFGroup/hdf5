@@ -10,7 +10,7 @@ dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
 AC_INIT(src/H5Library.C)
-dnl AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(src/H5config.h)
 AC_CONFIG_AUX_DIR(bin)
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
@@ -366,7 +366,7 @@ else
 fi
 
 dnl Some cleanup stuff
-rm -rf conftest* confdefs* core core.* *.core dummy.o
+rm -f conftest conftest.o conftest.c core core.* *.core dummy.o
 
 dnl Build config.status, touch the stamp files, and build all the Makefiles.
 dnl The order is such that the first `make' does not need to update any
