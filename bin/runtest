@@ -1,0 +1,468 @@
+#! /bin/sh
+# runs the hdf5/bin/snapshots
+#
+# $Id$
+
+# local setup
+DEBUGMODE=""
+test -n "$DEBUGMODE" && echo "******** DEBUGMODE is $DEBUGMODE ************"
+
+# the name of this program
+PROGNAME=$HOME/bin-sys/runsnap
+
+# Email any errors to whom
+TOWHOM=${DEBUGMODE:+acheng}
+TOWHOM=${TOWHOM:-hdf5lib@ncsa.uiuc.edu}
+
+# Setup
+HOSTNAME=`hostname | sed -e s/.ncsa.uiuc.edu//`
+H5DIR=$HOME/HDF5/v_1_3/hdf5
+TODAY=`date +%y%m%d`
+H5VER=			# default to current CVS version
+H5VERSTR=		# default to current CVS version
+
+# Default to do checkout (only once) and test, no release.
+# If srcdir is not used, don't launched multiple tests
+SNAPSHOT="${DEBUGMODE:+echo }bin/snapshot"
+SRCDIR="srcdir"
+SNAPCMD="$SRCDIR op-configure --enable-stream-vfd op-configure --enable-static-exec test clean"
+ENABLE_PARALLEL="op-configure --enable-parallel"
+
+# various hosts
+# DEC
+# Gondolin: DEC
+#DECHOST="skydive"	# skydive is being upgraded.
+			# gondolin rsh/ssh don't work.
+# HP
+# sangamon: HPUX 10
+# opus: HPUX 11
+HPHOST="sangamon"	# HPUX 10 & 11 # opus removed because both its
+			# NFS and AFS filesystems have problems.
+# Linux
+# Dangermouse, eirene: Linux
+# Dangermouse used to die if gmake -j is used.
+LINUXHOST=eirene
+
+# SGI O2K
+# modi4:	R10K,  IRIX64 6.5, default to -64,-mips4
+#		Testing {parallel,serial}x{-64,-n32}x
+O2KHOST=modi4
+# regular, unleaded, premium:
+#		R10K,  IRIX64 6.5, default to -n32,-mips4
+# impact7:	R4400, IRIX 6.5,   default to -n32,-mips3
+# o2-N:		R10K,  IRIX 6.5,   default to -n32,-mips4
+# paz:		R4400, IRIX 6.5,   default to -n32,-mips3
+SGIHOST="regular impact7 o2-3"	
+
+# Sun
+SUNHOST="arabica baldric"	# solaris 2.6 and 2.7
+
+# FreeBSD
+# AFS does not work well in hawkwind.  Use NFS/local space for its
+# test directory.  ssh does not work for it either.
+FREEBSDHOST="hawkwind"
+
+# run both serial and parallel for PARALLELHOST
+PARALLELHOST="modi4"
+
+# set up default all hosts to test
+ALLHOSTS="$O2KHOST $SUNHOST $SGIHOST $HPHOST $LINUXHOST $DECHOST $FREEBSDHOST"
+
+# test hosts
+TESTHOST=""
+
+#################################
+# Function definitions
+#################################
+SecOfDay()
+{
+    set `date '+%H %M %S'`
+    t_sec=`expr $1 \* 3600 + $2 \* 60 + $3`
+    echo $t_sec
+}
+
+# Calculated the elapsed time (in seconds) between the first
+# and second time.  If second time is smaller than the first,
+# we assume the clock has passed midnight and calculate appropriately.
+ElapsedTime()
+{
+    if [ $2 -lt $1 ]; then
+	t_sec=`expr 3600 \* 24 - $1 + $2`
+    else
+	t_sec=`expr $2 - $1`
+    fi
+    echo `expr $t_sec / 60`m `expr $t_sec % 60`s
+}
+
+# Report errors
+# $1--an error message to be printed
+REPORT_ERR()
+{
+    ERRMSG=$1
+    # print it with a banner shifted right a bit
+    echo "		*************************************"
+    echo "		$ERRMSG"
+    echo "		*************************************"
+    # report it in the FAILED-LOG file too
+    (date; echo "$ERRMSG") >> $FAILEDLOG
+}
+
+#
+# Report results of the last test done
+REPORT_RESULT()
+{
+    if [ $retcode -eq 0 ]; then
+	echo "$TEST_TYPE tests succeeded in $HOSTNAME"
+    else
+	# test failed.
+	REPORT_ERR "****$TEST_TYPE tests FAILED in $HOSTNAME****"
+    fi
+}
+
+# Print a blank line
+PRINT_BLANK()
+{
+    echo
+}
+
+# Print trailer summary
+PRINT_TRAILER()
+{
+    echo "*** finished $TEST_TYPE tests in $HOSTNAME ***"
+    date; EndTime=`SecOfDay`
+    echo Total time = `ElapsedTime $StartTime $EndTime`
+    PRINT_BLANK
+    # reset StartTime for the next elapsed time report
+    StartTime=`SecOfDay`
+}
+
+# Figure out which remote command to use to reach a host.
+# Try rsh first, then ssh.
+# $1--hostname to reach.
+CHECK_RSH()
+{
+    # Figure out how to use ping command in this host.
+    # Some hosts use "ping host count", some use "ping -c count host"
+    # Test "ping -c ..." style first because some '-c' machines treat
+    # the command 'ping localhost 3' means to ping host '3'.
+    if [ -z "$PING" ]; then
+	if ping -c 3 localhost >/dev/null 2>&1; then
+	    PING='ping -c 3'
+	    PINGCOUNT=
+	elif ping localhost 3 >/dev/null 2>&1; then
+	    PING=ping
+	    PINGCOUNT=3
+	else	# don't know how to use ping.  Set it to false.
+	    PING=false
+	    PINGCOUNT=
+	fi
+    fi
+    #
+    host=$1
+    if $PING $host $PINGCOUNT >/dev/null 2>&1; then
+	if rsh $host -n hostname >/dev/null 2>&1; then
+	    RSH=rsh
+	elif ssh $host -n hostname >/dev/null 2>&1; then
+	    RSH=ssh
+	else
+	    echo cannot remote command with $host
+	    RSH="false"
+	fi
+    else
+	echo $host is down
+	RSH="false"
+    fi
+}
+
+# Try locate the HDF4 library
+# This is a hack because there is no consistent place to find
+# the valid HDF library.
+LOCATE_HDF4()
+{
+    H4_SW=
+    H4_BIN=
+    OS=`uname -s`
+    # this default is the best guess of locating hdf4 software
+    h4paths_defaults="/usr/ncsa /usr/sdt /usr/local"
+
+    case "$OS" in
+	HP-UX)
+	    h4paths="/afs/ncsa/packages/hdf/HPUX_10.20"
+	    ;;
+	IRIX)
+	    h4paths="/afs/ncsa/packages/hdf/4.1r3_irix"
+	    ;;
+	IRIX64)
+	    case "$CC" in
+	    cc|"")	#default cc
+		abi=`cc -show_defaults 2>&1 | grep 'default abi'`
+		case $abi in
+		*-n32)
+		    h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
+		    ;;
+		*-64)
+		    h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		    ;;
+		*)
+		    h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		    ;;
+		esac	# $abi
+		;;
+	    *-n32)
+		h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
+		;;
+	    *)
+		h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		;;
+	    esac
+	    ;;
+	Linux)
+	    h4paths="/afs/ncsa/packages/hdf/linux"
+	    ;;
+	OSF1)
+	    h4paths="/afs/ncsa/packages/hdf/OSF1_V4.0"
+	    ;;
+	*)
+	    h4paths="$h4paths_defaults"
+	    ;;
+    esac
+
+    # check if the hdf4 software is actually available
+    for h4 in $h4paths; do
+	if [ -f $h4/lib/libdf.a -a -f $h4/include/hdf.h ]; then
+	    H4_SW="$h4/include,$h4/lib"
+	    if [ -f $h4/bin/hdp ]; then
+		H4_BIN=$h4/bin
+	    fi
+	    break
+	fi
+    done
+}
+
+
+# Run one snapshot test
+# $*--Types of test being run
+RUNSNAPTEST()
+{
+    SNAPCMD_OPT=""		# snapshot test option
+    SRCDIRNAME=""
+    CC_SAVED=$CC
+    TEST_TYPE=$*
+    retcode=0
+    date
+    echo "*** starting $TEST_TYPE tests in $HOSTNAME ***"
+    echo "Uname -a: `uname -a`"
+
+    # parse the test type and set options accordingly
+    while [ $# -gt 0 ]; do
+	case $1 in
+	    -n32) # want -n32 option
+		SRCDIRNAME=${SRCDIRNAME}-n32
+		CC="cc -n32"
+		export CC
+		shift
+		;;
+	    parallel) # want parallel test
+		SNAPCMD_OPT="$SNAPCMD_OPT $ENABLE_PARALLEL"
+		SRCDIRNAME=${SRCDIRNAME}-pp
+		shift
+		;;
+	    standard) # standard test
+		shift
+		;;
+	    *) # unknown test
+		echo "$0: unknown type of test ($1)"
+		retcode=1
+		shift
+		;;
+	esac
+    done
+    [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
+
+    # Track down the HDF4 software
+    LOCATE_HDF4
+    if [ -n "$H4_SW" ]; then
+	SNAPCMD_OPT="$SNAPCMD_OPT hdf4 $H4_SW"
+    fi
+    if [ -n "$H4_BIN" ]; then
+	PATH=${PATH}:${H4_BIN}
+    fi
+	
+    if [ -n "${SRCDIRNAME}" ]; then
+	SNAPCMD_OPT="$SNAPCMD_OPT srcdirname ${SRCDIRNAME}"
+    fi
+
+    # If LOGFILE already exists, it means this host has been tested today.
+    # Do at most one run per day.
+    LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}
+    if [ -f $LOGFILE ]; then
+	echo LOGFILE $LOGFILE exists.  No more run today.
+	retcode=1 && errcode=$retcode && return $retcode
+    fi
+
+    echo Running snapshot with output saved in $LOGFILE
+    (date; echo Hostname=$HOSTNAME) >> $LOGFILE
+
+    (
+    cd $H5DIR
+    $SNAPSHOT $SNAPCMD $SNAPCMD_OPT
+    ) >> $LOGFILE 2>&1
+    retcode=$?
+    [ $retcode -ne 0 ] && errcode=$retcode
+
+    date >> $LOGFILE
+
+    # restore CC
+    CC=$CC_SAVED
+}
+
+# Flush the AFS files if applicable.
+# Hopefully the flushing is done when the tests of this
+# host are done rather than when the launching site try
+# to pull them in at the same time.  This way, the afs
+# server updates are spread out.
+FLUSH_FILES()
+{
+    /usr/afsws/bin/fs flush $SNAPYARD
+}
+
+
+#################################
+# Main
+#################################
+#################################
+# Set up global variables
+#################################
+retcode=0			# error code of individula task
+errcode=0			# error code of the whole test
+
+
+#################################
+# Parse options
+#################################
+while [ $# -gt 0 ]; do
+    case "$1" in
+	-r*)
+	    # the version string has a leading _ but not for H5DIR name
+	    H5VER="$1"
+	    H5VERSTR=_`echo $H5VER | sed -e s/-r// -e s/\\\./_/g`
+	    H5DIR=$HOME/HDF5/v$H5VERSTR/hdf5
+	    PROGNAME="$PROGNAME $H5VER"
+	    ;;
+	-all)
+	    TESTHOST=$ALLHOSTS
+	    ;;
+	*)
+	    TESTHOST=$*
+	    break
+	    ;;
+    esac
+    shift
+done
+
+#################################
+# Setup snapshot test directories
+#################################
+# Show the real physical path rather than the symbolic path
+SNAPYARD=`cd $HOME/snapshots-hdf5${H5VERSTR} && /bin/pwd`
+# Log file basename
+LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
+FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
+CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
+
+
+#################################
+# Setup to print a trailer summary when exiting not via
+# the normal end of the script.
+#################################
+trap PRINT_TRAILER 0
+
+#
+StartTime=`SecOfDay`
+
+# Do a checkout if one has not been done today
+# Also check MANIFEST file
+if [ ! -f $CVSLOG ]; then
+    echo Running CVS checkout with output saved in $CVSLOG
+    (cd $H5DIR; $SNAPSHOT checkout ) >> $CVSLOG 2>&1
+    errcode=$?
+    if [ $errcode -ne 0 ]; then
+	# test failed.
+	REPORT_ERR "****CVS checkout FAILED in $HOSTNAME****"
+	exit $errcode
+    fi
+    echo Checking MAINFEST file ...
+    (cd $H5DIR; bin/chkmanifest)
+    errcode=$?
+    if [ $errcode -ne 0 ]; then
+	# test failed.
+	REPORT_ERR "****MANIFEST check FAILED****"
+    fi
+    PRINT_BLANK
+fi
+
+# Decide to do test for the local host or for remote hosts
+if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
+    date
+    echo "*** launching tests from $HOSTNAME ***"
+    PRINT_BLANK
+    TEST_TYPE="launching"
+    cd ${SNAPYARD}/log
+    for h in $TESTHOST; do
+	TMP_OUTPUT="#$h.out"
+	CHECK_RSH $h
+	# launch concurrent tests only if srcdir is used
+	if [ -n "$SRCDIR" ]; then
+	    (echo $RSH $h -n $PROGNAME;
+	    $RSH $h -n $PROGNAME) > $TMP_OUTPUT 2>&1 &
+	else
+	    (echo $RSH $h -n $PROGNAME;
+	    $RSH $h -n $PROGNAME) > $TMP_OUTPUT 2>&1
+	fi
+    done
+    # wait for all launched tests to finish, then cat them back out.
+    wait
+    for h in $TESTHOST; do
+	TMP_OUTPUT="#$h.out"
+	cat $TMP_OUTPUT
+	# Verify test script did complete by checking the last lines
+	(tail -2 $TMP_OUTPUT | grep -s '^Total time' > /dev/null 2>&1) ||
+	    REPORT_ERR "****snaptest FAILED to complete in $h****"
+	rm $TMP_OUTPUT
+    done
+    exit 0
+fi
+
+# Running the standard test in this host.
+RUNSNAPTEST standard
+REPORT_RESULT
+PRINT_TRAILER
+
+#
+# Running the parallel test if this is parallel host too
+if ( echo $PARALLELHOST | grep -s $HOSTNAME > /dev/null ) then
+    RUNSNAPTEST parallel
+    REPORT_RESULT
+    PRINT_TRAILER
+fi
+
+#
+# If this is modi4, run -n32 tests too.
+if [ $HOSTNAME = modi4 ]; then
+    #
+    # Serial test
+    RUNSNAPTEST -n32 standard
+    REPORT_RESULT
+    PRINT_TRAILER
+    # parallel test
+    RUNSNAPTEST -n32 parallel
+    REPORT_RESULT
+    PRINT_TRAILER
+fi
+
+FLUSH_FILES
+
+# disable trailer summary printing since all trailers have been
+# printed and we are exiting normally.
+trap 0
+exit $errcode
