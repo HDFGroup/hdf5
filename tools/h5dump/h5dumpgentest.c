@@ -68,14 +68,44 @@
 #define FILE40  "tattr2.h5"
 #define FILE41  "tcompound_complex.h5"
 #define FILE42  "tnamed_dtype_attr.h5"
-#define FILE43 "tvldtypes5.h5"
+#define FILE43  "tvldtypes5.h5"
+#define FILE44  "tfilters.h5"
 
 
-/* prototypes */
-static int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
+/*-------------------------------------------------------------------------
+ * prototypes
+ *-------------------------------------------------------------------------
+ */
+
+/* utility functions */
+static int 
+write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
                 hid_t type_id, void *buf);
-static int write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
+static int 
+write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t type_id, void *buf );
+
+
+/* a filter operation callback function */
+static size_t
+myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts, 
+      const unsigned int UNUSED *cd_values, size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf);
+
+/* a "set local" callback     */
+static herr_t
+set_local_myfilter(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id);
+
+#define MYFILTER_ID 405
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_MYFILTER[1] = {{
+    MYFILTER_ID,		       /* Filter id number		*/
+    "myfilter",			       /* Filter name for debugging	*/
+    NULL,                /* The "can apply" callback     */
+    set_local_myfilter,  /* The "set local" callback     */
+    myfilter,			         /* The actual filter function	*/
+}};
 
 
 
@@ -88,6 +118,12 @@ static int write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_n
 
 #define SPACE1_RANK 1
 #define SPACE1_DIM1 4
+
+#define DIM1  20
+#define DIM2  10
+#define CDIM1 DIM1/2
+#define CDIM2 DIM2/2
+#define RANK  2
 
 /* Element selection information */
 #define POINT1_NPOINTS 10
@@ -3033,7 +3069,7 @@ static void gent_char(void)
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype) 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -3473,7 +3509,7 @@ static void write_attr_in(hid_t loc_id,
  *
  * Purpose: write datasets in LOC_ID 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -3940,8 +3976,8 @@ static void write_dset_in(hid_t loc_id,
 
 static void gent_attr_all(void)
 {
-    hid_t   file_id; 
-    hid_t   dset_id;
+ hid_t   file_id; 
+ hid_t   dset_id;
 	hid_t   group_id;
 	hid_t   group2_id;
 	hid_t   root_id;
@@ -4036,8 +4072,6 @@ int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Return: 
- *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: May 27, 2003
@@ -4058,16 +4092,23 @@ int write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
  /* Create a dataset */
  dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT);
+ assert (dset_id >= 0);
   
  /* Write the buf */
  if ( buf )
+ {
   status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+  assert (status >= 0);
+ }
 
  /* Close */
  status = H5Dclose(dset_id);
- status = H5Sclose(space_id);
+ assert (status >= 0);
 
- return status;
+ status = H5Sclose(space_id);
+ assert (status >= 0);
+
+ return 1;
 
 }
 
@@ -4132,7 +4173,7 @@ static void gent_compound_complex(void)
             }
         }
 
-        Array1[m].e = ( m * .96 );
+        Array1[m].e = (float)( m * .96 );
 
 	for (n = 0; n < F41_ARRAY_DIMf; n++) {
             Array1[m].f[n] = ( m * 1024.9637 );
@@ -4314,11 +4355,490 @@ static void gent_named_dtype_attr(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function: make_dset
+ *
+ * Purpose: utility function to create and write a dataset in LOC_ID
+ *
+ *-------------------------------------------------------------------------
+ */
+static 
+int make_dset(hid_t loc_id,
+              const char *name,
+              hid_t sid, 
+              hid_t dcpl,
+              void *buf)
+{
+ hid_t   dsid;
+
+ /* create the dataset */
+ if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl))<0)
+  return -1;
+
+ /* write */
+ if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  goto out;
+
+ /* close */
+ if(H5Dclose(dsid)<0)
+  return -1;
+
+ return 0;
+ out:
+ H5E_BEGIN_TRY {
+  H5Dclose(dsid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_external
+ *
+ * Purpose: make a dataset with external storage
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+make_external(hid_t fid)
+{
+ hid_t   dcpl;         /*dataset creation property list */
+ hid_t   sid;          /*dataspace ID */
+ hid_t	  dsid;	 	      /*dataset ID			*/
+ hsize_t	cur_size[1];		/*data space current size	*/
+ hsize_t	max_size[1];		/*data space maximum size	*/
+ hsize_t size;         /*bytes reserved for data in the external file*/
+ int     ret;
+ 
+ cur_size[0] = max_size[0] = 100;
+ size = (max_size[0]*sizeof(int)/2);
+
+ dcpl=H5Pcreate(H5P_DATASET_CREATE);
+ ret=H5Pset_external(dcpl,"ext1.bin",(off_t)0,size);
+ assert(ret>=0);
+
+ ret=H5Pset_external(dcpl,"ext2.bin",(off_t)0,size);
+ assert(ret>=0);
+
+ sid=H5Screate_simple(1, cur_size, max_size);
+ assert(ret>=0);
+
+ dsid=H5Dcreate(fid, "external", H5T_NATIVE_INT, sid, dcpl);
+ assert(ret>=0);
+
+ H5Dclose(dsid);
+ assert(ret>=0);
+
+ H5Sclose(sid);
+ assert(ret>=0);
+
+ H5Pclose(dcpl);
+ assert(ret>=0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gent_filters
+ *
+ * Purpose: make several datasets with filters, external dataset
+ *  fill value
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_filters()
+{
+ hid_t    fid;  /* file id */
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hid_t    sid1; /* dataspace ID */
+ hid_t    tid;  /* datatype ID */
+ hid_t    did;  /* dataset ID */
+ unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
+ unsigned szip_pixels_per_block=4;
+ hsize_t  dims1[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf1[DIM1][DIM2];
+ hsize_t  dims2[1]={2};
+ hvl_t    buf2[2];
+ hsize_t  dims3[1]={1};
+ /*char     buf3[]={"this is a string\n with a newline"};*/
+ char     buf3[]={"string\n new"};
+ hsize_t  dims4[1]={6};
+ char     buf4[6]={"abcdef"};
+ int      i, j, n, ret, fillval, val;
+
+ typedef enum 
+ {
+  E_RED,
+  E_GREEN
+ } e_t;
+
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf1[i][j]=n++;
+  }
+ }
+ 
+ /* create a file */
+ fid  = H5Fcreate(FILE44, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+ 
+ /* create a space */
+ sid = H5Screate_simple(SPACE2_RANK, dims1, NULL);
+
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+/*-------------------------------------------------------------------------
+ * create a compact and contiguous storage layout dataset
+ * add a comment to the datasets
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_layout(dcpl, H5D_COMPACT);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"compact",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ ret=H5Gset_comment(fid,"compact", "This is a dataset with compact storage");
+ assert(ret>=0);
+
+ ret=H5Pset_layout(dcpl, H5D_CONTIGUOUS);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"contiguous",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ ret=H5Gset_comment(fid,"contiguous", "This is a dataset with contiguous storage");
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * make several dataset with filters
+ *-------------------------------------------------------------------------
+ */
+
+ /* set up chunk */
+ ret=H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * SZIP
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_SZIP)
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+ /* set szip data */
+ ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"szip",sid,dcpl,buf1);
+ assert(ret>=0);
+#endif
+
+/*-------------------------------------------------------------------------
+ * GZIP
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+ /* set deflate data */
+ ret=H5Pset_deflate(dcpl, 9);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"deflate",sid,dcpl,buf1);
+ assert(ret>=0);
+#endif
+
+
+/*-------------------------------------------------------------------------
+ * shuffle
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_SHUFFLE)
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+ /* set the shuffle filter */
+ ret=H5Pset_shuffle(dcpl);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"shuffle",sid,dcpl,buf1);
+ assert(ret>=0);
+#endif
+
+
+/*-------------------------------------------------------------------------
+ * checksum
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+ /* set the checksum filter */
+ ret=H5Pset_fletcher32(dcpl);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fletcher32",sid,dcpl,buf1);
+ assert(ret>=0);
+#endif
+
+/*-------------------------------------------------------------------------
+ * all filters
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+#if defined (H5_HAVE_FILTER_SHUFFLE)
+ /* set the shuffle filter */
+ ret=H5Pset_shuffle(dcpl);
+ assert(ret>=0);
+#endif
+
+#if defined (H5_HAVE_FILTER_SZIP)
+ szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
+ /* set szip data */
+ ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
+ assert(ret>=0);
+#endif
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ /* set deflate data */
+ ret=H5Pset_deflate(dcpl, 5);
+ assert(ret>=0);
+#endif
+
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ /* set the checksum filter */
+ ret=H5Pset_fletcher32(dcpl);
+ assert(ret>=0);
+#endif
+
+ ret=make_dset(fid,"all",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ 
+/*-------------------------------------------------------------------------
+ * user defined filter
+ *-------------------------------------------------------------------------
+ */
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+#ifdef H5_WANT_H5_V1_4_COMPAT
+ ret=H5Zregister (MYFILTER_ID, "myfilter", myfilter);
+#else 
+ ret=H5Zregister (H5Z_MYFILTER);
+#endif 
+ assert(ret>=0);
+
+ H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"myfilter",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * make an external dataset
+ *-------------------------------------------------------------------------
+ */
+ make_external(fid);
+
+/*-------------------------------------------------------------------------
+ * make datasets with fill value combinations
+ *-------------------------------------------------------------------------
+ */
+
+ fillval = -99;
+ 
+ ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fill early",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fill never",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fill ifset",sid,dcpl,buf1);
+ assert(ret>=0);
+
+
+/*-------------------------------------------------------------------------
+ * commit a H5G_TYPE type with a comment
+ *-------------------------------------------------------------------------
+ */
+ tid=H5Tcopy(H5T_STD_B8LE);
+ ret=H5Tcommit(fid, "my type", tid);
+ assert(ret>=0);
+
+ ret=H5Gset_comment(fid,"my type", "This is a commited datatype");
+ assert(ret>=0);
+
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * enum type with nonprintable characters in the name
+ *-------------------------------------------------------------------------
+ */
+ tid = H5Tcreate(H5T_ENUM, sizeof(e_t));
+ H5Tenum_insert(tid, "RED 3 \\n",   (val = 0, &val));
+ write_dset(fid,2,dims1,"enum",tid,0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * vlen 
+ *-------------------------------------------------------------------------
+ */
+
+	buf2[0].len = 1;
+	buf2[0].p = malloc( 1 * sizeof(int));
+	((int *)buf2[0].p)[0]=1;
+	buf2[1].len = 2;
+	buf2[1].p = malloc( 2 * sizeof(int));
+	((int *)buf2[1].p)[0]=2;
+	((int *)buf2[1].p)[1]=3;
+
+ sid1=H5Screate_simple(1,dims2,NULL);
+ tid=H5Tvlen_create(H5T_NATIVE_INT);
+ did=H5Dcreate(fid,"vlen",tid,sid1,H5P_DEFAULT);
+ ret=H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2);
+ assert(ret>=0);
+ ret=H5Tcommit(fid,"myvlen",tid);
+ assert(ret>=0);
+ ret=H5Dvlen_reclaim(tid,sid1,H5P_DEFAULT,buf2);
+ assert(ret>=0);
+ ret=H5Dclose(did);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * bitfield
+ *-------------------------------------------------------------------------
+ */
+ tid = H5Tcopy(H5T_STD_B8LE);
+ write_dset(fid,1,dims3,"bitfield",tid,buf3);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * string
+ *-------------------------------------------------------------------------
+ */
+
+ tid=H5Tcopy(H5T_C_S1);
+ ret=H5Tset_size(tid, sizeof(buf3));
+ assert(ret>=0);
+ write_dset(fid,1,dims3,"string",tid,buf3);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * char array
+ *-------------------------------------------------------------------------
+ */
+ write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
+ 
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+ ret=H5Sclose(sid1);
+ assert(ret>=0);
+
+ ret=H5Sclose(sid);
+ assert(ret>=0);
+ 
+ ret=H5Pclose(dcpl);
+ assert(ret>=0);
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: myfilter
+ *
+ * Purpose: filter operation callback function; the filter does nothing
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts, 
+      const unsigned int UNUSED *cd_values, size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf)
+{
+ return nbytes;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: set_local_myfilter
+ *
+ * Purpose: filter operation "set local" callback
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
+{
+ unsigned flags;                /* Filter flags */
+ size_t   cd_nelmts=0;          /* Number of filter parameters */
+ unsigned cd_values[2]={5,6};   /* Filter parameters */
+ 
+ /* Get the filter's current parameters */
+ if(H5Pget_filter_by_id(dcpl_id,MYFILTER_ID,&flags,&cd_nelmts,cd_values,0,NULL)<0)
+  return(FAIL);
+
+ cd_nelmts=2; 
+ 
+ /* Modify the filter's parameters for this dataset */
+ if(H5Pmodify_filter(dcpl_id,MYFILTER_ID,flags, cd_nelmts,cd_values)<0)
+  return(FAIL);
+ 
+ return(SUCCEED);
+} 
+
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
  */
 
+#if 1
 
 int main(void)
 {
@@ -4377,8 +4897,88 @@ int main(void)
     gent_attr_all();
 
     gent_compound_complex();
-
     gent_named_dtype_attr();
+
+    gent_filters();
 
     return 0;
 }
+#else
+
+#include <stdio.h>
+#include <hdf5.h>
+
+#define COMMIT_CMPD_DATATYPE 1
+
+typedef struct cmpdStruct
+   {
+   int a;
+   int b;
+   hvl_t string;
+   } cmpdStruct;
+
+int main( void )
+{
+   hid_t h5File, cmpdType, dataSetID, dataSpaceID;
+   hsize_t dataSpaceSize;
+   cmpdStruct myStruct;
+   herr_t status;
+
+   myStruct.a = 2;
+   myStruct.b = 6;
+   myStruct.string.p = (char *)malloc( sizeof(char) * 4 );
+   myStruct.string.len = 4;
+   strcpy( myStruct.string.p, "adsf" );
+   
+
+   /* create hdf file */
+   h5File = H5Fcreate( "vlen.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+   printf ("%i\n", h5File);
+
+   /* create compound datatype */
+   cmpdType = H5Tcreate( H5T_COMPOUND, sizeof(cmpdStruct) );
+   printf ("%i\n", cmpdType);
+   status = H5Tinsert( cmpdType, "a", HOFFSET(cmpdStruct, a), H5T_NATIVE_INT );
+   printf ("%i\n", status);
+   status = H5Tinsert( cmpdType, "b", HOFFSET(cmpdStruct, b), H5T_NATIVE_INT );
+   printf ("%i\n", status);
+/*
+   status =H5Tinsert( cmpdType, "string", HOFFSET(cmpdStruct, string),
+              H5Tvlen_create( H5T_NATIVE_CHAR ) );
+*/
+
+   status =H5Tinsert( cmpdType, "string", HOFFSET(cmpdStruct, string),
+              H5Tvlen_create( H5T_C_S1 ) );
+
+   printf ("%i\n", status);
+
+#if (COMMIT_CMPD_DATATYPE == 1)
+   /* commit datatype */
+   status =H5Tcommit( h5File, "cmpdType", cmpdType );
+   printf ("%i\n", status);
+#endif
+
+   /* create dataspace ID */
+   dataSpaceID = H5Screate_simple( 1, (dataSpaceSize=1, &dataSpaceSize), NULL );
+   /* create dataset ID */
+   printf ("%i\n", dataSpaceID);
+   dataSetID = H5Dcreate( h5File, "cmpdStruct", cmpdType, dataSpaceID, H5P_DEFAULT );
+   printf ("%i\n", dataSetID);
+
+   /* write dataset */
+   status = H5Dwrite( dataSetID, cmpdType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &myStruct );
+   printf ("%i\n", status);
+    
+   status = H5Tclose (cmpdType);
+   printf ("%i\n", status);
+   status = H5Dclose (dataSetID);
+   printf ("%i\n", status);
+   status = H5Sclose (dataSpaceID);
+   printf ("%i\n", status);
+   status = H5Fclose (h5File);
+   printf ("%i\n", status);
+
+   return( 0 );
+}
+
+#endif
