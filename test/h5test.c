@@ -11,6 +11,9 @@
 
 #undef NDEBUG			/*override -DNDEBUG			*/
 #include <h5test.h>
+#ifdef WIN32
+#include <process.h>
+#endif
 
 /*
  * Define these environment variables or constants to influence functions in
@@ -212,7 +215,11 @@ h5_reset(void)
      * Cause the library to emit some diagnostics early so they don't
      * interfere with other formatted output.
      */
+#ifdef WIN32
+    sprintf(filename, "/tmp/h5emit-%05d.h5",_getpid()); 
+#else
     sprintf(filename, "/tmp/h5emit-%05d.h5", getpid());
+#endif
     H5E_BEGIN_TRY {
 	hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 			       H5P_DEFAULT);
