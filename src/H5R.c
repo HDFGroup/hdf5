@@ -330,6 +330,7 @@ static hid_t
 H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
 {
     H5D_t *dataset;             /* Pointer to dataset to open */
+    H5G_t *group;               /* Pointer to group to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
     intn oid_type;              /* type of object being dereferenced */
@@ -401,6 +402,16 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
     oid_type=H5G_get_type(&ent);
     switch(oid_type) {
         case H5G_GROUP:
+            if ((group=H5G_open_oid(&ent)) == NULL) {
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
+            }
+
+            /* Create an atom for the dataset */
+            if ((ret_value = H5I_register(H5I_GROUP, group)) < 0) {
+                H5G_close(group);
+                HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL,
+                      "can't register group");
+            }
             break;
 
         case H5G_TYPE:

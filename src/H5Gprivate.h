@@ -119,6 +119,7 @@ __DLL__ H5F_t *H5G_fileof(H5G_t *grp);
 __DLL__ H5G_t *H5G_create(H5G_entry_t *loc, const char *name,
 			  size_t size_hint);
 __DLL__ H5G_t *H5G_open(H5G_entry_t *loc, const char *name);
+__DLL__ H5G_t *H5G_open_oid(H5G_entry_t *ent);
 __DLL__ H5G_t *H5G_reopen(H5G_t *grp);
 __DLL__ herr_t H5G_close(H5G_t *grp);
 __DLL__ H5G_t *H5G_rootof(H5F_t *f);

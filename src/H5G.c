@@ -1348,6 +1348,7 @@ H5G_isa(H5G_entry_t *ent)
  *		Monday, January	 5, 1998
  *
  * Modifications:
+ *      Modified to call H5G_open_oid - QAK - 3/17/99
  *
  *-------------------------------------------------------------------------
  */
@@ -1356,7 +1357,7 @@ H5G_open(H5G_entry_t *loc, const char *name)
 {
     H5G_t		*grp = NULL;
     H5G_t		*ret_value = NULL;
-    H5O_stab_t		mesg;
+    H5G_entry_t ent;            	/*dataset symbol table entry	*/
 
     FUNC_ENTER(H5G_open, NULL);
 
@@ -1365,29 +1366,77 @@ H5G_open(H5G_entry_t *loc, const char *name)
     assert(name && *name);
 
     /* Open the object, making sure it's a group */
+    if (H5G_find(loc, name, NULL, &ent/*out*/) < 0) {
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
+    }
+    /* Open the group object */
+    if ((grp=H5G_open_oid(&ent)) ==NULL) {
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "not found");
+    }
+    ret_value = grp;
+
+done:
+    if (!ret_value && grp) {
+        H5MM_xfree(grp);
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_open_oid
+ *
+ * Purpose:	Opens an existing group.  The group should eventually be
+ *		closed by calling H5G_close().
+ *
+ * Return:	Success:	Ptr to a new group.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *	    Wednesday, March	17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5G_open_oid(H5G_entry_t *ent)
+{
+    H5G_t		*grp = NULL;
+    H5G_t		*ret_value = NULL;
+    H5O_stab_t		mesg;
+
+    FUNC_ENTER(H5G_open_oid, NULL);
+
+    /* Check args */
+    assert(ent);
+
+    /* Open the object, making sure it's a group */
     if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		     "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
-    if (H5G_find(loc, name, NULL, &(grp->ent)/*out*/) < 0) {
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
-    }
+
+    /* Copy over the symbol table information if it's provided */
+    HDmemcpy(&(grp->ent),ent,sizeof(H5G_entry_t));
+
+    /* Grab the object header */
     if (H5O_open(&(grp->ent)) < 0) {
-	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
     }
     if (NULL==H5O_read (&(grp->ent), H5O_STAB, 0, &mesg)) {
-	H5O_close(&(grp->ent));
-	HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
+        H5O_close(&(grp->ent));
+        HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
     }
     grp->nref = 1;
     ret_value = grp;
 
-  done:
+done:
     if (!ret_value && grp) {
-	H5MM_xfree(grp);
+        H5MM_xfree(grp);
     }
     FUNC_LEAVE(ret_value);
-}
+}   /* end H5G_open_oid() */
 
 
 /*-------------------------------------------------------------------------
