@@ -41,13 +41,14 @@ void *old_client_data;			/* previous error handler arg.*/
 /* FILENAME and filenames must have the same number of names.
  * Use PARATESTFILE in general and use a separated filename only if the file
  * created in one test is accessed by a different test.
- * FILENAME[0] is reserved as the file name for PARATESTFILE.
+ * filenames[0] is reserved as the file name for PARATESTFILE.
  */
+#define NFILENAME 2
 #define PARATESTFILE filenames[0]
-const char *FILENAME[2]={
+const char *FILENAME[NFILENAME]={
 	    "ParaTest",
 	    NULL};
-char	filenames[2][PATH_MAX];
+char	filenames[NFILENAME][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE

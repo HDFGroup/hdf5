@@ -480,6 +480,6 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 	printf("[more errors ...]\n");
     if (vrfyerrs)
-	printf("%d errors found in dataset_vrfy\n", vrfyerrs);
+	printf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
     return(vrfyerrs);
 }
