@@ -412,10 +412,10 @@ test_attr_compound_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_ndims(space);
-    VERIFY(rank, ATTR4_RANK, "H5Sget_ndims");
-    ret=H5Sget_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sget_dims");
+    rank=H5Sextent_ndims(space);
+    VERIFY(rank, ATTR4_RANK, "H5Sextent_ndims");
+    ret=H5Sextent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sextent_dims");
     if(dims[0]!=ATTR4_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR4_DIM1);
         num_errs++;
@@ -797,10 +797,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_ndims(space);
-    VERIFY(rank, ATTR1_RANK, "H5Sget_ndims");
-    ret=H5Sget_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sget_dims");
+    rank=H5Sextent_ndims(space);
+    VERIFY(rank, ATTR1_RANK, "H5Sextent_ndims");
+    ret=H5Sextent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sextent_dims");
     if(dims[0]!=ATTR1_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR1_DIM1);
         num_errs++;
@@ -858,10 +858,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_ndims(space);
-    VERIFY(rank, ATTR2_RANK, "H5Sget_ndims");
-    ret=H5Sget_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sget_dims");
+    rank=H5Sextent_ndims(space);
+    VERIFY(rank, ATTR2_RANK, "H5Sextent_ndims");
+    ret=H5Sextent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sextent_dims");
     if(dims[0]!=ATTR2_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR2_DIM1);
         num_errs++;
@@ -924,10 +924,10 @@ test_attr_mult_read(void)
     /* Verify Dataspace */
     space=H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_ndims(space);
-    VERIFY(rank, ATTR3_RANK, "H5Sget_ndims");
-    ret=H5Sget_dims(space,dims, NULL);
-    CHECK(ret, FAIL, "H5Sget_dims");
+    rank=H5Sextent_ndims(space);
+    VERIFY(rank, ATTR3_RANK, "H5Sextent_ndims");
+    ret=H5Sextent_dims(space,dims, NULL);
+    CHECK(ret, FAIL, "H5Sextent_dims");
     if(dims[0]!=ATTR3_DIM1) {
         printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR3_DIM1);
         num_errs++;

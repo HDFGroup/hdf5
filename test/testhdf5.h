@@ -138,6 +138,7 @@ void                    test_h5t(void);
 void                    test_h5s(void);
 void                    test_h5d(void);
 void                    test_attr(void);
+void                    test_select(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
@@ -147,5 +148,6 @@ void                    cleanup_ohdr(void);
 void                    cleanup_stab(void);
 void                    cleanup_h5s(void);
 void                    cleanup_attr(void);
+void                    cleanup_select(void);
 
 #endif /* HDF5cleanup_H */

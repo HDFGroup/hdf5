@@ -28,9 +28,9 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c \
-	dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c \
-	iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c
+TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tselect.c tstab.c \
+    th5s.c dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c \
+    external.c iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c
 TEST_OBJ=$(PROG_SRC:.c=.o)
 
 # Private header files (not to be installed)...
@@ -47,7 +47,7 @@ timings _timings: $(TIMINGS)
 	done;
 
 # How to build the programs...
-TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o tstab.o th5s.o
+TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o tselect.o tstab.o th5s.o
 testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
 

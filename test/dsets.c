@@ -704,7 +704,7 @@ test_multiopen (hid_t file)
 
     /* Get the size from the second handle */
     if ((space = H5Dget_space (dset2))<0) goto error;
-    if (H5Sget_dims (space, tmp_size, NULL)<0) goto error;
+    if (H5Sextent_dims (space, tmp_size, NULL)<0) goto error;
     if (cur_size[0]!=tmp_size[0]) {
 	puts ("*FAILED*");
 	printf ("   Got %d instead of %d!\n",

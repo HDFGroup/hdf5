@@ -169,6 +169,7 @@ main(int argc, char *argv[])
     InitTest("stab", test_stab, cleanup_stab, "Symbol Tables");
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
+    InitTest("select", test_select, cleanup_select,  "Selections");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
