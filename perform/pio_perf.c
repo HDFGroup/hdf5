@@ -561,17 +561,15 @@ run_test(FILE *output, iotype iot, parameters parms)
 static void
 get_minmax(minmax *mm, double val)
 {
-    double sum;
-    int myrank, nproc;
+    double min, max, sum;
+    int myrank;
 
     MPI_Comm_rank(pio_comm_g, &myrank);
-    MPI_Comm_size(pio_comm_g, &nproc);
+    MPI_Comm_size(pio_comm_g, &mm->num);
 
-    MPI_Allreduce(&val, &(mm->max), 1, MPI_DOUBLE, MPI_MAX, pio_comm_g);
-    MPI_Allreduce(&val, &(mm->min), 1, MPI_DOUBLE, MPI_MIN, pio_comm_g);
-    MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, pio_comm_g);
-    mm->sum += sum;
-    mm->num += nproc;
+    MPI_Allreduce(&val, &mm->max, 1, MPI_DOUBLE, MPI_MAX, pio_comm_g);
+    MPI_Allreduce(&val, &mm->min, 1, MPI_DOUBLE, MPI_MIN, pio_comm_g);
+    MPI_Allreduce(&val, &mm->sum, 1, MPI_DOUBLE, MPI_SUM, pio_comm_g);
 }
 
 /*
