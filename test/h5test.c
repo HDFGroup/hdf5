@@ -67,7 +67,7 @@
 /* For the PFS of TFLOPS */
 #define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1"
 #else
-#define HDF5_PARAPREFIX "/tmp"
+#define HDF5_PARAPREFIX ""
 #endif
 #endif
 char	*paraprefix = NULL;	/* for command line option para-prefix */
@@ -256,6 +256,10 @@ h5_reset(void)
  *
  *		Albert Cheng, 2000-01-25
  *		Added prefix for parallel test files.
+ *
+ * 		Albert Cheng, 2003-05-08
+ *		Changed the default parallel prefix back to NULL but added
+ *              an explanation remark of $HDF5_PARAPREFIX.
  *-------------------------------------------------------------------------
  */
 char *
@@ -265,6 +269,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     const char     *suffix = ".h5"; /* suffix has default */
     char           *ptr, last = '\0';
     size_t          i, j;
+    static int	    HDF5_PARAPREFIX_explained=0;
     hid_t           driver=(-1);
     
     if (!base_name || !fullname || size < 1)
@@ -290,11 +295,19 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	 * then try the constant
 	 */
 	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
-
+	if (!prefix && !HDF5_PARAPREFIX_explained){
+	    printf("*** Remark ***\n"
+		   "You can use environment variable HDF5_PARAPREFIX to "
+		   "run parallel test files in a\n"
+		   "different directory or to add file type prefix. E.g.,\n"
+		   "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+		   "   export HDF5_PARAPREFIX\n"
+		   "*** End of Remark ***\n");
+	    HDF5_PARAPREFIX_explained++;
 #ifdef HDF5_PARAPREFIX
-	if (!prefix)
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
+	}
     }else{
 	/* For serial:
 	 * First use the environment variable, then try the constant
