@@ -460,6 +460,10 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define if your system supports pthread_attr_setscope(&attribute,
+   PTHREAD_SCOPE_SYSTEM) call. */
+#undef SYSTEM_SCOPE_THREADS
+
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 

@@ -87,13 +87,10 @@ void tts_dcreate(void)
     /* set pthread attribute to perform global scheduling */
     ret=pthread_attr_init(&attribute);
     assert(ret==0);
+#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-/* Don't check return value on FreeBSD, since PTHREAD_SCOPE_SYSTEM is not
- * currently supported in v4.7
- */
-#ifndef __FreeBSD__
     assert(ret==0);
-#endif /* __FreeBSD__ */
+#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file

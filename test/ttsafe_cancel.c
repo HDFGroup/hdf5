@@ -62,7 +62,9 @@ void tts_cancel(void)
 
 	/* make thread scheduling global */
 	pthread_attr_init(&attribute);
+#ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
 	pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+#endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
 	/*
 	 * Create a hdf5 file using H5F_ACC_TRUNC access, default file
