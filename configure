@@ -9854,7 +9854,7 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
-{ grep __cplusplus src H5pubconf.h 1>2 2>/dev/null;} || \
+{ grep __cplusplus src H5pubconf.h 1>&2 2>/dev/null;} || \
   cat >> src/H5pubconf.h <<EOF
 
 /* inline is a keyword in C++. If this is a C++ compiler, undefine it */

@@ -1380,7 +1380,7 @@ EOF
 
 dnl Put the C++ ifdef wrappers in the H5pubconf file as well, but only
 dnl if it's not there already.
-{ grep __cplusplus src H5pubconf.h 1>2 2>/dev/null;} || \
+{ grep __cplusplus src H5pubconf.h 1>&2 2>/dev/null;} || \
   cat >> src/H5pubconf.h <<EOF
 
 /* inline is a keyword in C++. If this is a C++ compiler, undefine it */
