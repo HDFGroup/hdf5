@@ -25,6 +25,9 @@
 typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
+/* Forward declarations for prototypes arguments */
+struct H5O_fill_t;
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5P_init(void);
 
@@ -60,6 +63,8 @@ H5_DLL herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);
+H5_DLL herr_t H5P_is_fill_value_defined(const struct H5O_fill_t *fill,
+        H5D_fill_value_t *status);
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
         H5D_fill_value_t *status);
 

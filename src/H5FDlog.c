@@ -39,7 +39,7 @@ static hid_t H5FD_LOG_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
-    char *logfile;		/* Allocated log file name */
+    char *logfile;	        /* Allocated log file name */
     unsigned flags;             /* Flags for logging behavior */
     size_t buf_size;            /* Size of buffers for track flavor and number of times each byte is accessed */
 } H5FD_log_fapl_t;
@@ -283,7 +283,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity)
+H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
 {
     H5FD_log_fapl_t	fa;     /* File access property list information */
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -330,7 +330,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_log(hid_t fapl_id, char *logfile, unsigned flags, size_t buf_size)
+H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned flags, size_t buf_size)
 {
     H5FD_log_fapl_t	fa;     /* File access property list information */
     H5P_genplist_t *plist;      /* Property list pointer */

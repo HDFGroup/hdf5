@@ -140,6 +140,4 @@ H5_DLL herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			  void *udata);
 H5_DLL herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t
                             op, haddr_t addr, void *udata);
-H5_DLL int    H5B_Kvalue(H5F_t *f, const H5B_class_t *type);
-
 #endif

@@ -134,14 +134,23 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     p += H5O_ALIGN(attr->dt_size);
 
     /* decode the attribute dataspace */
-    if (NULL==(attr->ds = H5FL_ALLOC(H5S_t,1)))
+    if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
+        hsize_t nelem;  /* Number of elements in extent */
+        unsigned u;     /* Local index variable */
+
         attr->ds->extent.type = H5S_SIMPLE;
         HDmemcpy(&(attr->ds->extent.u.simple),simple, sizeof(H5S_simple_t));
         H5FL_FREE(H5S_simple_t,simple);
+
+        /* Compute the number of elements in the extent */
+        for(u=0, nelem=1; u<attr->ds->extent.u.simple.rank; u++)
+            nelem*=attr->ds->extent.u.simple.size[u];
+        attr->ds->extent.nelem = nelem;
     } else {
         attr->ds->extent.type = H5S_SCALAR;
+        attr->ds->extent.nelem = 1;
     }
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->ds,0)<0)

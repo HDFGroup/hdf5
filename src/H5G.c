@@ -111,15 +111,24 @@ static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 /* Struct only used by change name callback function */
 typedef struct H5G_names_t {
     H5G_entry_t	*loc;
-    const char *src_name;
+    H5RS_str_t *src_name;
     H5G_entry_t	*src_loc;
-    const char *dst_name;
+    H5RS_str_t *dst_name;
     H5G_entry_t	*dst_loc;
     H5G_names_op_t op;
 } H5G_names_t;  
 
+/* Enum for H5G_namei actions */
+typedef enum {
+    H5G_NAMEI_TRAVERSE,         /* Just traverse groups */
+    H5G_NAMEI_INSERT            /* Insert entry in group */
+}H5G_namei_act_t ;
+
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
+
+/* Declare extern the PQ free list for the wrapped strings */
+H5FL_BLK_EXTERN(str_buf);
 
 /* Private prototypes */
 static herr_t H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key);
@@ -1186,21 +1195,28 @@ H5G_basename(const char *name, size_t *size_p)
  *      Modified to deep copies of symbol table entries
  *      Added `id to name' support.
  *
+ *      Quincey Koziol, 2003-01-06
+ *      Added "action" and "ent" parameters to allow different actions when
+ *      working on the last component of a name.  (Specifically, this allows
+ *      inserting an entry into a group, instead of trying to look it up)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
-	  unsigned target, int *nlinks/*out*/)
+	  unsigned target, int *nlinks/*out*/, H5G_namei_act_t action,
+          H5G_entry_t *ent)
 {
     H5G_entry_t		  _grp_ent;     /*entry for current group	*/
     H5G_entry_t		  _obj_ent;     /*entry found			*/
     size_t		  nchars;	/*component name length		*/
     int			  _nlinks = H5G_NLINKS;
     const char		   *s = NULL;
-    unsigned null_obj = obj_ent == NULL ? 1 : 0;        /* Flag to indicate this function was called with obj_ent set to NULL */
-    unsigned null_grp = grp_ent == NULL ? 1 : 0;        /* Flag to indicate this function was called with grp_ent set to NULL */
-    unsigned group_copy = 0;            /* Flag to indicate that the group entry is copied */
+    unsigned null_obj;          /* Flag to indicate this function was called with obj_ent set to NULL */
+    unsigned null_grp;          /* Flag to indicate this function was called with grp_ent set to NULL */
+    unsigned group_copy = 0;    /* Flag to indicate that the group entry is copied */
+    unsigned last_comp = 0;     /* Flag to indicate that a component is the last component in the name */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOINIT(H5G_namei);
@@ -1209,13 +1225,17 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     if (rest)
         *rest = name;
     if (!grp_ent) {
-        HDmemset(&_grp_ent,0,sizeof(H5G_entry_t));
         grp_ent = &_grp_ent;
+        null_grp = 1;
     } /* end if */
+    else
+        null_grp = 0;
     if (!obj_ent) {
-        HDmemset(&_obj_ent,0,sizeof(H5G_entry_t));
         obj_ent = &_obj_ent;
+        null_obj = 1;
     } /* end if */
+    else
+        null_obj = 0;
     if (!nlinks)
         nlinks = &_nlinks;
     
@@ -1293,21 +1313,46 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	/* Set flag that we've copied a new entry into the group entry */
 	group_copy =1;
 
-	if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/ )<0) {
-	    /*
-	     * Component was not found in the current symbol table, possibly
-	     * because GRP_ENT isn't a symbol table.
-	     */
-	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
-	}
+        /* Check if this is the last component of the name */
+        if(!((s=H5G_component(name+nchars, NULL)) && *s))
+            last_comp=1;
+
+        switch(action) {
+            case H5G_NAMEI_TRAVERSE:
+                if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/ )<0) {
+                    /*
+                     * Component was not found in the current symbol table, possibly
+                     * because GRP_ENT isn't a symbol table.
+                     */
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+                }
+                break;
+
+            case H5G_NAMEI_INSERT:
+                if(!last_comp) {
+                    if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/ )<0) {
+                        /*
+                         * Component was not found in the current symbol table, possibly
+                         * because GRP_ENT isn't a symbol table.
+                         */
+                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
+                    }
+                } /* end if */
+                else {
+                    if (H5G_stab_insert(grp_ent, H5G_comp_g, ent) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert name");
+                    HGOTO_DONE(SUCCEED);
+                } /* end else */
+                break;
+        } /* end switch */
 
 	/*
 	 * If we found a symbolic link then we should follow it.  But if this
 	 * is the last component of the name and the H5G_TARGET_SLINK bit of
 	 * TARGET is set then we don't follow it.
 	 */
-	if(H5G_CACHED_SLINK==obj_ent->type && (0==(target & H5G_TARGET_SLINK) ||
-                ((s=H5G_component(name+nchars, NULL)) && *s))) {
+	if(H5G_CACHED_SLINK==obj_ent->type &&
+                (0==(target & H5G_TARGET_SLINK) || !last_comp)) {
 	    if ((*nlinks)-- <= 0)
 		HGOTO_ERROR (H5E_SYM, H5E_SLINK, FAIL, "too many symbolic links");
 	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks)<0)
@@ -1319,10 +1364,8 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	 * the H5G_TARGET_MOUNT bit of TARGET is set and this is the last
 	 * component of the name.
 	 */
-	if (0==(target & H5G_TARGET_MOUNT) ||
-                ((s=H5G_component(name+nchars, NULL)) && *s)) {
+	if (0==(target & H5G_TARGET_MOUNT) || !last_comp)
 	    H5F_mountpoint(obj_ent/*in,out*/);
-	}
 	
 	/* next component */
 	name += nchars;
@@ -1376,7 +1419,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     const char		*clv = NULL;		/*cached link value	*/
     char		*linkval = NULL;	/*the copied link value	*/
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
-    char                *tmp_user_path=NULL, *tmp_canon_path=NULL; /* Temporary pointer to object's user path & canonical path */
+    H5RS_str_t          *tmp_user_path_r=NULL, *tmp_canon_path_r=NULL; /* Temporary pointer to object's user path & canonical path */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
@@ -1393,10 +1436,10 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     linkval = H5MM_xstrdup (clv);
 		
     /* Hold the entry's name (& old_name) to restore later */
-    tmp_user_path=obj_ent->user_path;
-    obj_ent->user_path=NULL;
-    tmp_canon_path=obj_ent->canon_path;
-    obj_ent->canon_path=NULL;
+    tmp_user_path_r=obj_ent->user_path_r;
+    obj_ent->user_path_r=NULL;
+    tmp_canon_path_r=obj_ent->canon_path_r;
+    obj_ent->canon_path_r=NULL;
 
     /* Free the names for the group entry */
     H5G_free_ent_name(grp_ent);
@@ -1405,24 +1448,24 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     H5G_ent_copy(&tmp_grp_ent,grp_ent,H5G_COPY_DEEP);
 
     /* Traverse the link */
-    if (H5G_namei (&tmp_grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks))
+    if (H5G_namei (&tmp_grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, nlinks, H5G_NAMEI_TRAVERSE, NULL))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
 
     /* Free the entry's names, we will use the original name for the object */
     H5G_free_ent_name(obj_ent);
 
     /* Restore previous name for object */
-    obj_ent->user_path = tmp_user_path;
-    tmp_user_path=NULL;
-    obj_ent->canon_path = tmp_canon_path;
-    tmp_canon_path=NULL;
+    obj_ent->user_path_r = tmp_user_path_r;
+    tmp_user_path_r=NULL;
+    obj_ent->canon_path_r = tmp_canon_path_r;
+    tmp_canon_path_r=NULL;
 	
 done:
     /* Error cleanup */
-    if(tmp_user_path)
-        H5MM_xfree(tmp_user_path);
-    if(tmp_canon_path)
-        H5MM_xfree(tmp_canon_path);
+    if(tmp_user_path_r)
+        H5RS_decr(tmp_user_path_r);
+    if(tmp_canon_path_r)
+        H5RS_decr(tmp_canon_path_r);
 
     /* Release cloned copy of group entry */
     H5G_free_ent_name(&tmp_grp_ent);
@@ -1475,6 +1518,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      */
     if (!ent) {
 	ent = &new_root;
+        HDmemset(ent, 0, sizeof(H5G_entry_t));
 	if (H5G_stab_create (f, 256, ent/*out*/)<0)
 	    HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create root group");
 	if (1 != H5O_link (ent, 1))
@@ -1493,10 +1537,10 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
     }
 
     /* Create the path names for the root group's entry */
-    ent->user_path=HDstrdup("/");
-    assert(ent->user_path);
-    ent->canon_path=HDstrdup("/");
-    assert(ent->canon_path);
+    ent->user_path_r=H5RS_create("/");
+    assert(ent->user_path_r);
+    ent->canon_path_r=H5RS_create("/");
+    assert(ent->canon_path_r);
     ent->user_path_hidden=0;
 
     /*
@@ -1504,7 +1548,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      * don't count the root group as an open object.  The root group will
      * never be closed.
      */
-    if (NULL==(f->shared->root_grp = H5FL_ALLOC (H5G_t,1)))
+    if (NULL==(f->shared->root_grp = H5FL_CALLOC (H5G_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     f->shared->root_grp->ent = *ent;
     f->shared->root_grp->nref = 1;
@@ -1544,11 +1588,8 @@ done:
 H5G_t *
 H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
 {
-    const char	*rest = NULL;		/*the base name			*/
-    H5G_entry_t	grp_ent;		/*group containing new group	*/
-    char	_comp[1024];		/*name component		*/
-    size_t	nchars;			/*number of characters in compon*/
     H5G_t	*grp = NULL;		/*new group			*/
+    H5F_t       *file;                  /* File new group will be in    */
     H5G_t	*ret_value;		/* Return value */
 
     FUNC_ENTER_NOAPI(H5G_create, NULL);
@@ -1557,51 +1598,28 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     assert(loc);
     assert(name && *name);
 
-    /* lookup name */
-    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL))
-	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
-    H5E_clear(); /*it's OK that we didn't find it */
-    assert(H5F_addr_defined(grp_ent.header));
-
-    /* should be one null-terminated component left */
-    rest = H5G_component(rest, &nchars);
-    assert(rest && *rest);
-    if (rest[nchars]) {
-	const char *t = H5G_component(rest+nchars, NULL);
-	if (t && *t) {
-	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "missing component");
-	} else if (nchars+1 > sizeof _comp) {
-	    HGOTO_ERROR(H5E_SYM, H5E_COMPLEN, NULL, "component is too long");
-	} else {
-	    /* null terminate */
-	    HDmemcpy(_comp, rest, nchars);
-	    _comp[nchars] = '\0';
-	    rest = _comp;
-	}
-    }
-    
     /* create an open group */
-    if (NULL==(grp = H5FL_ALLOC(H5G_t,1)))
+    if (NULL==(grp = H5FL_CALLOC(H5G_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (H5G_stab_create(grp_ent.file, size_hint, &(grp->ent)/*out*/) < 0)
+
+    /* What file is the group being added to? */
+    if (NULL==(file=H5G_insertion_file(loc, name)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to locate insertion point");
+
+    /* Create the group entry */
+    if (H5G_stab_create(file, size_hint, &(grp->ent)/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     
     /* insert child name into parent */
-    if (1!=H5O_link(&(grp->ent), 1))
-	HGOTO_ERROR(H5E_SYM, H5E_LINK, NULL, "link inc failure");
-    if (H5G_stab_insert(&grp_ent, rest, &(grp->ent)) < 0) {
-	H5O_close(&(grp->ent));
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
-    }
+    if(H5G_insert(loc,name,&(grp->ent))<0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group");
+
     grp->nref = 1;
 
     /* Set return value */
     ret_value=grp;
 
 done:
-    /* Free the group entry created from H5G_namei() */
-    H5G_free_ent_name(&grp_ent);
-    
     if(ret_value==NULL) {
         if(grp!=NULL)
             H5FL_FREE(H5G_t,grp);
@@ -1733,7 +1751,7 @@ H5G_open_oid(H5G_entry_t *ent)
     assert(ent);
 
     /* Open the object, making sure it's a group */
-    if (NULL==(grp = H5FL_ALLOC(H5G_t,1)))
+    if (NULL==(grp = H5FL_CALLOC(H5G_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy over (take ownership) of the group entry object */
@@ -1894,10 +1912,6 @@ done:
 herr_t
 H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
 {
-    const char	*rest = NULL;	/*part of name not existing yet */
-    H5G_entry_t	grp;		/*entry for group to contain obj */
-    size_t	nchars;		/*number of characters in name	*/
-    char	_comp[1024];	/*name component		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_insert, FAIL);
@@ -1908,44 +1922,18 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     assert (ent);
 
     /*
-     * Look up the name -- it shouldn't exist yet.
+     * Lookup and insert the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(loc, name, &rest, &grp, NULL, H5G_TARGET_NORMAL, NULL)>=0)
+    if (H5G_namei(loc, name, NULL, NULL, NULL, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_INSERT, ent)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-    H5E_clear(); /*it's OK that we didn't find it */
-    rest = H5G_component(rest, &nchars);
-
-    /*
-     * There should be one component left.  Make sure it's null
-     * terminated.
-     */
-    if (rest[nchars]) {
-	if (H5G_component(rest + nchars, NULL)) {
-	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
-	} else if (nchars + 1 > sizeof _comp) {
-	    HGOTO_ERROR(H5E_SYM, H5E_COMPLEN, FAIL, "component is too long");
-	} else {
-	    /* null terminate */
-	    HDmemcpy(_comp, rest, nchars);
-	    _comp[nchars] = '\0';
-	    rest = _comp;
-	}
-    }
 
     /*
      * Insert the object into a symbol table.
      */
     if (H5O_link(ent, 1) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
-    if (H5G_stab_insert(&grp, rest, ent) < 0) {
-	H5O_link(ent, -1);
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to insert name");
-    }
 
 done:
-    /*Free the ID to name buffer */
-    H5G_free_ent_name(&grp);
-
     FUNC_LEAVE(ret_value);
 }
 
@@ -1989,7 +1977,7 @@ H5G_find(H5G_entry_t *loc, const char *name,
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, NULL)<0)
+    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
 done:
@@ -2184,8 +2172,8 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
              * Lookup the the new_name so we can get the group which will contain
              * the new entry.  The entry shouldn't exist yet.
              */
-            if (H5G_namei (new_loc, new_name, &rest, &grp_ent, NULL, 
-                            H5G_TARGET_NORMAL, NULL)>=0)
+            if (H5G_namei(new_loc, new_name, &rest, &grp_ent, NULL, 
+                            H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL)>=0)
                 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
             H5E_clear (); /*it's okay that we didn't find it*/
             rest = H5G_component (rest, &nchars);
@@ -2239,7 +2227,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             break;
 
         case H5G_LINK_HARD:
-            if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags, NULL)<0)
+            if (H5G_namei(cur_loc, cur_name, NULL, NULL, &cur_obj, namei_flags, NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found");
             if (H5G_insert (new_loc, new_name, &cur_obj)<0)
                 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to create new name/link for object");
@@ -2339,8 +2327,8 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     if (statbuf) HDmemset (statbuf, 0, sizeof *statbuf);
 
     /* Find the object's symbol table entry */
-    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   (unsigned)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0)
+    if (H5G_namei(loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
+		   (unsigned)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
 
     /*
@@ -2374,7 +2362,10 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->type = H5G_LINK;
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME, 0, &(statbuf->mtime))) {
 		H5E_clear();
-		statbuf->mtime = 0;
+                if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW, 0, &(statbuf->mtime))) {
+                    H5E_clear();
+                    statbuf->mtime = 0;
+                }
 	    }
 	    statbuf->type = H5G_get_type(&obj_ent);
 	    H5E_clear(); /*clear errors resulting from checking type*/
@@ -2450,7 +2441,7 @@ done:
 ssize_t 
 H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size)
 {
-    ssize_t		ret_value = FAIL;
+    ssize_t		ret_value;
     H5G_bt_ud3_t	udata;
     
     FUNC_ENTER_NOAPI(H5G_get_objname_by_idx, FAIL);
@@ -2472,10 +2463,10 @@ H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size)
             name[size-1]='\0';
     }
 
-    /* Free the duplicated name */
-    H5MM_xfree(udata.name);
-    
 done:
+    /* Free the duplicated name */
+    if(udata.name!=NULL)
+        H5MM_xfree(udata.name);
     FUNC_LEAVE(ret_value);
 }
 
@@ -2558,8 +2549,8 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
      * Get the symbol table entry for the link head and the symbol table
      * entry for the group in which the link head appears.
      */
-    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   H5G_TARGET_SLINK, NULL)<0)
+    if (H5G_namei(loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
+		   H5G_TARGET_SLINK, NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "symbolic link was not found");
     if (H5G_CACHED_SLINK!=obj_ent.type)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "object is not a symbolic link");
@@ -2615,7 +2606,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL)<0)
+		  NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Remove the previous comment message if any */
@@ -2624,7 +2615,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
     /* Add the new message */
     if (buf && *buf) {
 	comment.s = H5MM_xstrdup(buf);
-	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, &comment)<0)
+	if (H5O_modify(&obj_ent, H5O_NAME, H5O_NEW_MESG, 0, 1, &comment)<0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
 	H5O_reset(H5O_NAME, &comment);
     }
@@ -2669,7 +2660,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 
     /* Get the symbol table entry for the object */
     if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
-		  NULL)<0)
+		  NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
     /* Get the message */
@@ -2717,6 +2708,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
     size_t		len;
     const char		*base=NULL;
     H5G_stat_t		statbuf;        /* Info about object to unlink */
+    H5RS_str_t          *name_r;        /* Ref-counted version of name */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_unlink, FAIL);
@@ -2733,7 +2725,7 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 
     /* Get the entry for the group that contains the object to be unlinked */
     if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent,
-		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL)<0)
+		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL, H5G_NAMEI_TRAVERSE, NULL)<0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     if (!H5F_addr_defined(grp_ent.header))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "no containing group specified");
@@ -2745,8 +2737,11 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink name from symbol table");
 
     /* Search the open IDs and replace names for unlinked object */
-    if (H5G_replace_name(statbuf.type, &obj_ent, name, NULL, NULL, NULL, OP_UNLINK )<0)
+    name_r=H5RS_wrap(name);
+    assert(name_r);
+    if (H5G_replace_name(statbuf.type, &obj_ent, name_r, NULL, NULL, NULL, OP_UNLINK )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name");
+    H5RS_decr(name_r);
 
 done:
     /* Free the ID to name buffers */
@@ -2785,6 +2780,8 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
     char		*linkval=NULL;
     size_t		lv_size=32;
     H5G_entry_t         obj_ent;        /* Object entry for object being moved */
+    H5RS_str_t         *src_name_r;     /* Ref-counted version of src name */
+    H5RS_str_t         *dst_name_r;     /* Ref-counted version of dest name */
     herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_move, FAIL);
@@ -2825,10 +2822,16 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
      * This has to be done here because H5G_link and H5G_unlink have 
      * internal object entries, and do not modify the entries list
     */
-    if (H5G_namei (src_loc, src_name, NULL, NULL, &obj_ent, H5G_TARGET_NORMAL|H5G_TARGET_SLINK, NULL))
+    if (H5G_namei(src_loc, src_name, NULL, NULL, &obj_ent, H5G_TARGET_NORMAL|H5G_TARGET_SLINK, NULL, H5G_NAMEI_TRAVERSE, NULL))
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
-    if (H5G_replace_name(sb.type, &obj_ent, src_name, src_loc, dst_name, dst_loc, OP_MOVE )<0)
+    src_name_r=H5RS_wrap(src_name);
+    assert(src_name_r);
+    dst_name_r=H5RS_wrap(dst_name);
+    assert(dst_name_r);
+    if (H5G_replace_name(sb.type, &obj_ent, src_name_r, src_loc, dst_name_r, dst_loc, OP_MOVE )<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
+    H5RS_decr(src_name_r);
+    H5RS_decr(dst_name_r);
     H5G_free_ent_name(&obj_ent);
 
     /* Remove the old name */
@@ -2864,37 +2867,53 @@ done:
 H5F_t *
 H5G_insertion_file(H5G_entry_t *loc, const char *name)
 {
-    const char	*rest;
-    H5G_entry_t	grp_ent;
-    size_t	size;
     H5F_t      *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_insertion_file, NULL);
+
     assert(loc);
     assert(name && *name);
 
-    /*
-     * Look up the name to get the containing group and to make sure the name
-     * doesn't already exist.
+    /* Check if the location the object will be inserted into is part of a
+     * file mounting chain (either a parent or a child) and perform a more
+     * rigorous determination of the location's file (which traverses into
+     * mounted files, etc.).
      */
-    if (H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL)>=0)
-	HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
-    H5E_clear();
+    if(H5F_has_mount(loc->file) || H5F_is_mount(loc->file)) {
+        const char	*rest;
+        H5G_entry_t	grp_ent;
+        size_t	size;
 
-    /* Make sure only the last component wasn't resolved */
-    rest = H5G_component(rest, &size);
-    assert(*rest && size>0);
-    rest = H5G_component(rest+size, NULL);
-    if (*rest)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "insertion point not found");
+        /*
+         * Look up the name to get the containing group and to make sure the name
+         * doesn't already exist.
+         */
+        if (H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL)>=0) {
+            H5G_free_ent_name(&grp_ent);
+            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
+        } /* end if */
+        H5E_clear();
 
-    /* Set return value */
-    ret_value=grp_ent.file;
+        /* Make sure only the last component wasn't resolved */
+        rest = H5G_component(rest, &size);
+        assert(*rest && size>0);
+        rest = H5G_component(rest+size, NULL);
+        if (*rest) {
+            H5G_free_ent_name(&grp_ent);
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "insertion point not found");
+        } /* end if */
+
+        /* Set return value */
+        ret_value=grp_ent.file;
+
+        /* Free the ID to name buffer */
+        H5G_free_ent_name(&grp_ent);
+    } /* end if */
+    else
+        /* Use the location's file */
+        ret_value=loc->file;
 
 done:
-    /* Free the ID to name buffer */
-    H5G_free_ent_name(&grp_ent);
-
     FUNC_LEAVE(ret_value);
 }
 
@@ -2967,10 +2986,14 @@ H5G_free_ent_name(H5G_entry_t *ent)
     /* Check args */
     assert(ent);
 
-    if(ent->user_path)
-        ent->user_path = H5MM_xfree(ent->user_path);
-    if(ent->canon_path)
-        ent->canon_path = H5MM_xfree(ent->canon_path);
+    if(ent->user_path_r) {
+        H5RS_decr(ent->user_path_r);
+        ent->user_path_r=NULL;
+    } /* end if */
+    if(ent->canon_path_r) {
+        H5RS_decr(ent->canon_path_r);
+        ent->canon_path_r=NULL;
+    } /* end if */
  
 done:
     FUNC_LEAVE(ret_value);
@@ -3001,8 +3024,8 @@ done:
  */
 herr_t
 H5G_replace_name( int type, H5G_entry_t *loc,
-    const char *src_name, H5G_entry_t *src_loc,
-    const char *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op )
+    H5RS_str_t *src_name, H5G_entry_t *src_loc,
+    H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op )
 {
     H5G_names_t names;          /* Structure to hold operation information for callback */
     unsigned search_group=0;    /* Flag to indicate that groups are to be searched */
@@ -3095,16 +3118,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5G_common_path(const char *fullpath, const char *prefix)
+H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 {
+    const char *fullpath;       /* Pointer to actual fullpath string */
+    const char *prefix;         /* Pointer to actual prefix string */
     size_t  nchars1,nchars2;    /* Number of characters in components */
     htri_t ret_value=FALSE;     /* Return value */
   
     FUNC_ENTER_NOINIT(H5G_common_path);
   
     /* Get component of each name */
+    fullpath=H5RS_GET_STR(fullpath_r);
+    assert(fullpath);
     fullpath=H5G_component(fullpath,&nchars1);
     assert(fullpath);
+    prefix=H5RS_GET_STR(prefix_r);
+    assert(prefix);
     prefix=H5G_component(prefix,&nchars2);
     assert(prefix);
 
@@ -3199,12 +3228,11 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
         *-------------------------------------------------------------------------
         */
         case OP_MOUNT:
-            if(ent->file->mtab.parent && HDstrcmp(ent->user_path,ent->canon_path)) {
+            if(ent->file->mtab.parent && H5RS_cmp(ent->user_path_r,ent->canon_path_r)) {
                 /* Find the "top" file in the chain of mounted files */
                 top_ent_file=ent->file->mtab.parent;
-                while(top_ent_file->mtab.parent!=NULL) {
+                while(top_ent_file->mtab.parent!=NULL)
                     top_ent_file=top_ent_file->mtab.parent;
-                } /* end while */
             } /* end if */
             else
                 top_ent_file=ent->file;
@@ -3213,8 +3241,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
             if(top_ent_file->shared == names->loc->file->shared) {
                 /* Check if the source is along the entry's path */
                 /* (But not actually the entry itself) */
-                if(H5G_common_path(ent->user_path,names->src_name) &&
-                    HDstrcmp(ent->user_path,names->src_name)!=0) {
+                if(H5G_common_path(ent->user_path_r,names->src_name) &&
+                        H5RS_cmp(ent->user_path_r,names->src_name)!=0) {
                     /* Hide the user path */
                     ent->user_path_hidden++;
                 } /* end if */
@@ -3229,9 +3257,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
             if(ent->file->mtab.parent) {
                 /* Find the "top" file in the chain of mounted files for the entry */
                 top_ent_file=ent->file->mtab.parent;
-                while(top_ent_file->mtab.parent!=NULL) {
+                while(top_ent_file->mtab.parent!=NULL)
                     top_ent_file=top_ent_file->mtab.parent;
-                } /* end while */
             } /* end if */
             else
                 top_ent_file=ent->file;
@@ -3239,9 +3266,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
             if(names->loc->file->mtab.parent) {
                 /* Find the "top" file in the chain of mounted files for the location */
                 top_loc_file=names->loc->file->mtab.parent;
-                while(top_loc_file->mtab.parent!=NULL) {
+                while(top_loc_file->mtab.parent!=NULL)
                     top_loc_file=top_loc_file->mtab.parent;
-                } /* end while */
             } /* end if */
             else
                 top_loc_file=names->loc->file;
@@ -3249,7 +3275,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
             if(ent->user_path_hidden) {
                 /* If the ID's entry is not in the file we operated on, skip it */
                 if(top_ent_file->shared == top_loc_file->shared) {
-                    if(H5G_common_path(ent->user_path,names->src_name)) {
+                    if(H5G_common_path(ent->user_path_r,names->src_name)) {
                         /* Un-hide the user path */
                         ent->user_path_hidden--;
                     } /* end if */
@@ -3258,9 +3284,12 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
             else {
                 /* If the ID's entry is not in the file we operated on, skip it */
                 if(top_ent_file->shared == top_loc_file->shared) {
-                    if(ent->user_path && H5G_common_path(ent->user_path,names->src_name)) {
+                    if(ent->user_path_r && H5G_common_path(ent->user_path_r,names->src_name)) {
                         /* Free user path */
-                        ent->user_path=H5MM_xfree(ent->user_path);
+                        if(ent->user_path_r!=NULL) {
+                            H5RS_decr(ent->user_path_r);
+                            ent->user_path_r=NULL;
+                        } /* end if */
                     } /* end if */
                 } /* end if */
             } /* end else */
@@ -3276,16 +3305,22 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                 /* Check if we are referring to the same object */
                 if(H5F_addr_eq(ent->header, names->loc->header)) {
                     /* Check if the object was opened with the same canonical path as the one being moved */
-                    if(HDstrcmp(ent->canon_path,names->loc->canon_path)==0) {
+                    if(H5RS_cmp(ent->canon_path_r,names->loc->canon_path_r)==0) {
                         /* Free user path */
-                        ent->user_path=H5MM_xfree(ent->user_path);
+                        if(ent->user_path_r!=NULL) {
+                            H5RS_decr(ent->user_path_r);
+                            ent->user_path_r=NULL;
+                        } /* end if */
                     } /* end if */
                 } /* end if */
                 else {
                     /* Check if the location being unlinked is in the canonical path for the current object */
-                    if(H5G_common_path(ent->canon_path,names->loc->canon_path)) {
+                    if(H5G_common_path(ent->canon_path_r,names->loc->canon_path_r)) {
                         /* Free user path */
-                        ent->user_path=H5MM_xfree(ent->user_path);
+                        if(ent->user_path_r!=NULL) {
+                            H5RS_decr(ent->user_path_r);
+                            ent->user_path_r=NULL;
+                        } /* end if */
                     } /* end if */
                 } /* end else */
             } /* end if */
@@ -3298,90 +3333,116 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
         case OP_MOVE: /* H5Gmove case, check for relative names case */
             /* If the ID's entry is not in the file we operated on, skip it */
             if(ent->file->shared == names->loc->file->shared) {
-                char *src_path;         /* Full user path of source name */
-                char *dst_path;         /* Full user path of destination name */
-                char *canon_src_path;   /* Pointer to canonical part of source path */
-                char *canon_dst_path;   /* Pointer to canonical part of destination path */
+                H5RS_str_t *src_path_r; /* Full user path of source name */
+                H5RS_str_t *dst_path_r; /* Full user path of destination name */
+                H5RS_str_t *canon_src_path_r;   /* Copy of canonical part of source path */
+                H5RS_str_t *canon_dst_path_r;   /* Copy of canonical part of destination path */
 
                 /* Make certain that the source and destination names are full (not relative) paths */
-                if(*(names->src_name)!='/') {
+                if(*(H5RS_GET_STR(names->src_name))!='/') {
+                    const char *src_name;         /* Pointer to raw string of src_name */
+                    char *src_path;         /* Full user path of source name */
+                    const char *src_user_path;    /* Pointer to raw string of src path */
                     size_t src_path_len;    /* Length of the source path */
                     unsigned need_sep;      /* Flag to indicate if separator is needed */
 
+                    /* Get the pointer to the raw src user path */
+                    src_user_path=H5RS_GET_STR(names->src_loc->user_path_r);
+
                     /* Get the length of the name for the source group's user path */
-                    src_path_len=HDstrlen(names->src_loc->user_path);
+                    src_path_len=HDstrlen(src_user_path);
 
                     /* Determine if there is a trailing separator in the name */
-                    if(names->src_loc->user_path[src_path_len-1]=='/')
+                    if(src_user_path[src_path_len-1]=='/')
                         need_sep=0;
                     else
                         need_sep=1;
 
+                    /* Get the pointer to the raw src user path */
+                    src_name=H5RS_GET_STR(names->src_name);
+
                     /* Add in the length needed for the '/' separator and the relative path */
-                    src_path_len+=HDstrlen(names->src_name)+need_sep;
+                    src_path_len+=HDstrlen(src_name)+need_sep;
 
                     /* Allocate space for the path */
-                    if(NULL==(src_path = H5MM_malloc(src_path_len+1)))
+                    if(NULL==(src_path = H5FL_BLK_MALLOC(str_buf,src_path_len+1)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-                    HDstrcpy(src_path,names->src_loc->user_path);
+                    HDstrcpy(src_path,src_user_path);
                     if(need_sep)
                         HDstrcat(src_path,"/");
-                    HDstrcat(src_path,names->src_name);
+                    HDstrcat(src_path,src_name);
+
+                    /* Create reference counted string for src path */
+                    src_path_r=H5RS_own(src_path);
                 } /* end if */
                 else
-                    src_path=HDstrdup(names->src_name);
-                if(*(names->dst_name)!='/') {
-                    size_t dst_path_len;        /* Length of the destination path */
+                    src_path_r=H5RS_dup(names->src_name);
+                if(*(H5RS_GET_STR(names->dst_name))!='/') {
+                    const char *dst_name;         /* Pointer to raw string of dst_name */
+                    char *dst_path;         /* Full user path of destination name */
+                    const char *dst_user_path;    /* Pointer to raw string of dst path */
+                    size_t dst_path_len;    /* Length of the destination path */
                     unsigned need_sep;      /* Flag to indicate if separator is needed */
 
+                    /* Get the pointer to the raw dst user path */
+                    dst_user_path=H5RS_GET_STR(names->dst_loc->user_path_r);
+
                     /* Get the length of the name for the destination group's user path */
-                    dst_path_len=HDstrlen(names->dst_loc->user_path);
+                    dst_path_len=HDstrlen(dst_user_path);
 
                     /* Determine if there is a trailing separator in the name */
-                    if(names->dst_loc->user_path[dst_path_len-1]=='/')
+                    if(dst_user_path[dst_path_len-1]=='/')
                         need_sep=0;
                     else
                         need_sep=1;
 
+                    /* Get the pointer to the raw dst user path */
+                    dst_name=H5RS_GET_STR(names->dst_name);
+
                     /* Add in the length needed for the '/' separator and the relative path */
-                    dst_path_len+=HDstrlen(names->dst_name)+need_sep;
+                    dst_path_len+=HDstrlen(dst_name)+need_sep;
 
                     /* Allocate space for the path */
-                    if(NULL==(dst_path = H5MM_malloc(dst_path_len+1)))
+                    if(NULL==(dst_path = H5FL_BLK_MALLOC(str_buf,dst_path_len+1)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-                    HDstrcpy(dst_path,names->dst_loc->user_path);
+                    HDstrcpy(dst_path,dst_user_path);
                     if(need_sep)
                         HDstrcat(dst_path,"/");
-                    HDstrcat(dst_path,names->dst_name);
+                    HDstrcat(dst_path,dst_name);
+
+                    /* Create reference counted string for dst path */
+                    dst_path_r=H5RS_own(dst_path);
                 } /* end if */
                 else
-                    dst_path=HDstrdup(names->dst_name);
+                    dst_path_r=H5RS_dup(names->dst_name);
 
                 /* Get the canonical parts of the source and destination names */
 
                 /* Check if the object being moved was accessed through a mounted file */
-                if(HDstrcmp(names->loc->user_path,names->loc->canon_path)!=0) {
+                if(H5RS_cmp(names->loc->user_path_r,names->loc->canon_path_r)!=0) {
                     size_t non_canon_name_len;   /* Length of non-canonical part of name */
 
                     /* Get current string lengths */
-                    non_canon_name_len=HDstrlen(names->loc->user_path)-HDstrlen(names->loc->canon_path);
+                    non_canon_name_len=H5RS_len(names->loc->user_path_r)-H5RS_len(names->loc->canon_path_r);
 
-                    canon_src_path=src_path+non_canon_name_len;
-                    canon_dst_path=dst_path+non_canon_name_len;
+                    canon_src_path_r=H5RS_create(H5RS_GET_STR(src_path_r)+non_canon_name_len);
+                    canon_dst_path_r=H5RS_create(H5RS_GET_STR(dst_path_r)+non_canon_name_len);
                 } /* end if */
                 else {
-                    canon_src_path=src_path;
-                    canon_dst_path=dst_path;
+                    canon_src_path_r=H5RS_dup(src_path_r);
+                    canon_dst_path_r=H5RS_dup(dst_path_r);
                 } /* end else */
 
                 /* Check if the link being changed in the file is along the canonical path for this object */
-                if(H5G_common_path(ent->canon_path,canon_src_path)) {
+                if(H5G_common_path(ent->canon_path_r,canon_src_path_r)) {
                     size_t user_dst_len;    /* Length of destination user path */
                     size_t canon_dst_len;   /* Length of destination canonical path */
-                    char *old_user_path;    /* Pointer to previous user path */
-                    char *tail_path;    /* Pointer to "tail" of path */
+                    const char *old_user_path;    /* Pointer to previous user path */
+                    char *new_user_path;    /* Pointer to new user path */
+                    char *new_canon_path;   /* Pointer to new canonical path */
+                    const char *tail_path;  /* Pointer to "tail" of path */
                     size_t tail_len;    /* Pointer to "tail" of path */
                     char *src_canon_prefix;     /* Pointer to source canonical path prefix of component which is moving */
                     size_t src_canon_prefix_len;/* Length of the source canonical path prefix */
@@ -3391,6 +3452,12 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     size_t user_prefix_len; /* Length of the user path prefix */
                     char *src_comp;     /* The source name of the component which is actually changing */
                     char *dst_comp;     /* The destination name of the component which is actually changing */
+                    const char *canon_src_path;   /* pointer to canonical part of source path */
+                    const char *canon_dst_path;   /* pointer to canonical part of destination path */
+
+                    /* Get the pointers to the raw strings */
+                    canon_src_path=H5RS_GET_STR(canon_src_path_r);
+                    canon_dst_path=H5RS_GET_STR(canon_dst_path_r);
 
                     /* Get the source & destination components */
                     src_comp=HDstrrchr(canon_src_path,'/');
@@ -3411,46 +3478,48 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     HDstrncpy(dst_canon_prefix,canon_dst_path,dst_canon_prefix_len);
                     dst_canon_prefix[dst_canon_prefix_len]='\0';
 
+                    /* Hold this for later use */
+                    old_user_path=H5RS_GET_STR(ent->user_path_r);
+
                     /* Find the user prefix for the entry */
-                    user_prefix_len=HDstrlen(ent->user_path)-HDstrlen(ent->canon_path);
+                    user_prefix_len=HDstrlen(old_user_path)-H5RS_len(ent->canon_path_r);
                     if(NULL==(user_prefix = H5MM_malloc(user_prefix_len+1)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-                    HDstrncpy(user_prefix,ent->user_path,user_prefix_len);
+                    HDstrncpy(user_prefix,old_user_path,user_prefix_len);
                     user_prefix[user_prefix_len]='\0';
-
-                    /* Hold this for later use */
-                    old_user_path=ent->user_path;
 
                     /* Set the tail path info */
                     tail_path=old_user_path+user_prefix_len+src_canon_prefix_len+HDstrlen(src_comp);
                     tail_len=HDstrlen(tail_path);
-
-                    /* Free the old canonical path */
-                    H5MM_xfree(ent->canon_path);
 
                     /* Get the length of the destination paths */
                     user_dst_len=user_prefix_len+dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
                     canon_dst_len=dst_canon_prefix_len+HDstrlen(dst_comp)+tail_len;
 
                     /* Allocate space for the new user path */
-                    if(NULL==(ent->user_path = H5MM_malloc(user_dst_len+1)))
+                    if(NULL==(new_user_path = H5FL_BLK_MALLOC(str_buf,user_dst_len+1)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
                     
                     /* Allocate space for the new canonical path */
-                    if(NULL==(ent->canon_path = H5MM_malloc(canon_dst_len+1)))
+                    if(NULL==(new_canon_path = H5FL_BLK_MALLOC(str_buf,canon_dst_len+1)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
                     
                     /* Create the new names */
-                    HDstrcpy(ent->user_path,user_prefix);
-                    HDstrcat(ent->user_path,dst_canon_prefix);
-                    HDstrcat(ent->user_path,dst_comp);
-                    HDstrcat(ent->user_path,tail_path);
-                    HDstrcpy(ent->canon_path,dst_canon_prefix);
-                    HDstrcat(ent->canon_path,dst_comp);
-                    HDstrcat(ent->canon_path,tail_path);
+                    HDstrcpy(new_user_path,user_prefix);
+                    HDstrcat(new_user_path,dst_canon_prefix);
+                    HDstrcat(new_user_path,dst_comp);
+                    HDstrcat(new_user_path,tail_path);
+                    HDstrcpy(new_canon_path,dst_canon_prefix);
+                    HDstrcat(new_canon_path,dst_comp);
+                    HDstrcat(new_canon_path,tail_path);
 
-                    /* Free the old user path */
-                    H5MM_xfree(old_user_path);
+                    /* Release the old user & canonical paths */
+                    H5RS_decr(ent->user_path_r);
+                    H5RS_decr(ent->canon_path_r);
+
+                    /* Take ownership of the new user & canonical paths */
+                    ent->user_path_r=H5RS_own(new_user_path);
+                    ent->canon_path_r=H5RS_own(new_canon_path);
 
                     /* Free the extra paths allocated */
                     H5MM_xfree(src_canon_prefix);
@@ -3460,8 +3529,10 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
 
 
                 /* Free the extra paths allocated */
-                H5MM_xfree(src_path);
-                H5MM_xfree(dst_path);
+                H5RS_decr(src_path_r);
+                H5RS_decr(dst_path_r);
+                H5RS_decr(canon_src_path_r);
+                H5RS_decr(canon_dst_path_r);
             } /* end if */
             break;
 

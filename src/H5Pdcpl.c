@@ -963,7 +963,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
         
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0)
+    if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DATASET_XFER_DEFAULT)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
     if (buf!=value)
         HDmemcpy(value, buf, H5T_get_size(type));
@@ -977,6 +977,53 @@ done:
         H5I_dec_ref(src_id);
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_is_fill_value_defined
+ *
+ * Purpose:	Check if fill value is defined.  Internal version of function
+ * 
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *              Extracted from H5P_fill_value_defined, QAK, Dec. 13, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *status)
+{
+    herr_t		ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5P_is_fill_value_defined, FAIL);
+
+    assert(fill);
+    assert(status);
+
+    /* Check if the fill value was never set */
+    if(fill->size == (size_t)-1 && !fill->buf) {
+	*status = H5D_FILL_VALUE_UNDEFINED;
+    }
+    /* Check if the fill value was set to the default fill value by the library */
+    else if(fill->size == 0 && !fill->buf) {
+	*status = H5D_FILL_VALUE_DEFAULT;
+    }
+    /* Check if the fill value was set by the application */
+    else if(fill->size > 0 && fill->buf) {
+	*status = H5D_FILL_VALUE_USER_DEFINED;
+    }
+    else {
+	*status = H5D_FILL_VALUE_ERROR;
+        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5P_is_fill_value_defined() */
 
 
 /*-------------------------------------------------------------------------
@@ -1009,22 +1056,9 @@ H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status)
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
 
-    /* Check if the fill value was never set */
-    if(fill.size == (size_t)-1 && !fill.buf) {
-	*status = H5D_FILL_VALUE_UNDEFINED;
-    }
-    /* Check if the fill value was set to the default fill value by the library */
-    else if(fill.size == 0 && !fill.buf) {
-	*status = H5D_FILL_VALUE_DEFAULT;
-    }
-    /* Check if the fill value was set by the application */
-    else if(fill.size > 0 && fill.buf) {
-	*status = H5D_FILL_VALUE_USER_DEFINED;
-    }
-    else {
-	*status = H5D_FILL_VALUE_ERROR;
-        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 
-    }
+    /* Get the fill-value status */
+    if(H5P_is_fill_value_defined(&fill, status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
 
 done:
     FUNC_LEAVE(ret_value);

@@ -33,7 +33,8 @@ typedef struct H5S_simple_t {
 
 /* Extent container */
 typedef struct {
-    H5S_class_t	type;		    /* Type of extent */
+    H5S_class_t	type;   /* Type of extent */
+    hsize_t nelem;      /* Number of elements in extent */
     union {
         H5S_simple_t	simple;	/* Simple dimensionality information  */
     } u;

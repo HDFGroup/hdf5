@@ -57,12 +57,14 @@ typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id,
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 
 /* Define property list callback function pointer types */
-typedef herr_t (*H5P_prp_create_func_t)(const char *name, size_t size, void *def_value);
-typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name, size_t size, void *value);
-typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name, size_t size, void *value);
-typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name, size_t size, void *value);
-typedef herr_t (*H5P_prp_copy_func_t)(const char *name, size_t size, void *value);
-typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size, void *value);
+typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
+typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
+typedef H5P_prp_cb1_t H5P_prp_create_func_t;
+typedef H5P_prp_cb2_t H5P_prp_set_func_t;
+typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
+typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
+typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
@@ -73,19 +75,25 @@ extern "C" {
 
 /*
  * The library created property list classes
+ *
+ * NOTE: When adding H5P_* macros, remember to redefine them in H5Pprivate.h
+ *
  */
-#define H5P_NO_CLASS		   	(H5open(), H5P_CLS_NO_CLASS_g)
-#define H5P_NO_CLASS_HASH_SIZE   1  /* 1, not 0, otherwise allocations get weird */
-#define H5P_FILE_CREATE 		(H5open(), H5P_CLS_FILE_CREATE_g)
-#define H5P_FILE_CREATE_HASH_SIZE  	17
-#define H5P_FILE_ACCESS 		(H5open(), H5P_CLS_FILE_ACCESS_g)
-#define H5P_FILE_ACCESS_HASH_SIZE   	17
-#define H5P_DATASET_CREATE     		(H5open(), H5P_CLS_DATASET_CREATE_g)
-#define H5P_DATASET_CREATE_HASH_SIZE   	17
-#define H5P_DATASET_XFER       		(H5open(), H5P_CLS_DATASET_XFER_g)
-#define H5P_DATASET_XFER_HASH_SIZE   	17
-#define H5P_MOUNT       		(H5open(), H5P_CLS_MOUNT_g)
-#define H5P_MOUNT_HASH_SIZE   		17
+
+/* When this header is included from H5Pprivate.h, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef _H5Pprivate_H
+#define H5OPEN        H5open(),
+#else   /* _H5Pprivate_H */
+#define H5OPEN
+#endif  /* _H5Pprivate_H */
+
+#define H5P_NO_CLASS		   	(H5OPEN H5P_CLS_NO_CLASS_g)
+#define H5P_FILE_CREATE 		(H5OPEN H5P_CLS_FILE_CREATE_g)
+#define H5P_FILE_ACCESS 		(H5OPEN H5P_CLS_FILE_ACCESS_g)
+#define H5P_DATASET_CREATE     		(H5OPEN H5P_CLS_DATASET_CREATE_g)
+#define H5P_DATASET_XFER       		(H5OPEN H5P_CLS_DATASET_XFER_g)
+#define H5P_MOUNT       		(H5OPEN H5P_CLS_MOUNT_g)
 H5_DLLVAR hid_t H5P_CLS_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_CLS_FILE_ACCESS_g;
@@ -95,13 +103,16 @@ H5_DLLVAR hid_t H5P_CLS_MOUNT_g;
 
 /*
  * The library created default property lists
+ *
+ * NOTE: When adding H5P_* macros, remember to redefine them in H5Pprivate.h
+ *
  */
-#define H5P_NO_CLASS_DEFAULT   		(H5open(), H5P_LST_NO_CLASS_g)
-#define H5P_FILE_CREATE_DEFAULT		(H5open(), H5P_LST_FILE_CREATE_g)
-#define H5P_FILE_ACCESS_DEFAULT 	(H5open(), H5P_LST_FILE_ACCESS_g)
-#define H5P_DATASET_CREATE_DEFAULT  	(H5open(), H5P_LST_DATASET_CREATE_g)
-#define H5P_DATASET_XFER_DEFAULT   	(H5open(), H5P_LST_DATASET_XFER_g)
-#define H5P_MOUNT_DEFAULT       	(H5open(), H5P_LST_MOUNT_g)
+#define H5P_NO_CLASS_DEFAULT   		(H5OPEN H5P_LST_NO_CLASS_g)
+#define H5P_FILE_CREATE_DEFAULT		(H5OPEN H5P_LST_FILE_CREATE_g)
+#define H5P_FILE_ACCESS_DEFAULT 	(H5OPEN H5P_LST_FILE_ACCESS_g)
+#define H5P_DATASET_CREATE_DEFAULT  	(H5OPEN H5P_LST_DATASET_CREATE_g)
+#define H5P_DATASET_XFER_DEFAULT   	(H5OPEN H5P_LST_DATASET_XFER_g)
+#define H5P_MOUNT_DEFAULT       	(H5OPEN H5P_LST_MOUNT_g)
 H5_DLLVAR hid_t H5P_LST_NO_CLASS_g;
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_g;
@@ -109,11 +120,8 @@ H5_DLLVAR hid_t H5P_LST_DATASET_CREATE_g;
 H5_DLLVAR hid_t H5P_LST_DATASET_XFER_g;
 H5_DLLVAR hid_t H5P_LST_MOUNT_g;
 
-/* Default hash table size */
-#define H5P_DEFAULT_HASH_SIZE           17
-
 /* Public functions */
-H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
+H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, 
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
             H5P_cls_close_func_t cls_close, void *close_data);

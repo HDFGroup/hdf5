@@ -24,6 +24,14 @@
 #endif
 
 #include "H5Pprivate.h"
+#include "H5TBprivate.h"	/* TBBTs	  		        */
+
+/* Define enum for type of object that property is within */
+typedef enum {
+    H5P_PROP_WITHIN_UNKNOWN=0,  /* Property container is unknown */
+    H5P_PROP_WITHIN_LIST,       /* Property is within a list */
+    H5P_PROP_WITHIN_CLASS       /* Property is within a class */
+} H5P_prop_within_t;
 
 /* Define enum for modifications to class */
 typedef enum {
@@ -40,21 +48,19 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_t {
     /* Values for this property */
-    unsigned xor_val;      /* XOR'ed version of the name, for faster comparisons */
     char *name;         /* Name of property */
     size_t size;        /* Size of property value */
     void *value;        /* Pointer to property value */
+    H5P_prop_within_t type;     /* Type of object the property is within */
+    unsigned shared_name;       /* Boolean: whether the name is shared or not */
 
     /* Callback function pointers & info */
     H5P_prp_create_func_t create;   /* Function to call when a property is created */
-    void *def_value;      /* Pointer to default value to pass along to create callback */
     H5P_prp_set_func_t set; /* Function to call when a property value is set */
     H5P_prp_get_func_t get; /* Function to call when a property value is retrieved */
     H5P_prp_delete_func_t del; /* Function to call when a property is deleted */
     H5P_prp_copy_func_t copy;  /* Function to call when a property is copied */
     H5P_prp_close_func_t close; /* Function to call when a property is closed */
-
-    struct H5P_genprop_t *next;  /* Pointer to the next property in this list */
 } H5P_genprop_t;
 
 /* Define structure to hold class information */
@@ -62,12 +68,13 @@ struct H5P_genclass_t {
     struct H5P_genclass_t *parent;     /* Pointer to parent class */
     char *name;         /* Name of property list class */
     size_t  nprops;     /* Number of properties in class */
-    unsigned   hashsize;   /* Hash table size */
     unsigned   plists;     /* Number of property lists that have been created since the last modification to the class */
     unsigned   classes;    /* Number of classes that have been derived since the last modification to the class */
     unsigned   ref_count;  /* Number of oustanding ID's open on this class object */
     unsigned   internal;   /* Whether this class is internal to the library or not */
     unsigned   deleted;    /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
+    unsigned   revision;   /* Revision number of a particular class (global) */
+    H5TB_TREE *props;   /* TBBT containing properties */
 
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
@@ -76,8 +83,6 @@ struct H5P_genclass_t {
     void *copy_data;    /* Pointer to user data to pass along to copy callback */
     H5P_cls_close_func_t close_func;   /* Function to call when a property list is closed */
     void *close_data;   /* Pointer to user data to pass along to close callback */
-
-    H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the class */
 };
 
 /* Define structure to hold property list information */
@@ -86,14 +91,14 @@ struct H5P_genplist_t {
     hid_t   plist_id;       /* Copy of the property list ID (for use in close callback) */
     size_t  nprops;         /* Number of properties in class */
     unsigned   class_init:1;   /* Whether the class initialization callback finished successfully */
-
-    /* Hash size for a property list is same as class */
-    H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the list */
+    H5TB_TREE *del;     /* TBBT containing names of deleted properties */
+    H5TB_TREE *props;   /* TBBT containing properties */
 };
 
 /* Private functions, not part of the publicly documented API */
-H5_DLL herr_t H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop);
+H5_DLL herr_t H5P_add_prop(H5TB_TREE *props, H5P_genprop_t *prop);
 H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
+H5_DLL int H5P_tbbt_strcmp(const void *k1, const void *k2, int UNUSED cmparg);
 
 #endif /* _H5Ppkg_H */
 

@@ -256,17 +256,12 @@ test_vlstrings_special(void)
     const char *wdata[SPACE1_DIM1] = {"one", "two", "", "four"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   /* Information read in */
-    hid_t dataspace, dataset2;
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1;       /* Datatype ID			*/
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i;          /* counting variable */
-    int         str_used;   /* String data in memory */
-    int         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -313,6 +308,10 @@ test_vlstrings_special(void)
         } /* end if */
     } /* end for */
     
+    /* Reclaim the read VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");

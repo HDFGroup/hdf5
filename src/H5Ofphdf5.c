@@ -107,7 +107,7 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert(!sh);
 
     /* decode */
-    fmeta = H5FL_ALLOC(H5O_fphdf5_t, 1);
+    fmeta = H5FL_CALLOC(H5O_fphdf5_t);
 
     /* decode the OID first */
     NBYTEDECODE(p, fmeta->oid, sizeof(fmeta->oid));
@@ -333,7 +333,7 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
     /* check args */
     assert(src);
 
-    if (!dst && NULL == (dst = H5FL_ALLOC(H5O_fphdf5_t, 0)))
+    if (!dst && NULL == (dst = H5FL_MALLOC(H5O_fphdf5_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy the individual metadata*/

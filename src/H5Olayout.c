@@ -93,7 +93,7 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(mesg = H5FL_ALLOC(H5O_layout_t,1)))
+    if (NULL==(mesg = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version. 1 when space allocated; 2 when space allocation is delayed */
@@ -248,7 +248,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest=H5FL_ALLOC(H5O_layout_t,0)))
+    if (!dest && NULL==(dest=H5FL_MALLOC(H5O_layout_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
     /* copy */
@@ -387,7 +387,7 @@ H5O_layout_reset (void *_mesg)
             mesg->buf=H5MM_xfree(mesg->buf);
 
         /* Reset the message */
-        HDmemset(mesg, 0, sizeof(H5O_layout_t));
+        mesg->type=H5D_CONTIGUOUS;
     } /* end if */
 
 done:

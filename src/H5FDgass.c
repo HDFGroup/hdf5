@@ -17,14 +17,10 @@
 #include "H5MMprivate.h"        /* Memory allocation */
 #include "H5Pprivate.h"		/*property lists			*/
 
-
-#undef MAX
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
+#ifdef H5_HAVE_GASS
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_GASS_g = 0;
-
-#ifdef H5_HAVE_GASS
 
 /* File operations */
 #define OP_UNKNOWN	0
@@ -363,7 +359,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Obtain a pointer to gass-specific file access properties */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5P_get_driver(plist)) {
+    if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_GASS!=H5P_get_driver(plist)) {
         GASS_INFO_NULL (_fa.info);
         /* _fa.info = GASS_INFO_NULL; */
         /* _fa.info = {0,0}; */ /*default*/

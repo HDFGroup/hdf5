@@ -526,7 +526,7 @@ herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
          HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* Set values */
@@ -600,7 +600,7 @@ herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
                                             
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
          HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* Set values */
@@ -674,7 +674,7 @@ herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
          HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* Set values */
@@ -748,7 +748,7 @@ herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
                                         
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
          HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* Set values */

@@ -59,9 +59,9 @@ static int interface_initialize_g = 0;
  */
 herr_t
 H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-        H5P_genplist_t *dc_plist,
-        const H5S_t *file_space, size_t elmt_size,
-        size_t seq_len, hsize_t dset_offset, void *buf/*out*/)
+    H5P_genplist_t *dc_plist, const H5O_efl_t *efl,
+    const H5S_t *file_space, size_t elmt_size,
+    size_t seq_len, hsize_t dset_offset, void *buf/*out*/)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -70,10 +70,11 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Check args */
     assert(f);
     assert(layout);
+    assert(efl);
     assert(buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
-    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
+    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
 
 done:
@@ -104,9 +105,9 @@ done:
  */
 herr_t
 H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
-        H5P_genplist_t *dc_plist,
-        const H5S_t *file_space, size_t elmt_size,
-        size_t seq_len, hsize_t dset_offset, const void *buf)
+    H5P_genplist_t *dc_plist, const H5O_efl_t *efl,
+    const H5S_t *file_space, size_t elmt_size,
+    size_t seq_len, hsize_t dset_offset, const void *buf)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -115,10 +116,11 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     /* Check args */
     assert(f);
     assert(layout);
+    assert(efl);
     assert(buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
-    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
+    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
 
 done:
@@ -151,7 +153,7 @@ done:
  */
 herr_t
 H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-        H5P_genplist_t *dc_plist,
+        H5P_genplist_t *dc_plist, const H5O_efl_t *efl,
         const H5S_t *file_space, size_t elmt_size,
         size_t nseq, size_t seq_len_arr[], hsize_t dset_offset_arr[],
         void *_buf/*out*/)
@@ -172,7 +174,6 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
     int	i,j;				/*counters		*/
-    struct H5O_efl_t efl;               /* External File List info */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
@@ -184,6 +185,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Check args */
     assert(f);
     assert(layout);
+    assert(efl);
     assert(real_buf);
     /* Make certain we have the correct type of property list */
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
@@ -221,14 +223,10 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif /* H5_HAVE_PARALLEL */
 
-    /* Get necessary properties from property list */
-    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get EFL value");
-
     switch (layout->type) {
         case H5D_CONTIGUOUS:
             /* Read directly from file if the dataset is in an external file */
-            if (efl.nused>0) {
+            if (efl->nused>0) {
                 /* Iterate through the sequence vectors */
                 for(v=0; v<nseq; v++) {
 #ifdef H5_HAVE_PARALLEL
@@ -260,7 +258,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
                     H5_CHECK_OVERFLOW(dset_offset_arr[v],hsize_t,haddr_t);
-                    if (H5O_efl_read(f, &efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    if (H5O_efl_read(f, efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
 
                     /* Increment offset in buffer */
@@ -281,7 +279,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             /*
              * This method is unable to access external raw data files 
              */
-            if (efl.nused>0)
+            if (efl->nused>0)
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
 
             /* Compute the file offset coordinates and hyperslab size */
@@ -542,7 +540,7 @@ done:
  */
 herr_t
 H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
-        H5P_genplist_t *dc_plist,
+        H5P_genplist_t *dc_plist, const H5O_efl_t *efl,
         const H5S_t *file_space, size_t elmt_size,
         size_t nseq, size_t seq_len_arr[], hsize_t dset_offset_arr[],
         const void *_buf)
@@ -563,7 +561,6 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
     int	i,j;				/*counters		*/
-    struct H5O_efl_t efl;               /* External File List info */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
@@ -575,6 +572,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     /* Check args */
     assert(f);
     assert(layout);
+    assert(efl);
     assert(real_buf);
     /* Make certain we have the correct type of property list */
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
@@ -612,14 +610,10 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on chunked datasets not supported yet");
 #endif /* H5_HAVE_PARALLEL */
 
-    /* Get necessary properties from property list */
-    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get EFL value");
-
     switch (layout->type) {
         case H5D_CONTIGUOUS:
             /* Write directly to file if the dataset is in an external file */
-            if (efl.nused>0) {
+            if (efl->nused>0) {
                 /* Iterate through the sequence vectors */
                 for(v=0; v<nseq; v++) {
 #ifdef H5_HAVE_PARALLEL
@@ -650,7 +644,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
                     H5_CHECK_OVERFLOW(dset_offset_arr[v],hsize_t,haddr_t);
-                    if (H5O_efl_write(f, &efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    if (H5O_efl_write(f, efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
 
                     /* Increment offset in buffer */
@@ -671,7 +665,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
             /*
              * This method is unable to access external raw data files 
              */
-            if (efl.nused>0)
+            if (efl->nused>0)
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
 
             /* Compute the file offset coordinates and hyperslab size */

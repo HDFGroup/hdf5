@@ -1264,7 +1264,7 @@ test_compatible(void)
   char       *srcdir = getenv("srcdir"); /*where the src code is located*/ 
   char       testfile[512]="";  /* test file name */
 
-  TESTING("contiguous dataset compatibility with v. 1.5"); 
+  TESTING("contiguous dataset compatibility with v. 1.4"); 
 
   /* Generate correct name for test file by prepending the source path */
   if(srcdir && ((strlen(srcdir) + strlen(FILE_COMPATIBLE) + 1) < 

@@ -417,7 +417,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     }
     if (!memb_fapl) {
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    _memb_fapl[mt] = H5P_DEFAULT;
+	    _memb_fapl[mt] = H5Pcreate(H5P_FILE_ACCESS);
 	}
 	memb_fapl = _memb_fapl;
     }
@@ -464,6 +464,12 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     memcpy(fa.memb_name, memb_name, H5FD_MEM_NTYPES*sizeof(char*));
     memcpy(fa.memb_addr, memb_addr, H5FD_MEM_NTYPES*sizeof(haddr_t));
     fa.relax = relax;
+
+    /* Patch up H5P_DEFAULT property lists for members */
+    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+        if(fa.memb_fapl[mt]==H5P_DEFAULT)
+            fa.memb_fapl[mt] = H5Pcreate(H5P_FILE_ACCESS);
+    }
     return H5Pset_driver(fapl_id, H5FD_MULTI, &fa);
 }
 
@@ -581,13 +587,19 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
     if (!memb_dxpl)
         H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1);
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	if (H5P_DEFAULT!=memb_dxpl[mt] &&
-            TRUE!=H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
+        if (memb_dxpl[mt]!=H5P_DEFAULT && TRUE!=H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
             H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
     }
 
     /* Initialize the data transfer property list */
     memcpy(dx.memb_dxpl, memb_dxpl, H5FD_MEM_NTYPES*sizeof(hid_t));
+
+    /* Convert "generic" default property lists into default dataset transfer property lists */
+    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+        if (dx.memb_dxpl[mt]==H5P_DEFAULT)
+            dx.memb_dxpl[mt]=H5P_DATASET_XFER_DEFAULT;
+    }
+
     return H5Pset_driver(dxpl_id, H5FD_MULTI, &dx);
 }
 
@@ -1173,7 +1185,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
      */
     if (NULL==(file=calloc(1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
-    if (H5P_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
+    if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE);
     }
@@ -1652,7 +1664,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     H5Eclear();
 
     /* Get the data transfer properties */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
+    if (H5P_FILE_ACCESS_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
 	dx = H5Pget_driver_info(dxpl_id);
     }
     
@@ -1707,7 +1719,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     H5Eclear();
 
     /* Get the data transfer properties */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
+    if (H5P_FILE_ACCESS_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
 	dx = H5Pget_driver_info(dxpl_id);
     }
     

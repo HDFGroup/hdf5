@@ -99,12 +99,14 @@ typedef struct H5AC_t {
     H5AC_prot_t *prot;		/*the protected slots		     */
 #endif /* H5AC_DEBUG */
     int	nprots;			/*number of protected objects	     */
+#ifdef H5AC_DEBUG
     struct {
 	unsigned	nhits;			/*number of cache hits		     */
 	unsigned	nmisses;		/*number of cache misses	     */
 	unsigned	ninits;			/*number of cache inits		     */
 	unsigned	nflushes;		/*number of flushes to disk	     */
     } diagnostics[H5AC_NTYPES];		/*diagnostics for each type of object*/
+#endif /* H5AC_DEBUG */
 } H5AC_t;
 
 #ifdef H5_HAVE_PARALLEL
@@ -133,6 +135,10 @@ H5_DLL herr_t H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 			void *thing);
 H5_DLL herr_t H5AC_debug(H5F_t *f);
 
+/* This seems to be slower than just calling H5AC_find_f, which performs the
+ * cache lookup also. - QAK
+ */
+#ifdef OLD_WAY
 #define H5AC_find(F,TYPE,ADDR,UDATA1,UDATA2)				      \
    ((F)->shared->cache->slot[H5AC_HASH(F,ADDR)]!=NULL &&	      \
     ((F)->shared->cache->slot[H5AC_HASH(F,ADDR)]->type==(TYPE) &&	      \
@@ -140,6 +146,7 @@ H5_DLL herr_t H5AC_debug(H5F_t *f);
     ((F)->shared->cache->diagnostics[(TYPE)->id].nhits++,		      \
      (F)->shared->cache->slot[H5AC_HASH(F,ADDR)]) :		      \
     H5AC_find_f(F, TYPE, ADDR, UDATA1, UDATA2))
+#endif /* OLD_WAY */
      
 #endif /* !_H5ACprivate_H */
 

@@ -20,11 +20,16 @@
 
 #define PABLO_MASK	H5O_mtime_mask
 
+static void *H5O_mtime_new_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static size_t H5O_mtime_new_size(H5F_t *f, const void *_mesg);
+
 static void *H5O_mtime_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
-static herr_t H5O_mtime_free (void *_mesg);
+static herr_t H5O_mtime_reset(void *_mesg);
+static herr_t H5O_mtime_free(void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
@@ -37,8 +42,25 @@ const H5O_class_t H5O_MTIME[1] = {{
     H5O_mtime_encode,		/*encode message		*/
     H5O_mtime_copy,		/*copy the native value		*/
     H5O_mtime_size,		/*raw message size		*/
-    NULL,			/*free internal memory		*/
-    H5O_mtime_free,		            /* free method			*/
+    H5O_mtime_reset,		/* reset method			*/
+    H5O_mtime_free,		/* free method			*/
+    NULL,			/*get share method		*/
+    NULL,			/*set share method		*/
+    H5O_mtime_debug,		/*debug the message		*/
+}};
+
+/* This message derives from H5O */
+/* (Only encode, decode & size routines are different from old mtime routines) */
+const H5O_class_t H5O_MTIME_NEW[1] = {{
+    H5O_MTIME_NEW_ID,		/*message id number		*/
+    "mtime_new",		/*message name for debugging	*/
+    sizeof(time_t),		/*native message size		*/
+    H5O_mtime_new_decode,	/*decode message		*/
+    H5O_mtime_new_encode,	/*encode message		*/
+    H5O_mtime_copy,		/*copy the native value		*/
+    H5O_mtime_new_size,		/*raw message size		*/
+    H5O_mtime_reset,		/* reset method			*/
+    H5O_mtime_free,		/* free method			*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     H5O_mtime_debug,		/*debug the message		*/
@@ -48,8 +70,71 @@ const H5O_class_t H5O_MTIME[1] = {{
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
+/* Current version of new mtime information */
+#define H5O_MTIME_VERSION 	1	
+ 
+/* Track whether tzset routine was called */
+static int	ntzset=0;
+
 /* Declare a free list to manage the time_t struct */
 H5FL_DEFINE(time_t);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mtime_new_decode
+ *
+ * Purpose:	Decode a new modification time message and return a pointer to a
+ *		new time_t value.
+ *
+ * Return:	Success:	Ptr to new message in native struct.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan  3 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_mtime_new_decode(H5F_t UNUSED *f, const uint8_t *p,
+		 H5O_shared_t UNUSED *sh)
+{
+    time_t	*mesg, the_time;
+    int		version;        /* Version of mtime information */
+    void        *ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_mtime_new_decode, NULL);
+
+    /* check args */
+    assert(f);
+    assert(p);
+    assert (!sh);
+
+    /* decode */
+    version = *p++;
+    if(version!=H5O_MTIME_VERSION)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for mtime message");
+
+    /* Skip reserved bytes */
+    p+=3;
+
+    /* Get the time_t from the file */
+    UINT32DECODE(p, the_time);
+
+    /* The return value */
+    if (NULL==(mesg = H5FL_MALLOC(time_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    *mesg = the_time;
+
+    /* Set return value */
+    ret_value=mesg;
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5O_mtime_new_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -77,7 +162,6 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     time_t	*mesg, the_time;
     int	i;
     struct tm	tm;
-    static int	ncalls=0;
     void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_mtime_decode, NULL);
@@ -88,7 +172,10 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert (!sh);
 
     /* Initialize time zone information */
-    if (0==ncalls++) HDtzset();
+    if (!ntzset) {
+        HDtzset();
+        ntzset=1;
+    } /* end if */
 
     /* decode */
     for (i=0; i<14; i++) {
@@ -166,7 +253,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 #endif
     
     /* The return value */
-    if (NULL==(mesg = H5FL_ALLOC(time_t,1)))
+    if (NULL==(mesg = H5FL_MALLOC(time_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     *mesg = the_time;
 
@@ -176,6 +263,50 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 done:
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mtime_new_encode
+ *
+ * Purpose:	Encodes a new modification time message.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan  3 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_mtime_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+{
+    const time_t	*mesg = (const time_t *) _mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_mtime_new_encode, FAIL);
+
+    /* check args */
+    assert(f);
+    assert(p);
+    assert(mesg);
+
+    /* Version */
+    *p++ = H5O_MTIME_VERSION;
+
+    /* Reserved bytes */
+    *p++ = 0;
+    *p++ = 0;
+    *p++ = 0;
+
+    /* Encode time */
+    UINT32ENCODE(p, *mesg);
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5O_mtime_new_encode() */
 
 
 /*-------------------------------------------------------------------------
@@ -247,7 +378,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest = H5FL_ALLOC(time_t,0)))
+    if (!dest && NULL==(dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
     /* copy */
@@ -259,6 +390,42 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 done:
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mtime_new_size
+ *
+ * Purpose:	Returns the size of the raw message in bytes not
+ *		counting the message type or size fields, but only the data
+ *		fields.	 This function doesn't take into account
+ *		alignment.
+ *
+ * Return:	Success:	Message data size in bytes w/o alignment.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan  3 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5O_mtime_new_size(H5F_t * UNUSED f, const void * UNUSED mesg)
+{
+    size_t ret_value=8;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_mtime_new_size, 0);
+
+    /* check args */
+    assert(f);
+    assert(mesg);
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5O_mtime_new_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -291,6 +458,33 @@ H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
     /* check args */
     assert(f);
     assert(mesg);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mtime_reset
+ *
+ * Purpose:	Frees resources within a modification time message, but doesn't free
+ *		the message itself.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Mondey, December 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_mtime_reset(void UNUSED *_mesg)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_mtime_reset, FAIL);
 
 done:
     FUNC_LEAVE(ret_value);

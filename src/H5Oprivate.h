@@ -91,7 +91,7 @@ typedef struct H5O_class_t {
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);
-    herr_t  (*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
+    herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
     herr_t	(*debug)(H5F_t*, const void*, FILE*, int, int);
 } H5O_class_t;
 
@@ -116,14 +116,14 @@ typedef struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     hbool_t	dirty;			/*out of data wrt disk		     */
-    int	version;		/*version number		     */
-    int	nlink;			/*link count			     */
+    int		version;		/*version number		     */
+    int		nlink;			/*link count			     */
     unsigned	nmesgs;			/*number of messages		     */
-    unsigned	alloc_nmesgs;	/*number of message slots	     */
-    H5O_mesg_t	*mesg;		/*array of messages		     */
+    unsigned	alloc_nmesgs;		/*number of message slots	     */
+    H5O_mesg_t	*mesg;			/*array of messages		     */
     unsigned	nchunks;		/*number of chunks		     */
-    unsigned	alloc_nchunks;	/*chunks allocated		     */
-    H5O_chunk_t *chunk;		/*array of chunks		     */
+    unsigned	alloc_nchunks;		/*chunks allocated		     */
+    H5O_chunk_t *chunk;			/*array of chunks		     */
 } H5O_t;
 
 /*
@@ -194,9 +194,9 @@ typedef struct H5O_efl_entry_t {
 
 typedef struct H5O_efl_t {
     haddr_t	heap_addr;		/*address of name heap		     */
-    int	nalloc;			/*number of slots allocated	     */
-    int	nused;			/*number of slots used		     */
-    H5O_efl_entry_t *slot;	/*array of external file entries     */
+    int	nalloc;				/*number of slots allocated	     */
+    int	nused;				/*number of slots used		     */
+    H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
 /*
@@ -227,10 +227,10 @@ typedef struct H5O_pline_t {
     size_t	nalloc;			/*num elements in `filter' array     */
     struct {
         H5Z_filter_t	id;		/*filter identification number	     */
-        unsigned		flags;		/*defn and invocation flags	     */
+        unsigned	flags;		/*defn and invocation flags	     */
         char		*name;		/*optional filter name		     */
         size_t		cd_nelmts;	/*number of elements in cd_values[]  */
-        unsigned		*cd_values;	/*client data values		     */
+        unsigned	*cd_values;	/*client data values		     */
     } *filter;				/*array of filters		     */
 } H5O_pline_t;
 
@@ -303,9 +303,15 @@ typedef struct H5O_stab_t {
 } H5O_stab_t;
 
 /*
+ * Modification time message (new format on disk).  The message is just a `time_t'.
+ */
+#define H5O_MTIME_NEW_ID	0x0012
+H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
+
+/*
  * Generic property list message.
  */
-#define H5O_PLIST_ID	0x0012
+#define H5O_PLIST_ID	0x0013
 H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 
 /* operates on an H5P_genplist_t struct */
@@ -314,7 +320,7 @@ H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 /*
  * Flexible parallel message
  */
-#define H5O_FPHDF5_ID	0x0013
+#define H5O_FPHDF5_ID	0x0014
 H5_DLLVAR const H5O_class_t H5O_FPHDF5[1];
 
 struct H5S_simple_t;
@@ -349,8 +355,13 @@ H5_DLL htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type,
 H5_DLL void *H5O_read(H5G_entry_t *ent, const H5O_class_t *type,
 		       int sequence, void *mesg);
 H5_DLL int H5O_modify(H5G_entry_t *ent, const H5O_class_t *type,
-			int overwrite, unsigned flags, const void *mesg);
+    int overwrite, unsigned flags, unsigned update_time, const void *mesg);
+H5_DLL H5O_t * H5O_protect(H5G_entry_t *ent);
+H5_DLL herr_t H5O_unprotect(H5G_entry_t *ent, H5O_t *oh);
+H5_DLL int H5O_append(H5F_t *f, H5O_t *oh, const H5O_class_t *type, 
+    unsigned flags, const void *mesg);
 H5_DLL herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
+H5_DLL herr_t H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force);
 H5_DLL herr_t H5O_remove(H5G_entry_t *ent, const H5O_class_t *type,
 			  int sequence);
 H5_DLL herr_t H5O_reset(const H5O_class_t *type, void *native);

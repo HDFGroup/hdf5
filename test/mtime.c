@@ -17,6 +17,11 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define TESTFILE1       "tmtimeo.h5"
+#define MTIME1          1041605080
+#define TESTFILE2       "tmtimen.h5"
+#define MTIME2          1041606478
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -31,6 +36,11 @@ const char *FILENAME[] = {
  *              Thursday, July 30, 1998
  *
  * Modifications:
+ *              Added checks for old and new modification time messages
+ *              in pre-created datafiles (generated with gen_old_mtime.c and
+ *              gen_new_mtime.c).
+ *              Quincey Koziol
+ *              Friday, January  3, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -101,9 +111,65 @@ main(void)
 	printf("    got: %s\n    ans: %s\n", buf1, buf2);
 	return 1;
     }
-    
-    /* All looks good */
     PASSED();
+    
+    /* Check opening existing file with old-style modification time information
+     * and make certain that the time is correct
+     */
+    TESTING("accessing old modification time messages");
+    
+    {
+    char testfile[512]="";
+    char *srcdir = HDgetenv("srcdir");
+    if (srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE1) + 1) < sizeof(testfile))){
+	HDstrcpy(testfile, srcdir);
+	HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, TESTFILE1);
+    file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file >= 0){
+        if(H5Gget_objinfo(file, "/Dataset1", TRUE, &sb1)<0)
+            return 1;
+        if(sb1.mtime!=MTIME1) return 1;
+        if (H5Fclose(file)<0) return 1;
+    }
+    else {
+	printf("***cannot open the pre-created old modification test file (%s)\n",
+	    testfile);
+	return 1;
+    } /* end else */
+    }
+    PASSED();
+
+    /* Check opening existing file with new-style modification time information
+     * and make certain that the time is correct
+     */
+    TESTING("accessing new modification time messages");
+    
+    {
+    char testfile[512]="";
+    char *srcdir = HDgetenv("srcdir");
+    if (srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE2) + 1) < sizeof(testfile))){
+	HDstrcpy(testfile, srcdir);
+	HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, TESTFILE2);
+    file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file >= 0){
+        if(H5Gget_objinfo(file, "/Dataset1", TRUE, &sb2)<0)
+            return 1;
+        if(sb2.mtime!=MTIME2) return 1;
+        if (H5Fclose(file)<0) return 1;
+    }
+    else {
+	printf("***cannot open the pre-created old modification test file (%s)\n",
+	    testfile);
+	return 1;
+    } /* end else */
+    }
+    PASSED();
+
+    /* All looks good */
     puts("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;

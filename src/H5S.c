@@ -303,8 +303,21 @@ H5S_create(H5S_class_t type)
     FUNC_ENTER_NOAPI(H5S_create, NULL);
 
     /* Create a new data space */
-    if((ret_value = H5FL_ALLOC(H5S_t,1))!=NULL) {
+    if((ret_value = H5FL_CALLOC(H5S_t))!=NULL) {
         ret_value->extent.type = type;
+
+        switch(type) {
+            case H5S_SCALAR:
+                ret_value->extent.nelem = 1;
+                break;
+            case H5S_SIMPLE:
+                ret_value->extent.nelem = 0;
+                break;
+            default:
+                assert("unknown dataspace (extent) type" && 0);
+                break;
+        } /* end switch */
+
         if(H5S_select_all(ret_value,0)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     } /* end if */
@@ -647,12 +660,12 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 
         case H5S_SIMPLE:
             if (src->u.simple.size) {
-                dst->u.simple.size = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
+                dst->u.simple.size = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank);
                 for (u = 0; u < src->u.simple.rank; u++)
                     dst->u.simple.size[u] = src->u.simple.size[u];
             }
             if (src->u.simple.max) {
-                dst->u.simple.max = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
+                dst->u.simple.max = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank);
                 for (u = 0; u < src->u.simple.rank; u++)
                     dst->u.simple.max[u] = src->u.simple.max[u];
             }
@@ -697,7 +710,7 @@ H5S_copy(const H5S_t *src)
 
     FUNC_ENTER_NOAPI(H5S_copy, NULL);
 
-    if (NULL==(dst = H5FL_ALLOC(H5S_t,0)))
+    if (NULL==(dst = H5FL_MALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the field in the struct */
@@ -740,30 +753,14 @@ hssize_t
 H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
     hssize_t    ret_value;
-    unsigned		u;
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_npoints, -1);
 
     /* check args */
     assert(ds);
 
-    switch (ds->extent.type) {
-        case H5S_SCALAR:
-            ret_value = 1;
-            break;
-
-        case H5S_SIMPLE:
-            for (ret_value=1, u=0; u<ds->extent.u.simple.rank; u++)
-                ret_value *= ds->extent.u.simple.size[u];
-            break;
-
-        case H5S_COMPLEX:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-
-        default:
-            assert("unknown data space class" && 0);
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown data space class)");
-    }
+    /* Get the number of elements in extent */
+    ret_value = ds->extent.nelem;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1078,7 +1075,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
+H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1090,7 +1087,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
     switch (ds->extent.type) {
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, &(ds->extent.u.simple))<0)
+            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, update_time, &(ds->extent.u.simple))<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
@@ -1105,6 +1102,52 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds)
 done:
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_append
+ *
+ * Purpose:	Updates a data space by adding a message to an object
+ *		header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, December 31, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_append(H5F_t *f, H5O_t *oh, const H5S_t *ds)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_append, FAIL);
+
+    assert(f);
+    assert(oh);
+    assert(ds);
+
+    switch (ds->extent.type) {
+        case H5S_SCALAR:
+        case H5S_SIMPLE:
+            if (H5O_append(f, oh, H5O_SDSPACE, 0, &(ds->extent.u.simple))<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
+            break;
+
+        case H5S_COMPLEX:
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not implemented yet");
+
+        default:
+            assert("unknown data space class" && 0);
+            break;
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5S_append() */
 
 
 /*-------------------------------------------------------------------------
@@ -1136,23 +1179,34 @@ H5S_read(H5G_entry_t *ent)
     /* check args */
     assert(ent);
 
-    if (NULL==(ds = H5FL_ALLOC(H5S_t,1)))
+    if (NULL==(ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple)) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
 
-    if(ds->extent.u.simple.rank != 0)
-         ds->extent.type = H5S_SIMPLE;
-    else
-         ds->extent.type = H5S_SCALAR;
+    if(ds->extent.u.simple.rank != 0) {
+        hsize_t nelem;  /* Number of elements in extent */
+        unsigned u;     /* Local index variable */
+
+        ds->extent.type = H5S_SIMPLE;
+
+        /* Compute the number of elements in the extent */
+        for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
+            nelem*=ds->extent.u.simple.size[u];
+        ds->extent.nelem = nelem;
+    } /* end if */
+    else {
+        ds->extent.type = H5S_SCALAR;
+        ds->extent.nelem = 1;
+    } /* end else */
 
     /* Default to entire dataspace being selected */
     if(H5S_select_all(ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,ds->extent.u.simple.rank,1)))
+    if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set the value for successful return */
@@ -1407,7 +1461,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
         space->select.offset=H5FL_ARR_FREE(hssize_t,space->select.offset);
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,rank,1)))
+    if (NULL==(space->select.offset = H5FL_ARR_CALLOC(hssize_t,rank)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* shift out of the previous state to a "simple" dataspace */
@@ -1433,18 +1487,27 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 
     if (rank == 0) {		/* scalar variable */
         space->extent.type = H5S_SCALAR;
+        space->extent.nelem = 1;
         space->extent.u.simple.rank = 0;	/* set to scalar rank */
     } else {
+        hsize_t nelem;  /* Number of elements in extent */
+        unsigned u;     /* Local index variable */
+
         space->extent.type = H5S_SIMPLE;
 
         /* Set the rank and copy the dims */
         space->extent.u.simple.rank = rank;
-        space->extent.u.simple.size = H5FL_ARR_ALLOC(hsize_t,rank,0);
+        space->extent.u.simple.size = H5FL_ARR_MALLOC(hsize_t,rank);
         HDmemcpy(space->extent.u.simple.size, dims, sizeof(hsize_t) * rank);
+
+        /* Compute the number of elements in the extent */
+        for(u=0, nelem=1; u<space->extent.u.simple.rank; u++)
+            nelem*=space->extent.u.simple.size[u];
+        space->extent.nelem = nelem;
 
         /* Copy the maximum dimensions if specified */
         if(max!=NULL) {
-            space->extent.u.simple.max = H5FL_ARR_ALLOC(hsize_t,rank,0);
+            space->extent.u.simple.max = H5FL_ARR_MALLOC(hsize_t,rank);
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
@@ -1629,6 +1692,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
     assert (space && H5S_SIMPLE==space->extent.type);
     assert (size);
 
+    /* Check through all the dimensions to see if modifying the dataspace is allowed */
     for (u=0; u<space->extent.u.simple.rank; u++) {
         if (space->extent.u.simple.size[u]<size[u]) {
             if (space->extent.u.simple.max &&
@@ -1641,10 +1705,16 @@ H5S_extend (H5S_t *space, const hsize_t *size)
 
     /* Update */
     if (ret_value) {
-        for (u=0; u<space->extent.u.simple.rank; u++) {
+        hsize_t nelem;  /* Number of elements in extent */
+
+        /* Change the dataspace size & re-compute the number of elements in the extent */
+        for (u=0, nelem=1; u<space->extent.u.simple.rank; u++) {
             if (space->extent.u.simple.size[u]<size[u])
                 space->extent.u.simple.size[u] = size[u];
+
+            nelem*=space->extent.u.simple.size[u];
         }
+        space->extent.nelem = nelem;
     }
 
 done:
@@ -1872,7 +1942,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
     /* Allocate space for new offset */
     if(space->select.offset==NULL) {
-        if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,space->extent.u.simple.rank,0)))
+        if (NULL==(space->select.offset = H5FL_ARR_MALLOC(hssize_t,space->extent.u.simple.rank)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
 
@@ -1922,9 +1992,14 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
 
     /* Update */
     if (ret_value) {
-        /* Update dimensions with new values */
-        for ( u = 0; u < space->extent.u.simple.rank; u++ )
+        hsize_t nelem;  /* Number of elements in extent */
+
+        /* Change the dataspace size & re-compute the number of elements in the extent */
+        for (u=0, nelem=1; u < space->extent.u.simple.rank; u++ ) {
             space->extent.u.simple.size[u] = size[u];
+            nelem*=space->extent.u.simple.size[u];
+        } /* end for */
+        space->extent.nelem = nelem;
     } /* end if */
 
 done:

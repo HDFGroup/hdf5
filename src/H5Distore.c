@@ -862,7 +862,7 @@ H5F_istore_init (H5F_t *f)
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
     if (f->shared->rdcc_nbytes>0 && f->shared->rdcc_nelmts>0) {
 	rdcc->nslots = f->shared->rdcc_nelmts;
-	rdcc->slot = H5FL_ARR_ALLOC (H5F_rdcc_ent_ptr_t,rdcc->nslots,1);
+	rdcc->slot = H5FL_ARR_CALLOC (H5F_rdcc_ent_ptr_t,rdcc->nslots);
 	if (NULL==rdcc->slot)
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
@@ -1440,7 +1440,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache");
 
         /* Create a new entry */
-        ent = H5FL_ALLOC(H5F_rdcc_ent_t,0);
+        ent = H5FL_MALLOC(H5F_rdcc_ent_t);
         ent->locked = 0;
         ent->dirty = FALSE;
         ent->chunk_size = chunk_size;
@@ -1943,8 +1943,9 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
 #ifdef H5_HAVE_PARALLEL
             /* Additional sanity check when operating in parallel */
-            if (chunk_addr==HADDR_UNDEF || pline.nfilters>0)
+            if (chunk_addr==HADDR_UNDEF || pline.nfilters>0) {
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
+            }
 #endif /* H5_HAVE_PARALLEL */
             
             /*
@@ -2312,7 +2313,7 @@ done:
  */
 herr_t
 H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
-		    const hsize_t *space_dim, H5P_genplist_t *dc_plist)
+        const hsize_t *space_dim, H5P_genplist_t *dc_plist, hbool_t full_overwrite)
 {
     hssize_t	chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
     hsize_t	chunk_size;     /* Size of chunk in bytes */
@@ -2407,7 +2408,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     } /* end for */
 
     /* Check if fill values should be written to blocks */
-    if(fill_time != H5D_FILL_TIME_NEVER) {
+    if(fill_time != H5D_FILL_TIME_NEVER && !full_overwrite) {
         /* Allocate chunk buffer for processes to use when writing fill values */
         H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
         if (NULL==(chunk = H5MM_malloc((size_t)chunk_size)))
@@ -2484,7 +2485,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
 
             /* Check if fill values should be written to blocks */
-            if(fill_time != H5D_FILL_TIME_NEVER) {
+            if(fill_time != H5D_FILL_TIME_NEVER && !full_overwrite) {
 #ifdef H5_HAVE_PARALLEL
                 /* Check if this file is accessed with an MPI-capable file driver */
                 if(using_mpi) {

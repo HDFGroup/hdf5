@@ -72,6 +72,8 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_VFL,		"Virtual File Layer"},
     {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},
     {H5E_FPHDF5,	"Flexible Parallel HDF5"},
+    {H5E_TST,		"Ternary Search Trees"},
+    {H5E_RS,		"Reference Counted Strings"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {

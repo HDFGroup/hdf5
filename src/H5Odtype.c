@@ -48,7 +48,7 @@ const H5O_class_t H5O_DTYPE[1] = {{
     H5O_dtype_copy,		/* copy the native value	*/
     H5O_dtype_size,		/* size of raw message		*/
     H5O_dtype_reset,		/* reset method			*/
-    H5O_dtype_free,		    /* free method			*/
+    H5O_dtype_free,		/* free method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_debug,		/* debug the message		*/
@@ -227,7 +227,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 } /* end if */
 
                 /* Allocate space for the field's datatype */
-                temp_type = H5FL_ALLOC (H5T_t,1);
+                temp_type = H5FL_CALLOC (H5T_t);
                 if (NULL==temp_type)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
                 temp_type->ent.header = HADDR_UNDEF;
@@ -289,7 +289,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              */
             dt->u.enumer.nmembs = dt->u.enumer.nalloc = flags & 0xffff;
             assert(dt->u.enumer.nmembs>=0);
-            if (NULL==(dt->parent=H5FL_ALLOC(H5T_t,1)))
+            if (NULL==(dt->parent=H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
             if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
@@ -343,7 +343,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             } /* end if */
 
             /* Decode base type of VL information */
-            if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
+            if (NULL==(dt->parent = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
             if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
@@ -381,7 +381,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 UINT32DECODE(*pp, dt->u.array.perm[j]);
 
             /* Decode base type of array */
-            if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
+            if (NULL==(dt->parent = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
             if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
@@ -794,7 +794,7 @@ H5O_dtype_decode(H5F_t *f, const uint8_t *p,
     /* check args */
     assert(p);
 
-    if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
+    if (NULL==(dt = H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     dt->ent.header = HADDR_UNDEF;
 
@@ -1009,18 +1009,12 @@ static herr_t
 H5O_dtype_reset(void *_mesg)
 {
     H5T_t		   *dt = (H5T_t *) _mesg;
-    H5T_t		   *tmp = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_dtype_reset, FAIL);
 
-    if (dt) {
-        if (NULL==(tmp = H5FL_ALLOC(H5T_t,0)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        *tmp = *dt;
-        H5T_close(tmp);
-        HDmemset(dt, 0, sizeof(H5T_t));
-    }
+    if (dt)
+        H5T_free(dt);
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1130,8 +1124,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     H5G_ent_copy(&(dt->ent),&(sh->u.ent),H5G_COPY_SHALLOW);
 
     /* Reset the names of the copied symbol table entry */
-    dt->ent.user_path = NULL;
-    dt->ent.canon_path = NULL;
+    dt->ent.user_path_r = NULL;
+    dt->ent.canon_path_r = NULL;
 
     /* Note that the datatype is a named datatype */
     dt->state = H5T_STATE_NAMED;

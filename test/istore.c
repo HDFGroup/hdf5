@@ -100,6 +100,7 @@ new_object(H5F_t *f, const char *name, unsigned ndims, H5G_entry_t *ent/*out*/)
     unsigned		    u;
 
     /* Create the object header */
+    HDmemset(ent,0,sizeof(H5G_entry_t));
     if (H5O_create(f, 64, ent)) {
 	H5_FAILED();
 	puts("    H5O_create() = NULL");
@@ -118,7 +119,7 @@ new_object(H5F_t *f, const char *name, unsigned ndims, H5G_entry_t *ent/*out*/)
     }
     /* Create the root of the B-tree that describes chunked storage */
     H5F_istore_create (f, &layout/*in,out*/);
-    if (H5O_modify(ent, H5O_LAYOUT, H5O_NEW_MESG, 0, &layout) < 0) {
+    if (H5O_modify(ent, H5O_LAYOUT, H5O_NEW_MESG, 0, 1, &layout) < 0) {
 	H5_FAILED();
 	puts("    H5O_modify istore message failure.");
 	goto error;

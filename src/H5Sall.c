@@ -175,7 +175,6 @@ done:
 hsize_t
 H5S_all_npoints (const H5S_t *space)
 {
-    unsigned u;     /* Counters */
     hsize_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_all_npoints, 0);
@@ -183,8 +182,7 @@ H5S_all_npoints (const H5S_t *space)
     /* Check args */
     assert (space);
 
-    for(u=0, ret_value=1; u<space->extent.u.simple.rank; u++)
-        ret_value*=space->extent.u.simple.size[u];
+    ret_value=(hsize_t)H5S_get_simple_extent_npoints(space);
     
 done:
     FUNC_LEAVE (ret_value);

@@ -100,7 +100,7 @@ test_attr_basic_write(void)
     hid_t		attr, attr2;	    /* Attribute ID		*/
     hsize_t             attr_size;  /* storage size for attribute       */
     ssize_t             attr_name_size; /* size of attribute name       */
-    char                *attr_name;     /* name of attribute            */
+    char                *attr_name=NULL;    /* name of attribute        */
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {ATTR1_DIM1};
     hsize_t		dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
@@ -121,6 +121,7 @@ test_attr_basic_write(void)
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
@@ -161,7 +162,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
             num_errs++;
          } /* end if */
 
@@ -203,7 +204,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("2. attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
             num_errs++;
         } /* end if */
 
@@ -238,7 +239,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1a[i]!=read_data1[i]) {
-            printf("2. attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
             num_errs++;
         } /* end if */
 
@@ -347,7 +348,7 @@ test_attr_basic_read(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
             num_errs++;
          } /* end if */
 
@@ -377,7 +378,7 @@ test_attr_basic_read(void)
     for(i=0; i<ATTR2_DIM1; i++)
         for(j=0; j<ATTR2_DIM2; j++)
         if(attr_data2[i][j]!=read_data2[i][j]) {
-            printf("attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",i,j,attr_data2[i][j],i,j,read_data1[i]);
+            printf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
             num_errs++;
          } /* end if */
 
@@ -605,9 +606,9 @@ test_attr_compound_read(void)
     for(i=0; i<ATTR4_DIM1; i++)
         for(j=0; j<ATTR4_DIM2; j++)
             if(HDmemcmp(&attr_data4[i][j],&read_data4[i][j],sizeof(struct attr4_struct))) {
-                printf("attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
-                printf("attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
-                printf("attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
+                printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
+                printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
+                printf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
                 num_errs++;
              } /* end if */
 
@@ -943,7 +944,7 @@ test_attr_mult_read(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
             num_errs++;
          } /* end if */
 
@@ -1009,7 +1010,7 @@ test_attr_mult_read(void)
     for(i=0; i<ATTR2_DIM1; i++)
         for(j=0; j<ATTR2_DIM2; j++)
         if(attr_data2[i][j]!=read_data2[i][j]) {
-            printf("attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",i,j,attr_data2[i][j],i,j,read_data2[i][j]);
+            printf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
             num_errs++;
          } /* end if */
 
@@ -1080,7 +1081,7 @@ test_attr_mult_read(void)
         for(j=0; j<ATTR3_DIM2; j++)
             for(k=0; k<ATTR3_DIM3; k++)
                 if(attr_data3[i][j][k]!=read_data3[i][j][k]) {
-                    printf("attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
+                    printf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
                     num_errs++;
                  } /* end if */
 

@@ -341,7 +341,8 @@ H5O_efl_reset(void *_mesg)
 	mesg->slot[i].name = H5MM_xfree (mesg->slot[i].name);
     mesg->heap_addr = HADDR_UNDEF;
     mesg->nused = mesg->nalloc = 0;
-    mesg->slot = H5MM_xfree(mesg->slot);
+    if(mesg->slot)
+        mesg->slot = H5MM_xfree(mesg->slot);
 
 done:
     FUNC_LEAVE(ret_value);

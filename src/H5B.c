@@ -212,7 +212,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     size = H5B_nodesize(f, type, &total_native_keysize, sizeof_rkey);
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, (hsize_t)size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree root node");
-    if (NULL==(bt = H5FL_ALLOC(H5B_t,1)))
+    if (NULL==(bt = H5FL_CALLOC(H5B_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node");
     bt->type = type;
     bt->sizeof_rkey = sizeof_rkey;
@@ -222,10 +222,10 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     bt->left = HADDR_UNDEF;
     bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
-    if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,1)) ||
-            NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
-            NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,(size_t)(2*H5B_Kvalue(f,type)),0)) ||
-            NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(size_t)(2*H5B_Kvalue(f,type)+1),0)))
+    if (NULL==(bt->page=H5FL_BLK_CALLOC(page,size)) ||
+            NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
+            NULL==(bt->child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
+            NULL==(bt->key=H5FL_ARR_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node");
 
     /*
@@ -234,7 +234,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
      * translated to native format.
      */
     for (i = 0, offset = H5B_SIZEOF_HDR(f);
-	 i < 2 * H5B_Kvalue(f, type);
+	 i < 2 * H5F_KVALUE(f, type);
 	 i++, offset += bt->sizeof_rkey + H5F_SIZEOF_ADDR(f)) {
 
 	bt->key[i].dirty = FALSE;
@@ -246,9 +246,9 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     /*
      * The last possible key...
      */
-    bt->key[2 * H5B_Kvalue(f, type)].dirty = FALSE;
-    bt->key[2 * H5B_Kvalue(f, type)].rkey = bt->page + offset;
-    bt->key[2 * H5B_Kvalue(f, type)].nkey = NULL;
+    bt->key[2 * H5F_KVALUE(f, type)].dirty = FALSE;
+    bt->key[2 * H5F_KVALUE(f, type)].rkey = bt->page + offset;
+    bt->key[2 * H5F_KVALUE(f, type)].nkey = NULL;
 
     /*
      * Cache the new B-tree node.
@@ -273,54 +273,6 @@ done:
     
     FUNC_LEAVE(ret_value);
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B_Kvalue
- *
- * Purpose:	Replaced a macro to retrieve a B-tree key value for a certain
- *              type, now that the generic properties are being used to store
- *              the B-tree values.
- *
- * Return:	Success:	Non-negative, and the B-tree key value is
- *                              returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
- *		Oct 14 2001
- *
- * Modifications:
- *		Quincey Koziol, 2001-10-15
- *		Added this header and removed unused ret_value variable.
- *-------------------------------------------------------------------------
- */
-int
-H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
-{
-    int btree_k[H5B_NUM_BTREE_ID];
-    H5P_genplist_t *plist;
-    int      ret_value;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B_Kvalue, FAIL);
-
-    assert(f);
-    assert(type);
-
-    /* Check arguments */
-    if (NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
-
-    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes");
-
-    /* Set return value */
-    ret_value=btree_k[type->id];
-
-done:
-    FUNC_LEAVE(ret_value);
-} /* end H5B_Kvalue() */
 
 
 /*-------------------------------------------------------------------------
@@ -364,17 +316,17 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     assert(type);
     assert(type->get_sizeof_rkey);
 
-    if (NULL==(bt = H5FL_ALLOC(H5B_t,1)))
+    if (NULL==(bt = H5FL_CALLOC(H5B_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     bt->sizeof_rkey = (type->get_sizeof_rkey) (f, udata);
     size = H5B_nodesize(f, type, &total_nkey_size, bt->sizeof_rkey);
     bt->type = type;
     bt->dirty = FALSE;
     bt->ndirty = 0;
-    if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,0)) ||
-            NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_nkey_size,0)) ||
-            NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(size_t)(2*H5B_Kvalue(f,type)+1),0)) ||
-            NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,(size_t)(2*H5B_Kvalue(f,type)),0)))
+    if (NULL==(bt->page=H5FL_BLK_MALLOC(page,size)) ||
+            NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_nkey_size)) ||
+            NULL==(bt->key=H5FL_ARR_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))) ||
+            NULL==(bt->child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree node");
@@ -398,7 +350,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     H5F_addr_decode(f, (const uint8_t **) &p, &(bt->right));
 
     /* the child/key pairs */
-    for (i = 0; i < 2 * H5B_Kvalue(f, type); i++) {
+    for (i = 0; i < 2 * H5F_KVALUE(f, type); i++) {
 
 	bt->key[i].dirty = FALSE;
 	bt->key[i].rkey = p;
@@ -413,9 +365,9 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
 	}
     }
 
-    bt->key[2 * H5B_Kvalue(f, type)].dirty = FALSE;
-    bt->key[2 * H5B_Kvalue(f, type)].rkey = p;
-    bt->key[2 * H5B_Kvalue(f, type)].nkey = NULL;
+    bt->key[2 * H5F_KVALUE(f, type)].dirty = FALSE;
+    bt->key[2 * H5F_KVALUE(f, type)].rkey = p;
+    bt->key[2 * H5F_KVALUE(f, type)].nkey = NULL;
 
     /* Set return value */
     ret_value = bt;
@@ -675,9 +627,9 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
     /*
      * Initialize variables.
      */
-    assert(old_bt->nchildren == 2 * H5B_Kvalue(f, type));
+    assert(old_bt->nchildren == 2 * H5F_KVALUE(f, type));
     recsize = old_bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
-    k = H5B_Kvalue(f, type);
+    k = H5F_KVALUE(f, type);
 
 #ifdef H5B_DEBUG
     if (H5DEBUG(B)) {
@@ -770,7 +722,7 @@ H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
     new_bt->right = old_bt->right;
 
     if (H5F_addr_defined(old_bt->right)) {
-	if (NULL == (tmp_bt = H5AC_find(f, H5AC_BT, old_bt->right, type, udata)))
+	if (NULL == (tmp_bt = H5AC_find_f(f, H5AC_BT, old_bt->right, type, udata)))
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load right sibling");
 	tmp_bt->dirty = TRUE;
 	tmp_bt->left = *new_addr_p;
@@ -919,7 +871,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     assert(H5B_INS_RIGHT == my_ins);
 
     /* the current root */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_find_f(f, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to locate root of B-tree");
     level = bt->level;
     if (!lt_key_changed) {
@@ -929,7 +881,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     }
     
     /* the new node */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, child, type, udata)))
+    if (NULL == (bt = H5AC_find_f(f, H5AC_BT, child, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new node");
     if (!rt_key_changed) {
 	if (!bt->key[bt->nchildren].nkey &&
@@ -948,7 +900,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate file space to move root");
 
     /* update the new child's left pointer */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, child, type, udata)))
+    if (NULL == (bt = H5AC_find_f(f, H5AC_BT, child, type, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new child");
     bt->dirty = TRUE;
     bt->left = old_root;
@@ -958,7 +910,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
      * at the new location -QAK
      */
     /* Bring the old root into the cache if it's not already */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_find_f(f, H5AC_BT, addr, type, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new child");
 
     /* Make certain the old root info is marked as dirty before moving it, */
@@ -1038,7 +990,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
     FUNC_ENTER_NOINIT(H5B_insert_child);
 
     assert(bt);
-    assert(bt->nchildren<2*H5B_Kvalue(f, type));
+    assert(bt->nchildren<2*H5F_KVALUE(f, type));
 
     bt->dirty = TRUE;
     recsize = bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
@@ -1383,7 +1335,7 @@ H5B_insert_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 	/*
 	 * If this node is full then split it before inserting the new child.
 	 */
-	if (bt->nchildren == 2 * H5B_Kvalue(f, type)) {
+	if (bt->nchildren == 2 * H5F_KVALUE(f, type)) {
 	    if (H5B_split(f, type, bt, addr, idx, split_ratios, udata,
 			  new_node_p/*out*/)<0)
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, H5B_INS_ERROR, "unable to split node");
@@ -1488,7 +1440,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
     assert(H5F_addr_defined(addr));
     assert(udata);
 
-    if (NULL == (bt=H5AC_find(f, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt=H5AC_find_f(f, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node");
     if (bt->level > 0) {
 	/* Keep following the left-most child until we reach a leaf node. */
@@ -1499,8 +1451,8 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child=H5FL_ARR_ALLOC(haddr_t,(size_t)(2*H5B_Kvalue(f,type)),0)) ||
-                NULL==(key=H5MM_malloc((2*H5B_Kvalue(f, type)+1)*type->sizeof_nkey)))
+	if (NULL==(child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
+                NULL==(key=H5MM_malloc((2*H5F_KVALUE(f, type)+1)*type->sizeof_nkey)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	for (cur_addr=addr, ret_value=0; H5F_addr_defined(cur_addr); cur_addr=next_addr) {
 
@@ -1509,7 +1461,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
 	     * leave the B-tree node protected during an application
 	     * callback.
 	     */
-	    if (NULL==(bt=H5AC_find (f, H5AC_BT, cur_addr, type, udata)))
+	    if (NULL==(bt=H5AC_find_f (f, H5AC_BT, cur_addr, type, udata)))
 		HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node");
 	    for (i=0; i<bt->nchildren; i++)
 		child[i] = bt->child[i];
@@ -1698,13 +1650,13 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 	bt->ndirty = 0;
 	if (level>0) {
 	    if (H5F_addr_defined(bt->left)) {
-		if (NULL==(sibling=H5AC_find(f, H5AC_BT, bt->left, type, udata)))
+		if (NULL==(sibling=H5AC_find_f(f, H5AC_BT, bt->left, type, udata)))
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree");
 		sibling->right = bt->right;
 		sibling->dirty = TRUE;
 	    }
 	    if (H5F_addr_defined(bt->right)) {
-		if (NULL==(sibling=H5AC_find(f, H5AC_BT, bt->right, type, udata)))
+		if (NULL==(sibling=H5AC_find_f(f, H5AC_BT, bt->right, type, udata)))
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree");
 		sibling->left = bt->left;
 		sibling->dirty = TRUE;
@@ -1862,7 +1814,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
      * If the B-tree is now empty then make sure we mark the root node as
      * being at level zero
      */
-    if (NULL==(bt=H5AC_find(f, H5AC_BT, addr, type, udata)))
+    if (NULL==(bt=H5AC_find_f(f, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree root node");
     if (0==bt->nchildren && 0!=bt->level) {
 	bt->level = 0;
@@ -1915,20 +1867,20 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
     assert(f);
     assert(type);
     assert(sizeof_rkey > 0);
-    assert(H5B_Kvalue(f, type) > 0);
+    assert(H5F_KVALUE(f, type) > 0);
 
     /*
      * Total native key size.
      */
     if (total_nkey_size)
-	*total_nkey_size = (2 * H5B_Kvalue(f, type) + 1) * type->sizeof_nkey;
+	*total_nkey_size = (2 * H5F_KVALUE(f, type) + 1) * type->sizeof_nkey;
 
     /*
      * Total node size.
      */
     size = (H5B_SIZEOF_HDR(f) + /*node header	*/
-	    2 * H5B_Kvalue(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
-	    (2 * H5B_Kvalue(f, type) + 1) * sizeof_rkey);	/*keys		*/
+	    2 * H5F_KVALUE(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
+	    (2 * H5F_KVALUE(f, type) + 1) * sizeof_rkey);	/*keys		*/
 
     /* Set return value */
     ret_value=size;
@@ -1979,19 +1931,19 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
     size = H5B_nodesize(f, old_bt->type, &total_native_keysize, old_bt->sizeof_rkey);
 
     /* Allocate memory for the new H5B_t object */
-    if (NULL==(new_node = H5FL_ALLOC(H5B_t,0)))
+    if (NULL==(new_node = H5FL_MALLOC(H5B_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node");
 
     /* Copy the main structure */
     HDmemcpy(new_node,old_bt,sizeof(H5B_t));
 
     /* Compute the number of keys in this node */
-    nkeys=2*H5B_Kvalue(f,old_bt->type);
+    nkeys=2*H5F_KVALUE(f,old_bt->type);
 
-    if (NULL==(new_node->page=H5FL_BLK_ALLOC(page,size,0)) ||
-            NULL==(new_node->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
-            NULL==(new_node->child=H5FL_ARR_ALLOC(haddr_t,nkeys,0)) ||
-            NULL==(new_node->key=H5FL_ARR_ALLOC(H5B_key_t,(nkeys+1),0)))
+    if (NULL==(new_node->page=H5FL_BLK_MALLOC(page,size)) ||
+            NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
+            NULL==(new_node->child=H5FL_ARR_MALLOC(haddr_t,nkeys)) ||
+            NULL==(new_node->key=H5FL_ARR_MALLOC(H5B_key_t,(nkeys+1))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node");
 
     /* Copy the other structures */
@@ -2064,7 +2016,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     /*
      * Load the tree node.
      */
-    if (NULL == (bt = H5AC_find(f, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_find_f(f, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node");
 
     /*
@@ -2101,7 +2053,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     HDfprintf(stream, "%*s%-*s %d (%d)\n", indent, "", fwidth,
 	      "Number of children (max):",
 	      (int) (bt->nchildren),
-	      (int) (2 * H5B_Kvalue(f, type)));
+	      (int) (2 * H5F_KVALUE(f, type)));
 
     /*
      * Print the child addresses
@@ -2164,7 +2116,7 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 	}
     }
     /* Initialize the queue */
-    bt = H5AC_find(f, H5AC_BT, addr, type, udata);
+    bt = H5AC_find_f(f, H5AC_BT, addr, type, udata);
     assert(bt);
     cur = H5MM_calloc(sizeof(struct child_t));
     assert (cur);

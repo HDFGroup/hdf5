@@ -357,6 +357,9 @@ done:
  *              of the functions in the library.
  *          - Added 'depth' parameter to determine how much of the group
  *              entry structure we want to copy.  The new depths are:
+ *                  H5G_COPY_NULL - Copy all the fields from the
+ *                      source to the destination, but set the destination's
+ *                      user path and canonical path to NULL.
  *                  H5G_COPY_LIMITED - Copy all the fields from the
  *                      source to the destination, except for the user path
  *                      field, keeping it the same as its
@@ -373,19 +376,19 @@ done:
 herr_t
 H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t depth)
 {
-    char *tmp_user_path=NULL;   /* Temporary string pointers for entry's user path */
+    H5RS_str_t *tmp_user_path_r=NULL;   /* Temporary string pointer for entry's user path */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
 
-    /* check arguments */
-    assert( src );
-    assert( dst );
+    /* Check arguments */
+    assert(src);
+    assert(dst);
 
     /* If the depth is "very shallow", keep the old entry's user path */
     if(depth==H5G_COPY_LIMITED) {
-        tmp_user_path=dst->user_path;
-        H5MM_xfree(dst->canon_path);
+        tmp_user_path_r=dst->user_path_r;
+        H5RS_decr(dst->canon_path_r);
     } /* end if */
 
     /* Copy the top level information */
@@ -393,11 +396,14 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
 
     /* Deep copy the names */
     if(depth==H5G_COPY_DEEP) {
-        dst->user_path=H5MM_xstrdup(src->user_path);
-        dst->canon_path=H5MM_xstrdup(src->canon_path);
+        dst->user_path_r=H5RS_dup(src->user_path_r);
+        dst->canon_path_r=H5RS_dup(src->canon_path_r);
     } else if(depth==H5G_COPY_LIMITED) {
-        dst->user_path=tmp_user_path;
-        dst->canon_path=H5MM_xstrdup(src->canon_path);
+        dst->user_path_r=tmp_user_path_r;
+        dst->canon_path_r=H5RS_dup(src->canon_path_r);
+    } else if(depth==H5G_COPY_NULL) {
+        dst->user_path_r=NULL;
+        dst->canon_path_r=NULL;
     } /* end if */
 
 done:

@@ -21,7 +21,8 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* Files		  	*/
+#include "H5Fprivate.h"		/* Files		  	        */
+#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
@@ -33,6 +34,8 @@
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
+
+/* Local variables */
 
 /*
  * Predefined property list classes. These are initialized at runtime by 
@@ -56,6 +59,19 @@ hid_t H5P_LST_DATASET_CREATE_g      = FAIL;
 hid_t H5P_LST_DATASET_XFER_g        = FAIL;
 hid_t H5P_LST_MOUNT_g               = FAIL;
 
+/* Track the revision count of a class, to make comparisons faster */
+static unsigned H5P_next_rev=0;
+#define H5P_GET_NEXT_REV        (H5P_next_rev++)
+
+/* Declare a free list to manage the H5P_genprop_t struct */
+H5FL_DEFINE(H5P_genprop_t);
+
+/* Declare a free list to manage the H5P_genplist_t struct */
+H5FL_DEFINE(H5P_genplist_t);
+
+/* Declare a free list to manage the H5P_genclass_t struct */
+H5FL_DEFINE_STATIC(H5P_genclass_t);
+
 /* Local typedefs */
 
 /* Typedef for checking for duplicate class names in parent class */
@@ -66,13 +82,82 @@ typedef struct {
 
 /* Local static functions */
 static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
-     const char *name, unsigned hashsize, unsigned internal,
+     const char *name, unsigned internal,
      H5P_cls_create_func_t cls_create, void *create_data,
      H5P_cls_copy_func_t cls_copy, void *copy_data,
      H5P_cls_close_func_t cls_close, void *close_data);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
-static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop);
+static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_do_prop_cb1
+ PURPOSE
+    Internal routine to call a property list callback routine and update
+    the property list accordingly.
+ USAGE
+    herr_t H5P_do_prop_cb1(tree,prop,cb)
+        H5TB_TREE *tree;        IN/OUT: TBBT to hold changed properties
+        H5P_genprop_t *prop;    IN: Property to call callback for
+        H5P_prp_cb1_t *cb;      IN: Callback routine to call
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Calls the callback routine passed in.  If the callback routine changes
+    the property value, then the property is duplicated and added to TBBT.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5P_do_prop_cb1(H5TB_TREE *tree, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
+{
+    void *tmp_value=NULL;       /* Temporary value buffer */
+    H5P_genprop_t *pcopy=NULL;  /* Copy of property to insert into TBBT */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOINIT(H5P_do_prop_cb1);
+
+    /* Allocate space for a temporary copy of the property value */
+    if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for temporary property value");
+    HDmemcpy(tmp_value,prop->value,prop->size);
+
+    /* Call "type 1" callback ('create', 'copy' or 'close') */
+    if(cb(prop->name,prop->size,tmp_value)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Property callback failed");
+
+    /* Check if the property value changed */
+    if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+        /* Make a copy of the class's property */
+        if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST))==NULL)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+
+        /* Copy the changed value into the new property */
+        HDmemcpy(pcopy->value,tmp_value,prop->size);
+
+        /* Insert the changed property into the property list */
+        if(H5P_add_prop(tree,pcopy)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into TBBT");
+    } /* end if */
+
+done:
+    /* Release the temporary value buffer */
+    if(tmp_value!=NULL)
+        H5MM_xfree(tmp_value);
+
+    /* Cleanup on failure */
+    if(ret_value<0) {
+        if(pcopy!=NULL)
+            H5P_free_prop(pcopy);
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_do_prop_cb1() */
 
 
 /*-------------------------------------------------------------------------
@@ -102,60 +187,6 @@ H5P_init(void)
 done:
     FUNC_LEAVE(ret_value);
 }
-
-
-/*--------------------------------------------------------------------------
-NAME
-    H5P_xor_name -- Generate an xor'ed value for a string
-USAGE
-    unsigned H5P_xor_name(s)
-        const char *s;  IN: String to operate over
-RETURNS
-    Always returns valid value
-DESCRIPTION
-    Generates an xor'ed value for a string
---------------------------------------------------------------------------*/
-static unsigned
-H5P_xor_name(const char *s)
-{
-    unsigned ret=0;
-    unsigned char temp;
-
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5P_xor_name);
-
-    if(s!=NULL)
-        while(*s!='\0') {
-            temp=(ret>>24)&0xff;
-            ret <<= 8;
-            ret |= temp;
-            ret ^= *s++;
-        }
-
-    FUNC_LEAVE(ret);
-}   /* end H5P_xor_name() */
-
-
-/*--------------------------------------------------------------------------
-NAME
-    H5P_hash_name -- Generate a hash value for a string
-USAGE
-    unsigned H5P_hash_name(s, hashsize)
-        const char *s;  IN: String to operate over
-        unsigned;          IN: Size of hash table to clip against
-RETURNS
-    Always returns valid value
-DESCRIPTION
-    Generates a hash location based on an xor'ed value for a string
---------------------------------------------------------------------------*/
-static unsigned
-H5P_hash_name(const char *s, unsigned hashsize)
-{
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5P_hash_name);
-
-    FUNC_LEAVE(H5P_xor_name(s)%hashsize);
-}   /* end H5P_hash_name() */
 
 
 /*--------------------------------------------------------------------------
@@ -195,7 +226,7 @@ H5P_init_interface(void)
 
     /* Allocate the root class */
     assert(H5P_CLS_NO_CLASS_g==(-1));
-    if (NULL==(root_class = H5P_create_class (NULL,"root",H5P_NO_CLASS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(root_class = H5P_create_class (NULL,"root",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the root class */
@@ -206,7 +237,7 @@ H5P_init_interface(void)
 
     /* Allocate the file creation class */
     assert(H5P_CLS_FILE_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"file create",H5P_FILE_CREATE_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"file create",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file creation class */
@@ -215,7 +246,7 @@ H5P_init_interface(void)
 
     /* Allocate the file access class */
     assert(H5P_CLS_FILE_ACCESS_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"file access",H5P_FILE_ACCESS_HASH_SIZE,1,H5F_acs_create,NULL,H5F_acs_copy,NULL,H5F_acs_close,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"file access",1,H5F_acs_create,NULL,H5F_acs_copy,NULL,H5F_acs_close,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file access class */
@@ -226,7 +257,7 @@ H5P_init_interface(void)
 
     /* Allocate the dataset creation class */
     assert(H5P_CLS_DATASET_CREATE_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"dataset create",H5P_DATASET_CREATE_HASH_SIZE,1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"dataset create",1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the dataset creation class */
@@ -235,7 +266,7 @@ H5P_init_interface(void)
 
     /* Allocate the data xfer class */
     assert(H5P_CLS_DATASET_XFER_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,H5D_xfer_create,NULL,H5D_xfer_copy,NULL,H5D_xfer_close,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",1,H5D_xfer_create,NULL,H5D_xfer_copy,NULL,H5D_xfer_close,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the data xfer class */
@@ -244,7 +275,7 @@ H5P_init_interface(void)
 
     /* Allocate the mount class */
     assert(H5P_CLS_MOUNT_g==(-1));
-    if (NULL==(pclass = H5P_create_class (root_class,"file mount",H5P_MOUNT_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"file mount",1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the mount class */
@@ -357,10 +388,8 @@ H5P_term_interface(void)
 static H5P_genclass_t *
 H5P_copy_pclass(H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *new_pclass = NULL;      /* Property list class copied */
-    H5P_genprop_t *tmp;         /* Temporary pointer to parent class properties */
-    H5P_genprop_t *pcopy;       /* Copy of property to insert into class */
-    unsigned u;                 /* Local index variable */
+    H5P_genclass_t *new_pclass = NULL;  /* Property list class copied */
+    H5P_genprop_t *pcopy;               /* Copy of property to insert into class */
     H5P_genclass_t *ret_value=NULL;     /* return value */
 
     FUNC_ENTER_NOINIT(H5P_copy_pclass);
@@ -372,32 +401,30 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
      */
 
     /* Create the new property list class */
-    if (NULL==(new_pclass=H5P_create_class(pclass->parent, pclass->name, pclass->hashsize, 0, pclass->create_func, pclass->create_data, pclass->copy_func, pclass->copy_data, pclass->close_func, pclass->close_data)))
+    if (NULL==(new_pclass=H5P_create_class(pclass->parent, pclass->name, 0, pclass->create_func, pclass->create_data, pclass->copy_func, pclass->copy_data, pclass->close_func, pclass->close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, NULL, "unable to create property list class");
 
     /* Copy the properties registered for this class */
     if(pclass->nprops>0) {
-        /* Walk through the hash table */
-        for(u=0; u<pclass->hashsize; u++) {
-            tmp=pclass->props[u];
+        H5TB_NODE *curr_node;   /* Current node in TBBT */
 
-            /* Walk through the list of properties at each hash location */
-            while(tmp!=NULL) {
-                /* Make a copy of the class's property */
-                if((pcopy=H5P_dup_prop(tmp))==NULL)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+        /* Walk through the properties in the old class */
+        curr_node=H5TB_first(pclass->props->root);
+        while(curr_node!=NULL) {
+            /* Make a copy of the class's property */
+            if((pcopy=H5P_dup_prop(curr_node->data,H5P_PROP_WITHIN_CLASS))==NULL)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
 
-                /* Insert the initialized property into the property list */
-                if(H5P_add_prop(new_pclass->props,new_pclass->hashsize,pcopy)<0)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
+            /* Insert the initialized property into the property list */
+            if(H5P_add_prop(new_pclass->props,pcopy)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
 
-                /* Increment property count for class */
-                new_pclass->nprops++;
+            /* Increment property count for class */
+            new_pclass->nprops++;
 
-                /* Go to next registered property in class */
-                tmp=tmp->next;
-            } /* end while */
-        } /* end for */
+            /* Get the next property node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
     } /* end if */
 
     /* Set the return value */
@@ -432,13 +459,16 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
+hid_t
+H5P_copy_plist(H5P_genplist_t *old_plist)
 {
+    H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genplist_t *new_plist=NULL;  /* New property list generated from copy */
-    H5P_genprop_t *tprop;       /* Temporary pointer to properties */
+    H5P_genprop_t *tmp;         /* Temporary pointer to properties */
     H5P_genprop_t *new_prop;    /* New property created for copy */
     hid_t new_plist_id;         /* Property list ID of new list created */
-    unsigned u;                 /* Local index variable */
+    H5TB_NODE *curr_node;       /* Current node in TBBT */
+    H5TB_TREE *seen=NULL;       /* TBBT containing properties already seen */
     hid_t ret_value=FAIL;       /* return value */
  
     FUNC_ENTER_NOAPI(H5P_copy_plist, FAIL);
@@ -449,8 +479,8 @@ hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
      * Create new property list object
      */
 
-    /* Allocate room for the property list & it's hash table of properties */
-    if (NULL==(new_plist = H5MM_calloc (sizeof(H5P_genplist_t)+((old_plist->pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
+    /* Allocate room for the property list */
+    if (NULL==(new_plist = H5FL_CALLOC(H5P_genplist_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed");
 
     /* Set class state */
@@ -458,14 +488,54 @@ hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
     new_plist->nprops = 0;      /* Initially the plist has the same number of properties as the class */
     new_plist->class_init = 0;  /* Initially, wait until the class callback finishes to set */
 
-    /* Cycle through the properties and copy them also */
-    for(u=0; u<old_plist->pclass->hashsize; u++) {
-        tprop=old_plist->props[u];
+    /* Initialize the TBBT to hold the changed properties */
+    if((new_plist->props=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,FAIL,"can't create TBBT for changed properties");
 
-        /* Walk through the list of properties at each hash location */
-        while(tprop!=NULL) {
+    /* Create the TBBT for deleted properties */
+    if((new_plist->del=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for deleted properties");
+
+    /* Create the TBBT to hold names of properties already seen
+     * (This prevents a property in the class hierarchy from having it's
+     * 'create' callback called, if a property in the class hierarchy has
+     * already been seen)
+     */
+    if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for seen properties");
+
+    /* Cycle through the deleted properties & copy them into the new list's deleted section */
+    if(old_plist->del->root) {
+        curr_node=H5TB_first(old_plist->del->root);
+        while(curr_node) {
+            char *new_name;   /* Pointer to new name */
+
+            /* Duplicate string for insertion into new deleted property TBBT */
+            if((new_name=H5MM_xstrdup(curr_node->data))==NULL)
+                HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"memory allocation failed");
+
+            /* Insert property name into deleted list */
+            if(H5TB_dins(new_plist->del,new_name,new_name)==NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into deleted TBBT");
+
+            /* Add property name to "seen" list */
+            if(H5TB_dins(seen,new_name,new_name)==NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+
+            /* Get the next property node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
+    } /* end if */
+
+    /* Cycle through the properties and copy them also */
+    if(old_plist->props->root) {
+        curr_node=H5TB_first(old_plist->props->root);
+        while(curr_node) {
+            /* Get a pointer to the node's property */
+            tmp=curr_node->data;
+
             /* Make a copy of the list's property */
-            if((new_prop=H5P_dup_prop(tprop))==NULL)
+            if((new_prop=H5P_dup_prop(tmp,H5P_PROP_WITHIN_LIST))==NULL)
                 HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
             /* Call property copy callback, if it exists */
@@ -477,16 +547,61 @@ hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
             } /* end if */
 
             /* Insert the initialized property into the property list */
-            if(H5P_add_prop(new_plist->props,new_plist->pclass->hashsize,new_prop)<0)
+            if(H5P_add_prop(new_plist->props,new_prop)<0) {
+                H5P_free_prop(new_prop);
                 HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into list");
+            } /* end if */
+
+            /* Add property name to "seen" list */
+            if(H5TB_dins(seen,new_prop->name,new_prop->name)==NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
 
             /* Increment the number of properties in list */
             new_plist->nprops++;
 
-            /* Go to next registered property in class */
-            tprop=tprop->next;
+            /* Get the next property node in the TBBT */
+            curr_node=H5TB_next(curr_node);
         } /* end while */
-    } /* end for */
+    } /* end if */
+
+    /*
+     * Check for copying class properties (up through list of parent classes also),
+     * initialize each with default value & make property 'copy' callback.
+     */
+    tclass=old_plist->pclass;
+    while(tclass!=NULL) {
+        if(tclass->nprops>0) {
+            /* Walk through the properties in the old class */
+            curr_node=H5TB_first(tclass->props->root);
+            while(curr_node!=NULL) {
+                /* Get pointer to property from node */
+                tmp=curr_node->data;
+
+                /* Only "copy" properties we haven't seen before */
+                if(H5TB_dfind(seen,tmp->name,NULL)==NULL) {
+                    /* Call property creation callback, if it exists */
+                    if(tmp->copy) {
+                        /* Call the callback & insert changed value into tree (if necessary) */
+                        if(H5P_do_prop_cb1(new_plist->props,tmp,tmp->copy)<0)
+                            HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't create property");
+                    } /* end if */
+
+                    /* Add property name to "seen" list */
+                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+
+                    /* Increment the number of properties in list */
+                    new_plist->nprops++;
+                } /* end if */
+
+                /* Get the next property node in the TBBT */
+                curr_node=H5TB_next(curr_node);
+            } /* end while */
+        } /* end if */
+
+        /* Go up to parent class */
+        tclass=tclass->parent;
+    } /* end while */
 
     /* Increment the number of property lists derived from class */
     if(H5P_access_class(new_plist->pclass,H5P_MOD_INC_LST)<0)
@@ -515,6 +630,10 @@ hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
     ret_value=new_plist_id;
 
 done:
+    /* Release the tree of 'seen' properties */
+    if(seen!=NULL)
+        H5TB_dfree(seen,NULL,NULL);
+
     if (ret_value<0 && new_plist)
         H5P_close(new_plist);
 
@@ -543,7 +662,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Pcopy(hid_t id)
+hid_t
+H5Pcopy(hid_t id)
 {
     void *obj;                 /* Property object to copy */
     hid_t ret_value=FALSE;      /* return value */
@@ -592,6 +712,7 @@ done:
  USAGE
     H5P_genprop_t *H5P_dup_prop(oprop)
         H5P_genprop_t *oprop;   IN: Pointer to property to copy
+        H5P_prop_within_t type; IN: Type of object the property will be inserted into
  RETURNS
     Returns a pointer to the newly created duplicate of a property on success,
         NULL on failure.
@@ -603,7 +724,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
-H5P_dup_prop(H5P_genprop_t *oprop)
+H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 {
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value;        /* Return value */
@@ -611,16 +732,47 @@ H5P_dup_prop(H5P_genprop_t *oprop)
     FUNC_ENTER_NOINIT(H5P_dup_prop);
 
     assert(oprop);
+    assert(type!=H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
-    if (NULL==(prop = H5MM_malloc (sizeof(H5P_genprop_t))))
+    if (NULL==(prop = H5FL_MALLOC (H5P_genprop_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy basic property information */
     HDmemcpy(prop,oprop,sizeof(H5P_genprop_t));
 
-    /* Duplicate name */
-    prop->name = H5MM_xstrdup(oprop->name);
+    /* Check if we should duplicate the name or share it */
+
+    /* Duplicating property for a class */
+    if(type==H5P_PROP_WITHIN_CLASS) {
+        assert(oprop->type==H5P_PROP_WITHIN_CLASS);
+        assert(oprop->shared_name==0);
+
+        /* Duplicate name */
+        prop->name = H5MM_xstrdup(oprop->name);
+    } /* end if */
+    /* Duplicating property for a list */
+    else {
+        /* Check if we are duplicating a property from a list or a class */
+
+        /* Duplicating a property from a list */
+        if(oprop->type==H5P_PROP_WITHIN_LIST) {
+            /* If the old property's name wasn't shared, we have to copy it here also */
+            if(!oprop->shared_name)
+                prop->name = H5MM_xstrdup(oprop->name);
+        } /* end if */
+        /* Duplicating a property from a class */
+        else {
+            assert(oprop->type==H5P_PROP_WITHIN_CLASS);
+            assert(oprop->shared_name==0);
+
+            /* Share the name */
+            prop->shared_name=1;
+
+            /* Set the type */
+            prop->type=type;
+        } /* end else */
+    } /* end else */
 
     /* Duplicate current value, if it exists */
     if(oprop->value!=NULL) {
@@ -629,17 +781,6 @@ H5P_dup_prop(H5P_genprop_t *oprop)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
         HDmemcpy(prop->value,oprop->value,prop->size);
     } /* end if */
-
-    /* Duplicate default value, if it exists */
-    if(oprop->def_value!=NULL) {
-        assert(prop->size>0);
-        if (NULL==(prop->def_value = H5MM_malloc (prop->size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        HDmemcpy(prop->def_value,oprop->def_value,prop->size);
-    } /* end if */
-
-    /* Reset the link to the next property */
-    prop->next=NULL;
 
     /* Set return value */
     ret_value=prop;
@@ -652,9 +793,7 @@ done:
                 H5MM_xfree(prop->name);
             if(prop->value!=NULL)
                 H5MM_xfree(prop->value);
-            if(prop->def_value!=NULL)
-                H5MM_xfree(prop->def_value);
-            H5MM_xfree(prop);
+            H5FL_FREE(H5P_genprop_t,prop);
         } /* end if */
     } /* end if */
 
@@ -668,12 +807,12 @@ done:
  PURPOSE
     Internal routine to create a new property
  USAGE
-    H5P_genprop_t *H5P_create_prop(name,size,def_value,prp_create,prp_set,
+    H5P_genprop_t *H5P_create_prop(name,size,type,value,prp_create,prp_set,
             prp_get,prp_delete,prp_close)
         const char *name;       IN: Name of property to register
         size_t size;            IN: Size of property in bytes
-        void *def_value;        IN: Pointer to buffer containing default value
-                                    for property in newly created property lists
+        H5P_prop_within_t type; IN: Type of object the property will be inserted into
+        void *value;            IN: Pointer to buffer containing value for property
         H5P_prp_create_func_t prp_create;   IN: Function pointer to property
                                     creation callback
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
@@ -693,7 +832,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
-H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
+H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
+    void *value,
     H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
@@ -704,16 +844,18 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     FUNC_ENTER_NOINIT(H5P_create_prop);
 
     assert(name);
-    assert((size>0 && (def_value!=NULL || value!=NULL)) || (size==0));
+    assert((size>0 && value!=NULL) || (size==0));
+    assert(type!=H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
-    if (NULL==(prop = H5MM_malloc (sizeof(H5P_genprop_t))))
+    if (NULL==(prop = H5FL_MALLOC (H5P_genprop_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set the property initial values */
-    prop->xor_val = H5P_xor_name(name); /* Generate the XOR'd value for the name */
     prop->name = H5MM_xstrdup(name); /* Duplicate name */
+    prop->shared_name=0;
     prop->size=size;
+    prop->type=type;
 
     /* Duplicate value, if it exists */
     if(value!=NULL) {
@@ -724,15 +866,6 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     else
         prop->value=NULL;
 
-    /* Duplicate default value, if it exists */
-    if(def_value!=NULL) {
-        if (NULL==(prop->def_value = H5MM_malloc (prop->size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        HDmemcpy(prop->def_value,def_value,prop->size);
-    } /* end if */
-    else
-        prop->def_value=NULL;
-
     /* Set the function pointers */
     prop->create=prp_create;
     prop->set=prp_set;
@@ -740,9 +873,6 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     prop->del=prp_delete;
     prop->copy=prp_copy;
     prop->close=prp_close;
-
-    /* Reset the link to the next property */
-    prop->next=NULL;
 
     /* Set return value */
     ret_value=prop;
@@ -755,9 +885,7 @@ done:
                 H5MM_xfree(prop->name);
             if(prop->value!=NULL)
                 H5MM_xfree(prop->value);
-            if(prop->def_value!=NULL)
-                H5MM_xfree(prop->def_value);
-            H5MM_xfree(prop);
+            H5FL_FREE(H5P_genprop_t,prop);
         } /* end if */
     } /* end if */
 
@@ -769,95 +897,142 @@ done:
  NAME
     H5P_add_prop
  PURPOSE
-    Internal routine to insert a property into a property hash table
+    Internal routine to insert a property into a property TBBT
  USAGE
-    herr_t H5P_add_prop(hash, hashsize, prop)
-        H5P_gen_prop_t *hash[]; IN/OUT: Pointer to array of properties for hash table
-        unsigned hashsize;         IN: Size of hash table
+    herr_t H5P_add_prop(tree, prop)
+        H5TB_TREE *tree;        IN/OUT: Pointer to TBBT of properties
         H5P_genprop_t *prop;    IN: Pointer to property to insert
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
-    Inserts a property into a hash table of properties, using the hashed
-    property name.
+    Inserts a property into a TBBT of properties.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
+H5P_add_prop(H5TB_TREE *tree, H5P_genprop_t *prop)
 {
-    unsigned loc;                  /* Hash table location */
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5P_add_prop);
+    FUNC_ENTER_NOAPI(H5P_add_prop,FAIL);
 
-    assert(hash);
-    assert(hashsize>0);
+    assert(tree);
     assert(prop);
+    assert(prop->type!=H5P_PROP_WITHIN_UNKNOWN);
 
-    /* Get correct hash table location */
-    loc=H5P_hash_name(prop->name,hashsize);
-    
-    /* Insert property into hash table */
-    prop->next=hash[loc];
-    hash[loc]=prop;
+    /* Insert property into TBBT */
+    if(H5TB_dins(tree,prop,prop->name)==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into TBBT");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5P_add_prop() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_find_prop
+    H5P_find_prop_plist
  PURPOSE
-    Internal routine to check for a property in a hash table
+    Internal routine to check for a property in a property list's TBBT
  USAGE
-    H5P_genprop_t *H5P_find_prop(hash, hashsize, name)
-        H5P_genprop_t *hash[];  IN: Pointer to array of properties for hash table
-        unsigned hashsize;         IN: Size of hash table
+    H5P_genprop_t *H5P_find_prop(plist, name)
+        H5P_genplist_t *plist;  IN: Pointer to property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Returns pointer to property on success, NULL on failure.
  DESCRIPTION
-        Checks for a property in a hash table of properties.
+    Checks for a property in a property list's TBBT of properties.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
-H5P_find_prop(H5P_genprop_t *hash[], unsigned hashsize, const char *name)
+H5P_find_prop_plist(H5P_genplist_t *plist, const char *name)
 {
+    H5TB_NODE *prop_node;       /* TBBT node holding property */
     H5P_genprop_t *ret_value;   /* Property pointer return value */
-    unsigned loc;                  /* Hash table location */
-    unsigned xor_val;              /* XOR'ed value of the name to look for */
 
-    FUNC_ENTER_NOINIT(H5P_find_prop);
+    FUNC_ENTER_NOINIT(H5P_find_prop_plist);
 
-    assert(hash);
-    assert(hashsize>0);
+    assert(plist);
     assert(name);
 
-    /* Get correct hash table location */
-    loc=H5P_hash_name(name,hashsize);
-    
-    /* Get the XOR'ed value for the name to search for, to speed up comparisons */
-    xor_val=H5P_xor_name(name);
-    
-    /* Locate property in list */
-    ret_value=hash[loc];
-    while(ret_value!=NULL) {
-        /* Check for name matching */
-        if(ret_value->xor_val==xor_val && HDstrcmp(ret_value->name,name)==0)
-            break;
-        
-        /* Advance to the next property */
-        ret_value=ret_value->next;
-    } /* end while */
+    /* Check if the property has been deleted from list */
+    if(H5TB_dfind(plist->del,name,NULL)!=NULL) {
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in TBBT");
+    } /* end if */
+    else {
+        /* Get the property node from the TBBT */
+        if((prop_node=H5TB_dfind(plist->props,name,NULL))!=NULL) {
+            /* Get the property from the node */
+            ret_value=prop_node->data;
+        } /* end if */
+        else {
+            H5P_genclass_t *tclass;     /* Temporary class pointer */
 
+            tclass=plist->pclass;
+            while(tclass!=NULL) {
+                /* Find the property in the class */
+                if((prop_node=H5TB_dfind(tclass->props,name,NULL))!=NULL)
+                    /* Get pointer to actual property & leave */
+                    HGOTO_DONE(prop_node->data);
+
+                /* Go up to parent class */
+                tclass=tclass->parent;
+            } /* end while */
+
+            /* If we've gotten this far, we haven't found the property */
+            HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in TBBT");
+        } /* end else */
+    } /* end else */
+
+done:
     FUNC_LEAVE (ret_value);
-}   /* H5P_find_prop() */
+}   /* H5P_find_prop_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_find_prop_pclass
+ PURPOSE
+    Internal routine to check for a property in a class TBBT
+ USAGE
+    H5P_genprop_t *H5P_find_prop_class(tree, name)
+        H5P_genclass *pclass;   IN: Pointer generic property class to check
+        const char *name;       IN: Name of property to check for
+ RETURNS
+    Returns pointer to property on success, NULL on failure.
+ DESCRIPTION
+    Checks for a property in a class' TBBT of properties.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static H5P_genprop_t *
+H5P_find_prop_pclass(H5P_genclass_t *pclass, const char *name)
+{
+    H5TB_NODE *prop_node;       /* TBBT node holding property */
+    H5P_genprop_t *ret_value;   /* Property pointer return value */
+
+    FUNC_ENTER_NOINIT(H5P_find_prop_pclass);
+
+    assert(pclass);
+    assert(name);
+
+    /* Get the property node from the TBBT */
+    if((prop_node=H5TB_dfind(pclass->props,name,NULL))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in TBBT");
+
+    /* Get the property from the node */
+    ret_value=prop_node->data;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_find_prop_pclass() */
 
 
 /*--------------------------------------------------------------------------
@@ -885,15 +1060,15 @@ H5P_free_prop(H5P_genprop_t *prop)
 
     assert(prop);
 
-    /* Release the property value and default value if they exist */
-    if(prop->size>0) {
-        if(prop->value)
-            H5MM_xfree(prop->value);
-        if(prop->def_value)
-            H5MM_xfree(prop->def_value);
-    } /* end if */
-    H5MM_xfree(prop->name);
-    H5MM_xfree(prop);
+    /* Release the property value if it exists */
+    if(prop->value)
+        H5MM_xfree(prop->value);
+
+    /* Only free the name if we own it */
+    if(prop->shared_name==0)
+        H5MM_xfree(prop->name);
+
+    H5FL_FREE(H5P_genprop_t,prop);
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5P_free_prop() */
@@ -903,11 +1078,10 @@ H5P_free_prop(H5P_genprop_t *prop)
  NAME
     H5P_free_all_prop
  PURPOSE
-    Internal routine to remove all properties from a property hash table
+    Internal routine to remove all properties from a property TBBT
  USAGE
-    herr_t H5P_free_all_prop(hash, hashsize, make_cb)
-        H5P_gen_prop_t *hash[]; IN/OUT: Pointer to array of properties for hash table
-        unsigned hashsize;         IN: Size of hash table
+    herr_t H5P_free_all_prop(tree, make_cb)
+        H5TB_TREE *tree;           IN/OUT: Pointer to property TBBT
         unsigned make_cb;          IN: Whether to make property callbacks or not
  RETURNS
     Returns non-negative on success, negative on failure.
@@ -920,35 +1094,39 @@ H5P_free_prop(H5P_genprop_t *prop)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
+H5P_free_all_prop(H5TB_TREE *tree,unsigned make_cb)
 {
-    H5P_genprop_t *tprop, *next;/* Temporary pointer to properties */
-    unsigned u;                    /* Local index variable */
+    H5P_genprop_t *tprop;       /* Temporary pointer to properties */
+    H5TB_NODE *curr_node, *next_node;   /* Current & next nodes in TBBT */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_free_all_prop);
 
-    assert(hash);
-    assert(hashsize>0);
+    assert(tree);
 
     /* Work through all the properties... */
-    for(u=0; u<hashsize; u++) {
-        tprop=hash[u];
-        while(tprop!=NULL) {
-            /* Find next node right away, to avoid accessing the current node after it's been free'd */
-            next=tprop->next;
+    curr_node=H5TB_first(tree->root);
+    while(curr_node!=NULL) {
+        /* Get the next node in the TBBT */
+        next_node=H5TB_next(curr_node);
 
-            /* Call the close callback and ignore the return value, there's nothing we can do about it */
-            if(make_cb && tprop->close!=NULL)
-                (tprop->close)(tprop->name,tprop->size,tprop->value);
+        /* Remove the node from the TBBT */
+        if((tprop=H5TB_rem(&tree->root,curr_node,NULL))==NULL)
+            HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from TBBT");
 
-            /* Free the property, ignoring return value, nothing we can do */
-            H5P_free_prop(tprop);
+        /* Call the close callback and ignore the return value, there's nothing we can do about it */
+        if(make_cb && tprop->close!=NULL)
+            (tprop->close)(tprop->name,tprop->size,tprop->value);
 
-            tprop=next;
-        } /* end while */
-    } /* end for */
+        /* Free the property, ignoring return value, nothing we can do */
+        H5P_free_prop(tprop);
 
-    FUNC_LEAVE (SUCCEED);
+        /* Advance to the next property node in the TBBT */
+        curr_node=next_node;
+    } /* end while */
+
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5P_free_all_prop() */
 
 
@@ -1027,9 +1205,13 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         H5MM_xfree(pclass->name);
 
         /* Free the class properties without making callbacks */
-        H5P_free_all_prop(pclass->props,pclass->hashsize,0);
+        if(pclass->nprops>0)
+            H5P_free_all_prop(pclass->props,0);
 
-        H5MM_xfree(pclass);
+        /* Free the property tree itself */
+        H5TB_dfree(pclass->props,NULL,NULL);
+
+        H5FL_FREE(H5P_genclass_t,pclass);
 
         /* Reduce the number of dependent classes on parent class also */
         if(par_class!=NULL)
@@ -1091,11 +1273,10 @@ H5P_check_class(void *_obj, hid_t id, const void *_key)
  PURPOSE
     Internal routine to create a new property list class.
  USAGE
-    H5P_genclass_t H5P_create_class(par_class, name, hashsize, internal,
+    H5P_genclass_t H5P_create_class(par_class, name, internal,
                 cls_create, create_data, cls_close, close_data)
         H5P_genclass_t *par_class;  IN: Pointer to parent class
         const char *name;       IN: Name of class we are creating
-        unsigned hashsize; IN: Number of buckets in hash table
         unsigned internal; IN: Whether this is an internal class or not
         H5P_cls_create_func_t;  IN: The callback function to call when each
                                     property list in this class is created.
@@ -1120,7 +1301,7 @@ H5P_check_class(void *_obj, hid_t id, const void *_key)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genclass_t *
-H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize, unsigned internal,
+H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned internal,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data
@@ -1136,23 +1317,26 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     /* (This allows the root of the tree to be created with this routine -QAK) */
     if(!internal) {
         assert(par_class);
-        assert(hashsize>0);
     }
 
-    /* Allocate room for the class & it's hash table of properties */
-    if (NULL==(pclass = H5MM_calloc (sizeof(H5P_genclass_t)+((hashsize-1)*sizeof(H5P_genprop_t *)))))
+    /* Allocate room for the class */
+    if (NULL==(pclass = H5FL_CALLOC(H5P_genclass_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
 
     /* Set class state */
     pclass->parent = par_class;
     pclass->name = H5MM_xstrdup(name);
     pclass->nprops = 0;     /* Classes are created without properties initially */
-    pclass->hashsize = hashsize;
     pclass->plists = 0;     /* No properties lists of this class yet */
     pclass->classes = 0;    /* No classes derived from this class yet */
     pclass->ref_count = 1;  /* This is the first reference to the new class */
     pclass->internal = internal;
     pclass->deleted = 0;    /* Not deleted yet... :-) */
+    pclass->revision = H5P_GET_NEXT_REV;        /* Get a revision number for the class */
+
+    /* Create the TBBT for properties */
+    if((pclass->props=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for properties");
 
     /* Set callback functions and pass-along data */
     pclass->create_func = cls_create;
@@ -1175,7 +1359,7 @@ done:
     /* Free any resources allocated */
     if(ret_value==NULL) {
         if(pclass!=NULL)
-            H5MM_xfree(pclass);
+            H5FL_FREE(H5P_genclass_t,pclass);
     }
 
     FUNC_LEAVE (ret_value);
@@ -1188,11 +1372,10 @@ done:
  PURPOSE
     Create a new property list class.
  USAGE
-    hid_t H5Pcreate_class(parent, name, hashsize, cls_create, create_data,
+    hid_t H5Pcreate_class(parent, name, cls_create, create_data,
                 cls_close, close_data)
         hid_t parent;       IN: Property list class ID of parent class
         const char *name;   IN: Name of class we are creating
-        unsigned hashsize;     IN: Number of buckets in hash table
         H5P_cls_create_func_t cls_create;   IN: The callback function to call
                                     when each property list in this class is
                                     created.
@@ -1218,7 +1401,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
+H5Pcreate_class(hid_t parent, const char *name, 
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data
@@ -1229,7 +1412,7 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
     hid_t	ret_value;                  /* Return value		   */
 
     FUNC_ENTER_API(H5Pcreate_class, FAIL);
-    H5TRACE9("i","isIuxxxxxx",parent,name,hashsize,cls_create,create_data,
+    H5TRACE8("i","isxxxxxx",parent,name,cls_create,create_data,
              cls_copy,copy_data,cls_close,close_data);
 
     /* Check arguments. */
@@ -1237,8 +1420,6 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
-    if (hashsize==0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hashsize too small");
     if ((create_data!=NULL && cls_create==NULL)
             || (copy_data!=NULL && cls_copy==NULL)
             || (close_data!=NULL && cls_close==NULL))
@@ -1251,7 +1432,7 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class");
 
     /* Create the new property list class */
-    if (NULL==(pclass=H5P_create_class(par_class, name, hashsize, 0, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
+    if (NULL==(pclass=H5P_create_class(par_class, name, 0, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class");
 
     /* Get an atom for the class */
@@ -1291,14 +1472,14 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
+static H5P_genplist_t *
+H5P_create(H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *tclass=NULL;        /* Temporary class pointer */
-    H5P_genplist_t *plist=NULL;         /* New property list created */
-    H5P_genplist_t *ret_value;          /* return value */
-    H5P_genprop_t *tmp;                 /* Temporary pointer to parent class properties */
-    H5P_genprop_t *pcopy;               /* Copy of property to insert into class */
-    unsigned u;                         /* Local index variable */
+    H5P_genclass_t *tclass;         /* Temporary class pointer */
+    H5P_genplist_t *plist=NULL;     /* New property list created */
+    H5P_genprop_t *tmp;             /* Temporary pointer to parent class properties */
+    H5TB_TREE *seen=NULL;           /* TBBT to hold names of properties already seen */
+    H5P_genplist_t *ret_value;      /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_create);
 
@@ -1308,8 +1489,8 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
      * Create new property list object
      */
 
-    /* Allocate room for the property list & it's hash table of properties */
-    if (NULL==(plist = H5MM_calloc (sizeof(H5P_genplist_t)+((pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
+    /* Allocate room for the property list */
+    if (NULL==(plist = H5FL_CALLOC(H5P_genplist_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
 
     /* Set class state */
@@ -1317,57 +1498,57 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
     plist->nprops = 0;      /* Initially the plist has the same number of properties as the class */
     plist->class_init = 0;  /* Initially, wait until the class callback finishes to set */
 
+    /* Create the TBBT for changed properties */
+    if((plist->props=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for changed properties");
+
+    /* Create the TBBT for deleted properties */
+    if((plist->del=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for deleted properties");
+
+    /* Create the TBBT to hold names of properties already seen
+     * (This prevents a property in the class hierarchy from having it's
+     * 'create' callback called, if a property in the class hierarchy has
+     * already been seen)
+     */
+    if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for seen properties");
+
     /*
-     * Copy class properties (up through list of parent classes also),
+     * Check if we should copy class properties (up through list of parent classes also),
      * initialize each with default value & make property 'create' callback.
      */
     tclass=pclass;
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
-            /* Walk through the hash table */
-            for(u=0; u<tclass->hashsize; u++) {
-                tmp=tclass->props[u];
-                /* Walk through the list of properties at each hash location */
-                while(tmp!=NULL) {
-                    /* Check for property already existing in list */
-                    if(H5P_find_prop(plist->props,pclass->hashsize,tmp->name)==NULL) {
-                        /* Make a copy of the class's property */
-                        if((pcopy=H5P_dup_prop(tmp))==NULL)
-                            HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+            H5TB_NODE *curr_node;   /* Current node in TBBT */
 
-                        /* Create initial value from default value for non-zero sized properties */
-                        if(pcopy->size>0) {
-                            /* Properties from the class should have any values yet, but should have a default */
-                            assert(pcopy->value==NULL);
-                            assert(pcopy->def_value);
+            /* Walk through the properties in the old class */
+            curr_node=H5TB_first(tclass->props->root);
+            while(curr_node!=NULL) {
+                /* Get pointer to property from node */
+                tmp=curr_node->data;
 
-                            /* Allocate space for the property value & copy default value */
-                            if (NULL==(pcopy->value = H5MM_malloc (pcopy->size)))
-                                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-                            HDmemcpy(pcopy->value,pcopy->def_value,pcopy->size);
-                        } /* end if */
-
-                        /* Call property creation callback, if it exists */
-                        if(pcopy->create) {
-                            if((pcopy->create)(pcopy->name,pcopy->size,pcopy->value)<0) {
-                                H5P_free_prop(pcopy);
-                                HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't initialize property");
-                            } /* end if */
-                        } /* end if */
-
-                        /* Insert the initialized property into the property list */
-                        if(H5P_add_prop(plist->props,pclass->hashsize,pcopy)<0)
-                            HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
-
-                        /* Increment the number of properties in list */
-                        plist->nprops++;
+                /* Only "create" properties we haven't seen before */
+                if(H5TB_dfind(seen,tmp->name,NULL)==NULL) {
+                    /* Call property creation callback, if it exists */
+                    if(tmp->create) {
+                        /* Call the callback & insert changed value into tree (if necessary) */
+                        if(H5P_do_prop_cb1(plist->props,tmp,tmp->create)<0)
+                            HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't create property");
                     } /* end if */
 
-                    /* Go to next registered property in class */
-                    tmp=tmp->next;
-                } /* end while */
-            } /* end for */
+                    /* Add property name to "seen" list */
+                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+
+                    /* Increment the number of properties in list */
+                    plist->nprops++;
+                } /* end if */
+
+                /* Get the next property node in the TBBT */
+                curr_node=H5TB_next(curr_node);
+            } /* end while */
         } /* end if */
 
         /* Go up to parent class */
@@ -1382,14 +1563,25 @@ static H5P_genplist_t *H5P_create(H5P_genclass_t *pclass)
     ret_value=plist;
 
 done:
+    /* Release the tree of 'seen' properties */
+    if(seen!=NULL)
+        H5TB_dfree(seen,NULL,NULL);
+
     /* Release resources allocated on failure */
     if(ret_value==NULL) {
         if(plist!=NULL) {
-            /* Close & free all the properties */
-            H5P_free_all_prop(plist->props,pclass->hashsize,1);
+            /* Close & free any changed properties */
+            if(plist->props) {
+                H5P_free_all_prop(plist->props,1);
+                H5TB_dfree(plist->props,NULL,NULL);
+            } /* end if */
 
-            /* Decrement the number of property lists derived from the class */
-            pclass->plists--;
+            /* Release the deleted property TBBT */
+            if(plist->del)
+                H5TB_dfree(plist->del,NULL,NULL);
+
+            /* Release the property list itself */
+            H5FL_FREE(H5P_genplist_t,plist);
         } /* end if */
     } /* end if */
 
@@ -1419,7 +1611,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_create_id(H5P_genclass_t *pclass)
+hid_t
+H5P_create_id(H5P_genclass_t *pclass)
 {
     H5P_genplist_t	*plist=NULL;    /* Property list created */
     hid_t plist_id=FAIL;        /* Property list ID */
@@ -1485,7 +1678,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Pcreate(hid_t cls_id)
+hid_t
+H5Pcreate(hid_t cls_id)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
     hid_t ret_value;               /* return value */
@@ -1636,16 +1830,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
+herr_t
+H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
 {
     H5P_genclass_t *new_class; /* New class pointer */
-    H5P_genprop_t *tmp_prop;   /* Temporary property pointer */
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
     H5P_genprop_t *pcopy;      /* Property copy */
-    unsigned u;                   /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_register, FAIL);
@@ -1655,50 +1848,59 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     assert((size>0 && def_value!=NULL) || (size==0));
 
     /* Check for duplicate named properties */
-    if((tmp_prop=H5P_find_prop(pclass->props,pclass->hashsize,name))!=NULL)
+    if(H5TB_dfind(pclass->props,name,NULL)!=NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
 
     /* Check if class needs to be split because property lists or classes have
      *  been created since the last modification was made to the class.
      */
     if(pclass->plists>0 || pclass->classes>0) {
-        if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
+        if((new_class=H5P_create_class(pclass->parent,pclass->name,
                 pclass->internal,pclass->create_func,pclass->create_data,
                 pclass->copy_func,pclass->copy_data,
                 pclass->close_func,pclass->close_data))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
 
-        /* Walk through the hash table of the old class and copy properties */
-        for(u=0; u<pclass->hashsize; u++) {
-            tmp_prop=pclass->props[u];
-            while(tmp_prop!=NULL) {
+        /* Walk through the TBBT of the old class and copy properties */
+        if(pclass->nprops>0) {
+            H5TB_NODE *curr_node;   /* Current node in TBBT */
+
+            /* Walk through the properties in the old class */
+            curr_node=H5TB_first(pclass->props->root);
+            while(curr_node!=NULL) {
                 /* Make a copy of the class's property */
-                if((pcopy=H5P_dup_prop(tmp_prop))==NULL)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+                if((pcopy=H5P_dup_prop(curr_node->data,H5P_PROP_WITHIN_CLASS))==NULL)
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
 
-                /* Insert the property into the new property class */
-                if(H5P_add_prop(new_class->props,pclass->hashsize,pcopy)<0)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
+                /* Insert the initialized property into the property list */
+                if(H5P_add_prop(new_class->props,pcopy)<0)
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
 
-                /* Go to next registered property in class */
-                tmp_prop=tmp_prop->next;
+                /* Increment property count for class */
+                new_class->nprops++;
+
+                /* Get the next property node in the TBBT */
+                curr_node=H5TB_next(curr_node);
             } /* end while */
-        } /* end for */
+        } /* end if */
 
         /* Use the new class instead of the old one */
         pclass=new_class;
     } /* end if */
 
     /* Create property object from parameters */
-    if((new_prop=H5P_create_prop(name,size,def_value,NULL,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
+    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_CLASS,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
     /* Insert property into property list class */
-    if(H5P_add_prop(pclass->props,pclass->hashsize,new_prop)<0)
+    if(H5P_add_prop(pclass->props,new_prop)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
 
     /* Increment property count for class */
     pclass->nprops++;
+
+    /* Update the revision for the class */
+    pclass->revision = H5P_GET_NEXT_REV;
 
 done:
     if(ret_value==FAIL) {
@@ -1707,9 +1909,7 @@ done:
                 H5MM_xfree(new_prop->name);
             if(new_prop->value!=NULL)
                 H5MM_xfree(new_prop->value);
-            if(new_prop->def_value!=NULL)
-                H5MM_xfree(new_prop->def_value);
-            H5MM_xfree(new_prop);
+            H5FL_FREE(H5P_genprop_t,new_prop);
         } /* end if */
     }  /* end if */
     FUNC_LEAVE (ret_value);
@@ -1847,7 +2047,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
+herr_t
+H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
     H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
@@ -1986,8 +2187,9 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
     H5P_prp_close_func_t prp_close)
 {
-    H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genprop_t *new_prop=NULL;       /* Temporary property pointer */
+    H5TB_NODE *prop_node;               /* TBBT node holding property */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_insert);
 
@@ -1996,15 +2198,44 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     assert((size>0 && value!=NULL) || (size==0));
 
     /* Check for duplicate named properties */
-    if(H5P_find_prop(plist->props,plist->pclass->hashsize,name)!=NULL)
+    if(H5TB_dfind(plist->props,name,NULL)!=NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
 
+    /* Check if the property has been deleted */
+    if((prop_node=H5TB_dfind(plist->del,name,NULL))!=NULL) {
+        /* Remove the property name from the deleted property TBBT */
+        if(H5TB_rem(&plist->del->root,prop_node,NULL)==NULL)
+            HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from deleted TBBT");
+
+        /* Fall through to add property to list */
+    } /* end if */
+    else {
+        H5P_genclass_t *tclass;     /* Temporary class pointer */
+
+        /* Check if the property is already in the class hierarchy */
+        tclass=plist->pclass;
+        while(tclass!=NULL) {
+            if(tclass->nprops>0) {
+                /* Find the property in the class */
+                if(H5TB_dfind(tclass->props,name,NULL)!=NULL)
+                    HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
+            } /* end if */
+
+            /* Go up to parent class */
+            tclass=tclass->parent;
+        } /* end while */
+
+        /* Fall through to add property to list */
+    } /* end else */
+
+    /* Ok to add to property list */
+
     /* Create property object from parameters */
-    if((new_prop=H5P_create_prop(name,size,NULL,value,NULL,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
+    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_LIST,value,NULL,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
     /* Insert property into property list class */
-    if(H5P_add_prop(plist->props,plist->pclass->hashsize,new_prop)<0)
+    if(H5P_add_prop(plist->props,new_prop)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
 
     /* Increment property count for class */
@@ -2017,9 +2248,7 @@ done:
                 H5MM_xfree(new_prop->name);
             if(new_prop->value!=NULL)
                 H5MM_xfree(new_prop->value);
-            if(new_prop->def_value!=NULL)
-                H5MM_xfree(new_prop->def_value);
-            H5MM_xfree(new_prop);
+            H5FL_FREE(H5P_genprop_t,new_prop);
         } /* end if */
     }  /* end if */
 
@@ -2132,7 +2361,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
+herr_t
+H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
     H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
     H5P_prp_close_func_t prp_close)
@@ -2190,9 +2420,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
+herr_t
+H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
 {
+    H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genprop_t *prop;        /* Temporary property pointer */
+    H5TB_NODE *prop_node;       /* TBBT node holding property */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_set, FAIL);
@@ -2201,36 +2434,123 @@ herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
     assert(name);
     assert(value);
 
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
+    /* Check if the property has been deleted */
+    if(H5TB_dfind(plist->del,name,NULL)!=NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
-    /* Check for property size >0 */
-    if(prop->size==0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
+    /* Find property in changed list */
+    if((prop_node=H5TB_dfind(plist->props,name,NULL))!=NULL) {
+        /* Get pointer to actual property */
+        prop=prop_node->data;
 
-    /* Make a copy of the value and pass to 'set' callback */
-    if(prop->set!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
+        /* Check for property size >0 */
+        if(prop->size==0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
 
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,value,prop->size);
+        /* Make a copy of the value and pass to 'set' callback */
+        if(prop->set!=NULL) {
+            void *tmp_value;            /* Temporary value for property */
 
-        /* Call user's callback */
-        if((*(prop->set))(plist->plist_id,name,prop->size,tmp_value)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
+            /* Make a copy of the current value, in case the callback fails */
+            if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+            HDmemcpy(tmp_value,value,prop->size);
 
-        /* Copy new [possibly unchanged] value into property value */
-        HDmemcpy(prop->value,tmp_value,prop->size);
+            /* Call user's callback */
+            if((*(prop->set))(plist->plist_id,name,prop->size,tmp_value)<0) {
+                H5MM_xfree(tmp_value);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
+            } /* end if */
 
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
+            /* Copy new [possibly unchanged] value into property value */
+            HDmemcpy(prop->value,tmp_value,prop->size);
+
+            /* Free the temporary value buffer */
+            H5MM_xfree(tmp_value);
+        } /* end if */
+        /* No 'set' callback, just copy value */
+        else
+            HDmemcpy(prop->value,value,prop->size);
     } /* end if */
-    /* No 'set' callback, just copy value */
-    else
-        HDmemcpy(prop->value,value,prop->size);
+    else {
+        /*
+         * Check if we should set class properties (up through list of parent classes also),
+         * & make property 'set' callback.
+         */
+        tclass=plist->pclass;
+        while(tclass!=NULL) {
+            if(tclass->nprops>0) {
+                /* Find the property in the class */
+                if((prop_node=H5TB_dfind(tclass->props,name,NULL))!=NULL) {
+                    H5P_genprop_t *pcopy;  /* Copy of property to insert into TBBT */
+
+                    /* Get pointer to actual property */
+                    prop=prop_node->data;
+
+                    /* Check for property size >0 */
+                    if(prop->size==0)
+                        HGOTO_ERROR(H5E_PLIST,H5E_BADVALUE,FAIL,"property has zero size");
+
+                    /* Make a copy of the value and pass to 'set' callback */
+                    if(prop->set!=NULL) {
+                        void *tmp_value;            /* Temporary value for property */
+
+                        /* Make a copy of the current value, in case the callback fails */
+                        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+                        HDmemcpy(tmp_value,value,prop->size);
+
+                        /* Call user's callback */
+                        if((*(prop->set))(plist->plist_id,name,prop->size,tmp_value)<0) {
+                            H5MM_xfree(tmp_value);
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
+                        } /* end if */
+
+                        if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+                            /* Make a copy of the class's property */
+                            if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST))==NULL)
+                                HGOTO_ERROR(H5E_PLIST,H5E_CANTCOPY,FAIL,"Can't copy property");
+
+                            /* Copy new value into property value */
+                            HDmemcpy(pcopy->value,tmp_value,pcopy->size);
+
+                            /* Insert the changed property into the property list */
+                            if(H5P_add_prop(plist->props,pcopy)<0)
+                                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert changed property into TBBT");
+                        } /* end if */
+
+                        /* Free the temporary value buffer */
+                        H5MM_xfree(tmp_value);
+                    } /* end if */
+                    /* No 'set' callback, just copy value */
+                    else {
+                        if(HDmemcmp(value,prop->value,prop->size)) {
+                            /* Make a copy of the class's property */
+                            if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST))==NULL)
+                                HGOTO_ERROR(H5E_PLIST,H5E_CANTCOPY,FAIL,"Can't copy property");
+
+                            HDmemcpy(pcopy->value,value,pcopy->size);
+
+                            /* Insert the changed property into the property list */
+                            if(H5P_add_prop(plist->props,pcopy)<0)
+                                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert changed property into TBBT");
+                        } /* end if */
+                    } /* end else */
+
+                    /* Leave */
+                    HGOTO_DONE(SUCCEED);
+                } /* end while */
+            } /* end if */
+
+            /* Go up to parent class */
+            tclass=tclass->parent;
+        } /* end while */
+
+        /* If we get this far, then it wasn't in the list of changed properties,
+         * nor in the properties in the class hierarchy, indicate an error
+         */
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in TBBT");
+    } /* end else */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -2268,7 +2588,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pset(hid_t plist_id, const char *name, void *value)
+herr_t
+H5Pset(hid_t plist_id, const char *name, void *value)
 {
     H5P_genplist_t *plist;      /* Property list to modify */
     herr_t ret_value=SUCCEED;   /* return value */
@@ -2323,12 +2644,31 @@ H5P_exist_plist(H5P_genplist_t *plist, const char *name)
     assert(plist);
     assert(name);
 
-    /* Check for property in property list */
-    if(H5P_find_prop(plist->props,plist->pclass->hashsize,name)==NULL)
+    /* Check for property in deleted property list */
+    if(H5TB_dfind(plist->del,name,NULL)!=NULL)
         ret_value=0;
-    else
-        ret_value=1;
+    else {
+        /* Check for property in changed property list */
+        if(H5TB_dfind(plist->props,name,NULL)!=NULL)
+            ret_value=1;
+        else {
+            H5P_genclass_t *tclass;     /* Temporary class pointer */
 
+            tclass=plist->pclass;
+            while(tclass!=NULL) {
+                if(H5TB_dfind(tclass->props,name,NULL)!=NULL)
+                    HGOTO_DONE(1);
+
+                /* Go up to parent class */
+                tclass=tclass->parent;
+            } /* end while */
+
+            /* If we've reached here, we couldn't find the property */
+            ret_value=0;
+        } /* end else */
+    } /* end else */
+
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_exist_plist() */
 
@@ -2365,7 +2705,7 @@ H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
     assert(name);
 
     /* Check for property in property list */
-    if(H5P_find_prop(pclass->props,pclass->hashsize,name)==NULL)
+    if(H5TB_dfind(pclass->props,name,NULL)==NULL)
         ret_value=0;
     else
         ret_value=1;
@@ -2396,7 +2736,8 @@ H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5Pexist(hid_t id, const char *name)
+htri_t
+H5Pexist(hid_t id, const char *name)
 {
     H5P_genplist_t	*plist;    /* Property list to query */
     H5P_genclass_t	*pclass;   /* Property class to query */
@@ -2467,7 +2808,7 @@ H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
     assert(size);
 
     /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
+    if((prop=H5P_find_prop_plist(plist,name))==NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Get property size */
@@ -2513,7 +2854,7 @@ H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
     assert(size);
 
     /* Find property */
-    if((prop=H5P_find_prop(pclass->props,pclass->hashsize,name))==NULL)
+    if((prop=H5P_find_prop_pclass(pclass,name))==NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Get property size */
@@ -2547,7 +2888,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pget_size(hid_t id, const char *name, size_t *size)
+herr_t
+H5Pget_size(hid_t id, const char *name, size_t *size)
 {
     H5P_genclass_t	*pclass;   /* Property class to query */
     H5P_genplist_t	*plist;    /* Property list to query */
@@ -2643,7 +2985,8 @@ H5P_get_class(H5P_genplist_t *plist)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Pget_class(hid_t plist_id)
+hid_t
+H5Pget_class(hid_t plist_id)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
     H5P_genclass_t	*pclass=NULL;   /* Property list class */
@@ -2730,7 +3073,8 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
+herr_t
+H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -2770,7 +3114,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pget_nprops(hid_t id, size_t *nprops)
+herr_t
+H5Pget_nprops(hid_t id, size_t *nprops)
 {
     H5P_genplist_t	*plist;    /* Property list to query */
     H5P_genclass_t	*pclass;   /* Property class to query */
@@ -2853,13 +3198,6 @@ H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
         if((cmp_value=HDmemcmp(prop1->value,prop2->value,prop1->size))!=0)
             HGOTO_DONE(cmp_value);
 
-    /* Check if they both have default values allocated (or not allocated) */
-    if(prop1->def_value==NULL && prop2->def_value!=NULL) HGOTO_DONE(-1);
-    if(prop1->def_value!=NULL && prop2->def_value==NULL) HGOTO_DONE(1);
-    if(prop1->def_value!=NULL)
-        if((cmp_value=HDmemcmp(prop1->def_value,prop2->def_value,prop1->size))!=0)
-            HGOTO_DONE(cmp_value);
-
     /* Check if they both have the same 'create' callback */
     if(prop1->create==NULL && prop2->create!=NULL) HGOTO_DONE(-1);
     if(prop1->create!=NULL && prop2->create==NULL) HGOTO_DONE(1);
@@ -2889,8 +3227,6 @@ H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
     if(prop1->close==NULL && prop2->close!=NULL) HGOTO_DONE(-1);
     if(prop1->close!=NULL && prop2->close==NULL) HGOTO_DONE(1);
     if(prop1->close!=prop2->close) HGOTO_DONE(-1);
-
-    /* Don't check the 'next' field, they must be equal by now */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -2922,15 +3258,18 @@ done:
 static int
 H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
-    H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
-    unsigned u;                    /* Local index variable */
-    int cmp_value;             /* Value from comparison */
-    int ret_value=0;         /* return value */
+    H5TB_NODE *tnode1,*tnode2;      /* Temporary pointer to propery nodes */
+    int cmp_value;                  /* Value from comparison */
+    int ret_value=0;                /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_cmp_class);
 
     assert(pclass1);
     assert(pclass2);
+
+    /* Use the revision number to quickly check for identical classes */
+    if(pclass1->revision==pclass2->revision)
+        HGOTO_DONE(0);
 
     /* Check the name */
     if((cmp_value=HDstrcmp(pclass1->name,pclass2->name))!=0)
@@ -2939,10 +3278,6 @@ H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
     /* Check the number of properties */
     if(pclass1->nprops < pclass2->nprops) HGOTO_DONE(-1);
     if(pclass1->nprops > pclass2->nprops) HGOTO_DONE(1);
-
-    /* Check the hashsize */
-    if(pclass1->hashsize < pclass2->hashsize) HGOTO_DONE(-1);
-    if(pclass1->hashsize > pclass2->hashsize) HGOTO_DONE(1);
 
     /* Check the number of property lists created from the class */
     if(pclass1->plists < pclass2->plists) HGOTO_DONE(-1);
@@ -2979,29 +3314,21 @@ H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
     if(pclass1->close_data > pclass2->close_data) HGOTO_DONE(1);
 
     /* Cycle through the properties and compare them also */
-    for(u=0; u<pclass1->hashsize; u++) {
-        tprop1=pclass1->props[u];
-        tprop2=pclass2->props[u];
+    tnode1=H5TB_first(pclass1->props->root);
+    tnode2=H5TB_first(pclass2->props->root);
+    while(tnode1 || tnode2) {
+        /* Check if they both have properties in this TBBT node */
+        if(tnode1==NULL && tnode2!=NULL) HGOTO_DONE(-1);
+        if(tnode1!=NULL && tnode2==NULL) HGOTO_DONE(1);
 
-        /* Check if they both have properties in this hash location */
-        if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
-        if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
+        /* Compare the two properties */
+        if((cmp_value=H5P_cmp_prop(tnode1->data,tnode2->data))!=0)
+            HGOTO_DONE(cmp_value);
 
-        /* Check the actual properties */
-        while(tprop1!=NULL && tprop2!=NULL) {
-            /* Compare the two properties */
-            if((cmp_value=H5P_cmp_prop(tprop1,tprop2))!=0)
-                HGOTO_DONE(cmp_value);
-
-            /* Advance the pointers */
-            tprop1=tprop1->next;
-            tprop2=tprop2->next;
-
-            /* Check if they both have properties in this location */
-            if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
-            if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
-        } /* end while */
-    } /* end for */
+        /* Advance the pointers */
+        tnode1=H5TB_next(tnode1);
+        tnode2=H5TB_next(tnode2);
+    } /* end while */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -3033,8 +3360,7 @@ done:
 static int
 H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
 {
-    H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
-    unsigned u;                    /* Local index variable */
+    H5TB_NODE *tnode1,*tnode2;      /* Temporary pointer to propery nodes */
     int cmp_value;             /* Value from comparison */
     int ret_value=0;         /* return value */
 
@@ -3042,10 +3368,6 @@ H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
 
     assert(plist1);
     assert(plist2);
-
-    /* Check the parent class */
-    if(plist1->pclass < plist2->pclass) HGOTO_DONE(-1);
-    if(plist1->pclass > plist2->pclass) HGOTO_DONE(1);
 
     /* Check the number of properties */
     if(plist1->nprops < plist2->nprops) HGOTO_DONE(-1);
@@ -3055,24 +3377,57 @@ H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
     if(plist1->class_init < plist2->class_init) HGOTO_DONE(-1);
     if(plist1->class_init > plist2->class_init) HGOTO_DONE(1);
 
-    /* Cycle through the properties and compare them also */
-    for(u=0; u<plist1->pclass->hashsize; u++) {
-        tprop1=plist1->props[u];
+    /* Check for identical deleted properties */
+    if(plist1->del->root) {
+        /* Check for no deleted properties in plist2 */
+        if(plist2->del->root==NULL) HGOTO_DONE(1);
 
-        /* Check the actual properties */
-        while(tprop1!=NULL) {
-            /* Find a property with the same name in the second property list */
-            if((tprop2=H5P_find_prop(plist2->props,plist2->pclass->hashsize,tprop1->name))==NULL)
-                HGOTO_DONE(1);
+        tnode1=H5TB_first(plist1->del->root);
+        tnode2=H5TB_first(plist2->del->root);
+        while(tnode1 || tnode2) {
+            /* Check if they both have properties in this TBBT node */
+            if(tnode1==NULL && tnode2!=NULL) HGOTO_DONE(-1);
+            if(tnode1!=NULL && tnode2==NULL) HGOTO_DONE(1);
 
-            /* Compare the two properties */
-            if((cmp_value=H5P_cmp_prop(tprop1,tprop2))!=0)
+            /* Compare the two deleted properties */
+            if((cmp_value=HDstrcmp(tnode1->data,tnode2->data))!=0)
                 HGOTO_DONE(cmp_value);
 
-            /* Advance to next property */
-            tprop1=tprop1->next;
+            /* Advance the pointers */
+            tnode1=H5TB_next(tnode1);
+            tnode2=H5TB_next(tnode2);
         } /* end while */
-    } /* end for */
+    } /* end if */
+    else
+        if(plist2->del->root!=NULL) HGOTO_DONE (-1);
+
+    /* Cycle through the changed properties and compare them also */
+    if(plist1->props->root) {
+        /* Check for no changed properties in plist2 */
+        if(plist2->props->root==NULL) HGOTO_DONE(1);
+
+        tnode1=H5TB_first(plist1->props->root);
+        tnode2=H5TB_first(plist2->props->root);
+        while(tnode1 || tnode2) {
+            /* Check if they both have properties in this TBBT node */
+            if(tnode1==NULL && tnode2!=NULL) HGOTO_DONE(-1);
+            if(tnode1!=NULL && tnode2==NULL) HGOTO_DONE(1);
+
+            /* Compare the two properties */
+            if((cmp_value=H5P_cmp_prop(tnode1->data,tnode2->data))!=0)
+                HGOTO_DONE(cmp_value);
+
+            /* Advance the pointers */
+            tnode1=H5TB_next(tnode1);
+            tnode2=H5TB_next(tnode2);
+        } /* end while */
+    } /* end if */
+    else
+        if(plist2->props->root!=NULL) HGOTO_DONE (-1);
+
+    /* Check the parent classes */
+    if((cmp_value=H5P_cmp_class(plist1->pclass,plist2->pclass))!=0)
+        HGOTO_DONE(cmp_value);
 
 done:
     FUNC_LEAVE (ret_value);
@@ -3099,7 +3454,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5Pequal(hid_t id1, hid_t id2)
+htri_t
+H5Pequal(hid_t id1, hid_t id2)
 {
     void *obj1, *obj2;          /* Property objects to compare */
     htri_t ret_value=FALSE;     /* return value */
@@ -3205,7 +3561,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id)
+htri_t
+H5P_isa_class(hid_t plist_id, hid_t pclass_id)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
     H5P_genclass_t	*pclass;        /* Property list class */
@@ -3251,7 +3608,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id)
+htri_t
+H5Pisa_class(hid_t plist_id, hid_t pclass_id)
 {
     htri_t ret_value;                   /* return value */
 
@@ -3300,7 +3658,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void *H5P_object_verify(hid_t plist_id, hid_t pclass_id)
+void *
+H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 {
     void *ret_value;                   /* return value */
 
@@ -3317,100 +3676,6 @@ void *H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_object_verify() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5P_iterate_props
- PURPOSE
-    Internal routine to iterate over a hashtable of properties 
- USAGE
-    herr_t H5P_iterate_props(id, hash, hashsize, idx, iter_func, iter_data)
-        hid_t id;                   IN: ID of property object iterating over
-        H5P_gen_prop_t *hash[];     IN: Pointer to array of properties for hash table
-        unsigned hashsize;             IN: Size of hash table
-        int *idx;                   IN/OUT: Index of the property to begin with
-        H5P_iterate_t iter_func;    IN: Function pointer to function to be
-                                        called with each property iterated over.
-        void *iter_data;            IN/OUT: Pointer to iteration data from user
- RETURNS
-    Success: Returns the return value of the last call to ITER_FUNC if it was
-                non-zero, or zero if all properties have been processed.
-    Failure: negative value
- DESCRIPTION
-    This routine iterates over the properties in the property object specified
-with ID.  For each property in the object, the ITER_DATA and some
-additional information, specified below, are passed to the ITER_FUNC function.
-The iteration begins with the IDX property in the object and the next element
-to be processed by the operator is returned in IDX.  If IDX is NULL, then the
-iterator starts at the first property; since no stopping point is returned in
-this case, the iterator cannot be restarted if one of the calls to its operator
-returns non-zero. 
-
-The prototype for H5P_iterate_t is: 
-    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
-The operation receives the property list or class identifier for the object
-being iterated over, ID, the name of the current property within the object,
-NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
-
-The return values from an operator are: 
-    Zero causes the iterator to continue, returning zero when all properties
-        have been processed. 
-    Positive causes the iterator to immediately return that positive value,
-        indicating short-circuit success. The iterator can be restarted at the
-        index of the next property. 
-    Negative causes the iterator to immediately return that value, indicating
-        failure. The iterator can be restarted at the index of the next
-        property.
-
-H5Piterate assumes that the properties in the object identified by ID remains
-unchanged through the iteration.  If the membership changes during the
-iteration, the function's behavior is undefined. 
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static int
-H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], unsigned hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
-{
-    H5P_genprop_t *prop;        /* Temporary property pointer */
-    unsigned u;                    /* Local index variable */
-    int curr_idx=0;             /* Current iteration index */
-    int ret_value=0;            /* Return value */
-
-    FUNC_ENTER_NOINIT(H5P_iterate_props);
-
-    assert(hash);
-    assert(hashsize>0);
-    assert(idx);
-    assert(iter_func);
-
-    /* Cycle through the properties and compare them also */
-    for(u=0; u<hashsize && ret_value==0; u++) {
-        prop=hash[u];
-
-        /* Check the actual properties */
-        while(prop!=NULL && ret_value==0) {
-            /* Check if we are at the object to start iterating over */
-            if(curr_idx>=*idx)
-                ret_value=(*iter_func)(id,prop->name,iter_data);
-
-            /* Increment the iteration index if iteration function succeeded */
-            if(ret_value==0)
-                curr_idx++;
-
-            /* Advance the pointer */
-            prop=prop->next;
-        } /* end while */
-    } /* end for */
-
-    /* Set the index we stopped at */
-    *idx=curr_idx;
-
-    FUNC_LEAVE (ret_value);
-}   /* H5P_iterate_props() */
 
 
 /*--------------------------------------------------------------------------
@@ -3467,8 +3732,13 @@ iteration, the function's behavior is undefined.
 static int
 H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
+    H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genplist_t *plist;      /* Property list pointer */
-    int ret_value;              /* Return value */
+    H5P_genprop_t *tmp;         /* Temporary pointer to properties */
+    H5TB_TREE *seen=NULL;       /* TBBT to hold names of properties already seen */
+    H5TB_NODE *curr_node;       /* Current node in TBBT */
+    int curr_idx=0;             /* Current iteration index */
+    int ret_value=FAIL;         /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_iterate_plist);
 
@@ -3479,10 +3749,90 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
     if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    /* Iterate through the properties in the property list */
-    ret_value=H5P_iterate_props(plist_id, plist->props, plist->pclass->hashsize, idx, iter_func, iter_data);
+    /* Create the TBBT to hold names of properties already seen
+     */
+    if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for seen properties");
+
+    /* Walk through the changed properties in the list */
+    if(plist->props->root) {
+        curr_node=H5TB_first(plist->props->root);
+        while(curr_node!=NULL) {
+            /* Get pointer to property from node */
+            tmp=curr_node->data;
+
+            /* Check if we've found the correctly indexed property */
+            if(curr_idx>=*idx) {
+                /* Call the callback function */
+                ret_value=(*iter_func)(plist_id,tmp->name,iter_data);
+
+                if(ret_value!=0)
+                    HGOTO_DONE(ret_value);
+            } /* end if */
+
+            /* Increment the current index */
+            curr_idx++;
+
+            /* Add property name to "seen" list */
+            if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+
+            /* Get the next property node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
+    } /* end if */
+
+    /* Walk up the class hiearchy */
+    tclass=plist->pclass;
+    while(tclass!=NULL) {
+        if(tclass->nprops>0) {
+            /* Walk through the properties in the class */
+            curr_node=H5TB_first(tclass->props->root);
+            while(curr_node!=NULL) {
+                /* Get pointer to property from node */
+                tmp=curr_node->data;
+
+                /* Only call iterator callback for properties we haven't seen
+                 * before and that haven't been deleted
+                 */
+                if(H5TB_dfind(seen,tmp->name,NULL)==NULL &&
+                        H5TB_dfind(plist->del,tmp->name,NULL)==NULL) {
+
+
+                    /* Check if we've found the correctly indexed property */
+                    if(curr_idx>=*idx) {
+                        /* Call the callback function */
+                        ret_value=(*iter_func)(plist_id,tmp->name,iter_data);
+
+                        if(ret_value!=0)
+                            HGOTO_DONE(ret_value);
+                    } /* end if */
+
+                    /* Increment the current index */
+                    curr_idx++;
+
+                    /* Add property name to "seen" list */
+                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+                } /* end if */
+
+                /* Get the next property node in the TBBT */
+                curr_node=H5TB_next(curr_node);
+            } /* end while */
+        } /* end if */
+
+        /* Go up to parent class */
+        tclass=tclass->parent;
+    } /* end while */
 
 done:
+    /* Set the index we stopped at */
+    *idx=curr_idx;
+
+    /* Release the tree of 'seen' properties */
+    if(seen!=NULL)
+        H5TB_dfree(seen,NULL,NULL);
+
     FUNC_LEAVE (ret_value);
 }   /* H5P_iterate_plist() */
 
@@ -3542,7 +3892,10 @@ static int
 H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genclass_t *pclass;     /* Property list pointer */
-    int ret_value;              /* Return value */
+    H5TB_NODE *curr_node;       /* Current node in TBBT */
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    int curr_idx=0;             /* Current iteration index */
+    int ret_value=FAIL;         /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_iterate_pclass);
 
@@ -3553,10 +3906,33 @@ H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *ite
     if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
-    /* Iterate through the properties in the property list */
-    ret_value=H5P_iterate_props(pclass_id, pclass->props, pclass->hashsize, idx, iter_func, iter_data);
+    /* Set the current index */
+    curr_idx=*idx;
+
+    /* Cycle through the properties and call the callback */
+    curr_node=H5TB_index(pclass->props->root,(unsigned)*idx);
+    while(curr_node!=NULL) {
+        /* Get the property for the node */
+        prop=curr_node->data;
+
+        /* Call the callback function */
+        ret_value=(*iter_func)(pclass_id,prop->name,iter_data);
+
+        /* Check if iteration function succeeded */
+        if(ret_value!=0)
+            HGOTO_DONE(ret_value);
+
+        /* Increment the iteration index */
+        curr_idx++;
+
+        /* Get the next property node in the TBBT */
+        curr_node=H5TB_next(curr_node);
+    } /* end while */
 
 done:
+    /* Set the index we stopped at */
+    *idx=curr_idx;
+
     FUNC_LEAVE (ret_value);
 }   /* H5P_iterate_pclass() */
 
@@ -3613,7 +3989,8 @@ iteration, the function's behavior is undefined.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+int
+H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     int fake_idx=0;         /* Index when user doesn't provide one */
     int ret_value;          /* return value */
@@ -3672,7 +4049,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name)
+unsigned
+H5P_peek_unsigned(H5P_genplist_t *plist, const char *name)
 {
     unsigned ret_value;            /* return value */
 
@@ -3716,7 +4094,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name)
+hid_t
+H5P_peek_hid_t(H5P_genplist_t *plist, const char *name)
 {
     hid_t ret_value;            /* return value */
 
@@ -3760,7 +4139,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
+void *
+H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
 {
     void * ret_value;            /* return value */
 
@@ -3804,7 +4184,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
+hsize_t
+H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
 {
     hsize_t ret_value;            /* return value */
 
@@ -3848,7 +4229,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
+size_t
+H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
 {
     size_t ret_value;            /* return value */
 
@@ -3893,9 +4275,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value)
+herr_t
+H5P_get(H5P_genplist_t *plist, const char *name, void *value)
 {
+    H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genprop_t *prop;        /* Temporary property pointer */
+    H5TB_NODE *prop_node;       /* TBBT node holding property */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5P_get, FAIL);
@@ -3904,36 +4289,113 @@ herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value)
     assert(name);
     assert(value);
 
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
+    /* Check if the property has been deleted */
+    if(H5TB_dfind(plist->del,name,NULL)!=NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
-    /* Check for property size >0 */
-    if(prop->size==0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
+    /* Find property */
+    if((prop_node=H5TB_dfind(plist->props,name,NULL))!=NULL) {
+        /* Get pointer to actual property */
+        prop=prop_node->data;
 
-    /* Make a copy of the value and pass to 'get' callback */
-    if(prop->get!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
+        /* Check for property size >0 */
+        if(prop->size==0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
 
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,prop->value,prop->size);
+        /* Make a copy of the value and pass to 'get' callback */
+        if(prop->get!=NULL) {
+            void *tmp_value;            /* Temporary value for property */
 
-        /* Call user's callback */
-        if((*(prop->get))(plist->plist_id,name,prop->size,tmp_value)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't get property value");
+            /* Make a copy of the current value, in case the callback fails */
+            if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+            HDmemcpy(tmp_value,prop->value,prop->size);
 
-        /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(value,tmp_value,prop->size);
+            /* Call user's callback */
+            if((*(prop->get))(plist->plist_id,name,prop->size,tmp_value)<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't get property value");
 
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
+            /* Copy new [possibly unchanged] value into return value */
+            HDmemcpy(value,tmp_value,prop->size);
+
+            /* Free the temporary value buffer */
+            H5MM_xfree(tmp_value);
+        } /* end if */
+        /* No 'get' callback, just copy value */
+        else
+            HDmemcpy(value,prop->value,prop->size);
     } /* end if */
-    /* No 'get' callback, just copy value */
-    else
-        HDmemcpy(value,prop->value,prop->size);
+    else {
+        /*
+         * Check if we should get class properties (up through list of parent classes also),
+         * & make property 'get' callback.
+         */
+        tclass=plist->pclass;
+        while(tclass!=NULL) {
+            if(tclass->nprops>0) {
+                /* Find the property in the class */
+                if((prop_node=H5TB_dfind(tclass->props,name,NULL))!=NULL) {
+                    /* Get pointer to actual property */
+                    prop=prop_node->data;
+
+                    /* Check for property size >0 */
+                    if(prop->size==0)
+                        HGOTO_ERROR(H5E_PLIST,H5E_BADVALUE,FAIL,"property has zero size");
+
+                    /* Call the 'get' callback, if there is one */
+                    if(prop->get!=NULL) {
+                        void *tmp_value;            /* Temporary value for property */
+
+                        /* Make a copy of the current value, in case the callback fails */
+                        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+                        HDmemcpy(tmp_value,prop->value,prop->size);
+
+                        /* Call user's callback */
+                        if((*(prop->get))(plist->plist_id,name,prop->size,tmp_value)<0) {
+                            H5MM_xfree(tmp_value);
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
+                        } /* end if */
+
+                        if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+                            H5P_genprop_t *pcopy;  /* Copy of property to insert into TBBT */
+
+                            /* Make a copy of the class's property */
+                            if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST))==NULL)
+                                HGOTO_ERROR(H5E_PLIST,H5E_CANTCOPY,FAIL,"Can't copy property");
+
+                            /* Copy new value into property value */
+                            HDmemcpy(pcopy->value,tmp_value,prop->size);
+
+                            /* Insert the changed property into the property list */
+                            if(H5P_add_prop(plist->props,pcopy)<0)
+                                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert changed property into TBBT");
+                        } /* end if */
+
+                        /* Copy new [possibly unchanged] value into return value */
+                        HDmemcpy(value,tmp_value,prop->size);
+
+                        /* Free the temporary value buffer */
+                        H5MM_xfree(tmp_value);
+                    } /* end if */
+                    /* No 'get' callback, just copy value */
+                    else
+                        HDmemcpy(value,prop->value,prop->size);
+
+                    /* Leave */
+                    HGOTO_DONE(SUCCEED);
+                } /* end while */
+            } /* end if */
+
+            /* Go up to parent class */
+            tclass=tclass->parent;
+        } /* end while */
+
+        /* If we get this far, then it wasn't in the list of changed properties,
+         * nor in the properties in the class hierarchy, indicate an error
+         */
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in TBBT");
+    } /* end else */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -3968,7 +4430,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pget(hid_t plist_id, const char *name, void * value)
+herr_t
+H5Pget(hid_t plist_id, const char *name, void * value)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
@@ -4021,63 +4484,106 @@ done:
 herr_t
 H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
 {
+    H5P_genclass_t *tclass;     /* Temporary class pointer */
+    H5TB_NODE *curr_node;       /* TBBT node holding property */
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
-    unsigned loc;                  /* Hash table location */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    char *del_name;             /* Pointer to deleted name */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5P_remove);
+    FUNC_ENTER_NOAPI(H5P_remove,FAIL);
 
     assert(plist);
     assert(name);
 
-    /* Find the property in the property list */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
+    /* Indicate that the property isn't in the list if it has been deleted already */
+    if(H5TB_dfind(plist->del,name,NULL)!=NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in TBBT");
 
-    /* Pass value to 'close' callback, if it exists */
-    if(prop->del!=NULL) {
-        /* Call user's callback */
-        if((*(prop->del))(plist_id,name,prop->size,prop->value)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
-    } /* end if */
+    /* Get the property node from the changed property TBBT */
+    if((curr_node=H5TB_dfind(plist->props,name,NULL))!=NULL) {
+        /* Get pointer to property for node */
+        prop=curr_node->data;
 
-    /* Get correct hash table location */
-    loc=H5P_hash_name(name,plist->pclass->hashsize);
-    
-    /* Remove property from property list */
-    /* Check if the property being removed is at the head of the list for a hash location */
-    if(prop==plist->props[loc]) {
-        /* Jump over the property we are deleting */
-        plist->props[loc]=prop->next;
+        /* Pass value to 'close' callback, if it exists */
+        if(prop->del!=NULL) {
+            /* Call user's callback */
+            if((*(prop->del))(plist_id,name,prop->size,prop->value)<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
+        } /* end if */
+
+        /* Duplicate string for insertion into new deleted property TBBT */
+        if((del_name=H5MM_xstrdup(name))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"memory allocation failed");
+
+        /* Insert property name into deleted list */
+        if(H5TB_dins(plist->del,del_name,del_name)==NULL)
+            HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into deleted TBBT");
+
+        /* Remove the property from the TBBT */
+        if(H5TB_rem(&plist->props->root,curr_node,NULL)==NULL)
+            HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from TBBT");
 
         /* Free the property, ignoring return value, nothing we can do */
         H5P_free_prop(prop);
+
+        /* Decrement the number of properties in list */
+        plist->nprops--;
     } /* end if */
+    /* Walk through all the properties in the class hierarchy, looking for the property */
     else {
-        /* Set up initial pointers */
-        prev=tprop=plist->props[loc];
-        tprop=tprop->next;
-        while(tprop!=NULL) {
-            if(tprop==prop) {
-                /* Jump over the property we are deleting */
-                prev->next=prop->next;
+        /*
+         * Check if we should delete class properties (up through list of parent classes also),
+         * & make property 'delete' callback.
+         */
+        tclass=plist->pclass;
+        while(tclass!=NULL) {
+            if(tclass->nprops>0) {
+                /* Find the property in the class */
+                if((prop=H5P_find_prop_pclass(tclass,name))!=NULL) {
+                    /* Pass value to 'del' callback, if it exists */
+                    if(prop->del!=NULL) {
+                        void *tmp_value;       /* Temporary value buffer */
 
-                /* Free the property, ignoring return value, nothing we can do */
-                H5P_free_prop(prop);
+                        /* Allocate space for a temporary copy of the property value */
+                        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for temporary property value");
+                        HDmemcpy(tmp_value,prop->value,prop->size);
 
-                /* Break out of while loop */
-                break;
+                        /* Call user's callback */
+                        if((*(prop->del))(plist_id,name,prop->size,tmp_value)<0) {
+                            H5MM_xfree(tmp_value);
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
+                        } /* end if */
+
+                        /* Release the temporary value buffer */
+                        H5MM_xfree(tmp_value);
+                    } /* end if */
+
+                    /* Duplicate string for insertion into new deleted property TBBT */
+                    if((del_name=H5MM_xstrdup(name))==NULL)
+                        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"memory allocation failed");
+
+                    /* Insert property name into deleted list */
+                    if(H5TB_dins(plist->del,del_name,del_name)==NULL)
+                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into deleted TBBT");
+
+                    /* Decrement the number of properties in list */
+                    plist->nprops--;
+
+                    /* Leave */
+                    HGOTO_DONE(SUCCEED);
+                } /* end while */
             } /* end if */
 
-            /* Move to the next nodes */
-            prev=tprop;
-            tprop=tprop->next;
+            /* Go up to parent class */
+            tclass=tclass->parent;
         } /* end while */
-    } /* end else */
 
-    /* Decrement the number of properties in list */
-    plist->nprops--;
+        /* If we get this far, then it wasn't in the list of changed properties,
+         * nor in the properties in the class hierarchy, indicate an error
+         */
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in TBBT");
+    } /* end else */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4110,7 +4616,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Premove(hid_t plist_id, const char *name)
+herr_t
+H5Premove(hid_t plist_id, const char *name)
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
     herr_t ret_value;           /* return value */
@@ -4180,20 +4687,17 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     if(NULL == (src_plist = H5I_object(src_id)) || NULL == (dst_plist = H5I_object(dst_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
 
-    /* Check if the property exists in the destination */
-    prop=H5P_find_prop(dst_plist->props,dst_plist->pclass->hashsize,name);
-
     /* If the property exists in the destination alread */
-    if(prop!=NULL) {
+    if(H5P_find_prop_plist(dst_plist,name)!=NULL) {
         /* Delete the property from the destination list, calling the 'close' callback if necessary */
         if(H5P_remove(dst_id,dst_plist,name)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
         /* Get the pointer to the source property */
-        prop=H5P_find_prop(src_plist->props,src_plist->pclass->hashsize,name);
+        prop=H5P_find_prop_plist(src_plist,name);
 
         /* Make a copy of the source property */
-        if((new_prop=H5P_dup_prop(prop))==NULL)
+        if((new_prop=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST))==NULL)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
         /* Call property copy callback, if it exists */
@@ -4203,7 +4707,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         } /* end if */
 
         /* Insert the initialized property into the property list */
-        if(H5P_add_prop(dst_plist->props,dst_plist->pclass->hashsize,new_prop)<0)
+        if(H5P_add_prop(dst_plist->props,new_prop)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into list");
 
         /* Increment the number of properties in list */
@@ -4212,10 +4716,10 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     /* If not, get the information required to do an H5Pinsert with the property into the destination list */
     else {
         /* Get the pointer to the source property */
-        prop=H5P_find_prop(src_plist->props,src_plist->pclass->hashsize,name);
+        prop=H5P_find_prop_plist(src_plist,name);
 
         /* Create property object from parameters */
-        if((new_prop=H5P_create_prop(prop->name,prop->size,prop->def_value,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->copy))==NULL)
+        if((new_prop=H5P_create_prop(prop->name,prop->size,H5P_PROP_WITHIN_LIST,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->copy))==NULL)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
         /* Call property creation callback, if it exists */
@@ -4225,7 +4729,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         } /* end if */
 
         /* Insert property into property list class */
-        if(H5P_add_prop(dst_plist->props,dst_plist->pclass->hashsize,new_prop)<0)
+        if(H5P_add_prop(dst_plist->props,new_prop)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
 
         /* Increment property count for class */
@@ -4274,7 +4778,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t UNUSED *src_pclass, const char *name)
+H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass, const char *name)
 {
     H5P_genprop_t *prop;            /* Temporary property pointer */
     herr_t ret_value=SUCCEED;       /* return value */
@@ -4285,18 +4789,19 @@ H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t UNUSED *src_pcla
     assert(src_pclass);
     assert(name);
 
-    /* Check if the property exists in the destination */
-    prop=H5P_find_prop(dst_pclass->props,dst_pclass->hashsize,name);
-
     /* If the property exists in the destination already */
-    if(prop!=NULL) {
+    if(H5P_exist_pclass(dst_pclass,name)) {
         /* Delete the old property from the destination class */
         if(H5P_unregister(dst_pclass,name)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
     } /* end if */
 
+    /* Get the property from the source */
+    if((prop=H5P_find_prop_pclass(src_pclass,name))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to locate property");
+
     /* Register the property into the destination */
-    if(H5P_register(dst_pclass,name,prop->size,prop->def_value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->close)<0)
+    if(H5P_register(dst_pclass,name,prop->size,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->close)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:
@@ -4404,9 +4909,8 @@ done:
 static herr_t
 H5P_unregister(H5P_genclass_t *pclass, const char *name)
 {
+    H5TB_NODE *prop_node;       /* TBBT node holding property */
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
-    unsigned loc;                  /* Hash table location */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5P_unregister);
@@ -4414,45 +4918,25 @@ H5P_unregister(H5P_genclass_t *pclass, const char *name)
     assert(pclass);
     assert(name);
 
-    /* Find the property in the property list */
-    if((prop=H5P_find_prop(pclass->props,pclass->hashsize,name))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
+    /* Get the property node from the TBBT */
+    if((prop_node=H5TB_dfind(pclass->props,name,NULL))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in TBBT");
 
-    /* Get correct hash table location */
-    loc=H5P_hash_name(name,pclass->hashsize);
-    
-    /* Remove property from property list */
-    /* Check if the property being removed is at the head of the list for a hash location */
-    if(prop==pclass->props[loc]) {
-        pclass->props[loc]=prop->next;
+    /* Get the pointer to the property */
+    prop=prop_node->data;
 
-        /* Free the property, ignoring return value, nothing we can do */
-        H5P_free_prop(prop);
-    } /* end if */
-    else {
-        /* Set up initial pointers */
-        prev=tprop=pclass->props[loc];
-        tprop=tprop->next;
-        while(tprop!=NULL) {
-            if(tprop==prop) {
-                /* Jump over the property we are deleting */
-                prev->next=prop->next;
+    /* Remove the property from the TBBT */
+    if(H5TB_rem(&pclass->props->root,prop_node,NULL)==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from TBBT");
 
-                /* Free the property, ignoring return value, nothing we can do */
-                H5P_free_prop(prop);
-
-                /* Break out of while loop */
-                break;
-            } /* end if */
-
-            /* Move to the next nodes */
-            prev=tprop;
-            tprop=tprop->next;
-        } /* end while */
-    } /* end else */
+    /* Free the property, ignoring return value, nothing we can do */
+    H5P_free_prop(prop);
 
     /* Decrement the number of registered properties in class */
     pclass->nprops--;
+
+    /* Update the revision for the class */
+    pclass->revision = H5P_GET_NEXT_REV;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4480,7 +4964,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Punregister(hid_t pclass_id, const char *name)
+herr_t
+H5Punregister(hid_t pclass_id, const char *name)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
     herr_t ret_value;           /* return value */
@@ -4529,8 +5014,12 @@ done:
 herr_t
 H5P_close(void *_plist)
 {
+    H5P_genclass_t *tclass;         /* Temporary class pointer */
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
-    herr_t ret_value=SUCCEED;     /* return value */
+    H5TB_TREE *seen=NULL;           /* TBBT to hold names of properties already seen */
+    H5TB_NODE *curr_node;           /* Current node in TBBT */
+    H5P_genprop_t *tmp;             /* Temporary pointer to properties */
+    herr_t ret_value=SUCCEED;       /* return value */
 
     FUNC_ENTER_NOINIT(H5P_close);
 
@@ -4542,17 +5031,106 @@ H5P_close(void *_plist)
         (plist->pclass->close_func)(plist->plist_id,plist->pclass->close_data);
     } /* end if */
 
-    /* Make calls to any property close callbacks which exist */
-    H5P_free_all_prop(plist->props,plist->pclass->hashsize,1);
+    /* Create the TBBT to hold names of properties already seen
+     * (This prevents a property in the class hierarchy from having it's
+     * 'close' callback called, if a property in the class hierarchy has
+     * already been seen)
+     */
+    if((seen=H5TB_fast_dmake(H5TB_FAST_STR_COMPARE))==NULL)
+        HGOTO_ERROR(H5E_PLIST,H5E_CANTMAKETREE,NULL,"can't create TBBT for seen properties");
+
+    /* Walk through the changed properties in the list */
+    if(plist->props->root) {
+        curr_node=H5TB_first(plist->props->root);
+        while(curr_node!=NULL) {
+            /* Get pointer to property from node */
+            tmp=curr_node->data;
+
+            /* Call property close callback, if it exists */
+            if(tmp->close) {
+                /* Call the 'close' callback */
+                (tmp->close)(tmp->name,tmp->size,tmp->value);
+            } /* end if */
+
+            /* Add property name to "seen" list */
+            if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+
+            /* Get the next property node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
+    } /* end if */
+
+    /*
+     * Check if we should remove class properties (up through list of parent classes also),
+     * initialize each with default value & make property 'remove' callback.
+     */
+    tclass=plist->pclass;
+    while(tclass!=NULL) {
+        if(tclass->nprops>0) {
+            /* Walk through the properties in the class */
+            curr_node=H5TB_first(tclass->props->root);
+            while(curr_node!=NULL) {
+                /* Get pointer to property from node */
+                tmp=curr_node->data;
+
+                /* Only "delete" properties we haven't seen before
+                 * and that haven't already been deleted
+                 */
+                if(H5TB_dfind(seen,tmp->name,NULL)==NULL &&
+                        H5TB_dfind(plist->del,tmp->name,NULL)==NULL) {
+
+                    /* Call property close callback, if it exists */
+                    if(tmp->close) {
+                        void *tmp_value;       /* Temporary value buffer */
+
+                        /* Allocate space for a temporary copy of the property value */
+                        if (NULL==(tmp_value=H5MM_malloc(tmp->size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for temporary property value");
+                        HDmemcpy(tmp_value,tmp->value,tmp->size);
+
+                        /* Call the 'close' callback */
+                        (tmp->close)(tmp->name,tmp->size,tmp_value);
+
+                        /* Release the temporary value buffer */
+                        H5MM_xfree(tmp_value);
+                    } /* end if */
+
+                    /* Add property name to "seen" list */
+                    if(H5TB_dins(seen,tmp->name,tmp->name)==NULL)
+                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,NULL,"can't insert property into seen TBBT");
+                } /* end if */
+
+                /* Get the next property node in the TBBT */
+                curr_node=H5TB_next(curr_node);
+            } /* end while */
+        } /* end if */
+
+        /* Go up to parent class */
+        tclass=tclass->parent;
+    } /* end while */
 
     /* Decrement class's dependant property list value! */
     if(H5P_access_class(plist->pclass,H5P_MOD_DEC_LST)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "Can't decrement class ref count");
 
+    /* Free the list of 'seen' properties */
+    seen=H5TB_dfree(seen,NULL,NULL);
+
+    /* Free the list of deleted property names */
+    H5TB_dfree(plist->del,free,NULL);
+
+    /* Free the property tree itself */
+    H5TB_dfree(plist->props,H5P_free_prop,NULL);
+
     /* Destroy property list object */
-    H5MM_xfree(plist);
+    H5FL_FREE(H5P_genplist_t,plist);
 
 done:
+    /* Release the tree of 'seen' properties */
+    if(seen!=NULL)
+        H5TB_dfree(seen,NULL,NULL);
+
     FUNC_LEAVE (ret_value);
 }   /* H5P_close() */
 
@@ -4578,7 +5156,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pclose(hid_t plist_id)
+herr_t
+H5Pclose(hid_t plist_id)
 {
     H5P_genplist_t	*plist;    /* Property list created */
     herr_t ret_value=SUCCEED;      /* return value */
@@ -4625,7 +5204,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *H5P_get_class_name(H5P_genclass_t *pclass)
+char *
+H5P_get_class_name(H5P_genclass_t *pclass)
 {
     char *ret_value;      /* return value */
 
@@ -4661,7 +5241,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *H5Pget_class_name(hid_t pclass_id)
+char *
+H5Pget_class_name(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
     char *ret_value;       /* return value */
@@ -4889,7 +5470,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_open_class_path_test(const char *path)
+hid_t
+H5P_open_class_path_test(const char *path)
 {
     H5P_genclass_t *pclass=NULL;/* Property class to query */
     hid_t ret_value;            /* Return value */
@@ -4970,7 +5552,8 @@ H5P_get_class_parent(H5P_genclass_t *pclass)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Pget_class_parent(hid_t pclass_id)
+hid_t
+H5Pget_class_parent(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
     H5P_genclass_t	*parent=NULL;   /* Parent's property class */

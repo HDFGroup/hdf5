@@ -26,6 +26,7 @@
 #include "H5private.h"
 #include "H5Bprivate.h"
 #include "H5Fprivate.h"
+#include "H5RSprivate.h"        /* Reference-counted strings            */
 
 /*
  * Define this to enable debugging.
@@ -95,8 +96,13 @@ typedef struct H5G_entry_t {
     H5G_type_t  type;                   /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
+#ifdef OLD_WAY
     char        *user_path;             /* Path to object, as opened by user */
     char        *canon_path;            /* Path to object, as found in file  */
+#else /* OLD_WAY */
+    H5RS_str_t  *user_path_r;           /* Path to object, as opened by user */
+    H5RS_str_t  *canon_path_r;          /* Path to object, as found in file  */
+#endif /* OLD_WAY */
     unsigned    user_path_hidden;       /* Whether the user's path is valid  */
 } H5G_entry_t;
 
@@ -123,6 +129,7 @@ typedef enum {
 
 /* Depth of group entry copy */
 typedef enum {
+    H5G_COPY_NULL,      /* Null destination names */
     H5G_COPY_LIMITED,   /* Limited copy from source to destination, omitting name & old name fields */
     H5G_COPY_SHALLOW,   /* Copy from source to destination, including name & old name fields */
     H5G_COPY_DEEP       /* Deep copy from source to destination, including duplicating name & old name fields */
@@ -174,8 +181,8 @@ H5_DLL herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
 H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc,
-        const char *src_name, H5G_entry_t *src_loc,
-        const char *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
+        H5RS_str_t *src_name, H5G_entry_t *src_loc,
+        H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
 H5_DLL  herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
             H5G_ent_copy_depth_t depth);
 H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);

@@ -17,9 +17,12 @@
 #define _H5Fpkg_H
 
 #include "H5Fprivate.h"
+#include "H5FOprivate.h"        /* File objects                         */
 
 /* This is a near top-level header! Try not to include much! */
 #include "H5private.h"
+
+#include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID */
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -94,6 +97,13 @@ typedef struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     uint32_t	consist_flags;	/* File Consistency Flags		*/
+
+    /* Cached values from FCPL */
+    size_t	sizeof_addr;	/* Size of addresses in file            */
+    size_t	sizeof_size;	/* Size of offsets in file              */
+    unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
+    int btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
+
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
@@ -110,8 +120,9 @@ typedef struct H5F_file_t {
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     struct H5G_t *root_grp;	/* Open root group			*/
-    int	ncwfs;		/* Num entries on cwfs list		*/
+    int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
+    H5FO_t *open_objs;          /* Open objects in file                 */
 
     /* Data Sieve Buffering fields */
     unsigned char *sieve_buf;   /* Buffer to hold data sieve buffer */
@@ -121,7 +132,7 @@ typedef struct H5F_file_t {
     unsigned sieve_dirty;       /* Flag to indicate that the data sieve buffer is dirty */
 
     H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
-    H5F_close_degree_t fc_degree;	/* File close behavior degree	*/
+    H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
 } H5F_file_t;
 
 /* A record of the mount table */

@@ -44,7 +44,7 @@ const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_sdspace_copy,	    	/* copy the native value		*/
     H5O_sdspace_size,	    	/* size of symbol table entry	    	*/
     H5O_sdspace_reset,	    	/* default reset method		    	*/
-    H5O_sdspace_free,		    /* free method			*/
+    H5O_sdspace_free,		/* free method				*/
     NULL,		    	/* get share method			*/
     NULL, 			/* set share method			*/
     H5O_sdspace_debug,	        /* debug the message		    	*/
@@ -105,7 +105,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if ((sdim = H5FL_ALLOC(H5S_simple_t,1)) != NULL) {
+    if ((sdim = H5FL_CALLOC(H5S_simple_t)) != NULL) {
         version = *p++;
         if (version!=H5O_SDSPACE_VERSION)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
@@ -116,19 +116,19 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
         p += 5; /*reserved*/
 
         if (sdim->rank > 0) {
-            if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+            if (NULL==(sdim->size=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             for (u = 0; u < sdim->rank; u++)
                 H5F_DECODE_LENGTH (f, p, sdim->size[u]);
             if (flags & H5S_VALID_MAX) {
-                if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+                if (NULL==(sdim->max=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 for (u = 0; u < sdim->rank; u++)
                     H5F_DECODE_LENGTH (f, p, sdim->max[u]);
             }
 #ifdef LATER
             if (flags & H5S_VALID_PERM) {
-                if (NULL==(sdim->perm=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0)))
+                if (NULL==(sdim->perm=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 for (u = 0; u < sdim->rank; u++)
                     UINT32DECODE(p, sdim->perm[u]);
@@ -254,25 +254,25 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 
     /* check args */
     assert(src);
-    if (!dst && NULL==(dst = H5FL_ALLOC(H5S_simple_t,0)))
+    if (!dst && NULL==(dst = H5FL_MALLOC(H5S_simple_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* deep copy -- pointed-to values are copied also */
     HDmemcpy(dst, src, sizeof(H5S_simple_t));
     
     if (src->size) {
-	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	if (NULL==(dst->size = H5FL_ARR_MALLOC(hsize_t,src->rank)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->size, src->size, src->rank*sizeof(src->size[0]));
     }
     if (src->max) {
-	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	if (NULL==(dst->max=H5FL_ARR_MALLOC(hsize_t,src->rank)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->max, src->max, src->rank*sizeof(src->max[0]));
     }
 #ifdef LATER
     if (src->perm) {
-	if (NULL==(dst->perm=H5FL_ARR_ALLOC(hsize_t,src->rank,0)))
+	if (NULL==(dst->perm=H5FL_ARR_MALLOC(hsize_t,src->rank)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 	HDmemcpy (dst->perm, src->perm, src->rank*sizeof(src->perm[0]));
     }

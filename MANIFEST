@@ -830,6 +830,8 @@
 ./src/H5FDstream.h
 ./src/H5FL.c
 ./src/H5FLprivate.h
+./src/H5FO.c
+./src/H5FOprivate.h
 ./src/H5FP.c
 ./src/H5FPclient.c
 ./src/H5FPprivate.h
@@ -859,7 +861,6 @@
 ./src/H5MPprivate.h
 ./src/H5O.c
 ./src/H5Oattr.c
-./src/H5Ocomp.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -869,6 +870,7 @@
 ./src/H5Omtime.c
 ./src/H5Oname.c
 ./src/H5Onull.c
+./src/H5Opline.c
 ./src/H5Oplist.c
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
@@ -886,6 +888,8 @@
 ./src/H5R.c
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
+./src/H5RS.c
+./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c
 ./src/H5Shyper.c
@@ -896,6 +900,8 @@
 ./src/H5Sprivate.h
 ./src/H5Spublic.h
 ./src/H5Sselect.c
+./src/H5ST.c
+./src/H5STprivate.h
 ./src/H5T.c
 ./src/H5Tbit.c
 ./src/H5Tconv.c
@@ -958,6 +964,8 @@
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
 ./test/set_extent.c
 ./test/srb_append.c
 ./test/srb_read.c
@@ -978,6 +986,8 @@
 ./test/titerate.c
 ./test/tmeta.c
 ./test/tmisc.c
+./test/tmtimen.h5
+./test/tmtimeo.h5
 ./test/ttime.c
 ./test/trefer.c
 ./test/tselect.c

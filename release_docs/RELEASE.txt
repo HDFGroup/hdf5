@@ -236,6 +236,8 @@ Documentation
  
     o Performance
     -------------
+      * Improved dataset creation time by about 30% (relative to the 1.4.x
+        branch).
 
 
 New Features

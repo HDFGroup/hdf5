@@ -194,8 +194,11 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     /* Check arguments */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if(memb_fapl_id!=H5P_DEFAULT && TRUE != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
+    if(H5P_DEFAULT == memb_fapl_id)
+        memb_fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     /*
      * Initialize driver specific information. No need to copy it into the FA
@@ -345,8 +348,8 @@ H5FD_family_fapl_copy(const void *_old_fa)
     memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
 
     /* Deep copy the property list objects in the structure */
-    if(old_fa->memb_fapl_id==H5P_DEFAULT)
-        new_fa->memb_fapl_id = H5P_DEFAULT;
+    if(old_fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT)
+        H5I_inc_ref(new_fa->memb_fapl_id);
     else {
         if(NULL == (plist = H5I_object(old_fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
@@ -427,9 +430,14 @@ H5FD_family_dxpl_copy(const void *_old_dx)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     memcpy(new_dx, old_dx, sizeof(H5FD_family_dxpl_t));
-    if(NULL == (plist = H5I_object(old_dx->memb_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    new_dx->memb_dxpl_id = H5P_copy_plist(plist);
+
+    if(old_dx->memb_dxpl_id==H5P_DATASET_XFER_DEFAULT)
+        H5I_inc_ref(new_dx->memb_dxpl_id);
+    else {
+        if(NULL == (plist = H5I_object(old_dx->memb_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        new_dx->memb_dxpl_id = H5P_copy_plist(plist);
+    } /* end else */
 
     /* Set return value */
     ret_value=new_dx;
@@ -515,8 +523,9 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Initialize file from file access properties */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_family_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
-    if (H5P_DEFAULT==fapl_id) {
-        file->memb_fapl_id = H5P_DEFAULT;
+    if (H5P_FILE_ACCESS_DEFAULT==fapl_id) {
+        file->memb_fapl_id = H5P_FILE_ACCESS_DEFAULT;
+        H5I_inc_ref(file->memb_fapl_id);
         file->memb_size = 1024*1024*1024; /*1GB*/
     } else {
         H5FD_family_fapl_t *fa;
@@ -524,8 +533,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
         fa = H5P_get_driver_info(plist);
-        if(fa->memb_fapl_id==H5P_DEFAULT)
-            file->memb_fapl_id = H5P_DEFAULT;
+        if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT)
+            H5I_inc_ref(file->memb_fapl_id);
         else {
             if(NULL == (plist = H5I_object(fa->memb_fapl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
@@ -920,8 +929,6 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     FUNC_ENTER_NOAPI(H5FD_family_get_handle, FAIL);
 
     /* Get the plist structure and family offset */
-    if(H5P_DEFAULT == fapl)
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
     if(NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
@@ -963,7 +970,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned char	*buf = (unsigned char*)_buf;
-    hid_t		memb_dxpl_id = H5P_DEFAULT;
+    hid_t		memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     int			i;
     haddr_t		sub;
     size_t		req;
@@ -979,7 +986,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
      */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
+    if (H5P_DATASET_XFER_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
         assert(TRUE==H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -1040,7 +1047,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     const unsigned char	*buf = (const unsigned char*)_buf;
-    hid_t		memb_dxpl_id = H5P_DEFAULT;
+    hid_t		memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     int			i;
     haddr_t		sub;
     size_t		req;
@@ -1056,7 +1063,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
      */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
+    if (H5P_DATASET_XFER_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
         assert(TRUE==H5P_isa_class(dxpl_id, H5P_DATASET_XFER));

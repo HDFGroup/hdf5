@@ -4595,7 +4595,7 @@ xml_print_strs(hid_t did, int source)
     hid_t                   type, space;
     void                   *buf;
     char                   *bp;
-    char                   *onestring;
+    char                   *onestring=NULL;
     hsize_t                 ssiz;
     size_t                  tsiz, str_size;
     size_t                  i;

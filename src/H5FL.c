@@ -34,12 +34,12 @@ static int		interface_initialize_g = 0;
     Default limits on how much memory can accumulate on each free list before
     it is garbage collected.
  */
-static size_t H5FL_reg_glb_mem_lim=1*16*65536;/* Default to 1MB limit on all regular free lists */
-static size_t H5FL_reg_lst_mem_lim=1*65536;   /* Default to 64KB limit on each regular free list */
-static size_t H5FL_arr_glb_mem_lim=4*16*65536;/* Default to 4MB limit on all array free lists */
-static size_t H5FL_arr_lst_mem_lim=4*65536;   /* Default to 256KB limit on each array free list */
-static size_t H5FL_blk_glb_mem_lim=16*16*65536; /* Default to 16MB limit on all block free lists */
-static size_t H5FL_blk_lst_mem_lim=16*65536;  /* Default to 1024KB (1MB) limit on each block free list */
+static size_t H5FL_reg_glb_mem_lim=1*1024*1024; /* Default to 1MB limit on all regular free lists */
+static size_t H5FL_reg_lst_mem_lim=1*65536;     /* Default to 64KB limit on each regular free list */
+static size_t H5FL_arr_glb_mem_lim=4*1024*1024; /* Default to 4MB limit on all array free lists */
+static size_t H5FL_arr_lst_mem_lim=4*65536;     /* Default to 256KB limit on each array free list */
+static size_t H5FL_blk_glb_mem_lim=16*1024*1024; /* Default to 16MB limit on all block free lists */
+static size_t H5FL_blk_lst_mem_lim=1024*1024;   /* Default to 1024KB (1MB) limit on each block free list */
 
 /* A garbage collection node for regular free lists */
 typedef struct H5FL_reg_gc_node_t {
@@ -248,7 +248,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FL_reg_alloc
+ * Function:	H5FL_reg_malloc
  *
  * Purpose:	Allocate a block on a free list
  *
@@ -263,11 +263,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
+H5FL_reg_malloc(H5FL_reg_head_t *head)
 {
     void *ret_value;        /* Pointer to object to return */
 
-    FUNC_ENTER_NOAPI(H5FL_reg_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_reg_malloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -301,13 +301,46 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
         head->allocated++;
     } /* end else */
 
-    /* Clear to zeros, if asked */
-    if(clear)
-        HDmemset(ret_value,0,head->size);
+done:
+    FUNC_LEAVE (ret_value);
+}   /* end H5FL_reg_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FL_reg_calloc
+ *
+ * Purpose:	Allocate a block on a free list and clear it to zeros
+ *
+ * Return:	Success:	Pointer to a valid object
+ * 		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, December 23, 2002
+ *
+ * Modifications:
+ * 	
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FL_reg_calloc(H5FL_reg_head_t *head)
+{
+    void *ret_value;        /* Pointer to object to return */
+
+    FUNC_ENTER_NOAPI(H5FL_reg_calloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
+
+    /* Allocate the block */
+    if (NULL==(ret_value = H5FL_reg_malloc(head)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Clear to zeros */
+    HDmemset(ret_value,0,head->size);
 
 done:
     FUNC_LEAVE (ret_value);
-}   /* end H5FL_reg_alloc() */
+}   /* end H5FL_reg_calloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -562,7 +595,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
     FUNC_ENTER_NOINIT(H5FL_blk_create_list);
 
     /* Allocate room for the new free list node */
-    if(NULL==(temp=H5FL_ALLOC(H5FL_blk_node_t,0)))
+    if(NULL==(temp=H5FL_MALLOC(H5FL_blk_node_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk info");
     
     /* Set the correct values for the new free list */
@@ -632,7 +665,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FL_blk_alloc
+ * Function:	H5FL_blk_free_block_avail
+ *
+ * Purpose:	Checks if a free block of the appropriate size is available
+ *      for a given list.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, December 16, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size)
+{
+    H5FL_blk_node_t *free_list;  /* The free list of nodes of correct size */
+    htri_t ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FL_blk_free_block_avail, FAIL);
+
+    /* Double check parameters */
+    assert(head);
+
+    /* check if there is a free list for blocks of this size */
+    /* and if there are any blocks available on the list */
+    if((free_list=H5FL_blk_find_list(&(head->head),size))!=NULL && free_list->list!=NULL)
+        ret_value=TRUE;
+    else
+        ret_value=FALSE;
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5FL_blk_free_block_avail() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FL_blk_malloc
  *
  * Purpose:	Allocates memory for a block.  This routine is used
  *      instead of malloc because the block can be kept on a free list so
@@ -650,13 +721,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
+H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
 {
     H5FL_blk_node_t *free_list;  /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;  /* Temp. ptr to the new native list allocated */
     void *ret_value;    /* Pointer to the block to return to the user */
 
-    FUNC_ENTER_NOAPI(H5FL_blk_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_blk_malloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -702,13 +773,50 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
         ret_value=((char *)temp)+sizeof(H5FL_blk_list_t);
     } /* end else */
 
-    /* Clear the block to zeros, if requested */
-    if(clear)
-        HDmemset(ret_value,0,size);
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5FL_blk_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FL_blk_calloc
+ *
+ * Purpose:	Allocates memory for a block and clear it to zeros.
+ *      This routine is used
+ *      instead of malloc because the block can be kept on a free list so
+ *      they don't thrash malloc/free as much.
+ *
+ * Return:	Success:	valid pointer to the block
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, December 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size)
+{
+    void *ret_value;    /* Pointer to the block to return to the user */
+
+    FUNC_ENTER_NOAPI(H5FL_blk_calloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
+
+    /* Allocate the block */
+    if (NULL==(ret_value = H5FL_blk_malloc(head,size)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Clear the block to zeros */
+    HDmemset(ret_value,0,size);
 
 done:
     FUNC_LEAVE(ret_value);
-} /* end H5FL_blk_alloc() */
+} /* end H5FL_blk_calloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -818,7 +926,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 
         /* check if we are actually changing the size of the buffer */
         if(new_size!=temp->size) {
-            if((ret_value=H5FL_blk_alloc(head,new_size,0))==NULL)
+            if((ret_value=H5FL_blk_malloc(head,new_size))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block");
             blk_size=MIN(new_size,temp->size);
             HDmemcpy(ret_value,block,blk_size);
@@ -829,7 +937,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
     } /* end if */
     /* Not re-allocating, just allocate a fresh block */
     else
-        ret_value=H5FL_blk_alloc(head,new_size,0);
+        ret_value=H5FL_blk_malloc(head,new_size);
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1141,7 +1249,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FL_arr_alloc
+ * Function:	H5FL_arr_malloc
  *
  * Purpose:	Allocate an array of objects
  *
@@ -1156,13 +1264,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
+H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
     size_t mem_size;        /* Size of memory block being recycled */
 
-    FUNC_ENTER_NOAPI(H5FL_arr_alloc, NULL);
+    FUNC_ENTER_NOAPI(H5FL_arr_malloc, NULL);
 
     /* Double check parameters */
     assert(head);
@@ -1215,18 +1323,51 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
             /* Get a pointer to the new block */
             ret_value=((char *)new_obj)+sizeof(H5FL_arr_node_t);
         } /* end else */
-
-        /* Clear to zeros, if asked */
-        if(clear)
-            HDmemset(ret_value,0,mem_size);
     } /* end if */
     /* No fixed number of elements, use PQ routine */
     else
-        ret_value=H5FL_blk_alloc(&(head->u.queue),mem_size,clear);
+        ret_value=H5FL_blk_malloc(&(head->u.queue),mem_size);
 
 done:
     FUNC_LEAVE (ret_value);
-}   /* end H5FL_arr_alloc() */
+}   /* end H5FL_arr_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FL_arr_calloc
+ *
+ * Purpose:	Allocate an array of objects and clear it to zeros
+ *
+ * Return:	Success:	Pointer to a valid array object
+ * 		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, December 23, 2002
+ *
+ * Modifications:
+ * 	
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem)
+{
+    void *ret_value;        /* Pointer to object to return */
+
+    FUNC_ENTER_NOAPI(H5FL_arr_calloc, NULL);
+
+    /* Double check parameters */
+    assert(head);
+
+    /* Allocate the array */
+    if (NULL==(ret_value = H5FL_arr_malloc(head,elem)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* Clear to zeros */
+    HDmemset(ret_value,0,head->size*elem);
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* end H5FL_arr_calloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -1258,7 +1399,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 
     /* Check if we are really allocating the object */
     if(obj==NULL) {
-        ret_value=H5FL_arr_alloc(head,new_elem,0);
+        ret_value=H5FL_arr_malloc(head,new_elem);
     } /* end if */
     else {
         /* Check if there is a maximum number of elements in array */
@@ -1272,7 +1413,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
             /* Check if the size is really changing */
             if(temp->nelem!=new_elem) {
                 /* Get the new array of objects */
-                ret_value=H5FL_arr_alloc(head,new_elem,0);
+                ret_value=H5FL_arr_malloc(head,new_elem);
 
                 /* Copy the appropriate amount of elements */
                 blk_size=head->size*MIN(temp->nelem,new_elem);

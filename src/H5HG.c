@@ -127,19 +127,19 @@ H5HG_create (H5F_t *f, size_t size)
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, NULL,
 		     "unable to allocate file space for global heap");
     }
-    if (NULL==(heap = H5FL_ALLOC (H5HG_heap_t,1))) {
+    if (NULL==(heap = H5FL_CALLOC (H5HG_heap_t))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->addr = addr;
     heap->size = size;
     heap->dirty = TRUE;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,size,0))) {
+    if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->nalloc = H5HG_NOBJS (f, size);
-    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,heap->nalloc,1))) {
+    if (NULL==(heap->obj = H5FL_ARR_CALLOC (H5HG_obj_t,heap->nalloc))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -246,12 +246,12 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED udata1,
     assert (!udata2);
 
     /* Read the initial 4k page */
-    if (NULL==(heap = H5FL_ALLOC (H5HG_heap_t,1))) {
+    if (NULL==(heap = H5FL_CALLOC (H5HG_heap_t))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->addr = addr;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,H5HG_MINSIZE,0))) {
+    if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,H5HG_MINSIZE))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -301,7 +301,7 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,nalloc,1))) {
+    if (NULL==(heap->obj = H5FL_ARR_CALLOC (H5HG_obj_t,nalloc))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -671,7 +671,7 @@ H5HG_peek (H5F_t *f, H5HG_t *hobj)
     assert (hobj);
 
     /* Load the heap and return a pointer to the object */
-    if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL==(heap=H5AC_find_f (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     ret_value = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
@@ -679,7 +679,7 @@ H5HG_peek (H5F_t *f, H5HG_t *hobj)
 
     /*
      * Advance the heap in the CWFS list.  We might have done this already
-     * with the H5AC_find(), but it won't hurt to do it twice.
+     * with the H5AC_find_f(), but it won't hurt to do it twice.
      */
     if (heap->obj[0].begin) {
 	for (i=0; i<f->shared->ncwfs; i++) {
@@ -733,7 +733,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
     assert (hobj);
 
     /* Load the heap */
-    if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL==(heap=H5AC_find_f (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
@@ -745,7 +745,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
 
     /*
      * Advance the heap in the CWFS list.  We might have done this already
-     * with the H5AC_find(), but it won't hurt to do it twice.
+     * with the H5AC_find_f(), but it won't hurt to do it twice.
      */
     if (heap->obj[0].begin) {
 	for (i=0; i<f->shared->ncwfs; i++) {
@@ -802,7 +802,7 @@ H5HG_link (H5F_t *f, H5HG_t *hobj, int adjust)
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
     /* Load the heap */
-    if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL==(heap=H5AC_find_f (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
@@ -855,7 +855,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
         HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
     /* Load the heap */
-    if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL==(heap=H5AC_find_f (f, H5AC_GHEAP, hobj->addr, NULL, NULL)))
         HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
@@ -899,7 +899,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     } else {
         /*
          * If the heap is in the CWFS list then advance it one position.  The
-         * H5AC_find() might have done that too, but that's okay.  If the
+         * H5AC_find_f() might have done that too, but that's okay.  If the
          * heap isn't on the CWFS list then add it to the end.
          */
         for (i=0; i<f->shared->ncwfs; i++) {
@@ -959,7 +959,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if (NULL == (h = H5AC_find(f, H5AC_GHEAP, addr, NULL, NULL)))
+    if (NULL == (h = H5AC_find_f(f, H5AC_GHEAP, addr, NULL, NULL)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,

@@ -327,9 +327,8 @@ test_userblock_offset(hid_t fapl)
 {
     char                filename[32];
     hid_t		file, fcpl, dataset, space;
-    int			i, j, n;
+    int			i, j;
     hsize_t		dims[2];
-/*    FILE                *f;*/
     int                   f;
     haddr_t             offset;
     int                 rdata[100][200];
@@ -339,19 +338,11 @@ test_userblock_offset(hid_t fapl)
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     
     if((fcpl=H5Pcreate(H5P_FILE_CREATE))<0) goto error;
-    if(H5Pset_userblock(fcpl, USER_BLOCK)<0) goto error;
+    if(H5Pset_userblock(fcpl, (hsize_t)USER_BLOCK)<0) goto error;
     
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0) {
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0)
 	goto error;
-    }
     
-    /* Initialize the dataset */
-    /*for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    points[i][j] = n++;
-	}
-    }*/
-
     /* Create the data space */
     dims[0] = 100;
     dims[1] = 200;

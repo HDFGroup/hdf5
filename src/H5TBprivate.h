@@ -23,7 +23,7 @@
 #endif /* LATER */
 
 /* Typedef for key comparison function */
-typedef int (*H5TB_cmp_t)(void *k1, void *k2, int cmparg);
+typedef int (*H5TB_cmp_t)(const void *k1, const void *k2, int cmparg);
 
 /* Shortcut macros for links */
 # define   PARENT  0
@@ -89,6 +89,10 @@ typedef struct H5TB_tree
 /* Define the "fast compare" values */
 #define H5TB_FAST_HADDR_COMPARE    1
 #define H5TB_FAST_INTN_COMPARE     2
+#define H5TB_FAST_STR_COMPARE      3
+
+/* Define an access macro for getting a node's data */
+#define H5TB_NODE_DATA(n)       ((n)->data)
 
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
@@ -96,8 +100,9 @@ extern      "C"
 #endif                          /* c_plusplus || __cplusplus */
 
 H5_DLL H5TB_TREE  *H5TB_dmake (H5TB_cmp_t cmp, int arg, unsigned fast_compare);
-H5_DLL H5TB_NODE  *H5TB_dfind (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
-H5_DLL H5TB_NODE  *H5TB_find(H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
+H5_DLL H5TB_TREE  *H5TB_fast_dmake (unsigned fast_compare);
+H5_DLL H5TB_NODE  *H5TB_dfind (H5TB_TREE * tree, const void * key, H5TB_NODE ** pp);
+H5_DLL H5TB_NODE  *H5TB_find(H5TB_NODE * root, const void * key, H5TB_cmp_t cmp,
                  int arg, H5TB_NODE ** pp);
 H5_DLL H5TB_NODE  *H5TB_dless (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
 H5_DLL H5TB_NODE  *H5TB_less (H5TB_NODE * root, void * key, H5TB_cmp_t cmp,

@@ -101,6 +101,7 @@ H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
 H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
+H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL herr_t H5T_close(H5T_t *dt);
 H5_DLL herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func);

@@ -1388,9 +1388,7 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
  *
  * WARNING:	DO NOT CALL ANY HDF5 FUNCTION THAT CALLS FUNC_ENTER(). DOING
  *		SO MAY CAUSE H5_trace() TO BE INVOKED RECURSIVELY OR MAY
- *		CAUSE LIBRARY INITIALIZATIONS THAT ARE NOT DESIRED.  DO NOT
- *		USE THE H5T_*_* CONSTANTS SINCE THEY CALL H5_open() WHICH
- *		INVOKES FUNC_ENTER().
+ *		CAUSE LIBRARY INITIALIZATIONS THAT ARE NOT DESIRED.
  *
  * Return:	void
  *
@@ -1453,7 +1451,7 @@ H5_trace (double *returning, const char *func, const char *type, ...)
     if (H5_debug_g.ttimes) {
         H5_timer_begin(&event_time);
     } else {
-        memset(&event_time, 0, sizeof event_time);
+        HDmemset(&event_time, 0, sizeof event_time);
     }
     
     /* Print the first part of the line.  This is the indication of the

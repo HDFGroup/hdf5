@@ -10,6 +10,7 @@
  */
 #include "H5private.h"
 #include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5Iprivate.h"
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
@@ -22,6 +23,7 @@ static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_new_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_new_reset(void *_mesg);
+static herr_t H5O_fill_new_free(void *_mesg);
 static herr_t H5O_fill_new_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
@@ -30,6 +32,7 @@ static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
+static herr_t H5O_fill_free(void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
@@ -43,7 +46,7 @@ const H5O_class_t H5O_FILL[1] = {{
     H5O_fill_copy,              /*copy the native value                 */
     H5O_fill_size,              /*raw message size                      */
     H5O_fill_reset,             /*free internal memory                  */
-    NULL,                       /* free method   	                */
+    H5O_fill_free,		/* free method			*/
     NULL,                       /*get share method                      */
     NULL,                       /*set share method                      */
     H5O_fill_debug,             /*debug the message                     */
@@ -59,7 +62,7 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
     H5O_fill_new_copy,		/*copy the native value			*/
     H5O_fill_new_size,		/*raw message size			*/
     H5O_fill_new_reset,		/*free internal memory			*/
-    NULL,		        /* free method				*/
+    H5O_fill_new_free,		/* free method			*/
     NULL,			/*get share method			*/
     NULL,			/*set share method			*/
     H5O_fill_new_debug,		/*debug the message			*/
@@ -70,6 +73,12 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
 /* Interface initialization */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Declare a free list to manage the H5O_fill_new_t struct */
+H5FL_DEFINE(H5O_fill_new_t);
+
+/* Declare a free list to manage the H5O_fill_t struct */
+H5FL_DEFINE(H5O_fill_t);
 
 
 /*-------------------------------------------------------------------------
@@ -104,7 +113,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
     assert(!sh);
 
-    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_new_t))))
+    if (NULL==(mesg=H5FL_CALLOC(H5O_fill_new_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
  
     /* Version */
@@ -137,7 +146,7 @@ done:
     if (!ret_value && mesg) {
         if(mesg->buf)
             H5MM_xfree(mesg->buf);
-	H5MM_xfree(mesg);
+	H5FL_FREE(H5O_fill_new_t,mesg);
     }
 
     FUNC_LEAVE(ret_value);
@@ -173,7 +182,7 @@ H5O_fill_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
     assert(!sh);
 
-    if (NULL==(mesg=H5MM_calloc(sizeof(H5O_fill_t))))
+    if (NULL==(mesg=H5FL_CALLOC(H5O_fill_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message");
     UINT32DECODE(p, mesg->size);
     if (mesg->size>0) {
@@ -189,7 +198,7 @@ done:
     if (!ret_value && mesg) {
         if(mesg->buf)
             H5MM_xfree(mesg->buf);
-        H5MM_xfree(mesg);
+	H5FL_FREE(H5O_fill_t,mesg);
     }
 
     FUNC_LEAVE(ret_value);
@@ -311,13 +320,16 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
 
     assert(mesg);
 
-    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_new_t))))
+    if (!dest && NULL==(dest=H5FL_MALLOC(H5O_fill_new_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message");
 
     /* Copy data type of fill value */
-    if (mesg->type &&
-            NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
+    if (mesg->type) {
+        if(NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
+    } /* end if */
+    else
+        dest->type=NULL;
 
     /* Copy fill value and its size */
     if (mesg->buf) {
@@ -326,7 +338,11 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
 	dest->size = mesg->size;
 	HDmemcpy(dest->buf, mesg->buf, (size_t)mesg->size);
-    }
+    } /* end if */
+    else {
+        dest->buf=NULL;
+        dest->size=0;
+    } /* end else */
 
     /* Copy three fill value attributes */
     dest->alloc_time   = mesg->alloc_time;
@@ -343,7 +359,7 @@ done:
 	if (dest->type)
             H5T_close(dest->type);
 	if (!_dest)
-            H5MM_xfree(dest);
+            H5FL_FREE(H5O_fill_new_t,dest);
     }
 
     FUNC_LEAVE(ret_value);
@@ -378,17 +394,24 @@ H5O_fill_copy(const void *_mesg, void *_dest)
 
     assert(mesg);
 
-    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_fill_t))))
+    if (!dest && NULL==(dest=H5FL_CALLOC(H5O_fill_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message");
-    if (mesg->type &&
-            NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
+
+    if (mesg->type) {
+        if(NULL==(dest->type=H5T_copy(mesg->type, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type");
+    } /* end if */
+    else
+        dest->type=NULL;
+
     if (mesg->buf) {
         if (NULL==(dest->buf=H5MM_malloc(mesg->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
         dest->size = mesg->size;
         HDmemcpy(dest->buf, mesg->buf, mesg->size);
-    }
+    } /* end if */
+    else
+        dest->buf=NULL;
 
     /* Set return value */
     ret_value = dest;
@@ -400,7 +423,7 @@ done:
         if (dest->type)
             H5T_close(dest->type);
         if (!_dest)
-            H5MM_xfree(dest);
+            H5FL_FREE(H5O_fill_t,dest);
     }
 
     FUNC_LEAVE(ret_value);
@@ -567,6 +590,66 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_fill_new_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 5, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_fill_new_free (void *mesg)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_fill_new_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_fill_new_t,mesg);
+
+done:
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_fill_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 5, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_fill_free (void *mesg)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_fill_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_fill_t,mesg);
+
+done:
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_debug
  *
  * Purpose:	Prints debugging info for the message.
@@ -721,7 +804,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0)
+    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DATASET_XFER_DEFAULT)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     /* Update the fill message */

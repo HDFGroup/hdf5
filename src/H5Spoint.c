@@ -167,7 +167,7 @@ H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t *
     top=curr=NULL;
     for(i=0; i<num_elem; i++) {
         /* Allocate space for the new node */
-        if((new_node = H5FL_ALLOC(H5S_pnt_node_t,0))==NULL)
+        if((new_node = H5FL_MALLOC(H5S_pnt_node_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
 
         if((new_node->pnt = H5MM_malloc(space->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
@@ -350,7 +350,7 @@ H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
 
     /* Allocate space for the point selection information if necessary */
     if(space->select.type!=H5S_SEL_POINTS || space->select.sel_info.pnt_lst==NULL) {
-        if((space->select.sel_info.pnt_lst = H5FL_ALLOC(H5S_pnt_list_t,1))==NULL)
+        if((space->select.sel_info.pnt_lst = H5FL_CALLOC(H5S_pnt_list_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate element information");
     } /* end if */
 
@@ -412,14 +412,14 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
     assert(dst);
 
     /* Allocate room for the head of the point list */
-    if((dst->select.sel_info.pnt_lst=H5FL_ALLOC(H5S_pnt_list_t,0))==NULL)
+    if((dst->select.sel_info.pnt_lst=H5FL_MALLOC(H5S_pnt_list_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
 
     curr=src->select.sel_info.pnt_lst->head;
     new_head=NULL;
     while(curr!=NULL) {
         /* Create each point */
-        if((new_node=H5FL_ALLOC(H5S_pnt_node_t,0))==NULL)
+        if((new_node=H5FL_MALLOC(H5S_pnt_node_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
         if((new_node->pnt = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");

@@ -232,10 +232,6 @@ H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
 
         /* Use the user's memory allocation routine is one is defined */
 
-        /* Get the default dataset transfer property list if the user didn't provide one */
-        if (H5P_DEFAULT == plist_id)
-            plist_id= H5P_DATASET_XFER_DEFAULT;
-
         /* Get the allocation function & info */
         if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
@@ -366,10 +362,6 @@ H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
     H5_CHECK_OVERFLOW(((seq_len+1)*base_size),hsize_t,size_t);
 
     /* Use the user's memory allocation routine if one is defined */
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == plist_id)
-        plist_id= H5P_DATASET_XFER_DEFAULT;
 
     /* Get the allocation function & info */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -705,10 +697,6 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == plist_id)
-        plist_id= H5P_DATASET_XFER_DEFAULT;
 
     /* Get the free func & information */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))

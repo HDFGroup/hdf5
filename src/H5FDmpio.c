@@ -25,6 +25,8 @@
 #include "H5MMprivate.h"        /* Memory allocation */
 #include "H5Pprivate.h"		/*property lists			*/
 
+#ifdef H5_HAVE_PARALLEL
+
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIO
@@ -32,8 +34,6 @@
  * compliant when H5_HAVE_PARALLEL isn't defined)
  */
 static hid_t H5FD_MPIO_g = 0;
-
-#ifdef H5_HAVE_PARALLEL
 
 /*
  * The description of a file belonging to this driver.
@@ -255,6 +255,9 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL);
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
+    if(fapl_id==H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
@@ -370,6 +373,9 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     FUNC_ENTER_API(H5Pset_dxpl_mpio, FAIL);
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
+    if(dxpl_id==H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
@@ -848,7 +854,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Obtain a pointer to mpio-specific file access properties */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(plist)) {
+    if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	_fa.info = MPI_INFO_NULL; /*default*/
 	fa = &_fa;

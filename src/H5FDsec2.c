@@ -310,7 +310,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
     /* Create the new file struct */
-    if (NULL==(file=H5FL_ALLOC(H5FD_sec2_t,1)))
+    if (NULL==(file=H5FL_CALLOC(H5FD_sec2_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
 
     file->fd = fd;

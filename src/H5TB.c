@@ -90,7 +90,7 @@
 
 /* Local Function Prototypes */
 static H5TB_NODE * H5TB_end(H5TB_NODE * root, int side);
-static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare,
+static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare,
     H5TB_NODE ** pp);
 static herr_t H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added);
 static H5TB_NODE *H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side);
@@ -105,9 +105,145 @@ static herr_t H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
 /* Declare a free list to manage the H5TB_NODE struct */
 H5FL_DEFINE_STATIC(H5TB_NODE);
 
+/* Declare a free list to manage the H5TB_TREE struct */
+H5FL_DEFINE_STATIC(H5TB_TREE);
+
 #define PABLO_MASK	H5TB_mask
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5TB_strcmp
+ *
+ * Purpose:	Key comparison routine for TBBT routines
+ *
+ * Return:	same as strcmp()
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 4, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5TB_strcmp(const void *k1, const void *k2, int UNUSED cmparg)
+{
+    FUNC_ENTER_NOINIT(H5TB_strcmp);
+
+    assert(k1);
+    assert(k2);
+
+    FUNC_LEAVE(HDstrcmp(k1,k2));
+} /* end H5TB_strcmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5TB_addr_cmp
+ *
+ * Purpose:	Key comparison routine for TBBT routines
+ *
+ * Return:	same as H5F_addr_cmp()
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5TB_addr_cmp(const void *k1, const void *k2, int UNUSED cmparg)
+{
+    FUNC_ENTER_NOINIT(H5TB_addr_cmp);
+
+    assert(k1);
+    assert(k2);
+
+    FUNC_LEAVE(H5F_addr_cmp(*(const haddr_t *)k1,*(const haddr_t *)k2));
+} /* end H5TB_addr_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5TB_int_cmp
+ *
+ * Purpose:	Key comparison routine for TBBT routines
+ *
+ * Return:	same as comparing two integers
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
+{
+    FUNC_ENTER_NOINIT(H5TB_int_cmp);
+
+    assert(k1);
+    assert(k2);
+
+    FUNC_LEAVE(*(const int *)k1 - *(const int *)k2);
+} /* end H5TB_int_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5TB_fast_dmake
+ *
+ * Purpose:	Wrapper around H5TB_dmake for callers which want to use
+ *              a "fast comparison" key.
+ *
+ * Return:	Success:	Pointer to a valid H5TB tree
+ * 		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 20, 2002
+ *
+ * Modifications:
+ * 	
+ *-------------------------------------------------------------------------
+ */
+H5TB_TREE  *
+H5TB_fast_dmake(unsigned fast_compare)
+{
+    H5TB_cmp_t  compar;         /* Key comparison function */
+    int cmparg;                 /* Key comparison value */
+    H5TB_TREE  *ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5TB_fast_dmake, NULL);
+
+    /* Get the corret fast comparison routine */
+    switch(fast_compare) {
+        case H5TB_FAST_HADDR_COMPARE:
+            compar=H5TB_addr_cmp;
+            cmparg=-1;
+            break;
+
+        case H5TB_FAST_INTN_COMPARE:
+            compar=H5TB_int_cmp;
+            cmparg=-1;
+            break;
+
+        case H5TB_FAST_STR_COMPARE:
+            compar=H5TB_strcmp;
+            cmparg=-1;
+            break;
+
+        default:
+            HGOTO_ERROR (H5E_TBBT, H5E_BADVALUE, NULL, "invalid fast comparison type");
+    } /* end switch */
+
+    /* Set return value */
+    if((ret_value=H5TB_dmake(compar,cmparg,fast_compare))==NULL)
+        HGOTO_ERROR (H5E_TBBT, H5E_CANTCREATE, NULL, "can't create TBBT");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* end H5TB_fast_dmake() */
 
 
 /*-------------------------------------------------------------------------
@@ -192,7 +328,7 @@ H5TB_dmake(H5TB_cmp_t cmp, int arg, unsigned fast_compare)
 
     FUNC_ENTER_NOAPI(H5TB_dmake, NULL);
 
-    if (NULL == (tree = H5MM_malloc(sizeof(H5TB_TREE))))
+    if (NULL == (tree = H5FL_MALLOC(H5TB_TREE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     tree->root = NULL;
@@ -234,7 +370,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_dfind(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
+H5TB_dfind(H5TB_TREE * tree, const void * key, H5TB_NODE ** pp)
 {
     H5TB_NODE *ret_value;
 
@@ -242,10 +378,16 @@ H5TB_dfind(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
 
     assert(tree);
 
-    if(tree->fast_compare!=0)
-        ret_value=H5TB_ffind(tree->root, key, tree->fast_compare, pp);
-    else
-        ret_value=H5TB_find(tree->root, key, tree->compar, tree->cmparg, pp);
+    if(tree->root)
+        if(tree->fast_compare!=0)
+            ret_value=H5TB_ffind(tree->root, key, tree->fast_compare, pp);
+        else
+            ret_value=H5TB_find(tree->root, key, tree->compar, tree->cmparg, pp);
+    else {
+        if (NULL != pp)
+            *pp = NULL;
+        ret_value=NULL;
+    } /* end else */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -280,7 +422,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_find(H5TB_NODE * root, void * key,
+H5TB_find(H5TB_NODE * root, const void * key,
      H5TB_cmp_t compar, int arg, H5TB_NODE ** pp)
 {
     H5TB_NODE  *ptr = root;
@@ -461,7 +603,7 @@ H5TB_index(H5TB_NODE * root, unsigned indx)
     if (NULL != ptr) {
       /* Termination condition is if the index equals the number of children on
          out left plus the current node */
-        while (ptr != NULL && indx != ((unsigned) LeftCnt(ptr)) + 1 ) {
+        while (ptr != NULL && indx != ((unsigned) LeftCnt(ptr)) ) {
             if (indx <= (unsigned) LeftCnt(ptr)) {
                 ptr = ptr->Lchild;
               } /* end if */
@@ -564,7 +706,7 @@ H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, int arg)
 
     if (NULL != H5TB_find(*root, (key ? key : item), compar, arg, &parent))
         HGOTO_ERROR (H5E_TBBT, H5E_EXISTS, NULL, "node already in tree");
-    if (NULL == (ptr = H5FL_ALLOC(H5TB_NODE,0)))
+    if (NULL == (ptr = H5FL_MALLOC(H5TB_NODE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     ptr->data = item;
     ptr->key = key ? key : item;
@@ -760,12 +902,13 @@ H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp)
     H5FL_FREE(H5TB_NODE,leaf);
     H5TB_balance(root, par, side, -1);
 
-    ((H5TB_TREE *) root)->count--;
-
     /* Set return value */
     ret_value=data;
 
 done:
+    if(ret_value)
+        ((H5TB_TREE *) root)->count--;
+
     FUNC_LEAVE(ret_value);
 }   /* end H5TB_rem() */
 
@@ -945,7 +1088,7 @@ H5TB_dfree(H5TB_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /*
         H5TB_free(&tree->root, fd, fk);
 
         /* Free the tree root */
-        H5MM_xfree(tree);
+        H5FL_FREE(H5TB_TREE,tree);
     } /* end if */
 
 done:
@@ -1254,7 +1397,7 @@ done:
 /* This routine is based on tbbtfind (fix bugs in both places!) */
 /* Returns a pointer to the found node (or NULL) */
 static H5TB_NODE  *
-H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
+H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE ** pp)
 {
     H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
@@ -1267,7 +1410,7 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
     switch(fast_compare) {
         case H5TB_FAST_HADDR_COMPARE:
             if (ptr) {
-                while (0 != (cmp = H5F_addr_cmp(*(haddr_t *)key,*(haddr_t *)ptr->key))) {
+                while (0 != (cmp = H5F_addr_cmp(*(const haddr_t *)key,*(haddr_t *)ptr->key))) {
                       parent = ptr;
                       side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
@@ -1284,7 +1427,24 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
 
         case H5TB_FAST_INTN_COMPARE:
             if (ptr) {
-                while (0 != (cmp = (*(int *)key - *(int *)ptr->key))) {
+                while (0 != (cmp = (*(const int *)key - *(int *)ptr->key))) {
+                      parent = ptr;
+                      side = (cmp < 0) ? LEFT : RIGHT;
+                      if (!HasChild(ptr, side))
+                          break;
+                      ptr = ptr->link[side];
+                  } /* end while */
+              } /* end if */
+            if (NULL != pp)
+                *pp = parent;
+
+            /* Set return value */
+            ret_value= (0 == cmp) ? ptr : NULL;
+            break;
+
+        case H5TB_FAST_STR_COMPARE:
+            if (ptr) {
+                while (0 != (cmp = HDstrcmp(key,ptr->key))) {
                       parent = ptr;
                       side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))

@@ -2850,7 +2850,7 @@ static void gent_vlstr(void)
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."
         };   /* Information to write */
-    char *string_att= "This is the string for the attribute";
+    const char *string_att= "This is the string for the attribute";
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset, root;	/* Dataset ID			*/
     hid_t		sid1, dataspace;/* Dataspace ID			*/

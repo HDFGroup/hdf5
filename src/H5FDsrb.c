@@ -17,11 +17,10 @@
 #include "H5Pprivate.h"		/*property lists			*/
 
 
-/* The driver identification number, initialized at runtime */
-static hid_t H5FD_SRB_g = 0;
-
 #ifdef H5_HAVE_SRB
 
+/* The driver identification number, initialized at runtime */
+static hid_t H5FD_SRB_g = 0;
 
 /*
  * This driver supports systems that have the lseek64() function by defining
@@ -320,7 +319,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
+    if(H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
         HDmemset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        
         fa = &_fa;
     }

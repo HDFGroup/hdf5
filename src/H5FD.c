@@ -513,7 +513,7 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
     FUNC_ENTER_NOAPI(H5FD_fapl_copy, NULL);
 
     /* Check args */
-    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+    if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
     if (!old_fapl)
         HGOTO_DONE(NULL); /*but no error*/
@@ -560,7 +560,7 @@ H5FD_fapl_free(hid_t driver_id, void *fapl)
     FUNC_ENTER_NOAPI(H5FD_fapl_free, FAIL);
 
     /* Check args */
-    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+    if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
     
     /* Allow driver to free or do it ourselves */
@@ -606,7 +606,7 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
     FUNC_ENTER_NOAPI(H5FD_dxpl_copy, NULL);
 
     /* Check args */
-    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+    if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
     if (!old_dxpl)
         HGOTO_DONE(NULL); /*but no error*/
@@ -653,7 +653,7 @@ H5FD_dxpl_free(hid_t driver_id, void *dxpl)
     FUNC_ENTER_NOAPI(H5FD_dxpl_free, FAIL);
 
     /* Check args */
-    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+    if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
     
     /* Allow driver to free or do it ourselves */
@@ -731,6 +731,13 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     FUNC_ENTER_API(H5FDopen, NULL);
 
+    /* Check arguments */
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if (TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+
     if (NULL==(ret_value=H5FD_open(name, flags, fapl_id, maxaddr)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
@@ -773,10 +780,8 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     
     FUNC_ENTER_NOAPI(H5FD_open, NULL);
 
-    /* Check arguments */
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    /* Get file access property list */
+    if(NULL == (plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list"); 
  
     if (0==maxaddr)
@@ -786,7 +791,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
 
     /* Get driver info */
-    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+    if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
     if (NULL==driver->open)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");
@@ -1392,7 +1397,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                 else {
 
                     /* Attempt to allocate memory for temporary node */ 
-                    tmp = H5FL_ALLOC(H5FD_free_t,0);
+                    tmp = H5FL_MALLOC(H5FD_free_t);
 #ifdef H5F_DEBUG
                     if (H5DEBUG(F)) {
                         HDfprintf(H5DEBUG(F),
@@ -1807,7 +1812,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
                     tail_size=(file->accum_loc+file->accum_size)-tail_addr;
 
                     /* Write out the part of the accumulator after the block to free */
-                    if (H5FD_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)
+                    if (H5FD_write(file, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
                 } /* end if */
 
@@ -1904,7 +1909,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         } /* end if */
         else {
             /* Allocate a new node to hold the free block's information */
-            if(NULL==(last = H5FL_ALLOC(H5FD_free_t,0)))
+            if(NULL==(last = H5FL_MALLOC(H5FD_free_t)))
                 HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate node for free space info");
 
             last->addr = addr;
@@ -2336,8 +2341,9 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
-    if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+    else
+        if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
 
@@ -2563,8 +2569,9 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
-    if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
+    else
+        if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
 

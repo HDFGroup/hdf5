@@ -468,6 +468,12 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_TIME
 
+dnl ----------------------------------------------------------------------
+dnl Check for these two functions before <sys/time.h> is checked for, otherwise
+dnl they are not detected correctly on Solaris [2.6].
+dnl
+AC_CHECK_FUNCS(difftime gettimeofday)
+
 dnl Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
@@ -1287,8 +1293,8 @@ AC_MSG_RESULT(no))
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(difftime fork gethostname getpwuid getrusage)
-AC_CHECK_FUNCS(gettimeofday BSDgettimeofday longjmp setsysinfo sigaction)
+AC_CHECK_FUNCS(fork gethostname getpwuid getrusage)
+AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
 
 dnl ----------------------------------------------------------------------

@@ -1503,7 +1503,6 @@ test_refer_dtype2(hid_t file)
                         *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t             *tu8;        /* Temporary pointer to uint8 data */
     int                 i;           /* counting variables */
-    herr_t		ret;	     /* Generic return value		*/
 
     /* Output message about test being performed */
     TESTING("dataset region reference");

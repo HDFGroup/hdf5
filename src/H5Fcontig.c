@@ -36,8 +36,11 @@ static int		interface_initialize_g = 0;
 /* Declare a PQ free list to manage the sieve buffer information */
 H5FL_BLK_DEFINE(sieve_buf);
 
-/* Extern the free list to manage blocks of type conversion data */
-H5FL_BLK_EXTERN(type_conv);
+/* Declare the free list to manage blocks of non-zero fill-value data */
+H5FL_BLK_DEFINE_STATIC(non_zero_fill);
+
+/* Declare the free list to manage blocks of zero fill-value data */
+H5FL_BLK_DEFINE_STATIC(zero_fill);
 
 
 /*-------------------------------------------------------------------------
@@ -56,11 +59,10 @@ H5FL_BLK_EXTERN(type_conv);
  */
 herr_t
 H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
-    struct H5P_genplist_t *dc_plist, const struct H5S_t *space,
-    size_t elmt_size)
+    struct H5P_genplist_t *dc_plist, const struct H5O_efl_t *efl,
+    const struct H5S_t *space,
+    const struct H5O_fill_t *fill, size_t elmt_size)
 {
-    H5O_fill_t  fill;           /* Fill value information */
-    H5O_efl_t   efl;            /* External File List info */
     hssize_t    snpoints;       /* Number of points in space (for error checking) */
     size_t      npoints;        /* Number of points in space */
     size_t      ptsperbuf;      /* Maximum # of points which fit in the buffer */
@@ -77,6 +79,7 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
     unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif /* H5_HAVE_PARALLEL */
+    int         non_zero_fill_f=(-1);   /* Indicate that a non-zero fill-value was used */
     herr_t	ret_value=SUCCEED;	/* Return value */
     
     FUNC_ENTER_NOAPI(H5F_contig_fill, FAIL);
@@ -90,12 +93,6 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     assert(dc_plist!=NULL);
     assert(space);
     assert(elmt_size>0);
-
-    /* Get necessary properties from dataset creation property list */
-    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get fill value");
-    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve up MPI parameters */
@@ -136,46 +133,62 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
     assert(snpoints>=0);
     H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 
-    /* Don't write default fill-values to external files */
-    if(efl.nused>0 && !fill.buf)
-        HGOTO_DONE(SUCCEED);
-
-    /* If fill value is library default, use the element size */
-    if(!fill.buf)
-        fill.size=elmt_size;
+    /* If fill value is not library default, use it to set the element size */
+    if(fill->buf)
+        elmt_size=fill->size;
 
     /*
      * Fill the entire current extent with the fill value.  We can do
      * this quite efficiently by making sure we copy the fill value
      * in relatively large pieces.
      */
-     ptsperbuf = MAX(1, bufsize/fill.size);
-     bufsize = ptsperbuf*fill.size;
+     ptsperbuf = MAX(1, bufsize/elmt_size);
+     bufsize = ptsperbuf*elmt_size;
 
-     /* Allocate temporary buffer */
-     if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
-         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
+    /* Fill the buffer with the user's fill value */
+    if(fill->buf) {
+        /* Allocate temporary buffer */
+        if ((buf=H5FL_BLK_MALLOC(non_zero_fill,bufsize))==NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
 
-     /* Fill the buffer with the user's fill value */
-     if(fill.buf)
-        H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
-     else /* Fill the buffer with the default fill value */
-        HDmemset(buf,0,bufsize);
+        H5V_array_fill(buf, fill->buf, elmt_size, ptsperbuf);
+
+        /* Indicate that a non-zero fill buffer was used */
+        non_zero_fill_f=1;
+    } /* end if */
+    else {      /* Fill the buffer with the default fill value */
+        htri_t buf_avail;
+
+        /* Check if there is an already zeroed out buffer available */
+        buf_avail=H5FL_BLK_AVAIL(zero_fill,bufsize);
+        assert(buf_avail!=FAIL);
+
+        /* Allocate temporary buffer (zeroing it if no buffer is available) */
+        if(!buf_avail)
+            buf=H5FL_BLK_CALLOC(zero_fill,bufsize);
+        else
+            buf=H5FL_BLK_MALLOC(zero_fill,bufsize);
+        if(buf==NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
+
+        /* Indicate that a zero fill buffer was used */
+        non_zero_fill_f=0;
+    } /* end else */
      
-     /* Start at the beginning of the dataset */
-     addr = 0;
+    /* Start at the beginning of the dataset */
+    addr = 0;
 
-     /* Loop through writing the fill value to the dataset */
-     while (npoints>0) {
-          size = MIN(ptsperbuf, npoints) * fill.size;
+    /* Loop through writing the fill value to the dataset */
+    while (npoints>0) {
+          size = MIN(ptsperbuf, npoints) * elmt_size;
 
 #ifdef H5_HAVE_PARALLEL
             /* Check if this file is accessed with an MPI-capable file driver */
             if(using_mpi) {
                 /* Round-robin write the chunks out from only one process */
                 if(mpi_round==mpi_rank) {
-                    if (H5F_seq_write(f, dxpl_id, layout, dc_plist, space,
-                            fill.size, size, addr, buf)<0)
+                    if (H5F_seq_write(f, dxpl_id, layout, dc_plist, efl, space,
+                            elmt_size, size, addr, buf)<0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                 } /* end if */
                 mpi_round=(++mpi_round)%mpi_size;
@@ -185,8 +198,8 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
             } /* end if */
             else {
 #endif /* H5_HAVE_PARALLEL */
-                if (H5F_seq_write(f, dxpl_id, layout, dc_plist, space,
-                        fill.size, size, addr, buf)<0)
+                if (H5F_seq_write(f, dxpl_id, layout, dc_plist, efl, space,
+                        elmt_size, size, addr, buf)<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
 #ifdef H5_HAVE_PARALLEL
             } /* end else */
@@ -211,8 +224,13 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
 
 done:
     /* Free the buffer for fill values */
-    if (buf)
-        H5FL_BLK_FREE(type_conv,buf);
+    if (buf) {
+        assert(non_zero_fill_f>=0);
+        if(non_zero_fill_f)
+            H5FL_BLK_FREE(non_zero_fill,buf);
+        else
+            H5FL_BLK_FREE(zero_fill,buf);
+    } /* end if */
 
     FUNC_LEAVE(ret_value);
 }
@@ -661,7 +679,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                 } /* end if */
                 else {
                     /* Allocate room for the data sieve buffer */
-                    if (NULL==(f->shared->sieve_buf=H5FL_BLK_ALLOC(sieve_buf,f->shared->sieve_buf_size,0)))
+                    if (NULL==(f->shared->sieve_buf=H5FL_BLK_MALLOC(sieve_buf,f->shared->sieve_buf_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* Determine the new sieve buffer size & location */
@@ -1128,7 +1146,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                 } /* end if */
                 else {
                     /* Allocate room for the data sieve buffer */
-                    if (NULL==(f->shared->sieve_buf=H5FL_BLK_ALLOC(sieve_buf,f->shared->sieve_buf_size,0)))
+                    if (NULL==(f->shared->sieve_buf=H5FL_BLK_MALLOC(sieve_buf,f->shared->sieve_buf_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* Determine the new sieve buffer size & location */

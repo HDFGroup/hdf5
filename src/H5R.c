@@ -331,7 +331,6 @@ done:
 static hid_t
 H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
 {
-    H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_t *group;               /* Pointer to group to open */
     H5T_t *datatype;            /* Pointer to datatype to open */
     H5G_entry_t ent;            /* Symbol table entry */
@@ -428,14 +427,9 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
             break;
 
         case H5G_DATASET:
-            if ((dataset=H5D_open_oid(&ent)) == NULL)
+            /* Open the dataset */
+            if ((ret_value=H5D_open(&ent)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
-
-            /* Create an atom for the dataset */
-            if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0) {
-                H5D_close(dataset);
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset");
-            }
             break;
 
         default:
@@ -524,7 +518,6 @@ done:
 static H5S_t *
 H5R_get_region(H5F_t *file, H5R_type_t UNUSED ref_type, void *_ref)
 {
-    H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
     hdset_reg_ref_t *ref=(hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
@@ -556,12 +549,8 @@ H5R_get_region(H5F_t *file, H5R_type_t UNUSED ref_type, void *_ref)
     p=(uint8_t *)buf;
     H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
 
-    /* Open the dataset object */
-    if ((dataset=H5D_open_oid(&ent)) == NULL)
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
-
-    /* Copy the dataspace object */
-    if ((ret_value=H5D_get_space(dataset)) == NULL)
+    /* Open and copy the dataset's dataspace */
+    if ((ret_value=H5S_read(&ent)) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, NULL, "not found");
 
     /* Unserialize the selection */
@@ -570,10 +559,6 @@ H5R_get_region(H5F_t *file, H5R_type_t UNUSED ref_type, void *_ref)
 
     /* Free the buffer allocated in H5HG_read() */
     H5MM_xfree(buf);
-
-    /* Close the dataset we opened */
-    if (H5D_close(dataset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "not found");
 
 done:
     FUNC_LEAVE(ret_value);

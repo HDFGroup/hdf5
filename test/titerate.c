@@ -194,12 +194,12 @@ static void test_iter_group(void)
             ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
             CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
             
-            ret = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
-            CHECK(ret, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
+            ret = (herr_t)H5Gget_objtype_by_idx(root_group, (hsize_t)i);
+            CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
         }
     
         H5E_BEGIN_TRY {
-            ret = H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
+            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
         } H5E_END_TRY;   
         VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
 
@@ -664,7 +664,7 @@ static void test_grp_memb_funcs(void)
     VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
     for(i=0; i< (int)num_membs; i++) {
-        ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
+        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
         CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
         
         /* Keep a copy of the dataset names around for later */
@@ -683,7 +683,7 @@ static void test_grp_memb_funcs(void)
     }
     
     H5E_BEGIN_TRY {
-        ret = H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
+        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, 16);
     } H5E_END_TRY;   
     VERIFY(ret, FAIL, "H5Gget_objsname_by_idx");
 
@@ -704,8 +704,10 @@ static void test_grp_memb_funcs(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free the dataset names */
-    for(i=0; i< NDATASETS+2; i++)
+    for(i=0; i< NDATASETS+2; i++) {
         free(dnames[i]);
+        free(obj_names[i]);
+    }
 
 } /* test_grp_memb_funcs() */
 

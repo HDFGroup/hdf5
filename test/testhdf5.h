@@ -121,6 +121,8 @@ int                     print_func(const char *,...);
 /* Prototypes for the test routines */
 void                    test_metadata(void);
 void                    test_tbbt(void);
+void                    test_tst(void);
+void                    test_refstr(void);
 void                    test_file(void);
 void                    test_h5t(void);
 void                    test_h5s(void);

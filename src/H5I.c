@@ -359,8 +359,10 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
              * Do nothing to the object if the reference count is larger than
              * one and forcing is off.
              */
-            if (!force && cur->count>1)
+            if (!force && cur->count>1) {
+                next=cur->next;
                 continue;
+            } /* end if */
 
             /* Check for a 'free' function and call it, if it exists */
             if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
@@ -540,7 +542,7 @@ H5I_register(H5I_type_t grp, void *object)
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
-    if ((id_ptr = H5FL_ALLOC(H5I_id_info_t,0)) == NULL)
+    if ((id_ptr = H5FL_MALLOC(H5I_id_info_t)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Create the struct & it's ID */
@@ -1156,11 +1158,11 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 
     /* get symbol table entry */
     if(NULL!=(ent = H5G_loc(id))) {
-        if (ent->user_path != NULL && ent->user_path_hidden==0) {
-            len = HDstrlen(ent->user_path);
+        if (ent->user_path_r != NULL && ent->user_path_hidden==0) {
+            len = H5RS_len(ent->user_path_r);
 
             if(name) {
-                HDstrncpy(name, ent->user_path, MIN(len+1,size));
+                HDstrncpy(name, H5RS_GET_STR(ent->user_path_r), MIN(len+1,size));
                 if(len >= size)
                     name[size-1]='\0';
             } /* end if */

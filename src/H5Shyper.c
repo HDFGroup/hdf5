@@ -156,10 +156,14 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
             sel_iter->hyp.iter_rank=cont_dim;
 
             /* Allocate the position & initialize to initial location */
-            sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,cont_dim,0);
-            sel_iter->hyp.diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,cont_dim,0);
-            sel_iter->hyp.size = H5FL_ARR_ALLOC(hsize_t,cont_dim,0);
-            sel_iter->hyp.sel_off = H5FL_ARR_ALLOC(hssize_t,cont_dim,0);
+            sel_iter->hyp.off = H5FL_ARR_MALLOC(hsize_t,cont_dim);
+            assert(sel_iter->hyp.off);
+            sel_iter->hyp.diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,cont_dim);
+            assert(sel_iter->hyp.diminfo);
+            sel_iter->hyp.size = H5FL_ARR_MALLOC(hsize_t,cont_dim);
+            assert(sel_iter->hyp.size);
+            sel_iter->hyp.sel_off = H5FL_ARR_MALLOC(hssize_t,cont_dim);
+            assert(sel_iter->hyp.sel_off);
 
             /* "Flatten" dataspace extent and selection information */
             for(i=space->extent.u.simple.rank-1, acc=1; i>=0; i--) {
@@ -197,10 +201,20 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
         } /* end if */
         else {
             /* Allocate the position & initialize to initial location */
-            sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
+            sel_iter->hyp.off = H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank);
+            assert(sel_iter->hyp.off);
             for(u=0; u<space->extent.u.simple.rank; u++)
                 sel_iter->hyp.off[u]=tdiminfo[u].start;
+
+            /* Initialize other regular region information also (for release) */
+            sel_iter->hyp.diminfo = NULL;
+            sel_iter->hyp.size = NULL;
+            sel_iter->hyp.sel_off = NULL;
         } /* end else */
+
+        /* Initialize irregular region information also (for release) */
+        sel_iter->hyp.spans=NULL;
+        sel_iter->hyp.span=NULL;
     } /* end if */
     else {
 /* Initialize the information needed for non-regular hyperslab I/O */
@@ -211,8 +225,10 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
         H5S_hyper_span_precompute(sel_iter->hyp.spans,elmt_size);
 
         /* Allocate the span tree pointers, span pointers and positions */
-        sel_iter->hyp.span = H5FL_ARR_ALLOC(H5S_hyper_span_t,space->extent.u.simple.rank,0);
-        sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
+        sel_iter->hyp.span = H5FL_ARR_MALLOC(H5S_hyper_span_t,space->extent.u.simple.rank);
+        assert(sel_iter->hyp.span);
+        sel_iter->hyp.off = H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank);
+        assert(sel_iter->hyp.off);
 
         /* Initialize the starting span_info's and spans */
         spans=sel_iter->hyp.spans;
@@ -230,6 +246,11 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
             /* Get the pointer to the next level down */
             spans=spans->head->down;
         } /* end for */
+
+        /* Initialize regular region information also (for release) */
+        sel_iter->hyp.diminfo = NULL;
+        sel_iter->hyp.size = NULL;
+        sel_iter->hyp.sel_off = NULL;
     } /* end else */
 
 done:
@@ -499,7 +520,7 @@ H5S_hyper_new_span (hssize_t low, hssize_t high, H5S_hyper_span_info_t *down, H5
     FUNC_ENTER_NOINIT(H5S_hyper_new_span);
 
     /* Allocate a new span node */
-    if((ret_value = H5FL_ALLOC(H5S_hyper_span_t,0))==NULL)
+    if((ret_value = H5FL_MALLOC(H5S_hyper_span_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
        
     /* Copy the span's basic information */
@@ -710,7 +731,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     } /* end if */
     else {
         /* Allocate a new span_info node */
-        if((ret_value = H5FL_ALLOC(H5S_hyper_span_info_t,0))==NULL)
+        if((ret_value = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
            
         /* Copy the span_info information */
@@ -1033,7 +1054,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     /* Check if there is regular hyperslab information to copy */
     if(src->select.sel_info.hslab.diminfo!=NULL) {
         /* Create the per-dimension selection info */
-        if((new_diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,src->extent.u.simple.rank,0))==NULL)
+        if((new_diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,src->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension array");
 
         /* Copy the per-dimension selection info */
@@ -1046,7 +1067,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
         dst->select.sel_info.hslab.diminfo = new_diminfo;
 
         /* Create the per-dimension selection info */
-        if((new_diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,src->extent.u.simple.rank,0))==NULL)
+        if((new_diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,src->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension array");
 
         /* Copy the per-dimension selection info */
@@ -1676,13 +1697,13 @@ H5S_hyper_deserialize (H5S_t *space, const uint8_t *buf)
     UINT32DECODE(buf,num_elem);  /* decode the number of points */
 
     /* Allocate space for the coordinates */
-    if((start = H5FL_ARR_ALLOC(hsize_t,rank,0))==NULL)
+    if((start = H5FL_ARR_MALLOC(hsize_t,rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
-    if((end = H5FL_ARR_ALLOC(hsize_t,rank,0))==NULL)
+    if((end = H5FL_ARR_MALLOC(hsize_t,rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
-    if((block = H5FL_ARR_ALLOC(hsize_t,rank,0))==NULL)
+    if((block = H5FL_ARR_MALLOC(hsize_t,rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
-    if((count = H5FL_ARR_ALLOC(hsize_t,rank,0))==NULL)
+    if((count = H5FL_ARR_MALLOC(hsize_t,rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
     
     /* Set the count for all blocks */
@@ -2603,7 +2624,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
         assert(*span_tree==NULL);
 
         /* Allocate a new span_info node */
-        if((*span_tree = H5FL_ALLOC(H5S_hyper_span_info_t,0))==NULL)
+        if((*span_tree = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span");
            
         /* Set the span tree's basic information */
@@ -3631,7 +3652,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
         /* Generate all the spans segments for this dimension */
         for(u=0; u<count[i]; u++) {
             /* Allocate a span node */
-            if((span = H5FL_ALLOC(H5S_hyper_span_t,0))==NULL)
+            if((span = H5FL_MALLOC(H5S_hyper_span_t))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
 
             /* Set the span's basic information */
@@ -3661,7 +3682,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
         } /* end for */
 
         /* Allocate a span info node */
-        if((down = H5FL_ALLOC(H5S_hyper_span_info_t,0))==NULL)
+        if((down = H5FL_MALLOC(H5S_hyper_span_info_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
 
         /* Set the reference count */
@@ -3931,7 +3952,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         hssize_t fill=1;
 
         /* Allocate temporary buffer */
-        if ((_stride=H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0))==NULL)
+        if ((_stride=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         stride = _stride;
@@ -3942,7 +3963,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         hssize_t fill=1;
 
         /* Allocate temporary buffer */
-        if ((_block=H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0))==NULL)
+        if ((_block=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         block = _block;
@@ -4046,7 +4067,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Copy all the application per-dimension selection info into the space descriptor */
-        if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL)
+        if((diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
         for(u=0; u<space->extent.u.simple.rank; u++) {
             diminfo[u].start = start[u];
@@ -4057,7 +4078,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         space->select.sel_info.hslab.app_diminfo = diminfo;
 
         /* Allocate room for the optimized per-dimension selection info */
-        if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL)
+        if((diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
 
         /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
@@ -4479,7 +4500,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         hssize_t fill=1;
 
         /* Allocate temporary buffer */
-        if ((_stride=H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0))==NULL)
+        if ((_stride=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         stride = _stride;
@@ -4490,7 +4511,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         hssize_t fill=1;
 
         /* Allocate temporary buffer */
-        if ((_block=H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0))==NULL)
+        if ((_block=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         block = _block;
@@ -4595,7 +4616,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Copy all the application per-dimension selection info into the space descriptor */
-        if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL)
+        if((diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
         for(u=0; u<space->extent.u.simple.rank; u++) {
             diminfo[u].start = start[u];
@@ -4606,7 +4627,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         space->select.sel_info.hslab.app_diminfo = diminfo;
 
         /* Allocate room for the optimized per-dimension selection info */
-        if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL)
+        if((diminfo = H5FL_ARR_MALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
 
         /* Optimize the hyperslab selection to detect contiguously selected block/stride information */

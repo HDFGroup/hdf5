@@ -243,7 +243,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_FILE_CREATE_g!=-1);
 
     /* Get the pointer to file creation class */
-    if(NULL == (crt_pclass = H5I_object_verify(H5P_CLS_FILE_CREATE_g, H5I_GENPROP_CLS)))
+    if(NULL == (crt_pclass = H5I_object(H5P_CLS_FILE_CREATE_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -326,7 +326,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_FILE_ACCESS_g!=-1);
 
     /* Get the pointer to file creation class */
-    if(NULL == (acs_pclass = H5I_object_verify(H5P_CLS_FILE_ACCESS_g, H5I_GENPROP_CLS)))
+    if(NULL == (acs_pclass = H5I_object(H5P_CLS_FILE_ACCESS_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -407,7 +407,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_MOUNT_g!=-1);
 
     /* Get the pointer to file mount class */
-    if(NULL == (mnt_pclass = H5I_object_verify(H5P_CLS_MOUNT_g, H5I_GENPROP_CLS)))
+    if(NULL == (mnt_pclass = H5I_object(H5P_CLS_MOUNT_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -503,7 +503,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI(H5F_acs_create, FAIL);
 
     /* Check argument */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve properties */
@@ -558,7 +558,7 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5F_acs_close, FAIL);
 
     /* Check argument */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
@@ -610,9 +610,9 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 
     FUNC_ENTER_NOAPI(H5F_acs_copy, FAIL);
 
-    if(NULL == (new_plist = H5I_object_verify(new_fapl_id, H5I_GENPROP_LST)))
+    if(NULL == (new_plist = H5I_object(new_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
-    if(NULL == (old_plist = H5I_object_verify(old_fapl_id, H5I_GENPROP_LST)))
+    if(NULL == (old_plist = H5I_object(old_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Get values from old property list */
@@ -1375,7 +1375,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified");
 
     /* Open the file at the virtual file layer */
-    if (NULL==(file=H5FD_open(name, H5F_ACC_RDONLY, H5P_DEFAULT, HADDR_UNDEF)))
+    if (NULL==(file=H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file");
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
@@ -1428,13 +1428,13 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
  
     FUNC_ENTER_NOINIT(H5F_new);
 
-    if (NULL==(f=H5FL_ALLOC(H5F_t,1)))
+    if (NULL==(f=H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     if (shared) {
 	f->shared = shared;
     } else {
-	f->shared = H5FL_ALLOC(H5F_file_t,1);
+	f->shared = H5FL_CALLOC(H5F_file_t);
 	f->shared->boot_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->freespace_addr = HADDR_UNDEF;
@@ -1445,16 +1445,19 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * new file handle.  We do this early because some values might need
 	 * to change as the file is being opened.
 	 */
-        if(H5P_DEFAULT == fcpl_id)
-            fcpl_id = H5P_FILE_CREATE_DEFAULT;
-        if(NULL == (plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
+        if(NULL == (plist = H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
         f->shared->fcpl_id = H5P_copy_plist(plist);
 
+        /* Get the FCPL values to cache */
+        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &f->shared->sizeof_addr)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for address");
+        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &f->shared->sizeof_size)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size");
+        if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &f->shared->sym_leaf_k)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size");
 
-        if(H5P_DEFAULT == fapl_id)
-            fapl_id = H5P_FILE_ACCESS_DEFAULT;
-        if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+        if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
 
         if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
@@ -1486,6 +1489,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 
 	/* Create the chunk cache */
 	H5F_istore_init(f);
+
+        /* Create the file's "open object" information */
+        if(H5FO_create(f)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object TBBT");
     } /* end else */
     
     f->shared->nrefs++;
@@ -1561,13 +1568,17 @@ H5F_dest(H5F_t *f)
                 f->shared->root_grp=NULL;
             }
 	    if (H5AC_dest(f)) {
-		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
+		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
 	    if (H5F_istore_dest (f)<0) {
-		HERROR(H5E_FILE, H5E_CANTINIT, "problems closing file");
+		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
+	    if (H5FO_dest(f)<0) {
+                HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
+                ret_value = FAIL; /*but keep going*/
+	    } /* end if */
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
 
             /* Free the data sieve buffer, if it's been allocated */
@@ -1837,6 +1848,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * empty or not.
      */
     if (0==H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+        /* Get values to cache from the FCPL */
+        if(H5P_get(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&shared->sizeof_addr)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address");
+        if(H5P_get(c_plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &shared->sizeof_size)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number for object size");
+        if(H5P_get(c_plist, H5F_CRT_SYM_LEAF_NAME, &shared->sym_leaf_k)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for symbol table leaf nodes");
+        if(H5P_get(c_plist, H5F_CRT_BTREE_RANK_NAME, &shared->btree_k[0])<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes");        
+
 	/*
 	 * The superblock starts immediately after the user-defined header,
 	 * which we have already insured is a proper size.  The base address
@@ -1903,6 +1924,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number in an address");
         if(H5P_set(c_plist, H5F_CRT_ADDR_BYTE_NUM_NAME,&sizeof_addr)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number in an address");
+        shared->sizeof_addr=sizeof_addr;        /* Keep a local copy also */
 
 	/* Size of file sizes */
         sizeof_size = *p++;
@@ -1911,6 +1933,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad byte number for object size");
         if(H5P_set(c_plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set byte number for object size");
+        shared->sizeof_size=sizeof_size;        /* Keep a local copy also */
 	
 	/* Reserved byte */
 	p++;
@@ -1921,6 +1944,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad symbol table leaf node 1/2 rank");
         if(H5P_set(c_plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for symbol table leaf nodes");
+        shared->sym_leaf_k=sym_leaf_k;        /* Keep a local copy also */
 
 	/* Need 'get' call to set other array values */
         if(H5P_get(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
@@ -1930,6 +1954,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "bad 1/2 rank for btree internal nodes");
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set rank for btree internal nodes");
+        HDmemcpy(shared->btree_k,btree_k,sizeof(int)*H5B_NUM_BTREE_ID); /* Keep a local copy also */
 
 	/* File consistency flags. Not really used yet */
 	UINT32DECODE(p, shared->consist_flags);
@@ -2033,9 +2058,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * second time or later, verify the access property list value matches
      * the degree in shared file structure.
      */
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(NULL == (a_plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (a_plist = H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
     if(H5P_get(a_plist, H5F_CLOSE_DEGREE_NAME, &fc_degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree");  
@@ -2138,14 +2161,16 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     /* Check file creation property list */
     if(H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
-    if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list");
+    else
+        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list");
 
     /* Check the file access property list */
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
+    else
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
 
     /*
      * Adjust bit flags by turning on the creation bit and making sure that
@@ -2230,11 +2255,12 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags");
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
+    else
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open(filename, flags, H5P_DEFAULT, fapl_id)))
+    if (NULL==(new_file=H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
 
     /* Get an atom for the file */
@@ -2399,8 +2425,6 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     int                 freespace_vers; /* Freespace info version */
     int                 obj_dir_vers;   /* Object header info version */
     int                 share_head_vers;/* Shared header info version */
-    int                 btree_k[H5B_NUM_BTREE_ID];      /* B-tree size info */
-    unsigned            sym_leaf_k;     /* Number of symbols in B-tree leafs */
     H5P_genplist_t *plist;              /* Property list */
     herr_t              ret_value;      /* Return value */
     
@@ -2492,10 +2516,6 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get object directory version");
     if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get shared-header format version");
-    if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for symbol table leaf nodes");
-    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes");
 
     /* encode the file boot block */
     p = sbuf;
@@ -2511,8 +2531,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     assert (H5F_SIZEOF_SIZE(f)<=255);
     *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
     *p++ = 0;			/*reserved */
-    UINT16ENCODE(p, sym_leaf_k);
-    UINT16ENCODE(p, btree_k[H5B_SNODE_ID]);
+    UINT16ENCODE(p, f->shared->sym_leaf_k);
+    UINT16ENCODE(p, f->shared->btree_k[H5B_SNODE_ID]);
     UINT32ENCODE(p, f->shared->consist_flags);    
     H5F_addr_encode(f, &p, f->shared->base_addr);
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
@@ -2904,6 +2924,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     H5F_t	*parent = NULL;		/*file containing mount point	*/
     int	lt, rt, md, cmp;	/*binary search indices		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
+    H5RS_str_t  *name_r;                /* Ref-counted version of name */
     herr_t	ret_value = SUCCEED;	/*return value			*/
     
     FUNC_ENTER_NOINIT(H5F_mount);
@@ -2975,8 +2996,11 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
-    if (H5G_replace_name( H5G_UNKNOWN, loc, name, NULL, NULL, NULL, OP_MOUNT )<0)
+    name_r=H5RS_wrap(name);
+    assert(name_r);
+    if (H5G_replace_name( H5G_UNKNOWN, loc, name_r, NULL, NULL, NULL, OP_MOUNT )<0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name");
+    H5RS_decr(name_r);
 
 done:
     if (ret_value<0 && mount_point)
@@ -3050,7 +3074,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
 	for (i=0; i<parent->mtab.nmounts; i++) {
 	    if (parent->mtab.child[i].file==child) {
                 /* Search the open IDs replace names to reflect unmount operation */
-                if (H5G_replace_name( H5G_UNKNOWN, mnt_ent, mnt_ent->user_path, NULL, NULL, NULL, OP_UNMOUNT )<0)
+                if (H5G_replace_name( H5G_UNKNOWN, mnt_ent, mnt_ent->user_path_r, NULL, NULL, NULL, OP_UNMOUNT )<0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name ");
 
 		/* Unmount the child */
@@ -3181,6 +3205,74 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_has_mount
+ *
+ * Purpose:	Check if a file has mounted files within it.
+ *
+ * Return:	Success:	TRUE/FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January  2, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5F_has_mount(const H5F_t *file)
+{
+    htri_t ret_value;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5F_has_mount, FAIL);
+
+    assert(file);
+
+    if(file->mtab.nmounts>0)
+        ret_value=TRUE;
+    else
+        ret_value=FALSE;
+    
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5F_has_mount() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_is_mount
+ *
+ * Purpose:	Check if a file is mounted within another file.
+ *
+ * Return:	Success:	TRUE/FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January  2, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5F_is_mount(const H5F_t *file)
+{
+    htri_t ret_value;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5F_is_mount, FAIL);
+
+    assert(file);
+
+    if(file->mtab.parent!=NULL)
+        ret_value=TRUE;
+    else
+        ret_value=FALSE;
+    
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5F_is_mount() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Fmount
  *
  * Purpose:	Mount file CHILD_ID onto the group specified by LOC_ID and
@@ -3214,8 +3306,9 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_MOUNT_DEFAULT;
-    if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
+    else
+        if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
 
     /* Do the mount */
     if (H5F_mount(loc, name, child, plist_id)<0)
@@ -3307,7 +3400,7 @@ H5Freopen(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if (NULL==(new_file=H5F_new(old_file->shared, H5P_DEFAULT, H5P_DEFAULT)))
+    if (NULL==(new_file=H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file");
 
     /* Keep old file's read/write intent in new file */
@@ -3373,27 +3466,14 @@ H5F_get_intent(const H5F_t *f)
 size_t
 H5F_sizeof_addr(const H5F_t *f)
 {
-    size_t sizeof_addr = 0;
-    H5P_genplist_t *plist;              /* Property list */
-    size_t      ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_sizeof_addr, 0);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_sizeof_addr);
 
     assert(f);
     assert(f->shared);
 
-    /* Get property list */
-    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, UFAIL, "not a property list");
-
-    if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, "can't get byte number for address");
-
-    /* Set return value */
-    ret_value=sizeof_addr;
-
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(f->shared->sizeof_addr);
 }
 
 
@@ -3419,28 +3499,85 @@ done:
 size_t
 H5F_sizeof_size(const H5F_t *f)
 {
-    size_t   sizeof_size = 0;
-    H5P_genplist_t *plist;              /* Property list */
-    size_t      ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_sizeof_size, 0);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_sizeof_size);
 
     assert(f);
     assert(f->shared);
 
-    /* Get property list */
-    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, UFAIL, "not a property list");
+done:
+    FUNC_LEAVE(f->shared->sizeof_size);
+}
 
-    if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, "can't get byte number for object size");
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_sym_leaf_k
+ *
+ * Purpose:	Replaced a macro to retrieve the symbol table leaf size,
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-negative, and the symbol table leaf size is
+ *                              returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		Oct 14 2001
+ *
+ * Modifications:
+ *		Quincey Koziol, 2001-10-15
+ *		Added this header and removed unused ret_value variable.
+ *-------------------------------------------------------------------------
+ */
+unsigned H5F_sym_leaf_k(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_sym_leaf_k);
 
-    /* Set return value */
-    ret_value=sizeof_size;
+    assert(f);
+    assert(f->shared);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(f->shared->sym_leaf_k);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_Kvalue
+ *
+ * Purpose:	Replaced a macro to retrieve a B-tree key value for a certain
+ *              type, now that the generic properties are being used to store
+ *              the B-tree values.
+ *
+ * Return:	Success:	Non-negative, and the B-tree key value is
+ *                              returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		Oct 14 2001
+ *
+ * Modifications:
+ *		Quincey Koziol, 2001-10-15
+ *		Added this header and removed unused ret_value variable.
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
+{
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_Kvalue);
+
+    assert(f);
+    assert(f->shared);
+    assert(type);
+
+done:
+    FUNC_LEAVE(f->shared->btree_k[type->id]);
+} /* end H5F_Kvalue() */
 
 
 /*-------------------------------------------------------------------------
@@ -3509,23 +3646,35 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5F_get_fileno() */
 
-
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_base_addr
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'base_addr' value
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu <slu@ncsa.uiuc.edu>
+ *		December 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 haddr_t 
 H5F_get_base_addr(const H5F_t *f)
 {
-    haddr_t	ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_get_base_addr, FAIL);
+    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
+    FUNC_ENTER_NOINIT(H5F_get_base_addr);
 
     assert(f);
     assert(f->shared);
 
-    /* Retrieve the file's base address */
-    ret_value = f->shared->base_addr;
-
 done:
-    FUNC_LEAVE(ret_value);
-}
+    FUNC_LEAVE(f->shared->base_addr);
+} /* end H5F_get_bass_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -3800,9 +3949,6 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
 	  int fwidth)
 {
     hsize_t userblock_size;
-    int     btree_k[H5B_NUM_BTREE_ID];
-    unsigned sym_leaf_k;
-    size_t  sizeof_addr, sizeof_size;
     int     boot_vers, freespace_vers, obj_dir_vers, share_head_vers;
     H5P_genplist_t *plist;              /* Property list */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -3822,15 +3968,6 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
 
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
-    if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
-    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree nodes");
-
-    if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
-    if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object size");
 
     if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &boot_vers)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot block version");
@@ -3868,14 +4005,14 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	      "Size of user block:", (unsigned long) userblock_size);
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file size_t type:", (unsigned) sizeof_size);
+	      "Size of file size_t type:", (unsigned) f->shared->sizeof_size);
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file haddr_t type:", (unsigned) sizeof_addr);
+	      "Size of file haddr_t type:", (unsigned) f->shared->sizeof_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Symbol table leaf node 1/2 rank:", sym_leaf_k);
+	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:",
-              (unsigned) (btree_k[H5B_SNODE_ID]));
+              (unsigned) (f->shared->btree_k[H5B_SNODE_ID]));
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Boot block version number:", (unsigned) boot_vers);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,

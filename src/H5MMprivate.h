@@ -15,7 +15,7 @@
  *-------------------------------------------------------------------------
  */
 #ifndef _H5MMprivate_H
-#define _H5MMprivate_h
+#define _H5MMprivate_H
 
 #include "H5MMpublic.h"
 
@@ -29,7 +29,7 @@
 #define H5MM_malloc(Z)	HDmalloc(MAX(1,Z))
 #define H5MM_calloc(Z)	HDcalloc(1,MAX(1,Z))
 #endif /* H5_MALLOC_WORKS */
-#define H5MM_free(Z)	HDfree(1,Z)
+#define H5MM_free(Z)	HDfree(Z)
 
 /*
  * Library prototypes...

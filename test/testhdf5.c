@@ -157,6 +157,8 @@ main(int argc, char *argv[])
     InitTest("configure", test_configure, cleanup_configure, "Configure definitions");
     InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
     InitTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees");
+    InitTest("tst", test_tst, NULL,  "Ternary Search Trees");
+    InitTest("refstr", test_refstr, NULL,  "Reference Counted Strings");
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");

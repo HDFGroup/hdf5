@@ -583,6 +583,7 @@ H5FP_update_file_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
     switch (sap_sync->action) {
+#ifdef OLD_WAY
     case H5FP_ACT_CREATE:
         if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
             H5O_efl_t efl;
@@ -598,7 +599,7 @@ H5FP_update_file_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
                                       fmeta->sdim->size, fmeta->sdim->max) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
 
-            if (H5D_update_entry_cache(file, ent, H5G_entof(grp),
+            if (H5D_update_entry_info(file, ent, H5G_entof(grp),
                                        fmeta->dset->s, space,
                                        fmeta->plist, fmeta->layout, fmeta->dtype,
                                        FALSE, fmeta->header) == FAIL)
@@ -607,7 +608,7 @@ H5FP_update_file_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
             if (H5P_get(fmeta->plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
 
-            if (H5D_update_external_storage_cache(file, ent, &efl, fmeta->layout) == FAIL)
+            if (H5D_update_external_storage_info(file, ent, &efl, fmeta->layout) == FAIL)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINIT, FAIL,
                             "can't update external file layout metadata cache");
         }
@@ -624,6 +625,7 @@ H5FP_update_file_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
         }
 
         break;
+#endif /* OLD_WAY */
 
     case H5FP_ACT_DELETE:
     default:

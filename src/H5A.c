@@ -275,7 +275,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     H5E_clear ();
 
     /* Create the attribute message and save the attribute index */
-    if (H5O_modify(&(attr->ent), H5O_ATTR, H5O_NEW_MESG, 0, attr) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR, H5O_NEW_MESG, 0, 1, attr) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
 
     /* Register the new attribute and get an ID for it */
@@ -635,7 +635,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 
     /* Perform data type conversion */
     if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf,
-                    H5P_DEFAULT)<0) {
+                    H5P_DATASET_XFER_DEFAULT)<0) {
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
@@ -650,7 +650,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 
     /* Modify the attribute data */
     attr->data=tconv_buf;   /* Set the data pointer temporarily */
-    if (H5O_modify(&(attr->ent), H5O_ATTR, idx, 0, attr) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR, idx, 0, 1, attr) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to update attribute header messages");
 
@@ -787,7 +787,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         }
 
         /* Perform data type conversion.  */
-        if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0)
+        if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, H5P_DATASET_XFER_DEFAULT)<0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed");
 
         /* Copy the converted data into the user's buffer */
@@ -1223,7 +1223,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name)
     found_attr->initialized=TRUE;
 
     /* Modify the attribute message */
-    if (H5O_modify(ent, H5O_ATTR, idx, 0, found_attr) < 0) 
+    if (H5O_modify(ent, H5O_ATTR, idx, 0, 1, found_attr) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
    
     /* Close the attribute */

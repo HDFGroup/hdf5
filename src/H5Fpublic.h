@@ -28,13 +28,25 @@
  * which are compatible with the library to which the application is linked.
  * We're assuming that these constants are used rather early in the hdf5
  * session.
+ *
+ * NOTE: When adding H5F_ACC_* macros, remember to redefine them in H5Fprivate.h
+ *
  */
-#define H5F_ACC_RDONLY	(H5check(),0x0000u)	/*absence of rdwr => rd-only */
-#define H5F_ACC_RDWR	(H5check(),0x0001u)	/*open for read and write    */
-#define H5F_ACC_TRUNC	(H5check(),0x0002u)	/*overwrite existing files   */
-#define H5F_ACC_EXCL	(H5check(),0x0004u)	/*fail if file already exists*/
-#define H5F_ACC_DEBUG	(H5check(),0x0008u)	/*print debug info	     */
-#define H5F_ACC_CREAT	(H5check(),0x0010u)	/*create non-existing files  */
+
+/* When this header is included from H5Fprivate.h, don't make calls to H5check() */
+#undef H5CHECK
+#ifndef _H5Fprivate_H
+#define H5CHECK          H5check(),
+#else   /* _H5Fprivate_H */
+#define H5CHECK
+#endif  /* _H5Fprivate_H */
+
+#define H5F_ACC_RDONLY	(H5CHECK 0x0000u)	/*absence of rdwr => rd-only */
+#define H5F_ACC_RDWR	(H5CHECK 0x0001u)	/*open for read and write    */
+#define H5F_ACC_TRUNC	(H5CHECK 0x0002u)	/*overwrite existing files   */
+#define H5F_ACC_EXCL	(H5CHECK 0x0004u)	/*fail if file already exists*/
+#define H5F_ACC_DEBUG	(H5CHECK 0x0008u)	/*print debug info	     */
+#define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
 
 #define H5F_OBJ_FILE	(0x0001u)
 #define H5F_OBJ_DATASET	(0x0002u)

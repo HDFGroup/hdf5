@@ -81,7 +81,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
 
     /* Decode */
-    if (NULL==(pline = H5FL_ALLOC(H5O_pline_t,1)))
+    if (NULL==(pline = H5FL_CALLOC(H5O_pline_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     version = *p++;
     if (version!=H5O_PLINE_VERSION)
@@ -244,7 +244,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
     
     FUNC_ENTER_NOAPI(H5O_pline_copy, NULL);
 
-    if (!dst && NULL==(dst = H5FL_ALLOC (H5O_pline_t,0)))
+    if (!dst && NULL==(dst = H5FL_MALLOC (H5O_pline_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     *dst = *src;
@@ -381,7 +381,8 @@ H5O_pline_reset (void *mesg)
         H5MM_xfree(pline->filter[i].name);
         H5MM_xfree(pline->filter[i].cd_values);
     }
-    H5MM_xfree(pline->filter);
+    if(pline->filter)
+        H5MM_xfree(pline->filter);
     HDmemset(pline, 0, sizeof *pline);
 
 done:

@@ -495,7 +495,7 @@ H5TN_init_interface(void)\n\
 
 	/* The part common to fixed and floating types */
 	printf("\
-    if (NULL==(dt = H5FL_ALLOC (H5T_t,1)))\n\
+    if (NULL==(dt = H5FL_CALLOC (H5T_t)))\n\
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\"memory allocation failed\");\n\
     dt->state = H5T_STATE_IMMUTABLE;\n\
     dt->ent.header = HADDR_UNDEF;\n\
