@@ -2646,13 +2646,17 @@ rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
    for d in $LDFLAGS ; do
-      d=`echo $d | sed -e 's/-L//g'`
       case "$d" in
-         .*)
-	    	    	    d=${ROOT}/$d
+         -L*)
+            d=`echo $d | sed -e 's/-L//g'`
+            case "$d" in
+               .*)
+	                                              d=${ROOT}/$d
+                  ;;
+            esac
+            DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
 	    ;;
       esac
-      DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
    done
 fi
 
