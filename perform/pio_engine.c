@@ -102,7 +102,7 @@ static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
      /* For the PFS of TFLOPS */
 #    define HDF5_PARAPREFIX     "pfs:/pfs_grande/multi/tmp_1"
 #  else
-#    define HDF5_PARAPREFIX     "/tmp"
+#    define HDF5_PARAPREFIX     ""
 #  endif    /* __PUMAGON__ */
 #endif  /* !HDF5_PARAPREFIX */
 
@@ -279,6 +279,9 @@ do_pio(parameters param)
 
         sprintf(base_name, "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
+	if (pio_debug_level > 0)
+	    HDfprintf(output, "rank %d: data filename=%s\n",
+		pio_mpi_rank_g, fname);
 
 	/* Need barrier to make sure everyone starts at the same time */
         MPI_Barrier(pio_comm_g);
