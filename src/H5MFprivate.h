@@ -33,10 +33,10 @@
 /*
  * Library prototypes...
  */
-__DLL__ haddr_t H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size);
-__DLL__ herr_t H5MF_xfree(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+H5_DLL haddr_t H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size);
+H5_DLL herr_t H5MF_xfree(H5F_t *f, H5FD_mem_t type, haddr_t addr,
 			  hsize_t size);
-__DLL__ haddr_t H5MF_realloc(H5F_t *f, H5FD_mem_t type, haddr_t old_addr,
+H5_DLL haddr_t H5MF_realloc(H5F_t *f, H5FD_mem_t type, haddr_t old_addr,
 			     hsize_t old_size, hsize_t new_size);
 
 #endif

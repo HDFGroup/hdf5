@@ -95,27 +95,27 @@ extern      "C"
 {
 #endif                          /* c_plusplus || __cplusplus */
 
-__DLL__ H5TB_TREE  *H5TB_dmake (H5TB_cmp_t cmp, int arg, unsigned fast_compare);
-__DLL__ H5TB_NODE  *H5TB_dfind (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
-__DLL__ H5TB_NODE  *H5TB_find(H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
+H5_DLL H5TB_TREE  *H5TB_dmake (H5TB_cmp_t cmp, int arg, unsigned fast_compare);
+H5_DLL H5TB_NODE  *H5TB_dfind (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
+H5_DLL H5TB_NODE  *H5TB_find(H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
                  int arg, H5TB_NODE ** pp);
-__DLL__ H5TB_NODE  *H5TB_dless (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
-__DLL__ H5TB_NODE  *H5TB_less (H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
+H5_DLL H5TB_NODE  *H5TB_dless (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
+H5_DLL H5TB_NODE  *H5TB_less (H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
                  int arg, H5TB_NODE ** pp);
-__DLL__ H5TB_NODE  *H5TB_index (H5TB_NODE * root, unsigned indx);
-__DLL__ H5TB_NODE  *H5TB_dins (H5TB_TREE * tree, void * item, void * key);
-__DLL__ H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
-__DLL__ void *H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp);
-__DLL__ H5TB_NODE  *H5TB_first (H5TB_NODE * root);
-__DLL__ H5TB_NODE  *H5TB_last (H5TB_NODE * root);
-__DLL__ H5TB_NODE  *H5TB_next (H5TB_NODE * node);
-__DLL__ H5TB_NODE  *H5TB_prev (H5TB_NODE * node);
-__DLL__ H5TB_TREE  *H5TB_dfree (H5TB_TREE * tree, void(*fd) (void *), void(*fk) (void *));
-__DLL__ void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) (void *));
-__DLL__ long        H5TB_count (H5TB_TREE * tree);
+H5_DLL H5TB_NODE  *H5TB_index (H5TB_NODE * root, unsigned indx);
+H5_DLL H5TB_NODE  *H5TB_dins (H5TB_TREE * tree, void * item, void * key);
+H5_DLL H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
+H5_DLL void *H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp);
+H5_DLL H5TB_NODE  *H5TB_first (H5TB_NODE * root);
+H5_DLL H5TB_NODE  *H5TB_last (H5TB_NODE * root);
+H5_DLL H5TB_NODE  *H5TB_next (H5TB_NODE * node);
+H5_DLL H5TB_NODE  *H5TB_prev (H5TB_NODE * node);
+H5_DLL H5TB_TREE  *H5TB_dfree (H5TB_TREE * tree, void(*fd) (void *), void(*fk) (void *));
+H5_DLL void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) (void *));
+H5_DLL long        H5TB_count (H5TB_TREE * tree);
 
 #ifdef H5TB_DEBUG
-__DLL__ herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), int method);
+H5_DLL herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), int method);
 #endif /* H5TB_DEBUG */
 
 #if defined c_plusplus || defined __cplusplus

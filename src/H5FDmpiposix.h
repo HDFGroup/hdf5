@@ -43,13 +43,13 @@
 extern "C" {
 #endif
 
-__DLL__ hid_t H5FD_mpiposix_init(void);
-__DLL__ herr_t H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm);
-__DLL__ herr_t H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/);
-__DLL__ MPI_Comm H5FD_mpiposix_communicator(H5FD_t *_file);
-__DLL__ herr_t H5FD_mpiposix_closing(H5FD_t *file);
-__DLL__ int H5FD_mpiposix_mpi_rank(H5FD_t *_file);
-__DLL__ int H5FD_mpiposix_mpi_size(H5FD_t *_file);
+H5_DLL hid_t H5FD_mpiposix_init(void);
+H5_DLL herr_t H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm);
+H5_DLL herr_t H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/);
+H5_DLL MPI_Comm H5FD_mpiposix_communicator(H5FD_t *_file);
+H5_DLL herr_t H5FD_mpiposix_closing(H5FD_t *file);
+H5_DLL int H5FD_mpiposix_mpi_rank(H5FD_t *_file);
+H5_DLL int H5FD_mpiposix_mpi_size(H5FD_t *_file);
 
 #ifdef __cplusplus
 }

@@ -160,36 +160,36 @@ struct H5F_t {
 };
 
 #ifdef H5_HAVE_PARALLEL
-__DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
-__DLLVAR__  hbool_t H5_mpiposix_1_metawrite_g;
+H5_DLLVAR  hbool_t H5_mpi_1_metawrite_g;
+H5_DLLVAR  hbool_t H5_mpiposix_1_metawrite_g;
 #endif /* H5_HAVE_PARALLEL */
 
 /* Private functions, not part of the publicly documented API */
-__DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
+H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
 				       uint8_t *l);
-__DLL__ H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
+H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
 			hid_t fapl_id);
-__DLL__ herr_t H5F_close(H5F_t *f);
-__DLL__ herr_t H5F_close_all(void);
-__DLL__ herr_t H5F_flush_all(hbool_t invalidate);
-__DLL__ herr_t H5F_debug(H5F_t *f, haddr_t addr, FILE * stream,
+H5_DLL herr_t H5F_close(H5F_t *f);
+H5_DLL herr_t H5F_close_all(void);
+H5_DLL herr_t H5F_flush_all(hbool_t invalidate);
+H5_DLL herr_t H5F_debug(H5F_t *f, haddr_t addr, FILE * stream,
 			 int indent, int fwidth);
-__DLL__ herr_t H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream,
+H5_DLL herr_t H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream,
 				int indent, int fwidth, int ndims);
-__DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
+H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
 /* Functions that operate on indexed storage */
-__DLL__ herr_t H5F_istore_init (H5F_t *f);
-__DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
-__DLL__ herr_t H5F_istore_dest (H5F_t *f);
-__DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
-__DLL__ herr_t H5F_istore_read(H5F_t *f, hid_t dxpl_id,
+H5_DLL herr_t H5F_istore_init (H5F_t *f);
+H5_DLL herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
+H5_DLL herr_t H5F_istore_dest (H5F_t *f);
+H5_DLL herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
+H5_DLL herr_t H5F_istore_read(H5F_t *f, hid_t dxpl_id,
                                 const struct H5O_layout_t *layout,
                                 struct H5P_genplist_t *dc_plist,
                                 const hsize_t size_m[], const hssize_t offset_m[],
                                 const hssize_t offset_f[], const hsize_t size[],
                                 void *buf/*out*/);
-__DLL__ herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
+H5_DLL herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
                                 const struct H5O_layout_t *layout,
                                 struct H5P_genplist_t *dc_plist,
                                 const hsize_t size_m[], const hssize_t offset_m[],
@@ -197,22 +197,22 @@ __DLL__ herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
                                 const void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
-__DLL__ herr_t H5F_contig_read(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_contig_read(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
         size_t size, hid_t dxpl_id, void *_buf/*out*/);
-__DLL__ herr_t H5F_contig_write(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_contig_write(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
         size_t size, hid_t dxpl_id, const void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
-__DLL__ herr_t H5F_contig_readv(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_contig_readv(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
         size_t nseq, size_t size[], hsize_t offset[], hid_t dxpl_id, void *_buf/*out*/);
-__DLL__ herr_t H5F_contig_writev(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_contig_writev(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
         size_t nseq, size_t size[], hsize_t offset[], hid_t dxpl_id, const void *buf);
 
 /* Functions that operate on compact dataset storage */
-__DLL__ herr_t H5F_compact_readv(H5F_t *f, const struct H5O_layout_t *layout, size_t nseq,      
+H5_DLL herr_t H5F_compact_readv(H5F_t *f, const struct H5O_layout_t *layout, size_t nseq,      
                                 size_t size_arr[], hsize_t offset_arr[],
                                 hid_t dxpl_id, void *_buf/*out*/);
-__DLL__ herr_t H5F_compact_writev(H5F_t *f, struct H5O_layout_t *layout, size_t nseq,
+H5_DLL herr_t H5F_compact_writev(H5F_t *f, struct H5O_layout_t *layout, size_t nseq,
                                 size_t size_arr[], hsize_t offset_arr[], 
                                 hid_t dxpl_id, const void *_buf);
 

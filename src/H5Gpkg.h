@@ -112,35 +112,35 @@ typedef struct H5G_bt_ud2_t {
 /*
  * This is the class identifier to give to the B-tree functions.
  */
-__DLLVAR__ H5B_class_t H5B_SNODE[1];
+H5_DLLVAR H5B_class_t H5B_SNODE[1];
 
 /* The cache subclass */
-__DLLVAR__ const H5AC_class_t H5AC_SNODE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
 
 /*
  * Functions that understand symbol tables but not names.  The
  * functions that understand names are exported to the rest of
  * the library and appear in H5Gprivate.h.
  */
-__DLL__ herr_t H5G_stab_create(H5F_t *f, size_t size_hint,
+H5_DLL herr_t H5G_stab_create(H5F_t *f, size_t size_hint,
 			       H5G_entry_t *ent/*out*/);
-__DLL__ herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
+H5_DLL herr_t H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
 			     H5G_entry_t *obj_ent/*out*/);
-__DLL__ herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
+H5_DLL herr_t H5G_stab_insert(H5G_entry_t *grp_ent, const char *name,
 			       H5G_entry_t *obj_ent);
-__DLL__ herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name);
+H5_DLL herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name);
 
 /*
  * Functions that understand symbol table entries.
  */
-__DLL__ herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
+H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, int n);
-__DLL__ herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
+H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, int n);
 
 /* Functions that understand symbol table nodes */
-__DLL__ unsigned H5G_node_k(const H5F_t *f);
-__DLL__ herr_t H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
+H5_DLL unsigned H5G_node_k(const H5F_t *f);
+H5_DLL herr_t H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 		  void UNUSED *_rt_key, void *_udata);
 
 #endif

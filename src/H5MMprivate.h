@@ -34,9 +34,9 @@
 /*
  * Library prototypes...
  */
-__DLL__ void *H5MM_realloc(void *mem, size_t size);
-__DLL__ char *H5MM_xstrdup(const char *s);
-__DLL__ char *H5MM_strdup(const char *s);
-__DLL__ void *H5MM_xfree(void *mem);
+H5_DLL void *H5MM_realloc(void *mem, size_t size);
+H5_DLL char *H5MM_xstrdup(const char *s);
+H5_DLL char *H5MM_strdup(const char *s);
+H5_DLL void *H5MM_xfree(void *mem);
 
 #endif

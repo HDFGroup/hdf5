@@ -10,29 +10,29 @@
 
 #if defined(_HDF5DLL_)
 #pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
-#define __DLL__ __declspec(dllexport)
-#define __DLLVAR__ __declspec(dllexport)
+#define H5_DLL __declspec(dllexport)
+#define H5_DLLVAR __declspec(dllexport)
 #elif defined(_HDF5USEDLL_)
-#define __DLL__ __declspec(dllimport)
-#define __DLLVAR__ __declspec(dllimport)
+#define H5_DLL __declspec(dllimport)
+#define H5_DLLVAR __declspec(dllimport)
 #else
-#define __DLL__
-#define __DLLVAR__ extern
+#define H5_DLL
+#define H5_DLLVAR extern
 #endif /* _HDF5DLL_ */
 
 // Added to export or to import C++ APIs - BMR (02-15-2002)
 #if defined(HDF5_CPPDLL_EXPORTS) // this name is generated at creation
-#define __DLLCPP__ __declspec(dllexport)
+#define H5_DLLCPP __declspec(dllexport)
 #elif defined(HDF5CPP_USEDLL)
-#define __DLLCPP__ __declspec(dllimport)
+#define H5_DLLCPP __declspec(dllimport)
 #else
-#define __DLLCPP__
+#define H5_DLLCPP
 #endif /* HDF5_CPPDLL_EXPORTS */
 
 #else /*WIN32*/
-#define __DLL__
-#define __DLLVAR__ extern
-#define __DLLCPP__
+#define H5_DLL
+#define H5_DLLVAR extern
+#define H5_DLLCPP
 #endif
 
 #endif /* H5API_ADPT_H */

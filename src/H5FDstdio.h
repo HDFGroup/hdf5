@@ -18,8 +18,8 @@
 extern "C" {
 #endif
 
-__DLL__ hid_t H5FD_stdio_init(void);
-__DLL__ herr_t H5Pset_fapl_stdio(hid_t fapl_id);
+H5_DLL hid_t H5FD_stdio_init(void);
+H5_DLL herr_t H5Pset_fapl_stdio(hid_t fapl_id);
 
 #ifdef __cplusplus
 }

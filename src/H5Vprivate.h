@@ -34,45 +34,45 @@
 /* A null pointer is equivalent to a zero vector */
 #define H5V_ZERO        NULL
 
-__DLL__ hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
+H5_DLL hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
 				 const hssize_t *offset,
 				 hssize_t *stride);
-__DLL__ htri_t H5V_hyper_disjointp(unsigned n, const hssize_t *offset1,
+H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hssize_t *offset1,
 				   const hsize_t *size1,
 				   const hssize_t *offset2,
 				   const hsize_t *size2);
-__DLL__ htri_t H5V_hyper_eq(int n, const hssize_t *offset1,
+H5_DLL htri_t H5V_hyper_eq(int n, const hssize_t *offset1,
 			    const hsize_t *size1, const hssize_t *offset2,
 			    const hsize_t *size2);
-__DLL__ herr_t H5V_hyper_fill(unsigned n, const hsize_t *_size,
+H5_DLL herr_t H5V_hyper_fill(unsigned n, const hsize_t *_size,
 			      const hsize_t *total_size,
 			      const hssize_t *offset, void *_dst,
 			      unsigned fill_value);
-__DLL__ herr_t H5V_hyper_copy(unsigned n, const hsize_t *size,
+H5_DLL herr_t H5V_hyper_copy(unsigned n, const hsize_t *size,
 			      const hsize_t *dst_total_size,
 			      const hssize_t *dst_offset, void *_dst,
 			      const hsize_t *src_total_size,
 			      const hssize_t *src_offset, const void *_src);
-__DLL__ herr_t H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
+H5_DLL herr_t H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
 			       const hssize_t *stride, void *_dst,
 			       unsigned fill_value);
-__DLL__ herr_t H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
+H5_DLL herr_t H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
 			       const hssize_t *dst_stride, void *_dst,
 			       const hssize_t *src_stride, const void *_src);
-__DLL__ herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, int dst_n,
+H5_DLL herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, int dst_n,
 				const hsize_t *dst_size,
 				const hssize_t *dst_stride, void *_dst,
 				int src_n, const hsize_t *src_size,
 				const hssize_t *src_stride, const void *_src);
-__DLL__ herr_t H5V_stride_optimize1(unsigned *np, hsize_t *elmt_size,
+H5_DLL herr_t H5V_stride_optimize1(unsigned *np, hsize_t *elmt_size,
 				    hsize_t *size, hssize_t *stride1);
-__DLL__ herr_t H5V_stride_optimize2(unsigned *np, hsize_t *elmt_size,
+H5_DLL herr_t H5V_stride_optimize2(unsigned *np, hsize_t *elmt_size,
 				    hsize_t *size, hssize_t *stride1,
 				    hssize_t *stride2);
-__DLL__ herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
+H5_DLL herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 			      size_t count);
-__DLL__ hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
+H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
 				 const hssize_t *offset);
 
 

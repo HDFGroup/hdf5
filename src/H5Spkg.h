@@ -158,88 +158,88 @@ struct H5S_t {
 };
 
 /* Extent functions */
-__DLL__ herr_t H5S_close_simple(H5S_simple_t *simple);
-__DLL__ herr_t H5S_release_simple(H5S_simple_t *simple);
-__DLL__ herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
+H5_DLL herr_t H5S_close_simple(H5S_simple_t *simple);
+H5_DLL herr_t H5S_release_simple(H5S_simple_t *simple);
+H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
 /* Point select functions */
-__DLL__ herr_t H5S_point_iter_init (const H5S_t *space, size_t elmt_size,
+H5_DLL herr_t H5S_point_iter_init (const H5S_t *space, size_t elmt_size,
         H5S_sel_iter_t *iter);
-__DLL__ hsize_t H5S_point_iter_nelmts (const H5S_sel_iter_t *iter);
-__DLL__ herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_point_release(H5S_t *space);
-__DLL__ hsize_t H5S_point_npoints(const H5S_t *space);
-__DLL__ herr_t H5S_point_copy(H5S_t *dst, const H5S_t *src);
-__DLL__ htri_t H5S_point_is_valid(const H5S_t *space);
-__DLL__ hssize_t H5S_point_serial_size(const H5S_t *space);
-__DLL__ herr_t H5S_point_serialize(const H5S_t *space, uint8_t *buf);
-__DLL__ herr_t H5S_point_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
-__DLL__ htri_t H5S_point_is_contiguous(const H5S_t *space);
-__DLL__ htri_t H5S_point_is_single(const H5S_t *space);
-__DLL__ htri_t H5S_point_is_regular(const H5S_t *space);
-__DLL__ herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
+H5_DLL hsize_t H5S_point_iter_nelmts (const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
+H5_DLL herr_t H5S_point_release(H5S_t *space);
+H5_DLL hsize_t H5S_point_npoints(const H5S_t *space);
+H5_DLL herr_t H5S_point_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL htri_t H5S_point_is_valid(const H5S_t *space);
+H5_DLL hssize_t H5S_point_serial_size(const H5S_t *space);
+H5_DLL herr_t H5S_point_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_point_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL htri_t H5S_point_is_contiguous(const H5S_t *space);
+H5_DLL htri_t H5S_point_is_single(const H5S_t *space);
+H5_DLL htri_t H5S_point_is_regular(const H5S_t *space);
+H5_DLL herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
 /* "All" select functions */
-__DLL__ herr_t H5S_all_iter_init (const H5S_t *space, size_t elmt_size,
+H5_DLL herr_t H5S_all_iter_init (const H5S_t *space, size_t elmt_size,
         H5S_sel_iter_t *iter);
-__DLL__ hsize_t H5S_all_iter_nelmts (const H5S_sel_iter_t *iter);
-__DLL__ herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_all_release(H5S_t *space);
-__DLL__ hsize_t H5S_all_npoints(const H5S_t *space);
-__DLL__ htri_t H5S_all_is_valid(const H5S_t *space);
-__DLL__ hssize_t H5S_all_serial_size(const H5S_t *space);
-__DLL__ herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
-__DLL__ herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
-__DLL__ htri_t H5S_all_is_contiguous(const H5S_t *space);
-__DLL__ htri_t H5S_all_is_single(const H5S_t *space);
-__DLL__ htri_t H5S_all_is_regular(const H5S_t *space);
-__DLL__ herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
+H5_DLL hsize_t H5S_all_iter_nelmts (const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
+H5_DLL herr_t H5S_all_release(H5S_t *space);
+H5_DLL hsize_t H5S_all_npoints(const H5S_t *space);
+H5_DLL htri_t H5S_all_is_valid(const H5S_t *space);
+H5_DLL hssize_t H5S_all_serial_size(const H5S_t *space);
+H5_DLL herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL htri_t H5S_all_is_contiguous(const H5S_t *space);
+H5_DLL htri_t H5S_all_is_single(const H5S_t *space);
+H5_DLL htri_t H5S_all_is_regular(const H5S_t *space);
+H5_DLL herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
 /* Hyperslab selection functions */
-__DLL__ herr_t H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size,
+H5_DLL herr_t H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size,
         H5S_sel_iter_t *iter);
-__DLL__ hsize_t H5S_hyper_iter_nelmts (const H5S_sel_iter_t *iter);
-__DLL__ herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_hyper_release(H5S_t *space);
-__DLL__ hsize_t H5S_hyper_npoints(const H5S_t *space);
-__DLL__ herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
-__DLL__ htri_t H5S_hyper_is_valid(const H5S_t *space);
-__DLL__ hssize_t H5S_hyper_serial_size(const H5S_t *space);
-__DLL__ herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t *buf);
-__DLL__ herr_t H5S_hyper_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
-__DLL__ htri_t H5S_hyper_is_contiguous(const H5S_t *space);
-__DLL__ htri_t H5S_hyper_is_single(const H5S_t *space);
-__DLL__ htri_t H5S_hyper_is_regular(const H5S_t *space);
-__DLL__ herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
+H5_DLL hsize_t H5S_hyper_iter_nelmts (const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
+H5_DLL herr_t H5S_hyper_release(H5S_t *space);
+H5_DLL hsize_t H5S_hyper_npoints(const H5S_t *space);
+H5_DLL herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL htri_t H5S_hyper_is_valid(const H5S_t *space);
+H5_DLL hssize_t H5S_hyper_serial_size(const H5S_t *space);
+H5_DLL herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_hyper_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL htri_t H5S_hyper_is_contiguous(const H5S_t *space);
+H5_DLL htri_t H5S_hyper_is_single(const H5S_t *space);
+H5_DLL htri_t H5S_hyper_is_regular(const H5S_t *space);
+H5_DLL herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
 /* "None" selection functions */
-__DLL__ herr_t H5S_none_iter_init (const H5S_t *space, size_t elmt_size,
+H5_DLL herr_t H5S_none_iter_init (const H5S_t *space, size_t elmt_size,
         H5S_sel_iter_t *iter);
-__DLL__ hsize_t H5S_none_iter_nelmts (const H5S_sel_iter_t *iter);
-__DLL__ herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_none_release(H5S_t *space);
-__DLL__ hsize_t H5S_none_npoints(const H5S_t *space);
-__DLL__ htri_t H5S_none_is_valid(const H5S_t *space);
-__DLL__ hssize_t H5S_none_serial_size(const H5S_t *space);
-__DLL__ herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
-__DLL__ herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
-__DLL__ herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
-__DLL__ htri_t H5S_none_is_contiguous(const H5S_t *space);
-__DLL__ htri_t H5S_none_is_single(const H5S_t *space);
-__DLL__ htri_t H5S_none_is_regular(const H5S_t *space);
-__DLL__ herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
+H5_DLL hsize_t H5S_none_iter_nelmts (const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
+H5_DLL herr_t H5S_none_release(H5S_t *space);
+H5_DLL hsize_t H5S_none_npoints(const H5S_t *space);
+H5_DLL htri_t H5S_none_is_valid(const H5S_t *space);
+H5_DLL hssize_t H5S_none_serial_size(const H5S_t *space);
+H5_DLL herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+H5_DLL htri_t H5S_none_is_contiguous(const H5S_t *space);
+H5_DLL htri_t H5S_none_is_single(const H5S_t *space);
+H5_DLL htri_t H5S_none_is_regular(const H5S_t *space);
+H5_DLL herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 /* Needed for use in hyperslab code (H5Shyper.c) */
-__DLL__ herr_t H5S_select_none(H5S_t *space);
+H5_DLL herr_t H5S_select_none(H5S_t *space);
 
 #endif

@@ -197,17 +197,17 @@ typedef struct H5FL_arr_head_t {
 /*
  * Library prototypes.
  */
-__DLL__ void * H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear);
-__DLL__ void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
-__DLL__ void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size);
-__DLL__ void * H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear);
-__DLL__ void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
-__DLL__ void * H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear);
-__DLL__ void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
-__DLL__ void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
-__DLL__ herr_t H5FL_garbage_coll(void);
-__DLL__ herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
+H5_DLL void * H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear);
+H5_DLL void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
+H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size);
+H5_DLL void * H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear);
+H5_DLL void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
+H5_DLL void * H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear);
+H5_DLL void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
+H5_DLL void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
+H5_DLL herr_t H5FL_garbage_coll(void);
+H5_DLL herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
     int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);
-__DLL__ int   H5FL_term_interface(void);
+H5_DLL int   H5FL_term_interface(void);
 
 #endif

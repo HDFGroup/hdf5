@@ -40,11 +40,11 @@ extern      "C"
 {
 #endif	/* c_plusplus || __cplusplus */
 
-__DLL__ void H5TS_first_thread_init(void);
-__DLL__ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
-__DLL__ herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
-__DLL__ herr_t H5TS_cancel_count_inc(void);
-__DLL__ herr_t H5TS_cancel_count_dec(void);
+H5_DLL void H5TS_first_thread_init(void);
+H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
+H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
+H5_DLL herr_t H5TS_cancel_count_inc(void);
+H5_DLL herr_t H5TS_cancel_count_dec(void);
 
 #if defined c_plusplus || defined __cplusplus
 }

@@ -123,18 +123,18 @@ typedef struct {
 } H5I_id_group_t;
 
 /* Private Functions in H5I.c */
-__DLL__ int H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
+H5_DLL int H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
 			    H5I_free_t func);
-__DLL__ int H5I_nmembers(H5I_type_t grp);
-__DLL__ herr_t H5I_clear_group(H5I_type_t grp, hbool_t force);
-__DLL__ herr_t H5I_destroy_group(H5I_type_t grp);
-__DLL__ hid_t H5I_register(H5I_type_t grp, void *object);
-__DLL__ void *H5I_object(hid_t id);
-__DLL__ void *H5I_object_verify(hid_t id, H5I_type_t id_type);
-__DLL__ H5I_type_t H5I_get_type(hid_t id);
-__DLL__ void *H5I_remove(hid_t id);
-__DLL__ void *H5I_search(H5I_type_t grp, H5I_search_func_t func,
+H5_DLL int H5I_nmembers(H5I_type_t grp);
+H5_DLL herr_t H5I_clear_group(H5I_type_t grp, hbool_t force);
+H5_DLL herr_t H5I_destroy_group(H5I_type_t grp);
+H5_DLL hid_t H5I_register(H5I_type_t grp, void *object);
+H5_DLL void *H5I_object(hid_t id);
+H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
+H5_DLL H5I_type_t H5I_get_type(hid_t id);
+H5_DLL void *H5I_remove(hid_t id);
+H5_DLL void *H5I_search(H5I_type_t grp, H5I_search_func_t func,
 			 const void *key);
-__DLL__ int H5I_inc_ref(hid_t id);
-__DLL__ int H5I_dec_ref(hid_t id);
+H5_DLL int H5I_inc_ref(hid_t id);
+H5_DLL int H5I_dec_ref(hid_t id);
 #endif

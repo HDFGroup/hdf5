@@ -51,10 +51,10 @@ typedef int hid_t;
 extern "C" {
 #endif
 
-__DLL__ H5I_type_t H5Iget_type(hid_t id);
-__DLL__ ssize_t H5Iget_name(hid_t object_id, char *name/*out*/, size_t size);
-__DLL__ herr_t  H5Idebug_name(hid_t id);
-__DLL__ herr_t  H5Idebug_grp(H5I_type_t grp);
+H5_DLL H5I_type_t H5Iget_type(hid_t id);
+H5_DLL ssize_t H5Iget_name(hid_t object_id, char *name/*out*/, size_t size);
+H5_DLL herr_t  H5Idebug_name(hid_t id);
+H5_DLL herr_t  H5Idebug_grp(H5I_type_t grp);
 
 
 

@@ -82,21 +82,21 @@ extern "C" {
 #endif
 
 /* Functions in H5F.c */
-__DLL__ htri_t H5Fis_hdf5 (const char *filename);
-__DLL__ hid_t  H5Fcreate (const char *filename, unsigned flags,
+H5_DLL htri_t H5Fis_hdf5 (const char *filename);
+H5_DLL hid_t  H5Fcreate (const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
-__DLL__ hid_t  H5Fopen (const char *filename, unsigned flags,
+H5_DLL hid_t  H5Fopen (const char *filename, unsigned flags,
 		        hid_t access_plist);
-__DLL__ hid_t  H5Freopen(hid_t file_id);
-__DLL__ herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
-__DLL__ herr_t H5Fclose (hid_t file_id);
-__DLL__ hid_t  H5Fget_create_plist (hid_t file_id);
-__DLL__ hid_t  H5Fget_access_plist (hid_t file_id);
-__DLL__ herr_t H5Fget_obj_count(hid_t file_id, unsigned types, 
+H5_DLL hid_t  H5Freopen(hid_t file_id);
+H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+H5_DLL herr_t H5Fclose (hid_t file_id);
+H5_DLL hid_t  H5Fget_create_plist (hid_t file_id);
+H5_DLL hid_t  H5Fget_access_plist (hid_t file_id);
+H5_DLL herr_t H5Fget_obj_count(hid_t file_id, unsigned types, 
                                 unsigned *obj_id_count);
-__DLL__ herr_t H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *obj_id_list);
-__DLL__ herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
-__DLL__ herr_t H5Funmount(hid_t loc, const char *name);
+H5_DLL herr_t H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *obj_id_list);
+H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 
 #ifdef __cplusplus
 }

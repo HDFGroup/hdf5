@@ -144,38 +144,38 @@
 typedef struct H5D_t H5D_t;
   
 /* Functions defined in H5D.c */
-__DLL__ herr_t H5D_init(void);
-__DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name, 
+H5_DLL herr_t H5D_init(void);
+H5_DLL H5D_t *H5D_create(H5G_entry_t *loc, const char *name, 
                           const H5T_t *type, const H5S_t *space, 
                           hid_t dcpl_id);
-__DLL__ H5D_t *H5D_open(H5G_entry_t *loc, const char *name);
-__DLL__ herr_t H5D_close(H5D_t *dataset);
-__DLL__ htri_t H5D_isa(H5G_entry_t *ent);
-__DLL__ herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
+H5_DLL H5D_t *H5D_open(H5G_entry_t *loc, const char *name);
+H5_DLL herr_t H5D_close(H5D_t *dataset);
+H5_DLL htri_t H5D_isa(H5G_entry_t *ent);
+H5_DLL herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
 			const H5S_t *mem_space, const H5S_t *file_space,
 			hid_t dset_xfer_plist, void *buf/*out*/);
-__DLL__ herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
+H5_DLL herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 			 const H5S_t *mem_space, const H5S_t *file_space,
 			 hid_t dset_xfer_plist, const void *buf);
-__DLL__ herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
-__DLL__ H5G_entry_t *H5D_entof(H5D_t *dataset);
-__DLL__ H5T_t *H5D_typeof(H5D_t *dset);
-__DLL__ H5S_t *H5D_get_space(H5D_t *dset);
-__DLL__ H5D_t * H5D_open_oid(H5G_entry_t *ent);
-__DLL__ H5F_t * H5D_get_file(const H5D_t *dset);
-__DLL__ hsize_t H5D_get_storage_size(H5D_t *dset);
-__DLL__ void *H5D_vlen_get_buf_size_alloc(size_t size, void *info);
-__DLL__ herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, hsize_t ndim, 
+H5_DLL herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
+H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
+H5_DLL H5T_t *H5D_typeof(H5D_t *dset);
+H5_DLL H5S_t *H5D_get_space(H5D_t *dset);
+H5_DLL H5D_t * H5D_open_oid(H5G_entry_t *ent);
+H5_DLL H5F_t * H5D_get_file(const H5D_t *dset);
+H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset);
+H5_DLL void *H5D_vlen_get_buf_size_alloc(size_t size, void *info);
+H5_DLL herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, hsize_t ndim, 
                                      hssize_t *point, void *op_data);
-__DLL__ herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
+H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
                             void *copy_data);
-__DLL__ herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
-__DLL__ herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
-__DLL__ herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
+H5_DLL herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);
+H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
+H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
-__DLL__ herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-__DLL__ herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size);
-__DLL__ herr_t H5D_flush(H5F_t *f);
+H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
+H5_DLL herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size);
+H5_DLL herr_t H5D_flush(H5F_t *f);
 
 
 #endif
