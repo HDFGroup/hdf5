@@ -544,9 +544,7 @@ H5Pget_class(hid_t plist_id)
     H5TRACE1("p","i",plist_id);
 
     if ((group = H5I_get_type(plist_id)) < 0 ||
-#ifndef NDEBUG
             group >= H5I_TEMPLATE_MAX ||
-#endif
             group < H5I_TEMPLATE_0) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
 		      "not a property list");
@@ -583,9 +581,7 @@ H5P_get_class(hid_t plist_id)
     FUNC_ENTER(H5P_get_class, H5P_NO_CLASS);
 
     if ((group = H5I_get_type(plist_id)) < 0 ||
-#ifndef NDEBUG
             group >= H5I_TEMPLATE_MAX ||
-#endif
             group < H5I_TEMPLATE_0) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
 		      "not a property list");

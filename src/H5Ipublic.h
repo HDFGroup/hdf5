@@ -38,9 +38,7 @@ typedef enum {
     H5I_TEMPLATE_5,	        /*group ID for Template objects		    */
     H5I_TEMPLATE_6,	        /*group ID for Template objects		    */
     H5I_TEMPLATE_7,	        /*group ID for Template objects		    */
-#ifndef NDEBUG
     H5I_TEMPLATE_MAX,	    /*not really a group ID			        */
-#endif
     H5I_GROUP,		        /*group ID for Group objects		    */
     H5I_DATATYPE,	        /*group ID for Datatype objects		    */
     H5I_DATASPACE,	        /*group ID for Dataspace objects	    */

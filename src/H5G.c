@@ -1776,9 +1776,7 @@ H5G_loc (hid_t loc_id)
     case H5I_TEMPLATE_5:
     case H5I_TEMPLATE_6:
     case H5I_TEMPLATE_7:
-#ifndef NDEBUG
     case H5I_TEMPLATE_MAX:
-#endif
     case H5I_GENPROP_CLS:
     case H5I_GENPROP_LST:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
