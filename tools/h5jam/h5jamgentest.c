@@ -383,7 +383,7 @@ char *bp;
   H5Fclose(fid);
 
 
-	fd = open(FILE8,O_RDWR);
+	fd = HDopen(FILE8,O_RDWR, 0);
 	if (fd < 0) {
 		/* panic */
 	}
@@ -394,7 +394,7 @@ char *bp;
 		*bp++ = pattern[i%10];	
 	}
 
-	write(fd,buf,512);
+	HDwrite(fd,buf,512);
 
 	close(fd);
 }
@@ -527,7 +527,7 @@ char *bp;
   H5Fclose(fid);
 
 
-	fd = open(FILE9,O_RDWR);
+	fd = HDopen(FILE9,O_RDWR, 0);
 	if (fd < 0) {
 		/* panic */
 	}
@@ -538,7 +538,7 @@ char *bp;
 		*bp++ = pattern[i%10];	
 	}
 
-	write(fd,buf,1024);
+	HDwrite(fd,buf,1024);
 
 	close(fd);
 }
@@ -565,7 +565,7 @@ char *bp;
 	}
 
 	
-	write(fd,buf,size);
+	HDwrite(fd,buf,size);
 
 	close(fd);
 }
@@ -593,7 +593,7 @@ char *bp;
 		*bp++ = (char) i & 0xff;	
 	}
 	
-	write(fd,buf,size);
+	HDwrite(fd,buf,size);
 
 	close(fd);
 }
