@@ -43,6 +43,11 @@ TOOLTEST() {
     # Run test.
     echo $RUNPARALLEL $TEST_APP_BIN "$@"
     eval $RUNPARALLEL $TEST_APP_BIN "$@"
+
+    # Check if the command failed and increment nerrors if so.
+    if test $? -ne 0 ; then
+        nerrors="`expr $nerrors + 1`"
+    fi
 }
 
 ##############################################################################
@@ -56,3 +61,12 @@ TOOLTEST
 # testphdf5 test using the MPI-POSIX VFL driver
 TOOLTEST -p
 
+# Emit message about testing status
+if test $nerrors -eq 0 ; then
+   echo "All $TEST_APP tests passed."
+else
+   echo "ERROR! One or more $TEST_APP tests failed."
+fi
+
+# Propagate a useful exit code
+exit $nerrors
