@@ -5360,8 +5360,8 @@ H5T_open_oid (H5G_entry_t *ent)
 
     /* Mark the type as named and open */
     dt->state = H5T_STATE_OPEN;
-    dt->ent = *ent;
-
+				dt->ent = *ent; 
+		
     /* Set return value */
     ret_value=dt;
 
@@ -5406,6 +5406,8 @@ done:
  *      Robb Matzke, 20 May 1999
  *	Now able to copy opaque types.
  *
+	*	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 21 Sep 2002
+ *	 Added a deep copy of the symbol table entry
 	*
  *-------------------------------------------------------------------------
  */
@@ -5427,8 +5429,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
 				/* Copy actual information */
-    *new_dt = *old_dt;
-			
+     *new_dt = *old_dt; 
+					
     /* Copy parent information */
     if (new_dt->parent)
         new_dt->parent = H5T_copy(new_dt->parent, method);
@@ -5574,6 +5576,11 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
     } /* end switch */
 
+
+				/*deep copy of the symbol table entry*/
+				if (H5G_ent_copy(&(old_dt->ent),&(new_dt->ent))<0)
+					HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+					
     /* Set return value */
     ret_value=new_dt;
     
@@ -5718,6 +5725,10 @@ done:
  *
  *		Robb Matzke, 1999-05-20
  *		Closes opaque types also.
+ *
+ *	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *	 Added "ID to name" support
+	*
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5771,6 +5782,9 @@ H5T_close(H5T_t *dt)
         default:
             break;
     }
+
+				/*Free the ID to name buffer */
+    H5G_free_ent_name(&(dt->ent));
 
     /* Free the datatype struct */
     H5FL_FREE(H5T_t,dt);

@@ -79,6 +79,7 @@
 #define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
 
+
 /* Packages needed by this file... */
 #include "H5private.h"
 #include "H5Aprivate.h"
@@ -1063,8 +1064,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     int			         _nlinks = H5G_NLINKS;
     const char		   *s = NULL;
     herr_t         ret_value=SUCCEED;  
-				
-
+		
 				H5G_t          *tmp_grp;
 				const char		   *orig_name = name;
 				unsigned int   null_obj = obj_ent == NULL ? 1 : 0;
@@ -1148,7 +1148,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	/* Set flag if at least one component was found */
 	found_once =1;
 
-	if (H5G_stab_find(grp_ent, H5G_comp_g, /*&tmp_obj_ent*/ obj_ent/*out*/ )<0) {
+	if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/ )<0) {
 	    /*
 	     * Component was not found in the current symbol table, possibly
 	     * because GRP_ENT isn't a symbol table.
