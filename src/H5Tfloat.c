@@ -19,12 +19,14 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Tfloat_mask
+
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-#define PABLO_MASK	H5Tfloat_mask
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -48,9 +50,9 @@ DESCRIPTION
 static herr_t
 H5T_init_float_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_float_interface);
+    FUNC_ENTER_NOINIT(H5T_init_float_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_float_interface() */
 
 
@@ -58,8 +60,8 @@ H5T_init_float_interface(void)
  * Function:	H5Tget_fields
  *
  * Purpose:	Returns information about the locations of the various bit
- *		fields of a floating point data type.  The field positions
- *		are bit positions in the significant region of the data type.
+ *		fields of a floating point datatype.  The field positions
+ *		are bit positions in the significant region of the datatype.
  *		Bits are numbered with the least significant bit number zero.
  *
  *		Any (or even all) of the arguments can be null pointers.
@@ -74,7 +76,7 @@ H5T_init_float_interface(void)
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -85,16 +87,16 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tget_fields, FAIL);
+    FUNC_ENTER_API(H5Tget_fields, FAIL)
     H5TRACE6("e","ixxxxx",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
     
     /* Get values */
     if (spos) *spos = dt->u.atomic.u.f.sign;
@@ -104,7 +106,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     if (msize) *msize = dt->u.atomic.u.f.msize;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -113,7 +115,7 @@ done:
  *
  * Purpose:	Sets the locations and sizes of the various floating point
  *		bit fields.  The field positions are bit positions in the
- *		significant region of the data type.  Bits are numbered with
+ *		significant region of the datatype.  Bits are numbered with
  *		the least significant bit number zero.
  *
  *		Fields are not allowed to extend beyond the number of bits of
@@ -126,7 +128,7 @@ done:
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *	
  *-------------------------------------------------------------------------
  */
@@ -137,33 +139,33 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_fields, FAIL);
+    FUNC_ENTER_API(H5Tset_fields, FAIL)
     H5TRACE6("e","izzzzz",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
     if (epos + esize > dt->u.atomic.prec)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid")
     if (mpos + msize > dt->u.atomic.prec)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid")
     if (spos >= dt->u.atomic.prec)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid")
     
     /* Check for overlap */
     if (spos >= epos && spos < epos + esize)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within exponent field")
     if (spos >= mpos && spos < mpos + msize)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within mantissa field");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign bit appears within mantissa field")
     if ((mpos < epos && mpos + msize > epos) ||
             (epos < mpos && epos + esize > mpos))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent and mantissa fields overlap")
     
     /* Commit */
     dt->u.atomic.u.f.sign = spos;
@@ -173,7 +175,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     dt->u.atomic.u.f.msize = msize;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -191,7 +193,7 @@ done:
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *-------------------------------------------------------------------------
  */
 size_t
@@ -200,22 +202,22 @@ H5Tget_ebias(hid_t type_id)
     H5T_t	*dt = NULL;
     size_t	ret_value;
 
-    FUNC_ENTER_API(H5Tget_ebias, 0);
+    FUNC_ENTER_API(H5Tget_ebias, 0)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for datatype class")
     
     /* bias */
     H5_ASSIGN_OVERFLOW(ret_value,dt->u.atomic.u.f.ebias,uint64_t,size_t);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -231,7 +233,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -241,24 +243,24 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_ebias, FAIL);
+    FUNC_ENTER_API(H5Tset_ebias, FAIL)
     H5TRACE2("e","iz",type_id,ebias);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
 
     /* Commit */
     dt->u.atomic.u.f.ebias = ebias;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -277,7 +279,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -287,22 +289,22 @@ H5Tget_norm(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_norm_t	ret_value;
 
-    FUNC_ENTER_API(H5Tget_norm, H5T_NORM_ERROR);
+    FUNC_ENTER_API(H5Tget_norm, H5T_NORM_ERROR)
     H5TRACE1("Tn","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a datatype")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR, "operation not defined for datatype class")
     
     /* norm */
     ret_value = dt->u.atomic.u.f.norm;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -310,7 +312,7 @@ done:
  * Function:	H5Tset_norm
  *
  * Purpose:	Sets the mantissa normalization method for a floating point
- *		data type.
+ *		datatype.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -319,7 +321,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -329,26 +331,26 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_norm, FAIL);
+    FUNC_ENTER_API(H5Tset_norm, FAIL)
     H5TRACE2("e","iTn",type_id,norm);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if (norm < 0 || norm > H5T_NORM_NONE)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
     
     /* Commit */
     dt->u.atomic.u.f.norm = norm;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -369,7 +371,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -379,22 +381,22 @@ H5Tget_inpad(hid_t type_id)
     H5T_t	*dt = NULL;
     H5T_pad_t	ret_value;
 
-    FUNC_ENTER_API(H5Tget_inpad, H5T_PAD_ERROR);
+    FUNC_ENTER_API(H5Tget_inpad, H5T_PAD_ERROR)
     H5TRACE1("Tp","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a datatype")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR, "operation not defined for datatype class")
     
     /* pad */
     ret_value = dt->u.atomic.u.f.pad;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -413,7 +415,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -423,25 +425,25 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_inpad, FAIL);
+    FUNC_ENTER_API(H5Tset_inpad, FAIL)
     H5TRACE2("e","iTp",type_id,pad);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if (pad < 0 || pad >= H5T_NPAD)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
     
     /* Commit */
     dt->u.atomic.u.f.pad = pad;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 

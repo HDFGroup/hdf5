@@ -91,6 +91,9 @@
         H5FL.c
         H5FO.c
 
+        H5Tfields.c
+        H5Tfixed.c
+        H5Tfloat.c
         H5Tnative.c
         H5Toffset.c
         H5Topaque.c

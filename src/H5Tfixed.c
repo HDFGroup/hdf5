@@ -19,12 +19,14 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Tfixed_mask
+
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-#define PABLO_MASK	H5Tfixed_mask
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -48,9 +50,9 @@ DESCRIPTION
 static herr_t
 H5T_init_fixed_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_fixed_interface);
+    FUNC_ENTER_NOINIT(H5T_init_fixed_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_fixed_interface() */
 
 
@@ -68,7 +70,7 @@ H5T_init_fixed_interface(void)
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
@@ -77,17 +79,17 @@ H5Tget_sign(hid_t type_id)
     H5T_t		*dt = NULL;
     H5T_sign_t		ret_value;
 
-    FUNC_ENTER_API(H5Tget_sign, H5T_SGN_ERROR);
+    FUNC_ENTER_API(H5Tget_sign, H5T_SGN_ERROR)
     H5TRACE1("Ts","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer datatype")
         
     ret_value = H5T_get_sign(dt);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -109,11 +111,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
-H5T_get_sign(H5T_t *dt)
+H5T_get_sign(H5T_t const *dt)
 {
     H5T_sign_t		ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR);
+    FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR)
 
     assert(dt);
 
@@ -123,13 +125,13 @@ H5T_get_sign(H5T_t *dt)
 
     /* Check args */
     if (H5T_INTEGER!=dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for datatype class")
     
     /* Sign */
     ret_value = dt->u.atomic.u.i.sign;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -146,7 +148,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
+ *	Also works with derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -156,27 +158,27 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_sign, FAIL);
+    FUNC_ENTER_API(H5Tset_sign, FAIL)
     H5TRACE2("e","iTs",type_id,sign);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if (sign < 0 || sign >= H5T_NSGN)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type")
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_INTEGER!=dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
     
     /* Commit */
     dt->u.atomic.u.i.sign = sign;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
