@@ -2382,7 +2382,8 @@ test_set_local(const char *filename, hid_t fapl)
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
     unsigned    cd_values[2]={BOGUS2_PARAM_1, BOGUS2_PARAM_2};   /* Parameters for Bogus2 filter */
-    hsize_t     i,j,n;          /* Local index variables */
+    hsize_t     i,j;          /* Local index variables */
+    double      n;          /* Local index variables */
 
     TESTING("dataset filter 'set local' callback");
 
@@ -2390,7 +2391,7 @@ test_set_local(const char *filename, hid_t fapl)
     for (i = n = 0; i < 100; i++)
 	for (j = 0; j < 200; j++) {
 	    points[i][j] = n++;
-	    points_dbl[i][j] = (double)1.5*(double)n++;
+	    points_dbl[i][j] = (double)1.5*n++;
 	}
 
     /* Open file */
