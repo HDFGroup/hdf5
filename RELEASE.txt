@@ -61,6 +61,10 @@ New Features
    * Added a new array datatype to the datatypes which can be created.  Removed
      "array fields" from compound datatypes (use an array datatype instead).
    * Parallel HDF5 works correctly with mpich-1.2.1 on Solaris, SGI, Linux.
+   * You can now install the HDF5 documentation using the
+     ``make install-doc'' command. The documentation is installed in the
+     $(prefix)/doc directory where $(prefix) is the prefix specified by
+     the (optional) ``--prefix'' flag during configuration.
 
 h4toh5 Utility 
 ==============
