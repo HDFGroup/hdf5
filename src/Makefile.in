@@ -49,6 +49,8 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
 
 # Number format detection
 H5Tinit.c: H5detect
+	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) | \
+		sed -e 's/-L/:/g' -e 's/ //g'`" \
 	$(RUNSERIAL) ./H5detect >H5Tinit.c
 
 # no $(LIB) in the action below since that's being made now.

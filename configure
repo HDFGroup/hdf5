@@ -5406,12 +5406,14 @@ echo "configure:5406: checking how to print long long" >&5
 if eval "test \"`echo '$''{'hdf5_cv_printf_ll'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  for hdf5_cv_printf_ll in l L q ll unknown; do
+  LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
+export LD_LIBRARY_PATH
+             for hdf5_cv_printf_ll in l L q ll unknown; do
                 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 5415 "configure"
+#line 5417 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -5422,7 +5424,7 @@ else
 	             sprintf(s,"%${hdf5_cv_printf_ll}d",x);
 	             exit (strcmp(s,"1099511627776"));}
 EOF
-if { (eval echo configure:5426: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:5428: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   break
 else
@@ -5442,7 +5444,7 @@ EOF
 
 
 echo $ac_n "checking for debug flags""... $ac_c" 1>&6
-echo "configure:5446: checking for debug flags" >&5
+echo "configure:5448: checking for debug flags" >&5
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -5452,21 +5454,26 @@ fi
 
 
 all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
-if test X = "X$DEBUG_PKG" -o Xyes = "X$DEBUG_PKG"; then
-   DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-   CPPFLAGS="$CPPFLAGS -UNDEBUG"
-   echo "$ac_t""default ($DEBUG_PKG)" 1>&6
-elif test Xall = "X$DEBUG_PKG"; then
-   DEBUG_PKG=$all_packages
-   CPPFLAGS="$CPPFLAGS -UNDEBUG"
-   echo "$ac_t""all ($DEBUG_PKG)" 1>&6
-elif test Xno = "X$DEBUG_PKG" -o Xnone = "X$DEBUG_PKG"; then
-   echo "$ac_t""none" 1>&6
-   DEBUG_PKG=
-   CPPFLAGS="$CPPFLAGS -DNDEBUG"
-else
-   echo "$ac_t""$DEBUG_PKG" 1>&6
-fi
+case X-$DEBUG_PKG in
+    X-|X-yes)
+	DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
+	CPPFLAGS="$CPPFLAGS -UNDEBUG"
+	echo "$ac_t""default ($DEBUG_PKG)" 1>&6
+	;;
+    X-all)
+	DEBUG_PKG=$all_packages
+	CPPFLAGS="$CPPFLAGS -UNDEBUG"
+	echo "$ac_t""all ($DEBUG_PKG)" 1>&6
+	;;
+    X-no|X-none)
+	echo "$ac_t""none" 1>&6
+	DEBUG_PKG=
+	CPPFLAGS="$CPPFLAGS -DNDEBUG"
+	;;
+    *)
+	echo "$ac_t""$DEBUG_PKG" 1>&6
+	;;
+esac
 
 if test "X" != "X$DEBUG_PKG"; then
    for pkg in `echo $DEBUG_PKG | tr 'a-z,' 'A-Z '`; do
@@ -5475,7 +5482,7 @@ if test "X" != "X$DEBUG_PKG"; then
 fi
 
 echo $ac_n "checking for API tracing""... $ac_c" 1>&6
-echo "configure:5479: checking for API tracing" >&5;
+echo "configure:5486: checking for API tracing" >&5;
 # Check whether --enable-trace or --disable-trace was given.
 if test "${enable_trace+set}" = set; then
   enableval="$enable_trace"
@@ -5505,7 +5512,7 @@ case "$CC_BASENAME" in
 	# exists.
 	PARALLEL=mpicc
 	echo $ac_n "checking for mpirun""... $ac_c" 1>&6
-echo "configure:5509: checking for mpirun" >&5
+echo "configure:5516: checking for mpirun" >&5
 
 	# Find the path where mpicc is located.
 	cmd=`echo $CC |cut -f1 -d' '`
@@ -5550,7 +5557,7 @@ fi
 
 
 echo $ac_n "checking for parallel support files""... $ac_c" 1>&6
-echo "configure:5554: checking for parallel support files" >&5
+echo "configure:5561: checking for parallel support files" >&5
 case "X-$enable_parallel" in
     X-|X-no|X-none)
 	# Either we are not compiling for parallel or the header and library
@@ -5567,21 +5574,21 @@ case "X-$enable_parallel" in
 
 	# Try link a simple MPI program.  If fail, try again with -lmpi.
 	cat > conftest.$ac_ext <<EOF
-#line 5571 "configure"
+#line 5578 "configure"
 #include "confdefs.h"
 
 int main() {
 MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:5578: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5585: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   :
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   echo $ac_n "checking for MPI_Init in -lmpi""... $ac_c" 1>&6
-echo "configure:5585: checking for MPI_Init in -lmpi" >&5
+echo "configure:5592: checking for MPI_Init in -lmpi" >&5
 ac_lib_var=`echo mpi'_'MPI_Init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5589,7 +5596,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5593 "configure"
+#line 5600 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5600,7 +5607,7 @@ int main() {
 MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:5604: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5611: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5635,21 +5642,21 @@ rm -f conftest*
 	# -lmpio.
 	if test "yes" = "$PARALLEL"; then
 	    cat > conftest.$ac_ext <<EOF
-#line 5639 "configure"
+#line 5646 "configure"
 #include "confdefs.h"
 
 int main() {
 MPI_File_open()
 ; return 0; }
 EOF
-if { (eval echo configure:5646: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5653: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   :
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   echo $ac_n "checking for MPI_File_open in -lmpio""... $ac_c" 1>&6
-echo "configure:5653: checking for MPI_File_open in -lmpio" >&5
+echo "configure:5660: checking for MPI_File_open in -lmpio" >&5
 ac_lib_var=`echo mpio'_'MPI_File_open | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5657,7 +5664,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5661 "configure"
+#line 5668 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5668,7 +5675,7 @@ int main() {
 MPI_File_open()
 ; return 0; }
 EOF
-if { (eval echo configure:5672: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5679: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5721,7 +5728,7 @@ rm -f conftest*
 	# is missing.
 	PARALLEL=mpich
 	echo $ac_n "checking for MPI_Init in -lmpich""... $ac_c" 1>&6
-echo "configure:5725: checking for MPI_Init in -lmpich" >&5
+echo "configure:5732: checking for MPI_Init in -lmpich" >&5
 ac_lib_var=`echo mpich'_'MPI_Init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5729,7 +5736,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpich  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5733 "configure"
+#line 5740 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5740,7 +5747,7 @@ int main() {
 MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:5744: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5751: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5789,24 +5796,24 @@ EOF
 
     # Display what we found about running programs
     echo $ac_n "checking prefix for running on one processor""... $ac_c" 1>&6
-echo "configure:5793: checking prefix for running on one processor" >&5
+echo "configure:5800: checking prefix for running on one processor" >&5
     echo "$ac_t""$RUNSERIAL" 1>&6
     echo $ac_n "checking prefix for running in parallel""... $ac_c" 1>&6
-echo "configure:5796: checking prefix for running in parallel" >&5
+echo "configure:5803: checking prefix for running in parallel" >&5
     echo "$ac_t""$RUNPARALLEL" 1>&6
 
     # Check that we can link a simple MPI and MPI-IO application
     echo $ac_n "checking whether a simple MPI-IO program can be linked""... $ac_c" 1>&6
-echo "configure:5801: checking whether a simple MPI-IO program can be linked" >&5
+echo "configure:5808: checking whether a simple MPI-IO program can be linked" >&5
     cat > conftest.$ac_ext <<EOF
-#line 5803 "configure"
+#line 5810 "configure"
 #include "confdefs.h"
 
 int main() {
 MPI_Init();MPI_File_open();
 ; return 0; }
 EOF
-if { (eval echo configure:5810: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5817: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   echo "$ac_t""yes" 1>&6
 else
