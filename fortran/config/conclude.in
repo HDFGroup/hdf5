@@ -87,9 +87,14 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	      fi;							      \
 	   fi;								      \
 	done
+	# install h5fc as h5pfc for parallel mode.
 	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
-	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	     if test "X$(PARALLEL)" != "Xno" -a $$f = "h5fc"; then            \
+	      ($(LT_INSTALL_PROG) $$f $(bindir)/h5pfc || exit 1);	      \
+	     else							      \
+	      ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	     fi;                                                              \
 	   fi;							              \
 	done
 

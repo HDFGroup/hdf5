@@ -145,7 +145,17 @@ install: $(AUX_LIB) $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $
 	done
 	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
-	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	     if test "X$(PARALLEL)" != "Xno"; then                            \
+	       if test $$f = "h5cc"; then                     		      \
+	         ($(LT_INSTALL_PROG) $$f $(bindir)/h5pcc || exit 1);          \
+	       elif test $$f = "h5fc"; then                                   \
+	         ($(LT_INSTALL_PROG) $$f $(bindir)/h5pfc || exit 1);          \
+	       else							      \
+	         ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);	      \
+	       fi;							      \
+	     else                                                             \
+	       ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	     fi;							      \
 	   fi;							              \
 	done
 	@for d in X $(SUBDIRS); do                                            \

@@ -1,4 +1,3 @@
-## HDF5 Library Examples Makefile(.in)
 ##
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
@@ -12,13 +11,16 @@
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
+## HDF5 Library Examples Makefile(.in)
+##
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 @COMMENCE@
 
 ## Replace building CC with the just installed h5cc
-CC=$(bindir)/h5cc
+H5CC=$(bindir)/h5cc
+H5CC_PP=$(bindir)/h5pcc
 CPPFLAGS=-I. -I$(srcdir)
 CFLAGS=
 
@@ -26,7 +28,7 @@ CFLAGS=
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=ph5example
 TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
-	h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
+           h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
@@ -38,8 +40,8 @@ CLEAN=*.h5 *.raw *.meta *.clog
 ## for building automatic dependencies.
 TEST_SRC_PARA=ph5example.c
 TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c     \
-	 h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c     \
-	 h5_reference.c h5_drivers.c $(TEST_SRC_PARA)
+         h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c     \
+         h5_reference.c h5_drivers.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 EXAMPLE_PROGS=$(TEST_SRC)
@@ -47,39 +49,111 @@ EXAMPLE_PROGS=$(TEST_SRC)
 ## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 h5_chunk_read: $(srcdir)/h5_chunk_read.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_chunk_read.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_compound: $(srcdir)/h5_compound.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_compound.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_extend_write: $(srcdir)/h5_extend_write.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_extend_write.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_group: $(srcdir)/h5_group.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_group.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_write: $(srcdir)/h5_write.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_write.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_read: $(srcdir)/h5_read.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_read.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_select: $(srcdir)/h5_select.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_select.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_attribute: $(srcdir)/h5_attribute.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_attribute.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_mount: $(srcdir)/h5_mount.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_mount.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_reference: $(srcdir)/h5_reference.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_reference.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 h5_drivers: $(srcdir)/h5_drivers.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/h5_drivers.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 ph5example: $(srcdir)/ph5example.c
-	$(CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC) $(CPPFLAGS) -o $@ $<;					\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $<;				\
+	fi
 
 @CONCLUDE@
