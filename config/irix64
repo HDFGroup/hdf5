@@ -39,8 +39,10 @@ CC="cc -ansi -64"
 
 # -woff 1174	about function declared but not used
 # -woff 1429	about long long type non-standard
-warn="-fullwarn -woff 1174,1429"
-#warn="-woff 1174,1429"
+# -woff 1209    about constant expressions
+# -woff 1196    about __vfork() being implicitly declared, config prob.
+warn="-fullwarn -woff 1174,1429,1209,1196"
+#warn="-woff 1174,1429,1209,1196"
 
 profile="-pg"
 
