@@ -531,70 +531,10 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
     
     if(driver_id > 0) {
-        /* Increment the reference count on driver and copy driver info */
-        H5I_inc_ref(driver_id);
-        driver_info = H5FD_fapl_copy(driver_id, driver_info);
-
-        /* Set the driver properties for the list */
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
+        /* Set the driver for the property list */
+        if(H5FD_fapl_open(plist, driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*--------------------------------------------------------------------------
- * Function:	H5F_acs_close
- * 
- * Purpose:	Callback routine which is called whenever a file access 
- *		property list is closed.  This routine performs any generic 
- *		cleanup needed on the properties.
- *
- * Return:	Success:	Non-negative
- * 		
- * 		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *		Tuesday, Oct 23, 2001
- * 
- * Modifications:
- *
- *---------------------------------------------------------------------------
- */ 
-herr_t 
-H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
-{
-    hid_t      driver_id;
-    void       *driver_info;
-    H5P_genplist_t *plist;              /* Property list */
-    herr_t     ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5F_acs_close, FAIL);
-
-    /* Check argument */
-    if(NULL == (plist = H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
-    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-    if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-
-    if(driver_id > 0) {
-        /* Free memory for driver info and decrement reference count for driver */
-        H5FD_fapl_free(driver_id, driver_info);
-        H5I_dec_ref(driver_id);
-        driver_info = NULL;
-        driver_id   = -1;
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -640,13 +580,58 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
     
     if(driver_id > 0) {
-        H5I_inc_ref(driver_id);
-        driver_info = H5FD_fapl_copy(driver_id, driver_info);
-        if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
-        if(H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
+        /* Set the driver for the property list */
+        if(H5FD_fapl_open(new_plist, driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5F_acs_close
+ * 
+ * Purpose:	Callback routine which is called whenever a file access 
+ *		property list is closed.  This routine performs any generic 
+ *		cleanup needed on the properties.
+ *
+ * Return:	Success:	Non-negative
+ * 		
+ * 		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ * 
+ * Modifications:
+ *
+ *---------------------------------------------------------------------------
+ */ 
+herr_t 
+H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
+{
+    hid_t      driver_id;
+    void       *driver_info;
+    H5P_genplist_t *plist;              /* Property list */
+    herr_t     ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5F_acs_close, FAIL);
+
+    /* Check argument */
+    if(NULL == (plist = H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+    if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+
+    if(driver_id > 0) {
+        /* Close the driver for the property list */
+        if(H5FD_fapl_close(driver_id, driver_info)<0)
+            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
