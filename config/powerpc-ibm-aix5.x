@@ -33,12 +33,12 @@ case $CC_BASENAME in
     enable_shared="${enable_shared:-no}"
     # CFLAGS must be set else configure set it to -g
     CFLAGS="$CFLAGS"
-    DEBUG_CFLAGS="-g"
+    DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
     PROD_CFLAGS=""
     PROD_CPPFLAGS=
-    PROFILE_CFLAGS="-pg"
+    PROFILE_CFLAGS="-g -qfullpath -pg"
     PROFILE_CPPFLAGS=
     ;;
 
