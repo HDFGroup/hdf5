@@ -233,13 +233,11 @@ int make_all_objects(hid_t loc_id)
  H5Glink(loc_id, H5G_LINK_SOFT, "dset", "link");
 
 /*-------------------------------------------------------------------------
- * write a series of datasetes on the group, and root group
+ * write a series of datasetes 
  *-------------------------------------------------------------------------
  */
 
  write_dset_in(root_id,"dset_referenced",loc_id,0);
- write_dset_in(group_id,"dset_referenced",loc_id,0);
-
 
  /* Close */
  H5Dclose(dset_id);
@@ -985,3 +983,4 @@ int make_fill(hid_t loc_id)
  return 0;                                                 
  
 }
+
