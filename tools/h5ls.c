@@ -1741,6 +1741,9 @@ main (int argc, char *argv[])
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
 	     NULL, ragged_list2);
 
+	/*init the programtype var fromthe tools lib*/
+	programtype = H5LS;
+
     /* Name of this program without the path */
     if ((progname=strrchr(argv[0], '/'))) progname++;
     else progname = argv[0];

@@ -1267,6 +1267,9 @@ H5Eset_auto (NULL, NULL);
         exit(1);
     }
 
+/*init the programtype var fromt he tools lib*/
+	programtype = H5DUMP;
+
     opts = malloc((argc/2) * sizeof (int));
     opts[0] = -1;
     /* parse command line options */
