@@ -87,6 +87,16 @@ TESTHOST=""
 #################################
 # Function definitions
 #################################
+
+# Print messages to stdout
+# Use this to show output heading to stdout
+PRINT()
+{
+    echo "$*"
+}
+
+# Show seconds since midnight.
+# This is used to calculate seconds elapsed
 SecOfDay()
 {
     set `date '+%H %M %S'`
@@ -113,11 +123,11 @@ REPORT_ERR()
 {
     ERRMSG=$1
     # print it with a banner shifted right a bit
-    echo "		*************************************"
-    echo "		$ERRMSG"
-    echo "		*************************************"
+    PRINT "		*************************************"
+    PRINT "		$ERRMSG"
+    PRINT "		*************************************"
     # report it in the FAILED-LOG file too
-    (date; echo "$ERRMSG") >> $FAILEDLOG
+    (date; PRINT "$ERRMSG") >> $FAILEDLOG
 }
 
 #
@@ -125,25 +135,25 @@ REPORT_ERR()
 REPORT_RESULT()
 {
     if [ $retcode -eq 0 ]; then
-	echo "PASSED: $TEST_TYPE tests for $HOSTNAME" | tee -a $PASSEDLOG
+	PRINT "PASSED ${HOSTNAME}: $TEST_TYPE" | tee -a $PASSEDLOG
     else
 	# test failed.
-	REPORT_ERR "****FAILED: $TEST_TYPE tests for $HOSTNAME****"
+	REPORT_ERR "****FAILED ${HOSTNAME}: $TEST_TYPE****"
     fi
 }
 
 # Print a blank line
 PRINT_BLANK()
 {
-    echo
+    PRINT
 }
 
 # Print trailer summary
 PRINT_TRAILER()
 {
-    echo "*** finished $TEST_TYPE tests in $HOSTNAME ***"
+    PRINT "*** finished $TEST_TYPE tests in $HOSTNAME ***"
     date; EndTime=`SecOfDay`
-    echo Total time = `ElapsedTime $StartTime $EndTime`
+    PRINT Total time = `ElapsedTime $StartTime $EndTime`
     PRINT_BLANK
     # reset StartTime for the next elapsed time report
     StartTime=`SecOfDay`
@@ -165,25 +175,26 @@ CHECK_RSH()
 	elif ping localhost 3 >/dev/null 2>&1; then
 	    PING=ping
 	    PINGCOUNT=3
-	else	# don't know how to use ping.  Set it to false.
-	    PING=false
+	else	# don't know how to use ping.
+	    PING=no_ping
 	    PINGCOUNT=
 	fi
     fi
     #
     host=$1
-    if $PING $host $PINGCOUNT >/dev/null 2>&1; then
+    # Try remote command with host if it responds to ping.
+    # Still try it if we don't know how to do ping.
+    if [ no_ping = "$PING" ] || $PING $host $PINGCOUNT >/dev/null 2>&1; then
 	if rsh $host -n hostname >/dev/null 2>&1; then
 	    RSH=rsh
 	elif ssh $host -n hostname >/dev/null 2>&1; then
 	    RSH=ssh
 	else
-	    echo cannot remote command with $host
-	    RSH="false"
+	    PRINT cannot remote command with $host
+	    RSH="NoRemoteCommand"
 	fi
     else
-	echo $host is down
-	RSH="false"
+	RSH="NotReachable"
     fi
 }
 
@@ -201,13 +212,13 @@ WAITFOR()
     nminutes=$2
     if [ -z "$wait_file" -o ! "$nminutes" -ge 0 ]
     then
-	echo "errors in argument of WAITFOR(): wait_file($1) or nminutes($2)"
+	PRINT "errors in argument of WAITFOR(): wait_file($1) or nminutes($2)"
 	WAIT_STATUS=-1
 	return
     fi
     while [ ! -f $wait_file ]; do
 	if [ $nminutes -gt 0 ]; then
-	    echo "Wait For $wait_file to appear"
+	    PRINT "Wait For $wait_file to appear"
 	    sleep 60			#sleep 1 minute
 	else
 	    WAIT_STATUS=1
@@ -234,13 +245,13 @@ WAITTILL()
     nminutes=$2
     if [ -z "$wait_file" -o ! "$nminutes" -ge 0 ]
     then
-	echo "errors in argument of WAITTILL(): wait_file($1) or nminutes($2)"
+	PRINT "errors in argument of WAITTILL(): wait_file($1) or nminutes($2)"
 	WAIT_STATUS=-1
 	return
     fi
     while [ -f $wait_file ]; do
 	if [ $nminutes -gt 0 ]; then
-	    echo "Wait till $wait_file has disappeared"
+	    PRINT "Wait till $wait_file has disappeared"
 	    sleep 60			#sleep 1 minute
 	else
 	    WAIT_STATUS=1
@@ -265,8 +276,8 @@ RUNSNAPTEST()
     TEST_TYPE=$*
     retcode=0
     date
-    echo "*** starting $TEST_TYPE tests in $HOSTNAME ***"
-    echo "Uname -a: `uname -a`"
+    PRINT "*** starting $TEST_TYPE tests in $HOSTNAME ***"
+    PRINT "Uname -a: `uname -a`"
 
     # parse the test type and set options accordingly
     while [ $# -gt 0 ]; do
@@ -298,7 +309,7 @@ RUNSNAPTEST()
 		shift; shift
 		;;
 	    *) # unknown test
-		echo "$0: unknown type of test ($1)"
+		PRINT "$0: unknown type of test ($1)"
 		retcode=1
 		shift
 		;;
@@ -323,8 +334,9 @@ RUNSNAPTEST()
 
     # Setup log file name to save test output
     LOGFILE=${LOGBASENAME}${SRCDIRNAME}_${TODAY}
-    echo "Running snapshot with output saved in\n   $LOGFILE"
-    (date; echo Hostname=$HOSTNAME) >> $LOGFILE
+    PRINT "Running snapshot with output saved in"
+    PRINT "   $LOGFILE"
+    (date; PRINT Hostname=$HOSTNAME) >> $LOGFILE
 
     (
     cd $SNAPYARD/current
@@ -366,8 +378,8 @@ SNAPTEST_CONFIG_PARSE()
 	    *:)	# ignore types of test for other hosts
 		;;
 	    *)	# unknown configuration option
-		echo $x $y
-		echo "***Unknown configuration option. Ignored.***"
+		PRINT $x $y
+		PRINT "***Unknown configuration option. Ignored.***"
 		;;
 	esac
     done
@@ -446,7 +458,7 @@ while [ $# -gt 0 ]; do
 	    DEBUGMODE="$1"
 	    SNAPSHOT="echo bin/snapshot"
 	    PROGNAME="$PROGNAME $DEBUGMODE"
-	    echo "******** DEBUGMODE is $DEBUGMODE ************"
+	    PRINT "******** DEBUGMODE is $DEBUGMODE ************"
 	    ;;
 	-r*)
 	    # the version string has a leading _ but not for H5DIR name
@@ -464,7 +476,7 @@ while [ $# -gt 0 ]; do
 	    NOCVS=nocvs
 	    ;;
 	-*) # Unknow option
-	    echo "Unknown option ($1)"
+	    PRINT "Unknown option ($1)"
 	    USAGE
 	    exit 1
 	    ;;
@@ -514,13 +526,14 @@ StartTime=`SecOfDay`
 
 # Process the configuration
 SNAPTEST_CONFIG
-echo STANDARD_OPT=$STANDARD_OPT
-echo TEST_TYPES=$TEST_TYPES
+PRINT STANDARD_OPT=$STANDARD_OPT
+PRINT TEST_TYPES=$TEST_TYPES
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
 if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
-    echo "Running CVS checkout with output saved in\n   $CVSLOG"
+    PRINT "Running CVS checkout with output saved in"
+    PRINT "   $CVSLOG"
     # Set CVS lock first
     touch $CVSLOG_LOCK
     ($SNAPSHOT checkout ) >> $CVSLOG 2>&1
@@ -532,7 +545,7 @@ if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
 	REPORT_ERR "****CVS checkout FAILED in $HOSTNAME****"
 	exit $errcode
     fi
-    echo Checking MAINFEST file ...
+    PRINT Checking MAINFEST file ...
     (cd $SNAPYARD/current; bin/chkmanifest)
     errcode=$?
     if [ $errcode -ne 0 ]; then
@@ -565,21 +578,37 @@ PROGNAME="$SNAPYARD/current/$PROGNAME"
 # Decide to do test for the local host or for remote hosts
 if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     date
-    echo "*** launching tests from $HOSTNAME ***"
+    PRINT "*** launching tests from $HOSTNAME ***"
     PRINT_BLANK
     TEST_TYPE="launching"
     cd ${SNAPYARD}/log
     for h in $TESTHOST; do
 	TMP_OUTPUT="#$h.out"
+	(PRINT "=============="
+	 PRINT "Testing $h"
+	 PRINT "==============") > $TMP_OUTPUT
 	CHECK_RSH $h
-	# launch concurrent tests only if srcdir is used
-	if [ -n "$SRCDIR" ]; then
-	    (echo $RSH $h -n $PROGNAME;
-	    $RSH $h -n $PROGNAME) > $TMP_OUTPUT 2>&1 &
-	else
-	    (echo $RSH $h -n $PROGNAME;
-	    $RSH $h -n $PROGNAME) > $TMP_OUTPUT 2>&1
-	fi
+	# run the remote shell command with output to $TMP_OUTPUT
+	case "$RSH" in
+	    rsh|ssh)
+		PRINT $RSH $h -n $PROGNAME
+		# launch concurrent tests only if srcdir is used
+		if [ -n "$SRCDIR" ]; then
+		    $RSH $h -n $PROGNAME &
+		else
+		    $RSH $h -n $PROGNAME
+		fi
+		;;
+	    NoRemoteCommand)
+		PRINT $h does not accept Remote Command
+		;;
+	    NotReachable)
+		PRINT $h is not reachable 
+		;;
+	    *)
+		PRINT "CHECK_RSH for $h returned unknow result ($RSH)"
+		;;
+	esac >> $TMP_OUTPUT 2>&1
     done
     # wait for all launched tests to finish, then cat them back out.
     wait
@@ -588,7 +617,8 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
 	(tail -2 $TMP_OUTPUT | grep -s '^Total time' > /dev/null 2>&1) ||
-	    REPORT_ERR "****snaptest FAILED to complete in $h****"
+	    (REPORT_ERR "****snaptest FAILED to complete in $h****" &&
+		PRINT_BLANK)
 	rm $TMP_OUTPUT
     done
     exit 0
