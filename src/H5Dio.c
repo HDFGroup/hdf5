@@ -994,7 +994,14 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
+        target_size<MAX(src_type_size, dst_type_size))
+        target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
+    
+    /* Sanity check elements in temporary buffer */
+    if (request_nelmts<=0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
 
     /* Figure out the strip mine size. */
     if (H5S_select_iter_init(&file_iter, file_space, src_type_size)<0)
@@ -1230,6 +1237,9 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
+        target_size<MAX(src_type_size, dst_type_size))
+        target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
     /* Sanity check elements in temporary buffer */
@@ -1491,8 +1501,11 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
-    request_nelmts = target_size / MAX(src_type_size, dst_type_size);
-    
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
+        target_size<MAX(src_type_size, dst_type_size))
+        target_size = MAX(src_type_size, dst_type_size);
+    request_nelmts = target_size / MAX (src_type_size, dst_type_size);
+        
     /* Sanity check elements in temporary buffer */
     if (request_nelmts<=0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
@@ -1787,6 +1800,9 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
+        target_size<MAX(src_type_size, dst_type_size))
+        target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
     /* Sanity check elements in temporary buffer */

@@ -51,6 +51,7 @@ const char *FILENAME[] = {
 #define DSET_COMPACT_IO_NAME    "compact_io"
 #define DSET_COMPACT_MAX_NAME   "max_compact"
 #define DSET_COMPACT_MAX2_NAME   "max_compact_2"
+#define DSET_CONV_BUF_NAME	"conv_buf"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_SZIP_NAME          "szip"
@@ -90,6 +91,11 @@ const char *FILENAME[] = {
 #define BOGUS2_PARAM_1          13      /* (No particular meaning, just for checking value) */
 #define BOGUS2_PARAM_2          35      /* (No particular meaning, just for checking value) */
 #define BOGUS2_ALL_NPARMS       4       /* Total number of parameter = permanent + "local" parameters */
+
+/* Dimensionality for conversion buffer test */
+#define DIM1          100  /* Dim. Size of data member # 1 */
+#define DIM2         5000  /* Dim. Size of data member # 2 */
+#define DIM3           10  /* Dim. Size of data member # 3 */
 
 #ifdef TESTING
 /* Parameters for internal filter test */
@@ -729,6 +735,154 @@ error:
      return -1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_buffer
+ *
+ * Purpose:	Test size of data type conversion buffer.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		Monday, May 12, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_conv_buffer(hid_t fid)
+{
+    typedef struct
+    {
+        int      a[DIM1][DIM2][DIM3];
+        float    b[DIM2];
+        double   c[DIM3];
+    } CmpField;
+
+    typedef struct
+    { 
+        float    b[DIM2];
+        double   c[DIM3];
+    } CmpFieldR;
+
+    herr_t       status = -1;
+    int          j, k, l;    
+
+    CmpField     *cf;
+    CmpFieldR    *cfrR;
+
+    hid_t       dataset = -1; /* dataset ID             */
+    hid_t       space   = -1; /* data space ID          */
+    hid_t       ctype1, ctype2; /* data type ID           */
+    hid_t       arr_type1, arr_type2, arr_type3, arr_type4, arr_type5;
+    hsize_t     dimsa[3];
+    hsize_t     dimsb[1];
+    hsize_t     dimsc[1];
+    hid_t       xfer_list;
+    hsize_t      size;
+
+    TESTING("data type conversion buffer size");
+    
+    cf = (CmpField *)calloc(1, sizeof(CmpField));
+
+    /* Populate the data members */    
+    for (j = 0; j < DIM1; j++) 
+	for (k = 0; k < DIM2; k++) 
+	    for (l = 0; l < DIM3; l++)
+		cf->a[j][k][l] = 10*(j+1) + l + k;
+
+    for (j = 0; j < DIM2; j++)
+	cf->b[j] = 100.*(j+1) + 0.01*j;
+	
+    for (j = 0; j < DIM3; j++)
+	cf->c[j] = 100.*(j+1) + 0.02*j;
+		  	
+
+  /* Create data space */
+  if((space=H5Screate(H5S_SCALAR))<0) goto error;
+
+  /* Add  members to the compound data type */
+  dimsa[0] = DIM1;
+  dimsa[1] = DIM2;
+  dimsa[2] = DIM3;
+  dimsb[0] = DIM2;
+  dimsc[0] = DIM3;
+  
+  /* Create the memory data type */
+  if((ctype1 = H5Tcreate(H5T_COMPOUND, sizeof (CmpField)))<0) goto error;
+
+  if((arr_type1 = H5Tarray_create(H5T_NATIVE_INT, 3, dimsa, NULL))<0) goto error;
+  if((arr_type2 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL))<0) goto error;
+  if((arr_type3 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL))<0) goto error;
+
+  if(H5Tinsert(ctype1, "A", HOFFSET(CmpField, a), arr_type1)<0) goto error;
+  if(H5Tinsert (ctype1, "B", HOFFSET(CmpField, b), arr_type2)<0) goto error;
+  if(H5Tinsert (ctype1, "C", HOFFSET(CmpField, c), arr_type3)<0) goto error;
+
+  /* Create the dataset */
+  if((dataset = H5Dcreate(fid, DSET_CONV_BUF_NAME, ctype1, space, H5P_DEFAULT))<0) goto error;
+  if(H5Dwrite(dataset, ctype1, H5S_ALL, H5S_ALL, H5P_DEFAULT, cf)<0) goto error;
+  
+  if((ctype2 = H5Tcreate(H5T_COMPOUND, sizeof (CmpFieldR)))<0) goto error;
+
+  if((arr_type4 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL))<0) goto error;
+  if((arr_type5 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL))<0) goto error;
+    
+  if(H5Tinsert (ctype2, "B", HOFFSET(CmpFieldR, b), arr_type4)<0) goto error;
+  if(H5Tinsert (ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5)<0) goto error;
+
+  /* Read should succeed since library will set conversion buffer big enough */
+  cfrR = (CmpFieldR *)calloc(1, sizeof(CmpFieldR));
+  if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfrR)<0) goto error;
+
+  /* Read should fail since conversion buffer isn't big enough */ 
+  xfer_list = H5Pcreate (H5P_DATASET_XFER);
+  size = (DIM2*DIM3*(sizeof(int))+ DIM2*(sizeof(float))+
+         DIM3*(sizeof(double)));
+  if(H5Pset_buffer (xfer_list, size, NULL, NULL)<0) goto error;
+
+  H5E_BEGIN_TRY {
+    status = H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR);
+  } H5E_END_TRY;
+  if (status >= 0) {
+      H5_FAILED();
+      puts("    Library shouldn't allow conversion buffer too small");
+      goto error;
+  }
+
+  /* Read will succeed since conversion buffer is big enough */
+  size = (DIM1*DIM2*DIM3*(sizeof(int))+ DIM2*(sizeof(float))+
+         DIM3*(sizeof(double)));
+  if(H5Pset_buffer (xfer_list, size, NULL, NULL)<0) goto error;
+
+  if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR)<0) goto error;
+
+
+  if(H5Pclose(xfer_list)<0) goto error;
+  if(H5Sclose(space)<0) goto error;
+  if(H5Tclose(arr_type1)<0) goto error;
+  if(H5Tclose(arr_type2)<0) goto error;
+  if(H5Tclose(arr_type3)<0) goto error;
+  if(H5Tclose(ctype1)<0) goto error;
+  if(H5Tclose(ctype2)<0) goto error;
+  if(H5Tclose(arr_type4)<0) goto error;
+  if(H5Tclose(arr_type5)<0) goto error;
+  if(H5Dclose(dataset)<0) goto error;
+
+  if(cf)
+    HDfree(cf);
+  if(cfrR)
+    HDfree(cfrR);  
+  puts(" PASSED");
+  return(0);
+
+error:
+  return -1;    
+}
+    
 
 /*-------------------------------------------------------------------------
  * Function:	test_tconv
@@ -2858,6 +3012,7 @@ main(void)
     nerrors += test_simple_io(fapl)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_max_compact(fapl)<0  ?1:0;
+    nerrors += test_conv_buffer(file)<0	?1:0; 
     nerrors += test_tconv(file)<0	?1:0; 
     nerrors += test_filters(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
