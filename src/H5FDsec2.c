@@ -90,13 +90,19 @@ typedef struct H5FD_sec2_t {
  * file_seek:		The function which adjusts the current file position,
  *			either lseek() or lseek64().
  */
+/* adding for windows NT file system support. */
+
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
 #   define file_seek		lseek64
+#elif defined WIN32
+#   define file_offset_t    __int64
+#   define file_seek        _lseeki64
 #else
 #   define file_offset_t	off_t
 #   define file_seek		lseek
 #endif
+
 
 /*
  * These macros check for overflow of various quantities.  These macros
