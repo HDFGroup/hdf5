@@ -1216,7 +1216,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
        H5_INIT_GLOBAL = TRUE;                                                 \
        if (H5_init_library()<0)  					      \
           HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
-            "library initialization failed");		                      \
+            "library initialization failed")		                      \
    }								              \
                                                                               \
    /* Initialize this interface or bust */				      \
@@ -1226,7 +1226,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
               ((herr_t(*)(void))interface_init_func)()<0) {		      \
          interface_initialize_g = 0;				              \
          HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
-            "interface initialization failed");		                      \
+            "interface initialization failed")		                      \
       }								              \
    }                                                                          \
                                                                               \
@@ -1243,7 +1243,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
               ((herr_t(*)(void))interface_init_func)()<0) {		      \
          interface_initialize_g = 0;				              \
          HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
-            "interface initialization failed");		                      \
+            "interface initialization failed")		                      \
       }								              \
    }                                                                          \
                                                                               \

@@ -39,7 +39,7 @@
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR (maj, min, str);						      \
    if (H5_IS_API(FUNC) && H5E_auto_g)  					      \
-       (H5E_auto_g)(H5E_auto_data_g)
+       (void)((H5E_auto_g)(H5E_auto_data_g))
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -62,7 +62,7 @@
  */
 #define HGOTO_ERROR(maj, min, ret_val, str) {				      \
    HCOMMON_ERROR (maj, min, str);					      \
-   HGOTO_DONE (ret_val);					              \
+   HGOTO_DONE (ret_val)						              \
 }
 
 /*

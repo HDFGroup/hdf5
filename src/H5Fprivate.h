@@ -297,7 +297,7 @@ typedef struct H5F_t H5F_t;
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME       "rdcc_nbytes"
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        1024*1024
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        (1024*1024)
 
 /* Definition for preemption read chunks first */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_NAME        "rdcc_w0"
@@ -324,7 +324,7 @@ typedef struct H5F_t H5F_t;
    is allowed by file driver */
 #define H5F_ACS_SIEVE_BUF_SIZE_NAME             "sieve_buf_size"
 #define H5F_ACS_SIEVE_BUF_SIZE_SIZE             sizeof(size_t)
-#define H5F_ACS_SIEVE_BUF_SIZE_DEF              64*1024
+#define H5F_ACS_SIEVE_BUF_SIZE_DEF              (64*1024)
 
 /* Definition for minimum "small data" allocation block size (when
    aggregating "small" raw data allocations. */
