@@ -29,6 +29,9 @@
 /* Number of elements in each test */
 #define NTESTELEM	100000
 
+/* For test_compound_10 */
+#define ARRAY_DIM       4 
+
 /* Define if you want to see a count of overflows */
 #undef SHOW_OVERFLOWS
 
@@ -61,6 +64,7 @@ const char *FILENAME[] = {
     "dtypes2",
     "dtypes3",
     "dtypes4",
+    "dtypes5",
     NULL
 };
 
@@ -117,6 +121,8 @@ static int num_opaque_conversions_g = 0;
 
 void some_dummy_func(float x);
 static int opaque_check(int tag_it);
+void *test_vltypes_alloc_custom(size_t size, void *info);
+void test_vltypes_free_custom(void *mem, void *info);
 
 
 /*-------------------------------------------------------------------------
@@ -1446,7 +1452,7 @@ test_compound_9(void)
 {
     typedef struct cmpd_struct {
        int          i1;
-       const char*  str;
+       char*        str;
        int          i2;
     } cmpd_struct;
 
@@ -1560,8 +1566,8 @@ test_compound_9(void)
         goto error;      
     if(H5Tclose(cmpd_tid)<0)
         goto error;      
-    /*if(H5Tclose(dup_tid)<0)
-        goto error;*/      
+    if(H5Tclose(dup_tid)<0)
+        goto error;
     if(H5Tclose(str_id)<0)
         goto error;      
     if(H5Sclose(space_id)<0)
@@ -1595,7 +1601,7 @@ test_compound_9(void)
     } /* end if */
 
     rdata.i1 = rdata.i2 = 0;
-    free(rdata.str);
+    if(rdata.str) free(rdata.str);
 
     if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
         H5_FAILED(); AT();
@@ -1609,11 +1615,203 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
+    if(rdata.str) free(rdata.str);
+
     if(H5Dclose(dset_id)<0)
         goto error;      
     if(H5Tclose(cmpd_tid)<0)
         goto error;      
     if(H5Tclose(dup_tid)<0)
+        goto error;      
+    if(H5Fclose(file)<0)
+        goto error;      
+
+    PASSED();
+    return 0;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_10
+ *
+ * Purpose:     Tests array data type of compound type with VL string as field.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Tuesday, June 15, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_10(void)
+{
+    typedef struct cmpd_struct {
+       int          i1;
+       char*        str;
+       hvl_t        text;
+       int          i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata[ARRAY_DIM];
+    cmpd_struct rdata[ARRAY_DIM];
+    hid_t       file;
+    hid_t       arr_tid, cmpd_tid, cstr_id, vlstr_id, dup_tid;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hid_t       xfer_pid;
+    hsize_t     arr_dim[1] = {ARRAY_DIM};  /* Array dimensions */
+    hsize_t     dim1[1];
+    void        *t1, *t2;
+    char        filename[1024];
+    int         len;
+    int         i;
+
+    TESTING("array data type of compound type with VL string");
+  
+    for(i=0; i<ARRAY_DIM; i++) { 
+        wdata[i].i1 = i*10+i;
+        wdata[i].str = strdup("C string A");
+        wdata[i].str[9] += i;
+        wdata[i].i2 = i*1000+i*10;
+
+        wdata[i].text.p   = (void*)strdup("variable-length text A\0");
+        len = wdata[i].text.len = strlen((char*)wdata[i].text.p)+1;
+        ((char*)(wdata[i].text.p))[len-2] += i;
+        ((char*)(wdata[i].text.p))[len-1] = '\0';
+    }
+
+    /* Create File */
+    h5_fixname(FILENAME[4], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create file!\n");
+        goto error;
+    } /* end if */
+
+    /* Create first compound datatype */ 
+    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct)))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i1'\n");
+        goto error;
+    } /* end if */
+    
+    cstr_id = H5Tcopy(H5T_C_S1);
+    if(H5Tset_size(cstr_id,H5T_VARIABLE)<0) {
+        H5_FAILED(); AT();
+        printf("Can't set size for C string\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"c_string",HOFFSET(cmpd_struct,str),cstr_id)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'str'\n");
+        goto error;
+    } /* end if */
+
+    /* Create vl-string data type */
+    if((vlstr_id =  H5Tvlen_create(H5T_NATIVE_CHAR))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create VL string\n");
+        goto error;
+    } /* end if */
+   
+    if(H5Tinsert(cmpd_tid, "vl_string",HOFFSET(cmpd_struct, text), vlstr_id)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'text'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT)<0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i2'\n");
+        goto error;
+    } /* end if */
+    
+    /* Create the array data type for c_string data */
+    if((arr_tid = H5Tarray_create(cmpd_tid,1,arr_dim, NULL))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create array type\n");
+        goto error;
+    } /* end if */
+
+    dim1[0] = 1;
+    if((space_id=H5Screate_simple(1,dim1,NULL))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
+    if((dset_id = H5Dcreate(file,"Dataset",arr_tid,space_id,H5P_DEFAULT))<0) {
+        H5_FAILED(); AT();
+        printf("Can't create dataset\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dwrite(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata)<0) {
+        H5_FAILED(); AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dread(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    for(i=0; i<ARRAY_DIM; i++) {
+        if(rdata[i].i1!=wdata[i].i1 || rdata[i].i2!=wdata[i].i2 || 
+            strcmp(rdata[i].str, wdata[i].str)) {
+            H5_FAILED(); AT();
+            printf("incorrect read data\n");
+            goto error;
+        } /* end if */
+        
+        if(rdata[i].text.len!=wdata[i].text.len) {
+            H5_FAILED(); AT();
+            printf("incorrect VL length\n");
+            goto error;
+        } /* end if */
+        
+        t1 = rdata[i].text.p;
+        t2 = wdata[i].text.p;
+        if(strcmp((char*)t1, (char*)t2)) {
+            H5_FAILED(); AT();
+            printf("incorrect VL read data\n");
+            goto error;
+        }
+
+        free(t1);
+        free(t2);
+        free(wdata[i].str);
+        free(rdata[i].str);
+    } /* end for */
+
+    if(H5Dclose(dset_id)<0)
+        goto error;      
+    if(H5Tclose(cmpd_tid)<0)
+        goto error;      
+    if(H5Tclose(arr_tid)<0)
+        goto error;      
+    if(H5Tclose(cstr_id)<0)
+        goto error;      
+    if(H5Tclose(vlstr_id)<0)
+        goto error;      
+    if(H5Sclose(space_id)<0)
         goto error;      
     if(H5Fclose(file)<0)
         goto error;      
@@ -4803,6 +5001,7 @@ main(void)
     nerrors += test_compound_7();
     nerrors += test_compound_8();
     nerrors += test_compound_9();
+    nerrors += test_compound_10();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
