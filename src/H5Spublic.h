@@ -43,7 +43,7 @@ hid_t H5Scopy (hid_t space_id);
 herr_t H5Sclose (hid_t space_id);
 hsize_t H5Sget_npoints (hid_t space_id);
 int H5Sget_ndims (hid_t space_id);
-int H5Sget_dims (hid_t space_id, hsize_t dims[]);
+int H5Sget_dims (hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 hbool_t H5Sis_simple (hid_t space_id);
 herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 herr_t H5Sset_hyperslab(hid_t sid, const hssize_t *start, const hsize_t *count,

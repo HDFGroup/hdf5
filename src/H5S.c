@@ -657,8 +657,8 @@ H5S_get_ndims(const H5S_t *ds)
 /*-------------------------------------------------------------------------
  * Function:	H5Sget_dims
  *
- * Purpose:	Returns the size in each dimension of a data space DS through
- *		the DIMS argument.
+ * Purpose:	Returns the size and maximum sizes in each dimension of
+ *		a data space DS through	the DIMS and MAXDIMS arguments.
  *
  * Return:	Success:	Number of dimensions, the same value as
  *				returned by H5Sget_ndims().
@@ -669,11 +669,15 @@ H5S_get_ndims(const H5S_t *ds)
  *		Thursday, December 11, 1997
  *
  * Modifications:
+ *		June 18, 1998	Albert Cheng
+ *		Added maxdims argument.  Removed dims argument check
+ *		since it can still return ndims even if both dims and
+ *		maxdims are NULLs.
  *
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/)
+H5Sget_dims(hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
@@ -686,10 +690,7 @@ H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/)
 	NULL == (ds = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (!dims) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
-    }
-    ret_value = H5S_get_dims(ds, dims, NULL);
+    ret_value = H5S_get_dims(ds, dims, maxdims);
 
     FUNC_LEAVE(ret_value);
 }
