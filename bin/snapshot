@@ -86,6 +86,31 @@ while [ $# -gt 0 ] ; do
 	    cmdtest="test"
 	    cmd=""
 	    ;;
+	setenv)
+	    # set environment variable
+	    shift
+	    eval $1="$2"
+	    export $1
+	    shift
+	    ;;
+	setenvN)
+	    # set environment variable with $1 values
+	    # e.g., setenvN 3 x a b c is same as setenv x="a b c".
+	    # a kludge now--the extra single quotes are needed
+	    # else eval complains.
+	    shift
+	    envN=$1
+	    shift
+	    envname=$1
+	    envalue=
+	    while test $envN -gt 0; do
+		shift
+		envalue="$envalue $1"
+		envN=`expr $envN - 1`
+	    done
+	    eval $envname="'$envalue'"
+	    export $envname
+	    ;;
 	srcdir)
 	    #use srcdir option for test
 	    srcdir="yes"
@@ -174,6 +199,11 @@ Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
     release:  Run release
     clean:    Run make clean
     distclean:Run make distclean
+    setenv <name> <value>:
+              Set environment variable <name> to <value>.
+    setenvN <N> <name> <value> ...:
+	      Set environment variable with <N> values.
+	      E.g., setenvN 3 x a b c is same as setenv x="a b c".
     srcdir:   Use srcdir option (does not imply other commands)
               "snapshot srcdir" is equivalent to "snapshot srcdir all"
               "snapshot srcdir checkout" is equivalent to "snapshot checkout"
