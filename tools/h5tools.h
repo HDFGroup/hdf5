@@ -272,6 +272,7 @@ unsigned long objno[2];
 char objname[1024];
 int displayed;
 int recorded;
+int objflag;
 } obj_t;
 
 
@@ -298,7 +299,8 @@ typedef struct find_objs_t {
 
 herr_t find_objs(hid_t group, const char *name, void *op_data);
 int search_obj (table_t *temp, unsigned long *);
-
+void init_table(table_t **temp);
+void init_prefix(char **temp);
 /*
 	taken from h5dump.h
   */

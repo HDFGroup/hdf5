@@ -974,57 +974,6 @@ hid_t  type, space;
 }
 
 
-/*-------------------------------------------------------------------------
- * Function:    init_table
- *
- * Purpose:     allocate and initialize tables for shared groups, datasets, 
- *              and committed types
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-----------------------------------------------------------------------*/
-static void
-init_table (void){
-int i;
-	
-	group_table = malloc(sizeof(table_t));
-	type_table = malloc(sizeof(table_t));
-	dset_table = malloc(sizeof(table_t));
-
-    group_table->size = dset_table->size = type_table->size = 20;
-    group_table->nobjs = dset_table->nobjs = type_table->nobjs = 0;
-
-    group_table->objs = (obj_t*) malloc(group_table->size*sizeof(obj_t));
-    dset_table->objs = (obj_t*) malloc(dset_table->size*sizeof(obj_t));
-    type_table->objs = (obj_t*) malloc(type_table->size*sizeof(obj_t));
-
-    for (i = 0; i < group_table->size; i++) {
-         group_table->objs[i].objno[0] = group_table->objs[i].objno[1] = 0;
-         group_table->objs[i].displayed = 0;
-         group_table->objs[i].recorded = 0;
-    }
-
-    for (i = 0; i < dset_table->size; i++) {
-         dset_table->objs[i].objno[0] = dset_table->objs[i].objno[1] = 0;
-         dset_table->objs[i].displayed = 0;
-         dset_table->objs[i].recorded = 0;
-    }
-
-    for (i = 0; i < type_table->size; i++) {
-         type_table->objs[i].objno[0] = type_table->objs[i].objno[1] = 0;
-         type_table->objs[i].displayed = 0;
-         type_table->objs[i].recorded = 0;
-    }
-
-    prefix = (char *) malloc(prefix_len * sizeof (char));
-    *prefix = '\0';
-}
-
-
 
 #if H5DUMP_DEBUG
 /*-------------------------------------------------------------------------
@@ -1244,8 +1193,10 @@ main(int argc, char *argv[])
     }
 
     /* allocate and initialize internal data structure */
-    init_table();
-
+    init_table(&group_table);
+    init_table(&type_table);
+    init_table(&dset_table);
+	init_prefix(&prefix);
 
 	/*init the find_objs_t*/
 	info->threshold = 0;
