@@ -130,7 +130,6 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
     H5D_t *new_dset;        /* new dataset object to create */
     hatom_t ret_value = SUCCEED;
     hdf5_file_t *file = NULL;
-    H5G_entry_t	tmp_ent;
     
     FUNC_ENTER(H5D_create, H5D_init_interface, FAIL);
 
@@ -153,32 +152,10 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
     new_dset->data_addr = -1;		/* No data yet */
     new_dset->dirty = FALSE;		/* There are no messages yet */
 
-    /* Create the (empty) object header in the file */
-    memset (&tmp_ent, 0, sizeof(tmp_ent));
-    if ((tmp_ent.header = H5O_new (file, 0, H5D_MINHDR_SIZE))<0) {
-       HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
+    /* Open (and create) a new file object */
+    if (NULL==(new_dset->ent = H5G_create (file, name, H5D_MINHDR_SIZE))) {
+       HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
     }
-
-    /*
-     * Link the (empty) object header into the symbol table so others can
-     * access it.  At least that way no one will try to create another one of
-     * these things with the same name.  We also hold the object open while
-     * H5D has a handle, preventing others from moving or deleting it from
-     * under us.
-     */
-#ifdef LATER
-    /* We should use the real CWD instead of always the root object! */
-#else
-    H5G_shadow_sync (file->root_sym);
-    if (H5G_insert (file, file->root_sym, NULL, name, &tmp_ent)<0) {
-       /* Something by that name already exists, or some other failure */
-       HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL);
-    }
-    if (NULL==(new_dset->ent = H5G_open (file, file->root_sym, name))) {
-       /* Can't open the header we just created -- should never happen */
-       HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
-    }
-#endif
 
     /* Register the new datatype and get an ID for it */
     if((ret_value=H5Aregister_atom(H5_DATASET, (const VOIDP)new_dset))<0)
@@ -236,22 +213,10 @@ hatom_t H5D_find_name(hatom_t grp_id, hobjtype_t type, const char *name)
     dset->file = file;
     dset->dirty = FALSE;
     
-#ifdef LATER
-    /* We should really use the real CWD instead of the root object! */
-#else
-    /*
-     *                     WARNING! WARNING! WARNING!
-     * The following line explicitly uses the root symbol as the current
-     * working directory.  This should be changed to something more
-     * appropriate and is only hacked in here to get the prototype working.
-     * -QAK
-     *                     WARNING! WARNING! WARNING!
-     */
-    H5G_shadow_sync (file->root_sym);
-    if (NULL==(dset->ent=H5G_open (file, file->root_sym, name))) {
+    /* Open the dataset object */
+    if (NULL==(dset->ent=H5G_open (file, name))) {
        HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, FAIL);
     }
-#endif
 
     /* Get the dataset's type (currently only atomic types) */
     if((dset->type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
@@ -422,7 +387,7 @@ done:
 herr_t H5Dread(hatom_t oid, hatom_t did, VOIDP buf)
 {
     H5D_t *dataset; /* dataset object to do I/O on */
-    void *readbuf;         /* pointer to buffer to write out */
+    void *readbuf=NULL;     /* pointer to buffer to write out */
     uintn   free_buf=0;     /* if temporary conversion buffer needs to be free'd */
     uintn   toread;         /* number of bytes to read in */
     herr_t  ret_value = SUCCEED;
@@ -507,7 +472,7 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
 {
     H5D_t *dataset;         /* dataset object to do I/O on */
     uintn   towrite;        /* number of bytes to write out */
-    void *writebuf;         /* pointer to buffer to write out */
+    void *writebuf=NULL;    /* pointer to buffer to write out */
     uintn   free_buf=0;     /* if temporary conversion buffer needs to be free'd */
     herr_t        ret_value = SUCCEED;
 
@@ -649,11 +614,6 @@ herr_t H5D_flush(hatom_t oid)
 	   }
 	}
 
-	/* Flush dataset header to disk -- just for debugging */
-	if (H5AC_flush (dataset->file, NULL, dataset->ent->header, FALSE)<0) {
-          HRETURN_ERROR (H5E_OHDR, H5E_CANTFLUSH, FAIL);
-       }
-       
 	dataset->dirty = FALSE;	/*it's clean now*/
     }
        

@@ -352,6 +352,8 @@ typedef struct {
     file_access_temp_t file_access_parms; /* File-access template	*/
 #endif
     struct H5G_entry_t *root_sym; /* Root symbol table entry		*/
+    uintn nshadows;		/* Size of shadow hash table		*/
+    struct H5G_hash_t **shadow; /* The shadow hash table		*/
   } hdf5_file_t;
 
 

@@ -310,7 +310,8 @@ H5AC_compare (const void *_a, const void *_b)
  *
  * Return:	Success:	SUCCEED
  *
- *		Failure:	FAIL
+ *		Failure:	FAIL if there was a request to flush all
+ *				items and something was protected.
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -374,6 +375,14 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
       }
       map = H5MM_xfree (map);
 
+      /*
+       * If there are protected object then fail.  However, everything
+       * else should have been flushed.
+       */
+      if (f->cache->nprots>0) {
+	 HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL);
+      }
+      
    } else if ((!type || f->cache->slot[i].type==type) &&
 	      f->cache->slot[i].addr==addr) {
       /*
@@ -387,14 +396,6 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
       }
       if (destroy) f->cache->slot[i].type = NULL;
 
-   }
-
-   /*
-    * If there are protected objects then fail.  However, everything
-    * else should have been flushed.
-    */
-   if (f->cache->nprots>0) {
-      HRETURN_ERROR (H5E_CACHE, H5E_PROTECT, FAIL);
    }
 
    FUNC_LEAVE (SUCCEED);

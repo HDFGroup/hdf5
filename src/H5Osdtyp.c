@@ -41,8 +41,9 @@ static char RcsId[] = "@(#)$Revision$";
 static void *H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_sim_dtype_encode (hdf5_file_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static void *H5O_sim_dtype_fast (const H5G_entry_t *ent, void *_mesg);
-static hbool_t H5O_sim_dtype_cache (H5G_entry_t *ent, const void *_mesg);
+static void *H5O_sim_dtype_fast (const H5G_cache_t *cache, void *_mesg);
+static hbool_t H5O_sim_dtype_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
+				    const void *_mesg);
 static void *H5O_sim_dtype_copy (const void *_mesg, void *_dest);
 static size_t H5O_sim_dtype_size (hdf5_file_t *f, const void *_mesg);
 static herr_t H5O_sim_dtype_debug (hdf5_file_t *f, const void *_mesg,
@@ -166,25 +167,21 @@ H5O_sim_dtype_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mes
     for simple datatypes, as they can be cached in the symbol-table entry)
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
+H5O_sim_dtype_fast (const H5G_cache_t *cache, void *mesg)
 {
    H5O_sim_dtype_t *sdtype = (H5O_sim_dtype_t *)mesg;
    
    FUNC_ENTER (H5O_sim_dtype_fast, NULL, NULL);
 
    /* check args */
-   assert (ent);
+   assert (cache);
 
-   if (H5G_CACHED_SDATA==ent->type) {
-      if (!sdtype) sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t));
-      sdtype->len = ent->cache.sdata.nt.length;
-      sdtype->arch = ent->cache.sdata.nt.arch;
+   if (!sdtype) sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t));
+   sdtype->len = cache->sdata.nt.length;
+   sdtype->arch = cache->sdata.nt.arch;
 
-      /* Convert into atomic base type. */
-      sdtype->base = MAKE_ATOM (H5_DATATYPE, ent->cache.sdata.nt.type);
-   } else {
-      sdtype = NULL;
-   }
+   /* Convert into atomic base type. */
+   sdtype->base = MAKE_ATOM (H5_DATATYPE, cache->sdata.nt.type);
 
    FUNC_LEAVE (sdtype);
 } /* end H5O_sim_dtype_fast() */
@@ -201,50 +198,54 @@ H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
         const void *mesg;       IN: Pointer to the simple datatype struct
  RETURNS
     BTRUE if symbol-table modified, BFALSE if not modified, BFAIL on failure.
+    The new cache type is returned through the CACHE_TYPE argument.
  DESCRIPTION
         This function is the opposite of the H5O_sim_dtype_fast method, it
     copies a message into the cached portion of a symbol-table entry.  (This
     method is required for simple datatypes, as they can be cached in the
     symbol-table entry)
 --------------------------------------------------------------------------*/
-static hbool_t
-H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
+static herr_t
+H5O_sim_dtype_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
+		     const void *mesg)
 {
     const H5O_sim_dtype_t *sdtype = (const H5O_sim_dtype_t *)mesg;
     hbool_t modified = BFALSE;
-   
+    
     FUNC_ENTER (H5O_sim_dtype_cache, NULL, BFAIL);
 
     /* check args */
-    assert (ent);
+    assert (cache_type);
+    assert (cache);
     assert (sdtype);
 
-    if (H5G_CACHED_SDATA != ent->type) {
+    if (H5G_CACHED_SDATA != *cache_type) {
        /*
         * No sdata cached yet.
         */
        modified = BTRUE;
-       ent->type = H5G_CACHED_SDATA;
-       ent->cache.sdata.nt.length = sdtype->len;
-       ent->cache.sdata.nt.arch = sdtype->arch;
-       ent->cache.sdata.nt.type = sdtype->base;
+       *cache_type = H5G_CACHED_SDATA;
+       cache->sdata.nt.length = sdtype->len;
+       cache->sdata.nt.arch = sdtype->arch;
+       cache->sdata.nt.type = sdtype->base;
+
     } else {
        /*
         * Some sdata already cached.
         */
-       if (ent->cache.sdata.nt.length != sdtype->len) {
+       if (cache->sdata.nt.length != sdtype->len) {
 	  modified = BTRUE;
-	  ent->cache.sdata.nt.length = sdtype->len;
+	  cache->sdata.nt.length = sdtype->len;
        }
 
-       if (ent->cache.sdata.nt.arch != sdtype->arch) {
+       if (cache->sdata.nt.arch != sdtype->arch) {
 	  modified = BTRUE;
-	  ent->cache.sdata.nt.arch = sdtype->arch;
+	  cache->sdata.nt.arch = sdtype->arch;
        }
 
-       if (ent->cache.sdata.nt.type != (uint16)sdtype->base) {
+       if (cache->sdata.nt.type != (uint16)sdtype->base) {
 	  modified = BTRUE;
-	  ent->cache.sdata.nt.type = (uint16)sdtype->base;
+	  cache->sdata.nt.type = (uint16)sdtype->base;
        }
     }
 

@@ -60,7 +60,7 @@ static herr_t H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata);
 static size_t H5G_node_sizeof_rkey (hdf5_file_t *f);
 
 /* H5G inherits cache-like properties from H5AC */
-static const H5AC_class_t H5AC_SNODE[1] = {{
+const H5AC_class_t H5AC_SNODE[1] = {{
       (void*(*)(hdf5_file_t*,haddr_t,void*))H5G_node_load,
       (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5G_node_flush,
 }};
@@ -310,6 +310,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       if (H5G_shadow_sync (sym->entry+i)<0) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
       }
+      if (sym->entry[i].dirty) sym->dirty = TRUE;
    }
 
    /*
@@ -333,7 +334,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       UINT16ENCODE (p, sym->nsyms);
 
       /* entries */
-      H5G_encode_vec (f, &p, sym->entry, sym->nsyms);
+      H5G_ent_encode_vec (f, &p, sym->entry, sym->nsyms);
       HDmemset (p, 0, size - (p-buf));
       
       status = H5F_block_write (f, addr, size, buf);
@@ -424,7 +425,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, void *_udata)
    UINT16DECODE (p, sym->nsyms);
 
    /* entries */
-   if (H5G_decode_vec (f, &p, sym->entry, sym->nsyms)<0) {
+   if (H5G_ent_decode_vec (f, &p, sym->entry, sym->nsyms)<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, NULL);
    }
    buf = H5MM_xfree (buf);
@@ -588,6 +589,8 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
        */
       H5G_shadow_sync (sn->entry+idx);
       bt_udata->entry_ptr = sn->entry+idx;
+      bt_udata->node_addr = addr;
+      bt_udata->node_ptr = sn;
       break;
 
    default:
@@ -597,9 +600,17 @@ H5G_node_found (hdf5_file_t *f, haddr_t addr, const void *_lt_key,
    ret_value = SUCCEED;
 
 done:
-   if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+   /*
+    * Don't unprotect the symbol table entry if we're returning success since
+    * this might invalidate the bt_udata->entry_ptr and bt_udata->node_ptr
+    * pointers. Instead, we unprotect it in H5G_stab_find().
+    */
+   if (ret_value<0) {
+      if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+      }
    }
+
    FUNC_LEAVE (ret_value);
 }
 
@@ -663,6 +674,8 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    intn			i;
    haddr_t		ret_value = FAIL;
    H5G_shadow_t		*shadow = NULL;
+   H5G_node_t		*insert_into=NULL;	/*node that gets new entry*/
+   haddr_t		insert_addr=-1;		/*address of that node	*/
 
    FUNC_ENTER (H5G_node_insert, NULL, FAIL);
 
@@ -675,6 +688,8 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    assert (md_key);
    assert (rt_key);
    assert (bt_udata);
+   bt_udata->node_addr = -1;
+   bt_udata->node_ptr = NULL;
    bt_udata->entry_ptr = NULL;
 
    /*
@@ -757,90 +772,77 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       sn->nsyms = H5G_NODE_K (f);
       sn->dirty += 1;
 
-      /* Insert the new entry */
-      if (idx<=H5G_NODE_K(f)) {
-	 
-	 /* Adjust shadows */
-	 for (i=idx; i<sn->nsyms; i++) {
-	    if (sn->entry[i].shadow) {
-	       sn->entry[i].shadow->main = sn->entry + i + 1;
-	    }
-	 }
-	 if (bt_udata->entry.shadow) {
-	    bt_udata->entry.shadow->main = sn->entry + idx;
-	 }
-
-	 /* Move entries */
-	 HDmemmove (sn->entry + idx + 1,
-		    sn->entry + idx,
-		    (H5G_NODE_K(f)-idx) * sizeof(H5G_entry_t));
-	 sn->entry[idx] = bt_udata->entry;
-	 sn->entry[idx].name_off = offset;
-	 sn->entry[idx].dirty = TRUE;
-	 sn->nsyms += 1;
-	 
-      } else {
-	 idx -= H5G_NODE_K (f);
-
-	 /* Adjust shadows */
-	 for (i=idx; i<snrt->nsyms; i++) {
-	    if (snrt->entry[i].shadow) {
-	       snrt->entry[i].shadow->main = snrt->entry + i + 1;
-	    }
-	 }
-	 if (bt_udata->entry.shadow) {
-	    bt_udata->entry.shadow->main = snrt->entry + idx;
-	 }
-
-	 /* Move entries */
-	 HDmemmove (snrt->entry + idx + 1,
-		    snrt->entry + idx,
-		    (H5G_NODE_K(f)-idx) * sizeof (H5G_entry_t));
-	 snrt->entry[idx] = bt_udata->entry;
-	 snrt->entry[idx].name_off = offset;
-	 snrt->entry[idx].dirty = TRUE;
-	 snrt->nsyms += 1;
-
-	 if (idx+1 == sn->nsyms) {
-	    rt_key->offset = offset;
-	    *rt_key_changed = TRUE;
-	 }
-      }
-
       /* The middle key */
       md_key->offset = sn->entry[sn->nsyms-1].name_off;
 
+      /* Where to insert the new entry? */
+      if (idx<=H5G_NODE_K(f)) {
+	 insert_into = sn;
+	 insert_addr = addr;
+	 if (idx==H5G_NODE_K(f)) md_key->offset = offset;
+      } else {
+	 idx -= H5G_NODE_K (f);
+	 insert_into = snrt;
+	 insert_addr = new_node;
+      }
+      ret_value = new_node;
+
    } else {
-      /*
-       * Add the new symbol to the node.
-       */
+      /* Where to insert the new entry? */
       sn->dirty += 1;
-      for (i=idx; i<sn->nsyms; i++) {
-	 if (sn->entry[i].shadow) {
-	    sn->entry[i].shadow->main = sn->entry + i + 1;
-	 }
-      }
-      if (bt_udata->entry.shadow) {
-	 bt_udata->entry.shadow->main = sn->entry + idx;
-      }
-      HDmemmove (sn->entry+idx+1, sn->entry+idx,
-		 (sn->nsyms-idx) * sizeof (H5G_entry_t));
-      sn->nsyms += 1;
-      sn->entry[idx] = bt_udata->entry;
-      sn->entry[idx].name_off = offset;
-      sn->entry[idx].dirty = TRUE;
-      
-      if (idx+1==sn->nsyms) {
+      insert_into = sn;
+      insert_addr = addr;
+      if (idx==sn->nsyms) {
 	 rt_key->offset = offset;
 	 *rt_key_changed = TRUE;
       }
+      ret_value = 0;
    }
 
-   ret_value = new_node; /*successful return */
+   /* Adjust shadows */
+   for (i=idx; i<insert_into->nsyms; i++) {
+      if (insert_into->entry[i].shadow) {
+	 insert_into->entry[i].shadow->main = insert_into->entry + i + 1;
+      }
+   }
+   if (bt_udata->entry.shadow) {
+      H5G_shadow_move (f, bt_udata->entry.shadow,
+		       bt_udata->name, 
+		       insert_into->entry + idx,
+		       bt_udata->dir_addr);
+   }
+
+   /* Move entries */
+   HDmemmove (insert_into->entry + idx + 1,
+	      insert_into->entry + idx,
+	      (insert_into->nsyms-idx) * sizeof(H5G_entry_t));
+   insert_into->entry[idx] = bt_udata->entry;
+   insert_into->entry[idx].name_off = offset;
+   insert_into->entry[idx].dirty = TRUE;
+   insert_into->nsyms += 1;
+
+   /* Update udata return values */
+   bt_udata->node_addr = insert_addr;
+   bt_udata->node_ptr = insert_into;
+   bt_udata->entry_ptr = insert_into->entry + idx;
 
 done:
-   if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
-      HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+   if (ret_value<0) {
+      /* failing... */
+      if (sn && H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+      }
+   } else if (insert_into!=sn) {
+      /* unprotect the first node and protect the return value */
+      if (H5AC_unprotect (f, H5AC_SNODE, addr, sn)<0) {
+	 HRETURN_ERROR (H5E_SYM, H5E_PROTECT, FAIL);
+      }
+      if (NULL==(sn=H5AC_protect (f, H5AC_SNODE, insert_addr, &ac_udata))) {
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      }
+      assert (sn==bt_udata->node_ptr);
+   } else {
+      /* keep the node protected until we get back to H5G_stab_insert() */
    }
 
    FUNC_LEAVE (ret_value);
@@ -988,7 +990,7 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
     * If we couldn't load the symbol table node, then try loading the
     * B-tree node.
     */
-   if (NULL==(sn=H5AC_find(f, H5AC_SNODE, addr, NULL))) {
+   if (NULL==(sn=H5AC_find(f, H5AC_SNODE, addr, &ac_udata))) {
       H5ECLEAR; /*discard that error*/
       status = H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE);
       if (status<0) HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
@@ -1019,7 +1021,7 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		  "Name:",
 		  s);
       }
-      H5G_debug (f, sn->entry+i, stream, indent, fwidth);
+      H5G_ent_debug (f, sn->entry+i, stream, indent, fwidth);
       fprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
 	       "Shadow:",
 	       sn->entry[i].shadow ? "Yes":"No");

@@ -26,8 +26,9 @@
 static void *H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static void *H5O_stab_fast (const H5G_entry_t *ent, void *_mesg);
-static hbool_t H5O_stab_cache (H5G_entry_t *ent, const void *_mesg);
+static void *H5O_stab_fast (const H5G_cache_t *cache, void *_mesg);
+static hbool_t H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
+			       const void *_mesg);
 static void *H5O_stab_copy (const void *_mesg, void *_dest);
 static size_t H5O_stab_size (hdf5_file_t *f, const void *_mesg);
 static herr_t H5O_stab_debug (hdf5_file_t *f, const void *_mesg,
@@ -133,8 +134,8 @@ H5O_stab_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_stab_fast
  *
- * Purpose:	Initializes a new message struct with info from a symbol
- *		table entry.
+ * Purpose:	Initializes a new message struct with info from the cache of
+ *		a symbol table entry.
  *
  * Return:	Success:	Ptr to message struct, allocated if none
  *				supplied.
@@ -150,22 +151,18 @@ H5O_stab_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_fast (const H5G_entry_t *ent, void *_mesg)
+H5O_stab_fast (const H5G_cache_t *cache, void *_mesg)
 {
    H5O_stab_t	*stab = (H5O_stab_t *)_mesg;
    
    FUNC_ENTER (H5O_stab_fast, NULL, NULL);
 
    /* check args */
-   assert (ent);
+   assert (cache);
 
-   if (H5G_CACHED_STAB==ent->type) {
-      if (!stab) stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
-      stab->btree_addr = ent->cache.stab.btree_addr;
-      stab->heap_addr = ent->cache.stab.heap_addr;
-   } else {
-      stab = NULL;
-   }
+   if (!stab) stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
+   stab->btree_addr = cache->stab.btree_addr;
+   stab->heap_addr = cache->stab.heap_addr;
 
    FUNC_LEAVE (stab);
 }
@@ -177,8 +174,9 @@ H5O_stab_fast (const H5G_entry_t *ent, void *_mesg)
  * Purpose:	Copies a message into the cache portion of a symbol table
  *		entry.
  *
- * Return:	Success:	TRUE if modified.
- *				FALSE if not modified.
+ * Return:	Success:	TRUE if modified; FALSE if not modified.
+ *				In either case, the new cache type is
+ *				returned through the CACHE_TYPE argument.
  *
  *		Failure:	FAIL
  *
@@ -191,7 +189,7 @@ H5O_stab_fast (const H5G_entry_t *ent, void *_mesg)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5O_stab_cache (H5G_entry_t *ent, const void *_mesg)
+H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache, const void *_mesg)
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
    hbool_t		modified = FALSE;
@@ -199,28 +197,24 @@ H5O_stab_cache (H5G_entry_t *ent, const void *_mesg)
    FUNC_ENTER (H5O_stab_cache, NULL, FAIL);
 
    /* check args */
-   assert (ent);
+   assert (cache_type);
+   assert (cache);
    assert (stab);
 
-   /*
-    * We do this in two steps so Purify doesn't complain about
-    * uninitialized memory reads even though they don't bother
-    * anything.
-    */
-   if (H5G_CACHED_STAB != ent->type) {
+   if (H5G_CACHED_STAB != *cache_type) {
       modified = TRUE;
-      ent->type = H5G_CACHED_STAB;
-      ent->cache.stab.btree_addr = stab->btree_addr;
-      ent->cache.stab.heap_addr = stab->heap_addr;
+      *cache_type = H5G_CACHED_STAB;
+      cache->stab.btree_addr = stab->btree_addr;
+      cache->stab.heap_addr = stab->heap_addr;
    } else {
-      if (ent->cache.stab.btree_addr != stab->btree_addr) {
+      if (cache->stab.btree_addr != stab->btree_addr) {
 	 modified = TRUE;
-	 ent->cache.stab.btree_addr = stab->btree_addr;
+	 cache->stab.btree_addr = stab->btree_addr;
       }
 
-      if (ent->cache.stab.heap_addr != stab->heap_addr) {
+      if (cache->stab.heap_addr != stab->heap_addr) {
 	 modified = TRUE;
-	 ent->cache.stab.heap_addr = stab->heap_addr;
+	 cache->stab.heap_addr = stab->heap_addr;
       }
    }
 

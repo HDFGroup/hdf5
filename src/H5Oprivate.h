@@ -50,8 +50,8 @@ typedef struct H5O_class_t {
    H5G_type_t	cache_type;		/*type field in symbol table	*/
    void		*(*decode)(hdf5_file_t*,size_t,const uint8*);
    herr_t	(*encode)(hdf5_file_t*,size_t,uint8*,const void*);
-   void		*(*fast)(const H5G_entry_t*, void*); /*get from stab ent*/
-   hbool_t	(*cache)(H5G_entry_t*,const void*); /*put into entry	*/
+   void		*(*fast)(const H5G_cache_t*, void*);/*get from of entry	*/
+   hbool_t	(*cache)(H5G_type_t*, H5G_cache_t*,const void*); /*into entry*/
    void		*(*copy)(const void*,void*); /*copy native value	*/
    size_t	(*raw_size)(hdf5_file_t*,const void*); /*sizeof raw val	*/
    herr_t	(*reset)(void*); /*free nested data structures		*/
@@ -158,7 +158,7 @@ typedef struct H5O_stab_t {
 
 
 haddr_t H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint);
-intn H5O_link (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent, intn adjust);
+intn H5O_link (hdf5_file_t *f, H5G_entry_t *ent, intn adjust);
 void *H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 		const H5O_class_t *type, intn sequence, void *mesg);
 const void *H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,

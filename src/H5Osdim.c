@@ -41,8 +41,9 @@ static char RcsId[] = "@(#)$Revision$";
 static void *H5O_sim_dim_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_sim_dim_encode (hdf5_file_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static void *H5O_sim_dim_fast (const H5G_entry_t *ent, void *_mesg);
-static hbool_t H5O_sim_dim_cache (H5G_entry_t *ent, const void *_mesg);
+static void *H5O_sim_dim_fast (const H5G_cache_t *cache, void *_mesg);
+static hbool_t H5O_sim_dim_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
+				  const void *_mesg);
 static void *H5O_sim_dim_copy (const void *_mesg, void *_dest);
 static size_t H5O_sim_dim_size (hdf5_file_t *f, const void *_mesg);
 static herr_t H5O_sim_dim_debug (hdf5_file_t *f, const void *_mesg,
@@ -208,7 +209,7 @@ H5O_sim_dim_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
     for simple dimensionality, as they can be cached in the symbol-table entry)
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
+H5O_sim_dim_fast (const H5G_cache_t *cache, void *mesg)
 {
    H5O_sim_dim_t *sdim = (H5O_sim_dim_t *)mesg;
    uintn u;                    /* local counting variable */
@@ -216,19 +217,15 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
    FUNC_ENTER (H5O_sim_dim_fast, NULL, NULL);
 
    /* check args */
-   assert (ent);
+   assert (cache);
 
-   if (H5G_CACHED_SDATA==ent->type) {
-      if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
-      sdim->rank = ent->cache.sdata.ndim;
-      assert (sdim->rank<=NELMTS (ent->cache.sdata.dim));
-      sdim->dim_flags = 0;
-      sdim->size = H5MM_xmalloc (sizeof(uint32) * sdim->rank);
-      for (u=0; u<sdim->rank; u++) {
-         sdim->size[u] = ent->cache.sdata.dim[u];
-      }
-   } else {
-      sdim = NULL;
+   if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
+   sdim->rank = cache->sdata.ndim;
+   assert (sdim->rank<=NELMTS (cache->sdata.dim));
+   sdim->dim_flags = 0;
+   sdim->size = H5MM_xmalloc (sizeof(uint32) * sdim->rank);
+   for (u=0; u<sdim->rank; u++) {
+      sdim->size[u] = cache->sdata.dim[u];
    }
    
    FUNC_LEAVE (sdim);
@@ -246,6 +243,7 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
         const void *mesg;       IN: Pointer to the simple dimensionality struct
  RETURNS
     BTRUE if symbol-table modified, BFALSE if not modified, BFAIL on failure.
+    The new cache type is returned through the CACHE_TYPE argument.
  DESCRIPTION
         This function is the opposite of the H5O_sim_dim_fast method, it
     copies a message into the cached portion of a symbol-table entry.  (This
@@ -253,7 +251,8 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
     the symbol-table entry)
 --------------------------------------------------------------------------*/
 static hbool_t
-H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
+H5O_sim_dim_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
+		   const void *mesg)
 {
     const H5O_sim_dim_t *sdim = (const H5O_sim_dim_t *)mesg;
     uintn u;        /* Local counting variable */
@@ -262,41 +261,42 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
     FUNC_ENTER (H5O_sim_dim_cache, NULL, BFAIL);
 
     /* check args */
-    assert (ent);
+    assert (cache_type);
+    assert (cache);
     assert (sdim);
 
-    if (sdim->rank <= NELMTS (ent->cache.sdata.dim)) {
-       if (H5G_CACHED_SDATA != ent->type) {
+    if (sdim->rank <= NELMTS (cache->sdata.dim)) {
+       if (H5G_CACHED_SDATA != *cache_type) {
 	  modified = BTRUE;
-	  ent->type = H5G_CACHED_SDATA;
-	  ent->cache.sdata.ndim = sdim->rank;
+	  *cache_type = H5G_CACHED_SDATA;
+	  cache->sdata.ndim = sdim->rank;
 	  for (u=0; u<=sdim->rank; u++) {
-	     ent->cache.sdata.dim[u] = sdim->size[u];
+	     cache->sdata.dim[u] = sdim->size[u];
 	  }
        } else {
-	  if(ent->cache.sdata.ndim!= sdim->rank) {
+	  if(cache->sdata.ndim != sdim->rank) {
 	     modified = BTRUE;
-	     ent->cache.sdata.ndim = sdim->rank;
+	     cache->sdata.ndim = sdim->rank;
           }
 
 	  /* Check each dimension */
-	  if (NULL==ent->cache.sdata.dim) {
+	  if (NULL==cache->sdata.dim) {
 	     modified = BTRUE;
 	  } else {
 	     for (u=0; u<sdim->rank; u++) {
-                if (ent->cache.sdata.dim[u] != sdim->size[u]) {
+                if (cache->sdata.dim[u] != sdim->size[u]) {
                    modified = BTRUE;
-                   ent->cache.sdata.dim[u] = sdim->size[u];
+                   cache->sdata.dim[u] = sdim->size[u];
 		}
 	     }
           }
        }
-    } else if (H5G_CACHED_SDATA == ent->type) {
+    } else if (H5G_CACHED_SDATA == *cache_type) {
        /*
         * Number of dimensions is too large to cache.
         */
        modified = TRUE;
-       ent->type = H5G_NOTHING_CACHED;
+       *cache_type = H5G_NOTHING_CACHED;
     }
        
     FUNC_LEAVE (modified);
@@ -330,25 +330,23 @@ H5O_sim_dim_copy (const void *mesg, void *dest)
    if (!dst)
        dst = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
 
-   /* copy */
+   /* deep copy -- pointed-to values are copied also */
    HDmemcpy(dst,src,sizeof(H5O_sim_dim_t));
+   if (src->size) dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
+   if (src->max)  dst->max  = H5MM_xcalloc (src->rank, sizeof(uint32));
+   if (src->perm) dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
+
    if(src->rank>0)
      {
-       if(dst->size==NULL)
-           dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
        HDmemcpy(dst->size,src->size,src->rank*sizeof(uint32));
        /* Check for maximum dimensions and copy those */
        if((src->dim_flags&0x01)>0)
          {
-           if(dst->max==NULL)
-               dst->max = H5MM_xcalloc (src->rank, sizeof(uint32));
            HDmemcpy(dst->max,src->max,src->rank*sizeof(uint32));
          } /* end if */
        /* Check for dimension permutation and copy those */
        if((src->dim_flags&0x02)>0)
          {
-           if(dst->max==NULL)
-               dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
            HDmemcpy(dst->perm,src->perm,src->rank*sizeof(uint32));
          } /* end if */
      } /* end if */

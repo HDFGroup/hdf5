@@ -395,11 +395,15 @@ H5F_new (void)
 {
    hdf5_file_t	*f = H5MM_xcalloc (1, sizeof(hdf5_file_t));
 
-   /* Create a cache */
+   /* Create a main cache */
    H5AC_new (f, H5AC_NSLOTS);
 
+   /* Create the shadow hash table */
+   f->nshadows = H5G_NSHADOWS;
+   f->shadow = H5MM_xcalloc (f->nshadows, sizeof(struct H5G_hash_t*));
+
    /* Create a root symbol slot */
-   f->root_sym = H5G_new_entry ();
+   f->root_sym = H5G_ent_calloc ();
    
    return f;
 }
@@ -434,6 +438,8 @@ H5F_dest (hdf5_file_t *f)
       f->dir = H5MM_xfree (f->dir);
       f->filename = H5MM_xfree (f->filename);
       f->root_sym = H5MM_xfree (f->root_sym);
+      f->nshadows = 0;
+      f->shadow = H5MM_xfree (f->shadow);
       H5MM_xfree (f);
    }
    return NULL;
@@ -777,7 +783,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     H5F_decode_length(new_file,p,new_file->logical_len); /* Decode logical length of file */
 
     /* Decode the root symbol table entry */
-    if (H5G_decode (new_file, &p, new_file->root_sym)<0) {
+    if (H5G_ent_decode (new_file, &p, new_file->root_sym)<0) {
        /*can't decode root symbol table entry */
        HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
     }
@@ -870,6 +876,8 @@ H5Fflush (hatom_t fid, hbool_t invalidate)
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
+ *				-2 if the there are open objects and
+ * 				INVALIDATE was non-zero.
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -883,12 +891,19 @@ static herr_t
 H5F_flush (hdf5_file_t *f, hbool_t invalidate)
 {
    uint8	buf[2048], *p=buf;
+   herr_t	shadow_flush;
    
    FUNC_ENTER (H5F_flush, H5F_init_interface, FAIL);
 
    /* nothing to do if the file is read only */
    if (0==(H5ACC_WRITE & f->acc_perm)) HRETURN (SUCCEED);
 
+   /*
+    * Flush all open object info. If this fails just remember it and return
+    * failure at the end.  At least that way we get a consistent file.
+    */
+   shadow_flush = H5G_shadow_flush (f,  invalidate);
+      
    /* flush (and invalidate) the entire cache */
    if (H5AC_flush (f, NULL, 0, invalidate)<0) {
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL); /*can't flush cache*/
@@ -912,7 +927,7 @@ H5F_flush (hdf5_file_t *f, hbool_t invalidate)
    H5F_encode_offset (f, p, f->smallobj_off);
    H5F_encode_offset (f, p, f->freespace_off);
    H5F_encode_length (f, p, f->logical_len);
-   H5G_encode (f, &p, f->root_sym);
+   H5G_ent_encode (f, &p, f->root_sym);
 
    /* write the boot block to disk */
    if (H5F_block_write (f, 0, p-buf, buf)<0) {
@@ -922,6 +937,11 @@ H5F_flush (hdf5_file_t *f, hbool_t invalidate)
    /* update file length if necessary */
    if (f->logical_len<=0) f->logical_len = p-buf;
 
+   /* Did shadow flush fail above? */
+   if (shadow_flush<0) {
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, -2);/*object are still open*/
+   }
+   
    FUNC_LEAVE (SUCCEED);
 }
 
@@ -978,7 +998,9 @@ herr_t H5Fclose(hatom_t fid)
     if((--file->ref_count)==0)
       {
         if(file->file_handle!=H5F_INVALID_FILE) {
-	   if (H5F_flush (file, TRUE)<0) {
+	   if (-2==(ret_value=H5F_flush (file, TRUE))) {
+	      /*objects are still open*/
+	   } else if (ret_value<0) {
 	      /*can't flush cache*/
 	      HGOTO_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
 	   }
@@ -990,6 +1012,11 @@ herr_t H5Fclose(hatom_t fid)
         }
       } /* end if */
 
+      /* Did the H5F_flush() fail because of open objects? */
+      if (ret_value<0) {
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTFLUSH, FAIL);
+      }
+	
 done:
   if(ret_value == FAIL)   
     { /* Error condition cleanup */
@@ -1180,7 +1207,7 @@ H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	    (unsigned)(f->file_create_parms.sharedheader_ver));
 
    fprintf (stream, "%*sRoot symbol table entry:\n", indent, "");
-   H5G_debug (f, f->root_sym, stream, indent+3, MAX(0, fwidth-3));
+   H5G_ent_debug (f, f->root_sym, stream, indent+3, MAX(0, fwidth-3));
 	    
    FUNC_LEAVE (SUCCEED);
 }

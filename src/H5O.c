@@ -501,16 +501,17 @@ H5O_reset (const H5O_class_t *type, void *native)
  *-------------------------------------------------------------------------
  */
 intn
-H5O_link (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent, intn adjust)
+H5O_link (hdf5_file_t *f, H5G_entry_t *ent, intn adjust)
 {
    H5O_t	*oh = NULL;
+   haddr_t	addr;
    
    FUNC_ENTER (H5O_link, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (addr>0 || (ent && ent->header>0));
-   if (addr<=0) addr = ent->header;
+   assert (ent && H5G_ent_addr (ent)>0);
+   addr = H5G_ent_addr (ent);
    
    /* get header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
@@ -529,10 +530,7 @@ H5O_link (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent, intn adjust)
       }
    } else {
       oh->nlink += adjust;
-      if (oh->nlink>1 && ent && H5G_NOTHING_CACHED!=ent->type) {
-	 ent->dirty = TRUE;
-	 ent->type = H5G_NOTHING_CACHED;
-      }
+      if (oh->nlink>1) H5G_ent_invalidate (ent);
    }
 
    oh->dirty = TRUE;
@@ -568,22 +566,29 @@ H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    H5O_t	*oh = NULL;
    void		*retval = NULL;
    intn		idx;
+   H5G_cache_t	*cache = NULL;
+   H5G_type_t	cache_type;
    
    FUNC_ENTER (H5O_read, NULL, NULL);
 
    /* check args */
    assert (f);
-   if (addr<=0 && (!ent || ent->header<=0)) {
+   if (addr<=0 && !ent) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
    }
-   if (addr<=0) addr = ent->header;
+   if (addr<=0 && (addr=H5G_ent_addr (ent))<=0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+   }
    assert (sequence>=0);
 
    /* can we get it from the symbol table? */
-   if (ent && H5G_NOTHING_CACHED!=ent->type && type && type->fast) {
-      retval = (type->fast)(ent, mesg);
-      if (retval) HRETURN (retval);
-      H5ECLEAR;
+   if (ent) {
+      cache = H5G_ent_cache (ent, &cache_type);
+      if (type && cache_type==type->cache_type && type->fast) {
+	 retval = (type->fast)(cache, mesg);
+	 if (retval) HRETURN (retval);
+	 H5ECLEAR;
+      }
    }
 
    /* can we get it from the object header? */
@@ -759,10 +764,10 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* check args */
    assert (f);
-   assert (addr>0 || (ent && ent->header>0));
+   assert (addr>0 || (ent && H5G_ent_addr (ent)>0));
    assert (type);
    assert (mesg);
-   if (addr<=0) addr = ent->header;
+   if (addr<=0) addr = H5G_ent_addr (ent);
    
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
@@ -805,8 +810,11 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* Copy into the symbol table entry */
    if (oh->nlink<=1 && ent && type->cache) {
-      hbool_t modified = (type->cache)(ent, mesg);
-      if (ent && !ent->dirty) ent->dirty = modified;
+      H5G_type_t cache_type;
+      H5G_cache_t *cache = H5G_ent_cache (ent, &cache_type);
+      hbool_t modified = (type->cache)(&cache_type, cache, mesg);
+      if (modified) H5G_ent_modified (ent, cache_type);
+      
    }
 
    FUNC_LEAVE (sequence);
@@ -854,9 +862,9 @@ H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 
    /* check args */
    assert (f);
-   assert (addr>0 || (ent && ent->header>0));
+   assert (addr>0 || (ent && H5G_ent_addr (ent)>0));
    assert (type);
-   if (addr<=0) addr = ent->header;
+   if (addr<=0) addr = H5G_ent_addr (ent);
 
    /* load the object header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
@@ -866,11 +874,12 @@ H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    for (i=seq=0; i<oh->nmesgs; i++) {
       if (type->id != oh->mesg[i].type->id) continue;
       if (seq++ == sequence || H5O_ALL==sequence) {
+	 H5G_type_t cache_type;
+	 H5G_ent_cache (ent, &cache_type);
 
 	 /* clear symbol table entry cache */
-	 if (ent && type->cache && type->cache_type==ent->type) {
-	    ent->type = H5G_NOTHING_CACHED;
-	    ent->dirty = TRUE;
+	 if (ent && type->cache && type->cache_type==cache_type) {
+	    H5G_ent_invalidate (ent);
 	 }
 
 	 /* change message type to nil and zero it */
