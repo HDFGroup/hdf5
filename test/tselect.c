@@ -2641,7 +2641,7 @@ test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_
 ** 
 ****************************************************************/
 static void 
-test_select_hyper_union_random_5d(void)
+test_select_hyper_union_random_5d(hid_t read_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -2672,7 +2672,7 @@ test_select_hyper_union_random_5d(void)
         for(j=0; j<SPACE5_DIM2; j++)
             for(k=0; k<SPACE5_DIM3; k++)
                 for(l=0; l<SPACE5_DIM4; l++)
-                    for(m=0; m<SPACE5_DIM4; m++)
+                    for(m=0; m<SPACE5_DIM5; m++)
                         *tbuf++=(int)(((((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k)*SPACE5_DIM4)+l)*SPACE5_DIM5)+m;
 
     /* Create file */
@@ -2739,9 +2739,41 @@ printf("start[%d]=%d, count[%d]=%d\n",j,(int)start[j],j,(int)count[j]);
         npoints2 = H5Sget_select_npoints(sid2);
         VERIFY(npoints, npoints2, "H5Sget_select_npoints");
 
+#ifdef QAK
+printf("random I/O, before H5Dread()\n");
+{
+    hsize_t blocks[15][2][SPACE5_RANK];
+    hssize_t nblocks;
+    intn k;
+
+    nblocks=H5Sget_select_hyper_nblocks(sid1);
+    printf("nblocks=%d\n",(int)nblocks);
+    H5Sget_select_hyper_blocklist(sid1,0,nblocks,blocks);
+    for(j=0; j<nblocks; j++) {
+        printf("Block #%d, start = {",j);
+        for(k=0; k<SPACE5_RANK; k++) {
+            printf("%d",blocks[j][0][k]);
+            if(k<(SPACE5_RANK-1))
+                printf(", ");
+            else
+                printf("}, end = {");
+        } /* end for */
+        for(k=0; k<SPACE5_RANK; k++) {
+            printf("%d",blocks[j][1][k]);
+            if(k<(SPACE5_RANK-1))
+                printf(", ");
+            else
+                printf("}\n");
+        } /* end for */
+    } /* end for */
+}
+#endif /* QAK */
         /* Read selection from disk */
-        ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,rbuf);
+        ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,read_plist,rbuf);
         CHECK(ret, FAIL, "H5Dread");
+#ifdef QAK
+printf("random I/O, after H5Dread()\n");
+#endif /* QAK */
 
         /* Compare data read with data written out */
         tbuf=rbuf;
@@ -2784,6 +2816,9 @@ printf("start[%d]=%d, count[%d]=%d\n",j,(int)start[j],j,(int)count[j]);
 void 
 test_select(void)
 {
+    hid_t plist_id;     /* Property list for reading random hyperslabs */
+    herr_t	ret;	/* Generic return value		*/
+
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
 
@@ -2801,7 +2836,22 @@ test_select(void)
     test_select_hyper_union();  /* Test hyperslab union code */
     test_select_hyper_union_stagger();  /* Test hyperslab union code for staggered slabs */
     test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
-    test_select_hyper_union_random_5d();  /* Test hyperslab union code for random 5-D hyperslabs */
+
+    /* test the random hyperslab I/O with the default property list for reading */
+    test_select_hyper_union_random_5d(H5P_DEFAULT);  /* Test hyperslab union code for random 5-D hyperslabs */
+
+    /* Create a dataset transfer property list */
+    plist_id=H5Pcreate(H5P_DATASET_XFER);
+    CHECK(plist_id, FAIL, "H5Pcreate");
+
+    /* test random hyperslab I/O with a much smaller buffer for reads */
+    ret=H5Pset_buffer(plist_id,(hsize_t)128,NULL,NULL);
+    CHECK(ret, FAIL, "H5Pset_buffer");
+
+    test_select_hyper_union_random_5d(plist_id);  /* Test hyperslab union code for random 5-D hyperslabs */
+
+    ret=H5Pclose(plist_id);
+    CHECK(ret, FAIL, "H5Pclose");
 
 }   /* test_select() */
 
