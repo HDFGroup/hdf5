@@ -71,6 +71,9 @@ install:
 	done
 	@$(LT) --mode=finish $(libdir);
 
+install-doc:
+	(cd doc && $(MAKE) $@) || exit 1;
+
 ## Number format detection
 H5detect: 
 	(cd src && $(MAKE) $@)
