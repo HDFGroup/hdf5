@@ -4,16 +4,16 @@ Expected output for 'h5dump tdatareg.h5'
 HDF5 "tdatareg.h5" {
 GROUP "/" {
    DATASET "Dataset1" {
-      DATATYPE { H5T_REFERENCE }
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
+      DATATYPE { H5T_REFERENCE } 
+      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
       DATA {
          DATASET 0:744 {(2,2)-(7,7)}, DATASET 0:744 {(6,9), (2,2), (8,4), (1,6),
           (2,8), (3,2), (0,4), (9,0), (7,1), (3,3)}, NULL, NULL
-      }
-   }
+      } 
+   } 
    DATASET "Dataset2" {
-      DATATYPE { H5T_STD_U8LE }
-      DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) }
+      DATATYPE { H5T_STD_U8LE } 
+      DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) } 
       DATA {
          0, 3, 6, 9, 12, 15, 18, 21, 24, 27,
          30, 33, 36, 39, 42, 45, 48, 51, 54, 57,
@@ -25,7 +25,7 @@ GROUP "/" {
          210, 213, 216, 219, 222, 225, 228, 231, 234, 237,
          240, 243, 246, 249, 252, 255, 2, 5, 8, 11,
          14, 17, 20, 23, 26, 29, 32, 35, 38, 41
-      }
-   }
-}
-}
+      } 
+   } 
+} 
+} 
