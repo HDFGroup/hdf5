@@ -268,7 +268,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     }
 
     /*
-     * Test v2 B-tree creation
+     * Create v2 B-tree 
      */
     if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
 	H5_FAILED();
@@ -279,8 +279,9 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree many - redistribute 2 leaves in level 1 B-tree");
+    TESTING("B-tree many - redistribute 2 leaves in level 1 B-tree (l->r)");
 
+    /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
         record=u+INSERT_SPLIT_ROOT_NREC/2;
         if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -289,6 +290,8 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
             goto error;
         }
     }
+
+    /* Force redistribution from left node into right node */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC/2; u++) {
         record=u;
         if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
@@ -297,7 +300,41 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
             goto error;
         }
     }
+    PASSED();
 
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree many - redistribute 2 leaves in level 1 B-tree (r->l)");
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Force redistribution from left node into right node */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC/2; u++) {
+        record=u+INSERT_SPLIT_ROOT_NREC;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
     PASSED();
 
     if (H5Fclose(file)<0) TEST_ERROR;
@@ -341,11 +378,7 @@ main(void)
     /* Test basic B-tree insertion */
     nerrors += test_insert_basic(fapl);
     nerrors += test_insert_split_root(fapl);
-#ifdef QAK
     nerrors += test_insert_level1_2leaf_redistrib(fapl);
-#else /* QAK */
-HDfprintf(stderr,"Uncomment test!\n");
-#endif /* QAK */
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");

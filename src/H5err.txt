@@ -162,6 +162,7 @@ MINOR, BTREE, H5E_EXISTS, Object already exists
 MINOR, BTREE, H5E_CANTENCODE, Unable to encode value
 MINOR, BTREE, H5E_CANTDECODE, Unable to decode value
 MINOR, BTREE, H5E_CANTSPLIT, Unable to split node
+MINOR, BTREE, H5E_CANTREDISTRIBUTE, Unable to redistribute records
 MINOR, BTREE, H5E_CANTINSERT, Unable to insert object
 MINOR, BTREE, H5E_CANTLIST, Unable to list node
 

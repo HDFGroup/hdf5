@@ -65,8 +65,13 @@
     2 + /* Merge % of full (as integer, ie. "98" means 98%) */                \
     H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
 
-/* Macro to retrieve pointer to i'th native key for leaf node */
+/* Macro to retrieve pointer to i'th native key for native record buffer */
+#define H5B2_NAT_NREC(b,shared,idx)  (b+(shared)->nat_off[(idx)])
+
+/* Macro to retrieve pointer to i'th native key for internal node */
 #define H5B2_INT_NREC(i,shared,idx)  ((i)->int_native+(shared)->nat_off[(idx)])
+
+/* Macro to retrieve pointer to i'th native key for leaf node */
 #define H5B2_LEAF_NREC(l,shared,idx)  ((l)->leaf_native+(shared)->nat_off[(idx)])
 
 
