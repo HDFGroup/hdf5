@@ -27,11 +27,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/uio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 /* our header files */
@@ -411,6 +411,40 @@ parse_size_directive(const char *size)
 }
 
 static void
+fill_with_random_data(Bytef *src, uLongf src_len)
+{
+    register int i;
+    struct stat buf;
+
+    if (stat("/dev/urandom", &buf) == 0) {
+        int fd = open("/dev/urandom", O_RDONLY);
+
+        printf("Using /dev/urandom for random data\n");
+
+        if (fd < 0)
+            error(strerror(errno));
+
+        for (;;) {
+            ssize_t rc = read(fd, src, src_len);
+
+            if (rc == -1)
+                error(strerror(errno));
+
+            if (rc == src_len)
+                break;
+
+            src += rc;
+            src_len -= rc;
+        }
+    } else {
+        printf("Using random() for random data\n");
+
+        for (i = 0; i < src_len; ++i)
+            src[i] = 0xff & random();
+    }
+}
+
+static void
 do_write_test(unsigned long file_size, unsigned long min_buf_size,
               unsigned long max_buf_size)
 {
@@ -433,9 +467,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         compression_time = 0.0;
 
         if (random_test)
-            /* fill the buffer with random data */
-            for (i = 0; i < src_len; ++i)
-                src[i] = 0xff | (1 + (int)(255.0 * rand()/(RAND_MAX + 1.0)));
+            fill_with_random_data(src, src_len);
 
         printf("Buffer size == ");
 
@@ -464,7 +496,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
             /* loop to make sure we write everything out that we want to write */
             for (;;) {
-                int rc = write(output, s_ptr, s_len);
+                ssize_t rc = write(output, s_ptr, s_len);
 
                 if (rc == -1)
                     error(strerror(errno));
