@@ -45,7 +45,6 @@ typedef enum {
     H5I_ERROR_CLASS,            /*group ID for error classes                */
     H5I_ERROR_MSG,              /*group ID for error messages               */
     H5I_ERROR_STACK,            /*group ID for error stacks                 */
-    
     H5I_NGROUPS		        /*number of valid groups, MUST BE LAST!	    */
 } H5I_type_t;
 

@@ -30,10 +30,10 @@
 
 /* Take out _new later */
 typedef enum H5E_type_t {
-    H5E_ERROR_new   =-1,
+    H5E_LLIMIT_new   =-1,
     H5E_MAJOR_new,
     H5E_MINOR_new,
-    H5E_LIMIT_new
+    H5E_ULIMIT_new
 } H5E_type_t;
 
 /* Information about an error; element of error stack */
@@ -55,155 +55,150 @@ typedef struct H5E_error_t_new {
 #define H5OPEN
 #endif  /* _H5Eprivate_H */
 
-/* HDF5 error class */
-#define H5E_ERR_CLS		(H5OPEN H5E_ERR_CLS_g)
-H5_DLLVAR hid_t H5E_ERR_CLS_g;
-
-#ifdef TMP
 /* HDF5 error class: major errors. */
-hid_t    H5E_NONE_MAJOR;                /*special zero, no error                     */
-hid_t    H5E_ARGS;                      /*invalid arguments to routine               */
-hid_t    H5E_RESOURCE;                  /*resource unavailable                       */
-hid_t    H5E_INTERNAL;                  /*Internal error (too specific to document in detail) */
-hid_t    H5E_FILE;                      /*file Accessability                         */
-hid_t    H5E_IO;                        /*Low-level I/O                              */
-hid_t    H5E_FUNC;                      /*function Entry/Exit                        */
-hid_t    H5E_ATOM;                      /*object Atom                                */
-hid_t    H5E_CACHE;                     /*object Cache                               */
-hid_t    H5E_BTREE;                     /*B-Tree Node                                */
-hid_t    H5E_SYM;                       /*symbol Table                               */
-hid_t    H5E_HEAP;                      /*Heap                                       */
-hid_t    H5E_OHDR;                      /*object Header                              */
-hid_t    H5E_DATATYPE;                  /*Datatype                                   */
-hid_t    H5E_DATASPACE;                 /*Dataspace                                  */
-hid_t    H5E_DATASET;                   /*Dataset                                    */
-hid_t    H5E_STORAGE;                   /*data storage                               */
-hid_t    H5E_PLIST;                     /*Property lists                             */
-hid_t    H5E_ATTR;                      /*Attribute                                  */
-hid_t    H5E_PLINE;                     /*Data filters                               */
-hid_t    H5E_EFL;                       /*External file list                         */
-hid_t    H5E_REFERENCE;                 /*References                                 */
-hid_t    H5E_VFL;		        /*Virtual File Layer			     */
-hid_t    H5E_TBBT; 		        /*Threaded, Balanced, Binary Trees           */
-hid_t    H5E_FPHDF5;		        /*Flexible Parallel HDF5                     */
-hid_t    H5E_TST; 		        /*Ternary Search Trees                       */
-hid_t    H5E_RS;  		        /*Reference Counted Strings                  */
-hid_t    H5E_ERROR;  		        /*Error API				     */
+hid_t    H5E_NONE_MAJOR_new;                /*special zero, no error                     */
+hid_t    H5E_ARGS_new;                      /*invalid arguments to routine               */
+hid_t    H5E_RESOURCE_new;                  /*resource unavailable                       */
+hid_t    H5E_INTERNAL_new;                  /*Internal error (too specific to document in detail) */
+hid_t    H5E_FILE_new;                      /*file Accessability                         */
+hid_t    H5E_IO_new;                        /*Low-level I/O                              */
+hid_t    H5E_FUNC_new;                      /*function Entry/Exit                        */
+hid_t    H5E_ATOM_new;                      /*object Atom                                */
+hid_t    H5E_CACHE_new;                     /*object Cache                               */
+hid_t    H5E_BTREE_new;                     /*B-Tree Node                                */
+hid_t    H5E_SYM_new;                       /*symbol Table                               */
+hid_t    H5E_HEAP_new;                      /*Heap                                       */
+hid_t    H5E_OHDR_new;                      /*object Header                              */
+hid_t    H5E_DATATYPE_new;                  /*Datatype                                   */
+hid_t    H5E_DATASPACE_new;                 /*Dataspace                                  */
+hid_t    H5E_DATASET_new;                   /*Dataset                                    */
+hid_t    H5E_STORAGE_new;                   /*data storage                               */
+hid_t    H5E_PLIST_new;                     /*Property lists                             */
+hid_t    H5E_ATTR_new;                      /*Attribute                                  */
+hid_t    H5E_PLINE_new;                     /*Data filters                               */
+hid_t    H5E_EFL_new;                       /*External file list                         */
+hid_t    H5E_REFERENCE_new;                 /*References                                 */
+hid_t    H5E_VFL_new;		        /*Virtual File Layer			     */
+hid_t    H5E_TBBT_new; 		        /*Threaded, Balanced, Binary Trees           */
+hid_t    H5E_FPHDF5_new;		        /*Flexible Parallel HDF5                     */
+hid_t    H5E_TST_new; 		        /*Ternary Search Trees                       */
+hid_t    H5E_RS_new;  		        /*Reference Counted Strings                  */
+hid_t    H5E_ERROR_new;  		        /*Error API				     */
 
 
 /* HDF5 error class: minor errors. */
-hid_t    H5E_NONE_MINOR;                /*special zero, no error                     */
-hid_t    H5E_UNINITIALIZED;             /*information is unitialized                 */
-hid_t    H5E_UNSUPPORTED;               /*feature is unsupported                     */
-hid_t    H5E_BADTYPE;                   /*incorrect type found                       */
-hid_t    H5E_BADRANGE;                  /*argument out of range                      */
-hid_t    H5E_BADVALUE;                  /*bad value for argument                     */
+         /* Argument errors */
+hid_t    H5E_NONE_MINOR_new;                /*special zero, no error                     */
+hid_t    H5E_UNINITIALIZED_new;             /*information is unitialized                 */
+hid_t    H5E_UNSUPPORTED_new;               /*feature is unsupported                     */
+hid_t    H5E_BADTYPE_new;                   /*incorrect type found                       */
+hid_t    H5E_BADRANGE_new;                  /*argument out of range                      */
+hid_t    H5E_BADVALUE_new;                  /*bad value for argument                     */
 
          /* Resource errors */
-hid_t    H5E_NOSPACE;                   /*no space available for allocation          */
-hid_t    H5E_CANTCOPY;                  /*unable to copy object                      */
-hid_t    H5E_CANTFREE;                  /*unable to free object                      */
-hid_t    H5E_ALREADYEXISTS;             /*Object already exists                      */
-hid_t    H5E_CANTLOCK;                  /*Unable to lock object                      */
-hid_t    H5E_CANTUNLOCK;                /*Unable to unlock object                    */
-hid_t    H5E_CANTGC;		        /*Unable to garbage collect                  */
+hid_t    H5E_NOSPACE_new;                   /*no space available for allocation          */
+hid_t    H5E_CANTCOPY_new;                  /*unable to copy object                      */
+hid_t    H5E_CANTFREE_new;                  /*unable to free object                      */
+hid_t    H5E_ALREADYEXISTS_new;             /*Object already exists                      */
+hid_t    H5E_CANTLOCK_new;                  /*Unable to lock object                      */
+hid_t    H5E_CANTUNLOCK_new;                /*Unable to unlock object                    */
+hid_t    H5E_CANTGC_new;		        /*Unable to garbage collect                  */
 
     /* File accessability errors */
-hid_t    H5E_FILEEXISTS;                /*file already exists                        */
-hid_t    H5E_FILEOPEN;                  /*file already open                          */
-hid_t    H5E_CANTCREATE;                /*Can't create file                          */
-hid_t    H5E_CANTOPENFILE;              /*Can't open file                            */
-hid_t    H5E_CANTCLOSEFILE;             /*Can't close file			     */
-hid_t    H5E_NOTHDF5;                   /*not an HDF5 format file                    */
-hid_t    H5E_BADFILE;                   /*bad file ID accessed                       */
-hid_t    H5E_TRUNCATED;                 /*file has been truncated                    */
-hid_t    H5E_MOUNT;			/*file mount error			     */
+hid_t    H5E_FILEEXISTS_new;                /*file already exists                        */
+hid_t    H5E_FILEOPEN_new;                  /*file already open                          */
+hid_t    H5E_CANTCREATE_new;                /*Can't create file                          */
+hid_t    H5E_CANTOPENFILE_new;              /*Can't open file                            */
+hid_t    H5E_CANTCLOSEFILE_new;             /*Can't close file			     */
+hid_t    H5E_NOTHDF5_new;                   /*not an HDF5 format file                    */
+hid_t    H5E_BADFILE_new;                   /*bad file ID accessed                       */
+hid_t    H5E_TRUNCATED_new;                 /*file has been truncated                    */
+hid_t    H5E_MOUNT_new;			/*file mount error			     */
 
     /* Generic low-level file I/O errors */
-hid_t    H5E_SEEKERROR;                 /*seek failed                                */
-hid_t    H5E_READERROR;                 /*read failed                                */
-hid_t    H5E_WRITEERROR;                /*write failed                               */
-hid_t    H5E_CLOSEERROR;                /*close failed                               */
-hid_t    H5E_OVERFLOW;		        /*address overflowed			     */
-hid_t    H5E_FCNTL;                     /*file fcntl failed                          */
+hid_t    H5E_SEEKERROR_new;                 /*seek failed                                */
+hid_t    H5E_READERROR_new;                 /*read failed                                */
+hid_t    H5E_WRITEERROR_new;                /*write failed                               */
+hid_t    H5E_CLOSEERROR_new;                /*close failed                               */
+hid_t    H5E_OVERFLOW_new;		        /*address overflowed			     */
+hid_t    H5E_FCNTL_new;                     /*file fcntl failed                          */
 
     /* Function entry/exit interface errors */
-hid_t    H5E_CANTINIT;                  /*Can't initialize object                    */
-hid_t    H5E_ALREADYINIT;               /*object already initialized                 */
-hid_t    H5E_CANTRELEASE;               /*Can't release object                       */
+hid_t    H5E_CANTINIT_new;                  /*Can't initialize object                    */
+hid_t    H5E_ALREADYINIT_new;               /*object already initialized                 */
+hid_t    H5E_CANTRELEASE_new;               /*Can't release object                       */
 
     /* Object atom related errors */
-hid_t    H5E_BADATOM;                   /*Can't find atom information                */
-hid_t    H5E_BADGROUP;                  /*Can't find group information               */
-hid_t    H5E_CANTREGISTER;              /*Can't register new atom                    */
-hid_t    H5E_CANTINC;                   /*Can't increment reference count            */
-hid_t    H5E_CANTDEC;                   /*Can't decrement reference count            */
-hid_t    H5E_NOIDS;                     /*Out of IDs for group                       */
+hid_t    H5E_BADATOM_new;                   /*Can't find atom information                */
+hid_t    H5E_BADGROUP_new;                  /*Can't find group information               */
+hid_t    H5E_CANTREGISTER_new;              /*Can't register new atom                    */
+hid_t    H5E_CANTINC_new;                   /*Can't increment reference count            */
+hid_t    H5E_CANTDEC_new;                   /*Can't decrement reference count            */
+hid_t    H5E_NOIDS_new;                     /*Out of IDs for group                       */
 
     /* Cache related errors */
-hid_t    H5E_CANTFLUSH;                 /*Can't flush object from cache              */
-hid_t    H5E_CANTLOAD;                  /*Can't load object into cache               */
-hid_t    H5E_PROTECT;                   /*protected object error                     */
-hid_t    H5E_NOTCACHED;                 /*object not currently cached                */
+hid_t    H5E_CANTFLUSH_new;                 /*Can't flush object from cache              */
+hid_t    H5E_CANTLOAD_new;                  /*Can't load object into cache               */
+hid_t    H5E_PROTECT_new;                   /*protected object error                     */
+hid_t    H5E_NOTCACHED_new;                 /*object not currently cached                */
 
     /* B-tree related errors */
-hid_t    H5E_NOTFOUND;                  /*object not found                           */
-hid_t    H5E_EXISTS;                    /*object already exists                      */
-hid_t    H5E_CANTENCODE;                /*Can't encode value                         */
-hid_t    H5E_CANTDECODE;                /*Can't decode value                         */
-hid_t    H5E_CANTSPLIT;                 /*Can't split node                           */
-hid_t    H5E_CANTINSERT;                /*Can't insert object                        */
-hid_t    H5E_CANTLIST;                  /*Can't list node                            */
+hid_t    H5E_NOTFOUND_new;                  /*object not found                           */
+hid_t    H5E_EXISTS_new;                    /*object already exists                      */
+hid_t    H5E_CANTENCODE_new;                /*Can't encode value                         */
+hid_t    H5E_CANTDECODE_new;                /*Can't decode value                         */
+hid_t    H5E_CANTSPLIT_new;                 /*Can't split node                           */
+hid_t    H5E_CANTINSERT_new;                /*Can't insert object                        */
+hid_t    H5E_CANTLIST_new;                  /*Can't list node                            */
 
     /* Object header related errors */
-hid_t    H5E_LINKCOUNT;                 /*bad object header link count               */
-hid_t    H5E_VERSION;                   /*wrong version number                       */
-hid_t    H5E_ALIGNMENT;                 /*alignment error                            */
-hid_t    H5E_BADMESG;                   /*unrecognized message                       */
-hid_t    H5E_CANTDELETE;                /* Can't delete message                      */
+hid_t    H5E_LINKCOUNT_new;                 /*bad object header link count               */
+hid_t    H5E_VERSION_new;                   /*wrong version number                       */
+hid_t    H5E_ALIGNMENT_new;                 /*alignment error                            */
+hid_t    H5E_BADMESG_new;                   /*unrecognized message                       */
+hid_t    H5E_CANTDELETE_new;                /* Can't delete message                      */
 
     /* Group related errors */
-hid_t    H5E_CANTOPENOBJ;               /*Can't open object                          */
-hid_t    H5E_COMPLEN;                   /*name component is too long                 */
-hid_t    H5E_CWG;                       /*problem with current working group         */
-hid_t    H5E_LINK;                      /*link count failure                         */
-hid_t    H5E_SLINK;			/*symbolic link error			     */
+hid_t    H5E_CANTOPENOBJ_new;               /*Can't open object                          */
+hid_t    H5E_COMPLEN_new;                   /*name component is too long                 */
+hid_t    H5E_CWG_new;                       /*problem with current working group         */
+hid_t    H5E_LINK_new;                      /*link count failure                         */
+hid_t    H5E_SLINK_new;			/*symbolic link error			     */
 
     /* Datatype conversion errors */
-hid_t    H5E_CANTCONVERT;               /*Can't convert datatypes                    */
-hid_t    H5E_BADSIZE;                   /*Bad size for object                        */
+hid_t    H5E_CANTCONVERT_new;               /*Can't convert datatypes                    */
+hid_t    H5E_BADSIZE_new;                   /*Bad size for object                        */
 
     /* Dataspace errors */
-hid_t    H5E_CANTCLIP;                  /*Can't clip hyperslab region                */
-hid_t    H5E_CANTCOUNT;                 /*Can't count elements                       */
-hid_t    H5E_CANTSELECT;                /*Can't select hyperslab                     */
-hid_t    H5E_CANTNEXT;                  /*Can't move to next iterator location       */
-hid_t    H5E_BADSELECT;                 /*Invalid selection                          */
-hid_t    H5E_CANTCOMPARE;               /*Can't compare objects                      */
+hid_t    H5E_CANTCLIP_new;                  /*Can't clip hyperslab region                */
+hid_t    H5E_CANTCOUNT_new;                 /*Can't count elements                       */
+hid_t    H5E_CANTSELECT_new;                /*Can't select hyperslab                     */
+hid_t    H5E_CANTNEXT_new;                  /*Can't move to next iterator location       */
+hid_t    H5E_BADSELECT_new;                 /*Invalid selection                          */
+hid_t    H5E_CANTCOMPARE_new;               /*Can't compare objects                      */
 
     /* Property list errors */
-hid_t    H5E_CANTGET;                   /*Can't get value                            */
-hid_t    H5E_CANTSET;                   /*Can't set value                            */
-hid_t    H5E_DUPCLASS;                  /*Duplicate class name in parent class */
+hid_t    H5E_CANTGET_new;                   /*Can't get value                            */
+hid_t    H5E_CANTSET_new;                   /*Can't set value                            */
+hid_t    H5E_DUPCLASS_new;                  /*Duplicate class name in parent class */
 
     /* Parallel errors */
-hid_t   H5E_MPI;			/*some MPI function failed		     */
-hid_t    H5E_MPIERRSTR;		        /*MPI Error String 			     */
+hid_t    H5E_MPI_new;			/*some MPI function failed		     */
+hid_t    H5E_MPIERRSTR_new;		        /*MPI Error String 			     */
 
     /* FPHDF5 errors */
-hid_t    H5E_CANTMAKETREE;              /*can't make a TBBT tree                     */
-hid_t    H5E_CANTRECV;                  /*can't receive messages from processes      */
-hid_t    H5E_CANTSENDMDATA;             /*can't send metadata message                */
-hid_t    H5E_CANTCHANGE;                /*can't register change on server            */
-hid_t    H5E_CANTALLOC;                 /*can't allocate from file                   */
+hid_t    H5E_CANTMAKETREE_new;              /*can't make a TBBT tree                     */
+hid_t    H5E_CANTRECV_new;                  /*can't receive messages from processes      */
+hid_t    H5E_CANTSENDMDATA_new;             /*can't send metadata message                */
+hid_t    H5E_CANTCHANGE_new;                /*can't register change on server            */
+hid_t    H5E_CANTALLOC_new;                 /*can't allocate from file                   */
 
     /* I/O pipeline errors */
-hid_t    H5E_NOFILTER;                  /*requested filter is not available          */
-hid_t    H5E_CALLBACK;                  /*callback failed                            */
-hid_t    H5E_CANAPPLY;                  /*error from filter "can apply" callback     */
-hid_t    H5E_SETLOCAL;                  /*error from filter "set local" callback     */
+hid_t    H5E_NOFILTER_new;                  /*requested filter is not available          */
+hid_t    H5E_CALLBACK_new;                  /*callback failed                            */
+hid_t    H5E_CANAPPLY_new;                  /*error from filter "can apply" callback     */
+hid_t    H5E_SETLOCAL_new;                  /*error from filter "set local" callback     */
 
-#endif /* TMP */
 #endif /* NEW_ERR */
 
 /*

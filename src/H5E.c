@@ -209,7 +209,7 @@ hid_t H5E_ERR_CLS_g			= FAIL;
 
 #endif /* NEW_ERR */
 
-#ifndef NEW_ERR
+#ifdef NEW_ERR
 #ifdef H5_HAVE_THREADSAFE
 /*
  * The per-thread error stack. pthread_once() initializes a special
@@ -352,14 +352,208 @@ H5E_init_interface(void)
     H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
                     (H5I_free_t)H5E_close_stack);
 
+#ifndef H5_HAVE_THREADSAFE
     H5E_stack_g_new[0].func = &(H5Eprint_new);
     H5E_stack_g_new[0].auto_data = stderr;
+#endif /* H5_HAVE_THREADSAFE */
+
+    H5E_ERR_CLS_g = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5E_CLS_LIB_VERS);
+
+    H5E_NONE_MAJOR_new  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_NONE_MAJOR_MSG_new);
+    H5E_ARGS_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ARGS_MSG_new);
+    H5E_RESOURCE_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RESOURCE_MSG_new);
+    H5E_INTERNAL_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_INTERNAL_MSG_new);
+    H5E_FILE_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FILE_MSG_new);
+
+    H5E_IO_new          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_IO_MSG_new);
+    H5E_FUNC_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FUNC_MSG_new);
+    H5E_ATOM_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATOM_MSG_new);
+    H5E_CACHE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_CACHE_MSG_new);
+    H5E_BTREE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_BTREE_MSG_new);
+
+    H5E_SYM_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_SYM_MSG_new);
+    H5E_HEAP_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
+    H5E_OHDR_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
+    H5E_DATATYPE_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATATYPE_MSG_new);
+    H5E_DATASPACE_new   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASPACE_MSG_new);
+
+    H5E_DATASET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASET_MSG_new);
+    H5E_STORAGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_STORAGE_MSG_new);
+    H5E_PLIST_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLIST_MSG_new);
+    H5E_ATTR_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATTR_MSG_new);
+    H5E_PLINE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLINE_MSG_new);
+    
+    H5E_EFL_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_EFL_MSG_new);
+    H5E_REFERENCE_new   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_REFERENCE_MSG_new);
+    H5E_VFL_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_VFL_MSG_new);
+    H5E_TBBT_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TBBT_MSG_new);
+    H5E_FPHDF5_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FPHDF5_MSG_new);
+
+    H5E_TST_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TST_MSG_new);
+    H5E_RS_new          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RS_MSG_new);
+    H5E_ERROR_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ERROR_MSG_new);
+
+    /* Minor errors */
+    H5E_NONE_MINOR_new  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR_new, H5E_NONE_MINOR_MSG_new);
+    H5E_UNINITIALIZED_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNINITIALIZED_MSG_new);
+    H5E_UNSUPPORTED_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNSUPPORTED_MSG_new);
+    H5E_BADTYPE_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADTYPE_MSG_new);
+    H5E_BADRANGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADRANGE_MSG_new);
+    H5E_BADVALUE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADVALUE_MSG_new);
+
+    H5E_NOSPACE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOSPACE_MSG_new);
+    H5E_CANTCOPY_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOPY_MSG_new);
+    H5E_CANTFREE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFREE_MSG_new);
+    H5E_ALREADYEXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYEXISTS_MSG_new);
+    H5E_CANTLOCK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOCK_MSG_new);
+    H5E_CANTUNLOCK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTUNLOCK_MSG_new);
+    H5E_CANTGC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGC_MSG_new);
+    
+    H5E_FILEEXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEEXISTS_MSG_new);
+    H5E_FILEOPEN_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEOPEN_MSG_new);
+    H5E_CANTCREATE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCREATE_MSG_new);
+    H5E_CANTOPENFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENFILE_MSG_new);
+    H5E_CANTCLOSEFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLOSEFILE_MSG_new);
+    H5E_NOTHDF5_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTHDF5_MSG_new);
+    H5E_BADFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADFILE_MSG_new);
+    H5E_TRUNCATED_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_TRUNCATED_MSG_new);
+    H5E_MOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MOUNT_MSG_new);
+
+    H5E_SEEKERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SEEKERROR_MSG_new);
+    H5E_READERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_READERROR_MSG_new);
+    H5E_WRITEERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_WRITEERROR_MSG_new);
+    H5E_CLOSEERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CLOSEERROR_MSG_new);
+
+    H5E_CANTINIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINIT_MSG_new);
+    H5E_ALREADYINIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYINIT_MSG_new);
+    H5E_CANTRELEASE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRELEASE_MSG_new);
+    
+    H5E_BADATOM_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADATOM_MSG_new);
+    H5E_BADGROUP_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADGROUP_MSG_new);
+    H5E_CANTREGISTER_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTREGISTER_MSG_new);
+    H5E_CANTINC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINC_MSG_new);
+    H5E_CANTDEC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDEC_MSG_new);
+    H5E_NOIDS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOIDS_MSG_new);
+    
+    H5E_CANTFLUSH_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFLUSH_MSG_new);
+    H5E_CANTLOAD_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOAD_MSG_new);
+    H5E_PROTECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_PROTECT_MSG_new);
+    H5E_NOTCACHED_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTCACHED_MSG_new);
+    
+    H5E_NOTFOUND_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTFOUND_MSG_new);
+    H5E_EXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_EXISTS_MSG_new);
+    H5E_CANTENCODE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTENCODE_MSG_new);
+    H5E_CANTDECODE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDECODE_MSG_new);
+    H5E_CANTSPLIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSPLIT_MSG_new);
+    H5E_CANTINSERT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINSERT_MSG_new);
+    H5E_CANTLIST_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLIST_MSG_new);
+    
+    H5E_LINKCOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINKCOUNT_MSG_new);
+    H5E_VERSION_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_VERSION_MSG_new);
+    H5E_ALIGNMENT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALIGNMENT_MSG_new);
+    H5E_BADMESG_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADMESG_MSG_new);
+    H5E_CANTDELETE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDELETE_MSG_new);
+    
+    H5E_CANTOPENOBJ_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENOBJ_MSG_new);
+    H5E_COMPLEN_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_COMPLEN_MSG_new);
+    H5E_CWG_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CWG_MSG_new);
+    H5E_LINK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINK_MSG_new);
+    H5E_SLINK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SLINK_MSG_new);
+    
+    H5E_CANTCONVERT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCONVERT_MSG_new);
+    H5E_BADSIZE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSIZE_MSG_new);
+    
+    H5E_CANTCLIP_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLIP_MSG_new);
+    H5E_CANTCOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOUNT_MSG_new);
+    H5E_CANTSELECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSELECT_MSG_new);
+    H5E_CANTNEXT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTNEXT_MSG_new);
+    H5E_BADSELECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSELECT_MSG_new);
+    H5E_CANTCOMPARE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOMPARE_MSG_new);
+    
+    H5E_CANTGET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGET_MSG_new);
+    H5E_CANTSET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSET_MSG_new);
+    H5E_DUPCLASS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_DUPCLASS_MSG_new);
+
+    H5E_MPI_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPI_MSG_new);
+    H5E_MPIERRSTR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPIERRSTR_MSG_new);
+    
+    H5E_CANTMAKETREE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTMAKETREE_MSG_new);
+    H5E_CANTRECV_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRECV_MSG_new);
+    H5E_CANTSENDMDATA_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSENDMDATA_MSG_new);
+    H5E_CANTCHANGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCHANGE_MSG_new);
+    H5E_CANTALLOC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTALLOC_MSG_new);
+
+    H5E_NOFILTER_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOFILTER_MSG_new);
+    H5E_CALLBACK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CALLBACK_MSG_new);
+    H5E_CANAPPLY_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANAPPLY_MSG_new);
+    H5E_SETLOCAL_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SETLOCAL_MSG_new);
 
     /* From the old function; take out later */
     H5E_auto_data_g = stderr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_term_interface
+ *
+ * Purpose:	Terminates the H5E interface
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ *
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Raymond Lu
+ *	        Tuesday, July 22, 2003	
+ *
+ * Modifications:
+ *              
+ *-------------------------------------------------------------------------
+ */
+int
+H5E_term_interface(void)
+{
+    int	        ncls, nmsg, nstk, n=0;
+
+    FUNC_ENTER_NOINIT(H5E_term_interface);
+
+    if (interface_initialize_g) {
+        /* Check if there are any open property list classes or lists */
+        ncls = H5I_nmembers(H5I_ERROR_CLASS);
+        nmsg = H5I_nmembers(H5I_ERROR_MSG);
+        nstk = H5I_nmembers(H5I_ERROR_STACK);
+
+        n = ncls + nmsg + nstk;
+        if(n>0) {
+	    if (nmsg>0)
+	        H5I_clear_group(H5I_ERROR_MSG, FALSE);
+
+	    if (ncls>0) {
+	        H5I_clear_group(H5I_ERROR_CLASS, FALSE);
+                
+                /* Reset the error class, if they've been closed */
+                if(H5I_nmembers(H5I_ERROR_CLASS)==0)
+                        H5E_ERR_CLS_g = -1;
+            }
+            if (nstk>0)
+	        H5I_clear_group(H5I_ERROR_STACK, FALSE);
+        
+	} else {
+	    /* Destroy the error class, message, and stack id groups */
+	    H5I_destroy_group(H5I_ERROR_CLASS);
+	    H5I_destroy_group(H5I_ERROR_MSG);
+	    H5I_destroy_group(H5I_ERROR_STACK);
+
+	    /* Mark closed */
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
+    }
+
+    FUNC_LEAVE_NOAPI(n);
 }
 
 #else /* NEW_ERR */
@@ -597,15 +791,18 @@ ssize_t
 H5E_get_class_name(H5E_cls_t *cls, char *name, size_t size)
 {
     ssize_t       ret_value;   /* Return value */
-    ssize_t       len;
+    ssize_t       len = FAIL;
     
     FUNC_ENTER_NOAPI(H5E_get_class_name, FAIL);
 
-    len = HDstrlen(cls->cls_name);
+    if(cls->cls_name)
+        len = HDstrlen(cls->cls_name);
+    else
+        len = 0;
 
     if(name) {
-       HDstrncpy(name, cls->cls_name, MIN(len+1, size));
-       if(len >= size)
+       HDstrncpy(name, cls->cls_name, MIN(len+1, (ssize_t)size));
+       if(len >= (ssize_t)size)
           name[size-1]='\0';
     } 
     
@@ -844,7 +1041,7 @@ H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size)
 
     if(msg) {
        HDstrncpy(msg, msg_ptr->msg, MIN(len+1, size));
-       if(len >= size)
+       if(len >= (ssize_t)size)
           msg[size-1]='\0';
     } 
     
@@ -884,13 +1081,14 @@ H5E_get_stack_new(void)
 
     FUNC_ENTER_NOAPI(H5E_get_stack_new,NULL);
 
-    estack = pthread_getspecific(H5TS_errstk_key_g);
+    estack = pthread_getspecific(H5TS_errstk_key_g_new);
+
     if (!estack) {
         /* no associated value with current thread - create one */
         estack = (H5E_t_new *)H5MM_calloc(sizeof(H5E_t_new));
-        estack->func = &(H5Eprint_new);
+        estack->func = H5Eprint_new;
         estack->auto_data = stderr;
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+        pthread_setspecific(H5TS_errstk_key_g_new, (void *)estack);
     }
 
     /* Set return value */
@@ -1637,39 +1835,32 @@ herr_t
 H5E_print_new(H5E_t_new *estack, FILE *stream)
 {
     herr_t	ret_value = SUCCEED;
-    H5E_print_t *eprint = NULL;
+    H5E_print_t eprint;
     H5E_cls_t   origin_cls={"Unknown class", "Unknown library", "Unknown library version"};
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
     /*NO TRACE*/
 
-    eprint = H5MM_calloc(sizeof(H5E_print_t));
-    
     if (!stream) 
-        eprint->stream = stderr;
+        eprint.stream = stderr;
     else
-        eprint->stream = stream;
+        eprint.stream = stream;
 
-    eprint->cls = H5MM_calloc(sizeof(H5E_cls_t));
+    eprint.cls.cls_name = HDstrdup(origin_cls.cls_name);
+    eprint.cls.lib_name = HDstrdup(origin_cls.lib_name);
+    eprint.cls.lib_vers = HDstrdup(origin_cls.lib_vers); 
     
-    eprint->cls->cls_name = HDstrdup(origin_cls.cls_name);
-    eprint->cls->lib_name = HDstrdup(origin_cls.lib_name);
-    eprint->cls->lib_vers = HDstrdup(origin_cls.lib_vers);
-    
-    ret_value = H5E_walk_new (estack, H5E_WALK_DOWNWARD, H5E_walk_cb_new, (void*)eprint);
-    
-    /* Free memory. */
-    if(eprint && eprint->cls) {
-        if(eprint->cls->cls_name) H5MM_free(eprint->cls->cls_name);
-        if(eprint->cls->lib_name) H5MM_free(eprint->cls->lib_name);
-        if(eprint->cls->lib_vers) H5MM_free(eprint->cls->lib_vers);
-    }
-    if(eprint) {
-        if(eprint->cls) H5MM_free(eprint->cls);
-        H5MM_free(eprint);
-    }
-   
+    ret_value = H5E_walk_new (estack, H5E_WALK_DOWNWARD, H5E_walk_cb_new, (void*)&eprint);
+  
+    /* Free memory */ 
+    if(eprint.cls.cls_name)
+        H5MM_free(eprint.cls.cls_name);
+    if(eprint.cls.lib_name)
+        H5MM_free(eprint.cls.lib_name);
+    if(eprint.cls.lib_vers)
+        H5MM_free(eprint.cls.lib_vers);
+  
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -1849,15 +2040,15 @@ H5E_walk_cb_new(int n, H5E_error_t_new *err_desc, void *client_data)
     cls_str = maj_ptr->cls->cls_name;
     
     /* Print error message */
-    if(HDstrcmp(cls_ptr->lib_name, eprint->cls->lib_name)) {
+    if(HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
         /* store the new class information, free the old one. */
-        if(eprint->cls->cls_name) H5MM_free(eprint->cls->cls_name);
-        if(eprint->cls->lib_name) H5MM_free(eprint->cls->lib_name);
-        if(eprint->cls->lib_vers) H5MM_free(eprint->cls->lib_vers);
+        if(eprint->cls.cls_name) H5MM_free(eprint->cls.cls_name);
+        if(eprint->cls.lib_name) H5MM_free(eprint->cls.lib_name);
+        if(eprint->cls.lib_vers) H5MM_free(eprint->cls.lib_vers);
 
-        if(cls_ptr->cls_name) eprint->cls->cls_name = HDstrdup(cls_ptr->cls_name);
-        if(cls_ptr->lib_name) eprint->cls->lib_name = HDstrdup(cls_ptr->lib_name);
-        if(cls_ptr->lib_vers) eprint->cls->lib_vers = HDstrdup(cls_ptr->lib_vers);
+        if(cls_ptr->cls_name) eprint->cls.cls_name = HDstrdup(cls_ptr->cls_name);
+        if(cls_ptr->lib_name) eprint->cls.lib_name = HDstrdup(cls_ptr->lib_name);
+        if(cls_ptr->lib_vers) eprint->cls.lib_vers = HDstrdup(cls_ptr->lib_vers);
 
         fprintf (stream, "%s-DIAG: Error detected in %s ", cls_ptr->lib_name, cls_ptr->lib_vers);
         
@@ -2051,7 +2242,7 @@ H5E_set_auto_new(H5E_t_new *estack, H5E_auto_t func, void *client_data)
 
     assert(estack);
 
-    estack->func = &func;
+    estack->func = func;
     estack->auto_data = client_data;
 
 done:

@@ -32,6 +32,9 @@ typedef struct H5TS_cancel_struct {
 /* Global variable definitions */
 pthread_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 pthread_key_t H5TS_errstk_key_g;
+#ifndef NEW_ERR
+pthread_key_t H5TS_errstk_key_g_new;
+#endif /* NEW_ERR */
 pthread_key_t H5TS_funcstk_key_g;
 pthread_key_t H5TS_cancel_key_g;
 hbool_t H5TS_allow_concurrent_g = FALSE; /* concurrent APIs override this */
@@ -107,7 +110,10 @@ H5TS_first_thread_init(void)
 
     /* initialize key for thread-specific error stacks */
     pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
-
+#ifndef NEW_ERR
+    /* initialize key for thread-specific error stacks */
+    pthread_key_create(&H5TS_errstk_key_g_new, H5TS_key_destructor);
+#endif /* NEW_ERR */
     /* initialize key for thread-specific function stacks */
     pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
 
