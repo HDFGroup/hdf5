@@ -168,6 +168,7 @@ main(int argc, char *argv[])
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
     InitTest("select", test_select, cleanup_select,  "Selections");
     InitTest("reference", test_reference, cleanup_reference,  "References");
+    InitTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5get_libversion(&major, &minor, &release);

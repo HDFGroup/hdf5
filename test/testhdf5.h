@@ -125,6 +125,7 @@ void                    test_h5d(void);
 void                    test_attr(void);
 void                    test_select(void);
 void                    test_reference(void);
+void                    test_vltypes(void);
 
 /* Prototypes for the cleanup routines */
 void                    cleanup_metadata(void);
@@ -133,5 +134,6 @@ void                    cleanup_h5s(void);
 void                    cleanup_attr(void);
 void                    cleanup_select(void);
 void                    cleanup_reference(void);
+void                    cleanup_vltypes(void);
 
 #endif /* HDF5cleanup_H */
