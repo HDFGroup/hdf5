@@ -75,17 +75,53 @@ EOF
 fi
 
 # Architecture-specific flags
-case "$host_cpu" in
-    i686)
-	ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
-	;;
+case "$host_os-$host_cpu" in
+    # FreeBSD sets the information from "hostname -m" to the general machine
+    # architecture, not the specific CPU for the machine, so even our
+    # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
+    # machine, use the "sysctl" command to get the CPU hardware model.
+    freebsd*)
+        host_cpu_model=`sysctl -n hw.model`
+        case "$host_cpu_model" in
+            # Hmm.. this might not catch Celerons, but it won't hurt them either...
+            *Pro*|*II*)
+                # This check should be kept in sync with the *-i686 check below
+                case "$cc_vendor-$cc_version" in
+                    gcc-2.95*)
+                        ARCH=${ARCH:="-march=i686 -malign-double"}
+                        ;;
+                    gcc-*|egcs-*|pgcc-*)
+                        ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
+                        ;;
+                esac
+            ;;
+        esac
+        ;;
+
+    *-i686)
+        case "$cc_vendor-$cc_version" in
+            gcc-2.95*)
+                ARCH=${ARCH:="-march=i686 -malign-double"}
+                ;;
+            gcc-*|egcs-*|pgcc-*)
+                ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
+                ;;
+        esac
+        ;;
+esac
+
+# Host-specific flags
+case "`hostname`" in
+    hawkwind.ncsa.uiuc.edu)
+        ARCH="$ARCH -pipe"
+        ;;
 esac
 
 # Compiler flags
 case "$cc_vendor-$cc_version" in
     gcc-2.7*)
 	# General
-	CFLAGS="$CFLAGS -ansi"
+	CFLAGS="$CFLAGS $ARCH -ansi"
 
 	# Production
 	PROC_CFLAGS="-O3 $NOFP -finline-functions -Wno-shadow"
@@ -105,10 +141,10 @@ case "$cc_vendor-$cc_version" in
 
     gcc-2.8.*)
         # General
-        CFLAGS="$CFLAGS -Wsign-compare"
+        CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CFLAGS="-O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
 	PROD_CPPFLAGS=
 
 	# Debug
@@ -123,12 +159,12 @@ case "$cc_vendor-$cc_version" in
 	cc_flags_set=yes
 	;;
 
-    gcc-2.95)
+    gcc-2.95*)
 	# General
-	CFLAGS="$CFLAGS -Wsign-compare"
+	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
+	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
 	PROD_CPPFLAGS=
 
 	# Debug
@@ -145,10 +181,10 @@ case "$cc_vendor-$cc_version" in
 
     egcs-2.*|pgcc-2.*)
 	# General
-	CFLAGS="$CFLAGS -Wsign-compare"
+	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
+	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
 	PROD_CPPFLAGS=
 
 	# Debug
