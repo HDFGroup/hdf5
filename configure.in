@@ -1552,6 +1552,12 @@ touch ./config/stamp1
 saved_no_create=$no_create
 no_create=yes
 
+PARALLEL_MAKE=
+
+if test -n "$TESTPARALLEL"; then
+   PARALLEL_MAKE="$TESTPARALLEL/Makefile"
+fi
+
 EXTRA_H4_MAKEFILES=
 
 if test -n "$H4TOH5"; then
@@ -1574,7 +1580,7 @@ AC_OUTPUT(src/libhdf5.settings
           src/Makefile
           pablo/Makefile
           test/Makefile
-          testpar/Makefile
+          $PARALLEL_MAKE
           tools/Makefile
           tools/h5dump/Makefile
           tools/h5ls/Makefile
