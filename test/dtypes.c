@@ -4388,15 +4388,15 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		switch (src_type) {
 		case FLT_FLOAT:
 		    memcpy(aligned, saved+j*sizeof(float), sizeof(float));
-		    hw_llong = (long long)(*((float*)aligned));
+		    hw_llong = (long_long)(*((float*)aligned));
 		    break;
 		case FLT_DOUBLE:
 		    memcpy(aligned, saved+j*sizeof(double), sizeof(double));
-		    hw_llong = (long long)(*((double*)aligned));
+		    hw_llong = (long_long)(*((double*)aligned));
 		    break;
 		case FLT_LDOUBLE:
 		    memcpy(aligned, saved+j*sizeof(long double), sizeof(double));
-		    hw_llong = (long long)(*((long double*)aligned));
+		    hw_llong = (long_long)(*((long double*)aligned));
 		    break;
 		default:
 		    break;
@@ -4406,15 +4406,15 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		switch (src_type) {
 		case FLT_FLOAT:
 		    memcpy(aligned, saved+j*sizeof(float), sizeof(float));
-		    hw_ullong = (unsigned long long)(*((float*)aligned));
+		    hw_ullong = (unsigned long_long)(*((float*)aligned));
 		    break;
 		case FLT_DOUBLE:
 		    memcpy(aligned, saved+j*sizeof(double), sizeof(double));
-		    hw_ullong = (unsigned long long)(*((double*)aligned));
+		    hw_ullong = (unsigned long_long)(*((double*)aligned));
 		    break;
 		case FLT_LDOUBLE:
 		    memcpy(aligned, saved+j*sizeof(long double), sizeof(double));
-		    hw_ullong = (unsigned long long)(*((long double*)aligned));
+		    hw_ullong = (unsigned long_long)(*((long double*)aligned));
 		    break;
 		default:
 		    break;
@@ -4675,10 +4675,10 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		printf(" %29lu\n", *((unsigned long*)hw));
 		break;
 	    case INT_LLONG:
-		printf(" %29ld\n", *((long long*)hw));
+		printf(" %29ld\n", *((long_long*)hw));
 		break;
 	    case INT_ULLONG:
-		printf(" %29ld\n", *((unsigned long long*)hw));
+		printf(" %29ld\n", *((unsigned long_long*)hw));
 		break;
 	    case FLT_FLOAT:
 		printf(" %29f\n", *((float*)hw));

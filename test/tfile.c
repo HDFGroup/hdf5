@@ -53,7 +53,7 @@
 #define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
 #define FILE3	"tfile3.h5"
 
-#define GROUP_NAME         "/group"
+#define GRP_NAME         "/group"
 #define DSET_NAME         "dataset"
 #define ATTR_NAME          "attr"
 #define TYPE_NAME          "type"
@@ -848,7 +848,7 @@ test_get_file_id(void)
     /* Create a group in the file.  Make a duplicated file ID from the group.
      * And close this duplicated ID
      */
-    group_id = H5Gcreate(fid, GROUP_NAME, 0);
+    group_id = H5Gcreate(fid, GRP_NAME, 0);
     CHECK(group_id, FAIL, "H5Gcreate");
    
     /* Test H5Iget_file_id() */
@@ -868,7 +868,7 @@ test_get_file_id(void)
     fid = H5Fopen(FILE4, H5F_ACC_RDWR, H5P_DEFAULT);       
     CHECK(fid, FAIL, "H5Fcreate");
    
-    group_id = H5Gopen(fid, GROUP_NAME);
+    group_id = H5Gopen(fid, GRP_NAME);
     CHECK(group_id, FAIL, "H5Gcreate");
    
     /* Test H5Iget_file_id() */
