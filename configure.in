@@ -747,7 +747,7 @@ AC_SUBST(H5_VERSION)
 AC_SUBST(CONFIG_DATE) CONFIG_DATE=`date`
 
 # User doing the configuration
-AC_SUBST(CONFIG_USER) CONFIG_USER="$USER@`hostname`"
+AC_SUBST(CONFIG_USER) CONFIG_USER="`whoami`@`hostname`"
 if test "X-$ORGANIZATION" != "X-"; then
     CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
 fi
