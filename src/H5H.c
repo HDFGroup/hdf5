@@ -171,7 +171,7 @@ H5H_create(H5F_t *f, H5H_type_t heap_type, size_t size_hint,
 static H5H_t           *
 H5H_load(H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
 {
-    uint8                   hdr[20];
+    uint8                   hdr[52];
     const uint8            *p = NULL;
     H5H_t                  *heap = NULL;
     H5H_free_t             *fl = NULL, *tail = NULL;
