@@ -724,6 +724,10 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
             fprintf(stream,"Never\n");
             break;
 
+        case H5D_FILL_TIME_IFSET:
+            fprintf(stream,"If Set\n");
+            break;
+
         default:
             fprintf(stream,"Unknown!\n");
             break;
