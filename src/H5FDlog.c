@@ -115,7 +115,6 @@ typedef struct H5FD_log_t {
  *			either lseek() or lseek64().
  */
 /* adding for windows NT file system support. */
-/* pvn: added __MWERKS__ support. */
 
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
