@@ -144,6 +144,30 @@
  *    good enough.
  *                                                     JRM - 12/9/04
  *
+ *
+ *    In the H5C__DLL_PRE_INSERT_SC macro, replaced the lines:
+ *
+ *    ( ( (len) == 1 ) && 
+ *      ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||
+ *        ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) ) 
+ *      ) 
+ *    ) ||
+ *
+ *    with:
+ *
+ *    ( ( (len) == 1 ) &&
+ *      ( ( (head_ptr) != (tail_ptr) ) ||
+ *        ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )
+ *      ) 
+ *    ) ||
+ *
+ *    Epoch markers have size 0, so we can now have a non-empty list with
+ *    zero size.  Hence the "( (Size) <= 0 )" clause cause false failures
+ *    in the sanity check.  Since "Size" is typically a size_t, it can't
+ *    take on negative values, and thus the revised clause "( (Size) < 0 )"
+ *    caused compiler warnings.
+ *                                                     JRM - 12/22/04
+ *    
  ****************************************************************************/
 
 #if H5C_DO_SANITY_CHECKS
@@ -198,7 +222,7 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
      ) ||                                                                    \
      ( (len) < 0 ) ||                                                        \
      ( ( (len) == 1 ) &&                                                     \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                  \
+       ( ( (head_ptr) != (tail_ptr) ) ||                                     \
          ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
        )                                                                     \
      ) ||                                                                    \
