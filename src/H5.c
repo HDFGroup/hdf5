@@ -2542,6 +2542,32 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 		}
 		break;
 
+	    case 'd':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5T_direction_t direct = va_arg (ap, H5T_direction_t);
+		    switch (direct) {
+                        case H5T_DIR_DEFAULT:
+                            fprintf (out, "H5T_DIR_DEFAULT");
+                            break;
+                        case H5T_DIR_ASCEND:
+                            fprintf (out, "H5T_DIR_ASCEND");
+                            break;
+                        case H5T_DIR_DESCEND:
+                            fprintf (out, "H5T_DIR_DESCEND");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)direct);
+                            break;
+		    }
+		}
+		break;
+
 	    case 'e':
 		if (ptr) {
 		    if (vp) {
@@ -2818,6 +2844,26 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 
 	case 'Z':
 	    switch (type[1]) {
+                case 'e':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5Z_EDC_t edc = va_arg (ap, H5Z_EDC_t);
+
+                        if (H5Z_DISABLE_EDC==edc) {
+                            fprintf (out, "H5Z_DISABLE_EDC");
+                        } else if (H5Z_ENABLE_EDC==edc) {
+                            fprintf (out, "H5Z_ENABLE_EDC");
+                        } else {
+                            fprintf (out, "%ld", (long)edc);
+                        }
+                    }
+                    break;
+
                 case 'f':
                     if (ptr) {
                         if (vp) {

@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
 /* Private header files */
@@ -444,6 +442,7 @@ H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pset_edc_check, FAIL);
+    H5TRACE2("e","iZe",plist_id,check);
 
     /* Check argument */
     if (check != H5Z_ENABLE_EDC && check != H5Z_DISABLE_EDC)
@@ -486,6 +485,7 @@ H5Pget_edc_check(hid_t plist_id)
     H5Z_EDC_t      ret_value;   /* return value */
     
     FUNC_ENTER_API(H5Pget_edc_check, FAIL);
+    H5TRACE1("Ze","i",plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -521,13 +521,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void* op_data)
+H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
 {
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value=SUCCEED;   /* return value */
     H5Z_cb_t            cb_struct;
     
     FUNC_ENTER_API(H5Pset_filter_callback, FAIL);
+    H5TRACE3("e","ixx",plist_id,func,op_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))

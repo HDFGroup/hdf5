@@ -8,6 +8,7 @@ h5ls.lo: \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5Ipublic.h \
