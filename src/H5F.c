@@ -2805,10 +2805,10 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
                 p[i%sizeof(f->shared->drvr_chksum)] ^= dbuf[i];
 
             /* Compare with current checksums */
-            if(chksum!=f->shared->boot_chksum) {
+            if(chksum!=f->shared->drvr_chksum) {
                 /* Write driver information block */
                 if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
-                               f->shared->base_addr + superblock_size,
+                               f->shared->base_addr + f->shared->driver_addr,
                                driver_size, dbuf) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                 "unable to write driver information block");
