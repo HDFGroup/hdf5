@@ -54,9 +54,9 @@
 
 1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
-	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5.  For Unix platforms, it is
-	available in tar format uncompressed or compressed with compress,
-	gzip, or bzip2.  For Microsoft Windows, it is in ZIP format.
+	ftp://hdf.ncsa.uiuc.edu/HDF5/current/src.  For Unix platforms, it is
+	available in tar format compressed with gzip.  For Microsoft Windows,
+        it is in ZIP format.
 
 	The HDF team also makes snapshots of the source code available on
 	a regular basis. These snapshots are unsupported (that is, the
