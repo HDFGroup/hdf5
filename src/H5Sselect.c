@@ -130,7 +130,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
     assert(src);
 
     /* Copy regular fields */
-    dst->select=src->select;
+    HDmemcpy(&dst->select,&src->select,sizeof(H5S_select_t));
 
 /* Need to copy order information still */
 
@@ -1114,16 +1114,16 @@ HDfprintf(stderr,"%s: Entering\n",FUNC);
     else if(space1->select.type==H5S_SEL_NONE || space2->select.type==H5S_SEL_NONE) {
         HGOTO_DONE(TRUE);
     } /* end if */
-    else if((space1->select.type==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab.diminfo)
-            && (space2->select.type==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab.diminfo)) {
+    else if((space1->select.type==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab.diminfo_valid)
+            && (space2->select.type==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab.diminfo_valid)) {
 
         /* Check that the shapes are the same */
         for (u=0; u<space1->extent.u.simple.rank; u++) {
-            if(space1->select.sel_info.hslab.diminfo[u].stride!=space2->select.sel_info.hslab.diminfo[u].stride)
+            if(space1->select.sel_info.hslab.opt_diminfo[u].stride!=space2->select.sel_info.hslab.opt_diminfo[u].stride)
                 HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab.diminfo[u].count!=space2->select.sel_info.hslab.diminfo[u].count)
+            if(space1->select.sel_info.hslab.opt_diminfo[u].count!=space2->select.sel_info.hslab.opt_diminfo[u].count)
                 HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab.diminfo[u].block!=space2->select.sel_info.hslab.diminfo[u].block)
+            if(space1->select.sel_info.hslab.opt_diminfo[u].block!=space2->select.sel_info.hslab.opt_diminfo[u].block)
                 HGOTO_DONE(FALSE);
         } /* end for */
     } /* end if */

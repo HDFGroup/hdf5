@@ -645,12 +645,15 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL);
 
     /* Copy the regular fields */
-    *dst=*src;
+    dst->type=src->type;
+    dst->nelem=src->nelem;
+    dst->u.simple.rank=src->u.simple.rank;
 
     switch (src->type) {
         case H5S_NULL:
         case H5S_SCALAR:
-            /*nothing needed */
+            dst->u.simple.size=NULL;
+            dst->u.simple.max=NULL;
             break;
 
         case H5S_SIMPLE:
@@ -659,11 +662,15 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
                 for (u = 0; u < src->u.simple.rank; u++)
                     dst->u.simple.size[u] = src->u.simple.size[u];
             }
+            else
+                dst->u.simple.size=NULL;
             if (src->u.simple.max) {
                 dst->u.simple.max = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank);
                 for (u = 0; u < src->u.simple.rank; u++)
                     dst->u.simple.max[u] = src->u.simple.max[u];
             }
+            else
+                dst->u.simple.max=NULL;
             break;
 
         case H5S_COMPLEX:
@@ -708,8 +715,10 @@ H5S_copy(const H5S_t *src)
     if (NULL==(dst = H5FL_MALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
+#ifdef LATER
     /* Copy the field in the struct */
     *dst = *src;
+#endif /* LATER */
 
     /* Copy the source dataspace's extent */
     if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
