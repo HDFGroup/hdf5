@@ -9365,7 +9365,7 @@ fi
 
  SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
 cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
-SEARCH="$SEARCH_RULE`eval $cmd`"
+export SEARCH="$SEARCH_RULE`eval $cmd`"
 
 if test "X$GMAKE" = "Xyes"; then
     SETX=":"

@@ -1445,7 +1445,7 @@ AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
 dnl The directory search list
 AC_SUBST(SEARCH) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
 cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
-SEARCH="$SEARCH_RULE`eval $cmd`"
+export SEARCH="$SEARCH_RULE`eval $cmd`"
 
 dnl We don't need to say when we're entering directories if we're using
 dnl GNU make becuase make does it for us.
