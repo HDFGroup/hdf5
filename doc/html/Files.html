@@ -366,7 +366,7 @@
     <h3>6.3. Buffered Temporary Files</h3>
 
     <p>The <em>core</em> driver uses <code>malloc()</code> and
-      <code>free()</code> to allocated space for a file in the heap. Reading
+      <code>free()</code> to allocate space for a file in the heap. Reading
       and writing to a file of this type results in mem-to-mem copies instead
       of disk I/O and as a result is somewhat faster.  However, the total file
       size must not exceed the amount of available virtual memory, and only
