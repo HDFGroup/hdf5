@@ -12,6 +12,19 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* WARNING!!!
+ *
+ * The function H5TB_rem() may not delete the node specified in its parameter 
+ * list -- if the target node is internal, it may swap data with a leaf node 
+ * and delete the leaf instead.
+ *
+ * This implies that any pointer to a node in the supplied tree may be 
+ * invalid after this functions returns.  Thus any function retaining such 
+ * pointers over a call to H5TB_rem() should either discard, or refresh them.
+ *
+ *                                                  JRM - 4/9/04
+ */
+
 /*
  * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       Saturday, April 22, 2000
@@ -71,7 +84,9 @@
  * void H5TB_free( ITM ***root, void (*df)(ITM *), void (*kf)(void *) );
  */
 
-/* $Id$ */
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5TB_mask
 
 #include "H5private.h"		/*library		  */
 #include "H5Eprivate.h"		/*error handling	  */
@@ -104,7 +119,6 @@ H5FL_DEFINE_STATIC(H5TB_NODE);
 /* Declare a free list to manage the H5TB_TREE struct */
 H5FL_DEFINE_STATIC(H5TB_TREE);
 
-#define PABLO_MASK	H5TB_mask
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
@@ -458,33 +472,40 @@ done:
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_find(H5TB_NODE * root, const void * key,
+H5TB_find(H5TB_NODE * ptr, const void * key,
      H5TB_cmp_t compar, int arg, H5TB_NODE ** pp)
 {
-    H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
     int        cmp = 1;
-    int        side;
-    H5TB_NODE  *ret_value;      /* Return value */
+    H5TB_NODE  *ret_value;
 
     FUNC_ENTER_NOAPI(H5TB_find, NULL);
-
 
     if(ptr) {
         while (0 != (cmp = KEYcmp(key, ptr->key, arg))) {
             parent = ptr;
-            side = (cmp < 0) ? LEFT : RIGHT;
-            if (!HasChild(ptr, side))
-                break;
-            ptr = ptr->link[side];
-          } /* end while */
+            if(cmp<0) {
+                if(!LeftCnt(ptr)) {
+                    ptr=NULL;
+                    break;
+                } /* end if */
+                ptr = ptr->link[LEFT];
+            } /* end if */
+            else {
+                if(!RightCnt(ptr)) {
+                    ptr=NULL;
+                    break;
+                } /* end if */
+                ptr = ptr->link[RIGHT];
+            } /* end else */
+        } /* end while */
     } /* end if */
 
     if (NULL != pp)
         *pp = parent;
 
     /* Set return value */
-    ret_value= (0 == cmp) ? ptr : NULL;
+    ret_value=ptr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -555,6 +576,9 @@ done:
  *              Thursday, May 5, 2000
  *
  * Modifications:
+ *		Fixed function so it seems to perform as advertized.  Two
+ *		tests were inverted in the backtrack case.
+ *							JRM - 4/13/04
  * 
  * Notes:
  * 	
@@ -585,11 +609,15 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
 	/* didn't find an exact match, search back up the tree until a node */
 	/* is found with a key less than the key searched for */
     if(cmp!=0) {
-        while((ptr=ptr->Parent)!=NULL) {
-              cmp = KEYcmp(key, ptr->key, arg);
-              if(cmp<0) /* found a node which is less than the search for one */
-                  break;
-          } /* end while */
+        /* If we haven't already found the least node, then backtrack to
+         * find it */
+        if(cmp<0) {
+            while((ptr=ptr->Parent)!=NULL) {
+                  cmp = KEYcmp(key, ptr->key, arg);
+                  if(cmp>0) /* found a node which is less than the search for one */
+                      break;
+              } /* end while */
+        } /* end if */
         if(ptr==NULL) /* didn't find a node in the tree which was less */
             cmp=1;
         else /* reset this for cmp test below */
@@ -806,6 +834,19 @@ done:
  * Modifications:
  * 
  * Notes:
+ *
+ *	WARNING!!!
+ *
+ * 	H5TB_rem() may not delete the node specified in its parameter 
+ *	list -- if the target node is internal, it may swap data with a 
+ *	leaf node and delete the leaf instead.
+ *
+ *	This implies that any pointer to a node in the supplied tree may be 
+ *	invalid after this functions returns.  Thus any function retaining 
+ *	such pointers over a call to H5TB_rem() should either discard, or 
+ *	refresh them.
+ *
+ *                                                  JRM - 4/9/04
  * 	
  *-------------------------------------------------------------------------
  */
@@ -1295,90 +1336,120 @@ done:
 /* This routine is based on tbbtfind (fix bugs in both places!) */
 /* Returns a pointer to the found node (or NULL) */
 static H5TB_NODE  *
-H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE ** pp)
+H5TB_ffind(H5TB_NODE * ptr, const void * key, unsigned fast_compare, H5TB_NODE ** pp)
 {
-    H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
-    int        side;
-    int        cmp = 1;
-    H5TB_NODE  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_ffind);
 
-    switch(fast_compare) {
-        case H5TB_FAST_HADDR_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = H5F_addr_cmp(*(const haddr_t *)key,*(haddr_t *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+    if(ptr) {
+        switch(fast_compare) {
+            case H5TB_FAST_HADDR_COMPARE:
+                {
+                    haddr_t key_val=*(const haddr_t *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(haddr_t *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(haddr_t *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_INTN_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = (*(const int *)key - *(int *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_INTN_COMPARE:
+                {
+                    int key_val=*(const int *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(int *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(int *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_STR_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = HDstrcmp(key,ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_STR_COMPARE:
+                {
+                    int cmp;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (0 != (cmp = HDstrcmp(key,ptr->key))) {
+                        parent = ptr;
+                        if(cmp<0) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_HSIZE_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = (int)(*(const hsize_t *)key - *(hsize_t *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_HSIZE_COMPARE:
+                {
+                    hsize_t key_val=*(const hsize_t *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(hsize_t *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(hsize_t *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        default:
-            break;
-    } /* end switch */
+            default:
+                assert("invalid fast compare type" && 0);
+                break;
+        } /* end switch */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    if (NULL != pp)
+        *pp = parent;
+
+    FUNC_LEAVE_NOAPI(ptr);
 } /* H5TB_ffind() */
 
 /* swapkid -- Often refered to as "rotating" nodes.  ptr and ptr's `side'
