@@ -10,7 +10,7 @@ dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
 AC_INIT(src/H5Library.cpp)
-AC_CONFIG_AUX_DIR(bin)
+AC_CONFIG_AUX_DIR(../bin)
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 
