@@ -725,9 +725,21 @@ H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
             HRETURN_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
                           "can't create file without write intent");
         }
+#ifdef HAVE_PARALLEL
+	/* ROMIO cannot handle file-open with EXCL Create due to racing problem */
+	/* The first process creates the file which then fails all */
+	/* other processes.  Turn on TRUNC bit here.  It does not matter */
+	/* since the file does not exist at this point. */
         fd = H5F_low_open(type, name,
-                          H5F_ACC_WRITE | H5F_ACC_CREAT | H5F_ACC_EXCL,
+                          H5F_ACC_WRITE | H5F_ACC_CREAT |
+			  (flags & H5F_ACC_TRUNC),
                           &search);
+#else
+        fd = H5F_low_open(type, name,
+                          H5F_ACC_WRITE | H5F_ACC_CREAT |
+			  (flags & H5F_ACC_EXCL) | (flags & H5F_ACC_TRUNC),
+                          &search);
+#endif /*HAVE_PARALLEL*/
         if (!fd) {
             HRETURN_ERROR(H5E_FILE, H5E_CANTCREATE, NULL,
                           "can't create file");
