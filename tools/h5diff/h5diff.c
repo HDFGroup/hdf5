@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -184,8 +183,6 @@ int main(int argc, const char *argv[])
  info_t     *info1=NULL;
  info_t     *info2=NULL;
  options_t  options = {0,0,0,0,0,0,0};
- void       *edata;
- H5E_auto_t func;
  const char *file1_name = NULL;
  const char *file2_name = NULL;
  const char *obj1_name  = NULL;
@@ -236,8 +233,7 @@ int main(int argc, const char *argv[])
  */
 
  /* disable error reporting */
- H5Eget_auto(H5E_DEFAULT, &func, &edata);
- H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+ H5E_BEGIN_TRY {
  
  /* Open the files */
  if ((file1_id=H5Fopen(file1_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
@@ -251,7 +247,7 @@ int main(int argc, const char *argv[])
   exit(1);
  }
  /* enable error reporting */
- H5Eset_auto(H5E_DEFAULT, func, edata);
+ } H5E_END_TRY;
 
  
 /*-------------------------------------------------------------------------
@@ -555,7 +551,7 @@ int compare_object( char *obj1, char *obj2 )
 /*-------------------------------------------------------------------------
  * Function: match
  *
- * Purpose: Find commom objects; the algorithm used for this search is the 
+ * Purpose: Find common objects; the algorithm used for this search is the 
  *  cosequential match algorithm and is described in 
  *  Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
  *
@@ -582,7 +578,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
  int  i;
  /*build a common list */
  table_t  *table=NULL;
- unsigned long infile[2]; 
+ unsigned infile[2]; 
  char c1, c2;
  int  nfound=0;
 
@@ -599,7 +595,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   if ( cmp == 0 )
   {
    infile[0]=1; infile[1]=1;
-   table_add(infile, info1[curr1].name, info1[curr1].type, table );
+   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
 
    curr1++;
    curr2++;
@@ -607,13 +603,13 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   else if ( cmp < 0 )
   {
    infile[0]=1; infile[1]=0;
-   table_add(infile, info1[curr1].name, info1[curr1].type, table );
+   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
    curr1++;
   }
   else 
   {
    infile[0]=0; infile[1]=1;
-   table_add(infile, info2[curr2].name, info2[curr2].type, table );
+   table_add_flags(infile, info2[curr2].name, info2[curr2].type, table );
    curr2++;
   }
 
@@ -628,7 +624,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   while ( curr1<nobjects1 )
   {
    infile[0]=1; infile[1]=0;
-   table_add(infile, info1[curr1].name, info1[curr1].type, table );
+   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
    curr1++;
   }
  }
@@ -639,7 +635,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   while ( curr2<nobjects2 )
   {
    infile[0]=0; infile[1]=1;
-   table_add(infile, info2[curr2].name, info2[curr2].type, table );
+   table_add_flags(infile, info2[curr2].name, info2[curr2].type, table );
    curr2++;
   }
  }
@@ -653,8 +649,8 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
  printf("---------------------------------------\n");
  for (i = 0; i < table->nobjs; i++)
  {
-  c1 = (table->objs[i].objno[0]) ? 'x' : ' ';
-  c2 = (table->objs[i].objno[1]) ? 'x' : ' ';
+  c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
+  c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
   printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].objname);
  }
  printf("\n");
@@ -667,7 +663,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
 
  for (i = 0; i < table->nobjs; i++)
  {
-  if ( table->objs[i].objno[0]==1 && table->objs[i].objno[1]==1 )
+  if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
    nfound+=diff( file1_id, table->objs[i].objname, 
                  file2_id, table->objs[i].objname, 
                  options, table->objs[i].type );
@@ -848,8 +844,6 @@ static
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options )
 {
- void         *edata;
- H5E_auto_t   func;
  hid_t        dset1_id  =-1;
  hid_t        dset2_id  =-1;
  hid_t        space1_id =-1;
@@ -875,8 +869,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
 
 
  /* disable error reporting */
- H5Eget_auto(H5E_DEFAULT, &func, &edata);
- H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+ H5E_BEGIN_TRY {
 
 /*-------------------------------------------------------------------------
  * open the handles
@@ -895,7 +888,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   goto out;
  }
  /* enable error reporting */
- H5Eset_auto(H5E_DEFAULT, func, edata);
+ } H5E_END_TRY;
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
