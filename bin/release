@@ -137,7 +137,7 @@ test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd ..; \
     tar cf x.tar hdf5-$VERS/Makefile \
-	`sed s+^.+hdf5-$VERS+ $MANIFEST` || exit 1 \
+	`sed s+^\./+hdf5-$VERS/+ $MANIFEST` || exit 1 \
 )
 
 # Compress
