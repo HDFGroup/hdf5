@@ -41,7 +41,7 @@
 
 static void *H5O_shared_decode (H5F_t*, hid_t dxpl_id, const uint8_t*, H5O_shared_t *sh);
 static herr_t H5O_shared_encode (H5F_t*, uint8_t*, const void*);
-static void *H5O_shared_copy(const void *_mesg, void *_dest);
+static void *H5O_shared_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_shared_size (H5F_t*, const void *_mesg);
 static herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -98,7 +98,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_class_t
 {
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_shared_read,NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read);
 
     /* check args */
     assert(f);
@@ -344,7 +344,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_copy(const void *_mesg, void *_dest)
+H5O_shared_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_shared_t  *mesg = (const H5O_shared_t *) _mesg;
     H5O_shared_t	*dest = (H5O_shared_t *) _dest;

@@ -40,7 +40,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_stab_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void *H5O_stab_copy(const void *_mesg, void *_dest);
+static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free (void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -179,7 +179,7 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
     H5O_stab_t          *stab = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_stab_fast, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_fast);
 
     /* check args */
     assert(cache);
@@ -222,7 +222,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_copy(const void *_mesg, void *_dest)
+H5O_stab_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;

@@ -41,6 +41,14 @@ static int H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(const H5A_t *attr);
 static herr_t H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t dxpl_id);
 
+/* Object header iterator callbacks */
+/* Data structure for callback for locating the index by name */
+typedef struct H5A_iter_cb1 {
+    const char *name;
+    int idx;
+} H5A_iter_cb1;
+static herr_t H5A_find_idx_by_name(const void *mesg, unsigned idx, void *op_data);
+
 /* The number of reserved IDs in dataset ID group */
 #define H5A_RESERVED_ATOMS  0
 
@@ -216,8 +224,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 	   const H5S_t *space, hid_t dxpl_id)
 {
     H5A_t	*attr = NULL;
-    H5A_t	found_attr;
-    int	seq=0;
+    H5A_iter_cb1 cb;                    /* Iterator callback */
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_create)
@@ -227,6 +234,14 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     assert(name);
     assert(type);
     assert(space);
+
+    /* Iterate over the existing attributes to check for duplicates */
+    cb.name=name;
+    cb.idx=(-1);
+    if((ret_value=H5O_iterate(ent,H5O_ATTR_ID,H5A_find_idx_by_name,&cb,dxpl_id))<0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
+    if(ret_value>0)
+        HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL, "attribute already exists")
 
     /* Check if the dataspace has an extent set (or is NULL) */
     if( !(H5S_has_extent(space)) )
@@ -282,25 +297,8 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->ent_opened=1;
 
-    /* Read in the existing attributes to check for duplicates */
-    seq=0;
-    while(H5O_read(&(attr->ent), H5O_ATTR_ID, seq, &found_attr, dxpl_id)!=NULL) {
-        /*
-	 * Compare found attribute name to new attribute name reject creation
-	 * if names are the same.
-	 */
-	if(HDstrcmp(found_attr.name,attr->name)==0) {
-	    (void)H5O_reset (H5O_ATTR_ID, &found_attr);
-	    HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL, "attribute already exists")
-	}
-	if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-	seq++;
-    }
-    H5E_clear_stack(NULL);
-
     /* Create the attribute message and save the attribute index */
-    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, 1, attr, dxpl_id) < 0) 
+    if (H5O_modify(&(attr->ent), H5O_ATTR_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
 
     /* Register the new attribute and get an ID for it */
@@ -318,6 +316,52 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_create() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_find_idx_by_name
+ PURPOSE
+    Iterator callback to determine the index of a attribute
+ USAGE
+    herr_t H5A_find_idx_by_name (mesg, idx, op_data)
+        const H5A_t *mesg;      IN: Pointer to attribute
+        unsigned idx;           IN: Index of attribute
+        void *op_data;          IN: Op data passed in
+ RETURNS
+    Non-negative on success, negative on failure
+ 
+ ERRORS
+
+ DESCRIPTION
+        This function determines if an attribute matches the name to search
+    for (from the 'op_data') and sets the index value in the 'op_data'.
+--------------------------------------------------------------------------*/
+static herr_t
+H5A_find_idx_by_name(const void *_mesg, unsigned idx, void *_op_data)
+{
+    const H5A_t *mesg = (const H5A_t *)_mesg;   /* Pointer to attribute */
+    H5A_iter_cb1 *op_data = (H5A_iter_cb1 *)_op_data;   /* Pointer to op data */
+    int		ret_value;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_find_idx_by_name)
+
+    assert(mesg);
+    assert(op_data);
+
+    /*
+     * Compare found attribute name to queried name and set the idx in the
+     * callback info if names are the same.
+     */
+    if(HDstrcmp(mesg->name,op_data->name)==0) {
+        op_data->idx=idx;
+        ret_value=1;
+    } /* end if */
+    else
+        ret_value=0;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A_find_idx_by_name() */
 
 
 /*--------------------------------------------------------------------------
@@ -343,8 +387,7 @@ done:
 static int
 H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
 {
-    H5A_t      	found_attr;
-    int		i;                      /* Index variable */
+    H5A_iter_cb1 cb;                    /* Iterator callback */
     int		ret_value=FAIL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_get_index)
@@ -352,25 +395,13 @@ H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
     assert(ent);
     assert(name);
 
-    /* Look up the attribute for the object */
-    i=0;
-    while(H5O_read(ent, H5O_ATTR_ID, i, &found_attr, dxpl_id)!=NULL) {
-	/*
-	 * Compare found attribute name to new attribute name reject creation
-	 * if names are the same.
-	 */
-	if(HDstrcmp(found_attr.name,name)==0) {
-	    if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-            HGOTO_DONE(i);
-	}
-	if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-	i++;
-    }
-    H5E_clear_stack(NULL);
-    
-    if(ret_value<0)
+    cb.name=name;
+    cb.idx=(-1);
+    if((ret_value=H5O_iterate(ent,H5O_ATTR_ID,H5A_find_idx_by_name,&cb,dxpl_id))<0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "error iterating over attributes")
+    if(ret_value>0)
+        ret_value=cb.idx;
+    else
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
 
 done:
@@ -690,7 +721,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
 
         /* Modify the attribute data */
-        if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, 1, attr, dxpl_id) < 0) 
+        if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, H5O_UPDATE_DATA_ONLY|H5O_UPDATE_TIME, attr, dxpl_id) < 0) 
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
     } /* end if */
 
@@ -1267,7 +1298,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     found_attr.initialized=TRUE;
 
     /* Modify the attribute message */
-    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, 1, &found_attr, dxpl_id) < 0) 
+    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, H5O_UPDATE_TIME, &found_attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
    
     /* Close the attribute */
@@ -1405,9 +1436,8 @@ done:
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
-    H5A_t       found_attr;
     H5G_entry_t	*ent = NULL;		/*symtab ent of object to attribute */
-    int        idx=0, found=-1;
+    int         found;
     herr_t	ret_value;
 
     FUNC_ENTER_API(H5Adelete, FAIL)
@@ -1421,25 +1451,8 @@ H5Adelete(hid_t loc_id, const char *name)
     if (!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Look up the attribute for the object */
-    idx=0;
-    while(H5O_read(ent, H5O_ATTR_ID, idx, &found_attr, H5AC_dxpl_id)!=NULL) {
-	/*
-	 * Compare found attribute name to new attribute name reject
-	 * creation if names are the same.
-	 */
-	if(HDstrcmp(found_attr.name,name)==0) {
-	    if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-	    found = idx;
-	    break;
-	}
-	if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-	idx++;
-    }
-    H5E_clear_stack(NULL);
-    if (found<0)
+    /* Look up the attribute index for the object */
+    if((found=H5A_get_index(ent,name,H5AC_dxpl_id))<0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found")
 
     /* Delete the attribute from the location */
@@ -1506,7 +1519,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
+H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr, unsigned update_flags)
 {
     H5A_t	*new_attr=NULL;
     hbool_t     allocated_attr=FALSE;   /* Whether the attribute was allocated */
@@ -1519,6 +1532,9 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 
     /* get space */
     if(_new_attr==NULL) {
+        /* Sanity check - We should not be only updating data if we don'y have anything */
+        HDassert(!(update_flags&H5O_UPDATE_DATA_ONLY));
+
         if (NULL==(new_attr = H5FL_MALLOC(H5A_t)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         allocated_attr=TRUE;
@@ -1526,19 +1542,23 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
     else
         new_attr=_new_attr;
 
-    /* Copy the top level of the attribute */
-    *new_attr = *old_attr;
+    if(!(update_flags&H5O_UPDATE_DATA_ONLY)) {
+        /* Copy the top level of the attribute */
+        *new_attr = *old_attr;
 
-    /* Don't open the object header for a copy */
-    new_attr->ent_opened=0;
+        /* Don't open the object header for a copy */
+        new_attr->ent_opened=0;
 
-    /* Copy the guts of the attribute */
-    new_attr->name=HDstrdup(old_attr->name);
-    new_attr->dt=H5T_copy(old_attr->dt, H5T_COPY_ALL);
-    new_attr->ds=H5S_copy(old_attr->ds, FALSE);
+        /* Copy the guts of the attribute */
+        new_attr->name=HDstrdup(old_attr->name);
+        new_attr->dt=H5T_copy(old_attr->dt, H5T_COPY_ALL);
+        new_attr->ds=H5S_copy(old_attr->ds, FALSE);
+    } /* end if */
     if(old_attr->data) {
-        if (NULL==(new_attr->data=H5MM_malloc(old_attr->data_size)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        if(!(update_flags&H5O_UPDATE_DATA_ONLY) || new_attr->data==NULL) {
+            if (NULL==(new_attr->data=H5MM_malloc(old_attr->data_size)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        } /* end if */
         HDmemcpy(new_attr->data,old_attr->data,old_attr->data_size);
     } /* end if */
 

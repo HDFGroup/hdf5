@@ -84,7 +84,7 @@ H5Z_class_t H5Z_SZIP[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
     unsigned dtype_size;                /* Datatype's size (in bits) */
     H5T_order_t dtype_order;            /* Datatype's endianness order */

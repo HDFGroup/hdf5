@@ -32,7 +32,7 @@
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
-static void *H5O_attr_copy (const void *_mesg, void *_dest);
+static void *H5O_attr_copy (const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_free (void *mesg);
@@ -368,8 +368,8 @@ done:
         This function copies a native (memory) attribute message,
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
-static void            *
-H5O_attr_copy(const void *_src, void *_dst)
+static void *
+H5O_attr_copy(const void *_src, void *_dst, unsigned update_flags)
 {
     const H5A_t            *src = (const H5A_t *) _src;
     void                   *ret_value;  /* Return value */
@@ -380,7 +380,7 @@ H5O_attr_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (ret_value = H5A_copy(_dst,src)))
+    if (NULL == (ret_value = H5A_copy(_dst,src,update_flags)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
 
 done:
@@ -481,7 +481,7 @@ H5O_attr_reset(void *_mesg)
     H5A_t                  *attr = (H5A_t *) _mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset);
 
     if (attr)
         H5A_free(attr);

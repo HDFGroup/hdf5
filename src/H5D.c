@@ -2891,7 +2891,7 @@ H5D_close(H5D_t *dataset)
             case H5D_COMPACT:               
                 /* Update header message of layout for compact dataset. */
                 if(dataset->shared->layout.u.compact.dirty) {
-                    if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->shared->layout), H5AC_dxpl_id)<0)
+                    if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id)<0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to update layout message")
                     dataset->shared->layout.u.compact.dirty = FALSE;
                 } /* end if */
@@ -4134,7 +4134,7 @@ H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
                 case H5D_COMPACT:               
                     if(dataset->shared->layout.u.compact.dirty) {
-                        if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, 1, &(dataset->shared->layout), dxpl_id)<0)
+                        if(H5O_modify(&(dataset->ent), H5O_LAYOUT_ID, 0, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id)<0)
                             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
                         dataset->shared->layout.u.compact.dirty = FALSE;
                     } /* end if */

@@ -109,7 +109,7 @@ H5G_stab_create(H5F_t *f, hid_t dxpl_id, size_t init, H5G_entry_t *self/*out*/)
      * Insert the symbol table message into the object header and the symbol
      * table entry.
      */
-    if (H5O_modify(self, H5O_STAB_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, 1, &stab, dxpl_id)<0) {
+    if (H5O_modify(self, H5O_STAB_ID, H5O_NEW_MESG, H5O_FLAG_CONSTANT, H5O_UPDATE_TIME, &stab, dxpl_id)<0) {
 	H5O_close(self);
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
     }

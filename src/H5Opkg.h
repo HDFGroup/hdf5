@@ -62,7 +62,7 @@ typedef struct H5O_class_t {
     size_t	native_size;			 /*size of native message    */
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*, struct H5O_shared_t*);
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*);
-    void	*(*copy)(const void*, void*);    /*copy native value         */
+    void	*(*copy)(const void*, void*, unsigned);    /*copy native value         */
     size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */

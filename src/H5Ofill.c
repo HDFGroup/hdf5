@@ -33,7 +33,7 @@
 
 static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
+static void  *H5O_fill_new_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_fill_new_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_new_reset(void *_mesg);
 static herr_t H5O_fill_new_free(void *_mesg);
@@ -42,7 +42,7 @@ static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FIL
 
 static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void  *H5O_fill_copy(const void *_mesg, void *_dest);
+static void  *H5O_fill_copy(const void *_mesg, void *_dest, unsigned update_flags);
 static size_t H5O_fill_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
@@ -158,7 +158,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     } /* end if */
     else
         mesg->size=(-1);
-    
+
     /* Set return value */
     ret_value = (void*)mesg;
     
@@ -293,7 +293,7 @@ static herr_t
 H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_encode);
 
     assert(f);
@@ -328,7 +328,7 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_copy(const void *_mesg, void *_dest)
+H5O_fill_new_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     H5O_fill_new_t		*dest = (H5O_fill_new_t *)_dest;
@@ -400,7 +400,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_copy(const void *_mesg, void *_dest)
+H5O_fill_copy(const void *_mesg, void *_dest, unsigned UNUSED update_flags)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
     H5O_fill_t          *dest = (H5O_fill_t *)_dest;
@@ -555,7 +555,7 @@ H5O_fill_new_reset(void *_mesg)
     }
     mesg->alloc_time   = (H5D_alloc_time_t)0;
     mesg->fill_time    = (H5D_fill_time_t)0;
-    mesg->fill_defined = FALSE; 
+    mesg->fill_defined = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
@@ -579,6 +579,7 @@ static herr_t
 H5O_fill_reset(void *_mesg)
 {
     H5O_fill_t  *mesg = (H5O_fill_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset);
 
@@ -818,10 +819,10 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
     H5O_fill_new_t	*fill = _fill;
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
     void		*buf=NULL, *bkg=NULL;	/*conversion buffers	*/
-    hid_t		src_id=-1, dst_id=-1;	/*data type identifiers	*/
+    hid_t		src_id=-1, dst_id=-1;	/*datatype identifiers	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_fill_convert, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_convert);
 
     assert(fill);
     assert(dset_type);
@@ -838,7 +839,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
      * Can we convert between source and destination data types?
      */
     if (NULL==(tpath=H5T_path_find(fill->type, dset_type, NULL, NULL, dxpl_id)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types")
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
 
     /* Don't bother doing anything if there will be no actual conversion */
     if (!H5T_path_noop(tpath)) {
@@ -849,7 +850,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
         /*
-         * Data type conversions are always done in place, so we need a buffer
+         * Datatype conversions are always done in place, so we need a buffer
          * that is large enough for both source and destination.
          */
         if (H5T_get_size(fill->type)>=H5T_get_size(dset_type)) {
@@ -864,7 +865,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
 
         /* Do the conversion */
         if (H5T_convert(tpath, src_id, dst_id, 1, 0, 0, buf, bkg, dxpl_id)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
         /* Update the fill message */
         if (buf!=fill->buf) {

@@ -281,7 +281,7 @@ done:
 hid_t
 H5Gopen(hid_t loc_id, const char *name)
 {
-    hid_t        ret_value = FAIL;
+    hid_t       ret_value = FAIL;
     H5G_t       *grp = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t	 ent;
@@ -402,9 +402,9 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
     if (!idx_p)
         idx_p = &idx;
     if (idx<0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
     if (!op)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /*
      * Open the group on which to operate.  We also create a group ID which
@@ -416,7 +416,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p,
         H5Gclose(udata.group_id);
         HGOTO_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "bad group atom");
     }
-    
+
     /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
     udata.skip = idx;
     udata.ent = &(grp->ent);
@@ -1544,7 +1544,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 
     /* If this was an insert, make sure that the insert function was actually
      * called (this catches no-op names like "." and "/") */
-     if( action== H5G_NAMEI_INSERT && !did_insert)
+     if(action == H5G_NAMEI_INSERT && !did_insert)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group already exists");
 
 done:
@@ -1793,7 +1793,6 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
     if (NULL==(grp->shared = H5FL_CALLOC(H5G_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-
     /* What file is the group being added to? */
     if (NULL==(file=H5G_insertion_file(loc, name, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to locate insertion point");
@@ -1825,10 +1824,11 @@ done:
             if(H5O_delete(file, dxpl_id,grp->ent.header)<0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header");
         } /* end if */
-        if(grp!=NULL)
+        if(grp!=NULL) {
             if(grp->shared != NULL)
                 H5FL_FREE(H5G_shared_t, grp->shared);
             H5FL_FREE(H5G_t,grp);
+        }
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2988,7 +2988,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
     /* Add the new message */
     if (buf && *buf) {
 	comment.s = H5MM_xstrdup(buf);
-	if (H5O_modify(&obj_ent, H5O_NAME_ID, H5O_NEW_MESG, 0, 1, &comment, dxpl_id)<0)
+	if (H5O_modify(&obj_ent, H5O_NAME_ID, H5O_NEW_MESG, 0, H5O_UPDATE_TIME, &comment, dxpl_id)<0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
 	H5O_reset(H5O_NAME_ID, &comment);
     }
