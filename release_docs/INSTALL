@@ -218,35 +218,35 @@
 	before the library and executables are built.
 
 5.3.2. Using an alternate C compiler
-	By default, configure will look for the C compiler by trying
-	`gcc' and `cc'. However, if the environment variable "CC" is set
-	then its value is used as the C compiler (users of csh and
-	derivatives will need to prefix the commands below with `env').
-	For instance, to use the native C compiler on a system which also
-	has the GNU gcc compiler:
+	By default, configure will look for the C compiler by trying `gcc'
+	and `cc'. However, if the environment variable "CC" is set then its
+	value is used as the C compiler (users of csh and derivatives will
+	need to prefix the commands below with `env'). For instance, to use
+	the native C compiler on a system which also has the GNU gcc
+	compiler:
 
 	    $ CC=cc ./configure
 
-	A parallel version of hdf5 can be built by specifying `mpicc' as
-	the C compiler (the `--enable-parallel' flag documented below is
-	optional).  Using the `mpicc' compiler will insure that the
-	correct MPI and MPI-IO header files and libraries are used.
+	A parallel version of hdf5 can be built by specifying `mpicc' as the
+	C compiler (the `--enable-parallel' flag documented below is
+	optional). Using the `mpicc' compiler will insure that the correct
+	MPI and MPI-IO header files and libraries are used.
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-	On Irix64 the default compiler is `cc'. To use an alternate
-	compiler specify it with the CC variable:
+	On Irix64 the default compiler is `cc'. To use an alternate compiler
+	specify it with the CC variable:
 
 	    $ CC='cc -n32' ./configure
 
-        Similarly, users compiling on a Solaris machine and desiring to
-        build the distribution with 64-bit support should specify the
-        correct flags with the CC variable:
+	Similarly, users compiling on a Solaris machine and desiring to build
+	the distribution with 64-bit support should specify the correct flags
+	with the CC variable:
 
 	    $ CC='cc -xarch=v9' ./configure
 
-        Specifying these machine architecture flags in the CFLAGS variable
-        (see below) will not work correctly.
+	Specifying these machine architecture flags in the CFLAGS variable
+	(see below) will not work correctly.
 
 5.3.3. Additional compilation flags
 	If addtional flags must be passed to the compilation commands

@@ -209,6 +209,8 @@ New Features
       in order to correctly handle dataset region references.  Moved
       H5Rget_object_type() to be only compiled into the library when v1.4
       compatibility is enabled.
+    * Parallel HDF5 is now supported on HP-UX 11.00 platforms.
+
 
 Platforms Tested
 ================
