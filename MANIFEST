@@ -1015,6 +1015,7 @@
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5import.c
+./tools/misc/h5redeploy
 ./tools/misc/h5repart.c
 ./tools/misc/pdb2hdf.c
 
