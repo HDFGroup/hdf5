@@ -777,7 +777,7 @@ case X-$THREADSAFE in
 	;;
 esac
 
-if test X-yes != X-$THREADSAFE; then
+if test X-yes = X-$THREADSAFE; then
     AC_DEFINE(HAVE_THREADSAFE)
 fi
 

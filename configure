@@ -7786,7 +7786,7 @@ case X-$THREADSAFE in
 	;;
 esac
 
-if test X-yes != X-$THREADSAFE; then
+if test X-yes = X-$THREADSAFE; then
     cat >> confdefs.h <<\EOF
 #define HAVE_THREADSAFE 1
 EOF
