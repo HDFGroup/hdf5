@@ -41,6 +41,7 @@ typedef struct meta_func_t
     herr_t  (*flush) (hatom_t );    /* Flush the object to disk */
     herr_t  (*delete) (hatom_t );   /* Delete an object from file */
     hatom_t (*get_parent) (hatom_t );   /* Get the parent object of an object */
+    hatom_t (*get_file) (hatom_t ); /* Get the file ID of an object */
     herr_t  (*release) (hatom_t );  /* End access to an object */
   }
 meta_func_t;
@@ -60,6 +61,7 @@ meta_func_t meta_func_arr[]={
         NULL,                   /* File-Creation Template Flush */
         NULL,                   /* File-Creation Template Delete */
         NULL,                   /* File-Creation Template GetParent */
+        NULL,                   /* File-Creation Template GetFile */
         H5C_release             /* File-Creation Template Release */
     },
     {   /* Datatype object meta-functions (defined in H5T.c) */
@@ -76,6 +78,7 @@ meta_func_t meta_func_arr[]={
         NULL,                   /* Datatype Flush */
         NULL,                   /* Datatype Delete */
         NULL,                   /* Datatype GetParent */
+        NULL,                   /* Datatype GetFile */
         H5T_release             /* Datatype Release */
     },
     {   /* Dimensionality object meta-functions (defined in H5P.c) */
@@ -92,6 +95,7 @@ meta_func_t meta_func_arr[]={
         NULL,                   /* Dimensionality Flush */
         NULL,                   /* Dimensionality Delete */
         NULL,                   /* Dimensionality GetParent */
+        NULL,                   /* Dimensionality GetFile */
         H5P_release             /* Dimensionality Release */
     },
     {   /* Dataset object meta-functions (defined in H5D.c) */
@@ -108,6 +112,7 @@ meta_func_t meta_func_arr[]={
         H5D_flush,              /* Dataset Flush */
         NULL,                   /* Dataset Delete */
         NULL,                   /* Dataset GetParent */
+        NULL,                   /* Dataset GetFile */
         H5D_release             /* Dataset Release */
     }
   };

@@ -25,6 +25,7 @@ static char RcsId[] = "@(#)$Revision$";
    EXPORTED ROUTINES
        H5Mcreate    -- Create an object
        H5Mcopy      -- Copy an object
+       H5Mget_file  -- Get the file ID for an object
        H5Mrelease   -- Release access to an object
 
    LIBRARY-SCOPED ROUTINES
@@ -205,6 +206,92 @@ done:
 
     FUNC_LEAVE(ret_value);
 } /* end H5Mcopy() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Mflush
+ PURPOSE
+    Flush an HDF5 object out to a file.
+ USAGE
+    hatom_t H5Mget_file(oid)
+        hatom_t oid;       IN: Object to flush
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function re-directs the object's flush into the appropriate
+    interface, as defined by the function pointers in hdf5fptr.h
+--------------------------------------------------------------------------*/
+hatom_t H5Mflush(hatom_t oid)
+{
+    group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
+    intn i;         /* local counting variable */
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Mflush, H5M_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+    if(group<=BADGROUP || group>=MAXGROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+
+    i=H5M_find_type(group);
+    if(meta_func_arr[i].flush==NULL)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+    ret_value=meta_func_arr[i].flush(oid);
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Mflush() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Mget_file
+ PURPOSE
+    Get the file ID an HDF5 object.
+ USAGE
+    hatom_t H5Mget_file(oid)
+        hatom_t oid;       IN: Object to query
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function re-directs the object's query into the appropriate
+    interface, as defined by the function pointers in hdf5fptr.h
+--------------------------------------------------------------------------*/
+hatom_t H5Mget_file(hatom_t oid)
+{
+    group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
+    intn i;         /* local counting variable */
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Mget_file, H5M_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+    if(group<=BADGROUP || group>=MAXGROUP)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+
+    i=H5M_find_type(group);
+    if(meta_func_arr[i].get_file==NULL)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+    ret_value=meta_func_arr[i].get_file(oid);
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Mget_file() */
 
 /*--------------------------------------------------------------------------
  NAME

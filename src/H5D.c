@@ -91,15 +91,15 @@ hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
-    /* Allocate space for the new data-type */
+    /* Allocate space for the new dataset */
     if((new_dset=HDmalloc(sizeof(H5D_dataset_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     
-    /* Initialize the dimensionality object */
+    /* Initialize the dataset object */
     if(H5Aatom_group(owner_id)==H5_FILE)
         new_dset->file=owner_id;
     else
-        new_dset->file=owner_id;
+        new_dset->file=H5Mget_file(owner_id);
     new_dset->parent=owner_id;      /* set the owner's ID */
     new_dset->name=HDstrdup(name);  /* make a copy of the dataset name */
     new_dset->modified=BTRUE;       /* Yep, we're new... */
