@@ -22,13 +22,13 @@ include $(top_srcdir)/config/commence.am
 # Include src directory
 INCLUDES=-I$(top_srcdir)/src
 
-# This is our main target
-lib_LTLIBRARIES=libhdf5_cpp.la
-
 # Build the library statically because some compliers can only link one
 # dynamic library, and that's the main hdf5 library (which is much larger
 # than this one).
-libhdf5_cpp_la_LDFLAGS=-static
+AM_LDFLAGS=-static
+
+# This is our main target
+lib_LTLIBRARIES=libhdf5_cpp.la
 
 bin_SCRIPTS=h5c++
 
