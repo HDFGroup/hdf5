@@ -482,6 +482,8 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
     htri_t		    ret_value;
     struct stat		    sb;
 
+	int fid;
+
     FUNC_ENTER(H5F_low_size, FAIL);
     assert(type);
 
@@ -492,7 +494,6 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 			this extra block is needed because windows sets the st_dev member of sb
 			to be 0 if it is a file which makes the comparison below wrong
 		*/
-		int fid;
 
 		fid=open(name,mode|_O_BINARY);
 		HDfstat(fid,&sb);
