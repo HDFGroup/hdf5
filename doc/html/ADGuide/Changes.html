@@ -35,7 +35,7 @@ This document is intended to assist application developers who must keep
 an application synchroniaed with the HDF5 library or related software.
 
 
-<h2>Release 1.4 (current release)</h2> 
+<h2>Release 1.4 (current release) Versus Release 1.2.2</h2> 
 
 <dir>
 
@@ -210,7 +210,7 @@ H5Tinsert_array
         </td></tr>
         </table>
         </dir>
-        Note that the entire H5RA interface, an esperimental interface for 
+        Note that the entire H5RA interface, an experimental interface for 
         ragged arrays, has been removed from the library.
 
 
@@ -238,6 +238,55 @@ H5Tinsert_array
 
 </dir>
 <p>&nbsp;
+
+<h2>Migration from Release 1.2.2 to Release 1.4 (current release) </h2> 
+
+<dir>
+    <h3>H5Tinsert_array</h3>
+    The functionality of H5Tinsert_array has been replaced by H5Tcreate_array.
+    Here is an example of changing code from H5Tinsert_array to H5Tcreate_array.
+<pre>
+V1.2.2
+{
+    struct tmp_struct {
+        int a;
+        float f[3];
+        double d[2][4];
+    };
+    size_t f_dims[1]={3};
+    size_t d_dims[2]={2,4};
+    hid_t compound_type;
+
+    compound_type=H5Tcreate(H5T_COMPOUND,sizeof(struct tmp_struct));
+    H5Tinsert(compound_type,"a",HOFFSET(struct tmp_struct,a),H5T_NATIVE_INT);
+    H5Tinsert_array(compound_type,"f",HOFFSET(struct tmp_struct,f),1,f_dims,NULL,H5T_NATIVE_FLOAT);
+    H5Tinsert_array(compound_type,"d",HOFFSET(struct tmp_struct,d),2,d_dims,NULL,H5T_NATIVE_DOUBLE);
+}
+
+V1.4.0
+{
+    struct tmp_struct {
+        int a;
+        float f[3];
+        double d[2][4];
+    };
+    size_t f_dims[1]={3};
+    size_t d_dims[2]={2,4};
+    hid_t compound_type;
+    hid_t array_type;
+
+    compound_type=H5Tcreate(H5T_COMPOUND,sizeof(struct tmp_struct));
+    H5Tinsert(compound_type,"a",HOFFSET(struct tmp_struct,a),H5T_NATIVE_INT);
+    array_type=H5Tcreate_array(H5T_NATIVE_FLOAT,1,f_dims,NULL);
+    H5Tinsert(compound_type,"f",HOFFSET(struct tmp_struct,f),array_type);
+    H5Tclose(array_type);
+    array_type=H5Tcreate_array(H5T_NATIVE_DOUBLE,2,d_dims,NULL);
+    H5Tinsert(compound_type,"d",HOFFSET(struct tmp_struct,d),array_type);
+    H5Tclose(array_type);
+}
+
+</pre>
+</dir>
 
 
 <h2>This and Prior Releases: The RELEASE and HISTORY Files</h2>
@@ -301,7 +350,7 @@ H5Tinsert_array
 
 <!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified:  22 January 2001 
+Last modified:  21 February 2001 
 <!-- hhmts end -->
 
 <br>
