@@ -724,7 +724,7 @@ H5TB_dins(H5TB_TREE * tree, void * item, void * key)
     assert(tree);
 
     /* Try to insert the node */
-    ret_value = H5TB_ins(&(tree->root), item, key, tree->compar, tree->cmparg);
+    ret_value = H5TB_ins(&(tree->root), item, key, tree->fast_compare, tree->compar, tree->cmparg);
 
     /* If we successfully inserted the node, increment the node count in the tree */
     if (ret_value != NULL)
@@ -753,11 +753,13 @@ done:
  * Modifications:
  * 
  * Notes:
+ *      Assumes that the comparison routine is _NOT_ used for trees with
+ *      "fast compare" set.
  * 	
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, int arg)
+H5TB_ins(H5TB_NODE ** root, void * item, void * key, unsigned fast_compare, H5TB_cmp_t compar, int arg)
 {
     int        cmp;
     H5TB_NODE  *ptr, *parent;
@@ -768,8 +770,16 @@ H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, int arg)
     assert(root);
     assert(item);
 
-    if (NULL != H5TB_find(*root, (key ? key : item), compar, arg, &parent))
-        HGOTO_ERROR (H5E_TBBT, H5E_EXISTS, NULL, "node already in tree");
+    /* Find node in tree, or parent of where node will go */
+    if(fast_compare!=0) {
+        if(NULL != H5TB_ffind(*root, (key ? key : item), fast_compare, &parent))
+            HGOTO_ERROR (H5E_TBBT, H5E_EXISTS, NULL, "node already in tree");
+    } /* end if */
+    else {
+        if(NULL != H5TB_find(*root, (key ? key : item), compar, arg, &parent))
+            HGOTO_ERROR (H5E_TBBT, H5E_EXISTS, NULL, "node already in tree");
+    } /* end else */
+
     if (NULL == (ptr = H5FL_MALLOC(H5TB_NODE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     ptr->data = item;
