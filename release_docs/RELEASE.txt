@@ -389,7 +389,7 @@ Supported Configuration Features Summary
     FreeBSD              y   y (1)     n    n         y    y              y
     Linux 2.2            y   y (1)     y    y (1)     y    y              y
     Linux 2.4 gcc   (3)  y   y (1)     y    n         y    y              y
-    Linux 2.4 Intel (3)  y   n         x    n         y    n              y
+    Linux 2.4 Intel (3)  y   n         y    n         y    n              y
     Linux 2.4 PGI   (3)  y   n         y    n         y    n              y
     Linux 2.4 IA32       y   n         y    n         n    n              y
     Linux 2.4 IA64       y   n         y    n         n    n              y
