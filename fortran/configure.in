@@ -649,8 +649,9 @@ dnl `--disable-parallel' but specifies a known parallel compiler (like mpicc
 dnl or mpcc) then parallel support is enabled but configure doesn't search
 dnl for any parallel header files or libraries.
 dnl
-AC_ARG_ENABLE(parallel,
-  [  --enable-parallel=TYPE  Search for MPI-IO and MPI support files])
+AC_ARG_ENABLE([parallel],
+              [AC_HELP_STRING([--enable-parallel],
+                              [Search for MPI-IO and MPI support files])])
 
 AC_MSG_CHECKING(for parallel support files)
 case "X-$enable_parallel" in

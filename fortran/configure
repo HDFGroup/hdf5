@@ -1001,7 +1001,7 @@ Optional Features:
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
-  --enable-parallel=TYPE  Search for MPI-IO and MPI support files
+  --enable-parallel       Search for MPI-IO and MPI support files
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
