@@ -21,6 +21,9 @@
 /* Public headers needed by this file */
 #include <H5public.h>
 
+/* Default root directory size */
+#define H5G_DEFAULT_ROOT SIZE   256
+
 #ifdef __cplusplus
 extern "C" {
 #endif

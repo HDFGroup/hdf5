@@ -557,6 +557,53 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    FUNC_LEAVE (SUCCEED);
 }
    
+/*--------------------------------------------------------------------------
+ NAME
+    H5G_set_root
+ PURPOSE
+    Inserts symbol table ENT as the file's root object giving it the specified
+    NAME.  NAME is not allowed to be relative.
+ USAGE
+    herr_t H5G_set_root(f, name, ent)
+        hatom_t f;          IN: File to set root entry
+        const char *name;   IN: Root object's name
+        H5G_entry_t *ent;   IN: Root object's symbol-table entry
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function sets the root object of a file to be the symbol-table
+    table passed as an argument.  The primary function of this routine is to
+    make a dataset the root object of a file.  (The dataset may be replaced
+    with a "real" root directory, but at this point, the dataset is the only
+    object in the file)
+--------------------------------------------------------------------------*/
+herr_t
+H5G_set_root (hdf5_file_t *f, const char *name, H5G_entry_t *ent)
+{
+   herr_t	status;
+   const char	*rest=NULL;
+   H5G_entry_t	_parent;
+   size_t	nchars;
+   char		_comp[1024];
+   
+   FUNC_ENTER (H5G_set_root, NULL, FAIL);
+
+   /* check args */
+   assert (f);
+   assert (name && *name);
+   assert (ent);
+
+   /* lookup base-name */
+   if(HDstrlen(rest = H5G_basename (name, NULL))<=0)
+      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, FAIL); /* invalid base name */
+   H5ECLEAR; 
+
+   /* insert entry as root object */
+   HDmemcpy(file->root_sym,ent,sizeof(H5G_entry_t));
+      
+   FUNC_LEAVE (SUCCEED);
+}
+   
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_modify

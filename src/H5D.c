@@ -142,7 +142,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did)
 {
-    H5D_dataset_t *dataset;         /* dataset object to release */
+    H5D_dataset_t *dataset;         /* dataset object to modify */
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Dset_info, H5D_init_interface, FAIL);
@@ -236,7 +236,7 @@ done:
     /* Normal function cleanup */
 
     FUNC_LEAVE(ret_value);
-} /* end H5Dset_info() */
+} /* end H5Dwrite() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -256,9 +256,6 @@ done:
 herr_t H5D_flush(hatom_t oid)
 {
     H5D_dataset_t *dataset;         /* dataset object to release */
-#ifdef QUINCEY
-    H5F_
-#endif
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5D_flush, H5D_init_interface, FAIL);
@@ -275,20 +272,66 @@ herr_t H5D_flush(hatom_t oid)
         /* Check if we need to create the dataset header and insert the dataset in the file's hierarchy */
         if(dataset->header==0)
           {
+            H5G_entry_t d_sym;
             H5F_root_symtype_t root_type=H5F_root_type(dataset->file);
+            hdf5_file_t *file;
+            group_t dset_parent=H5Aatom_group(dataset->parent);
+
+            /* Get the dataset's file... (I'm not fond of this. -QAK) */
+            if((file=H5Aatom_object(dataset->file))==NULL)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADATOM, FAIL);
 
             /* Flush object header, etc. to the file... */
             if(root_type==H5F_ROOT_ERROR)
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL);
-            if(root_type==H5F_ROOT_DATASET || H5F_ROOT_UNKNOWN)
+
+            /* construct dataset symbol-table entry */
+            d_sym.name_off=0;
+            /* allocate the dataset's object header */
+            if((d_sym.header=H5O_new(file, 1, 0))<0)
+                HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+            d_sym.type=H5G_NOTHING_CACHED;
+            dataset->header=d_sym.header;
+
+            /* Insert dataset into parent directory, if there is one */
+            if(dset_parent!=H5_FILE ||
+                    (dset_parent==H5_FILE && root_type==H5F_ROOT_DIRECTORY))
               {
+                uintn namelen;  /* length of parent directory's name */
+                char *name;     /* pointer to parent directory's name */
+
+                /* Get the name of the parent directory */
+                if((namelen=H5Mname_len(dataset->parent))==UFAIL)
+                    HGOTO_ERROR(H5E_DIRECTORY, H5E_BADVALUE, FAIL);
+                if((name=HDmalloc(namelen+1))==NULL);
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+                if(H5Mget_name(dataset->parent,name)==FAIL)
+                    HGOTO_ERROR(H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
+
+                /* Insert the dataset into the parent directory */
+                if(H5G_insert (file, NULL, name, dataset->name, &d_sym)==FAIL)
+                    HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTINSERT, FAIL);
+                HDfree(name);
               } /* end if */
-            else
+            else    /* insert dataset as root-object, or into root-directory */
               {
-#ifdef QUINCEY
-                if(root_type
-#endif
-              } /* end if */
+                if(root_type==H5F_ROOT_DATASET || H5F_ROOT_UNKNOWN)
+                  {
+                    /* Make the root directory and stuff the dataset into it */
+                    if(H5G_mkroot (file, H5G_DEFAULT_ROOT_SIZE)==FAIL)
+                        HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTCREATE, FAIL);
+                    if(H5G_insert (file, NULL, NULL, dataset->name, &d_sym)==FAIL)
+                        HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTINSERT, FAIL);
+                  } /* end if */
+                else
+                  {
+                    /* Set the root of the file to point to the dataset */
+                    if(root_type==H5F_ROOT_NONE)
+                        H5G_set_root(file, dataset->name, &d_sym);
+                  } /* end else */
+              } /* end else */
+            
+            /* Add the appropriate messages for the dataset */
           } /* end if */
       } /* end if */
 
