@@ -57,7 +57,6 @@ typedef struct H5FD_mpio_t {
     MPI_Info	info;		/*file information			*/
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
-    hbool_t	truncate_pending; /* Whether a file truncation is pending */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
@@ -796,52 +795,29 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
 
-    /* Determine if the file should be truncated */
-    if(flags & H5F_ACC_TRUNC) {
-#ifdef H5_MPI_FILE_SET_SIZE_BIG
-        /* Indicate that a 'truncate' operation is pending on the file */
-        file->truncate_pending=TRUE;
-
-        /* File is treated as zero size now */
-        size=0;
-#else /* H5_MPI_FILE_SET_SIZE_BIG */
-        /* Only processor p0 will get the filesize and broadcast it. */
-        if (mpi_rank == 0) {
-            /* Get current file size */
-            if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
-                HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
-        } /* end if */
-
-        /* Broadcast file-size */
-        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
-            HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
-
-        /* Only truncate the file if it is non-zero length */
-        if(size) {
-            if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(fh, (MPI_Offset)0)))
-                HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
-
-            /* Don't let any proc return until all have truncated the file. */
-            if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(comm_dup)))
-                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mpi_code)
-
-            /* File is zero size now */
-            size = 0;
-        } /* end if */
-#endif /* H5_MPI_FILE_SET_SIZE_BIG */
+    /* Only processor p0 will get the filesize and broadcast it. */
+    if (mpi_rank == 0) {
+        /* Get current file size */
+        if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
+            HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
     } /* end if */
-    else {
-        /* Only processor p0 will get the filesize and broadcast it. */
-        if (mpi_rank == 0) {
-            /* Get current file size */
-            if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
-                HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
-        } /* end if */
 
-        /* Broadcast file size */
-        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
-            HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
-    } /* end else */
+    /* Broadcast file size */
+    if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
+        HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+
+    /* Determine if the file should be truncated */
+    if(size && (flags & H5F_ACC_TRUNC)) {
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(fh, (MPI_Offset)0)))
+            HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
+
+        /* Don't let any proc return until all have truncated the file. */
+        if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(comm_dup)))
+            HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mpi_code)
+
+        /* File is zero size now */
+        size = 0;
+    } /* end if */
 
     /* Set the size of the file (from library's perspective) */
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
@@ -907,25 +883,6 @@ H5FD_mpio_close(H5FD_t *_file)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
-
-#ifdef H5_MPI_FILE_SET_SIZE_BIG
-    /* Check if we should truncate the file */
-    if(file->truncate_pending) {
-        MPI_Offset 	mpi_off;        /* Offset to write test data at */
-
-        /* Some numeric conversions */
-        assert(file->eoa>0);
-        if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
-
-        /* Truncate the extra data off the end */
-        /* (Don't worry about a barrier after the call, since we are closing) */
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
-            HMPI_DONE_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
-    } /* end if */
-#else /* H5_MPI_FILE_SET_SIZE_BIG */
-    assert(!file->truncate_pending);
-#endif /* H5_MPI_FILE_SET_SIZE_BIG */
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != (mpi_code=MPI_File_close(&(file->f)/*in,out*/)))
@@ -1714,9 +1671,6 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
         /* Extend the file's size */
         if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code)
-
-        /* File does not need to be truncated now */
-        file->truncate_pending=FALSE;
 #else /* H5_MPI_FILE_SET_SIZE_BIG */
         if (0==file->mpi_rank) {
             uint8_t             byte=0;
