@@ -157,10 +157,11 @@ sub rewrite_func ($$$$$) {
     }
   } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
     # Replaced an H5TRACE macro
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\s*\([ \t]*?\);)\n/"$1$2$trace"/es) {
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\s*\(.*?\);)\n/"$1$2$trace"/es) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";
+    print "body=\n>>>>>", $body, "<<<<<\n";
     goto error;
   }
 

@@ -679,6 +679,7 @@ H5T_term_interface(void)
 #ifdef H5T_DEBUG
     intn	nprint=0;
     hsize_t	nbytes;
+    H5T_cdata_t	*cdata;
 #endif
     
     /* Unregister all conversion functions */
@@ -733,6 +734,39 @@ H5T_term_interface(void)
 	H5MM_xfree (path);
 	H5T_path_g[i] = NULL;
     }
+
+#ifdef H5T_DEBUG
+    /* Print debugging infor for the `noop' conversion */
+    if (H5T_conv_noop==H5T_find(NULL, NULL, H5T_BKG_NO, &cdata)) {
+	if (cdata->stats->ncalls>0) {
+	    if (0==nprint++) {
+		HDfprintf (stderr, "H5T: type conversion statistics "
+			   "accumulated over life of library:\n");
+		HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
+			   H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
+			   "System", "Elapsed", "Bandwidth");
+		HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
+			   H5T_NAMELEN-1, "----", "-----", "-----", "----",
+			   "------", "-------", "---------");
+	    }
+	    nbytes = cdata->stats->nelmts;
+	    HDfprintf (stderr,
+		       "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f",
+		       H5T_NAMELEN-1, "no-op",
+		       cdata->stats->nelmts,
+		       cdata->stats->ncalls,
+		       cdata->stats->timer.utime, 
+		       cdata->stats->timer.stime, 
+		       cdata->stats->timer.etime);
+	    if (cdata->stats->timer.etime>0) {
+		HDfprintf (stderr, " %15g\n",
+			   nbytes / cdata->stats->timer.etime);
+	    } else {
+		HDfprintf (stderr, " %15s\n", "Inf");
+	    }
+	}
+    }
+#endif
 
     /* Clear conversion tables */
     H5T_apath_g = 0;

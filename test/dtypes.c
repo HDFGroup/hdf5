@@ -8,12 +8,13 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 #include <assert.h>
-#include <float.h>
 #include <hdf5.h>
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define H5T_PACKAGE
@@ -51,6 +52,39 @@ typedef struct complex_t {
 typedef enum flt_t {
     FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER
 } flt_t;
+
+/*
+ * Some machines generate SIGFPE on floating point overflows.  According to
+ * the Posix standard, we cannot assume that we can continue from such a
+ * signal. Therefore, if the following constant is defined then tests that
+ * might raise SIGFPE are executed in a child process.
+ */
+#define HANDLE_SIGFPE
+
+
+/*-------------------------------------------------------------------------
+ * Function:	fpe_handler
+ *
+ * Purpose:	Exit with 255
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef HANDLE_SIGFPE
+static void
+fpe_handler(int __unused__ signo)
+{
+    puts(" -SKIP-");
+    puts("   Test skipped due to SIGFPE from probable overflow.");
+    exit(255);
+}
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -675,6 +709,74 @@ test_conv_int (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	my_isnan
+ *
+ * Purpose:	Determines whether VAL points to NaN.
+ *
+ * Return:	TRUE or FALSE
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+my_isnan(flt_t type, void *val)
+{
+    int retval;
+    char s[256];
+    
+    switch (type) {
+    case FLT_FLOAT:
+	retval = (*((float*)val)!=*((float*)val));
+	break;
+
+    case FLT_DOUBLE:
+	retval = (*((double*)val)!=*((double*)val));
+	break;
+
+    case FLT_LDOUBLE:
+	retval = (*((long double*)val)!=*((long double*)val));
+	break;
+
+    default:
+	return 0;
+    }
+
+    /*
+     * Sometimes NaN==NaN (e.g., DEC Alpha) so we try to print it and see if
+     * the result contains a NaN string.
+     */
+    if (!retval) {
+	switch (type) {
+	case FLT_FLOAT:
+	    sprintf(s, "%g", *((float*)val));
+	    break;
+	    
+	case FLT_DOUBLE:
+	    sprintf(s, "%g", *((double*)val));
+	    break;
+
+	case FLT_LDOUBLE:
+	    sprintf(s, "%Lg", *((long double*)val));
+	    break;
+
+	default:
+	    return 0;
+	}
+
+	if (!strstr(s, "NaN") || !strstr(s, "NAN") || !strstr(s, "nan")) {
+	    retval = 1;
+	}
+    }
+
+    return retval;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_flt_1
  *
  * Purpose:	Test conversion of random floating point values from SRC to
@@ -713,6 +815,39 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     size_t		i, j, k;		/*counters		*/
     int			endian;			/*machine endianess	*/
+
+#ifdef HANDLE_SIGFPE
+    pid_t		child_pid;		/*process ID of child	*/
+    int			status;			/*child exit status	*/
+    
+    /*
+     * Some systems generage SIGFPE during floating point overflow and we
+     * cannot assume that we can continue from such a signal.  Therefore, we
+     * fork here and let the child run the test and return the number of
+     * failures with the exit status.
+     */
+    fflush(stdout);
+    fflush(stderr);
+    if ((child_pid=fork())<0) {
+	perror("fork");
+	return 1;
+    } else if (child_pid>0) {
+	while (child_pid!=waitpid(child_pid, &status, 0)) /*void*/;
+	if (WIFEXITED(status) && 255==WEXITSTATUS(status)) {
+	    return 0; /*child exit after catching SIGFPE*/
+	} else if (WIFEXITED(status)) {
+	    return WEXITSTATUS(status);
+	} else {
+	    puts("   Child didn't exit normally.");
+	    return 1;
+	}
+    }
+
+    /*
+     * The remainder of this function is executed only by the child.
+     */
+    signal(SIGFPE,fpe_handler);
+#endif
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
@@ -785,6 +920,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
 	/* Check the software results against the hardware */
 	for (j=0; j<nelmts; j++) {
+	    hw_f = 911.0;
+	    hw_d = 911.0;
+	    hw_ld = 911.0;
 
 	    /* The hardware conversion */
 	    if (FLT_FLOAT==src_type) {
@@ -800,14 +938,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		}
 	    } else if (FLT_DOUBLE==src_type) {
 		if (FLT_FLOAT==dst_type) {
-		    /* Watch out for that FPE on overflow! */
-		    if (((double*)saved)[j] > FLT_MAX) {
-			hw_f = FLT_MAX;
-		    } else if (((double*)saved)[j] < -FLT_MAX) {
-			hw_f = -FLT_MAX;
-		    } else {
-			hw_f = ((double*)saved)[j];
-		    }
+		    hw_f = ((double*)saved)[j];
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = ((double*)saved)[j];
@@ -818,24 +949,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		}
 	    } else {
 		if (FLT_FLOAT==dst_type) {
-		    /* Watch out for that FPE on overflow! */
-		    if (((long double*)saved)[j] > FLT_MAX) {
-			hw_f = FLT_MAX;
-		    } else if (((long double*)saved)[j] < -FLT_MAX) {
-			hw_f = -FLT_MAX;
-		    } else {
-			hw_f = ((long double*)saved)[j];
-		    }
+		    hw_f = ((long double*)saved)[j];
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
-		    /* Watch out for that FPE! */
-		    if (((long double*)saved)[j] > DBL_MAX) {
-			hw_d = DBL_MAX;
-		    } else if (((long double*)saved)[j] < -DBL_MAX) {
-			hw_d = -DBL_MAX;
-		    } else {
-			hw_d = ((long double*)saved)[j];
-		    }
+		    hw_d = ((long double*)saved)[j];
 		    hw = (unsigned char*)&hw_d;
 		} else {
 		    hw_ld = ((long double*)saved)[j];
@@ -857,16 +974,16 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	     * pattern for NaN by setting the significand to all ones.
 	     */
 	    if (FLT_FLOAT==dst_type &&
-		((float*)buf)[j]!=((float*)buf)[j] &&
-		((float*)hw)[0]!=((float*)hw)[0]) {
+		my_isnan(dst_type, (float*)buf+j) &&
+		my_isnan(dst_type, hw)) {
 		continue;
 	    } else if (FLT_DOUBLE==dst_type &&
-		       ((double*)buf)[j]!=((double*)buf)[j] &&
-		       ((double*)hw)[0]!=((double*)hw)[0]) {
+		       my_isnan(dst_type, (double*)buf+j) &&
+		       my_isnan(dst_type, hw)) {
 		continue;
 	    } else if (FLT_LDOUBLE==dst_type &&
-		       ((long double*)buf)[j]!=((long double*)buf)[j] &&
-		       ((long double*)hw)[0]!=((long double*)hw)[0]) {
+		       my_isnan(dst_type, (long double*)buf+j) &&
+		       my_isnan(dst_type, hw)) {
 		continue;
 	    }
 #endif
@@ -877,16 +994,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	     * hardware conversions on some machines return NaN instead of
 	     * overflowing to +Inf or -Inf or underflowing to +0 or -0.
 	     */
-	    if (FLT_FLOAT==dst_type &&
-		*((float*)hw)!=*((float*)hw)) {
-		continue;
-	    } else if (FLT_DOUBLE==dst_type &&
-		       *((double*)hw)!=*((double*)hw)) {
-		continue;
-	    } else if (FLT_LDOUBLE==dst_type &&
-		       *((long double*)hw)!=*((long double*)hw)) {
-		continue;
-	    }
+	    if (my_isnan(dst_type, hw)) continue;
 #endif
 
 #if 1
@@ -970,12 +1078,20 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
  done:
     if (buf) free (buf);
     if (saved) free (saved);
+#ifdef HANDLE_SIGFPE
+    exit(MIN((int)fails_all_tests, 254));
+#else
     return (int)fails_all_tests;
+#endif
 
  error:
     if (buf) free (buf);
     if (saved) free (saved);
-    return (int)MIN(1, fails_all_tests);
+#ifdef HANDLE_SIGFPE
+    exit(MIN(MAX((int)fails_all_tests, 1), 254));
+#else
+    return MAX((int)fails_all_tests, 1);
+#endif
 }
 
 
@@ -1000,10 +1116,6 @@ main(void)
 {
     unsigned long	nerrors = 0;
 
-#if 0
-    signal(SIGFPE,SIG_IGN);
-#endif
-
     /* Set the error handler */
     H5Eset_auto (display_error_cb, NULL);
 
@@ -1015,12 +1127,6 @@ main(void)
     nerrors += test_named ()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
 
-#ifndef LATER
-    /*
-     * NOT READY FOR TESTING YET BECAUSE SOME SYSTEMS GENERATE A SIGFPE WHEN
-     * AN OVERFLOW OCCURS CASTING A DOUBLE TO A FLOAT.
-     */
-#else
     /* Test degenerate cases */
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE);
@@ -1038,7 +1144,6 @@ main(void)
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
-#endif
     
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",

@@ -182,7 +182,9 @@ dtypes.o: \
    ../src/H5Tpkg.h \
    ../src/H5HGprivate.h \
    ../src/H5Fprivate.h \
-   ../src/H5private.h
+   ../src/H5private.h \
+   ../src/H5Tprivate.h \
+   ../src/H5Gprivate.h
 hyperslab.o: \
    hyperslab.c \
    ../src/H5private.h \

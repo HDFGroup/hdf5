@@ -1026,6 +1026,7 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims, const hsize_t *m
     herr_t		    ret_value = SUCCEED;
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
+    H5TRACE4("e","iIs*h*h",sid,rank,dims,max);
 
     /* Check args */
     if ((space = H5I_object(sid)) == NULL) {
@@ -1336,6 +1337,7 @@ H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
     int		i;
 
     FUNC_ENTER(H5Screate, FAIL);
+    H5TRACE3("i","Is*h*h",rank,dims,maxdims);
 
     /* Check arguments */
     if (rank<0) {
