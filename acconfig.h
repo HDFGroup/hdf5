@@ -24,3 +24,15 @@
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS
+
+/* Define if `struct text_info' is defined */
+#undef HAVE_STRUCT_TEXT_INFO
+
+/* Define if `struct videoconfig' is defined */
+#undef HAVE_STRUCT_VIDEOCONFIG
+
+/* Define if the ioctl TIOCGETD is defined */
+#undef HAVE_TIOCGETD
+
+/* Define if the ioctl TIOCGWINSZ is defined */
+#undef HAVE_TIOCGWINSZ

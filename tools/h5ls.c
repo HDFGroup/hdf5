@@ -23,10 +23,11 @@
 #endif
 
 /* Command-line switches */
-static int verbose_g = 0;
-static int dump_g = 0;
-static int width_g = 80;
-static int string_g = FALSE;
+static int verbose_g = 0;		/*lots of extra output		     */
+static int width_g = 80;		/*output width in characters	     */
+static hbool_t dump_g = FALSE;		/*display dataset values?	     */
+static hbool_t label_g = FALSE;		/*label compound values?	     */
+static hbool_t string_g = FALSE;	/*print 1-byte numbers as ASCII?     */
 
 /* Information about how to display each type of object */
 static struct dispatch_t {
@@ -46,6 +47,7 @@ static struct dispatch_t {
 }
 
 static herr_t list (hid_t group, const char *name, void *cd);
+static void display_type(hid_t type, int indent);
 
 
 /*-------------------------------------------------------------------------
@@ -70,6 +72,7 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
       -d, --dump       Print the values of datasets\n\
+      -l, --label      Label members of compound datasets\n\
       -s, --string     Print 1-byte integer datasets as ASCII\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
@@ -83,6 +86,669 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
       members is displayed.  If no object names are specified then\n\
       information about all of the objects in the root group is displayed.\n",
 	    progname);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_string
+ *
+ * Purpose:	Print a string value by escaping unusual characters.
+ *
+ * Return:	Number of characters printed.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+display_string(const char *s)
+{
+    int		nprint=0;
+    
+    for (/*void*/; s && *s; s++) {
+	switch (*s) {
+	case '"':
+	    printf("\\\"");
+	    nprint += 2;
+	    break;
+	case '\\':
+	    printf("\\\\");
+	    nprint += 2;
+	    break;
+	case '\b':
+	    printf("\\b");
+	    nprint += 2;
+	    break;
+	case '\f':
+	    printf("\\f");
+	    nprint += 2;
+	    break;
+	case '\n':
+	    printf("\\n");
+	    nprint += 2;
+	    break;
+	case '\r':
+	    printf("\\r");
+	    nprint += 2;
+	    break;
+	case '\t':
+	    printf("\\t");
+	    nprint += 2;
+	    break;
+	default:
+	    if (isprint(*s)) {
+		putchar(*s);
+		nprint++;
+	    } else {
+		printf("\\%03o", *((const unsigned char*)s));
+		nprint += 4;
+	    }
+	    break;
+	}
+    }
+    return nprint;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_native_type
+ *
+ * Purpose:	Prints the name of a native C data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_native_type(hid_t type, int __unused__ indent)
+{
+    if (H5Tequal(type, H5T_NATIVE_CHAR)) {
+	printf("native char");
+    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+	printf("native unsigned char");
+    } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+	printf("native short");
+    } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+	printf("native unsigned short");
+    } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+	printf("native int");
+    } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+	printf("native unsigned int");
+    } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+	printf("native long");
+    } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+	printf("native unsigned long");
+    } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+	printf("native long long");
+    } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+	printf("native unsigned long long");
+    } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+	printf("native float");
+    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+	printf("native double");
+    } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+	printf("native long double");
+    } else if (H5Tequal(type, H5T_NATIVE_B8)) {
+	printf("native 8-bit field");
+    } else if (H5Tequal(type, H5T_NATIVE_B16)) {
+	printf("native 16-bit field");
+    } else if (H5Tequal(type, H5T_NATIVE_B32)) {
+	printf("native 32-bit field");
+    } else if (H5Tequal(type, H5T_NATIVE_B64)) {
+	printf("native 64-bit field");
+    } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
+	printf("native hsize_t");
+    } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
+	printf("native hssize_t");
+    } else if (H5Tequal(type, H5T_NATIVE_HERR)) {
+	printf("native herr_t");
+    } else if (H5Tequal(type, H5T_NATIVE_HBOOL)) {
+	printf("native hbool_t");
+    } else {
+	return FALSE;
+    }
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_ieee_type
+ *
+ * Purpose:	Print the name of an IEEE floating-point data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_ieee_type(hid_t type, int __unused__ indent)
+{
+    if (H5Tequal(type, H5T_IEEE_F32BE)) {
+	printf("IEEE 32-bit big-endian float");
+    } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+	printf("IEEE 32-bit little-endian float");
+    } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+	printf("IEEE 64-bit big-endian float");
+    } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+	printf("IEEE 64-bit little-endian float");
+    } else {
+	return FALSE;
+    }
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_precision
+ *
+ * Purpose:	Prints information on the next line about precision and
+ *		padding if the precision is less than the total data type
+ *		size.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+display_precision(hid_t type, int indent)
+{
+    size_t		prec;		/*precision			*/
+    H5T_pad_t		plsb, pmsb;	/*lsb and msb padding		*/
+    const char		*plsb_s=NULL;	/*lsb padding string		*/
+    const char		*pmsb_s=NULL;	/*msb padding string		*/
+    size_t		nbits;		/*number of bits		*/
+
+    /*
+     * If the precision is less than the total size then show the precision
+     * and offset on the following line.  Also display the padding
+     * information.
+     */
+    if (8*H5Tget_size(type)!=(prec=H5Tget_precision(type))) {
+	printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
+	       indent, "", (unsigned long)prec, 1==prec?"":"s",
+	       (unsigned long)H5Tget_offset(type));
+
+	H5Tget_pad(type, &plsb, &pmsb);
+	if (H5Tget_offset(type)>0) {
+	    switch (plsb) {
+	    case H5T_PAD_ZERO:
+		plsb_s = "zero";
+		break;
+	    case H5T_PAD_ONE:
+		plsb_s = "one";
+		break;
+	    case H5T_PAD_BACKGROUND:
+		plsb_s = "bkg";
+		break;
+	    case H5T_PAD_ERROR:
+	    case H5T_NPAD:
+		plsb_s = "unknown";
+		break;
+	    }
+	}
+	if (H5Tget_offset(type)+prec<8*H5Tget_size(type)) {
+	    switch (pmsb) {
+	    case H5T_PAD_ZERO:
+		pmsb_s = "zero";
+		break;
+	    case H5T_PAD_ONE:
+		pmsb_s = "one";
+		break;
+	    case H5T_PAD_BACKGROUND:
+		pmsb_s = "bkg";
+		break;
+	    case H5T_PAD_ERROR:
+	    case H5T_NPAD:
+		pmsb_s = "unknown";
+		break;
+	    }
+	}
+	if (plsb_s || pmsb_s) {
+	    printf("\n%*s(", indent, "");
+	    if (plsb_s) {
+		nbits = H5Tget_offset(type);
+		printf("%lu %s bit%s at bit 0",
+		       (unsigned long)nbits, plsb_s, 1==nbits?"":"s");
+	    }
+	    if (plsb_s && pmsb_s) printf(", ");
+	    if (pmsb_s) {
+		nbits = 8*H5Tget_size(type)-(H5Tget_offset(type)+prec);
+		printf("%lu %s bit%s at bit %lu",
+		       (unsigned long)nbits, pmsb_s, 1==nbits?"":"s",
+		       (unsigned long)(8*H5Tget_size(type)-nbits));
+	    }
+	    printf(")");
+	}
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_int_type
+ *
+ * Purpose:	Print the name of an integer data type.  Common information
+ *		like number of bits, byte order, and sign scheme appear on
+ *		the first line. Additional information might appear in
+ *		parentheses on the following lines.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_int_type(hid_t type, int indent)
+{
+    H5T_order_t		order;		/*byte order value		*/
+    const char 		*order_s=NULL;	/*byte order string		*/
+    H5T_sign_t		sign;		/*sign scheme value		*/
+    const char		*sign_s=NULL;	/*sign scheme string		*/
+    
+    if (H5T_INTEGER!=H5Tget_class(type)) return FALSE;
+    
+    /* Byte order */
+    if (H5Tget_size(type)>1) {
+	order = H5Tget_order(type);
+	if (H5T_ORDER_LE==order) {
+	    order_s = " little-endian";
+	} else if (H5T_ORDER_BE==order) {
+	    order_s = " big-endian";
+	} else if (H5T_ORDER_VAX==order) {
+	    order_s = " mixed-endian";
+	} else {
+	    order_s = " unknown-byte-order";
+	}
+    } else {
+	order_s = "";
+    }
+
+    /* Sign */
+    if (H5T_SGN_NONE==sign) {
+	sign_s = " unsigned";
+    } else if (H5T_SGN_2==sign) {
+	sign_s = "";
+    } else {
+	sign_s = " unknown-sign";
+    }
+    
+    /*
+     * Print size, order, and sign on first line, precision and padding
+     * information on the subsequent lines
+     */
+    printf("%lu-bit%s%s integer",
+	   (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
+    display_precision(type, indent);
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_float_type
+ *
+ * Purpose:	Print info about a floating point data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_float_type(hid_t type, int indent)
+{
+    H5T_order_t		order;		/*byte order value		*/
+    const char 		*order_s=NULL;	/*byte order string		*/
+    size_t		spos;		/*sign bit position		*/
+    size_t		esize, epos;	/*exponent size and position	*/
+    size_t		msize, mpos;	/*significand size and position	*/
+    size_t		ebias;		/*exponent bias			*/
+    H5T_norm_t		norm;		/*significand normalization	*/
+    const char		*norm_s=NULL;	/*normalization string		*/
+    H5T_pad_t		pad;		/*internal padding value	*/
+    const char		*pad_s=NULL;	/*internal padding string	*/
+    
+    if (H5T_FLOAT!=H5Tget_class(type)) return FALSE;
+    
+    /* Byte order */
+    if (H5Tget_size(type)>1) {
+	order = H5Tget_order(type);
+	if (H5T_ORDER_LE==order) {
+	    order_s = " little-endian";
+	} else if (H5T_ORDER_BE==order) {
+	    order_s = " big-endian";
+	} else if (H5T_ORDER_VAX==order) {
+	    order_s = " mixed-endian";
+	} else {
+	    order_s = " unknown-byte-order";
+	}
+    } else {
+	order_s = "";
+    }
+
+    /*
+     * Print size and byte order on first line, precision and padding on
+     * subsequent lines.
+     */
+    printf("%lu-bit%s floating-point",
+	   (unsigned long)(8*H5Tget_size(type)), order_s);
+    display_precision(type, indent);
+
+    /* Print sizes, locations, and other information about each field */
+    H5Tget_fields (type, &spos, &epos, &esize, &mpos, &msize);
+    ebias = H5Tget_ebias(type);
+    norm = H5Tget_norm(type);
+    switch (norm) {
+    case H5T_NORM_IMPLIED:
+	norm_s = ", msb implied";
+	break;
+    case H5T_NORM_MSBSET:
+	norm_s = ", msb always set";
+	break;
+    case H5T_NORM_NONE:
+	norm_s = ", no normalization";
+	break;
+    case H5T_NORM_ERROR:
+	norm_s = ", unknown normalization";
+	break;
+    }
+    printf("\n%*s(significant for %lu bit%s at bit %lu%s)", indent, "", 
+	   (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
+	   norm_s);
+    printf("\n%*s(exponent for %lu bit%s at bit %lu, bias is 0x%lx)",
+	   indent, "", (unsigned long)esize, 1==esize?"":"s",
+	   (unsigned long)epos, (unsigned long)ebias);
+    printf("\n%*s(sign bit at %lu)", indent, "", (unsigned long)spos);
+    return TRUE;
+
+    /* Display internal padding */
+    if (1+esize+msize<H5Tget_precision(type)) {
+	pad = H5Tget_inpad(type);
+	switch (pad) {
+	case H5T_PAD_ZERO:
+	    pad_s = "zero";
+	    break;
+	case H5T_PAD_ONE:
+	    pad_s = "one";
+	    break;
+	case H5T_PAD_BACKGROUND:
+	    pad_s = "bkg";
+	    break;
+	case H5T_PAD_ERROR:
+	case H5T_NPAD:
+	    pad_s = "unknown";
+	    break;
+	}
+	printf("\n%*s(internal padding bits are %s)", indent, "", pad_s);
+    }
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_cmpd_type
+ *
+ * Purpose:	Print info about a compound data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_cmpd_type(hid_t type, int indent)
+{
+    char	*name=NULL;	/*member name				*/
+    int		ndims;		/*dimensionality			*/
+    size_t	dims[8];	/*dimensions				*/
+    int		perm[8];	/*index permutation			*/
+    hid_t	subtype;	/*member data type			*/
+    int		i, j, n;	/*miscellaneous counters		*/
+    
+    
+    if (H5T_COMPOUND!=H5Tget_class(type)) return FALSE;
+    printf("struct {");
+    for (i=0; i<H5Tget_nmembers(type); i++) {
+
+	/* Name and offset */
+	name = H5Tget_member_name(type, i);
+	printf("\n%*s\"", indent+4, "");
+	n = display_string(name);
+	printf("\"%*s +%-4lu ", MAX(0, 16-n), "",
+	       (unsigned long)H5Tget_member_offset(type, i));
+	free(name);
+
+	/* Dimensions and permutation */
+	ndims = H5Tget_member_dims(type, i, dims, perm);
+	if (ndims>0) {
+	    printf("[");
+	    for (j=0; j<ndims; j++) {
+		printf("%s%lu", j?",":"", (unsigned long)(dims[j]));
+	    }
+	    printf("]");
+	    for (j=0; j<ndims; j++) {
+		if (perm[j]!=j) break;
+	    }
+	    if (j<ndims) {
+		printf("x[");
+		for (j=0; j<ndims; j++) {
+		    printf("%s%d", j?",":"", perm[j]);
+		}
+		printf("]");
+	    }
+	    printf(" ");
+	}
+	
+	/* Data type */
+	subtype = H5Tget_member_type(type, i);
+	display_type(subtype, indent+4);
+	H5Tclose(subtype);
+    }
+    printf("\n%*s}", indent, "");
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_string
+ *
+ * Purpose:	Print information about a string data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_string_type(hid_t type, int __unused__ indent)
+{
+    H5T_str_t		pad;
+    const char		*pad_s=NULL;
+    H5T_cset_t		cset;
+    const char		*cset_s=NULL;
+    
+    if (H5T_STRING!=H5Tget_class(type)) return FALSE;
+
+    /* Padding */
+    pad = H5Tget_strpad(type);
+    switch (pad) {
+    case H5T_STR_NULLTERM:
+	pad_s = "null-terminated";
+	break;
+    case H5T_STR_NULLPAD:
+	pad_s = "null-padded";
+	break;
+    case H5T_STR_SPACEPAD:
+	pad_s = "space-padded";
+	break;
+    case H5T_STR_RESERVED_3:
+    case H5T_STR_RESERVED_4:
+    case H5T_STR_RESERVED_5:
+    case H5T_STR_RESERVED_6:
+    case H5T_STR_RESERVED_7:
+    case H5T_STR_RESERVED_8:
+    case H5T_STR_RESERVED_9:
+    case H5T_STR_RESERVED_10:
+    case H5T_STR_RESERVED_11:
+    case H5T_STR_RESERVED_12:
+    case H5T_STR_RESERVED_13:
+    case H5T_STR_RESERVED_14:
+    case H5T_STR_RESERVED_15:
+    case H5T_STR_ERROR:
+	pad_s = "unknown-format";
+	break;
+    }
+
+    /* Character set */
+    cset = H5Tget_cset(type);
+    switch (cset) {
+    case H5T_CSET_ASCII:
+	cset_s = "ASCII";
+	break;
+    case H5T_CSET_RESERVED_1:
+    case H5T_CSET_RESERVED_2:
+    case H5T_CSET_RESERVED_3:
+    case H5T_CSET_RESERVED_4:
+    case H5T_CSET_RESERVED_5:
+    case H5T_CSET_RESERVED_6:
+    case H5T_CSET_RESERVED_7:
+    case H5T_CSET_RESERVED_8:
+    case H5T_CSET_RESERVED_9:
+    case H5T_CSET_RESERVED_10:
+    case H5T_CSET_RESERVED_11:
+    case H5T_CSET_RESERVED_12:
+    case H5T_CSET_RESERVED_13:
+    case H5T_CSET_RESERVED_14:
+    case H5T_CSET_RESERVED_15:
+    case H5T_CSET_ERROR:
+	cset_s = "unknown-character-set";
+	break;
+    }
+
+    printf("%lu-byte %s %s string",
+	   (unsigned long)H5Tget_size(type), pad_s, cset_s);
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_reference_type
+ *
+ * Purpose:	Prints information about a reference data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_reference_type(hid_t type, int __unused__ indent)
+{
+    if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
+
+    printf("%lu-byte unknown reference",
+	   (unsigned long)H5Tget_size(type));
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_type
+ *
+ * Purpose:	Prints a data type definition.  The definition is printed
+ *		without any leading space or trailing line-feed (although
+ *		there might be line-feeds inside the type definition).  The
+ *		first line is assumed to have INDENT characters before it on
+ *		the same line (printed by the caller).
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+display_type(hid_t type, int indent)
+{
+    H5T_class_t		data_class;
+    
+    /* Bad data type */
+    if (type<0) {
+	printf("<ERROR>");
+	return;
+    }
+
+    /* Shared? */
+    if (H5Tcommitted(type)) printf("shared ");
+
+    /* Print the type */
+    if (display_native_type(type, indent) ||
+	display_ieee_type(type, indent) ||
+	display_int_type(type, indent) ||
+	display_float_type(type, indent) ||
+	display_cmpd_type(type, indent) ||
+	display_string_type(type, indent) ||
+	display_reference_type(type, indent)) {
+	return;
+    }
+
+    /* Unknown type */
+    printf("%lu-byte class-%u unknown",
+	   (unsigned long)H5Tget_size(type),
+	   (unsigned)data_class);
 }
 
 
@@ -111,7 +777,7 @@ dump_dataset_values(hid_t dset)
     memset(&info, 0, sizeof info);
     info.idx_fmt = "        (%s) ";
     info.line_ncols = width_g;
-    if (verbose_g) info.cmpd_name = "%s=";
+    if (label_g) info.cmpd_name = "%s=";
 
     /*
      * If the dataset is a 1-byte integer type then format it as an ASCI
@@ -223,6 +889,7 @@ dataset_list1(hid_t dset)
 	    HDfprintf(stdout, "/%Hu", max_size[i]);
 	}
     }
+    if (0==ndims) printf("SCALAR");
     putchar('}');
     H5Sclose (space);
 
@@ -251,18 +918,55 @@ static herr_t
 dataset_list2(hid_t dset)
 {
     hid_t		dcpl;		/*dataset creation property list*/
+    hid_t		type;		/*data type of dataset		*/
     int			nf;		/*number of filters		*/
     unsigned		filt_flags;	/*filter flags			*/
     H5Z_filter_t	filt_id;	/*filter identification number	*/
     unsigned		cd_values[20];	/*filter client data values	*/
     size_t		cd_nelmts;	/*filter client number of values*/
     size_t		cd_num;		/*filter client data counter	*/
-    char		f_name[32];	/*filter name			*/
+    char		f_name[256];	/*filter/file name		*/
     char		s[64];		/*temporary string buffer	*/
+    off_t		f_offset;	/*offset in external file	*/
+    hsize_t		f_size;		/*bytes used in external file	*/
+    hsize_t		total_offset;	/*total dataset offset		*/
     int			i;
+    
 
     if (verbose_g>0) {
 	dcpl = H5Dget_create_plist(dset);
+
+	/* Print data type */
+	printf("    %-10s ", "Type:");
+	type = H5Dget_type(dset);
+	display_type(type, 15);
+	H5Tclose(type);
+	printf("\n");
+
+	/* Print information about external strorage */
+	if ((nf = H5Pget_external_count(dcpl))>0) {
+	    printf("    %-10s %d external file%s (num/addr/offset/length)\n",
+		   "Extern:", nf, 1==nf?"":"s");
+	    for (i=0, total_offset=0; i<nf; i++) {
+		if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
+				    &f_size)<0) {
+		    HDfprintf(stdout,
+			      "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
+			      i, total_offset, "", "",
+			      i+1<nf?"Following addresses are incorrect":"");
+		} else if (H5S_UNLIMITED==f_size) {
+		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s \"",
+			      i, total_offset, (hsize_t)f_offset, "INF");
+		    display_string(f_name);
+		} else {
+		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu \"",
+			      i, total_offset, (hsize_t)f_offset, f_size);
+		    display_string(f_name);
+		}
+		printf("\"\n");
+		total_offset += f_size;
+	    }
+	}
 
 	/* Print information about raw data filters */
 	if ((nf = H5Pget_nfilters(dcpl))>0) {
@@ -286,6 +990,33 @@ dataset_list2(hid_t dset)
     }
 
     if (dump_g) dump_dataset_values(dset);
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	datatype_list2
+ *
+ * Purpose:	List information about a data type which should appear after
+ *		information which is general to all objects.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datatype_list2(hid_t type)
+{
+    printf("    %-10s ", "Type:");
+    display_type(type, 15);
+    printf("\n");
     return 0;
 }
 
@@ -387,22 +1118,27 @@ list (hid_t group, const char *name, void __unused__ *cd)
 	puts("**NOT FOUND**");
 	return 0;
     } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
-	printf("Unknown type(%d)\n", sb.type);
-	return 0;
+	printf("Unknown type(%d)", sb.type);
+	sb.type = -1;
     }
-    if (dispatch_g[sb.type].name) fputs(dispatch_g[sb.type].name, stdout);
+    if (sb.type>=0 && dispatch_g[sb.type].name) {
+	fputs(dispatch_g[sb.type].name, stdout);
+    }
 
     /*
      * Open the object.  Not all objects can be opened.  If this is the case
      * then return right away.
      */
-    if (NULL==dispatch_g[sb.type].open ||
-	(obj=(dispatch_g[sb.type].open)(group, name))<0) return 0;
+    if (sb.type>=0 &&
+	(NULL==dispatch_g[sb.type].open ||
+	 (obj=(dispatch_g[sb.type].open)(group, name))<0)) return 0;
 
     /*
      * List the first line of information for the object.
      */
-    if (dispatch_g[sb.type].list1) (dispatch_g[sb.type].list1)(obj);
+    if (sb.type>=0 && dispatch_g[sb.type].list1) {
+	(dispatch_g[sb.type].list1)(obj);
+    }
     putchar('\n');
     
     /*
@@ -410,26 +1146,113 @@ list (hid_t group, const char *name, void __unused__ *cd)
      * which is common to all objects.
      */
     if (verbose_g>0) {
-	H5Aiterate(obj, NULL, list_attr, NULL);
+	if (sb.type>=0) H5Aiterate(obj, NULL, list_attr, NULL);
 	printf("    %-10s %lu:%lu:%lu:%lu\n", "Location:",
 	       sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
 	printf("    %-10s %u\n", "Links:", sb.nlink);
 	if (sb.mtime>0 && NULL!=(tm=localtime(&(sb.mtime)))) {
 	    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-	    printf("    %-10s %s\n", "Modtime:", buf);
+	    printf("    %-10s %s\n", "Modified:", buf);
 	}
 	comment[0] = '\0';
 	H5Gget_comment(group, name, sizeof(comment), comment);
 	strcpy(comment+sizeof(comment)-4, "...");
 	if (comment[0]) printf("    %-10s %s\n", "Comment:", comment);
     }
-    if (dispatch_g[sb.type].list2) (dispatch_g[sb.type].list2)(obj);
+    if (sb.type>0 && dispatch_g[sb.type].list2) {
+	(dispatch_g[sb.type].list2)(obj);
+    }
     
     /*
      * Close the object.
      */
-    (dispatch_g[sb.type].close)(obj);
+    if (sb.type>0) (dispatch_g[sb.type].close)(obj);
     return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	get_width
+ *
+ * Purpose:	Figure out how wide the screen is.  This is highly
+ *		unportable, but the user can always override the width we
+ *		detect by giving a command-line option. These code snippets
+ *		were borrowed from the GNU less(1).
+ *
+ * Return:	Success:	Number of columns.
+ *
+ *		Failure:	Some default number of columms.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+get_width(void)
+{
+    int		width = 80;		/*the default			*/
+    char	*s;
+
+    /*
+     * Try to get it from the COLUMNS environment variable first since it's
+     * value is sometimes wrong.
+     */
+    if ((s=getenv("COLUMNS")) && *s && isdigit(*s)) {
+	width = strtol(s, NULL, 0);
+    }
+
+#if defined(HAVE_STRUCT_VIDEOCONFIG) && defined(HAVE__GETVIDEOCONFIG)
+    {
+	/* Microsoft C */
+	struct videoconfig w;
+	_getvideoconfig(&w);
+	width = w.numtextcols;
+    }
+#elif defined(HAVE_STRUCT_TEXT_INFO) && defined(HAVE_GETTEXTINFO)
+    {
+	/* Borland C or DJGPPC */
+	struct text_info w;
+	gettextinfo(&w);
+	width = w.screenwidth;
+    }
+#elif defined(HAVE_GETCONSOLESCREENBUFFERINFO)
+    {
+	/* Win32 C */
+	CONSOLE_SCREEN_BUFFER_INFO scr;
+	GetConsoleScreenBufferInfo(con_out, &scr);
+	width = scr.srWindow.Right - scr.srWindow.Left + 1;
+    }
+#elif defined(HAVE__SCRSIZE)
+    {
+	/* OS/2 */
+	int w[2];
+	_scrsize(w);
+	width = w[0];
+    }
+#elif defined(HAVE_TIOCGWINSZ) && defined(HAVE_IOCTL)
+    {
+	/* Unix with ioctl(TIOCGWINSZ) */
+	struct winsize w;
+	if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0) {
+	    width = w.ws_col;
+	}
+    }
+#elif defined(HAVE_TIOCGETD) && defined(HAVE_IOCTL)
+    {
+	/* Unix with ioctl(TIOCGETD) */
+	struct uwdata w;
+	if (ioctl(2, WIOCGETD, &w)>=0 && w.uw_width>0) {
+	    width = w.uw_width / w.uw_hs;
+	}
+    }
+#endif
+
+    /* Set to at least 1 */
+    if (width<1) width = 1;
+    return width;
 }
 
 
@@ -465,7 +1288,7 @@ main (int argc, char *argv[])
     DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose,
 	     NULL, NULL);
     DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose,
-	     NULL, NULL);
+	     NULL, datatype_list2);
     DISPATCH(H5G_LINK, "-> ", link_open, NULL,
 	     NULL, NULL);
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
@@ -474,7 +1297,10 @@ main (int argc, char *argv[])
     /* Name of this program without the path */
     if ((progname=strrchr (argv[0], '/'))) progname++;
     else progname = argv[0];
-    
+
+    /* Default output width */
+    width_g = get_width();
+
     /* Switches come before non-switch arguments */
     for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) {
 	if (!strcmp(argv[argno], "--")) {
@@ -485,7 +1311,9 @@ main (int argc, char *argv[])
 	    usage(progname);
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--dump")) {
-	    dump_g++;
+	    dump_g = TRUE;
+	} else if (!strcmp(argv[argno], "--label")) {
+	    label_g = TRUE;
 	} else if (!strcmp(argv[argno], "--string")) {
 	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
@@ -525,7 +1353,10 @@ main (int argc, char *argv[])
 		case 'd':	/* --dump */
 		    dump_g++;
 		    break;
-		case 's':
+		case 'l':	/* --label */
+		    label_g = TRUE;
+		    break;
+		case 's':	/* --string */
 		    string_g = TRUE;
 		    break;
 		case 'v':	/* --verbose */

@@ -39,9 +39,17 @@
 #   include <unistd.h>
 #endif
 #ifdef _POSIX_VERSION
-#   include <sys/stat.h>
 #   include <sys/wait.h>
 #   include <pwd.h>
+#endif
+
+/*
+ * The `struct stat' data type for stat() and fstat(). This is a Posix file
+ * but often apears on non-Posix systems also.  The `struct stat' is required
+ * for hdf5 to compile, although only a few fields are actually used.
+ */
+#ifdef HAVE_SYS_STAT_H
+#   include <sys/stat.h>
 #endif
 
 /*
@@ -69,6 +77,14 @@
  */
 #ifdef HAVE_SYS_RESOURCE_H
 #   include <sys/resource.h>
+#endif
+
+/*
+ * Unix ioctls.  These are used by h5ls (and perhaps others) to determine a
+ * resonable output width.
+ */
+#ifdef HAVE_SYS_IOCTL_H
+#   include <sys/ioctl.h>
 #endif
 
 /*

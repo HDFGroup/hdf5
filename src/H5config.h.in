@@ -59,6 +59,18 @@
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS
 
+/* Define if `struct text_info' is defined */
+#undef HAVE_STRUCT_TEXT_INFO
+
+/* Define if `struct videoconfig' is defined */
+#undef HAVE_STRUCT_VIDEOCONFIG
+
+/* Define if the ioctl TIOCGETD is defined */
+#undef HAVE_TIOCGETD
+
+/* Define if the ioctl TIOCGWINSZ is defined */
+#undef HAVE_TIOCGWINSZ
+
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
 
@@ -92,6 +104,15 @@
 /* Define if you have the BSDgettimeofday function.  */
 #undef HAVE_BSDGETTIMEOFDAY
 
+/* Define if you have the GetConsoleScreenBufferInfo function.  */
+#undef HAVE_GETCONSOLESCREENBUFFERINFO
+
+/* Define if you have the _getvideoconfig function.  */
+#undef HAVE__GETVIDEOCONFIG
+
+/* Define if you have the _scrsize function.  */
+#undef HAVE__SCRSIZE
+
 /* Define if you have the difftime function.  */
 #undef HAVE_DIFFTIME
 
@@ -110,8 +131,14 @@
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
 
+/* Define if you have the gettextinfo function.  */
+#undef HAVE_GETTEXTINFO
+
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the ioctl function.  */
+#undef HAVE_IOCTL
 
 /* Define if you have the lseek64 function.  */
 #undef HAVE_LSEEK64
@@ -128,8 +155,14 @@
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H

@@ -123,7 +123,7 @@ esac
 
 
 dnl ----------------------------------------------------------------------
-dnl Check for libraries.  (none required yet)
+dnl Check for libraries.
 dnl
 AC_CHECK_LIB(m, ceil)
 AC_CHECK_LIB(coug, main)	dnl ...for ASCI/Red
@@ -135,7 +135,7 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_CHECK_HEADERS(io.h sys/resource.h sys/time.h unistd.h winsock.h zlib.h)
-
+AC_CHECK_HEADERS(sys/ioctl.h sys/stat.h)
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.
@@ -219,6 +219,37 @@ AC_TRY_COMPILE([
 AC_DEFINE(HAVE_STAT_ST_BLOCKS)
 AC_MSG_RESULT(yes),
 AC_MSG_RESULT(no))
+
+dnl ----------------------------------------------------------------------
+dnl How do we figure out the width of a tty in characters?
+dnl
+AC_CHECK_FUNCS(_getvideoconfig gettextinfo GetConsoleScreenBufferInfo)
+AC_CHECK_FUNCS(_scrsize ioctl)
+
+AC_MSG_CHECKING(for struct videoconfig)
+AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],
+AC_DEFINE(HAVE_STRUCT_VIDEOCONFIG)
+AC_MSG_RESULT(yes),
+AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for struct text_info)
+AC_TRY_COMPILE(,[struct text_info w; w.screenwidth=0;],
+AC_DEFINE(HAVE_STRUCT_TEXT_INFO)
+AC_MSG_RESULT(yes),
+AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for TIOCGWINSZ)
+AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGWINSZ;],
+AC_DEFINE(HAVE_TIOCGWINSZ)
+AC_MSG_RESULT(yes),
+AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(for TIOCGGETD)
+AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
+AC_DEFINE(HAVE_TIOCGETD)
+AC_MSG_RESULT(yes),
+AC_MSG_RESULT(no))
+
 
 dnl ----------------------------------------------------------------------
 dnl Check for functions.

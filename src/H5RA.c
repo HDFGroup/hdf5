@@ -431,8 +431,8 @@ H5RA_isa(H5G_entry_t *ent)
     }
 
     /* Is `raw' a dataset? */
-    if (H5G_find(ent, "raw", NULL, &d_ent)<0 ||
-	(exists=H5D_isa(&d_ent))<0) {
+    if (H5G_find(ent, "raw", NULL, &d_ent)<0) HRETURN(FALSE);
+    if ((exists=H5D_isa(&d_ent))<0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
     } else if (!exists) {
 	HRETURN(FALSE);
