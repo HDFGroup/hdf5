@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         TestInfo(argv[0]);
 
         /* Parse command line arguments */
-        TestParseCmdLine(argc,argv,&Summary,&CleanUp);
+        TestParseCmdLine(argc,argv,&Summary,&CleanUp,NULL);
 
         /* Perform requested testing */
         PerformTests();
