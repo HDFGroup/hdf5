@@ -1020,6 +1020,7 @@
 ./test/th5s.c
 ./test/th5s.h5
 ./test/theap.c
+./test/tid.c
 ./test/titerate.c
 ./test/tlayouto.h5
 ./test/tmeta.c

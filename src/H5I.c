@@ -303,7 +303,7 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 		if (H5I_next_type < MAX_NUM_TYPES)
 		{
 			ret_value = H5I_next_type;
-			H5I_next_type++;
+			H5_INC_ENUM(H5I_type_t, H5I_next_type);
 		}
 		else
 		{
@@ -330,7 +330,6 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 	}
 	
 	/* Initialize the type */
-
     /* Check arguments */
 #ifdef HASH_SIZE_POWER_2
     if (!POWER_OF_TWO(hash_size) || hash_size == 1)
