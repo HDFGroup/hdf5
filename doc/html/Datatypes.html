@@ -1144,7 +1144,25 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
       are discussed on a separate 
       <a href="DatatypesEnum.html">Enumeration Data Types</a> page.
 
-    <h2>9. Sharing Data Types among Datasets</h2>
+    <h2>9. Variable-length Data Types</h2>
+
+      Variable-length (VL) data types have been implemented for HDF5 
+      Release 1.2.  The documents are not yet ready (at the time of 
+      the Beta release), but a 
+      <a href="VLdatatypes.html" target="ExtDoc">temporary VL data types 
+      document</a> is provided.  VL datatypes are manipulated by means 
+      of the following functions:
+      <ul>
+        <li>H5Tvlen_create
+        <li>H5Dget_vlen_buf_size        &nbsp;&nbsp;&nbsp; (Not yet implemented.)
+        <li>H5Dvlen_reclaim
+        <li>H5Pset_vlen_mem_manage_type
+        <li>H5Pset_vlen_mem_manager
+      </ul>
+      The first three functions above are currently described in the 
+      <i><a href="RM_H5Front.html">HDF5 Reference Manual</a></i>.
+
+    <h2>10. Sharing Data Types among Datasets</h2>
 
     <p>If a file has lots of datasets which have a common data type
       then the file could be made smaller by having all the datasets
@@ -1190,7 +1208,7 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
       </center>
 
     <a name="Datatypes-DataConversion">
-    <h2>10. Data Conversion</h2>
+    <h2>11. Data Conversion</h2>
     </a>
 
     <p>The library is capable of converting data from one type to

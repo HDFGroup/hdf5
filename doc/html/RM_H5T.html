@@ -65,8 +65,12 @@ of a dataset.
     <li><a href="#Datatype-GetSize">H5Tget_size</a>
     <li><a href="#Datatype-Close">H5Tclose</a>
 <p>
+<i>Variable-length Datatypes</i>
+    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
+<p>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Atomic Datatype</i>
+<i>Atomic Datatype Properties</i>
+  <table><tr><td valign=top>
     <li><a href="#Datatype-SetSize">H5Tset_size</a>
     <li><a href="#Datatype-GetOrder">H5Tget_order</a>
     <li><a href="#Datatype-SetOrder">H5Tset_order</a>
@@ -78,12 +82,11 @@ of a dataset.
     <li><a href="#Datatype-SetPad">H5Tset_pad</a>
     <li><a href="#Datatype-GetSign">H5Tget_sign</a>
     <li><a href="#Datatype-SetSign">H5Tset_sign</a>
-</td><td valign=top>
-<i>Properties</i>
     <li><a href="#Datatype-GetFields">H5Tget_fields</a>
     <li><a href="#Datatype-SetFields">H5Tset_fields</a>
     <li><a href="#Datatype-GetEbias">H5Tget_ebias</a>
     <li><a href="#Datatype-SetEbias">H5Tset_ebias</a>
+  </td><td valign=top>
     <li><a href="#Datatype-GetNorm">H5Tget_norm</a>
     <li><a href="#Datatype-SetNorm">H5Tset_norm</a>
     <li><a href="#Datatype-GetInpad">H5Tget_inpad</a>
@@ -92,7 +95,8 @@ of a dataset.
     <li><a href="#Datatype-SetCset">H5Tset_cset</a>
     <li><a href="#Datatype-GetStrpad">H5Tget_strpad</a>
     <li><a href="#Datatype-SetStrpad">H5Tset_strpad</a>
-<p>
+  <p>
+  </td></tr></table>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <i>Properties of Compound Types</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
@@ -445,6 +449,38 @@ H5Tget_overflow ()
             <dd>Class of datatype to create.
         <dt><em>size_t</em> <code>size</code>
             <dd>The number of bytes in the datatype to create.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns datatype identifier if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-VLCreate">H5Tvlen_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Tvlen_create</code>(<em>hid_t </em><code>base_type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new variable-length dataype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tvlen_create</code> creates a new variable-length (VL) dataype.
+        <p>
+        The base datatype will be the datatype that the sequence is composed of,
+        characters for character strings, vertex coordinates for polygon lists, etc.
+        The base type specified for the VL datatype can be of any HDF5 datatype,
+        including another VL datatype, a compound datatype or an atomic datatype.
+        <p>
+        When necessary, use <code>H5Tget_super</code> to determine the base type 
+        of the VL datatype.
+        <p>
+        The datatype identifier returned from this function should be 
+        released with <code>H5Tclose</code> or resource leaks will result.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>base_type_id</code>
+            <dd>Base type of datatype to create.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
