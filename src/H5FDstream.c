@@ -21,6 +21,10 @@
  *
  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5FD_stream_mask
+
 #include "H5private.h"                /* library function  */
 
 /* Only build this driver if it was configured with --with-Stream-VFD */

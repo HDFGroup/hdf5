@@ -39,12 +39,15 @@
  *		errors within the H5E package.
  *
  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5E_mask
+
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Iprivate.h"		/* IDs                                    */
 #include "H5Eprivate.h"		/* Private error routines		  */
 #include "H5MMprivate.h"	/* Memory management			  */
-
-#define PABLO_MASK	H5E_mask
 
 /* Interface initialization? */
 static int interface_initialize_g = 0;
