@@ -2340,28 +2340,34 @@ done:
  * 		Robb Matzke, 1999-08-02
  *		The split_ratios are passed in as part of the data transfer
  *		property list.
+ *
+ * 		Quincey Koziol, 2002-05-16
+ *		Rewrote algorithm to allocate & write blocks without using
+ *              lock/unlock code.
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_PARALLEL
 herr_t
 H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		    const hsize_t *space_dim, const H5O_pline_t *pline,
 		    const H5O_fill_t *fill)
 {
-
-    int		i, carry;
-    unsigned		u;
-    hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
-    uint8_t		*chunk=NULL;
-    int		idx_hint=0;
-    hsize_t		chunk_size;
-#ifdef AKC
-    H5F_istore_ud1_t	udata;
-#endif
+    hssize_t	chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
+    hsize_t	chunk_size;     /* Size of chunk in bytes */
+    void *chunk=NULL;           /* Chunk buffer for writing fill values */
+    H5F_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
+    H5D_xfer_t *dxpl;           /* Data xfer property list */
+    double	split_ratios[3];/* B-tree node splitting ratios		*/
+    int         mpi_rank;       /* This process's rank  */
+    int         mpi_size;       /* Total # of processes */
+    int         mpi_round=0;    /* Current process responsible for I/O */
+    unsigned    chunk_allocated=0; /* Flag to indicate that chunk was actually allocated */
+    int		carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
+    int		i;              /* Local index variable */
+    unsigned	u;              /* Local index variable */
+    herr_t	ret_value=SUCCEED;	/* Return value */
     
     FUNC_ENTER(H5F_istore_allocate, FAIL);
-#ifdef AKC
-    printf("Enter %s:\n", FUNC);
-#endif
 
     /* Check args */
     assert(f);
@@ -2371,73 +2377,79 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(layout->addr));
 
+    /* Get dataset transfer property list */
+    dxpl = (H5P_DEFAULT==dxpl_id) ? &H5D_xfer_dflt : (H5D_xfer_t *)H5I_object(dxpl_id);
+    if(dxpl==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+
+    /* Get the split ratios from the dataset transfer property list */
+    split_ratios[0] = dxpl->split_ratios[0];
+    split_ratios[1] = dxpl->split_ratios[1];
+    split_ratios[2] = dxpl->split_ratios[2];
+
+    /* Can't use data I/O pipeline in parallel (yet) */
+    if (pline->nfilters>0)
+        HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, FAIL, "can't use data pipeline in parallel");
+
     /*
-     * Setup indice to go through all chunks. (Future improvement
-     * should allocate only chunks that have no file space assigned yet.
+     * Setup indicesto go through all chunks.
      */
     for (u=0, chunk_size=1; u<layout->ndims; u++) {
         chunk_offset[u]=0;
         chunk_size *= layout->dim[u];
     }
 
+    /* Allocate chunk buffer for processes to use when writing fill values */
+    if (NULL==(chunk = H5F_istore_chunk_alloc(chunk_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
+
+    /* Fill the chunk with the proper values */
+    if(fill && fill->buf) {
+        /*
+         * Replicate the fill value throughout the chunk.
+         */
+        assert(0==chunk_size % fill->size);
+        H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
+    } else {
+        /*
+         * No fill value was specified, assume all zeros.
+         */
+        HDmemset (chunk, 0, chunk_size);
+    } /* end else */
+
+    /* Retrieve up MPI parameters */
+    if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+    if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
     /* Loop over all chunks */
-    while (1) {
-	
-#ifdef AKC
-	printf("Checking allocation for chunk( ");
-	for (u=0; u<layout->ndims; u++){
-	    printf("%ld ", chunk_offset[u]);
-	}
-	printf(")\n");
-#endif
-#ifdef NO
-        if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0) {
-#endif
-            /* No file space assigned yet.  Allocate it. */
-            /* The following needs improvement like calling the */
-            /* allocation directly rather than indirectly using the */
-            /* allocation effect in the unlock process. */
+    carry=0;
+    while (carry==0) {
+        /* Check if the chunk exists yet */
+        if(H5F_istore_get_addr(f,layout,chunk_offset)==HADDR_UNDEF) {
+            /* Initialize the chunk information */
+            udata.mesg = *layout;
+            udata.key.filter_mask = 0;
+            udata.addr = HADDR_UNDEF;
+            udata.key.nbytes = chunk_size;
+            for (u=0; u<layout->ndims; u++)
+                udata.key.offset[u] = chunk_offset[u];
 
-#ifdef AKC
-            printf("need allocation\n");
-#endif
-            /*
-             * Lock the chunk, copy from application to chunk, then unlock the
-             * chunk.
-             */
+            /* Allocate the chunk with all processes */
+            if (H5B_insert(f, H5B_ISTORE, layout->addr, split_ratios, &udata)<0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
 
-#ifdef H5_HAVE_PARALLEL
-            /* rky 981207 Serialize access to this critical region. */
-            if (SUCCEED!= H5FD_mpio_wait_for_left_neighbor(f->shared->lf)) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "unable to lock the data chunk");
-            }
-#endif
-            if (NULL==(chunk=H5F_istore_lock(f, dxpl_id, layout, pline,
-                          fill, chunk_offset, FALSE, &idx_hint))) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "unable to read raw data chunk");
-            }
-	     H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
-            if (H5F_istore_unlock(f, dxpl_id, layout, pline, TRUE,
-                      chunk_offset, &idx_hint, chunk, (size_t)chunk_size)<0) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "uanble to unlock raw data chunk");
-            }
-#ifdef H5_HAVE_PARALLEL
-            if (SUCCEED!= H5FD_mpio_signal_right_neighbor(f->shared->lf)) {
-                HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-                       "unable to unlock the data chunk");
-            }
-#endif
-#ifdef NO
-        } else {
-#ifdef AKC
-            printf("NO need for allocation\n");
-            HDfprintf(stdout, "udata.addr=%a\n", udata.addr);
-#endif
-        }
-#endif
+            /* Round-robin write the chunks out from only one process */
+            if(mpi_round==mpi_rank) {
+                if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
+            } /* end if */
+            mpi_round=(++mpi_round)%mpi_size;
+
+            /* Indicate that a chunk was allocated */
+            chunk_allocated=1;
+        } /* end if */
 	
         /* Increment indices */
         for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
@@ -2447,26 +2459,24 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             } else {
                 carry = 0;
             }
-        }
-        if (carry)
-            break;
+        } /* end for */
     }
 
-#ifdef H5_HAVE_PARALLEL
-    /*
-     * rky 980923
-     * 
-     * The following barrier is a temporary fix to prevent overwriting real
-     * data caused by a race between one proc's call of H5F_istore_allocate
-     * (from H5D_init_storage, ultimately from H5Dcreate and H5Dextend) and
-     * another proc's call of H5Dwrite.  Eventually, this barrier should be
-     * removed, when H5D_init_storage is changed to call H5MF_alloc directly
-     * to allocate space, instead of calling H5F_istore_unlock.
-     */
-    if (MPI_Barrier(H5FD_mpio_communicator(f->shared->lf))) {
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Barrier failed");
-    }
-#endif
+    /* Only need to block at the barrier if we actually allocated a chunk */
+    if(chunk_allocated) {
+        /* Wait at barrier to avoid race conditions where some processes are
+         * still writing out chunks and other processes race ahead to read
+         * them in, getting bogus data.
+         */
+        if (MPI_Barrier(H5FD_mpio_communicator(f->shared->lf)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Barrier failed");
+    } /* end if */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    /* Free the chunk for fill values */
+    if(chunk!=NULL)
+        H5F_istore_chunk_free(chunk);
+
+    FUNC_LEAVE(ret_value);
 }
+#endif /* H5_HAVE_PARALLEL */
