@@ -7,15 +7,27 @@
  *
  * Purpose:	Create an hdf5 file with a 1d dataset of uint8.
  */
-#include <fcntl.h>
-#include <hdf5.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
+
+/* See H5private.h for how to include system headers */
+#include <H5config.h>
+#ifdef STDC_HEADERS
+#   include <fcntl.h>
+#   include <string.h>
+#   include <stdlib.h>
+#   include <stdio.h>
 #endif
+
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
+
+#include <hdf5.h>
+
 
 /*-------------------------------------------------------------------------
  * Function:	usage

@@ -919,6 +919,7 @@ dataset_list2(hid_t dset)
 {
     hid_t		dcpl;		/*dataset creation property list*/
     hid_t		type;		/*data type of dataset		*/
+    hid_t		space;		/*data space of dataset		*/
     int			nf;		/*number of filters		*/
     unsigned		filt_flags;	/*filter flags			*/
     H5Z_filter_t	filt_id;	/*filter identification number	*/
@@ -929,42 +930,50 @@ dataset_list2(hid_t dset)
     char		s[64];		/*temporary string buffer	*/
     off_t		f_offset;	/*offset in external file	*/
     hsize_t		f_size;		/*bytes used in external file	*/
-    hsize_t		total_offset;	/*total dataset offset		*/
+    hsize_t		total;		/*total size or offset		*/
+    hsize_t		chsize[64];	/*chunk size in elements	*/
+    int			ndims;		/*dimensionality		*/
     int			i;
     
-
     if (verbose_g>0) {
 	dcpl = H5Dget_create_plist(dset);
-
-	/* Print data type */
-	printf("    %-10s ", "Type:");
+	space = H5Dget_space(dset);
 	type = H5Dget_type(dset);
-	display_type(type, 15);
-	H5Tclose(type);
-	printf("\n");
+
+	/* Print information about chunked storage */
+	if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
+	    ndims = H5Pget_chunk(dcpl, NELMTS(chsize), chsize/*out*/);
+	    printf("    %-10s {", "Chunks:");
+	    total = H5Tget_size(type);
+	    for (i=0; i<ndims; i++) {
+		printf("%s%lu", i?", ":"", (unsigned long)(chsize[i]));
+		total *= chsize[i];
+	    }
+	    printf("} %lu bytes\n", (unsigned long)total);
+	}
 
 	/* Print information about external strorage */
 	if ((nf = H5Pget_external_count(dcpl))>0) {
 	    printf("    %-10s %d external file%s (num/addr/offset/length)\n",
 		   "Extern:", nf, 1==nf?"":"s");
-	    for (i=0, total_offset=0; i<nf; i++) {
+	    for (i=0, total=0; i<nf; i++) {
 		if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
 				    &f_size)<0) {
 		    HDfprintf(stdout,
 			      "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
-			      i, total_offset, "", "",
+			      i, total, "", "",
 			      i+1<nf?"Following addresses are incorrect":"");
 		} else if (H5S_UNLIMITED==f_size) {
 		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10s \"",
-			      i, total_offset, (hsize_t)f_offset, "INF");
+			      i, total, (hsize_t)f_offset, "INF");
 		    display_string(f_name);
 		} else {
 		    HDfprintf(stdout, "        #%03d %10Hu %10Hu %10Hu \"",
-			      i, total_offset, (hsize_t)f_offset, f_size);
+			      i, total, (hsize_t)f_offset, f_size);
 		    display_string(f_name);
 		}
 		printf("\"\n");
-		total_offset += f_size;
+		total += f_size;
 	    }
 	}
 
@@ -986,6 +995,15 @@ dataset_list2(hid_t dset)
 		printf("}\n");
 	    }
 	}
+
+	/* Print data type */
+	printf("    %-10s ", "Type:");
+	display_type(type, 15);
+	printf("\n");
+
+	/* Close stuff */
+	H5Tclose(type);
+	H5Sclose(space);
 	H5Pclose(dcpl);
     }
 

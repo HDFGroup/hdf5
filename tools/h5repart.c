@@ -11,17 +11,28 @@
  *		changing the size of the family members.  It can also be used
  *		to copy a single file to a single file with holes.
  */
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <hdf5.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
+
+/* See H5private.h for how to include system headers */
+#include <H5config.h>
+#ifdef STDC_HEADERS
+#   include <ctype.h>
+#   include <errno.h>
+#   include <fcntl.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
 #endif
+
+#ifdef HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
+
+#include <hdf5.h>
 #define FALSE	0
 #define TRUE	1
 #define NAMELEN	4096

@@ -29,8 +29,6 @@
 #endif
 
 #define OPT(X,S)	((X)?(X):(S))
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
-#define NELMTS(X)	(sizeof(X)/sizeof(*X))
 #define ALIGN(A,Z)	((((A)+(Z)-1)/(Z))*(Z))
 
 
@@ -250,7 +248,9 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	sprintf(temp, "%lu", *((unsigned long*)vp));
 	
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
-	if (sizeof(hssize_t)==sizeof(long)) {
+	if (sizeof(hssize_t)==sizeof(int)) {
+	    sprintf(temp, "%d", *((int*)vp));
+	} else if (sizeof(hssize_t)==sizeof(long)) {
 	    sprintf(temp, "%ld", *((long*)vp));
 	} else {
 	    char fmt[8];
@@ -261,7 +261,9 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	}
 	
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
-	if (sizeof(hsize_t)==sizeof(long)) {
+	if (sizeof(hsize_t)==sizeof(int)) {
+	    sprintf(temp, "%u", *((unsigned*)vp));
+	} else if (sizeof(hsize_t)==sizeof(long)) {
 	    sprintf(temp, "%lu", *((unsigned long*)vp));
 	} else {
 	    char fmt[8];

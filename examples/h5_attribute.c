@@ -12,7 +12,6 @@
  
 #include <stdlib.h>
 #include <hdf5.h>
-#include <H5private.h>
 
 #define FILE "Attributes.h5"
 
@@ -46,7 +45,7 @@ main (void)
    float matrix[ADIM1][ADIM2]; /* Attribute data */ 
 
    herr_t  ret;                /* Return value */
-   uint32  i,j;                /* Counters */
+   unsigned i,j;                /* Counters */
    int     idx;                /* Attribute index */
    char    string_out[80];     /* Buffer to read string attribute back */
    int     point_out;          /* Buffer to read scalar attribute back */

@@ -183,17 +183,14 @@ main (void)
     off_t		offset;
     hssize_t		start[2];
     hsize_t		count[2];
-    
 
-	/*  
-	* The extra cast in the following statement is a bug                           
-	* workaround for the Win32 version 0.0 compiler.                               
-	* 1998-11-06 ptl                                                               
-	*/   
+    /*
+     * The extra cast in the following statement is a bug workaround for the
+     * Win32 version 0.0 compiler.
+     * 1998-11-06 ptl
+     */
     printf ("I/O request size is %1.1fMB\n",
-			((double)((hssize_t)(size[0]*size[1])))/(1024.0*1024));
-	   // ((double)(size[0])*(double)(size[1]))/(1024.0*1024));
-
+	    ((double)((hssize_t)(size[0]*size[1])))/(1024.0*1024));
     
     /* Open the files */
     file = H5Fcreate (HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

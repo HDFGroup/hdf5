@@ -94,7 +94,6 @@
 #   include <io.h>
 #endif
 #ifdef HAVE_WINSOCK_H
-//#   include <winsock.h>
 #   include <winsock2.h>
 #endif
 #ifndef F_OK

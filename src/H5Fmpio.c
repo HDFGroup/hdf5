@@ -47,9 +47,6 @@
 #include <H5Dprivate.h>
 #include <H5MMprivate.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #ifndef HAVE_PARALLEL
 /* 
  * The H5F_mpio_xxxx functions are for parallel I/O only and are
