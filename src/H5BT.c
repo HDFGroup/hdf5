@@ -108,3 +108,117 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_create() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_insert_neighbor_cb
+ *
+ * Purpose:	v2 B-tree neighbor callback for H5BT_insert()
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 10, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5BT_insert_neighbor_cb(const void *_record, void *_op_data)
+{
+    const H5BT_blk_info_t *record = (const H5BT_blk_info_t *)_record;
+    H5BT_blk_info_t *search = (H5BT_blk_info_t *)_op_data;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_insert_neighbor_cb)
+
+    *search = *record;
+
+    FUNC_LEAVE_NOAPI(0)
+} /* end H5BT_insert_neighbor_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_insert
+ *
+ * Purpose:	Insert new block (offset/length) into a block tracker.
+ *              Duplicate and overlapping blocks are rejected.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 10 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t length)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    H5BT_blk_info_t lower, upper;       /* Info for blocks less than & greater than new block */
+    hbool_t lower_valid = FALSE, upper_valid = FALSE;   /* Lower & upper blocks valid? */
+    H5BT_blk_info_t new_block;          /* Info for new block */
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5BT_insert, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Check for block at this address already */
+    if (H5B2_find(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &offset, NULL, NULL) >= 0)
+	HGOTO_ERROR(H5E_BLKTRK, H5E_EXISTS, FAIL, "block at address already exists")
+    /* Clear any errors from H5B2_find() */
+    H5E_clear_stack(NULL);
+
+    /* Find next block lower than the new block */
+    if ( H5B2_neighbor(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, H5B2_COMPARE_LESS, &offset, H5BT_insert_neighbor_cb, &lower) >= 0) {
+        if ( H5F_addr_overlap(lower.addr, lower.len, offset, length) )
+            HGOTO_ERROR(H5E_BLKTRK, H5E_OVERLAPS, FAIL, "new block overlaps existing block")
+
+        /* Set flag to indicate lower bound found */
+        lower_valid = TRUE;
+    } /* end if */
+    /* Clear any errors from H5B2_neighbor() */
+    H5E_clear_stack(NULL);
+
+    /* Find next block higher than the new block */
+    if ( H5B2_neighbor(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, H5B2_COMPARE_GREATER, &offset, H5BT_insert_neighbor_cb, &upper) >= 0) {
+        if ( H5F_addr_overlap(upper.addr, upper.len, offset, length) )
+            HGOTO_ERROR(H5E_BLKTRK, H5E_OVERLAPS, FAIL, "new block overlaps existing block")
+
+        /* Set flag to indicate upper bound found */
+        upper_valid = TRUE;
+    } /* end if */
+    /* Clear any errors from H5B2_neighbor() */
+    H5E_clear_stack(NULL);
+
+    /* Check for merged blocks */
+    if(lower_valid || upper_valid) {
+HDfprintf(stderr,"%s: Lower & upper block merging not supported yet!\n",FUNC);
+HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "lower or upper block found!")
+    } /* end if */
+
+    /* Insert new block into B-tree */
+    new_block.addr = offset;
+    new_block.len = length;
+    if(H5B2_insert(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &new_block) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to insert block")
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_insert() */
+
