@@ -37,6 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
+#include "H5RCprivate.h"	/* Reference counted object functions	*/
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -126,7 +127,7 @@ typedef struct H5F_file_t {
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
-    void        *raw_page;      /* Pointer to raw B-tree node buffer    */
+    H5RC_t      *rc_page;       /* Pointer to ref-counted raw B-tree node buffer    */
 } H5F_file_t;
 
 /* A record of the mount table */

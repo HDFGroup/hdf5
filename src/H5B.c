@@ -241,8 +241,9 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     bt->left = HADDR_UNDEF;
     bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
-    if((bt->raw_page=(type->get_page)(f, udata))==NULL)
+    if((bt->rc_page=(type->get_page)(f, udata))==NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
+    bt->raw_page=H5RC_GET_OBJ(bt->rc_page);
     if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
             NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
             NULL==(bt->nkey=H5FL_SEQ_MALLOC(voidp,(size_t)(2*H5F_KVALUE(f,type)+1))))
@@ -340,8 +341,9 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
             NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if((bt->raw_page=(type->get_page)(f, udata))==NULL)
+    if((bt->rc_page=(type->get_page)(f, udata))==NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
+    bt->raw_page=H5RC_GET_OBJ(bt->rc_page);
     if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->raw_page)<0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree node")
 
@@ -574,6 +576,7 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
     H5FL_SEQ_FREE(haddr_t,bt->child);
     H5FL_SEQ_FREE(voidp,bt->nkey);
     H5FL_BLK_FREE(native_block,bt->native);
+    H5RC_DEC(bt->rc_page);
     H5FL_FREE(H5B_t,bt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -2202,6 +2205,9 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
         } else {
             new_node->nkey[u] = NULL;
         }
+
+    /* Increment the ref-count on the raw page */
+    H5RC_INC(new_node->rc_page);
 
     /* Set return value */
     ret_value=new_node;

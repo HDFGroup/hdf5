@@ -64,6 +64,7 @@ typedef struct H5G_node_key_t {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size(H5F_t *f);
+static herr_t H5G_node_page_free (void *page);
 
 /* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -196,7 +197,11 @@ H5G_node_get_page(H5F_t *f, const void UNUSED *_udata)
 
     assert(f);
 
-    FUNC_LEAVE_NOAPI(H5F_RAW_PAGE(f));
+    /* Increment reference count on B-tree node */
+    H5RC_INC(H5F_RC_PAGE(f));
+
+    /* Get the pointer to the ref-count object */
+    FUNC_LEAVE_NOAPI(H5F_RC_PAGE(f));
 } /* end H5G_node_get_page() */
 
 
@@ -1722,8 +1727,9 @@ done:
 herr_t
 H5G_node_init(H5F_t *f)
 {
-    size_t		sizeof_rkey;    /* Single raw key size */
-    size_t              size;           /* Raw B-tree node size */
+    size_t	sizeof_rkey;            /* Single raw key size */
+    size_t      size;                   /* Raw B-tree node size */
+    void        *page;                  /* Buffer for raw B-tree node */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
@@ -1736,8 +1742,12 @@ H5G_node_init(H5F_t *f)
     assert(sizeof_rkey);
     size = H5B_nodesize(f, H5B_SNODE, NULL, sizeof_rkey);
     assert(size);
-    if(NULL==(f->shared->raw_page=H5FL_BLK_MALLOC(grp_page,size)))
+    if(NULL==(page=H5FL_BLK_MALLOC(grp_page,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+    /* Make page buffer reference counted */
+    if(NULL==(f->shared->rc_page=H5RC_create(page,H5G_node_page_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for page")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1768,10 +1778,36 @@ H5G_node_close(const H5F_t *f)
     assert(f);
 
     /* Free the raw B-tree node buffer */
-    H5FL_BLK_FREE(grp_page,f->shared->raw_page);
+    H5RC_DEC(f->shared->rc_page);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_node_close */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_page_free
+ *
+ * Purpose:	Free a B-tree node
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July  8, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_page_free (void *page)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_page_free)
+
+    /* Free the raw B-tree node buffer */
+    H5FL_BLK_FREE(grp_page,page);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_page_free() */
 
 
 /*-------------------------------------------------------------------------

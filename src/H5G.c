@@ -1524,6 +1524,7 @@ done:
     /* If we started with a NULL grp_ent and we copied something into it, free the entry information */
     if(null_grp && group_copy)
         H5G_free_ent_name(grp_ent);
+
    FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1660,6 +1661,10 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
     assert(f);
     if (f->shared->root_grp)
         HGOTO_DONE(SUCCEED);
+
+    /* Create information needed for group nodes */
+    if(H5G_node_init(f)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group node info")
 
     /*
      * If there is no root object then create one. The root group always has

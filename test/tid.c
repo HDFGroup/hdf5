@@ -263,6 +263,7 @@ int id_predefined_test()
 
 	H5Tclose(typeID);
 
+        free(testObj);
 	return 0;
 
 out:

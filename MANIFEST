@@ -893,6 +893,8 @@
 ./src/H5R.c
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
+./src/H5RC.c
+./src/H5RCprivate.h
 ./src/H5RS.c
 ./src/H5RSprivate.h
 ./src/H5S.c
