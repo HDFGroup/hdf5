@@ -616,7 +616,8 @@ H5Sextent_ndims (hid_t space_id)
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     ret_value = H5S_extent_ndims(ds);
@@ -973,8 +974,8 @@ H5S_is_simple(const H5S_t *sdim)
  PURPOSE
     Check if a dataspace is simple
  USAGE
-    hbool_t H5Sis_simple(sid)
-	hid_t sid;	      IN: ID of dataspace object to query
+    hbool_t H5Sis_simple(space_id)
+	hid_t space_id;	      IN: ID of dataspace object to query
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -982,16 +983,16 @@ H5S_is_simple(const H5S_t *sdim)
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
 hbool_t
-H5Sis_simple (hid_t sid)
+H5Sis_simple (hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     hbool_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Sis_simple, FAIL);
-    H5TRACE1("b","i",sid);
+    H5TRACE1("b","i",space_id);
 
     /* Check args and all the boring stuff. */
-    if ((space = H5I_object(sid)) == NULL)
+    if ((space = H5I_object(space_id)) == NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value = H5S_is_simple(space);
@@ -1011,8 +1012,8 @@ H5Sis_simple (hid_t sid)
  PURPOSE
     Sets the size of a simple dataspace
  USAGE
-    herr_t H5Sset_extent_simple(sid, rank, dims, max)
-        hid_t sid;	      IN: Dataspace object to query
+    herr_t H5Sset_extent_simple(space_id, rank, dims, max)
+        hid_t space_id;	      IN: Dataspace object to query
         intn rank;	      IN: # of dimensions for the dataspace
         const size_t *dims;   IN: Size of each dimension for the dataspace
         const size_t *max;    IN: Maximum size of each dimension for the dataspace
@@ -1029,17 +1030,17 @@ H5Sis_simple (hid_t sid)
     dimension in the array (the slowest) may be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_extent_simple (hid_t sid, int rank, const hsize_t dims[/*rank*/],
+H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 		      const hsize_t max[/*rank*/])
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     intn		    u;	/* local counting variable */
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
-    H5TRACE4("e","iIs*[a1]h*[a1]h",sid,rank,dims,max);
+    H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
 
     /* Check args */
-    if ((space = H5I_object(sid)) == NULL) {
+    if ((space = H5I_object(space_id)) == NULL) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     }
     if (rank > 0 && dims == NULL) {
@@ -1051,8 +1052,10 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t dims[/*rank*/],
 #ifdef OLD_WAY
     if (dims) {
         for (u=0; u<rank; u++) {
-            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) && dims[u]==0) {
-                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dimension size");
+            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) &&
+		dims[u]==0) {
+                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			       "invalid dimension size");
             }
         }
     }
@@ -1178,8 +1181,10 @@ H5S_find (H5S_conv_t *conv, const H5S_t *mem_space, const H5S_t *file_space)
 
     /* Check args */
     assert (conv);
-    assert (mem_space && (H5S_SIMPLE==mem_space->extent.type || H5S_SCALAR==mem_space->extent.type));
-    assert (file_space && (H5S_SIMPLE==file_space->extent.type || H5S_SCALAR==mem_space->extent.type));
+    assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
+			  H5S_SCALAR==mem_space->extent.type));
+    assert (file_space && (H5S_SIMPLE==file_space->extent.type ||
+			   H5S_SCALAR==mem_space->extent.type));
 
     /*
      * We can't do conversion if the source and destination select a
@@ -1211,7 +1216,7 @@ H5S_find (H5S_conv_t *conv, const H5S_t *mem_space, const H5S_t *file_space)
     switch(file_space->select.type) {
         case H5S_SEL_POINTS:
 #ifdef QAK
-printf("%s: file space has point selection\n",FUNC);
+	    printf("%s: file space has point selection\n",FUNC);
 #endif /* QAK */
             conv->finit = H5S_point_init;
             conv->favail = H5S_point_favail;
@@ -1223,7 +1228,7 @@ printf("%s: file space has point selection\n",FUNC);
 
         case H5S_SEL_ALL:
 #ifdef QAK
-printf("%s: file space has all selection\n",FUNC);
+	    printf("%s: file space has all selection\n",FUNC);
 #endif /* QAK */
             conv->finit = H5S_all_init;
             conv->favail = H5S_all_favail;
@@ -1235,7 +1240,7 @@ printf("%s: file space has all selection\n",FUNC);
 
         case H5S_SEL_HYPERSLABS:
 #ifdef QAK
-printf("%s: file space has hyperslab selection\n",FUNC);
+	    printf("%s: file space has hyperslab selection\n",FUNC);
 #endif /* QAK */
             conv->finit = H5S_hyper_init;
             conv->favail = H5S_hyper_favail;
@@ -1248,7 +1253,7 @@ printf("%s: file space has hyperslab selection\n",FUNC);
         case H5S_SEL_NONE:
         default:
 #ifdef QAK
-printf("%s: file space has unknown selection\n",FUNC);
+	    printf("%s: file space has unknown selection\n",FUNC);
 #endif /* QAK */
             HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
                    "invalid file dataspace selection type");
@@ -1258,7 +1263,7 @@ printf("%s: file space has unknown selection\n",FUNC);
     switch(mem_space->select.type) {
         case H5S_SEL_POINTS:
 #ifdef QAK
-printf("%s: memory space has point selection\n",FUNC);
+	    printf("%s: memory space has point selection\n",FUNC);
 #endif /* QAK */
             conv->minit = H5S_point_init;
             conv->binit = H5S_point_init;
@@ -1270,7 +1275,7 @@ printf("%s: memory space has point selection\n",FUNC);
 
         case H5S_SEL_ALL:
 #ifdef QAK
-printf("%s: memory space has all selection\n",FUNC);
+	    printf("%s: memory space has all selection\n",FUNC);
 #endif /* QAK */
             conv->minit = H5S_all_init;
             conv->binit = H5S_all_init;
@@ -1282,7 +1287,7 @@ printf("%s: memory space has all selection\n",FUNC);
 
         case H5S_SEL_HYPERSLABS:
 #ifdef QAK
-printf("%s: memory space has hyperslab selection\n",FUNC);
+	    printf("%s: memory space has hyperslab selection\n",FUNC);
 #endif /* QAK */
             conv->minit = H5S_hyper_init;
             conv->binit = H5S_hyper_init;
@@ -1295,7 +1300,7 @@ printf("%s: memory space has hyperslab selection\n",FUNC);
         case H5S_SEL_NONE:
         default:
 #ifdef QAK
-printf("%s: memory space has unknown selection\n",FUNC);
+	    printf("%s: memory space has unknown selection\n",FUNC);
 #endif /* QAK */
             HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
                    "invalid file dataspace selection type");

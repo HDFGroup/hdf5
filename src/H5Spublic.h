@@ -44,8 +44,9 @@ extern "C" {
 
 /* Functions in H5S.c */
 hid_t H5Screate(H5S_class_t type);
-hid_t H5Screate_simple (int rank, const hsize_t dims[], const hsize_t maxdims[]);
-herr_t H5Sset_extent_simple (hid_t sid, int rank, const hsize_t dims[],
+hid_t H5Screate_simple (int rank, const hsize_t dims[],
+			const hsize_t maxdims[]);
+herr_t H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[],
 			     const hsize_t max[]);
 hid_t H5Scopy (hid_t space_id);
 herr_t H5Sclose (hid_t space_id);
@@ -55,11 +56,11 @@ int H5Sextent_dims (hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
 hbool_t H5Sis_simple (hid_t space_id);
 herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 hsize_t H5Sselect_npoints (hid_t spaceid);
-herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
-    const hssize_t *start, const hsize_t *_stride, const hsize_t *count,
-    const hsize_t *_block);
-herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elemn,
-    const hssize_t **coord);
+herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
+			    const hssize_t start[], const hsize_t _stride[],
+			    const hsize_t count[], const hsize_t _block[]);
+herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, size_t num_elemn,
+			   const hssize_t **coord);
 
 #ifdef __cplusplus
 }

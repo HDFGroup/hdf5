@@ -19,8 +19,8 @@
 #define PABLO_MASK      H5S_select_mask
 #define INTERFACE_INIT  H5S_select_init
 static intn             interface_initialize_g = FALSE;
-static herr_t		    H5S_select_init(void);
-static void		        H5S_select_term(void);
+static herr_t		H5S_select_init(void);
+static void		H5S_select_term(void);
 
 
 /*--------------------------------------------------------------------------
@@ -180,9 +180,11 @@ H5S_select_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
-    const hssize_t *start, const hsize_t *_stride, const hsize_t *count,
-    const hsize_t *_block)
+H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
+		     const hssize_t start[/*space_id*/],
+		     const hsize_t _stride[/*space_id*/],
+		     const hsize_t count[/*space_id*/],
+		     const hsize_t _block[/*space_id*/])
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     hsize_t *stride,        /* Stride array */
@@ -195,11 +197,12 @@ H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5Sselect_hyperslab, FAIL);
-    H5TRACE6("e","iSs*Hs*h*h*h",spaceid,op,start,_stride,count,_block);
+    H5TRACE6("e","iSs*[a0]Hs*[a0]h*[a0]h*[a0]h",space_id,op,start,_stride,
+             count,_block);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
-            NULL == (space=H5I_object(spaceid))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+            NULL == (space=H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if(start==NULL || count==NULL) {
@@ -234,18 +237,22 @@ H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
         block=(hsize_t *)_block;
     } /* end else */
 
-/* Check for overlapping blocks (remove when real block-merging algorithm is in place) */
-if(op==H5S_SELECT_SET && _block!=NULL) {
-    for(i=0; i<space->extent.u.simple.rank; i++) {
-        if(stride[i]<block[i]) {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                "hyperslab blocks overlap");
-        } /* end if */
-    } /* end for */
-} /* end if */
+    /*
+     * Check for overlapping blocks (remove when real block-merging algorithm
+     * is in place).
+     */
+    if(op==H5S_SELECT_SET && _block!=NULL) {
+	for(i=0; i<space->extent.u.simple.rank; i++) {
+	    if(stride[i]<block[i]) {
+		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+			    "hyperslab blocks overlap");
+	    } /* end if */
+	} /* end for */
+    } /* end if */
 
     /* Determine if selection is contiguous */
-    contig=1;       /* assume hyperslab is contiguous, until proven otherwise */
+    /* assume hyperslab is contiguous, until proven otherwise */
+    contig=1;
     for(i=0; i<space->extent.u.simple.rank; i++) {
         /* contiguous hyperslabs have the block size equal to the stride */
         if(stride[i]!=block[i]) {
@@ -255,7 +262,7 @@ if(op==H5S_SELECT_SET && _block!=NULL) {
     } /* end for */
 
 #ifdef QAK
-printf("%s: check 1.0\n",FUNC);
+    printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
     /* If we are setting a new selection, remove current selection first */
     if(op==H5S_SELECT_SET) {
@@ -266,25 +273,31 @@ printf("%s: check 1.0\n",FUNC);
     } /* end if */
 
 #ifdef QAK
-printf("%s: check 2.0\n",FUNC);
+    printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
     /* Allocate space for the hyperslab selection information if necessary */
-    if(space->select.type!=H5S_SEL_HYPERSLABS || space->select.sel_info.hyper_lst==NULL) {
-        if((space->select.sel_info.hyper_lst = H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
+    if(space->select.type!=H5S_SEL_HYPERSLABS ||
+       space->select.sel_info.hyper_lst==NULL) {
+        if((space->select.sel_info.hyper_lst =
+	    H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate hyperslab information");
-        if((space->select.sel_info.hyper_lst->lo_bounds = H5MM_calloc(space->extent.u.simple.rank*sizeof(H5S_hyper_bound_t *)))==NULL)
+			"can't allocate hyperslab information");
+        if((space->select.sel_info.hyper_lst->lo_bounds =
+	    H5MM_calloc(space->extent.u.simple.rank*
+			sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate hyperslab lo bound information");
-        if((space->select.sel_info.hyper_lst->hi_bounds = H5MM_calloc(space->extent.u.simple.rank*sizeof(H5S_hyper_bound_t *)))==NULL)
+			"can't allocate hyperslab lo bound information");
+        if((space->select.sel_info.hyper_lst->hi_bounds =
+	    H5MM_calloc(space->extent.u.simple.rank*
+			sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate hyperslab lo bound information");
+			"can't allocate hyperslab lo bound information");
     } /* end if */
 
-/* Generate list of blocks to add/remove based on selection operation */
+    /* Generate list of blocks to add/remove based on selection operation */
 
 #ifdef QAK
-printf("%s: check 3.0\n",FUNC);
+    printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
     /* Add hyperslab to selection */
     if(contig) { /* Check for trivial case */
@@ -314,9 +327,10 @@ printf("%s: check 3.0\n",FUNC);
                 slab[j]=start[j]+((i/slice[j])%count[j])*stride[j];
             
             /* Add the block to the list of hyperslab selections */
-            if(H5S_hyper_add(space,(const hssize_t *)slab,(const hsize_t *)block)<0) {
+            if(H5S_hyper_add(space,(const hssize_t *)slab,
+			     (const hsize_t *)block)<0) {
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
-                    "can't insert hyperslab");
+			    "can't insert hyperslab");
             } /* end if */
         } /* end for */
     } /* end if */
@@ -325,7 +339,7 @@ printf("%s: check 3.0\n",FUNC);
     space->select.type=H5S_SEL_HYPERSLABS;
     ret_value=SUCCEED;
 #ifdef QAK
-printf("%s: check 4.0\n",FUNC);
+    printf("%s: check 4.0\n",FUNC);
 #endif /* QAK */
 
 done:
@@ -389,7 +403,7 @@ herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     } /* end if */
 
 #ifdef QAK
-printf("%s: check 1.0\n",FUNC);
+    printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
     /* If we are setting a new selection, remove current selection first */
     if(op==H5S_SELECT_SET) {
@@ -400,7 +414,7 @@ printf("%s: check 1.0\n",FUNC);
     } /* end if */
 
 #ifdef QAK
-printf("%s: check 2.0\n",FUNC);
+    printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
     /* Allocate space for the point selection information if necessary */
     if(space->select.type!=H5S_SEL_POINTS || space->select.sel_info.pnt_lst==NULL) {
@@ -410,7 +424,7 @@ printf("%s: check 2.0\n",FUNC);
     } /* end if */
 
 #ifdef QAK
-printf("%s: check 3.0\n",FUNC);
+    printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
     /* Add points to selection */
     if(H5S_point_add(space,num_elem,coord)<0) {
@@ -422,7 +436,7 @@ printf("%s: check 3.0\n",FUNC);
     space->select.type=H5S_SEL_POINTS;
     ret_value=SUCCEED;
 #ifdef QAK
-printf("%s: check 4.0\n",FUNC);
+    printf("%s: check 4.0\n",FUNC);
 #endif /* QAK */
 
 done:

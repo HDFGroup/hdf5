@@ -411,14 +411,17 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
     }
 #endif
 #ifdef QAK
-{
-    intn i;
+    {
+	intn i;
 
-    printf("%s: n=%d, _dst=%p, _src=%p\n",FUNC,(int)n,_dst,_src);
-    for(i=0; i<n; i++) {
-        printf("%d: size=%d, dst_size=%d, dst_offset=%d, src_size=%d, src_offset=%d\n",i,(int)size[i],(int)dst_size[i],(int)dst_offset[i],(int)src_size[i],(int)src_offset[i]);
-    } /* end for */
-}
+	printf("%s: n=%d, _dst=%p, _src=%p\n",FUNC,(int)n,_dst,_src);
+	for(i=0; i<n; i++) {
+	    printf("%d: size=%d, dst_size=%d, dst_offset=%d, src_size=%d, "
+		   "src_offset=%d\n",
+		   i, (int)size[i], (int)dst_size[i], (int)dst_offset[i],
+		   (int)src_size[i], (int)src_offset[i]);
+	} /* end for */
+    }
 #endif /* QAK */
 
     /* Copy the size vector so we can modify it */

@@ -54,9 +54,11 @@ H5S_all_init (const struct H5O_layout_t __unused__ *layout,
 /*-------------------------------------------------------------------------
  * Function:	H5S_all_favail
  *
- * Purpose:	Figure out the optimal number of elements to transfer to/from the file
+ * Purpose:	Figure out the optimal number of elements to transfer to/from
+ *		the file.
  *
- * Return:	non-negative number of elements on success, negative on failure
+ * Return:	non-negative number of elements on success, negative on
+ *		failure.
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 16, 1998
@@ -107,7 +109,8 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
  *		bytes of a datum which this function treats as opaque.
  *		FILE_SPACE describes the data space of the dataset on disk
  *		and the elements that have been selected for reading (via
- *		hyperslab, etc).  This function will copy at most NELMTS elements.
+ *		hyperslab, etc).  This function will copy at most NELMTS
+ *		elements.
  *
  * Return:	Success:	Number of elements copied.
  *
@@ -122,10 +125,10 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
  */
 size_t
 H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
-		size_t elmt_size, const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		size_t nelmts,
-		const H5D_transfer_t xfer_mode, void *_buf/*out*/)
+	       const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
+	       size_t elmt_size, const H5S_t *file_space,
+	       H5S_sel_iter_t *file_iter, size_t nelmts,
+	       const H5D_transfer_t xfer_mode, void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -212,10 +215,10 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
-		size_t elmt_size, const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		size_t nelmts,
-		const H5D_transfer_t xfer_mode, const void *_buf)
+	       const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
+	       size_t elmt_size, const H5S_t *file_space,
+	       H5S_sel_iter_t *file_iter, size_t nelmts,
+	       const H5D_transfer_t xfer_mode, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -298,8 +301,8 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
  */
 size_t
 H5S_all_mgath (const void *_buf, size_t elmt_size,
-		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		size_t nelmts, void *_tconv_buf/*out*/)
+	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+	       size_t nelmts, void *_tconv_buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
@@ -388,8 +391,8 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
  */
 herr_t
 H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
-		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		size_t nelmts, void *_buf/*out*/)
+	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+	       size_t nelmts, void *_buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/

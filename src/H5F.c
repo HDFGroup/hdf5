@@ -250,17 +250,17 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_create_template (hid_t fid)
+H5Fget_create_template (hid_t file_id)
 {
     H5F_t		*file = NULL;
     hid_t		ret_value = FAIL;
     H5F_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Fget_create_template, FAIL);
-    H5TRACE1("i","i",fid);
+    H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5_FILE != H5I_group(fid) || NULL==(file=H5I_object (fid))) {
+    if (H5_FILE != H5I_group(file_id) || NULL==(file=H5I_object (file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     
@@ -1474,8 +1474,8 @@ H5F_close(H5F_t *f)
     Close an open HDF5 file.
 
  USAGE
-    herr_t H5Fclose(fid)
-	int32 fid;	IN: File ID of file to close
+    herr_t H5Fclose(file_id)
+	int32 file_id;	IN: File ID of file to close
 
  ERRORS
     ARGS      BADTYPE	    Not a file atom. 
@@ -1500,18 +1500,18 @@ H5F_close(H5F_t *f)
     changed.
 --------------------------------------------------------------------------*/
 herr_t
-H5Fclose (hid_t fid)
+H5Fclose (hid_t file_id)
 {
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fclose, FAIL);
-    H5TRACE1("e","i",fid);
+    H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (H5_FILE != H5I_group(fid)) {
+    if (H5_FILE != H5I_group(file_id)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     }
-    if (NULL == H5I_object(fid)) {
+    if (NULL == H5I_object(file_id)) {
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to unatomize file");
     }
 
@@ -1519,7 +1519,7 @@ H5Fclose (hid_t fid)
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if (H5I_dec_ref (fid)<0) {
+    if (H5I_dec_ref (file_id)<0) {
 	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
     }
     

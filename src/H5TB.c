@@ -282,8 +282,8 @@ done:
  PURPOSE
     Get the pointer to a temp. buffer memory
  USAGE
-    void *H5TBbuf_ptr(tbid)
-        hid_t tbid;       IN: Temp. buffer ID
+    void *H5TBbuf_ptr(tbuf_id)
+        hid_t tbuf_id;       IN: Temp. buffer ID
  RETURNS
     Non-NULL pointer to buffer memory on success, NULL on failure
  DESCRIPTION
@@ -294,15 +294,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 void *
-H5TBbuf_ptr(hid_t tbid)
+H5TBbuf_ptr(hid_t tbuf_id)
 {
     void *ret_value = NULL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
 
     FUNC_ENTER (H5TBbuf_ptr, NULL);
 
-    if (H5_TEMPBUF != H5I_group(tbid) ||
-            NULL == (tbuf = H5I_object(tbid))) {
+    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+            NULL == (tbuf = H5I_object(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a temp. buffer");
     }
 
@@ -335,7 +335,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBresize_ptr (hid_t tbid, hsize_t size)
+H5TBresize_ptr (hid_t tbuf_id, hsize_t size)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
@@ -343,10 +343,10 @@ H5TBresize_ptr (hid_t tbid, hsize_t size)
     void * old_ptr;             /* Pointer to the previous buffer */
 
     FUNC_ENTER (H5TBresize_ptr, FAIL);
-    H5TRACE2("e","ih",tbid,size);
+    H5TRACE2("e","ih",tbuf_id,size);
 
-    if (H5_TEMPBUF != H5I_group(tbid) ||
-            NULL == (tbuf = H5I_object(tbid))) {
+    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+            NULL == (tbuf = H5I_object(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }
 
@@ -387,7 +387,11 @@ H5TBresize_ptr (hid_t tbid, hsize_t size)
         } /* end while */
 
         /* Insert into correct position in list */
-        if(curr!=NULL) { /* can't be adding to the beginning of list, so this is in the middle somewhere */
+        if(curr!=NULL) {
+	    /*
+	     * Can't be adding to the beginning of list, so this is in the
+	     * middle somewhere.
+	     */
             curr->prev->next=tbuf;
             tbuf->prev=curr->prev;
             curr->prev=tbuf;
@@ -434,7 +438,10 @@ H5TBgarbage_coll (void)
     FUNC_ENTER (H5TBgarbage_coll, FAIL);
     H5TRACE0("e","");
 
-    /* Step through the list, remove each unused node, repair the list and free the node */
+    /*
+     * Step through the list, remove each unused node, repair the list and
+     * free the node.
+     */
     curr=H5TB_list_head;
     while(curr!=NULL) {
         next=curr->next;
@@ -475,8 +482,8 @@ done:
  PURPOSE
     Release a temp. buffer back to the list of unused ones.
  USAGE
-    herr_t H5TBrelease_buf(tbid)
-        hid_t tbid;       IN: Temp. buffer ID to release
+    herr_t H5TBrelease_buf(tbuf_id)
+        hid_t tbuf_id;       IN: Temp. buffer ID to release
  RETURNS
     non-negative on success, negative on failure
  DESCRIPTION
@@ -487,16 +494,16 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBrelease_buf (hid_t tbid)
+H5TBrelease_buf (hid_t tbuf_id)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
 
     FUNC_ENTER (H5TBresize_ptr, FAIL);
-    H5TRACE1("e","i",tbid);
+    H5TRACE1("e","i",tbuf_id);
 
-    if (H5_TEMPBUF != H5I_group(tbid) ||
-            NULL == (tbuf = H5I_object(tbid))) {
+    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+            NULL == (tbuf = H5I_object(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }
 

@@ -143,7 +143,7 @@ H5_init_library(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5_add_exit(void        (*func) (void))
+H5_add_exit(void (*func)(void))
 {
     H5_exit_t              *new_exit;
 
@@ -1396,6 +1396,66 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf(out, "H5T_NATIVE_DOUBLE");
 			} else if (obj==H5T_NATIVE_LDOUBLE_g) {
 			    fprintf(out, "H5T_NATIVE_LDOUBLE");
+			} else if (obj==H5T_IEEE_F32BE_g) {
+			    fprintf(out, "H5T_IEEE_F32BE");
+			} else if (obj==H5T_IEEE_F32LE_g) {
+			    fprintf(out, "H5T_IEEE_F32LE");
+			} else if (obj==H5T_IEEE_F64BE_g) {
+			    fprintf(out, "H5T_IEEE_F64BE");
+			} else if (obj==H5T_IEEE_F64LE_g) {
+			    fprintf(out, "H5T_IEEE_F64LE");
+			} else if (obj==H5T_STD_I8BE_g) {
+			    fprintf(out, "H5T_STD_I8BE");
+			} else if (obj==H5T_STD_I8LE_g) {
+			    fprintf(out, "H5T_STD_I8LE");
+			} else if (obj==H5T_STD_I16BE_g) {
+			    fprintf(out, "H5T_STD_I16BE");
+			} else if (obj==H5T_STD_I16LE_g) {
+			    fprintf(out, "H5T_STD_I16LE");
+			} else if (obj==H5T_STD_I32BE_g) {
+			    fprintf(out, "H5T_STD_I32BE");
+			} else if (obj==H5T_STD_I32LE_g) {
+			    fprintf(out, "H5T_STD_I32LE");
+			} else if (obj==H5T_STD_I64BE_g) {
+			    fprintf(out, "H5T_STD_I64BE");
+			} else if (obj==H5T_STD_I64LE_g) {
+			    fprintf(out, "H5T_STD_I64LE");
+			} else if (obj==H5T_STD_U8BE_g) {
+			    fprintf(out, "H5T_STD_U8BE");
+			} else if (obj==H5T_STD_U8LE_g) {
+			    fprintf(out, "H5T_STD_U8LE");
+			} else if (obj==H5T_STD_U16BE_g) {
+			    fprintf(out, "H5T_STD_U16BE");
+			} else if (obj==H5T_STD_U16LE_g) {
+			    fprintf(out, "H5T_STD_U16LE");
+			} else if (obj==H5T_STD_U32BE_g) {
+			    fprintf(out, "H5T_STD_U32BE");
+			} else if (obj==H5T_STD_U32LE_g) {
+			    fprintf(out, "H5T_STD_U32LE");
+			} else if (obj==H5T_STD_U64BE_g) {
+			    fprintf(out, "H5T_STD_U64BE");
+			} else if (obj==H5T_STD_U64LE_g) {
+			    fprintf(out, "H5T_STD_U64LE");
+			} else if (obj==H5T_STD_B8BE_g) {
+			    fprintf(out, "H5T_STD_B8BE");
+			} else if (obj==H5T_STD_B8LE_g) {
+			    fprintf(out, "H5T_STD_B8LE");
+			} else if (obj==H5T_STD_B16BE_g) {
+			    fprintf(out, "H5T_STD_B16BE");
+			} else if (obj==H5T_STD_B16LE_g) {
+			    fprintf(out, "H5T_STD_B16LE");
+			} else if (obj==H5T_STD_B32BE_g) {
+			    fprintf(out, "H5T_STD_B32BE");
+			} else if (obj==H5T_STD_B32LE_g) {
+			    fprintf(out, "H5T_STD_B32LE");
+			} else if (obj==H5T_STD_B64BE_g) {
+			    fprintf(out, "H5T_STD_B64BE");
+			} else if (obj==H5T_STD_B64LE_g) {
+			    fprintf(out, "H5T_STD_B64LE");
+			} else if (obj==H5T_C_S1_g) {
+			    fprintf(out, "H5T_C_S1");
+			} else if (obj==H5T_FORTRAN_S1_g) {
+			    fprintf(out, "H5T_FORTRAN_S1");
 			} else {
 			    fprintf(out, "%ld", (long)obj);
 			    if (strcmp (argname, "type")) {
@@ -1408,6 +1468,13 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			if (strcmp (argname, "space")) {
 			    fprintf (out, " (space)");
 			}
+			/*Save the rank of simple data spaces for arrays*/
+			{
+			    H5S_t *space = H5I_object(obj);
+			    if (H5S_SIMPLE==space->extent.type) {
+				asize[argno] = space->extent.u.simple.rank;
+			    }
+			}
 			break;
 		    case H5_DATASET:
 			fprintf(out, "%ld", (long)obj);
@@ -1419,6 +1486,12 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "attr")) {
 			    fprintf (out, " (attr)");
+			}
+			break;
+		    case H5_TEMPBUF:
+			fprintf(out, "%ld", (long)obj);
+			if (strcmp(argname, "tbuf")) {
+			    fprintf(out, " (tbuf");
 			}
 			break;
 		    default:

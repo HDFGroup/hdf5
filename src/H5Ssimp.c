@@ -537,11 +537,13 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
      */
     switch(file_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<file_space->extent.u.simple.rank; i++)
@@ -551,11 +553,13 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(mem_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<mem_space->extent.u.simple.rank; i++)
@@ -565,7 +569,8 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(file_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
@@ -573,7 +578,8 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
             for (i=0; i<file_space->u.simple.rank; i++) 
                 file_offset[i] = file_space->h.start[i];
 #endif
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<file_space->extent.u.simple.rank; i++) 
@@ -583,7 +589,8 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(mem_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
@@ -591,7 +598,8 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
             for (i=0; i<mem_space->u.simple.rank; i++) 
                 mem_offset[i] = mem_space->h.start[i];
 #endif
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<mem_space->extent.u.simple.rank; i++)
@@ -681,11 +689,13 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
      */
     switch(file_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<file_space->extent.u.simple.rank; i++)
@@ -695,11 +705,13 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(mem_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<mem_space->extent.u.simple.rank; i++)
@@ -709,7 +721,8 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(file_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
@@ -717,7 +730,8 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
             for (i=0; i<file_space->u.simple.rank; i++) 
                 file_offset[i] = file_space->h.start[i];
 #endif
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<file_space->extent.u.simple.rank; i++) 
@@ -727,7 +741,8 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
 
     switch(mem_space->select.type) {
         case H5S_SEL_NONE:      /* no selection defined */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
+			   "selection not defined");
 
         case H5S_SEL_POINTS:        /* point sequence selection defined */
         case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
@@ -735,7 +750,8 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
             for (i=0; i<mem_space->u.simple.rank; i++) 
                 mem_offset[i] = mem_space->h.start[i];
 #endif
-            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+			   "selection type not supprted currently");
 
         case H5S_SEL_ALL:           /* entire dataspace selection */
             for (i=0; i<mem_space->extent.u.simple.rank; i++)

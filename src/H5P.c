@@ -149,7 +149,7 @@ hid_t
 H5Pcreate (H5P_class_t type)
 {
     hid_t		    ret_value = FAIL;
-    void		   *tmpl = NULL;
+    void		   *plist = NULL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
     H5TRACE1("i","p",type);
@@ -157,35 +157,35 @@ H5Pcreate (H5P_class_t type)
     /* Allocate a new property list and initialize it with default values */
     switch (type) {
     case H5P_FILE_CREATE:
-	if (NULL==(tmpl = H5MM_malloc(sizeof(H5F_create_t)))) {
+	if (NULL==(plist = H5MM_malloc(sizeof(H5F_create_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(tmpl, &H5F_create_dflt, sizeof(H5F_create_t));
+	memcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
 	break;
 
     case H5P_FILE_ACCESS:
-	if (NULL==(tmpl = H5MM_malloc(sizeof(H5F_access_t)))) {
+	if (NULL==(plist = H5MM_malloc(sizeof(H5F_access_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(tmpl, &H5F_access_dflt, sizeof(H5F_access_t));
+	memcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
 	break;
 
     case H5P_DATASET_CREATE:
-	if (NULL==(tmpl = H5MM_malloc(sizeof(H5D_create_t)))) {
+	if (NULL==(plist = H5MM_malloc(sizeof(H5D_create_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(tmpl, &H5D_create_dflt, sizeof(H5D_create_t));
+	memcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
 	break;
 
     case H5P_DATASET_XFER:
-	if (NULL==(tmpl = H5MM_malloc(sizeof(H5D_xfer_t)))) {
+	if (NULL==(plist = H5MM_malloc(sizeof(H5D_xfer_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(tmpl, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
+	memcpy(plist, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
 	break;
 
     default:
@@ -194,7 +194,7 @@ H5Pcreate (H5P_class_t type)
     }
 
     /* Atomize the new property list */
-    if ((ret_value = H5P_create(type, tmpl)) < 0) {
+    if ((ret_value = H5P_create(type, plist)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to register property list");
     }
@@ -221,7 +221,7 @@ H5Pcreate (H5P_class_t type)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5P_create(H5P_class_t type, void *tmpl)
+H5P_create(H5P_class_t type, void *plist)
 {
     hid_t	ret_value = FAIL;
 
@@ -229,10 +229,10 @@ H5P_create(H5P_class_t type, void *tmpl)
 
     /* check args */
     assert(type >= 0 && type < H5P_NCLASSES);
-    assert(tmpl);
+    assert(plist);
 
     /* Atomize the new property list */
-    if ((ret_value=H5I_register((H5I_group_t)(H5_TEMPLATE_0+type), tmpl)) < 0) {
+    if ((ret_value=H5I_register((H5I_group_t)(H5_TEMPLATE_0+type), plist))<0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to register property list");
     }
@@ -254,17 +254,17 @@ H5P_create(H5P_class_t type, void *tmpl)
 	This function releases access to a property list object
 --------------------------------------------------------------------------*/
 herr_t
-H5Pclose (hid_t tid)
+H5Pclose (hid_t plist_id)
 {
     H5P_class_t		type;
-    void		*tmpl = NULL;
+    void		*plist = NULL;
 
     FUNC_ENTER(H5Pclose, FAIL);
-    H5TRACE1("e","i",tid);
+    H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
-    if ((type=H5P_get_class (tid))<0 ||
-	NULL==(tmpl=H5I_object (tid))) {
+    if ((type=H5P_get_class (plist_id))<0 ||
+	NULL==(plist=H5I_object (plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
 	
@@ -274,7 +274,7 @@ H5Pclose (hid_t tid)
      * free function is not registered as part of the group because it takes
      * an extra argument.
      */
-    if (0==H5I_dec_ref(tid)) H5P_close (type, tmpl);
+    if (0==H5I_dec_ref(plist_id)) H5P_close (type, plist);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -298,15 +298,15 @@ H5Pclose (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_close (H5P_class_t type, void *tmpl)
+H5P_close (H5P_class_t type, void *plist)
 {
-    H5F_access_t	*fa_list = (H5F_access_t*)tmpl;
-    H5D_create_t	*dc_list = (H5D_create_t*)tmpl;
+    H5F_access_t	*fa_list = (H5F_access_t*)plist;
+    H5D_create_t	*dc_list = (H5D_create_t*)plist;
     
     FUNC_ENTER (H5P_close, FAIL);
 
     /* Check args */
-    if (!tmpl) HRETURN (SUCCEED);
+    if (!plist) HRETURN (SUCCEED);
 
     /* Some property lists may need to do special things */
     switch (type) {
@@ -359,7 +359,7 @@ H5P_close (H5P_class_t type, void *tmpl)
     }
 
     /* Free the property list struct and return */
-    H5MM_xfree(tmpl);
+    H5MM_xfree(plist);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -381,15 +381,15 @@ H5P_close (H5P_class_t type, void *tmpl)
  *-------------------------------------------------------------------------
  */
 H5P_class_t
-H5Pget_class (hid_t tid)
+H5Pget_class (hid_t plist_id)
 {
     H5I_group_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
-    H5TRACE1("p","i",tid);
+    H5TRACE1("p","i",plist_id);
 
-    if ((group = H5I_group(tid)) < 0 ||
+    if ((group = H5I_group(plist_id)) < 0 ||
 #ifndef NDEBUG
 	group >= H5_TEMPLATE_MAX ||
 #endif
@@ -419,14 +419,14 @@ H5Pget_class (hid_t tid)
  *-------------------------------------------------------------------------
  */
 H5P_class_t
-H5P_get_class(hid_t tid)
+H5P_get_class(hid_t plist_id)
 {
     H5I_group_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5P_get_class, H5P_NO_CLASS);
 
-    if ((group = H5I_group(tid)) < 0 ||
+    if ((group = H5I_group(plist_id)) < 0 ||
 #ifndef NDEBUG
 	group >= H5_TEMPLATE_MAX ||
 #endif
@@ -466,25 +466,25 @@ H5P_get_class(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
+H5Pget_version (hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_version, FAIL);
-    H5TRACE5("e","ixxxx",tid,boot,freelist,stab,shhdr);
+    H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Get values */
-    if (boot) *boot = tmpl->bootblock_ver;
-    if (freelist) *freelist = tmpl->freespace_ver;
-    if (stab) *stab = tmpl->objectdir_ver;
-    if (shhdr) *shhdr = tmpl->sharedheader_ver;
+    if (boot) *boot = plist->bootblock_ver;
+    if (freelist) *freelist = plist->freespace_ver;
+    if (stab) *stab = plist->objectdir_ver;
+    if (shhdr) *shhdr = plist->sharedheader_ver;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -507,17 +507,17 @@ H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_userblock (hid_t tid, hsize_t size)
+H5Pset_userblock (hid_t plist_id, hsize_t size)
 {
     uintn		    i;
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
-    H5TRACE2("e","ih",tid,size);
+    H5TRACE2("e","ih",plist_id,size);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
@@ -530,7 +530,7 @@ H5Pset_userblock (hid_t tid, hsize_t size)
 		      "userblock size is not valid");
     }
     /* Set value */
-    tmpl->userblock_size = size;
+    plist->userblock_size = size;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -553,21 +553,21 @@ H5Pset_userblock (hid_t tid, hsize_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_userblock (hid_t tid, hsize_t *size)
+H5Pget_userblock (hid_t plist_id, hsize_t *size)
 {
-    H5F_create_t	*tmpl = NULL;
+    H5F_create_t	*plist = NULL;
 
     FUNC_ENTER(H5Pget_userblock, FAIL);
-    H5TRACE2("e","i*h",tid,size);
+    H5TRACE2("e","i*h",plist_id,size);
 
     /* Check args */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Get value */
-    if (size) *size = tmpl->userblock_size;
+    if (size) *size = plist->userblock_size;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -673,9 +673,9 @@ H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sizes
  *
- * Purpose:	Sets file size-of addresses and sizes.	TID should be a file
- *		creation property list.  A value of zero causes the property
- *		to not change.
+ * Purpose:	Sets file size-of addresses and sizes.	PLIST_ID should be a
+ *		file creation property list.  A value of zero causes the
+ *		property to not change.
  *
  * Return:	Success:	SUCCEED
  *
@@ -689,16 +689,16 @@ H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size)
+H5Pset_sizes (hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_sizeof_addr, FAIL);
-    H5TRACE3("e","izz",tid,sizeof_addr,sizeof_size);
+    H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
@@ -718,9 +718,9 @@ H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size)
     }
     /* Set value */
     if (sizeof_addr)
-	tmpl->sizeof_addr = sizeof_addr;
+	plist->sizeof_addr = sizeof_addr;
     if (sizeof_size)
-	tmpl->sizeof_size = sizeof_size;
+	plist->sizeof_size = sizeof_size;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -744,25 +744,25 @@ H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sizes (hid_t tid,
+H5Pget_sizes (hid_t plist_id,
 	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_sizes, FAIL);
-    H5TRACE3("e","ixx",tid,sizeof_addr,sizeof_size);
+    H5TRACE3("e","ixx",plist_id,sizeof_addr,sizeof_size);
 
     /* Check args */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Get values */
     if (sizeof_addr)
-	*sizeof_addr = tmpl->sizeof_addr;
+	*sizeof_addr = plist->sizeof_addr;
     if (sizeof_size)
-	*sizeof_size = tmpl->sizeof_size;
+	*sizeof_size = plist->sizeof_size;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -797,25 +797,25 @@ H5Pget_sizes (hid_t tid,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sym_k (hid_t tid, int ik, int lk)
+H5Pset_sym_k (hid_t plist_id, int ik, int lk)
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIsIs",tid,ik,lk);
+    H5TRACE3("e","iIsIs",plist_id,ik,lk);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Set values */
     if (ik > 0) {
-	tmpl->btree_k[H5B_SNODE_ID] = ik;
+	plist->btree_k[H5B_SNODE_ID] = ik;
     }
     if (lk > 0) {
-	tmpl->sym_leaf_k = lk;
+	plist->sym_leaf_k = lk;
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -840,24 +840,24 @@ H5Pset_sym_k (hid_t tid, int ik, int lk)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k (hid_t tid, int *ik /*out */ , int *lk /*out */ )
+H5Pget_sym_k (hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_sym_k, FAIL);
-    H5TRACE3("e","ixx",tid,ik,lk);
+    H5TRACE3("e","ixx",plist_id,ik,lk);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Get values */
     if (ik)
-	*ik = tmpl->btree_k[H5B_SNODE_ID];
+	*ik = plist->btree_k[H5B_SNODE_ID];
     if (lk)
-	*lk = tmpl->sym_leaf_k;
+	*lk = plist->sym_leaf_k;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -881,16 +881,16 @@ H5Pget_sym_k (hid_t tid, int *ik /*out */ , int *lk /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_istore_k (hid_t tid, int ik)
+H5Pset_istore_k (hid_t plist_id, int ik)
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_istore_k, FAIL);
-    H5TRACE2("e","iIs",tid,ik);
+    H5TRACE2("e","iIs",plist_id,ik);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
@@ -899,7 +899,7 @@ H5Pset_istore_k (hid_t tid, int ik)
 		      "istore IK value must be positive");
     }
     /* Set value */
-    tmpl->btree_k[H5B_ISTORE_ID] = ik;
+    plist->btree_k[H5B_ISTORE_ID] = ik;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -923,22 +923,22 @@ H5Pset_istore_k (hid_t tid, int ik)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k (hid_t tid, int *ik /*out */ )
+H5Pget_istore_k (hid_t plist_id, int *ik /*out */ )
 {
-    H5F_create_t	   *tmpl = NULL;
+    H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_istore_k, FAIL);
-    H5TRACE2("e","ix",tid,ik);
+    H5TRACE2("e","ix",plist_id,ik);
 
     /* Check arguments */
-    if (H5P_FILE_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file creation property list");
     }
     /* Get value */
     if (ik)
-	*ik = tmpl->btree_k[H5B_ISTORE_ID];
+	*ik = plist->btree_k[H5B_ISTORE_ID];
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -960,16 +960,16 @@ H5Pget_istore_k (hid_t tid, int *ik /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_layout (hid_t tid, H5D_layout_t layout)
+H5Pset_layout (hid_t plist_id, H5D_layout_t layout)
 {
-    H5D_create_t	   *tmpl = NULL;
+    H5D_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_layout, FAIL);
-    H5TRACE2("e","iDl",tid,layout);
+    H5TRACE2("e","iDl",plist_id,layout);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -978,7 +978,7 @@ H5Pset_layout (hid_t tid, H5D_layout_t layout)
 		      "raw data layout method is not valid");
     }
     /* Set value */
-    tmpl->layout = layout;
+    plist->layout = layout;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1000,20 +1000,20 @@ H5Pset_layout (hid_t tid, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
-H5Pget_layout (hid_t tid)
+H5Pget_layout (hid_t plist_id)
 {
-    H5D_create_t	   *tmpl = NULL;
+    H5D_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pget_layout, H5D_LAYOUT_ERROR);
-    H5TRACE1("Dl","i",tid);
+    H5TRACE1("Dl","i",plist_id);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
 		      "not a dataset creation property list");
     }
-    FUNC_LEAVE(tmpl->layout);
+    FUNC_LEAVE(plist->layout);
 }
 
 /*-------------------------------------------------------------------------
@@ -1038,17 +1038,17 @@ H5Pget_layout (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[/*ndims*/])
+H5Pset_chunk (hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
-    H5D_create_t	   *tmpl = NULL;
+    H5D_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
-    H5TRACE3("e","iIs*[a1]h",tid,ndims,dim);
+    H5TRACE3("e","iIs*[a1]h",plist_id,ndims,dim);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -1056,7 +1056,7 @@ H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[/*ndims*/])
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality must be positive");
     }
-    if ((size_t)ndims > NELMTS(tmpl->chunk_size)) {
+    if ((size_t)ndims > NELMTS(plist->chunk_size)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
 		      "chunk dimensionality is too large");
     }
@@ -1072,10 +1072,10 @@ H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[/*ndims*/])
     }
 
     /* Set value */
-    tmpl->layout = H5D_CHUNKED;
-    tmpl->chunk_ndims = ndims;
+    plist->layout = H5D_CHUNKED;
+    plist->chunk_ndims = ndims;
     for (i = 0; i < ndims; i++) {
-	tmpl->chunk_size[i] = dim[i];
+	plist->chunk_size[i] = dim[i];
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -1101,29 +1101,29 @@ H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[/*ndims*/])
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_chunk (hid_t tid, int max_ndims, hsize_t dim[]/*out*/)
+H5Pget_chunk (hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 {
     int			i;
-    H5D_create_t	*tmpl = NULL;
+    H5D_create_t	*plist = NULL;
 
     FUNC_ENTER(H5Pget_chunk, FAIL);
-    H5TRACE3("Is","iIsx",tid,max_ndims,dim);
+    H5TRACE3("Is","iIsx",plist_id,max_ndims,dim);
 
     /* Check arguments */
-    if (H5P_DATASET_CREATE != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
-    if (H5D_CHUNKED != tmpl->layout) {
+    if (H5D_CHUNKED != plist->layout) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "not a chunked storage layout");
     }
-    for (i=0; i<tmpl->chunk_ndims && i<max_ndims && dim; i++) {
-	dim[i] = tmpl->chunk_size[i];
+    for (i=0; i<plist->chunk_ndims && i<max_ndims && dim; i++) {
+	dim[i] = plist->chunk_size[i];
     }
 
-    FUNC_LEAVE(tmpl->chunk_ndims);
+    FUNC_LEAVE(plist->chunk_ndims);
 }
 
 
@@ -1318,8 +1318,8 @@ H5Pget_external (hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_driver
  *
- * Purpose:	Return the ID of the low-level file driver.  TID should be a
- *		file access property list.
+ * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
+ *		be a file access property list.
  *
  * Return:	Success:	A low-level driver ID
  *
@@ -1333,21 +1333,21 @@ H5Pget_external (hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
  *-------------------------------------------------------------------------
  */
 H5F_driver_t
-H5Pget_driver (hid_t tid)
+H5Pget_driver (hid_t plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_driver, H5F_LOW_ERROR);
-    H5TRACE1("Fd","i",tid);
+    H5TRACE1("Fd","i",plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5F_LOW_ERROR,
 		       "not a file access property list");
     }
 
-    FUNC_LEAVE (tmpl->driver);
+    FUNC_LEAVE (plist->driver);
 }
     
 
@@ -1370,22 +1370,22 @@ H5Pget_driver (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_stdio (hid_t tid)
+H5Pset_stdio (hid_t plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
     
     FUNC_ENTER (H5Pset_stdio, FAIL);
-    H5TRACE1("e","i",tid);
+    H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
 
     /* Set driver */
-    tmpl->driver = H5F_LOW_STDIO;
+    plist->driver = H5F_LOW_STDIO;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1411,20 +1411,20 @@ H5Pset_stdio (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_stdio (hid_t tid)
+H5Pget_stdio (hid_t plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_stdio, FAIL);
-    H5TRACE1("e","i",tid);
+    H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_STDIO != tmpl->driver) {
+    if (H5F_LOW_STDIO != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the stdio driver is not set");
     }
@@ -1452,22 +1452,22 @@ H5Pget_stdio (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sec2 (hid_t tid)
+H5Pset_sec2 (hid_t plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
     
     FUNC_ENTER (H5Pset_sec2, FAIL);
-    H5TRACE1("e","i",tid);
+    H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
 
     /* Set driver */
-    tmpl->driver = H5F_LOW_SEC2;
+    plist->driver = H5F_LOW_SEC2;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1493,20 +1493,20 @@ H5Pset_sec2 (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sec2 (hid_t tid)
+H5Pget_sec2 (hid_t plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_sec2, FAIL);
-    H5TRACE1("e","i",tid);
+    H5TRACE1("e","i",plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_SEC2 != tmpl->driver) {
+    if (H5F_LOW_SEC2 != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the sec2 driver is not set");
     }
@@ -1538,16 +1538,16 @@ H5Pget_sec2 (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_core (hid_t tid, size_t increment)
+H5Pset_core (hid_t plist_id, size_t increment)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
     
     FUNC_ENTER (H5Pset_core, FAIL);
-    H5TRACE2("e","iz",tid,increment);
+    H5TRACE2("e","iz",plist_id,increment);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
@@ -1557,8 +1557,8 @@ H5Pset_core (hid_t tid, size_t increment)
     }
 
     /* Set driver */
-    tmpl->driver = H5F_LOW_CORE;
-    tmpl->u.core.increment = increment;
+    plist->driver = H5F_LOW_CORE;
+    plist->u.core.increment = increment;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1586,27 +1586,27 @@ H5Pset_core (hid_t tid, size_t increment)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_core (hid_t tid, size_t *increment/*out*/)
+H5Pget_core (hid_t plist_id, size_t *increment/*out*/)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_core, FAIL);
-    H5TRACE2("e","ix",tid,increment);
+    H5TRACE2("e","ix",plist_id,increment);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_CORE != tmpl->driver) {
+    if (H5F_LOW_CORE != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the core driver is not set");
     }
 
     /* Return values */
     if (increment) {
-	*increment = tmpl->u.core.increment;
+	*increment = plist->u.core.increment;
     }
     
     FUNC_LEAVE (SUCCEED);
@@ -1631,41 +1631,41 @@ H5Pget_core (hid_t tid, size_t *increment/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
-	      const char *raw_ext, hid_t raw_tid)
+H5Pset_split (hid_t plist_id, const char *meta_ext, hid_t meta_plist_id,
+	      const char *raw_ext, hid_t raw_plist_id)
 {
-    H5F_access_t	*tmpl = NULL;
-    H5F_access_t	*meta_tmpl = &H5F_access_dflt;
-    H5F_access_t	*raw_tmpl = &H5F_access_dflt;
+    H5F_access_t	*plist = NULL;
+    H5F_access_t	*meta_plist = &H5F_access_dflt;
+    H5F_access_t	*raw_plist = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_split, FAIL);
-    H5TRACE5("e","isisi",tid,meta_ext,meta_tid,raw_ext,raw_tid);
+    H5TRACE5("e","isisi",plist_id,meta_ext,meta_plist_id,raw_ext,raw_plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
-    if (H5P_DEFAULT!=meta_tid &&
-	(H5P_FILE_ACCESS != H5P_get_class(meta_tid) ||
-	 NULL == (meta_tmpl = H5I_object(meta_tid)))) {
+    if (H5P_DEFAULT!=meta_plist_id &&
+	(H5P_FILE_ACCESS != H5P_get_class(meta_plist_id) ||
+	 NULL == (meta_plist = H5I_object(meta_plist_id)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
-    if (H5P_DEFAULT!=raw_tid &&
-	(H5P_FILE_ACCESS != H5P_get_class(raw_tid) ||
-	 NULL == (raw_tmpl = H5I_object(raw_tid)))) {
+    if (H5P_DEFAULT!=raw_plist_id &&
+	(H5P_FILE_ACCESS != H5P_get_class(raw_plist_id) ||
+	 NULL == (raw_plist = H5I_object(raw_plist_id)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
 
     /* Set driver */
-    tmpl->driver = H5F_LOW_SPLIT;
-    tmpl->u.split.meta_access = H5P_copy (H5P_FILE_ACCESS, meta_tmpl);
-    tmpl->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS, raw_tmpl);
-    tmpl->u.split.meta_ext = H5MM_xstrdup (meta_ext);
-    tmpl->u.split.raw_ext = H5MM_xstrdup (raw_ext);
+    plist->driver = H5F_LOW_SPLIT;
+    plist->u.split.meta_access = H5P_copy (H5P_FILE_ACCESS, meta_plist);
+    plist->u.split.raw_access = H5P_copy (H5P_FILE_ACCESS, raw_plist);
+    plist->u.split.meta_ext = H5MM_xstrdup (meta_ext);
+    plist->u.split.raw_ext = H5MM_xstrdup (raw_ext);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1700,23 +1700,23 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
+H5Pget_split (hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
 	      hid_t *meta_properties/*out*/, size_t raw_ext_size,
 	      char *raw_ext/*out*/, hid_t *raw_properties/*out*/)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_split, FAIL);
-    H5TRACE7("e","izxxzxx",tid,meta_ext_size,meta_ext,meta_properties,
+    H5TRACE7("e","izxxzxx",plist_id,meta_ext_size,meta_ext,meta_properties,
              raw_ext_size,raw_ext,raw_properties);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_SPLIT != tmpl->driver) {
+    if (H5F_LOW_SPLIT != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the split driver is not set");
     }
@@ -1729,30 +1729,30 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
 
     /* Output arguments */
     if (meta_ext && meta_ext_size>0) {
-	if (tmpl->u.split.meta_ext) {
-	    strncpy (meta_ext, tmpl->u.split.meta_ext, meta_ext_size);
+	if (plist->u.split.meta_ext) {
+	    strncpy (meta_ext, plist->u.split.meta_ext, meta_ext_size);
 	} else {
 	    strncpy (meta_ext, ".meta", meta_ext_size);
 	}
     }
     if (raw_ext && raw_ext_size>0) {
-	if (tmpl->u.split.raw_ext) {
-	    strncpy (raw_ext, tmpl->u.split.raw_ext, raw_ext_size);
+	if (plist->u.split.raw_ext) {
+	    strncpy (raw_ext, plist->u.split.raw_ext, raw_ext_size);
 	} else {
 	    strncpy (raw_ext, ".raw", raw_ext_size);
 	}
     }
     if (meta_properties) {
-	assert (tmpl->u.split.meta_access);
+	assert (plist->u.split.meta_access);
 	*meta_properties = H5P_create (H5P_FILE_ACCESS,
 				       H5P_copy (H5P_FILE_ACCESS,
-						 tmpl->u.split.meta_access));
+						 plist->u.split.meta_access));
     }
     if (raw_properties) {
-	assert (tmpl->u.split.raw_access);
+	assert (plist->u.split.raw_access);
 	*raw_properties = H5P_create (H5P_FILE_ACCESS,
 				      H5P_copy (H5P_FILE_ACCESS,
-						tmpl->u.split.raw_access));
+						plist->u.split.raw_access));
     }
     
     FUNC_LEAVE (SUCCEED);
@@ -1780,18 +1780,18 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
+H5Pset_family (hid_t plist_id, hsize_t memb_size, hid_t memb_plist_id)
 {
     
-    H5F_access_t	*tmpl = NULL;
-    H5F_access_t	*memb_tmpl = &H5F_access_dflt;
+    H5F_access_t	*plist = NULL;
+    H5F_access_t	*memb_plist = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_family, FAIL);
-    H5TRACE3("e","ihi",tid,memb_size,memb_tid);
+    H5TRACE3("e","ihi",plist_id,memb_size,memb_plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
@@ -1799,18 +1799,18 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
 		       "family member size is too small");
     }
-    if (H5P_DEFAULT!=memb_tid &&
-	(H5P_FILE_ACCESS != H5P_get_class(memb_tid) ||
-	 NULL == (tmpl = H5I_object(memb_tid)))) {
+    if (H5P_DEFAULT!=memb_plist_id &&
+	(H5P_FILE_ACCESS != H5P_get_class(memb_plist_id) ||
+	 NULL == (plist = H5I_object(memb_plist_id)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
 
     /* Set driver */
-    tmpl->driver = H5F_LOW_FAMILY;
-    H5F_addr_reset (&(tmpl->u.fam.memb_size));
-    H5F_addr_inc (&(tmpl->u.fam.memb_size), memb_size);
-    tmpl->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS, memb_tmpl);
+    plist->driver = H5F_LOW_FAMILY;
+    H5F_addr_reset (&(plist->u.fam.memb_size));
+    H5F_addr_inc (&(plist->u.fam.memb_size), memb_size);
+    plist->u.fam.memb_access = H5P_copy (H5P_FILE_ACCESS, memb_plist);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1821,7 +1821,7 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
  *
  * Purpose:	If the file access property list is set to the family driver
  *		then this function returns zero; otherwise it returns a
- *		negative value.	 On success, if MEMB_TID is a non-null
+ *		negative value.	 On success, if MEMB_PLIST_ID is a non-null
  *		pointer it will be initialized with the id of an open
  *		property list: the file access property list for the family
  *		members.  In the future, additional arguments may be added to
@@ -1839,33 +1839,34 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/, hid_t *memb_tid/*out*/)
+H5Pget_family (hid_t plist_id, hsize_t *memb_size/*out*/,
+	       hid_t *memb_plist_id/*out*/)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_family, FAIL);
-    H5TRACE3("e","ixx",tid,memb_size,memb_tid);
+    H5TRACE3("e","ixx",plist_id,memb_size,memb_plist_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_FAMILY != tmpl->driver) {
+    if (H5F_LOW_FAMILY != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the family driver is not set");
     }
 
     /* Output args */
     if (memb_size) {
-	*memb_size = tmpl->u.fam.memb_size.offset;
+	*memb_size = plist->u.fam.memb_size.offset;
     }
-    if (memb_tid) {
-	assert (tmpl->u.fam.memb_access);
-	*memb_tid = H5P_create (H5P_FILE_ACCESS,
+    if (memb_plist_id) {
+	assert (plist->u.fam.memb_access);
+	*memb_plist_id = H5P_create (H5P_FILE_ACCESS,
 				H5P_copy (H5P_FILE_ACCESS,
-					  tmpl->u.fam.memb_access));
+					  plist->u.fam.memb_access));
     }
 	
     FUNC_LEAVE (SUCCEED);
@@ -1897,17 +1898,17 @@ H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/, hid_t *memb_tid/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
+H5Pset_cache (hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 	      double rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_cache, FAIL);
-    H5TRACE4("e","iIszd",tid,mdc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE4("e","iIszd",plist_id,mdc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5P_get_class (tid) ||
-	NULL==(fapl=H5I_object (tid))) {
+    if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
+	NULL==(fapl=H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -1951,17 +1952,17 @@ H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_cache (hid_t tid, int *mdc_nelmts, size_t *rdcc_nbytes,
+H5Pget_cache (hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,
 	      double *rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pget_cache, FAIL);
-    H5TRACE4("e","i*Is*z*d",tid,mdc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE4("e","i*Is*z*d",plist_id,mdc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5P_get_class (tid) ||
-	NULL==(fapl=H5I_object (tid))) {
+    if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
+	NULL==(fapl=H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
@@ -2356,7 +2357,7 @@ H5Pget_deflate (hid_t plist_id)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi
  *
- * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info)
+ * Signature:	herr_t H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info)
  *
  * Purpose:	Store the access mode for MPIO call and the user supplied
  *		communicator and info in the access property list which can
@@ -2365,7 +2366,7 @@ H5Pget_deflate (hid_t plist_id)
  *		function.
  *
  * Parameters:
- *		hid_t tid 
+ *		hid_t plist_id 
  *		    ID of property list to modify 
  *		MPI_Comm comm 
  *		    MPI communicator to be used for file open as defined in
@@ -2406,16 +2407,16 @@ H5Pget_deflate (hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
+H5Pset_mpi (hid_t plist_id, MPI_Comm comm, MPI_Info info)
 {
-    H5F_access_t	   *tmpl = NULL;
+    H5F_access_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_mpi, FAIL);
-    H5TRACE3("e","iMcMi",tid,comm,info);
+    H5TRACE3("e","iMcMi",plist_id,comm,info);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class(tid) ||
-	NULL == (tmpl = H5I_object(tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access property list");
     }
@@ -2426,9 +2427,9 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
      */
 #endif
 
-    tmpl->driver = H5F_LOW_MPIO;
-    tmpl->u.mpio.comm = comm;
-    tmpl->u.mpio.info = info;
+    plist->driver = H5F_LOW_MPIO;
+    plist->u.mpio.comm = comm;
+    plist->u.mpio.info = info;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2461,25 +2462,25 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
+H5Pget_mpi (hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
 {
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
 
     FUNC_ENTER (H5Pget_mpi, FAIL);
-    H5TRACE3("e","i*Mc*Mi",tid,comm,info);
+    H5TRACE3("e","i*Mc*Mi",plist_id,comm,info);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5P_get_class (tid) ||
-	NULL == (tmpl = H5I_object (tid))) {
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a file access property list");
     }
-    if (H5F_LOW_MPIO != tmpl->driver) {
+    if (H5F_LOW_MPIO != plist->driver) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "the mpi driver is not set");
     }
-    *comm = tmpl->u.mpio.comm;
-    *info = tmpl->u.mpio.info;
+    *comm = plist->u.mpio.comm;
+    *info = plist->u.mpio.info;
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2490,7 +2491,8 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_xfer
  *
- * Signature:	herr_t H5Pset_xfer(hid_t tid, H5D_transfer_t data_xfer_mode)
+ * Signature:	herr_t H5Pset_xfer(hid_t plist_id,
+ *		                   H5D_transfer_t data_xfer_mode)
  *
  * Purpose:	Set the transfer mode of the dataset transfer property list.
  *		The list can then be used to control the I/O transfer mode
@@ -2498,7 +2500,7 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
  *		in the parallel HDF5 library and is not a collective function.
  *
  * Parameters:
- *		hid_t tid 
+ *		hid_t plist_id 
  *		    ID of a dataset transfer property list
  *		H5D_transfer_t data_xfer_mode
  *		    Data transfer modes: 
@@ -2523,16 +2525,16 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode)
+H5Pset_xfer (hid_t plist_id, H5D_transfer_t data_xfer_mode)
 {
     H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pset_xfer, FAIL);
-    H5TRACE2("e","iDt",tid,data_xfer_mode);
+    H5TRACE2("e","iDt",plist_id,data_xfer_mode);
 
     /* Check arguments */
-    if (H5P_DATASET_XFER != H5P_get_class(tid) ||
-	NULL == (plist = H5I_object(tid))) {
+    if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");
     }
@@ -2573,16 +2575,16 @@ H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
+H5Pget_xfer (hid_t plist_id, H5D_transfer_t *data_xfer_mode)
 {
     H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER (H5Pget_xfer, FAIL);
-    H5TRACE2("e","i*Dt",tid,data_xfer_mode);
+    H5TRACE2("e","i*Dt",plist_id,data_xfer_mode);
 
     /* Check arguments */
-    if (H5P_DATASET_XFER != H5P_get_class(tid) ||
-	NULL == (plist = H5I_object(tid))) {
+    if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+	NULL == (plist = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");
     }
@@ -2600,8 +2602,8 @@ H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
  PURPOSE
     Copy a property list
  USAGE
-    hid_t H5P_copy(tid)
-	hid_t tid;	  IN: property list object to copy
+    hid_t H5P_copy(plist_id)
+	hid_t plist_id;	  IN: property list object to copy
  RETURNS
     Returns property list ID (atom) on success, FAIL on failure
 
@@ -2618,33 +2620,33 @@ H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
  * parameter settings.
 --------------------------------------------------------------------------*/
 hid_t
-H5Pcopy (hid_t tid)
+H5Pcopy (hid_t plist_id)
 {
-    const void		   *tmpl = NULL;
-    void		   *new_tmpl = NULL;
+    const void		   *plist = NULL;
+    void		   *new_plist = NULL;
     H5P_class_t		    type;
     hid_t		    ret_value = FAIL;
     H5I_group_t		    group;
 
     FUNC_ENTER(H5Pcopy, FAIL);
-    H5TRACE1("i","i",tid);
+    H5TRACE1("i","i",plist_id);
 
     /* Check args */
-    if (NULL == (tmpl = H5I_object(tid)) ||
-	(type = H5P_get_class(tid)) < 0 ||
-	(group = H5I_group(tid)) < 0) {
+    if (NULL == (plist = H5I_object(plist_id)) ||
+	(type = H5P_get_class(plist_id)) < 0 ||
+	(group = H5I_group(plist_id)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
 		      "unable to unatomize property list");
     }
 
     /* Copy it */
-    if (NULL==(new_tmpl=H5P_copy (type, tmpl))) {
+    if (NULL==(new_plist=H5P_copy (type, plist))) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to copy property list");
     }
 
     /* Register the atom for the new property list */
-    if ((ret_value = H5I_register(group, new_tmpl)) < 0) {
+    if ((ret_value = H5I_register(group, new_plist)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to atomize property list pointer");
     }

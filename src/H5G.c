@@ -224,21 +224,21 @@ H5Gopen (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gclose (hid_t grp_id)
+H5Gclose (hid_t group_id)
 {
     FUNC_ENTER(H5Gclose, FAIL);
-    H5TRACE1("e","i",grp_id);
+    H5TRACE1("e","i",group_id);
 
     /* Check args */
-    if (H5_GROUP != H5I_group(grp_id) ||
-	NULL == H5I_object(grp_id)) {
+    if (H5_GROUP != H5I_group(group_id) ||
+	NULL == H5I_object(group_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     }
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count
      * reaches zero.
      */
-    if (H5I_dec_ref(grp_id) < 0) {
+    if (H5I_dec_ref(group_id) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
     }
     FUNC_LEAVE(SUCCEED);

@@ -152,7 +152,7 @@ H5D_term_interface(void)
  *		and initial persistent properties including the type of each
  *		datapoint as stored in the file (TYPE_ID), the size of the
  *		dataset (SPACE_ID), and other initial miscellaneous
- *		properties (CREATE_PARMS_ID).
+ *		properties (PLIST_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
  *		allowed to derive new types, data spaces, and creation
@@ -186,7 +186,7 @@ H5D_term_interface(void)
  */
 hid_t
 H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-	  hid_t create_parms_id)
+	  hid_t plist_id)
 {
     H5G_t		   *loc = NULL;
     H5T_t		   *type = NULL;
@@ -196,7 +196,7 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5D_create_t	   *create_parms = NULL;
 
     FUNC_ENTER(H5Dcreate, FAIL);
-    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,create_parms_id);
+    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* Check arguments */
     if (NULL == (loc = H5G_loc(loc_id))) {
@@ -213,9 +213,9 @@ H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (create_parms_id >= 0) {
-	if (H5P_DATASET_CREATE != H5P_get_class(create_parms_id) ||
-	    NULL == (create_parms = H5I_object(create_parms_id))) {
+    if (plist_id >= 0) {
+	if (H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	    NULL == (create_parms = H5I_object(plist_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "not a dataset creation property list");
 	}
@@ -314,24 +314,24 @@ H5Dopen (hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dclose (hid_t dataset_id)
+H5Dclose (hid_t dset_id)
 {
-    H5D_t		   *dataset = NULL;	/* dataset object to release */
+    H5D_t		   *dset = NULL;	/* dataset object to release */
 
     FUNC_ENTER(H5Dclose, FAIL);
-    H5TRACE1("e","i",dataset_id);
+    H5TRACE1("e","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET != H5I_group(dataset_id) ||
-	NULL == (dataset = H5I_object(dataset_id)) ||
-	NULL == dataset->ent.file) {
+    if (H5_DATASET != H5I_group(dset_id) ||
+	NULL == (dset = H5I_object(dset_id)) ||
+	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.
      */
-    if (H5I_dec_ref(dataset_id) < 0) {
+    if (H5I_dec_ref(dset_id) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
     }
     FUNC_LEAVE(SUCCEED);
@@ -358,23 +358,23 @@ H5Dclose (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_space (hid_t dataset_id)
+H5Dget_space (hid_t dset_id)
 {
-    H5D_t	*dataset = NULL;
+    H5D_t	*dset = NULL;
     H5S_t	*space = NULL;
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_space, FAIL);
-    H5TRACE1("i","i",dataset_id);
+    H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dataset_id) ||
-	NULL==(dataset=H5I_object (dataset_id))) {
+    if (H5_DATASET!=H5I_group (dset_id) ||
+	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
 
     /* Read the data space message and return a data space object */
-    if (NULL==(space=H5S_read (&(dataset->ent)))) {
+    if (NULL==(space=H5S_read (&(dset->ent)))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to load space info from dataset header");
     }
@@ -414,24 +414,24 @@ H5Dget_space (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_type (hid_t dataset_id)
+H5Dget_type (hid_t dset_id)
 {
     
-    H5D_t	*dataset = NULL;
+    H5D_t	*dset = NULL;
     H5T_t	*copied_type = NULL;
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_type, FAIL);
-    H5TRACE1("i","i",dataset_id);
+    H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dataset_id) ||
-	NULL==(dataset=H5I_object (dataset_id))) {
+    if (H5_DATASET!=H5I_group (dset_id) ||
+	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
 
     /* Copy the data type and mark it read-only */
-    if (NULL==(copied_type=H5T_copy (dataset->type, H5T_COPY_REOPEN))) {
+    if (NULL==(copied_type=H5T_copy (dset->type, H5T_COPY_REOPEN))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to copy the data type");
     }
@@ -471,24 +471,24 @@ H5Dget_type (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dget_create_plist (hid_t dataset_id)
+H5Dget_create_plist (hid_t dset_id)
 {
-    H5D_t		*dataset = NULL;
+    H5D_t		*dset = NULL;
     H5D_create_t	*copied_parms = NULL;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_create_plist, FAIL);
-    H5TRACE1("i","i",dataset_id);
+    H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dataset_id) ||
-	NULL==(dataset=H5I_object (dataset_id))) {
+    if (H5_DATASET!=H5I_group (dset_id) ||
+	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
 
     /* Copy the creation property list */
     if (NULL==(copied_parms=H5P_copy (H5P_DATASET_CREATE,
-				      dataset->create_parms))) {
+				      dset->create_parms))) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to copy the creation property list");
     }
@@ -507,12 +507,12 @@ H5Dget_create_plist (hid_t dataset_id)
 /*-------------------------------------------------------------------------
  * Function:	H5Dread
  *
- * Purpose:	Reads (part of) a DATASET from the file into application
+ * Purpose:	Reads (part of) a DSET from the file into application
  *		memory BUF. The part of the dataset to read is defined with
  *		MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
  *		converted from their file type to the MEM_TYPE_ID specified. 
  *		Additional miscellaneous data transfer properties can be
- *		passed to this function with the XFER_PARMS_ID argument.
+ *		passed to this function with the PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
  *		that the entire file data space is to be referenced.
@@ -524,7 +524,7 @@ H5Dget_create_plist (hid_t dataset_id)
  *		The number of elements in the memory data space must match
  *		the number of elements in the file data space.
  *
- *		The XFER_PARMS_ID can be the constant H5P_DEFAULT in which
+ *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
  * Return:	Success:	SUCCEED
@@ -547,23 +547,23 @@ H5Dget_create_plist (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-	hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/)
+H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5D_t		   *dataset = NULL;
+    H5D_t		   *dset = NULL;
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
-    H5TRACE6("e","iiiiix",dataset_id,mem_type_id,mem_space_id,file_space_id,
-             xfer_parms_id,buf);
+    H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
+             plist_id,buf);
 
     /* check arguments */
-    if (H5_DATASET != H5I_group(dataset_id) ||
-	NULL == (dataset = H5I_object(dataset_id)) ||
-	NULL == dataset->ent.file) {
+    if (H5_DATASET != H5I_group(dset_id) ||
+	NULL == (dset = H5I_object(dset_id)) ||
+	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     if (H5_DATATYPE != H5I_group(mem_type_id) ||
@@ -582,10 +582,10 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
     }
-    if (H5P_DEFAULT == xfer_parms_id) {
+    if (H5P_DEFAULT == plist_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5P_get_class(xfer_parms_id) ||
-	       NULL == (xfer_parms = H5I_object(xfer_parms_id))) {
+    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+	       NULL == (xfer_parms = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -593,7 +593,7 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* read raw data */
-    if (H5D_read(dataset, mem_type, mem_space, file_space, xfer_parms,
+    if (H5D_read(dset, mem_type, mem_space, file_space, xfer_parms,
 		 buf/*out*/) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     }
@@ -603,13 +603,13 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 /*-------------------------------------------------------------------------
  * Function:	H5Dwrite
  *
- * Purpose:	Writes (part of) a DATASET from application memory BUF to the
+ * Purpose:	Writes (part of) a DSET from application memory BUF to the
  *		file.  The part of the dataset to write is defined with the
  *		MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
  *		are converted from their current type (MEM_TYPE_ID) to their
  *		file data type.	 Additional miscellaneous data transfer
  *		properties can be passed to this function with the
- *		XFER_PARMS_ID argument.
+ *		PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
  *		that the entire file data space is to be referenced.
@@ -621,7 +621,7 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *		The number of elements in the memory data space must match
  *		the number of elements in the file data space.
  *
- *		The XFER_PARMS_ID can be the constant H5P_DEFAULT in which
+ *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
  *
  * Return:	Success:	SUCCEED
@@ -638,23 +638,23 @@ H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t xfer_parms_id, const void *buf)
+H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+	 hid_t file_space_id, hid_t plist_id, const void *buf)
 {
-    H5D_t		   *dataset = NULL;
+    H5D_t		   *dset = NULL;
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dwrite, FAIL);
-    H5TRACE6("e","iiiiix",dataset_id,mem_type_id,mem_space_id,file_space_id,
-             xfer_parms_id,buf);
+    H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
+             plist_id,buf);
 
     /* check arguments */
-    if (H5_DATASET != H5I_group(dataset_id) ||
-	NULL == (dataset = H5I_object(dataset_id)) ||
-	NULL == dataset->ent.file) {
+    if (H5_DATASET != H5I_group(dset_id) ||
+	NULL == (dset = H5I_object(dset_id)) ||
+	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     if (H5_DATATYPE != H5I_group(mem_type_id) ||
@@ -673,10 +673,10 @@ H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
     }
-    if (H5P_DEFAULT == xfer_parms_id) {
+    if (H5P_DEFAULT == plist_id) {
 	xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5P_get_class(xfer_parms_id) ||
-	       NULL == (xfer_parms = H5I_object(xfer_parms_id))) {
+    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+	       NULL == (xfer_parms = H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -684,7 +684,7 @@ H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* write raw data */
-    if (H5D_write(dataset, mem_type, mem_space, file_space, xfer_parms,
+    if (H5D_write(dset, mem_type, mem_space, file_space, xfer_parms,
 		  buf) < 0) {
 	HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     }
@@ -710,16 +710,16 @@ H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dextend (hid_t dataset_id, const hsize_t *size)
+H5Dextend (hid_t dset_id, const hsize_t *size)
 {
-    H5D_t	*dataset = NULL;
+    H5D_t	*dset = NULL;
     
     FUNC_ENTER (H5Dextend, FAIL);
-    H5TRACE2("e","i*h",dataset_id,size);
+    H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dataset_id) ||
-	NULL==(dataset=H5I_object (dataset_id))) {
+    if (H5_DATASET!=H5I_group (dset_id) ||
+	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     if (!size) {
@@ -727,7 +727,7 @@ H5Dextend (hid_t dataset_id, const hsize_t *size)
     }
 
     /* Increase size */
-    if (H5D_extend (dataset, size)<0) {
+    if (H5D_extend (dset, size)<0) {
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to extend dataset");
     }
@@ -1226,10 +1226,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
-    H5S_conv_t	sconv_func={NULL};	/*space conversion funcs*/
-    H5S_sel_iter_t mem_iter,        /* memory selection iteration information */
-        bkg_iter,                   /* background iteration information */
-        file_iter;                  /* file selection iteration information */
+    H5S_conv_t		sconv_func={NULL};	/*space conversion funcs*/
+    H5S_sel_iter_t 	mem_iter;        /* mem selection iteration info*/
+    H5S_sel_iter_t	bkg_iter;		/*background iteration info*/
+    H5S_sel_iter_t	file_iter;              /*file selection iter info*/
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL;
     herr_t		status;
@@ -1292,7 +1292,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * turns off background preservation.
      */
 #ifdef QAK
-printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
+    printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
 #endif /* QAK */
     if (nelmts!=H5S_select_npoints (file_space)) {
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1303,8 +1303,10 @@ printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id=H5I_register(H5_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
-                (dst_id=H5I_register(H5_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
+        if ((src_id=H5I_register(H5_DATATYPE,
+				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
+	    (dst_id=H5I_register(H5_DATATYPE,
+				 H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
                 "unable to register types for conversion");
         }
@@ -1314,7 +1316,7 @@ printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
 		     "unable to convert from file to memory data space");
     }
 #ifdef QAK
-printf("%s: check 1.0\n",FUNC);
+    printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
 	
 #ifdef HAVE_PARALLEL
@@ -1359,7 +1361,7 @@ printf("%s: check 1.0\n",FUNC);
         H5E_clear ();
     }
 #ifdef QAK
-printf("%s: check 2.0\n",FUNC);
+    printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
     
 	
@@ -1374,7 +1376,8 @@ printf("%s: check 2.0\n",FUNC);
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "temporary buffer max size is too small");
     }
-    if (FAIL == (sconv_func.finit)(&(dataset->layout), file_space, &file_iter)) {
+    if (FAIL == (sconv_func.finit)(&(dataset->layout),
+				   file_space, &file_iter)) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
              "unable to initialize file selection information");
     } 
@@ -1387,7 +1390,7 @@ printf("%s: check 2.0\n",FUNC);
              "unable to initialize background selection information");
     } 
 #ifdef QAK
-printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
+    printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #endif /* QAK */
 
     /*
@@ -1423,14 +1426,18 @@ printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #endif
 
 #ifdef QAK
-printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",FUNC,(int)nelmts,(int)need_bkg);
+    printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",
+	   FUNC,(int)nelmts,(int)need_bkg);
 #endif /* QAK */
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv_func.favail)(file_space,&file_iter, MIN(request_nelmts,(nelmts-smine_start)));
+        smine_nelmts = (sconv_func.favail)(file_space,&file_iter,
+					   MIN(request_nelmts,
+					       (nelmts-smine_start)));
 #ifdef QAK
-printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
+	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",
+	       FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif /* QAK */
 	
         /*
@@ -1447,33 +1454,34 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
         }
 #ifdef QAK
-printf("%s: check 6.0\n",FUNC);
+	printf("%s: check 6.0\n",FUNC);
 #endif /* QAK */
 #ifdef QAK
-printf("%s: check 6.5\n",FUNC);
-    {
-        int i;
-        uint16 *b;
+	printf("%s: check 6.5\n",FUNC);
+	{
+	    int i;
+	    uint16 *b;
 
-        if(qak_debug) {
-            b=tconv_buf;
-            printf("\ntconv_buf:");
-            for (i=0; i<smine_nelmts; i++,b++) {
-                printf("(%d)%u ",i,(unsigned)*b);
-            }
-            printf("\n");
-        }
-    }
+	    if(qak_debug) {
+		b=tconv_buf;
+		printf("\ntconv_buf:");
+		for (i=0; i<smine_nelmts; i++,b++) {
+		    printf("(%d)%u ",i,(unsigned)*b);
+		}
+		printf("\n");
+	    }
+	}
 #endif /* QAK */
         if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
                 (!H5D_OPTIMIZE_PIPE && need_bkg)) {
             if ((sconv_func.mgath)(buf, H5T_get_size (mem_type), mem_space,
-                    &bkg_iter, smine_nelmts, bkg_buf/*out*/)!=smine_nelmts) {
+				   &bkg_iter, smine_nelmts,
+				   bkg_buf/*out*/)!=smine_nelmts) {
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
             }
         }
 #ifdef QAK
-printf("%s: check 7.0\n",FUNC);
+	printf("%s: check 7.0\n",FUNC);
 #endif /* QAK */
 
         /*
@@ -1494,7 +1502,7 @@ printf("%s: check 7.0\n",FUNC);
         }
 
 #ifdef QAK
-printf("%s: check 8.0\n",FUNC);
+	printf("%s: check 8.0\n",FUNC);
 #endif /* QAK */
         /*
          * Scatter the data into memory.
@@ -1504,7 +1512,7 @@ printf("%s: check 8.0\n",FUNC);
             HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
         }
 #ifdef QAK
-printf("%s: check 9.0\n",FUNC);
+	printf("%s: check 9.0\n",FUNC);
 #endif /* QAK */
     }
     
@@ -1560,14 +1568,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
-    H5S_conv_t	sconv_func= {NULL};	/*space conversion funcs*/
-    H5S_sel_iter_t mem_iter,            /* memory selection iteration information */
-        bkg_iter,                       /* background iteration information */
-        file_iter;                      /* file selection iteration information */
+    H5S_conv_t		sconv_func= {NULL};	/*space conversion funcs*/
+    H5S_sel_iter_t	mem_iter;      /*memory selection iteration info*/
+    H5S_sel_iter_t	bkg_iter;            /*background iteration info*/
+    H5S_sel_iter_t	file_iter;       /*file selection iteration info*/
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL, status;
     size_t		src_type_size;		/*size of source type	*/
-    size_t		dst_type_size;		/*size of destination type*/
+    size_t		dst_type_size;	      /*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
@@ -1625,7 +1633,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * turns off background preservation.
      */
 #ifdef QAK
-printf("%s: check 0.5, nelmts=%d\n",FUNC,(int)nelmts);
+    printf("%s: check 0.5, nelmts=%d\n",FUNC,(int)nelmts);
 #endif /* QAK */
     if (nelmts!=H5S_select_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1649,7 +1657,7 @@ printf("%s: check 0.5, nelmts=%d\n",FUNC,(int)nelmts);
 		     "unable to convert from memory to file data space");
     }
 #ifdef QAK
-printf("%s: check 1.0\n",FUNC);
+    printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
     
 #ifdef HAVE_PARALLEL
@@ -1661,12 +1669,12 @@ printf("%s: check 1.0\n",FUNC);
 	    if (H5T_conv_noop==tconv_func &&
 		NULL!=sconv_func.write) {
 		status = (sconv_func.write)(dataset->ent.file,
-					     &(dataset->layout),
-				             &(dataset->create_parms->compress),
-					     &(dataset->create_parms->efl),
-					     H5T_get_size (dataset->type),
-					     file_space, mem_space,
-					     xfer_parms->xfer_mode, buf);
+					    &(dataset->layout),
+					    &(dataset->create_parms->compress),
+					    &(dataset->create_parms->efl),
+					    H5T_get_size (dataset->type),
+					    file_space, mem_space,
+					    xfer_parms->xfer_mode, buf);
 		if (status>=0) goto succeed;
 		HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 			     "collective write failed");
@@ -1695,7 +1703,7 @@ printf("%s: check 1.0\n",FUNC);
 	H5E_clear ();
     }
 #ifdef QAK
-printf("%s: check 2.0\n",FUNC);
+    printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
 
 
@@ -1710,7 +1718,7 @@ printf("%s: check 2.0\n",FUNC);
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "temporary buffer max size is too small");
     }
-    if (FAIL == (sconv_func.finit)(&(dataset->layout), file_space, &file_iter)) {
+    if (FAIL==(sconv_func.finit)(&(dataset->layout), file_space, &file_iter)) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
              "unable to initialize file selection information");
     } 
@@ -1723,7 +1731,7 @@ printf("%s: check 2.0\n",FUNC);
              "unable to initialize memory selection information");
     } 
 #ifdef QAK
-printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
+    printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #endif /* QAK */
 
     /*
@@ -1758,15 +1766,19 @@ printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
     }
 #endif
 #ifdef QAK
-printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",FUNC,(int)nelmts,(int)need_bkg);
+    printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",
+	   FUNC,(int)nelmts,(int)need_bkg);
 #endif /* QAK */
 
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv_func.favail)(file_space,&file_iter, MIN(request_nelmts,(nelmts-smine_start)));
+        smine_nelmts = (sconv_func.favail)(file_space,&file_iter,
+					   MIN(request_nelmts,
+					       (nelmts-smine_start)));
 #ifdef QAK
-printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
+	printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",
+	       FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif /* QAK */
 	
         /*
@@ -1779,20 +1791,20 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
         }
 #ifdef QAK
-    {
-        int i;
-        uint16 *b;
+	{
+	    int i;
+	    uint16 *b;
 
-        if(qak_debug) {
-            b=tconv_buf;
-            printf("\ntconv_buf:");
-            for (i=0; i<smine_nelmts; i++,b++) {
-                printf("(%d)%d ",i,(int)*b);
-            }
-            printf("\n");
-        }
-    }
-printf("%s: check 6.0\n",FUNC);
+	    if(qak_debug) {
+		b=tconv_buf;
+		printf("\ntconv_buf:");
+		for (i=0; i<smine_nelmts; i++,b++) {
+		    printf("(%d)%d ",i,(int)*b);
+		}
+		printf("\n");
+	    }
+	}
+	printf("%s: check 6.0\n",FUNC);
 #endif /* QAK */
         if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
                 (!H5D_OPTIMIZE_PIPE && need_bkg)) {
@@ -1802,7 +1814,8 @@ printf("%s: check 6.0\n",FUNC);
                     H5T_get_size (dataset->type), file_space,
                     &bkg_iter, smine_nelmts, xfer_parms->xfer_mode,
                     bkg_buf/*out*/)!=smine_nelmts) {
-                HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed");
+                HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			     "file gather failed");
             }
         }
 
@@ -1814,7 +1827,7 @@ printf("%s: check 6.0\n",FUNC);
 #endif
         cdata->command = H5T_CONV_CONV;
         status = (tconv_func) (src_id, dst_id, cdata, smine_nelmts, tconv_buf,
-                       bkg_buf);
+			       bkg_buf);
 #ifdef H5T_DEBUG
         H5T_timer_end (&timer, cdata, smine_nelmts);
 #endif
@@ -2016,7 +2029,7 @@ H5D_allocate (H5D_t *dataset)
     
     FUNC_ENTER(H5D_allocate, FAIL);
 #ifdef AKC
-printf("Enter %s:\n", FUNC);
+    printf("Enter %s:\n", FUNC);
 #endif
 
     /* Check args */

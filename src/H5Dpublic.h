@@ -44,17 +44,17 @@ extern "C" {
 #endif
 
 hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
-		 hid_t space_id, hid_t create_parms_id);
+		 hid_t space_id, hid_t plist_id);
 hid_t H5Dopen (hid_t file_id, const char *name);
-herr_t H5Dclose (hid_t dataset_id);
-hid_t H5Dget_space (hid_t dataset_id);
-hid_t H5Dget_type (hid_t dataset_id);
-hid_t H5Dget_create_plist (hid_t dataset_id);
-herr_t H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-		hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/);
-herr_t H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-		 hid_t file_space_id, hid_t xfer_parms_id, const void *buf);
-herr_t H5Dextend (hid_t dataset_id, const hsize_t *size);
+herr_t H5Dclose (hid_t dset_id);
+hid_t H5Dget_space (hid_t dset_id);
+hid_t H5Dget_type (hid_t dset_id);
+hid_t H5Dget_create_plist (hid_t dset_id);
+herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+		hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
+herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+		 hid_t file_space_id, hid_t plist_id, const void *buf);
+herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
 
 #ifdef __cplusplus
 }

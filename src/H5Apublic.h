@@ -27,17 +27,19 @@ typedef int (*H5A_operator_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, void *operator_data/*in,out*/);
 
 /* Public function prototypes */
-hid_t H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace, hid_t create_plist);
+hid_t H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+		hid_t plist_id);
 hid_t H5Aopen_name(hid_t loc_id, const char *name);
 hid_t H5Aopen_idx(hid_t loc_id, unsigned idx);
-herr_t H5Awrite(hid_t attr_id, hid_t mem_dt, void *buf);
-herr_t H5Aread(hid_t attr_id, hid_t mem_dt, void *buf);
+herr_t H5Awrite(hid_t attr_id, hid_t type_id, void *buf);
+herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 herr_t H5Aclose(hid_t attr_id);
-hid_t H5Aget_space(hid_t attr);
-hid_t H5Aget_type(hid_t attr);
-size_t H5Aget_name(hid_t attr, char *buf, size_t buf_size);
+hid_t H5Aget_space(hid_t attr_id);
+hid_t H5Aget_type(hid_t attr_id);
+size_t H5Aget_name(hid_t attr_id, char *buf, size_t buf_size);
 int H5Anum_attrs(hid_t loc_id);
-int H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data);
+int H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
+	       void *op_data);
 herr_t H5Adelete(hid_t loc_id, const char *name);
 
 #ifdef __cplusplus

@@ -116,12 +116,12 @@ H5A_term_interface(void)
  PURPOSE
     Creates a dataset as an attribute of another dataset or group
  USAGE
-    hid_t H5Acreate (loc_id, name, datatype, dataspace, create_plist)
+    hid_t H5Acreate (loc_id, name, type_id, space_id, plist_id)
         hid_t loc_id;       IN: Object (dataset or group) to be attached to
         const char *name;   IN: Name of attribute to create
-        hid_t datatype;     IN: ID of datatype for attribute
-        hid_t dataspace;    IN: ID of dataspace for attribute
-        hid_t create_plist; IN: ID of creation property list (currently not used)
+        hid_t type_id;      IN: ID of datatype for attribute
+        hid_t space_id;     IN: ID of dataspace for attribute
+        hid_t plist_id;     IN: ID of creation property list (currently not used)
  RETURNS
     SUCCEED/FAIL
  
@@ -133,7 +133,7 @@ H5A_term_interface(void)
     attribute for an object must be unique for that object.  The 'type_id'
     and 'space_id' are created with the H5T and H5S interfaces respectively.
     Currently only simple dataspaces are allowed for attribute dataspaces.
-    The 'create_plist_id' property list is currently un-used, but will be
+    The 'plist_id' property list is currently un-used, but will be
     used int the future for optional properties of attributes.  The attribute
     ID returned from this function must be released with H5Aclose or resource
     leaks will develop.
@@ -150,8 +150,8 @@ H5A_term_interface(void)
  *	
 --------------------------------------------------------------------------*/
 hid_t
-H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
-	  hid_t create_plist)
+H5Acreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+	  hid_t plist_id)
 {
     void           	*obj = NULL;
     H5G_entry_t    	*ent = NULL;
@@ -160,7 +160,7 @@ H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Acreate, FAIL);
-    H5TRACE5("i","isiii",loc_id,name,datatype,dataspace,create_plist);
+    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
     if (NULL==(obj=H5I_object (loc_id))) {
@@ -186,17 +186,17 @@ H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
-    if (H5_DATATYPE != H5I_group(datatype) ||
-	NULL == (type = H5I_object(datatype))) {
+    if (H5_DATATYPE != H5I_group(type_id) ||
+	NULL == (type = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
     }
-    if (H5_DATASPACE != H5I_group(dataspace) ||
-	NULL == (space = H5I_object(dataspace))) {
+    if (H5_DATASPACE != H5I_group(space_id) ||
+	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (H5P_DEFAULT!=create_plist &&
-	(H5P_DATASET_CREATE != H5P_get_class(create_plist) ||
-	 NULL == H5I_object(create_plist))) {
+    if (H5P_DEFAULT!=plist_id &&
+	(H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
+	 NULL == H5I_object(plist_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
@@ -262,7 +262,8 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 
     /* Compute the internal sizes */
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
-    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->extent.u.simple));
+    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,
+					    &(space->extent.u.simple));
     attr->data_size=H5S_extent_npoints(space)*H5T_get_size(type);
 
     /* Hold the symbol table entry (and file) open */
@@ -581,9 +582,9 @@ done:
  PURPOSE
     Write out data to an attribute
  USAGE
-    herr_t H5Awrite (attr_id, mem_dt, buf)
+    herr_t H5Awrite (attr_id, type_id, buf)
         hid_t attr_id;       IN: Attribute to write
-        hid_t mem_dt;        IN: Memory datatype of buffer
+        hid_t type_id;        IN: Memory datatype of buffer
         void *buf;           IN: Buffer of data to write
  RETURNS
     SUCCEED/FAIL
@@ -594,22 +595,22 @@ done:
         This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Awrite (hid_t attr_id, hid_t mem_dt, void *buf)
+H5Awrite (hid_t attr_id, hid_t type_id, void *buf)
 {
     H5A_t		   *attr = NULL;
     const H5T_t    *mem_type = NULL;
     herr_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Awrite, FAIL);
-    H5TRACE3("e","iix",attr_id,mem_dt,buf);
+    H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
-    if (H5_DATATYPE != H5I_group(mem_dt) ||
-	NULL == (mem_type = H5I_object(mem_dt))) {
+    if (H5_DATATYPE != H5I_group(type_id) ||
+	NULL == (mem_type = H5I_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (NULL == buf) {
@@ -752,9 +753,9 @@ done:
  PURPOSE
     Read in data from an attribute
  USAGE
-    herr_t H5Aread (attr_id, mem_dt, buf)
+    herr_t H5Aread (attr_id, type_id, buf)
         hid_t attr_id;       IN: Attribute to read
-        hid_t mem_dt;        IN: Memory datatype of buffer
+        hid_t type_id;       IN: Memory datatype of buffer
         void *buf;           IN: Buffer for data to read
  RETURNS
     SUCCEED/FAIL
@@ -765,22 +766,22 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread (hid_t attr_id, hid_t mem_dt, void *buf)
+H5Aread (hid_t attr_id, hid_t type_id, void *buf)
 {
-    H5A_t		   *attr = NULL;
-    const H5T_t    *mem_type = NULL;
-    herr_t		    ret_value = FAIL;
+    H5A_t		*attr = NULL;
+    const H5T_t    	*mem_type = NULL;
+    herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aread, FAIL);
-    H5TRACE3("e","iix",attr_id,mem_dt,buf);
+    H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
-    if (H5_DATATYPE != H5I_group(mem_dt) ||
-	NULL == (mem_type = H5I_object(mem_dt))) {
+    if (H5_DATATYPE != H5I_group(type_id) ||
+	NULL == (mem_type = H5I_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (NULL == buf) {

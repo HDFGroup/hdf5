@@ -74,8 +74,8 @@ static void
 dump_dataset_values(hid_t dset)
 {
     hid_t		file_space, mem_space, type;
-    hsize_t		start, file_nelmts, mem_nelmts;
-    hssize_t		zero = 0;
+    hsize_t		file_nelmts, mem_nelmts;
+    hssize_t		start, zero=0;
     unsigned char	buf[1024];
     hsize_t		i;
 
@@ -87,8 +87,10 @@ dump_dataset_values(hid_t dset)
 	file_nelmts = H5Sextent_npoints(file_space);
 	mem_nelmts = sizeof(buf);
 	mem_space = H5Screate_simple(1, &mem_nelmts, NULL);
-	for (start=0; start<file_nelmts; start+=mem_nelmts) {
-	    mem_nelmts = MIN(mem_nelmts, file_nelmts-start);
+	for (start=0;
+	     start<(hssize_t)file_nelmts;
+	     start+=(hssize_t)mem_nelmts) {
+	    mem_nelmts = MIN(mem_nelmts, file_nelmts-(hsize_t)start);
 	    H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL,
 				&mem_nelmts, NULL);
 	    H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &zero, NULL,
