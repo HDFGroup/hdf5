@@ -508,6 +508,8 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+<!--  [removed -- underlying C function removed from library]
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -528,6 +530,9 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pset_stdio_f
 </pre>
 
+
+-->
+<!--  [removed -- underlying C function removed from library]
 
 <p>&nbsp;
 <p>&nbsp;
@@ -553,6 +558,9 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+-->
+<!--  [removed -- underlying C function removed from library]
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -573,6 +581,9 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pset_sec2_f
 </pre>
 
+
+-->
+<!--  [removed -- underlying C function removed from library]
 
 <p>&nbsp;
 <p>&nbsp;
@@ -597,6 +608,8 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pget_sec2_f
 </pre>
 
+
+-->
 
 <p>&nbsp;
 <p>&nbsp;
@@ -644,6 +657,8 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+<!--  [removed -- underlying C function removed from library]
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -666,6 +681,9 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+-->
+<!--  [removed -- underlying C function removed from library]
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -686,6 +704,9 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pget_core_f
 </pre>
 
+
+-->
+<!--  [removed -- underlying C function removed from library]
 
 <p>&nbsp;
 <p>&nbsp;
@@ -713,6 +734,9 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+-->
+<!--  [removed -- underlying C function removed from library]
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -738,6 +762,8 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pget_family_f
 </pre>
 
+
+-->
 
 <p>&nbsp;
 <p>&nbsp;
@@ -1202,15 +1228,15 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5pset_mpi_f">
+<a name="h5pset_fapl_mpi_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_mpi_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_fapl_mpi_f</strong>
 <pre>
 
-         SUBROUTINE h5pset_mpi_f(prp_id, comm, info, hdferr) 
+         SUBROUTINE h5pset_fapl_mpi_f(prp_id, comm, info, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
@@ -1218,7 +1244,7 @@ FORTRAN Property List API -- h5p
             INTEGER, INTENT(IN) :: info ! MPI info object to be used for file open
                                         ! as defined in MPI_FILE_OPEN of MPI-2
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
-          END SUBROUTINE h5pset_mpi_f
+          END SUBROUTINE h5pset_fapl_mpi_f
 </pre>
 
 
@@ -1226,22 +1252,22 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5pget_mpi_f">
+<a name="h5pget_fapl_mpi_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_mpi_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_fapl_mpi_f</strong>
 <pre>
 
-          SUBROUTINE h5pget_mpi_f(prp_id, comm, info, hdferr) 
+          SUBROUTINE h5pget_fapl_mpi_f(prp_id, comm, info, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(OUT) :: comm ! buffer to return communicator 
             INTEGER, INTENT(IN) :: info ! buffer to return info object 
                                         ! as defined in MPI_FILE_OPEN of MPI-2
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
-          END SUBROUTINE h5pget_mpi_f
+          END SUBROUTINE h5pget_fapl_mpi_f
 </pre>
 
 
@@ -1249,23 +1275,22 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5pset_xfer_f">
+<a name="h5pset_dxpl_mpi_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_xfer_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_dxpl_mpi_f</strong>
 <pre>
 
-         SUBROUTINE h5pset_xfer_f(prp_id, data_xfer_mode, hdferr) 
+         SUBROUTINE h5pset_dxpl_mpi_f(prp_id, data_xfer_mode, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: data_xfer_mode ! Data transfer mode. Possible values are:
-                                                  ! H5D_XFER_INDEPENDENT_F (0)
-                                                  ! H5D_XFER_COLLECTIVE_F  (1)
-                                                  ! H5D_XFER_DFLT_F        (2) 
+                                                  ! H5FD_MPIO_INDEPENDENT_F (0)
+                                                  ! H5FD_MPIO_COLLECTIVE_F  (1)
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
-          END SUBROUTINE h5pset_xfer_f
+          END SUBROUTINE h5pset_dxpl_mpi_f
 </pre>
 
 
@@ -1273,23 +1298,22 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5pget_xfer_f">
+<a name="h5pget_dxpl_mpi_f">
 <p>&nbsp;
 </a>
 
 
-<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_xfer_f</strong>
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_dxpl_mpi_f</strong>
 <pre>
 
-         SUBROUTINE h5pget_xfer_f(prp_id, data_xfer_mode, hdferr) 
+         SUBROUTINE h5pget_dxpl_mpi_f(prp_id, data_xfer_mode, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(OUT) :: data_xfer_mode ! Data transfer mode. Possible values are:
-                                                  ! H5D_XFER_INDEPENDENT_F (0)
-                                                  ! H5D_XFER_COLLECTIVE_F  (1)
-                                                  ! H5D_XFER_DFLT_F        (2) 
+                                                  ! H5FD_MPIO_INDEPENDENT_F (0)
+                                                  ! H5FD_MPIO_COLLECTIVE_F  (1)
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
-          END SUBROUTINE h5pget_xfer_f 
+          END SUBROUTINE h5pget_dxpl_mpi_f 
 </pre>
 
 
@@ -1307,9 +1331,9 @@ FORTRAN Property List API -- h5p
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  17 July 2000
+Last modified:  19 February 2001
 <br>
-Describes HDF5 Release 1.2.2, July 2000
+Describes HDF5 Release 1.4, February 2001
 
 </body>
 </html>
