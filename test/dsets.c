@@ -97,7 +97,6 @@ const char *FILENAME[] = {
 #define DIM2         5000  /* Dim. Size of data member # 2 */
 #define DIM3           10  /* Dim. Size of data member # 3 */
 
-#ifdef TESTING
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1       2
 #define FILTER_CHUNK_DIM2       25
@@ -109,19 +108,6 @@ const char *FILENAME[] = {
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
-#else /* TESTING */
-/* Parameters for internal filter test */
-#define FILTER_CHUNK_DIM1       2
-#define FILTER_CHUNK_DIM2       25
-#define FILTER_HS_OFFSET1       7
-#define FILTER_HS_OFFSET2       30
-#define FILTER_HS_SIZE1         4
-#define FILTER_HS_SIZE2         50
-
-/* Shared global arrays */
-#define DSET_DIM1       100
-#define DSET_DIM2       200
-#endif /* TESTING */
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
@@ -2585,8 +2571,8 @@ file)
     hid_t       dcpl;           /* Dataspace creation property list ID */
     unsigned szip_options_mask=H5_SZIP_RAW_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block;
-    const hsize_t dims[2] = {4096, 500};        /* Dataspace dimensions */
-    const hsize_t chunk_dims[2] = {2048, 250};  /* Chunk dimensions */
+    const hsize_t dims[2] = {500, 4096};        /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
     herr_t      ret;            /* Status value */
 #else /* H5_HAVE_FILTER_SZIP */
     const char		*not_supported= "    Szip filter is not enabled.";
