@@ -1903,12 +1903,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, 0, conv_buf_ptr, NULL, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
-                /* Allocate new VL buffer */
-                if((*(dst->u.vlen.alloc))(xfer_parms,d,seq_len,dst_base_size)<0)
-                    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "allocation failed for VL data");
-
                 /* Write sequence to destination location */
-                if((*(dst->u.vlen.write))(dst->u.vlen.f,d,conv_buf_ptr,dst_size)<0)
+                if((*(dst->u.vlen.write))(xfer_parms,dst->u.vlen.f,d,conv_buf_ptr,seq_len,dst_base_size)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                 /*

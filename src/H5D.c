@@ -987,7 +987,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     }
 
     /* Create (open for write access) an object header */
-    if (H5O_create(f, 96, &(new_dset->ent)) < 0) {
+    if (H5O_create(f, 256, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to create dataset object header");
     }
@@ -1538,7 +1538,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } else if (!H5T_IS_NOOP(tpath)) {
         if ((src_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
-	    (dst_id=H5I_register(H5I_DATATYPE,
+            (dst_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
                 "unable to register types for conversion");
@@ -1951,13 +1951,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (!H5T_IS_NOOP(tpath)) {
-	if ((src_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(dataset->type, H5T_COPY_ALL)))<0) {
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-			"unable to register types for conversion");
-	}
+        if ((src_id = H5I_register(H5I_DATATYPE,
+                       H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
+            (dst_id = H5I_register(H5I_DATATYPE,
+                       H5T_copy(dataset->type, H5T_COPY_ALL)))<0) {
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
+                "unable to register types for conversion");
+        }
     }
 #ifdef QAK
     printf("%s: after H5T_find, tpath=%p, tpath->name=%s\n",FUNC,tpath,tpath->name);

@@ -4696,6 +4696,35 @@ H5T_open_oid (H5G_entry_t *ent)
     FUNC_LEAVE (dt);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_cmp_field_off
+ *
+ * Purpose:	Compares field offsets for qsort
+ *
+ * Return:	<0, 0, or >0 if field1's offset is less than, equal to, or greater
+ *          than field2's offset
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, July 15th, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T_cmp_field_off(const void *_field1, const void *_field2)
+{
+    const H5T_cmemb_t *field1=(const H5T_cmemb_t *)_field1,
+        *field2=(const H5T_cmemb_t *)_field2;
+    
+    if(field1->offset < field2->offset)
+        return(-1);
+    else if(field1->offset > field2->offset)
+        return(1);
+    else
+        return(0);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -4794,27 +4823,42 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     }
     
     if (H5T_COMPOUND == new_dt->type) {
-	/*
-	 * Copy all member fields to new type, then overwrite the
-	 * name and type fields of each new member with copied values.
-	 * That is, H5T_copy() is a deep copy.
-	 */
-	new_dt->u.compnd.memb = H5MM_malloc(new_dt->u.compnd.nalloc *
-					    sizeof(H5T_cmemb_t));
-	if (NULL==new_dt->u.compnd.memb) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
-		 new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
+        intn accum_change=0;    /* Amount of change in the offset of the fields */
+
+        /*
+         * Copy all member fields to new type, then overwrite the
+         * name and type fields of each new member with copied values.
+         * That is, H5T_copy() is a deep copy.
+         */
+        new_dt->u.compnd.memb = H5MM_malloc(new_dt->u.compnd.nalloc *
+                            sizeof(H5T_cmemb_t));
+        if (NULL==new_dt->u.compnd.memb) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                   "memory allocation failed");
+        }
+        HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
+             new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
+
+        /* Sort the fields based on offsets */
+        qsort(new_dt->u.compnd.memb, new_dt->u.compnd.nmembs, sizeof(H5T_cmemb_t), H5T_cmp_field_off);
 	
-	for (i=0; i<new_dt->u.compnd.nmembs; i++) {
-	    s = new_dt->u.compnd.memb[i].name;
-	    new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
-	    tmp = H5T_copy (old_dt->u.compnd.memb[i].type, method);
-	    new_dt->u.compnd.memb[i].type = tmp;
-	}
-	
+        for (i=0; i<new_dt->u.compnd.nmembs; i++) {
+            s = new_dt->u.compnd.memb[i].name;
+            new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
+            tmp = H5T_copy (old_dt->u.compnd.memb[i].type, method);
+            new_dt->u.compnd.memb[i].type = tmp;
+
+            /* Apply the accumulated size change to the offset of the field */
+            new_dt->u.compnd.memb[i].offset += accum_change;
+
+            /* If the field changed size, add that change to the accumulated size change */
+            if(new_dt->u.compnd.memb[i].type->size != old_dt->u.compnd.memb[i].type->size)
+                accum_change += (new_dt->u.compnd.memb[i].type->size - old_dt->u.compnd.memb[i].type->size);
+        }
+
+        /* Apply the accumulated size change to the size of the compound struct */
+        new_dt->size += accum_change;
+
     } else if (H5T_ENUM == new_dt->type) {
 	/*
 	 * Copy all member fields to new type, then overwrite the name fields
@@ -4836,9 +4880,11 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	    new_dt->u.enumer.name[i] = H5MM_xstrdup(s);
     } 
     } else if (H5T_VLEN == new_dt->type) {
-        /* H5T_copy converts any VL type into a memory VL type */
-	    if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
+            /* H5T_copy converts any VL type into a memory VL type */
+            if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+            }
         }
     } else if (H5T_OPAQUE == new_dt->type) {
         /*
