@@ -24,12 +24,6 @@
  *		first called functions will have entries on the stack. This is
  *		expected to be a rare condition.
  *
- *		Each thread has its own function stack, but since
- *		multi-threading has not been added to the library yet, this
- *		package maintains a single function stack. The function stack
- *		is statically allocated to reduce the complexity of handling
- *		errors within the H5FS package.
- *
  */
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5FSprivate.h"	/* Private function stack routines	  */
