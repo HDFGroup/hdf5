@@ -1483,6 +1483,10 @@ UNUSED
 
     FUNC_ENTER_NOINIT(H5D_chunk_read);
     
+#ifdef H5_HAVE_PARALLEL
+    H5D_io_assist_mpio(dx_plist, doing_mpio, xfer_mode, &xfer_mode_changed);
+#endif /*H5_HAVE_PARALLEL*/
+
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping");
@@ -1560,10 +1564,6 @@ UNUSED
     /*
      * This is the general case(type conversion).
      */
-
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, doing_mpio, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(dataset->type);
@@ -1840,6 +1840,10 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     FUNC_ENTER_NOINIT(H5D_chunk_write);
     
+#ifdef H5_HAVE_PARALLEL
+    H5D_io_assist_mpio(dx_plist, doing_mpio, xfer_mode, &xfer_mode_changed);
+#endif /*H5_HAVE_PARALLEL*/
+    
 #ifdef QAK
 {
     int mpi_rank;
@@ -1957,10 +1961,6 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * This is the general case(type conversion).
      */
      
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, doing_mpio, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
-    
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);

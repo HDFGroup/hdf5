@@ -400,6 +400,9 @@ int main(int argc, char **argv)
 
 	MPI_BANNER("extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
+
+	MPI_BANNER("extendible dataset collective write...");
+	extend_writeAll(filenames[2]);
     }
     else{
 	MPI_BANNER("write tests skipped");
@@ -414,6 +417,9 @@ int main(int argc, char **argv)
 
 	MPI_BANNER("extendible dataset independent read...");
 	extend_readInd(filenames[2]);
+
+	MPI_BANNER("extendible dataset collective read...");
+	extend_readAll(filenames[2]);
     }
     else{
 	MPI_BANNER("read tests skipped");
