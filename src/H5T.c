@@ -2684,7 +2684,7 @@ hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
 
     if(direction!=H5T_DIR_DEFAULT && direction!=H5T_DIR_ASCEND 
         && direction!=H5T_DIR_DESCEND)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not valid direction value");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not valid direction value");
 
     if((new_dt = H5T_get_native_type(dt, direction, NULL, NULL, &comp_size))==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
@@ -2722,7 +2722,7 @@ done:
 H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
 {   
     H5T_t       *dt;                /* Datatype to make native */
-    H5T_class_t class;              /* Class of datatype to make native */
+    H5T_class_t h5_class;           /* Class of datatype to make native */
     size_t      size;               /* Size of datatype to make native */
     int         nmemb;              /* Number of members in compound & enum types */
     H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
@@ -2735,13 +2735,13 @@ H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *stru
         
     assert(dtype); 
 
-    if((class = H5T_get_class(dtype))<0)
+    if((h5_class = H5T_get_class(dtype))<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
         
     if((size =  H5T_get_size(dtype))==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size");
         
-    switch(class) {
+    switch(h5_class) {
         case H5T_INTEGER:
             {
                 H5T_sign_t  sign;       /* Signedness of integer type */
