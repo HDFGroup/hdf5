@@ -1,4 +1,16 @@
 #!/bin/sh
+# Test script for the h4toh5 tests.
+# Using the h4toh5 convert to convert a pre-created hdf file to
+# an hdf5 file (output file), then compare it with a pre-created
+# corresponding hdf5 file (expected file).
+# If the same, that particular test passes.
+# If not the same, the output file and expected file are processed
+# by the h5dump tool to see if they produce the same results.
+# If the same, the test passes.
+# If not, show the difference of the two results and report the test failed.
+#
+# h5dump is default to use the one just built.  It can be overridden
+# by setting $H5DUMP to a different value such as /usr/local/bin/h5dump.
 
 h4toh5=./h4toh5		# a relative name
 cmp='cmp -s'
@@ -6,7 +18,8 @@ diff='diff -c'
 
 RM='rm -f'
 SED='sed '
-H5DUMP='h5dump'	# Use the h5dumper in the same tools directory
+H5DUMP=${H5DUMP:-`pwd`/'h5dump'}	# Default to use the h5dumper
+					# in the same tools directory
 
 # Verify if $H5DUMP is a valid command.
 tmpfile=/tmp/testh4toh5.$$
