@@ -59,6 +59,7 @@
 ./config/irix5.x
 ./config/irix6.x
 ./config/linux-gnu
+./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/powerpc-ibm-aix4.x
@@ -547,6 +548,7 @@
 ./fortran/config/irix5.x
 ./fortran/config/irix6.x
 ./fortran/config/linux-gnu
+./fortran/config/linux-gnuaout
 ./fortran/config/linux-gnulibc1
 ./fortran/config/linux-gnulibc2
 ./fortran/config/powerpc-ibm-aix4.x
@@ -605,6 +607,8 @@
 ./fortran/src/H5Sff.f90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.f90
+./fortran/src/H5Zf.c
+./fortran/src/H5Zff.f90
 ./fortran/src/H5f90.h
 ./fortran/src/H5f90global.f90
 ./fortran/src/H5f90i.h
@@ -637,6 +641,7 @@
 ./fortran/test/tH5Sselect.f90
 ./fortran/test/tH5T.f90
 ./fortran/test/tH5VL.f90
+./fortran/test/tH5Z.f90
 
 ./fortran/testpar/Dependencies
 ./fortran/testpar/Makefile.in
