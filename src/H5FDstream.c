@@ -26,8 +26,6 @@
 /* Only build this driver if it was configured with --with-Stream-VFD */
 #ifdef H5_HAVE_STREAM
 
-#include "H5private.h"		
-
 #include "H5Eprivate.h"               /* error handling                      */
 #include "H5FDpublic.h"               /* VFD structures                      */
 #include "H5MMprivate.h"              /* memory allocation                   */
@@ -134,10 +132,11 @@ static const H5FD_stream_fapl_t default_fapl =
  * REGION_OVERFLOW:      Checks whether an address and size pair describe data
  *                        which can be addressed entirely in memory.
  */
-
-
-
-
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t        off64_t
+#else
+#   define file_offset_t        off_t
+#endif
 #define MAXADDR                 (((haddr_t)1<<(8*sizeof(file_offset_t)-1))-1)
 #define ADDR_OVERFLOW(A)        (HADDR_UNDEF==(A) ||                          \
                                  ((A) & ~(haddr_t)MAXADDR))

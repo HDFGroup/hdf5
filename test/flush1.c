@@ -13,14 +13,6 @@
  */
 #include "h5test.h"
 
-
-#if defined __MWERKS__
-#include <abort_exit.h>
-# define EXIT(a) __exit(a)
-#else
-# define EXIT(a) _exit(a)
-#endif
-
 const char *FILENAME[] = {
     "flush",
     NULL
@@ -97,10 +89,10 @@ main(void)
     PASSED();
     fflush(stdout);
     fflush(stderr);
-    _exit(0);
+    HD_exit(0);
     return 0;
 
  error:
-    _exit(1);
+    HD_exit(1);
     return 1;
 }

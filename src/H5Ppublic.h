@@ -20,7 +20,6 @@
 /* Default Template for creation, access, etc. templates */
 #define H5P_DEFAULT     0
 
-#include <H5private.h>
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Ipublic.h"
@@ -28,7 +27,6 @@
 #include "H5Fpublic.h"
 #include "H5MMpublic.h"
 #include "H5Zpublic.h"
-
 
 /* Property list classes */
 typedef enum H5P_class_t {

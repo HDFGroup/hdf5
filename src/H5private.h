@@ -173,50 +173,15 @@ MS doesn't recognize it yet (as of April 2001)
 typedef long off_t;
 /* Metroworks does not define EINTR in <errno.h> */
 # define EINTR 4
-#endif
-/*__MWERKS__*/
+#endif /*__MWERKS__*/
 
-#endif
-/*WIN32*/
-
-/*
- * This driver supports systems that have the lseek64() function by defining
- * some macros here so we don't have to have conditional compilations later
- * throughout the code.
- *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *			the lseek() or lseek64() call.
- *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
- *
- * adding for windows NT file system support. 
- */
-
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#elif defined (WIN32)
-# ifdef __MWERKS__
-# define file_offset_t off_t
-# define file_seek lseek
-# else /*MSVC*/
-# define file_offset_t __int64
-# define file_seek _lseeki64
-# endif
-#else
-#   define file_offset_t	off_t
-#   define file_seek		lseek
-#endif
+#endif /*WIN32*/
 
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
 #   define R_OK 04
 #endif
-
-
-
 
 /*
  * Pablo support files.
@@ -572,7 +537,12 @@ __DLL__ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDexecve(S,AV,E)	execve(S,AV,E)
 #define HDexecvp(S,AV)		execvp(S,AV)
 #define HDexit(N)		exit(N)
+#if defined __MWERKS__
+#include <abort_exit.h>
+#define HD_exit(N)		__exit(N)
+#else /* __MWERKS __ */
 #define HD_exit(N)		_exit(N)
+#endif /* __MWERKS __ */
 #define HDexp(X)		exp(X)
 #define HDfabs(X)		fabs(X)
 #define HDfclose(F)		fclose(F)
@@ -796,9 +766,9 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#if defined (__MWERKS__)
+#ifdef WIN32
 #define HDstrdup(S)    _strdup(S)
-#else
+#else /* WIN32 */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP 
 extern char *strdup(const char *s);
