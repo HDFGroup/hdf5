@@ -989,23 +989,6 @@
 ./tools/gifconv/writehdf.c
 
 
-./tools/h4toh5/Dependencies
-./tools/h4toh5/Makefile.in
-./tools/h4toh5/h4toh5anno.c
-./tools/h4toh5/h4toh5image.c
-./tools/h4toh5/h4toh5main.c
-./tools/h4toh5/h4toh5main.h
-./tools/h4toh5/h4toh5pal.c
-./tools/h4toh5/h4toh5sds.c
-./tools/h4toh5/h4toh5test.c
-./tools/h4toh5/h4toh5user.h
-./tools/h4toh5/h4toh5util.c
-./tools/h4toh5/h4toh5util.h
-./tools/h4toh5/h4toh5vdata.c
-./tools/h4toh5/h4toh5vgroup.c
-./tools/h4toh5/testh4toh5.sh
-./tools/h4toh5/parafile
-
 ./tools/h5dump/Dependencies
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
@@ -1017,12 +1000,6 @@
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh
-
-./tools/h5toh4/Dependencies
-./tools/h5toh4/Makefile.in
-./tools/h5toh4/h5toh4.c
-./tools/h5toh4/h5toh4.h
-./tools/h5toh4/testh5toh4.sh
 
 ./tools/lib/Dependencies
 ./tools/lib/Makefile.in
