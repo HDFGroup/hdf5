@@ -149,7 +149,14 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		    HDremove(temp);
 		}
 	    } else if (driver == H5FD_CORE) {
-		/*void*/
+                hbool_t backing;        /* Whether the core file has backing store */
+
+                H5Pget_fapl_core(fapl,NULL,&backing);
+
+                /* If the file was stored to disk with bacing store, remove it */
+                if(backing)
+                    HDremove(filename);
+
 	    } else if (driver == H5FD_MULTI) {
 		H5FD_mem_t mt;
 		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
