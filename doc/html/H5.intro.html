@@ -230,6 +230,10 @@ in the source code installation.  At a higher level, those changes include:
 <li>Over 30 new API functions
 </UL>
 
+<P>The changes in bugfix releases, numbered Release 1.2.<i>x</i>, 
+will be listed in the <code>RELEASE</code>, <code>HISTORY</code>, and 
+<code>README</code> files distributed with the source code. 
+
 <P>The changes as HDF5 has evolved from the first Alpha release 
 to the present are summarized in the file <CODE>hdf5/HISTORY</CODE> 
 in the source code installation.  
@@ -465,7 +469,7 @@ We particularly encourage you to read <A HREF="Chunking.html"><I>Dataset Chunkin
     <P>At the lowest level, as information is actually written to the disk, 
        an HDF5 file is made up of the following objects:
       <ul>
-         <li>A boot block
+         <li>A super block
          <li>B-tree nodes (containing either symbol nodes or raw data chunks)
          <li>Object headers
 
