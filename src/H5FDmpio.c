@@ -56,7 +56,7 @@ typedef struct H5FD_mpio_t {
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    int		old_use_types;  /*remember value of use_types		*/
+    unsigned	old_use_view;   /*remember value of use_view		*/
 } H5FD_mpio_t;
 
 /* Prototypes */
@@ -150,14 +150,14 @@ static int interface_initialize_g = 0;
 
 /* ======== Temporary, Local data transfer properties ======== */
 /* Definitions for memory MPI type property */
-#define H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME       "H5FD_mpio_mem_mpi_type"
-#define H5FD_MPIO_XFER_MEM_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
+#define H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME        "H5FD_mpio_mem_mpi_type"
+#define H5FD_MPIO_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
 /* Definitions for file MPI type property */
-#define H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME      "H5FD_mpio_file_mpi_type"
-#define H5FD_MPIO_XFER_FILE_MPI_TYPE_SIZE      sizeof(MPI_Datatype)
+#define H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME       "H5FD_mpio_file_mpi_type"
+#define H5FD_MPIO_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
 /* Definitions for whether to use MPI types property */
-#define H5FD_MPIO_XFER_USE_MPI_TYPES_NAME      "H5FD_mpio_use_mpi_type"
-#define H5FD_MPIO_XFER_USE_MPI_TYPES_SIZE      0
+#define H5FD_MPIO_XFER_USE_VIEW_NAME            "H5FD_mpio_use_view"
+#define H5FD_MPIO_XFER_USE_VIEW_SIZE            sizeof(unsigned)
 
 
 /*-------------------------------------------------------------------------
@@ -537,7 +537,7 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
+H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype, unsigned use_view)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
 
@@ -555,8 +555,8 @@ H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
     if(H5P_insert(plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME,H5FD_MPIO_XFER_FILE_MPI_TYPE_SIZE,&ftype,NULL,NULL,NULL,NULL,NULL)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property");
 
-    /* Set 'use types' flag property */
-    if(H5P_insert(plist,H5FD_MPIO_XFER_USE_MPI_TYPES_NAME,H5FD_MPIO_XFER_USE_MPI_TYPES_SIZE,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    /* Set 'use view' property */
+    if(H5P_insert(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,H5FD_MPIO_XFER_USE_VIEW_SIZE,&use_view,NULL,NULL,NULL,NULL,NULL)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property");
 
     FUNC_LEAVE(SUCCEED);
@@ -597,8 +597,8 @@ H5FD_mpio_teardown(hid_t dxpl_id)
     if(H5P_remove(dxpl_id,plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property");
 
-    /* Remove 'use types' flag property */
-    if(H5P_remove(dxpl_id,plist,H5FD_MPIO_XFER_USE_MPI_TYPES_NAME)<0)
+    /* Remove 'use view' property */
+    if(H5P_remove(dxpl_id,plist,H5FD_MPIO_XFER_USE_VIEW_NAME)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property");
 
     FUNC_LEAVE(SUCCEED);
@@ -1192,7 +1192,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Status  		mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
-    int				use_types_this_time, used_types_last_time;
+    unsigned			use_view_this_time=0, used_view_last_time;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
@@ -1237,14 +1237,15 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
-     * wouldn't need to rely on the use_types field if MPI semantics allowed
+     * wouldn't need to rely on the use_view field if MPI semantics allowed
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    if((use_types_this_time=H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_MPI_TYPES_NAME))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
+    if(H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_VIEW_NAME)>0)
+        if(H5P_get(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,&use_view_this_time)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
-    if (use_types_this_time) {
+    if (use_view_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
@@ -1270,20 +1271,16 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * Don't bother to reset the view if we're not using the types this time,
      * and did we didn't use them last time either.
      */
-    used_types_last_time = file->old_use_types;
-    if (used_types_last_time || /* change to new ftype or MPI_BYTE */
-            use_types_this_time) { 	/* almost certainly a different ftype */
+    used_view_last_time = file->old_use_view;
+    if (used_view_last_time || /* change to new ftype or MPI_BYTE */
+            use_view_this_time) { 	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native",  file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
-    /*
-     * We always set the use_types flag to 0 because the default is not to
-     * use types next time, unless someone explicitly requests it by setting
-     * this flag to !=0.
-     */
-    file->old_use_types = use_types_this_time;
+    /* Keep the 'use view' flag around for the next I/O */
+    file->old_use_view = use_view_this_time;
 
     /* Read the data. */
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
@@ -1314,7 +1311,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
      * had the 'buf_type' set to MPI_BYTE -QAK
      */
-    if(use_types_this_time) {
+    if(use_view_this_time) {
         /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
          * If this gets fixed (and MPI_Get_count() is reliable), the
          * kludge below where the 'bytes_read' value from MPI_Get_count() is
@@ -1350,7 +1347,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
      * reading past logical end of HDF5 file???
      */
     if ((n=(size_i-bytes_read)) > 0) {
-        if (use_types_this_time) {
+        if (use_view_this_time) {
             /*
              * INCOMPLETE rky 1998-09-18
              * Haven't implemented reading zeros beyond EOF. What to do???
@@ -1488,7 +1485,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
-    int				use_types_this_time, used_types_last_time;
+    unsigned			use_view_this_time=0, used_view_last_time;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
@@ -1533,14 +1530,15 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
-     * wouldn't need to rely on the use_types field if MPI semantics allowed
+     * wouldn't need to rely on the use_view field if MPI semantics allowed
      * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
      * could mean "use MPI_BYTE" by convention).
      */
-    if((use_types_this_time=H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_MPI_TYPES_NAME))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
+    if(H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_VIEW_NAME)>0)
+        if(H5P_get(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,&use_view_this_time)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
-    if (use_types_this_time) {
+    if (use_view_this_time) {
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
@@ -1566,20 +1564,20 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * Don't bother to reset the view if we're not using the types this time,
      * and did we didn't use them last time either.
      */
-    used_types_last_time = file->old_use_types;
-    if (used_types_last_time ||	/* change to new ftype or MPI_BYTE */
-            use_types_this_time) {	/* almost certainly a different ftype */
+    used_view_last_time = file->old_use_view;
+    if (used_view_last_time ||	/* change to new ftype or MPI_BYTE */
+            use_view_this_time) {	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native", file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
     /*
-     * We always set the use_types flag to 0 because the default is not to
+     * We always set the use_view flag to 0 because the default is not to
      * use types next time, unless someone explicitly requests it by setting
      * this flag to !=0.
      */
-    file->old_use_types = use_types_this_time;
+    file->old_use_view = use_view_this_time;
 
     /* Only p<round> will do the actual write if all procs in comm write same data */
     if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
@@ -1626,7 +1624,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
      * had the 'buf_type' set to MPI_BYTE -QAK
      */
-    if(use_types_this_time) {
+    if(use_view_this_time) {
         /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
          * If this gets fixed (and MPI_Get_count() is reliable), the
          * kludge below where the 'bytes_written' value from MPI_Get_count() is
