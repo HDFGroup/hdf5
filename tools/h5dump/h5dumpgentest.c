@@ -1,4 +1,4 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -4452,19 +4452,24 @@ static void gent_filters()
  hid_t    sid1; /* dataspace ID */
  hid_t    tid;  /* datatype ID */
  hid_t    did;  /* dataset ID */
+#if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=4;
+#endif
  hsize_t  dims1[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf1[DIM1][DIM2];
  hsize_t  dims2[1]={2};
  hvl_t    buf2[2];
  hsize_t  dims3[1]={1};
- /*char     buf3[]={"this is a string\n with a newline"};*/
- char     buf3[]={"string\n new"};
+ char     buf3[]={"this is\n a string with three\n newline\n escape characters"};
  hsize_t  dims4[1]={6};
  char     buf4[6]={"abcdef"};
- int      i, j, n, ret, fillval, val;
+ hobj_ref_t buf5[5]; 
+ hsize_t  dims5[1]={5};
+ int      i, j, n, ret, val;
+ int      fillval = -99;
+
 
  typedef enum 
  {
@@ -4489,6 +4494,10 @@ static void gent_filters()
  /* create a dataset creation property list; the same DCPL is used for all dsets */
  dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+
 /*-------------------------------------------------------------------------
  * create a compact and contiguous storage layout dataset
  * add a comment to the datasets
@@ -4510,6 +4519,18 @@ static void gent_filters()
  assert(ret>=0);
 
  ret=H5Gset_comment(fid,"contiguous", "This is a dataset with contiguous storage");
+ assert(ret>=0);
+
+ ret=H5Pset_layout(dcpl, H5D_CHUNKED);
+ assert(ret>=0);
+
+ ret=H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"chunked",sid,dcpl,buf1);
+ assert(ret>=0);
+
+ ret=H5Gset_comment(fid,"chunked", "This is a dataset with chunked storage");
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -4659,12 +4680,11 @@ static void gent_filters()
  */
  make_external(fid);
 
-/*-------------------------------------------------------------------------
+ /*-------------------------------------------------------------------------
  * make datasets with fill value combinations
  *-------------------------------------------------------------------------
  */
 
- fillval = -99;
  
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
  assert(ret>=0);
@@ -4675,20 +4695,21 @@ static void gent_filters()
  ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill early",sid,dcpl,buf1);
+ ret=make_dset(fid,"fill_early",sid,dcpl,buf1);
  assert(ret>=0);
 
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill never",sid,dcpl,buf1);
+ ret=make_dset(fid,"fill_never",sid,dcpl,buf1);
  assert(ret>=0);
 
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill ifset",sid,dcpl,buf1);
+ ret=make_dset(fid,"fill_ifset",sid,dcpl,buf1);
  assert(ret>=0);
+
 
 
 /*-------------------------------------------------------------------------
@@ -4696,10 +4717,10 @@ static void gent_filters()
  *-------------------------------------------------------------------------
  */
  tid=H5Tcopy(H5T_STD_B8LE);
- ret=H5Tcommit(fid, "my type", tid);
+ ret=H5Tcommit(fid, "mytype", tid);
  assert(ret>=0);
 
- ret=H5Gset_comment(fid,"my type", "This is a commited datatype");
+ ret=H5Gset_comment(fid,"mytype", "This is a commited datatype");
  assert(ret>=0);
 
  ret=H5Tclose(tid);
@@ -4768,6 +4789,23 @@ static void gent_filters()
  *-------------------------------------------------------------------------
  */
  write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
+
+/*-------------------------------------------------------------------------
+ * reference
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Rcreate(&buf5[0],fid,"compact",H5R_OBJECT,-1);
+ assert(ret>=0);
+ ret=H5Rcreate(&buf5[1],fid,"myvlen",H5R_OBJECT,-1);
+ assert(ret>=0);
+  ret=H5Rcreate(&buf5[2],fid,"compact",H5R_OBJECT,-1);
+ assert(ret>=0);
+ ret=H5Rcreate(&buf5[3],fid,"myvlen",H5R_OBJECT,-1);
+ assert(ret>=0);
+ ret=H5Rcreate(&buf5[4],fid,"contiguous",H5R_OBJECT,-1);
+ assert(ret>=0);
+ write_dset(fid,1,dims5,"reference",H5T_STD_REF_OBJ,buf5);
+
  
 /*-------------------------------------------------------------------------
  * close

@@ -323,6 +323,9 @@ typedef struct h5dump_t {
     /*print array indices in output matrix */
     int pindex;
 
+    /*interpret CR/LF information */
+    int do_lf;
+
 } h5dump_t;
 
 typedef struct dump_header{
@@ -509,4 +512,6 @@ extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid
 
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
+
+
 #endif	/* H5TOOLS_H__ */

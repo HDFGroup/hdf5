@@ -246,7 +246,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 }
 
 
-/*-------------------------------------------------------------------------
+/*---------------------/----------------------------------------------------
  * Function:    indentation
  *
  * Purpose:     Print spaces for indentation

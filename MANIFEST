@@ -1197,6 +1197,8 @@
 ./tools/lib/h5tools_str.h
 ./tools/lib/h5tools_utils.c
 ./tools/lib/h5tools_utils.h
+./tools/lib/h5tools_ref.h
+./tools/lib/h5tools_ref.c
 ./tools/lib/talign.c
 ./tools/lib/h5diff_attr.c
 ./tools/lib/h5diff.h
@@ -1342,6 +1344,21 @@
 ./tools/testfiles/tboot.ddl
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tfilters.h5
+./tools/testfiles/tchunked.ddl
+./tools/testfiles/tcompact.ddl
+./tools/testfiles/tcontiguos.ddl
+./tools/testfiles/tdeflate.ddl
+./tools/testfiles/texternal.ddl
+./tools/testfiles/tfillearly.ddl
+./tools/testfiles/tfillifset.ddl
+./tools/testfiles/tfillnever.ddl
+./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/treference.ddl
+./tools/testfiles/tshuffle.ddl
+./tools/testfiles/tstring.ddl
+./tools/testfiles/tuserfilter.ddl
+./tools/testfiles/tszip.ddl
+
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1440,6 +1457,8 @@
 ./tools/testfiles/file4.h5
 ./tools/testfiles/file5.h5
 ./tools/testfiles/file6.h5
+./tools/testfiles/file7.h5
+./tools/testfiles/file8.h5
 ./tools/testfiles/h5diff_10.txt
 ./tools/testfiles/h5diff_11.txt
 ./tools/testfiles/h5diff_12.txt
@@ -1503,6 +1522,8 @@
 ./tools/testfiles/h5diff_627.txt
 ./tools/testfiles/h5diff_628.txt
 ./tools/testfiles/h5diff_629.txt
+./tools/testfiles/h5diff_70.txt
+./tools/testfiles/h5diff_80.txt
 ./tools/testfiles/test1.h5
 ./tools/testfiles/test3.h5
 ./tools/testfiles/test4.h5

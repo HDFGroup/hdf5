@@ -27,6 +27,9 @@
 #include "h5tools.h"            /*for h5dump_t structure    */
 #include "h5tools_str.h"        /*function prototypes       */
 
+extern char     *lookup_ref_path(hobj_ref_t *);
+
+
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -452,6 +455,11 @@ h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
             h5tools_str_append(str, "\\f");
             break;
         case '\n':
+         if (info->do_lf) {
+            h5tools_str_append(str, "\n");
+            h5tools_str_append(str, "           ");
+         }
+           else
             h5tools_str_append(str, "\\n");
             break;
         case '\r':
@@ -793,6 +801,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         } else {
+            char *path=NULL;
             otype = H5Rget_obj_type(container, H5R_OBJECT, vp);
             obj = H5Rdereference(container, H5R_OBJECT, vp);
             H5Gget_objinfo(obj, ".", FALSE, &sb);
@@ -822,6 +831,14 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             } else {
                 h5tools_str_append(str, info->obj_format,
                           sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
+            }
+
+            /* Print name */
+            path = lookup_ref_path(vp);
+            if (path) {
+             h5tools_str_append(str, " ");
+             h5tools_str_append(str, path);
+             h5tools_str_append(str, " ");
             }
         }
     } else if (H5Tget_class(type) == H5T_ARRAY) {

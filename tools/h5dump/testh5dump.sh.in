@@ -89,6 +89,15 @@ TOOLTEST() {
    fi
 }
 
+
+
+# Print a "SKIP" message
+SKIP() {
+ TESTING $DUMPER $@
+ echo  " -SKIP-"
+}
+	
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###
@@ -207,6 +216,70 @@ TOOLTEST tboot.ddl -H -B -d compact tfilters.h5
 
 # test for file contents
 TOOLTEST tcontents.ddl -n tfilters.h5
+
+# tests for storage layout
+# compact
+TOOLTEST tcompact.ddl -H -p -d compact tfilters.h5
+# contiguous
+TOOLTEST tcontiguos.ddl -H -p -d contiguos tfilters.h5
+# chunked
+TOOLTEST tchunked.ddl -H -p -d chunked tfilters.h5
+# external 
+TOOLTEST texternal.ddl -H -p -d external tfilters.h5
+
+# Fill values
+TOOLTEST tfillearly.ddl -H -p -d fill_early tfilters.h5
+TOOLTEST tfillnever.ddl -H -p -d fill_never tfilters.h5
+TOOLTEST tfillifset.ddl -H -p -d fill_ifset tfilters.h5
+
+# references , print path
+TOOLTEST treference.ddl -d reference  tfilters.h5
+
+# string , print new lines
+TOOLTEST tstring.ddl -e -d string  tfilters.h5
+
+
+# tests for filters
+# SZIP
+option="-H -p -d szip tfilters.h5"
+if test $USE_FILTER_SZIP != "yes"; then
+	 SKIP $option
+else
+	 TOOLTEST tszip.ddl $option
+fi
+# deflate
+option="-H -p -d deflate tfilters.h5"
+if test $USE_FILTER_DEFLATE != "yes"; then
+	 SKIP $option
+else
+	 TOOLTEST tdeflate.ddl $option
+fi
+# shuffle
+option="-H -p -d shuffle tfilters.h5"
+if test $USE_FILTER_SHUFFLE != "yes"; then
+	 SKIP $option
+else
+         TOOLTEST tshuffle.ddl $option
+fi
+# fletcher32
+option="-H -p -d fletcher32  tfilters.h5"
+if test $USE_FILTER_FLETCHER32 != "yes"; then
+	SKIP $option
+else
+	TOOLTEST tfletcher32.ddl $option
+fi
+# user defined
+TOOLTEST tuserfilter.ddl -H  -d myfilter  tfilters.h5
+		  
+		  
+
+
+
+
+
+		  
+
+    
 
 
 if test $nerrors -eq 0 ; then
