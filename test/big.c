@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1998 NCSA
+ * Copyright (C) 1998-2002 NCSA
  *                    All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -23,6 +23,9 @@ const char *FILENAME[] = {
 #else
 #   define GB8LL	0	/*cannot do the test*/
 #endif
+
+/* Protocols */
+void usage(void);
 
 
 /*-------------------------------------------------------------------------
@@ -359,8 +362,10 @@ static void
 usage(void)
 {
     HDfprintf(stdout,
-	"Usage: big [-h] [-fsize <fsize>}\n"
+	"Usage: big [-h] [-c] [-fsize <fsize>}\n"
 	"\t-h\tPrint the help page\n"
+	"\t-c\tFile system Checking skipped.  Caution: this test generates\n"
+	"\t\tmany big files and may fill up the file system.\n"
 	"\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
 	"\t\ta positive float point number.  Default value is %Hu.\n"
 	"Examples:\n"
@@ -387,6 +392,8 @@ usage(void)
  * Modifications:
  *		Albert Cheng, 2002/03/28
  *		Added command option -fsize.
+ *		Albert Cheng, 2002/04/19
+ *		Added command option -c.
  *
  *-------------------------------------------------------------------------
  */
@@ -396,6 +403,7 @@ main (int ac, char **av)
     hid_t	fapl=-1;
     hsize_t	family_size;
     hsize_t	family_size_def;	/* default family file size */
+    int		cflag=1;		/* check file system before test */
     
     /* parameters setup */
     family_size_def = FAMILY_SIZE;
@@ -409,13 +417,16 @@ main (int ac, char **av)
 		family_size_def = (hsize_t) atof(*av);
 		if (family_size_def <= 0)
 		    family_size_def = (hsize_t)FAMILY_SIZE;
-		ac--; av++;
 	    }
 	    else{
 		printf("***Missing fsize value***\n");
 		usage();
 		return 1;
 	    }
+	}
+	else if (strcmp("-c", *av)==0){
+	    /* turn off file system check before test */
+	    cflag=0;
 	}
 	else if (strcmp("-h", *av)==0){
 	    usage();
@@ -445,42 +456,47 @@ main (int ac, char **av)
 	    goto error;
     }
 
-    /*
-     * We shouldn't run this test if the file system doesn't support holes
-     * because we would generate multi-gigabyte files.
-     */
-    puts("Checking if file system is adequate for this test...");
-    if (sizeof(long_long)<8 || 0==GB8LL) {
-	puts("Test skipped because sizeof(long_long) is too small. This");
-	puts("hardware apparently doesn't support 64-bit integer types.");
-    h5_cleanup(FILENAME, fapl);
-	exit(0);
-    }
-    if (!is_sparse()) {
-	puts("Test skipped because file system does not support holes.");
-    h5_cleanup(FILENAME, fapl);
-	exit(0);
-    }
-    if (!enough_room(fapl)) {
-	puts("Test skipped because of quota (file size or num open files).");
-    h5_cleanup(FILENAME, fapl);
-	exit(0);
-    }
-    if (sizeof(hsize_t)<=4) {
-	puts("Test skipped because the hdf5 library was configured with the");
-	puts("--disable-hsizet flag in order to work around a compiler bug.");
-    h5_cleanup(FILENAME, fapl);
-	exit(0);
+    if (cflag){
+	/*
+	 * We shouldn't run this test if the file system doesn't support holes
+	 * because we would generate multi-gigabyte files.
+	 */
+	puts("Checking if file system is adequate for this test...");
+	if (sizeof(long_long)<8 || 0==GB8LL) {
+	    puts("Test skipped because sizeof(long_long) is too small. This");
+	    puts("hardware apparently doesn't support 64-bit integer types.");
+	    usage();
+	    goto quit;
+	}
+	if (!is_sparse()) {
+	    puts("Test skipped because file system does not support holes.");
+	    usage();
+	    goto quit;
+	}
+	if (!enough_room(fapl)) {
+	    puts("Test skipped because of quota (file size or num open files).");
+	    usage();
+	    goto quit;
+	}
+	if (sizeof(hsize_t)<=4) {
+	    puts("Test skipped because the hdf5 library was configured with the");
+	    puts("--disable-hsizet flag in order to work around a compiler bug.");
+	    usage();
+	    goto quit;
+	}
     }
     
     /* Do the test */
     if (writer(fapl, WRT_N)) goto error;
     if (reader(fapl)) goto error;
     puts("All big tests passed.");
+
+quit:
+    /* End with normal exit code */
     if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
     return 0;
 
- error:
+error:
     if (fapl>=0) H5Pclose(fapl);
     puts("*** TEST FAILED ***");
     return 1;
