@@ -1,4 +1,4 @@
-HDF5 version 1.7.19 currently under development
+HDF5 version 1.7.19-fph5_alpha0 released on Fri Feb 27 05:35:13 CST 2004
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
