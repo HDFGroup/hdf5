@@ -22,10 +22,11 @@
  * Use:         Just a small wrapper to write text attributes easily
  *******************************************************************/
 static int write_text_attribute(hid_t dataset_id , const char *attr_name,
-                                const char *attr_value)
+                                const char *attr_value, const size_t attr_len)
 {
     /* variables for the attributes */
-    hsize_t attr_dims_size;     /* dimensions for the attribute */
+    hsize_t attr_dims;     /* dimensions for the attribute */
+    hsize_t attr_size;     /* dimensions for the attribute */
     hid_t attr_dataspace_id;    /* dataspaces needed for the various attributes */
     hid_t attr_attr_id;	        /* attribute id */
     hid_t attr_type_id;
@@ -34,15 +35,17 @@ static int write_text_attribute(hid_t dataset_id , const char *attr_name,
     if (!attr_name || !attr_value)
         return -1;
 
+    attr_dims = 1;
+
     /* figure out size of the data */
-    attr_dims_size = 1;
+    attr_size = (hsize_t)attr_len;
 
     /* set the type to string */
     attr_type_id = H5Tcopy(H5T_C_S1);
-    H5Tset_size(attr_type_id , (size_t)attr_dims_size);
+    H5Tset_size(attr_type_id , (size_t)attr_size);
 
     /* create the dataspace for the attribute */
-    attr_dataspace_id = H5Screate_simple(1 , &attr_dims_size , NULL);
+    attr_dataspace_id = H5Screate(H5S_SCALAR);
 
     /* create the attribute */
     attr_attr_id = H5Acreate(dataset_id , attr_name , attr_type_id ,
@@ -157,25 +160,25 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         /* set palette attributes */
 
         /* attribute CLASS = PALETTE */
-        if ((write_text_attribute(pal_id , "CLASS" , "PALETTE")) < 0) {
+        if ((write_text_attribute(pal_id , "CLASS" , "PALETTE",strlen("PALETTE"))) < 0) {
             fprintf(stderr , "Unable to write palette attributes. Aborting\n");
             return -1;
         }
 
         /* attribute PAL_COLORMODEL = RGB */
-        if ((write_text_attribute(pal_id , "PAL_COLORMODEL" , "RGB")) < 0) {
+        if ((write_text_attribute(pal_id , "PAL_COLORMODEL" , "RGB",strlen("RGB"))) < 0) {
             fprintf(stderr , "Unable to write palette attributes. Aborting\n");
             return -1;
         }
 
         /* attribute PAL_TYPE = STANDARD8 */
-        if ((write_text_attribute(pal_id , "PAL_TYPE" , "STANDARD8")) < 0) {
+        if ((write_text_attribute(pal_id , "PAL_TYPE" , "STANDARD8",strlen("STANDARD8"))) < 0) {
             fprintf(stderr , "Unable to write palette attributes. Aborting\n");
             return -1;
         }
 
         /* attribute PAL_VERSION = 1.0 */
-        if ((write_text_attribute(pal_id , "PAL_VERSION" , "1.0")) < 0) {
+        if ((write_text_attribute(pal_id , "PAL_VERSION" , "1.0",strlen("1.0"))) < 0) {
             fprintf(stderr , "Unable to write palette attributes. Aborting\n");
             return -1;
         }
@@ -285,7 +288,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         ** Value	: IMAGE
         *****************************************/
 
-        if (write_text_attribute(sub_image_id , "CLASS" , "IMAGE") < 0) {
+        if (write_text_attribute(sub_image_id , "CLASS" , "IMAGE",strlen("IMAGE")) < 0) {
             fprintf(stderr , "Unable to write CLASS = IMAGE attribute\n");
             return -1;
         }
@@ -295,7 +298,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         ** Value	: 1.0
         *****************************************/
 
-        if (write_text_attribute(sub_image_id , "IMAGE_VERSION" , "1.0") < 0) {
+        if (write_text_attribute(sub_image_id , "IMAGE_VERSION" , "1.0",strlen("1.0")) < 0) {
             fprintf(stderr , "Unable to write IMAGE_VERSION attribute\n");
             return -1;
         }
@@ -305,7 +308,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         ** Value	: IMAGE_BITMAP
         *****************************************/
 
-        if (write_text_attribute(sub_image_id , "IMAGE_SUBCLASS" , "IMAGE_BITMAP") < 0) {
+        if (write_text_attribute(sub_image_id , "IMAGE_SUBCLASS" , "IMAGE_BITMAP", strlen("IMAGE_BITMAP")) < 0) {
             fprintf(stderr , "Unable to write IMAGE_SUBCLASS attribute\n");
             return -1;
         }
@@ -315,7 +318,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         ** Value	: RGB
         *****************************************/
 
-        if (write_text_attribute(sub_image_id , "IMAGE_COLORMODEL" , "RGB") < 0) {
+        if (write_text_attribute(sub_image_id , "IMAGE_COLORMODEL" , "RGB", strlen("RGB")) < 0) {
             fprintf(stderr , "Unable to write IMAGE_SUBCLASS attribute\n");
             return -1;
         }
