@@ -264,6 +264,7 @@
 ./doc/html/Tutor/intro.html
 ./doc/html/Tutor/iterate.html
 ./doc/html/Tutor/mount.html
+./doc/html/Tutor/property.html
 ./doc/html/Tutor/questions.html
 ./doc/html/Tutor/rdwt.html
 ./doc/html/Tutor/references.html
@@ -271,6 +272,7 @@
 ./doc/html/Tutor/reftoreg.html
 ./doc/html/Tutor/select.html
 ./doc/html/Tutor/selectc.html
+./doc/html/Tutor/software.html
 ./doc/html/Tutor/title.html
 ./doc/html/Tutor/util.html
 
@@ -314,6 +316,15 @@
 
 ./doc/html/Tutor/examples/Dependencies
 ./doc/html/Tutor/examples/Makefile.in
+./doc/html/Tutor/examples/attrexample.f90
+./doc/html/Tutor/examples/chunk.f90
+./doc/html/Tutor/examples/compound.f90
+./doc/html/Tutor/examples/dsetexample.f90
+./doc/html/Tutor/examples/fileexample.f90
+./doc/html/Tutor/examples/groupexample.f90
+./doc/html/Tutor/examples/grpdsetexample.f90
+./doc/html/Tutor/examples/grpit.f90
+./doc/html/Tutor/examples/grpsexample.f90
 ./doc/html/Tutor/examples/h5_compound.c
 ./doc/html/Tutor/examples/h5_copy.c
 ./doc/html/Tutor/examples/h5_crtatt.c
@@ -333,9 +344,51 @@
 ./doc/html/Tutor/examples/h5_ref2regr.c
 ./doc/html/Tutor/examples/h5_ref2regw.c
 ./doc/html/Tutor/examples/h5_reference.c
+./doc/html/Tutor/examples/hyperslab.f90
+./doc/html/Tutor/examples/mountexample.f90
+./doc/html/Tutor/examples/refobjexample.f90
+./doc/html/Tutor/examples/refregexample.f90
+./doc/html/Tutor/examples/rwdsetexample.f90
+./doc/html/Tutor/examples/selectele.f90
 
+./doc/html/Tutor/examples/java/Compound.java
+./doc/html/Tutor/examples/java/Copy.java
+./doc/html/Tutor/examples/java/CreateAttribute.java
+./doc/html/Tutor/examples/java/CreateDataset.java
+./doc/html/Tutor/examples/java/CreateFile.java
+./doc/html/Tutor/examples/java/CreateFileInput.java
+./doc/html/Tutor/examples/java/CreateGroup.java
+./doc/html/Tutor/examples/java/CreateGroupAR.java
+./doc/html/Tutor/examples/java/CreateGroupDataset.java
+./doc/html/Tutor/examples/java/DatasetRdWt.java
 ./doc/html/Tutor/examples/java/Dependencies
+./doc/html/Tutor/examples/java/HyperSlab.java
 ./doc/html/Tutor/examples/java/Makefile.in
+./doc/html/Tutor/examples/java/Makefile
+./doc/html/Tutor/examples/java/README
+./doc/html/Tutor/examples/java/readme.html
+./doc/html/Tutor/examples/java/runCompound.sh
+./doc/html/Tutor/examples/java/runCompound.sh.in
+./doc/html/Tutor/examples/java/runCopy.sh
+./doc/html/Tutor/examples/java/runCopy.sh.in
+./doc/html/Tutor/examples/java/runCreateAttribute.sh
+./doc/html/Tutor/examples/java/runCreateAttribute.sh.in
+./doc/html/Tutor/examples/java/runCreateDataset.sh
+./doc/html/Tutor/examples/java/runCreateDataset.sh.in
+./doc/html/Tutor/examples/java/runCreateFile.sh
+./doc/html/Tutor/examples/java/runCreateFile.sh.in
+./doc/html/Tutor/examples/java/runCreateFileInput.sh
+./doc/html/Tutor/examples/java/runCreateFileInput.sh.in
+./doc/html/Tutor/examples/java/runCreateGroup.sh
+./doc/html/Tutor/examples/java/runCreateGroup.sh.in
+./doc/html/Tutor/examples/java/runCreateGroupAR.sh
+./doc/html/Tutor/examples/java/runCreateGroupAR.sh.in
+./doc/html/Tutor/examples/java/runCreateGroupDataset.sh
+./doc/html/Tutor/examples/java/runCreateGroupDataset.sh.in
+./doc/html/Tutor/examples/java/runDatasetRdWt.sh
+./doc/html/Tutor/examples/java/runDatasetRdWt.sh.in
+./doc/html/Tutor/examples/java/runHyperSlab.sh
+./doc/html/Tutor/examples/java/runHyperSlab.sh.in
 
 ./doc/html/cpplus/CppInterfaces.html
 ./doc/html/cpplus/CppUserNotes.doc
