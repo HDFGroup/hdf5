@@ -12,9 +12,9 @@ file in the HDF5 source.
 The HDF5 documentation can be found on the NCSA ftp server
 (ftp.ncsa.uiuc.edu) in the directory:
 
-     /HDF/HDF5/docs/
+    /HDF/HDF5/docs/
 
-For more information look at the HDF5 home page at:
+For more information, see the HDF5 home page at:
    
     http://hdf.ncsa.uiuc.edu/HDF5/
 
@@ -38,30 +38,31 @@ New Features
 ============
   o Configuration
   ================
-    * The H4 to H5 tools were removed from the main source and placed in a
-      separate package. You can get these tools from the HDF ftp site
-     (ftp://hdf.ncsa.uiuc.edu/). The "--with-hdf4" command-line option during
-      configure is no longer valid.  BW - 2002/06/25
+    * The H4 to H5 tools have been removed from the main source and placed 
+      in a separate package. You can get these tools from the HDF ftp site
+      (ftp://hdf.ncsa.uiuc.edu/). The "--with-hdf4" command-line option 
+      during configure is no longer valid.  BW - 2002/06/25
 
   o Library
   =========
     o General
     --------- 
-      * Fill-value's forward-compatibility with 1.5 was added.  SLU -
+      * Fill-value forward-compatibility with release 1.5 was added.  SLU -
         2002/04/11
       * A new query function H5Tget_member_index has been added for compound
-        and enumeration data types, to retrieve member's index by name.
-        SLU - 2002/04/05
+        and enumeration data types.  This function retrieves a member's index 
+        by name.  SLU - 2002/04/05
       * Added serial multi-gigabyte file size test.  "test/big -h" shows
         the help page.  AKC - 2002/03/29
  
     o APIs
     ------
-      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were
-        overloaded with "dims" argument to be assumed size array of type
-        INTEGER(HSIZE_T). We recommend to use the subroutines with the new type.
-        Module subroutines that accept "dims" as INTEGER array of size 7 will
-        be deprecated in 1.6 release.  EIP - 2002/05/06
+      * The F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f, and h5aread_f 
+        were overloaded with a "dims" argument of type INTEGER(HSIZE_T) to 
+        specify the size of the array.  We recommend using these subroutines 
+        with the new type; module subroutines that accept "dims" as an i
+        INTEGER array of size 7 will be deprecated in release 1.6.  
+        EIP - 2002/05/06
  
     o Performance
     -------------
@@ -75,26 +76,26 @@ New Features
         performance.  QAK - 2002/06/03
 
 
-  o Parallel Library
+  o Parallel library
   ==================
     * Fixed bug in parallel I/O routines where a collective I/O which used
       MPI derived types, followed by an independent I/O would cause the library
       to hang.  QAK 2002/06/24
     * Added environment variable flag to control whether creating MPI derived
-      typed is preferred or not.  This can affect performance, depending on
-      which way the MPI-I/O library is optimized for.  The default is set to
-      prefer MPI derived types for collective raw data transfers, setting the
+      types is preferred or not.  This can affect performance, depending on
+      which way the MPI-I/O library is optimized.  The default is set to
+      prefer MPI derived types for collective raw data transfers; setting the
       HDF5_MPI_PREFER_DERIVED_TYPES environment variable to "0" (i.e.:
       "setenv HDF5_MPI_PREFER_DERIVED_TYPES 0") changes the preference to avoid
-      using then whenever possible.  QAK - 2002/06/19
+      using them whenever possible.  QAK - 2002/06/19
     * Changed MPI I/O routines to avoid creating MPI derived types (and thus
-      needing to set the file view) for contiguous selections within datasets,
-      which should result in some performance improvement for those types of
+      needing to set the file view) for contiguous selections within datasets.
+      This should result in some performance improvement for those types of
       selections.  QAK - 2002/06/18
-    * Enable MPI type support for collective I/O to be enabled by default.
+    * Changed MPI type support for collective I/O to be enabled by default.
       This can be disabled by setting the HDF5_MPI_OPT_TYPES environment
       variable to the value "0".  QAK - 2002/06/14
-    * Allow chunks in chunked datasets to be cached when parallel file is
+    * Allowed chunks in chunked datasets to be cached when parallel file is
       opened for read-only access (bug #709).  QAK - 2002/06/10
     * Changed method for allocating chunked dataset blocks to only allocate
       blocks that don't already exist, instead of attempting to create all the
@@ -102,7 +103,7 @@ New Features
       datasets.  QAK - 2002/05/17
     * Allowed the call to MPI_File_sync to be avoided when the file is going to
       immediately be closed, improving performance.  QAK - 2002/05/13
-    * Allow the metadata writes to be shared among all processes, easing the
+    * Allowed the metadata writes to be shared among all processes, easing the
       burden on process 0.  QAK - 2002/05/10
 
 
@@ -113,20 +114,21 @@ New Features
 
   o Support for new platforms and languages
   =========================================
-    * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
+    * Parallel Fortran Library works now on HP-UX B.11.00 Sys V.
       EIP - 2002/05/06
-    * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4
-    * Intel C++ compilers Version 6.0 are supported on windows 2000
+    * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4.
+    * Intel C++ compilers Version 6.0 are supported on Windows 2000.
 
   
   o Misc.
   =========================================
-   * zlib is moved out of windows source release. Users should go to
-     ZLIB homepage(URL: http://www.zlib.org) to download the corresponding 
+   * zlib has been moved out of the Windows source release. Users should go to
+     the ZLIB homepage(http://www.zlib.org) to download the corresponding 
      zlib library.
-   * Windows binary release is built with the old version of zlib library.
-     We expect users to use zlib 1.1.4 to build with source release.  
-   * In windows-specified install document, we specify how to test backward
+   * The Windows binary release is built with the old version of the zlib 
+     library.  We expect users to use zlib 1.1.4 to build with the source 
+     release.  
+   * In the Windows-specific install document, we specify how to test backward
      compatibility. However, in this release, we are not testing the backward
      compatibility of HDF5.
 
@@ -141,22 +143,21 @@ Bug Fixes since HDF5-1.4.3 Release
         transferred when the number of elements in a row did not fit evenly
         into the buffer provided.  QAK 2002/06/12
     * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
-        (one with no members) to be used to create a dataset or committed to a
-        file.  QAK - 2002/06/11
+        (one with no members) to be used to create a dataset or to be committed
+        to a file.  QAK - 2002/06/11
     * Fixed bug (#777) which allowed a compound datatype to be inserted into
         itself.  QAK - 2002/06/10
     * Fixed bug (#789) where creating 1-D dataset region reference caused the
         library to go into infinite loop.  QAK - 2002/06/10
     * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
         written to the file and then subsequently queried with the
-        H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
-        of H5S_SCALAR. EIP - 2002/06/04
+        H5Sget_simple_extent_type function; type was reported as H5S_SIMPLE 
+        instead of H5S_SCALAR. EIP - 2002/06/04
     * Clear symbol table node "dirty" flag when flushing symbol tables to
         disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain
         obscure situations when many objects were created in the
         file.  QAK - 2002/05/31
-        was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where read/write intent in file IDs created with H5Freopen
         was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where selection offsets were not being used when iterating
@@ -170,7 +171,7 @@ Bug Fixes since HDF5-1.4.3 Release
     * Fixed limitation in h5dumper with object names which reached over 1024
         characters in length. We can now handle arbitrarily larger sizes for
         object names. BW - 2002/03/29
-    * Fixed bug where variable-length string type doesn't behave as
+    * Fixed bug where variable-length string type did not behave as a
         string.  SLU - 2002/03/28
     * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
         of the H5G_stat_t struct.  QAK - 2002/03/27
@@ -184,7 +185,7 @@ Performance Improvements
     This release of the HDF5 library has been extensively tuned to improve
 performance, especially to improve parallel I/O performance.
     Most of the specific information for particular performance improvements
-is mentioned in the "New Features" and "Bug Fixes Since HDF5-1.4.3" sections
+is mentioned in the "New Features" and "Bug Fixes since HDF5-1.4.3" sections
 of this document, but in general, the library should make fewer and larger
 I/O requests when accessing a file.  Additionally, improvements to the parallel
 I/O portions of the library should have reduced the communications and barriers
@@ -196,12 +197,19 @@ support team at hdfhelp@ncsa.uiuc.edu.
     Hopefully these improvements will benefit all HDF5 applications, but if
 there are particular I/O patterns that appear to be slower than necessary,
 please send e-mail to hdfhelp@ncsa.uiuc.edu with a sample program showing the
-problem behavior and we will look into the issue to see if it is possible to
+problem behavior; we will look into the issue to see if it is possible to
 address it.
 
 
 Documentation
 =============
+    * Documentation was updated for the hdf5-1.4.4 release.
+    * A new "HDF5 User's Guide" is under development.  See 
+      http://hdf.ncsa.uiuc.edu/HDF5/doc_dev_snapshot/H5_NewUG/current/.
+    * A "Parallel HDF5 Tutorial" is available at 
+      http://hdf.ncsa.uiuc.edu/HDF5/doc/Tutor/.
+    * The "HDF5 Tutorial" is not distributed with this release.  It is 
+      available at http://hdf.ncsa.uiuc.edu/HDF5/doc/Tutor/.
 
 
 Platforms Tested
@@ -246,8 +254,8 @@ Platforms Tested
                                   Compaq Fortran V5.5-1877-48BBF
                                   gcc version 3.0 for C++
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
-     (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0 
-                                  Workshop Compilers 5.0 98/10/25 
+     (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
+                                  WorkShop Compilers 5.0 98/10/25 
                                   FORTRAN 90 2.0 Patch 107356-04 
     SunOS 5.8/32                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
      (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
@@ -295,7 +303,7 @@ Supported Configuration Features Summary
     Solaris2.8 32      y  n         y    n        y    y            y     y
     IRIX6.5            y  y (1)     n    n        n    y            y     y
     IRIX64_6.5 64      y  y (2)     y    y        n    y            y     y
-    IRIX64_6.5 32      y  y (2)     n    n        n    y            y     y
+    IRIX64_6.5 n32     y  y (2)     n    n        n    y            y     y
     HPUX10.20          y  n         y    n        n    y            y     y
     HPUX11.00          y  n         y    n        n    y            y     y
     HPUX11 SysV        y  y         y    y        n    y            y     y
@@ -324,7 +332,7 @@ Supported Configuration Features Summary
     Solaris2.8 32      y              x        y        n    n     y
     IRIX6.5            y              x        n        n    n     y
     IRIX64_6.5 64      y              x        y        n    y     y
-    IRIX64_6.5 32      y              x        y        n    y     y
+    IRIX64_6.5 n32     y              x        y        n    y     y
     HPUX10.20          y              y        n        n    n     y
     HPUX11.00          y              x        n        n    n     y
     HPUX11 SysV        y              x        n        n    n     y
@@ -360,15 +368,14 @@ Known Problems
     * Datasets or attributes which have a variable-length string datatype are
       not printing correctly with h5dump and h5ls.
 
-    * When a dataset with the variable-legth datatype is overwritten, 
+    * When a dataset with the variable-length datatype is overwritten, 
       the library can develop memory leaks that cause the file to become 
       unnecessarily large.  This is planned to be fixed in the next release.
 
     * On the SV1, the h5ls test fails due to a difference between the 
       SV1 printf precision and the printf precision on other platforms.
 
-
-    * The h5dump tests may fail to match the expected output in some
+    * The h5dump tests may fail to match the expected output on some
       platforms (e.g. SP2 parallel, Windows) where the error messages
       directed to "stderr" do not appear in the "right order" with output
       from stdout.  This is not an error.
@@ -383,8 +390,8 @@ Known Problems
     
     * The HDF5_MPI_OPT_TYPES optimization code in the parallel HDF5 will cause
       a hang in some cases when chunked storage is used.  This is now set to
-      be off by default.  One may turn it on by setting environment variable
-      HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
+      be off by default.  One may turn it on by setting the environment 
+      variable HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
 
     * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
       Intel's ecc or icc compilers), you will need to modify the generated
@@ -394,22 +401,22 @@ Known Problems
           # How to pass a linker flag through the compiler.
           wl=""
 
-      change these lines to this:
+      Change these lines to this:
 
           # How to pass a linker flag through the compiler.
           wl="-Wl,"
 
-     * To build Fortran Library using Intel compilers one has to 
-          x modify source code in the fortran/src directory to remove !DEC and !MS
-            compiler's directives 
-          x build fails in fortran/test and then in frotran/examples directory;
-            to proceed edit work.pcl files in those directories to contain 
-            two lines
+    * To build the Fortran library using Intel compilers, one has to 
+          x modify the source code in the fortran/src directory to remove the
+            !DEC and !MS compiler directives.
+          x The build will fail in the fortran/test directory and then in the
+            fortran/examples directory; to proceed, edit the work.pcl files in
+            those directories to contain two lines
 
                     work.pc
                     ../src/work.pc 
 
-     * To build Fortran Library on IA64 use
+    * To build the Fortran library on IA64 use
                    setenv CC "ecc -DIA64"
                    setenv F9X "efc -cl,work.pcl"
-            before running configure and see steps described above.
+            before running configure and see the steps described above.
