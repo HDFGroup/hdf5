@@ -1034,7 +1034,7 @@ printf("%s: Check 1.0\n",FUNC);
      * algorithm to compute the offsets and run through as many as possible,
      * until the buffer fills up.
      */
-    if(num_read<nelmts) { /* Just in case the "remainder" aboce filled the buffer */
+    if(num_read<nelmts) { /* Just in case the "remainder" above filled the buffer */
 #ifdef QAK
 printf("%s: Check 2.0\n",FUNC);
 #endif /* QAK */
@@ -1534,7 +1534,7 @@ printf("%s: Check 1.0\n",FUNC);
      * algorithm to compute the offsets and run through as many as possible,
      * until the buffer fills up.
      */
-    if(num_write<nelmts) { /* Just in case the "remainder" aboce filled the buffer */
+    if(num_write<nelmts) { /* Just in case the "remainder" above filled the buffer */
 #ifdef QAK
 printf("%s: Check 2.0\n",FUNC);
 #endif /* QAK */
@@ -2012,7 +2012,7 @@ printf("%s: Check 1.0\n",FUNC);
      * algorithm to compute the offsets and run through as many as possible,
      * until the buffer fills up.
      */
-    if(num_read<nelmts) { /* Just in case the "remainder" aboce filled the buffer */
+    if(num_read<nelmts) { /* Just in case the "remainder" above filled the buffer */
 #ifdef QAK
 printf("%s: Check 2.0\n",FUNC);
 #endif /* QAK */
@@ -2486,7 +2486,7 @@ printf("%s: Check 1.0\n",FUNC);
      * algorithm to compute the offsets and run through as many as possible,
      * until the buffer fills up.
      */
-    if(num_write<nelmts) { /* Just in case the "remainder" aboce filled the buffer */
+    if(num_write<nelmts) { /* Just in case the "remainder" above filled the buffer */
 #ifdef QAK
 printf("%s: Check 2.0\n",FUNC);
 #endif /* QAK */
@@ -4534,9 +4534,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[/*space_id*/],
 		      const hsize_t block[/*space_id*/])
 {
-    hssize_t real_stride[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
-    hssize_t real_count[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
-    hssize_t real_block[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
     hsize_t *_stride=NULL;        /* Stride array */
     hsize_t *_block=NULL;        /* Block size array */
     int i;                      /* Counters */
@@ -4612,31 +4609,28 @@ for(i=0; i<space->extent.u.simple.rank; i++)
         } /* end for */
         space->select.sel_info.hslab.app_diminfo = diminfo;
 
-        /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
-        /* Modify the stride, block & count for contiguous hyperslab selections */
-        for(i=0; i<space->extent.u.simple.rank; i++) {
-            /* contiguous hyperslabs have the block size equal to the stride */
-            if(stride[i]==block[i]) {
-                real_count[i]=1;
-                real_stride[i]=1;
-                real_block[i]=count[i]*block[i];
-            } /* end if */
-            else {
-                real_stride[i]=stride[i];
-                real_count[i]=count[i];
-                real_block[i]=block[i];
-            } /* end else */
-        } /* end for */
-
-        /* Copy all the per-dimension selection info into the space descriptor */
+        /* Allocate room for the optimized per-dimension selection info */
         if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
         } /* end if */
+
+        /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
+        /* Modify the stride, block & count for contiguous hyperslab selections */
         for(i=0; i<space->extent.u.simple.rank; i++) {
+            /* Starting location doesn't get optimized */
             diminfo[i].start = start[i];
-            diminfo[i].stride = real_stride[i];
-            diminfo[i].count = real_count[i];
-            diminfo[i].block = real_block[i];
+
+            /* contiguous hyperslabs have the block size equal to the stride */
+            if(stride[i]==block[i]) {
+                diminfo[i].stride=1;
+                diminfo[i].count=1;
+                diminfo[i].block=count[i]*block[i];
+            } /* end if */
+            else {
+                diminfo[i].stride=stride[i];
+                diminfo[i].count=count[i];
+                diminfo[i].block=block[i];
+            } /* end else */
         } /* end for */
         space->select.sel_info.hslab.diminfo = diminfo;
 
