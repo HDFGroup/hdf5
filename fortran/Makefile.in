@@ -108,7 +108,7 @@ distclean:
 	-$(RM) config/commence config/conclude
 	-$(RM) config/stamp1 config/stamp2 config/depend?
 	-$(RM) config.cache config.log config.status
-	-$(RM) src/H5config_fortran.h
+	-$(RM) src/H5config_fortran.h src/H5pubconf_fortran.h
 	-$(RM) libtool Makefile
 
 maintainer-clean:

@@ -24,6 +24,21 @@ AC_CONFIG_HEADER([src/H5config_fortran.h])
 
 AC_CONFIG_AUX_DIR([../bin])
 
+AC_OUTPUT_COMMANDS([
+  echo "creating src/H5pubconf_fortran.h"
+  sed 's/#define /#define H5_/' < src/H5config_fortran.h |\
+    sed 's/#undef /#undef H5_/' > pubconf_fortran
+
+  if test ! -f src/H5pubconf_fortran.h; then
+    /bin/mv -f pubconf_fortran src/H5pubconf_fortran.h
+  elif (diff pubconf_fortran src/H5pubconf_fortran.h >/dev/null); then
+    /bin/rm -f pubconf_fortran
+    echo "src/H5pubconf_fortran.h is unchanged"
+  else
+    /bin/mv -f pubconf_fortran src/H5pubconf_fortran.h
+  fi
+])
+
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 AC_SUBST(FFLAGS)
