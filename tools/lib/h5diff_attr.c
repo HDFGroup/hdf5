@@ -65,7 +65,6 @@ int diff_attr(hid_t      loc1_id,
  char       name2[255];
  int        n1, n2, i, j, nfound;
  H5S_class_t    space_type1, space_type2;
- H5T_class_t    tclass1, tclass2;
  int        ret=0;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0) 

@@ -26,6 +26,8 @@
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
+#define START_OF_DATA		0x0001
+#define END_OF_DATA		0x0002
 
 /*
  * Information about how to format output.
@@ -313,6 +315,9 @@ typedef struct h5dump_t {
     const char *dset_ptformat_pre;
     const char *dset_ptformat;
 
+     /*print array indices in output matrix */
+    int pindex;
+
 } h5dump_t;
 
 typedef struct dump_header{
@@ -437,7 +442,7 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 /* taken from h5dump.h*/
 #define ATTRIBUTE       "ATTRIBUTE"
 #define BLOCK           "BLOCK"
-#define BOOT_BLOCK      "BOOT_BLOCK"
+#define SUPER_BLOCK     "SUPER_BLOCK"
 #define COMPRESSION     "COMPRESSION"
 #define CONCATENATOR    "//"
 #define COMPLEX         "COMPLEX"
@@ -466,6 +471,22 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define STRPAD          "STRPAD"
 #define SUBSET          "SUBSET"
 
+#define FILTERS         "FILTERS"
+#define DEFLATE         "COMPRESSION DEFLATE"
+#define DEFLATE_LEVEL   "LEVEL"
+#define SHUFFLE         "PREPROCESSING SHUFFLE"
+#define FLETCHER32      "CHECKSUM FLETCHER32"
+#define SZIP            "COMPRESSION SZIP"
+#define UNKNOWN_FILTER  "UNKNOWN_FILTER"
+#define STORAGE_LAYOUT  "STORAGE_LAYOUT"
+#define CONTIGUOUS      "CONTIGUOUS"
+#define COMPACT         "COMPACT"
+#define CHUNKED         "CHUNKED"
+#define EXTERNAL_FILE   "EXTERNAL_FILE"
+#define FILLVALUE       "FILLVALUE"
+#define FILE_CONTENTS   "FILE_CONTENTS"
+
+
 #define BEGIN           "{"
 #define END             "}"
 
@@ -479,6 +500,10 @@ extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);
 extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
+
+extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
+                         h5tools_context_t *ctx/*in,out*/, unsigned flags,
+                         hsize_t nelmts, hid_t type, void *_mem);
 
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);

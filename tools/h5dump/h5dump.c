@@ -18,9 +18,19 @@
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
+#include "h5trav.h"
+
 
 /* module-scoped variables */
 static const char  *progname = "h5dump";
+
+/* 3 private values: can't be set, but can be read.
+   Note: these are defined in H5Zprivate, they are
+   duplicated here.
+ */
+#define H5_SZIP_LSB_OPTION_MASK         8
+#define H5_SZIP_MSB_OPTION_MASK         16
+#define H5_SZIP_RAW_OPTION_MASK         128
 
 static int          d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
@@ -32,13 +42,17 @@ static const char  *driver = NULL;      /* The driver to open the file with. */
 static const dump_header *dump_header_format;
 
 /* things to display or which are set via command line parameters */
-static int          display_all = TRUE;
-static int          display_bb = FALSE;
-static int          display_oid = FALSE;
-static int          display_data = TRUE;
+static int          display_all       = TRUE;
+static int          display_oid       = FALSE;
+static int          display_data      = TRUE;
 static int          display_attr_data = TRUE;
-static int          display_char = FALSE;   /*print 1-byte numbers as ASCII? */
-static int          usingdasho = FALSE;
+static int          display_char      = FALSE;   /*print 1-byte numbers as ASCII? */
+static int          usingdasho        = FALSE;
+static int          display_bb        = FALSE; /*superblock */
+static int          display_dcpl      = FALSE; /*dcpl */   
+static int          display_fi        = FALSE; /*file index */   
+static int          display_ai        = TRUE;  /*array index */   
+
 
 /**
  **  Added for XML  **
@@ -65,6 +79,7 @@ typedef struct ref_path_table_entry {
 /** end XML **/
 
 /* internal functions */
+static hid_t     h5_fileaccess(void);
 static void      dump_oid(hid_t oid);
 static void      print_enum(hid_t type);
 static herr_t    dump_all(hid_t group, const char *name, void *op_data);
@@ -145,6 +160,8 @@ static h5dump_t         dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
+    1       /*array indices */
+
 };
 
 /**
@@ -227,6 +244,7 @@ static h5dump_t         xml_dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
+     0      /*array indices */
 };
 
 /** XML **/
@@ -235,7 +253,7 @@ static const dump_header standardformat = {
     "standardformat",		/*name */
     "HDF5",			/*fileebgin */
     "",				/*fileend */
-    BOOT_BLOCK,			/*bootblockbegin */
+    SUPER_BLOCK,			/*bootblockbegin */
     "",				/*bootblockend */
     GROUPNAME,			/*groupbegin */
     "",				/*groupend */
@@ -334,11 +352,13 @@ struct handler_t {
     /* binary: not implemented yet */
 static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #else
-static const char *s_opts = "hBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
+    { "contents", no_arg, 'n' },
+    { "properties", no_arg, 'p' },
 #if 0
     /* binary: not implemented yet */
     { "binary", no_arg, 'b' },
@@ -470,7 +490,11 @@ static void             dump_dataset(hid_t, const char *, struct subset_t *);
 static void             dump_dataspace(hid_t space);
 static void             dump_datatype(hid_t type);
 static herr_t           dump_attr(hid_t, const char *, void *);
-static void             dump_data(hid_t, int, struct subset_t *);
+static void             dump_data(hid_t, int, struct subset_t *, int);
+static void             dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
+static void             dump_comment(hid_t obj_id);
+static void             dump_fcpl(hid_t fid);
+static void             dump_list(hid_t fid);
 
 /* XML format:   same interface, alternative output */
 
@@ -480,7 +504,7 @@ static void             xml_dump_dataset(hid_t, const char *, struct subset_t *)
 static void             xml_dump_dataspace(hid_t space);
 static void             xml_dump_datatype(hid_t type);
 static herr_t           xml_dump_attr(hid_t, const char *, void *);
-static void             xml_dump_data(hid_t, int, struct subset_t *);
+static void             xml_dump_data(hid_t, int, struct subset_t *, int);
 
 /** 
  ** Added for XML **
@@ -495,7 +519,7 @@ typedef struct dump_functions_t {
     void                (*dump_dataspace_function) (hid_t);
     void                (*dump_datatype_function) (hid_t);
     herr_t              (*dump_attribute_function) (hid_t, const char *, void *);
-    void                (*dump_data_function) (hid_t, int, struct subset_t *);
+    void                (*dump_data_function) (hid_t, int, struct subset_t *, int);
 } dump_functions;
 
 /* Standard DDL output */
@@ -570,6 +594,7 @@ usage(const char *prog)
     fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
+    fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
     fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
@@ -578,6 +603,7 @@ usage(const char *prog)
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
+    fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
@@ -955,25 +981,7 @@ print_datatype(hid_t type,unsigned in_group)
     } /* end else */
 }
 
-/*-------------------------------------------------------------------------
- * Function:    dump_bb
- *
- * Purpose:     Dump the boot block
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-dump_bb(void)
-{
-    printf("%s %s boot block not yet implemented %s\n",
-	   BOOT_BLOCK, BEGIN, END);
-}
+
 
 /*-------------------------------------------------------------------------
  * Function:    dump_datatype
@@ -1125,7 +1133,7 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    dump_oid(attr_id);
 
 	if (display_data || display_attr_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, 0);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1235,7 +1243,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
 	    dump_oid(attr_id);
 
 	if (display_data || display_attr_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, 0);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1599,7 +1607,7 @@ dump_group(hid_t gid, const char *name)
 {
     H5G_stat_t  statbuf;
     hid_t       dset, type;
-    char        type_name[1024], *tmp, comment[50];
+    char        type_name[1024], *tmp;
     int         i, xtype = H5G_UNKNOWN; /* dump all */
 
     tmp = malloc(strlen(prefix) + strlen(name) + 2);
@@ -1610,15 +1618,9 @@ dump_group(hid_t gid, const char *name)
     indent += COL;
 
     if (display_oid)
-	dump_oid(gid);
+	    dump_oid(gid);
 
-    comment[0] = '\0';
-    H5Gget_comment(gid, ".", sizeof(comment), comment);
-
-    if (comment[0]) {
-        indentation(indent);
-        printf("COMMENT \"%s\"\n", comment);
-    }
+    dump_comment(gid);
 
     if (!strcmp(name, "/") && unamedtype)
 	/* dump unamed type in root group */
@@ -1626,7 +1628,7 @@ dump_group(hid_t gid, const char *name)
 	    if (!type_table->objs[i].recorded) {
 		dset = H5Dopen(gid, type_table->objs[i].objname);
 		type = H5Dget_type(dset);
-                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[i].objno);
+  sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[i].objno);
 		dump_named_datatype(type, type_name);
 		H5Tclose(type);
 		H5Dclose(dset);
@@ -1679,18 +1681,24 @@ dump_group(hid_t gid, const char *name)
 static void
 dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 {
-    hid_t   type, space;
+    hid_t   type, space, dcpl_id;
 
     indentation(indent);
     begin_obj(dump_header_format->datasetbegin, name,
 	      dump_header_format->datasetblockbegin);
     type = H5Dget_type(did);
     space = H5Dget_space(did);
+    dcpl_id = H5Dget_create_plist(did); 
+   
+    dump_comment(did);
     dump_datatype(type);
     dump_dataspace(space);
 
     if (display_oid)
-	dump_oid(did);
+     dump_oid(did);
+    
+    if (display_dcpl)
+     dump_dcpl(dcpl_id, type, did);
 
     if (display_data)
 	switch (H5Tget_class(type)) {
@@ -1709,7 +1717,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 	case H5T_ENUM:
 	case H5T_VLEN:
 	case H5T_ARRAY:
-	    dump_data(did, DATASET_DATA, sset);
+	    dump_data(did, DATASET_DATA, sset, display_ai);
 	    break;
 
 	default:
@@ -1721,6 +1729,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     indent -= COL;
     H5Tclose(type);
     H5Sclose(space);
+    H5Pclose(dcpl_id);
     indentation(indent);
     end_obj(dump_header_format->datasetend,
 	    dump_header_format->datasetblockend);
@@ -1872,7 +1881,7 @@ dump_subsetting_header(struct subset_t *sset, int dims)
  *-------------------------------------------------------------------------
  */
 static void
-dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
+dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
 {
     h5dump_t   *outputformat = &dataformat;
     int         status = -1;
@@ -1942,6 +1951,21 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
             string_dataformat.line_suf = "\"";
             outputformat = &string_dataformat;
         }
+
+
+ /* print the matrix indices */
+ outputformat->pindex=pindex;
+ if (outputformat->pindex)
+ {
+  outputformat->idx_fmt = "(%s)";
+  outputformat->idx_n_fmt = "%lu";
+  outputformat->idx_sep = ",";
+  outputformat->line_pre  = "        %s ";
+  outputformat->line_1st  = "        %s ";
+  outputformat->line_cont = "        %s ";
+  depth=0;
+ }
+
 
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);
@@ -2013,6 +2037,529 @@ dump_oid(hid_t oid)
     indentation(indent + COL);
     printf("%s %s %d %s\n", OBJID, BEGIN, oid, END);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_comment
+ *
+ * Purpose:     prints the comment for the the object name
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void dump_comment(hid_t obj_id)
+{
+ char comment[50];
+ 
+ comment[0] = '\0';
+ H5Gget_comment(obj_id, ".", sizeof(comment), comment);
+ 
+ if (comment[0]) {
+  indentation(indent);
+  printf("COMMENT \"%s\"\n", comment);
+ }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_fill_value
+ *
+ * Purpose:     prints the fill value
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
+{
+ h5tools_context_t	ctx;			/*print context		*/
+ size_t            size;
+ void              *buf=NULL;
+ hsize_t           nelmts=1;
+ h5dump_t          *outputformat = &dataformat;
+
+ memset(&ctx, 0, sizeof(ctx));
+ ctx.indent_level=2;
+	size = H5Tget_size(type_id);
+	buf = malloc(size);
+
+ H5Pget_fill_value(dcpl, type_id, buf);
+    
+ h5tools_dump_simple_data(stdout, outputformat, obj_id, &ctx,
+  START_OF_DATA | END_OF_DATA, nelmts, type_id, buf);
+
+ if (buf)
+  free (buf);
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_dcpl
+ *
+ * Purpose:     prints several dataset create property list properties
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
+{
+ int              nfilters;       /* number of filters */
+ unsigned         filt_flags;     /* filter flags */
+ H5Z_filter_t     filtn;          /* filter identification number */
+ unsigned         cd_values[20];  /* filter client data values */
+ size_t           cd_nelmts;      /* filter client number of values */
+ char             f_name[256];    /* filter name */
+ unsigned         szip_options_mask;
+ unsigned         szip_pixels_per_block;
+ hsize_t          chsize[64];     /* chunk size in elements */
+ int              rank;           /* rank */
+ char	            name[256];		    /* external file name		*/
+ off_t            offset;         /* offset of external file 	*/
+ hsize_t          size;           /* size of external file 	*/
+ H5D_fill_value_t fvstatus;
+ H5D_alloc_time_t at;
+ H5D_fill_time_t  ft;
+ hsize_t          storage_size;
+ haddr_t          ioffset;
+ int              i, next;
+ unsigned         j;
+
+ storage_size=H5Dget_storage_size(obj_id);
+ ioffset=H5Dget_offset(obj_id);
+ next=H5Pget_external_count(dcpl_id);
+
+ 
+/*-------------------------------------------------------------------------
+ * STORAGE_LAYOUT	   
+ *-------------------------------------------------------------------------
+ */
+ indentation(indent + COL);
+ printf("%s ", STORAGE_LAYOUT);
+
+ if (H5D_CHUNKED == H5Pget_layout(dcpl_id)) 
+ {
+  printf("%s %s\n", CHUNKED, BEGIN);
+   /*start indent */
+  indent += COL;
+  indentation(indent + COL);
+  printf("SIZE %d ", (int)storage_size);
+  rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize);
+  printf("%s %d", dump_header_format->dataspacedimbegin, (int)chsize[0]);
+  for ( i=1; i<rank; i++) 
+   printf(", %d", (int)chsize[i]);
+	 printf(" %s\n", dump_header_format->dataspacedimend);
+  /*end indent */
+  indent -= COL;
+  indentation(indent + COL);
+  printf("%s\n",END);
+ }
+ else if (H5D_COMPACT == H5Pget_layout(dcpl_id)) 
+ {
+  printf("%s %s\n", COMPACT, BEGIN);
+  /*start indent */
+  indent += COL;
+  indentation(indent + COL);
+  printf("SIZE %d\n", (int)storage_size);
+  /*end indent */
+  indent -= COL;
+  indentation(indent + COL);
+  printf("%s\n",END);
+ }
+ else if (H5D_CONTIGUOUS == H5Pget_layout(dcpl_id)) 
+ {
+ /*-------------------------------------------------------------------------
+  * EXTERNAL_FILE
+  *-------------------------------------------------------------------------
+  */
+  if (next) 
+  {
+   printf("%s %s %s\n", CONTIGUOUS, EXTERNAL, BEGIN);
+    /*start indent */
+   indent += COL;
+   
+   for ( i=0; i<next; i++) {
+    H5Pget_external(dcpl_id,(unsigned)i,sizeof(name),name,&offset,&size);
+    indentation(indent + COL);
+    printf("FILENAME %s SIZE %d OFFSET %d\n",name,(int)size,(int)offset);
+   }
+   /*end indent */
+   indent -= COL;
+   indentation(indent + COL);
+   printf("%s\n",END);
+  }
+  
+  else
+  {
+   printf("%s %s\n", CONTIGUOUS, BEGIN);
+   /*start indent */
+   indent += COL;
+   indentation(indent + COL);
+   printf("SIZE %d OFFSET %d\n", (int)storage_size, (int)ioffset);
+   /*end indent */
+   indent -= COL;
+   indentation(indent + COL);
+   printf("%s\n",END);
+  }
+ }
+
+  
+
+
+/*-------------------------------------------------------------------------
+ * FILTERS	   
+ *-------------------------------------------------------------------------
+ */
+ nfilters = H5Pget_nfilters(dcpl_id);
+ if (nfilters)
+ {
+  
+  indentation(indent + COL);
+  printf("%s %s\n", FILTERS, BEGIN);
+  indent += COL;
+  
+  
+  for (i=0; i<nfilters; i++) 
+  {
+   cd_nelmts = NELMTS(cd_values);
+   filtn = H5Pget_filter(dcpl_id, 
+    (unsigned)i, 
+    &filt_flags, 
+    &cd_nelmts,
+    cd_values, 
+    sizeof(f_name), 
+    f_name);
+   
+   switch (filtn)
+   {
+   case H5Z_FILTER_DEFLATE:
+    indentation(indent + COL);
+    printf("%s %s %s %d %s\n", DEFLATE, BEGIN, DEFLATE_LEVEL, cd_values[0], END);
+    break;
+   case H5Z_FILTER_SHUFFLE:
+    indentation(indent + COL);
+    printf("%s\n", SHUFFLE);
+    break;
+   case H5Z_FILTER_FLETCHER32:
+    indentation(indent + COL);
+    printf("%s\n", FLETCHER32);
+    break;
+   case H5Z_FILTER_SZIP:
+    {
+     szip_options_mask=cd_values[0];;
+     szip_pixels_per_block=cd_values[1];
+     
+     indentation(indent + COL);
+     printf("%s %s\n",SZIP, BEGIN);
+     
+     /*start indent */
+     
+     indent += COL;
+     indentation(indent + COL);
+     printf("PIXELS_PER_BLOCK %d\n", szip_pixels_per_block);
+     
+     indentation(indent + COL);
+     if (szip_options_mask & H5_SZIP_CHIP_OPTION_MASK) 
+      printf("MODE %s\n", "HARDWARE");
+     else if (szip_options_mask & H5_SZIP_ALLOW_K13_OPTION_MASK) 
+      printf("MODE %s\n", "K13");
+     
+     indentation(indent + COL);
+     if (szip_options_mask & H5_SZIP_EC_OPTION_MASK) 
+      printf("CODING %s\n", "ENTROPY");
+     else if (szip_options_mask & H5_SZIP_NN_OPTION_MASK) 
+      printf("CODING %s\n", "NEAREST NEIGHBOUR");
+     
+     indentation(indent + COL);
+     if (szip_options_mask & H5_SZIP_LSB_OPTION_MASK) 
+      printf("BYTE_ORDER %s\n", "LSB");
+     else if (szip_options_mask & H5_SZIP_MSB_OPTION_MASK) 
+      printf("BYTE_ORDER %s\n", "MSB");
+     
+     indentation(indent + COL);
+     if (szip_options_mask & H5_SZIP_RAW_OPTION_MASK) 
+      printf("HEADER %s\n", "RAW");
+     
+     /*end indent */
+     
+     indent -= COL;
+     indentation(indent + COL);
+     printf("%s\n",END);
+    }
+    break;
+   default:
+    indentation(indent + COL);
+    printf("%s %d %s", UNKNOWN_FILTER, filtn, cd_nelmts? "" : "\n" );
+    if (cd_nelmts) {
+     printf("%s %s ","PARAMS", BEGIN);
+     for (j=0; j<cd_nelmts; j++) {
+      printf("%d ", cd_values[j]);
+     }
+     printf("%s\n", END);
+    }
+    break;
+   }/*switch*/ 
+  } /*i*/
+  
+  indent -= COL;
+  indentation(indent + COL);
+  printf("%s\n",END);
+ }/*nfilters*/
+
+/*-------------------------------------------------------------------------
+ * FILLVALUE
+ *-------------------------------------------------------------------------
+ */
+
+ indentation(indent + COL);
+ printf("%s %s\n", FILLVALUE, BEGIN);
+
+ /*start indent */
+ indent += COL;
+
+ indentation(indent + COL);
+ printf("FILL_TIME ");
+
+ H5Pget_fill_time(dcpl_id, &ft);
+ switch ( ft ) 
+ {
+ default:
+  break;
+	case H5D_FILL_TIME_ALLOC: 
+  printf("%s", "ALLOC\n");
+		break;
+	case H5D_FILL_TIME_NEVER: 
+  printf("%s", "NEVER\n");
+		break;
+	case H5D_FILL_TIME_IFSET: 
+  printf("%s", "IFSET\n");
+		break;
+ }
+
+ indentation(indent + COL);
+ printf("%s", "ALLOC_TIME ");
+ H5Pget_alloc_time(dcpl_id, &at);
+
+ switch (at) 
+ {
+	case H5D_ALLOC_TIME_EARLY: 
+  printf("%s", "EARLY\n");
+		break;
+	case H5D_ALLOC_TIME_INCR:
+  printf("%s", "INCR\n");
+		break;
+	case H5D_ALLOC_TIME_LATE: 
+  printf("%s", "LATE\n");
+		break;
+ }
+
+ indentation(indent + COL);
+ printf("%s ", "VALUE ");
+
+ H5Pfill_value_defined(dcpl_id, &fvstatus);
+ 
+ if (fvstatus == H5D_FILL_VALUE_UNDEFINED) 
+ {
+  printf("%s\n", "UNDEFINED");
+ }
+ else 
+ {
+  dump_fill_value(dcpl_id,type_id,obj_id);
+ }
+
+ /* end indent */ 
+ indent -= COL;
+ indentation(indent + COL);
+ printf("\n");
+ indentation(indent + COL);
+ printf("%s\n",END);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_fcpl
+ *
+ * Purpose:     prints file creation property list information
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_fcpl(hid_t fid)
+{
+ hid_t    fcpl;      /* file creation property list ID */
+ hid_t		  fapl;      /* file access property list ID */
+ hsize_t  userblock; /* userblock size retrieved from FCPL */
+ size_t   off_size;  /* size of offsets in the file */
+ size_t   len_size;  /* size of lengths in the file */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+ int      super;     /* superblock version # */
+ int      freelist;  /* free list version # */
+ int      stab;      /* symbol table entry version # */
+ int      shhdr;     /* shared object header version # */
+#else 
+ unsigned super;     /* superblock version # */
+ unsigned freelist;  /* free list version # */
+ unsigned stab;      /* symbol table entry version # */
+ unsigned shhdr;     /* shared object header version # */
+#endif 
+ herr_t   ret;       /* generic return value */
+ hid_t    fdriver;    /* file driver */
+ char     dname[15]; /* buffer to store driver name */
+ unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+ int      sym_ik;    /* symbol table B-tree initial 'K' value */
+ int      istore_ik; /* indexed storage B-tree initial 'K' value */
+#else 
+ unsigned sym_ik;    /* symbol table B-tree initial 'K' value */
+ unsigned istore_ik; /* indexed storage B-tree initial 'K' value */
+#endif 
+
+
+
+ fcpl=H5Fget_create_plist(fid);
+ ret=H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+ ret=H5Pget_userblock(fcpl,&userblock);
+ ret=H5Pget_sizes(fcpl,&off_size,&len_size);
+ ret=H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
+ ret=H5Pget_istore_k(fcpl,&istore_ik);
+ ret=H5Pclose(fcpl);
+ fapl   = h5_fileaccess();
+ fdriver = H5Pget_driver(fapl);
+ H5Pclose(fapl);
+ 
+ 
+ printf("%s %s\n",SUPER_BLOCK, BEGIN);
+ indentation(indent + COL);
+ printf("%s %d\n","SUPERBLOCK_VERSION", super);
+ indentation(indent + COL);
+ printf("%s %d\n","FREELIST_VERSION", freelist);
+ indentation(indent + COL);
+ printf("%s %d\n","SYMBOLTABLE_VERSION", stab);
+ indentation(indent + COL);
+ printf("%s %d\n","OBJECTHEADER_VERSION", (int)shhdr);
+ indentation(indent + COL);
+ printf("%s %d\n","USERBLOCK_VERSION", userblock);
+ indentation(indent + COL);
+ printf("%s %d\n","OFFSET_SIZE", off_size);
+ indentation(indent + COL);
+ printf("%s %d\n","LENGTH_SIZE", len_size);
+ indentation(indent + COL);
+ printf("%s %d\n","BTREE_RANK", sym_ik); 
+ indentation(indent + COL);
+ printf("%s %d\n","BTREE_LEAF", sym_lk);
+
+ if (H5FD_CORE==fdriver)
+ {
+  strcpy(dname,"H5FD_CORE");
+ }
+#if 0
+ else if (H5FD_DPSS==fdriver)
+ {
+  strcpy(dname,"H5FD_DPSS");
+ }
+#endif
+ else if (H5FD_FAMILY==fdriver)
+ {
+  strcpy(dname,"H5FD_FAMILY");
+ }
+ else if (H5FD_GASS==fdriver)
+ {
+  strcpy(dname,"H5FD_GASS");
+ }
+ else if (H5FD_LOG==fdriver)
+ {
+  strcpy(dname,"H5FD_LOG");
+ }
+ else if (H5FD_MPIO==fdriver)
+ {
+  strcpy(dname,"H5FD_MPIO");
+ }
+ else if (H5FD_MULTI==fdriver)
+ {
+  strcpy(dname,"H5FD_MULTI");
+ }
+ else if (H5FD_SEC2==fdriver)
+ {
+  strcpy(dname,"H5FD_SEC2");
+ }
+ else if (H5FD_STDIO==fdriver)
+ {
+  strcpy(dname,"H5FD_STDIO");
+ }
+#ifdef H5_HAVE_STREAM
+ else if (H5FD_STREAM==fdriver)
+ {
+  strcpy(dname,"H5FD_STREAM");
+ }
+#endif
+
+ indentation(indent + COL);
+ printf("%s %s\n","FILE_DRIVER", dname);
+ indentation(indent + COL);
+ printf("%s %d\n","ISTORE_K", istore_ik);
+  
+ printf("%s\n",END);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_list
+ *
+ * Purpose:     prints all objects 
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void dump_list(hid_t fid)
+{
+ int          nobjects;
+ trav_info_t  *info=NULL;
+
+ /* get the number of objects in the files */
+ nobjects = h5trav_getinfo(fid, NULL);
+
+ /* get the list of objects in the files */
+ info = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t));
+ if (info==NULL)
+  return;
+
+ h5trav_getinfo(fid, info);
+ printf("%s %s\n",FILE_CONTENTS, BEGIN);
+ h5trav_printinfo(nobjects,info);
+ printf(" %s\n",END);
+ h5trav_freeinfo(info,nobjects);
+}
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    set_output_file
@@ -2507,6 +3054,13 @@ parse_start:
             display_bb = TRUE;
             last_was_dset = FALSE;
             break;
+        case 'n':
+            display_fi = TRUE;
+            last_was_dset = FALSE;
+            break;
+        case 'p':
+            display_dcpl = TRUE;
+            break;
         case 'H':
             display_data = FALSE;
             display_attr_data = FALSE;
@@ -2876,20 +3430,22 @@ main(int argc, const char *argv[])
     info.dset_table = dset_table;
     info.status = d_status;
 
+    
+    thefile = fid;
+    /* find all objects that might be targets of a refernce */
+    if ((gid = H5Gopen(fid, "/")) < 0) {
+     error_msg(progname, "unable to open root group\n");
+     d_status = EXIT_FAILURE;
+     goto done;
+    }
+    ref_path_table_put(gid, "/");
+    H5Giterate(fid, "/", NULL, fill_ref_path_table, NULL);
+    H5Gclose(gid);
+
+
     if (doxml) {
 	/* initialize XML */
-	thefile = fid;
 
-	/* find all objects that might be targets of a refernce */
-	if ((gid = H5Gopen(fid, "/")) < 0) {
-            error_msg(progname, "unable to open root group\n");
-            d_status = EXIT_FAILURE;
-            goto done;
-	}
-
-	ref_path_table_put(gid, "/");
-	H5Giterate(fid, "/", NULL, fill_ref_path_table, NULL);
-	H5Gclose(gid);
 
 	/* reset prefix! */
 	strcpy(prefix, "");
@@ -2958,8 +3514,19 @@ main(int argc, const char *argv[])
 	}
     }
 
-    if (display_bb)
-	dump_bb();
+	   if (!doxml) 
+    {
+     if (display_fi)
+     {
+      dump_list(fid);
+      end_obj(dump_header_format->fileend,dump_header_format->fileblockend);
+      goto done;
+     }
+     
+     if (display_bb)
+      dump_fcpl(fid);
+    }
+  
 
     if (display_all) {
         if ((gid = H5Gopen(fid, "/")) < 0) {
@@ -4199,7 +4766,7 @@ xml_dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNUSED pindex)
 {
     h5dump_t               *outputformat = &xml_dataformat;
     int                     status = -1;
@@ -4337,7 +4904,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    case H5T_OPAQUE:
 	    case H5T_ENUM:
 	    case H5T_ARRAY:
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL, 0);
 		break;
 
 	    case H5T_TIME:
@@ -4357,7 +4924,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    case H5T_COMPOUND:
 		indentation(indent);
 		printf("<!-- Note: format of compound data not specified -->\n");
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL, 0);
 		break;
 
 	    case H5T_REFERENCE:
@@ -4380,7 +4947,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 
 	    case H5T_VLEN:
 		printf("<!-- Note: format of VL data not specified -->\n");
-		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL);
+		dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL, 0);
 		break;
 	    default:
 		indentation(indent);
@@ -5024,13 +5591,7 @@ check_filters(hid_t dcpl)
 	    indentation(indent + COL);
 	    printf("<%sShuffle />",xmlnsprefix);
 	} else if (filter == H5Z_FILTER_SZIP) {
-/* 3 private values: can't be set, but can be read.
-   Note: these are defined in H5Zprivate, they are
-   duplicated here.
- */
-#define H5_SZIP_LSB_OPTION_MASK         8
-#define H5_SZIP_MSB_OPTION_MASK         16
-#define H5_SZIP_RAW_OPTION_MASK         128
+
 	    indentation(indent + COL);
 	    printf("<%sSZIP ",xmlnsprefix);
             if (cd_nelmts < 2) {
@@ -5392,7 +5953,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	case H5T_OPAQUE:
 	case H5T_ENUM:
 	case H5T_ARRAY:
-	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL, 0);
 	    break;
 
 	case H5T_TIME:
@@ -5411,7 +5972,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	case H5T_COMPOUND:
 	    indentation(indent);
 	    printf("<!-- Note: format of compound data not specified -->\n");
-	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL, 0);
 	    break;
 
 	case H5T_REFERENCE:
@@ -5434,7 +5995,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 
 	case H5T_VLEN:
 	    printf("<!-- Note: format of VL data not specified -->\n");
-	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL);
+	    dump_function_table->dump_data_function(did, DATASET_DATA, NULL, 0);
 	    break;
 	default:
 	    indentation(indent);
@@ -5575,4 +6136,112 @@ xml_print_enum(hid_t type)
     free(name);
     free(value);
     H5Tclose(super);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	h5_fileaccess
+ *
+ * Purpose:	Returns a file access template which is the default template
+ *		but with a file driver set according to the constant or
+ *		environment variable HDF5_DRIVER
+ *
+ * Return:	Success:	A file access property list
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+h5_fileaccess(void)
+{
+  static const char *multi_letters = "msbrglo";
+
+    const char	*val = NULL;
+    const char	*name;
+    char s[1024];
+    hid_t fapl = -1;
+    
+    /* First use the environment variable, then the constant */
+    val = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+    if (!val) val = HDF5_DRIVER;
+#endif
+
+    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
+    if (!val || !*val) return fapl; /*use default*/
+    
+    HDstrncpy(s, val, sizeof s);
+    s[sizeof(s)-1] = '\0';
+    if (NULL==(name=HDstrtok(s, " \t\n\r"))) return fapl;
+
+    if (!HDstrcmp(name, "sec2")) {
+	/* Unix read() and write() system calls */
+	if (H5Pset_fapl_sec2(fapl)<0) return -1;
+    } else if (!HDstrcmp(name, "stdio")) {
+	/* Standard C fread() and fwrite() system calls */
+	if (H5Pset_fapl_stdio(fapl)<0) return -1;
+    } else if (!HDstrcmp(name, "core")) {
+	/* In-core temporary file with 1MB increment */
+	if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
+    } else if (!HDstrcmp(name, "split")) {
+	/* Split meta data and raw data each using default driver */
+	if (H5Pset_fapl_split(fapl,
+			      "-m.h5", H5P_DEFAULT,
+			      "-r.h5", H5P_DEFAULT)<0)
+	    return -1;
+    } else if (!HDstrcmp(name, "multi")) {
+	/* Multi-file driver, general case of the split driver */
+	H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
+	hid_t memb_fapl[H5FD_MEM_NTYPES];
+	const char *memb_name[H5FD_MEM_NTYPES];
+	char sv[H5FD_MEM_NTYPES][1024];
+	haddr_t memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t	mt;
+
+	HDmemset(memb_map, 0, sizeof memb_map);
+	HDmemset(memb_fapl, 0, sizeof memb_fapl);
+	HDmemset(memb_name, 0, sizeof memb_name);
+	HDmemset(memb_addr, 0, sizeof memb_addr);
+
+	assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+	    memb_fapl[mt] = H5P_DEFAULT;
+	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+	    memb_name[mt] = sv[mt];
+	    memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
+	}
+
+	if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+			      memb_addr, FALSE)<0) {
+	    return -1;
+	}
+    } else if (!HDstrcmp(name, "family")) {
+        hsize_t fam_size = 100*1024*1024; /*100 MB*/
+
+	/* Family of files, each 1MB and using the default driver */
+	if ((val=HDstrtok(NULL, " \t\n\r")))
+	    fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
+	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+            return -1;
+    } else if (!HDstrcmp(name, "log")) {
+        long log_flags = H5FD_LOG_LOC_IO;
+
+        /* Log file access */
+        if ((val = HDstrtok(NULL, " \t\n\r")))
+            log_flags = HDstrtol(val, NULL, 0);
+
+        if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
+	    return -1;
+    } else {
+	/* Unknown driver */
+	return -1;
+    }
+
+    return fapl;
 }

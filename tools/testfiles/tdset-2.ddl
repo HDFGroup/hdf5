@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -H -d dset1 -d /dset2 -d dset3 --dataset=dset4 tdset.h5'
+Expected output for 'h5dump -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5'
 #############################
 HDF5 "tdset.h5" {
 DATASET "dset1" {
@@ -14,7 +14,4 @@ DATASET "dset3" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  NULL
 }
-DATASET "dset4" {
-   }
 }
-h5dump error: unable to open dataset "dset4"

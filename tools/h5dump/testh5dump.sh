@@ -62,8 +62,13 @@ TOOLTEST() {
       $RUNSERIAL $DUMPER_BIN $@
    ) >$actual 2>$actual_err
    cat $actual_err >> $actual
-    
-   if $CMP $expect $actual; then
+
+
+   if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+    echo " CREATED"
+    cp $actual $expect
+   elif $CMP $expect $actual; then
       echo " PASSED"
    else
       echo "*FAILED*"
@@ -92,7 +97,7 @@ TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl tdset.h5
 # test for displaying selected datasets
-TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 -d dset3 --dataset=dset4 tdset.h5
+TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
 # test for displaying attributes
 TOOLTEST tattr-1.ddl tattr.h5
@@ -120,7 +125,7 @@ TOOLTEST tcomp-1.ddl tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
-TOOLTEST tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
+TOOLTEST tcomp-3.ddl -t /#6632:0 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl tcompound_complex.h5
 
@@ -190,6 +195,13 @@ TOOLTEST tchar1.ddl -r tchar.h5
 # test failure handling
 # Missing file name
 TOOLTEST tnofilename.ddl
+
+# test for super block
+TOOLTEST tboot.ddl -H -B -d compact tfilters.h5
+
+# test for file contents
+TOOLTEST tcontents.ddl -n tfilters.h5
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

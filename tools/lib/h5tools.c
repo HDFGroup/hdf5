@@ -43,8 +43,7 @@
 
 #define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
 
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
+
 
 /* global variables */
 int         indent;
@@ -500,7 +499,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
  *      handled correctly.
  *-------------------------------------------------------------------------
  */
-static void
+void
 h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
