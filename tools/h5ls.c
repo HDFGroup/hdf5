@@ -1170,7 +1170,7 @@ dump_dataset_values(hid_t dset)
      * Print all the values.
      */
     printf("    Data:\n");
-    if (h5dump_dset(stdout, &info, dset, -1)<0) {
+    if (h5dump_dset(stdout, &info, dset, -1, -1)<0) {
 	printf("        Unable to print data.\n");
     }
 
@@ -1267,7 +1267,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {
-		h5dump_mem(stdout, &info, p_type, space, buf);
+		h5dump_mem(stdout, &info, p_type, space, buf,-1);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 
@@ -1917,9 +1917,6 @@ main (int argc, char *argv[])
 	     NULL, NULL);
     DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
 	     NULL, ragged_list2);
-
-    /* Init the program type for the tools lib*/
-    programtype = H5LS; /*global*/
 
     /* Name of this program without the path */
     if ((progname=strrchr(argv[0], '/'))) progname++;
