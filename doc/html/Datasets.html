@@ -169,7 +169,9 @@
 	</dl>
     </dl>
 
+    <a name="Dataset_PSetChunk">
     <p>Once the general layout is defined, the user can define
+    </a>
       properties of that layout.  Currently, the only layout that has
       user-settable properties is the <code>H5D_CHUNKED</code> layout,
       which needs to know the dimensionality and chunk size.
@@ -220,10 +222,12 @@ H5Pset_chunk (plist, 2, size);
 
     <h2>3. Compression Properties</h2>
 
-    <p>Some types of storage layout allow data compression which is
-      defined by the functions described here. <b>Compression is not
-      implemented yet.</b>
+    <p>Chunked data storage 
+      (see <a href="#Dataset_PSetChunk"><code>H5Pset_chunk</code></a>) 
+      allows data compression as defined by the function 
+      <code>H5Pset_deflate</code>.
 
+<!--
     <dl>
       <dt><code>herr_t H5Pset_compression (hid_t <em>plist_id</em>,
 	  H5Z_method_t <em>method</em>)</code>
@@ -246,6 +250,7 @@ H5Pset_chunk (plist, 2, size);
 	    (LZ77) encoding is used, the same encoding used by the
 	    free GNU <code>gzip</code> program.
 	</dl>
+-->
 
 	<br><br>
       <dt><code>herr_t H5Pset_deflate (hid_t <em>plist_id</em>,
@@ -717,7 +722,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 26 chunk_size[0] = chunk_size[1] = 100;
 27 properties = H5Pcreate (H5P_DATASET_CREATE);
 28 H5Pset_chunk (properties, 2, chunk_size);
-29 H5Pset_compression (properties, H5D_COMPRESS_LZ77);
+29 H5Pset_deflate (properties, 9);
 30 
 31 /*
 32  * Create a new dataset within the file.  The datatype

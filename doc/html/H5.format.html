@@ -86,11 +86,31 @@
     </ol>
 </td></tr>
 </table>
+</center>
 
 <br><br>
 
 
     <h2>Introduction</h2>
+
+    <table align=right width=100>
+    <tr><td>&nbsp;</td><td align=center>
+        <hr>
+        <img src="FF-IH_FileGroup.gif" alt="HDF5 Groups" hspace=15 vspace=15>
+    </td><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td><td align=center>
+        <strong>Figure 1:</strong> Relationships among the HDF5 root group, other groups, and objects
+        <hr>
+    </td><td>&nbsp;</td></tr>
+
+    <tr><td>&nbsp;</td><td align=center>
+        <img src="FF-IH_FileObject.gif" alt="HDF5 Objects" hspace=15 vspace=15>
+    </td><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td><td align=center>
+        <strong>Figure 2:</strong> HDF5 objects -- datasets, datatypes, or dataspaces
+        <hr>
+    </td><td>&nbsp;</td></tr>
+    </table>
 
     <P>The format of an HDF5 file on disk encompasses several
       key ideas of the HDF4 and AIO file formats as well as
@@ -98,17 +118,6 @@
       more self-describing than the HDF4 format and is more
       uniformly applied to data objects in the file.
       
-    <table align=left width=100>
-    <tr><td align=center>
-        <hr>
-        <img src="FF-IH_FileGroup.gif" alt="HDF5 Groups" hspace=15 vspace=15>
-    </td><td>&nbsp;</td></tr><tr><td align=center>
-        <strong>Figure 1:</strong> Relationships among the HDF5 root group, other groups, and objects
-        <hr>
-    </td><td>&nbsp;</td></tr>
-    </table>
-
-
     <P>An HDF5 file appears to the user as a directed graph.  
       The nodes of this graph are the higher-level HDF5 objects
       that are exposed by the HDF5 APIs:
@@ -126,17 +135,6 @@
          <li>A super block
          <li>B-tree nodes (containing either symbol nodes or raw data chunks)
          <li>Object headers
-
-    <table align=right width=95>
-    <tr><td>&nbsp;</td><td align=center>
-        <hr>
-        <img src="FF-IH_FileObject.gif" alt="HDF5 Objects" hspace=15 vspace=15>
-    </td></tr><tr><td>&nbsp;</td><td align=center>
-        <strong>Figure 2:</strong> HDF5 objects -- datasets, datatypes, or dataspaces
-        <hr>
-    </td></tr>
-    </table>
-
          <li>Collections
          <li>Local heaps
          <li>Free space
