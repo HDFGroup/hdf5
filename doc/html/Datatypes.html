@@ -2701,29 +2701,57 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
       conversion path, then the hard function is favored and when
       multiple soft functions apply, the one defined last is favored.
 
-    <p>A data conversion function is of type <code>H5T_conv_t</code>
-	which is defined as:
+    <p>A data conversion function is of type <code>H5T_conv_t</code>,
+	which is defined as follows:
 
-    <p>
-      <code><pre>
-typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
-                             hid_t <em>dest_type</em>,
-			     H5T_cdata_t *<em>cdata</em>,
-			     size_t <em>nelmts</em>,
-			     void *<em>buffer</em>,
-                             void *<em>background</em>);
-    </pre></code>
+<dir><pre><em>typedef</em> herr_t (<em>*H5T_conv_t</em>) (hid_t <em>src_id</em>, 
+                              hid_t <em>dst_id</em>, 
+                              H5T_cdata_t *<em>cdata</em>,
+                              hsize_t <em>nelmts</em>, 
+                              size_t <em>buf_stride</em>, 
+                              size_t <em>bkg_stride</em>, 
+                              void *<em>buffer</em>, 
+                              void *<em>bkg_buffer</em>,
+                              hid_t <em>dset_xfer_plist</em>);</pre></dir>
+      
 
-    <p>The conversion function is called with the source and
-      destination datatypes (<em>src_type</em> and
-      <em>dst_type</em>), path-constant data (<em>cdata</em>), the
-      number of instances of the datatype to convert
-      (<em>nelmts</em>), a buffer which initially contains an array of
-      data having the source type and on return will contain an array
-      of data having the destination type (<em>buffer</em>), and a
-      temporary or background buffer (<em>background</em>).  Functions
-      return a negative value on failure and some other value on
-      success.
+    <p>The conversion function is called with 
+      the source and destination datatypes (<em>src_id</em> and 
+          <em>dst_id</em>), 
+      the path-constant data struct (<em>cdata</em>), 
+      the number of instances of the datatype to convert (<em>nelmts</em>), 
+      a conversion buffer (<em>buffer</em>) which initially contains 
+          an array of data having the source type and on return will 
+          contain an array of data having the destination type, 
+      a temporary or background buffer (<em>bkg_buffer</em>, 
+          see description of <code>H5T_BKG_YES</code> below),
+      conversion and background buffer strides (<em>buf_stride</em> and
+          <em>bkg_stride</em>) that indicate what data is to be converted, and
+      a dataset transfer properties list (<em>dset_xfer_plist</em>).  
+      Functions return a negative value on failure and 
+      some other value on success.
+
+     <p><em>buf_stride</em> and <em>bkg_stride</em> are in bytes and
+      are related to the size of the datatype.
+      If every data element is to be converted, the parameter's value 
+      is equal to the size of the datatype; 
+      if every other data element is to be converted, the parameter's value
+      is equal to twice the size of the datatype; etc.
+
+     <p><em>dset_xfer_plist</em> may contain properties that are passed
+      to the read and write calls.  
+      This parameter is currently used only with variable-length data.
+
+     <p><em>bkg_buffer</em> and <em>bkg_stride</em> are used only with 
+      compound datatypes.
+
+     <p>The path-constant data struct, <code>H5T_cdata_t</code>, 
+      is declared as follows:
+        
+<dir><pre><em>typedef</em> struct <em>*H5T_cdata_t</em> (H5T_cmd_t <em>command</em>, 
+                             H5T_bkg_t <em>need_bkg</em>, 
+                             hbool_t *<em>recalc</em>,
+                             void *<em>priv</em>)</pre></dir>
 
     <p>The <code>command</code> field of the <em>cdata</em> argument
       determines what happens within the conversion function.  It's
@@ -2883,9 +2911,9 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
  5 
  6 herr_t
  7 cray_ushort2be (hid_t src, hid_t dst,
- 8                 H5T_cdata_t *cdata,
- 9                 size_t nelmts, void *buf,
-10                 const void *background)
+ 8                 H5T_cdata_t *cdata, hsize_t nelmts, 
+ 9                 size_t buf_str, size_t bkg_str, void *buf, 
+10                 const void *background, hid_t plist)
 11 {
 12     unsigned char *src = (unsigned char *)buf;
 13     unsigned char *dst = src;
@@ -3063,7 +3091,7 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  16 February 2001
+Last modified:  20 July 2001
 <!-- hhmts end -->
 
 <br>

@@ -2171,17 +2171,32 @@ zero.
         For soft conversion functions, only the class of these types is important.
         <p>
         The type of the conversion function pointer is declared as:
-        <dl>
-        <dd><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) 
-                   (<em>hid_t </em><code>src_id</code>, 
-                    <em>hid_t </em><code>dst_id</code>, 
-                    <em>H5T_cdata_t *</em><code>cdata</code>,
-                    <em>size_t </em><code>nelmts</code>, 
-                    <em>size_t </em><code>stride</code>, 
-                    <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg</code>,
-                    <em>hid_t </em><code>dset_xfer_plist</code>);
-        </dl>
+        <dir>
+<pre><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
+                              <em>hid_t </em><code>dst_id</code>, 
+                              <em>H5T_cdata_t *</em><code>cdata</code>,
+                              <em>hsize_t </em><code>nelmts</code>, 
+                              <em>size_t </em><code>buf_stride</code>, 
+                              <em>size_t </em><code>bkg_stride</code>, 
+                              <em>void *</em><code>buf</code>, 
+                              <em>void *</em><code>bkg</code>,
+                              <em>hid_t </em><code>dset_xfer_plist</code>)</pre>
+        </dir>
+        <p>
+        The <code>H5T_cdata_t</code> struct is declared as:
+        <dir>
+<pre><code>typedef</code> <em>struct </em><code>*H5T_cdata_t</code> (<em>H5T_cmd_t </em><code>command</code>, 
+                             <em>H5T_bkg_t </em><code>need_bkg</code>, 
+                             <em>hbool_t *</em><code>recalc</code>,
+                             <em>void *</em><code>priv</code>)</pre>
+        </dir>
+        <p>
+        The <code>*H5T_conv_t</code> parameters and 
+        the elements of the <code>H5T_cdata_t</code> struct
+        are described more fully in the 
+        "<a href="Datatypes.html#Datatypes-DataConversion" 
+        target="WinUG">Data Conversion</a>" section of
+        "The Datatype Interface (H5T)" in the <cite>HDF5 User's Guide</cite>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5T_pers_t</em> <code>pers</code>
@@ -2712,7 +2727,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  5 July 2001
+Last modified:  20 July 2001
 <br>
 Describes HDF5 Release 1.4.2, July 2001
 
