@@ -651,6 +651,7 @@
       <code>H5Tinsert()</code>) and cannot be subsequently modified.
       This makes it imposible to define recursive data structures.
 
+
     <a name="DTypes-PredefinedAtomic">
     <h2>6. Predefined Atomic Datatypes</h2>
     </a>
@@ -2429,7 +2430,215 @@ in the HDF5 distribution.
 
 
 
-    <h2>10. Sharing Datatypes among Datasets</h2>
+<h2>10. Array Datatypes</h2>
+
+The array class of datatypes, <code>H5T_ARRAY</code>, allows the 
+construction of true, homogeneous, multi-dimensional arrays.  
+Since these are homogeneous arrays, each element of the array will be 
+of the same datatype, designated at the time the array is created.
+
+<p>
+Arrays can be nested.
+Not only is an array datatype used as an element of an HDF5 dataset,
+but the elements of an array datatype may be of any datatype, 
+including another array datatype.
+
+<p>
+Array datatypes cannot be subdivided for I/O; the entire array must 
+be transferred from one dataset to another. 
+
+<p>
+Within the limitations outlined in the next paragraph, array datatypes 
+may be <em>N</em>-dimensional and of any dimension size.  
+Unlimited dimensions, however, are not supported. 
+Functionality similar to unlimited dimension arrays is available through 
+the use of variable-length datatypes.
+
+<p>
+The maximum number of dimensions, i.e., the maximum rank, of an array
+datatype is specified by the HDF5 library constant <code>H5S_MAX_RANK</code>.
+The minimum rank is 1 (one).
+All dimension sizes must be greater than 0 (zero). 
+
+<p>
+One array dataype may only be converted to another array datatype 
+if the number of dimensions and the sizes of the dimensions are equal 
+and the datatype of the first array's elements can be converted 
+to the datatype of the second array's elements.
+
+<h3>10.1 Array Datatype APIs</h2>
+
+The functions for creating and manipulating array datadypes are 
+as follows:
+
+<dir>
+<table>
+    <tr>
+        <td><code><b>H5Tarray_create</b></code>
+        </td><td>&nbsp;&nbsp;
+        </td><td>Creates an array datatype.
+        </td></tr><tr><td colspan=3><dir>
+            <em>hid_t</em> <code>H5Tarray_create</code>(
+                       <em>hid_t</em> <code>base</code>,
+                       <em>int</em> <code>rank</code>,
+                       <em>const hsize_t</em> <code>dims[/*rank*/]</code>,
+                       <em>const int</em> <code>perm[/*rank*/]</code>
+            )
+        </dir>
+    </td></tr><tr>
+        <td><code><b>H5Tget_array_ndims</b></code>
+        </td><td>&nbsp;&nbsp;
+        </td><td>Retrieves the rank of the array datatype.
+        </td></tr><tr><td colspan=3><dir>
+            <em>int</em> <code>H5Tget_array_ndims</code>(
+                       <em>hid_t</em> <code>adtype_id</code>
+            )
+        </dir>
+    </td></tr><tr>
+        <td><code><b>H5Tget_array_dims</b></code>
+        </td><td>&nbsp;&nbsp;
+        </td><td>Retrieves the dimension sizes of the array datatype.
+        </td></tr><tr><td colspan=3><dir>
+            <em>int</em> <code>H5Tget_array_dims</code>(
+                       <em>hid_t</em> <code>adtype_id</code>,
+                       <em>hsize_t *</em><code>dims[]</code>,
+                       <em>int *</em><code>perm[]</code>
+            )
+        </dir>
+    </td></tr>
+</table>
+</dir>
+
+
+<h3>10.2 Transition Issues in Adapting Existing Software<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(Transition to HDF5 Release 1.4 Only)</h3>
+
+The array datatype class is new with Release 1.4;  
+prior releases included an array element for compound datatypes.
+<p>
+The use of the array datatype class will not interfere with the 
+use of existing compound datatypes.  Applications may continue to 
+read and write the older field arrays, but they will no longer be 
+able to create array fields in newly-defined compound datatypes.
+<p>
+Existing array fields will be transparently mapped to array datatypes
+when they are read in.
+
+
+<h3>10.3 Code Example</h3>
+
+The following example creates an array datatype and creates and writes 
+a dataset to the HDF5 file.  The elements of the dataset have the 
+array datatype.
+
+<center>
+<table border align=center width="100%">
+  <caption align=bottom><h4>Example: Array Datatype</h4></caption>
+  <tr>
+    <td>
+      <pre>
+/*  
+ *  This example creates and writes dataset to the HDF5 file.
+ *  Elements of the datasets have an array datatype.
+ */
+ 
+#include <hdf5.h>
+
+#define FILE        "SDS_array_type.h5"
+#define DATASETNAME "IntArray" 
+#define ARRAY_DIM1     5                      /* array dimensions and rank */
+#define ARRAY_DIM2     4 
+#define ARRAY_RANK     2 
+#define SPACE_DIM     10                      /* dataset dimensions and rank */ 
+#define RANK  1 
+
+int
+main (void)
+{
+    hid_t       file, dataset;         /* file and dataset handles */
+    hid_t       datatype, dataspace;   /* handles */
+    hsize_t     sdims[] = {SPACE_DIM};              /* dataset dimensions */
+    hsize_t     adims[] = {ARRAY_DIM1, ARRAY_DIM2}; /* array dimensions */
+    hsize_t     adims_out[2]; 
+    herr_t      status;                             
+    int         data[SPACE_DIM][ARRAY_DIM1][ARRAY_DIM2];   /* data to write */
+    int         k, i, j;
+    int         array_rank_out; 
+
+    /* 
+     * Data  and output buffer initialization. 
+     */
+    for (k = 0; k < SPACE_DIM; k++) {
+      for (j = 0; j < ARRAY_DIM1; j++) {
+	for (i = 0; i < ARRAY_DIM2; i++)
+               data[k][j][i] = k;
+      }
+    }     
+    /*
+     * Create a new file using H5F_ACC_TRUNC access,
+     * default file creation properties, and default file
+     * access properties.
+     */
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Describe the size of the array and create the data space for fixed
+     * size dataset. 
+     */
+    dataspace = H5Screate_simple(RANK, sdims, NULL); 
+
+    /* 
+     * Define array datatype for the data in the file.
+     */
+    datatype = H5Tarray_create(H5T_NATIVE_INT, ARRAY_RANK, adims, NULL);
+
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
+			H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL,
+		      H5P_DEFAULT, data);
+
+
+    /*
+     * Close/release resources.
+     */
+    H5Sclose(dataspace);
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+    /*
+     * Reopen dataset, and return information about its datatype.
+     */
+    dataset = H5Dopen(file, DATASETNAME);
+    datatype = H5Dget_type(dataset);
+    array_rank_out = H5Tget_array_ndims(datatype);
+    status = H5Tget_array_dims(datatype, adims_out, NULL); 
+    printf(" Array datatype rank is %d \n", array_rank_out);
+    printf(" Array dimensions are %d x %d \n", (int)adims_out[0],   
+                                               (int)adims_out[1]);
+
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+    H5Fclose(file);
+ 
+    return 0;
+}     
+      </pre>
+    </td>
+  </tr>
+</table>
+</center>
+
+
+
+    <h2>11. Sharing Datatypes among Datasets</h2>
 
     <p>If a file has lots of datasets which have a common datatype,
       then the file could be made smaller by having all the datasets
@@ -2446,7 +2655,7 @@ in the HDF5 distribution.
     <p>
       <center>
 	<table border align=center width="100%">
-	  <caption align=bottom><h4>Example: Shared Types</h4></caption>
+	  <caption align=bottom><h4>Example: Shared Datatypes</h4></caption>
 	  <tr>
 	    <td>
 	      <p>To create two datasets that share a common datatype
@@ -2474,8 +2683,11 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
 	</table>
       </center>
 
+
+
+
     <a name="Datatypes-DataConversion">
-    <h2>11. Data Conversion</h2>
+    <h2>12. Data Conversion</h2>
     </a>
 
     <p>The library is capable of converting data from one type to
@@ -2881,7 +3093,7 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  5 February 2001
+Last modified:  9 February 2001
 <!-- hhmts end -->
 
 <br>
