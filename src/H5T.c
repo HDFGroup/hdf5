@@ -6916,6 +6916,10 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     H5T_sort_value(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
+    if (rt == 0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
+                      "datatype has no members");
+    }
     md = -1;
 
     while (lt<rt) {
@@ -6929,9 +6933,10 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 	    break;
 	}
     }
-    if (md<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
-		      "value is not in the domain of the enumeration type");
+    /* Value was not yet defined. This fixes bug # 774, 2002/06/05 EIP */
+    if (cmp!=0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
+                      "value is currently not defined");
     }
 
     /* Save result name */
@@ -6973,7 +6978,7 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     int	lt, md, rt;		/*indices for binary search	*/
     int	cmp;			/*comparison result		*/
     
-    FUNC_ENTER_NOAPI(H5T_enum_nameof, FAIL);
+    FUNC_ENTER_NOAPI(H5T_enum_valueof, FAIL);
 
     /* Check args */
     assert(dt && H5T_ENUM==dt->type);
@@ -6984,6 +6989,10 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     H5T_sort_name(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
+    if (rt == 0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
+                      "datatype has no members");
+    }
     md = -1;
 
     while (lt<rt) {
@@ -6997,9 +7006,10 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 	    break;
 	}
     }
-    if (md<0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
-		      "string is not in the domain of the enumeration type");
+    /* Value was not yet defined. This fixes bug # 774, 2002/06/05 EIP */
+    if (cmp!=0) { 
+        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
+                      "string doesn't exist in the enumeration type");
     }
 
     HDmemcpy(value, dt->u.enumer.value+md*dt->size, dt->size);
