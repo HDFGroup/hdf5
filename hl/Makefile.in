@@ -69,7 +69,6 @@ install:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
-	@$(LT) --mode=finish $(libdir);
 
 install-doc:
 	(cd doc && $(MAKE) $@) || exit 1;
