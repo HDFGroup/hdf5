@@ -4994,9 +4994,9 @@ H5S_hyper_select_valid_helper (const H5S_hyper_span_info_t *spans, const hssize_
     while(curr!=NULL && ret_value==TRUE) {
         /* Check if an offset has been defined */
         /* Bounds check the selected point + offset against the extent */
-        if(((curr->low+offset[rank])>(hssize_t)size[rank])
+        if(((curr->low+offset[rank])>=(hssize_t)size[rank])
                 || ((curr->low+offset[rank])<0)
-                || ((curr->high+offset[rank])>(hssize_t)size[rank])
+                || ((curr->high+offset[rank])>=(hssize_t)size[rank])
                 || ((curr->high+offset[rank])<0)) {
             ret_value=FALSE;
             break;

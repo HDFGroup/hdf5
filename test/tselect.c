@@ -3703,6 +3703,101 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 
 /****************************************************************
 **
+**  test_select_valid(): Test basic H5S (dataspace) selection code.
+**      Tests selection validity
+** 
+****************************************************************/
+static void 
+test_select_valid(void)
+{
+    herr_t error;
+    htri_t valid;
+    hid_t main_space, sub_space;
+    hssize_t safe_start[2]={1,1};
+    hsize_t safe_count[2]={1,1};
+    hssize_t start[2];
+    hsize_t dims[2],maxdims[2],size[2],count[2];
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Selection Validity\n"));
+
+    count[0] = count[1] = 1;
+    dims[0] = dims[1] = maxdims[0] = maxdims[1] = 10;
+
+    main_space = H5Screate_simple(2,dims,maxdims);
+    CHECK(main_space, FAIL, "H5Screate_simple");
+
+    MESSAGE(8, ( "Case 1 : in the dimensions\nTry offset (4,4) and size(6,6), the original space is of size (10,10)\n"));
+    start[0] = start[1] = 4;
+    size[0] = size[1] = 6;
+
+    sub_space = H5Scopy(main_space);
+    CHECK(sub_space, FAIL, "H5Scopy");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_SET,start,size,count,size);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, TRUE, "H5Sselect_valid");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_OR,safe_start,NULL,safe_count,NULL);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, TRUE, "H5Sselect_valid");
+
+    error=H5Sclose(sub_space);
+    CHECK(error, FAIL, "H5Sclose");
+
+    MESSAGE(8, ( "Case 2 : exceed dimensions by 1\nTry offset (5,5) and size(6,6), the original space is of size (10,10)\n"));
+    start[0] = start[1] = 5;
+    size[0] = size[1] = 6;
+
+    sub_space = H5Scopy(main_space);
+    CHECK(sub_space, FAIL, "H5Scopy");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_SET,start,size,count,size);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, FALSE, "H5Sselect_valid");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_OR,safe_start,NULL,safe_count,NULL);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, FALSE, "H5Sselect_valid");
+
+    error=H5Sclose(sub_space);
+    CHECK(error, FAIL, "H5Sclose");
+
+    MESSAGE(8, ( "Case 3 : exceed dimensions by 2\nTry offset (6,6) and size(6,6), the original space is of size (10,10)\n"));
+    start[0] = start[1] = 6;
+    size[0] = size[1] = 6;
+
+    sub_space = H5Scopy(main_space);
+    CHECK(sub_space, FAIL, "H5Scopy");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_SET,start,size,count,size);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, FALSE, "H5Sselect_valid");
+
+    error=H5Sselect_hyperslab(sub_space,H5S_SELECT_OR,safe_start,NULL,safe_count,NULL);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    valid=H5Sselect_valid(sub_space);
+    VERIFY(valid, FALSE, "H5Sselect_valid");
+
+    error=H5Sclose(sub_space);
+    CHECK(error, FAIL, "H5Sclose");
+    error=H5Sclose(main_space);
+    CHECK(error, FAIL, "H5Sclose");
+}   /* test_select_hyper_chunk() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -3795,6 +3890,8 @@ test_select(void)
     ret=H5Pclose(plist_id);
     CHECK(ret, FAIL, "H5Pclose");
 
+    /* More tests for checking validity of selections */
+    test_select_valid();
 }   /* test_select() */
 
 
