@@ -14,26 +14,36 @@ hdf5_builddir=$(top_builddir)/src
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
-LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
-LIB=../src/libhdf5_cpp.la
-CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
-HDF5LIB=$(hdf5_builddir)/libhdf5.la
+CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(top_srcdir)/test -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
 
-TEST_PROGS_SRC=
-TEST_PROGS=
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
+LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
+LIB=../src/libhdf5_cpp.la
+LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
-TEST_SRC=
+## These are our main targets. They should be listed in the order to be
+## executed, generally most specific tests to least specific tests.
+RUNTEST=$(LT_RUN)
+
+TEST_SRC=dsets.cpp testhdf5.cpp tfile.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
+TEST_PROGS=$(TEST_SRC:.cpp=)
 
 TEST_SCRIPTS=
 
 DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
 
-$(TEST_PROGS): $(LIB)
-	@echo No C++ test as of yet.
+$(TEST_PROGS): $(LIB) $(LIBHDF5)
+
+testhdf5: $(TEST_OBJ)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+dsets: dsets.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.lo $(hdf5_builddir)/../test/h5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

@@ -1,18 +1,12 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ *
+ */
 
 /*
    FILE
-   testhdf5.c - HDF5 testing framework main file.
+   testhdf5.cpp - HDF5 testing framework main file.
 
    REMARKS
    General test wrapper for HDF5 base library test programs
@@ -33,9 +27,9 @@
 
  */
 
-#if defined __MWERKS__
+#ifdef __MWERKS__
 #include <console.h>
-#endif
+#endif  /* __MWERKS__ */
 
 #include <stdarg.h>
 
@@ -43,19 +37,19 @@
 #define HDF5_TEST_MASTER
 
 /* Internal Variables */
-static int              Index = 0;
+static int      Index = 0;
 
 /* Global variables */
-int                     num_errs = 0;
-int                     Verbosity;
+int             num_errs = 0;
+int             Verbosity;
 
 // Use C version of the header file testhdf5.h instead of re-coding it
-#include <testhdf5.h>
-#include <H5Cpp.h>
+#include "testhdf5.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif
+#endif  /* !H5_NO_NAMESPACE */
 
 struct TestStruct {
     int    NumErrors;
@@ -66,16 +60,16 @@ struct TestStruct {
     void (*Cleanup) (void);
 } Test[MAXNUMOFTESTS];
 
-static void             InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr);
-static void             usage(void);
+static void InitTest(const char *, void (*) (void), void (*) (void), const char *TheDescr);
+static void usage(void);
 
-static void 
-InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
+static void InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
 {
     if (Index >= MAXNUMOFTESTS) {
         print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
         exit(-1);
-    }                           /* end if */
+    }
+
     HDstrcpy(Test[Index].Description, TheDescr);
     HDstrcpy(Test[Index].Name, TheName);
     Test[Index].Call = TheCall;
@@ -88,8 +82,6 @@ InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), co
 static void 
 usage(void)
 {
-    intn                    i;
-
     print_func("Usage: testhdf5 [-v[erbose] (l[ow]|m[edium]|h[igh]|0-10)] \n");
     print_func("               [-[e]x[clude] name+] \n");
     print_func("               [-o[nly] name+] \n");
@@ -111,10 +103,12 @@ usage(void)
     print_func("This program currently tests the following: \n\n");
     print_func("%16s %s\n", "Name", "Description");
     print_func("%16s %s\n", "----", "-----------");
-    for (i = 0; i < Index; i++)
+
+    for (int i = 0; i < Index; i++)
         print_func("%16s %s\n", Test[i].Name, Test[i].Description);
+
     print_func("\n\n");
-}                               /* end usage() */
+}
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -124,37 +118,38 @@ usage(void)
 int 
 print_func(const char *format,...)
 {
-    va_list                 arglist;
-    int                     ret_value;
+    va_list arglist;
+    int     ret_value;
 
     va_start(arglist, format);
     ret_value = vprintf(format, arglist);
     va_end(arglist);
-    return (ret_value);
+    return ret_value;
 }
 
 void
 test_tbbt(void)
-{ }
+{
+}
 
 int 
 main(int argc, char *argv[])
 {
-    int                     CLLoop;     /* Command Line Loop */
-    int                     Loop, Loop1;
-    int                     Summary = 0;
-    int                     CleanUp = 1;
-    int                     Cache = 1;
+    int CLLoop;     /* Command Line Loop */
+    int Loop, Loop1;
+    int Summary = 0;
+    int CleanUp = 1;
+    int Cache = 1;
 
-#if defined __MWERKS__
+#ifdef __MWERKS__
     argc = ccommand(&argv);
-#endif
+#endif  /* __MWERKS__ */
 
 #if !(defined MAC || defined __MWERKS__ || defined SYMANTEC_C)
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
     setbuf(stdout, NULL);
-#endif
+#endif  /* !(MAC || __MWERKS__ || SYMANTEC_C) */
 
     /*
      * Turn off automatic error reporting since we do it ourselves.  Besides,
@@ -184,13 +179,14 @@ main(int argc, char *argv[])
     //InitTest("array", test_array, cleanup_array,  "Array Datatypes");
     //InitTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
 
-    Verbosity = 4;              /* Default Verbosity is Low */
+    Verbosity = 4;  /* Default Verbosity is Low */
     uintn major, minor, release;
     H5Library::getLibVersion( major, minor, release);
 
     print_func("\nFor help use: testhdf5 -help\n");
     print_func("Linked with hdf5 version %u.%u release %u\n",
 	       (unsigned)major, (unsigned)minor, (unsigned)release);
+
     for (CLLoop = 1; CLLoop < argc; CLLoop++) {
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-v") == 0))) {
@@ -202,7 +198,8 @@ main(int argc, char *argv[])
                 Verbosity = 10;
             else
                 Verbosity = atoi(argv[CLLoop + 1]);
-        }                       /* end if */
+        }
+
         if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
                                 (HDstrcmp(argv[CLLoop], "-s") == 0)))
             Summary = 1;
@@ -212,6 +209,7 @@ main(int argc, char *argv[])
             usage();
             exit(0);
         }
+
         if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-cleanoff") == 0) ||
                                 (HDstrcmp(argv[CLLoop], "-c") == 0)))
             CleanUp = 0;
@@ -225,26 +223,32 @@ main(int argc, char *argv[])
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-exclude") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-x") == 0))) {
             Loop = CLLoop + 1;
+
             while ((Loop < argc) && (argv[Loop][0] != '-')) {
                 for (Loop1 = 0; Loop1 < Index; Loop1++)
                     if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
                         Test[Loop1].SkipFlag = 1;
+
                 Loop++;
-            }                   /* end while */
-        }                       /* end if */
+            }
+        }
+
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-begin") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-b") == 0))) {
             Loop = CLLoop + 1;
+
             while ((Loop < argc) && (argv[Loop][0] != '-')) {
                 for (Loop1 = 0; Loop1 < Index; Loop1++) {
                     if (HDstrcmp(argv[Loop], Test[Loop1].Name) != 0)
                         Test[Loop1].SkipFlag = 1;
                     if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
                         Loop1 = Index;
-                }               /* end for */
+                }
+
                 Loop++;
-            }                   /* end while */
-        }                       /* end if */
+            }
+        }
+
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-only") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-o") == 0))) {
             for (Loop = 0; Loop < Index; Loop++)
@@ -255,9 +259,9 @@ main(int argc, char *argv[])
                     if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
                         Test[Loop1].SkipFlag = 0;
                 Loop++;
-            }                   /* end while */
-        }                       /* end if */
-    }                           /* end for */
+            }
+        }
+    }
 
 #ifdef NOT_YET
     if (Cache)                  /* turn on caching, unless we were instucted not to */
@@ -276,11 +280,12 @@ main(int argc, char *argv[])
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
             MESSAGE(5, ("===============================================\n"));
             MESSAGE(5, ("There were %d errors detected.\n\n", (int) Test[Loop].NumErrors));
-        }                       /* end else */
-    }                           /* end for */
+        }
+    }
 
     MESSAGE(2, ("\n\n"))
-        if (num_errs)
+
+    if (num_errs)
         print_func("!!! %d Error(s) were detected !!!\n\n", (int) num_errs);
     else
         print_func("All tests were successful. \n\n");
@@ -296,9 +301,11 @@ main(int argc, char *argv[])
             else
                 print_func("%16s %6d %s\n", Test[Loop].Name, (int) Test[Loop].NumErrors,
                            Test[Loop].Description);
-        }                       /* end for */
+        }
+
         print_func("\n\n");
-    }                           /* end if */
+    }
+
     if (CleanUp && !getenv("HDF5_NOCLEANUP")) {
         MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
 
@@ -307,6 +314,6 @@ main(int argc, char *argv[])
             if (!Test[Loop].SkipFlag && Test[Loop].Cleanup!=NULL)
                 (*Test[Loop].Cleanup) ();
     }
-    return (num_errs);
-}                               /* end main() */
 
+    return num_errs;
+}

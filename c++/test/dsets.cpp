@@ -18,9 +18,9 @@
 *
 *************************************************************/
 
-#include <h5test.h>
-#include <testhdf5.h>
-#include <H5Cpp.h>
+#include "h5test.h"
+#include "testhdf5.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
@@ -92,7 +92,7 @@ test_create( H5File& file)
 	    dataset = new DataSet (file.createDataSet 
 			(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 	    // continuation here, that means no exception has been thrown
-	    FAILED();
+	    H5_FAILED();
 	    cout << "    Library allowed overwrite of existing dataset." << endl;
 	    goto error;
         }
@@ -115,7 +115,7 @@ test_create( H5File& file)
 	try {
 	    dataset = new DataSet (file.openDataSet( "does_not_exist" ));
 	    // continuation here, that means no exception has been thrown
-	    FAILED();
+	    H5_FAILED();
 	    cout << "    Opened a non-existent dataset." << endl;
 	    goto error;
 	}
@@ -182,7 +182,7 @@ check_values (hsize_t i, hsize_t j, int apoint, int acheck)
 {
     if (apoint != acheck)
     {
-	FAILED();
+	H5_FAILED();
 	cout << "    Read different values than written.\n" << endl;
 	cout << "    At index " << (unsigned long)i << "," << 
    	(unsigned long)j << endl;
@@ -227,7 +227,7 @@ test_simple_io( H5File& file)
 	}
     }
 
-    void* tconv_buf = new char [1000];
+    char* tconv_buf = new char [1000];
     try 
     {
 	/* Create the data space */
@@ -327,13 +327,13 @@ test_tconv( H5File& file)
 	dataset.read ((void*) in, PredType::STD_I32BE);
 
 	/* Check */
-	for (i = 0; i < 1000000; i++) {
+	for (int i = 0; i < 1000000; i++) {
 	    if (in[4*i+0]!=out[4*i+3] ||
 		in[4*i+1]!=out[4*i+2] ||
 		in[4*i+2]!=out[4*i+1] ||
 		in[4*i+3]!=out[4*i+0]) 
 	    {
-		FAILED();
+		H5_FAILED();
 		cout << "    Read with byte order conversion failed." << endl;
 		goto error;
 	    }
@@ -423,7 +423,7 @@ test_compression(H5File& file)
 	    points[i][j] = n++;
 	}
     }
-    void* tconv_buf = new char [1000];
+    char* tconv_buf = new char [1000];
 
     try 
     {
@@ -468,7 +468,7 @@ test_compression(H5File& file)
 	for (i=0; i<size[0]; i++) {
 	    for (j=0; j<size[1]; j++) {
 		if (0!=check[i][j]) {
-		    FAILED();
+		    H5_FAILED();
 		    cout << "    Read a non-zero value." << endl;
 		    cout << "    At index " << (unsigned long)i << "," << 
 		   (unsigned long)j << endl;
@@ -622,7 +622,7 @@ test_compression(H5File& file)
 	for (j=0; j<hs_size[1]; j++) {
 	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
 		check[hs_offset[0]+i][hs_offset[1]+j]) {
-		FAILED();
+		H5_FAILED();
 		cout << "    Read different values than written.\n" << endl;
 		cout << "    At index " << (unsigned long)(hs_offset[0]+i) << 
 		   "," << (unsigned long)(hs_offset[1]+j) << endl;
@@ -751,7 +751,7 @@ test_multiopen (H5File& file)
 	space->getSimpleExtentDims (tmp_size);
 	if (cur_size[0]!=tmp_size[0]) 
 	{
-	    FAILED();
+	    H5_FAILED();
 	    cout << "    Got " << (int)tmp_size[0] << " instead of " 
 		    << (int)cur_size[0] << "!" << endl;
 	    delete space;
@@ -981,8 +981,8 @@ main(void)
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 			// should create an object from this id - BMR
     
-/* BMR: leave paralell stuff out!
 #if 0
+/* BMR: leave paralell stuff out!  */
     {
 	// Turn off raw data cache
 	int mdc_nelmts;
@@ -990,7 +990,6 @@ main(void)
  (H5Pset_cache(fapl_id, mdc_nelmts, 0, 0, 0.0)<0) goto error;
     }
 #endif
-*/
     
     char        filename[1024];
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);

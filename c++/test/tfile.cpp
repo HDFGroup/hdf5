@@ -1,54 +1,46 @@
-/****************************************************************************
- * NCSA HDF								    *
- * Software Development Group						    *
- * National Center for Supercomputing Applications			    *
- * University of Illinois at Urbana-Champaign				    *
- * 605 E. Springfield, Champaign IL 61820				    *
- *									    *
- * For conditions of distribution and use, see the accompanying		    *
- * hdf/COPYING file.							    *
- *									    *
- ****************************************************************************/
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ *
+ */
 
-/***********************************************************
-*
-* Test program:	 tfile
-*
-* Test the low-level file I/O features.
-*
-*************************************************************/
+/*
+ * Test program:	 tfile
+ *
+ * Test the low-level file I/O features.
+ */
 
-#include <testhdf5.h>
-#include <H5Cpp.h>
+#include "H5private.h"
+#include "H5Bprivate.h"
+#include "H5Pprivate.h"
+
+#include "testhdf5.h"
+#include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif
+#endif  /* !H5_NO_NAMESPACE */
 
-#include <H5private.h>
-#include <H5Bprivate.h>
-#include <H5Pprivate.h>
+#define F1_USERBLOCK_SIZE       (hsize_t)0
+#define F1_OFFSET_SIZE          sizeof(haddr_t)
+#define F1_LENGTH_SIZE          sizeof(hsize_t)
+#define F1_SYM_LEAF_K           4
+#define F1_SYM_INTERN_K         16
+#define FILE1                   "tfile1.h5"
 
-#define F1_USERBLOCK_SIZE  (hsize_t)0
-#define F1_OFFSET_SIZE	   sizeof(haddr_t)
-#define F1_LENGTH_SIZE	   sizeof(hsize_t)
-#define F1_SYM_LEAF_K	   4
-#define F1_SYM_INTERN_K	   16
-#define FILE1	"tfile1.h5"
+#define F2_USERBLOCK_SIZE       (hsize_t)512
+#define F2_OFFSET_SIZE          8
+#define F2_LENGTH_SIZE          8
+#define F2_SYM_LEAF_K           8
+#define F2_SYM_INTERN_K         32
+#define FILE2                   "tfile2.h5"
 
-#define F2_USERBLOCK_SIZE  (hsize_t)512
-#define F2_OFFSET_SIZE	   8
-#define F2_LENGTH_SIZE	   8
-#define F2_SYM_LEAF_K	   8
-#define F2_SYM_INTERN_K	   32
-#define FILE2	"tfile2.h5"
-
-#define F3_USERBLOCK_SIZE  (hsize_t)0
-#define F3_OFFSET_SIZE	   F2_OFFSET_SIZE
-#define F3_LENGTH_SIZE	   F2_LENGTH_SIZE
-#define F3_SYM_LEAF_K	   F2_SYM_LEAF_K
-#define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
-#define FILE3	"tfile3.h5"
+#define F3_USERBLOCK_SIZE       (hsize_t)0
+#define F3_OFFSET_SIZE          F2_OFFSET_SIZE
+#define F3_LENGTH_SIZE          F2_LENGTH_SIZE
+#define F3_SYM_LEAF_K           F2_SYM_LEAF_K
+#define F3_SYM_INTERN_K         F2_SYM_INTERN_K
+#define FILE3                   "tfile3.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -68,9 +60,9 @@ using namespace H5;
 static void 
 test_file_create(void)
 {
-    hid_t		tmpl1, tmpl2;	/*file creation templates	*/
-    int			iparm, iparm2;
-    herr_t		ret;		/*generic return value		*/
+    hid_t       tmpl1, tmpl2;	/*file creation templates	*/
+    int	        iparm, iparm2;
+    herr_t      ret;		/*generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
@@ -227,7 +219,7 @@ test_file_create(void)
     catch( FileIException error ) {
 	CHECK(-1, FAIL, error.getCDetailMesg());
     }
-}				/* test_file_create() */
+} /* test_file_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -280,7 +272,7 @@ test_file_open(void)
     catch( PropListIException error ) {
         CHECK(FAIL, FAIL, error.getCDetailMesg());
     }
-}				/* test_file_open() */
+} /* test_file_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -291,7 +283,7 @@ test_file_open(void)
  * Return:      None
  *
  * Programmer:  Binh-Minh Ribler
- *              January, 2001
+ *              January 2001
  *
  * Modifications:
  *
@@ -305,7 +297,7 @@ test_file(void)
 
     test_file_create();	/* Test file creation (also creation templates) */
     test_file_open();	/* Test file opening */
-}				/* test_file() */
+} /* test_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -315,8 +307,8 @@ test_file(void)
  *
  * Return:	none
  *
- * Programmer:	Albert Cheng
- *              July 2, 1998
+ * Programmer:  Binh-Minh Ribler
+ *              January 2001
  *
  * Modifications:
  *
@@ -328,5 +320,4 @@ cleanup_file(void)
     remove(FILE1);
     remove(FILE2);
     remove(FILE3);
-}
-
+} /* cleanup_file */
