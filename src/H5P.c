@@ -885,7 +885,7 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
     H5F_create_t	   *plist = NULL;
 
-    FUNC_ENTER(H5Pset_sizeof_addr, FAIL);
+    FUNC_ENTER(H5Pset_sizes, FAIL);
     H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
 
     /* Check arguments */
@@ -2296,13 +2296,13 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 {
     H5F_xfer_t		*plist = NULL;
     
-    FUNC_ENTER (H5Pget_hyper_cache, 0);
+    FUNC_ENTER (H5Pget_hyper_cache, FAIL);
     H5TRACE3("e","ixx",plist_id,cache,limit);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
 	NULL == (plist = H5I_object (plist_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0,
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
     }
 
@@ -2375,7 +2375,7 @@ H5Pget_preserve(hid_t plist_id)
 {
     H5F_xfer_t		*plist = NULL;
     
-    FUNC_ENTER (H5Pset_preserve, FAIL);
+    FUNC_ENTER (H5Pget_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
 
     /* Check arguments */
@@ -2546,22 +2546,22 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     H5D_create_t	*plist = NULL;
     size_t		i;
     
-    FUNC_ENTER (H5Pget_filter, FAIL);
+    FUNC_ENTER (H5Pget_filter, H5Z_FILTER_ERROR);
     H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
     
     /* Check arguments */
     if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
-	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
+	HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, H5Z_FILTER_ERROR,
 		      "transient filters are not supported yet");
     }
     if (H5P_DATASET_CREATE!=H5P_get_class (plist_id) ||
 	NULL==(plist=H5I_object (plist_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5Z_FILTER_ERROR,
 		       "not a dataset creation property list");
     }
     if (idx<0 || (size_t)idx>=plist->pline.nfilters) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
 		      "filter number is invalid");
     }
     if (cd_nelmts || cd_values) {
@@ -2572,11 +2572,11 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 	     * is unimportant because the H5O layer will detect when a message
 	     * is too large.
 	     */
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
 			  "probable uninitialized *cd_nelmts argument");
 	}
 	if (cd_nelmts && *cd_nelmts>0 && !cd_values) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
 			  "client data values not supplied");
 	}
 	/*
@@ -3222,7 +3222,7 @@ H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/)
 {
     H5F_access_t	*fapl = NULL;
 
-    FUNC_ENTER (H5Pget_alignment, FAIL);
+    FUNC_ENTER (H5Pget_gc_reference, FAIL);
     H5TRACE2("e","ix",fapl_id,gc_ref);
 
     /* Check args */
@@ -3303,7 +3303,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func,
 {
     H5F_xfer_t		*plist = NULL;
     
-    FUNC_ENTER (H5Pset_vlen_mem_manager, FAIL);
+    FUNC_ENTER (H5Pget_vlen_mem_manager, FAIL);
     H5TRACE5("e","i*x*x*x*x",plist_id,alloc_func,alloc_info,free_func,
              free_info);
 
