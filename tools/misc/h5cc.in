@@ -248,7 +248,7 @@ fi
 
 if test "x$do_link" = "xyes"; then
   shared_link=""
-  libraries=" $libraries  -lhdf5 "
+  libraries=" $libraries -lhdf5_hl -lhdf5 "
   link_args="$link_args -L${libdir}"
 
   case "$kind" in
@@ -272,7 +272,7 @@ if test "x$do_link" = "xyes"; then
   fi
 
   if test "x$USE_SHARED_LIB" != "xyes"; then
-    # The "-lhdf5" flag is in here already...This is a static compile,
+    # The "-lhdf5"  & "-lhdf5_hl"  flag is in here already...This is a static compile,
     # though, so change it to the static version (.a) of the library.
     new_libraries=""
     for lib in $libraries; do
@@ -280,7 +280,10 @@ if test "x$do_link" = "xyes"; then
         -lhdf5)
           new_libraries="$new_libraries ${libdir}/libhdf5.a"
           ;;
-        *)
+        -lhdf5_hl)
+          new_libraries="$new_libraries ${libdir}/libhdf5_hl.a"
+	  ;;
+	 *)
           new_libraries="$new_libraries $lib"
           ;;
       esac
