@@ -121,10 +121,11 @@ typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
-#define FNAME_POST_UNDERSCORE
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #define FNAME(x) x
+#else
+#define FNAME_POST_UNDERSCORE
 #endif /*H5_ABSOFT*/
 
 #define _fcdtocp(desc) (desc)
