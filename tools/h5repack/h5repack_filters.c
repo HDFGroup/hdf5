@@ -16,6 +16,31 @@
 #include "h5test.h"
 #include "h5repack.h"
 
+
+/*-------------------------------------------------------------------------
+ * Function: aux_objinsert_filter
+ *
+ * Purpose: auxiliary function, inserts the filter in object OBJ
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void aux_objinsert_filter(pack_info_t *obj,
+                                 filter_info_t filt)
+{
+ int j;
+
+ for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
+ {
+  obj->filter[j].filtn = -1;
+ }
+
+ obj->nfilters=1;
+ obj->filter[0]=filt;
+
+}
+
 /*-------------------------------------------------------------------------
  * Function: filter_this
  *
@@ -30,56 +55,58 @@
  *
  *-------------------------------------------------------------------------
  */
-
 int filter_this(const char* name,    /* object name from traverse list */
                 pack_opt_t *options, /* repack options */
-                pack_info_t *obj)    /* info about object to filter */
+                pack_info_t *obj /*OUT*/)    /* info about object to filter */
 {
  char *pdest;
  int  result;
- int  i;
-
+ int  i, j;
+ 
  /* if we are applying to all objects just return true */
  if (options->all_filter)
  {
   /* assign the global filter and chunk info to the OBJ info */
-  obj->filter=options->filter_g;
+  aux_objinsert_filter( obj, options->filter_g );
   obj->chunk=options->chunk_g;
   return 1;
  }
-
+ 
  for ( i=0; i<options->op_tbl->nelems; i++) 
  {
-  if (options->op_tbl->objs[i].filter.filtn != -1 )
+  for ( j=0; j<options->op_tbl->objs[i].nfilters; j++)
   {
-   if (strcmp(options->op_tbl->objs[i].path,name)==0)
+   if (options->op_tbl->objs[i].filter[j].filtn != -1 )
    {
-    *obj=options->op_tbl->objs[i];
-    return 1;
-   }
-   
-   pdest  = strstr(name,options->op_tbl->objs[i].path);
-   result = (int)(pdest - name);
-   
-   /* found at position 1, meaning without '/' */
-   if( pdest != NULL && result==1 )
-   {
-    *obj=options->op_tbl->objs[i];
-    return 1;
-   }
-  }
- }
-
+    if (strcmp(options->op_tbl->objs[i].path,name)==0)
+    {
+     *obj=options->op_tbl->objs[i];
+     return 1;
+    }
+    
+    pdest  = strstr(name,options->op_tbl->objs[i].path);
+    result = (int)(pdest - name);
+    
+    /* found at position 1, meaning without '/' */
+    if( pdest != NULL && result==1 )
+    {
+     *obj=options->op_tbl->objs[i];
+     return 1;
+    }
+   } /*if*/
+  }/*j*/
+ }/*i*/
+ 
  return 0;
 }
 
 
 
 /*-------------------------------------------------------------------------
- * Function: apply_filter
+ * Function: apply_filters
  *
- * Purpose: apply a filter to the property list; do extra checking
- *  in the case of SZIP
+ * Purpose: apply the filters in the object to the property list; 
+ *  do extra checking in the case of SZIP
  *
  * Return: 0, ok, -1 no
  *
@@ -90,10 +117,10 @@ int filter_this(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
 
-int apply_filter(hid_t dcpl_id,
-                 size_t size,         /* size of datatype in bytes */
-                 pack_opt_t *options, /* repack options */
-                 pack_info_t *obj)    /* info about object to filter */
+int apply_filters(hid_t dcpl_id,
+                  size_t size,         /* size of datatype in bytes */
+                  pack_opt_t *options, /* repack options */
+                  pack_info_t *obj)    /* info about object to filter */
 {
  int          nfilters;       /* number of filters */
  unsigned     filt_flags;     /* filter flags */
@@ -103,7 +130,7 @@ int apply_filter(hid_t dcpl_id,
  size_t       cd_num;         /* filter client data counter */
  char         f_name[256];    /* filter/file name */
  char         s[64];          /* temporary string buffer */
- int          i;
+ int          i, j;
  unsigned     aggression;     /* the deflate level */
  unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
  unsigned     szip_pixels_per_block;
@@ -148,77 +175,79 @@ int apply_filter(hid_t dcpl_id,
  H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
  H5Z_FILTER_SZIP       4 , szip compression 
 */
-
- switch (obj->filter.filtn)
+ for ( j=0; j<obj->nfilters; j++)
  {
- case H5Z_FILTER_NONE:
-  
-  break;
-  
-  
- case H5Z_FILTER_DEFLATE:
-
-
-  aggression=obj->filter.cd_values[0];
-  
-  /* set up for deflated data */
-  if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-   return -1;
-  if(H5Pset_deflate(dcpl_id,aggression)<0)
-   return -1;
-  
-  break;
-  
-  
- case H5Z_FILTER_SZIP:
-  
-  szip_pixels_per_block=obj->filter.cd_values[0];
-  
-  /* check szip parameters */
-  if (check_szip(obj->chunk.rank,
-                 obj->chunk.chunk_lengths,
-                 size,
-                 szip_options_mask,
-                 szip_pixels_per_block)==1)
+  switch (obj->filter[j].filtn)
   {
-   /* set up for szip data */
-   if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
+  case H5Z_FILTER_NONE:
+   
+   break;
+   
+   
+  case H5Z_FILTER_DEFLATE:
+   
+   
+   aggression=obj->filter[j].cd_values[0];
+   
+   /* set up for deflated data */
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
     return -1;
-   if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
+   if(H5Pset_deflate(dcpl_id,aggression)<0)
     return -1;
    
-  }
-  else
-  {
-   printf("SZIP filter cannot be applied\n");
-  }
-  
-  break;
-
-  
- case H5Z_FILTER_SHUFFLE:
-  
-  if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-   return -1;
-  if (H5Pset_shuffle(dcpl_id)<0) 
-   return -1;
-  
-  break;
-  
- case H5Z_FILTER_FLETCHER32:
-
-  if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
-   return -1;
-  if (H5Pset_fletcher32(dcpl_id)<0) 
-   return -1;
-
-  break;
-
-  
- default:
-  break;
-  
- } /* switch */
+   break;
+   
+   
+  case H5Z_FILTER_SZIP:
+   
+   szip_pixels_per_block=obj->filter[j].cd_values[0];
+   
+   /* check szip parameters */
+   if (check_szip(obj->chunk.rank,
+    obj->chunk.chunk_lengths,
+    size,
+    szip_options_mask,
+    szip_pixels_per_block)==1)
+   {
+    /* set up for szip data */
+    if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
+     return -1;
+    if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
+     return -1;
+    
+   }
+   else
+   {
+    printf("SZIP filter cannot be applied\n");
+   }
+   
+   break;
+   
+   
+  case H5Z_FILTER_SHUFFLE:
+   
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+    return -1;
+   if (H5Pset_shuffle(dcpl_id)<0) 
+    return -1;
+   
+   break;
+   
+  case H5Z_FILTER_FLETCHER32:
+   
+   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+    return -1;
+   if (H5Pset_fletcher32(dcpl_id)<0) 
+    return -1;
+   
+   break;
+   
+   
+  default:
+   break;
+   
+  } /* switch */
+ }/*j*/
 
  return 0;
 }

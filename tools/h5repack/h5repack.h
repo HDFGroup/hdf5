@@ -64,13 +64,18 @@ typedef struct {
  int     rank;
 } chunk_info_t;
 
+/* we currently define a maximum value for the filters array,
+   that corresponds to the current library filters */
+#define H5_REPACK_MAX_NFILTERS 4
+
 /* information for one object, contains PATH, CHUNK info and FILTER info */
 typedef struct {
- char          path[MAX_NC_NAME]; /* name of object */
- filter_info_t filter;            /* filter information */
- H5D_layout_t  layout;            /* layout information */
- chunk_info_t  chunk;             /* chunk information */
- hid_t         refobj_id;         /* object ID, references */
+ char          path[MAX_NC_NAME];               /* name of object */
+ filter_info_t filter[H5_REPACK_MAX_NFILTERS];  /* filter array */
+ int           nfilters;                        /* current number of filters */
+ H5D_layout_t  layout;                          /* layout information */
+ chunk_info_t  chunk;                           /* chunk information */
+ hid_t         refobj_id;                       /* object ID, references */
 } pack_info_t;
 
 /* store a table of all objects */
@@ -115,6 +120,9 @@ int h5repack_addlayout (const char* str, pack_opt_t *options);
 int h5repack_init      (pack_opt_t *options, int verbose);
 int h5repack_end       (pack_opt_t *options);
 int h5repack_verify    (const char *fname,pack_opt_t *options);
+int h5repack_cmpdcpl   (const char *fname1,
+                        const char *fname2);
+
 
 #ifdef __cplusplus
 }
@@ -177,10 +185,10 @@ int filter_this(const char* name,
                 pack_opt_t *options,
                 pack_info_t *pack); /* info about object to filter */
 
-int apply_filter(hid_t dcpl_id,
-                 size_t size,         /* size of datatype in bytes */
-                 pack_opt_t *options, /* repack options */
-                 pack_info_t *pack);   /* info about object to filter */
+int apply_filters(hid_t dcpl_id,
+                  size_t size,         /* size of datatype in bytes */
+                  pack_opt_t *options, /* repack options */
+                  pack_info_t *pack);   /* info about object to filter */
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
@@ -211,7 +219,6 @@ int layout_this(hid_t dcpl_id,             /* DCPL from input object */
                 pack_info_t *pack /*OUT*/) /* object to apply layout */;
 
 int apply_layout(hid_t dcpl_id,
-                 pack_opt_t *options, /* repack options */
                  pack_info_t *pack);  /* info about object  */
 
 

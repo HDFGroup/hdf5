@@ -17,6 +17,68 @@
 #include "h5repack.h"
 
 
+/*-------------------------------------------------------------------------
+ * Function: aux_tblinsert_filter
+ *
+ * Purpose: auxiliary function, inserts the filter in object OBJS[ I ]
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void aux_tblinsert_filter(pack_opttbl_t *table, 
+                              int I,
+                              filter_info_t filt)
+{
+ if (table->objs[ I ].nfilters<H5_REPACK_MAX_NFILTERS)
+ {
+  table->objs[ I ].filter[ table->objs[ I ].nfilters++ ] = filt;
+ }
+ else
+ {
+  printf("Cannot insert the filter in this object.\
+   Maximum capacity exceeded\n");
+ }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: aux_inctable
+ *
+ * Purpose: auxiliary function, increases the size of the collection by N_OBJS
+ *
+ * Return: 0, ok, -1, fail
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int aux_inctable(pack_opttbl_t *table, int n_objs )
+{
+ int i, j, k;
+ 
+ table->size += n_objs;
+ table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
+ if (table->objs==NULL) {
+  printf("Error: not enough memory for options table\n");
+  return -1;
+ }
+ for (i = table->nelems; i < table->size; i++) 
+ {
+  strcpy(table->objs[i].path,"\0");
+  for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
+  {
+   table->objs[i].filter[j].filtn  = -1;
+   for ( k=0; k<CDVALUES; k++) 
+    table->objs[i].filter[j].cd_values[k] = -1;
+  }
+  table->objs[i].chunk.rank = -1;
+  table->objs[i].refobj_id = -1;
+  table->objs[i].layout = -1;
+  table->objs[i].nfilters = 0;
+ }
+ return 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function: options_table_init
@@ -30,7 +92,7 @@
 
 int options_table_init( pack_opttbl_t **tbl )
 {
- int i, j;
+ int i, j, k;
  pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
   printf("Error: not enough memory for options table\n");
@@ -45,15 +107,20 @@ int options_table_init( pack_opttbl_t **tbl )
   return -1;
  }
  
- for ( i=0; i<table->size; i++) {
-   strcpy(table->objs[i].path,"\0");
-   table->objs[i].filter.filtn  = -1;
-   for ( j=0; j<CDVALUES; j++) 
-    table->objs[i].filter.cd_values[j] = -1;
-   table->objs[i].chunk.rank = -1;
-   table->objs[i].refobj_id = -1;
-   table->objs[i].layout = -1;
+ for ( i=0; i<table->size; i++) 
+ {
+  strcpy(table->objs[i].path,"\0");
+  for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
+  {
+   table->objs[i].filter[j].filtn  = -1;
+   for ( k=0; k<CDVALUES; k++) 
+    table->objs[i].filter[j].cd_values[k] = -1;
   }
+  table->objs[i].chunk.rank = -1;
+  table->objs[i].refobj_id = -1;
+  table->objs[i].layout = -1;
+  table->objs[i].nfilters = 0;
+ }
  
  *tbl = table;
  return 0;
@@ -94,24 +161,12 @@ int options_add_layout( obj_list_t *obj_list,
 {
  int i, j, k, I, added=0, found=0;
  
- if (table->nelems+n_objs >= table->size) {
-  table->size += n_objs;
-  table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
-  if (table->objs==NULL) {
-   printf("Error: not enough memory for options table\n");
+ /* increase the size of the collection by N_OBJS if necessary */
+ if (table->nelems+n_objs >= table->size) 
+ {
+  if (aux_inctable(table,n_objs)<0)
    return -1;
-  }
-  for (i = table->nelems; i < table->size; i++) {
-   strcpy(table->objs[i].path,"\0");
-   table->objs[i].filter.filtn  = -1;
-   for ( j=0; j<CDVALUES; j++) 
-    table->objs[i].filter.cd_values[j] = -1;
-   table->objs[i].chunk.rank = -1;
-   table->objs[i].refobj_id = -1;
-   table->objs[i].layout = -1;
-  }
  }
-
  
  /* search if this object is already in the table; "path" is the key */
  if (table->nelems>0)
@@ -205,22 +260,11 @@ int options_add_filter(obj_list_t *obj_list,
  
  int i, j, I, added=0, found=0;
  
- if (table->nelems+n_objs >= table->size) {
-  table->size += n_objs;
-  table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
-  if (table->objs==NULL) {
-   printf("Error: not enough memory for options table\n");
+ /* increase the size of the collection by N_OBJS if necessary */
+ if (table->nelems+n_objs >= table->size) 
+ {
+  if (aux_inctable(table,n_objs)<0)
    return -1;
-  }
-  for (i = table->nelems; i < table->size; i++) {
-   strcpy(table->objs[i].path,"\0");
-   table->objs[i].filter.filtn  = -1;
-   for ( j=0; j<CDVALUES; j++) 
-    table->objs[i].filter.cd_values[j] = -1;
-   table->objs[i].chunk.rank = -1;
-   table->objs[i].refobj_id = -1;
-   table->objs[i].layout = -1;
-  }
  }
  
  /* search if this object is already in the table; "path" is the key */
@@ -236,8 +280,7 @@ int options_add_filter(obj_list_t *obj_list,
     if (strcmp(obj_list[j].obj,table->objs[i].path)==0)
     {
      /* insert */
-     
-     table->objs[i].filter = filt;
+     aux_tblinsert_filter(table,i,filt);
      found=1;
      break;
     } /* if */
@@ -249,7 +292,7 @@ int options_add_filter(obj_list_t *obj_list,
     I = table->nelems + added;  
     added++;
     strcpy(table->objs[I].path,obj_list[j].obj);
-    table->objs[I].filter = filt;
+    aux_tblinsert_filter(table,I,filt);
    }
   } /* j */ 
  }
@@ -263,7 +306,7 @@ int options_add_filter(obj_list_t *obj_list,
    I = table->nelems + added;  
    added++;
    strcpy(table->objs[I].path,obj_list[j].obj);
-   table->objs[I].filter = filt;
+   aux_tblinsert_filter(table,I,filt);
   }
  }
  

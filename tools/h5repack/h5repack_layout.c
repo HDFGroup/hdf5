@@ -154,7 +154,6 @@ int layout_this(hid_t dcpl_id,             /* DCPL from input object */
  */
 
 int apply_layout(hid_t dcpl_id,
-                 pack_opt_t *options, /* repack options */
                  pack_info_t *obj)   /* info about object  */
 {
  

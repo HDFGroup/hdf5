@@ -156,7 +156,7 @@ int h5repack_verify(const char *fname,
  hid_t  dset_id;  /* dataset ID */ 
  hid_t  dcpl_id;  /* dataset creation property list ID */ 
  hid_t  space_id; /* space ID */ 
- int    ret=1, i;
+ int    ret=1, i, j;
  trav_table_t  *travt=NULL;
 
  /* open the file */
@@ -166,7 +166,7 @@ int h5repack_verify(const char *fname,
  for ( i=0; i<options->op_tbl->nelems; i++) 
  {
   char* name=options->op_tbl->objs[i].path;
-  pack_info_t obj=options->op_tbl->objs[i];
+  pack_info_t *obj = &options->op_tbl->objs[i];
 
 /*-------------------------------------------------------------------------
  * open
@@ -183,14 +183,17 @@ int h5repack_verify(const char *fname,
  * filter check
  *-------------------------------------------------------------------------
  */
-  if (has_filter(dcpl_id,obj.filter.filtn)==0)
-   ret=0;
+  for ( j=0; j<obj->nfilters; j++)
+  {
+   if (has_filter(dcpl_id,obj->filter[j].filtn)==0)
+    ret=0;
+  }
 
 /*-------------------------------------------------------------------------
  * layout check
  *-------------------------------------------------------------------------
  */
-  if (has_layout(dcpl_id,&obj)==0)
+  if (has_layout(dcpl_id,obj)==0)
    ret=0;
 
 /*-------------------------------------------------------------------------
@@ -306,3 +309,163 @@ error:
  return -1;
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: h5repack_cmpdcpl
+ *
+ * Purpose: compare 2 files for identical property lists of all objects
+ *
+ * Return: 1=identical, 0=not identical, -1=error
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 31, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int h5repack_cmpdcpl(const char *fname1,
+                     const char *fname2)
+{
+ hid_t         fid1;       /* file ID */ 
+ hid_t         fid2;       /* file ID */ 
+ hid_t         dset1;      /* dataset ID */ 
+ hid_t         dset2;      /* dataset ID */ 
+ hid_t         dcpl1;      /* dataset creation property list ID */ 
+ hid_t         dcpl2;      /* dataset creation property list ID */ 
+ trav_table_t  *travt1=NULL;
+ trav_table_t  *travt2=NULL;
+ int           ret=1, i;
+
+/*-------------------------------------------------------------------------
+ * open the files first; if they are not valid, no point in continuing
+ *-------------------------------------------------------------------------
+ */
+
+ /* disable error reporting */
+ H5E_BEGIN_TRY {
+ 
+ /* Open the files */
+ if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+ {
+  printf("<%s>: No such file or directory\n", fname1 );
+  return -1;
+ }
+ if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+ {
+  printf("<%s>: No such file or directory\n", fname2 );
+  H5Fclose(fid1);
+  return -1;
+ }
+ /* enable error reporting */
+ } H5E_END_TRY;
+
+/*-------------------------------------------------------------------------
+ * get file table list of objects
+ *-------------------------------------------------------------------------
+ */
+ trav_table_init(&travt1);
+ trav_table_init(&travt2);
+ if (h5trav_gettable(fid1,travt1)<0)
+  goto error;
+ if (h5trav_gettable(fid2,travt2)<0)
+  goto error;
+
+
+/*-------------------------------------------------------------------------
+ * traverse the suppplied object list
+ *-------------------------------------------------------------------------
+ */
+
+ for ( i=0; i < travt1->nobjs; i++)
+ {
+  switch ( travt1->objs[i].type )
+  {
+/*-------------------------------------------------------------------------
+ * nothing to do for groups, links and types
+ *-------------------------------------------------------------------------
+ */
+  default:
+   break;
+
+/*-------------------------------------------------------------------------
+ * H5G_DATASET
+ *-------------------------------------------------------------------------
+ */
+  case H5G_DATASET:
+   if ((dset1=H5Dopen(fid1,travt1->objs[i].name))<0) 
+    goto error;
+   if ((dset2=H5Dopen(fid2,travt1->objs[i].name))<0) 
+    goto error;
+   if ((dcpl1=H5Dget_create_plist(dset1))<0) 
+    goto error;
+   if ((dcpl2=H5Dget_create_plist(dset2))<0) 
+    goto error;
+
+/*-------------------------------------------------------------------------
+ * compare the property lists
+ *-------------------------------------------------------------------------
+ */
+   if ((ret=H5Pequal(dcpl1,dcpl2))<0) 
+    goto error;
+
+   if (ret==0)
+   {
+    printf("Property lists for <%s> are different\n",travt1->objs[i].name); 
+   }
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+   if (H5Pclose(dcpl1)<0) 
+    goto error;
+   if (H5Pclose(dcpl2)<0) 
+    goto error;
+   if (H5Dclose(dset1)<0) 
+    goto error;
+   if (H5Dclose(dset2)<0) 
+    goto error;
+   
+   break;
+
+  } /*switch*/
+ } /*i*/
+
+/*-------------------------------------------------------------------------
+ * free
+ *-------------------------------------------------------------------------
+ */
+
+ trav_table_free(travt1);
+ trav_table_free(travt2);
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+ H5Fclose(fid1);
+ H5Fclose(fid2);
+ return ret;
+
+/*-------------------------------------------------------------------------
+ * error
+ *-------------------------------------------------------------------------
+ */
+
+error:
+ H5E_BEGIN_TRY {
+ H5Pclose(dcpl1);
+ H5Pclose(dcpl2); 
+ H5Dclose(dset1);
+ H5Dclose(dset2);
+ H5Fclose(fid1);
+ H5Fclose(fid2);
+ trav_table_free(travt1);
+ trav_table_free(travt2);
+ } H5E_END_TRY;
+ return -1;
+
+}

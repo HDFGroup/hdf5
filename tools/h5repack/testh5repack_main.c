@@ -50,8 +50,13 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
   TEST_ERROR;
+#if 0
+ if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
+  TEST_ERROR;
+#endif
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+
  PASSED(); 
 
  TESTING("    copy of attributes");
@@ -520,10 +525,7 @@ test_layout_chunked(void)
  
 error:                                                       
  return 1;
-
-
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: test_layout_contiguous
@@ -667,11 +669,71 @@ test_layout_compact(void)
  
 error:                                                       
  return 1;
-
-
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: test_filterqueue
+ *
+ * Purpose: 
+ *
+ * 1) test several filters 
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the input on the output file
+ *
+ * Return: Success: zero
+ *  Failure: 1
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             January 5, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_filterqueue(void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+ memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ TESTING("    filter queue");
+
+/*-------------------------------------------------------------------------
+ * add some filters
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:GZIP 1",&pack_options)<0)
+  TEST_ERROR;
+#if 0
+ if (h5repack_addfilter("dset1:SZIP 8",&pack_options)<0)
+  TEST_ERROR;
+#endif
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+ return 0; 
+ 
+error:                                                       
+ return 1;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -683,12 +745,11 @@ error:
  *  Failure: non-zero
  *
  * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             September, 19, 2003
- *
- * Modifications:
+ *             January, 5, 2004
  *
  *-------------------------------------------------------------------------
  */
+
 
 int main (void)
 {
@@ -700,8 +761,6 @@ int main (void)
  /* make the test files */
  if (make_testfiles()<0)
   goto error;
-
-#if 1
 
  /* test a copy with no filters */
  nerrors += test_copy();
@@ -721,22 +780,29 @@ int main (void)
  /* test a copy with layout CHUNK options */
  nerrors += test_layout_chunked();
 
-#endif
-
-#if 1
-
  /* test a copy with layout CONTI options */
  nerrors += test_layout_contiguous();
-
-#endif
-
-#if 1
 
  /* test a copy with layout COMPA options */
  nerrors += test_layout_compact();
 
-#endif
+ /* test a copy with the shuffle filter */
+ nerrors += test_filter_shuffle();
 
+ /* test a copy with the checksum filter */
+ nerrors += test_filter_checksum();
+
+ /* test a copy with layout CHUNK options */
+ nerrors += test_layout_chunked();
+
+ /* test a copy with layout CONTI options */
+ nerrors += test_layout_contiguous();
+
+ /* test a copy with layout COMPA options */
+ nerrors += test_layout_compact();
+
+ /* test a copy with all available filters */
+ nerrors += test_filterqueue();
 
  /* check for errors */
  if (nerrors)
@@ -752,4 +818,6 @@ error:
 
  return 0;
 }
+
+
 

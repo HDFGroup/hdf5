@@ -23,6 +23,25 @@
 
 static int check_options(pack_opt_t *options);
 
+
+/*-------------------------------------------------------------------------
+ * Function: aux_initglb_filter
+ *
+ * Purpose: auxiliary function, initialize the options global filter
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void aux_initglb_filter(pack_opt_t *options)
+{
+ int k;
+ options->filter_g.filtn  = -1;
+ for ( k=0; k<CDVALUES; k++) 
+  options->filter_g.cd_values[k] = -1;
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: h5repack
  *
@@ -130,6 +149,7 @@ int h5repack_addfilter(const char* str,
  if (options->all_filter==1)
  {
   /* if we are compressing all set the global filter type */
+  aux_initglb_filter(options);
   options->filter_g=filt;
  }
 
@@ -294,24 +314,26 @@ static int check_options(pack_opt_t *options)
  {
   pack_info_t pack  = options->op_tbl->objs[i];
   char*       name = pack.path;
-  if (pack.filter.filtn>0)
+
+  for ( j=0; j<pack.nfilters; j++)
   {
    if (options->verbose) 
    {
     printf("\t<%s> with %s filter",
      name,
-     get_sfilter(pack.filter.filtn));
+     get_sfilter(pack.filter[j].filtn));
    }
+
    has_cp=1;
    
    /*check for invalid combination of options */
-   switch (pack.filter.filtn)
+   switch (pack.filter[j].filtn)
    {
    default:
     break;
    case H5Z_FILTER_SZIP:
     
-    szip_pixels_per_block=pack.filter.cd_values[0];
+    szip_pixels_per_block=pack.filter[j].cd_values[0];
     
     /* check szip parameters */
     if (check_szip(pack.chunk.rank,
@@ -325,7 +347,7 @@ static int check_options(pack_opt_t *options)
         Reset this object filter info 
       */
 
-     options->op_tbl->objs[i].filter.filtn=-1;
+     options->op_tbl->objs[i].filter[j].filtn=-1;
      options->op_tbl->objs[i].chunk.rank=-1;
      printf("\tObject <%s> cannot be filtered\n",name);
 
@@ -334,7 +356,7 @@ static int check_options(pack_opt_t *options)
      
     break;
    } /* switch */
-  } /* filtn */
+  } /* j */
  } /* i */
  
  if (options->all_filter==1 && has_cp){

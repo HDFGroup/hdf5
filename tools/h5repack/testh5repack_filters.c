@@ -38,7 +38,7 @@ int make_deflate(hid_t loc_id)
  hid_t    sid;  /* dataspace ID */
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
- int      buf[40][20];
+ int      buf[DIM1][DIM2];
  int      i, j, n=0;
 
  for (i=0; i<DIM1; i++){
@@ -110,7 +110,7 @@ int make_szip(hid_t loc_id)
  unsigned szip_pixels_per_block;
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
- int      buf[40][20];
+ int      buf[DIM1][DIM2];
  int      i, j, n=0;
 
  for (i=0; i<DIM1; i++){
@@ -119,13 +119,11 @@ int make_szip(hid_t loc_id)
   }
  }
  
- memset(buf,0,sizeof buf);
-
   /* 
   pixels_per_block must be an even number, and <= pixels_per_scanline 
   and <= MAX_PIXELS_PER_BLOCK
   */
- szip_pixels_per_block=10;
+ szip_pixels_per_block=16;
  
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
@@ -180,7 +178,7 @@ int make_nofilters(hid_t loc_id)
 {
  char     name[5];
  hsize_t  dims[RANK]={DIM1,DIM2};
- int      buf[40][20];
+ int      buf[DIM1][DIM2];
  int      i, j, n=0;
 
  for (i=0; i<DIM1; i++){

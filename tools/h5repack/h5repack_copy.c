@@ -242,7 +242,7 @@ int do_copy_file(hid_t fidin,
    {
 
     /* the information about the object to be filtered/"layouted" */
-    pack_info_t pack;
+    pack_info_t obj;
 
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
@@ -265,9 +265,9 @@ int do_copy_file(hid_t fidin,
      * if the layout could not be applied, continue
      *-------------------------------------------------------------------------
      */
-    if (layout_this(dcpl_id,travt->objs[i].name,options,&pack))
+    if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
     {
-     if (apply_layout(dcpl_id,options,&pack)<0)
+     if (apply_layout(dcpl_id,&obj)<0)
       continue;
     }
     
@@ -276,9 +276,9 @@ int do_copy_file(hid_t fidin,
      * if the filter could not be applied, continue
      *-------------------------------------------------------------------------
      */
-    if (filter_this(travt->objs[i].name,options,&pack))
+    if (filter_this(travt->objs[i].name,options,&obj))
     {
-     if (apply_filter(dcpl_id,H5Tget_size(mtype_id),options,&pack)<0)
+     if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
       continue;
     }
     
