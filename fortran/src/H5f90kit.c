@@ -1,3 +1,17 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <ctype.h>
 #include <stddef.h>                                 
 #include "H5f90.h"
@@ -10,7 +24,7 @@
  * HD5f2cstring   -- convert a Fortran string to a C string
  */
 
-/* ------------------------------- HDc2fstr ------------------------------- 
+/* ------------------------------- HD5c2fstr ------------------------------- 
 NAME
    HD5c2fstr -- convert a C string into a Fortran string IN PLACE
 USAGE
@@ -36,7 +50,7 @@ HD5c2fstr(char *str, int len)
     return 0;
 }   /* HD5c2fstr */
 
-/* ----------------------------- HDf2cstring ------------------------------ */
+/* ----------------------------- HD5f2cstring ------------------------------ */
 /*
 NAME
    HD5f2cstring -- convert a Fortran string to a C string

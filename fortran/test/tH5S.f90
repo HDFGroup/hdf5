@@ -1,19 +1,26 @@
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !
 ! 
 !    Testing Dataspace Interface functionality.
 !
-!      MODULE H5STEST
-
-!        USE HDF5 ! This module contains all necessary modules 
-        
-!      CONTAINS
-      
 !
-!The following subroutine tests the following functionalities:
-!h5screate_f, h5scopy_f, h5screate_simple_f, h5sis_simple_f,   
-!h5sget_simple_extent_dims_f,h5sget_simple_extent_ndims_f 
-!h5sget_simple_extent_npoints_f, h5sget_simple_extent_type_f,
-!h5sextent_copy_f, h5sset_extent_simple_f, h5sset_extent_none_f     
+!    The following subroutine tests the following functionalities:
+!    h5screate_f, h5scopy_f, h5screate_simple_f, h5sis_simple_f,   
+!    h5sget_simple_extent_dims_f,h5sget_simple_extent_ndims_f 
+!    h5sget_simple_extent_npoints_f, h5sget_simple_extent_type_f,
+!    h5sextent_copy_f, h5sset_extent_simple_f, h5sset_extent_none_f     
 !
         SUBROUTINE dataspace_basic_test(total_error)
 
@@ -252,5 +259,3 @@
           RETURN
         END SUBROUTINE dataspace_basic_test
 
-
-!      END MODULE H5STEST
