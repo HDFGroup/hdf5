@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1998 NCSA
+ * Copyright (C) 1998-2002 NCSA
  *		 All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
@@ -16,7 +16,7 @@
 
 #include "H5public.h"		/* Include Public Definitions		*/
 
-/* include the pthread library */
+/* include the pthread header */
 #ifdef H5_HAVE_THREADSAFE
 #include <pthread.h>
 #endif
@@ -130,19 +130,6 @@
 
 #define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
 #include <windows.h>
-
-/*
-inline is now in C but in the C99 standard and not the old C89 version so
-MS doesn't recognize it yet (as of April 2001)
-Move H5_inline into windows version of H5pubconf.h; avoid duplicating warnings.
-*/
-/*
-#if defined(__MWERKS__) || defined(__cplusplus)
-# define H5_inline   inline
-# else
-# define H5_inline 
-#endif
-*/
 
 #endif /*WIN32*/
 
