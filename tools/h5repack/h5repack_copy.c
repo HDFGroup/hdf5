@@ -30,7 +30,7 @@
  *
  *-------------------------------------------------------------------------
  */
-static void print_obj(hid_t dcpl, char *name)
+static void print_obj(hid_t dcpl_id, char *name)
 {
  char         str[255]; 
 #if defined (PRINT_DEBUG )
@@ -47,13 +47,13 @@ static void print_obj(hid_t dcpl, char *name)
  strcpy(str,"\0");
 
  /* get information about input filters */
- if ((nfilters = H5Pget_nfilters(dcpl))<0) 
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return;
 
  for ( i=0; i<nfilters; i++)
  {
   cd_nelmts = NELMTS(cd_values);
-  filtn = H5Pget_filter(dcpl, 
+  filtn = H5Pget_filter(dcpl_id, 
    (unsigned)i, 
    &filt_flags, 
    &cd_nelmts,
@@ -245,7 +245,6 @@ int do_copy_objects(hid_t fidin,
 #endif /* LATER */
  int       i, j;
  int       wrote=0;
- H5T_class_t type_class;        /* datatype class */
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -309,16 +308,9 @@ int do_copy_objects(hid_t fidin,
    for (j=0; j<rank; j++) 
     nelmts*=dims[j];
    
-   if((type_class = H5Tget_class(ftype_id))<0)
-       goto error;
-   if(type_class==H5T_BITFIELD) {
-       if((mtype_id=H5Tcopy(ftype_id))<0)
-           goto error;
-   } else {
-       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-            goto error;
-   }
-  
+   if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
+    goto error;
+
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
 
@@ -604,7 +596,6 @@ int copy_attr(hid_t loc_in,
  char       name[255];
  int        n, j;
  unsigned   u;
- H5T_class_t type_class;
 
  if ((n = H5Aget_num_attrs(loc_in))<0) 
   goto error;
@@ -644,16 +635,9 @@ int copy_attr(hid_t loc_in,
   for (j=0; j<rank; j++) 
    nelmts*=dims[j];
   
-  if((type_class = H5Tget_class(ftype_id))<0)
-       goto error;
-  if(type_class==H5T_BITFIELD) {
-       if((mtype_id=H5Tcopy(ftype_id))<0)
-           goto error;
-  } else {
-       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-            goto error;
-  }
- 
+  if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
+   goto error;
+
   if ((msize=H5Tget_size(mtype_id))==0)
    goto error;
 

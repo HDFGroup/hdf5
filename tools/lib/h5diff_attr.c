@@ -60,7 +60,6 @@ int diff_attr(hid_t      loc1_id,
  int        rank2;        /* rank of dataset */
  hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
- H5T_class_t type_class;        /* Datatype class */
 	char       name1[255];
  char       name2[255];
 	int        n1, n2, i, j;
@@ -162,25 +161,11 @@ int diff_attr(hid_t      loc1_id,
  for (j=0; j<rank1; j++) 
   nelmts1*=dims1[j];
  
- if((type_class = H5Tget_class(ftype1_id))<0)
-       goto error;
- if(type_class==H5T_BITFIELD) {
-       if((mtype1_id=H5Tcopy(ftype1_id))<0)
-           goto error;
- } else {
-       if ((mtype1_id=H5Tget_native_type(ftype1_id,H5T_DIR_DEFAULT))<0)
-            goto error;
- }
+ if ((mtype1_id=h5tools_get_native_type(ftype1_id))<0)
+    goto error;
 
- if((type_class = H5Tget_class(ftype2_id))<0)
-       goto error;
- if(type_class==H5T_BITFIELD) {
-       if((mtype2_id=H5Tcopy(ftype2_id))<0)
-           goto error;
- } else {
-       if ((mtype2_id=H5Tget_native_type(ftype2_id,H5T_DIR_DEFAULT))<0)
-            goto error;
- }
+ if ((mtype2_id=h5tools_get_native_type(ftype2_id))<0)
+    goto error;
 
  if ((msize1=H5Tget_size(mtype1_id))==0)
   goto error;

@@ -344,7 +344,7 @@ int traverse( hid_t loc_id,
   H5E_BEGIN_TRY {
 
   /* get info */
-  H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
+   H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
   } H5E_END_TRY;
 
   /* add to array */
@@ -383,7 +383,7 @@ int traverse( hid_t loc_id,
     inserted_objs += traverse( loc_id, path, table, info, idx, print );
    }
 
-    /* search table
+     /* search table
        group with more than one link to it */
    if (statbuf.nlink > 1) 
    {
@@ -426,10 +426,9 @@ int traverse( hid_t loc_id,
     /* print it */
     if (print)
      printf(" %-10s %s\n", "dataset", path  );
-    
    }
 
-    /* search table
+   /* search table
        dataset with more than one link to it */
    if (statbuf.nlink > 1) 
    {
@@ -469,7 +468,7 @@ int traverse( hid_t loc_id,
     /* add object to table */
     trav_table_add(statbuf.objno, path, H5G_TYPE, table );
 
-    /* print it */
+     /* print it */
     if (print)
      printf(" %-10s %s\n", "datatype", path  );
    }

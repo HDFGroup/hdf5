@@ -574,7 +574,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
     unsigned char *ucp_vp = (unsigned char *)vp;
     char          *cp_vp = (char *)vp;
     hid_t          memb, obj, region;
-    int	           nmembs, otype;
+    unsigned       nmembs;
+    int	           otype;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
     H5G_stat_t     sb;
@@ -641,6 +642,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         }
         pad = H5Tget_strpad(type);
 
+        /* Check for NULL pointer for string */
         if(s==NULL) {
             h5tools_str_append(str, "NULL");
         }
@@ -748,7 +750,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
         }
     } else if (H5Tget_class(type) == H5T_COMPOUND) {
-        int j;
+        unsigned j;
 
         nmembs = H5Tget_nmembers(type);
         h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
@@ -877,12 +879,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             }
 
             /* Print OID */
-            if (info->obj_hidefileno) {
+            if (info->obj_hidefileno)
                 h5tools_str_append(str, info->obj_format, sb.objno[1], sb.objno[0]);
-            } else {
+            else
                 h5tools_str_append(str, info->obj_format,
                           sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
-            }
 
             /* Print name */
             path = lookup_ref_path(vp);
@@ -1122,4 +1123,3 @@ h5tools_is_zero(const void *_mem, size_t size)
 
     return TRUE;
 }
-

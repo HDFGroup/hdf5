@@ -41,7 +41,7 @@
 #endif
 
 typedef struct trav_info_t {
-	char       *name;
+	char      *name;
 	H5G_obj_t1 type;
 } trav_info_t;
 

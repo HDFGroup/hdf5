@@ -23,10 +23,6 @@
 
 #include "hdf5.h"
 
-#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2
-#define VERSION12
-#endif	/* H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2 */
-
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
@@ -105,7 +101,6 @@ typedef struct h5dump_t {
      *
      *   str_repeat: If set to non-zero then any character value repeated N
      *               or more times is printed as 'C'*N
-     *
      *
      * Numeric data is also subject to the formats for individual elements.
      */
@@ -326,7 +321,6 @@ typedef struct h5dump_t {
     /*escape non printable characters */
     int do_escape;
 
-
 } h5dump_t;
 
 typedef struct dump_header{
@@ -493,7 +487,6 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define FILE_CONTENTS   "FILE_CONTENTS"
 
 
-
 #define BEGIN           "{"
 #define END             "}"
 
@@ -501,17 +494,19 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 extern void     h5tools_init(void);
 extern void     h5tools_close(void);
 extern hid_t    h5tools_fopen(const char *fname, const char *driver,
-                              char *drivername, size_t drivername_len);
+                              char *drivername, size_t drivername_len,
+                              int argc, const char *argv[]);
 extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);
 extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
+extern hid_t    h5tools_get_native_type(hid_t type);
+
 extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem);
 
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
-
 
 #endif	/* H5TOOLS_H__ */
