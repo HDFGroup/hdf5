@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Add data shuffle filter(source code H5Zshuffle.c), the combination of the
+      shuffling and compression can make data compression better without suffering
+      much encoding and decoding CPU time for many application datasets(especially
+      for floating point data). KY - 2002/11/13
     * Allow scalar dataspaces to be used for parallel I/O.  QAK - 2002/11/05
     * Fixed error condition where "none" selections were not being handled
       correctly in parallel.  QAK - 2002/10/29
