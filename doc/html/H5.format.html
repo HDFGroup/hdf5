@@ -15,10 +15,15 @@ TABLE.format CAPTION { font-weight:bold; font-size:larger;}
 
 TABLE.note {border:none; text-align:right; width:80%;}
 
-TABLE.desc { border:none; width:80%;}
-TABLE.desc TH { }
-TABLE.desc TR { }
-TABLE.desc TD { }
+TABLE.desc { border:solid; border-collapse:collapse; text-align:left; width:80%;}
+TABLE.desc TR { vertical-align:top;}
+TABLE.desc TH { border-style:ridge; font-size:larger; padding:4px; text-decoration:underline;}
+TABLE.desc TD { border-style:ridge; padding:4px; }
+
+TABLE.list { border:none; }
+TABLE.list TR { vertical-align:top;}
+TABLE.list TH { border:none; text-decoration:underline;}
+TABLE.list TD { border:none; }
 
 </STYLE>
        
@@ -257,8 +262,8 @@ TABLE.desc TD { }
       items within the file, the size of each group page,
       and a group entry for the root object in the file.
 
-    <p>
-    <center>
+    <br>
+    <div align=center>
       <table class=format>
 	<caption>
 	  HDF5 Super Block Layout
@@ -299,19 +304,24 @@ TABLE.desc TD { }
 	</tr>
 
 	<tr>
-	  <td colspan=4>Base Address<sup><font size="-2">O</font></sup></td>
+	  <td colspan=2 style="border:dotted;">Indexed Storage Internal Node K<sup>1</sup></td>
+	  <td colspan=2 style="border:dotted;">Reserved (zero)<sup>1</sup></td>
 	</tr>
 
 	<tr>
-	  <td colspan=4>Address of Global Free-space Heap<sup><font size="-2">O</font></sup></td>
+	  <td colspan=4>Base Address<sup>O</sup></td>
 	</tr>
 
 	<tr>
-	  <td colspan=4>End of File Address<sup><font size="-2">O</font></sup></td>
+	  <td colspan=4>Address of Global Free-space Heap<sup>O</sup></td>
 	</tr>
 
 	<tr>
-	  <td colspan=4>Driver Information Block Address<sup><font size="-2">O</font></sup></td>
+	  <td colspan=4>End of File Address<sup>O</sup></td>
+	</tr>
+
+	<tr>
+	  <td colspan=4>Driver Information Block Address<sup>O</sup></td>
 	</tr>
 
 	<tr>
@@ -325,30 +335,37 @@ TABLE.desc TD { }
             <br>
             of the size specified in "Size of Offsets.")
         </td></tr>
+        <tr><td>
+            (Items marked with an '1' the above table are
+            <br>
+            new in version 1 of the superblock)
+        </td></tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>HDF5 File Signature</td>
-	  <td>This field contains a constant value and can be used to
+	  <td>
+            <P>This field contains a constant value and can be used to
 	    quickly identify a file as being an HDF5 file.  The
 	    constant value is designed to allow easy identification of
 	    an HDF5 file and to allow certain types of data corruption
 	    to be detected.  The file signature of an HDF5 file always
 	    contains the following values:
+            </P
 
-	    <br><br><center>
-	      <table border align=center cellpadding=4 width="100%">
+            <center>
+	      <table border align=center cellpadding=4>
 		<tr align=center>
-		  <td>decimal</td>
+		  <td align=right>Decimal:</td>
                   <td width="8%">137</td>
 		  <td width="8%">72</td>
 		  <td width="8%">68</td>
@@ -360,33 +377,33 @@ TABLE.desc TD { }
 		</tr>
 
 		<tr align=center>
-		  <td>hexadecimal</td>
-		  <td width="8%">89</td>
-		  <td width="8%">48</td>
-		  <td width="8%">44</td>
-		  <td width="8%">46</td>
-		  <td width="8%">0d</td>
-		  <td width="8%">0a</td>
-		  <td width="8%">1a</td>
-		  <td width="8%">0a</td>
+		  <td align=right>Hexadecimal:</td>
+		  <td>89</td>
+		  <td>48</td>
+		  <td>44</td>
+		  <td>46</td>
+		  <td>0d</td>
+		  <td>0a</td>
+		  <td>1a</td>
+		  <td>0a</td>
 		</tr>
 
 		<tr align=center>
-		  <td>ASCII C Notation</td>
-		  <td width="8%">\211</td>
-		  <td width="8%">H</td>
-		  <td width="8%">D</td>
-		  <td width="8%">F</td>
-		  <td width="8%">\r</td>
-		  <td width="8%">\n</td>
-		  <td width="8%">\032</td>
-		  <td width="8%">\n</td>
+		  <td align=right>ASCII C Notation:</td>
+		  <td>\211</td>
+		  <td>H</td>
+		  <td>D</td>
+		  <td>F</td>
+		  <td>\r</td>
+		  <td>\n</td>
+		  <td>\032</td>
+		  <td>\n</td>
 		</tr>
 	      </table>
 	    </center>
 	    <br>
 
-	    This signature both identifies the file as an HDF5 file
+	    <P>This signature both identifies the file as an HDF5 file
 	    and provides for immediate detection of common
 	    file-transfer problems. The first two bytes distinguish
 	    HDF5 files on systems that expect the first two bytes to
@@ -400,10 +417,15 @@ TABLE.desc TD { }
 	    under MS-DOS. The final line feed checks for the inverse
 	    of the CR-LF translation problem.  (This is a direct
 	    descendent of the <A href="http://www.libpng.org/pub/png/spec/PNG-Rationale.html#R.PNG-file-signature">PNG</A> file
-            signature.)</td>
+            signature.)
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+            </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version Number of the Super Block</td>
 	  <td>
             <P>This value is used to determine the format of the
@@ -413,13 +435,16 @@ TABLE.desc TD { }
 	    determine how the information in the super block is
 	    formatted.
             </P>
-            <P>The only value currently valid in this field is '0', which
-            indicates that the super block is formatted as described above.
+
+            <P>Values of 0 and 1 are defined for this field.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
             </P>
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version Number of the File Free-space Information</td>
 	  <td>
             <P>This value is used to determine the format of the
@@ -429,10 +454,13 @@ TABLE.desc TD { }
             indicates that the free space index is formatted as described 
             <A href="#FreeSpaceIndex">below</A>.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version Number of the Root Group Symbol Table Entry</td>
 	  <td>
             <P>This value is used to determine the format of the
@@ -446,10 +474,13 @@ TABLE.desc TD { }
             indicates that the root group symbol table entry is formatted as
             described <A href="#SymbolTableEntry">below</A>.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Version Number of the Shared Header Message Format</td>
 	  <td>
             <P>This value is used to determine the format of the
@@ -463,26 +494,41 @@ TABLE.desc TD { }
             indicates that shared header messages are formatted as
             described <A href="#SharedObjectHeader">below</A>.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Size of Offsets</td>
-	  <td>This value contains the number of bytes used to store
+	  <td>
+            <P>This value contains the number of bytes used to store
 	    addresses in the file.  The values for the addresses of
 	    objects in the file are offsets relative to a base address,
 	    usually the address of the super block signature.  This
 	    allows a wrapper to be added after the file is created
-	    without invalidating the internal offset locations.</td>
+	    without invalidating the internal offset locations.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Size of Lengths</td>
-	  <td>This value contains the number of bytes used to store
-	    the size of an object.</td>
+	  <td>
+            <P>This value contains the number of bytes used to store
+	    the size of an object.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Group Leaf Node K</td>
 	  <td>
             <P>Each leaf node of a group B-tree will have at
@@ -494,27 +540,34 @@ TABLE.desc TD { }
             </P>
             <P>See the <A href="#Btrees">description</A> of B-trees below.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Group Internal Node K</td>
 	  <td>
-            <P>Each internal node of a group B-tree will have
-	    at least K pointers to other nodes but not more than 2K
-	    pointers.  If the group has only one internal
-	    node then it might have fewer than K pointers.
+            <P>Each internal node of a group B-tree will have at
+	    least this many entries but not more than twice this
+	    many.  If the group has only one internal
+	    node then it might have fewer entries.
             </P>
             <P>This value must be greater than zero.
             </P>
             <P>See the <A href="#Btrees">description</A> of B-trees below.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
 	</tr>
 
-        <tr valign=top>
+        <tr>
           <td>File Consistency Flags</td>
-          <td>This value contains flags to indicate information
+          <td>
+            <P>This value contains flags to indicate information
             about the consistency of the information contained
             within the file.  Currently, the following bit flags are
             defined: 
@@ -533,39 +586,79 @@ TABLE.desc TD { }
             normal access to a file and only set after the file's
             consistency is guaranteed by the library or a
             consistency utility.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
         </tr>
 
-        <tr valign=top>
+	<tr>
+	  <td>Indexed Storage Internal Node K</td>
+	  <td>
+            <P>Each internal node of a indexed storage B-tree will have at
+	    least this many entries but not more than twice this
+	    many.  If the group has only one internal
+	    node then it might have fewer entries.
+            </P>
+            <P>This value must be greater than zero.
+            </P>
+            <P>See the <A href="#Btrees">description</A> of B-trees below.
+            </P>
+
+            <P><EM>This field is present in version 1+ of the superblock.</EM>
+            </P>
+          </td>
+	</tr>
+
+        <tr>
           <td>Base Address</td>
-          <td>This is the absolute file address of the first byte of
+          <td>
+            <P>This is the absolute file address of the first byte of
             the HDF5 data within the file.  The library currently 
             constrains this value to be the absolute file address 
             of the super block itself when creating new files; 
             future versions of the library may provide greater 
             flexibility.  Unless otherwise noted,
             all other file addresses are relative to this base
-            address.</td>
+            address.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Address of Global Free-space Index</td>
-          <td>Free-space management is not yet defined in the HDF5
+          <td>
+            <P>Free-space management is not yet defined in the HDF5
             file format and is not handled by the library.
             Currently this field always contains the 
             <A href="#UndefinedAddress">undefined address</A>. 
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>End of File Address</td>
-          <td>This is the relative file address of the first byte past
+          <td>
+            <P>This is the relative file address of the first byte past
             the end of all HDF5 data.  It is used to determine whether a
             file has been accidently truncated and as an address where
             file data allocation can occur if space from the free list is
-            not used.</td>
+            not used.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Driver Information Block Address</td>
           <td>
             <P>This is the relative file address of the file driver
@@ -574,17 +667,26 @@ TABLE.desc TD { }
             driver information block then this entry should be the
             <A href="#UndefinedAddress">undefined address</A>.
             </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
           </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Root Group Symbol Table Entry</td>
-          <td>This is the <A href="##SymbolTableEntry">symbol table entry</A>
+          <td>
+            <P>This is the <A href="#SymbolTableEntry">symbol table entry</A>
             of the root group, which serves as the entry point into 
-            the group graph for the file.</td>
+            the group graph for the file.
+            </P>
+
+            <P><EM>This field is present in version 0+ of the superblock.</EM>
+            </P>
+          </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <H3><A name="DriverInfo">
 	Disk Format: Level 0B - File Driver Info</A></H3>
@@ -594,62 +696,69 @@ TABLE.desc TD { }
       order to reopen a file.  The format of the file driver information
       block is:
  
-    <p>
-    <center>
-      <table border align=center cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Driver Information Block</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Driver Information Block
         </caption>
  
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
 	</tr>  
  
-        <tr align=center>
+        <tr>
           <td>Version</td>
           <td colspan=3>Reserved (zero)</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Driver Information Size (4 bytes)</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Driver Identification (8 bytes)<br><br></td>
         </tr>
 
-        <tr align=center>
-          <td colspan=4><br><br>Driver Information<br><br><br></td>
+        <tr>
+          <td colspan=4><br><br>Driver Information (<em>n</em> bytes)<br><br><br></td>
         </tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Version</td>
-          <td>The version number of the driver information block. The
-            file format documented here is version zero.</td>
+          <td>
+            <P>The version number of the driver information block. The
+            file format documented here is version zero.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Driver Information Size</td>
-          <td>The size in bytes of the Driver Information part of this 
-            structure.</td>
+          <td>
+            <P>The size in bytes of the Driver Information part of this 
+            structure.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Driver Identification</td>
-          <td>This is an eight-byte ASCII string without null
+          <td>
+            <P>This is an eight-byte ASCII string without null
             termination which identifies the driver and version number 
             of the Driver Information block. The predefined drivers
             supplied with the HDF5 library are identified by the
@@ -658,6 +767,8 @@ TABLE.desc TD { }
             the original version then the last letter(s) of the
             identification will be replaced by a version number in
             ASCII.  
+            </P>
+            <P>
             For example, the various versions of the <em>family driver</em> 
             will be identified by <code>NCSAfami</code>, <code>NCSAfam0</code>,
             <code>NCSAfam1</code>, etc. 
@@ -665,10 +776,13 @@ TABLE.desc TD { }
             to eight characters.  Subsequent identifiers will be created by
             substituting sequential numerical values for the final character, 
             starting with zero.)
-            <p>
+            </P>
+            <P>
             Identification for user-defined drivers 
             is arbitrary but should be unique and avoid the four character
-            prefix "NCSA".</td>
+            prefix "NCSA".
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
@@ -679,7 +793,7 @@ TABLE.desc TD { }
             <code>H5FD_sb_decode</code> functions.</td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <BR>
     <HR>
@@ -708,97 +822,100 @@ TABLE.desc TD { }
       Aside from that difference, internal nodes and leaf nodes
       are identical.
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>B-tree Nodes</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          B-tree Nodes
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Signature</td>
 
-        <tr align=center>
+        <tr>
           <td>Node Type</td>
           <td>Node Level</td>
           <td colspan=2>Entries Used</td>
 
-        <tr align=center>
-          <td colspan=4>Address of Left Sibling<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Left Sibling<sup>O</sup></td>
 
-        <tr align=center>
-          <td colspan=4>Address of Right Sibling<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Right Sibling<sup>O</sup></td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Key 0 (variable size)</td>
 
-        <tr align=center>
-          <td colspan=4>Address of Child 0<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Child 0<sup>O</sup></td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Key 1 (variable size)</td>
 
-        <tr align=center>
-          <td colspan=4>Address of Child 1<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Child 1<sup>O</sup></td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>...</td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Key 2<em>K</em> (variable size)</td>
 
-        <tr align=center>
-          <td colspan=4>Address of Child 2<em>K</em><sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Child 2<em>K</em><sup>O</sup></td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Key 2<em>K</em>+1 (variable size)</td>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'O' the above table are
             <br>
             of the size specified in "Size of Offsets.")
-          </div>
         </td></tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Signature</td>
-          <td>The ASCII character string "<code>TREE</code>" is 
+          <td>
+            <P>The ASCII character string "<code>TREE</code>" is 
             used to indicate the
             beginning of a B-link tree node.  This gives file
             consistency checking utilities a better chance of
-            reconstructing a damaged file.</td>
+            reconstructing a damaged file.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Node Type</td>
-          <td>Each B-link tree points to a particular type of data.
+          <td>
+            <P>Each B-link tree points to a particular type of data.
             This field indicates the type of data as well as
             implying the maximum degree <em>K</em> of the tree and
             the size of each Key field.
-            <br>
-            <table>
+            </P>
+
+            <table class=list>
                 <tr>
-                <th width="30%"><U>Node Type</U></th>
-                <th width="70%" align=left><U>Description</U></th>
+                <th width="30%">Node Type</th>
+                <th width="70%" align=left>Description</th>
                 </tr>
                 <tr>
                     <td align=center>0</td>
@@ -812,57 +929,73 @@ TABLE.desc TD { }
           </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Node Level</td>
-          <td>The node level indicates the level at which this node
+          <td>
+            <P>The node level indicates the level at which this node
             appears in the tree (leaf nodes are at level zero).  Not
             only does the level indicate whether child pointers
             point to sub-trees or to data, but it can also be used
             to help file consistency checking utilities reconstruct
-            damanged trees.</td>
+            damanged trees.
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
           <td>Entries Used</td>
-          <td>This determines the number of children to which this
+          <td>
+            <P>This determines the number of children to which this
             node points.  All nodes of a particular type of tree
             have the same maximum degree, but most nodes will point
             to less than that number of children.  The valid child
             pointers and keys appear at the beginning of the node
             and the unused pointers and keys appear at the end of
             the node.  The unused pointers and keys have undefined
-            values.</td>
+            values.
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
           <td>Address of Left Sibling</td>
-          <td>This is the relative file address of the left sibling of
+          <td>
+            <P>This is the relative file address of the left sibling of
             the current node.  If the current
             node is the left-most node at this level then this field
-            is the <A href="#UndefinedAddress">undefined address</A>.</td>
+            is the <A href="#UndefinedAddress">undefined address</A>.
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
           <td>Address of Right Sibling</td>
-          <td>This is the relative file address of the right sibling of
+          <td>
+            <P>This is the relative file address of the right sibling of
             the current node.  If the current
             node is the right-most node at this level then this
-            field is the <A href="#UndefinedAddress">undefined address</A>.</td>
+            field is the <A href="#UndefinedAddress">undefined address</A>.
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
           <td>Keys and Child Pointers</td>
-          <td>Each tree has 2<em>K</em>+1 keys with 2<em>K</em>
+          <td>
+            <P>Each tree has 2<em>K</em>+1 keys with 2<em>K</em>
             child pointers interleaved between the keys.  The number
             of keys and child pointers actually containing valid
             values is determined by the node's <em>Entries Used</em> field.
             If that field is <em>N</em> then the B-link tree contains
-            <em>N</em> child pointers and <em>N</em>+1 keys.</td>
+            <em>N</em> child pointers and <em>N</em>+1 keys.
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
           <td>Key</td>
-          <td>The format and size of the key values is determined by
+          <td>
+            <P>The format and size of the key values is determined by
             the type of data to which this tree points.  The keys are
             ordered and are boundaries for the contents of the child
             pointer; that is, the key values represented by child
@@ -870,37 +1003,42 @@ TABLE.desc TD { }
             <em>N</em>+1. Whether the interval is open or closed on
             each end is determined by the type of data to which the
             tree points.
-            <p>
+            </P>
+
+            <P>
             The format of the key depends on the node type.
             For nodes of node type 0 (group nodes), the key is formatted as
             follows:
             <center>
-            <table>
-            <tr valign=top align=left>
-              <td width=40%>A single field of <i>Size of Lengths</i> 
-                bytes</td>
+            <table class=list>
+            <tr>
+              <td width=30%>A single field of <i>Size of Lengths</i> 
+                bytes:</td>
               <td>Indicates the byte offset into the local heap 
                 for the first object name in the subtree which 
-                that key describes.</td>
+                that key describes.
+              </td>
             </tr>
             </table>
             </center>
-            <p>
+            </P>
+
+            <P>
             For nodes of node type 1 (chunked raw data nodes), the key is
             formatted as follows:
             <center>
-            <table>
-            <tr valign=top align=left>
-              <td width=40%>Bytes 1-4</td>
+            <table class=list>
+            <tr>
+              <td width=30%>Bytes 1-4:</td>
               <td>Size of chunk in bytes.</td>
             </tr>
-            <tr valign=top align=left>
-              <td>Bytes 4-8</td>
+            <tr>
+              <td>Bytes 4-8:</td>
               <td>Filter mask, a 32-bit bitfield indicating which 
                 filters have been applied to that chunk.</td>
             </tr>
-            <tr valign=top align=left>
-              <td><em>N</em> 64-bit fields</td>
+            <tr>
+              <td><em>N</em> 64-bit fields:</td>
               <td>A 64-bit index indicating the offset of the 
                 chunk within the dataset where <i>N</i> is the number 
                 of dimensions of the dataset.  For example, if 
@@ -911,7 +1049,8 @@ TABLE.desc TD { }
             </tr>
             </table>
             </center>
-            </td>
+            </P>
+          </td>
         </tr>
 
         <tr valign=top>
@@ -931,27 +1070,27 @@ TABLE.desc TD { }
           </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <p>
      Conceptually, each B-tree node looks like this:
-
      <center>
      <table>
        <tr valign=top align=center>
-         <td>key[0]</td><td>&nbsp;&nbsp;</td>
-         <td>child[0]</td><td>&nbsp;&nbsp;</td>
-         <td>key[1]</td><td>&nbsp;&nbsp;</td>
-         <td>child[1]</td><td>&nbsp;&nbsp;</td>
-         <td>key[2]</td><td>&nbsp;&nbsp;</td>
-         <td>...</td><td>&nbsp;&nbsp;</td>
-         <td>...</td><td>&nbsp;&nbsp;</td>
-         <td>key[<i>N</i>-1]</td><td>&nbsp;&nbsp;</td>
-         <td>child[<i>N</i>-1]</td><td>&nbsp;&nbsp;</td>
+         <td>key[0]</td><td>&nbsp;</td>
+         <td>child[0]</td><td>&nbsp;</td>
+         <td>key[1]</td><td>&nbsp;</td>
+         <td>child[1]</td><td>&nbsp;</td>
+         <td>key[2]</td><td>&nbsp;</td>
+         <td>...</td><td>&nbsp;</td>
+         <td>...</td><td>&nbsp;</td>
+         <td>key[<i>N</i>-1]</td><td>&nbsp;</td>
+         <td>child[<i>N</i>-1]</td><td>&nbsp;</td>
          <td>key[<i>N</i>]</td>
        </tr>
      </table>
      </center>
+     <br>
 
      where child[<i>i</i>] is a pointer to a sub-tree (at a level 
      above Level 0) or to data (at Level 0).  
@@ -1006,67 +1145,76 @@ TABLE.desc TD { }
       contains <em>K</em> symbols and the other contains
       <em>K</em>+1 symbols.
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Group Node (A Leaf of a B-tree)</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Group Node (A Leaf of a B-tree)
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Signature</td>
 
-        <tr align=center>
+        <tr>
           <td>Version Number</td>
           <td>Reserved (0)</td>
           <td colspan=2>Number of Symbols</td>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br><br>Group Entries<br><br><br></td>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Signature</td>
-          <td>The ASCII character string "<code>SNOD</code>" is 
+          <td>
+            <P>The ASCII character string "<code>SNOD</code>" is 
             used to indicate the
             beginning of a group node.  This gives file
             consistency checking utilities a better chance of
-            reconstructing a damaged file.</td>
+            reconstructing a damaged file.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Version Number</td>
-          <td>The version number for the group node.  This
+          <td>
+            <P>The version number for the group node.  This
             document describes version 1. (There is no version '0'
-            of the group node)</td>
+            of the group node)
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Number of Symbols</td>
-          <td>Although all group nodes have the same length,
+          <td>
+            <P>Although all group nodes have the same length,
             most contain fewer than the maximum possible number of
             symbol entries.  This field indicates how many entries
             contain valid data.  The valid entries are packed at the
             beginning of the group node while the remaining
-            entries contain undefined values.</td>
+            entries contain undefined values.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Group Entries</td>
           <td>
             <P>Each symbol has an entry in the group node.
@@ -1074,10 +1222,11 @@ TABLE.desc TD { }
             There are 2<EM>K</EM> entries in each group node, where
             <EM>K</EM> is the "Group Leaf Node K" value from the
             <A href="#SuperBlock">super block</A>.
+            </P>
           </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <h3><a name="SymbolTableEntry">
         Disk Format: Level 1C - Group Entry </a></h3>
@@ -1088,124 +1237,138 @@ TABLE.desc TD { }
       include space for caching certain constant metadata from the
       object header.
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Group Entry</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Group Entry
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
         </tr>
 
-        <tr align=center>
-          <td colspan=4>Name Offset<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Name Offset<sup>O</sup></td>
         </tr>
 
-        <tr align=center>
-          <td colspan=4>Object Header Address<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Object Header Address<sup>O</sup></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Cache Type</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Reserved</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br><br>Scratch-pad Space (16 bytes)<br><br><br></td>
         </tr>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'O' the above table are
             <br>
             of the size specified in "Size of Offsets.")
-          </div>
         </td></tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Name Offset</td>
-          <td>This is the byte offset into the group local
+          <td>
+            <P>This is the byte offset into the group local
             heap for the name of the object. The name is null
-            terminated.</td>
+            terminated.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Object Header Address</td>
-          <td>Every object has an object header which serves as a
+          <td>
+            <P>Every object has an object header which serves as a
             permanent location for the object's metadata.  In addition
             to appearing in the object header, some metadata can be
-            cached in the scratch-pad space.</td>
+            cached in the scratch-pad space.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Cache Type</td>
-          <td>The cache type is determined from the object header.
+          <td>
+            <P>The cache type is determined from the object header.
             It also determines the format for the scratch-pad space:
             <br>
-            <table>
-                <tr valign=top align=left>
-                    <td width="10%">0</td>
+            <table class=list>
+                <tr align=left>
+                    <th>Type:</th>
+                    <th>Description:</th>
+                </tr>
+                <tr>
+                    <td width="10%" align=center>0</td>
                     <td>No data is cached by the group entry.  This
                         is guaranteed to be the case when an object header
                         has a link count greater than one.
                     </td>
                 </tr>
-                <tr valign=top align=left>
-                    <td>1</td>
+                <tr>
+                    <td align=center>1</td>
                     <td>Object header metadata is cached in the group
                         entry.  This implies that the group
                         entry refers to another group.
                     </td>
                 </tr>
-                <tr valign=top align=left>
-                    <td>2</td>
+                <tr>
+                    <td align=center>2</td>
                     <td>The entry is a symbolic link.  The first four bytes
                         of the scratch-pad space are the offset into the local
                         heap for the link value.  The object header address
                         will be undefined.
                     </td>
                 </tr>
-                <tr valign=top align=left>
-                    <td><em>N</em></td>
+                <tr>
+                    <td align=center><em>N</em></td>
                     <td>Other cache values can be defined later and
                         libraries that do not understand the new values will
                         still work properly.
                     </td>
                 </tr>
             </table>
+            </P>
           </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Reserved</td>
-          <td>These four bytes are present so that the scratch-pad
+          <td>
+            <P>These four bytes are present so that the scratch-pad
             space is aligned on an eight-byte boundary.  They are
-            always set to zero.</td>
+            always set to zero.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Scratch-pad Space</td>
-          <td>This space is used for different purposes, depending
+          <td>
+            <P>This space is used for different purposes, depending
             on the value of the Cache Type field. Any metadata
             about a dataset object represented in the scratch-pad
             space is duplicated in the object header for that
@@ -1213,13 +1376,17 @@ TABLE.desc TD { }
             and the size of the dataspace for a dataset whose datatype 
             is atomic and whose dataspace is fixed and less than 
             four dimensions.
+            </P>
+            <P>
             Furthermore, no data is cached in the group
             entry scratch-pad space if the object header for
             the group entry has a link count greater than
-            one.</td>
+            one.
+            </P>
+          </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <h4>Format of the Scratch-pad Space</h4>
 
@@ -1235,216 +1402,235 @@ TABLE.desc TD { }
       contains cached metadata for another object header 
       in the following format:
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Object Header Scratch-pad Format</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Object Header Scratch-pad Format
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
 
-        <tr align=center>
-          <td colspan=4>Address of B-tree<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of B-tree<sup>O</sup></td>
 
-        <tr align=center>
-          <td colspan=4>Address of Name Heap<sup><font size=-2>O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Name Heap<sup>O</sup></td>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'O' the above table are
             <br>
             of the size specified in "Size of Offsets.")
-          </div>
         </td></tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Address of B-tree</td>
-          <td>This is the file address for the root of the 
-            group's B-tree.</td>
+          <td>
+            <P>This is the file address for the root of the 
+            group's B-tree.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Address of Name Heap</td>
-          <td>This is the file address for the group's local
-            heap, in which are stored the group's symbol names.</td>
+          <td>
+            <P>This is the file address for the group's local
+            heap, in which are stored the group's symbol names.
+            </P>
+          </td>
         </tr>
       </table>
-    </center>
+    </div>
 
 
-    <p>If the Cache Type field contains the value two
+    <P>If the Cache Type field contains the value two
       <code>(2)</code>, then the scratch-pad space
       contains cached metadata for another symbolic link
       in the following format:
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Symbolic Link Scratch-pad Format</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Symbolic Link Scratch-pad Format
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Offset to Link Value</td>
         </tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Offset to Link Value</td>
-          <td>The value of a symbolic link (that is, the name of the
+          <td>
+            <P>The value of a symbolic link (that is, the name of the
             thing to which it points) is stored in the local heap.
             This field is the 4-byte offset into the local heap for
-            the start of the link value, which is null terminated.</td>
+            the start of the link value, which is null terminated.
+            </P>
+          </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <h3><a name="LocalHeap">Disk Format: Level 1D - Local Heaps</a></h3>
 
-    <p>A heap is a collection of small heap objects.  Objects can be
+    <P>A heap is a collection of small heap objects.  Objects can be
       inserted and removed from the heap at any time.  
       The address of a heap does not change once the heap is created. 
       References to objects are stored in the group table; 
       the names of those objects are stored in the local heap.
+    </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <b>Local Heaps</b>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Local Heap
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Signature</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td>Version</td>
           <td colspan=3>Reserved (zero)</td>
         </td>
           
-        <tr align=center>
-          <td colspan=4>Data Segment Size<sup><font size="-2">L</font></sup></td>
+        <tr>
+          <td colspan=4>Data Segment Size<sup>L</sup></td>
         </tr>
 
-        <tr align=center>
-          <td colspan=4>Offset to Head of Free-list<sup><font size="-2">L</font></sup></td>
+        <tr>
+          <td colspan=4>Offset to Head of Free-list<sup>L</sup></td>
         </tr>
 
-        <tr align=center>
-          <td colspan=4>Address of Data Segment<sup><font size="-2">O</font></sup></td>
+        <tr>
+          <td colspan=4>Address of Data Segment<sup>O</sup></td>
         </tr>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'L' the above table are
             <br>
             of the size specified in "Size of Lengths.")
-          </div>
         </td></tr>
         <tr><td>
-          <div align=right>
             (Items marked with an 'O' the above table are
             <br>
             of the size specified in "Size of Offsets.")
-          </div>
         </td></tr>
       </table>
-    </center>
+    </div>
 
     <p>
     <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Signature</td>
-          <td>The ASCII character string "<code>HEAP</code>"
+          <td>
+            <P>The ASCII character string "<code>HEAP</code>"
             is used to indicate the
             beginning of a heap.  This gives file consistency
             checking utilities a better chance of reconstructing a
-            damaged file.</td>
+            damaged file.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Version</td>
-          <td>Each local heap has its own version number so that new
+          <td>
+            <P>Each local heap has its own version number so that new
             heaps can be added to old files.  This document
             describes version zero (0) of the local heap.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Data Segment Size</td>
-          <td>The total amount of disk memory allocated for the heap
+          <td>
+            <P>The total amount of disk memory allocated for the heap
             data.  This may be larger than the amount of space
             required by the objects stored in the heap.  The extra
-            unused space in the heap holds a linked list of free blocks.</td>
+            unused space in the heap holds a linked list of free blocks.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Offset to Head of Free-list</td>
-          <td>This is the offset within the heap data segment of the
+          <td>
+            <P>This is the offset within the heap data segment of the
             first free block (or the
             <A href="#UndefinedAddress">undefined address</A> if there is no
-            free block).  The free block contains &lt;Size of Lengths&gt; bytes that
+            free block).  The free block contains "Size of Lengths" bytes that
             are the offset of the next free chunk (or the
-            <A href="#UndefinedAddress">undefined address</A>
-            if this is the last free chunk) followed by &lt;Size of Lengths&gt;
-            bytes that store the size of this free chunk.</td>
+            <A href="#UndefinedAddress">undefined address</A> if this is the
+            last free chunk) followed by "Size of Lengths" bytes that store
+            the size of this free chunk.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Address of Data Segment</td>
-          <td>The data segment originally starts immediately after
+          <td>
+            <P>The data segment originally starts immediately after
             the heap header, but if the data segment must grow as a
             result of adding more objects, then the data segment may
             be relocated, in its entirety, to another part of the 
-            file.</td>
+            file.
+            </P>
+          </td>
         </tr>
       </table>
     </center>
@@ -1453,7 +1639,7 @@ TABLE.desc TD { }
 
     <h3><a name="GlobalHeap">Disk Format: Level 1E - Global Heap</a></h3>
 
-    <p>Each HDF5 file has a global heap which stores various types of
+    <P>Each HDF5 file has a global heap which stores various types of
       information which is typically shared between datasets.  The
       global heap was designed to satisfy these goals:
 
@@ -1462,23 +1648,19 @@ TABLE.desc TD { }
         resulting in repeated file I/O requests. Since global heap
         objects will typically be shared among several datasets, it is
         probable that the object will be accessed repeatedly.
-
-        <br><br>
       <li>Collections of related global heap objects should result in
         fewer and larger I/O requests.  For instance, a dataset of
         object references will have a global heap object for each
         reference.  Reading the entire set of object references
         should result in a few large I/O requests instead of one small
         I/O request for each reference.
-
-        <br><br>
       <li>It should be possible to remove objects from the global heap
         and the resulting file hole should be eligible to be reclaimed
         for other uses.
-        <br><br>
     </ol>
+    </P>
 
-    <p>The implementation of the heap makes use of the memory
+    <P>The implementation of the heap makes use of the memory
       management already available at the file level and combines that
       with a new top-level object called a <em>collection</em> to
       achieve Goal B. The global heap is the set of all collections.
@@ -1486,195 +1668,223 @@ TABLE.desc TD { }
       each collection contains one or more global heap objects. For
       the purposes of disk I/O and caching, a collection is treated as
       an atomic object.
+    </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>A Global Heap Collection</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          A Global Heap Collection
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Signature</td>
         </tr>
           
-        <tr align=center>
+        <tr>
           <td>Version</td>
           <td colspan=3>Reserved (zero)</td>
         </td>
           
-        <tr align=center>
+        <tr>
           <td colspan=4>Collection Size</td>
         </tr>
           
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Global Heap Object 1<br><br></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Global Heap Object 2<br><br></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>...<br><br></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Global Heap Object <em>N</em><br><br></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Global Heap Object 0 (free space)<br><br></td>
         </tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Signature</td>
-          <td>The ASCII character string "<code>GCOL</code>"
+          <td>
+            <P>The ASCII character string "<code>GCOL</code>"
             is used to indicate the
             beginning of a collection.  This gives file consistency
             checking utilities a better chance of reconstructing a
-            damaged file.</td>
+            damaged file.
+            </P>
+          </td>
         </tr>
           
-        <tr valign=top>
+        <tr>
           <td>Version</td>
-          <td>Each collection has its own version number so that new
+          <td>
+            <P>Each collection has its own version number so that new
             collections can be added to old files.  This document
             describes version one (1) of the collections (there is no
             version zero (0)).
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Collection Data Size</td>
-          <td>This is the size in bytes of the entire collection
+          <td>
+            <P>This is the size in bytes of the entire collection
             including this field.  The default (and minimum)
             collection size is 4096 bytes which is a typical file
             system block size and which allows for 170 16-byte heap
-            objects plus their overhead.</td>
+            objects plus their overhead.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Global Heap Object 1 through <em>N</em></td> 
-          <td>The objects are stored in any order with no 
-            intervening unused space.</td>
+          <td>
+            <P>The objects are stored in any order with no 
+            intervening unused space.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Global Heap Object 0</td>
-          <td>Global Heap Object 0 (zero), when present, represents the free space in
-            the collection.  Free space always appears at the end of
-            the collection.  If the free space is too small to store
-            the header for Object 0 (described below) then the
-            header is implied and the collection contains no free space.
+          <td>
+            <P>Global Heap Object 0 (zero), when present, represents the free
+            space in the collection.  Free space always appears at the end of
+            the collection.  If the free space is too small to store the header
+            for Object 0 (described below) then the header is implied and the
+            collection contains no free space.
+            </P>
+          </td>
       </table>
-    </center>
+    </div>
     
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-        <caption align=top>
-          <B>Global Heap Object</B>
+    <br>
+    <div align=center>
+      <table class=format>
+        <caption>
+          Global Heap Object
         </caption>
 
-        <tr align=center>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
-          <th width="25%">byte</th>
+        <tr>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
+          <th>byte</th>
         </tr>
           
-        <tr align=center>
+        <tr>
           <td colspan=2>Object ID</td>
           <td colspan=2>Reference Count</td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4>Reserved</td>
         </tr>
 
-        <tr align=center>
-          <td colspan=4>Object Data Size<sup><font size="-2">L</font></sup></td>
+        <tr>
+          <td colspan=4>Object Data Size<sup>L</sup></td>
         </tr>
 
-        <tr align=center>
+        <tr>
           <td colspan=4><br>Object Data<br><br></td>
         </tr>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'L' the above table are
             <br>
             of the size specified in "Size of Lengths.")
-          </div>
         </td></tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Object ID</td>
-          <td>Each object has a unique identification number within a
+          <td>
+            <P>Each object has a unique identification number within a
             collection.  The identification numbers are chosen so that
             new objects have the smallest value possible with the
             exception that the identifier <code>0</code> always refers to the
             object which represents all free space within the
-            collection.</td>
+            collection.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Reference Count</td>
-          <td>All heap objects have a reference count field.  An
+          <td>
+            <P>All heap objects have a reference count field.  An
             object which is referenced from some other part of the
             file will have a positive reference count. The reference
-            count for Object 0 is always zero.</td>
+            count for Object 0 is always zero.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Reserved</td>
-          <td>Zero padding to align next field on an 8-byte
-            boundary.</td>
+          <td>
+            <P>Zero padding to align next field on an 8-byte boundary.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
-          <td>Object Size</td> <td>This is the size of the the fields
-            above plus the object data stored for the object.  The
-            actual storage size is rounded up to a multiple of
-            eight.</td>
+        <tr>
+          <td>Object Size</td>
+          <td>
+            <P>This is the size of the the fields above plus the object data
+            stored for the object.  The actual storage size is rounded up to a
+            multiple of eight.
+            </P>
+          </td>
         </tr>
 
-        <tr valign=top>
+        <tr>
           <td>Object Data</td>
-          <td>The object data is treated as a one-dimensional array
-            of bytes to be interpreted by the caller.</td>
+          <td>
+            <P>The object data is treated as a one-dimensional array
+            of bytes to be interpreted by the caller.
+            </P>
+          </td>
         </tr>
       </table>
-    </center>
+    </div>
 
     <h3><a name="FreeSpaceIndex">Disk Format: Level 1F - Free-space Index</a></h3>
 
@@ -1686,7 +1896,7 @@ TABLE.desc TD { }
       that pointer is currently required to be the
       <A href="#UndefinedAddress">undefined address</A>.
 
-    <p>The free-space index is not otherwise publicly defined at this time.
+    <p>The format of the free-space index is not defined at this time.
 
 <!--
     <p>The Free-space Index is a collection of blocks of data,
@@ -1781,22 +1991,24 @@ TABLE.desc TD { }
 
     <h2><a name="DataObject">Disk Format: Level 2 - Data Objects </a></h2>
 
-    <p>Data objects contain the real information in the file.  These
+    <P>Data objects contain the real information in the file.  These
       objects compose the scientific data and other information which
       are generally thought of as "data" by the end-user.  All the
       other information in the file is provided as a framework for
       these data objects.
+    </P>
 
-    <p>A data object is composed of header information and data
+    <P>A data object is composed of header information and data
       information.  The header information contains the information
       needed to interpret the data information for the data object as
       well as additional "metadata" or pointers to additional
       "metadata" used to describe or annotate each data object.
+    </P>
 
     <h3><a name="ObjectHeader">
-	Disk Format: Level 2a - Data Object Headers</a></h3>
+	Disk Format: Level 2A - Data Object Headers</a></h3>
 
-    <p>The header information of an object is designed to encompass
+    <P>The header information of an object is designed to encompass
       all the information about an object which would be desired to be
       known, except for the data itself.  This information includes
       the dataspace, datatype, information about how the data
@@ -1807,194 +2019,233 @@ TABLE.desc TD { }
       is also stored in the object's header.  The header of each object is
       not necessarily located immediately prior to the object's data in the
       file and in fact may be located in any position in the file.
+    </P>
 
-    <p>
-    <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>Object Headers</B>
+    <P>Header messages are aligned on 8-byte boundaries.
+    </P>
+
+    <br>
+    <div align=center>
+      <table class=format>
+	<caption>
+	  Object Headers
 	</caption>
 
-	<tr align=center>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
+	<tr>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
 	</tr>
 
-	<tr align=center>
-	  <td colspan=1 width="25%">Version Number</td>
-	  <td colspan=1 width="25%">Reserved</td>
-	  <td colspan=2 width="50%">Number of Header Messages</td>
+	<tr>
+	  <td>Version</td>
+	  <td>Reserved (zero)</td>
+	  <td colspan=2>Number of Header Messages</td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=4>Object Reference Count</td>
 	</tr>
-	<tr align=center>
-	  <td colspan=4><br>Total Object Header Size<br><br></td>
+
+	<tr>
+	  <td colspan=4>Object Header Size</td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=2>Header Message Type #1</td>
 	  <td colspan=2>Size of Header Message Data #1</td>
 	</tr>
-	<tr align=center>
-	  <td>Flags</td>
-	  <td colspan=3>Reserved</td>
+
+	<tr>
+	  <td>Header Message #1 Flags</td>
+	  <td colspan=3>Reserved (zero)</td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=4><br>Header Message Data #1<br><br></td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=4>.<br>.<br>.<br></td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=2>Header Message Type #n</td>
 	  <td colspan=2>Size of Header Message Data #n</td>
 	</tr>
-	<tr align=center>
-	  <td>Flags</td>
-	  <td colspan=3>Reserved</td>
+
+	<tr>
+	  <td>Header Message #n Flags</td>
+	  <td colspan=3>Reserved (zero)</td>
 	</tr>
-	<tr align=center>
+
+	<tr>
 	  <td colspan=4><br>Header Message Data #n<br><br></td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>
-    <center>
-      <table align=center width="80%">
-	<tr align=left>
-          <th width="30%"><U><font size=+1>Field Name</font></U></th>
-          <th><U><font size=+1>Description</font></U></th>
+    <br>
+    <div align=center>
+      <table class=desc>
+	<tr>
+          <th width="30%">Field Name</th>
+          <th>Description</th>
 	</tr>
 
-	<tr valign=top>
-	  <td>Version number</td>
-	  <td>This value is used to determine the format of the
+	<tr>
+	  <td>Version</td>
+	  <td>
+            <P>This value is used to determine the format of the
 	    information in the object header.  When the format of the
 	    information in the object header is changed, the version number
 	    is incremented and can be used to determine how the
 	    information in the object header is formatted.  This
             document describes version one (1) (there was no version
-            zero (0)).</td>
+            zero (0)).
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Reserved</td>
-	  <td>Always set to zero.</td>
+	<tr>
+	  <td>Number of Header Messages</td>
+	  <td>
+            <P>This value determines the number of messages listed in
+	    object headers for this object.  This value includes the messages
+            in continuation messages for this object.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Number of header messages</td>
-	  <td>This value determines the number of messages listed in
-	    this object header.  This provides a fast way for software
-	    to prepare storage for the messages in the header.</td>
-	</tr>
-
-	<tr valign=top>
+	<tr>
 	  <td>Object Reference Count</td>
-	  <td>This value specifies the number of references to this
-	    object within the current file.  References to the
-	    data object from external files are not tracked.</td>
+	  <td>
+            <P>This value specifies the number of "hard links" to this object
+            within the current file.  References to the object from external
+            files, "soft links" in this file and object references in this
+            file are not tracked.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Total Object Header Size</td>
-	  <td>This value specifies the total number of bytes of header
-	    message data following this length field for the current
-	    message as well as any continuation data located elsewhere
-	    in the file.</td>
+	<tr>
+	  <td>Object Header Size</td>
+	  <td>
+            <P>This value specifies the number of bytes of header message data
+            following this length field that contain object header messages
+            for this object header.  This value does not include the size of
+            object header continuation blocks for this object elsewhere in the
+            file.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Header Message Type</td>
-	  <td>The header message type specifies the type of
-	    information included in the header message data following
-	    the type along with a small amount of other information.
-	    Bit 15 of the message type is set if the message is
-	    constant (constant messages cannot be changed since they
-	    may be cached in group entries throughout the
-	    file).  The header message types for the pre-defined
-	    header messages will be included in further discussion
-	    below.</td>
+	  <td>
+            <P>This value specifies the type of information included in the
+            following header message data.  The header message types for the
+            pre-defined header messages are included in sections below.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
+	<tr>
 	  <td>Size of Header Message Data</td>
-	  <td>This value specifies the number of bytes of header
+	  <td>
+            <P>This value specifies the number of bytes of header
 	    message data following the header message type and length
 	    information for the current message. The size includes
 	    padding bytes to make the message a multiple of eight
-	    bytes.</td>
+	    bytes.
+            </P>
+          </td>
 	</tr>
 
-	<tr valign=top>
-	  <td>Flags</td>
-	  <td>This is a bit field with the following definition:
-	    <dl>
-	      <dt><code>0</code>
-	      <dd>If set, the message data is constant.  This is used
-		for messages like the datatype message of a dataset.
-	      <dt><code>1</code>
-	      <dd>If set, the message is stored in the global heap and
-		the Header Message Data field contains a Shared Object
-		message and the Size of Header Message Data field
-		contains the size of that Shared Object message.
-	      <dt><code>2-7</code>
-	      <dd>Reserved
-	    </dl>
-	  </td>
+	<tr>
+	  <td>Header Message Flags</td>
+	  <td>
+            <P>This is a bit field with the following definition:
+            <table class=list>
+                <tr>
+                  <th width="30%">Bit</th>
+                  <th width="70%" align=left>Description</th>
+                </tr>
 
-	<tr valign=top>
+                <tr>
+                  <td align=center><code>0</code></td>
+                  <td>If set, the message data is constant.  This is used
+                    for messages like the datatype message of a dataset.
+                  </td>
+                </tr>
+                <tr>
+                  <td align=center><code>1</code></td>
+                  <td>If set, the message is stored in the global heap and
+                    the Header Message Data field contains a Shared Object
+                    message and the Size of Header Message Data field
+                    contains the size of that Shared Object message.
+                  </td>
+                </tr>
+                <tr>
+                  <td align=center><code>2-7</code></td>
+                  <td>Reserved</td>
+                </tr>
+	    </table>
+            </P>
+          </td>
+        </tr>
+
+	<tr>
 	  <td>Header Message Data</td>
-	  <td>The format and length of this field is determined by the
+	  <td>
+            <P>The format and length of this field is determined by the
 	    header message type and size respectively.  Some header
 	    message types do not require any data and this information
 	    can be eliminated by setting the length of the message to
 	    zero. The data is padded with enough zeros to make the
-	    size a multiple of eight.</td>
+	    size a multiple of eight.
+            </P>
+          </td>
 	</tr>
       </table>
-    </center>
+    </div>
 
-    <p>The header message types and the message data associated with
+    <P>The header message types and the message data associated with
       them compose the critical "metadata" about each object.  Some
       header messages are required for each object while others are
       optional.  Some optional header messages may also be repeated
       several times in the header itself, the requirements and number
       of times allowed in the header will be noted in each header
       message description below.
+    </P>
 
     <P>The following is a list of currently defined header messages:
+    </P>
 
     <hr>
     <h4><a name="NILMessage">Name: NIL</a></h4>
-    <b>Type: </b>0x0000<br>
-    <b>Length:</b> varies<br>
-    <b>Status:</b> Optional, may be repeated.<br>
-    <b>Purpose and Description:</b> The NIL message is used to
-    indicate a message 
-    which is to be ignored when reading the header messages for a data object.
-    [Probably one which has been deleted for some reason.]<br>
-    <b>Format of Data:</b> Unspecified.<br>
 
-<!-- Delete examples throughout doc
-    <b>Examples:</b> None.
--->
-
+    <B>Type: </B>0x0000<br>
+    <B>Length:</B> varies<br>
+    <B>Status:</B> Optional, may be repeated.<br>
+    <B>Purpose and Description:</B> The NIL message is used to
+    indicate a message which is to be ignored when reading the header messages
+    for a data object.
+    [Possibly one which has been deleted for some reason.]<br>
+    <B>Format of Data:</B> Unspecified.<br>
+    <br>
 
     <hr>
     <h4><a name="SimpleDataSpace">Name: Simple Dataspace</a></h4>
 
-    <b>Type: </b>0x0001<br>
-    <b>Length:</b> Varies according to the number of dimensions, 
-      as described in the following table<br>
-    <b>Status:</b> The <em>Simple Dataspace</em> message is required 
-     and may not be repeated.  This message is currently used with
-     datasets and named dataspaces.<br>
+    <B>Type: </B>0x0001<br>
+    <B>Length:</B> Varies according to the number of dimensions, 
+      as described in the following table.<br>
+    <B>Status:</B> The <em>Simple Dataspace</em> message is required 
+     and may not be repeated.<br>
 
-    <p>The <em>Simple Dataspace</em> message describes the number
+    <P>The <em>Simple Dataspace</em> message describes the number
       of dimensions and size of each dimension that the data object
       has.  This message is only used for datasets which have a
       simple, rectilinear grid layout; datasets requiring a more
@@ -2002,8 +2253,8 @@ TABLE.desc TD { }
       must use the <em>Complex Dataspace</em> message for expressing 
       the space the dataset inhabits.  
       <i>(Note: The <em>Complex Dataspace</em> functionality is 
-      not yet implemented (as of HDF5 Release 1.2).  It is not described 
-      in this document.)</i>
+      not yet implemented.  It is not described in this document.)</i>
+    </P>
 
     <p>
     <center>
@@ -2436,9 +2687,6 @@ TABLE.desc TD { }
 	  <td colspan=4>Grid Point Locations<br>.<br>.<br></td>
       </table>
     </center>
-
-    <h4><a name="DataSpaceExample">Examples:</a></h4>
-    Need some good examples, this is complex!
 -->
 
 
@@ -3166,11 +3414,6 @@ TABLE.desc TD { }
     <P><b>Format of Data:</b>  The message data is actually composed
       of dataset data, so the format will be determined by the dataset
       format.
-
-<!-- Delete examples throughout doc
-    <h4><a name="CompactDataStorageExample">Examples:</a></h4>
-    [very straightforward]
--->
 
     <hr>
     <h4><a name="ExternalFileListMessage">Name: Data Storage -
@@ -4094,11 +4337,6 @@ header continuation information is located.
 the file.
 </dl>
 </dl>
-
-<!-- Delete examples throughout doc
-<h4><a name="ContinuationExample">Examples:</a></h4>
-    [straightforward]
--->
 
 <hr>
 <h4><a name="SymbolTableMessage">Name: Group Message</a></h4>
