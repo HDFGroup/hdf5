@@ -15,7 +15,10 @@
 #include <string.h>
 #include <sys/time.h>
 #include <mpi.h>
-#include "mpio.h"
+#ifndef MPI_FILE_NULL           /*MPIO may be defined in mpi.h already       */
+#   include <mpio.h>
+#endif
+
 
 #include "hdf5.h"
 /* Macro definitions */
@@ -364,7 +367,8 @@ int parse_args(int argc, char **argv)
 				if (p=(char*)strchr(optarg, '/'))
 				    opt_threshold = atoi(p+1);
 				}
-				printf("alignment/threshold=%ld/%ld\n",
+				HDfprintf(stdout,
+				    "alignment/threshold=%Hu/%Hu\n",
 				     opt_alignment, opt_threshold);
 				break;
 			case 'c': /* correctness */
