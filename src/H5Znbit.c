@@ -42,14 +42,14 @@ typedef struct {
    int order;
 } para;
 
-void next_char(int *j, int *buf_len);
-void byte_order(int *big_endian, int *little_endian);
-void decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer,
+void H5Z_nbit_next_char(int *j, int *buf_len);
+void H5Z_nbit_byte_order(int *big_endian, int *little_endian);
+void H5Z_nbit_decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer,
                          int *j, int *buf_len, para p);
-void compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
+void H5Z_nbit_compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
                        int *j, int *buf_len, para p);
-void decompress(void *data, int data_size, char *buffer, int buffer_size, para p);
-void compress(void *data, int data_size, char *buffer, int buffer_size, para p);
+void H5Z_nbit_decompress(void *data, int data_size, char *buffer, int buffer_size, para p);
+void H5Z_nbit_compress(void *data, int data_size, char *buffer, int buffer_size, para p);
 
 /* This message derives from H5Z */
 H5Z_class_t H5Z_NBIT[1] = {{
@@ -278,7 +278,7 @@ H5Z_filter_nbit (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit decompression")
   
         /* decompress the buffer */
-        decompress(outbuf, d_nelmts, *buf, nbytes, nbit_param);   
+        H5Z_nbit_decompress(outbuf, d_nelmts, *buf, nbytes, nbit_param);   
     }
     /* output; compress */
     else {
@@ -292,7 +292,7 @@ H5Z_filter_nbit (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit compression")
   
         /* compress the buffer */
-        compress(*buf, d_nelmts, outbuf, size_out, nbit_param);
+        H5Z_nbit_compress(*buf, d_nelmts, outbuf, size_out, nbit_param);
     }
 
     /* free the input buffer */
@@ -316,13 +316,13 @@ done:
    data type regardless what is treated on byte basis 
 */
 
-void next_char(int *j, int *buf_len)
+void H5Z_nbit_next_char(int *j, int *buf_len)
 {
    ++(*j); 
    *buf_len = 8 * sizeof(char);
 }
 
-void byte_order(int *big_endian, int *little_endian)
+void H5Z_nbit_byte_order(int *big_endian, int *little_endian)
 {
    /* decide the machine's byte order */
    union {
@@ -340,7 +340,7 @@ void byte_order(int *big_endian, int *little_endian)
    }
 }       
 
-void decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
+void H5Z_nbit_decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
             int *j, int *buf_len, para p)
 {
    int dat_len; /* dat_len is the number of bits to be copied in each data char */
@@ -378,7 +378,7 @@ void decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char 
       ((char *)data)[i * p.sizeof_datatype + k] |=
       ((val & ~(~0 << *buf_len)) << (dat_len - *buf_len)) << char_offset;
       dat_len -= *buf_len;
-      next_char(j, buf_len);
+      H5Z_nbit_next_char(j, buf_len);
       if(dat_len == 0) 
          return;
       val = buffer[*j];
@@ -390,7 +390,7 @@ void decompress_one_byte(void *data, int i, int k, int begin_i, int end_i, char 
 }
 
 /* decompress buffer to original data form */
-void decompress(void *data, int data_size, char *buffer, int buffer_size, para p) 
+void H5Z_nbit_decompress(void *data, int data_size, char *buffer, int buffer_size, para p) 
 {
    /* i: index of data, j: index of buffer, 
       buf_len: number of bits to be copied in current char */
@@ -407,7 +407,7 @@ void decompress(void *data, int data_size, char *buffer, int buffer_size, para p
    
    /* decide the byte order of the machine */
    little_endian = big_endian = 0;
-   byte_order(&big_endian, &little_endian);
+   H5Z_nbit_byte_order(&big_endian, &little_endian);
 
    datatype_len = p.sizeof_datatype * 8;
 
@@ -426,7 +426,7 @@ void decompress(void *data, int data_size, char *buffer, int buffer_size, para p
 
       for(i = 0; i < data_size; i++) 
          for(k = begin_i; k >= end_i; k--)
-            decompress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
+            H5Z_nbit_decompress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
    }
 
    if(p.order == 20) { /* big endian */
@@ -440,11 +440,11 @@ void decompress(void *data, int data_size, char *buffer, int buffer_size, para p
 
       for(i = 0; i < data_size; i++) 
          for(k = begin_i; k <= end_i; k++)
-            decompress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
+            H5Z_nbit_decompress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
    } 
 }
 
-void compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
+void H5Z_nbit_compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *buffer, 
                        int *j, int *buf_len, para p)
 {
    int dat_len; /* dat_len is the number of bits to be copied in each data char */
@@ -479,7 +479,7 @@ void compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *b
    } else {
       buffer[*j] |= (val >> (dat_len - *buf_len)) & ~(~0 << *buf_len);
       dat_len -= *buf_len;
-      next_char(j, buf_len);
+      H5Z_nbit_next_char(j, buf_len);
       if(dat_len == 0) 
          return;
       val &= ~(~0 << dat_len);
@@ -491,7 +491,7 @@ void compress_one_byte(void *data, int i, int k, int begin_i, int end_i, char *b
 
 /* copy array of certain data type to buffer in compressed form
    return number of unused bits in the buffer */
-void compress(void *data, int data_size, char *buffer, int buffer_size, para p) {
+void H5Z_nbit_compress(void *data, int data_size, char *buffer, int buffer_size, para p) {
    /* i: index of data, j: index of buffer, 
       buf_len: number of bits to be filled in current char */
    int i, j, buf_len; 
@@ -506,7 +506,7 @@ void compress(void *data, int data_size, char *buffer, int buffer_size, para p) 
 
    /* decide the byte order of the machine */
    big_endian = little_endian = 0;
-   byte_order(&big_endian, &little_endian);
+   H5Z_nbit_byte_order(&big_endian, &little_endian);
 
    datatype_len = p.sizeof_datatype * 8;
    /* initialization before the loop */ 
@@ -524,7 +524,7 @@ void compress(void *data, int data_size, char *buffer, int buffer_size, para p) 
 
       for(i = 0; i < data_size; i++) 
          for(k = begin_i; k >= end_i; k--) 
-            compress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
+            H5Z_nbit_compress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
    }
 
    if(p.order == 20) { /* big endian */
@@ -538,7 +538,7 @@ void compress(void *data, int data_size, char *buffer, int buffer_size, para p) 
 
       for(i = 0; i < data_size; i++) 
          for(k = begin_i; k <= end_i; k++) 
-            compress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
+            H5Z_nbit_compress_one_byte(data, i, k, begin_i, end_i, buffer, &j, &buf_len, p);
    }    
 }
 #endif /* H5_HAVE_FILTER_NZIP */
