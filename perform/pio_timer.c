@@ -19,6 +19,8 @@
 
 #include <mpi.h>
 
+#include "pio_perf.h"
+
 /*
  * The number to divide the tv_usec field with to get a nice decimal to add to
  * the number of seconds.
@@ -122,6 +124,47 @@ set_time(pio_time *pt, timer_type t, int start_stop)
                             ((double)pt->sys_timer[t].tv_usec) / MILLISECOND);
             }
         }
+    }
+
+    if (pio_debug_level >= 4) {
+        char *msg;
+        int myrank;
+
+        MPI_Comm_rank(pio_comm_g, &myrank);
+
+        switch (t) {
+        case HDF5_FILE_OPENCLOSE:
+            msg = "File Open/Close";
+            break;
+        case HDF5_DATASET_CREATE:
+            msg = "Dataset Create";
+            break;
+        case HDF5_MPI_WRITE:
+            msg = "MPI Write";
+            break;
+        case HDF5_MPI_READ:
+            msg = "MPI Read";
+            break;
+        case HDF5_FINE_WRITE_FIXED_DIMS:
+            msg = "Fine Write";
+            break;
+        case HDF5_FINE_READ_FIXED_DIMS:
+            msg = "Fine Read";
+            break;
+        case HDF5_GROSS_WRITE_FIXED_DIMS:
+            msg = "Gross Write";
+            break;
+        case HDF5_GROSS_READ_FIXED_DIMS:
+            msg = "Gross Read";
+            break;
+        default:
+            msg = "Unknown Timer";
+            break;
+        }
+
+        fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
+                (start_stop == START ? "Start" : "Stop"),
+                pt->total_time[t]);
     }
 
     return pt;

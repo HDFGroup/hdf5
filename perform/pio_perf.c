@@ -79,8 +79,10 @@
 #define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
 
 /* global variables */
-int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK */
-int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD */
+FILE       *output;             /* output file                          */
+pio_time   *timer;              /* timer: global for stub functions     */
+int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
+int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
@@ -222,15 +224,15 @@ typedef struct _minmax {
 /* local functions */
 static long parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
-static void run_test_loop(FILE *output, struct options *options);
-static int run_test(FILE *output, iotype iot, parameters parms);
-static void output_all_info(FILE *output, minmax *mm, int count, int indent_level);
+static void run_test_loop(struct options *options);
+static int run_test(iotype iot, parameters parms);
+static void output_all_info(minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
 static minmax accumulate_minmax_stuff(minmax *mm, long raw_size, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
-static void output_report(FILE *output, const char *fmt, ...);
-static void print_indent(register FILE *output, register int indent);
+static void output_report(const char *fmt, ...);
+static void print_indent(register int indent);
 static void usage(const char *prog);
 
 /*
@@ -246,8 +248,9 @@ main(int argc, char **argv)
 {
     int ret;
     int exit_value = EXIT_SUCCESS;
-    FILE *output = stdout;
     struct options *opts = NULL;
+
+    output = stdout;
 
     /* initialize MPI and get the maximum num of processors we started with */
     MPI_Init(&argc, &argv);
@@ -295,7 +298,7 @@ main(int argc, char **argv)
         }
     }
 
-    run_test_loop(output, opts);
+    run_test_loop(opts);
 
 finish:
     MPI_Finalize();
@@ -324,7 +327,7 @@ finish:
  * Modifications:
  */
 static void
-run_test_loop(FILE *output, struct options *opts)
+run_test_loop(struct options *opts)
 {
     parameters parms;
     long num_procs;
@@ -363,7 +366,7 @@ run_test_loop(FILE *output, struct options *opts)
 
 	/* only processes doing PIO will run the tests */
 	if (doing_pio){
-            output_report(output, "Number of processors = %ld\n", parms.num_procs);
+            output_report("Number of processors = %ld\n", parms.num_procs);
 
             /* multiply the xfer buffer size by 2 for each loop iteration */
             for (buf_size = opts->min_xfer_size;
@@ -371,23 +374,22 @@ run_test_loop(FILE *output, struct options *opts)
                 parms.buf_size = buf_size;
                 parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
-                print_indent(output, 1);
-                output_report(output, "Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+                print_indent(1);
+                output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
                               buf_size,
                               ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
-                print_indent(output, 1);
-                output_report(output,
-                              "  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
+                print_indent(1);
+                output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
                 if (io_runs & PIO_RAW)
-                    run_test(output, RAWIO, parms);
+                    run_test(RAWIO, parms);
 
                 if (io_runs & PIO_MPI)
-                    run_test(output, MPIO, parms);
+                    run_test(MPIO, parms);
 
                 if (io_runs & PIO_HDF5)
-                    run_test(output, PHDF5, parms);
+                    run_test(PHDF5, parms);
             }
 
             if (destroy_comm_world() != SUCCESS) {
@@ -405,7 +407,7 @@ run_test_loop(FILE *output, struct options *opts)
  * Modifications:
  */
 static int
-run_test(FILE *output, iotype iot, parameters parms)
+run_test(iotype iot, parameters parms)
 {
     results         res;
     register int    i, ret_value = SUCCESS;
@@ -423,18 +425,18 @@ run_test(FILE *output, iotype iot, parameters parms)
 
     raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
     parms.io_type = iot;
-    print_indent(output, 2);
-    output_report(output, "Type of IO = ");
+    print_indent(2);
+    output_report("Type of IO = ");
 
     switch (iot) {
     case RAWIO:
-        output_report(output, "Raw\n");
+        output_report("Raw\n");
         break;
     case MPIO:
-        output_report(output, "MPIO\n");
+        output_report("MPIO\n");
         break;
     case PHDF5:
-        output_report(output, "PHDF5\n");
+        output_report("PHDF5\n");
         break;
     }
 
@@ -472,7 +474,8 @@ run_test(FILE *output, iotype iot, parameters parms)
         double t;
 
         MPI_Barrier(pio_comm_g);
-        res = do_pio(output, parms);
+        res = do_pio(parms);
+        timer = res.timers;
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
@@ -497,90 +500,91 @@ run_test(FILE *output, iotype iot, parameters parms)
 	get_minmax(&read_gross_mm, t);
 
         read_gross_mm_table[i] = read_gross_mm;
+        pio_time_destroy(res.timers);
     }
 
     /* accumulate and output the max, min, and average "write" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
-        print_indent(output, 3);
-        output_report(output, "Write details:\n");
-        output_all_info(output, write_mm_table, parms.num_iters, 4);
+        print_indent(3);
+        output_report("Write details:\n");
+        output_all_info(write_mm_table, parms.num_iters, 4);
     }
 
     total_mm = accumulate_minmax_stuff(write_mm_table, raw_size, parms.num_iters);
 
-    print_indent(output, 3);
-    output_report(output, "Write (%d iteration(s)):\n", parms.num_iters);
+    print_indent(3);
+    output_report("Write (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, 4);
-    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(output, 4);
-    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(output, 4);
-    output_report(output, "Average Throughput: %.2f MB/s\n",
+    print_indent(4);
+    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(4);
+    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(4);
+    output_report("Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross write" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
-        print_indent(output, 3);
-        output_report(output, "Write Open-Close details:\n");
-        output_all_info(output, write_gross_mm_table, parms.num_iters, 4);
+        print_indent(3);
+        output_report("Write Open-Close details:\n");
+        output_all_info(write_gross_mm_table, parms.num_iters, 4);
     }
 
     total_mm = accumulate_minmax_stuff(write_gross_mm_table, raw_size, parms.num_iters);
 
-    print_indent(output, 3);
-    output_report(output, "Write Open-Close (%d iteration(s)):\n", parms.num_iters);
+    print_indent(3);
+    output_report("Write Open-Close (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, 4);
-    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(output, 4);
-    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(output, 4);
-    output_report(output, "Average Throughput: %.2f MB/s\n",
+    print_indent(4);
+    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(4);
+    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(4);
+    output_report("Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "read" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
-        print_indent(output, 3);
-        output_report(output, "Read details:\n");
-        output_all_info(output, read_mm_table, parms.num_iters, 4);
+        print_indent(3);
+        output_report("Read details:\n");
+        output_all_info(read_mm_table, parms.num_iters, 4);
     }
 
     total_mm = accumulate_minmax_stuff(read_mm_table, raw_size, parms.num_iters);
 
-    print_indent(output, 3);
-    output_report(output, "Read (%d iteration(s)):\n", parms.num_iters);
+    print_indent(3);
+    output_report("Read (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, 4);
-    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(output, 4);
-    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(output, 4);
-    output_report(output, "Average Throughput: %.2f MB/s\n",
+    print_indent(4);
+    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(4);
+    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(4);
+    output_report("Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross read" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
-        print_indent(output, 3);
-        output_report(output, "Read Open-Close details:\n");
-        output_all_info(output, read_gross_mm_table, parms.num_iters, 4);
+        print_indent(3);
+        output_report("Read Open-Close details:\n");
+        output_all_info(read_gross_mm_table, parms.num_iters, 4);
     }
 
     total_mm = accumulate_minmax_stuff(read_gross_mm_table, raw_size, parms.num_iters);
 
-    print_indent(output, 3);
-    output_report(output, "Read Open-Close (%d iteration(s)):\n", parms.num_iters);
+    print_indent(3);
+    output_report("Read Open-Close (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, 4);
-    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(output, 4);
-    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(output, 4);
-    output_report(output, "Average Throughput: %.2f MB/s\n",
+    print_indent(4);
+    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(4);
+    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(4);
+    output_report("Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
     /* clean up our mess */
@@ -588,7 +592,6 @@ run_test(FILE *output, iotype iot, parameters parms)
     free(read_mm_table);
     free(write_gross_mm_table);
     free(read_gross_mm_table);
-    pio_time_destroy(res.timers);
     return ret_value;
 }
 
@@ -600,17 +603,17 @@ run_test(FILE *output, iotype iot, parameters parms)
  * Modifications:
  */
 static void
-output_all_info(FILE *output, minmax *mm, int count, int indent_level)
+output_all_info(minmax *mm, int count, int indent_level)
 {
     register int i;
 
     for (i = 0; i < count; ++i) {
-        print_indent(output, indent_level);
-        output_report(output, "Iteration %d:\n", i + 1);
-        print_indent(output, indent_level + 1);
-        output_report(output, "Minimum Time: %.2fs\n", mm[i].min);
-        print_indent(output, indent_level + 1);
-        output_report(output, "Maximum Time: %.2fs\n", mm[i].max);
+        print_indent(indent_level);
+        output_report("Iteration %d:\n", i + 1);
+        print_indent(indent_level + 1);
+        output_report("Minimum Time: %.2fs\n", mm[i].min);
+        print_indent(indent_level + 1);
+        output_report("Maximum Time: %.2fs\n", mm[i].max);
     }
 }
 
@@ -756,7 +759,7 @@ destroy_comm_world(void)
  * Modifications:
  */
 static void
-output_report(FILE *output, const char *fmt, ...)
+output_report(const char *fmt, ...)
 {
     int myrank;
 
@@ -780,7 +783,7 @@ output_report(FILE *output, const char *fmt, ...)
  * Modifications:
  */
 static void
-print_indent(register FILE *output, register int indent)
+print_indent(register int indent)
 {
     int myrank;
 
