@@ -5187,7 +5187,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
 		    /* Re-scale the mantissas based on any exponent difference */
 		    if(expo_diff!=0)
-		        check_mant[0] = ldexp(check_mant[0],(double)expo_diff);
+		        check_mant[0] = ldexp(check_mant[0],expo_diff);
 
 		    /* Compute the proper epsilon */
 		    epsilon=ldexp(epsilon,-valid_bits);
