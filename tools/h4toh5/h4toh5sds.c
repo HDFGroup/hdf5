@@ -125,9 +125,9 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int  memopt;
   int  sdsopt_flag = 1;
 
-  memopt = 0;
+  memopt   = 0;
+  slabsize = 0;
   if((fp= fopen("parafile","r"))==NULL){/*ignore the parameter file */
-    printf("coming here\n");
     sdsopt_flag = 0;
     memopt = 0;
     chunksize = HDF4_CHUNKSIZE;
@@ -141,10 +141,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     fscanf(fp,"%d",&chunksize);
     fclose(fp);
   }
-  /* if(memsize <=0) slabsize = -1;*/
-  if(memopt == 1) 
-    slabsize = SLABSIZE*1000000;
-  else slabsize = 0;
 
   special_code = -1;
   /* zeroing out the memory for sdsname and sdslabel.*/
@@ -490,7 +486,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     return FAIL;							      
   }									      
 
-  if(count_sdsdata*h4memsize <= slabsize || MEMOPT!= 1) {
+  if(count_sdsdata*h4memsize <= slabsize || memopt!= 1) {
 
     sds_data = malloc(h4memsize*count_sdsdata);
 

@@ -37,7 +37,6 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
 #include "h4toh5util.h"
 #include <fcntl.h>
 #include <errno.h>
-#include "h4toh5user.h"
 #endif
 
 /* For windows support.*/
