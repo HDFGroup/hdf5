@@ -16,13 +16,18 @@ The Code Warrior project file settings assumes ZLIB is intalled in D:\zlib\zlib.
 and SZIP is installed in D:\szip\codewarrior\szip.lib
 These precompiled libraries can be obtained from the HDF web site, 
 please see hdf.ncsa.uiuc.edu for downloading instructions.
+If you do not have these libraries installed on these locations, you must change
+the path in the Project Settings (menu Edit->Settings->Target->Access Paths)
 
 -------------------------------------------------------------------------
 Setup
 --------------------------------------------------------------------------
 
-1. Unpack the file all.zip located in d:\hdf5\windows to d:\. This file contains
-the Windows specific files of HDF5.
+1. This setup assumes that you installed the distribution zip file as 
+   explained in INSTALL_windows.txt file. The steps are
+   a) making a folder called <my install>/hdf5/ as your base hdf5 folder 
+   b) unpack the file all.zip located  in d:\hdf5\windows to d:\. 
+      This file contains the Windows specific files of HDF5.
 
 To build the HDF5 library with Code Warrior:
 1. Open the project file hdf5.mcp (located in d:\hdf5\proj\codewarrior\).
