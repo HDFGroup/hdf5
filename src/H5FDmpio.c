@@ -293,6 +293,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     fa.comm = comm;
     fa.info = info;
 
+    /* duplication is done during driver setting. */
     ret_value= H5P_set_driver(plist, H5FD_MPIO, &fa);
 
 done:
@@ -932,9 +933,7 @@ fprintf(stderr, "in H5FD_mpio_fapl_free\n");
 
     /* Free the internal communicator and INFO object */
     assert(MPI_COMM_NULL!=fa->comm);
-    MPI_Comm_free(&fa->comm);
-    if (MPI_INFO_NULL != fa->info)
-	MPI_Info_free(&fa->info);
+    H5FD_mpio_comm_info_free(&fa->comm, &fa->info);
     H5MM_xfree(fa);
 
 done:
@@ -942,7 +941,7 @@ done:
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
 #endif
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpio_fapl_free() */
 
 
@@ -985,6 +984,10 @@ fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
  *      	rky & ppw, 1999-11-07
  *		Modified "H5FD_mpio_open" so that file-truncation is
  *              avoided for brand-new files (with zero filesize).
+ *
+ * 		Albert Cheng, 2003-04-17
+ * 		Duplicate the communicator and Info object so that file is
+ * 		insulated from the old one.
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1163,6 +1166,9 @@ done:
  *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ * 		Albert Cheng, 2003-04-17
+ *		Free the communicator stored.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2287,6 +2293,6 @@ done:
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "Leaving H5FD_mpio_comm_info_free\n");
 #endif
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* H5_HAVE_PARALLEL */
