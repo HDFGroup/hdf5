@@ -44,7 +44,7 @@ int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 int docompact=1;                        /* compact dataset test */
 int doindependent=1;			/* independent test */
-unsigned dobig=1;                       /* "big" dataset tests */
+unsigned dobig=0;                       /* "big" dataset tests */
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[9]={
@@ -127,6 +127,7 @@ usage(void)
         "\tset number of groups for the multiple group test\n");  
     printf("\t-o\t\tno compact dataset test\n");
     printf("\t-i\t\tno independent read test\n");
+    printf("\t-b\t\trun big dataset test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
@@ -179,7 +180,7 @@ parse_options(int argc, char **argv)
                             break;
                 case 'i':   doindependent = 0;
                             break;
-                case 'b':   dobig = 0;
+                case 'b':   dobig = 1;
                             break;
 		case 'v':   verbose = 1;
 			    break;
@@ -470,17 +471,13 @@ int main(int argc, char **argv)
         MPI_BANNER("Independent test skipped");
     }
         
-#ifdef LATER
     if (dobig && sizeof(MPI_Offset)>4){
         MPI_BANNER("big dataset test...");
         big_dataset(filenames[7]); 
     }
     else {
-#endif /* LATER */
         MPI_BANNER("big dataset test skipped");
-#ifdef LATER
     }
-#endif /* LATER */
     
     if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig)){
 	usage();
