@@ -238,9 +238,7 @@ H5S_close(H5S_t *ds)
 	break;
 
     case H5S_SIMPLE:
-	H5MM_xfree(ds->u.simple.size);
-	H5MM_xfree(ds->u.simple.max);
-	H5MM_xfree(ds->u.simple.perm);
+    H5S_close_simple(&(ds->u.simple));
 	break;
 
     case H5S_COMPLEX:
@@ -257,6 +255,37 @@ H5S_close(H5S_t *ds)
 	H5MM_xfree(ds->h.stride);
     } /* end if */
     H5MM_xfree(ds);
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_close_simple
+ *
+ * Purpose:	Releases all memory associated with a simple data space.
+ *          (but doesn't free the simple space itself)
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, April  17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_close_simple(H5S_simple_t *simple)
+{
+    FUNC_ENTER(H5S_close_simple, FAIL);
+
+    assert(simple);
+
+	H5MM_xfree(simple->size);
+	H5MM_xfree(simple->max);
+	H5MM_xfree(simple->perm);
 
     FUNC_LEAVE(SUCCEED);
 }

@@ -3006,9 +3006,9 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Does the new member overlap any existing member ? */
     for (i = 0; i < parent->u.compnd.nmembs; i++) {
-	if ((offset < parent->u.compnd.memb[i].offset &&
+	if ((offset <= parent->u.compnd.memb[i].offset &&
 	     offset + member->size > parent->u.compnd.memb[i].offset) ||
-	    (parent->u.compnd.memb[i].offset < offset &&
+	    (parent->u.compnd.memb[i].offset <= offset &&
 	     parent->u.compnd.memb[i].offset +
 	     parent->u.compnd.memb[i].type->size > offset)) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,

@@ -258,7 +258,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
      */
     size_t                  ret_value = 8;
 
-    FUNC_ENTER(H5O_sim_dtype_size, 0);
+    FUNC_ENTER(H5O_sdspace_size, 0);
 
     /* add in the dimension sizes */
     ret_value += sdim->rank * H5F_SIZEOF_SIZE (f);

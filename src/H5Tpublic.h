@@ -20,7 +20,7 @@
 #include <H5public.h>
 #include <H5Ipublic.h>
 
-#define HOFFSET(S,M)    ((size_t)((const char*)&S.M-(const char*)&S))
+#define HOFFSET(S,M)    (offsetof(S,M))
 #define HPOFFSET(P,M)   ((size_t)((const char*)&(P->M)-(const char*)P))
 
 /* These are the various classes of data types */

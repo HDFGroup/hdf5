@@ -14,12 +14,12 @@
 static char		RcsId[] = "@(#)$Revision$";
 #endif
 
-/* $Id$ */
+#define H5D_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 #include <H5private.h>		/* Generic Functions			*/
 #include <H5Iprivate.h>		/* IDs			  		*/
 #include <H5ACprivate.h>	/* Cache			  	*/
-#include <H5Dprivate.h>		/* Dataset functions			*/
+#include <H5Dpkg.h>		    /* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5Gprivate.h>		/* Group headers		  	*/
 #include <H5HLprivate.h>	/* Name heap				*/
@@ -36,17 +36,6 @@ static char		RcsId[] = "@(#)$Revision$";
  * be optimized.
  */
 #define H5D_OPTIMIZE_PIPE 1
-
-/*
- * A dataset is the following struct.
- */
-struct H5D_t {
-    H5G_entry_t		ent;		/*cached object header stuff	*/
-    H5T_t		*type;		/*datatype of this dataset	*/
-    H5S_t		*space;		/*dataspace of this dataset	*/
-    H5D_create_t	*create_parms;	/*creation parameters		*/
-    H5O_layout_t	layout;		/*data layout			*/
-};
 
 /* Default dataset creation property list */
 const H5D_create_t	H5D_create_dflt = {

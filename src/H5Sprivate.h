@@ -108,6 +108,7 @@ typedef struct H5S_tconv_t {
 } H5S_conv_t;
 
 H5S_t *H5S_copy (const H5S_t *src);
+herr_t H5S_close_simple (H5S_simple_t *simple);
 herr_t H5S_close (H5S_t *ds);
 hsize_t H5S_get_npoints (const H5S_t *ds);
 hsize_t H5S_get_npoints_max(const H5S_t *ds);

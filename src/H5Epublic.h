@@ -46,6 +46,7 @@ typedef enum H5E_major_t {
     H5E_DATASET,                /*Dataset                                    */
     H5E_STORAGE,                /*data storage                               */
     H5E_TEMPLATE,               /*Property lists                             */
+    H5E_ATTR,                   /*Attribute                                  */
     H5E_COMP,			/*Data compression			     */
     H5E_EFL			/*External file list			     */
 } H5E_major_t;
@@ -108,6 +109,7 @@ typedef enum H5E_minor_t {
     H5E_VERSION,                /*wrong version number                       */
     H5E_ALIGNMENT,              /*alignment error                            */
     H5E_BADMESG,                /*unrecognized message                       */
+    H5E_CANTDELETE,             /* Can't delete message                      */
 
     /* Group related errors */
     H5E_CANTOPENOBJ,            /*Can't open object                          */

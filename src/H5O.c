@@ -62,7 +62,7 @@ static const H5O_class_t *const message_type_g[] = {
     NULL,		/*0x0009 Not assigned				*/
     NULL,		/*0x000A Not assigned				*/
     H5O_COMPRESS,	/*0x000B Data storage -- compressed object	*/
-    NULL,		/*0x000C Attribute list				*/
+    H5O_ATTR,		/*0x000C Attribute list				*/
     H5O_NAME,		/*0x000D Object name				*/
     NULL,		/*0x000E Object modification date and time	*/
     NULL,		/*0x000F Shared header message			*/
@@ -975,7 +975,7 @@ H5O_find_in_ohdr(H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
  *
  *		The OVERWRITE argument is either a sequence number of a
  *		message to overwrite (usually zero) or the constant
- *		H5O_NEW_MESSAGE (-1) to indicate that a new message is to
+ *		H5O_NEW_MESG (-1) to indicate that a new message is to
  *		be created.  If the message to overwrite doesn't exist then
  *		it is created (but only if it can be inserted so its sequence
  *		number is OVERWRITE; that is, you can create a message with
