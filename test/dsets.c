@@ -791,7 +791,7 @@ test_conv_buffer(hid_t fid)
 		cf->a[j][k][l] = 10*(j+1) + l + k;
 
     for (j = 0; j < DIM2; j++)
-	cf->b[j] = 100.*(j+1) + 0.01*j;
+	cf->b[j] = (float)(100.*(j+1) + 0.01*j);
 	
     for (j = 0; j < DIM3; j++)
 	cf->c[j] = 100.*(j+1) + 0.02*j;
@@ -2964,9 +2964,10 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
     
     /* Initialize the integer & floating-point dataset */
-    for (i = n = 0; i < DSET_DIM1; i++)
+    n=0.0;
+    for (i = 0; i < DSET_DIM1; i++)
 	for (j = 0; j < DSET_DIM2; j++) {
-	    points[i][j] = n++;
+	    points[i][j] = (int)n++;
 	    points_dbl[i][j] = (double)1.5*n++;
 	}
 

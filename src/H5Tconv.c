@@ -9293,7 +9293,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * Find the sign bit value of the source.
                  */
                 if (H5T_SGN_2 == src.u.i.sign)
-                    sign = H5T_bit_get_d(int_buf, src.prec-1, 1);
+                    sign = (size_t)H5T_bit_get_d(int_buf, src.prec-1, 1);
 
                 /*
                  * What is the bit position(starting from 0 as first one) for the most significant 

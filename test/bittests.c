@@ -310,7 +310,7 @@ test_shift (void)
 
 	/* Look for the ones */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
-	if (n!=offset+shift_dist) {
+	if ((size_t)n!=offset+shift_dist) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
 		    "(n=%d)\n", (int)n);
@@ -337,7 +337,7 @@ test_shift (void)
 
 	/* Look for the ones */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
-	if (n!=offset) {
+	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
 		    "(n=%d)\n", (int)n);
@@ -363,7 +363,7 @@ test_shift (void)
         if(size % 2 == 0)
             shift_dist = size;
         else 
-            shift_dist = -size;
+            shift_dist = -((ssize_t)size);
 
 	memset (vector, 0x00, sizeof vector);
         H5T_bit_set (vector, offset, size, 1);
@@ -445,7 +445,7 @@ test_increment (void)
 
 	/* Look for the one */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
-	if (size!=1 && n!=offset+size-1) {
+	if (size!=1 && (size_t)n!=offset+size-1) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
 		    "(n=%d)\n", (int)n);
@@ -529,7 +529,7 @@ test_decrement (void)
 
 	/* Look for the ones */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
-	if (n!=offset) {
+	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
 		    "(n=%d)\n", (int)n);
@@ -601,7 +601,7 @@ test_negate (void)
 
 	/* Look for the ones */
 	n = H5T_bit_find (vector, 0, 8*sizeof(vector), H5T_BIT_LSB, 1);
-	if (n!=offset) {
+	if ((size_t)n!=offset) {
 	    H5_FAILED();
 	    printf ("    Unable to find first bit in destination "
 		    "(n=%d)\n", (int)n);

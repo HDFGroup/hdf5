@@ -3712,7 +3712,7 @@ print_enum(hid_t type)
 
     /* Convert values to native data type */
     if (native > 0)
-        H5Tconvert(super, native, (hsize_t)nmembs, value, NULL, H5P_DEFAULT);
+        H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
 
     /*
      * Sort members by increasing value
@@ -6156,7 +6156,7 @@ xml_print_enum(hid_t type)
 
     /* Convert values to native data type */
     if (native > 0)
-	H5Tconvert(super, native, (hsize_t)nmembs, value, NULL, H5P_DEFAULT);
+	H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
 
     /* Sort members by increasing value */
     /*not implemented yet */

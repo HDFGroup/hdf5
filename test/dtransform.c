@@ -47,42 +47,52 @@ int main()
     herr_t err;
     int row, col;
 
+    TESTING("data transform, setting up")
+
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
 	    windchillCint[row][col] = (5/9.0)*(windchillFint[row][col] - 32);
     }
     
-    dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER);
-    dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER);
-    dxpl_id_simple = H5Pcreate(H5P_DATASET_XFER);
+    if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
+    if((dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
+    if((dxpl_id_simple = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
     
-    err= H5Pset_data_transform(dxpl_id_f_to_c, f_to_c);
-    err= H5Pset_data_transform(dxpl_id_c_to_f, c_to_f);
-    err = H5Pset_data_transform(dxpl_id_simple, simple);
+    if((err= H5Pset_data_transform(dxpl_id_f_to_c, f_to_c))<0) TEST_ERROR;
+    if((err= H5Pset_data_transform(dxpl_id_c_to_f, c_to_f))<0) TEST_ERROR;
+    if((err = H5Pset_data_transform(dxpl_id_simple, simple))<0) TEST_ERROR;
 
 
-    file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
 
-    dataspace = H5Screate_simple(2, dim, NULL); 
+    if((dataspace = H5Screate_simple(2, dim, NULL))<0) TEST_ERROR;
+
+    PASSED();
+
+    TESTING("data transform, writing integer data")
 
     /* Write out the integer dataset to the file, converting it to c */
-    datatype = H5Tcopy(H5T_NATIVE_INT);
-    dset_id_int = H5Dcreate(file_id, "/transformtest_int", datatype, dataspace, H5P_DEFAULT);
-    err = H5Dwrite(dset_id_int, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFint);
-    H5Tclose(datatype);
+    if((datatype = H5Tcopy(H5T_NATIVE_INT))<0) TEST_ERROR;
+    if((dset_id_int = H5Dcreate(file_id, "/transformtest_int", datatype, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
+    if((err = H5Dwrite(dset_id_int, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFint))<0) TEST_ERROR;
+    if((err = H5Tclose(datatype))<0) TEST_ERROR;
+
+    PASSED();
+
+    TESTING("data transform, writing float data")
     
     /* Write out a floating point version to the file, converting it to c */
-    datatype = H5Tcopy(H5T_NATIVE_FLOAT);
-    dset_id_float = H5Dcreate(file_id, "/transformtest_float", datatype, dataspace, H5P_DEFAULT);
-    err = H5Dwrite(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFint);
-    H5Tclose(datatype);
+    if((datatype = H5Tcopy(H5T_NATIVE_FLOAT))<0) TEST_ERROR;
+    if((dset_id_float = H5Dcreate(file_id, "/transformtest_float", datatype, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
+    if((err = H5Dwrite(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFint))<0) TEST_ERROR;
+    if((err = H5Tclose(datatype))<0) TEST_ERROR;
 
-	    
+    PASSED();
 
     TESTING("data transform, no data type conversion (int->int)")
     /* Read in the integer data with a data transform. */
-    err = H5Dread(dset_id_int, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread);
+    if((err = H5Dread(dset_id_int, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread))<0) TEST_ERROR;
     
     if( (compare_int(*windchillFintread, *windchillFint, 2)) == 0)
     {
@@ -93,7 +103,7 @@ int main()
 	PASSED();
 
     TESTING("data transform, no data type conversion (float->float)")
-    err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread);
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread))<0) TEST_ERROR;
     if( (compare_float(*windchillFfloat, *windchillFfloatread, 2.0)) == 0)
     {
 	fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
@@ -103,7 +113,7 @@ int main()
       PASSED();
 
    TESTING("data transform, with data type conversion (int->float)")
-    err = H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread);
+    if((err = H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread))<0) TEST_ERROR;
     if( (compare_float(*windchillFfloat, *windchillFfloatread, 2.0)) == 0)
          {   
              fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
@@ -113,7 +123,7 @@ int main()
        PASSED();
 
    TESTING("data transform, with data type conversion (float->int)")
-    err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread);
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread))<0) TEST_ERROR;
     if( (compare_int(*windchillFint, *windchillFintread, 2)) == 0)
          {   
              fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
@@ -123,7 +133,7 @@ int main()
        PASSED();
 
     TESTING("data transform, trivial transform, without type conversion")
-    err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread);
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread))<0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
@@ -138,7 +148,7 @@ int main()
     PASSED();
 
     TESTING("data transform, trivial transform, with type conversion")
-    err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread);
+    if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread))<0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
@@ -153,12 +163,12 @@ int main()
 
 
     /* Close the objects we opened/created */
-   err = H5Sclose(dataspace);
-   err = H5Dclose(dset_id_int);
-   err = H5Dclose(dset_id_float);
-   err = H5Fclose(file_id);
-   err = H5Pclose(dxpl_id_f_to_c);
-   err = H5Pclose(dxpl_id_c_to_f);
+   if((err = H5Sclose(dataspace))<0) TEST_ERROR;
+   if((err = H5Dclose(dset_id_int))<0) TEST_ERROR;
+   if((err = H5Dclose(dset_id_float))<0) TEST_ERROR;
+   if((err = H5Fclose(file_id))<0) TEST_ERROR;
+   if((err = H5Pclose(dxpl_id_f_to_c))<0) TEST_ERROR;
+   if((err = H5Pclose(dxpl_id_c_to_f))<0) TEST_ERROR;
 
    PASSED();
    

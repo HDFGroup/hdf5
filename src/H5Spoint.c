@@ -1312,7 +1312,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
 
     /* Choose the minimum number of bytes to sequence through */
     H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
-    start_io_left=io_left=MIN(iter->elmt_left,maxelem);
+    start_io_left=io_left=(size_t)MIN(iter->elmt_left,maxelem);
 
     /* Get the dataspace dimensions */
     if ((ndims=H5S_get_simple_extent_dims (space, dims, NULL))<0)

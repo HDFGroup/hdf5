@@ -1152,7 +1152,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
             target_size = max_type_size;
         /* If the buffer is too large to hold all the elements, make it smaller */
         else if(target_size>(nelmts*max_type_size))
-            target_size=(nelmts*max_type_size);
+            target_size=(size_t)(nelmts*max_type_size);
     } /* end if */
     request_nelmts = target_size / max_type_size;
     
@@ -1203,7 +1203,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
         assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
-        smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
+        smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
          * Gather the data from disk into the data type conversion
@@ -1397,7 +1397,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
             target_size = max_type_size;
         /* If the buffer is too large to hold all the elements, make it smaller */
         else if(target_size>(nelmts*max_type_size))
-            target_size=(nelmts*max_type_size);
+            target_size=(size_t)(nelmts*max_type_size);
     } /* end if */
     request_nelmts = target_size / max_type_size;
 
@@ -1452,7 +1452,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
         assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
-        smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
+        smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
          * Gather data from application buffer into the data type conversion
@@ -1673,7 +1673,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             target_size = max_type_size;
         /* If the buffer is too large to hold all the elements, make it smaller */
         else if(target_size>(nelmts*max_type_size))
-            target_size=(nelmts*max_type_size);
+            target_size=(size_t)(nelmts*max_type_size);
     } /* end if */
     request_nelmts = target_size / max_type_size;
         
@@ -1739,7 +1739,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
-            smine_nelmts = MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
+            smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
         
             /*
              * Gather the data from disk into the data type conversion
@@ -2026,7 +2026,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
             target_size = max_type_size;
         /* If the buffer is too large to hold all the elements, make it smaller */
         else if(target_size>(nelmts*max_type_size))
-            target_size=(nelmts*max_type_size);
+            target_size=(size_t)(nelmts*max_type_size);
     } /* end if */
     request_nelmts = target_size / max_type_size;
 
@@ -2096,7 +2096,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
-            smine_nelmts = MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
+            smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
             
             /*
              * Gather the data from disk into the data type conversion

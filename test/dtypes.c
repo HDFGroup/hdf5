@@ -1488,9 +1488,9 @@ static int
 test_compound_9(void)
 {
     typedef struct cmpd_struct {
-       int          i1;
-       const char*  str;
-       int          i2;
+       int    i1;
+       char*  str;
+       int    i2;
     } cmpd_struct;
 
     cmpd_struct wdata = {11, "variable-length string", 22};
@@ -1593,7 +1593,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || strcmp(rdata.str, wdata.str)) {
+    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED(); AT();
         printf("incorrect read data\n");
         goto error;

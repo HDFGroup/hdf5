@@ -801,7 +801,7 @@ display_enum_type(hid_t type, int ind)
     }
 
     /* Convert values to native data type */
-    if (native>0) H5Tconvert(super, native, (hsize_t)nmembs, value, NULL, H5P_DEFAULT);
+    if (native>0) H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
 
     /* Sort members by increasing value */
     /*not implemented yet*/
@@ -2216,7 +2216,7 @@ main (int argc, const char *argv[])
      * doesn't exist). */
     show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
     while (argno<argc) {
-        fname = argv[argno++];
+        fname = HDstrdup(argv[argno++]);
         oname = NULL;
         file = -1;
 
@@ -2266,6 +2266,7 @@ main (int argc, const char *argv[])
             if (H5Gclose(root)<0) leave(1);
         }
         H5Fclose(file);
+        free(fname);
     }
     leave(0);
 }

@@ -724,7 +724,8 @@ H5Z_new_node(H5Z_token_type type)
  *-------------------------------------------------------------------------
  */
 
-herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size, const H5T_t *buf_type)
+herr_t
+H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size, const H5T_t *buf_type)
 {
     H5Z_node *tree;
     hid_t array_type;
@@ -736,7 +737,7 @@ herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, size
 
     FUNC_ENTER_NOAPI(H5Z_xform_eval, FAIL)
 
-	assert(data_xform_prop);
+    assert(data_xform_prop);
 
     tree=data_xform_prop->parse_root;
 
@@ -776,7 +777,7 @@ herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, size
 	}
 	else if(array_type == H5T_NATIVE_FLOAT)
 	{
-	    f = tree->value.float_val;
+	    f = (float)tree->value.float_val;
 	    for(i=0; i<array_size; i++)
 		*((float*)array + i) = f;
 	}
@@ -820,7 +821,7 @@ H5Z_eval_full(H5Z_node *tree, void* array, size_t array_size,  hid_t array_type)
     
     error.type = H5Z_XFORM_ERROR;
         
-    FUNC_ENTER_NOAPI(H5Z_eval_full, ret_value);
+    FUNC_ENTER_NOAPI(H5Z_eval_full, error);
     
     /* check args */
     assert(tree);
@@ -828,359 +829,269 @@ H5Z_eval_full(H5Z_node *tree, void* array, size_t array_size,  hid_t array_type)
     if (tree->type == H5Z_XFORM_INTEGER) 
     {
         res.type = H5Z_XFORM_INTEGER;
-        res.value = tree->value;
-        HGOTO_DONE(res)
+        res.value.int_val = tree->value.int_val;
     } 
     else if (tree->type == H5Z_XFORM_FLOAT) 
     {
         res.type = H5Z_XFORM_FLOAT;
-        res.value = tree->value;
-        HGOTO_DONE(res)
+        res.value.float_val = tree->value.float_val;
     } 
     else if (tree->type == H5Z_XFORM_SYMBOL) 
     {
         res.type = H5Z_XFORM_SYMBOL;
-        res.value = tree->value;
+        res.value.sym_val = tree->value.sym_val;
         res.ar_type = array_type;
-        HGOTO_DONE(res)
     } 
     else 
     {
         resl = H5Z_eval_full(tree->lchild, array, array_size, array_type);
         resr = H5Z_eval_full(tree->rchild, array, array_size, array_type);
-        switch (tree->type) 
-        {
-        case H5Z_XFORM_PLUS:  
-           if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
-            {
-                res.type = H5Z_XFORM_SYMBOL; 
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) = resr.value.int_val + *((int*)array + i);
-                    }
-                    else if(array_type == H5T_NATIVE_FLOAT)
-                    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) = resr.value.int_val + *((float*)array + i);
-                    }
-		    else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-             HGOTO_DONE(res)
-            }
-            else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
-            {
-                res.type = H5Z_XFORM_SYMBOL;
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) += resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) += resr.value.float_val;
-                    }
-		    else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
+        res.type = H5Z_XFORM_SYMBOL; 
 
-                HGOTO_DONE(res)
-            }
-            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
-            {
-                 res.type = H5Z_XFORM_SYMBOL; 
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) += resl.value.int_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) += resl.value.int_val ;
-		    }
-		    else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-                HGOTO_DONE(res)
-          
-            }
-	   else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
-	   {
+        /* Check for un-handled datatype */
+        if(array_type!= H5T_NATIVE_INT && array_type!= H5T_NATIVE_FLOAT)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
 
-	       res.type = H5Z_XFORM_SYMBOL;
-	       if(array_type == H5T_NATIVE_INT)
-	       {
-		   for(i=0; i<array_size; i++)
-		       *((int*)array + i) += resl.value.float_val;
-	       }
-	       else if(array_type == H5T_NATIVE_FLOAT)
-	       {
-		   for(i=0; i<array_size; i++)
-		       *((float*)array + i) += resl.value.float_val ;
-	       }else
-		   HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-		       HGOTO_DONE(res)
-            }
-            else
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
-
-            HGOTO_DONE(res) 
-            break;
-	case H5Z_XFORM_MINUS:
-
-	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
-	    {
-		res.type = H5Z_XFORM_SYMBOL; 
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) -= resr.value.int_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) -= resr.value.int_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
-	    {
-                res.type = H5Z_XFORM_SYMBOL;
-                    if(array_type == H5T_NATIVE_INT)
-                    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) -= resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) -= resr.value.float_val;
-		    }
-		    else
-		    {
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-		    }
-		    HGOTO_DONE(res)
-	    }
-	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
-	    {
-		res.type = H5Z_XFORM_SYMBOL; 
-		    if(array_type == H5T_NATIVE_INT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) = resl.value.int_val - *((int*)array + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) = resl.value.int_val - *((float*)array + i);
-		    }else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-		HGOTO_DONE(res)
-
-	    }
-	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
-            {
-
-		res.type = H5Z_XFORM_SYMBOL;
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) = resl.value.float_val - *((int*)array + i);
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) =  resl.value.float_val - *((float*)array + i);
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-            else
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
-
-
-            HGOTO_DONE(res) 
-            break;
-
-
-        case H5Z_XFORM_MULT:
-
-	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
-	    {
-		res.type = H5Z_XFORM_SYMBOL; 
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) *=  resr.value.int_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) *=  resr.value.int_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
-	    {
-		res.type = H5Z_XFORM_SYMBOL;
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) *=  resr.value.float_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) *= resr.value.float_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
-	    {
-		res.type = H5Z_XFORM_SYMBOL; 
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) *= resl.value.int_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) *= resl.value.int_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-
-	    }
-	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT)) 
-	    {
-
-		res.type = H5Z_XFORM_SYMBOL;
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) *= resl.value.float_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) *= resl.value.float_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-	    else
-		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
-
-	    HGOTO_DONE(res) 
-	    break;
-
-
-	case H5Z_XFORM_DIVIDE: 
-
-	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
-	    {
-		res.type = H5Z_XFORM_SYMBOL; 
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) /= resr.value.int_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) /= resr.value.int_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-			HGOTO_DONE(res)
-	    }
-	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
-	    {
-		res.type = H5Z_XFORM_SYMBOL;
-		if(array_type == H5T_NATIVE_INT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((int*)array + i) /=  resr.value.float_val;
-		}
-		else if(array_type == H5T_NATIVE_FLOAT)
-		{
-		    for(i=0; i<array_size; i++)
-			*((float*)array + i) /= resr.value.float_val;
-		}else
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-                HGOTO_DONE(res)
-            }
-            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
-            {
-                res.type = H5Z_XFORM_SYMBOL; 
+        switch (tree->type) {
+            case H5Z_XFORM_PLUS:  
+               if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
                 {
                     if(array_type == H5T_NATIVE_INT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) = resl.value.int_val / *((int*)array + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) =  resl.value.int_val / *((float*)array + i);
-		    }else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
-		}
-                HGOTO_DONE(res)
-
-            }
-            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
-            {
-
-                res.type = H5Z_XFORM_SYMBOL;
-		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((int*)array + i) = resl.value.float_val / *((int*)array + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)array + i) = resl.value.float_val / *((float*)array + i);
-		    }else
-			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
-
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) += resr.value.int_val;
+                    }
+                    else 
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) += resr.value.int_val;
+                    }
                 }
-                HGOTO_DONE(res)
-            }
-            else
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
+                else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) += resr.value.float_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) += (float)resr.value.float_val;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) += resl.value.int_val;
+                    }
+                    else 
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) += resl.value.int_val ;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
+                {
+                   if(array_type == H5T_NATIVE_INT)
+                   {
+                       for(i=0; i<array_size; i++)
+                           *((int*)array + i) += resl.value.float_val;
+                   }
+                   else 
+                   {
+                       for(i=0; i<array_size; i++)
+                           *((float*)array + i) += (float)resl.value.float_val ;
+                   }
+                }
+                else
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
+                break;
 
-            HGOTO_DONE(res) 
-            break;
+            case H5Z_XFORM_MINUS:
+                if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) -= resr.value.int_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) -= resr.value.int_val;
+                    }
+                }
+                else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) -= resr.value.float_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) -= (float)resr.value.float_val;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) = resl.value.int_val - *((int*)array + i);
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) = resl.value.int_val - *((float*)array + i);
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) = resl.value.float_val - *((int*)array + i);
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) =  (float)resl.value.float_val - *((float*)array + i);
+                    }
+                }
+                else
+                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type conversion operation")
+                break;
 
 
+            case H5Z_XFORM_MULT:
 
-        default: 
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Invalid expression tree")
+                if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) *=  resr.value.int_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) *=  resr.value.int_val;
+                    }
+                }
+                else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) *=  resr.value.float_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) *= (float)resr.value.float_val;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) *= resl.value.int_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) *= resl.value.int_val;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT)) 
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) *= resl.value.float_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) *= (float)resl.value.float_val;
+                    }
+                }
+                else
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
+                break;
+
+            case H5Z_XFORM_DIVIDE: 
+                if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) /= resr.value.int_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) /= resr.value.int_val;
+                    }
+                }
+                else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) /=  resr.value.float_val;
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) /= (float)resr.value.float_val;
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) = resl.value.int_val / *((int*)array + i);
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) =  resl.value.int_val / *((float*)array + i);
+                    }
+                }
+                else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
+                {
+                    if(array_type == H5T_NATIVE_INT)
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((int*)array + i) = resl.value.float_val / *((int*)array + i);
+                    }
+                    else
+                    {
+                        for(i=0; i<array_size; i++)
+                            *((float*)array + i) = (float)resl.value.float_val / *((float*)array + i);
+                    }
+                }
+                else
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Unexpected type operation")
+                break;
+
+            default: 
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Invalid expression tree")
         }
     }
 
-done:
-    
-    FUNC_LEAVE_NOAPI(ret_value)
+    ret_value=res;
 
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

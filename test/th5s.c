@@ -362,7 +362,7 @@ test_h5s_null(void)
     VERIFY(stype, H5S_NULL, "H5Sget_simple_extent_type");
 
     /* Verify there is zero element in the dataspace */
-    ret = H5Sget_simple_extent_npoints(dset_sid2);
+    ret = (herr_t)H5Sget_simple_extent_npoints(dset_sid2);
     VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
 
     /* Try reading from the dataset (make certain our buffer is unmodified) */
@@ -390,7 +390,7 @@ test_h5s_null(void)
     VERIFY(stype, H5S_NULL, "H5Sget_simple_extent_type");
 
     /* Verify there is zero element in the dataspace */
-    ret = H5Sget_simple_extent_npoints(attr_sid);
+    ret = (herr_t)H5Sget_simple_extent_npoints(attr_sid);
     VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
     
     /* Close the dataspace */

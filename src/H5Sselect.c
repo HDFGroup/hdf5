@@ -225,7 +225,7 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+hssize_t
 H5S_select_serial_size(const H5S_t *space)
 {
     hssize_t ret_value;   /* Return value */

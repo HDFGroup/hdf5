@@ -1577,7 +1577,7 @@ test_vl_dtype(hid_t file)
             tmp=malloc(t2->len*sizeof(unsigned int));
             memcpy(tmp, t2->p, t2->len*H5Tget_size(nat_super_type));
 
-            if (H5Tconvert(nat_super_type, H5T_NATIVE_UINT, (hsize_t)t2->len, tmp, NULL, H5P_DEFAULT))
+            if (H5Tconvert(nat_super_type, H5T_NATIVE_UINT, t2->len, tmp, NULL, H5P_DEFAULT))
                 TEST_ERROR;
 
             for(k=0; k<t2->len; k++) {
