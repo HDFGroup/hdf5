@@ -439,3 +439,17 @@
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.dmp
 ./tools/testfiles/tstr2.h5
+
+./tools/testfiles/Expected/tall.hdf
+./tools/testfiles/Expected/tattr.hdf
+./tools/testfiles/Expected/tcompound.hdf
+./tools/testfiles/Expected/tcompound2.hdf
+./tools/testfiles/Expected/tdset.hdf
+./tools/testfiles/Expected/tdset2.hdf
+./tools/testfiles/Expected/tgroup.hdf
+./tools/testfiles/Expected/thlink.hdf
+./tools/testfiles/Expected/tloop.hdf
+./tools/testfiles/Expected/tmany.hdf
+./tools/testfiles/Expected/tslink.hdf
+./tools/testfiles/Expected/tstr.hdf
+./tools/testfiles/Expected/tstr2.hdf
