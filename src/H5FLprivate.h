@@ -95,15 +95,16 @@ typedef struct H5FL_blk_head_t {
     uintn init;         /* Whether the free list has been initialized */
     uintn allocated;    /* Number of blocks allocated */
     uintn onlist;       /* Number of blocks on free list */
+    size_t list_mem;    /* Amount of memory in block on free list */
     const char *name;   /* Name of the type */
     H5FL_blk_node_t *head;  /* Pointer to first free list in queue */
-}H5FL_blk_head_t;
+} H5FL_blk_head_t;
 
 /*
  * Macros for defining & using priority queues 
  */
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_BLK_DEFINE(t)  H5FL_blk_head_t t##_pq={0,0,0,#t,NULL}
+#define H5FL_BLK_DEFINE(t)  H5FL_blk_head_t t##_pq={0,0,0,0,#t,NULL}
 
 /* Reference a free list for type 't' defined in another file */
 #define H5FL_BLK_EXTERN(t)  extern H5FL_blk_head_t t##_pq
@@ -134,7 +135,8 @@ typedef struct H5FL_arr_node_t {
 typedef struct H5FL_arr_head_t {
     uintn init;         /* Whether the free list has been initialized */
     uintn allocated;    /* Number of blocks allocated */
-    uintn onlist;       /* Number of blocks on free list */
+    uintn *onlist;      /* Number of blocks on free list */
+    size_t list_mem;    /* Amount of memory in block on free list */
     const char *name;   /* Name of the type */
     intn  maxelem;      /* Maximum number of elements in an array */
     size_t size;        /* Size of the array elements in the list */
@@ -148,7 +150,7 @@ typedef struct H5FL_arr_head_t {
  * Macros for defining & using free lists for an array of a type
  */
 /* Declare a free list to manage arrays of type 't' */
-#define H5FL_ARR_DEFINE(t,m)  H5FL_arr_head_t t##_arr_free_list={0,0,0,#t##"_arr",m,sizeof(t),{NULL}}
+#define H5FL_ARR_DEFINE(t,m)  H5FL_arr_head_t t##_arr_free_list={0,0,NULL,0,#t##"_arr",m,sizeof(t),{NULL}}
 
 /* Reference a free list for arrays of type 't' defined in another file */
 #define H5FL_ARR_EXTERN(t)  extern H5FL_arr_head_t t##_arr_free_list
