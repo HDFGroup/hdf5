@@ -19,6 +19,7 @@ USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
 USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
+USE_FILTER_NBIT="@USE_FILTER_NBIT@"
 
 DUMPER=h5dump               # The tool name
 DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
@@ -281,6 +282,13 @@ if test $USE_FILTER_FLETCHER32 != "yes"; then
  SKIP $option
 else
  TOOLTEST tfletcher32.ddl $option
+fi
+# nbit
+option="-H -p -d nbit  tfilters.h5"
+if test $USE_FILTER_NBIT != "yes"; then
+ SKIP $option
+else
+ TOOLTEST tnbit.ddl $option
 fi
 # all
 option="-H -p -d all  tfilters.h5"

@@ -2348,6 +2348,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
      printf("%s\n",END);
     }
     break;
+   case H5Z_FILTER_NBIT:
+    indentation(indent + COL);
+    printf("%s\n", NBIT);
+    break;
    default:
     indentation(indent + COL);
     if (H5Zfilter_avail(filtn))
