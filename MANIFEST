@@ -996,6 +996,7 @@
 ./tools/h4toh5/h4toh5pal.c
 ./tools/h4toh5/h4toh5sds.c
 ./tools/h4toh5/h4toh5test.c
+./tools/h4toh5/h4toh5user.h
 ./tools/h4toh5/h4toh5util.c
 ./tools/h4toh5/h4toh5util.h
 ./tools/h4toh5/h4toh5vdata.c
