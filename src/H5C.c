@@ -251,13 +251,12 @@ H5Cclose(hid_t tid)
     }
 	
     /*
-     * Chuck the object! This will fail when the reference count reaches zero
-     * since there is no free func registered for the property list groups.
+     * Chuck the object!  When the reference count reaches zero then
+     * H5A_dec_ref() removes it from the group and we should free it.  The
+     * free function is not registered as part of the group because it takes
+     * an extra argument.
      */
-    if (H5A_dec_ref (tid)<0) {
-	H5ECLEAR;
-	H5C_close (type, tmpl);
-    }
+    if (0==H5A_dec_ref(tid)) H5C_close (type, tmpl);
 
     FUNC_LEAVE (SUCCEED);
 }

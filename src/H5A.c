@@ -554,44 +554,59 @@ H5A_remove(hid_t atm        /* IN: Atom to remove */
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5A_dec_ref - Decrements a reference to a reference counted atom.
-          IN: Atom to decrement reference count for
- DESCRIPTION
-    Decrements the number of references outstanding for an atom.  This will
-    fail if the group is not a reference counted group.  The atom group's
-    'free' function will be called for the atom if the reference count for the
-    atom reaches 0.
-
- RETURNS
-    SUCCEED/FAIL
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_dec_ref
+ *
+ * Purpose:	Decrements the number of references outstanding for an atom.
+ *		This will fail if the group is not a reference counted group.
+ *		The atom group's 'free' function will be called for the atom
+ *		if the reference count for the atom reaches 0 and a free
+ *		function has been defined at group creation time.
+ *
+ * Return:	Success:        New reference count.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Unknown
+ *
+ * Modifications:
+ *
+ * 	Robb Matzke, 19 Feb 1998
+ *	It is no longer an error when the reference count of an item reaches
+ *	zero and no `free' function has been defined.  The object is still
+ *	removed from the list.
+ *
+ *-------------------------------------------------------------------------
+ */
 intn
 H5A_dec_ref(hid_t atm)
 {
-    group_t                 grp = ATOM_TO_GROUP(atm);   /* Group the object is in */
-    atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
-    atom_info_t            *atm_ptr = NULL;     /* ptr to the new atom */
-    const void *            obj;        /* object to call 'free' function with */
-    intn                    ret_value = FAIL;
+    group_t		grp = ATOM_TO_GROUP(atm); /* Group the object is in */
+    atom_group_t        *grp_ptr = NULL;     /* ptr to the atomic group */
+    atom_info_t         *atm_ptr = NULL;     /* ptr to the new atom */
+    const void *        obj;        /* object to call 'free' function with */
+    intn		ret_value = FAIL;
 
     FUNC_ENTER(H5A_dec_ref, FAIL);
 
     grp_ptr = atom_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0 || grp_ptr->free_func == NULL) {
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
         HRETURN(FAIL);
     }
+    
     /* General lookup of the atom */
     if ((atm_ptr = H5A_find_atom(atm)) != NULL) {
         /* Decrement the reference count */
-        atm_ptr->count--;
+        ret_value = --(atm_ptr->count);
 
         /* If the reference count is zero, remove the object from the group */
         if (0 == atm_ptr->count && (obj = H5A_remove(atm)) != NULL) {
-            /* call the user's 'free' function for the atom's information */
-            (*grp_ptr->free_func) ((void *)obj);
+            /*
+	     * call the user's 'free' function for the atom's information,
+	     * otherwise just leak memory.
+	     */
+            if (*grp_ptr->free_func) (*grp_ptr->free_func)((void *)obj);
         }
         ret_value = SUCCEED;
     }
