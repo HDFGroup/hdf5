@@ -1217,23 +1217,6 @@ int HDF_get_comm( MPI_Comm );
 int HDF_get_Datatype( MPI_Datatype );
 int HDF_get_DataRep( char* );
 int HDF_get_Bytes( MPI_Datatype, int );
-int HDF_MPI_Get_count( MPI_Status *, MPI_Datatype, int *, int );
-/************************************************************************/
-/* MPI_Get_count isn't always implemented correctly and may cause the 	*/
-/* program to fail.  This is a kluge to allow the program to complete.  */
-/************************************************************************/
-int HDF_MPI_Get_count( MPI_Status* status, 
-                      MPI_Datatype t, 
-                      int* result, 
-                      int input  )
-{
-#ifdef LAM_MPI
-   *result = input;
-#else
-   MPI_Get_count( status, t, result );
-#endif
-   return;
-}
 
 /* Get the mode at the file openning */
 int HDF_get_mode( int amode )
@@ -1666,7 +1649,7 @@ int HDF_MPI_File_read_at( MPI_File fh, MPI_Offset offset, void *buf,
                              &dataPtr,dataLen );
    	   returnVal = MPI_File_read_at( fh, offset, buf, count, datatype, 
 	                                                            status );
-           HDF_MPI_Get_count(status,datatype,&rCount,count);
+           MPI_Get_count(status,datatype,&rCount);
            if ( rCount < 0 || rCount > count ) 
            {
               dataPtr.numBytes = -1;
@@ -1706,7 +1689,7 @@ int HDF_MPI_File_read_at_all( MPI_File fh, MPI_Offset offset, void *buf,
                              &dataPtr,dataLen );
    	   returnVal = MPI_File_read_at_all( fh, offset, buf, 
 				      count, datatype, status );
-           HDF_MPI_Get_count(status,datatype,&rCount,count);
+           MPI_Get_count(status,datatype,&rCount);
            if ( rCount < 0 || rCount > count ) 
            {
               dataPtr.numBytes = -1;
@@ -1748,7 +1731,7 @@ int HDF_MPI_File_write_at( MPI_File fh, MPI_Offset offset, void *buf,
       HDFtraceEvent_RT( HDFmpiWriteAtID, &dataPtr,dataLen );
       returnVal = MPI_File_write_at( fh, offset, buf, count, datatype, 
                                                                status );
-      HDF_MPI_Get_count(status,datatype,&rCount,count);
+      MPI_Get_count(status,datatype,&rCount);
       if ( rCount < 0 || rCount > count ) 
       {
          dataPtr.numBytes = -1;
@@ -1861,7 +1844,7 @@ PabloMPI_File_open( MPI_Comm comm,
    strcpy( mpiOpenBeginArguments.fileName, filename );
    
    /* Generate entry record */
-   traceIOEvent( mpiOpenBeginID, (char *) &mpiOpenBeginArguments, 
+   HDFtraceIOEvent( mpiOpenBeginID, (char *) &mpiOpenBeginArguments, 
                  sizeof( mpiOpenBeginArguments ) );
    
    returnVal = MPI_File_open( comm, filename, amode, info, fh );
@@ -1873,7 +1856,7 @@ PabloMPI_File_open( MPI_Comm comm,
    mpiOpenEndArguments.fileID = myHDFid;
    
    /* Generate exit record */
-   traceIOEvent( mpiOpenEndID, (char *) &mpiOpenEndArguments, 
+   HDFtraceIOEvent( mpiOpenEndID, (char *) &mpiOpenEndArguments, 
                  sizeof( mpiOpenEndArguments ) );
    
    return returnVal;
@@ -1897,7 +1880,7 @@ PabloMPI_File_close( MPI_File *fh )
    mpiCloseBeginArguments.fileID = myHDFid;
    
    /* Generate entry record */
-   traceIOEvent( mpiCloseBeginID, (char *) &mpiCloseBeginArguments, 
+   HDFtraceIOEvent( mpiCloseBeginID, (char *) &mpiCloseBeginArguments, 
 		 sizeof( mpiCloseBeginArguments ) );
    
    returnVal = MPI_File_close( fh );
@@ -1907,7 +1890,7 @@ PabloMPI_File_close( MPI_File *fh )
    mpiCloseEndArguments.fileID = myHDFid;
    
    /* Generate exit record */
-   traceIOEvent( mpiCloseEndID, (char *) &mpiCloseEndArguments, 
+   HDFtraceIOEvent( mpiCloseEndID, (char *) &mpiCloseEndArguments, 
 	      sizeof( mpiCloseEndArguments ) );
    
    return returnVal;
@@ -1934,7 +1917,7 @@ PabloMPI_File_set_size( MPI_File fh, MPI_Offset size )
    mpiSetSizeBeginArguments.fileSize = (long) size;
    
    /* Generate entry record */
-   traceIOEvent( mpiSetSizeBeginID, (char *) &mpiSetSizeBeginArguments, 
+   HDFtraceIOEvent( mpiSetSizeBeginID, (char *) &mpiSetSizeBeginArguments, 
 		 sizeof( mpiSetSizeBeginArguments ) );
    
    returnVal = MPI_File_set_size( fh, size );
@@ -1945,7 +1928,7 @@ PabloMPI_File_set_size( MPI_File fh, MPI_Offset size )
    mpiSetSizeEndArguments.fileID = myHDFid;
       
    /* Generate entry record */
-   traceIOEvent( mpiSetSizeEndID, (char *) &mpiSetSizeEndArguments, 
+   HDFtraceIOEvent( mpiSetSizeEndID, (char *) &mpiSetSizeEndArguments, 
 		 sizeof( mpiSetSizeEndArguments ) );
    
    return returnVal; 
@@ -1970,7 +1953,7 @@ PabloMPI_File_get_size( MPI_File fh, MPI_Offset *size )
    mpiGetSizeBeginArguments.fileID = myHDFid;
    
    /* Generate entry record */
-   traceIOEvent( mpiGetSizeBeginID, (char *) &mpiGetSizeBeginArguments, 
+   HDFtraceIOEvent( mpiGetSizeBeginID, (char *) &mpiGetSizeBeginArguments, 
 		 sizeof( mpiGetSizeBeginArguments ) );
    
    returnVal = MPI_File_get_size( fh, size);
@@ -1983,7 +1966,7 @@ PabloMPI_File_get_size( MPI_File fh, MPI_Offset *size )
    mpiGetSizeEndArguments.fileSize = (long) (*size);
    
    /* Generate entry record */
-   traceIOEvent( mpiGetSizeEndID, (char *) &mpiGetSizeEndArguments, 
+   HDFtraceIOEvent( mpiGetSizeEndID, (char *) &mpiGetSizeEndArguments, 
 		 sizeof( mpiGetSizeEndArguments ) );
    
    return returnVal;
@@ -2018,7 +2001,7 @@ PabloMPI_File_set_view( MPI_File fh,
    mpiSetViewBeginArguments.dataRep = HDF_get_DataRep( datarep );
    
    /* Generate entry record */
-   traceIOEvent( mpiSetViewBeginID, (char *) &mpiSetViewBeginArguments, 
+   HDFtraceIOEvent( mpiSetViewBeginID, (char *) &mpiSetViewBeginArguments, 
 		 sizeof( mpiSetViewBeginArguments ) );
    
    returnVal = MPI_File_set_view( fh, disp, etype, filetype, 
@@ -2030,7 +2013,7 @@ PabloMPI_File_set_view( MPI_File fh,
    mpiSetViewEndArguments.fileID = myHDFid;
    
    /* Generate entry record */
-   traceIOEvent( mpiSetViewEndID, (char *) &mpiSetViewEndArguments, 
+   HDFtraceIOEvent( mpiSetViewEndID, (char *) &mpiSetViewEndArguments, 
 		 sizeof( mpiSetViewEndArguments ) );
    
    return returnVal;
@@ -2059,7 +2042,7 @@ PabloMPI_File_get_view( MPI_File fh,
    mpiGetViewBeginArguments.fileID = myHDFid;
      
    /* Generate entry record */
-   traceIOEvent( mpiGetViewBeginID, (char *) &mpiGetViewBeginArguments, 
+   HDFtraceIOEvent( mpiGetViewBeginID, (char *) &mpiGetViewBeginArguments, 
 		 sizeof( mpiGetViewBeginArguments ) );
    
    returnVal = MPI_File_get_view( fh, disp, etype, filetype, datarep );
@@ -2075,7 +2058,7 @@ PabloMPI_File_get_view( MPI_File fh,
    mpiGetViewEndArguments.dataRep = HDF_get_DataRep( datarep );
    
    /* Generate entry record */
-   traceIOEvent( mpiGetViewEndID, (char *) &mpiGetViewEndArguments, 
+   HDFtraceIOEvent( mpiGetViewEndID, (char *) &mpiGetViewEndArguments, 
 		 sizeof( mpiGetViewEndArguments ) );
    
    return returnVal;  
@@ -2111,7 +2094,7 @@ PabloMPI_File_read_at( MPI_File fh,
     
   
    /* Generate entry record */
-   traceIOEvent( mpiReadAtBeginID, (char *) &mpiReadAtBeginArguments, 
+   HDFtraceIOEvent( mpiReadAtBeginID, (char *) &mpiReadAtBeginArguments, 
 		 sizeof( mpiReadAtBeginArguments ) );
    
    returnVal = MPI_File_read_at( fh, offset, buf, count, datatype, status );
@@ -2121,12 +2104,19 @@ PabloMPI_File_read_at( MPI_File fh,
    /* mpiReadAtEndArguments.fileID = (long) ( &fh ); */
    mpiReadAtEndArguments.fileID = myHDFid;
    
-   HDF_MPI_Get_count( status, datatype, &bcount, count );
-   mpiReadAtEndArguments.rCount = bcount;
-   mpiReadAtEndArguments.numBytes = HDF_get_Bytes( datatype, bcount );
-      
+   MPI_Get_count( status, datatype, &bcount );
+   if ( bcount < 0 || bcount > count ) 
+   {
+      mpiReadAtEndArguments.rCount = -1;
+      mpiReadAtEndArguments.numBytes = -1;
+   }   
+   else
+   {
+      mpiReadAtEndArguments.rCount = bcount;
+      mpiReadAtEndArguments.numBytes = HDF_get_Bytes( datatype, bcount );
+   }   
    /* Generate entry record */
-   traceIOEvent( mpiReadAtEndID, (char *) &mpiReadAtEndArguments, 
+   HDFtraceIOEvent( mpiReadAtEndID, (char *) &mpiReadAtEndArguments, 
 		 sizeof( mpiReadAtEndArguments ) );
    
    return returnVal;
@@ -2161,7 +2151,7 @@ PabloMPI_File_read_at_all( MPI_File fh,
    mpiReadAtAllBeginArguments.numBytes = HDF_get_Bytes( datatype, count );
    
    /* Generate entry record */
-   traceIOEvent( mpiReadAtAllBeginID, (char *) &mpiReadAtAllBeginArguments, 
+   HDFtraceIOEvent( mpiReadAtAllBeginID, (char *) &mpiReadAtAllBeginArguments, 
 		 sizeof( mpiReadAtAllBeginArguments ) );
    
    returnVal = MPI_File_read_at_all( fh, offset, buf, 
@@ -2172,12 +2162,20 @@ PabloMPI_File_read_at_all( MPI_File fh,
    /* mpiReadAtAllEndArguments.fileID = (long) ( &fh ); */
    mpiReadAtAllEndArguments.fileID = myHDFid;
    
-   HDF_MPI_Get_count( status, datatype, &bcount, count );
-   mpiReadAtAllEndArguments.rCount = bcount;
-   mpiReadAtAllEndArguments.numBytes = HDF_get_Bytes( datatype, bcount );
+   MPI_Get_count( status, datatype, &bcount );
+   if ( bcount < 0 || bcount > count )
+   {
+      mpiReadAtAllEndArguments.rCount = -1;
+      mpiReadAtAllEndArguments.numBytes = -1;
+   }
+   else
+   {
+      mpiReadAtAllEndArguments.rCount = bcount;
+      mpiReadAtAllEndArguments.numBytes = HDF_get_Bytes( datatype, bcount );
+   }
    
    /* Generate entry record */
-   traceIOEvent( mpiReadAtAllEndID, (char *) &mpiReadAtAllEndArguments, 
+   HDFtraceIOEvent( mpiReadAtAllEndID, (char *) &mpiReadAtAllEndArguments, 
 		 sizeof( mpiReadAtAllEndArguments ) );
    
    return returnVal;
@@ -2212,7 +2210,7 @@ PabloMPI_File_write_at( MPI_File fh,
    mpiWriteAtBeginArguments.numBytes = HDF_get_Bytes( datatype, count );
    
    /* Generate entry record */
-   traceIOEvent( mpiWriteAtBeginID, (char *) &mpiWriteAtBeginArguments, 
+   HDFtraceIOEvent( mpiWriteAtBeginID, (char *) &mpiWriteAtBeginArguments, 
 		 sizeof( mpiWriteAtBeginArguments ) );
   
    returnVal = MPI_File_write_at( fh, offset, buf, count, 
@@ -2223,12 +2221,12 @@ PabloMPI_File_write_at( MPI_File fh,
    /* mpiWriteAtEndArguments.fileID = (long) ( &fh ); */
    mpiWriteAtEndArguments.fileID = myHDFid;
    
-   HDF_MPI_Get_count( status, datatype, &bcount, count );
+   MPI_Get_count( status, datatype, &bcount );
    mpiWriteAtEndArguments.wCount = bcount;
    mpiWriteAtEndArguments.numBytes = HDF_get_Bytes( datatype, bcount );
    
    /* Generate entry record */
-   traceIOEvent( mpiWriteAtEndID, (char *) &mpiWriteAtEndArguments, 
+   HDFtraceIOEvent( mpiWriteAtEndID, (char *) &mpiWriteAtEndArguments, 
 		 sizeof( mpiWriteAtEndArguments ) );
    
    return returnVal;  
@@ -2264,7 +2262,7 @@ PabloMPI_File_write_at_all( MPI_File fh,
    mpiWriteAtAllBeginArguments.numBytes = HDF_get_Bytes( datatype, count );
       
    /* Generate entry record */
-   traceIOEvent( mpiWriteAtAllBeginID, (char *) &mpiWriteAtAllBeginArguments, 
+   HDFtraceIOEvent( mpiWriteAtAllBeginID, (char *) &mpiWriteAtAllBeginArguments, 
 		 sizeof( mpiWriteAtAllBeginArguments ) );
    
    returnVal = MPI_File_write_at_all( fh, offset, buf, 
@@ -2289,7 +2287,7 @@ PabloMPI_File_write_at_all( MPI_File fh,
    mpiWriteAtAllEndArguments.numBytes = numBytes;
 
    /* Generate entry record */
-   traceIOEvent( mpiWriteAtAllEndID, (char *) &mpiWriteAtAllEndArguments, 
+   HDFtraceIOEvent( mpiWriteAtAllEndID, (char *) &mpiWriteAtAllEndArguments, 
 		 sizeof( mpiWriteAtAllEndArguments ) );
    
    return returnVal;  
@@ -2314,7 +2312,7 @@ PabloMPI_File_sync( MPI_File fh )
    mpiSyncBeginArguments.fileID = myHDFid;
       
    /* Generate entry record */
-   traceIOEvent( mpiSyncBeginID, 
+   HDFtraceIOEvent( mpiSyncBeginID, 
 		 (char *) &mpiSyncBeginArguments, 
 		 sizeof( mpiSyncBeginArguments ) );
    
@@ -2326,7 +2324,7 @@ PabloMPI_File_sync( MPI_File fh )
    mpiSyncEndArguments.fileID = myHDFid;
    
    /* Generate entry record */
-   traceIOEvent( mpiSyncEndID, (char *) &mpiSyncEndArguments, 
+   HDFtraceIOEvent( mpiSyncEndID, (char *) &mpiSyncEndArguments, 
 		 sizeof( mpiSyncEndArguments ) );
    
    return returnVal;
