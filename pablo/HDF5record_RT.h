@@ -122,10 +122,10 @@ int BktLim[] = { 1, 4*ONEK, 64*ONEK, 256*ONEK, INT_MAX } ;
 //======================================================================*/
 typedef struct {
   	int     nCalls;   		/* number of proc calls		*/
-  	double  lastCall;		/* time of last call		*/
-  	double  incDur;			/* inclusive duration		*/
-  	double  excDur;			/* exclusive duration		*/
-	double  times[nTallyFields];	/* Tally op/calls times		*/
+  	CLOCK   lastCall;		/* time of last call		*/
+  	CLOCK   incDur;			/* inclusive duration		*/
+  	CLOCK   excDur;			/* exclusive duration		*/
+	CLOCK   times[nTallyFields];	/* Tally op/calls times		*/
 	int     counts[nTallyFields];	/* Tally op/calls counts	*/
 	int     bytes[nByteFields];	/* Tally bytes transferred	*/
 	int     Hists[nByteFields][nBkts];  /* Historgrams		*/
@@ -136,7 +136,7 @@ typedef struct {
 // Node used to maintain linked lists of HDF procedure activity.       	*
 //======================================================================*/
 typedef struct HDFnode {
-  	double  lastIOtime;		/* last IO time stamp		*/
+  	CLOCK   lastIOtime;		/* last IO time stamp		*/
 	HDFrec_t record;	        /* data				*/
 	struct HDFnode *ptr;		/* link pointer			*/
 	int	eventID;		/* event ID			*/

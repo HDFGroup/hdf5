@@ -188,12 +188,12 @@ void HDFendTrace_RT( void );
 int initproctracert_( void );
 int initHDFProcTrace_RT( void );
 void HDFtraceEvent_RT( int , char *, unsigned ) ;
-void BeginIOEventRecord ( int, double , void * );
-void EndIOEventRecord ( int , double , void * );
-void BeginMPIOEventRecord ( int, double, void *, int ); 
-void EndMPIOEventRecord ( int , double , void *, int);
-void BeginHDFEventRecord( int , double );
-void EndHDFEventRecord ( int , double ,void *);
+void BeginIOEventRecord ( int, CLOCK , void * );
+void EndIOEventRecord ( int , CLOCK , void * );
+void BeginMPIOEventRecord ( int, CLOCK , void *, int ); 
+void EndMPIOEventRecord ( int , CLOCK  , void *, int);
+void BeginHDFEventRecord( int , CLOCK  );
+void EndHDFEventRecord ( int , CLOCK  ,void *);
 void HDFrecordFileName( HDFsetInfo * );
 void HDFassignPabloIDs( int *, char *** );
 void writeHDFNamePacketsRT( char **, int );
@@ -347,15 +347,15 @@ int initHDFProcTrace_RT( void )
 	//==============================================================*/
 	InitNode.ptr = NULL;
         InitNode.eventID = 0;             
-        InitNode.lastIOtime = 0;           
+        InitNode.lastIOtime = zeroClock;
         InitNode.record.nCalls = 0;             
-        InitNode.record.lastCall = 0;
-        InitNode.record.incDur = 0;              
-        InitNode.record.excDur = 0;              
+        InitNode.record.lastCall = zeroClock;
+        InitNode.record.incDur = zeroClock;              
+        InitNode.record.excDur = zeroClock;              
         InitNode.record.hdfID = 0;             
         InitNode.record.xRef = 0;             
 	for ( j = 0; j < nTallyFields; ++j ) {
-           InitNode.record.times[j] = 0; 
+           InitNode.record.times[j] = zeroClock; 
 	}
 	for ( j = 0; j < nTallyFields; ++j ) {
            InitNode.record.counts[j] = 0; 
@@ -405,12 +405,10 @@ int initHDFProcTrace_RT( void )
 void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen ) 
 {
 	TR_LOCK	criticalSection;
-	CLOCK	currentTime;
-	double  seconds;
+	CLOCK	seconds;
 
 	criticalSection = TRlock();
-	currentTime = getClock();
-	seconds = clockToSeconds( currentTime );
+	seconds = getClock();
 
 	if ( isBeginIOEvent ( eventType ) || eventType == ID_malloc ) {
 	   BeginIOEventRecord ( eventType, seconds, dataPtr ) ;
@@ -436,7 +434,7 @@ void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen )
 //  This routine simply records the time in the record on the top of 	*
 //  the stack.								*
 //======================================================================*/ 
-void BeginIOEventRecord ( int eventType, double seconds, void *dataPtr  )
+void BeginIOEventRecord ( int eventType, CLOCK seconds, void *dataPtr  )
 {
 	char *name;
 	/*==============================================================*
@@ -481,14 +479,15 @@ void BeginIOEventRecord ( int eventType, double seconds, void *dataPtr  )
 //  record field corresponding to this type of I/O.  The Bytes field in *
 //  the record is updated if this is a read or write operation.		*
 //======================================================================*/ 
-void EndIOEventRecord ( int eventType, double secs, void *dataPtr )
+void EndIOEventRecord ( int eventType, CLOCK secs, void *dataPtr )
 {
-	double incDur;
+	CLOCK incDur;
 	int i, Field, ByteField, bytes;
 
-	incDur = secs - CallStack->lastIOtime;
+	incDur = clockSubtract(secs,CallStack->lastIOtime) ;
 	Field = getHDFFieldIndex( eventType ) ;
-        CallStack->record.times[Field] += incDur;
+        CallStack->record.times[Field] 
+            = clockAdd ( CallStack->record.times[Field] , incDur ) ;
         ++CallStack->record.counts[Field];
 	ByteField = getHDFByteFieldIndex( Field ) ;
 	switch ( eventType ) 
@@ -526,7 +525,7 @@ void EndIOEventRecord ( int eventType, double secs, void *dataPtr )
 //  the stack.								*
 //======================================================================*/ 
 void BeginMPIOEventRecord( int eventType, 
-	                   double seconds, 
+	                   CLOCK seconds, 
 	                   void *dataPtr,
 	                   int dataLen )
 {
@@ -670,14 +669,15 @@ void BeginMPIOEventRecord( int eventType,
 //  the record field corresponding MPI-I/O.  				*
 //======================================================================*/ 
 void EndMPIOEventRecord ( int eventType, 
-	                  double seconds, 
+	                  CLOCK secs, 
 	                  void *dataPtr,
 	                  int dataLen )
 {
-	double incDur;
+	CLOCK incDur;
 
-	incDur = seconds - CallStack->lastIOtime;
-        CallStack->record.times[MPI] += incDur;
+	incDur = clockSubtract(secs,CallStack->lastIOtime) ;
+        CallStack->record.times[MPI] 
+           = clockAdd ( CallStack->record.times[MPI], incDur );
         ++CallStack->record.counts[MPI];
 	if ( eventType == mpiOpenEndID && dataLen != 0 ) {
 	   /*===========================================================*
@@ -697,7 +697,7 @@ void EndMPIOEventRecord ( int eventType,
 //   	this thread.  If no stack exists, one is created.  If no record	* 
 //   	exist, a record is created.                                   	* 
 //======================================================================*/ 
-void BeginHDFEventRecord( int eventID, double secs )
+void BeginHDFEventRecord( int eventID, CLOCK secs )
 {
 	HDFnode_t *HDFrec;
 	/*==============================================================*
@@ -720,11 +720,11 @@ void BeginHDFEventRecord( int eventID, double secs )
 //  and adds it to the inclusive duration field of this record and to   *
 //  the HDF time field of the calling routines record.			*
 //======================================================================*/ 
-void EndHDFEventRecord ( int eventID, double seconds, void *dataPtr )
+void EndHDFEventRecord ( int eventID, CLOCK secs, void *dataPtr )
 {
         HDFsetInfo 	*info;
 	HDFnode_t	*HDFrec;
-	double 		incSecs;
+	CLOCK  		incSecs;
 	static int	dummyIDs = -4;
 	/*==============================================================*
 	// pop record from top of the stack, compute inclusive duration	*
@@ -736,8 +736,9 @@ void EndHDFEventRecord ( int eventID, double seconds, void *dataPtr )
 	   fprintf(stderr,">>> EndHDFEventRecord: Call Stack is empty. <<<\n");
 	   return;
 	}
-	incSecs = seconds - HDFrec->record.lastCall;
-	HDFrec->record.incDur = +incSecs;
+	incSecs = clockSubtract(secs,HDFrec->record.lastCall) ;
+                  
+	HDFrec->record.incDur = incSecs;
 	++HDFrec->record.nCalls;
    	/*==============================================================*
 	// add old record to chain to have its xRef field tagged.	*
@@ -760,7 +761,8 @@ void EndHDFEventRecord ( int eventID, double seconds, void *dataPtr )
 	/*==============================================================*
 	// Update the HDF totals for the calling program.		*
 	//==============================================================*/
-        CallStack->record.times[ HDF_ ] += incSecs ;
+        CallStack->record.times[ HDF_ ] 
+           = clockAdd( CallStack->record.times[ HDF_ ] , incSecs ) ;
         ++CallStack->record.counts[ HDF_ ] ;
 	/*==============================================================*
 	// If the stack has only one record it represents the main 	* 
@@ -1004,7 +1006,8 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 {
 	int i, j, arrayLen;
 	int allIOCount;
-	double allIOTime;
+	CLOCK allIOTime, excDur;
+	double t;
 	char buff[1024];
 	char *Packet;
 	HDFnode_t *Q;
@@ -1038,22 +1041,12 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	Header.threadID = TRgetNode();
         while ( P != NULL ) {
 	   Q = P->ptr;
-	   Header.eventID = P->eventID;
-	   Header.nCalls  = P->record.nCalls;
-           Header.Seconds = P->record.lastCall;
-	   Header.IncDur  = P->record.incDur;
-	   Header.ExcDur  = P->record.excDur;
-	   Header.HDFid   = P->record.hdfID;
-	   Header.XREFid  = P->record.xRef;
-	   Packet = buff;
-	   memcpy( Packet, &Header, sizeof(Header) );
-	   Packet += sizeof(Header);
 	   /*===========================================================*
 	   // Total the I/O time and counts                        	*
 	   //===========================================================*/
-           allIOTime = 0;
+           allIOTime = zeroClock;
            for ( j = FirstIO; j <= LastIO; ++j ) {
-              allIOTime += P->record.times[j];
+              allIOTime = clockAdd( allIOTime, P->record.times[j] );
            }
            P->record.times[AllIO] = allIOTime;
  
@@ -1063,13 +1056,35 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
            }
            P->record.counts[AllIO] = allIOCount;
 	   /*===========================================================*
+	   // compute exclusive duration.				*
+	   //===========================================================*/
+	   excDur = clockSubtract(P->record.incDur,allIOTime);
+	   excDur = clockSubtract(excDur,P->record.times[HDF_]);
+	   excDur = clockSubtract(excDur,P->record.times[MPI]);
+	   /*===========================================================*
+	   // print header information.					*
+	   //===========================================================*/
+	   Header.eventID = P->eventID;
+	   Header.nCalls  = P->record.nCalls;
+           Header.Seconds = clockToSeconds(P->record.lastCall);
+	   Header.IncDur  = clockToSeconds( P->record.incDur );
+	   Header.ExcDur  = clockToSeconds(excDur);
+	   Header.HDFid   = P->record.hdfID;
+	   Header.XREFid  = P->record.xRef;
+	   Packet = buff;
+	   memcpy( Packet, &Header, sizeof(Header) );
+	   Packet += sizeof(Header);
+	   /*===========================================================*
 	   // copy length of times array and times array to Packet.	*
 	   //===========================================================*/
 	   arrayLen = nTallyFields;
 	   memcpy( Packet, &arrayLen, sizeof(int) );
 	   Packet += sizeof(int);
-	   memcpy( Packet, P->record.times, nTallyFields*sizeof(double) );
-	   Packet += nTallyFields*sizeof(double);
+           for ( j = 0; j < nTallyFields; ++j ) {
+	      t = clockToSeconds(P->record.times[j]); 
+	      memcpy( Packet, &t, sizeof(double) );
+	      Packet += sizeof(double);
+	   }
 	   /*===========================================================*
 	   // copy length of counts array and counts array to Packet.	*
 	   //===========================================================*/
@@ -1117,16 +1132,14 @@ void HDFnodeInit ( HDFnode_t *S )
 void HDFrecordSum ( HDFrec_t *S, HDFrec_t *T )
 {
         int i, j;
- 
-        T->excDur = T->incDur - ( T->times[HDF_] + T->times[MPI]
-                                                 + T->times[AllIO] );
- 
+	
         S->nCalls    += T->nCalls;
-        S->lastCall  =  max( S->lastCall, T->lastCall );
-        S->incDur    += T->incDur;
-        S->excDur    += T->excDur;
+	if ( clockCompare ( S->lastCall, T->lastCall ) < 0 ) {
+           S->lastCall  =  T->lastCall ;
+	}
+        S->incDur    = clockAdd ( S->incDur, T->incDur );
         for ( j = 0; j < nTallyFields; ++j ) {
-           S->times[j] += T->times[j] ;
+           S->times[j] =  clockAdd( S->times[j] , T->times[j] ) ;
         }
         for ( j = 0; j < nTallyFields; ++j ) {
            S->counts[j] += T->counts[j] ;
