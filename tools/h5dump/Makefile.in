@@ -27,7 +27,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 ## Test programs and scripts.
 ##
 TEST_PROGS=h5dumpgentest
-TEST_SCRIPTS=$(srcdir)/testh5dump.sh $(srcdir)/testh5dumpxml.sh
+TEST_SCRIPTS=./testh5dump.sh $(srcdir)/testh5dumpxml.sh
 
 ## These are our main targets: library and tools.
 ##
