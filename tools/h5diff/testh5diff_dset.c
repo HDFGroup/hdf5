@@ -619,7 +619,7 @@ static void write_null_dset(hid_t loc_id, int make_diffs)
      int        val = 2;
      double     dval = 7.8;
     
-     /* Create the null attribute */
+     /* Create the null dataset */
      sid = H5Screate(H5S_NULL);
      if(make_diffs) {
          dset_id  = H5Dcreate(loc_id,"null_dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
