@@ -315,7 +315,7 @@ int h5toh4(char *h5_filename, char *h4_filename)
 	hid_t (*func)(void*);
 
 
-	find_objs_t *info = HDmalloc(sizeof(find_objs_t));
+	find_objs_t *info = malloc(sizeof(find_objs_t));
 
 
 
@@ -788,6 +788,28 @@ int32 order_array[512];
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 				break;
 			}
+#ifdef H5_WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_fieldtype;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,idx,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_fieldtype=H5Tarray_create(fieldtype,arrndims,arrdims,NULL);
+                    H5Tclose(fieldtype);
+                    fieldtype=new_fieldtype;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
             /* Special case for array fields */
             if(H5Tget_class(fieldtype)==H5T_ARRAY) {
                 hid_t   arr_base_type;
@@ -910,6 +932,28 @@ int32 order_array[512];
                     DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
                     break;
                 }
+#ifdef H5_WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_arr_type;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,idx,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_arr_type=H5Tarray_create(arr_type,arrndims,arrdims,NULL);
+                    H5Tclose(arr_type);
+                    arr_type=new_arr_type;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
                 /* Get the number of dimensions */
                 if ((ndimf = H5Tget_array_ndims(arr_type)) < 0 || ndimf > H5S_MAX_RANK ) {
                     fprintf(stderr, "Error: rank of members of compound type should not be %d\n",ndimf);
