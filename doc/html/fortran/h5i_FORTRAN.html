@@ -42,8 +42,34 @@ FORTRAN Identifier API -- h5i
                                          !H5I_ATTR_F(6)
                                          !H5I_BADID_F(-1)
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                            ! 0 on success, and -1 on failure
 
           END SUBROUTINE h5iget_type_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5iget_name_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5iget_name_f</strong>
+
+<pre>
+          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)    :: obj_id     ! Object identifier 
+            CHARACTER(LEN=*), INTENT(OUT) :: buf        ! Buffer to hold object name 
+            INTEGER(SIZE_T), INTENT(IN)   :: buf_size   ! Buffer size
+            INTEGER(SIZE_T), INTENT(OUT)  :: name_size  ! Name size
+            INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                                        ! 0 on success, and -1 on failure
+                                                     
+          END SUBROUTINE h5iget_name_f
 </pre>
 
 
@@ -60,7 +86,7 @@ FORTRAN Identifier API -- h5i
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  14 July 2000
+Last modified:  19 March 2003
 
 </body>
 </html>

@@ -219,8 +219,8 @@ FORTRAN Property List API -- h5p
           SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER, INTENT(IN) :: leveli        ! Compression level 
-            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+            INTEGER, INTENT(IN)        :: level  ! Compression level 
+            INTEGER, INTENT(OUT)       :: hdferr ! Error code
                                                  ! 0 on success and -1 on failure
  
           END SUBROUTINE h5pset_deflate_f
@@ -2234,6 +2234,100 @@ FORTRAN Property List API -- h5p
 				 !	Failure: -1   
           END SUBROUTINE h5pget_class_name_f
 </pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_shuffle_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_shuffle_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_shuffle_f(prp_id, type_size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
+            INTEGER, INTENT(IN)        :: type_size   ! Datatype size in bytes
+            INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_shuffle_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_edc_check_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_edc_check_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Dataset transfer property list identifier 
+            INTEGER, INTENT(IN)        :: flag        ! EDC flag; possible values
+                                                      ! H5Z_DISABLE_EDC_F 
+                                                      ! H5Z_ENABLE_EDC_F 
+            INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_edc_check_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_edc_check_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_edc_check_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_edc_check_f(prp_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Dataset transfer property list identifier 
+            INTEGER, INTENT(OUT)       :: flag        ! EDC flag; possible values
+                                                      ! H5Z_DISABLE_EDC_F 
+                                                      ! H5Z_ENABLE_EDC_F 
+            INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pget_edc_check_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_fletcher32_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_fletcher32_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Dataset creation property list identifier 
+            INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_fletcher32_f
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -2246,7 +2340,7 @@ FORTRAN Property List API -- h5p
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  14 March 2003
+Last modified:  19 March 2003
 
 </body>
 </html>

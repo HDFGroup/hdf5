@@ -1259,6 +1259,30 @@ FORTRAN Datatype API -- h5t
 <p>&nbsp;
 <hr>
 <p>&nbsp;
+<a name="h5tis_variable_str_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tis_variable_str_f</strong>
+<pre>
+
+          SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+            LOGICAL, INTENT(OUT)       :: status    ! Logical flag:
+                                                    ! .TRUE. is datatype is a varibale string
+                                                    ! .FALSE. otherwise 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5tis_variable_str_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
 <a name="h5tget_super_f">
 <p>&nbsp;
 </a>
@@ -1276,12 +1300,6 @@ FORTRAN Datatype API -- h5t
 </pre>
 
 
-
-
-
-
-
-
 </dl>
 
 <p>&nbsp;
@@ -1295,7 +1313,7 @@ FORTRAN Datatype API -- h5t
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  14 March 2003
+Last modified:  19 March 2003
 
 </body>
 </html>
