@@ -1482,6 +1482,7 @@ H5S_conv_t *
 H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 {
     size_t	i;
+    htri_t c1,c2;
     H5S_conv_t	*path;
     
     FUNC_ENTER (H5S_find, NULL);
@@ -1537,8 +1538,13 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     /*
      * Initialize direct read/write functions
      */
-    if (H5S_SEL_ALL==file_space->select.type &&
-	H5S_SEL_ALL==mem_space->select.type) {
+    c1=H5S_select_contiguous(file_space);
+    c2=H5S_select_contiguous(mem_space);
+    if(c1==FAIL || c2==FAIL)
+	HRETURN_ERROR(H5E_DATASPACE, H5E_INTERNAL, NULL,
+		      "invalid check for contiguous dataspace ");
+
+    if (c1==TRUE && c2==TRUE) {
 	path->read = H5S_all_read;
 	path->write = H5S_all_write;
     }

@@ -537,6 +537,7 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
  *              Thursday, April 22, 1999
  *
  * Modifications:
+ *    Modified to allow contiguous hyperslabs to be written out - QAK - 5/25/99
  *
  *-------------------------------------------------------------------------
  */
@@ -546,8 +547,12 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	     const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
 	     void *buf/*out*/, hbool_t *must_convert/*out*/)
 {
+    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    hsize_t	mem_size,file_size;
+    hssize_t	file_off;
     hsize_t	size[H5S_MAX_RANK];
-    hssize_t	offset[H5S_MAX_RANK];
+    hssize_t	file_offset[H5S_MAX_RANK];
+    hssize_t	mem_offset[H5S_MAX_RANK];
     int		i;
 
     FUNC_ENTER(H5S_all_read, FAIL);
@@ -558,6 +563,18 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
     if (mem_space->extent.u.simple.rank!=
 	file_space->extent.u.simple.rank) goto fall_through;
+    if (mem_space->select.type==H5S_SEL_HYPERSLABS) {
+	if(mem_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
+	mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+    } /* end if */
+    else
+    	if(mem_space->select.type!=H5S_SEL_ALL) goto fall_through;
+    if (file_space->select.type==H5S_SEL_HYPERSLABS) {
+	if(file_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
+	file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+    } /* end if */
+    else
+    	if(file_space->select.type!=H5S_SEL_ALL) goto fall_through;
 
     /* Get information about memory and file */
     for (i=0; i<mem_space->extent.u.simple.rank; i++) {
@@ -567,19 +584,34 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	if (file_space->extent.u.simple.max &&
 	    file_space->extent.u.simple.size[i]!=
 	    file_space->extent.u.simple.max[i]) goto fall_through;
-	if (mem_space->extent.u.simple.size[i]!=
-	    file_space->extent.u.simple.size[i]) goto fall_through;
-	size[i] = mem_space->extent.u.simple.size[i];
-	offset[i] = 0;
+	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
+	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+	} /* end if */
+	else {
+	    mem_size=mem_space->extent.u.simple.size[i];
+	} /* end else */
+	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
+	    file_size=(file_node->end[i]-file_node->start[i])+1;
+	    file_off=file_node->start[i];
+	} /* end if */
+	else {
+	    file_size=file_space->extent.u.simple.size[i];
+	    file_off=0;
+	} /* end else */
+	if (mem_size!=file_size) goto fall_through;
+	size[i] = file_size;
+	file_offset[i] = file_off;
+	mem_offset[i] = 0;
     }
     size[i] = elmt_size;
-    offset[i] = 0;
+    file_offset[i] = 0;
+    mem_offset[i] = 0;
 
     /* Read data from the file */
     if (H5F_arr_read(f, xfer_parms, layout, pline, NULL, efl, size,
-		     size, offset, offset, buf/*out*/)<0) {
+		     size, mem_offset, file_offset, buf/*out*/)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
-		      "unable to write data to the file");
+		      "unable to read data from the file");
     }
     *must_convert = FALSE;
 
@@ -604,6 +636,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
  *              Wednesday, April 21, 1999
  *
  * Modifications:
+ *    Modified to allow contiguous hyperslabs to be written out - QAK - 5/25/99
  *
  *-------------------------------------------------------------------------
  */
@@ -614,8 +647,12 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	      const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
 	      const void *buf, hbool_t *must_convert/*out*/)
 {
+    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    hsize_t	mem_size,file_size;
+    hssize_t	file_off;
     hsize_t	size[H5S_MAX_RANK];
-    hssize_t	offset[H5S_MAX_RANK];
+    hssize_t	file_offset[H5S_MAX_RANK];
+    hssize_t	mem_offset[H5S_MAX_RANK];
     int		i;
     
     FUNC_ENTER(H5S_all_write, FAIL);
@@ -626,6 +663,18 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
     if (mem_space->extent.u.simple.rank!=
 	file_space->extent.u.simple.rank) goto fall_through;
+    if (mem_space->select.type==H5S_SEL_HYPERSLABS) {
+	if(mem_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
+	mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+    } /* end if */
+    else
+    	if(mem_space->select.type!=H5S_SEL_ALL) goto fall_through;
+    if (file_space->select.type==H5S_SEL_HYPERSLABS) {
+	if(file_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
+	file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+    } /* end if */
+    else
+    	if(file_space->select.type!=H5S_SEL_ALL) goto fall_through;
 
     /* Get information about memory and file */
     for (i=0; i<mem_space->extent.u.simple.rank; i++) {
@@ -635,17 +684,32 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	if (file_space->extent.u.simple.max &&
 	    file_space->extent.u.simple.size[i]!=
 	    file_space->extent.u.simple.max[i]) goto fall_through;
-	if (mem_space->extent.u.simple.size[i]!=
-	    file_space->extent.u.simple.size[i]) goto fall_through;
-	size[i] = mem_space->extent.u.simple.size[i];
-	offset[i] = 0;
+	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
+	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+	} /* end if */
+	else {
+	    mem_size=mem_space->extent.u.simple.size[i];
+	} /* end else */
+	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
+	    file_size=(file_node->end[i]-file_node->start[i])+1;
+	    file_off=file_node->start[i];
+	} /* end if */
+	else {
+	    file_size=file_space->extent.u.simple.size[i];
+	    file_off=0;
+	} /* end else */
+	if (mem_size!=file_size) goto fall_through;
+	size[i] = file_size;
+	file_offset[i] = file_off;
+	mem_offset[i] = 0;
     }
     size[i] = elmt_size;
-    offset[i] = 0;
+    file_offset[i] = 0;
+    mem_offset[i] = 0;
 
     /* Write data to the file */
     if (H5F_arr_write(f, xfer_parms, layout, pline, NULL, efl, size,
-		      size, offset, offset, buf)<0) {
+		      size, mem_offset, file_offset, buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
 		      "unable to write data to the file");
     }

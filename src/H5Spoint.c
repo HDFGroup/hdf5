@@ -1069,3 +1069,42 @@ H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_point_bounds() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_contiguous
+ PURPOSE
+    Check if a point selection is contiguous within the dataspace extent.
+ USAGE
+    htri_t H5S_point_select_contiguous(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspace is contiguous.
+    This is primarily used for reading the entire selection in one swoop.
+    This code currently doesn't properly check for contiguousness when there is
+    more than one point, as that would take a lot of extra coding that we
+    don't need now.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_point_select_contiguous(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_contiguous, FAIL);
+
+    assert(space);
+
+    /* One point is definitely contiguous */
+    if(space->select.num_elem==1)
+    	ret_value=TRUE;
+    else	/* More than one point might be contiguous, but it's complex to check and we don't need it right now */
+    	ret_value=FALSE;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_contiguous() */

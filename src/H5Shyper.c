@@ -2921,3 +2921,58 @@ H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_hyper_bounds() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_contiguous
+ PURPOSE
+    Check if a hyperslab selection is contiguous within the dataspace extent.
+ USAGE
+    htri_t H5S_select_contiguous(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspace is contiguous.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_hyper_select_contiguous(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+    H5S_hyper_node_t *node;     /* Hyperslab node */
+    intn rank;                  /* Dataspace rank */
+    intn i;                     /* index variable */
+
+    FUNC_ENTER (H5S_hyper_select_contiguous, FAIL);
+
+    assert(space);
+
+    /* If there is more than one hyperslab in the selection, they are not contiguous */
+    if(space->select.sel_info.hslab.hyper_lst->count>1)
+    	ret_value=FALSE;
+    else {	/* If there is one hyperslab, then it might be contiguous */
+	/* Get the dataspace extent rank */
+	rank=space->extent.u.simple.rank;
+
+	/* Get the hyperslab node */
+	node=space->select.sel_info.hslab.hyper_lst->head;
+
+	/*
+	 * For a hyperslab to be contiguous, it's size must be the same as the
+	 * dataspace extent's in all but the slowest changing dimension
+	 */
+	ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
+	for(i=1; i<rank; i++) {
+		if(((node->end[i]-node->start[i])+1)!=space->extent.u.simple.size[i]) {
+			ret_value=FALSE;
+			break;
+		} /* end if */
+	}
+    } /* end else */
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_contiguous() */
