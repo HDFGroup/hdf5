@@ -139,7 +139,7 @@ static herr_t do_read(file_descr *fd, iotype iot, long ndsets,
 static herr_t do_fopen(iotype iot, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
-static void do_cleanupfile(char *fname);
+static void do_cleanupfile(iotype iot, char *fname);
 
 /*
  * Function:    do_pio
@@ -328,7 +328,7 @@ fprintf(stderr, "filename=%s\n", fname);
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
         VRFY((hrc == SUCCESS), "do_fclose failed");
-        do_cleanupfile(fname);
+        do_cleanupfile(iot, fname);
     }
 
 done:
@@ -950,17 +950,30 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
     case MPIO:
         if (flags & (PIO_CREATE | PIO_WRITE)) {
+	    MPI_File_delete(fname, MPI_INFO_NULL);
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
-                                MPI_INFO_NULL, &(fd->mpifd));
+                                MPI_INFO_NULL, &fd->mpifd);
+	    if (mrc != MPI_SUCCESS) {
+		fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+		GOTOERROR(FAIL);
+	    }
+	    /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
+	    /*filesize , set size to 0 explicitedly.	*/
+	    mrc = MPI_File_set_size(fd->mpifd, 0);
+	    if (mrc != MPI_SUCCESS) {
+		fprintf(stderr, "MPI_File_set_size failed\n");
+		GOTOERROR(FAIL);
+	    }
+
         } else {
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY,
-                                MPI_INFO_NULL, &(fd->mpifd));
+                                MPI_INFO_NULL, &fd->mpifd);
+	    if (mrc != MPI_SUCCESS) {
+		fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+		GOTOERROR(FAIL);
+	    }
         }
 
-        if (mrc != MPI_SUCCESS) {
-            fprintf(stderr, "MPI File Open failed(%s)\n", fname);
-            GOTOERROR(FAIL);
-        }
 
         break;
 
@@ -1032,7 +1045,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         break;
 
     case MPIO:
-        mrc = MPI_File_close(&(fd->mpifd));
+        mrc = MPI_File_close(&fd->mpifd);
 
         if (mrc != MPI_SUCCESS){
             fprintf(stderr, "MPI File close failed\n");
@@ -1069,7 +1082,7 @@ done:
  * Modifications:
  */
 static void
-do_cleanupfile(char *fname)
+do_cleanupfile(iotype iot, char *fname)
 {
     if (pio_mpi_rank_g != 0)
 	return;
@@ -1077,7 +1090,16 @@ do_cleanupfile(char *fname)
     if (clean_file_g == -1)
 	clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
     
-    if (clean_file_g)
-	remove(fname);
+    if (clean_file_g){
+	switch (iot){
+	case RAW:
+	    remove(fname);
+	    break;
+	case MPIO:
+	case PHDF5:
+	    MPI_File_delete(fname, MPI_INFO_NULL);
+	    break;
+	}
+    }
 }
 #endif /* H5_HAVE_PARALLEL */
