@@ -41,11 +41,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-#ifdef MAX
-#undef MAX
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
-#endif /* MAX */
-
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SEC2_g = 0;
 
