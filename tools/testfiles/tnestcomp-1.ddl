@@ -17,8 +17,8 @@ GROUP "/" {
             } "char_name";
             H5T_ARRAY { [2] H5T_IEEE_F32LE } "array_name";
          } "d_name";
-      }        
-      DATASPACE  SIMPLE { ( 10 ) / ( 10 ) } 
+      }
+      DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
       DATA {
          {
             0,
@@ -110,7 +110,7 @@ GROUP "/" {
                [ -100, 100 ]
             }
          }
-      } 
-   } 
-} 
-} 
+      }
+   }
+}
+}

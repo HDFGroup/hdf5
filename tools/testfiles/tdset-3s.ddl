@@ -3,8 +3,8 @@ Expected output for 'h5dump -d /dset1[1,1;;;] tdset.h5'
 #############################
 HDF5 "tdset.h5" {
 DATASET "/dset1" {
-   DATATYPE  H5T_STD_I32BE  
-   DATASPACE  SIMPLE { ( 10, 20 ) / ( 10, 20 ) } 
+   DATATYPE  H5T_STD_I32BE
+   DATASPACE  SIMPLE { ( 10, 20 ) / ( 10, 20 ) }
    SUBSET {
       START ( 1, 1 );
       STRIDE ( 1, 1 );
@@ -21,7 +21,7 @@ DATASET "/dset1" {
          21, 22, 23, 24, 17, 18, 19, 20, 21, 22, 23, 24, 25, 18, 19, 20, 21, 22,
          23, 24, 25, 26, 19, 20, 21, 22, 23, 24, 25, 26, 27, 20, 21, 22, 23, 24,
          25, 26, 27, 28
-      } 
-   } 
-} 
-} 
+      }
+   }
+}
+}

@@ -8,8 +8,8 @@ GROUP "/" {
          H5T_STD_I32LE "i";
          H5T_IEEE_F32LE "f";
          H5T_VLEN { H5T_STD_U32LE} "v";
-      }        
-      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
+      }
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
          {
             0,
@@ -31,7 +31,7 @@ GROUP "/" {
             20,
             (30, 31, 32, 33)
          }
-      } 
-   } 
-} 
-} 
+      }
+   }
+}
+}

@@ -31,7 +31,7 @@ Expected output for 'h5dump --xml --use-dtd tempty.h5'
 <!-- Note: format of VL data not specified -->
       <Data>
          <DataFromFile>
-                    
+                
          </DataFromFile>
       </Data>
    </Dataset>
@@ -111,7 +111,7 @@ Expected output for 'h5dump --xml --use-dtd tempty.h5'
       </DataType>
       <Data>
          <DataFromFile>
-          0 0 0 0   0 0 0 0   0 0 0 0   0 0 0 0 
+          0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
          </DataFromFile>
       </Data>
    </Dataset>
