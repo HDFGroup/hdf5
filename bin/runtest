@@ -534,7 +534,7 @@ errcode=0			# error code of the whole test
 skiptest=no			# if test is skipped
 CC_SAVED="$CC"			# CC & PATH maybe changed within a test.
 PATH_SAVED=$PATH		# These save the original values.
-timelimit=`expr 3600 \* 5`	# time limit for the timekeeper
+timelimit=300			# time limit (minutes) for the timekeeper
 
 #################################
 # Parse options
@@ -625,6 +625,7 @@ PASSEDLOG=${LOGDIR}/PASSED_LOG_${TODAY}
 FAILEDLOG=${LOGDIR}/FAILED_LOG_${TODAY}
 SKIPPEDLOG=${LOGDIR}/SKIPPED_LOG_${TODAY}
 TIMELOG=${LOGDIR}/TIME_LOG_${TODAY}
+TIMEKEEPERLOG=${LOGDIR}/TIMEKEEPER_LOG_${TODAY}
 CVSLOG=${LOGDIR}/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${LOGDIR}/CVS_LOG_LOCK_${TODAY}
 DIFFLOG=${LOGDIR}/DIFF_LOG_${TODAY}
@@ -753,7 +754,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     cd ${SNAPYARD}/log
     # Fork off timekeeper if concurrent tests will be used.
     if [ -n "$SRCDIR" ]; then
-	($SNAPYARD/current/bin/timekeeper $timelimit &)
+	($SNAPYARD/current/bin/timekeeper $timelimit > $TIMEKEEPERLOG 2>&1 &)
 	PRINT "    Fork off timekeeper $timelimit"
     fi
     n_test=0
