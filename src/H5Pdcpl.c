@@ -760,33 +760,38 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ * Programmer:	Kent Yang
+ *              Tuesday, April 1, 2003
  *
  * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
- *              generic property list. 
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_szip(hid_t plist_id, const unsigned cd_values[])
+H5Pset_szip(hid_t plist_id, 
+	int options_mask,
+	int bits_per_pixel,
+	int pixels_per_block,
+	int pixels_per_scanline)
 {
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
+    unsigned cd_values[4];      /* Filter parameters */
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pset_szip, FAIL);
-/*    H5TRACE2("e","i*Iu",plist_id,cd_values);
-    H5TRACE2("e","i*Iu",plist_id,cd_values);
-*/ 
+    H5TRACE5("e","iIsIsIsIs",plist_id,options_mask,bits_per_pixel,
+             pixels_per_block,pixels_per_scanline);
     
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set the parameters for the filter */
+    cd_values[0]=options_mask;
+    cd_values[1]=bits_per_pixel;
+    cd_values[2]=pixels_per_block;
+    cd_values[3]=pixels_per_scanline;
 
     /* Add the filter */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)

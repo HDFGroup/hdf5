@@ -220,7 +220,8 @@ H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]);
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
-H5_DLL herr_t H5Pset_szip(hid_t plist_id,const unsigned cd_values[]);
+H5_DLL herr_t H5Pset_szip(hid_t plist_id, int options_mask, int bits_per_pixel,
+	int pixels_per_block, int pixels_per_scanline);
 H5_DLL herr_t H5Pset_shuffle(hid_t plist_id, unsigned bytespertype);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
