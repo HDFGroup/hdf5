@@ -20,6 +20,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Iprivate.h>		/* ID Functions */
 #include <H5Dprivate.h>		/* Datasets */
 #include <H5Eprivate.h>		/* Error handling */
+#include <H5Fprivate.h>		/* Files */
 #include <H5Gprivate.h>		/* Groups */
 #include <H5Rprivate.h>		/* References */
 #include <H5Sprivate.h>		/* Dataspaces */
@@ -32,10 +33,10 @@ static herr_t		H5R_init_interface(void);
 static void		H5R_term_interface(void);
 
 /* Static functions */
-static herr_t H5R_create(href_t *ref, H5G_entry_t *loc, const char *name,
+static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space);
-static hid_t H5R_dereference(H5D_t *dset, href_t *ref);
-static H5S_t * H5R_get_space(href_t *ref);
+static hid_t H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref);
+static H5S_t * H5R_get_space(void *ref);
 
 
 /*--------------------------------------------------------------------------
@@ -98,7 +99,7 @@ H5R_term_interface(void)
     Creates a particular kind of reference for the user
  USAGE
     herr_t H5R_create(ref, loc, name, ref_type, space)
-        href_t *ref;        OUT: Reference created
+        void *ref;          OUT: Reference created
         H5G_entry_t *loc;   IN: File location used to locate object pointed to
         const char *name;   IN: Name of object at location LOC_ID of object
                                     pointed to
@@ -119,14 +120,14 @@ H5R_term_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5R_create(href_t *ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, H5S_t __unused__ *space)
+H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, H5S_t __unused__ *space)
 {
     H5G_stat_t sb;              /* Stat buffer for retrieving OID */
     herr_t ret_value = FAIL;
 
     FUNC_ENTER(H5R_create, FAIL);
 
-    assert(ref);
+    assert(_ref);
     assert(loc);
     assert(name);
     assert(ref_type>H5R_BADTYPE || ref_type<H5R_MAXTYPE);
@@ -134,9 +135,29 @@ H5R_create(href_t *ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type,
     if (H5G_get_objinfo (loc, name, 0, &sb)<0)
         HGOTO_ERROR (H5E_REFERENCE, H5E_NOTFOUND, FAIL, "unable to stat object");
 
-    /* Set information for reference */
-    ref->oid[0]=sb.objno[0];
-    ref->oid[1]=sb.objno[1];
+    switch(ref_type) {
+        case H5R_OBJECT:
+        {
+            hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
+            uint8 *p;       /* Pointer to OID to store */
+
+            /* Set information for reference */
+            p=(uint8 *)ref->oid;
+            H5F_addr_encode(loc->file,&p,(const haddr_t *)sb.objno);
+            break;
+        }
+
+        case H5R_DATASET_REGION:
+        case H5R_INTERNAL:
+            HRETURN_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL,
+                  "Dataset region and internal references are not supported yet");
+
+        case H5R_BADTYPE:
+        case H5R_MAXTYPE:
+            assert("unknown reference type" && 0);
+            HRETURN_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL,
+                  "internal error (unknown reference type)");
+    } /* end switch */
 
     /* Return success */
     ret_value=SUCCEED;
@@ -153,7 +174,7 @@ done:
     Creates a particular kind of reference for the user
  USAGE
     herr_t H5Rcreate(ref, loc_id, name, ref_type, space_id)
-        href_t *ref;        OUT: Reference created
+        void *ref;          OUT: Reference created
         hid_t loc_id;       IN: Location ID used to locate object pointed to
         const char *name;   IN: Name of object at location LOC_ID of object
                                     pointed to
@@ -174,7 +195,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Rcreate(href_t *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
+H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
     H5G_entry_t *loc = NULL;        /* File location */
     H5S_t	*space = NULL;          /* Pointer to dataspace containing region */
@@ -214,7 +235,8 @@ done:
  USAGE
     hid_t H5R_dereference(ref)
         H5D_t *dset;        IN: Dataset reference object is in.
-        href_t *ref;        IN: Reference to open.
+        H5R_type_t ref_type;    IN: Type of reference
+        void *ref;          IN: Reference to open.
         
  RETURNS
     Valid ID on success, FAIL on failure
@@ -228,17 +250,19 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hid_t
-H5R_dereference(H5D_t *dset, href_t *ref)
+H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
 {
     H5D_t *dataset;             /* Pointer to dataset to open */
+    hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
     H5G_entry_t ent;            /* Symbol table entry */
+    uint8 *p;                   /* Pointer to OID to store */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5R_dereference, FAIL);
 
     assert(ref);
+    assert(ref_type==H5R_OBJECT);
 
-printf("%s: ref->oid=%ld-%ld\n",FUNC,(long)ref->oid[0],ref->oid[1]);
     /*
      * Switch on object type, when we implement that feature, always try to
      *  open a dataset for now
@@ -251,9 +275,10 @@ printf("%s: ref->oid=%ld-%ld\n",FUNC,(long)ref->oid[0],ref->oid[1]);
 
     /* Initialize the symbol table entry */
     HDmemset(&ent,0,sizeof(H5G_entry_t));
-    HDmemcpy(&(ent.header),ref->oid,sizeof(haddr_t));
     ent.type=H5G_NOTHING_CACHED;
-/* ent.file=ref->file; */
+    ent.file=H5D_get_file(dset);
+    p=(uint8 *)ref->oid;
+    H5F_addr_decode(ent.file,(const uint8 **)&p,&(ent.header));
 
     /* Open the dataset object */
     if (H5D_open_oid(dataset, &ent) < 0) {
@@ -266,7 +291,6 @@ printf("%s: ref->oid=%ld-%ld\n",FUNC,(long)ref->oid[0],ref->oid[1]);
         HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		      "can't register dataset");
     }
-printf("%s: ret_value=%ld\n",FUNC,(long)ret_value);
 
 done:
     FUNC_LEAVE(ret_value);
@@ -281,7 +305,8 @@ done:
  USAGE
     hid_t H5Rdereference(ref)
         hid_t dataset;      IN: Dataset reference object is in.
-        href_t *ref;        IN: Reference to open.
+        H5R_type_t ref_type;    IN: Type of reference to create
+        void *ref;          IN: Reference to open.
         
  RETURNS
     Valid ID on success, FAIL on failure
@@ -294,22 +319,24 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rdereference(hid_t dataset, href_t *ref)
+H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *_ref)
 {
     H5D_t		   *dset = NULL;	/* dataset object */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rdereference, FAIL);
-    H5TRACE2("i","i*r",dataset,ref);
+    H5TRACE2("i","i*r",dataset,_ref);
 
     /* Check args */
     if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    if(ref==NULL)
+    if(ref_type<=H5R_BADTYPE || ref_type>=H5R_MAXTYPE)
+        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
+    if(_ref==NULL)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
 
     /* Create reference */
-    if ((ret_value=H5R_dereference(dset, ref))<0)
+    if ((ret_value=H5R_dereference(dset, ref_type, _ref))<0)
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object");
 
 done:
@@ -324,7 +351,7 @@ done:
     Retrieves a dataspace with the region pointed to selected.
  USAGE
     H5S_t *H5R_get_space(ref)
-        href_t *ref;        IN: Reference to open.
+        void *ref;        IN: Reference to open.
         
  RETURNS
     Pointer to the dataspace on success, NULL on failure
@@ -338,7 +365,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5S_t *
-H5R_get_space(href_t __unused__ *ref)
+H5R_get_space(void __unused__ *ref)
 {
     H5S_t *ret_value = NULL;
 
@@ -360,7 +387,7 @@ done:
     Retrieves a dataspace with the region pointed to selected.
  USAGE
     hid_t H5Rget_space(ref)
-        href_t *ref;        IN: Reference to open.
+        void *ref;        IN: Reference to open.
         
  RETURNS
     Valid ID on success, FAIL on failure
@@ -374,7 +401,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rget_space(href_t *ref)
+H5Rget_space(void *ref)
 {
     H5S_t *space = NULL;
     hid_t ret_value = FAIL;

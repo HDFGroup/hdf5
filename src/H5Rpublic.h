@@ -31,12 +31,19 @@ typedef enum {
     H5R_MAXTYPE                 /* highest type in group (Invalid as true type)*/
 } H5R_type_t;
 
-/* Reference structure for user's code */
+#ifdef LATER
+/* Generic reference structure for user's code */
 typedef struct {
     unsigned long oid[2];       /* OID of object referenced */
     unsigned long region[2];    /* heap ID of region in object */
     unsigned long file[2];      /* heap ID of external filename */
 } href_t;
+#endif /* LATER */
+
+/* Object reference structure for user's code */
+typedef struct {
+    unsigned long oid[2];       /* OID of object referenced */
+} hobj_ref_t;
 
 /* Publicly visible datastructures */
 
@@ -45,10 +52,10 @@ extern "C" {
 #endif
 
 /* Functions in H5R.c */
-herr_t H5Rcreate(href_t *ref, hid_t loc_id, const char *name,
+herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
         H5R_type_t ref_type, hid_t space_id);
-hid_t H5Rdereference(hid_t dataset, href_t *ref);
-hid_t H5Rget_space(href_t *ref);
+hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *ref);
+hid_t H5Rget_space(void *ref);
 
 #ifdef __cplusplus
 }

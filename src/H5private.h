@@ -177,19 +177,6 @@ typedef int intn;
 typedef unsigned uintn;
 
 /*
- * Status return values for the `herr_t' type.
- * Since some unix/c routines use 0 and -1 (or more precisely, non-negative
- * vs. negative) as their return code, and some assumption had been made in
- * the code about that, it is important to keep these constants the same
- * values.  When checking the success or failure of an integer-valued
- * function, remember to compare against zero and not one of these two
- * values.
- */
-#define SUCCEED         0
-#define FAIL            (-1)
-#define UFAIL           (unsigned)(-1)
-
-/*
  * File addresses.
  */
 typedef struct {

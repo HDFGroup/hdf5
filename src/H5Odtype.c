@@ -218,6 +218,15 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         }
         break;
 
+    case H5T_POINTER:
+        dt->u.atomic.order = H5T_ORDER_NONE;
+        dt->u.atomic.prec = 8 * dt->size;
+        dt->u.atomic.offset = 0;
+        dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+        dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+        dt->u.atomic.u.r.rtype = flags & 0x0f;
+        break;
+
     default:
         if (flags) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
@@ -457,6 +466,10 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         }
         break;
 
+    case H5T_POINTER:
+        flags |= (dt->u.atomic.u.r.rtype & 0x0f);
+        break;
+        
     default:
         /*nothing */
         break;

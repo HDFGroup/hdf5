@@ -220,14 +220,6 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 8*dt->size;
     dt->u.atomic.offset = 0;
 
-    /* Object pointer (i.e. object header address in file) */
-    dt = H5I_object (H5T_STD_PTR_OBJ_g = H5Tcopy (H5T_NATIVE_INT_g));
-    dt->type = H5T_POINTER;
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = sizeof(haddr_t);
-    dt->u.atomic.u.r.rtype = H5R_OBJECT;
-    dt->u.atomic.prec = 8*dt->size;
-    dt->u.atomic.offset = 0;
 
     /*------------------------------------------------------------
      * IEEE Types
@@ -605,6 +597,29 @@ H5T_init_interface(void)
     if ((H5T_FORTRAN_S1_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "can't initialize H5T layer");
+    }
+
+    /*------------------------------------------------------------
+     * Pointer types
+     *------------------------------------------------------------ 
+     */
+    /* Object pointer (i.e. object header address in file) */
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    }
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
+    dt->type = H5T_POINTER;
+    dt->size = sizeof(haddr_t);
+    dt->u.atomic.order = H5T_ORDER_NONE;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8 * dt->size;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.r.rtype = H5R_OBJECT;
+    if ((H5T_STD_PTR_OBJ_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to initialize H5T layer");
     }
 
     /*
@@ -4398,36 +4413,23 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 
     FUNC_ENTER(H5T_find, NULL);
 
-#ifdef QAK
-    printf("%s: check 1.0\n",FUNC);
-#endif /* QAK */
     if (!noop_cdata.stats &&
 	NULL==(noop_cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
 
-#ifdef QAK
-    printf("%s: check 2.0, src->type=%d, dst->type=%d\n",
-	   FUNC, (int)src->type, (int)dst->type);
-#endif /* QAK */
     /* No-op case */
     if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;
 	HRETURN(H5T_conv_noop);
     }
     
-#ifdef QAK
-    printf("%s: check 3.0\n", FUNC);
-#endif /* QAK */
     /* Find it */
     if (NULL == (path = H5T_path_find(NULL, src, dst, TRUE, NULL))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 		      "unable to create conversion path");
     }
-#ifdef QAK
-    printf("%s: path=%p\n", FUNC, path);
-#endif /* QAK */
 
     if ((ret_value=path->func)) {
 	*pcdata = &(path->cdata);
@@ -4495,9 +4497,6 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
             HRETURN(H5T_path_g[md]);
         }
     }
-#ifdef QAK
-    printf("%s: check 2.0, create=%d, md=%d\n", FUNC, (int)create, md);
-#endif /* QAK */
 
     /* Insert */
     if (create) {
@@ -4524,18 +4523,9 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                    "memory allocation failed");
         }
-#ifdef QAK
-	printf("%s: check 3.0, src=%p, dst=%p\n", FUNC, src, dst);
-	printf("%s: check 3.0, src->type=%d, dst->type=%d\n",
-	       FUNC, (int)src->type, (int)dst->type);
-#endif /* QAK */
         path->src = H5T_copy(src, H5T_COPY_ALL);
         path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
-#ifdef QAK
-	printf("%s: check 3.5, func=%p, name=%s\n",
-	       FUNC, func, (name!=NULL ? name : "NULL"));
-#endif /* QAK */
         /* Associate a function with the path if possible */
         if (func) {
             HDstrncpy (path->name, name, H5T_NAMELEN);
@@ -4601,9 +4591,6 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
             }
         }
     }
-#ifdef QAK
-    printf("%s: leaving path=%p\n", FUNC, path);
-#endif /* QAK */
     FUNC_LEAVE(path);
 }
 

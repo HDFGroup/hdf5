@@ -50,7 +50,7 @@ test_reference_obj(void)
     hid_t		group;      /* Group ID             */
     hid_t		sid1;       /* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE1_DIM1};
-    href_t      *wbuf,      /* buffer to write to disk */
+    hobj_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
     uint32      *tu32;      /* Temporary pointer to uint32 data */
@@ -61,9 +61,9 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(href_t)*SPACE1_DIM1);
-    rbuf=malloc(sizeof(href_t)*SPACE1_DIM1);
-    tbuf=malloc(sizeof(href_t)*SPACE1_DIM1);
+    wbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    rbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    tbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -118,11 +118,9 @@ test_reference_obj(void)
     ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
 
-printf("before pointer write\n");
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_STD_PTR_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
-printf("after pointer write\n");
 
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
@@ -149,7 +147,7 @@ printf("after pointer write\n");
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to open objects */
-    dset2 = H5Rdereference(dataset,&rbuf[0]);
+    dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
     CHECK(dataset, FAIL, "H5Rdereference");
 
     /* Check information in referenced dataset */

@@ -2261,6 +2261,32 @@ H5D_typeof (H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_get_file
+ *
+ * Purpose:	Returns the dataset's file pointer.
+ *
+ * Return:	Success:	Ptr to the dataset's file pointer.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 22, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5D_get_file (const H5D_t *dset)
+{
+    FUNC_ENTER (H5D_get_file, NULL);
+    assert (dset);
+    assert (dset->ent.file);
+    FUNC_LEAVE (dset->ent.file);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_init_storage
  *
  * Purpose:	Initialize the data for a new dataset.  If a selection is

@@ -1044,13 +1044,6 @@ H5O_find_in_ohdr(H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
     assert(addr && H5F_addr_defined(addr));
     assert(type_p);
 
-#ifdef QAK
-    printf("%s: addr=",FUNC);
-    H5F_addr_print(stdout,addr);
-    printf("\n%s: f=%p, addr=%p\n",FUNC,f,addr);
-    printf("%s: f->shared=%p\n",FUNC,f->shared);
-    printf("%s: H5AC_HASH=%lu\n",FUNC,(unsigned long)H5AC_HASH(f,addr));
-#endif /* QAK */
     /* Load the object header */
     if (NULL == (oh = H5AC_find(f, H5AC_OHDR, addr, NULL, NULL))) {
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,

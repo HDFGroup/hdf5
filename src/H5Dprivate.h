@@ -83,5 +83,6 @@ H5T_t *H5D_typeof (H5D_t *dset);
 H5S_t *H5D_get_space(H5D_t *dset);
 H5D_t * H5D_new(const H5D_create_t *create_parms);
 herr_t H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent);
+H5F_t * H5D_get_file(const H5D_t *dset);
 
 #endif
