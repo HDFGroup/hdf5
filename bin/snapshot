@@ -200,6 +200,16 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # not, just create one and assume that a snapshot is necessary.
     test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
+    # If there is a Makefile in ${CURRENT}, the last test done in it
+    # has not been distclean'ed.  They would interfere with other
+    # --srcdir build since make considers the files in ${CURRENT} 
+    # take precedence over files in its own build-directory.  Run
+    # a "make distclean" to clean them all out.  This is not really
+    # part of the "checkout" functions but this is the most convenient
+    # spot to do the distclean.  We will also continue the checkout process
+    # regardless of the return code of distclean.
+    ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
+
     # Check out the current version from CVS
     cvs -Q co -d ${CURRENT} ${CVSVERSION} hdf5 || exit 1
 fi # Do CVS checkout
