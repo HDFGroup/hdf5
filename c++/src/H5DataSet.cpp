@@ -478,24 +478,6 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataSet::p_close (private)
-///\brief       Closes this dataset.
-///\exception   H5::DataSetIException
-///\note
-///             This function will be obsolete because its functionality
-///             is recently handled by the C library layer.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void DataSet::p_close() const
-{
-   herr_t ret_value = H5Dclose( id );
-   if( ret_value < 0 )
-   {
-      throw DataSetIException(0, "H5Dclose failed");
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	DataSet destructor
 ///\brief	Properly terminates access to this dataset.
 // Programmer	Binh-Minh Ribler - 2000

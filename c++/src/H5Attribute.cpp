@@ -250,24 +250,6 @@ string Attribute::getName() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Attribute::p_close (private)
-///\brief	Closes this attribute.
-///\exception	H5::AttributeIException
-///\note
-///		This function will be obsolete because its functionality
-///		is recently handled by the C library layer. - May, 2004
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void Attribute::p_close() const
-{
-   herr_t ret_value = H5Aclose( id );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException(0, "H5Aclose failed");
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	Attribute destructor
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000

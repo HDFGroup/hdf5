@@ -87,9 +87,6 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Throw file exception.
 	virtual void throwException(const string func_name, const string msg) const;
 
-	// Used by the API to appropriately close a file.
-	void p_close() const;
-
 	// H5File destructor.
 	virtual ~H5File();
 

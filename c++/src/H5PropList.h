@@ -83,9 +83,6 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	PropList getClassParent() const;
 
-	// Used by the API to close the property list
-	void p_close() const;
-
 	virtual ~PropList();
 };
 

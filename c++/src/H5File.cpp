@@ -504,24 +504,6 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5File::p_close (private)
-///\brief       Closes this H5 file.
-///\exception   H5::FileIException
-///\note
-///             This function will be obsolete because its functionality
-///             is recently handled by the C library layer.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void H5File::p_close() const
-{
-   herr_t ret_value = H5Fclose( id );
-   if( ret_value < 0 )
-   {
-      throw FileIException(0, "H5Fclose failed");
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	H5File::throwException
 ///\brief	Throws file exception - initially implemented for CommonFG
 ///\param	func_name - Name of the function where failure occurs

@@ -153,26 +153,6 @@ void PropList::copyProp( PropList& dest, PropList& src, const string& name ) con
 
 
 //--------------------------------------------------------------------------
-// Function:	PropList::p_close
-///\brief	Closes the property list if it is not a default one
-///\note
-///   This function will be obsolete because its functionality is recently
-///   handled by the C library layer.
-///\exception	H5::PropListIException
-//--------------------------------------------------------------------------
-void PropList::p_close() const
-{
-   if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
-   {
-      herr_t ret_value = H5Pclose( id );
-      if( ret_value < 0 )
-      {
-         throw PropListIException(0, "property list close failed" );
-      }
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	PropList::getClass
 ///\brief	Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
 ///\return	The property list class if it is not equal to \c H5P_NO_CLASS

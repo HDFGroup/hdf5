@@ -82,9 +82,6 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);
 
-	// Used by the API to appropriately close a dataset.
-	virtual void p_close() const;
-
 	// Default constructor.
 	DataSet();
 
