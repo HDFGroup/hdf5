@@ -429,7 +429,7 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, intn indent,
 	    "Data space size:",
 	    (unsigned long)(mesg->ds_size));
     fprintf(stream, "%*sData space...\n", indent, "");
-    (H5O_SDSPACE->debug)(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
+    H5S_debug(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
 
     FUNC_LEAVE(SUCCEED);
 }

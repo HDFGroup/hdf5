@@ -8,6 +8,7 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 #include <assert.h>
+#include <float.h>
 #include <hdf5.h>
 #include <math.h>
 #include <signal.h>
@@ -60,15 +61,21 @@ typedef enum flt_t {
 /* Count the number of overflows */
 static int noverflows_g = 0;
 
+/* Skip overflow tests if non-zero */
+static int skip_overflow_tests_g = 0;
+
 /*
- * Some machines generate SIGFPE on floating point overflows.  According to
- * the Posix standard, we cannot assume that we can continue from such a
- * signal. Therefore, if the following constant is defined then tests that
- * might raise SIGFPE are executed in a child process.
+ * Although we check whether a floating point overflow generates a SIGFPE and
+ * turn off overflow tests in that case, it might still be possible for an
+ * overflow condition to occur.  Once a SIGFPE is raised the program cannot
+ * be allowed to continue (cf. Posix signals) so in order to recover from a
+ * SIGFPE we run tests that might generate one in a child process.
  */
 #if defined(HAVE_FORK) && defined(HAVE_WAITPID)
 #   define HANDLE_SIGFPE
 #endif
+
+void some_dummy_func(float x);
 
 
 /*-------------------------------------------------------------------------
@@ -89,7 +96,7 @@ static void
 fpe_handler(int __unused__ signo)
 {
     puts(" -SKIP-");
-    puts("   Test skipped due to SIGFPE from probable overflow.");
+    puts("   Test skipped due to SIGFPE.");
 #ifndef HANDLE_SIGFPE
     puts("   Remaining tests could not be run.");
     puts("   Please turn off SIGFPE on overflows and try again.");
@@ -120,6 +127,88 @@ overflow_handler(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 {
     noverflows_g++;
     return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	some_dummy_func
+ *
+ * Purpose:	A dummy function to help check for overflow.
+ *
+ * Note:	DO NOT DECLARE THIS FUNCTION STATIC OR THE COMPILER MIGHT
+ *		PROMOTE ARGUMENT `x' TO DOUBLE AND DEFEAT THE OVERFLOW
+ *		CHECKING.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+some_dummy_func(float x)
+{
+    char	s[128];
+    sprintf(s, "%g", x);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	generates_sigfpe
+ *
+ * Purpose:	Determines if SIGFPE is generated from overflows.  We must be
+ *		able to fork() and waitpid() in order for this test to work
+ *		properly.  Sets skip_overflow_tests_g to non-zero if they
+ *		would generate SIGBUS, zero otherwise.
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+generates_sigfpe(void)
+{
+#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
+    pid_t	pid;
+    int		status;
+    size_t	i, j;
+    double	d;
+    unsigned char *dp = (unsigned char*)&d;
+    float	f;
+
+    fflush(stdout);
+    fflush(stderr);
+    if ((pid=fork())<0) {
+	perror("fork");
+	exit(1);
+    } else if (0==pid) {
+	for (i=0; i<2000; i++) {
+	    for (j=0; j<sizeof(double); j++) dp[j] = rand();
+	    f = (float)d;
+	    some_dummy_func(f);
+	}
+	exit(0);
+    }
+    
+    while (pid!=waitpid(pid, &status, 0)) /*void*/;
+    if (WIFEXITED(status) && 0==WEXITSTATUS(status)) {
+	printf("Overflow cases will be tested.\n");
+	skip_overflow_tests_g = FALSE;
+    } else if (WIFSIGNALED(status) && SIGFPE==WTERMSIG(status)) {
+	printf("Overflow cases cannot be safely tested.\n");
+	skip_overflow_tests_g = TRUE;
+    }
+#else
+    printf("Cannot determine if overflows generate a SIGFPE; assuming yes.\n");
+    printf("Overflow cases will not be tested.\n");
+    skip_overflow_tests_g = TRUE;
+#endif
 }
 
 
@@ -961,7 +1050,31 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	 * will be used for the conversion while the `saved' buffer will be
 	 * used for the comparison later.
 	 */
-	for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
+	if (!skip_overflow_tests_g) {
+	    for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
+	} else {
+	    for (j=0; j<nelmts; j++) {
+		unsigned char temp[32];
+		if (src_size<=dst_size) {
+		    for (k=0; k<dst_size; k++) buf[j*src_size+k] = rand();
+		} else {
+		    for (k=0; k<dst_size; k++) temp[k] = rand();
+		    if (FLT_DOUBLE==src_type && FLT_FLOAT==dst_type) {
+			hw_d = *((float*)temp);
+			memcpy(buf+j*src_size, &hw_d, src_size);
+#ifdef USE_LDOUBLE
+		    } else if (FLT_LDOUBLE==src_type && FLT_FLOAT==dst_type) {
+			hw_ld = *((float*)temp);
+			memcpy(buf+j*src_size, &hw_ld, src_size);
+		    } else if (FLT_LDOUBLE==src_type && FLT_DOUBLE==dst_type) {
+			hw_ld = *((double*)temp);
+			memcpy(buf+j*src_size, &hw_ld, src_size);
+#endif
+		    }
+		}
+		memcpy(saved+j*src_size, buf+j*src_size, src_size);
+	    }
+	}
 
 	/* Perform the conversion in software */
 	if (H5Tconvert(src, dst, nelmts, buf, NULL)<0) goto error;
@@ -1198,6 +1311,9 @@ main(void)
     nerrors += test_transient ()<0 ? 1 : 0;
     nerrors += test_named ()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
+
+    /* Does floating point overflow generate a SIGFPE? */
+    generates_sigfpe();
 
     /* Test degenerate cases */
     nerrors += test_conv_flt_1("noop", H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);

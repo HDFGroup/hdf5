@@ -1429,3 +1429,49 @@ H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
     if (ret_value<0 && space) H5S_close(space);
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_debug
+ *
+ * Purpose:	Prints debugging information about a data space.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent, intn fwidth)
+{
+    const H5S_t	*mesg = (const H5S_t*)_mesg;
+    
+    FUNC_ENTER(H5S_debug, FAIL);
+    
+    switch (mesg->extent.type) {
+    case H5S_SCALAR:
+	fprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth,
+		"Space class:");
+	break;
+	
+    case H5S_SIMPLE:
+	fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
+		"Space class:");
+	(H5O_SDSPACE->debug)(f, &(mesg->extent.u.simple), stream,
+			     indent+3, MAX(0, fwidth-3));
+	break;
+	
+    default:
+	fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
+		"Space class:", (long)(mesg->extent.type));
+	break;
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}

@@ -226,6 +226,8 @@ hsize_t H5S_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 herr_t H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 			      const hsize_t *max);
+herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
+		 intn fwidth);
 
 /* Conversion functions for simple data spaces */
 size_t H5S_simp_init (const struct H5O_layout_t *layout,
