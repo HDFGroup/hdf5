@@ -180,7 +180,7 @@ static const H5FD_class_t H5FD_stream_g =
   H5FD_stream_open,                 /* open                                */
   H5FD_stream_close,                /* close                               */
   NULL,                             /* cmp                                 */
-  H5FD_stream_query,                /*query                                */
+  H5FD_stream_query,                /* query                               */
   NULL,                             /* alloc                               */
   NULL,                             /* free                                */
   H5FD_stream_get_eoa,              /* get_eoa                             */
@@ -902,16 +902,17 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_stream_query (const H5FD_t UNUSED *_f,
-                                 unsigned long *flags /* out */)
+static herr_t
+H5FD_stream_query(const H5FD_t UNUSED *_f,
+                  unsigned long *flags/*out*/)
 {
     FUNC_ENTER (H5FD_stream_query, SUCCEED);
 
     /* Set the VFL feature flags that this driver supports */
-    if (flags)
-    {
-      /* OK to perform data sieving for faster raw data reads & writes */
-      *flags |= H5FD_FEAT_DATA_SIEVE;
+    if (flags) {
+        *flags = 0;
+        /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_DATA_SIEVE;
     }
 
     FUNC_LEAVE (SUCCEED);
