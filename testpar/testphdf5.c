@@ -17,7 +17,9 @@ int chunkdim0;
 int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
-int ndatasets = 300;			/*number of datasets to create*/
+int ndatasets = 300;			/* number of datasets to create*/
+int ngroups = 512;                      /* number of groups to create in root
+                                         * group. */
 
 herr_t (*old_func)(void*);		/* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
@@ -26,13 +28,14 @@ void *old_client_data;			/* previous error handler arg.*/
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[5]={
+const char *FILENAME[6]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
 	    "ParaMdset",
+            "ParaMgroup",
 	    NULL};
-char	filenames[5][PATH_MAX];
+char	filenames[6][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -152,12 +155,14 @@ int MPI_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, 
 void
 usage(void)
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] "
+    printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] [-n<n_groups>] "
 	"[-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read test\n");
     printf("\t-w\t\tno write test\n");
     printf("\t-m<n_datasets>"
 	"\tset number of datasets for the multiple dataset test\n");
+    printf("\t-n<n_groups>"
+        "\tset number of groups for the multiple group test\n");  
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
@@ -198,6 +203,12 @@ parse_options(int argc, char **argv)
 				return(1);
 			    }
 			    break;
+	        case 'n':   ngroups = atoi((*argv+1)+1);
+		            if (ngroups < 0){
+                                nerrors++;
+                                return(1);
+			    }
+                            break;
 		case 'v':   verbose = 1;
 			    break;
 		case 'f':   if (--argc < 1) {
@@ -304,13 +315,25 @@ main(int argc, char **argv)
 	goto finish;
     }
 
-	if (ndatasets){
-	    MPI_BANNER("multiple datasets write ...");
-	    multiple_dset_write(filenames[3], ndatasets);
-	}
-	else{
-	    MPI_BANNER("Multiple datasets test skipped");
-	}
+    if (ndatasets){
+	MPI_BANNER("multiple datasets write ...");
+        multiple_dset_write(filenames[3], ndatasets);
+    }
+    else{
+        MPI_BANNER("Multiple datasets test skipped");
+    }
+
+    if (ngroups){
+	MPI_BANNER("multiple groups write ...");
+        multiple_group_write(filenames[4], ngroups);
+        if (doread) {
+       	    MPI_BANNER("multiple groups read ...");
+            multiple_group_read(filenames[4], ngroups);
+        }
+    }
+    else{
+        MPI_BANNER("Multiple groups test skipped");
+    }
 
     if (dowrite){
 	MPI_BANNER("dataset using split communicators...");
@@ -343,7 +366,7 @@ main(int argc, char **argv)
 	MPI_BANNER("read tests skipped");
     }
 
-    if (!(dowrite || doread || ndatasets)){
+    if (!(dowrite || doread || ndatasets || ngroups)){
 	usage();
 	nerrors++;
     }
