@@ -177,7 +177,7 @@ H5F_term_interface(void)
 void 
 H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
 {
-    intn                    i = H5F_SIZEOF_SIZE(f);
+    intn                    i = (intn)H5F_SIZEOF_SIZE(f)-1;
 
 #ifdef WORDS_BIGENDIAN
     /*
@@ -187,8 +187,8 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
         *(*p) = *(l + i);
 #else
     /* platform has little-endian integers */
-    for (; i >= 0; i--, (*p)++)
-        *(*p) = *l;
+    HDmemcpy(*p,l,i+1);
+    *p+=(i+1);
 #endif
 
 #ifdef LATER
