@@ -36,7 +36,10 @@ extern "C" {
 #endif
 
 /* Functions in H5P.c */
+#ifdef OLD_WAY
 hid_t H5Pcreate (H5P_class_t type);
+#endif /* OLD_WAY */
+hid_t H5Pcreate_simple (intn rank, size_t dims[]);
 herr_t H5Pclose (hid_t space_id);
 size_t H5Pget_npoints (hid_t space_id);
 intn H5Pget_ndims (hid_t space_id);

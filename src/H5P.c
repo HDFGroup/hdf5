@@ -31,6 +31,7 @@ static intn             interface_initialize_g = FALSE;
 static herr_t           H5P_init_interface(void);
 static void             H5P_term_interface(void);
 
+
 /*--------------------------------------------------------------------------
 NAME
    H5P_init_interface -- Initialize interface-specific information
@@ -58,6 +59,7 @@ H5P_init_interface(void)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5P_term_interface
@@ -81,6 +83,57 @@ H5P_term_interface(void)
     H5A_destroy_group(H5_DATASPACE);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Pcreate_simple
+ *
+ * Purpose:     Creates a new simple data space object and opens it for access.
+ *
+ * Return:      Success:        The ID for the new simple data space object.
+ *
+ *              Failure:        FAIL
+ *
+ * Errors:
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, January  27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Pcreate_simple(intn rank, size_t dims[])
+{
+    H5P_t                  *ds = NULL;
+    hid_t                   ret_value = FAIL;
+
+    FUNC_ENTER(H5Pcreate, FAIL);
+    H5ECLEAR;
+
+    ds = H5MM_xcalloc(1, sizeof(H5P_t));
+    ds->type = H5P_SIMPLE;
+
+    /* Initialize rank and dimensions */
+    ds->u.simple.rank = rank;
+    ds->u.simple.dim_flags = 0; /* max & perm information is not valid/useful */
+    ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(size_t));
+    HDmemcpy(ds->u.simple.size, dims, rank*sizeof(size_t));
+    ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
+    ds->u.simple.perm = H5MM_xcalloc(1, rank*sizeof(intn));
+
+    /* Register the new data space and get an ID for it */
+    if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+                    "unable to register data space for ID");
+    }
+  done:
+    if (ret_value < 0) {
+        H5MM_xfree(ds);
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+#ifdef OLD_WAY
 /*-------------------------------------------------------------------------
  * Function:    H5Pcreate
  *
@@ -140,6 +193,7 @@ H5Pcreate(H5P_class_t type)
     }
     FUNC_LEAVE(ret_value);
 }
+#endif /* OLD_WAY */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pclose
@@ -717,6 +771,7 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
     FUNC_LEAVE(0);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5P_is_simple
@@ -747,6 +802,7 @@ H5P_is_simple(const H5P_t *sdim)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pis_simple
@@ -785,6 +841,7 @@ H5Pis_simple(hid_t sid)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pset_space
@@ -893,6 +950,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5P_find
  *
