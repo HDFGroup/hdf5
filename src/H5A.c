@@ -262,7 +262,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 
     /* Compute the internal sizes */
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
-    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->u.simple));
+    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->extent.u.simple));
     attr->data_size=H5S_get_npoints(space)*H5T_get_size(type);
 
     /* Hold the symbol table entry (and file) open */

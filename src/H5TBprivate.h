@@ -1,0 +1,26 @@
+/****************************************************************************
+ * NCSA HDF								    *
+ * Software Development Group						    *
+ * National Center for Supercomputing Applications			    *
+ * University of Illinois at Urbana-Champaign				    *
+ * 605 E. Springfield, Champaign IL 61820				    *
+ *									    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
+ ****************************************************************************/
+
+/*
+ * This file contains private information about the H5TB module
+ */
+#ifndef _H5TBprivate_H
+#define _H5TBprivate_H
+
+/* Functions defined in H5TB.c */
+hid_t H5TBget_buf(hsize_t size, hbool_t resize);
+void *H5TBbuf_ptr(hid_t tbid);
+herr_t H5TBresize_ptr(hid_t tbid, hsize_t size);
+herr_t H5TBgarbage_coll(void);
+herr_t H5TBrelease_buf(hid_t tbid);
+
+#endif

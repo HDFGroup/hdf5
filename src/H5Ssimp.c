@@ -5,7 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Wednesday, January 21, 1998
  *
- * Purpose:	Simple data space functions.
+ * Purpose:	Simple selection data space I/O functions.
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
@@ -38,7 +38,7 @@ static intn             interface_initialize_g = FALSE;
 size_t
 H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
 	       const H5S_t *mem_space, const H5S_t *file_space,
-	       size_t desired_nelmts, H5S_number_t *numbering/*out*/)
+	       size_t desired_nelmts)
 {
     hsize_t	nelmts;
     int		m_ndims, f_ndims;	/*mem, file dimensionality	*/
@@ -50,12 +50,8 @@ H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
 
     /* Check args */
     assert (layout);
-    assert (mem_space && H5S_SIMPLE==mem_space->type);
-    assert (file_space && H5S_SIMPLE==file_space->type);
-    assert (numbering);
-
-    /* Numbering is implied by the hyperslab, C order, no data here */
-    HDmemset (numbering, 0, sizeof(H5S_number_t));
+    assert (mem_space && H5S_SIMPLE==mem_space->extent.type);
+    assert (file_space && H5S_SIMPLE==file_space->extent.type);
 
     /*
      * The stripmine size is such that only the slowest varying dimension can
@@ -66,7 +62,7 @@ H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
     for (i=m_ndims-1, acc=1; i>0; --i) acc *= size[i];
     nelmts = (desired_nelmts/acc) * acc;
     if (nelmts<=0) {
-	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
 		       "strip mine buffer is too small");
     }
 
@@ -76,20 +72,19 @@ H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
      */
     f_ndims = H5S_get_hyperslab (file_space, NULL, size, NULL);
     if (m_ndims!=f_ndims) {
-	nelmts = H5S_get_npoints (file_space);
-	if (nelmts>desired_nelmts) {
-	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
-			   "strip mining not supported across "
-			   "dimensionalities");
-	}
-	assert (nelmts==H5S_get_npoints (mem_space));
+        nelmts = H5S_get_npoints (file_space);
+        if (nelmts>desired_nelmts) {
+            HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+                   "strip mining not supported across dimensionalities");
+        }
+        assert (nelmts==H5S_get_npoints (mem_space));
     } else {
-	for (i=f_ndims-1, acc=1; i>0; --i) acc *= size[i];
-	acc *= (desired_nelmts/acc);
-	if (nelmts!=acc) {
-	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
-			   "unsupported strip mine size for shape change");
-	}
+        for (i=f_ndims-1, acc=1; i>0; --i) acc *= size[i];
+        acc *= (desired_nelmts/acc);
+        if (nelmts!=acc) {
+            HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+                   "unsupported strip mine size for shape change");
+        }
     }
     
     assert (nelmts < MAX_SIZET);
@@ -128,7 +123,6 @@ size_t
 H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
-		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts,
 		const H5D_transfer_t xfer_mode, void *buf/*out*/)
 {
@@ -147,7 +141,6 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (layout);
     assert (elmt_size>0);
     assert (file_space);
-    assert (numbering);
     assert (nelmts>0);
     assert (buf);
 
@@ -219,7 +212,6 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 herr_t
 H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 		const H5S_t *mem_space,
-		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, void *buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
@@ -236,8 +228,7 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
     /* Check args */
     assert (tconv_buf);
     assert (elmt_size>0);
-    assert (mem_space && H5S_SIMPLE==mem_space->type);
-    assert (numbering);
+    assert (mem_space && H5S_SIMPLE==mem_space->extent.type);
     assert (nelmts>0);
     assert (buf);
 
@@ -316,7 +307,6 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 size_t
 H5S_simp_mgath (const void *buf, size_t elmt_size,
 		const H5S_t *mem_space,
-		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, void *tconv_buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
@@ -333,8 +323,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
     /* Check args */
     assert (buf);
     assert (elmt_size>0);
-    assert (mem_space && H5S_SIMPLE==mem_space->type);
-    assert (numbering);
+    assert (mem_space && H5S_SIMPLE==mem_space->extent.type);
     assert (nelmts>0);
     assert (tconv_buf);
 
@@ -415,7 +404,6 @@ herr_t
 H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
-		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts,
 		const H5D_transfer_t xfer_mode, const void *buf)
 {
@@ -434,7 +422,6 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (layout);
     assert (elmt_size>0);
     assert (file_space);
-    assert (numbering);
     assert (nelmts>0);
     assert (buf);
 
@@ -521,9 +508,10 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
     FUNC_ENTER (H5S_simp_read, FAIL);
 
 #ifndef NDEBUG
-    assert (file_space->type==mem_space->type);
-    assert (file_space->u.simple.rank==mem_space->u.simple.rank);
-    for (i=0; i<file_space->u.simple.rank; i++) {
+    assert (file_space->extent.type==mem_space->extent.type);
+    assert (file_space->extent.u.simple.rank==mem_space->extent.u.simple.rank);
+    for (i=0; i<file_space->extent.u.simple.rank; i++) {
+#ifdef FIXME
 	if (file_space->hslab_def && mem_space->hslab_def) {
 	    assert (1==file_space->h.stride[i]);
 	    assert (1==mem_space->h.stride[i]);
@@ -538,6 +526,7 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
 	    assert (file_space->u.simple.size[i]==
 		    mem_space->u.simple.size[i]);
 	}
+#endif
     }
 #endif
 	
@@ -546,40 +535,74 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
      * Calculate size of hyperslab and offset of hyperslab into file and
      * memory.
      */
-    if (file_space->hslab_def) {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    hslab_size[i] = file_space->h.count[i];
-	}
-    } else {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    hslab_size[i] = file_space->u.simple.size[i];
-	}
-    }
-    for (i=0; i<mem_space->u.simple.rank; i++) {
-	mem_size[i] = mem_space->u.simple.size[i];
-    }
-    if (file_space->hslab_def) {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    file_offset[i] = file_space->h.start[i];
-	}
-    } else {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    file_offset[i] = 0;
-	}
-    }
-    if (mem_space->hslab_def) {
-	for (i=0; i<mem_space->u.simple.rank; i++) {
-	    mem_offset[i] = mem_space->h.start[i];
-	}
-    } else {
-	for (i=0; i<mem_space->u.simple.rank; i++) {
-	    mem_offset[i] = 0;
-	}
-    }
-    hslab_size[file_space->u.simple.rank] = elmt_size;
-    mem_size[file_space->u.simple.rank] = elmt_size;
-    file_offset[file_space->u.simple.rank] = 0;
-    mem_offset[file_space->u.simple.rank] = 0;
+    switch(file_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<file_space->extent.u.simple.rank; i++)
+                hslab_size[i] = file_space->extent.u.simple.size[i];
+            break;
+    } /* end switch */
+
+    switch(mem_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<mem_space->extent.u.simple.rank; i++)
+                mem_size[i] = mem_space->extent.u.simple.size[i];
+            break;
+    } /* end switch */
+
+    switch(file_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+#ifdef LATER
+            for (i=0; i<file_space->u.simple.rank; i++) 
+                file_offset[i] = file_space->h.start[i];
+#endif
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<file_space->extent.u.simple.rank; i++) 
+                file_offset[i] = 0;
+            break;
+    } /* end switch */
+
+    switch(mem_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+#ifdef LATER
+            for (i=0; i<mem_space->u.simple.rank; i++) 
+                mem_offset[i] = mem_space->h.start[i];
+#endif
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<mem_space->extent.u.simple.rank; i++)
+                mem_offset[i] = 0;
+            break;
+    } /* end switch */
+
+    hslab_size[file_space->extent.u.simple.rank] = elmt_size;
+    mem_size[file_space->extent.u.simple.rank] = elmt_size;
+    file_offset[file_space->extent.u.simple.rank] = 0;
+    mem_offset[file_space->extent.u.simple.rank] = 0;
     
     /* Read the hyperslab */
     if (H5F_arr_read (f, layout, comp, efl, hslab_size,
@@ -629,8 +652,9 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
     FUNC_ENTER (H5S_simp_write, FAIL);
 
 #ifndef NDEBUG
-    assert (file_space->type==mem_space->type);
-    assert (file_space->u.simple.rank==mem_space->u.simple.rank);
+    assert (file_space->extent.type==mem_space->extent.type);
+    assert (file_space->extent.u.simple.rank==mem_space->extent.u.simple.rank);
+#ifdef LATER
     for (i=0; i<file_space->u.simple.rank; i++) {
 	if (file_space->hslab_def && mem_space->hslab_def) {
 	    assert (1==file_space->h.stride[i]);
@@ -648,46 +672,81 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
 	}
     }
 #endif
+#endif
 	
 
     /*
      * Calculate size of hyperslab and offset of hyperslab into file and
      * memory.
      */
-    if (file_space->hslab_def) {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    hslab_size[i] = file_space->h.count[i];
-	}
-    } else {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    hslab_size[i] = file_space->u.simple.size[i];
-	}
-    }
-    for (i=0; i<mem_space->u.simple.rank; i++) {
-	mem_size[i] = mem_space->u.simple.size[i];
-    }
-    if (file_space->hslab_def) {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    file_offset[i] = file_space->h.start[i];
-	}
-    } else {
-	for (i=0; i<file_space->u.simple.rank; i++) {
-	    file_offset[i] = 0;
-	}
-    }
-    if (mem_space->hslab_def) {
-	for (i=0; i<mem_space->u.simple.rank; i++) {
-	    mem_offset[i] = mem_space->h.start[i];
-	}
-    } else {
-	for (i=0; i<mem_space->u.simple.rank; i++) {
-	    mem_offset[i] = 0;
-	}
-    }
-    hslab_size[file_space->u.simple.rank] = elmt_size;
-    mem_size[file_space->u.simple.rank] = elmt_size;
-    file_offset[file_space->u.simple.rank] = 0;
-    mem_offset[file_space->u.simple.rank] = 0;
+    switch(file_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<file_space->extent.u.simple.rank; i++)
+                hslab_size[i] = file_space->extent.u.simple.size[i];
+            break;
+    } /* end switch */
+
+    switch(mem_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<mem_space->extent.u.simple.rank; i++)
+                mem_size[i] = mem_space->extent.u.simple.size[i];
+            break;
+    } /* end switch */
+
+    switch(file_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+#ifdef LATER
+            for (i=0; i<file_space->u.simple.rank; i++) 
+                file_offset[i] = file_space->h.start[i];
+#endif
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<file_space->extent.u.simple.rank; i++) 
+                file_offset[i] = 0;
+            break;
+    } /* end switch */
+
+    switch(mem_space->select.type) {
+        case H5S_SEL_NONE:      /* no selection defined */
+            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection not defined");
+
+        case H5S_SEL_POINTS:        /* point sequence selection defined */
+        case H5S_SEL_HYPERSLABS:    /* hyperslab selection defined */
+#ifdef LATER
+            for (i=0; i<mem_space->u.simple.rank; i++) 
+                mem_offset[i] = mem_space->h.start[i];
+#endif
+            HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type not supprted currently");
+
+        case H5S_SEL_ALL:           /* entire dataspace selection */
+            for (i=0; i<mem_space->extent.u.simple.rank; i++)
+                mem_offset[i] = 0;
+            break;
+    } /* end switch */
+
+    hslab_size[file_space->extent.u.simple.rank] = elmt_size;
+    mem_size[file_space->extent.u.simple.rank] = elmt_size;
+    file_offset[file_space->extent.u.simple.rank] = 0;
+    mem_offset[file_space->extent.u.simple.rank] = 0;
     
     /* Write the hyperslab */
     if (H5F_arr_write (f, layout, comp, efl, hslab_size,
@@ -699,6 +758,3 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
     FUNC_LEAVE (SUCCEED);
 }
 
-
-	
-    

@@ -68,6 +68,7 @@
 #define H5I_OID_HASHSIZE        	64
 #define H5I_GROUPID_HASHSIZE    	64
 #define H5I_ATTRID_HASHSIZE    	    64
+#define H5I_TEMPBUFID_HASHSIZE 	    64
 
 /* Atom information structure used */
 typedef struct H5I_id_info_t {

@@ -102,7 +102,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	    for (u = 0; u < sdim->rank; u++) {
 		H5F_decode_length (f, p, sdim->size[u]);
 	    }
-	    if (flags & 0x01) {
+	    if (flags & H5S_VALID_MAX) {
 		if (NULL==(sdim->max=H5MM_malloc(sizeof(sdim->max[0])*
 						 sdim->rank))) {
 		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -112,7 +112,8 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 		    H5F_decode_length (f, p, sdim->max[u]);
 		}
 	    }
-	    if (flags & 0x02) {
+#ifdef LATER
+	    if (flags & H5S_VALID_PERM) {
 		if (NULL==(sdim->perm=H5MM_malloc(sizeof(sdim->perm[0])*
 						  sdim->rank))) {
 		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -121,6 +122,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 		for (u = 0; u < sdim->rank; u++)
 		    UINT32DECODE(p, sdim->perm[u]);
 	    }
+#endif
 	}
     }
     
@@ -171,8 +173,10 @@ H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
     assert(sdim);
 
     /* set flags */
-    if (sdim->max) flags |= 0x01;
-    if (sdim->perm) flags |= 0x02;
+    if (sdim->max) flags |= H5S_VALID_MAX;
+#ifdef LATER
+    if (sdim->perm) flags |= H5S_VALID_PERM;
+#endif
 
     /* encode */
     UINT32ENCODE(p, sdim->rank);
@@ -181,15 +185,17 @@ H5O_sdspace_encode(H5F_t *f, uint8 *p, const void *mesg)
 	for (u = 0; u < sdim->rank; u++) {
 	    H5F_encode_length (f, p, sdim->size[u]);
 	}
-	if (flags & 0x01) {
+	if (flags & H5S_VALID_MAX) {
 	    for (u = 0; u < sdim->rank; u++) {
 		H5F_encode_length (f, p, sdim->max[u]);
 	    }
 	}
-	if (flags & 0x02) {
+#ifdef LATER
+	if (flags & H5S_VALID_PERM) {
 	    for (u = 0; u < sdim->rank; u++)
 		UINT32ENCODE(p, sdim->perm[u]);
 	}
+#endif
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -241,6 +247,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 	}
 	HDmemcpy (dst->max, src->max, src->rank*sizeof(src->max[0]));
     }
+#ifdef LATER
     if (src->perm) {
 	if (NULL==(dst->perm=H5MM_calloc(src->rank*sizeof(src->perm[0])))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -248,6 +255,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 	}
 	HDmemcpy (dst->perm, src->perm, src->rank*sizeof(src->perm[0]));
     }
+#endif
 
     FUNC_LEAVE((void *) dst);
 }
@@ -278,7 +286,9 @@ H5O_sdspace_reset(void *_mesg)
     FUNC_ENTER (H5O_sdspace_reset, FAIL);
     mesg->size = H5MM_xfree (mesg->size);
     mesg->max = H5MM_xfree (mesg->max);
+#ifdef LATER
     mesg->perm = H5MM_xfree (mesg->perm);
+#endif
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -321,8 +331,10 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     /* add in the space for the maximum dimensions, if they are present */
     ret_value += sdim->max ? sdim->rank * H5F_SIZEOF_SIZE (f) : 0;
 
+#ifdef LATER
     /* add in the space for the dimension permutations, if they are present */
     ret_value += sdim->perm ? sdim->rank * 4 : 0;
+#endif
 
     FUNC_LEAVE(ret_value);
 }
@@ -386,6 +398,7 @@ H5O_sdspace_debug(H5F_t __unused__ *f, const void *mesg,
 	HDfprintf (stream, "CONSTANT\n");
     }
 
+#ifdef LATER
     if (sdim->perm) {
 	HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
 	for (u = 0; u < sdim->rank; u++) {
@@ -393,6 +406,7 @@ H5O_sdspace_debug(H5F_t __unused__ *f, const void *mesg,
 		     (unsigned long) (sdim->perm[u]));
 	}
     }
+#endif
 
     FUNC_LEAVE(SUCCEED);
 }

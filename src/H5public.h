@@ -27,7 +27,7 @@
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface changes    	     */
 #define H5_VERS_MINOR	0       /* For minor interface changes    	     */
-#define H5_VERS_RELEASE	2       /* For interface tweaks & bug-fixes	     */
+#define H5_VERS_RELEASE	8       /* For interface tweaks & bug-fixes	     */
 #define H5_VERS_PATCH	0       /* For small groups of bug fixes	     */
 
 #define H5check()	H5vers_check(H5_VERS_MAJOR,H5_VERS_MINOR,\

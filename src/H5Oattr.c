@@ -115,13 +115,13 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 		       "memory allocation failed");
     }
     if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
-        attr->ds->type = H5S_SIMPLE;
-        HDmemcpy(&(attr->ds->u.simple),simple, sizeof(H5S_simple_t));
+        attr->ds->extent.type = H5S_SIMPLE;
+        HDmemcpy(&(attr->ds->extent.u.simple),simple, sizeof(H5S_simple_t));
         H5MM_xfree(simple);
     } else {
-        attr->ds->type = H5S_SCALAR;
+        attr->ds->extent.type = H5S_SCALAR;
     } /* end else */
-    attr->ds_size=(H5O_SDSPACE->raw_size)(f,&(attr->ds->u.simple));
+    attr->ds_size=(H5O_SDSPACE->raw_size)(f,&(attr->ds->extent.u.simple));
     p+=attr->ds_size;
 
     /* Compute the size of the data */
@@ -190,7 +190,7 @@ H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
     p+=attr->dt_size;
 
     /* encode the attribute dataspace */
-    if((H5O_SDSPACE->encode)(f,p,&(attr->ds->u.simple))<0) {
+    if((H5O_SDSPACE->encode)(f,p,&(attr->ds->extent.u.simple))<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
                       "can't encode attribute dataspace");
     }

@@ -410,6 +410,16 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
 	assert(src_size[i] > 0);
     }
 #endif
+#ifdef QAK
+{
+    intn i;
+
+    printf("%s: n=%d, _dst=%p, _src=%p\n",FUNC,(int)n,_dst,_src);
+    for(i=0; i<n; i++) {
+        printf("%d: size=%d, dst_size=%d, dst_offset=%d, src_size=%d, src_offset=%d\n",i,(int)size[i],(int)dst_size[i],(int)dst_offset[i],(int)src_size[i],(int)src_offset[i]);
+    } /* end for */
+}
+#endif /* QAK */
 
     /* Copy the size vector so we can modify it */
     H5V_vector_cpy(n, size, _size);
@@ -610,3 +620,59 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
 
     FUNC_LEAVE(SUCCEED);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_array_fill
+ *
+ * Purpose:	Fills all bytes of an array with the same value using memset().
+ *      Increases amount copied by power of two until the halfway point is
+ *      crossed, then copies the rest in one swoop.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, June 18, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
+{
+    size_t      copy_size;          /* size of the buffer to copy */
+    size_t      copy_items;         /* number of items currently copying */
+    size_t      items_left;         /* number of items left to copy */
+    uint8      *dst=(uint8 *)_dst;  /* alias for pointer arithmetic */
+
+    FUNC_ENTER(H5V_array_fill, FAIL);
+    assert (dst);
+    assert (src);
+    assert (size < MAX_SIZET && size > 0);
+    assert (count < MAX_SIZET && count > 0);
+
+    HDmemcpy(dst, src, size);   /* copy first item */
+
+    /* Initialize counters, etc. while compensating for first element copied */
+    copy_size = size;
+    copy_items = 1;
+    items_left = count - 1;
+    dst += size;
+
+    /* copy until we've copied at least half of the items */
+    while (items_left >= copy_items)
+    {
+        HDmemcpy(dst, _dst, copy_size);   /* copy the current chunk */
+        dst += copy_size;     /* move the offset for the next chunk */
+        items_left -= copy_items;   /* decrement the number of items left */
+
+        copy_size *= 2;     /* increase the size of the chunk to copy */
+        copy_items *= 2;    /* increase the count of items we are copying */
+    }   /* end while */
+    if (items_left > 0)   /* if there are any items left to copy */
+        HDmemcpy(dst, _dst, items_left * size);
+
+    FUNC_LEAVE(SUCCEED);
+}   /* H5V_array_fill() */

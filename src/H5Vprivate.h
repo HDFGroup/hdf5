@@ -62,6 +62,7 @@ herr_t H5V_stride_optimize1(intn *np, hsize_t *elmt_size, hsize_t *size,
 			    hssize_t *stride1);
 herr_t H5V_stride_optimize2(intn *np, hsize_t *elmt_size, hsize_t *size,
 			    hssize_t *stride1, hssize_t *stride2);
+herr_t H5V_array_fill(void *_dst, const void *src, size_t size, size_t count);
 
 
 /*-------------------------------------------------------------------------
