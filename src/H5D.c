@@ -10,10 +10,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifdef RCSID
-static char		RcsId[] = "@(#)$Revision$";
-#endif
-
 /* $Id$ */
 
 #include <H5private.h>		/* Generic Functions			*/
