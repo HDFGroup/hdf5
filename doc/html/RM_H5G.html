@@ -234,13 +234,20 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gclose_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5gclose_f( gr_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: gr_id     ! Group identifier
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5gclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -295,13 +302,28 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier for the open group if successful; 
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gcreate_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gcreate_f&quot;,&quot;FortWin&quot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gcreate_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5gcreate_f(loc_id, name, gr_id, hdferr, size_hint)
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group to be created 
+  INTEGER(HID_T), INTENT(OUT) :: gr_id   ! Group identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(SIZE_T), OPTIONAL, INTENT(IN) :: size_hint  
+                                         ! Number of bytes to store the names 
+                                         ! of objects in the group. 
+                                         ! Default value is 
+                                         ! OBJECT_NAMELEN_DEFAULT_F
+END SUBROUTINE h5gcreate_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -348,10 +370,23 @@ create or access function.
         counting the null terminator, if successful; the value 
         returned may be larger than <code>bufsize</code>.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_comment_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gget_comment_f
+    <dd>
+	<pre>
+SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the object link 
+  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
+                                               ! comment  
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_comment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -404,10 +439,24 @@ create or access function.
     <dd>Returns a non-negative value, with the link value in <code>value</code>, 
         if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_linkval_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gget_linkval_f
+    <dd>
+	<pre>
+SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the symbolic link 
+  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
+                                               ! name of the object 
+                                               ! symbolic link points to
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_linkval_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -438,6 +487,21 @@ create or access function.
 <dt><strong>Returns:</strong>
   <dd>Returns positive value if successful;
       otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -560,12 +624,18 @@ create or access function.
     <dd> Returns a non-negative value if successful, with the fields of 
          <code>statbuf</code> (if non-null) initialized.
          Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_objinfo_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -625,6 +695,21 @@ create or access function.
   <dd>Returns the size of the object name if successful, 
       or <code>0</code> if no name is associated with the group identifier.
       Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -708,6 +793,21 @@ create or access function.
 <dt><strong>Returns:</strong>
   <dd>Returns the type of the object if successful.
       Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -785,35 +885,62 @@ create or access function.
     <dd>Returns the return value of the last operator if it was non-zero, 
         or zero if all group members were processed.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
+  <dt><strong>Fortran90 Interface:</strong>
     <dd>There is no direct FORTRAN couterpart for the C function 
         <code>H5Giterate</code>.  
         Instead, that functionality is provided by two FORTRAN functions:
-        <center>
-        <table width=80%>
-	<tr valign=top align=left>
-            <td>
-            <a href="fortran/h5g_FORTRAN.html#h5gn_members_f"
-                target="FortranWin"><code>h5gn_members_f</code></a>.
-            </td><td>&nbsp;&nbsp;</td><td>
-            <strong>Purpose:</strong>
-            Returns the number of group members.
-        </tr><tr valign=top align=left>
-            <td>
-            <a href="fortran/h5g_FORTRAN.html#h5gget_obj_info_idx_f"
-               target="FortranWin"><code>h5gget_obj_info_idx_f</code></a> 
+        
+    <center>
+    <table width=80%>
+      <tr valign=top align=left>
+        <td>
+          <code>h5gn_members_f</code>
+        </td>
+		<td>&nbsp;&nbsp;</td>
+		<td>
+          <strong>Purpose:</strong>
+          Returns the number of group members.
+        </tr>
+		<tr valign=top align=left>
+          <td>
+            <code>h5gget_obj_info_idx_f</code> 
             </td><td>&nbsp;&nbsp;</td><td>
             <strong>Purpose:</strong>
             Returns name and type of the group member identified by its index.
-            </td>
-        </table>
-        </center>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gn_members_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+          </td>
+		</tr>
+    </table>
+    </center>
+				
+		<pre>
+SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)           
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
+  INTEGER, INTENT(OUT) :: nmembers       ! Number of members in the
+                                         ! group 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gn_members_f
+		</pre>
+		
+		<pre>
+SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &
+                                 obj_name, obj_type, hdferr)           
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
+  INTEGER, INTENT(IN) :: idx             ! Index of member object 
+  CHARACTER(LEN=*), INTENT(OUT) :: obj_name   ! Name of the object 
+  INTEGER, INTENT(OUT) :: obj_type       ! Object type : 
+                                         ! H5G_LINK_F 
+                                         ! H5G_GROUP_F 
+                                         ! H5G_DATASET_F 
+                                         ! H5G_TYPE_F 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_obj_info_idx_f
+		</pre>
 </dl>
 
 <!-- NEW PAGE -->
@@ -865,13 +992,27 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5glink_f
+    <dd>
+	<pre>
+SUBROUTINE h5glink_f(loc_id, link_type, current_name, new_name, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id      ! File or group location identifier
+  INTEGER, INTENT(IN)        :: link_type   ! Link type, possible values are:
+                                            !     H5G_LINK_HARD_F
+                                            !     H5G_LINK_SOFT_F
+  CHARACTER(LEN=*), INTENT(IN) :: current_name
+                                            ! Current object name relative
+                                            ! to loc_id 
+  CHARACTER(LEN=*), INTENT(IN) :: new_name  ! New object name 
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+END SUBROUTINE h5glink_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -929,13 +1070,28 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink2_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5glink2_f
+    <dd>
+	<pre>
+SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, new_name, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: cur_loc_id ! File or group location identifier
+  CHARACTER(LEN=*), INTENT(IN) :: cur_name ! Name of the existing object
+                                           ! is relative to cur_loc_id 
+                                           ! Can be anything for the soft link
+  INTEGER, INTENT(IN) :: link_type         ! Link type, possible values are:
+                                           !     H5G_LINK_HARD_F
+                                           !     H5G_LINK_SOFT_F
+  INTEGER(HID_T), INTENT(IN) :: new_loc_id ! New location identifier
+  CHARACTER(LEN=*), INTENT(IN) :: new_name ! New object name 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+
+END SUBROUTINE h5glink2_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -977,10 +1133,22 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gmove_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gmove_f
+    <dd>
+	<pre>
+SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id     ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name     ! Original name of an object 
+  CHARACTER(LEN=*), INTENT(IN) :: new_name ! New name of an object 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5gmove_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1023,10 +1191,25 @@ create or access function.
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful; otherwise returns a negative 
     value. 
-  <dt><strong>Non-C API(s):</strong> 
-  <dd><a href="fortran/h5g_FORTRAN.html#h5gmove2_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a> 
-    <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gmove2_f
+    <dd>
+	<pre>
+SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: src_loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: src_name   ! Original name of an object 
+                                             ! relative to src_loc_id 
+  INTEGER(HID_T), INTENT(IN) :: dst_loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: dst_name   ! New name of an object
+                                             ! relative to dst_loc_id 
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5gmove2_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1063,13 +1246,22 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gopen_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5gopen_f(loc_id, name, gr_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group to open 
+  INTEGER(HID_T), INTENT(OUT) :: gr_id   ! Group identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gopen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1113,10 +1305,22 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gset_comment_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gset_comment_f
+    <dd>
+	<pre>
+SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id      ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name      ! Name of object 
+  CHARACTER(LEN=*), INTENT(IN) :: comment   ! Comment for the object 
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5gset_comment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1170,10 +1374,21 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gunlink_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5gunlink_f
+    <dd>
+	<pre>
+SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object to unlink 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gunlink_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1218,7 +1433,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2003");
+document.writeln("Last modified: 13 October 2003");
 -->
 </SCRIPT>
  

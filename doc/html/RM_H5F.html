@@ -240,10 +240,20 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5fclose_f(file_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5fclose_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -348,10 +358,39 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &  
+                       creation_prp, access_prp)
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  INTEGER, INTENT(IN) :: access_flag     ! File access flags 
+                                         ! Possible values are:
+                                         !     H5F_ACC_RDWR_F   
+                                         !     H5F_ACC_RDONLY_F   
+                                         !     H5F_ACC_TRUNC_F  
+                                         !     H5F_ACC_EXCL_F    
+                                         !     H5F_ACC_DEBUG_F   
+  INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
+                                         ! File creation propertly 
+                                         ! list identifier, if not 
+                                         ! specified its value is
+                                         ! H5P_DEFAULT_F  
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                         ! File access property list 
+                                         ! identifier, if not 
+                                         ! specified its value is
+                                         ! H5P_DEFAULT_F  
+END SUBROUTINE h5fcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -405,10 +444,23 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fflush_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fflush_f
+    <dd>
+	<pre>
+SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: obj_id      ! Object identifier
+  INTEGER, INTENT(IN)         :: scope       ! Flag with two possible values:
+                                             !     H5F_SCOPE_GLOBAL_F  
+                                             !     H5F_SCOPE_LOCAL_F  
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5fflush_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -442,10 +494,22 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file access property list identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_access_plist_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fget_access_plist_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_access_plist_f(file_id, fcpl_id, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+  INTEGER(HID_T), INTENT(OUT)  :: fapl_id ! File access property list identifier
+  INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_access_plist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -482,14 +546,28 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file creation property list identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_create_plist_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fget_create_plist_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_create_plist_f(file_id, fcpl_id, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+  INTEGER(HID_T), INTENT(OUT)  :: fcpl_id ! File creation property list 
+                                          ! identifier
+  INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_create_plist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Fget_freespace" -->
@@ -517,10 +595,25 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a the amount of free space in the file if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_freespace_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-     <!--
+<dt><strong>Returns:</strong>
+    <dd>Returns a file creation property list identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_freespace_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id       ! File identifier
+  INTEGER(HSSIZE_T), INTENT(OUT) :: free_space ! Amount of free space in file
+  INTEGER, INTENT(OUT)        :: hdferr        ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_freespace_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -597,10 +690,28 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a the number of open objects if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_obj_count_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-     <!--
+<dt><strong>Fortran90 Interface:</strong> h5fget_obj_count_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id   ! File identifier
+  INTEGER, INTENT(IN)         :: obj_type  ! Object types, possible values are:
+                                           !     H5F_OBJ_FILE_F
+                                           !     H5F_OBJ_GROUP_F
+                                           !     H5F_OBJ_DATASET_F
+                                           !     H5F_OBJ_DATATYPE_F
+                                           !     H5F_OBJ_ALL_F
+  INTEGER, INTENT(OUT)        :: obj_count ! Number of opened objects
+  INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_obj_count_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -650,10 +761,32 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns number of objects placed into <code>obj_id_list</code> if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_obj_ids_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fget_obj_ids_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id  ! File identifier
+  INTEGER,        INTENT(IN)   :: obj_type ! Object types, possible values are:
+                                           !     H5F_OBJ_FILE_F
+                                           !     H5F_OBJ_GROUP_F
+                                           !     H5F_OBJ_DATASET_F
+                                           !     H5F_OBJ_DATATYPE_F
+                                           !     H5F_OBJ_ALL_F
+  INTEGER, INTENT(IN)          :: max_objs ! Maximum number of object 
+                                           ! identifiers to retrieve
+  INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: obj_ids
+                                           ! Array of requested object 
+                                           ! identifiers
+  INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_obj_ids_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -703,11 +836,18 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_vfd_handle_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->    <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -735,10 +875,23 @@ facilitate moving easily between them.</i>
     <dd>When successful, returns a positive value, for <code>TRUE</code>,
         or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fis_hdf5_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fis_hdf5_f
+    <dd>
+	<pre>
+SUBROUTINE h5fis_hdf5_f(name, status, hdferr)   
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  LOGICAL, INTENT(OUT) :: status         ! This parameter indicates 
+                                         ! whether file is an HDF5 file 
+                                         ! ( TRUE or FALSE ) 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5fis_hdf5_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -782,10 +935,22 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fmount_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fmount_f
+    <dd>
+	<pre>
+SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN):: name        ! Group name at locationloc_id
+  INTEGER(HID_T), INTENT(IN)  :: child_id    ! File(to be mounted) identifier
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5fmount_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -882,10 +1047,29 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5fopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &  
+                     access_prp)
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  INTEGER, INTENT(IN) :: access_flag     ! File access flags  
+                                         ! Possible values are:
+                                         !     H5F_ACC_RDWR_F   
+                                         !     H5F_ACC_RDONLY_F    
+  INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                         ! File access property list 
+                                         ! identifier  
+END SUBROUTINE h5fopen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -927,10 +1111,21 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a new file identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5freopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5freopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5freopen_f(file_id, new_file_id, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id     ! File identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_file_id ! New file identifier 
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5freopen_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -973,10 +1168,21 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5funmount_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5funmount_f
+    <dd>
+	<pre>
+SUBROUTINE h5funmount_f(loc_id, name, child_id, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN):: name        ! Group name at location loc_id
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5funmount_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1024,7 +1230,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2003");
+document.writeln("Last modified: 13 October 2003");
 -->
 </SCRIPT>
  

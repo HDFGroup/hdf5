@@ -216,10 +216,19 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eclear_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5eclear_f
+    <dd>
+	<pre>
+SUBROUTINE h5eclear_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+END SUBROUTINE h5eclear_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -253,12 +262,18 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_auto_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -285,10 +300,20 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
          Otherwise returns "Invalid major error number."
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_major_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5eget_major_f
+    <dd>
+	<pre>
+SUBROUTINE h5eget_major_f(error_no, name, hdferr)
+  INTEGER, INTENT(IN) :: error_no         !Major error number
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! File name
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+END SUBROUTINE h5eget_major_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -315,10 +340,20 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
          Otherwise returns "Invalid minor error number."
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eget_minor_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5eget_minor_f
+    <dd>
+	<pre>
+SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
+  INTEGER, INTENT(IN) :: error_no         !Major error number
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! File name
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+END SUBROUTINE h5eget_minor_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -351,10 +386,19 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eprint_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5eprint_f
+    <dd>
+	<pre>
+SUBROUTINE h5eprint_f(hdferr, name)
+  CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
+  INTEGER, INTENT(OUT) :: hdferr                 ! Error code
+
+END SUBROUTINE h5eprint_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -407,12 +451,18 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5epush_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -453,10 +503,23 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5eset_auto_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5eset_auto_f
+    <dd>
+	<pre>
+SUBROUTINE h5eset_auto_f(printflag, hdferr)
+  INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
+                                    !printing on or off
+                                    !possible values are:
+                                    !printon (1)
+                                    !printoff(0)
+  INTEGER, INTENT(OUT) :: hdferr    ! Error code
+
+END SUBROUTINE h5eset_auto_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -531,12 +594,18 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5ewalk_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -589,12 +658,18 @@ errors within the H5E package.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5e_FORTRAN.html#h5ewalk_cb_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
