@@ -1614,6 +1614,8 @@
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
+./hl/test/sepia.pal
+./hl/test/earth.pal
 
 # hl fortran
 ./hl/fortran/src/H5f90i.h

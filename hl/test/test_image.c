@@ -25,19 +25,33 @@
 #define DATA_FILE2  "image24pixel.txt"
 #define DATA_FILE3  "image24plane.txt"
 #define DATA_FILE4  "usa.wri"
+#define PAL2_FILE   "sepia.pal"
+#define PAL3_FILE   "earth.pal"
 #define IMAGE1_NAME "image8bit"
 #define IMAGE2_NAME "image24bitpixel"
 #define IMAGE3_NAME "image24bitplane"
-#define PAL_NAME    "rainbow pallete"
+#define PAL1_NAME   "rainbow"
+#define PAL2_NAME   "sepia"
+#define PAL3_NAME   "earth"
 
 #define WIDTH  (hsize_t)50
 #define HEIGHT (hsize_t)20
+
+
+/* struct to store RGB values read from a .pal file */
+typedef struct rgb_t {
+	   unsigned char r;
+    unsigned char g;
+    unsigned char b;
+} rgb_t;
 
 /* prototypes */
 static int test_simple(void);
 static int test_data(void);
 static int test_generate(void);
-static int read_data( const char* file_name, hsize_t *width, hsize_t *height );
+static int read_data(const char* file_name, hsize_t *width, hsize_t *height );
+static int read_palette(const char* file_name, rgb_t *palette, int palette_size);
+
 
 /* globals */
 unsigned char *image_data = NULL;            
@@ -298,12 +312,13 @@ out:
 
 static int test_data(void)
 {
- hid_t      fid;
- hsize_t    pal_dims[2];
- char       *srcdir = getenv("srcdir"); /* the source directory */
- char       data_file[512]="";          /* buffer to hold name of existing data file */
- hsize_t    width;
- hsize_t    height;
+ hid_t          fid;
+ hsize_t        pal_dims[2];
+ hsize_t        width;
+ hsize_t        height;
+ unsigned char  pal[256*3]; /* buffer to hold an HDF5 palette */
+	rgb_t          rgb[256];   /* buffer to hold a .pal file palette */
+ int            i, n;
 
  /* create a file using default properties */
  if ((fid=H5Fcreate(FILE2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
@@ -318,32 +333,87 @@ static int test_data(void)
 
  TESTING2("make indexed image");
 
- strcpy(data_file, "");
- /* compose the name of the file to open, using the srcdir, if appropriate */
- if (srcdir)
- {
-  strcpy(data_file, srcdir);
-  strcat(data_file, "/");
- }
  /* read first data file */   
- strcat(data_file,DATA_FILE1);
- if ((read_data(data_file,&width,&height))<0)
+ if (read_data(DATA_FILE1,&width,&height)<0)
   goto out;
 
  /* make an image */
- if ((H5IMmake_image_8bit(fid,IMAGE1_NAME,width,height,image_data))<0)
+ if (H5IMmake_image_8bit(fid,IMAGE1_NAME,width,height,image_data)<0)
   goto out;
+
+ PASSED();
+
+
+ TESTING2("attaching palettes");
+
+/*-------------------------------------------------------------------------
+ * palette #1. rainbow palette. data is contained in "pal_rgb.h"
+ *-------------------------------------------------------------------------
+ */
     
- /* initialize the palette data; pal_rgb data is contained in "pal_rgb.h" */
+ /* initialize the palette data */
  pal_dims[0] = 256;
  pal_dims[1] = 3;
  
  /* make a palette */
- if ((H5IMmake_palette(fid,PAL_NAME,pal_dims,pal_rgb))<0)
+ if (H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb)<0)
   goto out;
 
  /* attach a palette to the image dataset */
- if ((H5IMlink_palette(fid,IMAGE1_NAME,PAL_NAME))<0)
+ if (H5IMlink_palette(fid,IMAGE1_NAME,PAL1_NAME)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * palette #1. sepia palette. 
+ * read a PAL file and attach the palette to the HDF5 file
+ *-------------------------------------------------------------------------
+ */
+
+	/* read a PAL file */
+ if (read_palette(PAL2_FILE, rgb, sizeof(rgb))<0)
+  goto out;
+
+	/* transfer to the HDF5 buffer */
+	for ( i=0, n=0; i<256*3; i+=3, n++)
+	{
+		pal[i]  =rgb[n].r;
+		pal[i+1]=rgb[n].g;
+		pal[i+2]=rgb[n].b;
+	}
+
+	/* make a palette */
+ if (H5IMmake_palette(fid,PAL2_NAME,pal_dims,pal)<0)
+  goto out;
+
+	/* attach the palette to the image dataset */
+ if (H5IMlink_palette(fid,IMAGE1_NAME,PAL2_NAME)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * palette #1. earth palette. 
+ * read a PAL file and attach the palette to the HDF5 file
+ *-------------------------------------------------------------------------
+ */
+
+	
+	/* read a PAL file */
+ if (read_palette(PAL3_FILE, rgb, sizeof(rgb))<0)
+  goto out;
+
+	/* transfer to the HDF5 buffer */
+	for ( i=0, n=0; i<256*3; i+=3, n++)
+	{
+		pal[i]  =rgb[n].r;
+		pal[i+1]=rgb[n].g;
+		pal[i+2]=rgb[n].b;
+	}
+
+	/* make a palette */
+ if (H5IMmake_palette(fid,PAL3_NAME,pal_dims,pal)<0)
+  goto out;
+
+	/* attach the palette to the image dataset */
+ if (H5IMlink_palette(fid,IMAGE1_NAME,PAL3_NAME)<0)
   goto out;
 
  PASSED();
@@ -357,15 +427,7 @@ static int test_data(void)
  TESTING2("make true color image with pixel interlace");
 
  /* read second data file */  
- strcpy(data_file, "");
- /* compose the name of the file to open, using the srcdir, if appropriate */
- if ( srcdir )
- {
-  strcpy(data_file, srcdir);
-  strcat(data_file, "/");
- }
- strcat( data_file, DATA_FILE2);
- if ((read_data(data_file,&width,&height))<0)
+ if ((read_data(DATA_FILE2,&width,&height))<0)
   goto out;
  
  /* make image */
@@ -382,15 +444,7 @@ static int test_data(void)
  TESTING2("make true color image with plane interlace");
 
  /* read third data file */  
- strcpy(data_file, "");
- /* compose the name of the file to open, using the srcdir, if appropriate */
- if ( srcdir )
- {
-  strcpy(data_file, srcdir);
-  strcat(data_file, "/");
- }
- strcat( data_file, DATA_FILE3);
- if ((read_data(data_file,&width,&height))<0)
+ if ((read_data(DATA_FILE3,&width,&height))<0)
   goto out;
  
  /* make image */
@@ -451,11 +505,9 @@ static int test_generate(void)
  printf("Testing read and process data and make indexed images\n");
 
 /*-------------------------------------------------------------------------
- * read data; the file data format is described below
+ * compose the name of the file to open, using the srcdir, if appropriate
  *-------------------------------------------------------------------------
  */
-
- /* compose the name of the file to open, using the srcdir, if appropriate */
  if ( srcdir )
  {
   strcpy(data_file, srcdir);
@@ -463,12 +515,15 @@ static int test_generate(void)
  }
  strcat(data_file,DATA_FILE4);
  
- /* Read  data file */   
+/*-------------------------------------------------------------------------
+ * read data; the file data format is described below
+ *-------------------------------------------------------------------------
+ */
+
  f  = fopen( data_file, "r" ) ;
- 
  if ( f == NULL )
  {
-  printf( "Could not find file %s. Try set $srcdir \n", DATA_FILE4 );
+  printf( "Could not find file %s. Try set $srcdir \n", data_file );
   H5Fclose(fid);
   return -1;
  }
@@ -593,15 +648,15 @@ static int test_generate(void)
  TESTING2("attaching palettes");
  
  /* make a palette */
- if ((H5IMmake_palette(fid,PAL_NAME,pal_dims,pal_rgb))<0)
+ if ((H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb))<0)
   goto out;
  
  /* Attach the palette to the image datasets */
- if ((H5IMlink_palette(fid,"All data",PAL_NAME))<0)
+ if ((H5IMlink_palette(fid,"All data",PAL1_NAME))<0)
   goto out;
- if ((H5IMlink_palette(fid,"Land data",PAL_NAME))<0)
+ if ((H5IMlink_palette(fid,"Land data",PAL1_NAME))<0)
   goto out;
- if ((H5IMlink_palette(fid,"Sea data",PAL_NAME))<0)
+ if ((H5IMlink_palette(fid,"Sea data",PAL1_NAME))<0)
   goto out;
 
  PASSED();
@@ -643,7 +698,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-static int read_data( const char* file_name, /*IN*/
+static int read_data( const char* fname, /*IN*/
                       hsize_t *width, /*OUT*/
                       hsize_t *height /*OUT*/ )
 {
@@ -652,12 +707,30 @@ static int read_data( const char* file_name, /*IN*/
  char   str[20];
  FILE   *f;
  int    w, h;
+ char   *srcdir = getenv("srcdir"); /* the source directory */
+ char   data_file[512]="";          /* buffer to hold name of existing data file */
 
- f = fopen( file_name, "r");
+/*-------------------------------------------------------------------------
+ * compose the name of the file to open, using "srcdir", if appropriate
+ *-------------------------------------------------------------------------
+ */
+ strcpy(data_file, "");
+ if (srcdir)
+ {
+  strcpy(data_file, srcdir);
+  strcat(data_file, "/");
+ }
+ strcat(data_file,fname);
 
+/*-------------------------------------------------------------------------
+ * read
+ *-------------------------------------------------------------------------
+ */
+
+ f = fopen(data_file, "r");
  if ( f == NULL )
  {
-  printf( "Could not open file %s. Try set $srcdir \n", file_name );
+  printf( "Could not open file %s. Try set $srcdir \n", data_file );
   return -1;
  }
 
@@ -689,3 +762,147 @@ static int read_data( const char* file_name, /*IN*/
  return 1;
 
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * read_palette
+ * Read an ASCII palette file .PAL into an array
+ * the files have a header of the type
+ *
+ * Parameters:          filename - name of file to read.
+ *                      palette - array of RwPalleteEntry to store the
+ *                                read palette.
+ *                      palette_size - number of elements in 'palette' array
+ *
+ * Return Value:        Returns number of entries read or 0 on error
+ *                      palette contains palette.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+#define STRING_JASC   "JASC-PAL"
+#define VERSION_JASC  "0100"
+#define STRING_CWPAL  "CWPAL"
+#define VERSION_CWPAL "100"
+
+static int read_palette(const char* fname, rgb_t *palette, int palette_size)
+{
+	FILE          *file;
+ char          buffer[80];
+ int           i;
+ unsigned int  red;
+ unsigned int  green;
+ unsigned int  blue;
+	int 		        numEntries;
+ char          *srcdir = getenv("srcdir"); /* the source directory */
+ char          data_file[512];             /* buffer to hold name of existing data file */
+
+/*-------------------------------------------------------------------------
+ * compose the name of the file to open, using "srcdir", if appropriate
+ *-------------------------------------------------------------------------
+ */
+ strcpy(data_file, "");
+ if (srcdir)
+ {
+  strcpy(data_file, srcdir);
+  strcat(data_file, "/");
+ }
+ strcat(data_file,fname);
+	
+ /* ensure the given palette is valid */
+ if (!palette)
+		return -1;
+	
+ /* open the input file */
+	if (!(file = fopen(data_file, "r")))
+ {
+  printf( "Could not open file %s. Try set $srcdir \n", data_file );
+  return -1;
+ }
+	
+ /* read the file ident string */
+	if (fgets(buffer, sizeof(buffer), file) == NULL)
+	{
+		fclose(file);
+		return -1;
+	}
+	
+ /* ensure it matches the palette file ident string */
+ if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 && 
+		    strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
+	{
+		fclose(file);
+  return -1;
+ }
+		
+	/* read the version string */
+	if (fgets(buffer, sizeof(buffer), file) == NULL)
+ {
+		fclose(file);
+  return -1;
+ }
+	
+ /* ensure it matches the palette file version string */ 
+	if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 && 
+	    	strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
+ {
+		fclose(file);
+  return -1;
+ }
+
+	/* read the number of colors */
+ if (fgets(buffer, sizeof(buffer), file) == NULL)
+ {
+		fclose(file);
+  return -1;
+ }
+	
+	
+ /* extract the number of colors. 
+	   check for missing version or number of colors
+	   in this case it reads the first entry
+    */
+	if ( strlen( buffer ) > 4 ) 
+ {
+		fclose(file);
+  return -1;
+ }
+	
+ if (sscanf(buffer, "%d", &numEntries) != 1)
+ {
+		fclose(file);
+  return -1;
+ }
+	
+	/* ensure there are a sensible number of colors in the palette */ 
+ if ((numEntries < 0) || (numEntries > 256) || (numEntries > palette_size))
+ {
+		fclose(file);
+  return(0);
+ }
+		
+	/* read the palette entries */
+	for (i = 0; i < numEntries; i++)
+	{
+		/* Extract the red, green and blue color components.  */
+		if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3)
+		{
+			fclose(file);
+			return -1;
+		}
+		/* sore this palette entry */
+		palette[i].r = (unsigned char)red;
+		palette[i].g = (unsigned char)green;
+		palette[i].b = (unsigned char)blue;
+	}
+
+ /* close file */
+	fclose(file);
+	
+	return numEntries;
+}
+
+
+
