@@ -225,8 +225,8 @@ printf("BTREE_SIZE=%u\n",parm);
 ****************************************************************/
 static void test_file_open(void)
 {
-    hatom_t fid1,fid2,fid3;    /* HDF5 File IDs */
-    hatom_t tmpl1,tmpl2;       /* File creation templates */
+    hatom_t fid1;    /* HDF5 File IDs */
+    hatom_t tmpl1;       /* File creation templates */
     uintn parm;           /* File-creation parameters */
     herr_t ret;         /* Generic return value */
 
