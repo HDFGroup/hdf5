@@ -115,7 +115,7 @@ nh5eget_major_c(int_f* error_no, _fcd name)
    * Call H5Eget_major function.
    */
   c_name = H5Eget_major(c_error_no);
-  HDpackFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
+  HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
   
   if(!strcmp(c_name, "Invalid major error number")) return ret_val;
   ret_val = 0;
@@ -145,7 +145,7 @@ nh5eget_minor_c(int_f* error_no, _fcd name)
    * Call H5Eget_minor function.
    */
   c_name = H5Eget_minor(c_error_no);
-  HDpackFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
+  HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
   
   if(!strcmp(c_name, "Invalid minor error number")) return ret_val;
   ret_val = 0;
