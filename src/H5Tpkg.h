@@ -98,6 +98,9 @@ typedef herr_t (*H5T_vlen_writefunc_t)(hid_t dxpl_id, H5F_t *f, void *vl_addr, v
 typedef struct H5T_vlen_t {
     H5T_vlen_type_t     type;   /* Type of VL data in buffer */
     H5T_vlen_loc_t      loc;    /* Location of VL data in buffer */
+    H5T_cset_t          cset;   /* For VL string. character set */
+    H5T_str_t           pad;    /* For VL string.  space or null padding of 
+                                 * extra bytes */                          
     H5F_t *f;                   /* File ID (if VL data is on disk) */
     H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
     H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
