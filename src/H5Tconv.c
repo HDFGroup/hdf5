@@ -475,7 +475,9 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t	tmp;
     H5T_t	*src = NULL;
     H5T_t	*dst = NULL;
+#ifdef NO_DUFFS_DEVICE
     hsize_t	i;
+#endif /* NO_DUFFS_DEVICE */
     size_t	j, md;
 
     FUNC_ENTER(H5T_conv_order, FAIL);
@@ -552,7 +554,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (duff_count % 8)
+              switch (nelmts % 8)
                 {
                     case 0:
                         do
@@ -628,7 +630,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (duff_count % 8)
+              switch (nelmts % 8)
                 {
                     case 0:
                         do
@@ -770,7 +772,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (duff_count % 8)
+              switch (nelmts % 8)
                 {
                     case 0:
                         do
@@ -978,7 +980,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     size_t duff_count = (nelmts + 7) / 8;
 
-              switch (duff_count % 8)
+              switch (nelmts % 8)
                 {
                     case 0:
                         do
