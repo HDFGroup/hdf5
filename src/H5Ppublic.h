@@ -52,9 +52,10 @@ typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 
 /* Define property list callback function pointer types */
-typedef herr_t (*H5P_prp_create_func_t)(const char *name, void **def_value);
-typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name, void **value);
+typedef herr_t (*H5P_prp_create_func_t)(const char *name, void *def_value);
+typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name, void *value);
 typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name, void *value);
+typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name, void *value);
 typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
 
 /* Define property list iteration function type */
@@ -95,10 +96,10 @@ __DLL__ hid_t H5Pcreate_list(hid_t cls_id);
 __DLL__ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-            H5P_prp_close_func_t prp_close);
+            H5P_prp_delete_func_t prp_del, H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
             void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-            H5P_prp_close_func_t prp_close);
+            H5P_prp_delete_func_t prp_delete, H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 __DLL__ htri_t H5Pexist(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
@@ -107,6 +108,7 @@ __DLL__ hid_t H5Pget_class_new(hid_t plist_id);
 __DLL__ hid_t H5Pget_class_parent(hid_t pclass_id);
 __DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
 __DLL__ htri_t H5Pequal(hid_t id1, hid_t id2);
+__DLL__ hid_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
 __DLL__ int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
             void *iter_data);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
