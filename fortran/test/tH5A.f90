@@ -14,7 +14,7 @@
      CHARACTER(LEN=8), PARAMETER :: filename = "atest.h5"    !File name
      CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
      CHARACTER(LEN=11), PARAMETER :: aname = "attr_string"   !String Attribute name
-     CHARACTER(LEN=13), PARAMETER :: aname2 = "attr_character"!Character Attribute name
+     CHARACTER(LEN=14), PARAMETER :: aname2 = "attr_character"!Character Attribute name
      CHARACTER(LEN=11), PARAMETER :: aname3 = "attr_double"   !DOuble Attribute name
      CHARACTER(LEN=9), PARAMETER :: aname4 = "attr_real"      !Real Attribute name
      CHARACTER(LEN=12), PARAMETER :: aname5 = "attr_integer"  !Integer Attribute name
@@ -61,16 +61,16 @@
      INTEGER(HID_T) :: attr5_type      !Returned INTEGER Attribute Datatype identifier
      INTEGER        :: num_attrs      !number of attributes 
      CHARACTER*256 :: attr_name    !buffer to put attr_name
-     INTEGER    ::  name_size = 80 !attribute name length
+     INTEGER(SIZE_T)    ::  name_size = 80 !attribute name length
 
-     CHARACTER*80, DIMENSION(2) ::  attr_data  ! Attribute data
+     CHARACTER*35, DIMENSION(2) ::  attr_data  ! String attribute data
+     CHARACTER*35, DIMENSION(2) ::  aread_data ! Buffer to put read back 
+                                               ! string attr data
      CHARACTER ::  attr_character_data = 'A'
      DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
 
-     CHARACTER*80, DIMENSION(2) ::  aread_data  ! buffer to put read back 
-                                                !string attr data
      
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
      INTEGER, DIMENSION(1)  :: aread_integer_data ! variable to put read back integer attr data
@@ -105,9 +105,9 @@
      !
      ! Initialize attribute's data
      !
-     attr_data(1) = "Dataset character attribute"
-     attr_data(2) = "Some other string here     "
-     attrlen = 80 
+     attr_data(1) = 'Dataset character attribute'
+     attr_data(2) = 'Some other string here     ' 
+     attrlen = len(attr_data(1)) 
     
      !
      ! Create the file.
@@ -270,7 +270,26 @@
      CALL check("h5sclose_f",error,total_error)
      CALL h5sclose_f(aspace2_id, error)
      CALL check("h5sclose_f",error,total_error)
-
+     !
+     ! Terminate access to the dataset.
+     !
+     CALL h5dclose_f(dset_id, error)
+     CALL check("h5dclose_f",error,total_error)
+     !
+     ! Terminate access to the file.
+     !
+     CALL h5fclose_f(file_id, error)
+     CALL check("h5fclose_f",error,total_error)
+     !
+     ! Open file
+     !
+     CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, error)
+     CALL check("h5open_f",error,total_error)
+     !
+     ! Reopen dataset
+     !
+     CALL h5dopen_f(file_id, dsetname, dset_id, error)
+     CALL check("h5dopen_f",error,total_error)
      !
      !open the String attrbute by name
      !
@@ -293,7 +312,10 @@
      CALL h5aopen_name_f(dset_id, aname4, attr4_id, error)
      CALL check("h5aopen_name_f",error,total_error)
 
-     CALL h5aopen_idx_f(dset_id, 4, attr5_id, error)
+     !
+     !open the INTEGER attrbute by name
+     !
+     CALL h5aopen_name_f(dset_id, aname5, attr5_id, error)
      CALL check("h5aopen_idx_f",error,total_error)
 
      !
@@ -301,9 +323,10 @@
      !
      CALL h5aget_name_f(attr5_id, name_size, attr_name, error)
      CALL check("h5aget_name_f",error,total_error)
-!Can I DO STRCMP LIKE THIS?
-     if (attr_name(1:name_size) .ne. aname5) then
-       write(*,*) "Get attr name is ", attr_name
+     if (attr_name(1:12) .ne. aname5) then
+       total_error = total_error + 1
+     end if
+     if (error .ne. 12) then
        total_error = total_error + 1
      end if
        
