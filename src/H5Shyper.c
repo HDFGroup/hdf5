@@ -267,6 +267,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
                         acc=1;
                     } /* end if */
                     else {
+                        /* All other dimensions */
                         iter->u.hyp.diminfo[curr_dim].start = tdiminfo[i].start;
                         iter->u.hyp.diminfo[curr_dim].stride = tdiminfo[i].stride;
                         iter->u.hyp.diminfo[curr_dim].count = tdiminfo[i].count;
@@ -1990,7 +1991,7 @@ done:
 herr_t
 H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
 {
-    const H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
+    const H5S_hyper_dim_t *diminfo;         /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset of element in dataspace */
     hssize_t start[H5O_LAYOUT_NDIMS];   /* Location of start of hyperslab */
@@ -2113,7 +2114,8 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
         len+=4;
 
         /* Add 8 bytes times the rank for each hyperslab selected */
-        H5_CHECK_OVERFLOW((8*space->extent.u.simple.rank*block_count),hssize_t,size_t);
+        H5_CHECK_OVERFLOW(block_count,hssize_t,hsize_t);
+        H5_CHECK_OVERFLOW((8*space->extent.u.simple.rank*(hsize_t)block_count),hsize_t,size_t);
         len+=(size_t)(8*space->extent.u.simple.rank*block_count);
 
         /* Encode each hyperslab in selection */
@@ -5315,7 +5317,6 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     H5S_hyper_span_info_t *a_and_b=NULL;    /* Span tree for hyperslab spans in both old and new span trees */
     H5S_hyper_span_info_t *b_not_a=NULL;    /* Span tree for hyperslab spans in new span tree and not in old span tree */
     hssize_t nelem;             /* Number of elements in hyperslab span tree */
-    unsigned u;                    /* Counters */
     htri_t      status;         /* Status from internal calls */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -5818,10 +5819,10 @@ done:
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -5839,7 +5840,7 @@ done:
 --------------------------------------------------------------------------*/
 static herr_t
 H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     H5S_hyper_span_t *curr_span;    /* Current hyperslab span node */
@@ -5851,9 +5852,10 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     hssize_t *abs_arr;  /* Absolute hyperslab span position */
     hssize_t *off_arr;  /* Offset within the dataspace extent */
     size_t span_size=0; /* Number of bytes in current span to actually process */
-    size_t nelem;       /* Number of elements left to process */
+    size_t io_left;     /* Number of elements left to process */
     size_t io_bytes_left;   /* Number of bytes left to process */
     size_t start_io_bytes_left;   /* Initial number of bytes left to process */
+    size_t io_used;     /* Number of elements processed */
     size_t curr_seq=0; /* Number of sequence/offsets stored in the arrays */
     int ndims;         /* Number of dimensions of dataset */
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
@@ -5867,14 +5869,11 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     assert(iter);
     assert(elem_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
-
-    /* "round" off the maxbytes allowed to a multiple of the element size */
-    maxbytes=(maxbytes/elem_size)*elem_size;
 
     /* Set the rank of the fastest changing dimension */
     ndims=space->extent.u.simple.rank;
@@ -5887,9 +5886,9 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     ispan=iter->u.hyp.span;
 
     /* Set the amount of elements to perform I/O on, etc. */
-    H5_CHECK_OVERFLOW( (iter->elmt_left*elem_size) ,hsize_t,size_t);
-    start_io_bytes_left=io_bytes_left=MIN(maxbytes,(size_t)(iter->elmt_left*elem_size));
-    nelem=io_bytes_left/elem_size;
+    H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
+    io_left=MIN(maxelem,(size_t)iter->elmt_left);
+    start_io_bytes_left=io_bytes_left=io_left*elem_size;
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elem_size; i>=0; i--) {
@@ -6228,13 +6227,14 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
     } /* end while */
 
     /* Decrement number of elements left in iterator */
-    iter->elmt_left-=(nelem-(io_bytes_left/elem_size));
+    io_used=(io_left-(io_bytes_left/elem_size));
+    iter->elmt_left-=io_used;
 
     /* Set the number of sequences generated */
     *nseq=curr_seq;
 
-    /* Set the number of bytes used */
-    *nbytes=(start_io_bytes_left-io_bytes_left);
+    /* Set the number of elements used */
+    *nelem=io_used;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5S_hyper_get_seq_list_gen() */
@@ -6252,10 +6252,10 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -6273,7 +6273,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 --------------------------------------------------------------------------*/
 static herr_t
 H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
-    size_t elmt_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+    size_t elmt_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     hsize_t *mem_size;                  /* Size of the source buffer */
@@ -6307,9 +6307,6 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t nelmts;      /* Starting number of elements */
     size_t io_left;     /* The number of elements left in I/O operation */
     size_t start_io_left; /* The initial number of elements left in I/O operation */
-#ifndef NO_DUFFS_DEVICE
-    size_t duffs_index; /* Counting index for Duff's device */
-#endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_get_seq_list_opt);
 
@@ -6318,9 +6315,9 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     assert(iter);
     assert(elmt_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
 
@@ -6357,11 +6354,9 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         acc*=mem_size[i];
     } /* end for */
 
-    /* Get the number of elements left in the selection */
-    H5_ASSIGN_OVERFLOW(io_left,iter->elmt_left,hsize_t,size_t);
-
     /* Calculate the number of elements to sequence through */
-    start_io_left=io_left=MIN(io_left,(maxbytes/elmt_size));
+    H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
+    start_io_left=io_left=MIN((size_t)iter->elmt_left,maxelem);
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((iter->u.hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride!=0 ||
@@ -6552,118 +6547,55 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Read in data until an entire sequence can't be written out any longer */
         while(curr_rows>0) {
+
+#define DUFF_GUTS							      \
+    /* Store the sequence information */				      \
+    off[curr_seq]=loc;							      \
+    len[curr_seq]=actual_bytes;						      \
+									      \
+    /* Increment sequence count */					      \
+    curr_seq++;								      \
+									      \
+    /* Increment information to reflect block just processed */		      \
+    loc+=fast_dim_buf_off;
+
 #ifdef NO_DUFFS_DEVICE
             /* Loop over all the blocks in the fastest changing dimension */
             while(fast_dim_count>0) {
-                /* Store the sequence information */
-                off[curr_seq]=loc;
-                len[curr_seq]=actual_bytes;
-
-                /* Increment sequence count */
-                curr_seq++;
-
-                /* Increment information to reflect block just processed */
-                loc+=fast_dim_buf_off;
+                DUFF_GUTS
 
                 /* Decrement number of blocks */
                 fast_dim_count--;
             } /* end while */
 #else /* NO_DUFFS_DEVICE */
-            duffs_index = (fast_dim_count + 7) / 8;
-            switch (fast_dim_count % 8) {
-                case 0:
-                    do
-                      {
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
+            {
+                size_t duffs_index; /* Counting index for Duff's device */
 
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 7:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 6:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 5:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 4:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 3:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 2:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 1:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                  } while (--duffs_index > 0);
-            } /* end switch */
+                duffs_index = (fast_dim_count + 7) / 8;
+                switch (fast_dim_count % 8) {
+                    case 0:
+                        do
+                          {
+                            DUFF_GUTS
+                    case 7:
+                            DUFF_GUTS
+                    case 6:
+                            DUFF_GUTS
+                    case 5:
+                            DUFF_GUTS
+                    case 4:
+                            DUFF_GUTS
+                    case 3:
+                            DUFF_GUTS
+                    case 2:
+                            DUFF_GUTS
+                    case 1:
+                            DUFF_GUTS
+                      } while (--duffs_index > 0);
+                } /* end switch */
+            }
 #endif /* NO_DUFFS_DEVICE */
+#undef DUFF_GUTS
 
             /* Increment offset in destination buffer */
             loc += wrap[fast_dim];
@@ -6779,7 +6711,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     *nseq=curr_seq;
 
     /* Set the number of bytes used */
-    *nbytes=(start_io_left-io_left)*elmt_size;
+    *nelem=start_io_left-io_left;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5S_hyper_get_seq_list_opt() */
@@ -6798,10 +6730,10 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -6819,7 +6751,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 --------------------------------------------------------------------------*/
 herr_t
 H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     herr_t ret_value;      /* return value */
@@ -6831,19 +6763,19 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     assert(iter);
     assert(elem_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
 
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if(space->select.sel_info.hslab.diminfo_valid)
         /* Use optimized call to generate sequence list */
-        ret_value=H5S_hyper_get_seq_list_opt(space,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len);
+        ret_value=H5S_hyper_get_seq_list_opt(space,iter,elem_size,maxseq,maxelem,nseq,nelem,off,len);
     else
         /* Call the general sequence generator routine */
-        ret_value=H5S_hyper_get_seq_list_gen(space,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len);
+        ret_value=H5S_hyper_get_seq_list_gen(space,iter,elem_size,maxseq,maxelem,nseq,nelem,off,len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

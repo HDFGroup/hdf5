@@ -1312,10 +1312,10 @@ done:
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -1333,11 +1333,11 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
-    hsize_t bytes_left;         /* The number of bytes left in the selection */
-    hsize_t start_bytes_left;   /* The initial number of bytes left in the selection */
+    size_t io_left;             /* The number of bytes left in the selection */
+    size_t start_io_left;       /* The initial number of bytes left in the selection */
     H5S_pnt_node_t *node;       /* Point node */
     hsize_t dims[H5O_LAYOUT_NDIMS];     /* Total size of memory buf */
     int	ndims;                  /* Dimensionality of space*/
@@ -1354,17 +1354,15 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     assert(iter);
     assert(elem_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
 
-    /* "round" off the maxbytes allowed to a multiple of the element size */
-    maxbytes=(maxbytes/elem_size)*elem_size;
-
     /* Choose the minimum number of bytes to sequence through */
-    start_bytes_left=bytes_left=MIN(iter->elmt_left*elem_size,maxbytes);
+    H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
+    start_io_left=io_left=MIN(iter->elmt_left,maxelem);
 
     /* Get the dataspace dimensions */
     if ((ndims=H5S_get_simple_extent_dims (space, dims, NULL))<0)
@@ -1411,8 +1409,8 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
             curr_seq++;
         } /* end else */
 
-        /* Decrement number of bytes left to process */
-        bytes_left-=elem_size;
+        /* Decrement number of elements left to process */
+        io_left--;
 
         /* Move the iterator */
         iter->u.pnt.curr=node->next;
@@ -1422,8 +1420,8 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
         if(curr_seq==maxseq)
             break;
 
-        /* Check if we're finished with all the bytes available */
-        if(bytes_left==0)
+        /* Check if we're finished with all the elements available */
+        if(io_left==0)
             break;
 
         /* Advance to the next point */
@@ -1433,9 +1431,8 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     /* Set the number of sequences generated */
     *nseq=curr_seq;
 
-    /* Set the number of bytes used */
-    H5_CHECK_OVERFLOW( (start_bytes_left-bytes_left) ,hsize_t,size_t);
-    *nbytes=(size_t)(start_bytes_left-bytes_left);
+    /* Set the number of elements used */
+    *nelem=start_io_left-io_left;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

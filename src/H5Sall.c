@@ -786,10 +786,10 @@ done:
                                     position of interest in selection.
         size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
-        size_t maxbytes;        IN: Maximum number of bytes to include in the
+        size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
         size_t *nseq;           OUT: Actual number of sequences generated
-        size_t *nbytes;         OUT: Actual number of bytes in sequences generated
+        size_t *nelem;          OUT: Actual number of elements in sequences generated
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
@@ -807,10 +807,9 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t UNUSED maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+    size_t elem_size, size_t UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
-    size_t max_elem;            /* Maximum number of elements to use */
     size_t elem_used;           /* The number of elements used */
     herr_t ret_value=SUCCEED;   /* return value */
 
@@ -821,18 +820,15 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     assert(iter);
     assert(elem_size>0);
     assert(maxseq>0);
-    assert(maxbytes>0);
+    assert(maxelem>0);
     assert(nseq);
-    assert(nbytes);
+    assert(nelem);
     assert(off);
     assert(len);
 
-    /* Detemine the maximum # of elements to use for this operation */
-    max_elem=maxbytes/elem_size;
-
     /* Determine the actual number of elements to use */
     H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
-    elem_used=MIN(max_elem,(size_t)iter->elmt_left);
+    elem_used=MIN(maxelem,(size_t)iter->elmt_left);
 
     /* Compute the offset in the dataset */
     off[0]=iter->u.all.offset*elem_size;
@@ -841,8 +837,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     /* Should only need one sequence for 'all' selections */
     *nseq=1;
 
-    /* Set the number of bytes used */
-    *nbytes=len[0];
+    /* Set the number of elements used */
+    *nelem=elem_used;
 
     /* Update the iterator */
     iter->elmt_left-=elem_used;
