@@ -77,7 +77,10 @@
 /* Define if we have Globus GASS support */
 #undef HAVE_GASS
 
-/* Define if we have Globus DPSS support */
+/* Define if we have Globus support */
+#undef HAVE_GLOBUS
+
+/* Define if we have DPSS support */
 #undef HAVE_DPSS
 
 /* The number of bytes in a __int64.  */
@@ -257,6 +260,9 @@
 /* Define if you have the <globus_common.h> header file.  */
 #undef HAVE_GLOBUS_COMMON_H
 
+/* Define if you have the <grid_storage_file.h> header file.  */
+#undef HAVE_GRID_STORAGE_FILE_H
+
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
@@ -265,6 +271,9 @@
 
 /* Define if you have the <pdb.h> header file.  */
 #undef HAVE_PDB_H
+
+/* Define if you have the <pthread.h> header file.  */
+#undef HAVE_PTHREAD_H
 
 /* Define if you have the <setjmp.h> header file.  */
 #undef HAVE_SETJMP_H
@@ -305,8 +314,8 @@
 /* Define if you have the <zlib.h> header file.  */
 #undef HAVE_ZLIB_H
 
-/* Define if you have the <pthread.h> header file.  */
-#undef HAVE_PTHREAD_H
+/* Define if you have the crypto library (-lcrypto).  */
+#undef HAVE_LIBCRYPTO
 
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
@@ -317,6 +326,9 @@
 /* Define if you have the globus_dc library (-lglobus_dc).  */
 #undef HAVE_LIBGLOBUS_DC
 
+/* Define if you have the globus_gaa library (-lglobus_gaa).  */
+#undef HAVE_LIBGLOBUS_GAA
+
 /* Define if you have the globus_gass_cache library (-lglobus_gass_cache).  */
 #undef HAVE_LIBGLOBUS_GASS_CACHE
 
@@ -326,8 +338,29 @@
 /* Define if you have the globus_gass_file library (-lglobus_gass_file).  */
 #undef HAVE_LIBGLOBUS_GASS_FILE
 
+/* Define if you have the globus_gass_transfer library (-lglobus_gass_transfer).  */
+#undef HAVE_LIBGLOBUS_GASS_TRANSFER
+
+/* Define if you have the globus_gass_transfer_assist library (-lglobus_gass_transfer_assist).  */
+#undef HAVE_LIBGLOBUS_GASS_TRANSFER_ASSIST
+
+/* Define if you have the globus_gss library (-lglobus_gss).  */
+#undef HAVE_LIBGLOBUS_GSS
+
+/* Define if you have the globus_gss_assist library (-lglobus_gss_assist).  */
+#undef HAVE_LIBGLOBUS_GSS_ASSIST
+
+/* Define if you have the globus_io library (-lglobus_io).  */
+#undef HAVE_LIBGLOBUS_IO
+
 /* Define if you have the globus_nexus library (-lglobus_nexus).  */
 #undef HAVE_LIBGLOBUS_NEXUS
+
+/* Define if you have the grid_storage_client library (-lgrid_storage_client).  */
+#undef HAVE_LIBGRID_STORAGE_CLIENT
+
+/* Define if you have the grid_storage_file library (-lgrid_storage_file).  */
+#undef HAVE_LIBGRID_STORAGE_FILE
 
 /* Define if you have the jpeg library (-ljpeg).  */
 #undef HAVE_LIBJPEG
@@ -353,11 +386,14 @@
 /* Define if you have the pdb library (-lpdb).  */
 #undef HAVE_LIBPDB
 
+/* Define if you have the pthread library (-lpthread).  */
+#undef HAVE_LIBPTHREAD
+
 /* Define if you have the silo library (-lsilo).  */
 #undef HAVE_LIBSILO
 
+/* Define if you have the ssl library (-lssl).  */
+#undef HAVE_LIBSSL
+
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
-
-/* Define if you have the pthread library (-lpthread).  */
-#undef HAVE_LIBPTHREAD

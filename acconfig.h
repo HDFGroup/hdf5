@@ -42,3 +42,9 @@
 
 /* Define if we have Globus GASS support */
 #undef HAVE_GASS
+
+/* Define if we have Globus support */
+#undef HAVE_GLOBUS
+
+/* Define if we have DPSS support */
+#undef HAVE_DPSS
