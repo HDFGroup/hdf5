@@ -60,7 +60,7 @@ TOOLTEST() {
 	echo "#############################"
 	cd $srcdir/../testfiles
         $RUNSERIAL $H5LS_BIN "$@"
-    ) >$actual 2>&1
+    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
     
     exitcode=$?
     if [ $exitcode -ne 0 ]; then
