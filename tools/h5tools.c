@@ -1501,7 +1501,7 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
     H5Sget_simple_extent_dims(space, ctx.p_max_idx, NULL);
 	
 
-    for (i=0, nelmts=1; i<(hsize_t)(ctx.ndims); i++) {
+    for (i=0, nelmts=1; (ctx.ndims != 0) && (i<(hsize_t)(ctx.ndims)); i++) {
 	nelmts *= ctx.p_max_idx[i] - ctx.p_min_idx[i];
     }
     if (0==nelmts) return 0; /*nothing to print*/
