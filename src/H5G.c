@@ -706,7 +706,10 @@ H5G_init_interface(void)
  *
  * Purpose:	Terminates the H5G interface
  *
- * Return:	void
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ *
+ * 		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
@@ -715,24 +718,33 @@ H5G_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5G_term_interface(intn status)
+intn
+H5G_term_interface(void)
 {
     size_t	i;
-
-    if (interface_initialize_g>0) {
-	/* Empty the object type table */
-	for (i=0; i<H5G_ntypes_g; i++) {
-	    H5MM_xfree(H5G_type_g[i].desc);
-	}
-	H5G_ntypes_g = H5G_atypes_g = 0;
-	H5G_type_g = H5MM_xfree(H5G_type_g);
+    intn	n=0;
     
-	/* Destroy the group object id group */
-	H5I_destroy_group(H5I_GROUP);
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_GROUP))) {
+	    H5I_clear_group(H5I_GROUP);
+	} else {
+	    /* Empty the object type table */
+	    for (i=0; i<H5G_ntypes_g; i++) {
+		H5MM_xfree(H5G_type_g[i].desc);
+	    }
+	    H5G_ntypes_g = H5G_atypes_g = 0;
+	    H5G_type_g = H5MM_xfree(H5G_type_g);
+    
+	    /* Destroy the group object id group */
+	    H5I_destroy_group(H5I_GROUP);
+
+	    /* Mark closed */
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
     }
     
-    interface_initialize_g = status;
+    return n;
 }
 
 

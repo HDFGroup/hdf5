@@ -273,6 +273,18 @@ H5O_close(H5G_entry_t *obj_ent)
     /* Decrement open-lock counters */
     --obj_ent->file->nopen_objs;
 
+#ifdef H5O_DEBUG
+    if (H5DEBUG(O)) {
+	if (obj_ent->file->closing && 1==obj_ent->file->shared->nrefs) {
+	    HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
+		      &(obj_ent->header),
+		      (unsigned long)(obj_ent->file->nopen_objs));
+	} else {
+	    HDfprintf(H5DEBUG(O), "< %a\n", &(obj_ent->header));
+	}
+    }
+#endif
+    
     /*
      * If the file open-lock count has reached zero and the file has a close
      * pending then close the file and remove it from the H5I_FILE_CLOSING ID
@@ -281,11 +293,6 @@ H5O_close(H5G_entry_t *obj_ent)
     if (0==obj_ent->file->nopen_objs && obj_ent->file->closing) {
 	H5I_dec_ref(obj_ent->file->closing);
     }
-#ifdef H5O_DEBUG
-    if (H5DEBUG(O)) {
-	HDfprintf(H5DEBUG(O), "< %a\n", &(obj_ent->header));
-    }
-#endif
 
     FUNC_LEAVE(SUCCEED);
 }

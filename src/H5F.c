@@ -212,9 +212,11 @@ H5F_init_interface(void)
  *		variables to their initial values.  Release all ID groups
  *		associated with this interface.
  *
- * Return:	Success:	
+ * Return:	Success:	Positive if anything was done that might
+ *				have affected other interfaces; zero
+ *				otherwise.
  *
- *		Failure:	
+ *		Failure:        Never fails.
  *
  * Programmer:	Robb Matzke
  *              Friday, February 19, 1999
@@ -223,14 +225,22 @@ H5F_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5F_term_interface(intn status)
+intn
+H5F_term_interface(void)
 {
-    if (interface_initialize_g>0) {
-	H5I_destroy_group(H5I_FILE);
-	H5I_destroy_group(H5I_FILE_CLOSING);
+    intn	n = 0;
+
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_FILE))) {
+	    H5F_close_all();
+	} else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
+	    H5I_destroy_group(H5I_FILE);
+	    H5I_destroy_group(H5I_FILE_CLOSING);
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
     }
-    interface_initialize_g = status;
+    return n;
 }
 
 
@@ -287,7 +297,9 @@ H5F_flush_all(hbool_t invalidate)
 /*-------------------------------------------------------------------------
  * Function:	H5F_close_all
  *
- * Purpose:	Close all open files.
+ * Purpose:	Close all open files. Any file which has open object headers
+ *		will be moved from the H5I_FILE group to the H5I_FILE_CLOSING
+ *		group.
  *
  * Return:	Success:	Non-negative
  *
@@ -304,26 +316,7 @@ herr_t
 H5F_close_all(void)
 {
     FUNC_ENTER(H5F_close_all, FAIL);
-
-    /*
-     * Close all normally open files. Any file which has open object headers
-     * will be moved to the H5I_FILE_CLOSING ID group.
-     */
-    if (H5I_destroy_group(H5I_FILE)<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-		      "unable to destroy H5I_FILE ID group");
-    }
-
-    /*
-     * Recreate the H5I_FILE group just in case someone wants to open or
-     * create another file later.
-     */
-    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
-		       (H5I_free_t)H5F_close)<0) {
-	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
-		      "unable to recreate H5I_FILE ID group");
-    }
-    
+    H5I_clear_group(H5I_FILE);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -788,7 +781,6 @@ H5F_dest(H5F_t *f)
 	 */
 	--f->nrefs;
     }
-
     
     FUNC_LEAVE(ret_value);
 }
@@ -954,7 +946,6 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
 			  "file is not writable");
 	}
-
 	if ((old = H5I_search(H5I_FILE, H5F_compare_files, &search)) ||
 	    (old = H5I_search(H5I_FILE_CLOSING, H5F_compare_files, &search))) {
 	    if (flags & H5F_ACC_TRUNC) {
@@ -975,9 +966,7 @@ H5F_open(const char *name, uintn flags,
 	    }
 	    f = H5F_new(old->shared, NULL, NULL);
 
-	}
-
-	else if (flags & H5F_ACC_TRUNC) {
+	} else if (flags & H5F_ACC_TRUNC) {
 	    /* Truncate existing file */
 	    if (0 == (flags & H5F_ACC_RDWR)) {
 		HRETURN_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
@@ -1817,12 +1806,12 @@ H5F_close(H5F_t *f)
 	}
     }
 #ifdef WIN32
-	/*free up the memory for path*/
+    /*free up the memory for path*/
 
-	free(f->shared->key.path);
+    free(f->shared->key.path);
 #endif
-	
-	/*
+
+    /*
      * Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.

@@ -641,6 +641,7 @@ display_cmpd_type(hid_t type, int indent)
     char	*name=NULL;	/*member name				*/
     int		ndims;		/*dimensionality			*/
     size_t	dims[8];	/*dimensions				*/
+    size_t	size;		/*total size of type in bytes		*/
     int		perm[8];	/*index permutation			*/
     hid_t	subtype;	/*member data type			*/
     int		i, j, n;	/*miscellaneous counters		*/
@@ -684,7 +685,9 @@ display_cmpd_type(hid_t type, int indent)
 	display_type(subtype, indent+4);
 	H5Tclose(subtype);
     }
-    printf("\n%*s}", indent, "");
+    size = H5Tget_size(type);
+    printf("\n%*s} %lu byte%s",
+	   indent, "", (unsigned long)size, 1==size?"":"s");
     return TRUE;
 }
 
@@ -1036,28 +1039,36 @@ list_attr (hid_t obj, const char *attr_name, void __unused__ *op_data)
 
     printf("    Attribute: ");
     n = display_string(stdout, attr_name, TRUE);
-    printf("%*s", MAX(0, 10-n), "");
+    printf("%*s", MAX(0, 9-n), "");
     if ((attr = H5Aopen_name(obj, attr_name))) {
 	space = H5Aget_space(attr);
 	type = H5Aget_type(attr);
 
 	/* Data space */
 	ndims = H5Sget_simple_extent_dims(space, size, NULL);
-	printf(" {");
-	for (i=0; i<ndims; i++) {
-	    HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
-	    nelmts *= size[i];
+	if (0==ndims) {
+	    puts(" scalar");
+	} else {
+	    printf(" {");
+	    for (i=0; i<ndims; i++) {
+		HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
+		nelmts *= size[i];
+	    }
+	    puts("}");
 	}
-	puts("}");
 
 	/* Data type */
-	printf("        Type:  ");
+	printf("        Type:      ");
 	display_type(type, 15);
 	putchar('\n');
 
 	/* Data */
 	memset(&info, 0, sizeof info);
-	info.idx_fmt = "            (%s) ";
+	if (nelmts<5) {
+	    info.idx_fmt = "        Data:  ";
+	} else {
+	    info.idx_fmt = "            (%s) ";
+	}
 	info.line_ncols = width_g;
 	if (label_g) info.cmpd_name = "%s=";
 	if (string_g && 1==H5Tget_size(type) &&
@@ -1322,9 +1333,11 @@ group_list2(hid_t grp, const char *name)
 static herr_t
 datatype_list2(hid_t type, const char __unused__ *name)
 {
-    printf("    %-10s ", "Type:");
-    display_type(type, 15);
-    printf("\n");
+    if (verbose_g>0) {
+	printf("    %-10s ", "Type:");
+	display_type(type, 15);
+	printf("\n");
+    }
     return 0;
 }
 

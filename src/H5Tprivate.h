@@ -61,7 +61,7 @@ typedef struct H5T_path_t {
 #define H5T_IS_NOOP(P)	((P)->is_hard && 0==H5T_cmp((P)->src, (P)->dst))
 
 /* Private functions */
-__DLL__ herr_t H5T_native_open(void);
+__DLL__ herr_t H5TN_init_interface(void);
 __DLL__ herr_t H5T_init(void);
 __DLL__ htri_t H5T_isa(H5G_entry_t *ent);
 __DLL__ H5T_t *H5T_open(H5G_entry_t *loc, const char *name);

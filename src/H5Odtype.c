@@ -248,6 +248,7 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 	/* Values */
 	HDmemcpy(dt->u.enumer.value, *pp,
 		 dt->u.enumer.nmembs * dt->parent->size);
+	*pp += dt->u.enumer.nmembs * dt->parent->size;
 	break;
 
     case H5T_REFERENCE:
@@ -269,6 +270,7 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_dtype_encode_helper

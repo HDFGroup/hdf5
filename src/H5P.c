@@ -100,18 +100,28 @@ H5P_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void
-H5P_term_interface(intn status)
+intn
+H5P_term_interface(void)
 {
-    intn		    i;
+    intn	i, n=0;
 
-    if (interface_initialize_g>0) {
-	for (i = 0; i < H5P_NCLASSES; i++) {
-	    H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
+    if (interface_initialize_g) {
+	for (i=0; i<H5P_NCLASSES; i++) {
+	    n += H5I_nmembers((H5I_type_t)(H5I_TEMPLATE_0+i));
+	}
+	if (n) {
+	    for (i=0; i<H5P_NCLASSES; i++) {
+		H5I_clear_group((H5I_type_t)(H5I_TEMPLATE_0+i));
+	    }
+	} else {
+	    for (i=0; i<H5P_NCLASSES; i++) {
+		H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
+		n++; /*H5I*/
+	    }
+	    interface_initialize_g = 0;
 	}
     }
-    
-    interface_initialize_g = status;
+    return n;
 }
 
 /*--------------------------------------------------------------------------

@@ -152,9 +152,13 @@ H5I_init_interface(void)
  * Function:	H5I_term_interface
  *
  * Purpose:	Terminate the H5I interface: release all memory, reset all
- *		global variables to initial values.
+ *		global variables to initial values. This only happens if all
+ *		groups have been destroyed from other interfaces.
  *
- * Return:	void
+ * Return:	Success:	Positive if any action was taken that might
+ *				affect some other interface; zero otherwise.
+ *
+ * 		Failure:	Negative.
  *
  * Programmer:	
  *
@@ -162,39 +166,43 @@ H5I_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-void 
-H5I_term_interface(intn status)
+intn
+H5I_term_interface(void)
 {
     H5I_id_group_t	*grp_ptr;
     H5I_id_info_t	*curr;
     H5I_type_t		grp;
+    intn		n=0;
 
-    if (interface_initialize_g>0) {
+    if (interface_initialize_g) {
+
+	/* How many groups are still being used? */
 	for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
-	    /*
-	     * Destroy each group regardless of reference count. This removes
-	     * any objects which might still be defined in the group. Then
-	     * free the group header struct and zero the global group array.
-	     */
-	    if ((grp_ptr=H5I_id_group_list_g[grp])) {
-		grp_ptr->count = 1;
-		H5I_destroy_group(grp);
+	    if ((grp_ptr=H5I_id_group_list_g[grp]) && grp_ptr->id_list) {
+		n++;
+	    }
+	}
+
+	/* If no groups are used then clean  up */
+	if (0==n) {
+	    for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
+		grp_ptr = H5I_id_group_list_g[grp];
 		H5MM_xfree(grp_ptr);
 		H5I_id_group_list_g[grp] = NULL;
 	    }
-	}
-	
 
-	/* Release the global free list */
-	while (H5I_id_free_list_g) {
-	    curr = H5I_id_free_list_g;
-	    H5I_id_free_list_g = H5I_id_free_list_g->next;
-	    H5MM_xfree(curr);
+	    /* Release the global free list */
+	    while (H5I_id_free_list_g) {
+		curr = H5I_id_free_list_g;
+		H5I_id_free_list_g = H5I_id_free_list_g->next;
+		H5MM_xfree(curr);
+	    }
 	}
+
+	/* Mark interface closed */
+	interface_initialize_g = 0;
     }
-    
-    /* Indicate interface status */
-    interface_initialize_g = status;
+    return n;
 }
 
 
@@ -300,6 +308,129 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, uintn reserved,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5I_nmembers
+ *
+ * Purpose:	Returns the number of members in a group.
+ *
+ * Return:	Success:	Number of members; zero if the group is empty
+ *				or has been deleted.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March 24, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5I_nmembers(H5I_type_t grp)
+{
+    H5I_id_group_t	*grp_ptr = NULL;
+    H5I_id_info_t	*cur=NULL;
+    intn		n=0;
+    uintn		i;
+
+    FUNC_ENTER(H5I_nmembers, FAIL);
+
+    if (grp<=H5I_BADID || grp>=H5I_NGROUPS) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
+    }
+    if (NULL==(grp_ptr=H5I_id_group_list_g[grp]) || grp_ptr->count<=0) {
+	HRETURN(0);
+    }
+
+    for (i=0; i<grp_ptr->hash_size; i++) {
+	for (cur=grp_ptr->id_list[i]; cur; cur=cur->next) {
+	    n++;
+	}
+    }
+    FUNC_LEAVE(n);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_clear_group
+ *
+ * Purpose:	Removes all objects from the group, calling the free
+ *		function for each object regardless of the reference count.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, March 24, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5I_clear_group(H5I_type_t grp)
+{
+    H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
+    H5I_id_info_t	*cur=NULL, *next=NULL;
+    intn		ret_value = SUCCEED;
+    uintn		i;
+
+    FUNC_ENTER(H5I_clear_group, FAIL);
+
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
+	HGOTO_DONE(FAIL);
+    }
+    
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
+	HGOTO_DONE(FAIL);
+    }
+
+#ifdef IDS_ARE_CACHED
+    /*
+     * Remove atoms from the global atom cache.
+     */
+    for (i=0; i<ID_CACHE_SIZE; i++) {
+	if (H5I_GROUP(H5I_id_cache_g[i]) == grp) {
+	    H5I_id_cache_g[i] = (-1);
+	    H5I_obj_cache_g[i] = NULL;
+	}
+    }
+#endif /* IDS_ARE_CACHED */
+
+    /*
+     * Call free method for all objects in group regardless of their reference
+     * counts. Ignore the return value from from the free method and remove
+     * object from group regardless.
+     */
+    if (grp_ptr->free_func) {
+	for (i=0; i<grp_ptr->hash_size; i++) {
+	    for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+		/* Free the object regardless of reference count */
+		if ((grp_ptr->free_func)(cur->obj_ptr)<0) {
+#if H5I_DEBUG
+		    if (H5DEBUG(I)) {
+			fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
+				"failure ignored\n", (int)grp,
+				(unsigned long)(cur->obj_ptr));
+		    }
+#endif /*H5I_DEBUG*/
+		}
+		    
+		/* Add ID struct to free list */
+		next = cur->next;
+		H5I_release_id_node(cur);
+	    }
+	    grp_ptr->id_list[i]=NULL;
+	}
+    }
+    
+  done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_destroy_group
  *
  * Purpose:	Decrements the reference count on an entire group of IDs.
@@ -324,9 +455,7 @@ herr_t
 H5I_destroy_group(H5I_type_t grp)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
-    H5I_id_info_t	*cur=NULL, *next=NULL;
     intn		ret_value = SUCCEED;
-    uintn		i;
 
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
@@ -345,46 +474,7 @@ H5I_destroy_group(H5I_type_t grp)
      * free function is invoked for each atom being freed.
      */
     if (1==grp_ptr->count) {
-#ifdef IDS_ARE_CACHED
-	/*
-	 * Remove atoms from the global atom cache.
-	 */
-	for (i=0; i<ID_CACHE_SIZE; i++) {
-	    if (H5I_GROUP(H5I_id_cache_g[i]) == grp) {
-		H5I_id_cache_g[i] = (-1);
-		H5I_obj_cache_g[i] = NULL;
-	    }
-	}
-#endif /* IDS_ARE_CACHED */
-
-	/*
-	 * Call free method for all objects in group regardless of there
-	 * reference counts. Ignore the return value from from the free
-	 * method and remove object from group regardless.
-	 */
-	if (grp_ptr->free_func) {
-	    for (i=0; i<grp_ptr->hash_size; i++) {
-		for (cur=grp_ptr->id_list[i]; cur; cur=next) {
-		    /* Free the object regardless of reference count */
-		    if ((grp_ptr->free_func)(cur->obj_ptr)<0) {
-#if H5I_DEBUG
-			if (H5DEBUG(I)) {
-			    fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
-				    "failure ignored\n", (int)grp,
-				    (unsigned long)(cur->obj_ptr));
-			}
-#endif /*H5I_DEBUG*/
-		    }
-		    
-		    /* Add ID struct to free list */
-		    next = cur->next;
-		    cur->next = H5I_id_free_list_g;
-		    H5I_id_free_list_g = cur;
-		}
-	    }
-	}
-
-	/* Free local cache and reset group */
+	H5I_clear_group(grp);
 	H5MM_xfree(grp_ptr->id_list);
 	HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
     } else {

@@ -129,7 +129,10 @@ H5D_init_interface(void)
  *
  * Purpose:	Terminate this interface.
  *
- * Return:	void
+ * Return:	Success:	Positive if anything was done that might
+ *				affect other interfaces; zero otherwise.
+ *
+ * 		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
  *              Friday, November 20, 1998
@@ -138,13 +141,21 @@ H5D_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5D_term_interface(intn status)
+intn
+H5D_term_interface(void)
 {
-    if (interface_initialize_g>0) {
-	H5I_destroy_group(H5I_DATASET);
+    int		n=0;
+
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_DATASET))) {
+	    H5I_clear_group(H5I_DATASET);
+	} else {
+	    H5I_destroy_group(H5I_DATASET);
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
     }
-    interface_initialize_g = status;
+    return n;
 }
 
 
@@ -1465,7 +1476,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;           /*have to xfer the slow way */
-#ifdef H5T_DEBUG
+#if defined(H5S_DEBUG) || defined(H5T_DEBUG)
     H5_timer_t		timer;
 #endif
 
@@ -1815,7 +1826,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
-#ifdef H5T_DEBUG
+#if defined(H5S_DEBUG) || defined(H5T_DEBUG)
     H5_timer_t		timer;
 #endif
 

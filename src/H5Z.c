@@ -72,8 +72,8 @@ H5Z_init_interface (void)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5Z_term_interface (intn status)
+intn
+H5Z_term_interface (void)
 {
     size_t	i;
 #ifdef H5Z_DEBUG
@@ -81,7 +81,7 @@ H5Z_term_interface (intn status)
     char	comment[16], bandwidth[32];
 #endif
 
-    if (interface_initialize_g>0) {
+    if (interface_initialize_g) {
 #ifdef H5Z_DEBUG
 	if (H5DEBUG(Z)) {
 	    for (i=0; i<H5Z_table_used_g; i++) {
@@ -103,7 +103,8 @@ H5Z_term_interface (intn status)
 		    }
 
 		    /* Truncate the comment to fit in the field */
-		    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+		    HDstrncpy(comment, H5Z_table_g[i].name,
+			      sizeof comment);
 		    comment[sizeof(comment)-1] = '\0';
 
 		    /*
@@ -129,16 +130,15 @@ H5Z_term_interface (intn status)
 	    }
 	}
 #endif
-
 	/* Free the table */
 	for (i=0; i<H5Z_table_used_g; i++) {
 	    H5MM_xfree(H5Z_table_g[i].name);
 	}
 	H5Z_table_g = H5MM_xfree(H5Z_table_g);
 	H5Z_table_used_g = H5Z_table_alloc_g = 0;
+	interface_initialize_g = 0;
     }
-    
-    interface_initialize_g = status;
+    return 0;
 }
 
 

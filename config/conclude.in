@@ -55,8 +55,13 @@ install: $(LIB) $(PUB_HDR) $(PROGS)
 	@test -d $(includedir) || mkdir $(includedir)
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
-	      (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);        \
-	   fi								      \
+	      if test -f $$f; then					      \
+		 (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
+	      else							      \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
+		    exit 1);						      \
+	      fi;							      \
+	   fi;								      \
 	done
 	@test -d $(bindir) || mkdir $(bindir)
 	@for f in X $(PROGS); do					      \

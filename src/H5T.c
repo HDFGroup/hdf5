@@ -192,7 +192,7 @@ H5T_init_interface(void)
      * Initialize pre-defined native data types from code generated during
      * the library configuration by H5detect.
      */
-    if (H5T_native_open()<0) {
+    if (H5TN_init_interface()<0) {
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to initialize interface");
     }
@@ -1091,7 +1091,11 @@ H5T_unlock_cb (void *_dt, const void __unused__ *key)
  *
  * Purpose:	Close this interface.
  *
- * Return:	void
+ * Return:	Success:	Positive if any action might have caused a
+ *				change in some other interface; zero
+ *				otherwise.
+ *
+ * 		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Friday, November 20, 1998
@@ -1102,53 +1106,59 @@ H5T_unlock_cb (void *_dt, const void __unused__ *key)
  *	called.
  *-------------------------------------------------------------------------
  */
-void
-H5T_term_interface(intn status)
+intn
+H5T_term_interface(void)
 {
-    intn	i, nprint=0;
+    intn	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
-    if (interface_initialize_g>0) {
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_DATATYPE))) {
+	    H5I_clear_group(H5I_DATATYPE);
+	} else {
+	    /* Unregister all conversion functions */
+	    for (i=0; i<H5T_g.npaths; i++) {
+		path = H5T_g.path[i];
+		assert (path);
 
-	/* Unregister all conversion functions */
-	for (i=0; i<H5T_g.npaths; i++) {
-	    path = H5T_g.path[i];
-	    assert (path);
-
-	    if (path->func) {
-		H5T_print_stats(path, &nprint/*in,out*/);
-		path->cdata.command = H5T_CONV_FREE;
-		if ((path->func)(FAIL, FAIL, &(path->cdata),
-				 0, NULL, NULL)<0) {
+		if (path->func) {
+		    H5T_print_stats(path, &nprint/*in,out*/);
+		    path->cdata.command = H5T_CONV_FREE;
+		    if ((path->func)(FAIL, FAIL, &(path->cdata),
+				     0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		    if (H5DEBUG(T)) {
-			fprintf (H5DEBUG(T), "H5T: conversion function "
-				 "0x%08lx failed to free private data for %s "
-				 "(ignored)\n",
-				 (unsigned long)(path->func), path->name);
-		    }
+			if (H5DEBUG(T)) {
+			    fprintf (H5DEBUG(T), "H5T: conversion function "
+				     "0x%08lx failed to free private data for "
+				     "%s (ignored)\n",
+				     (unsigned long)(path->func), path->name);
+			}
 #endif
-		    H5E_clear(); /*ignore the error*/
+			H5E_clear(); /*ignore the error*/
+		    }
 		}
+		H5T_close (path->src);
+		H5T_close (path->dst);
+		H5MM_xfree (path);
+		H5T_g.path[i] = NULL;
 	    }
-	    H5T_close (path->src);
-	    H5T_close (path->dst);
-	    H5MM_xfree (path);
-	    H5T_g.path[i] = NULL;
+
+	    /* Clear conversion tables */
+	    H5T_g.path = H5MM_xfree(H5T_g.path);
+	    H5T_g.npaths = H5T_g.apaths = 0;
+	    H5T_g.soft = H5MM_xfree(H5T_g.soft);
+	    H5T_g.nsoft = H5T_g.asoft = 0;
+
+	    /* Unlock all datatypes, then free them */
+	    H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
+	    H5I_destroy_group(H5I_DATATYPE);
+
+	    /* Mark interface as closed */
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
 	}
-
-	/* Clear conversion tables */
-	H5T_g.path = H5MM_xfree(H5T_g.path);
-	H5T_g.npaths = H5T_g.apaths = 0;
-	H5T_g.soft = H5MM_xfree(H5T_g.soft);
-	H5T_g.nsoft = H5T_g.asoft = 0;
-
-	/* Unlock all datatypes, then free them */
-	H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
-	H5I_destroy_group(H5I_DATATYPE);
     }
-    
-    interface_initialize_g = status;
+    return n;
 }
 
 

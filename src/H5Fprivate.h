@@ -302,7 +302,7 @@ typedef struct H5F_access_t {
 typedef struct H5F_search_t {
     dev_t	dev;		/* Device number containing file	*/
     ino_t	ino;		/* Unique file number on device		*/
-	char*   path;
+    char	*path;		/* File name used only in Win32		*/
 } H5F_search_t;
 
 /* For determining what the last file operation was */

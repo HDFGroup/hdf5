@@ -886,15 +886,12 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
       interface_initialize_g = 1;					      \
       if (interface_init_func &&					      \
 	  ((herr_t(*)(void))interface_init_func)()<0) {			      \
+         interface_initialize_g = 0;					      \
 	 HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
 			"interface initialization failed");		      \
       }									      \
-   } else if (interface_initialize_g<0) {				      \
-       assert("interface is closing" && 0);				      \
-       HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, err,			      \
-		     "interface is closing");				      \
    }									      \
-									      \
+   									      \
    /* Clear thread error stack entering public functions */		      \
    if (H5E_clearable_g && H5_IS_API (FUNC)) {				      \
        H5E_clear ();							      \
@@ -938,19 +935,19 @@ __DLL__ herr_t H5_init_library(void);
 __DLL__ void H5_term_library(void);
 
 /* Functions to terminate interfaces */
-__DLL__ void H5A_term_interface(intn status);
-__DLL__ void H5D_term_interface(intn status);
-__DLL__ void H5F_term_interface(intn status);
-__DLL__ void H5G_term_interface(intn status);
-__DLL__ void H5I_term_interface(intn status);
-__DLL__ void H5P_term_interface(intn status);
-__DLL__ void H5RA_term_interface(intn status);
-__DLL__ void H5R_term_interface(intn status);
-__DLL__ void H5S_term_interface(intn status);
-__DLL__ void H5TB_term_interface(intn status);
-__DLL__ void H5T_native_close(intn status);
-__DLL__ void H5T_term_interface(intn status);
-__DLL__ void H5Z_term_interface(intn status);
+__DLL__ intn H5A_term_interface(void);
+__DLL__ intn H5D_term_interface(void);
+__DLL__ intn H5F_term_interface(void);
+__DLL__ intn H5G_term_interface(void);
+__DLL__ intn H5I_term_interface(void);
+__DLL__ intn H5P_term_interface(void);
+__DLL__ intn H5RA_term_interface(void);
+__DLL__ intn H5R_term_interface(void);
+__DLL__ intn H5S_term_interface(void);
+__DLL__ intn H5TB_term_interface(void);
+__DLL__ intn H5TN_term_interface(void);
+__DLL__ intn H5T_term_interface(void);
+__DLL__ intn H5Z_term_interface(void);
 
 
 #endif

@@ -130,65 +130,46 @@ H5_init_library(void)
 void
 H5_term_library(void)
 {
+    intn	pending, ntries=0, n;
+    uintn	at=0;
+    char	loop[1024];
+    
     /* Don't do anything if the library is already closed */
     if (!H5_libinit_g) return;
 
     /*
-     * Close interfaces in a well-defined order based on dependencies. The
-     * goal is that closing one interface doesn't reopen another that was
-     * just closed. In order to help us track down dependencies that we
-     * didn't know about, we close the interfaces in a two step process.  The
-     * first step does the real work and makes the interface unusable. The
-     * second step doesn't do any work but makes it possible to reopen the
-     * interface later.
+     * Terminate each interface. The termination functions return a positive
+     * value if they do something that might affect some other interface in a
+     * way that would necessitate some cleanup work in the other interface.
      */
+#define DOWN(F)								      \
+    (((n=H5##F##_term_interface()) && at+5<sizeof loop)?		      \
+     (sprintf(loop+at, "%s%s", at?",":"", #F),				      \
+      at += strlen(loop+at),						      \
+      n):0)
+    
 
-    /*
-     * Cycles: The H5F layer participates in quite a few dependency cycles
-     *	       because it's cache depends on almost all other meta object
-     *	       packages and those packages depend on H5O which depends on H5F
-     *	       (because H5F_close() can delay until all object headers are
-     *	       closed). We handle this cycle by calling H5F_close() for all
-     *	       files, which flushes the meta data caches and updates the file
-     *	       boot block.
-     */
-    H5F_close_all();
-
-    /* Function			   What depends on it?			*/
-    /*-------------------------   -------------------------------	*/
-    H5D_term_interface(-1);	/*					*/
-    H5TB_term_interface(-1);	/*					*/
-    H5Z_term_interface(-1);	/*					*/
-    H5A_term_interface(-1);	/*					*/
-    H5RA_term_interface(-1);	/*					*/
-    H5G_term_interface(-1);	/*					*/
-    H5R_term_interface(-1);	/*					*/
-    H5S_term_interface(-1);	/*					*/
-    H5T_native_close(-1);	/* D RA					*/
-    H5T_term_interface(-1);	/* D RA					*/
-    H5P_term_interface(-1);	/* D F					*/
-    H5F_term_interface(-1); 	/* A D G S T				*/
-    H5I_term_interface(-1);	/* A D F G P RA S T TB Z		*/
-    /*------------------------- ---------------------------------	*/
-
-    /*
-     * Finalize the closing by calling all the functions again but with an
-     * argument of zero.  This allows the interface to be reopened later.
-     */
-    H5A_term_interface(0);
-    H5D_term_interface(0);
-    H5F_term_interface(0);
-    H5G_term_interface(0);
-    H5I_term_interface(0);
-    H5P_term_interface(0);
-    H5RA_term_interface(0);
-    H5R_term_interface(0);
-    H5S_term_interface(0);
-    H5TB_term_interface(0);
-    H5T_native_close(0);
-    H5T_term_interface(0);
-    H5Z_term_interface(0);
-
+    do {
+	pending = 0;
+	pending += DOWN(F);
+	pending += DOWN(D);
+	pending += DOWN(TB);
+	pending += DOWN(Z);
+	pending += DOWN(RA);
+	pending += DOWN(G);
+	pending += DOWN(R);
+	pending += DOWN(S);
+	pending += DOWN(TN);
+	pending += DOWN(T);
+	pending += DOWN(A);
+	pending += DOWN(P);
+	pending += DOWN(I);
+    } while (pending && ntries++<100);
+    if (pending) {
+	fprintf(stderr, "HDF5: infinite loop closing library\n");
+	fprintf(stderr, "      %s\n", loop);
+    }
+    
     /* Mark library as closed */
     H5_libinit_g = FALSE;
 }

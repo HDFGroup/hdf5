@@ -106,7 +106,10 @@ H5RA_init_interface(void)
  *
  * Purpose:	Terminate the ragged array interface.
  *
- * Return:	void
+ * Return:	Success:	Positive if anything was done that might
+ *				affect some other interface. Zero otherwise.
+ *
+ * 		Failure:	Negaitive
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 25, 1998
@@ -115,16 +118,23 @@ H5RA_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-H5RA_term_interface(intn status)
+intn
+H5RA_term_interface(void)
 {
-    if (interface_initialize_g>0) {
-	H5I_destroy_group(H5I_RAGGED);
-	H5T_close(H5RA_meta_type_g);
-	H5RA_meta_type_g = NULL;
+    intn	n=0;
+
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_RAGGED))) {
+	    H5I_clear_group(H5I_RAGGED);
+	} else {
+	    H5T_close(H5RA_meta_type_g);
+	    H5RA_meta_type_g = NULL;
+	    H5I_destroy_group(H5I_RAGGED);
+	    interface_initialize_g = 0;
+	    n = 1; /*H5T,H5I*/
+	}
     }
-    
-    interface_initialize_g = status;
+    return n;
 }
 
 

@@ -108,33 +108,36 @@ H5TB_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void
-H5TB_term_interface(intn status)
+intn
+H5TB_term_interface(void)
 {
     H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
         *next;                          /* pointer to next temp. buffer */
+    intn n=0;
 
-    if (interface_initialize_g>0) {
-	/* Destroy the atom group */
-	H5I_destroy_group(H5I_TEMPBUF);
+    if (interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_TEMPBUF))) {
+	    H5I_clear_group(H5I_TEMPBUF);
+	} else {
+	    /* Free group and buffers */
+	    H5I_destroy_group(H5I_TEMPBUF);
+	    while(curr!=NULL) {
+		next=curr->next;
 
-	/* Step through the list and free the buffers */
-	while(curr!=NULL) {
-	    next=curr->next;
+		if(curr->buf!=NULL)
+		    H5MM_xfree(curr->buf);
+		H5MM_xfree(curr);
 
-	    if(curr->buf!=NULL)
-		H5MM_xfree(curr->buf);
-	    H5MM_xfree(curr);
-
-	    curr=next;
-	} /* end while */
-
-	/* Reset head & tail pointers */
-	H5TB_list_head=H5TB_list_tail=NULL;
+		curr=next;
+	    }
+	    H5TB_list_head=H5TB_list_tail=NULL;
+	    interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	}
     }
-    
-    interface_initialize_g = status;
+    return n;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5TB_close
