@@ -673,6 +673,59 @@ H5SL_item(H5SL_node_t *slist_node)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5SL_release
+ PURPOSE
+    Release all nodes from a skip list
+ USAGE
+    herr_t H5SL_release(slist)
+        H5SL_t *slist;            IN/OUT: Pointer to skip list to release nodes
+
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+    Release all the nodes in a skip list.  Any objects left in the skip list
+    nodes are not deallocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5SL_release(H5SL_t *slist)
+{
+    H5SL_node_t *node, *next_node;      /* Pointers to skip list nodes */
+    size_t u;                   /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_release);
+
+    /* Check args */
+    assert(slist);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Free skip list nodes */
+    node=slist->header->forward[0];
+    while(node!=NULL) {
+        next_node=node->forward[0];
+        H5MM_xfree(node);
+        node=next_node;
+    } /* end while */
+
+    /* Reset the header pointers */
+    for(u=0; u<slist->max_level; u++)
+        slist->header->forward[u]=NULL;
+
+    /* Reset the dynamic internal fields */
+    slist->curr_level=-1;
+    slist->nobjs=0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5SL_release() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5SL_close
  PURPOSE
     Close a skip list, deallocating it.
@@ -693,8 +746,6 @@ H5SL_item(H5SL_node_t *slist_node)
 herr_t
 H5SL_close(H5SL_t *slist)
 {
-    H5SL_node_t *node, *next_node;      /* Pointers to skip list nodes */
-
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_close);
 
     /* Check args */
@@ -704,12 +755,10 @@ H5SL_close(H5SL_t *slist)
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    node=slist->header;
-    while(node!=NULL) {
-        next_node=node->forward[0];
-        H5MM_xfree(node);
-        node=next_node;
-    } /* end while */
+    H5SL_release(slist);        /* always succeeds */
+
+    /* Release header node */
+    H5MM_xfree(slist->header);
 
     /* Free skip list object */
     H5FL_FREE(H5SL_t,slist);

@@ -235,6 +235,28 @@ test_skiplist_insert_many(void)
         VERIFY(*found_item,rand_num[u],"H5SL_search");
     } /* end for */
 
+    /* Release all the items from the list */
+    ret=H5SL_release(slist);
+    CHECK(ret, FAIL, "H5SL_release");
+
+    /* Check that the skip list has no elements */
+    num=H5SL_count(slist);
+    VERIFY(num, 0, "H5SL_count");
+
+    /* Insert many objects into the skip list */
+    for(u=0; u<NUM_ELEMS; u++) {
+        ret=H5SL_insert(slist,&rand_num[u],&rand_num[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check that the skip list has correct # of elements */
+    num=H5SL_count(slist);
+    VERIFY(num, NUM_ELEMS, "H5SL_count");
+
+    /* Release all the items from the list */
+    ret=H5SL_release(slist);
+    CHECK(ret, FAIL, "H5SL_release");
+
     /* Close the skip list */
     ret=H5SL_close(slist);
     CHECK(ret, FAIL, "H5SL_close");
