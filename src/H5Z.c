@@ -529,7 +529,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
 
             /* Check if the chunks have filters */
             if(dcpl_pline.nfilters > 0) {
-                int chunk_ndims;        /* # of chunk dimensions */
+                unsigned chunk_ndims;   /* # of chunk dimensions */
                 hsize_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
                 H5S_t *space;           /* Dataspace describing chunk */
                 hid_t space_id;         /* ID for dataspace describing chunk */

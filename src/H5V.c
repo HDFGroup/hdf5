@@ -959,6 +959,97 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5V_array_down
+ *
+ * Purpose:	Given a set of dimension sizes, calculate the size of each
+ *              "down" slice.  This is the size of the dimensions for all the
+ *              dimensions below the current one, which is used for indexing
+ *              offsets in this dimension.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, April 28, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
+{
+    hsize_t	acc;	                /*accumulator			*/
+    int	        i;		        /*counter			*/
+    herr_t	ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5V_array_down, FAIL);
+
+    assert(n <= H5V_HYPER_NDIMS);
+    assert(total_size);
+    assert(down);
+
+    /* Build the sizes of each dimension in the array */
+    /* (From fastest to slowest) */
+    for(i=n-1,acc=1; i>=0; i--) {
+        down[i]=acc;
+        acc *= total_size[i];
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5V_array_down() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_array_offset_pre
+ *
+ * Purpose:	Given a coordinate description of a location in an array, this
+ *      function returns the byte offset of the coordinate.
+ *
+ *		The dimensionality of the whole array, and the offset is N.
+ *              The whole array dimensions are TOTAL_SIZE and the coordinate
+ *              is at offset OFFSET.
+ *
+ * Return:	Success: Byte offset from beginning of array to element offset
+ *		Failure: abort() -- should never fail
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June 22, 1999
+ *
+ * Modifications:
+ *              Use precomputed accumulator array
+ *              Quincey Koziol
+ *		Saturday, April 26, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5V_array_offset_pre(unsigned n, const hsize_t *total_size, const hsize_t *acc, const hssize_t *offset)
+{
+    hsize_t	    skip;	/*starting point byte offset		*/
+    int             i;		/*counter				*/
+    hsize_t	    ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5V_array_offset_pre, (HDabort(), 0));
+
+    assert(n <= H5V_HYPER_NDIMS);
+    assert(total_size);
+    assert(acc);
+    assert(offset);
+
+    /* Compute offset in array */
+    for (i=(int)(n-1), skip=0; i>=0; --i)
+        skip += acc[i] * offset[i];
+
+    /* Set return value */
+    ret_value=skip;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5V_array_offset_pre() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5V_array_offset
  *
  * Purpose:	Given a coordinate description of a location in an array, this
@@ -981,10 +1072,8 @@ done:
 hsize_t
 H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
 {
-    hsize_t	    skip;	/*starting point byte offset		*/
-    hsize_t	    acc;	/*accumulator				*/
-    int	    i;		/*counter				*/
-    hsize_t	    ret_value;  /* Return value */
+    hsize_t	acc_arr[H5V_HYPER_NDIMS];	/* Accumulated size of down dimensions */
+    hsize_t	ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI(H5V_array_offset, (HDabort(), 0));
 
@@ -992,16 +1081,229 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
     assert(total_size);
     assert(offset);
 
-    /* others */
-    for (i=(int)(n-1), acc=1, skip=0; i>=0; --i) {
-        skip += acc * offset[i];
-        acc *= total_size[i];
-    } /* end for */
+    /* Build the sizes of each dimension in the array */
+    if(H5V_array_down(n,total_size,acc_arr)<0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, UFAIL, "can't compute down sizes");
 
     /* Set return value */
-    ret_value=skip;
+    ret_value=H5V_array_offset_pre(n,total_size,acc_arr,offset);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5V_array_offset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_array_calc
+ *
+ * Purpose:	Given a linear offset in an array and the dimensions of that
+ *              array, this function computes the coordinates of that offset
+ *              in the array.
+ *
+ *		The dimensionality of the whole array, and the coordinates is N.
+ *              The array dimensions are TOTAL_SIZE and the coordinates
+ *              are returned in COORD.  The linear offset is in OFFSET.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, April 16, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hssize_t *coords)
+{
+    hsize_t	idx[H5V_HYPER_NDIMS];	/* Size of each dimension in bytes */
+    hsize_t     acc;                    /* Size accumulator */
+    unsigned    u;                      /* Local index variable */
+    int         i;                      /* Local index variable */
+    herr_t	ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5V_array_calc, FAIL);
+
+    /* Sanity check */
+    assert(n <= H5V_HYPER_NDIMS);
+    assert(total_size);
+    assert(coords);
+
+    /* Build the sizes of each dimension in the array */
+    /* (From fastest to slowest) */
+    for(i=n-1,acc=1; i>=0; i--) {
+        idx[i]=acc;
+        acc *= total_size[i];
+    } /* end for */
+
+    /* Compute the coordinates from the offset */
+    for(u=0; u<n; u++) {
+        coords[u]=offset/idx[u];
+        offset %= idx[u];
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5V_array_calc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_chunk_index
+ *
+ * Purpose:	Given a coordinate offset (COORD), the size of each chunk
+ *              (CHUNK), the number of chunks in each dimension (NCHUNKS)
+ *              and the number of dimensions of all of these (NDIMS), calculate
+ *              a "chunk index" for the chunk that the coordinate offset is
+ *              located in.
+ *
+ *              The chunk index starts at 0 and increases according to the 
+ *              fastest changing dimension, then the next fastest, etc.
+ *
+ *              For example, with a 3x5 chunk size and 6 chunks in the fastest
+ *              changing dimension and 3 chunks in the slowest changing
+ *              dimension, the chunk indices are as follows:
+ *
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              |  0  |  1  |  2  |  3  |  4  |  5  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              |  6  |  7  |  8  |  9  | 10  | 11  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              | 12  | 13  | 14  | 15  | 16  | 17  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *
+ *              The chunk index is placed in the CHUNK_IDX location for return
+ *              from this function
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, April 21, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5V_chunk_index(unsigned ndims, const hssize_t *coord, const hsize_t *chunk,
+    const hsize_t *nchunks, const hsize_t *down_nchunks, hsize_t *chunk_idx)
+{
+    hssize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
+    unsigned    u;                      /* Local index variable */
+    herr_t	ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5V_chunk_index, FAIL);
+
+    /* Sanity check */
+    assert(ndims <= H5V_HYPER_NDIMS);
+    assert(coord);
+    assert(chunk);
+    assert(nchunks);
+    assert(chunk_idx);
+
+    /* Compute the scaled coordinates for actual coordinates */
+    for(u=0; u<ndims; u++)
+        scaled_coord[u]=coord[u]/chunk[u];
+
+    /* Compute the chunk index */
+    *chunk_idx=H5V_array_offset_pre(ndims,nchunks,down_nchunks,scaled_coord);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5V_chunk_index() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_memcpyvv
+ *
+ * Purpose:	Given source and destination buffers in memory (SRC & DST)
+ *              copy sequences of from the source buffer into the destination
+ *              buffer.  Each set of sequnces has an array of lengths, an
+ *              array of offsets, the maximum number of sequences and the
+ *              current sequence to start at in the sequence.
+ *
+ *              There may be different numbers of bytes in the source and
+ *              destination sequences, data copying stops when either the
+ *              source or destination buffer runs out of sequence information.
+ *
+ * Return:	Non-negative # of bytes copied on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, May 2, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5V_memcpyvv(void *_dst,
+    size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
+    const void *_src,
+    size_t src_max_nseq, size_t *src_curr_seq, size_t src_len_arr[], hsize_t src_off_arr[])
+{
+    unsigned char *dst;         /* Destination buffer pointer */
+    const unsigned char *src;   /* Source buffer pointer */
+    size_t size;                /* Size of sequence in bytes */
+    size_t u,v;                 /* Local index variables */
+    ssize_t ret_value=0;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5V_memcpyvv, FAIL);
+
+    /* Sanity check */
+    assert(_dst);
+    assert(dst_curr_seq);
+    assert(*dst_curr_seq<dst_max_nseq);
+    assert(dst_len_arr);
+    assert(dst_off_arr);
+    assert(_src);
+    assert(src_curr_seq);
+    assert(*src_curr_seq<src_max_nseq);
+    assert(src_len_arr);
+    assert(src_off_arr);
+
+    /* Work through all the sequences */
+    for(u=*dst_curr_seq, v=*src_curr_seq; u<dst_max_nseq && v<src_max_nseq; ) {
+        /* Choose smallest buffer to write */
+        if(src_len_arr[v]<dst_len_arr[u])
+            size=src_len_arr[v];
+        else
+            size=dst_len_arr[u];
+
+        /* Compute offset on disk */
+        dst=(unsigned char *)_dst+dst_off_arr[u];
+
+        /* Compute offset in memory */
+        src=(const unsigned char *)_src+src_off_arr[v];
+
+        /* Copy data */
+        HDmemcpy(dst,src,size);
+
+        /* Update source information */
+        src_len_arr[v]-=size;
+        src_off_arr[v]+=size;
+        if(src_len_arr[v]==0)
+            v++;
+
+        /* Update destination information */
+        dst_len_arr[u]-=size;
+        dst_off_arr[u]+=size;
+        if(dst_len_arr[u]==0)
+            u++;
+
+        /* Increment number of bytes copied */
+        ret_value+=size;
+    } /* end for */
+
+    /* Update current sequence vectors */
+    *dst_curr_seq=u;
+    *src_curr_seq=v;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5V_memcpyvv() */
 

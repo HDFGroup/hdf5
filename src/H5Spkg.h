@@ -79,7 +79,12 @@ struct H5S_hyper_span_t {
 /* Information about a list of hyperslab spans */
 struct H5S_hyper_span_info_t {
     unsigned count;                    /* Ref. count of number of spans which share this span */
-    struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer (used during copies & as mark during precomputes for I/O) */
+    struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer
+                                             * (used during copies, as mark
+                                             * during precomputes for I/O & 
+                                             * to point to the last span in a
+                                             * list during single element adds)
+                                             */
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
@@ -117,12 +122,6 @@ typedef herr_t (*H5S_sel_get_seq_list_func_t)(const H5S_t *space, unsigned flags
 typedef hsize_t (*H5S_sel_get_npoints_func_t)(const H5S_t *space);
 /* Method to release current selection */
 typedef herr_t (*H5S_sel_release_func_t)(H5S_t *space);
-/* Method to initialize iterator for current selection */
-typedef herr_t (*H5S_sel_iter_init_func_t)(const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_iter);
-/* Method to determine number of elements left in iterator for current selection */
-typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
-/* Method to release iterator for current selection */
-typedef herr_t (*H5S_sel_iter_release_func_t)(H5S_sel_iter_t *iter);
 /* Method to determine if current selection is valid for dataspace */
 typedef htri_t (*H5S_sel_is_valid_func_t)(const H5S_t *space);
 /* Method to determine number of bytes required to store current selection */
@@ -137,6 +136,8 @@ typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 typedef htri_t (*H5S_sel_is_single_func_t)(const H5S_t *space);
 /* Method to determine if current selection is "regular" */
 typedef htri_t (*H5S_sel_is_regular_func_t)(const H5S_t *space);
+/* Method to initialize iterator for current selection */
+typedef herr_t (*H5S_sel_iter_init_func_t)(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_size);
 
 /* Selection information object */
 typedef struct {
@@ -151,9 +152,6 @@ typedef struct {
     H5S_sel_get_seq_list_func_t get_seq_list;   /* Method to retrieve a list of offset/length sequences for selection */
     H5S_sel_get_npoints_func_t get_npoints;     /* Method to compute number of elements in current selection */
     H5S_sel_release_func_t release;             /* Method to release current selection */
-    H5S_sel_iter_init_func_t iter_init;         /* Method to initialize iterator for current selection */
-    H5S_sel_iter_nelmts_func_t iter_nelmts;     /* Method to determine number of elements left in iterator for current selection */
-    H5S_sel_iter_release_func_t iter_release;   /* Method to release iterator for current selection */
     H5S_sel_is_valid_func_t is_valid;           /* Method to determine if current selection is valid for dataspace */
     H5S_sel_serial_size_func_t serial_size;     /* Method to determine number of bytes required to store current selection */
     H5S_sel_serialize_func_t serialize;         /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
@@ -161,6 +159,7 @@ typedef struct {
     H5S_sel_is_contiguous_func_t is_contiguous; /* Method to determine if current selection is contiguous */
     H5S_sel_is_single_func_t is_single;         /* Method to determine if current selection is a single block */
     H5S_sel_is_regular_func_t is_regular;       /* Method to determine if current selection is "regular" */
+    H5S_sel_iter_init_func_t iter_init;         /* Method to initialize iterator for current selection */
 } H5S_select_t;
 
 /* Main dataspace structure (typedef'd in H5Sprivate.h) */
@@ -174,11 +173,14 @@ H5_DLL herr_t H5S_close_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_release_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
-/* Point select functions */
-H5_DLL herr_t H5S_point_iter_init (const H5S_t *space, size_t elmt_size,
-        H5S_sel_iter_t *iter);
-H5_DLL hsize_t H5S_point_iter_nelmts (const H5S_sel_iter_t *iter);
+/* Point selection iterator functions */
+H5_DLL herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
+H5_DLL herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+H5_DLL hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_point_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_point_iter_release(H5S_sel_iter_t *sel_iter);
+
+/* Point selection functions */
 H5_DLL herr_t H5S_point_release(H5S_t *space);
 H5_DLL hsize_t H5S_point_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_point_copy(H5S_t *dst, const H5S_t *src);
@@ -194,11 +196,14 @@ H5_DLL herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
-/* "All" select functions */
-H5_DLL herr_t H5S_all_iter_init (const H5S_t *space, size_t elmt_size,
-        H5S_sel_iter_t *iter);
-H5_DLL hsize_t H5S_all_iter_nelmts (const H5S_sel_iter_t *iter);
+/* "All" selection iterator  functions */
+H5_DLL herr_t H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
+H5_DLL herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+H5_DLL hsize_t H5S_all_iter_nelmts(const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
+
+/* "All" selection functions */
 H5_DLL herr_t H5S_all_release(H5S_t *space);
 H5_DLL hsize_t H5S_all_npoints(const H5S_t *space);
 H5_DLL htri_t H5S_all_is_valid(const H5S_t *space);
@@ -213,11 +218,14 @@ H5_DLL herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
-/* Hyperslab selection functions */
-H5_DLL herr_t H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size,
-        H5S_sel_iter_t *iter);
-H5_DLL hsize_t H5S_hyper_iter_nelmts (const H5S_sel_iter_t *iter);
+/* Hyperslab selection iterator functions */
+H5_DLL herr_t H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
+H5_DLL herr_t H5S_hyper_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+H5_DLL hsize_t H5S_hyper_iter_nelmts(const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_hyper_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
+
+/* Hyperslab selection functions */
 H5_DLL herr_t H5S_hyper_release(H5S_t *space);
 H5_DLL hsize_t H5S_hyper_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
@@ -233,11 +241,14 @@ H5_DLL herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 
-/* "None" selection functions */
-H5_DLL herr_t H5S_none_iter_init (const H5S_t *space, size_t elmt_size,
-        H5S_sel_iter_t *iter);
-H5_DLL hsize_t H5S_none_iter_nelmts (const H5S_sel_iter_t *iter);
+/* "None" selection iterator functions */
+H5_DLL herr_t H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
+H5_DLL herr_t H5S_none_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
+H5_DLL hsize_t H5S_none_iter_nelmts(const H5S_sel_iter_t *iter);
+H5_DLL herr_t H5S_none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
+
+/* "None" selection functions */
 H5_DLL herr_t H5S_none_release(H5S_t *space);
 H5_DLL hsize_t H5S_none_npoints(const H5S_t *space);
 H5_DLL htri_t H5S_none_is_valid(const H5S_t *space);
@@ -252,6 +263,8 @@ H5_DLL herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 /* Needed for use in hyperslab code (H5Shyper.c) */
-H5_DLL herr_t H5S_select_none(H5S_t *space);
+#ifdef NEW_HYPERSLAB_API
+H5_DLL herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
+#endif /*NEW_HYPERSLAB_API*/
 
-#endif
+#endif /*_H5Spkg_H*/

@@ -21,13 +21,7 @@
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"
-#include "H5Fprivate.h"		/*for the H5F_t type			     */
-#include "H5Gprivate.h"		/*symbol tables				     */
-#include "H5MMpublic.h"		/*for H5MM_allocate_t and H5MM_free_t types  */
-#include "H5Oprivate.h"		/*object Headers			     */
-#include "H5Sprivate.h"		/*for the H5S_t type			     */
-#include "H5Tprivate.h"		/*for the H5T_t type			     */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 /*
  * Feature: Define H5D_DEBUG on the compiler command line if you want to
@@ -38,11 +32,6 @@
 #  undef H5D_DEBUG
 #endif
 
-#define H5D_RESERVED_ATOMS  0
-
-/* Set the minimum object header size to create objects with */
-#define H5D_MINHDR_SIZE 256
-
 /* ========  Dataset creation properties ======== */
 /* Definitions for storage layout property */
 #define H5D_CRT_LAYOUT_NAME        "layout"
@@ -50,7 +39,7 @@
 #define H5D_CRT_LAYOUT_DEF         H5D_CONTIGUOUS    
 /* Definitions for chunk dimensionality property */
 #define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"
-#define H5D_CRT_CHUNK_DIM_SIZE     sizeof(int)
+#define H5D_CRT_CHUNK_DIM_SIZE     sizeof(unsigned)
 #define H5D_CRT_CHUNK_DIM_DEF      1
 /* Definitions for chunk size */
 #define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"
@@ -155,23 +144,20 @@
 #define H5D_XFER_FILTER_CB_SIZE       sizeof(H5Z_cb_t)
 #define H5D_XFER_FILTER_CB_DEF        {NULL,NULL}
 
-/*
- * A dataset is the following struct.
- */
-typedef struct H5D_t {
-    H5G_entry_t         ent;            /* cached object header stuff   */
-    H5T_t              *type;           /* datatype of this dataset     */
-    H5S_t              *space;          /* dataspace of this dataset    */
-    hid_t               dcpl_id;        /* dataset creation property id */
-    H5O_layout_t        layout;         /* data layout                  */
-    /* Cache some frequently accessed values from the DCPL */
-    H5O_efl_t           efl;            /* External file list information */
-    H5D_alloc_time_t    alloc_time;     /* Dataset allocation time      */
-    H5D_fill_time_t	fill_time;	/* Dataset fill value writing time */
-    H5O_fill_t          fill;           /* Dataset fill value information */
-} H5D_t;
-  
-/* Functions defined in H5D.c */
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/* Typedef for reference counted string (defined in H5Dpkg.h) */
+typedef struct H5D_t H5D_t;
+
+/* Typedef for dataset storage information */
+typedef union H5D_storage_t {
+    H5O_efl_t   efl;            /* External file list information for dataset */
+    hssize_t    *chunk_coords;  /* chunk's coordinates in file chunks */
+} H5D_storage_t;
+
+/* Library-private functions defined in H5D package */
 H5_DLL herr_t H5D_init(void);
 H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);

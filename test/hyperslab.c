@@ -21,12 +21,11 @@
  *		because testing general dimensionalities would require us to
  *		rewrite much of the hyperslab stuff.
  */
+#include "h5test.h"
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
 #include "H5Vprivate.h"
-
-#define AT() printf ("	 at %s:%d in %s()\n",__FILE__,__LINE__,__FUNCTION__);
 
 #define TEST_SMALL	0x0001
 #define TEST_MEDIUM	0x0002
@@ -34,6 +33,10 @@
 #define VARIABLE_SRC	0
 #define VARIABLE_DST	1
 #define VARIABLE_BOTH	2
+
+#define ARRAY_FILL_SIZE 4
+#define ARRAY_OFFSET_NDIMS 3
+
 
 /*-------------------------------------------------------------------------
  * Function:	init_full
@@ -1072,6 +1075,141 @@ test_sub_super(size_t nx, size_t ny)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	test_array_fill
+ *
+ * Purpose:	Tests H5V_array_fill routine by copying a multibyte value
+ *              (an array of ints, in our case) into all the elements of an
+ *              array.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, April 21, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_array_fill(size_t lo, size_t hi)
+{
+    int         *dst;           /* Destination                  */
+    int         src[ARRAY_FILL_SIZE]; /* Source to duplicate    */
+    size_t	u, v, w;        /* Local index variables        */
+    char	s[256];
+
+    sprintf(s, "array filling %4lu-%-4lu elements", (unsigned long)lo,(unsigned long)hi);
+    TESTING(s);
+
+    /* Initialize */
+    dst = H5MM_calloc(sizeof(int)*ARRAY_FILL_SIZE * hi);
+
+    /* Setup */
+    for(u=0; u<ARRAY_FILL_SIZE; u++)
+        src[u]=u;
+
+    /* Fill */
+    for(w=lo; w<=hi; w++) {
+        H5V_array_fill(dst,src,sizeof(src),w);
+
+        /* Check */
+        for(u=0; u<w; u++)
+            for(v=0; v<ARRAY_FILL_SIZE; v++)
+                if(dst[(u*ARRAY_FILL_SIZE)+v]!=src[v]) TEST_ERROR;
+
+        HDmemset(dst,0,sizeof(int)*ARRAY_FILL_SIZE*w);
+    } /* end for */
+    PASSED();
+
+    H5MM_xfree(dst);
+    return SUCCEED;
+
+  error:
+    H5MM_xfree(dst);
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	test_array_offset_n_calc
+ *
+ * Purpose:	Tests H5V_array_offset and H5V_array_calc routines by comparing
+ *              computed array offsets against calculated ones and then going
+ *              back to the coordinates from the offset and checking those.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, April 21, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
+{
+    hsize_t     *a, *temp_a;    /* Array for stored calculated offsets */
+    hsize_t     off;            /* Offset in array */
+    size_t	u, v, w;        /* Local index variables        */
+    hsize_t     dims[ARRAY_OFFSET_NDIMS];        /* X, Y & X coordinates of array to check */
+    hssize_t    coords[ARRAY_OFFSET_NDIMS];      /* X, Y & X coordinates to check offset of */
+    hssize_t    new_coords[ARRAY_OFFSET_NDIMS];  /* X, Y & X coordinates of offset */
+    char	s[256];
+
+    sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z,(unsigned long)y,(unsigned long)x);
+    TESTING(s);
+
+    /* Initialize */
+    a = H5MM_malloc(sizeof(hsize_t) * x * y *z);
+    dims[0]=z;
+    dims[1]=y;
+    dims[2]=x;
+
+    /* Setup */
+    for(u=0, temp_a=a, off=0; u<z; u++)
+        for(v=0; v<y; v++)
+            for(w=0; w<x; w++)
+                *temp_a++ = off++;
+
+    /* Check offsets */
+    for(u=0; u<n; u++) {
+        /* Get random coordinate */
+        coords[0] = HDrandom() % z;
+        coords[1] = HDrandom() % y;
+        coords[2] = HDrandom() % x;
+
+        /* Get offset of coordinate */
+        off=H5V_array_offset(ARRAY_OFFSET_NDIMS,dims,coords);
+
+        /* Check offset of coordinate */
+        if(a[off]!=off) TEST_ERROR;
+
+        /* Get coordinates of offset */
+        if(H5V_array_calc(off,ARRAY_OFFSET_NDIMS,dims,new_coords)<0) TEST_ERROR;
+
+        /* Check computed coordinates */
+        for(v=0; v<ARRAY_OFFSET_NDIMS; v++)
+            if(coords[v]!=new_coords[v]) {
+                HDfprintf(stderr,"coords[%u]=%Hu, new_coords[%u]=%Hu\n",(unsigned)v,coords[v],(unsigned)v,new_coords[v]);
+                TEST_ERROR;
+            }
+    } /* end for */
+
+    PASSED();
+
+    H5MM_xfree(a);
+    return SUCCEED;
+
+  error:
+    H5MM_xfree(a);
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test various hyperslab operations.  Give the words
@@ -1096,9 +1234,9 @@ main(int argc, char *argv[])
     int			    nerrors = 0;
     unsigned		    size_of_test;
 
-    /* Parse arguments or assume `small' */
+    /* Parse arguments or assume `small' & `medium' */
     if (1 == argc) {
-	size_of_test = TEST_SMALL;
+	size_of_test = TEST_SMALL | TEST_MEDIUM;
     } else {
 	int			i;
 	for (i = 1, size_of_test = 0; i < argc; i++) {
@@ -1118,6 +1256,9 @@ main(int argc, char *argv[])
     if (size_of_test & TEST_MEDIUM)
 	printf(" MEDIUM");
     printf("\n");
+
+    /* Set the random # seed */
+    HDsrandom((unsigned long)time(NULL));
 
     /*
      * Open the library explicitly for thread-safe builds, so per-thread
@@ -1258,6 +1399,32 @@ main(int argc, char *argv[])
     }
     if (size_of_test & TEST_MEDIUM) {
 	status = test_sub_super(480, 640);
+	nerrors += status < 0 ? 1 : 0;
+    }
+   /*-------------------------
+    * TEST ARRAY FILL OPERATIONS
+    *------------------------- 
+    */
+
+    if (size_of_test & TEST_SMALL) {
+	status = test_array_fill(1,9);
+	nerrors += status < 0 ? 1 : 0;
+    }
+    if (size_of_test & TEST_MEDIUM) {
+	status = test_array_fill(9,257);
+	nerrors += status < 0 ? 1 : 0;
+    }
+   /*-------------------------
+    * TEST ARRAY OFFSET OPERATIONS
+    *------------------------- 
+    */
+
+    if (size_of_test & TEST_SMALL) {
+	status = test_array_offset_n_calc(20,7,11,13);
+	nerrors += status < 0 ? 1 : 0;
+    }
+    if (size_of_test & TEST_MEDIUM) {
+	status = test_array_offset_n_calc(500,71,193,347);
 	nerrors += status < 0 ? 1 : 0;
     }
 

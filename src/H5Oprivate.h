@@ -239,10 +239,14 @@ H5_DLL size_t H5O_layout_meta_size(H5F_t *f, const void *_mesg);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
-H5_DLL herr_t H5O_efl_read(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
-			    size_t size, uint8_t *buf);
-H5_DLL herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
-			     size_t size, const uint8_t *buf);
+H5_DLL ssize_t H5O_efl_readvv(const H5O_efl_t *efl,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *buf);
+H5_DLL ssize_t H5O_efl_writevv(const H5O_efl_t *efl,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *buf);
 
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_convert(void *_fill, H5T_t *type, hid_t dxpl_id);

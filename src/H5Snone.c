@@ -49,7 +49,7 @@ static int             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_none_iter_init (const H5S_t UNUSED *space, size_t UNUSED elmt_size, H5S_sel_iter_t UNUSED *sel_iter)
+H5S_none_iter_init (H5S_sel_iter_t *iter, const H5S_t UNUSED *space, size_t UNUSED elmt_size)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -57,11 +57,48 @@ H5S_none_iter_init (const H5S_t UNUSED *space, size_t UNUSED elmt_size, H5S_sel_
 
     /* Check args */
     assert (space && H5S_SEL_NONE==space->select.type);
-    assert (sel_iter);
+    assert (iter);
+
+    /* Initialize methods for selection iterator */
+    iter->iter_coords=H5S_none_iter_coords;
+    iter->iter_nelmts=H5S_none_iter_nelmts;
+    iter->iter_next=H5S_none_iter_next;
+    iter->iter_release=H5S_none_iter_release;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_none_iter_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_none_iter_coords
+ *
+ * Purpose:	Retrieve the current coordinates of iterator for current
+ *              selection
+ *
+ * Return:	non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, April 22, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *coords)
+{
+    herr_t ret_value=FAIL;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_none_iter_coords, FAIL);
+
+    /* Check args */
+    assert (iter);
+    assert (coords);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_none_iter_coords() */
 
 
 /*-------------------------------------------------------------------------
@@ -79,14 +116,14 @@ done:
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *sel_iter)
+H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *iter)
 {
     hsize_t ret_value=0;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_none_iter_nelmts, 0);
 
     /* Check args */
-    assert (sel_iter);
+    assert (iter);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -95,12 +132,46 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_none_iter_next
+ PURPOSE
+    Increment selection iterator
+ USAGE
+    herr_t H5S_none_iter_next(iter, nelem)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+        size_t nelem;               IN: Number of elements to advance by
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Advance selection iterator to the NELEM'th next element in the selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_none_iter_next(H5S_sel_iter_t UNUSED *iter, size_t UNUSED nelem)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_none_iter_next, FAIL);
+
+    /* Check args */
+    assert (iter);
+    assert (nelem>0);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_none_iter_next() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_none_iter_release
  PURPOSE
     Release "none" selection iterator information for a dataspace
  USAGE
-    herr_t H5S_none_iter_release(sel_iter)
-        H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
+    herr_t H5S_none_iter_release(iter)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -111,14 +182,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_iter_release (H5S_sel_iter_t UNUSED * sel_iter)
+H5S_none_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_none_iter_release, FAIL);
 
     /* Check args */
-    assert (sel_iter);
+    assert (iter);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -515,9 +586,6 @@ herr_t H5S_select_none (H5S_t *space)
     space->select.get_seq_list=H5S_none_get_seq_list;
     space->select.get_npoints=H5S_none_npoints;
     space->select.release=H5S_none_release;
-    space->select.iter_init=H5S_none_iter_init;
-    space->select.iter_nelmts=H5S_none_iter_nelmts;
-    space->select.iter_release=H5S_none_iter_release;
     space->select.is_valid=H5S_none_is_valid;
     space->select.serial_size=H5S_none_serial_size;
     space->select.serialize=H5S_none_serialize;
@@ -525,6 +593,7 @@ herr_t H5S_select_none (H5S_t *space)
     space->select.is_contiguous=H5S_none_is_contiguous;
     space->select.is_single=H5S_none_is_single;
     space->select.is_regular=H5S_none_is_regular;
+    space->select.iter_init=H5S_none_iter_init;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

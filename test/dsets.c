@@ -91,9 +91,31 @@ const char *FILENAME[] = {
 #define BOGUS2_PARAM_2          35      /* (No particular meaning, just for checking value) */
 #define BOGUS2_ALL_NPARMS       4       /* Total number of parameter = permanent + "local" parameters */
 
+#ifdef TESTING
+/* Parameters for internal filter test */
+#define FILTER_CHUNK_DIM1       2
+#define FILTER_CHUNK_DIM2       25
+#define FILTER_HS_OFFSET1       7
+#define FILTER_HS_OFFSET2       30
+#define FILTER_HS_SIZE1         4
+#define FILTER_HS_SIZE2         50
+
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
+#else /* TESTING */
+/* Parameters for internal filter test */
+#define FILTER_CHUNK_DIM1       2
+#define FILTER_CHUNK_DIM2       25
+#define FILTER_HS_OFFSET1       7
+#define FILTER_HS_OFFSET2       30
+#define FILTER_HS_SIZE1         4
+#define FILTER_HS_SIZE2         50
+
+/* Shared global arrays */
+#define DSET_DIM1       100
+#define DSET_DIM2       200
+#endif /* TESTING */
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
@@ -293,23 +315,23 @@ test_simple_io(hid_t fapl)
     void		*tconv_buf = NULL;
     int                 f;
     haddr_t             offset;
-    int                 rdata[100][200];
+    int                 rdata[DSET_DIM1][DSET_DIM2];
     
     TESTING("simple I/O");
 
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
     
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++)
-	for (j = 0; j < 200; j++)
+    for (i = n = 0; i < DSET_DIM1; i++)
+	for (j = 0; j < DSET_DIM2; j++)
 	    points[i][j] = n++;
 
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
     if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
 
     /* Create a small conversion buffer to test strip mining */
@@ -339,8 +361,8 @@ test_simple_io(hid_t fapl)
 	goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < DSET_DIM1; i++) {
+	for (j = 0; j < DSET_DIM2; j++) {
 	    if (points[i][j] != check[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -356,11 +378,11 @@ test_simple_io(hid_t fapl)
 
     f = HDopen(filename, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
-    HDread(f, rdata, sizeof(int)*100*200);
+    HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
     
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < DSET_DIM1; i++) {
+	for (j = 0; j < DSET_DIM2; j++) {
 	    if (points[i][j] != rdata[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -406,7 +428,7 @@ test_userblock_offset(hid_t fapl)
     hsize_t		dims[2];
     int                   f;
     haddr_t             offset;
-    int                 rdata[100][200];
+    int                 rdata[DSET_DIM1][DSET_DIM2];
     
     TESTING("dataset offset with user block");
     
@@ -419,8 +441,8 @@ test_userblock_offset(hid_t fapl)
 	goto error;
     
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
+    dims[0] = DSET_DIM1;
+    dims[1] = DSET_DIM2;
     if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
 
     /* Create the dataset */
@@ -441,11 +463,11 @@ test_userblock_offset(hid_t fapl)
 
     f = HDopen(filename, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
-    HDread(f, rdata, sizeof(int)*100*200);
+    HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
     
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < DSET_DIM1; i++) {
+	for (j = 0; j < DSET_DIM2; j++) {
 	    if (points[i][j] != rdata[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -609,11 +631,11 @@ test_max_compact(hid_t fapl)
     /* Initialize data */
     compact_size = (SIXTY_FOUR_KB-64)/sizeof(int);
     
-    wbuf = (int*)HDmalloc(sizeof(int)*compact_size);
-    rbuf = (int*)HDmalloc(sizeof(int)*compact_size);
+    wbuf = (int*)HDmalloc(sizeof(int)*(size_t)compact_size);
+    rbuf = (int*)HDmalloc(sizeof(int)*(size_t)compact_size);
 
     n=0;
-    for(i=0; i<compact_size; i++)
+    for(i=0; i<(int)compact_size; i++)
             wbuf[i] = n++;
     
     /* Create a small data space for compact dataset */
@@ -657,11 +679,11 @@ test_max_compact(hid_t fapl)
         goto error;
 
      /* Check that the values read are the same as the values written */
-     for (i = 0; i < compact_size; i++) {
+     for (i = 0; i < (int)compact_size; i++) {
         if (rbuf[i] != wbuf[i]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %d,%d\n", i);
+            printf("    At index %d\n", i);
             goto error;
         }
      }
@@ -1105,9 +1127,9 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     hid_t		dataset;        /* Dataset ID */
     hid_t		dxpl;           /* Dataset xfer property list ID */
     hid_t		sid;            /* Dataspace ID */
-    const hsize_t	size[2] = {100, 200};           /* Dataspace dimensions */
-    const hssize_t	hs_offset[2] = {7, 30}; /* Hyperslab offset */
-    const hsize_t	hs_size[2] = {4, 50};   /* Hyperslab size */
+    const hsize_t	size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
+    const hssize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
+    const hsize_t	hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
     hsize_t		i, j, n;        /* Local index variables */
     herr_t              status;         /* Error status */
@@ -1141,7 +1163,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(fid, name, H5T_NATIVE_INT, sid,
-			     dcpl))<0) goto error;
+			     dcpl))<0) goto error; 
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -1220,9 +1242,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 	   for (j=0; j<size[1]; j++) {
 	       if (points[i][j] != check[i][j]) {
 		  H5_FAILED();
-		  printf("    Read different values than written.\n");
-		  printf("    At index %lu,%lu\n",
-		           (unsigned long)i, (unsigned long)j);
+		  fprintf(stderr,"    Read different values than written.\n");
+		  fprintf(stderr,"    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+		  fprintf(stderr,"    At original: %d\n", (int)points[i][j]);
+		  fprintf(stderr,"    At returned: %d\n", (int)check[i][j]);
 		  goto error;
 	       }
 	   }
@@ -1382,15 +1405,15 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         for (i=0; i<hs_size[0]; i++) {
 	   for (j=0; j<hs_size[1]; j++) {
 	       if (points[hs_offset[0]+i][hs_offset[1]+j] !=
-		  check[hs_offset[0]+i][hs_offset[1]+j]) {
+                      check[hs_offset[0]+i][hs_offset[1]+j]) {
 		  H5_FAILED();
-		  printf("    Read different values than written.\n");
-		  printf("    At index %lu,%lu\n",
+		  fprintf(stderr,"    Read different values than written.\n");
+		  fprintf(stderr,"    At index %lu,%lu\n",
 		         (unsigned long)(hs_offset[0]+i),
 		         (unsigned long)(hs_offset[1]+j));
-		  printf("    At original: %d\n",
+		  fprintf(stderr,"    At original: %d\n",
 		         (int)points[hs_offset[0]+i][hs_offset[1]+j]);
-		  printf("    At returned: %d\n",
+		  fprintf(stderr,"    At returned: %d\n",
 		         (int)check[hs_offset[0]+i][hs_offset[1]+j]);
 		  goto error;
 	       }
@@ -1411,6 +1434,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     return(0);
 
 error:
+    if(tconv_buf)
+        free (tconv_buf);
     return -1;
 }
 
@@ -1440,7 +1465,7 @@ static herr_t
 test_filters(hid_t file)
 {
     hid_t	dc;                 /* Dataset creation property list ID */
-    const hsize_t chunk_size[2] = {2, 25};  /* Chunk dimensions */
+    const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset with null filter */
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
@@ -1697,7 +1722,7 @@ test_missing_filter(hid_t file)
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
     hid_t       dcpl;           /* Dataspace creation property list ID */
-    const hsize_t dims[2] = {100, 200};         /* Dataspace dimensions */
+    const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
     hsize_t     i,j;            /* Local index variables */
@@ -1797,7 +1822,7 @@ test_missing_filter(hid_t file)
 
     /* Verify that the size indicates data is uncompressed */
     /* (i.e. the deflation filter we asked for was silently ignored) */
-    if((H5Tget_size(H5T_NATIVE_INT)*100*200)!=dset_size) {
+    if((H5Tget_size(H5T_NATIVE_INT)*DSET_DIM1*DSET_DIM2)!=dset_size) {
         H5_FAILED();
         printf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
@@ -2394,7 +2419,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_can_apply_szip(hid_t file)
+test_can_apply_szip(hid_t
+#ifndef H5_HAVE_FILTER_SZIP
+UNUSED
+#endif /* H5_HAVE_FILTER_SSZIP */
+file)
 {
 #ifdef H5_HAVE_FILTER_SZIP
     hid_t       dsid;           /* Dataset ID */
@@ -2496,7 +2525,9 @@ test_can_apply_szip(hid_t file)
 
     return 0;
 
+#ifdef H5_HAVE_FILTER_SZIP
 error:
+#endif /* H5_HAVE_FILTER_SZIP */
     return -1;
 } /* end test_can_apply_szip() */
 
@@ -2543,8 +2574,8 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
     
     /* Initialize the integer & floating-point dataset */
-    for (i = n = 0; i < 100; i++)
-	for (j = 0; j < 200; j++) {
+    for (i = n = 0; i < DSET_DIM1; i++)
+	for (j = 0; j < DSET_DIM2; j++) {
 	    points[i][j] = n++;
 	    points_dbl[i][j] = (double)1.5*n++;
 	}

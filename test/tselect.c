@@ -3941,7 +3941,7 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 	    for (k = 0; k < Z; k++,tmpdata++,tmpdata_out++) {
                 if(*tmpdata!=*tmpdata_out) {
                     num_errs++;
-                    printf("Error! j=%d, i=%d, k=%d, *tmpdata=%x, *tmpdata_out=%x\n",j,i,k,(unsigned)*tmpdata,(unsigned)*tmpdata_out);
+                    printf("Line %d: Error! j=%d, i=%d, k=%d, *tmpdata=%x, *tmpdata_out=%x\n",__LINE__,j,i,k,(unsigned)*tmpdata,(unsigned)*tmpdata_out);
                 } /* end if */
             } /* end for */
 

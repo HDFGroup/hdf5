@@ -28,60 +28,55 @@
 #include "H5Oprivate.h"
 #include "H5FDprivate.h"        /*file driver                             */
 #include "H5FLprivate.h"        /*Free Lists                              */
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* Interface initialization */
 #define PABLO_MASK      H5Fcompact_mask
 static int              interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
+
 /*-------------------------------------------------------------------------
- * Function:    H5F_compact_readv
- *
+ * Function:    H5F_compact_readvv
+ * 
  * Purpose:     Reads some data vectors from a dataset into a buffer.
  *              The data is in compact dataset.  The address is relative 
  *              to the beginning address of the dataset.  The offsets and
  *              sequence lengths are in bytes.
- *
+ *              
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu 
- *              August 5, 2002 
- *
- * Notes:
- *              Offsets in the sequences must be monotonically increasing
  * 
+ * Programmer:  Quincey Koziol
+ *              May 7, 2003
+ *              
+ * Notes:       
+ *              Offsets in the sequences must be monotonically increasing
+ *              
  * Modifications:
- *
+ * 
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_compact_readv(H5F_t UNUSED *f, const H5O_layout_t *layout, size_t nseq, 
-                  size_t size_arr[], hsize_t offset_arr[], 
-                  hid_t UNUSED dxpl_id, void *_buf/*out*/)
+ssize_t
+H5F_compact_readvv(H5F_t UNUSED *f, const H5O_layout_t *layout,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
+    hid_t UNUSED dxpl_id, void *buf)
 {
-    unsigned char       *buf=(unsigned char *)_buf;
-    size_t              size;
-    haddr_t             offset;
-    unsigned            u;
-    herr_t              ret_value=SUCCEED;
+    ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5F_compact_readv, FAIL);
+    FUNC_ENTER_NOAPI(H5F_compact_readvv, FAIL);
 
-    for(u=0; u<nseq; u++) {
-        size=size_arr[u];
-        offset=offset_arr[u];
-        if(size > 0) {
-            HDmemcpy(buf, (unsigned char*)layout->buf+offset, size); 
-            buf +=size;
-        }
-    }
+    /* Use the vectorized memory copy routine to do actual work */
+    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,layout->buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
-done:
+done:   
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5F_compact_readv() */
+}   /* end H5F_compact_readvv() */
 
+
 /*-------------------------------------------------------------------------
- * Function:    H5F_compact_writev
+ * Function:    H5F_compact_writevv
  * 
  * Purpose:     Writes some data vectors from a dataset into a buffer.
  *              The data is in compact dataset.  The address is relative 
@@ -93,8 +88,8 @@ done:
  *              
  * Return:      Non-negative on success/Negative on failure
  * 
- * Programmer:  Raymond Lu
- *              August 5, 2002
+ * Programmer:  Quincey Koziol
+ *              May 2, 2003
  *              
  * Notes:       
  *              Offsets in the sequences must be monotonically increasing
@@ -103,30 +98,23 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_compact_writev(H5F_t UNUSED *f, H5O_layout_t *layout, size_t nseq,
-                  size_t size_arr[], hsize_t offset_arr[], 
-                  hid_t UNUSED dxpl_id, const void *_buf)
+ssize_t
+H5F_compact_writevv(H5F_t UNUSED *f, H5O_layout_t *layout,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
+    hid_t UNUSED dxpl_id, const void *buf)
 {
-    const unsigned char       *buf=(const unsigned char *)_buf;
-    size_t              size;
-    haddr_t             offset;
-    unsigned            u;
-    herr_t              ret_value=SUCCEED;
+    ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5F_compact_writev, FAIL);
+    FUNC_ENTER_NOAPI(H5F_compact_writevv, FAIL);
 
-    for(u=0; u<nseq; u++) {
-        size=size_arr[u];
-        offset=offset_arr[u];
-        if(size > 0) {
-            HDmemcpy((unsigned char*)layout->buf+offset, buf, size);
-            buf += size;
-        }
-    }
+    /* Use the vectorized memory copy routine to do actual work */
+    if((ret_value=H5V_memcpyvv(layout->buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
     layout->dirty = TRUE;
 
 done:   
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5F_compact_writev */
+}   /* end H5F_compact_writevv() */
+

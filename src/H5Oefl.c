@@ -37,6 +37,10 @@ static size_t H5O_efl_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
+static herr_t H5O_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size,
+    uint8_t *buf);
+static herr_t H5O_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size,
+    const uint8_t *buf);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_EFL[1] = {{
@@ -422,9 +426,8 @@ done:
  *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
-herr_t
-H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
-	      size_t size, uint8_t *buf)
+static herr_t
+H5O_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_read;
@@ -510,9 +513,8 @@ done:
  *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
-herr_t
-H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
-	       size_t size, const uint8_t *buf)
+static herr_t
+H5O_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_write;
@@ -579,6 +581,164 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
+	
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_efl_readvv
+ *
+ * Purpose:	Reads data from an external file list.  It is an error to
+ *		read past the logical end of file, but reading past the end
+ *		of any particular member of the external file list results in
+ *		zeros.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, May  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5O_efl_readvv(const H5O_efl_t *efl,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *_buf)
+{
+    unsigned char *buf;         /* Pointer to buffer to write */
+    haddr_t addr;               /* Actual address to read */
+    size_t size;                /* Size of sequence in bytes */
+    size_t u;                   /* Counting variable */
+    size_t v;                   /* Counting variable */
+    ssize_t ret_value=0;        /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_efl_readvv, FAIL);
+
+    /* Check args */
+    assert (efl && efl->nused>0);
+    assert (buf);
+
+    /* Work through all the sequences */
+    for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
+        /* Choose smallest buffer to write */
+        if(mem_len_arr[v]<dset_len_arr[u])
+            size=mem_len_arr[v];
+        else
+            size=dset_len_arr[u];
+
+        /* Compute offset on disk */
+        addr=dset_offset_arr[u];
+
+        /* Compute offset in memory */
+        buf = (unsigned char *)_buf + mem_offset_arr[v];
+
+        /* Read data */
+        if (H5O_efl_read(efl, addr, size, buf)<0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+        /* Update memory information */
+        mem_len_arr[v]-=size;
+        mem_offset_arr[v]+=size;
+        if(mem_len_arr[v]==0)
+            v++;
+
+        /* Update file information */
+        dset_len_arr[u]-=size;
+        dset_offset_arr[u]+=size;
+        if(dset_len_arr[u]==0)
+            u++;
+
+        /* Increment number of bytes copied */
+        ret_value+=size;
+    } /* end for */
+
+    /* Update current sequence vectors */
+    *dset_curr_seq=u;
+    *mem_curr_seq=v;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_efl_readvv() */
+	
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_efl_writevv
+ *
+ * Purpose:	Writes data to an external file list.  It is an error to
+ *		write past the logical end of file, but writing past the end
+ *		of any particular member of the external file list just
+ *		extends that file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, May  2, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5O_efl_writevv(const H5O_efl_t *efl,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *_buf)
+{
+    const unsigned char *buf;   /* Pointer to buffer to write */
+    haddr_t addr;               /* Actual address to read */
+    size_t size;                /* Size of sequence in bytes */
+    size_t u;                   /* Counting variable */
+    size_t v;                   /* Counting variable */
+    ssize_t ret_value=0;        /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_efl_writevv, FAIL);
+
+    /* Check args */
+    assert (efl && efl->nused>0);
+    assert (buf);
+
+    /* Work through all the sequences */
+    for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
+        /* Choose smallest buffer to write */
+        if(mem_len_arr[v]<dset_len_arr[u])
+            size=mem_len_arr[v];
+        else
+            size=dset_len_arr[u];
+
+        /* Compute offset on disk */
+        addr=dset_offset_arr[u];
+
+        /* Compute offset in memory */
+        buf = (const unsigned char *)_buf + mem_offset_arr[v];
+
+        /* Write data */
+        if (H5O_efl_write(efl, addr, size, buf)<0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+
+        /* Update memory information */
+        mem_len_arr[v]-=size;
+        mem_offset_arr[v]+=size;
+        if(mem_len_arr[v]==0)
+            v++;
+
+        /* Update file information */
+        dset_len_arr[u]-=size;
+        dset_offset_arr[u]+=size;
+        if(dset_len_arr[u]==0)
+            u++;
+
+        /* Increment number of bytes copied */
+        ret_value+=size;
+    } /* end for */
+
+    /* Update current sequence vectors */
+    *dset_curr_seq=u;
+    *mem_curr_seq=v;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_efl_writevv() */
 	
 
 /*-------------------------------------------------------------------------

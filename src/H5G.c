@@ -560,7 +560,7 @@ H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
         
     /*call private function*/
-    ret_value = (H5G_obj_t)H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
+    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
 
 done:
     FUNC_LEAVE_API(ret_value);

@@ -40,7 +40,7 @@ H5FL_ARR_EXTERN(hssize_t);
 H5FL_ARR_DEFINE_STATIC(size_t,-1);
 
 /* Declare a free list to manage arrays of hsize_t */
-H5FL_ARR_DEFINE_STATIC(hsize_t,-1);
+H5FL_ARR_EXTERN(hsize_t);
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_EXTERN(type_elem);
@@ -182,7 +182,7 @@ done:
     hssize_t H5Sget_select_npoints(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to query
  RETURNS
-    The number of elements in selection on success, 0 on failure
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Returns the number of elements in current selection for dataspace.
  GLOBAL VARIABLES
@@ -196,18 +196,52 @@ H5Sget_select_npoints(hid_t spaceid)
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hssize_t ret_value;         /* return value */
 
-    FUNC_ENTER_API(H5Sget_select_npoints, 0);
+    FUNC_ENTER_API(H5Sget_select_npoints, FAIL);
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = (*space->select.get_npoints)(space);
+    ret_value = H5S_get_select_npoints(space);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_npoints() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_npoints
+ PURPOSE
+    Get the number of elements in current selection
+ USAGE
+    hssize_t H5Sget_select_npoints(space)
+        H5S_t *space;             IN: Dataspace of selection to query
+ RETURNS
+    The number of elements in selection on success, 0 on failure
+ DESCRIPTION
+    Returns the number of elements in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5S_get_select_npoints(const H5S_t *space)
+{
+    hssize_t ret_value;         /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_get_select_npoints, 0);
+
+    /* Check args */
+    assert(space);
+
+    ret_value = (*space->select.get_npoints)(space);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_get_select_npoints() */
 
 
 /*--------------------------------------------------------------------------
@@ -243,11 +277,47 @@ H5Sselect_valid(hid_t spaceid)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
 
-    ret_value = (*space->select.is_valid)(space);
+    ret_value = H5S_select_valid(space);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Sselect_valid() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_valid
+ PURPOSE
+    Check whether the selection fits within the extent, with the current
+    offset defined.
+ USAGE
+    htri_t H5S_select_void(space)
+        H5S_t *space;           IN: Dataspace to query
+ RETURNS
+    TRUE if the selection fits within the extent, FALSE if it does not and
+        Negative on an error.
+ DESCRIPTION
+    Determines if the current selection at the current offet fits within the
+    extent for the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_select_valid(const H5S_t *space)
+{
+    htri_t ret_value;     /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_valid, 0);
+
+    assert(space);
+
+    ret_value = (*space->select.is_valid)(space);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_valid() */
 
 
 /*--------------------------------------------------------------------------
@@ -362,6 +432,207 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_select_iter_init
+ PURPOSE
+    Initializes iteration information for a selection.
+ USAGE
+    herr_t H5S_select_iter_init(sel_iter, space, elmt_size)
+        H5S_sel_iter_t *sel_iter; OUT: Selection iterator to initialize.
+        H5S_t *space;           IN: Dataspace object containing selection to
+                                    iterate over
+        size_t elmt_size;       IN: Size of elements in the selection
+ RETURNS
+     Non-negative on success, negative on failure.
+ DESCRIPTION
+    Initialize the selection iterator object to point to the first element
+    in the dataspace's selection.
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_size)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_iter_init, FAIL);
+
+    /* Check args */
+    assert(sel_iter);
+    assert(space);
+    assert(elmt_size>0);
+
+    /* Initialize common information */
+
+    /* Save the dataspace's rank */
+    sel_iter->rank=space->extent.u.simple.rank;
+
+    /* Allocate room for the dataspace dimensions */
+    sel_iter->dims = H5FL_ARR_MALLOC(hsize_t,sel_iter->rank);
+    assert(sel_iter->dims);
+
+    /* Keep a copy of the dataspace dimensions */
+    HDmemcpy(sel_iter->dims,space->extent.u.simple.size,sel_iter->rank*sizeof(hsize_t));
+
+    /* Call initialization routine for selection type */
+    ret_value= (*space->select.iter_init)(sel_iter, space, elmt_size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_iter_init() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_iter_coords
+ PURPOSE
+    Get the coordinates of the current iterator position
+ USAGE
+    herr_t H5S_select_iter_coords(sel_iter,coords)
+        H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
+        hssize_t *coords;         OUT: Array to place iterator coordinates in
+ RETURNS
+    Non-negative on success, negative on failure.
+ DESCRIPTION
+    The current location of the iterator within the selection is placed in
+    the COORDS array.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hssize_t *coords)
+{
+    herr_t ret_value;         /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_iter_coords, FAIL);
+
+    /* Check args */
+    assert(sel_iter);
+    assert(coords);
+
+    /* Call iter_coords routine for selection type */
+    ret_value = (*sel_iter->iter_coords)(sel_iter,coords);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_iter_coords() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_iter_nelmts
+ PURPOSE
+    Get the number of elements left to iterate over in selection
+ USAGE
+    hssize_t H5S_select_iter_nelmts(sel_iter)
+        H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
+ RETURNS
+    The number of elements in selection on success, 0 on failure
+ DESCRIPTION
+    Returns the number of elements in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hsize_t
+H5S_select_iter_nelmts (const H5S_sel_iter_t *sel_iter)
+{
+    hsize_t ret_value;         /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_iter_nelmts, 0);
+
+    /* Check args */
+    assert(sel_iter);
+
+    /* Call iter_nelmts routine for selection type */
+    ret_value = (*sel_iter->iter_nelmts)(sel_iter);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_iter_nelmts() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_iter_next
+ PURPOSE
+    Advance seletion iterator
+ USAGE
+    herr_t H5S_select_iter_next(iter, nelem)
+        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
+        size_t nelem;           IN: Number of elements to advance by
+ RETURNS
+    Non-negative on success, negative on failure.
+ DESCRIPTION
+    Move the current element for the selection iterator to the NELEM'th next
+    element in the selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+{
+    herr_t ret_value;         /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_iter_next, FAIL);
+
+    /* Check args */
+    assert(iter);
+    assert(nelem>0);
+
+    /* Call iter_coords routine for selection type */
+    ret_value = (*iter->iter_next)(iter,nelem);
+
+    /* Decrement the number of elements left in selection */
+    iter->elmt_left-=nelem;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_iter_next() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_iter_release
+ PURPOSE
+    Release a selection iterator's resources.
+ USAGE
+    hssize_t H5S_select_iter_release(sel_iter)
+        H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
+ RETURNS
+    The number of elements in selection on success, 0 on failure
+ DESCRIPTION
+    Returns the number of elements in current selection for dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
+{
+    herr_t ret_value;         /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_iter_release, FAIL);
+
+    /* Check args */
+    assert(sel_iter);
+
+    /* Release the array of dimensions common to all iterators */
+    H5FL_ARR_FREE(hsize_t,sel_iter->dims);
+
+    /* Call selection type-specific release routine */
+    ret_value = (*sel_iter->iter_release)(sel_iter);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_iter_release() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_iterate
  PURPOSE
     Iterate over the selected elements in a memory buffer.
@@ -389,7 +660,7 @@ done:
         the selection is not modified.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
+H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
         void *operator_data)
 {
     H5T_t *dt;                  /* Datatype structure */
@@ -441,7 +712,7 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
 
     /* Initialize iterator */
-    if ((*space->select.iter_init)(space, elmt_size, &iter)<0)
+    if (H5S_select_iter_init(&iter, space, elmt_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     iter_init=1;	/* Selection iteration info has been initialized */
 
@@ -509,7 +780,7 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
 done:
     /* Release selection iterator */
     if(iter_init) {
-        if ((*space->select.iter_release)(&iter)<0)
+        if (H5S_select_iter_release(&iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
@@ -530,7 +801,7 @@ done:
     Retrieve the type of selection in a dataspace
  USAGE
     H5S_sel_type H5Sget_select_type(space_id)
-        hid_t space_id;	        IN: Dataspace object to reset
+        hid_t space_id;	        IN: Dataspace object to query
  RETURNS
     Non-negative on success/Negative on failure.  Return value is from the
     set of values in the H5S_sel_type enumerated type.
@@ -552,11 +823,44 @@ H5Sget_select_type(hid_t space_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a data space");
 
     /* Set return value */
-    ret_value=space->select.type;
+    ret_value=H5S_get_select_type(space);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* end H5Sget_select_type() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_type
+ PURPOSE
+    Retrieve the type of selection in a dataspace
+ USAGE
+    H5S_sel_type H5Sget_select_type(space)
+        const H5S_t *space;	        IN: Dataspace object to query
+ RETURNS
+    Non-negative on success/Negative on failure.  Return value is from the
+    set of values in the H5S_sel_type enumerated type.
+ DESCRIPTION
+	This function retrieves the type of selection currently defined for
+    a dataspace.
+--------------------------------------------------------------------------*/
+H5S_sel_type
+H5S_get_select_type(const H5S_t *space)
+{
+    H5S_sel_type        ret_value;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_get_select_type, H5S_SEL_ERROR);
+
+    /* Check args */
+    assert(space);
+
+    /* Set return value */
+    ret_value=space->select.type;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* end H5S_get_select_type() */
 
 
 /*--------------------------------------------------------------------------
@@ -745,7 +1049,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Initialize iterator */
-    if ((*space->select.iter_init)(space, fill_size, &iter)<0)
+    if (H5S_select_iter_init(&iter, space, fill_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     iter_init=1;	/* Selection iteration info has been initialized */
 
@@ -780,7 +1084,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
 done:
     /* Release selection iterator */
     if(iter_init) {
-        if ((*space->select.iter_release)(&iter)<0)
+        if (H5S_select_iter_release(&iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
@@ -818,13 +1122,17 @@ done:
  */
 herr_t
 H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
-    H5P_genplist_t *dc_plist, const H5O_efl_t *efl, size_t elmt_size,
-    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
-    hid_t dxpl_id, const void *_buf)
+    H5P_genplist_t *dc_plist, const H5D_storage_t *store, 
+    size_t elmt_size, const H5S_t *space, H5S_sel_iter_t *iter, 
+    hsize_t nelmts, hid_t dxpl_id, const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
     hsize_t *off=NULL;             /* Array to store sequence offsets */
+    hsize_t mem_off;               /* Offset in memory */
+    size_t mem_curr_seq;           /* "Current sequence" in memory */
+    size_t dset_curr_seq;          /* "Current sequence" in dataset */
     size_t *len=NULL;              /* Array to store sequence lengths */
+    size_t mem_len;                /* Length of sequence in memory */
     ssize_t vector_size;           /* Value for vector size */
     size_t maxbytes;               /* Number of bytes in the buffer */
     size_t  nseq;                  /* Number of sequences generated */
@@ -837,7 +1145,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     assert (f);
     assert (layout);
     assert (elmt_size>0);
-    assert (efl);
+    assert (store);
     assert (space);
     assert (iter);
     assert (nelmts>0);
@@ -863,8 +1171,13 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
         if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
+        /* Reset the current sequence information */
+        mem_curr_seq=dset_curr_seq=0;
+        mem_len=nbytes;
+        mem_off=0;
+
         /* Write sequence list out */
-        if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, efl, space, elmt_size, nseq, len, off, buf)<0)
+        if (H5F_seq_writevv(f, dxpl_id, layout, dc_plist, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -909,13 +1222,17 @@ done:
  */
 hsize_t
 H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-    H5P_genplist_t *dc_plist, const H5O_efl_t *efl, size_t elmt_size,
-    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
-    hid_t dxpl_id, void *_buf/*out*/)
+    H5P_genplist_t *dc_plist, const H5D_storage_t *store, 
+    size_t elmt_size, const H5S_t *space, H5S_sel_iter_t *iter, 
+    hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
 {
     uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
     hsize_t *off=NULL;          /* Array to store sequence offsets */
+    hsize_t mem_off;            /* Offset in memory */
+    size_t mem_curr_seq;        /* "Current sequence" in memory */
+    size_t dset_curr_seq;       /* "Current sequence" in dataset */
     size_t *len=NULL;           /* Array to store sequence lengths */
+    size_t mem_len;             /* Length of sequence in memory */
     ssize_t vector_size;        /* Value for vector size */
     size_t maxbytes;            /* Number of bytes in the buffer */
     size_t nseq;                /* Number of sequences generated */
@@ -928,7 +1245,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (f);
     assert (layout);
     assert (elmt_size>0);
-    assert (efl);
+    assert (store);
     assert (space);
     assert (iter);
     assert (nelmts>0);
@@ -953,8 +1270,13 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
+        /* Reset the current sequence information */
+        mem_curr_seq=dset_curr_seq=0;
+        mem_len=nbytes;
+        mem_off=0;
+
         /* Read sequence list in */
-        if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, efl, space, elmt_size, nseq, len, off, buf)<0)
+        if (H5F_seq_readvv(f, dxpl_id, layout, dc_plist, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
@@ -1166,14 +1488,13 @@ done:
  */
 herr_t
 H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
-    const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/)
+    const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
+    const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t file_iter;   /* File selection iteration info */
     hbool_t file_iter_init=0;	/* File selection iteration info has been initialized */
-    uint8_t *buf=NULL;          /* Local buffer pointer, for address arithmetic */
     hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
     hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
     ssize_t vector_size;        /* Value for vector size */
@@ -1186,20 +1507,26 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     size_t file_nbytes;         /* Number of bytes used in file sequences */
     size_t curr_mem_seq;        /* Current memory sequence to operate on */
     size_t curr_file_seq;       /* Current file sequence to operate on */
-    size_t tmp_file_len;        /* Temporary number of bytes in file sequence */
-    unsigned partial_file;      /* Whether a partial file sequence was accessed */
-    size_t orig_file_len=0;     /* Original file sequence length for partial file access */
-    size_t orig_file_seq;       /* Original file sequence to operate on */
-    size_t tot_file_seq;        /* Number of file sequences to access */
+    ssize_t tmp_file_len;       /* Temporary number of bytes in file sequence */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_read, FAIL);
 
     /* Check args */
     assert(f);
-    assert(efl);
-    assert(_buf);
+    assert(store);
+    assert(buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    
+    /* Initialize file iterator */
+    if (H5S_select_iter_init(&file_iter, file_space, elmt_size)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
+    file_iter_init=1;	/* File selection iteration info has been initialized */
+
+    /* Initialize memory iterator */
+    if (H5S_select_iter_init(&mem_iter, mem_space, elmt_size)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
+    mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Get the hyperslab vector size */
     if((vector_size=H5S_get_vector_size(dxpl_id))<0)
@@ -1214,16 +1541,6 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
     if((file_off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-
-    /* Initialize file iterator */
-    if ((*file_space->select.iter_init)(file_space, elmt_size, &file_iter)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    file_iter_init=1;	/* File selection iteration info has been initialized */
-
-    /* Initialize memory iterator */
-    if ((*mem_space->select.iter_init)(mem_space, elmt_size, &mem_iter)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Get number of bytes in selection */
 #ifndef NDEBUG
@@ -1259,115 +1576,29 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
 
             /* Start at the beginning of the sequences again */
             curr_mem_seq=0;
-
-            /* Set the buffer pointer using the first sequence */
-            H5_CHECK_OVERFLOW(mem_off[0],hsize_t,size_t);
-            buf=(uint8_t *)_buf+(size_t)mem_off[0];
         } /* end if */
 
-        /* Check if current file sequence will fit into current memory sequence */
-        if(mem_len[curr_mem_seq]>=file_len[curr_file_seq]) {
-            /* Save the current number file sequence */
-            orig_file_seq=curr_file_seq;
+        /* Read file sequences into current memory sequence */
+        if ((tmp_file_len=H5F_seq_readvv(f, dxpl_id, layout, dc_plist, store,
+                file_nseq, &curr_file_seq, file_len, file_off,
+                mem_nseq, &curr_mem_seq, mem_len, mem_off,
+                buf))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
 
-            /* Determine how many file sequences will fit into current memory sequence */
-            tmp_file_len=0;
-            tot_file_seq=0;
-            while( curr_file_seq<file_nseq && (tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] ) {
-                tmp_file_len+=file_len[curr_file_seq];
-                curr_file_seq++;
-                tot_file_seq++;
-            } /* end while */
-
-            /* Check for partial file sequence */
-            if(tmp_file_len<mem_len[curr_mem_seq] && curr_file_seq<file_nseq) {
-                /* Get the original file sequence length */
-                orig_file_len=file_len[curr_file_seq];
-
-                /* Make the last file sequence a partial access */
-                file_len[curr_file_seq]=mem_len[curr_mem_seq]-tmp_file_len;
-
-                /* Increase the number of bytes to access */
-                tmp_file_len=mem_len[curr_mem_seq];
-
-                /* Indicate that there is an extra sequence to include in the file access */
-                tot_file_seq++;
-
-                /* Indicate a partial file sequence */
-                partial_file=1;
-            } /* end if */
-            else
-                partial_file=0;
-
-            /* Read file sequences into current memory sequence */
-            if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, tot_file_seq, &file_len[orig_file_seq], &file_off[orig_file_seq], buf)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
-
-            /* Update last file sequence, if it was partially accessed */
-            if(partial_file) {
-                file_off[curr_file_seq]+=orig_file_len-file_len[curr_file_seq];
-                file_len[curr_file_seq]=orig_file_len-file_len[curr_file_seq];
-            } /* end if */
-
-            /* Check if the current memory sequence was only partially accessed */
-            if(tmp_file_len<mem_len[curr_mem_seq]) {
-                /* Adjust current memory sequence */
-                mem_off[curr_mem_seq]+=tmp_file_len;
-                mem_len[curr_mem_seq]-=tmp_file_len;
-
-                /* Adjust memory buffer pointer */
-                buf+=tmp_file_len;
-            } /* end if */
-            else {
-                /* Must have used entire memory sequence, advance to next one */
-                curr_mem_seq++;
-
-                /* Check if it is valid to adjust buffer pointer */
-                if(curr_mem_seq<mem_nseq) {
-                    H5_CHECK_OVERFLOW(mem_off[curr_mem_seq],hsize_t,size_t);
-                    buf=(uint8_t *)_buf+(size_t)mem_off[curr_mem_seq];
-                } /* end if */
-            } /* end else */
-
-            /* Decrement number of bytes left to process */
-            maxbytes-=tmp_file_len;
-        } /* end if */
-        else {
-            /* Save number of bytes to access */
-            tmp_file_len=mem_len[curr_mem_seq];
-
-            /* Read part of current file sequence into current memory sequence */
-            if (H5F_seq_read(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, tmp_file_len, file_off[curr_file_seq], buf)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
-
-            /* Update current file sequence information */
-            file_off[curr_file_seq]+=tmp_file_len;
-            file_len[curr_file_seq]-=tmp_file_len;
-
-            /* Increment memory sequence */
-            curr_mem_seq++;
-
-            /* Check if it is valid to adjust buffer pointer */
-            if(curr_mem_seq<mem_nseq) {
-                H5_CHECK_OVERFLOW(mem_off[curr_mem_seq],hsize_t,size_t);
-                buf=(uint8_t *)_buf+(size_t)mem_off[curr_mem_seq];
-            } /* end if */
-
-            /* Decrement number of bytes left to process */
-            maxbytes-=tmp_file_len;
-        } /* end else */
+        /* Decrement number of bytes left to process */
+        maxbytes-=tmp_file_len;
     } /* end while */
 
 done:
     /* Release file selection iterator */
     if(file_iter_init) {
-        if ((*file_space->select.iter_release)(&file_iter)<0)
+        if (H5S_select_iter_release(&file_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
     /* Release memory selection iterator */
     if(mem_iter_init) {
-        if ((*mem_space->select.iter_release)(&mem_iter)<0)
+        if (H5S_select_iter_release(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
@@ -1400,14 +1631,13 @@ done:
  */
 herr_t
 H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
-    const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, hid_t dxpl_id, const void *_buf/*out*/)
+    const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
+    const H5S_t *mem_space, hid_t dxpl_id, const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t file_iter;   /* File selection iteration info */
     hbool_t file_iter_init=0;	/* File selection iteration info has been initialized */
-    const uint8_t *buf=NULL;    /* Local buffer pointer, for address arithmetic */
     hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
     hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
     ssize_t vector_size;        /* Value for vector size */
@@ -1420,21 +1650,17 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     size_t file_nbytes;         /* Number of bytes used in file sequences */
     size_t curr_mem_seq;        /* Current memory sequence to operate on */
     size_t curr_file_seq;       /* Current file sequence to operate on */
-    size_t tmp_file_len;        /* Temporary number of bytes in file sequence */
-    unsigned partial_file;      /* Whether a partial file sequence was accessed */
-    size_t orig_file_len=0;     /* Original file sequence length for partial file access */
-    size_t orig_file_seq;       /* Original file sequence to operate on */
-    size_t tot_file_seq;        /* Number of file sequences to access */
+    ssize_t tmp_file_len;       /* Temporary number of bytes in file sequence */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_write, FAIL);
 
     /* Check args */
     assert(f);
-    assert(efl);
-    assert(_buf);
+    assert(store);
+    assert(buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-
+    
     /* Get the hyperslab vector size */
     if((vector_size=H5S_get_vector_size(dxpl_id))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
@@ -1450,15 +1676,15 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Initialize file iterator */
-    if ((*file_space->select.iter_init)(file_space, elmt_size, &file_iter)<0)
+    if (H5S_select_iter_init(&file_iter, file_space, elmt_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     file_iter_init=1;	/* File selection iteration info has been initialized */
 
     /* Initialize memory iterator */
-    if ((*mem_space->select.iter_init)(mem_space, elmt_size, &mem_iter)<0)
+    if (H5S_select_iter_init(&mem_iter, mem_space, elmt_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
-
+    
     /* Get number of bytes in selection */
 #ifndef NDEBUG
     {
@@ -1493,115 +1719,29 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
 
             /* Start at the beginning of the sequences again */
             curr_mem_seq=0;
-
-            /* Set the buffer pointer using the first sequence */
-            H5_CHECK_OVERFLOW(mem_off[0],hsize_t,size_t);
-            buf=(const uint8_t *)_buf+(size_t)mem_off[0];
         } /* end if */
 
-        /* Check if current file sequence will fit into current memory sequence */
-        if(mem_len[curr_mem_seq]>=file_len[curr_file_seq]) {
-            /* Save the current number file sequence */
-            orig_file_seq=curr_file_seq;
+        /* Write memory sequences into file sequences */
+        if ((tmp_file_len=H5F_seq_writevv(f, dxpl_id, layout, dc_plist, store,
+                file_nseq, &curr_file_seq, file_len, file_off,
+                mem_nseq, &curr_mem_seq, mem_len, mem_off,
+                buf))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
-            /* Determine how many file sequences will fit into current memory sequence */
-            tmp_file_len=0;
-            tot_file_seq=0;
-            while( curr_file_seq<file_nseq && (tmp_file_len+file_len[curr_file_seq])<=mem_len[curr_mem_seq] ) {
-                tmp_file_len+=file_len[curr_file_seq];
-                curr_file_seq++;
-                tot_file_seq++;
-            } /* end while */
-
-            /* Check for partial file sequence */
-            if(tmp_file_len<mem_len[curr_mem_seq] && curr_file_seq<file_nseq) {
-                /* Get the original file sequence length */
-                orig_file_len=file_len[curr_file_seq];
-
-                /* Make the last file sequence a partial access */
-                file_len[curr_file_seq]=mem_len[curr_mem_seq]-tmp_file_len;
-
-                /* Increase the number of bytes to access */
-                tmp_file_len=mem_len[curr_mem_seq];
-
-                /* Indicate that there is an extra sequence to include in the file access */
-                tot_file_seq++;
-
-                /* Indicate a partial file sequence */
-                partial_file=1;
-            } /* end if */
-            else
-                partial_file=0;
-
-            /* Write current memory sequence into file sequences */
-            if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, tot_file_seq, &file_len[orig_file_seq], &file_off[orig_file_seq], buf)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
-
-            /* Update last file sequence, if it was partially accessed */
-            if(partial_file) {
-                file_off[curr_file_seq]+=orig_file_len-file_len[curr_file_seq];
-                file_len[curr_file_seq]=orig_file_len-file_len[curr_file_seq];
-            } /* end if */
-
-            /* Check if the current memory sequence was only partially accessed */
-            if(tmp_file_len<mem_len[curr_mem_seq]) {
-                /* Adjust current memory sequence */
-                mem_off[curr_mem_seq]+=tmp_file_len;
-                mem_len[curr_mem_seq]-=tmp_file_len;
-
-                /* Adjust memory buffer pointer */
-                buf+=tmp_file_len;
-            } /* end if */
-            else {
-                /* Must have used entire memory sequence, advance to next one */
-                curr_mem_seq++;
-
-                /* Check if it is valid to adjust buffer pointer */
-                if(curr_mem_seq<mem_nseq) {
-                    H5_CHECK_OVERFLOW(mem_off[curr_mem_seq],hsize_t,size_t);
-                    buf=(const uint8_t *)_buf+(size_t)mem_off[curr_mem_seq];
-                } /* end if */
-            } /* end else */
-
-            /* Decrement number of bytes left to process */
-            maxbytes-=tmp_file_len;
-        } /* end if */
-        else {
-            /* Save number of bytes to access */
-            tmp_file_len=mem_len[curr_mem_seq];
-
-            /* Write part of current memory sequence to current file sequence */
-            if (H5F_seq_write(f, dxpl_id, layout, dc_plist, efl, file_space, elmt_size, tmp_file_len, file_off[curr_file_seq], buf)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
-
-            /* Update current file sequence information */
-            file_off[curr_file_seq]+=tmp_file_len;
-            file_len[curr_file_seq]-=tmp_file_len;
-
-            /* Increment memory sequence */
-            curr_mem_seq++;
-
-            /* Check if it is valid to adjust buffer pointer */
-            if(curr_mem_seq<mem_nseq) {
-                H5_CHECK_OVERFLOW(mem_off[curr_mem_seq],hsize_t,size_t);
-                buf=(const uint8_t *)_buf+(size_t)mem_off[curr_mem_seq];
-            } /* end if */
-
-            /* Decrement number of bytes left to process */
-            maxbytes-=tmp_file_len;
-        } /* end else */
+        /* Decrement number of bytes left to process */
+        maxbytes-=tmp_file_len;
     } /* end while */
 
 done:
     /* Release file selection iterator */
     if(file_iter_init) {
-        if ((*file_space->select.iter_release)(&file_iter)<0)
+        if (H5S_select_iter_release(&file_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
     /* Release memory selection iterator */
     if(mem_iter_init) {
-        if ((*mem_space->select.iter_release)(&mem_iter)<0)
+        if (H5S_select_iter_release(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 

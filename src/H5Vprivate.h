@@ -83,8 +83,21 @@ H5_DLL herr_t H5V_stride_optimize2(unsigned *np, hsize_t *elmt_size,
 				    hssize_t *stride2);
 H5_DLL herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 			      size_t count);
+H5_DLL herr_t H5V_array_down(unsigned n, const hsize_t *total_size,
+    hsize_t *down);
+H5_DLL hsize_t H5V_array_offset_pre(unsigned n, const hsize_t *total_size,
+    const hsize_t *acc, const hssize_t *offset);
 H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
-				 const hssize_t *offset);
+    const hssize_t *offset);
+H5_DLL herr_t H5V_array_calc(hsize_t offset, unsigned n,
+    const hsize_t *total_size, hssize_t *coords);
+H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hssize_t *coord,
+    const hsize_t *chunk, const hsize_t *nchunks, const hsize_t *down_nchunks,
+    hsize_t *chunk_idx);
+H5_DLL ssize_t H5V_memcpyvv(void *_dst,
+    size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
+    const void *_src,
+    size_t src_max_nseq, size_t *src_curr_seq, size_t src_len_arr[], hsize_t src_off_arr[]);
 
 
 /*-------------------------------------------------------------------------

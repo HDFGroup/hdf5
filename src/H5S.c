@@ -56,7 +56,7 @@ H5FL_DEFINE(H5S_simple_t);
 H5FL_DEFINE(H5S_t);
 
 /* Declare a free list to manage the array's of hsize_t's */
-H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
+H5FL_ARR_DEFINE(hsize_t,-1);
 
 /* Declare a free list to manage the array's of hssize_t's */
 H5FL_ARR_DEFINE(hssize_t,H5S_MAX_RANK);
@@ -1548,7 +1548,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_conv_t *
-H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned flags)
+H5S_find (const H5S_t *mem_space, const H5S_t *file_space, unsigned
+#ifndef H5_HAVE_PARALLEL
+UNUSED
+#endif /* H5_HAVE_PARALLEL */
+flags)
 {
     H5S_conv_t	*path=NULL;  /* Space conversion path */
 #ifdef H5_HAVE_PARALLEL
@@ -1780,7 +1784,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     }
 
     /* Create the space and set the extent */
-    if(NULL==(space=H5S_create_simple(rank,dims,maxdims)))
+    if(NULL==(space=H5S_create_simple((unsigned)rank,dims,maxdims)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
     
     /* Atomize */
@@ -1817,7 +1821,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_create_simple(int rank, const hsize_t dims[/*rank*/],
+H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/])
 {
     H5S_t	*ret_value;     /* Return value */
@@ -1825,12 +1829,12 @@ H5S_create_simple(int rank, const hsize_t dims[/*rank*/],
     FUNC_ENTER_NOAPI(H5S_create_simple, NULL);
 
     /* Check arguments */
-    assert(rank>=0 && rank <=H5S_MAX_RANK);
+    assert(rank <=H5S_MAX_RANK);
 
     /* Create the space and set the extent */
     if(NULL==(ret_value=H5S_create(H5S_SIMPLE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace");
-    if(H5S_set_extent_simple(ret_value,(unsigned)rank,dims,maxdims)<0)
+    if(H5S_set_extent_simple(ret_value,rank,dims,maxdims)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "can't set dimensions");
     
 done:

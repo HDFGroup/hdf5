@@ -21,11 +21,11 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
-#include "H5Vprivate.h"         /* Vector functions */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		        */
+#include "H5Iprivate.h"		/* ID Functions		                */
+#include "H5Spkg.h"		/* Dataspace functions			*/
+#include "H5Vprivate.h"         /* Vector functions                     */
 
 /* Interface initialization */
 #define PABLO_MASK      H5Sall_mask
@@ -48,7 +48,7 @@ static int             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
+H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt_size)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -56,17 +56,58 @@ H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *
 
     /* Check args */
     assert (space && H5S_SEL_ALL==space->select.type);
-    assert (sel_iter);
+    assert (iter);
 
     /* Initialize the number of elements to iterate over */
-    sel_iter->all.elmt_left=H5S_get_simple_extent_npoints(space);
+    iter->elmt_left=H5S_get_simple_extent_npoints(space);
 
     /* Start at the upper left location */
-    sel_iter->all.offset=0;
+    iter->u.all.offset=0;
+
+    /* Initialize methods for selection iterator */
+    iter->iter_coords=H5S_all_iter_coords;
+    iter->iter_nelmts=H5S_all_iter_nelmts;
+    iter->iter_next=H5S_all_iter_next;
+    iter->iter_release=H5S_all_iter_release;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_iter_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_all_iter_coords
+ *
+ * Purpose:	Retrieve the current coordinates of iterator for current
+ *              selection
+ *
+ * Return:	non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, April 22, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
+{
+    herr_t ret_value=SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_all_iter_coords, FAIL);
+
+    /* Check args */
+    assert (iter);
+    assert (coords);
+
+    /* Calculate the coordinates for the current iterator offset */
+    if(H5V_array_calc(iter->u.all.offset,iter->rank,iter->dims,coords)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve coordinates");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_all_iter_coords() */
 
 
 /*-------------------------------------------------------------------------
@@ -84,17 +125,17 @@ done:
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5S_all_iter_nelmts (const H5S_sel_iter_t *sel_iter)
+H5S_all_iter_nelmts (const H5S_sel_iter_t *iter)
 {
     hsize_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_all_iter_nelmts, 0);
 
     /* Check args */
-    assert (sel_iter);
+    assert (iter);
 
     /* Set return value */
-    ret_value=sel_iter->all.elmt_left;
+    ret_value=iter->elmt_left;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -103,12 +144,49 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_all_iter_next
+ PURPOSE
+    Increment selection iterator
+ USAGE
+    herr_t H5S_all_iter_next(iter, nelem)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
+        size_t nelem;               IN: Number of elements to advance by
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Advance selection iterator to the NELEM'th next element in the selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_all_iter_next, FAIL);
+
+    /* Check args */
+    assert (iter);
+    assert (nelem>0);
+
+    /* Increment the iterator */
+    iter->u.all.offset+=nelem;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_all_iter_next() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_all_iter_release
  PURPOSE
     Release "all" selection iterator information for a dataspace
  USAGE
-    herr_t H5S_all_iter_release(sel_iter)
-        H5S_sel_iter_t *sel_iter;       IN: Pointer to selection iterator
+    herr_t H5S_all_iter_release(iter)
+        H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -119,14 +197,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_iter_release (H5S_sel_iter_t UNUSED * sel_iter)
+H5S_all_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_all_iter_release, FAIL);
 
     /* Check args */
-    assert (sel_iter);
+    assert (iter);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -542,9 +620,6 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
     space->select.get_seq_list=H5S_all_get_seq_list;
     space->select.get_npoints=H5S_all_npoints;
     space->select.release=H5S_all_release;
-    space->select.iter_init=H5S_all_iter_init;
-    space->select.iter_nelmts=H5S_all_iter_nelmts;
-    space->select.iter_release=H5S_all_iter_release;
     space->select.is_valid=H5S_all_is_valid;
     space->select.serial_size=H5S_all_serial_size;
     space->select.serialize=H5S_all_serialize;
@@ -552,6 +627,7 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
     space->select.is_contiguous=H5S_all_is_contiguous;
     space->select.is_single=H5S_all_is_single;
     space->select.is_regular=H5S_all_is_regular;
+    space->select.iter_init=H5S_all_iter_init;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -650,13 +726,13 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     assert(len);
 
     /* Calculate the number of bytes left in the selection */
-    bytes_left=iter->all.elmt_left*elem_size;
+    bytes_left=iter->elmt_left*elem_size;
 
     /* "round" off the maxbytes allowed to a multiple of the element size */
     maxbytes=(maxbytes/elem_size)*elem_size;
 
     /* Compute the offset in the dataset */
-    off[0]=iter->all.offset*elem_size;
+    off[0]=iter->u.all.offset*elem_size;
     H5_CHECK_OVERFLOW(bytes_left,hsize_t,size_t);
     len[0]=MIN(maxbytes,(size_t)bytes_left);
 
@@ -668,8 +744,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
 
     /* Update the iterator */
     elem_used=len[0]/elem_size;
-    iter->all.elmt_left-=elem_used;
-    iter->all.offset+=elem_used;
+    iter->elmt_left-=elem_used;
+    iter->u.all.offset+=elem_used;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -162,6 +162,9 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     /* Dataspace errors */
     {H5E_CANTCLIP,	"Can't clip hyperslab region"},
     {H5E_CANTCOUNT,	"Can't count elements"},
+    {H5E_CANTSELECT,    "Can't select hyperslab"},
+    {H5E_CANTNEXT,      "Can't move to next iterator location"},
+    {H5E_BADSELECT,     "Invalid selection"},
 
     /* Property list errors */
     {H5E_CANTGET,	"Can't get value"},
