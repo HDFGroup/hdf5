@@ -334,6 +334,8 @@ Documentation
 Bug Fixes since HDF5-1.4.0-beta2
 ================================
 
+    * Fixed a bug in the conversion from a little endian double to a big endian float
+      in some special cases.
     * Corrected configuration error which was not including compression support
         correctly.
     * Cleaned up lots of warnings.
@@ -354,7 +356,7 @@ Platforms Tested
 
 
   AIX 4.3.2 (IBM SP)            mpcc_r 3.6.6
-  Cray T3E sn6711 2.0.5.43      Cray Standard C Version 6.4.0.0
+  Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
