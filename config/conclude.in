@@ -24,8 +24,11 @@ tests: $(LIB) $(TESTS)
 test _test: tests
 	@for test in $(TESTS) dummy; do			                      \
 	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
 	      $(RUNTEST) ./$$test $(TEST_FLAGS) || exit 1;		      \
+	      echo "";							      \
 	   fi;								      \
 	done;
 
