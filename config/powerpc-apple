@@ -1,0 +1,34 @@
+#							-*- shell-script -*-
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# The default compiler is `gcc'
+if test "X-" = "X-$CC"; then
+    CC=gcc
+    CC_BASENAME=gcc
+fi
+
+# Architecture-specific flags
+ARCH=
+
+# Add "_POSIX_C_SOURCE" define to cpp flags, to quiet warnings
+#       from /usr/include/sys/cdefs.h
+#CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE=1" 
+
+# Omit frame pointer for optimized code?
+NOFP=${NOFP:=-fomit-frame-pointer}
+
+# Figure out compiler flags
+. $srcdir/config/gnu-flags
+
+# Special setup to use pthread support if enable-threadsafe is on.
+# Works with static executable only.
+#if test "X-" != "X-$enable_threadsafe"; then
+#    CFLAGS="$CFLAGS -pthread -D_THREAD_SAFE" 
+#    LDFLAGS="$LDFLAGS -pthread"
+#    LIBS="$LIBS -lcipher"
+#    enable_static_exec=yes
+#fi
