@@ -1,90 +1,85 @@
-## HDF5 Library Makefile(.in)
+## Tools HDF5 Makefile(.in)
 ##
-## Copyright (C) 1997 National Center for Supercomputing Applications.
+## Copyright (C) 2001 National Center for Supercomputing Applications.
 ##                    All rights reserved.
 ##
-## 
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
+
+## All subdirectories except for the ``lib'' subdirectory.
+##
+SUBDIRS=h5dump h5ls misc @H5TOH4@ @H4TOH5@
+
 @COMMENCE@
 
 ## Add include directory to the C preprocessor flags, add -lh5tools and
 ## -lhdf5 to the list of libraries.
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+##
+CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
+         -I$(top_srcdir)/tools/lib @CPPFLAGS@
 
 ## Test programs and scripts.
-TEST_PROGS=talign
-TEST_SCRIPTS=$(srcdir)/testh5dump.sh $(srcdir)/testh5ls.sh @TESTH5TOH4@ @TESTH4TOH5@
+##
+TEST_PROGS=
+TEST_SCRIPTS=
 
-## These are our main targets: library and tools. We link this library
-## statically because some systems can only link executables to a single
-## shared library and libhdf5 is much bigger than libh5tools.
-LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
-LIB=libh5tools.la
-LIBHDF5=../src/libhdf5.la
-PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @H4TOH5@ @H4TOH5TEST@ @PDB2HDF@
-PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst 
+## These are our main targets: library and tools.
+##
+LIBTOOLS=$(top_builddir)/tools/lib/libh5tools.la
+LIBHDF5=$(top_builddir)/src/libhdf5.la
 
-## Source and object files for the library; do not install
-LIB_SRC=h5tools.c
-LIB_OBJ=$(LIB_SRC:.c=.lo)
-PUB_LIB=
-
-## Source and object files for h4toh5 converter.
-H4TOH5_SRC=h4toh5main.c h4toh5vgroup.c h4toh5vdata.c h4toh5sds.c	\
-	   h4toh5image.c h4toh5pal.c h4toh5anno.c h4toh5util.c
-H4TOH5_OBJ=$(H4TOH5_SRC:.c=.lo)
-H4TOH5_HDR=h4toh5main.h h4toh5util.h
-
-## Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5toh4.c	\
-	 h5dumptst.c h4toh5test.c pdb2hdf.c talign.c $(H4TOH5_SRC)
-PROG_OBJ=$(PROG_SRC:.c=.lo)
-PRIVATE_HDR=h5tools.h $(H4TOH5_HDR)
+PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the tests
+##
 TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
-## Programs have to be built before they can be tested!
-check test _test: $(PROGS)
+lib ::
+	(cd lib && $(MAKE) $@) || exit 1;
 
-## How to build the programs... They all depend on the hdf5 library and
-## the tools library compiled in this directory.
-$(PROGS): $(LIB) $(LIBHDF5)
+progs: $(LIBTOOLS) $(LIBHDF5)
+	@@SETX@; for d in $(SUBDIRS); do                                      \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
+	done
 
-h5debug: h5debug.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+check tests test _test: $(PROGS)
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
+	done
 
-h5import: h5import.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5import.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+uninstall:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
+	done
 
-h5ls: h5ls.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5ls.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+install:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
+	done
 
-h5repart: h5repart.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5repart.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+install-doc:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@);                                            \
+	done
 
-h5dump: h5dump.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+.PHONY: all lib progs test _test install uninstall dep depend clean           \
+	mostlyclean distclean maintainer-clean
 
-h5toh4: h5toh4.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+clean mostlyclean:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@);                                            \
+	done
 
-h5dumptst: h5dumptst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dumptst.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+distclean:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@);                                            \
+	done
+	-$(RM) Makefile
 
-h4toh5test: h4toh5test.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h4toh5test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+maintainer-clean:
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
+	   (cd $$d && $(MAKE) $@);                                            \
+	done
 
-h4toh5: $(H4TOH5_OBJ)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(H4TOH5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-pdb2hdf: pdb2hdf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ pdb2hdf.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-talign: talign.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ talign.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-@CONCLUDE@
