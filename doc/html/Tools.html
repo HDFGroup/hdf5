@@ -256,6 +256,21 @@ installed with HDF5.
         isn't specified, then the file will be opened with each driver in
         turn and in the order specified above until one driver succeeds
         in opening the file.
+        </p>
+	<p>
+	One byte integer type data is displayed in decimal by default. When
+	displayed in ASCII, a non-printable code is displayed in 3 octal
+	digits preceeded by a back-slash unless there is a C language escape
+	sequence for it.  For example, CR and LF are printed as \r and \n.
+	Though the NUL code is represented as \0 in C, it is printed as
+	\000 to avoid ambiguity as illustrated in the following 1 byte
+	char data (since this is not a string, embedded NUL is possible).
+	<pre>
+	141 142 143 000 060 061 062 012
+	  a   b   c  \0   0   1   2  \n </pre>
+	h5dump prints them as "abc\000012\n".  But if h5dump prints NUL as \0,
+	the output is "abc\0012\n" which is ambiguous.
+        </p>
 
 <!-- NEW PAGE -->
 <dt><strong>XML Output:</strong>
@@ -2719,7 +2734,7 @@ Describes HDF5 Release 1.7, the unreleased development branch; working toward HD
 <dl>
   <dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 March 2004");
+document.writeln("Last modified: 24 November 2004");
 -->
 </SCRIPT>
 
