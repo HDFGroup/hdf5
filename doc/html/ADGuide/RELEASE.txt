@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post6 released on Sat Dec 13 13:17:43 CST 2003
+HDF5 version 1.6.1-post7 released on Sat Dec 13 15:09:02 CST 2003
 ================================================================================
 
 
@@ -71,9 +71,11 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed bug where scalar dataspaces for attributes were reporting as
+            simple dataspaces.  QAK - 2003/12/13
         - Fixed problem with selection offsets of hyperslab selections in
             chunked datasets causing the library to go into an infinite loop.
-            QAK - 2003/12/06
+            QAK - 2003/12/13
         - Fixed H5Giterate to avoid re-using index parameter after iteration
             callback has been called (allows iteration callback to modify the
             index parameter itself).  QAK - 2003/12/06
