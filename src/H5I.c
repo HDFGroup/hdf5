@@ -1345,33 +1345,29 @@ H5I_find_id(hid_t id)
 
     /* Check arguments */
     grp = H5I_GRP(id);
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
+    assert(grp > H5I_BADID && grp < H5I_NGROUPS);
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
+    assert(grp_ptr && grp_ptr->count > 0);
 
     /* Get the bucket in which the ID is located */
     hash_loc = (unsigned)H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
-    if (id_ptr == NULL)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID");
 
     /* Scan the bucket's linked list for a match */
     last_id=NULL;
     while (id_ptr) {
-	if (id_ptr->id == id)
+	if (id_ptr->id == id) {
+            /* If we found an object, move it to the front of the list, if it isn't there already */
+            if(last_id!=NULL) {
+                last_id->next=id_ptr->next;
+                id_ptr->next=grp_ptr->id_list[hash_loc];
+                grp_ptr->id_list[hash_loc]=id_ptr;
+            } /* end if */
             break;
+        } /* end if */
         last_id=id_ptr;
 	id_ptr = id_ptr->next;
-    }
-
-    /* If we found an object, move it to the front of the list, if it isn't there already */
-    if(id_ptr!=NULL && last_id!=NULL) {
-        last_id->next=id_ptr->next;
-        id_ptr->next=grp_ptr->id_list[hash_loc];
-        grp_ptr->id_list[hash_loc]=id_ptr;
-    } /* end if */
+    } /* end while */
 
     /* Set the return value */
     ret_value = id_ptr;
