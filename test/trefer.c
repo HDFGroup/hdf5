@@ -258,7 +258,7 @@ test_reference_region(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dset1=H5Dcreate(fid1,"Dataset1",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
+    dset1=H5Dcreate(fid1,"Dataset1",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dcreate");
 
     /* Create references */
@@ -294,7 +294,7 @@ test_reference_region(void)
     CHECK(ret, FAIL, "H5Rcreate");
 
     /* Write selection to disk */
-    ret=H5Dwrite(dset1,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close disk dataspace */
@@ -313,23 +313,23 @@ test_reference_region(void)
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 
-#ifdef LATER
     /* Re-open the file */
     fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"/Dataset3");
-    CHECK(ret, FAIL, "H5Dcreate");
+    dset1=H5Dopen(fid1,"/Dataset1");
+    CHECK(dset1, FAIL, "H5Dopen");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to open objects */
-    dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
+    dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
     CHECK(dset2, FAIL, "H5Rdereference");
 
+#ifdef LATER
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
@@ -344,19 +344,19 @@ test_reference_region(void)
     for(tu32=(uint32 *)drbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
         VERIFY(*tu32, (uint32)(i*3), "Data");
 
+#endif /* LATER */
+
     /* Close dereferenced Dataset */
     ret = H5Dclose(dset2);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close Dataset */
-    ret = H5Dclose(dataset);
+    ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-
-#endif /* LATER */
 
     /* Free memory buffers */
     free(wbuf);
