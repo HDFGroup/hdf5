@@ -82,6 +82,17 @@ while [ $# -gt 0 ] ; do
 	    cmddiff="diff"
 	    cmd=""
 	    ;;
+	deploy)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "deploy <dir> missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    cmddeploy="deploy"
+	    DEPLOYDIRNAME="$1"
+	    ;;
 	test)
 	    cmdtest="test"
 	    cmd=""
@@ -188,17 +199,20 @@ if [ "$cmd" = help ]; then
     set -
     cat <<EOF
 Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
-          [zlib <zlib_path>] [archive <arch_path>] [dir <dir>]
-	  [op-configure <option>] [--<option>]
+	[clean] [distclean] [echo] [deploy <dir>]
+	[zlib <zlib_path>] [archive <arch_path>] [srcdirname <dir>]
+	[op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
     checkout: Run cvs checkout
     diff:     Run diff on current and previous versions.  Exit 0 if
               no significant differences are found.  Otherwise, non-zero.
+    deploy:   deploy binary to directory <dir>
     test:     Run test
     release:  Run release
     clean:    Run make clean
     distclean:Run make distclean
+    echo:     Turn on echo mode (set -x)
     setenv <name> <value>:
               Set environment variable <name> to <value>.
     setenvN <N> <name> <value> ...:
@@ -377,6 +391,20 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	fi
     fi
 fi # Test the HDF5 library
+
+
+#=============================
+# Run deployment if requested.
+#=============================
+if [ -n "$DEPLOYDIRNAME" ]; then
+    if [ "$snapshot" = "yes" ]; then
+	TIMESTAMP "deploy"
+	if (cd ${TESTDIR} && ${CURRENT}/bin/deploy ${DEPLOYDIRNAME}); then
+	    errcode=$?
+	    exit $errcode
+	fi
+    fi
+fi # Deploy
 
 
 #=============================
