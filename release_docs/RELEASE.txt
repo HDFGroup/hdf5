@@ -35,10 +35,20 @@ CONTENTS
 
 New Features
 ============
+    Source code distribuiton:
+    -------------------------
 
+    High-Level (HL) C APIs were added to the source code distribution.
+    For HL documentation see
+    http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html
+    HL library libhdf5_hl.a(so) is built and installed
+    by default. Use --disable-hl configure flag to disable HL library.
 
     Library:
     --------
+        - We recommend you to use SZIP v2.0 with this release. 
+          For more information see
+          http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/ 
         - Compound datatype has been enhanced with a new feature of size 
             adjustment.  The size can be increased and decreased(without
             cutting the last member).  No API change is involved.  SLU - 
