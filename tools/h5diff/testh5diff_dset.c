@@ -14,7 +14,7 @@
 
 #include "testh5diff.h"
 
-
+#define STR_SIZE 3
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
@@ -58,7 +58,7 @@ static void write_dset_in(hid_t loc_id,
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
- char       buf1[2][2]= {"ab","de"};        /* string */
+ char       buf1[2][STR_SIZE]= {"ab","de"}; /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
@@ -71,7 +71,7 @@ static void write_dset_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
- char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+ char       buf12[6][STR_SIZE]= {"ab","cd","ef","gh","ij","kl"};  /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
@@ -82,7 +82,7 @@ static void write_dset_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
- char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+ char       buf13[24][STR_SIZE]= {"ab","cd","ef","gh","ij","kl","mn","pq",
  "rs","tu","vw","xz","AB","CD","EF","GH",
  "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
@@ -116,7 +116,7 @@ static void write_dset_in(hid_t loc_id,
 
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id,STR_SIZE);
  write_dset(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
 
@@ -281,7 +281,7 @@ static void write_dset_in(hid_t loc_id,
 
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id,STR_SIZE);
  write_dset(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
 
@@ -441,7 +441,7 @@ static void write_dset_in(hid_t loc_id,
  }
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id,STR_SIZE);
  write_dset(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
 
