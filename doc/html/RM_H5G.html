@@ -365,14 +365,11 @@ create or access function.
         If the any object identifier is open for the object, the space
         will not be released until after the object identifier is closed.
         <p>
-        <!-- editingcomment: freespace and file packing -->
         Note that space identified as freespace is available for re-use 
         only as long as the file remains open; once a file has been 
-        closed, the HDF5 library loses track of freespace. 
-        Identifying freespace does not imply that the file
-        will be packed or that, if the file is closed and later reopened,
-        that the space will be available for re-use.  
-        Such functionality has not yet been implemented in the HDF5 library.
+        closed, the HDF5 library loses track of freespace.  See
+        &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
+        in the <cite>HDF5 User's Guide</cite> for further details.
   <dt><strong>Warning:</strong>
     <dd>Exercise care in unlinking groups as it is possible to render data in 
         a file inaccessible with <code>H5Gunlink</code>.  
@@ -828,7 +825,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  6 July 2001
+Last modified:  11 July 2001
 <br>
 Describes HDF5 Release 1.4.2, July 2001
 

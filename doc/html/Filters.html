@@ -55,7 +55,8 @@
 
     <h2>1. Introduction</h2>
 
-    <p>HDF5 allows chunked data to pass through user-defined filters
+    <p>HDF5 allows chunked data<sup><a href="#fn1">1</a></sup> 
+      to pass through user-defined filters
       on the way to or from disk.  The filters operate on chunks of an
       <code>H5D_CHUNKED</code> dataset can be arranged in a pipeline
       so output of one filter becomes the input of the next filter.
@@ -507,6 +508,21 @@ H5Z: filter statistics accumulated over life of library:
 
 
 <hr>
+
+
+    <p><a name="fn1">Footnote 1:</a> Dataset chunks can be compressed 
+     through the use of filters.  Developers should be aware that 
+     reading and rewriting compressed chunked data can result in holes 
+     in an HDF5 file.  In time, enough such holes can increase the 
+     file size enough to impair application or library performance 
+     when working with that file.  See
+     &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
+     in the chapter
+     &ldquo;<a href="Performance.html">Performance Analysis and Issues</a>.&rdquo;
+
+
+
+<hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
@@ -554,7 +570,7 @@ H5Z: filter statistics accumulated over life of library:
 
 <!-- Created: Fri Apr 17 13:39:35 EDT 1998 -->
 <!-- hhmts start -->
-Last modified:  17 December 1999
+Last modified:  11 July 2001
 <!-- hhmts end -->
 
 <br>
