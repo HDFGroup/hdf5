@@ -1,5 +1,17 @@
 
-/* Example of using the parallel HDF5 library to access datasets */
+/*
+ * Example of using the parallel HDF5 library to access datasets.
+ *
+ * This program contains two parts.  In the first part, the mpi processes
+ * collectively create a new parallel HDF5 file and create two fixed
+ * dimension datasets in it.  Then each process writes a hyperslab into
+ * each dataset in an independent mode.  All processes collectively
+ * close the datasets and the file.
+ * In the second part, the processes collectively open the created file
+ * and the two datasets in it.  Then each process reads a hyperslab from
+ * each dataset in an independent mode and prints them out.
+ * All processes collectively close the datasets and the file.
+ */
 
 #include <assert.h>
 #include <hdf5.h>
