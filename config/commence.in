@@ -76,6 +76,7 @@ all:
 ## keep track of the most recent update of H5config.h.in and H5config.h
 ## because autoheader and config.status don't update the modification time
 ## if the contents don't change.
+## Invoke it by "gmake reconfigure".
 ##
 ## Graphically, the dependencies are:
 ##
@@ -132,7 +133,8 @@ $(top_srcdir)/configure: $(top_srcdir)/configure.in
 $(top_builddir)/config.status: $(top_srcdir)/configure $(STAMP1)
 	-cd $(top_builddir); ./config.status --recheck
 
-Makefile: $(MAKEFILE_PARTS) $(STAMP2)
+# rerun the autoconf process if any configure components have changed. 
+reconfigure: $(MAKEFILE_PARTS) $(STAMP2)
 	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
 
 ##-----------------------------------------------------------------------------
