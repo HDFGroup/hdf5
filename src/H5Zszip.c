@@ -77,7 +77,13 @@ const H5Z_class_t H5Z_SZIP[1] = {{
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications:
+ * Modifications: Used new logic to set the size of the scanline parameter.
+ *                Now SZIP compression can be applied to the chunk
+ *                of any shape and size with only one restriction: the number
+ *                of elements in the chunk has to be not less than number
+ *                of elements (pixels) in the block (cd_values[H5Z_SZIP_PARM_PPB]
+ *                parameter). 
+ *                           Elena Pourmal, July 20, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -89,6 +95,7 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     unsigned cd_values[H5Z_SZIP_TOTAL_NPARMS];  /* Filter parameters */
     hsize_t dims[H5O_LAYOUT_NDIMS];     /* Dataspace (i.e. chunk) dimensions */
     int ndims;                          /* Number of (chunk) dimensions */
+    hssize_t npoints;                   /* Number of points in the dataspace */
     int dtype_size;                     /* Datatype's size (in bits) */
     H5T_order_t dtype_order;            /* Datatype's endianness order */
     hsize_t scanline;                   /* Size of dataspace's fastest changing dimension */
@@ -123,20 +130,31 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get "local" parameter for this dataset's "pixels-per-scanline" */
     /* (Use the chunk's fastest changing dimension size) */
+    assert(ndims>0);
     scanline=dims[ndims-1];
 
-    /* Range check the scanline's size */
+    /* Adjust 'scanline' size if it is smaller than number of pixels per block or
+       if it is bigger than maximum pixels per scanline  */
+
+    /* Check the pixels per block against the 'scanline' size */
+    if(scanline<cd_values[H5Z_SZIP_PARM_PPB]) {
+
+    /* Get number of elements in the dataspace; use  
+       total number of elements in the chunk to define the new 'scanline' size*/
+    if ((npoints=H5Sget_simple_extent_npoints(space_id))<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+    if(npoints<cd_values[H5Z_SZIP_PARM_PPB])
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "pixels per block greater than total number of elements in the chunk")
+    scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
+    goto done;
+
+    }
+
+    /* Check the scanline's size against the maximum value and adjust 'scanline' 
+       size if necessary */
     if(scanline > SZ_MAX_PIXELS_PER_SCANLINE)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid scanline size");
-
-    /* Range check the pixels per block against the 'scanline' size */
-    if(scanline<cd_values[H5Z_SZIP_PARM_PPB])
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "pixels per block greater than scanline");
-
-    /* Range check the scanline's number of blocks */
-    if((scanline/cd_values[H5Z_SZIP_PARM_PPB]) > SZ_MAX_BLOCKS_PER_SCANLINE)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid number of blocks per scanline");
-
+       scanline = cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE;
+	
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5Z_can_apply_szip() */
