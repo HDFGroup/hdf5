@@ -353,7 +353,6 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
        is that gass_open does not support many of them (e.g., O_CREAT)
     */
 
-    /* fprintf (stderr, "flags=0x%x\n", flags); */
     
     if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_EXCL)) {
       if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)

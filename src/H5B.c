@@ -2246,8 +2246,6 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     if (0==ncalls++) {
 	if (H5DEBUG(B)) {
 	    fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
-	} else {
-	    fprintf(stderr, "H5B: debugging B-trees (expensive)\n");
 	}
     }
     /* Initialize the queue */

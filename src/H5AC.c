@@ -713,8 +713,6 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     if (0 == ncalls++) {
 	if (H5DEBUG(AC)) {
 	    fprintf(H5DEBUG(AC), "H5AC: debugging cache (expensive)\n");
-	} else {
-	    fprintf(stderr, "H5AC: debugging cache (expensive)\n");
 	}
     }
 #endif
