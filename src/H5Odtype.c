@@ -218,7 +218,7 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         }
         break;
 
-    case H5T_POINTER:
+    case H5T_REFERENCE:
         dt->u.atomic.order = H5T_ORDER_NONE;
         dt->u.atomic.prec = 8 * dt->size;
         dt->u.atomic.offset = 0;
@@ -466,7 +466,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         }
         break;
 
-    case H5T_POINTER:
+    case H5T_REFERENCE:
         flags |= (dt->u.atomic.u.r.rtype & 0x0f);
         break;
         

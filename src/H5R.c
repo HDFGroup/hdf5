@@ -36,7 +36,7 @@ static void		H5R_term_interface(void);
 static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space);
 static hid_t H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref);
-static H5S_t * H5R_get_space(void *ref);
+static H5S_t * H5R_get_region(void *ref);
 
 
 /*--------------------------------------------------------------------------
@@ -346,11 +346,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5R_get_space
+    H5R_get_region
  PURPOSE
     Retrieves a dataspace with the region pointed to selected.
  USAGE
-    H5S_t *H5R_get_space(ref)
+    H5S_t *H5R_get_region(ref)
         void *ref;        IN: Reference to open.
         
  RETURNS
@@ -365,11 +365,11 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5S_t *
-H5R_get_space(void __unused__ *ref)
+H5R_get_region(void __unused__ *ref)
 {
     H5S_t *ret_value = NULL;
 
-    FUNC_ENTER(H5R_get_space, NULL);
+    FUNC_ENTER(H5R_get_region, NULL);
 
     assert(ref);
 
@@ -377,16 +377,16 @@ H5R_get_space(void __unused__ *ref)
 done:
 #endif /* LATER */
     FUNC_LEAVE(ret_value);
-}   /* end H5R_get_space() */
+}   /* end H5R_get_region() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Rget_space
+    H5Rget_region
  PURPOSE
     Retrieves a dataspace with the region pointed to selected.
  USAGE
-    hid_t H5Rget_space(ref)
+    hid_t H5Rget_region(ref)
         void *ref;        IN: Reference to open.
         
  RETURNS
@@ -401,20 +401,19 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rget_space(void *ref)
+H5Rget_region(hid_t dset, H5R_type_t rtype, void *ref)
 {
     H5S_t *space = NULL;
     hid_t ret_value = FAIL;
 
-    FUNC_ENTER(H5Rget_space, FAIL);
-    H5TRACE1("i","x",ref);
+    FUNC_ENTER(H5Rget_region, FAIL);
 
     /* Check args */
     if(ref==NULL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
 
     /* Create reference */
-    if ((space=H5R_get_space(ref))==NULL)
+    if ((space=H5R_get_region(ref))==NULL)
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
 
     /* Atomize */
@@ -423,5 +422,5 @@ H5Rget_space(void *ref)
 
 done:
     FUNC_LEAVE(ret_value);
-}   /* end H5Rget_space() */
+}   /* end H5Rget_region() */
 

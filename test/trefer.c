@@ -105,7 +105,7 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_PTR_OBJ,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dcreate");
 
     /* Create references */
@@ -119,7 +119,7 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Rcreate");
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_STD_PTR_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close disk dataspace */
@@ -143,7 +143,7 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dcreate");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_STD_PTR_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to open objects */

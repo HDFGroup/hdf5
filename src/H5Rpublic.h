@@ -55,7 +55,7 @@ extern "C" {
 herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
         H5R_type_t ref_type, hid_t space_id);
 hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *ref);
-hid_t H5Rget_space(void *ref);
+hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, void *ref);
 
 #ifdef __cplusplus
 }

@@ -32,7 +32,7 @@ typedef enum H5T_class_t {
     H5T_BITFIELD         = 4,   /*bit field types                            */
     H5T_OPAQUE           = 5,   /*opaque types                               */
     H5T_COMPOUND         = 6,   /*compound types                             */
-    H5T_POINTER          = 7,   /*Pointer types                              */
+    H5T_REFERENCE        = 7,   /*reference types                            */
 
     H5T_NCLASSES         = 8    /*this must be last                          */
 } H5T_class_t;
@@ -209,7 +209,7 @@ extern hid_t H5T_IEEE_F64LE_g;
 #define H5T_STD_B32LE		(H5open(), H5T_STD_B32LE_g)
 #define H5T_STD_B64BE		(H5open(), H5T_STD_B64BE_g)
 #define H5T_STD_B64LE		(H5open(), H5T_STD_B64LE_g)
-#define H5T_STD_PTR_OBJ	    (H5open(), H5T_STD_PTR_OBJ_g)
+#define H5T_STD_REF_OBJ	    (H5open(), H5T_STD_REF_OBJ_g)
 extern hid_t H5T_STD_I8BE_g;
 extern hid_t H5T_STD_I8LE_g;
 extern hid_t H5T_STD_I16BE_g;
@@ -234,7 +234,7 @@ extern hid_t H5T_STD_B32BE_g;
 extern hid_t H5T_STD_B32LE_g;
 extern hid_t H5T_STD_B64BE_g;
 extern hid_t H5T_STD_B64LE_g;
-extern hid_t H5T_STD_PTR_OBJ_g;
+extern hid_t H5T_STD_REF_OBJ_g;
 
 /*
  * Types which are particular to Unix.

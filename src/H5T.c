@@ -59,7 +59,7 @@ hid_t H5T_STD_B32BE_g = FAIL;
 hid_t H5T_STD_B32LE_g = FAIL;
 hid_t H5T_STD_B64BE_g = FAIL;
 hid_t H5T_STD_B64LE_g = FAIL;
-hid_t H5T_STD_PTR_OBJ_g = FAIL;
+hid_t H5T_STD_REF_OBJ_g = FAIL;
 
 hid_t H5T_UNIX_D32BE_g = FAIL;
 hid_t H5T_UNIX_D32LE_g = FAIL;
@@ -609,7 +609,7 @@ H5T_init_interface(void)
     }
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
-    dt->type = H5T_POINTER;
+    dt->type = H5T_REFERENCE;
     dt->size = sizeof(haddr_t);
     dt->u.atomic.order = H5T_ORDER_NONE;
     dt->u.atomic.offset = 0;
@@ -617,7 +617,7 @@ H5T_init_interface(void)
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->u.atomic.u.r.rtype = H5R_OBJECT;
-    if ((H5T_STD_PTR_OBJ_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
+    if ((H5T_STD_REF_OBJ_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to initialize H5T layer");
     }
@@ -4347,7 +4347,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    /*void */
 	    break;
 
-	case H5T_POINTER:
+	case H5T_REFERENCE:
 	    if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype) {
 		HGOTO_DONE(-1);
 	    }	    
