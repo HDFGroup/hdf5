@@ -925,6 +925,7 @@
 ./test/tattr.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5s.c
