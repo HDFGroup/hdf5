@@ -189,7 +189,7 @@ H5FC_PP = $(bindir)/h5pfc
 F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 
-AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/test
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #

@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-AM_CFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # These are our main targets, the tools
 bin_PROGRAMS=gif2h5 h52gif

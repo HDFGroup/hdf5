@@ -21,7 +21,7 @@ include $(top_srcdir)/config/commence.am
 
 # Include files
 AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
-AM_CFLAGS=-I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/src
 
 # The Fortran test library
 lib_LTLIBRARIES=libh5test_fortran.la
@@ -56,11 +56,11 @@ LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 # Temporary files
 MOSTLYCLEANFILES=*.h5 *.tmp
 
-# Fortran dependencies must be hardcoded, unfortunately.
-#FORTLIBTEST_OBJ= fortranlib_test.lo                                    \
+## Fortran dependencies must be hardcoded, unfortunately.
+##FORTLIBTEST_OBJ= fortranlib_test.lo                                    \
         tH5F.lo tH5D.lo tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo       \
         tH5Sselect.lo tH5P.lo tH5A.lo tH5I.lo tH5G.lo tH5E.lo tf.lo    \
         t.lo
-#fortranlib_test$(EXEEXT): $(FORTLIBTEST_OBJ)
+##fortranlib_test$(EXEEXT): $(FORTLIBTEST_OBJ)
 
 include $(top_srcdir)/config/conclude.am

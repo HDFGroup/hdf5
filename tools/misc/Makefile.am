@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-AM_CFLAGS=-I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/src
 
 # Build pdb2hdf5 if LLNL's PDB is present (checked in configure)
 if BUILD_PDB2HDF_CONDITIONAL

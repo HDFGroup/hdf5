@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-AM_CFLAGS=-I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = $(top_srcdir)/test/testerror.sh

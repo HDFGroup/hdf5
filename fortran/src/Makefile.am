@@ -21,7 +21,7 @@ include $(top_srcdir)/config/commence.am
 
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking)
-AM_CFLAGS = -I$(top_srcdir)/src
+INCLUDES = -I$(top_srcdir)/src
 AM_FFLAGS=-I$(top_srcdir)/src
 
 # This is our main target, the fortran library

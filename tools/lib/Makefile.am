@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files in /src directory
-AM_CFLAGS=-I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/src
 
 # This is our main target, the h5tools library.  We link this library
 # statically because some systems can only link executables to a single
