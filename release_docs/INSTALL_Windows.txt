@@ -52,6 +52,7 @@ The following sections discuss installation procedures in detail:
   Section V:  Disable gzip compression  
   Section VI: How to build in HDF5 in VS 7.0(.NET) 
   Section VII: Build and test HDF5 snapshot release
+  Section VIII: Misc. 
 
 
 ***************************************************************
@@ -605,6 +606,7 @@ Tools->Options->Projects->VC++ Directories and choose Include and libraries unde
 the category of "show directories for" to add the corresponding path.
 
 Note: Currently we only build and test .NET on windows XP.
+
 Section VII:
 
 Build and test HDF5 snapshot release
@@ -622,6 +624,27 @@ Extra steps:
 3) Invoke command prompt and go to c:\myHDFstuff\hdf5\src.
 4) type H5Tinit.exe >H5Tinit.c
 5) Go back to section II, continue with step 1(2).
+
+Section VIII:
+
+Misc.
+
+1) drivers we support
+The default driver on windows we support is sec2 driver. However, stdio driver
+is also supported. If you want to use stdio driver in your application, you
+may set environment variable HDF5_DRIVER to "stdio".
+
+On windows 2000, the following steps should be followed to set environment
+variable,
+
+ a) Go to Control panel and find "system",
+ b) Click "system" and choose "advanced",
+ c) Choose Environment Variables
+ d) Add new variable "HDF5_DRIVER"
+ e) set the "HDF5_DRIVER" to "stdio"
+
+Reminder: if you don't want to use stdio driver, please remember to delete
+the environment variable "HDF5_DRIVER" or change the variable value to "sec2".
 
 Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
 
