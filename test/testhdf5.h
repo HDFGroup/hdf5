@@ -82,8 +82,8 @@ extern int              Verbosity;
 		   "%ld \n", where, (int)__LINE__, __FILE__, (long)x);	      \
     }									      \
     if (x != val) {							      \
-	print_func("*** UNEXPECTED VALUE from %s is %ld at line %4d "	      \
-		   "in %s\n", where, (long)x, (int)__LINE__, __FILE__);	      \
+	print_func("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d "	      \
+		   "in %s\n", where, (long)val, (long)x, (int)__LINE__, __FILE__);	      \
 	H5Eprint (stdout);						      \
 	num_errs++;							      \
     }									      \
@@ -122,6 +122,7 @@ int                     print_func(const char *,...);
 void                    test_metadata(void);
 void                    test_tbbt(void);
 void                    test_tst(void);
+void                    test_heap(void);
 void                    test_refstr(void);
 void                    test_file(void);
 void                    test_h5t(void);
