@@ -43,7 +43,7 @@ main(int argc, char *argv[])
     TestInit(argv[0], NULL, NULL);
 
     /* Tests are generally arranged from least to most complexity... */
-    AddTest("configure", test_configure, cleanup_configure, "Configure definitions", NULL);
+    AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL);
     AddTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code", NULL);
     AddTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees", NULL);
     AddTest("tst", test_tst, NULL,  "Ternary Search Trees", NULL);
