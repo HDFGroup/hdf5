@@ -1274,8 +1274,11 @@ dump_all(hid_t group, const char *name, void * op_data)
 
     if (*(int *)op_data != H5G_UNKNOWN && statbuf.type != *(int *) op_data)
         goto done;
-
+#ifdef WIN32
+    tmp = malloc(strlen(prefix)+strlen(name)+2);
+#else
     tmp = malloc(strlen(prefix) + strlen(name) + 1);
+#endif
     strcpy(tmp, prefix);
 
     switch (statbuf.type) {
