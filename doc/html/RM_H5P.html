@@ -4,7 +4,7 @@ HDF5/H5P API Specification
 </title></head>
 
 <body bgcolor="#FFFFFF">
-
+	
 
 <hr>
 <center>
@@ -65,6 +65,29 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-Close">H5Pclose</a>
     </ul>
 
+    <p><i>Generic Properties</i> 
+    <ul>
+    <li><a href="#Property-CreateClass">H5Pcreate_class</a> 
+    <li><a href="#Property-CreateList">H5Pcreate_list</a> 
+    <li><a href="#Property-Register">H5Pregister</a> 
+    <li><a href="#Property-Insert">H5Pinsert</a> 
+    <li><a href="#Property-Set">H5Pset</a> 
+    <li><a href="#Property-Exist">H5Pexist</a> 
+    <li><a href="#Property-GetSize">H5Pget_size</a> 
+    <li><a href="#Property-GetNProps">H5Pget_nprops</a> 
+    <li><a href="#Property-GetClassName">H5Pget_class_name</a> 
+    <li><a href="#Property-GetClassParent">H5Pget_class_parent</a> 
+    <li><a href="#Property-IsAClass">H5Pisa_class</a> 
+    <li><a href="#Property-Get">H5Pget</a> 
+    <li><a href="#Property-Equal">H5Pequal</a> 
+    <li><a href="#Property-Iterate">H5Piterate</a> 
+    <li><a href="#Property-CopyProp">H5Pcopy_prop</a> 
+    <li><a href="#Property-Remove">H5Premove</a> 
+    <li><a href="#Property-Unregister">H5Punregister</a> 
+    <li><a href="#Property-CloseList">H5Pclose_list</a> 
+    <li><a href="#Property-CloseClass">H5Pclose_class</a> 
+    </ul>
+
     <p><i>File Creation Properties</i>
     <ul>
     <li><a href="#Property-GetVersion">H5Pget_version</a>
@@ -78,20 +101,18 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
 
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>
-||&nbsp;&nbsp;<i>Indicates functions <br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;available only in the <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
+
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
-    <i>File Access Properties</i>
+
+    <i>File Close Properties</i>
+    <ul>
+    <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
+    <li><a href="#Property-GetfcloseDegree">H5Pget_fclose_degree</a>
+	</ul>
+
+    <p></p><i>File Access Properties</i>
     <ul>
     <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
     <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
@@ -174,6 +195,12 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
     <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
     </ul>
+
+<br>&nbsp;
+<br>
+||&nbsp;&nbsp;<i>Indicates functions <br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;available only in the <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
 
 </td></tr>
 
@@ -460,6 +487,1582 @@ facilitate moving easily between them.</i>
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CreateClass">H5Pcreate_class</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pcreate_class</code>(
+                 <em>hid_t</em> <code>class</code>,
+                 <em>const char *</em><code>name</code>,
+                 <em>H5P_cls_create_func_t</em> <code>create</code>,
+                 <em>H5P_cls_copy_func_t</em> <code>copy</code>,
+                 <em>H5P_cls_close_func_t</em> <coode>close</code>
+         )
+
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a new property list class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pcreate_class</code> registers a new property list class 
+	with the library.  
+	The new property list class can inherit from an existing property 
+    list class or may be derived from the default "empty" class.  
+	New classes with inherited properties from existing classes 
+    may not remove those existing properties, only add or remove 
+    their own class properties.
+    </P>
+	
+	The <code>create</code> routine is called when a new property list 
+	of this class is being created.  
+	The <code>H5P_cls_create_func_t</code> callback function is defined 
+	as follows:
+    <ul><em>typedef herr_t</em> (*<code>H5P_cls_create_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>,
+            <em>void *</em> <code>create_data</code>
+            );
+    </ul>
+    The parameters to this callback function are defined as follows:
+    <ul><table>
+      <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being created</td></tr>
+      <tr>
+        <td><em>void *</em> <code>create_data</code></td>
+        <td>IN/OUT: User pointer to any class creation information needed</td></tr>
+    </table></ul>
+    The <code>create</code> routine is called after any registered 
+	<code>create</code> function is called for each property value.  
+    If the <code>create</code> routine returns a negative value, 
+    the new list is not returned to the user and the
+    property list creation routine returns an error value.
+    </P>
+	
+	The <code>copy</code> routine is called when an existing property list 
+    of this class is copied.  
+	The <code>H5P_cls_copy_func_t</code> callback function  
+	is defined as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_cls_copy_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>,
+            <em>void *</em> <code>copy_data</code>
+            );
+        </ul>
+    The parameters to this callback function are defined as follows:
+    <ul><table>
+      <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list created by copying</td></tr>
+      <tr>
+        <td><em>void *</em> <code>copy_data</code></td>
+        <td>IN/OUT: User pointer to any class copy information needed</td></tr>
+    </table></ul>
+    The <code>copy</code> routine is called after any registered 
+	<code>copy</code> function is called for each property value.  
+    If the <code>copy</code> routine returns a negative value, the new list 
+    is not returned to the user and thenproperty list copy routine returns 
+    an error value.
+    </P>
+
+	The <code>close</code> routine is called when a property list of this 
+	class
+    is being closed.  
+	The <code></code>H5P_cls_close_func_t</code> callback function is defined 
+	as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_cls_close_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>,
+            <em>void *</em> <code>close_data</code>
+            );
+        </ul>
+    The parameters to this callback function are defined as follows:
+    <ul><table>
+      <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being closed</td></tr>
+      <tr>
+        <td><em>void *</em> <code>close_data</code></td>
+        <td>IN/OUT: User pointer to any class close information needed</td></tr>
+    </table></ul>
+    The <code>close</code> routine is called before any registered 
+	<code>close</code> function is called for each property value.  
+    If the <code>close</code> routine returns a negative value, 
+    the property list close routine returns an error value 
+    but the property list is still closed.
+	
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>class</code></td>
+        <td>IN: Property list class to inherit from.</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property list class to register</td></tr>
+    <tr>
+        <td><em>H5P_cls_create_func_t</em> <code>create</code></td>
+        <td>IN: Callback routine called when a property list is created</td></tr>
+    <tr>
+        <td><em>H5P_cls_copy_func_t</em> <code>copy</code></td>
+        <td>IN: Callback routine called when a property list is copied</td></tr>
+    <tr>
+        <td><em>H5P_cls_close_func_t</em> <code>close</code></td>
+        <td>IN: Callback routine called when a property list is being closed</td></tr>
+    </table>
+	
+  <dt><strong>Returns:</strong>
+    <dd>Success: a valid property list class identifier
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+
+  <dt><strong>Edit or Delete -- Comments, Bugs, Assumptions:</strong>
+    <dd>I would like to say "the property list is not closed" when a _close_
+    routine fails, but I don't think that's possible due to other properties in
+    the list being successfully closed & removed from the property list.  I
+    suppose that it would be possible to just remove the properties which have
+    successful _close_ callbacks, but I'm not happy with the ramifications of
+    a mangled, un-closable property list hanging around... Any comments?
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CreateList">H5Pcreate_list</a>
+  
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pcreate_list</code>(
+                 <em>hid_t</em> <code>class</code>)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a new property list class of a given class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pcreate_list</code> creates a new property list of a  
+	given class.  If a <code>create</code> callback exists for the 
+    property list class, it is called before the property list 
+    is passed back to the user.  
+	If <code>create</code> callbacks exist for any individual properties 
+    in the property list, they are called before the class 
+    <code>create</code> callback.
+	
+  <dt><strong>Parameter:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>class</code>;</td>
+        <td>IN: Class of property list to create.</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a valid property list identifier
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Register">H5Pregister</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pregister</code>(
+                  <em>hid_t</em> <code>class</code>,
+                  <em>const char *</em> <code>name</code>,
+                  <em>size_t</em> <code>size</code>,
+                  <em>void *</em> <code>default</code>,
+                  <em>H5P_prp_create_func_t</em> <code>create</code>,
+                  <em>H5P_prp_set_func_t</em> <code>set</code>,
+                  <em>H5P_prp_get_func_t</em> <code>get</code>,
+                  <em>H5P_prp_delete_func_t</em> <code>delete</code>,
+                  <em>H5P_prp_copy_func_t</em> <code>copy</code>,
+                  <em>H5P_prp_close_func_t</em> <code>close</code>
+				 )
+				 
+  <dt><strong>Purpose:</strong>
+    <dd>Registers a permanent property with a property list class.
+	
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pregister</code> registers a new property with a 
+    property list class.  
+    The property will exist in all property list objects of 
+    <code>class</code> created after this routine finishes.  The name 
+    of the property must not already exist, or this routine will fail.  
+    The default property value must be provided and all new property 
+    lists created with this property will have the property value set 
+    to the default value.  Any of the callback routines may be set to
+    NULL if they are not needed.
+
+    <P>
+    Zero-sized properties are allowed and do not store any data in the
+    property list.  These may be used as flags to indicate the presence 
+    or absence of a particular piece of information.  The default pointer 
+    for a zero-sized property may be set to NULL.  
+    The property <code>create</code> and <code>close</code> callbacks 
+    are called for zero-sized properties, but the <code>set</code> and 
+    <code>get</code> callbacks are never called.
+    </P>
+	
+    The <code>create</code> routine is called when a new property list 
+    with this property is being created.  
+    The <code>H5P_prp_create_func_t</code> callback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_create_func_t</code>)(
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>initial_value</code>);
+        </ul>
+    The parameters to this callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property being modified</td></tr>
+    <tr>
+        <td><em>size_t</em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em><code>initial_value</code></td>
+        <td>IN/OUT: The default value for the property being created,
+                which will be passed to <code>H5Pregister</code></td></tr>
+    </table></ul>
+    The <code>create</code> routine may modify the value to be set and 
+    those changes will be stored as the initial value of the property.  
+    If the <code>create</code> routine returns a negative value, 
+    the new property value is not copied into the property and the 
+    create routine returns an error value.
+    </P>
+	
+    The <code>set</code> routine is called before a new value is copied 
+    into the property.  
+    The <code>H5P_prp_set_func_t</code> callback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*H5P_prp_set_func_t)(
+            <em>hid_t </em><code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>new_value</code>);
+        </ul>
+    The parameters to this callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being modified</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property being modified</td></tr>
+    <tr>
+        <td><em>size_t </em><code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void **</em><code>new_value</code></td>
+        <td>IN/OUT: Pointer to new value pointer for the property being 
+		    modified</td></tr>
+    </table></ul>
+    The <code>set</code> routine may modify the value pointer to be set 
+    and those changes will be used when setting the property's value.  
+    If the <code>set</code> routine returns a negative value, the new 
+    property value is not copied into the property and the 
+    <code>set</code> routine returns an error value.  
+    The <code>set</code> routine will not be called for the initial 
+    value, only the <code>create</code> routine will be called.
+    </P>
+
+    The <code>get</code> routine is called when a value is retrieved 
+    from a property value.  
+    The <code>H5P_prp_get_func_t</code> callback function is defined 
+	as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_get_func_t</code>)(
+            <em>hid_t </em><code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being queried</td></tr>
+    <tr>
+        <td><em>const char *</em> <code>name</code></td>
+        <td>IN: The name of the property being queried</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em> <code>value</code></td>
+        <td>IN/OUT: The value of the property being returned</td></tr>
+    </table></ul>
+    The <code>get</code> routine may modify the value to be returned from 
+    the query and those changes will be returned to the calling routine.  
+    If the <code>set</code> routine returns a negative value, the query 
+    routine returns an error value.
+    </P>
+
+    The <code>delete</code> routine is called when a property is being 
+    deleted from a property list.  
+    The <code>H5P_prp_delete_func_t</code> callback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_delete_func_t</code>)(
+            <em>hid_t </em><code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list the property is being 
+		    deleted from</td></tr>
+    <tr>
+        <td><em>const char *</em> <code>name</code></td>
+        <td>IN: The name of the property in the list</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em> <code>value</code></td>
+        <td>IN: The value for the property being deleted</td></tr>
+    </table></ul>
+    The <code>delete</code> routine may modify the value passed in, 
+    but the value is not used by the library when the <code>delete</code> 
+    routine returns.  If the <code>delete</code> routine returns 
+    a negative value, the property list delete routine returns 
+    an error value but the property is still deleted.
+    </P>
+
+    The <code>copy</code> routine is called when a new property list with 
+    this property is being created through a copy operation.  
+    The <code>H5P_prp_copy_func_t</code> callback function is defined
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_copy_func_t</code>)(
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property being copied</td></tr>
+    <tr>
+        <td><em>size_t </em><code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>IN/OUT: The value for the property being copied</td></tr>
+    </table></ul>
+    The <code>copy</code> routine may modify the value to be set and 
+    those changes will be stored as the new value of the property.  
+    If the <code>copy</code> routine returns a negative value, 
+    the new property value is not copied into the property and 
+    the copy routine returns an error value.
+    </P>
+
+    The <code>close</code> routine is called when a property list with 
+    this property is being closed.  
+    The <code>H5P_prp_close_func_t</code> callback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_close_func_t</code>)(
+            <em>hid_t </em><code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being 
+		    closed</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property in the list</td></tr>
+    <tr>
+        <td><em>size_t</em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>IN: The value for the property being closed</td></tr>
+    </table></ul>
+    The <code>close</code> routine may modify the value passed in, 
+    but the value is not used by the library when the 
+    <code>close</code> routine returns.  
+    If the <code>close</code> routine returns a negative value, 
+    the property list close routine returns an error value but
+    the property list is still closed.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><code>hid_t</code> <em>class</em></td>
+        <td>IN: Property list class to register permanent property 
+		    within</td></tr>
+    <tr>
+        <td><code>const char *</code> <em>name</em></td>
+        <td>IN: Name of property to register</td></tr>
+    <tr>
+        <td><code>size_t</code> <em>size</em></td>
+        <td>IN: Size of property in bytes</td></tr>
+    <tr>
+        <td><code>void *</code> <em>default</em></td>
+        <td>IN: Default value for property in newly created property 
+		    lists</td></tr>
+    <tr>
+        <td><code>H5P_prp_create_func_t</code> <em>create</em></td>
+        <td>IN: Callback routine called when a property list is being 
+            created and the property value will be initialized</td></tr>
+    <tr>
+        <td><code>H5P_prp_set_func_t</code> <em>set</em></td>
+        <td>IN: Callback routine called before a new value is copied 
+            into the property's value</td></tr>
+    <tr>
+        <td><code>H5P_prp_get_func_t</code> <em>get</em></td>
+        <td>IN: Callback routine called when a property value is 
+            retrieved from the property</td></tr>
+    <tr>
+        <td><code>H5P_prp_delete_func_t</code> <em>delete</em></td>
+        <td>IN: Callback routine called when a property is deleted from
+            a property list</td></tr>
+    <tr>
+        <td><code>H5P_prp_copy_func_t</code> <em>copy</em></td>
+        <td>IN: Callback routine called when a property is copied from
+            a property list</td></tr>
+    <tr>
+        <td><code>H5P_prp_close_func_t</code> <em>close</em></td>
+        <td>IN: Callback routine called when a property list is being 
+            closed and the property value will be disposed of</td></tr>
+    </table></ul>
+
+<dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+    
+  <dt><strong>Edit or Remove -- Comments, Bugs, Assumptions:</strong>
+    <dd>The <code>set</code> callback function may be useful to range check the value being
+    set for the property or may perform some tranformation/translation of the
+    value set.  The <code>get</code> callback would then [probably] reverse the
+    transformation, etc.  A single <code>get</code> or <code>set</code> callback could
+    handle multiple properties by performing different actions based on the
+    property name or other properties in the property list.
+
+    <P>I would like to say "the property list is not closed" when a <code>close</code>
+    routine fails, but I don't think that's possible due to other properties in
+    the list being successfully closed and removed from the property list.  I
+    suppose that it would be possible to just remove the properties which have
+    successful <code>close</code> callbacks, but I'm not happy with the ramifications
+    of a mangled, un-closable property list hanging around... Any comments?
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Insert">H5Pinsert</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pinsert</code>(
+                  <em>hid_t</em> <code>plid</code>,
+                  <em>const char *</em><code>name</code>,
+                  <em>size_t</em> <code>size</code>,
+                  <em>void *</em><code>value</code>,
+                  <em>H5P_prp_set_func_t</em> <code>set</code>,
+                  <em>H5P_prp_get_func_t</em> <code>get</code>,
+                  <em>H5P_prp_delete_func_t</em> <code>delete</code>,
+                  <em>H5P_prp_copy_func_t</em> <code>copy</code>,
+                  <em>H5P_prp_close_func_t</em> <code>close</code>
+		)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Registers a temporary property with a property list.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pinsert</code> create a new property in a property list.  
+    The property will exist only in this property list and copies made 
+    from it.  
+	
+    <p>
+    The initial property value must be provided in 
+    <code>value</code> and the property value will be set accordingly.  
+	
+    <p>
+    The name of the property must not already exist in this list, 
+    or this routine will fail.  
+	
+    <p>
+    The <code>set</code> and <code>get</code> callback routines may 
+    be set to NULL if they are not needed.
+
+    <p>
+    Zero-sized properties are allowed and do not store any data in the
+    property list.  The default value of a zero-size property may be set 
+    to NULL.  They may be used to indicate the presence or absence of a 
+    particular piece of information.
+    </p>
+
+    The <code>set</code> routine is called before a new value is copied 
+    into the property.  
+    The <code>H5P_prp_set_func_t</code> calback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_set_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>,
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>new_value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being modified</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property being modified</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void **</em><code>new_value</code></td>
+        <td>IN: Pointer to new value pointer for the property being 
+		    modified</td></tr>
+    </table></ul>
+    The <code>set</code> routine may modify the value pointer to be set 
+    and those changes will be used when setting the property's value.  
+    If the <code>set</code> routine returns a negative value, the new 
+    property value is not copied into the property and the set routine 
+    returns an error value.  
+    The <code>set</code> routine will be called for the initial value.
+    </p>
+
+    The <code>get</code> routine is called when a value is retrieved 
+    from a property value.  
+    The <code>H5P_prp_get_func_t</code> callback functioin is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_get_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    where the parameters to the callback function are:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list being queried</td></tr>
+    <tr>
+        <td><em>const char *</em><emcodename</code></td>
+        <td>IN: The name of the property being queried</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>IN: The value of the property being returned</td></tr>
+    </table></ul>
+    The <code>get</code> routine may modify the value to be returned from 
+    the query and those changes will be preserved. 
+    If the <code>get</code> routine returns a negative value, the query 
+    routine returns an error value.
+    </p>
+
+    The <code>delete</code> routine is called when a property is being 
+    deleted from a property list.  
+    The <code>H5P_prp_delete_func_t</code> callback function is defined 
+    as follows:
+        <ul><code>typedef herr_t</code> (*<code>H5P_prp_delete_func_t</code>)(
+            <em>hid_t </em><code>prop_id</code>, 
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    where the parameters to the callback function are:
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>prop_id</code></td>
+        <td>IN: The identifier of the property list the property is 
+		    being deleted from</td></tr>
+    <tr>
+        <td><em>const char *</em> <code>name</code></td>
+        <td>IN: The name of the property in the list</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em> <code>value</code></td>
+        <td>IN: The value for the property being deleted</td></tr>
+    </table></ul>
+    The <code>delete</code> routine may modify the value passed in, 
+    but the value is not used by the library when the <code>delete</code> 
+    routine returns.  If the <code>delete</code> routine returns a 
+    negative value, the property list delete routine returns an 
+    error value but the property is still deleted. 
+    </P>
+    
+    The <code>copy</code> routine is called when a new property list 
+    with this property is being created through a copy operation.  
+    The <code>H5P_prp_copy_func_t</code> collback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_copy_func_t</code>)(
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    where the parameters to the callback function are:
+    <ul><table>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: The name of the property being copied</td></tr>
+    <tr>
+        <td><em>size_t </em> <code>size</code></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em> <code>value</code></td>
+        <td>IN/OUT: The value for the property being copied</td></tr>
+    </table></ul>
+    The <code>copy</code> routine may modify the value to be set and 
+    those changes will be stored as the new value of the property.  
+    If the <code>copy</code> routine returns a negative value, the 
+    new property value is not copied into the property and the 
+    copy routine returns an error value.
+
+    <P>The <code>close</code> routine is called when a property list 
+    with this property is being closed.  
+    The <code>H5P_prp_close_func_t</code> callback function is defined 
+    as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_prp_close_func_t</code>)(
+            <em>hid_t</em> <code>prop_id</code>,
+            <em>const char *</em><code>name</code>,
+            <em>size_t </em><code>size</code>,
+            <em>void *</em><code>value</code>);
+        </ul>
+    The parameters to the callback function are defined as follows:
+    <ul><table>
+    <tr>
+        <td><code>hid_t</em> <code>prop_id</em></td>
+        <td>IN: The ID of the property list being closed</td></tr>
+    <tr>
+        <td><code>const char *</code><em>name</em></td>
+        <td>IN: The name of the property in the list</td></tr>
+    <tr>
+        <td><code>size_t </code> <em>size</em></td>
+        <td>IN: The size of the property in bytes</td></tr>
+    <tr>
+        <td><code>void *</code><em>value</em></td>
+        <td>IN: The value for the property being closed</td></tr>
+    </table></ul>
+    The <code>close</code> routine may modify the value passed in, the value 
+    is not used by the library when the <code>close</code> routine returns.  
+    If the <code>close</code> routine returns a negative value, the  
+    property list close routine returns an error value but the property list 
+    is still closed.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><code>hid_t</code> <code>plid</em></td>
+        <td>IN: Property list identifier to create temporary property 
+	        within</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to create</td></tr>
+    <tr>
+        <td><em>size_t</em> <code>size</code></td>
+        <td>IN: Size of property in bytes</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>IN: Initial value for the property</td></tr>
+    <tr>
+        <td><em>H5P_prp_set_func_t</em> <code>set</code></td>
+        <td>IN: Callback routine called before a new value is copied into 
+                the property's value</td></tr>
+    <tr>
+        <td><em>H5P_prp_get_func_t</em> <code>get</code></td>
+        <td>IN: Callback routine called when a property value is retrieved 
+                from the property</td></tr>
+    <tr>
+        <td><em>H5P_prp_delete_func_t</em> <code>delete</code></td>
+        <td>IN: Callback routine called when a property is deleted from
+                a property list</td></tr>
+    <tr>
+        <td><em>H5P_prp_copy_func_t</em> <code>copy</code></td>
+        <td>IN: Callback routine called when a property is copied from
+                an existing property list</td></tr>
+    <tr>
+        <td><em>H5P_prp_close_func_t</em> <code>close</code></td>
+        <td>IN: Callback routine called when a property list is being closed 
+                and the property value will be disposed of</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+    
+  <dt><strong>Edit or Remove -- Comments, Bugs, Assumptions:</strong>
+    <dd>The <code>set</code> callback function may be useful to range check 
+    the value being set for the property or may perform some 
+    tranformation/translation of the value set.  The <code>get</code> callback 
+    would then [probably] reverse the transformation, etc.  A single 
+    <code>get</code> or <code>set</code> callback could handle 
+    multiple properties by performing different actions based on the 
+    property name or other properties in the property list.
+
+    <P>
+    There is no <code>create</code> callback routine for temporary property 
+    list objects, the initial value is assumed to have any necessary setup 
+    already performed on it.
+
+    <P>
+    I would like to say "the property list is not closed" when a <code>close</code> 
+    routine fails, but I don't think that's possible due to other properties in 
+    the list being successfully closed and removed from the property list.  I 
+    suppose that it would be possible to just remove the properties which have 
+    successful <code>close</code> callbacks, but I'm not happy with the
+    ramifications of a mangled, un-closable property list hanging around... 
+    Any comments?
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Set">H5Pset</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset</code>(
+                  <em>hid_t</em> <code>plid</code>,
+                  <em>const char *</em><code>name</code>,
+                  <em>void *</em><code>value</code>)
+        )
+
+  <dt><strong>Purpose:</strong>
+    <dd>Sets a property list value.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset</code> sets a new value for a property in a 
+    property list.  If there is a <code>set</code> callback 
+    routine registered for this property, the <code>value</code> will be 
+    passed to that routine and any changes to the <code>value</code> 
+    will be used when setting the property value.  
+    The information pointed to by the <code>value</code> pointer 
+    (possibly modified by the <code>set</code> callback) is copied into 
+    the property list value and may be changed by the application making 
+    the <code>H5Pset</code> call without affecting the property value.
+
+    <P>
+    The property name must exist or this routine will fail.  
+
+    <P>
+    If the <code>set</code> callback routine returns an error, the 
+    property value will not be modified.  
+
+    <P>
+    This routine may not be called for zero-sized properties 
+    and will return an error in that case.
+	
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</code>;
+        <td>IN: Property list identifier to modify</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code>;
+        <td>IN: Name of property to modify</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code>;
+        <td>IN: Pointer to value to set the property to</td></tr>
+    </table></ul>
+
+ <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Exist">H5Pexist</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pexist</code>(
+                  <em>hid_t</em> <code>id</code>;
+                  <em>const char *</em><code>name</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries whether a property name exists in a property list 
+    or class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pexist</code> determines  whether a property exists 
+    within a property list or class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier for the property to query</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to check for</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a positive value if the property exists in the 
+        property object; zero if the property does not exist
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetSize">H5Pget_size</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_size</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>const char *</em><code>name</code>,
+               <em>size_t *</em><code>size</code>
+		)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the size of a property value in bytes.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_size</code> retrieves the size of a 
+    property's value in bytes.  This function operates on both 
+    poperty lists and property classes
+	
+    <p>
+    Zero-sized properties are allowed and return <code>0</code>.  
+	
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to query</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to query</td></tr>
+    <tr>
+        <td><em>size_t *</em><code>size</code></td>
+        <td>OUT: Size of property in bytes</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetNProps">H5Pget_nprops</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_nprops</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>size_t *</em><code>nprops</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries number of properties in property list or class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_nprops</code> retrieves the number of properties in a 
+    property list or class.  
+    If a property class identifier is given, the number of registered  
+    properties in the class is returned in <code>nprops</code>.  
+    If a property list identifier is given, the current number of 
+    properties in the list is returned in <code>nprops</code>.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to query</td></tr>
+    <tr>
+        <td><em>size_t *</em><code>nprops</code></td>
+        <td>OUT: Number of properties in object</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetClassName">H5Pget_class_name</a>
+
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the name of a class.
+
+  <dt><strong>Signature:</strong>
+    <dd><em>char *</em> <code>H5Pget_class_name</code>(
+                  <em>hid_t</em> <code>pcid</code>
+	)
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_class_name</code> retrieves the name of a 
+    generic property list class.  The pointer to the name 
+    must be freed by the user after each successful call.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>pcid</code></td>
+        <td>IN: Identifier of the property class  to query</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a pointer to an allocated string containing the class name
+    <dd>Failure: NULL
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetClassParent">H5Pget_class_parent</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pget_class_parent</code>(
+                  <em>hid_t</em> <code>pcid</code>
+	)
+	
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the parent class of a property class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>pcid</code></td>
+        <td>IN: Identifier of the property class to query</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a valid parent class object identifier
+    <dd>Failure: a negative value
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_class_parent</code> retrieves an identifier for the 
+	parent class of a property class.
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-IsAClass">H5Pisa_class</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pisa_class</code>(
+                  <em>hid_t</em> <code>plist</code>,
+                  <em>hid_t</em> <code>pclass</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether a property list is a member of a class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pisa_class</code> checks to determine whether a property list 
+    is a member of the specified class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plist</code></td>
+        <td>IN: Identifier of the property list</td></tr>
+    <tr>
+        <td><code>hid_t</code> <em>pclass</em></td>
+        <td>IN: Identifier of the property class</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Get">H5Pget</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget</code>(
+                  <em>hid_t</em> <code>plid</code>,
+                  <em>const char *</em><code>name</code>,
+                  <em>void *</em><code>value</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the value of a property.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget</code> retrieves a copy of the value for a property  
+    in a property list.  If there is a <code>get</code> callback routine 
+    registered for this property, the copy of the value of the property 
+    will first be passed to that routine and any changes to the copy of 
+    the value will be used when returning the property value from this 
+    routine.   
+    
+    <p>
+    This routine may be called for zero-sized properties with the 
+    <code>value</code> set to NULL.  The <code>get</code> routine 
+    will be called with a NULL value if the callback exists.
+     
+    <p>
+    The property name must exist or this routine will fail.  
+   
+    <p>
+    If the <code>get</code> callback routine returns an error,
+    <code>value</code> will not be modified.   
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</ecodem></td>
+        <td>IN: Identifier of the property list to query</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to query</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>OUT: Pointer to a location to which to copy the value of 
+	         of the property</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong>  <a name="Property-Equal">H5Pequal</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pequal</code>(
+                  <em></em>hid_t</em> <em>id1</em>,
+                  <em>hid_t</em> <em>id2</em>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Compares two property lists or classes for equality.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pequal</code> compares two property lists or classes 
+    to determine whether they are equal to one another.  
+	
+    <p>
+    Either both <code>id1</code> and <code>id2</code> must be
+    property lists or both must be classes; comparing a list to a 
+    class is an error.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id1</code></td>
+        <td>IN: First property object to be compared</td></tr>
+    <tr>
+        <td><em>hid_t</em> <code>id2</code></td>
+        <td>IN: Second property object to be compared</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Iterate">H5Piterate</a>
+
+  <dt><strong>Purpose:</strong>
+    <dd>Iterates over properties in a property class or list.
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Piterate</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>int *</em> <code>idx</code>,
+               <em>H5P_iterate_t</em> <code>iter_func</code>,
+               <em>void *</em> <code>iter_data</code>
+	)
+
+  <dt><strong>Description:</strong>
+    <P><code>H5Piterate</code> iterates over the properties in the 
+    property object specified in <code>id</code>, which may be either a
+    property list or a property class, performing a specified 
+    operation on each property in turn.  
+	
+    <p>
+    For each property in the object, <code>iter_func</code> and
+    the additional information specified below are passed to the
+    <code>H5P_iterate_t</code> operator function.  
+	
+	<b><i>(NOTE: <code>iter_func</code> was changed to 
+	<code>H5P_iterate_t</code> in the preceding sentence.
+	Is this correct?)</i></b>
+	
+    <p>
+    The iteration begins with the <code>idx</code>-th property in 
+    the object; the next element to be processed by the operator 
+    is returned in <code>idx</code>.
+    If <code>idx</code> is NULL, the iterator starts at the first 
+    property; since no stopping point is returned in this case, 
+    the iterator cannot be restarted if one of the calls to its 
+    operator returns non-zero.
+    </p>
+
+    The prototype for the <code>H5P_iterate_t</code> operator is
+    as follows:
+        <ul> <dl>
+            <dt><em>typedef herr_t</em> (*<code>H5P_iterate_t</code>)(
+                                  <em>hid_t</em> <code>id</code>, 
+                                  <em>const char *</em><code>>name</code>, 
+                                  <em>void *</em><code>iter_data</code>
+	        )
+        </dl> </ul>
+    The operation receives the property list or class identifier for 
+    the object being iterated over, <code>id</code>,
+    the name of the current property within the object, <code>name</code>, 
+    and the pointer to the operator data passed in to
+    <code>H5Piterate</code>, <code>iter_data</code>.
+    </p>
+
+    The valid return values from an operator are as follows:
+        <ul><table>
+        <tr>
+            <td valign=top>Zero</td>
+            <td>Causes the iterator to continue, returning zero when all
+                properties have been processed</td></tr>
+        <tr>
+            <td valign=top>Positive</td>
+            <td>Causes the iterator to immediately return that positive 
+                value, indicating short-circuit success.  The iterator can 
+                be restarted at the index of the next property</td></tr>
+        <tr>
+            <td valign=top>Negative</td>
+            <td>Causes the iterator to immediately return that value,
+                indicating failure.  The iterator can be restarted at the 
+                index of the next property</td></tr>
+        </table></ul>
+
+    <P>
+    <code>H5Piterate</code> assumes that the properties in the object 
+    identified by <code>id</code> remain unchanged through the iteration.  
+    If the membership changes during the iteration, the function's behavior 
+    is undefined.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to iterate over</td></tr>
+    <tr>
+        <td><em>int *</em> <code>idx</code></td>
+        <td>IN/OUT: Index of the property to begin with</td></tr>
+    <tr>
+        <td><em>H5P_iterate_t</em> <code>iter_func</code></td>
+        <td>IN: Function pointer to function to be called with each 
+                property iterated over</td></tr>
+    <tr>
+        <td><em>void *</em> <code>iter_data</code></td>
+        <td>IN/OUT: Pointer to iteration data from user</td></tr>
+    </table></ul>
+
+<dt><strong>Returns:</strong>
+    <dd>Success: the return value of the last call to
+            <code>iter_func</code> if it was non-zero;
+            zero if all properties have been processed
+    <dd>Failure: a negative value
+    </table></ul>
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CopyProp">H5Pcopy_prop</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pcopy_prop</code>(
+                  <em>hid_t</em> <code>dst_id</code>,
+                  <em>hid_t</em> <code>src_id</code>,
+                  <em>const char *</em><code>name</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Copies a property from one list or class to another.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pcopy_prop</code> copies a property from one property 
+    list or class to another.
+    
+    <p>
+    If a property is copied from one class to another, all the property 
+    information will be first deleted from the destination class and 
+    then the property information will be copied from the source class 
+    into the destination class.  
+	
+    <p>
+    If a property is copied from one list to another, the property 
+    will be first deleted from the destination list (generating a call 
+    to the <code>close</code> callback for the property, if one exists)  
+    and then the property is copied from the source list to the 
+    destination list (generating a call to the <code>copy</code> 
+    callback for the property, if one exists).
+	
+    <p>
+    If the property does not exist in the class or list, this call is 
+    equivalent to calling <code>H5Pregister</code> or <code>H5Pinsert</code> 
+    (for a class or list, as appropriate) and the <code>create</code> 
+    callback will be called in the case of the property being 
+    copied into a list (if such a callback exists for the property).
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>dst_id</code></td>
+        <td>IN: Identifier of the destination property list or 
+	        class</td></tr>
+    <tr>
+        <td><em>hid_t</em> <code>src_id</code></td>
+        <td>IN: Identifier of the source property list or class</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of the property to copy</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Remove">H5Premove</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Premove</code>(<code>plid, name</code>)
+                  <em>hid_t</em> <code>plid</code>;
+                  <em>const char *</em><code>name</code>
+		)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Removes a property from a property list.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Premove</code> removes a property from a property list.  
+	
+    <p>
+    Both properties which were in existence when the property list 
+    was created (i.e. properties registered with <code>H5Pregister</code>) 
+    and properties added to the list after it was created (i.e. added 
+    with <code>H5Pinsert</code>) may be removed from a property list.  
+    Properties do not need to be removed from a property list before the 
+    list itself is closed; they will be released automatically when 
+    <code>H5Pclose</code> is called.
+	
+    <p>
+    If a <code>close</code> callback exists for the removed property, 
+    it will be called before the property is released.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</code></td>
+        <td>IN: Identifier of the property list to modify</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to remove</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Unregister">H5Punregister</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Punregister</code>(
+                  <em>H5P_class_t</em> <code>class</code>,
+                  <em>const char *</em><code>name</code>
+        )
+	
+  <dt><strong>Purpose:</strong>
+    <dd>Removes a property from a property list class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Punregister</code> removes a property from a 
+    property list class. 
+    
+    <p>
+    Future property lists created of that class will not contain 
+    this property;  
+    existing property lists containing this property are not affected.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>H5P_class_t</em> <code>class</code></td>
+        <td>IN: Property list class from which to remove 
+	        permanent property</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to remove</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CloseList">H5Pclose_list</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pclose_list</code>(
+                  <em>hid_t</em> <code>plist</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Closes a property list.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pclose_list</code> closes a property list.  
+    
+    <p>
+    If a <code>close</code> callback exists for the property list class, 
+    it is called before the property list is destroyed.  
+    If <code>close</code> callbacks exist for any individual properties 
+    in the property list, they are called after the class 
+    <code>close</code> callback.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plist</code><td>
+        <td>IN: Property list to close</td></tr>
+    </table></ul>
+    
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CloseClass">H5Pclose_class</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pclose_class</code>(
+                  <em>hid_t</em> <code>class</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Closes an existing property list class.
+
+  <dt><strong>Description:</strong>
+    <dd>Removes a property list class from the library.  
+    
+    <p>
+    Existing property lists of this class will continue to exist, 
+    but new ones are not able to be created.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>class</code></td>
+        <td>IN: Property list class to close</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <!--
+  <dt><strong>Non-C APIs:</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pXXX_f"
+	    target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+	<img src="Graphics/Java.gif">
+	<img src="Graphics/C++.gif">
+	-->
 </dl>
 
 
@@ -3974,6 +5577,119 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
 </dl>
 
 
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFcloseDegree">H5Pset_fclose_degree</a> 
+  <dt><strong>Signature:</strong> 
+  <dd><em>herr_t</em> <code>H5Pset_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
+    <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+  <dt><strong>Purpose:</strong> 
+  <dd>Sets the file close degree. 
+  <dt><strong>Description:</strong> 
+  <dd><code>H5Pset_fclose_degree</code> sets the file close degree property <code>fc_degree</code> 
+    in the file access property list <code>fapl_id</code>.  
+    <p> The value of <code>fc_degree</code> determines how aggressively <code>H5Fclose</code> 
+      deals with objects within a file that remain open when <code>H5Fclose</code> 
+      is called to close that file.  <code>fc_degree</code> can have any one of 
+      four valid values: 
+    <div align="center"> 
+      <table width="75%" border="1" cellpadding="3">
+        <tr> 
+          <th valign="top">Degree name</th>
+          <th valign="top"><code>H5Fclose</code> behavior with no open object 
+            in file</th>
+          <th valign="top"><code>H5Fclose</code> behavior with open object(s) 
+            in file</th>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_WEAK</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">Access to file identifier is terminated; actual file 
+            close is delayed until all objects in file are closed</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_SEMI</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">Function returns FAILURE</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_STRONG</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">All open objects ramaining in the file are closed then 
+            file is closed</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_DEFAULT</code></td>
+          <td colspan="2" valign="top">The VFL driver chooses the behavior.  Currently, 
+            all VFL drivers set this value to <code>H5F_CLOSE_WEAK</code>, except 
+            for the MPI-I/O driver, which sets it to <code>H5F_CLOSE_SEMI</code>. 
+          </td>
+        </tr>
+      </table>
+    </div>
+  <dt><strong>Parameters:</strong> 
+    <dl>
+      <dt><em>hid_t</em> <code>fapl_id</code> 
+      <dd>IN: File access property list identifier. 
+      <dt><em>H5F_close_degree_t</em> <code>fc_degree</code> 
+      <dd>IN: Pointer to a location containing the file close degree property, 
+        the value of <code>fc_degree</code>.
+    </dl>
+  <dt><strong>Returns:</strong> 
+  <dd>Returns a non-negative value if successful. Otherwise returns a negative 
+    value. 
+    <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFcloseDegree">H5Pget_fclose_degree</a> 
+  <dt><strong>Signature:</strong> 
+  <dd><em>herr_t</em> <code>H5Pget_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
+    <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+  <dt><strong>Purpose:</strong> 
+  <dd>Returns the file close degree. 
+  <dt><strong>Description:</strong> 
+  <dd><code>H5Pget_fclose_degree</code> returns the current setting of the file 
+    close degree property <code>fc_degree</code> in the file access property list 
+    <code>fapl_id</code>.  
+    <p> The value of <code>fc_degree</code> determines how aggressively <code>H5Fclose</code> 
+      deals with objects within a file that remain open when <code>H5Fclose</code> 
+      is called to close that file.  <code>fc_degree</code> can have any one of 
+      four valid values as described above in <a href="#Property-SetFcloseDegree"><code>H5Pset_fclose_degree</code></a>. 
+  <dt><strong>Parameters:</strong> 
+    <dl>
+      <dt><em>hid_t</em> <code>fapl_id</code> 
+      <dd>IN: File access property list identifier. 
+      <dt><em>H5F_close_degree_t</em> <code>fc_degree</code> 
+      <dd>OUT: Pointer to a location to which to return the file close degree 
+        property, the value of <code>fc_degree</code>.
+    </dl>
+  <dt><strong>Returns:</strong> 
+  <dd>Returns a non-negative value if successful. Otherwise returns a negative 
+    value. 
+    <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+    <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
 <!--  ***** TEMPLATE *****
 
 <hr>
@@ -4094,8 +5810,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  5 July 2002
-<br>
+Last modified: 1 October 2002 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
 
