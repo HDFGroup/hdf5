@@ -14,7 +14,7 @@ SUBDIRS=
 DOCDIR=$(docdir)/hdf5/Tutor/examples/java
 
 # Public doc files (to be installed)...
-PUB_DOCS=
+PUB_DOCS=Makefile.txt Makefile.in.txt
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=
