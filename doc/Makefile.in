@@ -18,9 +18,7 @@ SUBDIRS=html
 
 ##===========================================================================
 lib progs check test _test install uninstall:
-	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
-	done
+	@echo Nothing to be done for $@	
 
 tests TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
