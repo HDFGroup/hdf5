@@ -3390,8 +3390,7 @@ test_misc20(void)
     and encoder is available
                              EIP 2004/8/04
 */
-#ifdef H5_HAVE_FILTER_SZIP
-#ifdef H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
 /****************************************************************
 **
 **  test_misc21(): Test that late allocation time is treated the same
@@ -3574,6 +3573,9 @@ test_misc22(void)
             
                 VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
             
+                ret = H5Dclose (dsid);
+                CHECK(ret, FAIL, "H5Dclose");
+
                 ret = H5Gunlink (fid, MISC22_DSET_NAME );
                 CHECK(ret, FAIL, "H5Dunlink");
             
@@ -3597,8 +3599,7 @@ test_misc22(void)
 
     HDfree(buf);
 } /* end test_misc22() */
-#endif /* H5_SZIP_CAN_ENCODE */
-#endif /* H5_HAVE_FILTER_SZIP */
+#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
 
 /****************************************************************
 **
@@ -3631,13 +3632,10 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#ifdef H5_HAVE_FILTER_SZIP
-#ifdef H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
-#endif /* H5_SZIP_CAN_ENCODE */
-#endif /* H5_HAVE_FILTER_SZIP */
-
+#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
 } /* test_misc() */
 
 
@@ -3681,6 +3679,8 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
+#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
+#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
 }
