@@ -907,7 +907,7 @@ H5Fget_access_plist(hid_t file_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID");
 
     driver_info = H5FD_fapl_get(f->shared->lf);
-    if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, driver_info) < 0)
+    if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info");
 
     if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
