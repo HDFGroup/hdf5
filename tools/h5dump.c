@@ -17,7 +17,7 @@
 static int       display_oid = 0;
 static int       display_data = 1;
 static int       d_status = EXIT_SUCCESS;
-static int       unamedtype = 0;	/* shared data type with no name */
+static int       unamedtype = 0;    /* shared data type with no name */
 static int       prefix_len = 1024;
 static table_t  *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 static char     *prefix;
@@ -373,15 +373,13 @@ static herr_t           xml_dump_attr(hid_t attr, const char *attr_name,
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void                    (*dump_group_function) (hid_t, const char *);
-    void                    (*dump_named_datatype_function) (hid_t,
-							     const char *);
-    void                    (*dump_dataset_function) (hid_t, const char *);
-    void                    (*dump_dataspace_function) (hid_t);
-    void                    (*dump_datatype_function) (hid_t);
-    herr_t                  (*dump_attribute_function) (hid_t, const char *,
-							void *);
-    void                    (*dump_data_function) (hid_t, int);
+    void                (*dump_group_function) (hid_t, const char *);
+    void                (*dump_named_datatype_function) (hid_t, const char *);
+    void                (*dump_dataset_function) (hid_t, const char *);
+    void                (*dump_dataspace_function) (hid_t);
+    void                (*dump_datatype_function) (hid_t);
+    herr_t              (*dump_attribute_function) (hid_t, const char *, void *);
+    void                (*dump_data_function) (hid_t, int);
 } dump_functions;
 
 /* Standard DDL output */
@@ -412,10 +410,19 @@ static const dump_functions xml_function_table = {
  */
 static const dump_functions *dump_function_table;
 
+/* a structure to hold the subsetting particulars for a dataset */
+struct subset_t {
+    hsize_t *start;
+    hsize_t *stride;
+    hsize_t *count;
+    hsize_t *block;
+};
+
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
     void (*func)(hid_t, char *);
     char *obj;
+    struct subset_t *subset_info;
 };
 
 /*
@@ -423,78 +430,92 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:";
+static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:T:c:k:";
 static struct long_options l_opts[] = {
-	{ "help", no_arg, 'h' },
-	{ "hel", no_arg, 'h' },
-	{ "hel", no_arg, 'h' },
-	{ "boot-block", no_arg, 'B' },
-	{ "boot-bloc", no_arg, 'B' },
-	{ "boot-blo", no_arg, 'B' },
-	{ "boot-bl", no_arg, 'B' },
-	{ "boot-b", no_arg, 'B' },
-	{ "boot", no_arg, 'B' },
-	{ "boo", no_arg, 'B' },
-	{ "bo", no_arg, 'B' },
-	{ "header", no_arg, 'H' },
-	{ "heade", no_arg, 'H' },
-	{ "head", no_arg, 'H' },
-	{ "hea", no_arg, 'H' },
-	{ "object-ids", no_arg, 'i' },
-	{ "object-id", no_arg, 'i' },
-	{ "object-i", no_arg, 'i' },
-	{ "object", no_arg, 'i' },
-	{ "objec", no_arg, 'i' },
-	{ "obje", no_arg, 'i' },
-	{ "obj", no_arg, 'i' },
-	{ "ob", no_arg, 'i' },
-	{ "version", no_arg, 'V' },
-	{ "versio", no_arg, 'V' },
-	{ "versi", no_arg, 'V' },
-	{ "vers", no_arg, 'V' },
-	{ "ver", no_arg, 'V' },
-	{ "ve", no_arg, 'V' },
-	{ "attribute", require_arg, 'a' },
-	{ "attribut", require_arg, 'a' },
-	{ "attribu", require_arg, 'a' },
-	{ "attrib", require_arg, 'a' },
-	{ "attri", require_arg, 'a' },
-	{ "attr", require_arg, 'a' },
-	{ "att", require_arg, 'a' },
-	{ "at", require_arg, 'a' },
-	{ "dataset", require_arg, 'd' },
-	{ "datase", require_arg, 'd' },
-	{ "datas", require_arg, 'd' },
-	{ "datatype", require_arg, 't' },
-	{ "datatyp", require_arg, 't' },
-	{ "dataty", require_arg, 't' },
-	{ "datat", require_arg, 't' },
-	{ "group", require_arg, 'g' },
-	{ "grou", require_arg, 'g' },
-	{ "gro", require_arg, 'g' },
-	{ "gr", require_arg, 'g' },
-	{ "output", require_arg, 'o' },
-	{ "outpu", require_arg, 'o' },
-	{ "outp", require_arg, 'o' },
-	{ "out", require_arg, 'o' },
-	{ "ou", require_arg, 'o' },
-	{ "soft-link", require_arg, 'l' },
-	{ "soft-lin", require_arg, 'l' },
-	{ "soft-li", require_arg, 'l' },
-	{ "soft-l", require_arg, 'l' },
-	{ "soft", require_arg, 'l' },
-	{ "sof", require_arg, 'l' },
-	{ "so", require_arg, 'l' },
-	{ "width", require_arg, 'w' },
-	{ "widt", require_arg, 'w' },
-	{ "wid", require_arg, 'w' },
-	{ "wi", require_arg, 'w' },
-	{ "xml", no_arg, 'x' },
-	{ "xm", no_arg, 'x' },
-	{ "xml-dtd", require_arg, 'D' },
-	{ "xml-dt", require_arg, 'D' },
-	{ "xml-d", require_arg, 'D' },
-	{ NULL, 0, '\0' }
+    { "help", no_arg, 'h' },
+    { "hel", no_arg, 'h' },
+    { "boot-block", no_arg, 'B' },
+    { "boot-bloc", no_arg, 'B' },
+    { "boot-blo", no_arg, 'B' },
+    { "boot-bl", no_arg, 'B' },
+    { "boot-b", no_arg, 'B' },
+    { "boot", no_arg, 'B' },
+    { "boo", no_arg, 'B' },
+    { "bo", no_arg, 'B' },
+    { "header", no_arg, 'H' },
+    { "heade", no_arg, 'H' },
+    { "head", no_arg, 'H' },
+    { "hea", no_arg, 'H' },
+    { "object-ids", no_arg, 'i' },
+    { "object-id", no_arg, 'i' },
+    { "object-i", no_arg, 'i' },
+    { "object", no_arg, 'i' },
+    { "objec", no_arg, 'i' },
+    { "obje", no_arg, 'i' },
+    { "obj", no_arg, 'i' },
+    { "ob", no_arg, 'i' },
+    { "version", no_arg, 'V' },
+    { "versio", no_arg, 'V' },
+    { "versi", no_arg, 'V' },
+    { "vers", no_arg, 'V' },
+    { "ver", no_arg, 'V' },
+    { "ve", no_arg, 'V' },
+    { "attribute", require_arg, 'a' },
+    { "attribut", require_arg, 'a' },
+    { "attribu", require_arg, 'a' },
+    { "attrib", require_arg, 'a' },
+    { "attri", require_arg, 'a' },
+    { "attr", require_arg, 'a' },
+    { "att", require_arg, 'a' },
+    { "at", require_arg, 'a' },
+    { "block", require_arg, 'k' },
+    { "bloc", require_arg, 'k' },
+    { "blo", require_arg, 'k' },
+    { "bl", require_arg, 'k' },
+    { "count", require_arg, 'c' },
+    { "coun", require_arg, 'c' },
+    { "cou", require_arg, 'c' },
+    { "co", require_arg, 'c' },
+    { "dataset", require_arg, 'd' },
+    { "datase", require_arg, 'd' },
+    { "datas", require_arg, 'd' },
+    { "datatype", require_arg, 't' },
+    { "datatyp", require_arg, 't' },
+    { "dataty", require_arg, 't' },
+    { "datat", require_arg, 't' },
+    { "group", require_arg, 'g' },
+    { "grou", require_arg, 'g' },
+    { "gro", require_arg, 'g' },
+    { "gr", require_arg, 'g' },
+    { "output", require_arg, 'o' },
+    { "outpu", require_arg, 'o' },
+    { "outp", require_arg, 'o' },
+    { "out", require_arg, 'o' },
+    { "ou", require_arg, 'o' },
+    { "soft-link", require_arg, 'l' },
+    { "soft-lin", require_arg, 'l' },
+    { "soft-li", require_arg, 'l' },
+    { "soft-l", require_arg, 'l' },
+    { "soft", require_arg, 'l' },
+    { "sof", require_arg, 'l' },
+    { "so", require_arg, 'l' },
+    { "start", require_arg, 's' },
+    { "star", require_arg, 's' },
+    { "sta", require_arg, 's' },
+    { "stride", require_arg, 'T' },
+    { "strid", require_arg, 'T' },
+    { "stri", require_arg, 'T' },
+    { "str", require_arg, 'T' },
+    { "width", require_arg, 'w' },
+    { "widt", require_arg, 'w' },
+    { "wid", require_arg, 'w' },
+    { "wi", require_arg, 'w' },
+    { "xml", no_arg, 'x' },
+    { "xm", no_arg, 'x' },
+    { "xml-dtd", require_arg, 'D' },
+    { "xml-dt", require_arg, 'D' },
+    { "xml-d", require_arg, 'D' },
+    { NULL, 0, '\0' }
 };
 
 /*-------------------------------------------------------------------------
@@ -529,13 +550,14 @@ usage: %s [OPTIONS] file\n\
       -o F, --output=F    Output raw data into file F\n\
       -t T, --datatype=T  Print the specified named data type\n\
       -w #, --width=#     Set the number of columns of output\n\
-      -x, --xml           Output XML\n\
-      -D U, --xml-dtd=U  Use the DTD at URI\n\
+      -x, --xml           Output in XML\n\
+      -D U, --xml-dtd=U   Use the DTD at U\n\
+\n\
   P - is the full path from the root group to the object.\n\
   T - is the name of the data type.\n\
   F - is a filename.\n\
   # - is an integer greater than 1.\n\
-  U - is a URI a URI reference (as defined in [IETF RFC 2396],\n\
+  U - is a URI reference (as defined in [IETF RFC 2396],\n\
         updated by [IETF RFC 2732])\n\
 \n\
   Example:\n\
@@ -557,7 +579,8 @@ usage: %s [OPTIONS] file\n\
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 print_datatype(hid_t type)
 {
@@ -869,7 +892,8 @@ print_datatype(hid_t type)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_bb(void)
 {
@@ -889,7 +913,8 @@ dump_bb(void)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_datatype(hid_t type)
 {
@@ -921,7 +946,8 @@ dump_datatype(hid_t type)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_dataspace(hid_t space)
 {
@@ -987,7 +1013,8 @@ dump_dataspace(hid_t space)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 {
@@ -1043,7 +1070,8 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 dump_selected_attr(hid_t loc_id, const char *name)
 {
@@ -1191,7 +1219,8 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *   11/00  Added XML support.  Also, optionally checks the op_data
  *          argument.
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 dump_all(hid_t group, const char *name, void * op_data)
 {
@@ -1361,7 +1390,8 @@ dump_all(hid_t group, const char *name, void * op_data)
  *
  * Modifications: Comments: not yet implemented.
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_named_datatype(hid_t type, const char *name)
 {
@@ -1398,8 +1428,8 @@ dump_named_datatype(hid_t type, const char *name)
  *
  *      Call to dump_all -- add parameter to select everything.
  *
- *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_group(hid_t gid, const char *name)
 {
@@ -1474,7 +1504,8 @@ dump_group(hid_t gid, const char *name)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_dataset(hid_t did, const char *name)
 {
@@ -1537,7 +1568,8 @@ dump_dataset(hid_t did, const char *name)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 dump_tables(void)
 {
@@ -1580,7 +1612,7 @@ dump_tables(void)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------
+ *-------------------------------------------------------------------------
  */
 static void
 dump_data(hid_t obj_id, int obj_data)
@@ -1714,6 +1746,135 @@ static void
 handle_attributes(hid_t fid, char *attr)
 {
     dump_selected_attr(fid, attr);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    parse_hsize_list
+ *
+ * Purpose:     Parse a list of comma or space separated integers and return
+ *              them in a list. The string being passed into this function
+ *              should be at the start of the list you want to parse. You are
+ *              responsible for freeing the array returned from here.
+ *
+ *              Lists in the so-called "terse" syntax are separated by
+ *              semicolons (;). The lists themselves can be separated by
+ *              either commas (,) or white spaces.
+ *
+ * Return:      Success:    hsize_t array. NULL is a valid return type if
+ *                          there aren't any elements in the array.
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 6. February 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t *
+parse_hsize_list(const char *h_list)
+{
+    hsize_t *p_list;
+    const char *ptr;
+    unsigned int size_count = 0, i = 0, last_digit = 0;
+
+    if (!h_list || !*h_list || *h_list == ';')
+        return NULL;
+
+    /* count how many integers do we have */
+    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
+        if (isdigit(*ptr)) {
+            if (!last_digit)
+                /* the last read character wasn't a digit */
+                size_count++;
+
+            last_digit = 1;
+        } else {
+            last_digit = 0;
+        }
+
+    if (size_count == 0)
+        /* there aren't any integers to read */
+        return NULL;
+
+    /* allocate an array for the integers in the list */
+    p_list = calloc(size_count, sizeof(hsize_t));
+
+    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
+        if (isdigit(*ptr)) {
+            /* we should have an integer now */
+            p_list[i++] = (hsize_t)atoi(ptr);
+
+            while (isdigit(*ptr))
+                /* scroll to end of integer */
+                ptr++;
+        }
+
+    return p_list;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    parse_subset_params
+ *
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting
+ *              parameters.
+ *
+ * Return:      Success:    struct subset_t object
+ *              Failure:    NULL
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 6. February 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static struct subset_t *
+parse_subset_params(char *dset)
+{
+    struct subset_t *s = NULL;
+    register char *brace;
+
+    if ((brace = strrchr(dset, '[')) != NULL) {
+        char *slash = strrchr(dset, '/');
+
+        /* sanity check to make sure the [ isn't part of the dataset name */
+        if (brace > slash) {
+            *brace++ = '\0';
+            s = calloc(1, sizeof(struct subset_t));
+
+            printf("start\n");
+            s->start = parse_hsize_list(brace);
+
+            while (*brace && *brace != ';')
+                brace++;
+
+            if (*brace)
+                brace++;
+
+            printf("stride\n");
+            s->stride = parse_hsize_list(brace);
+
+            while (*brace && *brace != ';')
+                brace++;
+
+            if (*brace)
+                brace++;
+
+            printf("count\n");
+            s->count = parse_hsize_list(brace);
+
+            while (*brace && *brace != ';')
+                brace++;
+
+            if (*brace)
+                brace++;
+
+            printf("block\n");
+            s->block = parse_hsize_list(brace);
+        }
+    }
+
+    return s;
 }
 
 /*-------------------------------------------------------------------------
@@ -1958,7 +2119,7 @@ handle_datatypes(hid_t fid, char *type)
  *        Albert Cheng, 30. September 2000
  *        Add the -o option--output file for datasets raw data
  *
- *        Nov. 2000, REMcG, November 2000
+ *        REMcG, November 2000
  *        Changes to support XML.
  *
  *        Bill Wendling
@@ -1979,8 +2140,8 @@ main(int argc, const char *argv[])
     hid_t               (*func)(void*);
     find_objs_t         info;
     int                 opt;
-    struct handler_t   *hand;
-    int                 usingdasho = FALSE;
+    struct handler_t   *hand, *last_dset;
+    int                 usingdasho = FALSE, last_was_dset = FALSE;
 
     if (argc < 2) {
         usage(progname);
@@ -2002,15 +2163,19 @@ main(int argc, const char *argv[])
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+parse_start:
         switch ((char)opt) {
         case 'B':
             display_bb = TRUE;
+            last_was_dset = FALSE;
             break;
         case 'H':
             display_data = FALSE;
+            last_was_dset = FALSE;
             break;
         case 'v':
             display_oid = TRUE;
+            last_was_dset = FALSE;
             break;
         case 'V':
             print_version(progname);
@@ -2018,6 +2183,7 @@ main(int argc, const char *argv[])
             break;
         case 'w':
             nCols = atoi(opt_arg);
+            last_was_dset = FALSE;
             break;
         case 'a':
             display_all = 0;
@@ -2029,6 +2195,7 @@ main(int argc, const char *argv[])
                     break;
                 }
 
+            last_was_dset = FALSE;
             break;
         case 'd':
             display_all = 0;
@@ -2037,9 +2204,12 @@ main(int argc, const char *argv[])
                 if (!hand[i].func) {
                     hand[i].func = handle_datasets;
                     hand[i].obj = strdup(opt_arg);
+                    hand[i].subset_info = parse_subset_params(hand[i].obj);
+                    last_dset = hand;
                     break;
                 }
 
+            last_was_dset = TRUE;
             break;
         case 'g':
             display_all = 0;
@@ -2051,6 +2221,7 @@ main(int argc, const char *argv[])
                     break;
                 }
 
+            last_was_dset = FALSE;
             break;
         case 'l':
             display_all = 0;
@@ -2062,6 +2233,7 @@ main(int argc, const char *argv[])
                     break;
                 }
 
+            last_was_dset = FALSE;
             break;
         case 't':
             display_all = 0;
@@ -2073,6 +2245,7 @@ main(int argc, const char *argv[])
                     break;
                 }
 
+            last_was_dset = FALSE;
             break;
         case 'o':
             if (set_output_file(opt_arg) < 0){
@@ -2080,7 +2253,9 @@ main(int argc, const char *argv[])
                 usage(progname);
                 exit(EXIT_FAILURE);
             }
+
             usingdasho = TRUE;
+            last_was_dset = FALSE;
             break;
 
         /** XML parameters **/
@@ -2096,6 +2271,58 @@ main(int argc, const char *argv[])
             break;
         /** end XML parameters **/
 
+        /** subsetting parameters **/
+        case 's':
+        case 'T':
+        case 'c':
+        case 'k': {
+            struct subset_t *s;
+
+            if (!last_was_dset) {
+                fprintf(stderr, "%s error: option `-%c' can only be used after --dataset option\n",
+                        progname, opt);
+                exit(EXIT_FAILURE);
+            }
+
+            if (last_dset->subset_info) {
+                /* this overrides the "terse" syntax if they actually mixed
+                 * the two */
+                s = last_dset->subset_info;
+            } else {
+                last_dset->subset_info = s = calloc(1, sizeof(struct subset_t));
+            }
+
+            /*
+             * slightly convoluted, but...we are only interested in options
+             * for subsetting: "--start", "--stride", "--count", and "--block"
+             * which can come in any order. If we run out of parameters (EOF)
+             * or run into one which isn't a subsetting parameter (NOT s, T,
+             * c, or K), then we exit the do-while look, set hte subset_info
+             * to the structure we've been filling. If we've reached the end
+             * of the options, we exit the parsing (goto parse_end) otherwise,
+             * since we've "read" the next option, we need to parse it. So we
+             * just to the beginning of the switch statement (goto parse_start).
+             */
+            do {
+                switch ((char)opt) {
+                case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
+                case 'T': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
+                case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
+                case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
+                default: goto end_collect;
+                }
+            } while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF);
+
+end_collect:
+            last_was_dset = FALSE;
+
+            if (opt != EOF)
+                goto parse_start;
+            else
+                goto parse_end;
+        }
+        /** end subsetting parameters **/
+
         case 'h':
             usage(progname);
             exit(EXIT_SUCCESS);
@@ -2106,6 +2333,7 @@ main(int argc, const char *argv[])
         }
     }
 
+parse_end:
     /*  check for conflicting options */
     if (doxml) {
 	if (!display_all) {
@@ -2272,6 +2500,14 @@ done:
 
     for (i = 0; i < argc; i++) {
         free(hand[i].obj);
+
+        if (hand[i].subset_info) {
+            free(hand[i].subset_info->start);
+            free(hand[i].subset_info->stride);
+            free(hand[i].subset_info->count);
+            free(hand[i].subset_info->block);
+            free(hand[i].subset_info);
+        }
     }
 
     free(hand);
@@ -2410,8 +2646,7 @@ print_enum(hid_t type)
  *  method of selecting which one.
  */
 
-struct ref_path_table_entry_t
-{
+struct ref_path_table_entry_t {
     hsize_t                 obj;
     hobj_ref_t             *obj_ref;
     char                   *apath;
@@ -2434,7 +2669,8 @@ int                     npte = 0;	/* number of entries in the table */
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static struct ref_path_table_entry_t *
 ref_path_table_lookup(const char *thepath)
 {
@@ -2442,24 +2678,32 @@ ref_path_table_lookup(const char *thepath)
     hobj_ref_t             *ref;
     herr_t                  status;
     struct ref_path_table_entry_t *pte = ref_path_table;
+
     if (ref_path_table == NULL)
 	return NULL;
+
     ref = (hobj_ref_t *) malloc(sizeof(hobj_ref_t));
+
     if (ref == NULL) {
 	/*  fatal error ? */
 	return NULL;
     }
+
     status = H5Rcreate(ref, thefile, thepath, H5R_OBJECT, -1);
+
     if (status < 0) {
 	/*  fatal error ? */
 	return NULL;
     }
+
     for (i = 0; i < npte; i++) {
 	if (memcmp(ref, pte->obj_ref, sizeof(hobj_ref_t)) == 0) {
 	    return pte;
 	}
+
 	pte = pte->next;
     }
+
     return NULL;
 }
 
@@ -2477,9 +2721,9 @@ ref_path_table_lookup(const char *thepath)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
-
-static hobj_ref_t             *
+ *-------------------------------------------------------------------------
+ */
+static hobj_ref_t *
 ref_path_table_put(hid_t obj, const char *path)
 {
     hobj_ref_t             *ref;
@@ -2539,7 +2783,8 @@ ref_path_table_put(hid_t obj, const char *path)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static char                   *
 lookup_ref_path(hobj_ref_t * ref)
 {
@@ -2575,8 +2820,8 @@ lookup_ref_path(hobj_ref_t * ref)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
-
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
 {
@@ -2669,8 +2914,8 @@ static const char      *apos = "&apos;";
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
-
+ *-------------------------------------------------------------------------
+ */
 static char                   *
 xml_escape_the_name(const char *str)
 {
@@ -2752,8 +2997,8 @@ xml_escape_the_name(const char *str)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
-
+ *-------------------------------------------------------------------------
+ */
 static char                   *
 xml_escape_the_string(const char *str, int slen)
 {
@@ -2843,7 +3088,8 @@ xml_escape_the_string(const char *str, int slen)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_print_datatype(hid_t type)
 {
@@ -3210,7 +3456,8 @@ xml_print_datatype(hid_t type)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_datatype(hid_t type)
 {
@@ -3272,7 +3519,8 @@ xml_dump_datatype(hid_t type)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_dataspace(hid_t space)
 {
@@ -3337,7 +3585,8 @@ xml_dump_dataspace(hid_t space)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_data(hid_t obj_id, int obj_data)
 {
@@ -3442,7 +3691,8 @@ xml_dump_data(hid_t obj_id, int obj_data)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 {
@@ -3521,7 +3771,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 		break;
 	    }
 	} else {
-	    /* The case of an attribute never yet written (??) */
+	    /* The case of an attribute never yet written ?? */
 	    indentation(indent);
 	    printf("<Data>\n");
 	    indentation(indent + COL);
@@ -3559,7 +3809,8 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_named_datatype(hid_t type, const char *name)
 {
@@ -3666,7 +3917,8 @@ xml_dump_named_datatype(hid_t type, const char *name)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_group(hid_t gid, const char *name)
 {
@@ -3810,7 +4062,8 @@ xml_dump_group(hid_t gid, const char *name)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static int
 xml_print_refs(hid_t did, int source)
 {
@@ -3899,7 +4152,8 @@ xml_print_refs(hid_t did, int source)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static int
 xml_print_strs(hid_t did, int source)
 {
@@ -3989,7 +4243,8 @@ xml_print_strs(hid_t did, int source)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 check_compression(hid_t dcpl)
 {
@@ -4032,7 +4287,8 @@ check_compression(hid_t dcpl)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_dump_dataset(hid_t did, const char *name)
 {
@@ -4186,7 +4442,8 @@ xml_dump_dataset(hid_t did, const char *name)
  *
  * Modifications:
  *
- *-----------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------
+ */
 static void
 xml_print_enum(hid_t type)
 {
