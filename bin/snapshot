@@ -178,7 +178,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    cd ${COMPARE}/current
 # "perl -w ..." doesn't appear to be working on baldric..
 #    cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
-	    cvs -Q tag hdf5-`perl bin/h5vers |tr . _`
+#	    cvs -Q tag hdf5-`perl bin/h5vers |tr . _`
 	    bin/release -d $ARCHIVES $METHODS
 #    RELEASE_VERSION="`perl -w bin/h5vers -v`"
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
