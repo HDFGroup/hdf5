@@ -24,7 +24,7 @@
 # for execution.
 #
 debug="-g -UH5O_DEBUG -DH5F_OPT_SEEK=0"
-default_mode="-DDOS386 $debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+default_mode="$debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
 # Using the MPICH libary by Daniel Sands.
 # It contains both MPI-1 and MPI-IO functions.
