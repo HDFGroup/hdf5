@@ -12,7 +12,7 @@ namespace H5 {
 	// It is not even working, inifiteloop message still printed when
 	// calling H5close
 
-class H5Library {
+class __DLLCPP__ H5Library {
    public:
 	static bool need_cleanup; // indicates if H5close should be called
 

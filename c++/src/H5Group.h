@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class Group : public H5Object, public CommonFG {
+class __DLLCPP__ Group : public H5Object, public CommonFG {
    public:
 	// default constructor
 	Group();

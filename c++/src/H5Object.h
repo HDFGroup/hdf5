@@ -13,7 +13,7 @@
 namespace H5 {
 #endif
 
-class H5Object;  // forward declaration for UserData4Aiterate
+class __DLLCPP__ H5Object;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)( H5Object& loc/*in*/, 
@@ -30,7 +30,7 @@ class UserData4Aiterate { // user data for attribute iteration
 
 // The above part is being moved into Iterator, but not completed
 
-class H5Object : public IdComponent {
+class __DLLCPP__ H5Object : public IdComponent {
    public:
 	// Pure virtual function so appropriate close function can 
 	// be called by subclasses' for the corresponding HDF5 object

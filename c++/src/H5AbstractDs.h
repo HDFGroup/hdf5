@@ -10,7 +10,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
-class AbstractDs : public H5Object {
+class __DLLCPP__ AbstractDs : public H5Object {
    public:
 	// Gets the dataspace of this abstract dataset - pure virtual
 	virtual DataSpace getSpace() const = 0;

@@ -9,7 +9,7 @@
 namespace H5 {
 #endif
 
-class CompType : public DataType {
+class __DLLCPP__ CompType : public DataType {
    public:
 	// Creates a new compound datatype, given the type's size
 	CompType( size_t size ); // H5Tcreate
@@ -59,7 +59,7 @@ class CompType : public DataType {
 	StrType getMemberStrType( int member_num ) const;
 
 	// Adds a new member to this compound datatype.
-	void insertMember( const string name, size_t offset, const DataType& new_member ) const;
+	void insertMember( const string& name, size_t offset, const DataType& new_member ) const;
 
 	// Recursively removes padding from within this compound datatype. 
 	void pack() const;

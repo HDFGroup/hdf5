@@ -12,7 +12,7 @@ namespace H5 {
 
 class Group;
 class H5File;
-class CommonFG {
+class __DLLCPP__ CommonFG {
    public:
 	// Creates a new group at this location which can be a file or another group.
 	Group createGroup( const string& name, size_t size_hint = 0 ) const;

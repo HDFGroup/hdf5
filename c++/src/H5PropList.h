@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class PropList : public IdComponent {
+class __DLLCPP__ PropList : public IdComponent {
    public:
 	// Default property list
         static const PropList DEFAULT;

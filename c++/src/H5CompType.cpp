@@ -198,7 +198,7 @@ void CompType::getMemberType( int member_num, StrType& strtype ) const
 */
 
 // Adds a new member to a compound datatype
-void CompType::insertMember( const string name, size_t offset, const DataType& new_member ) const
+void CompType::insertMember( const string& name, size_t offset, const DataType& new_member ) const
 {
    // Convert string to C-string
    const char* name_C;
