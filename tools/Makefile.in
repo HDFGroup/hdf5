@@ -1,6 +1,6 @@
 ## Tools HDF5 Makefile(.in)
 ##
-## Copyright (C) 2001
+## Copyright (C) 2001, 2002
 ##     National Center for Supercomputing Applications.
 ##     All rights reserved.
 ##
@@ -10,7 +10,7 @@ srcdir=@srcdir@
 
 ## All subdirectories except for the ``lib'' subdirectory.
 ##
-SUBDIRS=h5dump h5ls misc gifconv @H5TOH4@ @H4TOH5@
+SUBDIRS=h5dump h5ls misc gifconv
 
 @COMMENCE@
 

@@ -423,7 +423,7 @@ dnl
 AC_CHECK_LIB(m,ceil)
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
-  dnl ...for Solaris and hdf4
+  dnl ...for Solaris
   AC_CHECK_LIB(nsl, xdr_int)
 fi
 
@@ -477,7 +477,7 @@ case "$host_cpu-$host_vendor-$host_os" in
         AC_CHECK_FUNCS(getdents64,
             dnl Add the large file support flags to the CPPFLAGS macro if
             dnl we're on a Linux system which austensibly supports LFS. (We
-            dnl think it does if it has the ``getdents64'' syscall).
+            dnl think it does if it has the `getdents64' syscall).
             LINUX_LFS=yes)
         ;;
     esac
@@ -607,119 +607,6 @@ AC_ARG_WITH(fnord,
     --with-xxx=DIR     - Specify only the directory which contains the
                          include/ and lib/ subdirectories
   ],,)
-
-dnl ----------------------------------------------------------------------
-dnl Is HDF4 present?  If so then we can compile the hdf4 related tools.
-dnl The HDF4 software has 4 component libraries (df, mfhdf, z, jpeg)
-dnl and many header files.  Will just verify the presence of mfhdf.h
-dnl because it includes many other HDF4 header files.
-dnl Their locations might be specified with the `--with-hdf4' command-line
-dnl switch.  The value is an include path and/or a library path.
-dnl If the library path is specified then it must be preceded by a comma.
-dnl
-dnl To check, we first assume HDF4 is present and then prove otherwise
-dnl when we cannot find all its components.
-dnl Notice that HDF4 (when wanted) must be checked before checking for
-dnl the ZLIB components because:
-dnl    1. HDF4 components contain ZLIB components.
-dnl    2. ZLIB components are always checked while HDF4 components are optional.
-dnl If ZLIB is checked first and not found, the libz value is set to no.
-dnl That will cause the later checking of HDF4 components, which also
-dnl include libz, to always fail.
-dnl If HDF4 components are checked first and the libz is not found, it will
-dnl cause the later checking of ZLIB componenets to fail too.  But in this
-dnl case, one can configure again without the optional with-hdf4 option.
-dnl
-AC_SUBST(HAVE_HDF4) HAVE_HDF4="no"
-AC_SUBST(HAVE_ZLIB) HAVE_ZLIB="no"
-
-AC_SUBST(H5TOH4) H5TOH4=h5toh4
-AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4.sh'
-
-AC_SUBST(H4TOH5) H4TOH5=h4toh5
-AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
-AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
-
-AC_ARG_WITH(hdf4,
-  [  --with-hdf4[=DIR]       Use the HDF4 library [default=no]],,
-  withval=no)
-
-case "$withval" in
-  yes)
-    failed="no"
-    AC_CHECK_LIB(z, compress2,, failed="yes")
-    if test "$failed" = "no"; then
-      HAVE_ZLIB="yes"
-      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
-    fi
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
-    fi
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
-    fi
-
-    if test "$failed" = "yes"; then
-      unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
-    else
-      HAVE_HDF4="yes"
-    fi
-    ;;
-  no)
-    AC_MSG_CHECKING(for HDF4)
-    AC_MSG_RESULT(suppressed)
-    unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        hdf4_inc="`echo $withval | cut -f1 -d,`"
-        hdf4_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          hdf4_inc="$withval/include"
-          hdf4_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    if test -n "$hdf4_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
-    fi
-
-    failed="no"
-    AC_CHECK_HEADERS(mfhdf.h,, failed="yes")
-
-    if test -n "$hdf4_lib"; then
-      LDFLAGS="$LDFLAGS -L$hdf4_lib"
-    fi
-
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(z, compress2,, failed="yes")
-    fi
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
-      HAVE_ZLIB="yes"
-    fi
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
-    fi
-    if test "$failed" = "no"; then
-      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
-    fi
-
-    if test "$failed" = "yes"; then
-      CPPFLAGS="$saved_CPPFLAGS"
-      LDFLAGS="$saved_LDFLAGS"
-      unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
-    else
-      HAVE_HDF4="yes"
-    fi
-    ;;
-esac
 
 dnl ----------------------------------------------------------------------
 dnl Is the GNU zlib present? It has a header file `zlib.h' and a library
@@ -1322,17 +1209,16 @@ AC_TRY_RUN([
 
 int main(void)
 {
-	exit(malloc (0) ? 0 : 1);
+    exit(malloc (0) ? 0 : 1);
 }
-   ], hdf5_cv_malloc_works=yes,hdf5_cv_malloc_works=no,)
-)
+], hdf5_cv_malloc_works=yes, hdf5_cv_malloc_works=no,))
 
 if test ${hdf5_cv_malloc_works} = "yes"; then
-    AC_DEFINE(MALLOC_WORKS, 1,
-        [Define if your system has a working `malloc' function.])
-    AC_MSG_RESULT(yes)
+  AC_DEFINE(MALLOC_WORKS, 1,
+            [Define if your system has a working \`malloc' function.])
+  AC_MSG_RESULT(yes)
 else
-    AC_MSG_RESULT(no)
+  AC_MSG_RESULT(no)
 fi
     
 dnl ----------------------------------------------------------------------
@@ -1454,7 +1340,7 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun)
 
     dnl Find the path where mpicc is located.
-    cmd=`echo $CC | cut -f1 -d' '`
+    cmd="`echo $CC | cut -f1 -d' '`"
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
@@ -1485,7 +1371,7 @@ case "$CC_BASENAME" in
     AC_MSG_CHECKING(for mpirun_lam or mpirun)
 
     dnl Find the path where hcc is located
-    cmd=`echo $CC | cut -f1 -d' '`
+    cmd="`echo $CC | cut -f1 -d' '`"
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
@@ -1590,7 +1476,7 @@ case "X-$enable_parallel" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Should the `testpar' directory participate in the build?
+dnl Should the 'testpar' directory participate in the build?
 dnl
 if test -n "$PARALLEL"; then
   TESTPARALLEL=testpar
@@ -1663,11 +1549,11 @@ dnl and installed with the libraries.
 dnl
 
 dnl HDF5 version from the first line of the README.txt file.
-H5_VERSION=`cut -d' ' -f3 $srcdir/README.txt | head -1`
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
 AC_SUBST(H5_VERSION)
 
 dnl Configuration date
-AC_SUBST(CONFIG_DATE) CONFIG_DATE=`date`
+AC_SUBST(CONFIG_DATE) CONFIG_DATE="`date`"
 
 dnl User doing the configuration
 AC_SUBST(CONFIG_USER) CONFIG_USER="`whoami`@`hostname`"
@@ -1746,7 +1632,7 @@ if test -x /bin/pwd; then
 else
   pwd=pwd
 fi
-AC_SUBST(ROOT) ROOT=`$pwd`
+AC_SUBST(ROOT) ROOT="`$pwd`"
 
 dnl ----------------------------------------------------------------------
 dnl Determine the runtime libraries we may need to include in the
@@ -1758,7 +1644,7 @@ if test -n "$LDFLAGS"; then
   for d in $LDFLAGS ; do
     case "$d" in
       -L*)
-        d=`echo $d | sed -e 's/-L//g'`
+        d="`echo $d | sed -e 's/-L//g'`"
         case "$d" in
           .*)
             dnl If the path isn't absolute, make it so by
@@ -1845,16 +1731,6 @@ if test "$HAVE_PABLO" = "yes"; then
   fi
 fi
 
-EXTRA_H4_MAKEFILES=""
-
-if test -n "$H4TOH5"; then
-  EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h4toh5/Makefile"
-fi
-    
-if test -n "$H5TOH4"; then
-   EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h5toh4/Makefile"
-fi
-
 AC_OUTPUT(src/libhdf5.settings
           config/depend1
           config/depend2
@@ -1876,7 +1752,6 @@ AC_OUTPUT(src/libhdf5.settings
           tools/misc/Makefile
           tools/misc/h5cc
           tools/gifconv/Makefile
-          $EXTRA_H4_MAKEFILES
           examples/Makefile
           doc/Makefile
           doc/html/Makefile
@@ -2003,9 +1878,6 @@ IF_YES_NO "$HDF_FORTRAN"
 
 PRINT_N "                           GASS"
 IF_YES_NO "$GASS"
-
-PRINT_N "                           HDF4"
-IF_YES_NO "$HAVE_HDF4"
 
 PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
