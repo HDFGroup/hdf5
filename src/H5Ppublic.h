@@ -210,6 +210,7 @@ H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]);
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
+H5_DLL herr_t H5Pset_shuffle(hid_t plist_id, unsigned bytespertype);
 #ifdef H5_WANT_H5_V1_4_COMPAT
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, int rdcc_nelmts,
        size_t rdcc_nbytes, double rdcc_w0);
