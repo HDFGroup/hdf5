@@ -16,7 +16,7 @@
  * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
  *              April 12, 2002
  *
- * Purpose:     Tests the H5Dset_extent call
+ * Purpose:     Tests the "ID to name" functionality
  */
 
 #include "hdf5.h"

@@ -2839,9 +2839,6 @@ done:
  *		Modified H5F_flush call to take one flag instead of
  *		several Boolean flags.
  *
- *  Pedro Vicente, 2003-04-21
- *		Changed do.while loop to while in the H5F_CLOSE_STRONG case.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
