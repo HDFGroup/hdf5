@@ -16,9 +16,9 @@
 #define VERSION12
 #endif	/* H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2 */
 
-#define ESCAPE_HTML     1
-
-#define OPT(X,S)		((X) ? (X) : (S))
+#define ESCAPE_HTML             1
+#define OPT(X,S)                ((X) ? (X) : (S))
+#define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
 
 /*
  * Information about how to format output.
@@ -308,7 +308,6 @@ typedef struct h5dump_t {
 
 } h5dump_t;
 
-
 typedef struct dump_header{
     const char *name;
     const char *filebegin;
@@ -384,67 +383,32 @@ typedef struct dump_header{
 
 } dump_header;
 
-/*
- * begin get_option section
- */
-extern int         opt_err;     /* getoption prints errors if this is on    */
-extern int         opt_ind;     /* token pointer                            */
-extern const char *opt_arg;     /* flag argument (or value)                 */
+typedef struct h5tools_context_t {
+    size_t	cur_column;	/*current column for output	*/
+    size_t	cur_elmt;	/*current element/output line	*/
+    int		need_prefix;	/*is line prefix needed?	*/
+    int		ndims;		/*dimensionality		*/
+    hsize_t	p_min_idx[H5S_MAX_RANK]; /*min selected index	*/
+    hsize_t	p_max_idx[H5S_MAX_RANK]; /*max selected index	*/
+    int		prev_multiline;	/*was prev datum multiline?	*/
+    size_t	prev_prefix_len;/*length of previous prefix	*/
+    int		continuation;	/*continuation of previous data?*/
+    int		size_last_dim;  /*the size of the last dimension,
+                                 *needed so we can break after each
+                                 *row */
+    int		indent_level;   /*the number of times we need some
+                                 *extra indentation */
+    int		default_indent_level; /*this is used when the indent
+                                       *level gets changed */
+} h5tools_context_t;
 
-enum {
-    no_arg = 0,         /* doesn't take an argument     */
-    require_arg,        /* requires an argument	        */
-    optional_arg        /* argument is optional         */
+/* a structure to hold the subsetting particulars for a dataset */
+struct subset_t {
+    hsize_t *start;
+    hsize_t *stride;
+    hsize_t *count;
+    hsize_t *block;
 };
-
-/*
- * get_option determines which options are specified on the command line and
- * returns a pointer to any arguments possibly associated with the option in
- * the ``opt_arg'' variable. get_option returns the shortname equivalent of
- * the option. The long options are specified in the following way:
- *
- * struct long_options foo[] = {
- * 	{ "filename", require_arg, 'f' },
- * 	{ "append", no_arg, 'a' },
- * 	{ "width", require_arg, 'w' },
- * 	{ NULL, 0, 0 }
- * };
- *
- * Long named options can have arguments specified as either:
- *
- * 	``--param=arg'' or ``--param arg''
- *
- * Short named options can have arguments specified as either:
- *
- * 	``-w80'' or ``-w 80''
- *
- * and can have more than one short named option specified at one time:
- *
- * 	-aw80
- * 
- * in which case those options which expect an argument need to come at the
- * end.
- */
-typedef struct long_options {
-    const char  *name;          /* name of the long option              */
-    int          has_arg;       /* whether we should look for an arg    */
-    char         shortval;      /* the shortname equivalent of long arg
-                                 * this gets returned from get_option   */
-} long_options;
-
-extern int    get_option(int argc, const char **argv, const char *opt,
-                         const struct long_options *l_opt);
-/*
- * end get_option section
- */
-
-extern hid_t  h5dump_fixtype(hid_t f_type);
-extern int    h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
-                          hid_t p_typ, int indentlevel);
-extern int    h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
-                         hid_t type, hid_t space, void *mem, int indentlevel);
-extern hid_t  h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
-
 
 /*if we get a new program that needs to use the library add its name here*/
 typedef enum {
@@ -452,38 +416,6 @@ typedef enum {
     H5LS,
     H5DUMP
 } ProgType;
-
-/*struct taken from the dumper. needed in table struct*/
-typedef struct obj_t {
-    unsigned long objno[2];
-    char objname[1024];
-    int displayed;
-    int recorded;
-    int objflag;
-} obj_t;
-
-/*struct for the tables that the find_objs function uses*/
-typedef struct table_t {
-    int size;
-    int nobjs;
-    obj_t *objs;
-} table_t;
-
-/*this struct stores the information that is passed to the find_objs function*/
-typedef struct find_objs_t {
-    int prefix_len; 
-    char *prefix;
-    unsigned int threshold; /* should be 0 or 1 */
-    table_t *group_table;
-    table_t *type_table;
-    table_t *dset_table;
-    int status;
-} find_objs_t;
-
-extern herr_t  find_objs(hid_t group, const char *name, void *op_data);
-extern int     search_obj (table_t *temp, unsigned long *);
-extern void    init_table(table_t **temp);
-extern void    init_prefix(char **temp, int);
 
 /* taken from h5dump.h */
 #define ATTRIBUTE_DATA  0
@@ -493,10 +425,7 @@ extern void    init_prefix(char **temp, int);
 #define COL             3
 
 extern int     indent;              /*how far in to indent the line         */
-extern int     nCols;               /*max number of columns for outputting  */
 extern FILE   *rawdatastream;       /*output stream for raw data            */
-
-extern void    indentation(int);
 
 /* taken from h5dump.h*/
 #define ATTRIBUTE       "ATTRIBUTE"
@@ -533,10 +462,13 @@ extern void    indentation(int);
 #define END             "}"
 
 /* Definitions of useful routines */
-extern void     print_version(const char *progname);
 extern void     h5tools_init(void);
 extern void     h5tools_close(void);
-extern void     error_msg(const char *progname, const char *fmt, ...);
-extern void     warn_msg(const char *progname, const char *fmt, ...);
+extern hid_t    h5tools_fopen(const char *fname, char *drivername, size_t drivername_len);
+extern hid_t    h5tools_fixtype(hid_t f_type);
+extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+                                  hid_t p_typ, struct subset_t *sset, int indentlevel);
+extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
+                                 hid_t type, hid_t space, void *mem, int indentlevel);
 
 #endif	/* H5TOOLS_H__ */

@@ -9,46 +9,25 @@
  *		readable format.
  */
 
-/*
- * Portions of this work are derived from _Obfuscated C and Other Mysteries_,
- * by Don Libes, copyright (c) 1993 by John Wiley & Sons, Inc.
- */
-
-#include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "h5tools.h"
 #include "h5tools_str.h"
+#include "h5tools_utils.h"
 #include "hdf5.h"
 #include "H5private.h"
 
-/* taken from h5dumputil.c */
-
-/*
- * If REPEAT_VERBOSE is defined then character strings will be printed so
- * that repeated character sequences like "AAAAAAAAAA" are displayed as
- *
- * 	'A' repeates 9 times
- *
- * Otherwise the format is more Perl-like
- *
- * 	'A'*10
- * 
- */
-#define REPEAT_VERBOSE
-
 /*
  * The output functions need a temporary buffer to hold a piece of the
- * dataset while it's being printed.  This constant sets the limit on the
- * size of that temporary buffer in bytes.  For efficiency's sake, choose the
+ * dataset while it's being printed. This constant sets the limit on the
+ * size of that temporary buffer in bytes. For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
 #if 1
-#define H5DUMP_BUFSIZE          (1024 * 1024)
+#define H5TOOLS_BUFSIZE         (1024 * 1024)
 #else
-#define H5DUMP_BUFSIZE          (1024)
+#define H5TOOLS_BUFSIZE         (1024)
 #endif
 
 #define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
@@ -56,248 +35,13 @@
 #define START_OF_DATA		0x0001
 #define END_OF_DATA		0x0002
 
-/* Special strings embedded in the output */
-#define OPTIONAL_LINE_BREAK     "\001"
+/* global variables */
+int         indent;
+int         compound_data;
+FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it */
 
 /* module-scoped variables */
-static int h5tools_init_g;      /* if h5tools lib has been initialized */
-
-int   indent;
-int   compound_data;
-int   nCols = 80;
-FILE *rawdatastream;	/* should initialize to stdout but gcc moans about it */
-
-/* ``get_option'' variables */
-int         opt_err = 1;    /*get_option prints errors if this is on */
-int         opt_ind = 1;    /*token pointer                          */
-const char *opt_arg;        /*flag argument (or value)               */
-
-/* Output variables */
-typedef struct h5tools_context_t {
-    size_t	cur_column;	/*current column for output	*/
-    size_t	cur_elmt;	/*current element/output line	*/
-    int		need_prefix;	/*is line prefix needed?	*/
-    int		ndims;		/*dimensionality		*/
-    hsize_t	p_min_idx[H5S_MAX_RANK]; /*min selected index	*/
-    hsize_t	p_max_idx[H5S_MAX_RANK]; /*max selected index	*/
-    int		prev_multiline;	/*was prev datum multiline?	*/
-    size_t	prev_prefix_len;/*length of previous prefix	*/
-    int		continuation;	/*continuation of previous data?*/
-    int		size_last_dim;  /*the size of the last dimension,
-                                 *needed so we can break after each
-                                 *row */
-    int		indent_level;   /*the number of times we need some
-                                 *extra indentation */
-    int		default_indent_level; /*this is used when the indent
-                                       *level gets changed */
-} h5tools_context_t;
-
-typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
-
-extern void  free_table(table_t **table);
-extern void  dump_table(char *name, table_t* table);
-extern int   get_table_idx(table_t *table, unsigned long *);
-extern int   get_tableflag(table_t*, int);
-extern int   set_tableflag(table_t*, int);
-extern char *get_objectname(table_t*, int);
-
-
-/*-------------------------------------------------------------------------
- * Function:	error_msg
- *
- * Purpose:	Print a nicely formatted error message to stderr flushing the
- *              stdout stream first.
- *
- * Return:	Nothing
- *
- * Programmer:	Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-error_msg(const char *progname, const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    fflush(stdout);
-    fprintf(stderr, "%s error: ", progname);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	warn_msg
- *
- * Purpose:	Print a nicely formatted warning message to stderr flushing
- *              the stdout stream first.
- *
- * Return:	Nothing
- *
- * Programmer:	Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-warn_msg(const char *progname, const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    fflush(stdout);
-    fprintf(stderr, "%s warning: ", progname);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	get_option
- *
- * Purpose:	Determine the command-line options a user specified. We can
- *		accept both short and long type command-lines.
- *
- * Return:	Success:	The short valued "name" of the command line
- * 				parameter or EOF if there are no more
- * 				parameters to process.
- *
- *		Failure:	A question mark.
- *
- * Programmer:	Bill Wendling
- *              Friday, 5. January 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
-{
-    static int sp = 1;    /* character index in current token */
-    int opt_opt = '?';    /* option character passed back to user */
-
-    if (sp == 1) {
-        /* check for more flag-like tokens */
-        if (opt_ind >= argc || argv[opt_ind][0] != '-' || argv[opt_ind][1] == '\0') {
-            return EOF;
-        } else if (strcmp(argv[opt_ind], "--") == 0) {
-            opt_ind++;
-            return EOF;
-        }
-    }
-
-    if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
-        /* long command line option */
-        const char *arg = &argv[opt_ind][2];
-        register int i;
-
-        for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = strlen(l_opts[i].name);
-
-            if (strncmp(arg, l_opts[i].name, len) == 0) {
-                /* we've found a matching long command line flag */
-                opt_opt = l_opts[i].shortval;
-
-                if (l_opts[i].has_arg != no_arg) {
-                    if (arg[len] == '=') {
-                        opt_arg = &arg[len + 1];
-                    } else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
-                        opt_arg = argv[++opt_ind];
-                    } else if (l_opts[i].has_arg == require_arg) {
-                        if (opt_err)
-                            fprintf(stderr,
-                                    "%s: option required for \"--%s\" flag\n",
-                                    argv[0], arg);
-
-                        opt_opt = '?';
-                    }
-                } else {
-                    if (arg[len] == '=') {
-                        if (opt_err)
-                            fprintf(stderr,
-                                    "%s: no option required for \"%s\" flag\n",
-                                    argv[0], arg);
-
-                        opt_opt = '?';
-                    }
-
-                    opt_arg = NULL;
-                }
-
-                break;
-            }
-        }
-
-        if (l_opts[i].name == NULL) {
-            /* exhausted all of the l_opts we have and still didn't match */
-            if (opt_err)
-                fprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
-
-            opt_opt = '?';
-        }
-
-        opt_ind++;
-        sp = 1;
-    } else {
-        register char *cp;    /* pointer into current token */
-
-        /* short command line option */
-        opt_opt = argv[opt_ind][sp];
-
-        if (opt_opt == ':' || (cp = strchr(opts, opt_opt)) == 0) {
-            if (opt_err)
-                fprintf(stderr, "%s: unknown option \"%c\"\n",
-                        argv[0], opt_opt);
-
-            /* if no chars left in this token, move to next token */
-            if (argv[opt_ind][++sp] == '\0') {
-                opt_ind++;
-                sp = 1;
-            }
-
-            return '?';
-        }
-
-        if (*++cp == ':') {
-            /* if a value is expected, get it */
-            if (argv[opt_ind][sp + 1] != '\0') {
-                /* flag value is rest of current token */
-                opt_arg = &argv[opt_ind++][sp + 1];
-            } else if (++opt_ind >= argc) {
-                if (opt_err)
-                    fprintf(stderr,
-                            "%s: value expected for option \"%c\"\n",
-                            argv[0], opt_opt);
-
-                opt_opt = '?';
-            } else {
-                /* flag value is next token */
-                opt_arg = argv[opt_ind++];
-            }
-
-            sp = 1;
-        } else {
-            /* set up to look at next char in token, next time */
-            if (argv[opt_ind][++sp] == '\0') {
-                /* no more in current token, so setup next token */
-                opt_ind++;
-                sp = 1;
-            }
-
-            opt_arg = NULL;
-        }
-    }
-
-    /* return the current flag character found */
-    return opt_opt;
-}
+static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 
 /*-------------------------------------------------------------------------
  * Function:	h5tools_init
@@ -357,697 +101,113 @@ h5tools_close(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5tools_escape
+ * Function:    h5tools_fopen
  *
- * Purpose:	Changes all "funny" characters in S into standard C escape
- *		sequences. If ESCAPE_SPACES is non-zero then spaces are
- *		escaped by prepending a backslash.
+ * Purpose:     Attempts to open a file with various VFL drivers.
  *
- * Return:	Success:	S
+ * Return:      Success:        a file id for the opened file. If
+ *                              DRIVERNAME is non-null then the first
+ *                              DRIVERNAME_SIZE-1 characters of the driver
+ *                              name are copied into the DRIVERNAME array
+ *                              and null terminated.
  *
- *		Failure:	NULL if the buffer would overflow. The
- *				buffer has as many left-to-right escapes as
- *				possible before overflow would have happened.
- *
- * Programmer:	Robb Matzke
- *              Monday, April 26, 1999
+ *              Failure:        -1. If DRIVERNAME is non-null then the
+ *                              first byte is set to the null terminator.
  *
  * Modifications:
+ *              Robb Matzke, 2000-06-23
+ *              We only have to initialize driver[] on the first call,
+ *              thereby preventing memory leaks from repeated calls to
+ *              H5Pcreate().
  *
+ *              Robb Matzke, 2000-06-23
+ *              Added DRIVERNAME_SIZE arg to prevent overflows when
+ *              writing to DRIVERNAME.
+ *
+ *              Robb Matzke, 2000-06-23
+ *              Added test to prevent coredump when the file could not be
+ *              opened by any driver.
+ *
+ *              Robb Matzke, 2000-06-23
+ *              Changed name from H5ToolsFopen() so it jives better with
+ *              the names we already have at the top of this source file.
+ *
+ *              Thomas Radke, 2000-09-12
+ *              Added Stream VFD to the driver[] array.
+ *
+ *              Bill Wendling, 2001-01-10
+ *              Changed macro behavior so that if we have a version other
+ *              than 1.2.x (i.e., > 1.2), then we do the drivers check.
  *-------------------------------------------------------------------------
  */
-static char *
-h5tools_escape(char *s/*in,out*/, size_t size, int escape_spaces)
+hid_t
+h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
 {
-    register size_t i;
-    size_t n = strlen(s);
-    const char *escape;
-    char octal[8];
-    
-    for (i = 0; i < n; i++) {
-	switch (s[i]) {
-	case '"':
-	    escape = "\\\"";
-	    break;
-	case '\\':
-	    escape = "\\\\";
-	    break;
-	case '\b':
-	    escape = "\\b";
-	    break;
-	case '\f':
-	    escape = "\\f";
-	    break;
-	case '\n':
-	    escape = "\\n";
-	    break;
-	case '\r':
-	    escape = "\\r";
-	    break;
-	case '\t':
-	    escape = "\\t";
-	    break;
-	case ' ':
-	    escape = escape_spaces ? "\\ " : NULL;
-	    break;
-	default:
-	    if (!isprint((int)*s)) {
-		sprintf(octal, "\\%03o", (unsigned char)s[i]);
-		escape = octal;
-	    } else {
-		escape = NULL;
-	    }
+    static struct {
+        const char     *name;
+        hid_t		fapl;
+    } driver[16];
+    static int          ndrivers = 0;
+    hid_t               fid = -1;
+#ifndef VERSION12
+    hid_t               fapl = H5P_DEFAULT;
+#endif  /* !VERSION12 */
+    int                 drivernum;
 
-	    break;
-	}
+    if (!ndrivers) {
+        /* Build a list of file access property lists which we should try
+         * when opening the file.  Eventually we'd like some way for the
+         * user to augment/replace this list interactively. */
+        driver[ndrivers].name = "sec2";
+        driver[ndrivers].fapl = H5P_DEFAULT;
+        ndrivers++;
+        
+#ifndef VERSION12
+        driver[ndrivers].name = "family";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
+        ndrivers++;
 
-	if (escape) {
-	    size_t esc_size = strlen(escape);
+        driver[ndrivers].name = "split";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+        ndrivers++;
 
-	    if (n + esc_size + 1 > size)
-		/*would overflow*/
-		return NULL;
+        driver[ndrivers].name = "multi";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+        ndrivers++;
 
-	    memmove(s + i + esc_size, s + i, (n - i) + 1); /*make room*/
-	    memcpy(s + i, escape, esc_size); /*insert*/
-	    n += esc_size;
-	    i += esc_size - 1;
-	}
+#ifdef H5_HAVE_STREAM
+        driver[ndrivers].name = "stream";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_stream(fapl, NULL);
+        ndrivers++;
+#endif	/* H5_HAVE_STREAM */
+#endif	/* !VERSION12 */
     }
 
-    return s;
-}
+    /* Try to open the file using each of the drivers */
+    for (drivernum = 0; drivernum < ndrivers; drivernum++) {
+        H5E_BEGIN_TRY {
+            fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
+        } H5E_END_TRY;
 
-/*-------------------------------------------------------------------------
- * Function:	h5tools_is_zero
- *
- * Purpose:	Determines if memory is initialized to all zero bytes.
- *
- * Return:	TRUE if all bytes are zero; FALSE otherwise
- *
- * Programmer:	Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-h5tools_is_zero(const void *_mem, size_t size)
-{
-    const unsigned char *mem = (const unsigned char *)_mem;
-
-    while (size-- > 0)
-	if (mem[size])
-	    return FALSE;
-
-    return TRUE;
-}
-
-/*-------------------------------------------------------------------------
- * Function:	h5dump_region
- *
- * Purpose:	Prints information about a dataspace region by appending
- *		the information to the specified string.
- *
- * Return:	Success:	0
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-h5dump_region(hid_t region, h5tools_str_t *str/*in,out*/, const h5dump_t *info)
-{
-    hssize_t	nblocks, npoints;
-    hsize_t     alloc_size;
-    hsize_t    *ptdata;
-    int		ndims = H5Sget_simple_extent_ndims(region);
-
-    /*
-     * These two functions fail if the region does not have blocks or points,
-     * respectively. They do not currently know how to translate from one to
-     * the other.
-     */
-    H5E_BEGIN_TRY {
-        nblocks = H5Sget_select_hyper_nblocks(region);
-        npoints = H5Sget_select_elem_npoints(region);
-    } H5E_END_TRY;
-
-    h5tools_str_append(str, "{");
-
-    /* Print block information */
-    if (nblocks > 0) {
-        int i;
-
-        alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        ptdata = malloc((size_t)alloc_size);
-        H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
-        H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
-
-        for (i = 0; i < nblocks; i++) {
-            int j;
-
-            h5tools_str_append(str, info->dset_blockformat_pre,
-                               i ? "," OPTIONAL_LINE_BREAK " " : "",
-                               (unsigned long)i);
-            
-            /* Start coordinates and opposite corner */
-            for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                   (unsigned long)ptdata[i * 2 * ndims + j]);
-
-            for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : ")-(",
-                                  (unsigned long)ptdata[i * 2 * ndims + j + ndims]);
-
-            h5tools_str_append(str, ")");
-        }
-
-        free(ptdata);
+        if (fid >= 0)
+	    break;
     }
 
-    /* Print point information */
-    if (npoints > 0) {
-        int i;
-
-        alloc_size = npoints * ndims * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        ptdata = malloc((size_t)alloc_size);
-        H5_CHECK_OVERFLOW(npoints,hssize_t,hsize_t);
-        H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
-
-        for (i = 0; i < npoints; i++) {
-            int j;
-
-            h5tools_str_append(str, info->dset_ptformat_pre ,
-                      i ? "," OPTIONAL_LINE_BREAK " " : "",
-                      (unsigned long)i);
-            
-            for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                      (unsigned long)(ptdata[i * ndims + j]));
-
-            h5tools_str_append(str, ")");
-        }
-
-        free(ptdata);
-    }
-    
-    h5tools_str_append(str, "}");
-    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:	h5tools_print_char
- *
- * Purpose:	Shove a character into the STR.
- *
- * Return:	Nothing
- *
- * Programmer:	Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
-{
-    if (info->str_locale == ESCAPE_HTML) {
-        if (ch <= ' ' || ch > '~')
-            h5tools_str_append(str, "%%%02x", ch);
-        else
-            h5tools_str_append(str, "%c", (char)ch);
-    } else {
-        switch (ch) {
-        case '"':
-            h5tools_str_append(str, "\\\"");
-            break;
-        case '\\':
-            h5tools_str_append(str, "\\\\");
-            break;
-        case '\b':
-            h5tools_str_append(str, "\\b");
-            break;
-        case '\f':
-            h5tools_str_append(str, "\\f");
-            break;
-        case '\n':
-            h5tools_str_append(str, "\\n");
-            break;
-        case '\r':
-            h5tools_str_append(str, "\\r");
-            break;
-        case '\t':
-            h5tools_str_append(str, "\\t");
-            break;
-        default:
-            if (isprint(ch))
-                h5tools_str_append(str, "%c", (char)ch);
-            else 
-                h5tools_str_append(str, "\\%03o", ch);
-
-            break;
-        }
-    }
-}
-
-/*-------------------------------------------------------------------------
- * Function:	h5tools_sprint
- *
- * Purpose:	Renders the value pointed to by VP of type TYPE into variable
- *		length string STR.
- *
- * Return:	A pointer to memory containing the result or NULL on error.
- *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
- *
- * Modifications:
- * 		Robb Matzke, 1999-04-26
- *		Made this function safe from overflow problems by allowing it
- *		to reallocate the output string.
- *
- * 		Robb Matzke, 1999-06-04
- *		Added support for object references. The new `container'
- *		argument is the dataset where the reference came from.
- *
- * 		Robb Matzke, 1999-06-07
- *		Added support for printing raw data. If info->raw is non-zero
- *		then data is printed in hexadecimal format.
- *
- *-------------------------------------------------------------------------
- */
-static char *
-h5tools_sprint(h5tools_str_t *str/*in,out*/, const h5dump_t *info,
-	      hid_t container, hid_t type, void *vp, h5tools_context_t *ctx)
-{
-    size_t         n, offset, size, nelmts, start;
-    char          *name, quote = '\0';
-    unsigned char *ucp_vp = (unsigned char *)vp;
-    char          *cp_vp = (char *)vp;
-    hid_t          memb, obj, region;
-    int	           nmembs, otype;
-    static char    fmt_llong[8], fmt_ullong[8];
-    H5T_str_t      pad;
-    H5G_stat_t     sb;
-
-    /*
-     * some tempvars to store the value before we append it to the string to
-     * get rid of the memory alignment problem
-     */
-    double             tempdouble;
-    float              tempfloat;
-    unsigned long_long tempullong;
-    long_long          templlong;
-    unsigned long      tempulong;
-    long               templong;
-    unsigned int       tempuint;
-    int                tempint;
-    unsigned short     tempushort;
-    short              tempshort;
- 
-    /* Build default formats for long long types */
-    if (!fmt_llong[0]) {
-        sprintf(fmt_llong, "%%%sd", PRINTF_LL_WIDTH);
-        sprintf(fmt_ullong, "%%%su", PRINTF_LL_WIDTH);
-    }
-
-    /* Append value depending on data type */
-    start = h5tools_str_len(str);
-
-    if (info->raw) {
-        size_t i;
-
-        h5tools_str_append(str, "0x");
-        n = H5Tget_size(type);
-
-        for (i = 0; i < n; i++)
-            h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
-    } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-        memcpy(&tempfloat, vp, sizeof(float));	
-        h5tools_str_append(str, OPT(info->fmt_float, "%g"), tempfloat);
-    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-        memcpy(&tempdouble, vp, sizeof(double)); 
-        h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
-    } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
-                               H5Tequal(type, H5T_NATIVE_UCHAR))) {
-        h5tools_print_char(str, info, *ucp_vp);
-    } else if (H5T_STRING == H5Tget_class(type)) {
-        unsigned int i;
-
-        quote = '\0';
-        size = H5Tget_size(type);
-        pad = H5Tget_strpad(type);
-
-        for (i = 0; i < size && (cp_vp[i] != '\0' || pad != H5T_STR_NULLTERM); i++) {
-            int j = 1;
-
-            /*
-             * Count how many times the next character repeats. If the
-             * threshold is zero then that means it can repeat any number
-             * of times.
-             */
-            if (info->str_repeat > 0)
-                while (i + j < size && cp_vp[i] == cp_vp[i + j])
-                    j++;
-            
-            /*
-             * Print the opening quote.  If the repeat count is high enough to
-             * warrant printing the number of repeats instead of enumerating
-             * the characters, then make sure the character to be repeated is
-             * in it's own quote.
-             */
-            if (info->str_repeat > 0 && j > info->str_repeat) {
-                if (quote)
-                    h5tools_str_append(str, "%c", quote);
-
-                quote = '\'';
-                h5tools_str_append(str, "%s%c", i ? " " : "", quote);
-            } else if (!quote) {
-                quote = '"';
-                h5tools_str_append(str, "%s%c", i ? " " : "", quote);
-            }
-                
-            /* Print the character */
-            h5tools_print_char(str, info, ucp_vp[i]);
-            
-            /* Print the repeat count */
-            if (info->str_repeat && j > info->str_repeat) {
-#ifdef REPEAT_VERBOSE
-                h5tools_str_append(str, "%c repeats %d times", quote, j - 1);
-#else
-                h5tools_str_append(str, "%c*%d", quote, j - 1);
-#endif
-                quote = '\0';
-                i += j - 1;
-            }
-
-        }
-
-        if (quote)
-            h5tools_str_append(str, "%c", quote);
-
-        if (i == 0)
-            /*empty string*/
-            h5tools_str_append(str, "\"\"");
-    } else if (H5Tequal(type, H5T_NATIVE_INT)) {
-        memcpy(&tempint, vp, sizeof(int));
-        h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
-    } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-        memcpy(&tempuint, vp, sizeof(unsigned int));
-        h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
-    } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), *cp_vp);
-    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);
-    } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-        memcpy(&tempshort, vp, sizeof(short));
-        h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
-    } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-        memcpy(&tempushort, vp, sizeof(unsigned short));
-        h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
-    } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-        memcpy(&templong, vp, sizeof(long));
-        h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
-    } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-        memcpy(&tempulong, vp, sizeof(unsigned long));
-        h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
-    } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-        memcpy(&templlong, vp, sizeof(long_long));
-        h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
-    } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-        memcpy(&tempullong, vp, sizeof(unsigned long_long));
-        h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
-    } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
-        if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, vp, sizeof(int));	  
-            h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
-        } else if (sizeof(hssize_t) == sizeof(long)) {
-            memcpy(&templong, vp, sizeof(long));
-            h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
+    /* Save the driver name */
+    if (drivername && drivername_size){
+        if (fid >= 0) {
+            strncpy(drivername, driver[drivernum].name, drivername_size);
+            drivername[drivername_size - 1] = '\0';
         } else {
-            memcpy(&templlong, vp, sizeof(long_long));
-            h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
+            drivername[0] = '\0'; /*no file opened*/
         }
-    } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
-        if (sizeof(hsize_t) == sizeof(int)) {
-            memcpy(&tempuint, vp, sizeof(unsigned int));
-            h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
-        } else if (sizeof(hsize_t) == sizeof(long)) {
-            memcpy(&tempulong, vp, sizeof(long));
-            h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
-        } else {
-            memcpy(&tempullong, vp, sizeof(unsigned long_long));
-            h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
-        }
-    } else if (H5Tget_class(type) == H5T_COMPOUND) {
-        int j;
-
-        nmembs = H5Tget_nmembers(type);
-        h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
-
-        for (j = 0; j < nmembs; j++) {
-            if (j)
-                h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", " OPTIONAL_LINE_BREAK));
-
-            /* RPM 2000-10-31
-             * If the previous character is a line-feed (which is true when
-             * h5dump is running) then insert some white space for
-             * indentation. Be warned that column number calculations will be
-             * incorrect and that object indices at the beginning of the line
-             * will be missing (h5dump doesn't display them anyway).  */
-            if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-                int x;
-
-                h5tools_str_append(str, OPT(info->line_pre, ""), "");
-
-                for (x = 0; x < ctx->indent_level + 1; x++)
-                    h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-            }
-
-            /* The name */
-            name = H5Tget_member_name(type, j);
-            h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-            free(name);
-
-            /* The value */
-            offset = H5Tget_member_offset(type, j);
-            memb = H5Tget_member_type(type, j);
-
-            ctx->indent_level++;
-            h5tools_sprint(str, info, container, memb, cp_vp + offset , ctx);
-            ctx->indent_level--;
-
-            H5Tclose(memb);
-        }
-
-        /* RPM 2000-10-31
-         * If the previous character is a line feed (which is true when
-         * h5dump is running) then insert some white space for indentation.
-         * Be warned that column number calculations will be incorrect and
-         * that object indices at the beginning of the line will be missing
-         * (h5dump doesn't display them anyway). */
-        h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
-
-        if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-            int x;
-
-            h5tools_str_append(str, OPT(info->line_pre, ""), "");
-
-            for (x = 0; x < ctx->indent_level; x++)
-                h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-        }
-
-        h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
-    } else if (H5Tget_class(type) == H5T_ENUM) {
-        char enum_name[1024];
-
-        if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name) >= 0) {
-            h5tools_str_append(str, h5tools_escape(enum_name, sizeof(enum_name), TRUE));
-        } else {
-            size_t i;
-
-            h5tools_str_append(str, "0x");
-            n = H5Tget_size(type);
-
-            for (i = 0; i < n; i++)
-                h5tools_str_append(str, "%02x", ucp_vp[i]);
-        }
-    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
-        /*
-         * Dataset region reference -- show the type and OID of the referenced
-         * object, but we are unable to show the region yet because there
-         * isn't enough support in the data space layer.  - rpm 19990604
-         */
-        if (h5tools_is_zero(vp, H5Tget_size(type))) {
-            h5tools_str_append(str, "NULL");
-        } else {
-            obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
-            region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-            H5Gget_objinfo(obj, ".", FALSE, &sb);
-
-            if (info->dset_hidefileno)
-                h5tools_str_append(str, info->dset_format, sb.objno[1], sb.objno[0]);
-            else
-                h5tools_str_append(str, info->dset_format,
-                      sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
-
-            h5dump_region(region, str, info);
-            H5Sclose(region);
-            H5Dclose(obj);
-        }
-    } else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
-        /*
-         * Object references -- show the type and OID of the referenced
-         * object.
-         */
-        if (h5tools_is_zero(vp, H5Tget_size(type))) {
-            h5tools_str_append(str, "NULL");
-        } else {
-            otype = H5Rget_object_type(container, vp);
-            obj = H5Rdereference(container, H5R_OBJECT, vp);
-            H5Gget_objinfo(obj, ".", FALSE, &sb);
-
-            /* Print object type and close object */
-            switch (otype) {
-                case H5G_GROUP:
-                    h5tools_str_append(str, GROUPNAME);
-                    H5Gclose(obj);
-                    break;
-                case H5G_DATASET:
-                    h5tools_str_append(str, DATASET);
-                    H5Dclose(obj);
-                    break;
-                case H5G_TYPE:
-                    h5tools_str_append(str, DATATYPE);
-                    H5Tclose(obj);
-                    break;
-                default:
-                    h5tools_str_append(str, "%u-", otype);
-                    break;
-            }
-
-            /* Print OID */
-            if (info->obj_hidefileno) {
-                h5tools_str_append(str, info->obj_format, sb.objno[1], sb.objno[0]);
-            } else {
-                h5tools_str_append(str, info->obj_format,
-                          sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
-            }
-        }
-    } else if (H5Tget_class(type) == H5T_ARRAY) {
-        int k, ndims;
-        hsize_t	i, dims[H5S_MAX_RANK];
-
-        /* Get the array's base datatype for each element */
-        memb = H5Tget_super(type);
-        size = H5Tget_size(memb);
-        ndims = H5Tget_array_ndims(type);
-        H5Tget_array_dims(type, dims, NULL);
-        assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
-
-        /* Calculate the number of array elements */
-        for (k = 0, nelmts = 1; k < ndims; k++)
-            nelmts *= dims[k];
-			
-        /* Print the opening bracket */
-        h5tools_str_append(str, "%s", OPT(info->arr_pre, "["));
-
-        for (i = 0; i < nelmts; i++) {
-            if (i)
-                h5tools_str_append(str, "%s",
-                          OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
-
-            if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
-                int x;
-
-                h5tools_str_append(str, "%s", "\n");
-
-                /*need to indent some more here*/
-                if (ctx->indent_level >= 0)
-                    h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
-
-                for (x = 0; x < ctx->indent_level + 1; x++)
-                    h5tools_str_append(str,"%s",OPT(info->line_indent,""));
-            } /* end if */
-
-            ctx->indent_level++;
-
-            /* Dump the array element */
-            h5tools_sprint(str, info, container, memb, cp_vp + i * size, ctx);
-
-            ctx->indent_level--;
-        } /* end for */
-
-        /* Print the closing bracket */
- 	h5tools_str_append(str, "%s", OPT(info->arr_suf, "]"));
-        H5Tclose(memb);
-    } else if (H5Tget_class(type) == H5T_VLEN) {
-        unsigned int i;
-
-        /* Get the VL sequences's base datatype for each element */
-        memb = H5Tget_super(type);
-        size = H5Tget_size(memb);
-
-        /* Print the opening bracket */
-        h5tools_str_append(str, "%s", OPT(info->vlen_pre, "("));
-
-        /* Get the number of sequence elements */
-        nelmts = ((hvl_t *)cp_vp)->len;
-
-        for (i = 0; i < nelmts; i++) {
-            if (i)
-                h5tools_str_append(str, "%s",
-                          OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
-
-#ifdef LATER
-/* Need to fix so VL data breaks at correct location on end of line -QAK */
-            if (info->arr_linebreak && h5tools_str_len(str)>=info->line_ncols) {
-                int x;
-
-                h5tools_str_append(str, "%s", "\n");
-
-                /* need to indent some more here */
-                if (ctx->indent_level >= 0)
-                    h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
-
-                for (x = 0; x < ctx->indent_level + 1; x++)
-                    h5tools_str_append(str,"%s",OPT(info->line_indent,""));
-            } /* end if */
-#endif /* LATER */
-
-            ctx->indent_level++;
-
-            /* Dump the array element */
-            h5tools_sprint(str, info, container, memb,
-                           ((char *)(((hvl_t *)cp_vp)->p)) + i * size, ctx);
-
-            ctx->indent_level--;
-        } /* end for */
-
-        h5tools_str_append(str, "%s", OPT(info->vlen_suf, ")"));
-        H5Tclose(memb);
-    } else {
-        /* All other types get printed as hexadecimal */
-        size_t i;
-
-        h5tools_str_append(str, "0x");
-        n = H5Tget_size(type);
-
-        for (i = 0; i < n; i++)
-            h5tools_str_append(str, "%02x", ucp_vp[i]);
     }
 
-    return h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
+    return fid;
 }
 
 /*-------------------------------------------------------------------------
@@ -1081,7 +241,7 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple_prefix
+ * Function:	h5tools_simple_prefix
  *
  * Purpose:	If ctx->need_prefix is set then terminate the current line
  *		(if applicable), calculate the prefix string, and display it
@@ -1099,26 +259,21 @@ h5tools_ncols(const char *s)
  *-------------------------------------------------------------------------
  */
 static void
-h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
-		     h5tools_context_t *ctx, hsize_t elmtno, int secnum)
+h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
+                      h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
     size_t templength = 0;
     int i, indentlevel = 0;
 	
-    memset(&prefix, 0, sizeof(h5tools_str_t));
-
     if (!ctx->need_prefix)
 	return;
-    
+ 
+    memset(&prefix, 0, sizeof(h5tools_str_t));
+
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
 	fputs(OPT(info->line_suf, ""), stream);
-#if 0 /*why?*/
-        if (info->line_ncols != ctx->cur_column) {
-            putc('\n', stream);
-        }
-#endif
         putc('\n', stream);
 	fputs(OPT(info->line_sep, ""), stream);
     }
@@ -1131,10 +286,12 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
     if (ctx->indent_level >= 0) {
         indentlevel = ctx->indent_level;
     } else {
-        /* this is because sometimes we dont print out all the header
+        /*
+         * this is because sometimes we dont print out all the header
          * info for the data(like the tattr-2.ddl example. if that happens
          * the ctx->indent_level a negative so we need to skip the above
-         * and just print out the default indent levels. */      
+         * and just print out the default indent levels.
+         */
 	indentlevel = ctx->default_indent_level;
     }
 
@@ -1145,12 +302,12 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
     else
         fputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
 
-    templength = h5tools_str_len(&prefix);      
+    templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++){
         fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
         templength += h5tools_str_len(&prefix);
-    }	
+    }
 
     ctx->cur_column = ctx->prev_prefix_len = templength;
     ctx->cur_elmt = 0;
@@ -1161,13 +318,13 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple_data
+ * Function:	h5tools_dump_simple_data
  *
  * Purpose:	Prints some (NELMTS) data elements to output STREAM. The
  *		elements are stored in _MEM as type TYPE and are printed
  *		according to the format described in INFO. The CTX struct
  *		contains context information shared between calls to this
- *		function.  The FLAGS is a bit field that indicates whether
+ *		function. The FLAGS is a bit field that indicates whether
  *		the data supplied in this call falls at the beginning or end
  *		of the total data to be printed (START_OF_DATA and
  *		END_OF_DATA).
@@ -1189,26 +346,26 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
  *-------------------------------------------------------------------------
  */
 static void
-h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
-		   h5tools_context_t *ctx/*in,out*/, unsigned flags,
-		   hsize_t nelmts, hid_t type, void *_mem)
+h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
+                         h5tools_context_t *ctx/*in,out*/, unsigned flags,
+                         hsize_t nelmts, hid_t type, void *_mem)
 {
     unsigned char	*mem = (unsigned char*)_mem;
     hsize_t		i;		/*element counter		*/
     char		*s, *section;	/*a section of output		*/
     int			secnum;		/*section sequence number	*/
     size_t		size;		/*size of each datum		*/
-    size_t		ncols=80;	/*available output width	*/
+    size_t		ncols = 80;	/*available output width	*/
     h5tools_str_t	buffer;		/*string into which to render	*/
     int			multiline;	/*datum was multiline		*/
-    int                 elmt_counter=0; /*counts the # elements printed.
-                                         * I (ptl?) needed something that
-                                         * isnt going to get reset when a new
-                                         * line is formed. I'm going to use
-                                         * this var to count elements and
-                                         * break after we see a number equal
-                                         * to the ctx->size_last_dim. */
-    
+    int                 elmt_counter = 0;/*counts the # elements printed.
+                                          *I (ptl?) needed something that
+                                          *isn't going to get reset when a new
+                                          *line is formed. I'm going to use
+                                          *this var to count elements and
+                                          *break after we see a number equal
+                                          *to the ctx->size_last_dim.   */
+
     /* Setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));
     size = H5Tget_size(type);
@@ -1216,12 +373,12 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     if (info->line_ncols > 0)
 	ncols = info->line_ncols;
 
-    h5dump_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
-    
+    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
+
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
         h5tools_str_reset(&buffer);
-        h5tools_sprint(&buffer, info, container, type, mem + i * size, ctx);
+        h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
         if (i + 1 < nelmts || 0 == (flags & END_OF_DATA))
             h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
@@ -1319,7 +476,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                 if (secnum)
                     multiline++;
 
-                h5dump_simple_prefix(stream, info, ctx, i, secnum);
+                h5tools_simple_prefix(stream, info, ctx, i, secnum);
             } else if ((i || ctx->continuation) && secnum == 0) {
                 fputs(OPT(info->elmt_suf2, " "), stream);
                 ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
@@ -1337,35 +494,32 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple_dset
+ * Function:	h5tools_dump_simple_subset
  *
- * Purpose:	Print some values from a dataset with a simple data space.
- *		This is a special case of h5dump_dset(). This function only
- *		intended for dumping datasets -- it does strip mining and
- *		some other things which are unnecessary for smaller objects
- *		such as attributes (to print small objects like attributes
- *		simply read the attribute and call h5dump_simple_mem()).
+ * Purpose:
  *
- * Return:	Success:	0
+ * Return:	Success:    SUCCEED
  *
- *		Failure:	-1
+ *		Failure:    FAIL
  *
- * Programmer:	Robb Matzke
- *              Thursday, July 23, 1998
+ * Programmer:	Bill Wendling
+ *              Wednesday, 07. March 2001
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */ 
-static int
-h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
-		   hid_t p_type, int indentlevel)
+static herr_t
+h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
+                           hid_t p_type, struct subset_t *sset,
+                           int indentlevel)
 {
+    herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
     hsize_t		elmtno, i;		/*counters		*/
     int			carry;			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
-    unsigned		flags;			/*buffer extent flags	*/
+    unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
 
     /* Print info */
@@ -1377,7 +531,126 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
     hsize_t		sm_nbytes;		/*bytes per stripmine	*/
     hsize_t		sm_nelmts;		/*elements per stripmine*/
-    unsigned char	*sm_buf=NULL;		/*buffer for raw data	*/
+    unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
+    hid_t		sm_space;		/*stripmine data space	*/
+
+    /* Hyperslab info */
+    hssize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
+    hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
+    hsize_t		hs_nelmts;		/*elements in request	*/
+
+    ret = FAIL;     /* be pessimistic */
+    f_space = H5Dget_space(dset);
+
+    if (f_space == FAIL)
+        goto done;
+
+    /*
+     * check that everything looks okay. the dimensionality must not be too
+     * great and the dimensionality of the items selected for printing must
+     * match the dimensionality of the dataset.
+     */
+    memset(&ctx, 0, sizeof(ctx));
+    ctx.indent_level = indentlevel;
+    ctx.need_prefix = 1;
+    ctx.ndims = H5Sget_simple_extent_ndims(f_space);
+
+    if ((size_t)ctx.ndims > NELMTS(sm_size))
+        goto done_close;
+
+    /* assume entire data space to be printed */
+    if (ctx.ndims > 0)
+        for (i = 0; i < (hsize_t)ctx.ndims; i++)
+            ctx.p_min_idx[i] = 0;
+
+    H5Sget_simple_extent_dims(f_space, total_size, NULL);
+    ctx.size_last_dim = total_size[ctx.ndims - 1];
+
+    /* calculate the potential number of elements we're going to print */
+    p_nelmts = 1;
+
+    if (ctx.ndims > 0)
+        for (i = 0; i < (hsize_t)ctx.ndims; i++)
+            p_nelmts *= total_size[i];
+ 
+    if (p_nelmts == 0) {
+        /* nothing to print */
+        ret = SUCCEED;
+        goto done_close;
+    }
+
+    /*
+     * determine the strip mine size and allocate a buffer. the strip mine is
+     * a hyperslab whose size is manageable.
+     */
+    sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
+
+    if (ctx.ndims > 0)
+        for (i = ctx.ndims; i > 0; --i) {
+            sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+            sm_nbytes *= sm_size[i - 1];
+            assert(sm_nbytes > 0);
+        }
+
+    assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+    sm_buf = malloc((size_t)sm_nbytes);
+    sm_nelmts = sm_nbytes / p_type_nbytes;
+    sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+
+    /* the stripmine loop */
+    memset(hs_offset, 0, sizeof hs_offset);
+    memset(zero, 0, sizeof zero);
+
+    ret = SUCCEED;
+
+done_close:
+    H5Sclose(f_space);
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	h5tools_dump_simple_dset
+ *
+ * Purpose:	Print some values from a dataset with a simple data space.
+ *		This is a special case of h5tools_dump_dset(). This function
+ *		only intended for dumping datasets -- it does strip mining and
+ *		some other things which are unnecessary for smaller objects
+ *		such as attributes (to print small objects like attributes
+ *		simply read the attribute and call h5tools_dump_simple_mem()).
+ *
+ * Return:	Success:    SUCCEED
+ *
+ *		Failure:    FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */ 
+static int
+h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+                         hid_t p_type, int indentlevel)
+{
+    hid_t		f_space;		/*file data space	*/
+    hsize_t		elmtno, i;		/*counters		*/
+    int			carry;			/*counter carry value	*/
+    hssize_t		zero[8];		/*vector of zeros	*/
+    unsigned int	flags;			/*buffer extent flags	*/
+    hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
+
+    /* Print info */
+    h5tools_context_t	ctx;			/*print context		*/
+    size_t		p_type_nbytes;		/*size of memory type	*/
+    hsize_t		p_nelmts;		/*total selected elmts	*/
+
+    /* Stripmine info */
+    hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
+    hsize_t		sm_nbytes;		/*bytes per stripmine	*/
+    hsize_t		sm_nelmts;		/*elements per stripmine*/
+    unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
 
     /* Hyperslab info */
@@ -1386,11 +659,12 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		hs_nelmts;		/*elements in request	*/
 
     /* VL data special information */
-    unsigned vl_data=0;     /* Whether the dataset contains VL datatypes */
+    unsigned int        vl_data = 0;            /*contains VL datatypes */
 
-#if 0
-    hsize_t		dim_n_size;
-#endif
+    f_space = H5Dget_space(dset);
+
+    if (f_space == FAIL)
+        return FAIL;
 
     /*
      * Check that everything looks okay. The dimensionality must not be too
@@ -1400,11 +674,12 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
-    f_space = H5Dget_space(dset);
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
 
-    if ((size_t)ctx.ndims > NELMTS(sm_size))
-        return -1;
+    if ((size_t)ctx.ndims > NELMTS(sm_size)) {
+        H5Sclose(f_space);
+        return FAIL;
+    }
 
     /* Assume entire data space to be printed */
     if (ctx.ndims > 0)
@@ -1412,39 +687,37 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-
-    if (ctx.ndims > 0) {
-        for (i = 0, p_nelmts = 1; i < (hsize_t)ctx.ndims; i++)
-            p_nelmts *= total_size[i];
-    } else {
-        p_nelmts = 1;
-    }
- 
-    if (p_nelmts == 0) {
-        H5Sclose(f_space);
-        return 0; /*nothing to print*/
-    }
-
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
+    /* calculate the number of elements we're going to print */
+    p_nelmts = 1;
+
+    if (ctx.ndims > 0)
+        for (i = 0, p_nelmts = 1; i < (hsize_t)ctx.ndims; i++)
+            p_nelmts *= total_size[i];
+ 
+    if (p_nelmts == 0) {
+        /* nothing to print */
+        H5Sclose(f_space);
+        return SUCCEED;
+    }
+
     /* Check if we have VL data in the dataset's datatype */
-    if(H5Tdetect_class(p_type,H5T_VLEN)==TRUE)
-        vl_data=TRUE;
+    if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+        vl_data = TRUE;
 
     /*
      * Determine the strip mine size and allocate a buffer. The strip mine is
      * a hyperslab whose size is manageable.
      */
-    p_type_nbytes = H5Tget_size(p_type);
+    sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
 
     if (ctx.ndims > 0) {
-        for (i = ctx.ndims, sm_nbytes = p_type_nbytes; i > 0; --i) {
-            sm_size[i - 1] = MIN(total_size[i - 1], H5DUMP_BUFSIZE / sm_nbytes);
+        for (i = ctx.ndims; i > 0; --i) {
+            sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
             sm_nbytes *= sm_size[i - 1];
             assert(sm_nbytes > 0);
         }
-    } else {
-        sm_nbytes = p_type_nbytes;
     }
 
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
@@ -1480,18 +753,18 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             H5Sclose(f_space);
             H5Sclose(sm_space);
             free(sm_buf);
-            return -1;
+            return FAIL;
         }
 
         /* Print the data */
         flags = (elmtno == 0) ? START_OF_DATA : 0;
         flags |= ((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0;
-        h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
-                               p_type, sm_buf);
+        h5tools_dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
+                                 p_type, sm_buf);
 
         /* Reclaim any VL memory, if necessary */
-        if(vl_data)
-            H5Dvlen_reclaim(p_type,sm_space,H5P_DEFAULT,sm_buf);
+        if (vl_data)
+            H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
         /* Calculate the next hyperslab offset */
         for (i = ctx.ndims, carry = 1; i > 0 && carry; --i) {
@@ -1499,7 +772,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             hs_offset[i - 1] += hs_size[i - 1];
 
             if (hs_offset[i - 1] == (hssize_t)total_size[i - 1])
-                hs_offset[i-1] = 0;
+                hs_offset[i - 1] = 0;
             else
                 carry = 0;
         }
@@ -1517,18 +790,18 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     H5Sclose(sm_space);
     H5Sclose(f_space);
     free(sm_buf);
-    return 0;
+    return SUCCEED;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple_mem
+ * Function:	h5tools_dump_simple_mem
  *
  * Purpose:	Print some values from memory with a simple data space.
- *		This is a special case of h5dump_mem().
+ *		This is a special case of h5tools_dump_mem().
  *
- * Return:	Success:	0
+ * Return:	Success:    SUCCEED
  *
- *		Failure:	-1
+ *		Failure:    FAIL
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 23, 1998
@@ -1538,8 +811,8 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
  *-------------------------------------------------------------------------
  */
 static int
-h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
-		  hid_t space, void *mem, int indentlevel)
+h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
+                        hid_t type, hid_t space, void *mem, int indentlevel)
 {
     hsize_t		i;			/*counters		*/
     hsize_t		nelmts;			/*total selected elmts	*/
@@ -1554,7 +827,7 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
     ctx.ndims = H5Sget_simple_extent_ndims(space);
 
     if ((size_t)ctx.ndims > NELMTS(ctx.p_min_idx))
-        return -1;
+        return FAIL;
 
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
@@ -1569,13 +842,13 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
         nelmts *= ctx.p_max_idx[i] - ctx.p_min_idx[i];
  
     if (nelmts == 0)
-        return 0; /*nothing to print*/
+        return SUCCEED; /*nothing to print*/
 
     ctx.size_last_dim = ctx.p_max_idx[ctx.ndims - 1];
 
     /* Print it */
-    h5dump_simple_data(stream, info, obj_id, &ctx,
-                       START_OF_DATA | END_OF_DATA, nelmts, type, mem);
+    h5tools_dump_simple_data(stream, info, obj_id, &ctx,
+                             START_OF_DATA | END_OF_DATA, nelmts, type, mem);
 
     /* Terminate the output */
     if (ctx.cur_column) {
@@ -1584,11 +857,11 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
         fputs(OPT(info->line_sep, ""), stream);
     }
  
-    return 0;
+    return SUCCEED;
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_fixtype
+ * Function:	h5tools_fixtype
  *
  * Purpose:	Given a file data type choose a memory data type which is
  *		appropriate for printing the data.
@@ -1607,7 +880,7 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
  *-------------------------------------------------------------------------
  */
 hid_t
-h5dump_fixtype(hid_t f_type)
+h5tools_fixtype(hid_t f_type)
 {
     hid_t   m_type = FAIL, f_memb;
     hid_t  *memb = NULL;
@@ -1679,14 +952,14 @@ h5dump_fixtype(hid_t f_type)
 	 * and add the members.
 	 */
 	nmembs = H5Tget_nmembers(f_type);
-    assert(nmembs>0);
+        assert(nmembs > 0);
 	memb = calloc((size_t)nmembs, sizeof(hid_t));
 	name = calloc((size_t)nmembs, sizeof(char *));
 	
 	for (i = 0, size = 0; i < nmembs; i++) {
 	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
-	    memb[i] = h5dump_fixtype(f_memb);
+	    memb[i] = h5tools_fixtype(f_memb);
 	    H5Tclose(f_memb);
 
 	    if (memb[i] < 0)
@@ -1724,7 +997,7 @@ h5dump_fixtype(hid_t f_type)
 
         /* Get the array's base type and convert it to the printable version */
         f_memb = H5Tget_super(f_type);
-        array_base = h5dump_fixtype(f_memb);
+        array_base = h5tools_fixtype(f_memb);
 
         /* Copy the array */
         m_type = H5Tarray_create(array_base, ndims, dim, NULL);
@@ -1737,7 +1010,7 @@ h5dump_fixtype(hid_t f_type)
     case H5T_VLEN:
         /* Get the VL sequence's base type and convert it to the printable version */
         f_memb = H5Tget_super(f_type);
-        array_base = h5dump_fixtype(f_memb);
+        array_base = h5tools_fixtype(f_memb);
 
         /* Copy the VL type */
         m_type = H5Tvlen_create(array_base);
@@ -1796,7 +1069,7 @@ h5dump_fixtype(hid_t f_type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_dset
+ * Function:	h5tools_dump_dset
  *
  * Purpose:	Print some values from a dataset DSET to the file STREAM
  *		after converting all types to P_TYPE (which should be a
@@ -1807,11 +1080,11 @@ h5dump_fixtype(hid_t f_type)
  *		some things like strip mining which are unnecessary for
  *		smaller objects such as attributes. The easiest way to print
  *		small objects is to read the object into memory and call
- *		h5dump_mem().
+ *		h5tools_dump_mem().
  *
- * Return:	Success:	0
+ * Return:	Success:    SUCCEED
  *
- *		Failure:	-1
+ *		Failure:    FAIL
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 23, 1998
@@ -1821,16 +1094,20 @@ h5dump_fixtype(hid_t f_type)
  *		If info->raw is set then the memory datatype will be the same
  *		as the file datatype.
  *
+ *		Bill Wendling, 2001-02-27
+ *		Renamed to ``h5tools_dump_dset'' and added the subsetting
+ *		parameter.
+ *
  *-------------------------------------------------------------------------
  */
 int
-h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
-            int indentlevel)
+h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
+                  struct subset_t *sset, int indentlevel)
 {
     hid_t     f_space;
     hid_t     p_type = _p_type;
     hid_t     f_type;
-    int       status = -1;
+    int       status = FAIL;
     h5dump_t  info_dflt;
 
     /* Use default values */
@@ -1848,7 +1125,7 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
         if (info->raw)
             p_type = H5Tcopy(f_type);
         else
-            p_type = h5dump_fixtype(f_type);
+            p_type = h5tools_fixtype(f_type);
 
         H5Tclose(f_type);
 
@@ -1861,8 +1138,12 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
 
     /* Print the data */
     if (H5Sis_simple(f_space) > 0) {
-        status = h5dump_simple_dset(rawdatastream, info, dset, p_type,
-                            indentlevel);
+        if (!sset)
+            status = h5tools_dump_simple_dset(rawdatastream, info, dset, p_type,
+                                              indentlevel);
+        else
+            status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type,
+                                                sset, indentlevel);
     }
 
     /* Close the dataspace */
@@ -1876,15 +1157,15 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_mem
+ * Function:	h5tools_dump_mem
  *
  * Purpose:	Displays the data contained in MEM. MEM must have the
  *		specified data TYPE and SPACE.  Currently only simple data
  *		spaces are allowed and only the `all' selection.
  *
- * Return:	Success:	0
+ * Return:	Success:    SUCCEED
  *
- *		Failure:	-1
+ *		Failure:    FAIL
  *
  * Programmer:	Robb Matzke
  *              Wednesday, January 20, 1999
@@ -1894,8 +1175,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type, hid_t space,
-	   void *mem,int indentlevel)
+h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
+                 hid_t space, void *mem, int indentlevel)
 {
     h5dump_t    info_dflt;
     
@@ -1904,7 +1185,7 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type, hid_t s
 	stream = stdout;
 
     if (!info) {
-	memset(&info_dflt, 0, sizeof info_dflt);
+	memset(&info_dflt, 0, sizeof(info_dflt));
 	info = &info_dflt;
     }
 
@@ -1912,537 +1193,6 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type, hid_t s
     if (H5Sis_simple(space) <= 0)
 	return -1;
 
-    return h5dump_simple_mem(stream, info, obj_id, type, space, mem, indentlevel);
-}
-
-/************************************************************************* 
-
-                           from h5dumputil.c
-
- *************************************************************************/
-
-/*-------------------------------------------------------------------------
- * Function:    indentation
- *
- * Purpose:     Print spaces for indentation
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void indentation(int x)
-{
-    if (x < nCols) {
-        while (x-- > 0)
-            printf(" ");
-    } else {
-        fprintf(stderr, "error: the indentation exceeds the number of cols.\n");
-        exit(1);
-    }
-}
-
-/*-------------------------------------------------------------------------
- * Function:    print_version
- *
- * Purpose:     Print the program name and the version information which is
- *		defined the same as the HDF5 library version.
- *
- * Return:      void
- *
- * Programmer:  unknown
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-print_version(const char *progname)
-{
-    printf("%s: Version %u.%u.%u%s%s\n",
-           progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-           H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
-}
-
-/*
- *
- * THE FUNCTIONS BELOW ARE FROM THE H5FINSHD.C FILE
- *
- */
-
-/*-------------------------------------------------------------------------
- * Function:    init_table
- *
- * Purpose:     allocate and initialize tables for shared groups, datasets, 
- *              and committed types
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-init_table(table_t** temp)
-{
-    int i;
-    table_t *table = malloc(sizeof(table_t));
-
-    table->size = 20;
-    table->nobjs = 0;
-    table->objs = malloc(table->size * sizeof(obj_t));
-
-    for (i = 0; i < table->size; i++) {
-        table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
-        table->objs[i].displayed = 0;
-        table->objs[i].recorded = 0;
-        table->objs[i].objflag = 0;
-    }
-
-    *temp = table;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    init_prefix
- *
- * Purpose:     allocate and initialize prefix
- *
- * Return:      void
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-init_prefix(char **prefix, int prefix_len)
-{
-    assert(prefix_len > 0);
-    *prefix = calloc((size_t)prefix_len, 1);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    free_table
- *
- * Purpose:     free tables for shared groups, datasets, 
- *              and committed types
- *
- * Return:      void
- *
- * Programmer:  Paul Harten
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-free_table(table_t **table)
-{
-    HDfree((*table)->objs);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    search_obj
- *
- * Purpose:     search the object specified by objno in the table
- *
- * Return:      an integer, the location of the object
- *              -1   if object is not found
- *
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int 
-search_obj(table_t *table, unsigned long *objno)
-{
-    register int i;
-
-    for (i = 0; i < table->nobjs; i++)
-        if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
-	    return i;
-  
-    return -1;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    add_obj
- *
- * Purpose:     add a shared object to the table
- *              realloc the table if necessary
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-add_obj(table_t *table, unsigned long *objno, char *objname)
-{
-    register int i;
-
-    if (table->nobjs == table->size) {
-        table->size *= 2;
-        table->objs = realloc(table->objs, table->size*sizeof(obj_t));
-
-        for (i = table->nobjs; i < table->size; i++) {
-            table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
-            table->objs[i].displayed = 0;
-            table->objs[i].recorded = 0;
-            table->objs[i].objflag = 0;
-        }
-    }
-
-    i = table->nobjs++;
-    table->objs[i].objno[0] = *objno;
-    table->objs[i].objno[1] = *(objno + 1);
-    strcpy(table->objs[i].objname, objname);
-}
-
-/*-------------------------------------------------------------------------
- * Function:   Find_objs 
- *
- * Purpose:    Find objects, committed types and store them in tables
- *
- * Return:      Success:        SUCCEED
- *
- *              Failure:        FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-find_objs(hid_t group, const char *name, void *op_data)
-{
-    hid_t obj, type;
-    H5G_stat_t statbuf;
-    char *tmp;
-    find_objs_t *info = (find_objs_t*)op_data;
-    register int i;
-
-    if (info->threshold > 1)
-        /*will get an infinite loop if greater than 1*/
-        return FAIL;
-
-    H5Gget_objinfo(group, name, TRUE, &statbuf);
-
-    tmp = malloc(strlen(info->prefix) + strlen(name) + 2);
-    strcpy(tmp, info->prefix); 
-
-    switch (statbuf.type) {
-    case H5G_GROUP:
-        if ((obj = H5Gopen(group, name)) >= 0) {
-            if (info->prefix_len < (int)(strlen(info->prefix) + strlen(name) + 2)) {
-                info->prefix_len *= 2;
-                info->prefix = realloc(info->prefix,
-                                       info->prefix_len * sizeof(char));
-            }
-
-            strcat(strcat(info->prefix,"/"), name);
-
-            if (statbuf.nlink > info->threshold) {
-                if (search_obj(info->group_table,  statbuf.objno) < 0) {
-                    add_obj(info->group_table, statbuf.objno, info->prefix); 
-                    H5Giterate(obj, ".", NULL, find_objs, (void *)info);
-                }
-            } else {
-                H5Giterate (obj, ".", NULL, find_objs, (void *)info);
-	    }
-
-            strcpy(info->prefix, tmp);
-            H5Gclose (obj);
-        } else {
-            info->status = 1;
-	}
-
-        break;
-
-    case H5G_DATASET:
-        strcat(tmp,"/");
-        strcat(tmp,name); /* absolute name of the data set */
-
-        if (statbuf.nlink > info->threshold  &&
-			search_obj(info->dset_table, statbuf.objno) < 0)
-            add_obj(info->dset_table, statbuf.objno, tmp);
-
-        if ((obj = H5Dopen (group, name)) >= 0) {              
-            type = H5Dget_type(obj);
-
-            if (H5Tcommitted(type) > 0) {
-                H5Gget_objinfo(type, ".", TRUE, &statbuf);
-
-                if (search_obj (info->type_table, statbuf.objno) < 0) {
-                    add_obj(info->type_table, statbuf.objno, tmp);
-                    info->type_table->objs[info->type_table->nobjs - 1].objflag = 0;
-                }
-            }
-
-            H5Tclose(type);
-            H5Dclose (obj);
-        } else {
-            info->status = 1;
-	}
-            
-        break;
-
-    case H5G_TYPE:
-        strcat(tmp,"/");
-        strcat(tmp,name); /* absolute name of the type */
-        i = search_obj(info->type_table, statbuf.objno);
-
-        if (i < 0) {
-            add_obj(info->type_table, statbuf.objno, tmp) ;
-
-            /* named data type */
-            info->type_table->objs[info->type_table->nobjs-1].recorded = 1;
-
-            /* named data type */
-            info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
-        } else {
-            strcpy (info->type_table->objs[i].objname, tmp);
-            info->type_table->objs[i].recorded = 1; 
-
-            /* named data type */  
-            info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
-        }
-
-        break;
-
-    default:
-        break;
-    }
-
-    free(tmp);
-    return SUCCEED;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    dump_tables
- *
- * Purpose:     display the contents of tables for debugging purposes
- *
- * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void 
-dump_table(char* tablename, table_t *table)
-{
-    register int i;
-
-    printf("%s: # of entries = %d\n", tablename,table->nobjs);
-
-    for (i = 0; i < table->nobjs; i++)
-        printf("%lu %lu %s %d\n", table->objs[i].objno[0],
-               table->objs[i].objno[1],
-               table->objs[i].objname,
-               table->objs[i].objflag);
-}
-
-/*-------------------------------------------------------------------------
- * Function:   get_table_idx
- *
- * Purpose:    Determine if objects are in a link loop
- *
- * Return:      Success:        table index of object detected to be in loop
- *
- *              Failure:        FAIL
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-get_table_idx(table_t *table, unsigned long *objno)
-{
-    return search_obj(table, objno);
-}
-
-/*-------------------------------------------------------------------------
- * Function:   Get table flag setting
- *
- * Purpose:    Keep the structures and variables used private to
- *             this file.
- *
- * Return:      Success:        Boolean setting of the i'th element of the
- *                              object table flag
- *
- *              Failure:        FAIL
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-get_tableflag(table_t *table, int idx)
-{
-    return table->objs[idx].objflag;
-}
-
-/*-------------------------------------------------------------------------
- * Function:   Set table flag setting
- *
- * Purpose:    Keep the structures and variables used private to
- *             this file.
- *
- * Return:      Success:        Boolean setting of the i'th element of the
- *                              object table flag
- *
- *              Failure:        FAIL
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-int
-set_tableflag(table_t *table, int idx)
-{
-    table->objs[idx].objflag = TRUE;
-    return SUCCEED;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    get_objectname
- *
- * Purpose:     Get name of i'th object in table
- *
- * Return:      Success:       strdup() of object name character string
- *
- *              Failure:       NULL
- *
- * Programmer:  Paul Harten
- *
- *-------------------------------------------------------------------------
- */
-char *
-get_objectname(table_t *table, int idx)
-{
-    return strdup(table->objs[idx].objname);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    h5dump_fopen
- *
- * Purpose:     Attempts to open a file with various VFL drivers.
- *
- * Return:      Success:        a file id for the opened file. If
- *                              DRIVERNAME is non-null then the first
- *                              DRIVERNAME_SIZE-1 characters of the driver
- *                              name are copied into the DRIVERNAME array
- *                              and null terminated.
- *
- *              Failure:        -1. If DRIVERNAME is non-null then the
- *                              first byte is set to the null terminator.
- *
- * Modifications:
- *              Robb Matzke, 2000-06-23
- *              We only have to initialize driver[] on the first call,
- *              thereby preventing memory leaks from repeated calls to
- *              H5Pcreate().
- *
- *              Robb Matzke, 2000-06-23
- *              Added DRIVERNAME_SIZE arg to prevent overflows when
- *              writing to DRIVERNAME.
- *
- *              Robb Matzke, 2000-06-23
- *              Added test to prevent coredump when the file could not be
- *              opened by any driver.
- *
- *              Robb Matzke, 2000-06-23
- *              Changed name from H5ToolsFopen() so it jives better with
- *              the names we already have at the top of this source file.
- *
- *              Thomas Radke, 2000-09-12
- *              Added Stream VFD to the driver[] array.
- *
- *              Bill Wendling, 2001-01-10
- *              Changed macro behavior so that if we have a version other
- *              than 1.2.x (i.e., > 1.2), then we do the drivers check.
- *-------------------------------------------------------------------------
- */
-hid_t
-h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
-{
-    static struct {
-        const char	*name;
-        hid_t		fapl;
-    } driver[16];
-    static int          ndrivers = 0;
-    hid_t               fid = -1;
-#ifndef VERSION12
-    hid_t               fapl = H5P_DEFAULT;
-#endif  /* !VERSION12 */
-    int                 drivernum;
-
-    if (!ndrivers) {
-        /* Build a list of file access property lists which we should try
-         * when opening the file.  Eventually we'd like some way for the
-         * user to augment/replace this list interactively. */
-        driver[ndrivers].name = "sec2";
-        driver[ndrivers].fapl = H5P_DEFAULT;
-        ndrivers++;
-        
-#ifndef VERSION12
-        driver[ndrivers].name = "family";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
-        ndrivers++;
-
-        driver[ndrivers].name = "split";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-        ndrivers++;
-
-        driver[ndrivers].name = "multi";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
-        ndrivers++;
-
-#ifdef H5_HAVE_STREAM
-        driver[ndrivers].name = "stream";
-        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_stream(fapl, NULL);
-        ndrivers++;
-#endif	/* H5_HAVE_STREAM */
-#endif	/* !VERSION12 */
-    }
-
-    /* Try to open the file using each of the drivers */
-    for (drivernum = 0; drivernum < ndrivers; drivernum++) {
-        H5E_BEGIN_TRY {
-            fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
-        } H5E_END_TRY;
-
-        if (fid >= 0)
-	    break;
-    }
-
-    /* Save the driver name */
-    if (drivername && drivername_size){
-        if (fid >= 0) {
-            strncpy(drivername, driver[drivernum].name, drivername_size);
-            drivername[drivername_size - 1] = '\0';
-        } else {
-            drivername[0] = '\0'; /*no file opened*/
-        }
-    }
-
-    return fid;
+    return h5tools_dump_simple_mem(stream, info, obj_id, type, space, mem,
+                                   indentlevel);
 }
