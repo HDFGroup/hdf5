@@ -108,6 +108,7 @@ New Features
   =========================================
       * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
         EIP - 2002/05/06
+      * Intel C++ and F90 compilers Version 6.0 are supported on Linux 2.4
 
 
 Bug Fixes since HDF5-1.4.3 Release
@@ -189,11 +190,13 @@ Platforms Tested
                                   HP F90 v2.4
                                   HP MPI [not a product] (03/24/2000) B6060BA
     IRIX 6.5                      MIPSpro cc 7.30
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.2m
+    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
+                                  F90 MIPSpro 7.3.1.3m (64 only)
     Linux 2.4.9-31smp             gcc 2.95.3
                                   g++ 2.95.3
                                   Intel(R) C++ Version 6.0
                                   Intel(R) Fortran Compiler Version 6.0
+                                  MPICH 1.2.2
     Linux 2.2.18smp               gcc 2.95.2
                                   gcc 2.95.2 with mpich 1.2.1
                                   g++ 2.95.2
@@ -217,12 +220,14 @@ Platforms Tested
                                         109508-04 2001/07/11
     TFLOPS r1.0.4 v4.2.2 i386     pgcc Rel 3.1-4i with mpich-1.2.3 with
                                           local modifications
-    IA-32 Linux 2.2.10smpx        cc Intel 5.0.1
-                                  egcs-2.91.66
+    IA-32 Linux 2.4.9             cc Intel 5.0.1
+                                  gcc 2.96
+                                  Intel(R) C++ Version 6.0
+                                  Intel(R) Fortran Compiler Version 6.0
+                                  
     IA-64 Linux 2.4.16 ia64       gcc version 2.96 20000731
-                                  Intel(R) C++ Itanium(TM) Compiler 
-                                  for the Itanium(TM)-based applications,
-                                  Version 6.0 Beta, Build 20010905       
+                                  Intel(R) C++ Version 6.0
+                                  Intel(R) Fortran Compiler Version 6.0
     Windows 2000 (NT5.0)          MSVC++ 6.0
                                   DEC Visual Fortran 6.0
     Windows NT4.0                 MSVC++ 6.0
@@ -338,15 +343,10 @@ Known Problems
       be off by default.  One may turn it on by setting environment variable
       HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
 
-    * On IA64 systems one has to use -DIA64 compilation flag to compile
-      h4toh5 and h5toh4 utilites. After configuration step manually modify
-      Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
-      -DIA64 to the compilation flags.
-
-	* On IA32 and IA64 systems, if you use a compiler other than GCC (such as
-	  Intel's ecc or icc compilers), you will need to modify the generated
-	  "libtool" program after configuration is finished. On or around line 104
-	  of the libtool file, there are lines which look like:
+    * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
+      Intel's ecc or icc compilers), you will need to modify the generated
+      "libtool" program after configuration is finished. On or around line 104
+      of the libtool file, there are lines which look like:
 
           # How to pass a linker flag through the compiler.
           wl=""
@@ -356,3 +356,19 @@ Known Problems
           # How to pass a linker flag through the compiler.
           wl="-Wl,"
 
+     * To build Fortran Library using Intel compilers one has to 
+          
+          x modify source code in the fortran/src directory to remove !DEC and !MS
+            compiler's directives 
+          x build fails in fortran/test and then in frotran/examples directory;
+            to proceed edit work.pcl files in those directories to contain 
+            two lines
+
+                    work.pc
+                    ../src/work.pc 
+
+          x on IA64 systems one has to use "-cl,work.pcl" Fortran compiler flag
+            to build in the fortran/test and fortran/examples directories;
+            modify Makefiles in those directories, or do 
+                   setenv F9X "efc -cl,work.pcl"
+            before running configure.
