@@ -167,7 +167,7 @@ test_create(hid_t file)
     assert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
     assert(status >= 0);
-    status = H5Pset_space_time(create_parms, H5D_SPACE_ALLOC_EARLY);
+    status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
     assert(status >= 0); 
 
     dataset = H5Dcreate(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, 
@@ -318,7 +318,7 @@ test_compact_io(void)
     assert(plist >= 0);
     status = H5Pset_layout(plist, H5D_COMPACT);
     assert(status >= 0);
-    status = H5Pset_space_time(plist, H5D_SPACE_ALLOC_EARLY); 
+    status = H5Pset_alloc_time(plist, H5D_ALLOC_TIME_EARLY); 
     assert(status >= 0);
 
     /* Create and write to a compact dataset */

@@ -1124,8 +1124,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_layout");   
 
     /* Set the space allocation time to early */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME1, H5T_NATIVE_INT, sid, dcpl);
@@ -1142,8 +1142,8 @@ test_misc8(void)
 
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME2, H5T_NATIVE_INT, sid, dcpl);
@@ -1167,8 +1167,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Set the space allocation time to incremental */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME3, H5T_NATIVE_INT, sid, dcpl);
@@ -1197,8 +1197,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_layout");   
 
     /* Set the space allocation time to late */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation late */
     /* Should fail */
@@ -1206,8 +1206,8 @@ test_misc8(void)
     VERIFY(did, FAIL, "H5Dcreate");
 
     /* Set the space allocation time to incremental */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation incremental */
     /* Should fail */
@@ -1215,8 +1215,8 @@ test_misc8(void)
     VERIFY(did, FAIL, "H5Dcreate");
 
     /* Set the space allocation time to early */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a contiguous dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
@@ -1238,8 +1238,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_layout");   
 
     /* Set the space allocation time to early */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Use chunked storage for this dataset */
     ret = H5Pset_chunk(dcpl,rank,chunk_dims);
@@ -1260,8 +1260,8 @@ test_misc8(void)
 
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Use chunked storage for this dataset */
     ret = H5Pset_chunk(dcpl,rank,chunk_dims);
@@ -1289,8 +1289,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Set the space allocation time to incremental */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a chunked dataset, with space allocation incremental */
     did = H5Dcreate(fid, MISC8_DSETNAME7, H5T_NATIVE_INT, sid, dcpl);
@@ -1339,8 +1339,8 @@ test_misc8(void)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Set the space allocation time to early */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_EARLY);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Use compression as well as chunking for these datasets */
 #ifdef H5_HAVE_COMPRESSION
@@ -1377,8 +1377,8 @@ test_misc8(void)
 
 #ifndef H5_HAVE_PARALLEL
     /* Set the space allocation time to late */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a chunked dataset, with space allocation late */
     did = H5Dcreate(fid, MISC8_DSETNAME9, H5T_NATIVE_INT, sid, dcpl);
@@ -1447,8 +1447,8 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Set the space allocation time to incremental */
-    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_INCR);
-    CHECK(ret, FAIL, "H5Pset_space_time"); 
+    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_INCR);
+    CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Create a chunked dataset, with space allocation incremental */
     did = H5Dcreate(fid, MISC8_DSETNAME10, H5T_NATIVE_INT, sid, dcpl);

@@ -234,7 +234,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     long	rd_l, fill_l = 0x4321;
     char	filename[1024];
     H5D_space_status_t	allocation;
-    H5D_space_time_t    alloc_time;
+    H5D_alloc_time_t    alloc_time;
     H5D_fill_time_t	fill_time;
     comp_datatype       rd_c, fill_ctype;
   
@@ -266,7 +266,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     /* I. Test cases for late space allocation except compact dataset */
 
     if(H5D_COMPACT!=layout) {
-        if(H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_LATE) < 0) goto error;
+        if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) goto error;
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
 
         /* 1. Compound datatype test */
@@ -325,7 +325,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     } else if (H5D_COMPACT==layout) {
         if (H5Pset_layout(dcpl, H5D_COMPACT)<0) goto error;
     }
-    if(H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_EARLY) < 0) goto error;
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) goto error;
 
     /* 1. Compound datatype test */
     if(H5Pget_fill_value(dcpl, comp_type_id, &fill_ctype)<0) goto error;
@@ -418,11 +418,11 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	   goto error;
         }
 #endif
-        if(H5Pget_space_time(dcpl, &alloc_time)<0) goto error;
+        if(H5Pget_alloc_time(dcpl, &alloc_time)<0) goto error;
         if(H5Pget_fill_time(dcpl, &fill_time)<0) goto error;
-        if(alloc_time != H5D_SPACE_ALLOC_LATE) {
+        if(alloc_time != H5D_ALLOC_TIME_LATE) {
             H5_FAILED();
-            puts("    Got non-H5D_SPACE_ALLOC_LATE space allocation time.");
+            puts("    Got non-H5D_ALLOC_TIME_LATE space allocation time.");
             printf("    Got %d\n", alloc_time);
         }
         if(fill_time != H5D_FILL_TIME_ALLOC) {
@@ -443,11 +443,11 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
             goto error;
         }
         if ((dcpl=H5Dget_create_plist(dset4))<0) goto error;
-        if(H5Pget_space_time(dcpl, &alloc_time)<0) goto error;
+        if(H5Pget_alloc_time(dcpl, &alloc_time)<0) goto error;
         if(H5Pget_fill_time(dcpl, &fill_time)<0) goto error;
-        if(alloc_time != H5D_SPACE_ALLOC_LATE) {
+        if(alloc_time != H5D_ALLOC_TIME_LATE) {
 	   H5_FAILED();
-	   puts("    Got non-H5D_SPACE_ALLOC_LATE space allocation time.");
+	   puts("    Got non-H5D_ALLOC_TIME_LATE space allocation time.");
 	   printf("    Got %d\n", alloc_time);
         }
         if(fill_time != H5D_FILL_TIME_NEVER) {
@@ -484,10 +484,10 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         printf("    Got %d\n", allocation);
         goto error;
     }  
-    if(H5Pget_space_time(dcpl, &alloc_time)<0) goto error;
-    if(alloc_time != H5D_SPACE_ALLOC_EARLY) {
+    if(H5Pget_alloc_time(dcpl, &alloc_time)<0) goto error;
+    if(alloc_time != H5D_ALLOC_TIME_EARLY) {
         H5_FAILED();
-        puts("    Got non-H5D_SPACE_ALLOC_EARLY space allocation time.");
+        puts("    Got non-H5D_ALLOC_TIME_EARLY space allocation time.");
         printf("    Got %d\n", alloc_time);
     }
     if(H5Pget_fill_time(dcpl, &fill_time)<0) goto error;
@@ -516,10 +516,10 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         printf("    Got %ld, set %ld\n", rd_l, fill_l);
         goto error;
     }
-    if(H5Pget_space_time(dcpl, &alloc_time)<0) goto error;
-    if(alloc_time != H5D_SPACE_ALLOC_EARLY) {
+    if(H5Pget_alloc_time(dcpl, &alloc_time)<0) goto error;
+    if(alloc_time != H5D_ALLOC_TIME_EARLY) {
         H5_FAILED();
-        puts("    Got non-H5D_SPACE_ALLOC_EARLY space allocation time.");
+        puts("    Got non-H5D_ALLOC_TIME_EARLY space allocation time.");
         printf("    Got %d\n", alloc_time);
     }
     if(H5Pget_fill_time(dcpl, &fill_time)<0) goto error;
@@ -878,9 +878,9 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if ((ctype_id=create_compound_type())<0) goto error; 
 
 
-    /* I. Test H5D_SPACE_ALLOC_LATE space allocation cases */
+    /* I. Test H5D_ALLOC_TIME_LATE space allocation cases */
     if(H5D_COMPACT != layout) {
-        if(H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_LATE) < 0) goto error;
+        if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) goto error;
 
         /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value to be default */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
@@ -931,8 +931,8 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     }
 
 
-    /* II.  Test H5D_SPACE_ALLOC_EARLY space allocation cases */
-    if(H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_EARLY) < 0) goto error;
+    /* II.  Test H5D_ALLOC_TIME_EARLY space allocation cases */
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) goto error;
 
     /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value to be default */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;

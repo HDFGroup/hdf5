@@ -31,13 +31,13 @@ typedef enum H5D_layout_t {
 } H5D_layout_t;
 
 /* Values for the space allocation time property */
-typedef enum H5D_space_time_t {
-    H5D_SPACE_ALLOC_ERROR	=-1,
-    H5D_SPACE_ALLOC_DEFAULT  	=0,
-    H5D_SPACE_ALLOC_EARLY	=1,
-    H5D_SPACE_ALLOC_LATE	=2,
-    H5D_SPACE_ALLOC_INCR	=3
-} H5D_space_time_t;   
+typedef enum H5D_alloc_time_t {
+    H5D_ALLOC_TIME_ERROR	=-1,
+    H5D_ALLOC_TIME_DEFAULT  	=0,
+    H5D_ALLOC_TIME_EARLY	=1,
+    H5D_ALLOC_TIME_LATE	=2,
+    H5D_ALLOC_TIME_INCR	=3
+} H5D_alloc_time_t;   
 
 /* Values for the status of space allocation */
 typedef enum H5D_space_status_t {

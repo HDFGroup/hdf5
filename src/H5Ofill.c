@@ -113,7 +113,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message");
     
     /* Space allocation time */
-    mesg->space_time = (H5D_space_time_t)*p++;
+    mesg->alloc_time = (H5D_alloc_time_t)*p++;
 
     /* Fill value write time */
     mesg->fill_time = (H5D_fill_time_t)*p++;
@@ -227,7 +227,7 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* Version */
     *p++ = H5O_FILL_VERSION;
     /* Space allocation time */
-    *p++ = mesg->space_time;
+    *p++ = mesg->alloc_time;
     /* Fill value writing time */
     *p++ = mesg->fill_time;
     /* Whether fill value is defined */
@@ -329,7 +329,7 @@ H5O_fill_new_copy(const void *_mesg, void *_dest)
     }
 
     /* Copy three fill value attributes */
-    dest->space_time   = mesg->space_time;
+    dest->alloc_time   = mesg->alloc_time;
     dest->fill_time    = mesg->fill_time;
     dest->fill_defined = mesg->fill_defined;
 
@@ -520,7 +520,7 @@ H5O_fill_new_reset(void *_mesg)
 	H5T_close(mesg->type);
 	mesg->type = NULL;
     }
-    mesg->space_time   = (H5D_space_time_t)0;
+    mesg->alloc_time   = (H5D_alloc_time_t)0;
     mesg->fill_time    = (H5D_fill_time_t)0;
     mesg->fill_defined = (H5D_fill_value_t)0; 
 

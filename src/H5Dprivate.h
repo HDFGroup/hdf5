@@ -61,9 +61,9 @@
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
 #define H5D_CRT_FILL_VALUE_DEF     {NULL, 0, NULL}
 /* Definitions for space allocation time */
-#define H5D_CRT_SPACE_TIME_NAME   "space_time"
-#define H5D_CRT_SPACE_TIME_SIZE   sizeof(H5D_space_time_t)
-#define H5D_CRT_SPACE_TIME_DEF    H5D_SPACE_ALLOC_DEFAULT
+#define H5D_CRT_ALLOC_TIME_NAME   "alloc_time"
+#define H5D_CRT_ALLOC_TIME_SIZE   sizeof(H5D_alloc_time_t)
+#define H5D_CRT_ALLOC_TIME_DEF    H5D_ALLOC_TIME_DEFAULT
 /* Definitions for time of fill value writing */
 #define H5D_CRT_FILL_TIME_NAME     "fill_time"
 #define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)

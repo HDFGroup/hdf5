@@ -1022,10 +1022,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_space_time
+ * Function:    H5Pset_alloc_time
  *
  * Purpose:     Set space allocation time for dataset during creation.
- *		Valid values are H5D_EARLY, H5D_LATE.
+ *		Valid values are H5D_ALLOC_TIME_DEFAULT, H5D_ALLOC_TIME_EARLY,
+ *			H5D_ALLOC_TIME_LATE, H5D_ALLOC_TIME_INCR
  * 
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1038,12 +1039,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_space_time(hid_t plist_id, H5D_space_time_t alloc_time)
+H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
 {
     H5P_genplist_t *plist; 	/* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value 	 */
 
-    FUNC_ENTER_API(H5Pset_space_time, FAIL);
+    FUNC_ENTER_API(H5Pset_alloc_time, FAIL);
     H5TRACE2("e","iDs",plist_id,alloc_time);
 
     /* Get the property list structure */
@@ -1051,7 +1052,7 @@ H5Pset_space_time(hid_t plist_id, H5D_space_time_t alloc_time)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
-    if(H5P_set(plist, H5D_CRT_SPACE_TIME_NAME, &alloc_time) < 0)
+    if(H5P_set(plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
@@ -1060,10 +1061,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_space_time
+ * Function:    H5Pget_alloc_time
  *
- * Purpose:     Get space allocation time for dataset creation.  Valid 
- *		values are H5D_EARLY, H5D_LATE.
+ * Purpose:     Get space allocation time for dataset creation.
+ *		Valid values are H5D_ALLOC_TIME_DEFAULT, H5D_ALLOC_TIME_EARLY,
+ *			H5D_ALLOC_TIME_LATE, H5D_ALLOC_TIME_INCR
  * 
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1076,12 +1078,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_space_time(hid_t plist_id, H5D_space_time_t *alloc_time/*out*/)
+H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value          */
 
-    FUNC_ENTER_API(H5Pget_space_time, FAIL);
+    FUNC_ENTER_API(H5Pget_alloc_time, FAIL);
     H5TRACE2("e","ix",plist_id,alloc_time);
 
     /* Get the property list structure */
@@ -1089,7 +1091,7 @@ H5Pget_space_time(hid_t plist_id, H5D_space_time_t *alloc_time/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
-    if(!alloc_time || H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, alloc_time) < 0)
+    if(!alloc_time || H5P_get(plist, H5D_CRT_ALLOC_TIME_NAME, alloc_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get space allocation time");
 
 done:

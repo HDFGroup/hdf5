@@ -231,9 +231,9 @@ __DLL__ herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
 __DLL__ herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
      void *value/*out*/);
 __DLL__ herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
-__DLL__ herr_t H5Pset_space_time(hid_t plist_id, H5D_space_time_t 
+__DLL__ herr_t H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t 
 	alloc_time);
-__DLL__ herr_t H5Pget_space_time(hid_t plist_id, H5D_space_time_t 
+__DLL__ herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t 
 	*alloc_time/*out*/);
 __DLL__ herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 __DLL__ herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t 

@@ -129,7 +129,7 @@ void compact_dataset(char *filename)
     VRFY((dcpl>=0), "dataset creation property list succeeded");
     ret=H5Pset_layout(dcpl, H5D_COMPACT);
     VRFY((dcpl >= 0), "set property list for compact dataset");
-    ret=H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_EARLY);
+    ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
     VRFY((ret >= 0), "set space allocation time for compact dataset");
 
     dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, dcpl);
