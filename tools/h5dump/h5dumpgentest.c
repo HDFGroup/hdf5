@@ -1141,18 +1141,18 @@ static void gent_str(void) {
     hid_t array_dt;
 
     hsize_t dims1[] = { 3, 4};
-    char string1[12][2] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
+    char string1[12][3] = {"s1","s2","s3","s4","s5","s6","s7","s8","s9",
                            "s0","s1","s2"};
 
     hsize_t dims2[]={20};
-    char string2[20][9] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+    char string2[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
                         "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8", 
                         "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2", 
                         "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6", 
                         "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
 
     hsize_t dims3[] = { 27};
-    char string3[27][5] = {"abcd0", "abcd1", "abcd2", "abcd3", 
+    char string3[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3", 
                        "abcd4", "abcd5", "abcd6", "abcd7", 
                        "abcd8", "abcd9", "abcd0", "abcd1", 
                        "abcd2", "abcd3", "abcd4", "abcd5", 
@@ -1163,13 +1163,13 @@ static void gent_str(void) {
     int i, j, k, l;
 
     hsize_t dims4[] = { 3 };
-    char string4[3][20] = { "s1234567890123456789", "s1234567890123456789",
+    char string4[3][21] = { "s1234567890123456789", "s1234567890123456789",
                             "s1234567890123456789"};
 
     hsize_t dims5[] = { 3, 6};
     typedef struct {
       int a[8][10];
-      char s[12][32];
+      char s[12][33];
     } compound_t;
     compound_t comp1[3][6];
     hsize_t mdims[2];
@@ -1179,7 +1179,7 @@ static void gent_str(void) {
   /* string 1 : nullterm string */
   space = H5Screate_simple(2, dims1, NULL);
   f_type = mkstr(5, H5T_STR_NULLTERM);
-  m_type = mkstr(2, H5T_STR_NULLTERM);
+  m_type = mkstr(3, H5T_STR_NULLTERM);
   dataset = H5Dcreate(fid, "/string1", f_type, space, H5P_DEFAULT);
   H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1);
   H5Tclose(m_type);
@@ -1190,7 +1190,7 @@ static void gent_str(void) {
   /* string 2 : space pad string */
   space = H5Screate_simple(1, dims2, NULL);
   f_type = mkstr(11, H5T_STR_SPACEPAD);
-  m_type = mkstr(9, H5T_STR_NULLTERM);
+  m_type = mkstr(10, H5T_STR_NULLTERM);
   dataset = H5Dcreate(fid, "/string2", f_type, space, H5P_DEFAULT);
   H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2);
   H5Tclose(m_type);
@@ -1201,7 +1201,7 @@ static void gent_str(void) {
   /* string 3 : null pad string */
   space = H5Screate_simple(1, dims3, NULL);
   f_type = mkstr(8, H5T_STR_NULLPAD);
-  m_type = mkstr(5, H5T_STR_NULLTERM);
+  m_type = mkstr(6, H5T_STR_NULLTERM);
   dataset = H5Dcreate(fid, "/string3", f_type, space, H5P_DEFAULT);
   H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3);
   H5Tclose(m_type);
@@ -1212,7 +1212,7 @@ static void gent_str(void) {
   /* string 4 : space pad long string */
   space = H5Screate_simple(1, dims4, NULL);
   f_type = mkstr(168, H5T_STR_SPACEPAD);
-  m_type = mkstr(20, H5T_STR_NULLTERM);
+  m_type = mkstr(21, H5T_STR_NULLTERM);
   dataset = H5Dcreate(fid, "/string4", f_type, space, H5P_DEFAULT);
   H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4);
   H5Tclose(m_type);
@@ -1235,16 +1235,19 @@ static void gent_str(void) {
   H5Tinsert(f_type2, "int_array", HOFFSET(compound_t, a), array_dt);
   H5Tclose(array_dt);
 
-  str_type = mkstr(32, H5T_STR_SPACEPAD);
   mdims[0] = 3; mdims[1] = 4;
 
+  str_type = mkstr(32, H5T_STR_SPACEPAD);
   array_dt=H5Tarray_create(str_type,2,mdims,NULL);
   H5Tinsert(f_type, "string", HOFFSET(compound_t, s), array_dt);
   H5Tclose(array_dt);
+  H5Tclose(str_type);
 
+  str_type = mkstr(33, H5T_STR_NULLTERM);
   array_dt=H5Tarray_create(str_type,2,mdims,NULL);
   H5Tinsert(f_type2, "string", HOFFSET(compound_t, s), array_dt);
   H5Tclose(array_dt);
+  H5Tclose(str_type);
 
   for (i = 0; i < 3; i++)
       for (j = 0; j < 6; j++) {
@@ -1252,13 +1255,12 @@ static void gent_str(void) {
                 for (l = 0; l < 10; l++)
                    comp1[i][j].a[k][l] = (l+j+k) * (l+j+k);
            for (k = 0 ; k < 12; k++)
-               sprintf(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
+               strcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
       }
            
   dataset = H5Dcreate(fid, "/comp1", f_type, space, H5P_DEFAULT);
   H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
 
-  H5Tclose(str_type);
   H5Tclose(f_type);
   H5Tclose(f_type2);
   H5Sclose(space);
