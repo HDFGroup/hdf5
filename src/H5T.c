@@ -966,9 +966,15 @@ H5T_init_interface(void)
     status |= H5Tregister(H5T_PERS_SOFT, "ibo",
 			  fixedpt, fixedpt,
 			  H5T_conv_order);
+    status |= H5Tregister(H5T_PERS_SOFT, "ibo(opt)",
+			  fixedpt, fixedpt,
+			  H5T_conv_order_opt);
     status |= H5Tregister(H5T_PERS_SOFT, "fbo",
 			  floatpt, floatpt,
 			  H5T_conv_order);
+    status |= H5Tregister(H5T_PERS_SOFT, "fbo(opt)",
+			  floatpt, floatpt,
+			  H5T_conv_order_opt);
     status |= H5Tregister(H5T_PERS_SOFT, "struct(no-opt)",
 			  compound, compound,
 			  H5T_conv_struct);
