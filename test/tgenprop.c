@@ -93,7 +93,7 @@ test_genprop_basic_class(void)
     VERIFY(ret, 1, "H5Pequal");
 
     /* Make certain false postives aren't being returned */
-    ret = H5Pequal(cid2,H5P_FILE_CREATE_NEW);
+    ret = H5Pequal(cid2,H5P_FILE_CREATE);
     VERIFY(ret, 0, "H5Pequal");
 
     /* Close parent class */
@@ -105,7 +105,7 @@ test_genprop_basic_class(void)
     CHECK_I(ret, "H5Pclose_class");
 
     /* Create another new generic class, derived from file creation class */
-    cid1 = H5Pcreate_class(H5P_FILE_CREATE_NEW,CLASS2_NAME,CLASS2_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_FILE_CREATE,CLASS2_NAME,CLASS2_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check class name */
@@ -122,7 +122,7 @@ test_genprop_basic_class(void)
     CHECK_I(cid2, "H5Pget_class_parent");
 
     /* Verify class parent correct */
-    ret = H5Pequal(cid2,H5P_FILE_CREATE_NEW);
+    ret = H5Pequal(cid2,H5P_FILE_CREATE);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Check class parent's parent */
