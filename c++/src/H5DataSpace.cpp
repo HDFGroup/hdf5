@@ -36,14 +36,7 @@ namespace H5 {
 const DataSpace DataSpace::ALL( H5S_ALL );
 
 //--------------------------------------------------------------------------
-// Function:	DataSpace default constructor
-///\brief	Default constructor: creates a stub DataSpace.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-DataSpace::DataSpace() : IdComponent() {}
-
-//--------------------------------------------------------------------------
-// Function:	DataSpace overloaded constructor
+// Function:	DataSpace constructor
 ///\brief	Creates a new dataspace given a dataspace type.
 ///\param	type - IN: Type of the dataspace to be created, which 
 ///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE;

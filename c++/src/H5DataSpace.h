@@ -102,9 +102,6 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Creates a DataSpace object using an existing dataspace id.
 	DataSpace(const hid_t space_id);
 
-	// Default constructor
-	DataSpace();
-
 	// Copy constructor: makes a copy of the original DataSpace object.
 	DataSpace(const DataSpace& original);
 

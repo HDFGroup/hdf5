@@ -103,7 +103,6 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setLayout
 ///\brief       Sets the type of storage used store the raw data for a dataset.
-///\param       plist  - IN: Property list id, here by mistake, should be removed
 ///\param       layout - IN: Type of storage layout for raw data
 ///\exception   H5::PropListIException
 ///\par Description
@@ -111,7 +110,7 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetLayout
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setLayout(hid_t plist, H5D_layout_t layout ) const
+void DSetCreatPropList::setLayout(H5D_layout_t layout) const
 {
    herr_t ret_value = H5Pset_layout( id, layout );
    if( ret_value < 0 )

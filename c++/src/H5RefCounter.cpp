@@ -19,32 +19,32 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	RefCounter default constructor
-//=\brief	Default constructor: Creates a reference counter and set it
-//=		to 1.
+// Purpose	Default constructor: Creates a reference counter and set it
+//		to 1.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 RefCounter::RefCounter() : counter(1) {} 
  
 //--------------------------------------------------------------------------
 // Function:	RefCounter::getCounter
-//=\brief	Returns the current value of the reference counter.
+// Purpose	Returns the current value of the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int RefCounter::getCounter () const { return counter; }
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::increment
-//=\brief	Increments the reference counter.
+// Purpose	Increments the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void RefCounter::increment() { counter++; }
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::decrement
-//=\brief	Decrements the reference counter.
+// Purpose	Decrements the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void RefCounter::decrement() 
@@ -58,11 +58,10 @@ void RefCounter::decrement()
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::noReference
-//=\brief	Returns true if there are no more reference to the object 
-//=		that uses this counter.
-//=\return	true if there are no more reference to the object
-//=             that uses this counter, and false, otherwise.
-//=\note	This function will be obsolete in the next release.
+// Purpose	Returns true if there are no more reference to the object 
+//		that uses this counter.
+// Return	true if there are no more reference to the object
+//		that uses this counter, and false, otherwise.
 // Description
 //		Decrements the reference counter then determines if there 
 //		are no more reference to the object that uses this counter.
@@ -77,10 +76,11 @@ bool RefCounter::noReference()
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter destructor
-//=\brief	Noop destructor.
+// Purpose	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 RefCounter::~RefCounter() {}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 } // end namespace

@@ -71,7 +71,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 
 	// Sets the type of storage used to store the raw data for the 
 	// dataset that uses this property list.
-	void setLayout(hid_t plist, H5D_layout_t layout ) const;
+	void setLayout(H5D_layout_t layout) const;
 
 	// Returns the number of filters in the pipeline.
 	int getNfilters() const;
