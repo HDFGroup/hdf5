@@ -112,7 +112,7 @@ AC_TYPE_SIZE_T
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(getpwuid gethostname)
+AC_CHECK_FUNCS(getpwuid gethostname system)
 
 AC_TRY_COMPILE([#include<sys/types.h>],
 	       [off64_t n = 0;],

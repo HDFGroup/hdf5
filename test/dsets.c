@@ -184,11 +184,12 @@ test_create(hid_t file)
 static herr_t
 test_simple_io(hid_t file)
 {
-    hid_t		    dataset, space;
-    herr_t		    status;
-    int			    points[100][200], check[100][200];
-    int			    i, j, n;
-    size_t		    dims[2];
+    hid_t		dataset, space, xfer;
+    herr_t		status;
+    int			points[100][200], check[100][200];
+    int			i, j, n;
+    size_t		dims[2];
+    void		*tconv_buf = NULL;
 
     printf("%-70s", "Testing simple I/O");
 
@@ -205,6 +206,13 @@ test_simple_io(hid_t file)
     space = H5Screate_simple(2, dims, NULL);
     assert(space>=0);
 
+    /* Create a small conversion buffer to test strip mining */
+    tconv_buf = malloc (1000);
+    xfer = H5Pcreate (H5P_DATASET_XFER);
+    assert (xfer>=0);
+    status = H5Pset_buffer (xfer, 1000, tconv_buf, NULL);
+    assert (status>=0);
+
     /* Create the dataset */
     dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
 			H5P_DEFAULT);
@@ -212,12 +220,12 @@ test_simple_io(hid_t file)
 
     /* Write the data to the dataset */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-		      H5P_DEFAULT, points);
+		      xfer, points);
     if (status<0) goto error;
 
     /* Read the dataset back */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-		     H5P_DEFAULT, check);
+		     xfer, check);
     if (status<0) goto error;
 
     /* Check that the values read are the same as the values written */

@@ -53,7 +53,7 @@ fi
 if test "X" = "X$CPPFLAGS"; then
     warn=
     profile=
-    debug="-DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    debug="-DH5AC_DEBUG -DH5B_DEBUG -DH5D_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
     production="-DNDEBUG"
     parallel=""
     default_mode='$debug $warn $parallel'

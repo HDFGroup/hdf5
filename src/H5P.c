@@ -1679,6 +1679,100 @@ H5Pget_family (hid_t tid, hid_t *memb_tid)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_buffer
+ *
+ * Purpose:	Given a dataset transfer property list, set the maximum size
+ *		for the type conversion buffer and background buffer and
+ *		optionally supply pointers to application-allocated buffers.
+ *		If the buffer size is smaller than the entire amount of data
+ *		being transfered between application and file, and a type
+ *		conversion buffer or background buffer is required then
+ *		strip mining will be used.  However, certain restrictions
+ *		apply for the size of buffer which can be used for strip
+ *		mining.  For instance, when strip mining a 100x200x300
+ *		hyperslab of a simple data space the buffer must be large
+ *		enough to hold a 1x200x300 slab.
+ *
+ *		If TCONV and/or BKG are null pointers then buffers will be
+ *		allocated and freed during the data transfer.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, March 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_buffer, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
+	NULL == (plist = H5A_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+    if (size<=0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "buffer size must not be zero");
+    }
+
+    /* Update property list */
+    plist->buf_size = size;
+    plist->tconv = tconv;
+    plist->bkg = bkg;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_buffer
+ *
+ * Purpose:	Reads values previously set with H5Pset_buffer().
+ *
+ * Return:	Success:	Buffer size.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, March 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pget_buffer, 0);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
+	NULL == (plist = H5A_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0,
+		       "not a dataset transfer property list");
+    }
+
+    /* Return values */
+    if (tconv) *tconv = plist->tconv;
+    if (bkg) *bkg = plist->bkg;
+
+    FUNC_LEAVE (plist->buf_size);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi
  *
  * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,

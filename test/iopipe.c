@@ -19,12 +19,22 @@
 
 #define RAW_FILE_NAME	"iopipe.raw"
 #define HDF5_FILE_NAME	"iopipe.h5"
+#define HEADING		"%-16s"
+#define PROGRESS	'='
+
+#if 1
+/* Normal testing */
 #define REQUEST_SIZE_X	4579
 #define REQUEST_SIZE_Y	4579
 #define NREAD_REQUESTS	45
 #define NWRITE_REQUESTS	45
-#define HEADING		"%-16s"
-#define PROGRESS	'='
+#else
+/* Speedy testing */
+#define REQUEST_SIZE_X	1000
+#define REQUEST_SIZE_Y	1000
+#define NREAD_REQUESTS	45
+#define NWRITE_REQUESTS	45
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -83,10 +93,17 @@ print_stats (const char *prefix,
 static void
 synchronize (void)
 {
+#ifdef HAVE_SYSTEM
     system ("sync");
     system ("df >/dev/null");
 #if 0
-    system ("/sbin/swapout 130");
+    /*
+     * This works well on Linux to get rid of all cached disk buffers. The
+     * number should be approximately the amount of RAM in MB.  Do not
+     * include swap space in that amount or the command will fail.
+     */
+    system ("/sbin/swapout 128");
+#endif
 #endif
 }
 

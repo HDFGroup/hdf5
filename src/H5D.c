@@ -63,7 +63,9 @@ const H5D_create_t	H5D_create_dflt = {
 
 /* Default dataset transfer property list */
 const H5D_xfer_t	H5D_xfer_dflt = {
-    0,				/* Place holder - remove this later	*/
+    1024*1024,			/* Temporary buffer size		*/
+    NULL,			/* Type conversion buffer or NULL	*/
+    NULL, 			/* Background buffer or NULL		*/
 };
 
 /* Interface initialization? */
@@ -813,7 +815,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     }
 
     /* Create (open for write access) an object header */
-    if (H5O_create(f, 80, &(new_dset->ent)) < 0) {
+    if (H5O_create(f, 96, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to create dataset object header");
     }
@@ -1087,7 +1089,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
-    size_t		nelmts	;		/*number of elements	*/
+    size_t		nelmts;			/*number of elements	*/
+    size_t		smine_start;		/*strip mine start loc	*/
+    size_t		smine_nelmts;		/*elements per strip	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
@@ -1097,6 +1101,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL;
     herr_t		status;
+    size_t		src_type_size;		/*size of source type	*/
+    size_t		dst_type_size;		/*size of destination type*/
+    size_t		target_size;		/*desired buffer size	*/
+    size_t		buffer_size;		/*actual buffer size	*/
+    size_t		request_nelmts;		/*requested strip mine	*/
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -1107,124 +1116,154 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(buf);
     if (!file_space) file_space = dataset->space;
     if (!mem_space) mem_space = file_space;
-    
-    /*
-     * Convert data types to atoms because the conversion functions are
-     * application-level functions.
-     */
-    if ((src_id = H5A_register(H5_DATATYPE, H5T_copy(dataset->type))) < 0 ||
-	(dst_id = H5A_register(H5_DATATYPE, H5T_copy(mem_type))) < 0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-		    "unable to register types for conversion");
-    }
+    nelmts = H5S_get_npoints(mem_space);
 
     /*
      * Locate the type conversion function and data space conversion
-     * functions, and set up the element numbering information.
+     * functions, and set up the element numbering information. If a data
+     * type conversion is necessary then register data type atoms.
      */
     if (NULL == (tconv_func = H5T_find(dataset->type, mem_type, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
+    } else if (H5T_conv_noop!=tconv_func) {
+	if ((src_id=H5A_register(H5_DATATYPE, H5T_copy(dataset->type)))<0 ||
+	    (dst_id=H5A_register(H5_DATATYPE, H5T_copy(mem_type)))<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
+			"unable to register types for conversion");
+	}
     }
     if (NULL==(sconv_func=H5S_find (mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from file to memory data space");
     }
-    if (sconv_func->init &&
-	(sconv_func->init)(&(dataset->layout), mem_space, file_space,
-			   &numbering/*out*/)<=0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize element numbering information");
-    } else {
-	HDmemset (&numbering, 0, sizeof numbering);
-    }
-    if (H5S_get_npoints (mem_space)!=H5S_get_npoints (file_space)) {
+    if (nelmts!=H5S_get_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
     
     /*
-     * Compute the size of the request and allocate scratch buffers.
-     */
-    nelmts = H5S_get_npoints(mem_space);
-
-    /*
      * If there is no type conversion then try reading directly into the
-     * application's buffer.
+     * application's buffer.  This saves at least one mem-to-mem copy.
      */
     if (H5D_OPTIMIZE_PIPE &&
 	H5T_conv_noop==tconv_func &&
 	NULL!=sconv_func->read) {
-#ifndef NDEBUG
-	fprintf (stderr, "HDF5-DIAG: Trying I/O pipe optimization...\n");
-#endif
 	status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
 				    mem_space, buf/*out*/);
 	if (status>=0) goto succeed;
-#ifndef NDEBUG
-	fprintf (stderr, "HDF5-DIAG: I/O pipe optimization failed\n");
+#ifdef H5D_DEBUG
+	fprintf (stderr, "HDF5-DIAG: input pipe optimization failed "
+		 "(falling through)\n");
 #endif
 	H5E_clear ();
     }
     
 	
     /*
-     * This is the general case.
+     * This is the general case.  Figure out the strip mine size.
      */
-#ifndef LATER
+    src_type_size = H5T_get_size(dataset->type);
+    dst_type_size = H5T_get_size(mem_type);
+    target_size = xfer_parms->buf_size;
+    request_nelmts = target_size / MAX(src_type_size, dst_type_size);
+    if (request_nelmts<=0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "temporary buffer max size is too small");
+    }
+    if (sconv_func->init) {
+	smine_nelmts = (sconv_func->init)(&(dataset->layout), mem_space,
+					  file_space, request_nelmts,
+					  &numbering/*out*/);
+	if (smine_nelmts<=0) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			 "unable to initialize element numbering information");
+	}
+    } else {
+	smine_nelmts = request_nelmts;
+	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
+
     /*
-     * Note: this prototype version allocates a buffer large enough to
-     *	 satisfy the entire request; strip mining is not implemented.
+     * Get a temporary buffer for type conversion unless the app has already
+     * supplied one through the xfer properties. Instead of allocating a
+     * buffer which is the exact size, we allocate the target size.  The
+     * malloc() is usually less resource-intensive if we allocate/free the
+     * same size over and over.
      */
-    {
-	size_t src_size = nelmts * H5T_get_size(dataset->type);
-	size_t dst_size = nelmts * H5T_get_size(mem_type);
-	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
-	if (cdata->need_bkg) bkg_buf = H5MM_xmalloc (dst_size);
+    if (NULL==(tconv_buf=xfer_parms->tconv)) {
+	tconv_buf = H5MM_xmalloc (target_size);
+    }
+    if (cdata->need_bkg && NULL==(bkg_buf=xfer_parms->bkg)) {
+	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
+    }
+
+#ifdef H5D_DEBUG
+    /* Strip mine diagnostics.... */
+    if (smine_nelmts<nelmts) {
+	fprintf (stderr, "HDF5-DIAG: strip mine");
+	if (smine_nelmts!=request_nelmts) {
+	    fprintf (stderr, " got %lu of %lu",
+		     (unsigned long)smine_nelmts,
+		     (unsigned long)request_nelmts);
+	}
+	if (buffer_size!=target_size) {
+	    fprintf (stderr, " (%1.1f%% of buffer)",
+		     100.0*buffer_size/target_size);
+	}
+	fprintf (stderr, " %1.1f iterations\n",
+		 (double)nelmts/smine_nelmts);
     }
 #endif
-    /*
-     * Gather the data from disk into the data type conversion buffer. Also
-     * gather data from application to background buffer (this step is not
-     * needed for most conversions, but we leave that as an exercise for
-     * later ;-)
-     */
-    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
-			    &(dataset->create_parms->efl), 
-			    H5T_get_size (dataset->type), file_space,
-			    &numbering, 0, nelmts,
-			    tconv_buf/*out*/)!=nelmts) {
-	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
-    }
-    if (H5T_BKG_YES==cdata->need_bkg) {
-	if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
-				&numbering, 0, nelmts,
-				bkg_buf/*out*/)!=nelmts) {
-	    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
+
+    /* Start strip mining... */
+    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
+	smine_nelmts = MIN (smine_nelmts, nelmts-smine_start);
+	
+	/*
+	 * Gather the data from disk into the data type conversion
+	 * buffer. Also gather data from application to background buffer
+	 * if necessary.
+	 */
+	if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+				&(dataset->create_parms->efl), 
+				H5T_get_size (dataset->type), file_space,
+				&numbering, smine_start, smine_nelmts,
+				tconv_buf/*out*/)!=smine_nelmts) {
+	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
+	}
+	if (H5T_BKG_YES==cdata->need_bkg) {
+	    if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
+				    &numbering, smine_start, smine_nelmts,
+				    bkg_buf/*out*/)!=smine_nelmts) {
+		HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
+	    }
+	}
+
+	/*
+	 * Perform data type conversion.
+	 */
+	cdata->command = H5T_CONV_CONV;
+	cdata->ncalls++;
+	if ((tconv_func)(src_id, dst_id, cdata, smine_nelmts, tconv_buf,
+			 bkg_buf)<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			"data type conversion failed");
+	}
+	cdata->nelmts += smine_nelmts;
+
+	/*
+	 * Scatter the data into memory.
+	 */
+	if ((sconv_func->mscat)(tconv_buf, H5T_get_size (mem_type), mem_space,
+				&numbering, smine_start, smine_nelmts,
+				buf/*out*/)<0) {
+	    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
 	}
     }
-
-    /*
-     * Perform data type conversion.
-     */
-    cdata->command = H5T_CONV_CONV;
-    cdata->ncalls++;
-    if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, bkg_buf)<0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		    "data type conversion failed");
-    }
-    cdata->nelmts += nelmts;
-
-    /*
-     * Scatter the data into memory.
-     */
-    if ((sconv_func->mscat)(tconv_buf, H5T_get_size (mem_type), mem_space,
-			    &numbering, 0, nelmts, buf/*out*/)<0) {
-	HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
-    }
-
     
  succeed:
     ret_value = SUCCEED;
@@ -1232,8 +1271,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
-    tconv_buf = H5MM_xfree(tconv_buf);
-    bkg_buf = H5MM_xfree (bkg_buf);
+    if (tconv_buf && NULL==xfer_parms->tconv) {
+	H5MM_xfree(tconv_buf);
+    }
+    if (bkg_buf && NULL==xfer_parms->bkg) {
+	H5MM_xfree (bkg_buf);
+    }
     FUNC_LEAVE(ret_value);
 }
 
@@ -1260,7 +1303,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	  const void *buf)
 {
-    size_t		nelmts;
+    size_t		nelmts;			/*total number of elmts	*/
+    size_t		smine_start;		/*strip mine start loc	*/
+    size_t		smine_nelmts;		/*elements per strip	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
@@ -1269,6 +1314,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_number_t	numbering;		/*element numbering info*/
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL, status;
+    size_t		src_type_size;		/*size of source type	*/
+    size_t		dst_type_size;		/*size of destination type*/
+    size_t		target_size;		/*desired buffer size	*/
+    size_t		buffer_size;		/*actual buffer size	*/
+    size_t		request_nelmts;		/*requested strip mine	*/
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -1279,47 +1329,32 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(buf);
     if (!file_space) file_space = dataset->space;
     if (!mem_space) mem_space = file_space;
+    nelmts = H5S_get_npoints(mem_space);
 
     /*
-     * Convert data types to atoms because the conversion functions are
-     * application-level functions.
-     */
-    if ((src_id = H5A_register(H5_DATATYPE, H5T_copy(mem_type)))<0 ||
-	(dst_id = H5A_register(H5_DATATYPE, H5T_copy(dataset->type)))<0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-		    "unable to register types for conversion");
-    }
-    
-    /*
      * Locate the type conversion function and data space conversion
-     * functions, and set up the element numbering information.
+     * functions, and set up the element numbering information. If a data
+     * type conversion is necessary then register data type atoms.
      */
     if (NULL == (tconv_func = H5T_find(mem_type, dataset->type, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
+    } else if (H5T_conv_noop!=tconv_func) {
+	if ((src_id = H5A_register(H5_DATATYPE, H5T_copy(mem_type)))<0 ||
+	    (dst_id = H5A_register(H5_DATATYPE, H5T_copy(dataset->type)))<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
+			"unable to register types for conversion");
+	}
     }
     if (NULL==(sconv_func=H5S_find (mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from memory to file data space");
     }
-    if (sconv_func->init &&
-	(sconv_func->init)(&(dataset->layout), mem_space, file_space,
-			   &numbering/*out*/)<=0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize element numbering information");
-    } else {
-	HDmemset (&numbering, 0, sizeof numbering);
-    }
-    if (H5S_get_npoints (mem_space)!=H5S_get_npoints (file_space)) {
+    if (nelmts!=H5S_get_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-
-    /*
-     * Compute the size of the request and allocate scratch buffers.
-     */
-    nelmts = H5S_get_npoints(mem_space);
-
+    
     /*
      * If there is no type conversion then try writing directly from
      * application buffer to file.
@@ -1327,75 +1362,123 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (H5D_OPTIMIZE_PIPE &&
 	H5T_conv_noop==tconv_func &&
 	NULL!=sconv_func->write) {
-#ifndef NDEBUG
-	fprintf (stderr, "HDF5-DIAG: Trying I/O pipe optimization...\n");
-#endif
 	status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
 				     &(dataset->create_parms->efl),
 				     H5T_get_size (dataset->type), file_space,
 				     mem_space, buf);
 	if (status>=0) goto succeed;
-#ifndef NDEBUG
-	fprintf (stderr, "HDF5-DIAG: I/O pipe optimization failed\n");
+#ifdef H5D_DEBUG
+	fprintf (stderr, "HDF5-DIAG: output pipe optimization failed "
+		 "(falling through)\n");
 #endif
 	H5E_clear ();
     }
 
 
     /*
-     * This is the general case.
+     * This is the general case.  Figure out the strip mine size.
      */
-#ifndef LATER
+    src_type_size = H5T_get_size(mem_type);
+    dst_type_size = H5T_get_size(dataset->type);
+    target_size = xfer_parms->buf_size;
+    request_nelmts = target_size / MAX (src_type_size, dst_type_size);
+    if (request_nelmts<=0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "temporary buffer max size is too small");
+    }
+    if (sconv_func->init) {
+	smine_nelmts = (sconv_func->init)(&(dataset->layout), mem_space,
+					  file_space, request_nelmts,
+					  &numbering/*out*/);
+	if (smine_nelmts<=0) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+			 "unable to initialize element numbering information");
+	}
+    } else {
+	smine_nelmts = request_nelmts;
+	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
+
     /*
-     * Note: This prototype version allocates a buffer large enough to
-     *	     satisfy the entire request; strip mining is not implemented.
+     * Get a temporary buffer for type conversion unless the app has already
+     * supplied one through the xfer properties.  Instead of allocating a
+     * buffer which is the exact size, we allocate the target size. The
+     * malloc() is usually less resource-intensive if we allocate/free the
+     * same size over and over.
      */
-    {
-	size_t src_size = nelmts * H5T_get_size(mem_type);
-	size_t dst_size = nelmts * H5T_get_size(dataset->type);
-	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
-	if (cdata->need_bkg) bkg_buf = H5MM_xmalloc (dst_size);
+    if (NULL==(tconv_buf=xfer_parms->tconv)) {
+	tconv_buf = H5MM_xmalloc (target_size);
+    }
+    if (cdata->need_bkg && NULL==(bkg_buf=xfer_parms->bkg)) {
+	bkg_buf = H5MM_xmalloc (smine_nelmts * dst_type_size);
+    }
+
+#ifdef H5D_DEBUG
+    /* Strip mine diagnostics.... */
+    if (smine_nelmts<nelmts) {
+	fprintf (stderr, "HDF5-DIAG: strip mine");
+	if (smine_nelmts!=request_nelmts) {
+	    fprintf (stderr, " got %lu of %lu",
+		     (unsigned long)smine_nelmts,
+		     (unsigned long)request_nelmts);
+	}
+	if (buffer_size!=target_size) {
+	    fprintf (stderr, " (%1.1f%% of buffer)",
+		     100.0*buffer_size/target_size);
+	}
+	fprintf (stderr, " %1.1f iterations\n",
+		 (double)nelmts/smine_nelmts);
     }
 #endif
-    /*
-     * Gather data from application buffer into the data type conversion
-     * buffer. Also gather data from the file into the background buffer
-     * (this step is not needed for most conversions, but we leave that as an
-     * exercise for later ;-)
-     */
-    if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
-			    &numbering, 0, nelmts, tconv_buf/*out*/)!=nelmts) {
-	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
-    }
-    if (H5T_BKG_YES==cdata->need_bkg) {
-	if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+
+    /* Start strip mining... */
+    for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
+	smine_nelmts = MIN (smine_nelmts, nelmts-smine_start);
+
+	/*
+	 * Gather data from application buffer into the data type conversion
+	 * buffer. Also gather data from the file into the background buffer
+	 * if necessary.
+	 */
+	if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
+				&numbering, smine_start, smine_nelmts,
+				tconv_buf/*out*/)!=smine_nelmts) {
+	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
+	}
+	if (H5T_BKG_YES==cdata->need_bkg) {
+	    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+				    &(dataset->create_parms->efl),
+				    H5T_get_size (dataset->type), file_space,
+				    &numbering, smine_start, smine_nelmts,
+				    bkg_buf/*out*/)!=smine_nelmts) {
+		HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			     "file gather failed");
+	    }
+	}
+
+	/*
+	 * Perform data type conversion.
+	 */
+	cdata->command = H5T_CONV_CONV;
+	cdata->ncalls++;
+	if ((tconv_func) (src_id, dst_id, cdata, smine_nelmts, tconv_buf,
+			  bkg_buf)<0) {
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+			"data type conversion failed");
+	}
+	cdata->nelmts += smine_nelmts;
+
+	/*
+	 * Scatter the data out to the file.
+	 */
+	if ((sconv_func->fscat)(dataset->ent.file, &(dataset->layout),
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
-				&numbering, 0, nelmts,
-				bkg_buf/*out*/)!=nelmts) {
-	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed");
+				&numbering, smine_start, smine_nelmts,
+				tconv_buf)<0) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
 	}
-    }
-
-    /*
-     * Perform data type conversion.
-     */
-    cdata->command = H5T_CONV_CONV;
-    cdata->ncalls++;
-    if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, bkg_buf)<0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		    "data type conversion failed");
-    }
-    cdata->nelmts += nelmts;
-
-    /*
-     * Scatter the data out to the file.
-     */
-    if ((sconv_func->fscat)(dataset->ent.file, &(dataset->layout),
-			    &(dataset->create_parms->efl),
-			    H5T_get_size (dataset->type), file_space,
-			    &numbering, 0, nelmts, tconv_buf)<0) {
-	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
     }
 
  succeed:
@@ -1404,10 +1487,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
  done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
-    tconv_buf = H5MM_xfree(tconv_buf);
-    bkg_buf = H5MM_xfree (bkg_buf);
+    if (tconv_buf && NULL==xfer_parms->tconv) {
+	H5MM_xfree(tconv_buf);
+    }
+    if (bkg_buf && NULL==xfer_parms->bkg) {
+	H5MM_xfree (bkg_buf);
+    }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_extend

@@ -37,9 +37,14 @@ static intn             interface_initialize_g = FALSE;
  */
 size_t
 H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
-	       const H5S_t *file_space, H5S_number_t *numbering/*out*/)
+	       const H5S_t *file_space, size_t desired_nelmts,
+	       H5S_number_t *numbering/*out*/)
 {
     size_t	nelmts;
+    int		m_ndims, f_ndims;	/*mem, file dimensionality	*/
+    size_t	size[H5O_LAYOUT_NDIMS];	/*size of selected hyperslab	*/
+    size_t	acc;
+    int		i;
     
     FUNC_ENTER (H5S_simp_init, 0);
 
@@ -49,11 +54,43 @@ H5S_simp_init (const struct H5O_layout_t *layout, const H5S_t *mem_space,
     assert (file_space && H5S_SIMPLE==file_space->type);
     assert (numbering);
 
-    /* Numbering is implied by the hyperslab, C order */
+    /* Numbering is implied by the hyperslab, C order, no data here */
     HDmemset (numbering, 0, sizeof(H5S_number_t));
 
-    /* Data can be efficiently copied at any size */
-    nelmts = H5S_get_npoints (file_space);
+    /*
+     * The stripmine size is such that only the slowest varying dimension can
+     * be split up.  We choose the largest possible strip mine size which is
+     * not larger than the desired size.
+     */
+    m_ndims = H5S_get_hyperslab (mem_space, NULL, size, NULL);
+    for (i=m_ndims-1, acc=1; i>0; --i) acc *= size[i];
+    nelmts = (desired_nelmts/acc) * acc;
+    if (nelmts<=0) {
+	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+		       "strip mine buffer is too small");
+    }
+
+    /*
+     * The value chosen for mem_space must be the same as the value chosen for
+     * file_space.
+     */
+    f_ndims = H5S_get_hyperslab (file_space, NULL, size, NULL);
+    if (m_ndims!=f_ndims) {
+	nelmts = H5S_get_npoints (file_space);
+	if (nelmts>desired_nelmts) {
+	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+			   "strip mining not supported across "
+			   "dimensionalities");
+	}
+	assert (nelmts==H5S_get_npoints (mem_space));
+    } else {
+	for (i=f_ndims-1, acc=1; i>0; --i) acc *= size[i];
+	acc *= (desired_nelmts/acc);
+	if (nelmts!=acc) {
+	    HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
+			   "unsupported strip mine size for shape change");
+	}
+    }
     
     FUNC_LEAVE (nelmts);
 }
@@ -95,6 +132,7 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    size_t	acc;				/*accumulator		*/
 #ifndef LATER
     intn	file_offset_signed[H5O_LAYOUT_NDIMS];
 #endif
@@ -113,12 +151,6 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (buf);
 
     /*
-     * The prototype doesn't support strip mining.
-     */
-    assert (0==start);
-    assert (nelmts==H5S_get_npoints (file_space));
-
-    /*
      * Get hyperslab information to determine what elements are being
      * selected (there might eventually be other selection methods too).
      * We only support hyperslabs with unit sample because there's no way to
@@ -132,6 +164,7 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
+    /* Argument type problems to be fixed later..... -RPM */
     if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
@@ -142,12 +175,23 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	file_offset[i] = file_offset_signed[i];
     }
 #endif
+
+    /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
 	if (sample[i]!=1) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, 0,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
+
+    /* Adjust the slowest varying dimension to take care of strip mining */
+    for (i=1, acc=1; i<space_ndims; i++) acc *= hsize[i];
+    assert (0==start % acc);
+    assert (0==nelmts % acc);
+    file_offset[0] += start / acc;
+    hsize[0] = nelmts / acc;
+
+    /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
     HDmemset (zero, 0, layout->ndims*sizeof(size_t));
@@ -194,6 +238,7 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
     size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    size_t	acc;				/*accumulator		*/
 #ifndef LATER
     intn	mem_offset_signed[H5O_LAYOUT_NDIMS];
 #endif
@@ -211,12 +256,6 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
     assert (buf);
 
     /*
-     * The prototype doesn't support strip mining.
-     */
-    assert (0==start);
-    assert (nelmts==H5S_get_npoints (mem_space));
-
-    /*
      * Retrieve hyperslab information to determine what elements are being
      * selected (there might be other selection methods in the future).  We
      * only handle hyperslabs with unit sample because there's currently no
@@ -229,6 +268,7 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
+    /* Argument type problems to be fixed later..... -RPM */
     if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
@@ -239,6 +279,8 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 	mem_offset[i] = mem_offset_signed[i];
     }
 #endif
+
+    /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
 	if (sample[i]!=1) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -249,6 +291,15 @@ H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve data space dimensions");
     }
+
+    /* Adjust the slowest varying dimension to take care of strip mining */
+    for (i=1, acc=1; i<space_ndims; i++) acc *= hsize[i];
+    assert (0==start % acc);
+    assert (0==nelmts % acc);
+    mem_offset[0] += start / acc;
+    hsize[0] = nelmts / acc;
+
+    /* The fastest varying dimension is for the data point itself */
     mem_offset[space_ndims] = 0;
     mem_size[space_ndims] = elmt_size;
     hsize[space_ndims] = elmt_size;
@@ -299,6 +350,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
     size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    size_t	acc;				/*accumulator		*/
 #ifndef LATER
     intn	mem_offset_signed[H5O_LAYOUT_NDIMS];
 #endif
@@ -316,12 +368,6 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
     assert (tconv_buf);
 
     /*
-     * The prototype doesn't support strip mining.
-     */
-    assert (0==start);
-    assert (nelmts==H5S_get_npoints (mem_space));
-
-    /*
      * Retrieve hyperslab information to determine what elements are being
      * selected (there might be other selection methods in the future).  We
      * only handle hyperslabs with unit sample because there's currently no
@@ -334,6 +380,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
+    /* Argument type problems to be fixed later..... -RPM */
     if ((space_ndims=H5S_get_hyperslab (mem_space, mem_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
@@ -344,6 +391,8 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
 	mem_offset[i] = mem_offset_signed[i];
     }
 #endif
+
+    /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
 	if (sample[i]!=1) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, 0,
@@ -354,6 +403,15 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve data space dimensions");
     }
+
+    /* Adjust the slowest varying dimension to account for strip mining */
+    for (i=1, acc=1; i<space_ndims; i++) acc *= hsize[i];
+    assert (0==start % acc);
+    assert (0==nelmts % acc);
+    mem_offset[0] += start / acc;
+    hsize[0] = nelmts / acc;
+    
+    /* The fastest varying dimension is for the data point itself */
     mem_offset[space_ndims] = 0;
     mem_size[space_ndims] = elmt_size;
     hsize[space_ndims] = elmt_size;
@@ -404,6 +462,7 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     size_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
     size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    size_t	acc;				/*accumulator		*/
 #ifndef LATER
     intn	file_offset_signed[H5O_LAYOUT_NDIMS];
 #endif
@@ -422,12 +481,6 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (buf);
 
     /*
-     * The prototype doesn't support strip mining.
-     */
-    assert (0==start);
-    assert (nelmts==H5S_get_npoints (file_space));
-    
-    /*
      * Get hyperslab information to determine what elements are being
      * selected (there might eventually be other selection methods too).
      * We only support hyperslabs with unit sample because there's no way to
@@ -441,6 +494,7 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		       "unable to retrieve hyperslab parameters");
     }
 #else
+    /* Argument type problems to be fixed later..... -RPM */
     if ((space_ndims=H5S_get_hyperslab (file_space, file_offset_signed,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
@@ -451,12 +505,23 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	file_offset[i] = file_offset_signed[i];
     }
 #endif
+
+    /* Check that there is no subsampling of the hyperslab */
     for (i=0; i<space_ndims; i++) {
 	if (sample[i]!=1) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 			   "hyperslab sampling is not implemented yet");
 	}
     }
+
+    /* Adjust the slowest varying dimension to account for strip mining */
+    for (i=1, acc=1; i<space_ndims; i++) acc *= hsize[i];
+    assert (0==start % acc);
+    assert (0==nelmts % acc);
+    file_offset[0] += start / acc;
+    hsize[0] = nelmts / acc;
+    
+    /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
     HDmemset (zero, 0, layout->ndims*sizeof(size_t));

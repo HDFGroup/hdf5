@@ -26,6 +26,15 @@
 #include <H5Sprivate.h>         /*for the H5S_t type                         */
 #include <H5Oprivate.h>         /*object Headers                             */
 
+/*
+ * Feature: Define H5D_DEBUG on the compiler command line if you want to
+ *	    debug dataset I/O. NDEBUG must not be defined in order for this
+ *	    to have any effect.
+ */
+#ifdef NDEBUG
+#  undef H5D_DEBUG
+#endif
+
 #define H5D_RESERVED_ATOMS  0
 
 /* Set the minimum object header size to create objects with */
@@ -41,8 +50,11 @@ typedef struct H5D_create_t {
 
 /* Dataset transfer property list */
 typedef struct H5D_xfer_t {
-    int _placeholder;                   /*unused--delete this later          */
+    size_t		buf_size;	/*max temp buffer size		     */
+    void		*tconv;		/*type conversion buffer or null     */
+    void		*bkg;		/*background buffer or null	     */
 } H5D_xfer_t;
+
 typedef struct H5D_t H5D_t;
 extern const H5D_create_t H5D_create_dflt;
 extern const H5D_xfer_t H5D_xfer_dflt;

@@ -65,7 +65,8 @@ typedef struct H5S_number_t {
 typedef struct H5S_tconv_t {
     /* Initialize element numbering information */
     size_t (*init)(const struct H5O_layout_t *layout, const H5S_t *mem_space,
-                   const H5S_t *file_space, H5S_number_t *numbering/*out*/);
+                   const H5S_t *file_space, size_t desired_nelmts,
+		   H5S_number_t *numbering/*out*/);
 
     /* Gather elements from disk to type conversion buffer */
     size_t (*fgath)(H5F_t *f, const struct H5O_layout_t *layout,
@@ -122,7 +123,7 @@ intn H5S_extend (H5S_t *space, const size_t *size);
 /* Conversion functions for simple data spaces */
 size_t H5S_simp_init (const struct H5O_layout_t *layout,
                       const H5S_t *mem_space, const H5S_t *file_space,
-                      H5S_number_t *numbering/*out*/);
+                      size_t desired_nelmts, H5S_number_t *numbering/*out*/);
 size_t H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		       const struct H5O_efl_t *efl, size_t elmt_size,
 		       const H5S_t *file_space, const H5S_number_t *numbering,
