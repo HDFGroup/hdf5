@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -g /g2 -g / -g /y tgroup.h5'
+Expected output for 'h5dump --group=/g2 --group / -g /y tgroup.h5'
 #############################
 HDF5 "tgroup.h5" {
 GROUP "/g2" {
@@ -41,6 +41,6 @@ GROUP "/" {
    } 
 } 
 GROUP "/y" {
-   h5dump error: unable to open /y
+   h5dump error: unable to open group "/y"
 } 
 } 
