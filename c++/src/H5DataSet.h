@@ -39,10 +39,14 @@ class __DLLCPP__ DataSet : public AbstractDs {
 	// Extends the dataset with unlimited dimension.
 	void extend( const hsize_t* size ) const;
 
+	// Fills a selection in memory with a value
+	void fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space);
+	// Fills a selection in memory with zero 
+	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space);
+
 	// Creates a copy of an existing DataSet using its id
-	// (used only by template functions in FGtemplates.h
-	// to return a DataSet, will not be published; Note: should use
-	// friend template function)
+	// Note: used by CommonFG to return a DataSet; should be modified
+	// to use friend template function instead)
 	DataSet( const hid_t dataset_id );
 
 	// Used by the API to appropriately close a dataset

@@ -180,6 +180,47 @@ void DataSet::extend( const hsize_t* size ) const
    }
 }
 
+/*--------------------------------------------------------------------------
+ NAME
+    fillMemBuf
+ PURPOSE 
+    Fills a selection in memory with a value
+ USAGE
+    fillMemBuf(fill, fill_type, buf, buf_type, space)
+    fillMemBuf(buf, buf_type, space)
+        void *buf;              IN/OUT: Memory buffer to fill selection within
+        DataType& buf_type;     IN: Datatype of the elements in buffer
+        DataSpace& space;       IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+        const void *fill;       IN: Pointer to fill value to use - default NULL
+        DataType& fill_type;    IN: Datatype of the fill value
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ COMMENTS, BUGS, ASSUMPTIONS
+    Second usage uses all zeros as fill value
+--------------------------------------------------------------------------*/
+void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space)
+{
+    hid_t fill_type_id = fill_type.getId();
+    hid_t buf_type_id = buf_type.getId();
+    hid_t space_id = space.getId();
+    herr_t ret_value = H5Dfill(fill, fill_type_id, buf, buf_type_id, space_id);
+    if( ret_value < 0 )
+    {
+	throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
+    }
+}
+void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
+{
+    hid_t buf_type_id = buf_type.getId();
+    hid_t space_id = space.getId();
+    herr_t ret_value = H5Dfill(NULL, buf_type_id, buf, buf_type_id, space_id);
+    if( ret_value < 0 )
+    {
+	throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
+    }
+}
+
 // This private function calls the C API H5Dclose to close this dataset.
 // Used by IdComponent::reset
 void DataSet::p_close() const
