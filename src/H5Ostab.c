@@ -23,15 +23,15 @@
 #define PABLO_MASK	H5O_stab_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p,
+static void *H5O_stab_decode (H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_stab_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
 static void *H5O_stab_fast (const H5G_cache_t *cache, void *_mesg);
 static hbool_t H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
 			       const void *_mesg);
 static void *H5O_stab_copy (const void *_mesg, void *_dest);
-static size_t H5O_stab_size (hdf5_file_t *f, const void *_mesg);
-static herr_t H5O_stab_debug (hdf5_file_t *f, const void *_mesg,
+static size_t H5O_stab_size (H5F_t *f, const void *_mesg);
+static herr_t H5O_stab_debug (H5F_t *f, const void *_mesg,
 			      FILE *stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
@@ -73,7 +73,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
+H5O_stab_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_stab_t	*stab;
    
@@ -111,7 +111,7 @@ H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
+H5O_stab_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
 
@@ -279,7 +279,7 @@ H5O_stab_copy (const void *_mesg, void *_dest)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_stab_size (hdf5_file_t *f, const void *_mesg)
+H5O_stab_size (H5F_t *f, const void *_mesg)
 {
    FUNC_ENTER (H5O_stab_size, NULL, FAIL);
    FUNC_LEAVE (2 * H5F_SIZEOF_OFFSET(f));
@@ -304,8 +304,8 @@ H5O_stab_size (hdf5_file_t *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
-		intn indent, intn fwidth)
+H5O_stab_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
+		intn fwidth)
 {
    const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
    

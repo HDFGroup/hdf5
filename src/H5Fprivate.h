@@ -31,8 +31,16 @@
 #define H5F_SIGNATURE_LEN 8
 
 /* size of size_t and off_t as they exist on disk */
-#define H5F_SIZEOF_OFFSET(F) ((F)->file_create_parms.offset_size)
-#define H5F_SIZEOF_SIZE(F)	((F)->file_create_parms.length_size)
+#define H5F_SIZEOF_OFFSET(F) ((F)->shared->file_create_parms.offset_size)
+#define H5F_SIZEOF_SIZE(F)	((F)->shared->file_create_parms.length_size)
+
+/*
+ * File open flags.
+ */
+#define H5F_ACC_WRITE	0x0001	/* Open file for read/write access	*/
+#define H5F_ACC_CREAT	0x0002	/* Create non-existing files		*/
+#define H5F_ACC_EXCL	0x0004	/* Fail if file exists			*/
+#define H5F_ACC_TRUNC	0x0008	/* Truncate existing file		*/
 
 /*
  * Define the low-level file interface.
@@ -335,26 +343,49 @@ typedef struct {
    uint8 sharedheader_ver;     	/* Version # of the shared header format */
 } file_create_temp_t;
 
-/* Define the structure to store the file information for HDF5 files */
-typedef struct {
-    char *dir;              	/* Directory the file is located within	*/
-    char *filename;         	/* Filename of file			*/
-    uintn acc_perm;         	/* Access Permissions for file		*/
-    hdf_file_t file_handle; 	/* File handle for actual I/O 		*/
-    uintn ref_count;        	/* Ref count for times file is opened 	*/
-    uint32 consist_flags;   	/* File Consistency Flags 		*/
-    haddr_t smallobj_off;    	/* Offset of small-obj heap within the file */
-    haddr_t freespace_off;   	/* Offset of free-space info within the file */
-    size_t logical_len;     	/* Logical length of file 		*/
-    struct H5AC_t *cache; 	/* The object cache 			*/
-    file_create_temp_t file_create_parms; /* File-creation template 	*/
+/*
+ * These things make a file unique.
+ */
+typedef struct H5F_search_t {
+   dev_t	dev;		/* Device number containing file	*/
+   ino_t	ino;		/* Unique file number on device		*/
+} H5F_search_t;
+
+/*
+ * Define the structure to store the file information for HDF5 files. One of
+ * these structures is allocated per file, not per H5Fopen().
+ */
+typedef struct H5F_file_t {
+   H5F_search_t	key;		/* The key for looking up files		*/
+   uintn	flags;         	/* Access Permissions for file		*/
+   hdf_file_t 	file_handle; 	/* File handle for actual I/O 		*/
+   uintn	nrefs;        	/* Ref count for times file is opened 	*/
+   uint32 	consist_flags; 	/* File Consistency Flags 		*/
+   haddr_t 	smallobj_off;  	/* Offset of small-obj heap within the file */
+   haddr_t 	freespace_off; 	/* Offset of free-space info within the file */
+   size_t	logical_len;   	/* Logical length of file 		*/
+   struct H5AC_t *cache; 	/* The object cache 			*/
+   file_create_temp_t file_create_parms; /* File-creation template 	*/
 #ifdef LATER
-    file_access_temp_t file_access_parms; /* File-access template	*/
+   file_access_temp_t file_access_parms; /* File-access template	*/
 #endif
-    struct H5G_entry_t *root_sym; /* Root symbol table entry		*/
-    uintn nshadows;		/* Size of shadow hash table		*/
-    struct H5G_hash_t **shadow; /* The shadow hash table		*/
-  } hdf5_file_t;
+   struct H5G_entry_t *root_sym; /* Root symbol table entry		*/
+   uintn nshadows;		/* Size of shadow hash table		*/
+   struct H5G_hash_t **shadow;	/* The shadow hash table		*/
+} H5F_file_t;
+
+/*
+ * This is the top-level file descriptor.  One of these structures is
+ * allocated every time H5Fopen() is called although they may contain
+ * pointers to shared H5F_file_t structs.
+ */
+typedef struct H5F_t {
+   uintn	intent;		/* The flags passed to H5F_open()	*/
+   char		*name;		/* Name used to open file		*/
+   H5F_file_t	*shared;	/* The shared file info			*/
+} H5F_t;
+
+
 
 
 #ifdef NOT_YET
@@ -403,12 +434,11 @@ typedef struct {
 
 
 /* Private functions, not part of the publicly documented API */
-void H5F_encode_length_unusual(const hdf5_file_t *f, uint8 **p, uint8 *l);
-void H5F_encode_offset_unusual(const hdf5_file_t *f, uint8 **p, uint8 *o);
-intn H5F_compare_filename(const VOIDP obj, const VOIDP key);
-herr_t H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
-herr_t H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
-herr_t H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
+void H5F_encode_offset_unusual(const H5F_t *f, uint8 **p, uint8 *o);
+herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth);
 
 #endif

@@ -25,10 +25,10 @@
 #define PABLO_MASK	H5O_cont_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_cont_encode (hdf5_file_t *f, size_t size, uint8 *p,
+static void *H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_cont_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static herr_t H5O_cont_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
+static herr_t H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
 			      intn indent, intn fwidth);
 
 /* This message derives from H5O */
@@ -69,7 +69,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cont_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
+H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
    H5O_cont_t	*cont = NULL;
    
@@ -107,7 +107,7 @@ H5O_cont_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_encode (hdf5_file_t *f, size_t size, uint8 *p, const void *_mesg)
+H5O_cont_encode (H5F_t *f, size_t size, uint8 *p, const void *_mesg)
 {
    const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;
 
@@ -145,7 +145,7 @@ H5O_cont_encode (hdf5_file_t *f, size_t size, uint8 *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
+H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
    const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;

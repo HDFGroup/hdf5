@@ -197,7 +197,7 @@ H5G_basename (const char *name, size_t *size_p)
  *-------------------------------------------------------------------------
  */
 static H5G_entry_t *
-H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
+H5G_namei (H5F_t *f, H5G_entry_t *cwd, const char *name,
 	   const char **rest, H5G_entry_t *dir_ent)
 {
    H5G_entry_t  dir;			/*entry for current directory	*/
@@ -214,17 +214,17 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 
    /* check args */
    assert (f);
-   assert (f->root_sym);
+   assert (f->shared->root_sym);
    assert (name && *name);
    assert (cwd || '/'==*name);
 
    /* starting point */
    if ('/'==*name) {
-      if (f->root_sym->header<=0) {
+      if (f->shared->root_sym->header<=0) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL);
       }
-      ret_value = f->root_sym;
-      dir = *(f->root_sym);
+      ret_value = f->shared->root_sym;
+      dir = *(f->shared->root_sym);
    } else {
       ret_value = cwd;
       dir = *cwd;
@@ -266,11 +266,11 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 	  * the name `foo'.
 	  */
 	 H5O_name_t mesg={0};
-	 if (!aside && dir.header==f->root_sym->header &&
+	 if (!aside && dir.header==f->shared->root_sym->header &&
 	     H5O_read (f, dir.header, &dir, H5O_NAME, 0, &mesg) &&
 	     !HDstrcmp (mesg.s, comp)) {
 	    H5O_reset (H5O_NAME, &mesg);
-	    ret_value = f->root_sym;
+	    ret_value = f->shared->root_sym;
 	    aside = TRUE;
 	 } else {
 	    /* component not found */
@@ -287,7 +287,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
    /* output parameters */
    if (rest) *rest = name; /*final null*/
    if (dir_ent) {
-      if (ret_value->header == f->root_sym->header) {
+      if (ret_value->header == f->shared->root_sym->header) {
 	 HDmemset (dir_ent, 0, sizeof(H5G_entry_t)); /*root has no parent*/
       } else {
 	 *dir_ent = dir;
@@ -337,7 +337,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_mkroot (hdf5_file_t *f, size_t size_hint)
+H5G_mkroot (H5F_t *f, size_t size_hint)
 {
    H5G_entry_t	*handle=NULL;		/*handle to open object		*/
    herr_t	ret_value=FAIL;		/*return value			*/
@@ -352,7 +352,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
     * Make sure that the file descriptor has the latest info -- someone might
     * have the root object open.
     */
-   H5G_shadow_sync (f->root_sym);
+   H5G_shadow_sync (f->shared->root_sym);
    
    /*
     * If we already have a root object, then open it and get it's name. The
@@ -363,11 +363,11 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
     * re-inserted back into the directory hierarchy.  We might leak file
     * memory, but at least we don't loose the original root object.
     */
-   if (f->root_sym->header>0) {
-      if (H5O_read (f, NO_ADDR, f->root_sym, H5O_STAB, 0, &stab)) {
+   if (f->shared->root_sym->header>0) {
+      if (H5O_read (f, NO_ADDR, f->shared->root_sym, H5O_STAB, 0, &stab)) {
 	 /* root directory already exists */
 	 HGOTO_ERROR (H5E_DIRECTORY, H5E_EXISTS, -2);
-      } else if (NULL==(handle=H5G_shadow_open (f, NULL, f->root_sym))) {
+      } else if (NULL==(handle=H5G_shadow_open (f, NULL, f->shared->root_sym))) {
 	 /* can't open root object */
 	 HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
       } else if (NULL==H5O_read (f, NO_ADDR, handle, H5O_NAME, 0, &name)) {
@@ -383,10 +383,10 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
     * something goes wrong at this step, closing the `handle' will rewrite
     * info back into f->root_sym because we set the dirty bit.
     */
-   if (H5G_stab_new (f, f->root_sym, size_hint)<0) {
+   if (H5G_stab_new (f, f->shared->root_sym, size_hint)<0) {
       HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL); /*cant create root*/
    }
-   if (1!=H5O_link (f, f->root_sym, 1)) {
+   if (1!=H5O_link (f, f->shared->root_sym, 1)) {
       HGOTO_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL);
    }
 
@@ -399,7 +399,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
       if (1!=H5O_link (f, handle, 0)) {
 	 HGOTO_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL);
       }
-      if (NULL==(ent_ptr=H5G_stab_insert (f, f->root_sym, obj_name,
+      if (NULL==(ent_ptr=H5G_stab_insert (f, f->shared->root_sym, obj_name,
 					  handle))) {
 	 HGOTO_ERROR (H5E_DIRECTORY, H5E_CANTINIT, FAIL);
       }
@@ -464,7 +464,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_mkdir (hdf5_file_t *f, const char *name, size_t size_hint)
+H5G_mkdir (H5F_t *f, const char *name, size_t size_hint)
 {
    const char	*rest=NULL;		/*the base name			*/
    H5G_entry_t	*cwd=NULL;		/*current working directory	*/
@@ -483,8 +483,8 @@ H5G_mkdir (hdf5_file_t *f, const char *name, size_t size_hint)
    assert (name && *name);
 #ifndef LATER
    /* Get current working directory */
-   H5G_shadow_sync (f->root_sym);
-   cwd = f->root_sym;
+   H5G_shadow_sync (f->shared->root_sym);
+   cwd = f->shared->root_sym;
 #endif
    assert (cwd || '/'==*name);
 
@@ -558,7 +558,7 @@ H5G_mkdir (hdf5_file_t *f, const char *name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_pushd (hdf5_file_t *f, const char *name)
+H5G_pushd (H5F_t *f, const char *name)
 {
    FUNC_ENTER (H5G_pushd, NULL, FAIL);
 
@@ -592,7 +592,7 @@ H5G_pushd (hdf5_file_t *f, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_popd (hdf5_file_t *f)
+H5G_popd (H5F_t *f)
 {
    FUNC_ENTER (H5G_popd, NULL, FAIL);
 
@@ -625,7 +625,7 @@ H5G_popd (hdf5_file_t *f)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
+H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
 {
    H5G_entry_t	ent;			/*entry data for the new object	*/
    H5G_entry_t	*ent_ptr;		/*ptr into symbol node for entry*/
@@ -647,8 +647,8 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
     * Get the current working directory.
     */
 #ifndef LATER
-   H5G_shadow_sync (f->root_sym);
-   cwd = f->root_sym;
+   H5G_shadow_sync (f->shared->root_sym);
+   cwd = f->shared->root_sym;
 #endif
 
    /*
@@ -666,7 +666,7 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
        * doesn't have a name or we shouldn't interfere with the name
        * it already has as a message.
        */
-      if (f->root_sym->header>0) {
+      if (f->shared->root_sym->header>0) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, NULL); /*root exists*/
       }
       if ((ent.header = H5O_new (f, 0, ohdr_hint))<0) {
@@ -676,8 +676,8 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
       if (1!=H5O_link (f, &ent, 1)) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, NULL); /*bad link count*/
       }
-      *(f->root_sym) = ent;
-      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->root_sym))) {
+      *(f->shared->root_sym) = ent;
+      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->shared->root_sym))) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
       }
       HRETURN (ret_value);
@@ -710,7 +710,7 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
    }
    
 
-   if (f->root_sym->header<=0) {
+   if (f->shared->root_sym->header<=0) {
       /*
        * This will be the only object in the file. Insert it as the root
        * object and add a name messaage to the object header (or modify
@@ -726,8 +726,8 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
       if (1!=H5O_link (f, &ent, 1)) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, NULL); /*bad link count*/
       }
-      *(f->root_sym) = ent;
-      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->root_sym))) {
+      *(f->shared->root_sym) = ent;
+      if (NULL==(ret_value=H5G_shadow_open (f, &dir, f->shared->root_sym))) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
       }
       HRETURN (ret_value);
@@ -736,13 +736,13 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
        * Make sure the root directory exists.  Ignore the failure if it's
        * because the directory already exists.
        */
-      hbool_t update_dir = (dir.header==f->root_sym->header);
+      hbool_t update_dir = (dir.header==f->shared->root_sym->header);
       herr_t status = H5G_mkroot (f, H5G_SIZE_HINT);
       if (status<0 && -2!=status) {
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_CANTINIT, NULL);
       }
       H5ECLEAR;
-      if (update_dir) dir = *(f->root_sym);
+      if (update_dir) dir = *(f->shared->root_sym);
    }
    
    /*
@@ -788,7 +788,7 @@ H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_open (hdf5_file_t *f, const char *name)
+H5G_open (H5F_t *f, const char *name)
 {
    H5G_entry_t	*ent=NULL;
    H5G_entry_t	*ret_value=NULL;
@@ -805,12 +805,12 @@ H5G_open (hdf5_file_t *f, const char *name)
 
    /* Get CWD */
 #ifndef LATER
-   H5G_shadow_sync (f->root_sym);
-   cwd = f->root_sym;
+   H5G_shadow_sync (f->shared->root_sym);
+   cwd = f->shared->root_sym;
 #endif
    assert (cwd || '/'==*name);
 
-   if (f->root_sym->header<=0) {
+   if (f->shared->root_sym->header<=0) {
       HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, NULL); /*object not found*/
    }
    if (NULL==(ent=H5G_namei (f, cwd, name, NULL, &dir))) {
@@ -842,7 +842,7 @@ H5G_open (hdf5_file_t *f, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_close (hdf5_file_t *f, H5G_entry_t *ent)
+H5G_close (H5F_t *f, H5G_entry_t *ent)
 {
    FUNC_ENTER (H5G_close, NULL, FAIL);
 
@@ -896,7 +896,7 @@ H5G_close (hdf5_file_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+H5G_find (H5F_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	  const char *name, H5G_entry_t *ent)
 {
    H5G_entry_t	*ent_p = NULL;
@@ -907,7 +907,7 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    assert (name && *name);
    assert (cwd || '/'==*name);
 
-   if (f->root_sym->header<=0) {
+   if (f->shared->root_sym->header<=0) {
       HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, FAIL); /*object not found*/
    }
 

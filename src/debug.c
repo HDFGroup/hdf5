@@ -46,7 +46,7 @@ int
 main (int argc, char *argv[])
 {
    hid_t	fid;
-   hdf5_file_t	*f;
+   H5F_t	*f;
    haddr_t	addr = 0;
    uint8	sig[16];
    intn		i;
@@ -72,7 +72,7 @@ main (int argc, char *argv[])
       HDexit (1);
    }
    if (NULL==(f=H5Aatom_object (fid))) {
-      fprintf (stderr, "cannot obtain hdf5_file_t pointer\n");
+      fprintf (stderr, "cannot obtain H5F_t pointer\n");
       HDexit (2);
    }
 

@@ -186,7 +186,7 @@ H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_decode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
@@ -230,7 +230,7 @@ H5G_ent_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
+H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
 {
    uint8	*p_ret = *pp;
 
@@ -299,7 +299,7 @@ H5G_ent_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
@@ -349,7 +349,7 @@ H5G_ent_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
+H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
 {
    uint8	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
@@ -418,7 +418,7 @@ H5G_ent_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug (hdf5_file_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
+H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
 	       intn fwidth)
 {
    int		i;

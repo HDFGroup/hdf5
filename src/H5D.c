@@ -49,7 +49,7 @@ static char RcsId[] = "@(#)$Revision$";
  * A dataset is the following struct.
  */
 typedef struct H5D_t {
-   hdf5_file_t	*file; 		/* File store for this object		   */
+   H5F_t	*file; 		/* File store for this object		   */
    H5G_entry_t	*ent; 		/* Cached object header stuff		   */
    h5_datatype_t *type; 	/* Datatype of this dataset		   */
    H5P_dim_t	*dim; 		/* Dimensionality of this dataset	   */
@@ -129,7 +129,7 @@ hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name)
 {
     H5D_t *new_dset;        /* new dataset object to create */
     hid_t ret_value = SUCCEED;
-    hdf5_file_t *file = NULL;
+    H5F_t *file = NULL;
     
     FUNC_ENTER(H5D_create, H5D_init_interface, FAIL);
 
@@ -190,7 +190,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t H5D_find_name(hid_t grp_id, hobjtype_t type, const char *name)
 {
-    hdf5_file_t *file;          /* Pointer to the file-store of this object */
+    H5F_t *file;          /* Pointer to the file-store of this object */
     H5D_t	*dset = NULL;	/* The dataset				    */
     hid_t ret_value = SUCCEED;
     H5O_std_store_t store;

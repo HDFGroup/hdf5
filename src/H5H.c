@@ -45,16 +45,15 @@ typedef struct H5H_t {
 } H5H_t;
 
 /* PRIVATE PROTOTYPES */
-static H5H_t *H5H_load (hdf5_file_t *f, haddr_t addr, void *udata);
-static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, haddr_t addr,
-			 H5H_t *heap);
+static H5H_t *H5H_load (H5F_t *f, haddr_t addr, void *udata);
+static herr_t H5H_flush (H5F_t *f, hbool_t dest, haddr_t addr, H5H_t *heap);
 
 /*
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
-   (void*(*)(hdf5_file_t*,haddr_t,void*))H5H_load,
-   (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5H_flush,
+   (void*(*)(H5F_t*,haddr_t,void*))H5H_load,
+   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
 
 /* Is the interface initialized? */
@@ -88,7 +87,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5H_new (hdf5_file_t *f, H5H_type_t heap_type, size_t size_hint)
+H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
 {
    H5H_t	*heap = NULL;
    size_t	total_size;		/*total heap size on disk	*/
@@ -162,7 +161,7 @@ H5H_new (hdf5_file_t *f, H5H_type_t heap_type, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (hdf5_file_t *f, haddr_t addr, void *udata)
+H5H_load (H5F_t *f, haddr_t addr, void *udata)
 {
    uint8	hdr[20], *p;
    H5H_t	*heap=NULL;
@@ -266,7 +265,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
+H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
 {
    uint8	*p = heap->chunk;
    H5H_free_t	*fl = heap->freelist;
@@ -369,7 +368,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
  *		function to fail.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	BUF (or the allocated buffer)
  *
@@ -384,7 +383,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
  *-------------------------------------------------------------------------
  */
 void *
-H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
+H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 {
    H5H_t	*heap = NULL;
 
@@ -392,7 +391,7 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (offset>=0);
 
@@ -423,7 +422,7 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *		may include an offset into the interior of the object.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	Ptr to the object.  The pointer points to
  *				a chunk of memory large enough to hold the
@@ -443,7 +442,7 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 const void *
-H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
+H5H_peek (H5F_t *f, haddr_t addr, off_t offset)
 {
    H5H_t	*heap = NULL;
    const void	*retval = NULL;
@@ -452,7 +451,7 @@ H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (offset>=0);
 
@@ -499,7 +498,7 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  * Purpose:	Inserts a new item into the heap.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	Offset of new item within heap.
  *
@@ -514,7 +513,7 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *-------------------------------------------------------------------------
  */
 off_t
-H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
+H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 {
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *max_fl=NULL;
@@ -528,7 +527,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (buf_size>0);
    assert (buf);
@@ -658,7 +657,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
  *		write for an object must be for the entire object.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
  *
@@ -673,7 +672,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
+H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
 	   const void *buf)
 {
    H5H_t	*heap = NULL;
@@ -682,7 +681,7 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (offset>=0);
    assert (buf);
@@ -717,7 +716,7 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
  *		one at the first offset past the removed portion.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
  *
@@ -732,7 +731,7 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
+H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
 {
    H5H_t	*heap = NULL;
    H5H_free_t	*fl = heap->freelist, *fl2 = NULL;
@@ -744,7 +743,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (offset>=0);
    assert (size>0);
@@ -831,7 +830,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
  * Purpose:	Prints debugging information about a heap.
  *
  *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the hdf5_file_t global heap field.
+ *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
  *
@@ -846,8 +845,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
-	   intn fwidth)
+H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
 {
    H5H_t	*h = NULL;
    int		i, j, overlap;
@@ -860,7 +858,7 @@ H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->smallobj_off;
+   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
    assert (addr>0);
    assert (stream);
    assert (indent>=0);

@@ -82,27 +82,27 @@ typedef struct H5G_entry_t H5G_entry_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5G_entry_t *H5G_mkdir (hdf5_file_t *f, const char *name, size_t size_hint);
-herr_t H5G_pushd (hdf5_file_t *f, const char *name);
-herr_t H5G_popd (hdf5_file_t *f);
-H5G_entry_t *H5G_create (hdf5_file_t *f, const char *name, size_t ohdr_hint);
-H5G_entry_t *H5G_open (hdf5_file_t *f, const char *name);
-herr_t H5G_close (hdf5_file_t *f, H5G_entry_t *ent);
-herr_t H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
+H5G_entry_t *H5G_mkdir (H5F_t *f, const char *name, size_t size_hint);
+herr_t H5G_pushd (H5F_t *f, const char *name);
+herr_t H5G_popd (H5F_t *f);
+H5G_entry_t *H5G_create (H5F_t *f, const char *name, size_t ohdr_hint);
+H5G_entry_t *H5G_open (H5F_t *f, const char *name);
+herr_t H5G_close (H5F_t *f, H5G_entry_t *ent);
+herr_t H5G_find (H5F_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 		 const char *name, H5G_entry_t *ent);
-herr_t H5G_ent_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
-herr_t H5G_ent_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
+herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
+herr_t H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
 
 /*
  * These functions operate on symbol table nodes.
  */
-herr_t H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+herr_t H5G_node_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		       intn fwidth, haddr_t heap);
 
 /*
  * These functions operate on shadow entries.
  */
-herr_t H5G_shadow_flush (hdf5_file_t *f, hbool_t invalidate);
+herr_t H5G_shadow_flush (H5F_t *f, hbool_t invalidate);
 
 /*
  * These functions operate on symbol table entries.  They're used primarily
@@ -114,7 +114,7 @@ herr_t H5G_ent_invalidate (H5G_entry_t *ent);
 haddr_t H5G_ent_addr (H5G_entry_t *ent);
 H5G_cache_t *H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type);
 herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
-herr_t H5G_ent_debug (hdf5_file_t *f, H5G_entry_t *ent, FILE *stream,
+herr_t H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream,
 		      intn indent, intn fwidth);
 
 #endif

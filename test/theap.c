@@ -44,7 +44,7 @@ test_heap (void)
 {
    int		i, j;
    hid_t	fid;
-   hdf5_file_t	*f;
+   H5F_t	*f;
    off_t	heap;
    char		buf[NOBJS+8];
    const char	*s;

@@ -99,25 +99,23 @@
 #define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
 
 /* PRIVATE PROTOTYPES */
-static haddr_t H5B_insert_helper (hdf5_file_t *f, haddr_t addr,
-				  H5B_class_t *type,
+static haddr_t H5B_insert_helper (H5F_t *f, haddr_t addr, H5B_class_t *type,
 				  uint8 *lt_key, hbool_t *lt_key_changed,
 				  uint8 *md_key, void *udata,
 				  uint8 *rt_key, hbool_t *rt_key_changed);
-static herr_t H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type,
+static herr_t H5B_insert_child (H5F_t *f, const H5B_class_t *type,
 				H5B_t *bt, intn idx, haddr_t child,
 				intn anchor, void *md_key);
-static herr_t H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
-			 H5B_t *b);
-static H5B_t *H5B_load (hdf5_file_t *f, haddr_t addr, void *_data);
-static herr_t H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx);
-static size_t H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
+static herr_t H5B_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *b);
+static H5B_t *H5B_load (H5F_t *f, haddr_t addr, void *_data);
+static herr_t H5B_decode_key (H5F_t *f, H5B_t *bt, intn idx);
+static size_t H5B_nodesize (H5F_t *f, const H5B_class_t *type,
 			    size_t *total_nkey_size, size_t sizeof_rkey);
 
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
-   (void*(*)(hdf5_file_t*,haddr_t,void*))H5B_load,
-   (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5B_flush,
+   (void*(*)(H5F_t*,haddr_t,void*))H5B_load,
+   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5B_flush,
 }};
 
 /* Is the H5B interface initialized? */
@@ -142,7 +140,7 @@ static interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5B_new (hdf5_file_t *f, const H5B_class_t *type)
+H5B_new (H5F_t *f, const H5B_class_t *type)
 {
    H5B_t	*bt=NULL;
    haddr_t	addr;
@@ -231,7 +229,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type)
  *-------------------------------------------------------------------------
  */
 static H5B_t *
-H5B_load (hdf5_file_t *f, haddr_t addr, void *_data)
+H5B_load (H5F_t *f, haddr_t addr, void *_data)
 {
    const H5B_class_t 	*type = (H5B_class_t *)_data;
    size_t		size, total_nkey_size;
@@ -334,7 +332,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, void *_data)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
+H5B_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
    intn		i;
    size_t	size = 0;
@@ -444,7 +442,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_find (hdf5_file_t *f, H5B_class_t *type, haddr_t addr, void *udata)
+H5B_find (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata)
 {
    H5B_t	*bt=NULL;
    intn		idx=-1, lt=0, rt, cmp=1;
@@ -544,8 +542,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5B_split (hdf5_file_t *f, H5B_class_t *type, H5B_t *old_bt,
-	   haddr_t old_addr, intn anchor)
+H5B_split (H5F_t *f, H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
+	   intn anchor)
 {
    H5B_t	*new_bt=NULL, *tmp_bt=NULL;
    haddr_t	ret_value=FAIL, new_addr=FAIL;
@@ -699,7 +697,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx)
+H5B_decode_key (H5F_t *f, H5B_t *bt, intn idx)
 {
    FUNC_ENTER (H5B_decode_key, NULL, FAIL);
    
@@ -733,7 +731,7 @@ H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx)
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5B_insert (hdf5_file_t *f, H5B_class_t *type, haddr_t addr, void *udata)
+H5B_insert (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata)
 {
    uint8	lt_key[256], md_key[256], rt_key[256];
    hbool_t	lt_key_changed=FALSE, rt_key_changed=FALSE;
@@ -878,7 +876,7 @@ H5B_insert (hdf5_file_t *f, H5B_class_t *type, haddr_t addr, void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, H5B_t *bt,
+H5B_insert_child (H5F_t *f, const H5B_class_t *type, H5B_t *bt,
 		  intn idx, haddr_t child, intn anchor, void *md_key)
 {
    size_t	recsize;
@@ -986,7 +984,7 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, H5B_t *bt,
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5B_insert_helper (hdf5_file_t *f, haddr_t addr, H5B_class_t *type,
+H5B_insert_helper (H5F_t *f, haddr_t addr, H5B_class_t *type,
 		   uint8 *lt_key, hbool_t *lt_key_changed,
 		   uint8 *md_key, void *udata,
 		   uint8 *rt_key, hbool_t *rt_key_changed)
@@ -1225,7 +1223,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_list (hdf5_file_t *f, H5B_class_t *type, haddr_t addr, void *udata)
+H5B_list (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata)
 {
    H5B_t	*bt=NULL;
    haddr_t	next_addr;
@@ -1307,7 +1305,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
+H5B_nodesize (H5F_t *f, const H5B_class_t *type,
 	      size_t *total_nkey_size, size_t sizeof_rkey)
 {
    size_t	size;
@@ -1357,7 +1355,7 @@ H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+H5B_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 	   intn fwidth, H5B_class_t *type)
 {
    H5B_t		*bt = NULL;

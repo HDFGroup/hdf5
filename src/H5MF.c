@@ -48,7 +48,7 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5MF_alloc (hdf5_file_t *f, size_t size)
+H5MF_alloc (H5F_t *f, size_t size)
 {
    haddr_t	addr;
 
@@ -56,12 +56,12 @@ H5MF_alloc (hdf5_file_t *f, size_t size)
 
    /* check arguments */
    assert (f);
-   assert (f->logical_len>0);
+   assert (f->shared->logical_len>0);
    assert (size>0);
 
    /* reserve space from the end of the file */
-   addr = f->logical_len;
-   f->logical_len += size;
+   addr = f->shared->logical_len;
+   f->shared->logical_len += size;
 
    FUNC_LEAVE (addr);
 }
@@ -88,7 +88,7 @@ H5MF_alloc (hdf5_file_t *f, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free (hdf5_file_t *f, haddr_t addr, size_t size)
+H5MF_free (H5F_t *f, haddr_t addr, size_t size)
 {
    FUNC_ENTER (H5MF_free, NULL, FAIL);
 

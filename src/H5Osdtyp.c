@@ -38,15 +38,15 @@ static char RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK	H5O_sim_dtype_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_sim_dtype_encode (hdf5_file_t *f, size_t size, uint8 *p,
+static void *H5O_sim_dtype_decode (H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_sim_dtype_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
 static void *H5O_sim_dtype_fast (const H5G_cache_t *cache, void *_mesg);
 static hbool_t H5O_sim_dtype_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
 				    const void *_mesg);
 static void *H5O_sim_dtype_copy (const void *_mesg, void *_dest);
-static size_t H5O_sim_dtype_size (hdf5_file_t *f, const void *_mesg);
-static herr_t H5O_sim_dtype_debug (hdf5_file_t *f, const void *_mesg,
+static size_t H5O_sim_dtype_size (H5F_t *f, const void *_mesg);
+static herr_t H5O_sim_dtype_debug (H5F_t *f, const void *_mesg,
 			      FILE *stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
@@ -76,7 +76,7 @@ static hbool_t interface_initialize_g = FALSE;
         with the decoded information
  USAGE
     void *H5O_sim_dtype_decode(f, raw_size, p)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         size_t raw_size;        IN: size of the raw information buffer
         const uint8 *p;         IN: the raw information buffer
  RETURNS
@@ -87,7 +87,7 @@ static hbool_t interface_initialize_g = FALSE;
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
+H5O_sim_dtype_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
     H5O_sim_dtype_t	*sdtype;
    
@@ -117,7 +117,7 @@ H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
     Encode a simple datatype message 
  USAGE
     herr_t H5O_sim_dtype_encode(f, raw_size, p, mesg)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         size_t raw_size;        IN: size of the raw information buffer
         const uint8 *p;         IN: the raw information buffer
         const void *mesg;       IN: Pointer to the simple datatype struct
@@ -128,7 +128,7 @@ H5O_sim_dtype_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sim_dtype_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
+H5O_sim_dtype_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 {
     const H5O_sim_dtype_t *sdtype = (const H5O_sim_dtype_t *)mesg;
 
@@ -292,7 +292,7 @@ H5O_sim_dtype_copy (const void *mesg, void *dest)
     Return the raw message size in bytes
  USAGE
     void *H5O_sim_dtype_copy(f, mesg)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source simple datatype struct
  RETURNS
     Size of message on success, FAIL on failure
@@ -302,7 +302,7 @@ H5O_sim_dtype_copy (const void *mesg, void *dest)
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sim_dtype_size (hdf5_file_t *f, const void *mesg)
+H5O_sim_dtype_size (H5F_t *f, const void *mesg)
 {
    FUNC_ENTER (H5O_sim_dtype_size, NULL, FAIL);
    FUNC_LEAVE (4);
@@ -315,7 +315,7 @@ H5O_sim_dtype_size (hdf5_file_t *f, const void *mesg)
     Prints debugging information for a simple datatype message
  USAGE
     void *H5O_sim_dtype_debug(f, mesg, stream, indent, fwidth)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source simple datatype struct
         FILE *stream;           IN: Pointer to the stream for output data
         intn indent;            IN: Amount to indent information by
@@ -327,7 +327,7 @@ H5O_sim_dtype_size (hdf5_file_t *f, const void *mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sim_dtype_debug (hdf5_file_t *f, const void *mesg, FILE *stream,
+H5O_sim_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
    const H5O_sim_dtype_t	*sdtype = (const H5O_sim_dtype_t *)mesg;

@@ -14,8 +14,16 @@
 #include <H5MMprivate.h>		/*memory management		*/
 #include <H5Oprivate.h>			/*object header messages	*/
 
+/*
+ * FEATURE: If this macro is defined then H5G_shadow_check() is occassionally
+ *	    (actually, quite often) called to check the consistency of the
+ *	    shadow table.  If there's something wrong with the table then
+ *	    abort() is called. Shadow table checking is a rather expensive
+ *	    operation.
+ */
+/* #define H5G_DEBUG_SHADOWS */
+
 #define PABLO_MASK	H5G_shadow_mask
-#undef DEBUG_SHADOWS
 
 /* Is the interface initialized? */
 static hbool_t interface_initialize_g = FALSE;
@@ -43,9 +51,9 @@ typedef struct H5G_hash_t {
  *
  *-------------------------------------------------------------------------
  */
-#ifdef DEBUG_SHADOWS
+#ifdef H5G_DEBUG_SHADOWS
 void
-H5G_shadow_check (hdf5_file_t *f)
+H5G_shadow_check (H5F_t *f)
 {
    H5G_hash_t	*hash=NULL;
    H5G_shadow_t	*shadow=NULL, *prev_shadow=NULL;
@@ -253,14 +261,14 @@ H5G_shadow_sync (H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 H5G_shadow_t *
-H5G_shadow_list (hdf5_file_t *f, haddr_t dir_addr)
+H5G_shadow_list (H5F_t *f, haddr_t dir_addr)
 {
-   uintn	idx = dir_addr % f->nshadows;
+   uintn	idx = dir_addr % f->shared->nshadows;
    H5G_hash_t	*bucket = NULL;
 
    FUNC_ENTER (H5G_shadows, NULL, NULL);
 
-   for (bucket=f->shadow[idx]; bucket; bucket=bucket->next) {
+   for (bucket=f->shared->shadow[idx]; bucket; bucket=bucket->next) {
       if (bucket->dir_addr==dir_addr) {
 	 HRETURN (bucket->head);
       }
@@ -291,7 +299,7 @@ H5G_shadow_list (hdf5_file_t *f, haddr_t dir_addr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
+H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
 {
    H5G_shadow_t *shadow = NULL;
    const char	*s = NULL;
@@ -305,7 +313,7 @@ H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
    assert (sym);		/* The symbol table node	*/
    assert (ac_udata);		/* The symbol table header info	*/
 
-#ifdef DEBUG_SHADOWS
+#ifdef H5G_DEBUG_SHADOWS
    H5G_shadow_check (f);
 #endif
 
@@ -358,7 +366,7 @@ H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
+H5G_shadow_open (H5F_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
 {
    H5G_shadow_t	*shadow = NULL;
    H5O_stab_t 	stab;
@@ -374,7 +382,7 @@ H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
 
    /* check args */
    assert (f);
-   assert (ent==f->root_sym || dir);
+   assert (ent==f->shared->root_sym || dir);
    assert (ent);
    dir_addr = dir ? dir->header : 0;
 
@@ -388,7 +396,7 @@ H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
 
    
    shadow = H5MM_xcalloc (1, sizeof(H5G_shadow_t));
-   if (ent==f->root_sym && 0==dir_addr) {
+   if (ent==f->shared->root_sym && 0==dir_addr) {
       /*
        * We're opening the root entry.
        */
@@ -425,15 +433,15 @@ H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
    /*
     * Link it into the shadow heap
     */
-   idx = dir_addr % f->nshadows;
-   for (hash=f->shadow[idx]; hash; hash=hash->next) {
+   idx = dir_addr % f->shared->nshadows;
+   for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {
       if (hash->dir_addr==dir_addr) break;
    }
    if (!hash) {
       hash = H5MM_xcalloc (1, sizeof(H5G_hash_t));
       hash->dir_addr = dir_addr;
-      hash->next = f->shadow[idx];
-      f->shadow[idx] = hash;
+      hash->next = f->shared->shadow[idx];
+      f->shared->shadow[idx] = hash;
       if (hash->next) hash->next->prev = hash;
    }
    if (hash->head) {
@@ -463,7 +471,7 @@ H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
       hash->head = shadow;
    }
 
-#ifdef DEBUG_SHADOWS
+#ifdef H5G_DEBUG_SHADOWS
    H5G_shadow_check (f);
 #endif
 
@@ -499,7 +507,7 @@ H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent)
+H5G_shadow_close (H5F_t *f, H5G_entry_t *ent)
 {
    uintn	idx;
    H5G_hash_t	*hash=NULL;
@@ -532,8 +540,8 @@ H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent)
       H5G_shadow_dissociate (ent);
 
       /* find symtabs shadow list */
-      idx = shadow->dir_addr % f->nshadows;
-      for (hash=f->shadow[idx]; hash; hash=hash->next) {
+      idx = shadow->dir_addr % f->shared->nshadows;
+      for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {
 	 if (hash->dir_addr==shadow->dir_addr) break;
       }
       assert (hash);
@@ -554,7 +562,7 @@ H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent)
       /* remove symtab's shadow list if empty */
       if (!hash->head) {
 	 if (hash->prev) hash->prev->next = hash->next;
-	 else f->shadow[idx] = hash->next;
+	 else f->shared->shadow[idx] = hash->next;
 	 if (hash->next) hash->next->prev = hash->prev;
 	 H5MM_xfree (hash);
       }
@@ -584,7 +592,7 @@ H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_move (hdf5_file_t *f, H5G_shadow_t *shadow, const char *new_name,
+H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow, const char *new_name,
 		 H5G_entry_t *new_entry, haddr_t dir_addr)
 {
    H5G_hash_t	*hash;
@@ -602,17 +610,17 @@ H5G_shadow_move (hdf5_file_t *f, H5G_shadow_t *shadow, const char *new_name,
        * greatly since it implies that this is the only shadow currently
        * defined for the entire file.
        */
-      idx = dir_addr % f->nshadows;
-      assert (NULL==f->shadow[idx]); 	/*Nothing at new idx...		*/
-      hash = f->shadow[0];
+      idx = dir_addr % f->shared->nshadows;
+      assert (NULL==f->shared->shadow[idx]); /*Nothing at new idx...	*/
+      hash = f->shared->shadow[0];
       assert (hash);			/*..but root idx has something. */
       assert (0==hash->dir_addr);	/*..and it's the root something	*/
       assert (NULL==hash->next);	/*..and just that		*/
       assert (hash->head==shadow);	/*..and exactly that		*/
 
       /* Move root entry to new hash bucket */
-      f->shadow[idx] = hash;
-      f->shadow[0] = NULL;
+      f->shared->shadow[idx] = hash;
+      f->shared->shadow[0] = NULL;
       hash->dir_addr = dir_addr;
 
       /* Associate SHADOW with NEW_ENTRY */
@@ -656,7 +664,7 @@ H5G_shadow_move (hdf5_file_t *f, H5G_shadow_t *shadow, const char *new_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_flush (hdf5_file_t *f, hbool_t invalidate)
+H5G_shadow_flush (H5F_t *f, hbool_t invalidate)
 {
    uintn	idx;
    H5G_hash_t	*hash = NULL;
@@ -665,26 +673,32 @@ H5G_shadow_flush (hdf5_file_t *f, hbool_t invalidate)
 
    FUNC_ENTER (H5G_shadow_flush, NULL, FAIL);
 
-   for (idx=0; idx<f->nshadows; idx++) {
-      for (hash=f->shadow[idx]; hash; hash=hash->next) {
+   for (idx=0; idx<f->shared->nshadows; idx++) {
+      for (hash=f->shared->shadow[idx]; hash; hash=hash->next) {
 	 for (shadow=hash->head; shadow; shadow=shadow->next) {
-	    if (!shadow->main &&
-		NULL==H5G_stab_find (f, shadow->dir_addr, NULL,
-				     shadow->name)) {
-	       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	    /*
+	     * If the shadow is dirty, then transfer the shadow info to the
+	     * symbol table node.
+	     */
+	    if (shadow->entry.dirty) {
+	       if (!shadow->main &&
+		   NULL==H5G_stab_find (f, shadow->dir_addr, NULL,
+					shadow->name)) {
+		  HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	       }
+	       assert (shadow->main);
+	       *(shadow->main) = shadow->entry;
+	       shadow->entry.dirty = FALSE;
+	       nfound++;
+
 	    }
-	    assert (shadow->main);
-	    *(shadow->main) = shadow->entry;
-	    shadow->entry.dirty = FALSE;
-	    nfound++;
-	    
 #ifndef NDEBUG
 	    /*
-	     * This is usually a bad thing--an hdf5 programmer forgot to
-	     * close some object before closing the file.  Since this is hard
-	     * to debug, we'll be nice and print the names here.  We don't
-	     * know the full name, but we'll print the file address (relative
-	     * to the boot block) of the object header for the directory that
+	     * This is usually a bad thing--an hdf5 programmer forgot to close
+	     * some object before closing the file.  Since this is hard to
+	     * debug, we'll be nice and print the names here.  We don't know
+	     * the full name, but we'll print the file address (relative to
+	     * the boot block) of the object header for the directory that
 	     * contains the open object.
 	     */
 	    if (invalidate) {

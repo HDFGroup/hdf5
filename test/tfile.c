@@ -249,9 +249,9 @@ static void test_file_open(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
 
-    /* Open second file */
+    /* Open first file */
     fid1=H5Fopen(FILE2,H5ACC_WRITE,0);
-    CHECK(fid1,FAIL,"H5Fooen");
+    CHECK(fid1,FAIL,"H5Fopen");
 
     /* Get the file-creation template */
     tmpl1=H5Fget_create_template(fid1);

@@ -50,7 +50,7 @@ static void
 test_1 (void)
 {
    hid_t	fid;
-   hdf5_file_t	*f;
+   H5F_t	*f;
    H5G_entry_t	*obj1=NULL, *obj2=NULL;
    H5G_entry_t	ent1, dir_ent;
    herr_t	status;
@@ -91,7 +91,7 @@ test_1 (void)
 
    /* is it really the root symbol? */
    VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->root_sym->header, "H5G_insert");
+   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
 
    
    
@@ -158,7 +158,7 @@ test_1 (void)
 
    /* is it really the root symbol? */
    VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->root_sym->header, "H5G_insert");
+   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
 
    /* now as `/foo' */
    HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
@@ -170,7 +170,7 @@ test_1 (void)
 
    /* is it really the root symbol? */
    VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->root_sym->header, "H5G_insert");
+   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
 
 
    
@@ -224,11 +224,9 @@ static void
 test_2 (void)
 {
    hid_t	fid;
-   hdf5_file_t	*f;
-   H5G_entry_t	cwd, sub;
+   H5F_t	*f;
    H5G_entry_t	*obj1=NULL;
    int		i;
-   haddr_t	addr;
    char		name[256];
    herr_t	status;
    int		nsyms = 5000;

@@ -25,7 +25,7 @@
 /*
  * Library prototypes...
  */
-haddr_t H5MF_alloc (hdf5_file_t *f, size_t size);
-herr_t H5MF_free (hdf5_file_t *f, haddr_t addr, size_t size);
+haddr_t H5MF_alloc (H5F_t *f, size_t size);
+herr_t H5MF_free (H5F_t *f, haddr_t addr, size_t size);
 
 #endif

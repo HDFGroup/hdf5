@@ -39,9 +39,8 @@
  *		by the LOAD method if the DEST argument is non-zero.
  */
 typedef struct H5AC_class_t {
-   void		*(*load)(hdf5_file_t*, haddr_t addr, void *udata);
-   herr_t	(*flush)(hdf5_file_t*, hbool_t dest, haddr_t addr,
-			 void *thing);
+   void		*(*load)(H5F_t*, haddr_t addr, void *udata);
+   herr_t	(*flush)(H5F_t*, hbool_t dest, haddr_t addr, void *thing);
 } H5AC_class_t;
 
 /*
@@ -50,7 +49,7 @@ typedef struct H5AC_class_t {
  * own cache, an array of slots.
  */
 #define H5AC_NSLOTS	10330	/*prime number tend to work best	*/
-#define H5AC_HASH(F,ADDR) ((unsigned)(ADDR) % (F)->cache->nslots)
+#define H5AC_HASH(F,ADDR) ((unsigned)(ADDR) % (F)->shared->cache->nslots)
 
 typedef struct H5AC_prot_t {
    const H5AC_class_t *type;	/*type of protected thing		*/
@@ -77,25 +76,25 @@ typedef struct H5AC_t {
 /*
  * Library prototypes.
  */
-herr_t H5AC_dest (hdf5_file_t *f);
-void *H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+herr_t H5AC_dest (H5F_t *f);
+void *H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		   void *udata);
-void * H5AC_protect (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+void * H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		     void *udata);
-herr_t H5AC_unprotect (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		       void *thing);
-herr_t H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		   hbool_t destroy);
-herr_t H5AC_new (hdf5_file_t *f, intn size_hint);
-herr_t H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
-		    haddr_t old, haddr_t new);
-herr_t H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+herr_t H5AC_new (H5F_t *f, intn size_hint);
+herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type, haddr_t old,
+		    haddr_t new);
+herr_t H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		 void *thing);
 
 #define H5AC_find(F,TYPE,ADDR,UDATA)					      \
-   (((F)->cache->slot[H5AC_HASH(F,ADDR)].type==(TYPE) &&		      \
-     (F)->cache->slot[H5AC_HASH(F,ADDR)].addr==(ADDR)) ?		      \
-    (F)->cache->slot[H5AC_HASH(F,ADDR)].thing :				      \
+   (((F)->shared->cache->slot[H5AC_HASH(F,ADDR)].type==(TYPE) &&	      \
+     (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].addr==(ADDR)) ?	      \
+    (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].thing :			      \
     H5AC_find_f (F, TYPE, ADDR, UDATA))
       
 

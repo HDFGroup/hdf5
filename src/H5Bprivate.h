@@ -31,7 +31,7 @@
     2*H5F_SIZEOF_OFFSET(F))	/*left and right sibling addresses	*/
 
 #define H5B_K(F,TYPE)		/*K value given file and Btree subclass	*/    \
-   ((F)->file_create_parms.btree_k[(TYPE)->id])
+   ((F)->shared->file_create_parms.btree_k[(TYPE)->id])
 
 #define H5B_ANCHOR_LT	0	/* left node is anchored, right is new	*/
 #define H5B_ANCHOR_RT	1	/* right node is anchored, left is new	*/
@@ -51,15 +51,15 @@ typedef enum H5B_subid_t {
 typedef struct H5B_class_t {
    H5B_subid_t	id;		/*id as found in file			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
-   size_t	(*get_sizeof_rkey)(hdf5_file_t*);
-   haddr_t	(*new)(hdf5_file_t*,void*,void*,void*);
-   intn		(*cmp)(hdf5_file_t*,void*,void*,void*);
-   herr_t	(*found)(hdf5_file_t*,haddr_t,const void*,void*,const void*);
-   haddr_t	(*insert)(hdf5_file_t*,haddr_t,int*,void*,hbool_t*,void*,void*,
+   size_t	(*get_sizeof_rkey)(H5F_t*);
+   haddr_t	(*new)(H5F_t*,void*,void*,void*);
+   intn		(*cmp)(H5F_t*,void*,void*,void*);
+   herr_t	(*found)(H5F_t*,haddr_t,const void*,void*,const void*);
+   haddr_t	(*insert)(H5F_t*,haddr_t,int*,void*,hbool_t*,void*,void*,
 			  void*,hbool_t*);
-   herr_t	(*list)(hdf5_file_t*,haddr_t,void*);
-   herr_t	(*decode)(hdf5_file_t*,uint8*,void*);
-   herr_t	(*encode)(hdf5_file_t*,uint8*,void*);
+   herr_t	(*list)(H5F_t*,haddr_t,void*);
+   herr_t	(*decode)(H5F_t*,uint8*,void*);
+   herr_t	(*encode)(H5F_t*,uint8*,void*);
 } H5B_class_t;
 
 /*
@@ -90,15 +90,12 @@ typedef struct H5B_t {
 /*
  * Library prototypes.
  */
-herr_t H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+herr_t H5B_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth, H5B_class_t *type);
-haddr_t H5B_new (hdf5_file_t *f, const H5B_class_t *type);
-herr_t H5B_find (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
-		 void *udata);
-haddr_t H5B_insert (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
-		    void *udata);
-herr_t H5B_list (hdf5_file_t *f, H5B_class_t *type, haddr_t addr,
-		 void *udata);
+haddr_t H5B_new (H5F_t *f, const H5B_class_t *type);
+herr_t H5B_find (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
+haddr_t H5B_insert (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
+herr_t H5B_list (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
 
 
 #endif

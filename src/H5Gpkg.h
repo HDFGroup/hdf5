@@ -21,7 +21,7 @@
 
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
 #define H5G_SIZE_HINT	1024	/*default root dir size hint		*/
-#define H5G_NODE_K(F) ((F)->file_create_parms.sym_leaf_k)
+#define H5G_NODE_K(F) ((F)->shared->file_create_parms.sym_leaf_k)
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 #define H5G_DEFAULT_ROOT_SIZE  32
 
@@ -41,6 +41,18 @@ struct H5G_entry_t {
 };
 
 /*
+ * A symbol table node is a collection of symbol table entries.  It can
+ * be thought of as the lowest level of the B-link tree that points to
+ * a collection of symbol table entries that belong to a specific symbol
+ * table or directory.
+ */
+typedef struct H5G_node_t {
+   hbool_t	dirty;		/*has cache been modified?		*/
+   int		nsyms;		/*number of symbols			*/
+   H5G_entry_t	*entry;		/*array of symbol table entries		*/
+} H5G_node_t;
+
+/*
  * A shadow is a copy of a symbol table entry which corresponds to an
  * `open' object.  Shadows are necessary because normal symbol table
  * entries can be preempted from the main cache.  The `shadow' field
@@ -56,18 +68,6 @@ struct H5G_shadow_t {
    struct H5G_shadow_t *next;	/*next shadow for same symbol table	*/
    struct H5G_shadow_t *prev;	/*previous shadow for same symbol table	*/
 };
-
-/*
- * A symbol table node is a collection of symbol table entries.  It can
- * be thought of as the lowest level of the B-link tree that points to
- * a collection of symbol table entries that belong to a specific symbol
- * table or directory.
- */
-typedef struct H5G_node_t {
-   int		dirty;		/*has cache been modified?		*/
-   int		nsyms;		/*number of symbols			*/
-   H5G_entry_t	*entry;		/*array of symbol table entries		*/
-} H5G_node_t;
 
 /*
  * Each key field of the B-link tree that points to symbol table
@@ -148,36 +148,34 @@ extern const H5AC_class_t H5AC_SNODE[1];
  * functions that understand directories are exported to the rest of
  * the library and appear in H5Gprivate.h.
  */
-haddr_t H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init);
-H5G_entry_t *H5G_stab_find (hdf5_file_t *f, haddr_t addr, H5G_entry_t *self,
+haddr_t H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init);
+H5G_entry_t *H5G_stab_find (H5F_t *f, haddr_t addr, H5G_entry_t *self,
 			    const char *name);
-H5G_entry_t *H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self,
+H5G_entry_t *H5G_stab_insert (H5F_t *f, H5G_entry_t *self,
 			      const char *name, H5G_entry_t *ent);
-intn H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
+intn H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
 		    char *names[], H5G_entry_t entries[]);
 
 /*
  * Functions that understand shadow entries.
  */
 herr_t H5G_shadow_sync (H5G_entry_t *ent);
-H5G_entry_t *H5G_shadow_open (hdf5_file_t *f, H5G_entry_t *dir,
+H5G_entry_t *H5G_shadow_open (H5F_t *f, H5G_entry_t *dir,
 			      H5G_entry_t *ent);
-herr_t H5G_shadow_close (hdf5_file_t *f, H5G_entry_t *ent);
+herr_t H5G_shadow_close (H5F_t *f, H5G_entry_t *ent);
 hbool_t H5G_shadow_p (H5G_entry_t *ent);
 herr_t H5G_shadow_dissociate (H5G_entry_t *ent);
-herr_t H5G_shadow_assoc_node (hdf5_file_t *f, H5G_node_t *sym,
+herr_t H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym,
 			      H5G_ac_ud1_t *ac_udata);
-H5G_shadow_t *H5G_shadow_list (hdf5_file_t *f, haddr_t stab_header_addr);
-herr_t H5G_shadow_move (hdf5_file_t *f, H5G_shadow_t *shadow,
+H5G_shadow_t *H5G_shadow_list (H5F_t *f, haddr_t stab_header_addr);
+herr_t H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow,
 			const char *new_name, H5G_entry_t *new_entry,
 			haddr_t dir_addr);
 
 /*
  * Functions that understand symbol table entries.
  */
-herr_t H5G_ent_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent,
-			   intn n);
-herr_t H5G_ent_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent,
-			   intn n);
+herr_t H5G_ent_decode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
+herr_t H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 
 #endif

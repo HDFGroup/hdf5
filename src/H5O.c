@@ -25,20 +25,19 @@
 #define PABLO_MASK	H5O_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
-			 H5O_t *oh);
-static H5O_t *H5O_load (hdf5_file_t *f, haddr_t addr, void *_data);
-static intn H5O_find_in_ohdr (hdf5_file_t *f, haddr_t addr,
+static herr_t H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
+static H5O_t *H5O_load (H5F_t *f, haddr_t addr, void *_data);
+static intn H5O_find_in_ohdr (H5F_t *f, haddr_t addr,
 			      const H5O_class_t **type_p, intn sequence);
-static intn H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type,
+static intn H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		       size_t size);
 static intn H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size);
-static intn H5O_alloc_new_chunk (hdf5_file_t *f, H5O_t *oh, size_t size);
+static intn H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
-   (void*(*)(hdf5_file_t*,haddr_t,void*))H5O_load,
-   (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5O_flush,
+   (void*(*)(H5F_t*,haddr_t,void*))H5O_load,
+   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5O_flush,
 }};
 
 /* Is the interface initialized? */
@@ -86,7 +85,7 @@ static const H5O_class_t *const message_type_g[] = {
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
+H5O_new (H5F_t *f, intn nlink, size_t size_hint)
 {
    size_t	size;		/*total size of object header	*/
    haddr_t	addr = FAIL;	/*address of object header	*/
@@ -166,7 +165,7 @@ H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load (hdf5_file_t *f, haddr_t addr, void *_data)
+H5O_load (H5F_t *f, haddr_t addr, void *_data)
 {
    H5O_t	*oh = NULL;
    H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/
@@ -328,7 +327,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
+H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 {
    uint8	buf[16], *p;
    int		i;
@@ -501,7 +500,7 @@ H5O_reset (const H5O_class_t *type, void *native)
  *-------------------------------------------------------------------------
  */
 intn
-H5O_link (hdf5_file_t *f, H5G_entry_t *ent, intn adjust)
+H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
 {
    H5O_t	*oh = NULL;
    haddr_t	addr;
@@ -560,7 +559,7 @@ H5O_link (hdf5_file_t *f, H5G_entry_t *ent, intn adjust)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 	  const H5O_class_t *type, intn sequence, void *mesg)
 {
    H5O_t	*oh = NULL;
@@ -630,7 +629,7 @@ H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
  *-------------------------------------------------------------------------
  */
 static intn
-H5O_find_in_ohdr (hdf5_file_t *f, haddr_t addr, const H5O_class_t **type_p,
+H5O_find_in_ohdr (H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
 		  intn sequence)
 {
    H5O_t	*oh = NULL;
@@ -697,8 +696,7 @@ H5O_find_in_ohdr (hdf5_file_t *f, haddr_t addr, const H5O_class_t **type_p,
  *-------------------------------------------------------------------------
  */
 const void *
-H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
-	  intn sequence)
+H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type, intn sequence)
 {
    intn		idx;
    H5O_t	*oh = NULL;
@@ -753,7 +751,7 @@ H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
  *-------------------------------------------------------------------------
  */
 intn
-H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 	    const H5O_class_t *type, intn overwrite, const void *mesg)
 {
    H5O_t	*oh = NULL;
@@ -852,7 +850,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_remove (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 	    const H5O_class_t *type, intn sequence)
 {
    H5O_t	*oh = NULL;
@@ -1035,7 +1033,7 @@ H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size)
  *-------------------------------------------------------------------------
  */
 static intn
-H5O_alloc_new_chunk (hdf5_file_t *f, H5O_t *oh, size_t size)
+H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size)
 {
    size_t	cont_size;		/*continuation message size	*/
    intn		found_null=(-1);	/*best fit null message		*/
@@ -1196,7 +1194,7 @@ H5O_alloc_new_chunk (hdf5_file_t *f, H5O_t *oh, size_t size)
  *-------------------------------------------------------------------------
  */
 static intn
-H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
+H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 {
    intn		chunkno;
    intn		idx;
@@ -1295,8 +1293,7 @@ H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
-	   intn indent, intn fwidth)
+H5O_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
 {
    H5O_t	*oh = NULL;
    intn		i, chunkno;

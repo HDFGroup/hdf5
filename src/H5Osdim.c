@@ -38,16 +38,16 @@ static char RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK	H5O_sim_dim_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_sim_dim_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_sim_dim_encode (hdf5_file_t *f, size_t size, uint8 *p,
+static void *H5O_sim_dim_decode (H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t H5O_sim_dim_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
 static void *H5O_sim_dim_fast (const H5G_cache_t *cache, void *_mesg);
 static hbool_t H5O_sim_dim_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
 				  const void *_mesg);
 static void *H5O_sim_dim_copy (const void *_mesg, void *_dest);
-static size_t H5O_sim_dim_size (hdf5_file_t *f, const void *_mesg);
-static herr_t H5O_sim_dim_debug (hdf5_file_t *f, const void *_mesg,
-			      FILE *stream, intn indent, intn fwidth);
+static size_t H5O_sim_dim_size (H5F_t *f, const void *_mesg);
+static herr_t H5O_sim_dim_debug (H5F_t *f, const void *_mesg,
+				 FILE *stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_SIM_DIM[1] = {{
@@ -76,7 +76,7 @@ static hbool_t interface_initialize_g = FALSE;
         struct with the decoded information
  USAGE
     void *H5O_sim_dim_decode(f, raw_size, p)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         size_t raw_size;        IN: size of the raw information buffer
         const uint8 *p;         IN: the raw information buffer
  RETURNS
@@ -87,7 +87,7 @@ static hbool_t interface_initialize_g = FALSE;
     within this function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dim_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
+H5O_sim_dim_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 {
     H5O_sim_dim_t *sdim=NULL;   /* New simple dimensionality structure */
     uintn u;                    /* local counting variable */
@@ -144,7 +144,7 @@ done:
     Encode a simple dimensionality message 
  USAGE
     herr_t H5O_sim_dim_encode(f, raw_size, p, mesg)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         size_t raw_size;        IN: size of the raw information buffer
         const uint8 *p;         IN: the raw information buffer
         const void *mesg;       IN: Pointer to the simple dimensionality struct
@@ -155,7 +155,7 @@ done:
     dimensionality message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sim_dim_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
+H5O_sim_dim_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 {
     const H5O_sim_dim_t *sdim = (const H5O_sim_dim_t *)mesg;
     uintn u;        /* Local counting variable */
@@ -361,7 +361,7 @@ H5O_sim_dim_copy (const void *mesg, void *dest)
     Return the raw message size in bytes
  USAGE
     void *H5O_sim_dim_copy(f, mesg)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source simple dimensionality struct
  RETURNS
     Size of message on success, FAIL on failure
@@ -371,7 +371,7 @@ H5O_sim_dim_copy (const void *mesg, void *dest)
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sim_dim_size (hdf5_file_t *f, const void *mesg)
+H5O_sim_dim_size (H5F_t *f, const void *mesg)
 {
    const H5O_sim_dim_t	*sdim = (const H5O_sim_dim_t *)mesg;
    size_t ret_value=8;  /* all dimensionality messages are at least 8 bytes long (rank and flags) */
@@ -392,7 +392,7 @@ H5O_sim_dim_size (hdf5_file_t *f, const void *mesg)
     Prints debugging information for a simple dimensionality message
  USAGE
     void *H5O_sim_dim_debug(f, mesg, stream, indent, fwidth)
-        hdf5_file_t *f;         IN: pointer to the HDF5 file struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source simple dimensionality struct
         FILE *stream;           IN: Pointer to the stream for output data
         intn indent;            IN: Amount to indent information by
@@ -404,7 +404,7 @@ H5O_sim_dim_size (hdf5_file_t *f, const void *mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sim_dim_debug (hdf5_file_t *f, const void *mesg, FILE *stream,
+H5O_sim_dim_debug (H5F_t *f, const void *mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
    const H5O_sim_dim_t	*sdim = (const H5O_sim_dim_t *)mesg;

@@ -48,14 +48,14 @@ typedef struct H5O_class_t {
    const char	*name;			/*message name for debugging	*/
    size_t	native_size;		/*size of native message	*/
    H5G_type_t	cache_type;		/*type field in symbol table	*/
-   void		*(*decode)(hdf5_file_t*,size_t,const uint8*);
-   herr_t	(*encode)(hdf5_file_t*,size_t,uint8*,const void*);
+   void		*(*decode)(H5F_t*,size_t,const uint8*);
+   herr_t	(*encode)(H5F_t*,size_t,uint8*,const void*);
    void		*(*fast)(const H5G_cache_t*, void*);/*get from of entry	*/
    hbool_t	(*cache)(H5G_type_t*, H5G_cache_t*,const void*); /*into entry*/
    void		*(*copy)(const void*,void*); /*copy native value	*/
-   size_t	(*raw_size)(hdf5_file_t*,const void*); /*sizeof raw val	*/
+   size_t	(*raw_size)(H5F_t*,const void*); /*sizeof raw val	*/
    herr_t	(*reset)(void*); /*free nested data structures		*/
-   herr_t	(*debug)(hdf5_file_t*,const void*, FILE*, intn, intn);
+   herr_t	(*debug)(H5F_t*,const void*, FILE*, intn, intn);
 } H5O_class_t;
 
 typedef struct H5O_mesg_t {
@@ -157,18 +157,18 @@ typedef struct H5O_stab_t {
 
 
 
-haddr_t H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint);
-intn H5O_link (hdf5_file_t *f, H5G_entry_t *ent, intn adjust);
-void *H5O_read (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+haddr_t H5O_new (H5F_t *f, intn nlink, size_t size_hint);
+intn H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust);
+void *H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 		const H5O_class_t *type, intn sequence, void *mesg);
-const void *H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
+const void *H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type,
 		      intn sequence);
-intn H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+intn H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 		 const H5O_class_t *type, intn overwrite, const void *mesg);
-herr_t H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
+herr_t H5O_remove (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
 		   const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
-herr_t H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
+herr_t H5O_debug (H5F_t *f, haddr_t addr, FILE *stream,
 		  intn indent, intn fwidth);
 
 #endif

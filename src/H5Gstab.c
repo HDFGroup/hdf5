@@ -57,7 +57,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
+H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init)
 {
    off_t	name;				/*offset of "" name	*/
    haddr_t	addr;				/*object header address	*/
@@ -144,7 +144,7 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_stab_find (hdf5_file_t *f, haddr_t addr, H5G_entry_t *self,
+H5G_stab_find (H5F_t *f, haddr_t addr, H5G_entry_t *self,
 	       const char *name)
 {
    H5G_bt_ud1_t         udata;		/*data to pass through B-tree	*/
@@ -223,7 +223,7 @@ H5G_stab_find (hdf5_file_t *f, haddr_t addr, H5G_entry_t *self,
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
 		 H5G_entry_t *ent)
 {
    H5O_stab_t		stab;		/*symbol table message		*/
@@ -306,7 +306,7 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
  *-------------------------------------------------------------------------
  */
 intn
-H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
+H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
 	       char *names[], H5G_entry_t entries[])
 {
    H5G_bt_ud2_t		udata;

@@ -45,15 +45,14 @@ typedef enum H5H_type_t {
 /*
  * Library prototypes...
  */
-haddr_t H5H_new (hdf5_file_t *f, H5H_type_t type, size_t size_hint);
-void *H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
-		void *buf);
-const void *H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset);
-off_t H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf);
-herr_t H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
+haddr_t H5H_new (H5F_t *f, H5H_type_t type, size_t size_hint);
+void *H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf);
+const void *H5H_peek (H5F_t *f, haddr_t addr, off_t offset);
+off_t H5H_insert (H5F_t *f, haddr_t addr, size_t size, const void *buf);
+herr_t H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
 		  const void *buf);
-herr_t H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size);
-herr_t H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+herr_t H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size);
+herr_t H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth);
 
 #endif
