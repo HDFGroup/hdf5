@@ -102,6 +102,9 @@ static herr_t H5FL_arr_gc_list(H5FL_arr_head_t *head);
 static herr_t H5FL_blk_gc(void);
 static herr_t H5FL_blk_gc_list(H5FL_blk_head_t *head);
 
+/* Declare a free list to manage the H5FL_blk_node_t struct */
+H5FL_DEFINE(H5FL_blk_node_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FL_init
@@ -195,15 +198,16 @@ H5FL_free(H5FL_head_t *head, void *obj)
     /* Point free list at the node freed */
     head->list=temp;
 
-    /* Increment the number of blocks on free list */
+    /* Increment the number of blocks & memory on free list */
     head->onlist++;
+    head->list_mem+=head->size;
 
     /* Increment the amount of "regular" freed memory globally */
     H5FL_gc_head.mem_freed+=head->size;
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if((head->onlist*head->size)>H5FL_REG_LST_MEM_LIM)
+    if(head->list_mem>H5FL_REG_LST_MEM_LIM)
         H5FL_gc_list(head);
 
     /* Then check the global amount memory on regular free lists */
@@ -264,8 +268,9 @@ H5FL_alloc(H5FL_head_t *head, uintn clear)
         /* Remove node from free list */
         head->list=head->list->next;
 
-        /* Decrement the number of blocks on free list */
+        /* Decrement the number of blocks & memory on free list */
         head->onlist--;
+        head->list_mem-=head->size;
 
         /* Decrement the amount of global "regular" free list memory in use */
         H5FL_gc_head.mem_freed-=(head->size);
@@ -319,7 +324,9 @@ H5FL_gc_list(H5FL_head_t *head)
     size_t total_mem;   /* Total memory used on list */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_gc_list", "");
+#endif
 
     /* Calculate the total memory used on this list */
     total_mem=head->onlist*head->size;
@@ -332,6 +339,9 @@ H5FL_gc_list(H5FL_head_t *head)
         /* Decrement the count of nodes allocated and free the node */
         head->allocated--;
 
+        /* Decrement count of free memory on this list */
+        head->list_mem-=head->size;
+
 #ifdef H5FL_DEBUG
         assert(!free_list->inuse);
 #endif /* H5FL_DEBUG */
@@ -341,6 +351,9 @@ H5FL_gc_list(H5FL_head_t *head)
         free_list=tmp;
     } /* end while */
 
+    /* Double check that all the memory on this list is recycled */
+    assert(head->list_mem==0);
+
     /* Indicate no free nodes on the free list */
     head->list=NULL;
     head->onlist=0;
@@ -348,7 +361,9 @@ H5FL_gc_list(H5FL_head_t *head)
     /* Decrement global count of free memory on "regular" lists */
     H5FL_gc_head.mem_freed-=total_mem;
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_gc_list() */
 
@@ -376,7 +391,9 @@ H5FL_gc(void)
     H5FL_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_gc", "");
+#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_gc_head.first;
@@ -391,7 +408,9 @@ H5FL_gc(void)
     /* Double check that all the memory on the free lists is recycled */
     assert(H5FL_gc_head.mem_freed==0);
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_gc() */
 
@@ -548,7 +567,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
     FUNC_ENTER(H5FL_blk_create_list, NULL);
 
     /* Allocate room for the new free list node */
-    if(NULL==(temp=H5MM_malloc(sizeof(H5FL_blk_node_t))))
+    if(NULL==(temp=H5FL_ALLOC(H5FL_blk_node_t,0)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk info");
     
     /* Set the correct values for the new free list */
@@ -663,7 +682,7 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
         ret_value=((char *)(free_list->list))+sizeof(H5FL_blk_list_t);
         free_list->list=free_list->list->next;
 
-        /* Decrement the number of blocks & memory on free list */
+        /* Decrement the number of blocks & memory used on free list */
         head->onlist--;
         head->list_mem-=size;
 
@@ -855,7 +874,9 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     void *temp;     /* Temp. ptr to the free list page node */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_blk_gc_list", "");
+#endif
 
     /* Loop through all the nodes in the block free list queue */
     while(head->head!=NULL) {
@@ -880,7 +901,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
         } /* end while */
 
         /* Free the free list node */
-        H5MM_xfree(head->head);
+        H5FL_FREE(H5FL_blk_node_t,head->head);
 
         /* Advance to the next free list */
         head->head=temp;
@@ -890,10 +911,12 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     head->head=NULL;
     head->onlist=0;
 
-    /* Double check that all the memory on this lists is recycled */
+    /* Double check that all the memory on this list is recycled */
     assert(head->list_mem==0);
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_blk_gc_list() */
 
@@ -919,7 +942,9 @@ H5FL_blk_gc(void)
     H5FL_blk_gc_node_t *gc_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_blk_gc", "");
+#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node=H5FL_blk_gc_head.first;
@@ -934,7 +959,9 @@ H5FL_blk_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_blk_gc_head.mem_freed==0);
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_blk_gc() */
 
@@ -972,6 +999,7 @@ H5FL_blk_term(void)
 #ifdef H5FL_DEBUG
 printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.first->pq->name,(int)H5FL_blk_gc_head.first->pq->allocated);
 #endif /* H5FL_DEBUG */
+
         /* Check if the list has allocations outstanding */
         if(H5FL_blk_gc_head.first->pq->allocated>0) {
             /* Add free list to the list of nodes with allocations open still */
@@ -1074,8 +1102,7 @@ void *
 H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 {
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
-    intn i;         /* Counter for array of free lists */
-    size_t list_mem;    /* Memory used on list */
+    size_t mem_size;        /* Size of memory being freed */
 
     FUNC_ENTER (H5FL_arr_free, NULL);
 
@@ -1103,17 +1130,19 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         /* Point free list at the node freed */
         head->u.list_arr[temp->nelem]=temp;
 
-        /* Increment the number of blocks on free lists */
+        /* Set the amount of memory being freed */
+        mem_size=temp->nelem*head->size;
+
+        /* Increment the number of blocks & memory used on free list */
         head->onlist[temp->nelem]++;
+        head->list_mem+=mem_size;
 
         /* Increment the amount of "array" freed memory globally */
-        H5FL_arr_gc_head.mem_freed+=head->size*temp->nelem;
+        H5FL_arr_gc_head.mem_freed+=mem_size;
 
         /* Check for exceeding free list memory use limits */
         /* First check this particular list */
-        for(list_mem=0, i=0; i<head->maxelem; i++)
-            list_mem+=head->onlist[i]*i*head->size;
-        if(list_mem>H5FL_ARR_LST_MEM_LIM)
+        if(head->list_mem>H5FL_ARR_LST_MEM_LIM)
             H5FL_arr_gc_list(head);
 
         /* Then check the global amount memory on array free lists */
@@ -1151,6 +1180,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
+    size_t mem_size;        /* Size of memory block being recycled */
 
     FUNC_ENTER (H5FL_arr_alloc, NULL);
 
@@ -1167,6 +1197,9 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
     if(!head->init)
         H5FL_arr_init(head);
 
+    /* Set the set of the memory block */
+    mem_size=head->size*elem;
+
     /* Check if there is a maximum number of elements in array */
     if(head->maxelem>0) {
         /* Check for nodes available on the free list first */
@@ -1177,11 +1210,12 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
             /* Remove node from free list */
             head->u.list_arr[elem]=head->u.list_arr[elem]->next;
 
-            /* Decrement the number of blocks on free list */
+            /* Decrement the number of blocks & memory used on free list */
             head->onlist[elem]--;
+            head->list_mem-=mem_size;
 
             /* Decrement the amount of global "array" free list memory in use */
-            H5FL_arr_gc_head.mem_freed-=(head->size*elem);
+            H5FL_arr_gc_head.mem_freed-=mem_size;
 
         } /* end if */
         /* Otherwise allocate a node */
@@ -1202,11 +1236,11 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
 
         /* Clear to zeros, if asked */
         if(clear)
-            HDmemset(ret_value,0,head->size*elem);
+            HDmemset(ret_value,0,mem_size);
     } /* end if */
     /* No fixed number of elements, use PQ routine */
     else {
-        ret_value=H5FL_blk_alloc(&(head->u.queue),head->size*elem,clear);
+        ret_value=H5FL_blk_alloc(&(head->u.queue),mem_size,clear);
     } /* end else */
 #endif /* NO_ARR_FREE_LISTS */
 
@@ -1302,7 +1336,9 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     size_t total_mem;   /* Total memory used on list */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_arr_gc_list", "");
+#endif
 
     /* Check if the array has a fixed maximum number of elements */
     if(head->maxelem>0) {
@@ -1328,18 +1364,27 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
                 head->u.list_arr[i]=NULL;
                 head->onlist[i]=0;
 
+                /* Decrement count of free memory on this "array" list */
+                head->list_mem-=total_mem;
+
                 /* Decrement global count of free memory on "array" lists */
                 H5FL_arr_gc_head.mem_freed-=total_mem;
             } /* end if */
 
         } /* end for */
+
+        /* Double check that all the memory on this list is recycled */
+        assert(head->list_mem==0);
+
     } /* end if */
     /* No maximum number of elements, use the block call to garbage collect */
     else {
         H5FL_blk_gc_list(&(head->u.queue));
     } /* end else */
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_arr_gc_list() */
 
@@ -1365,7 +1410,9 @@ H5FL_arr_gc(void)
     H5FL_gc_arr_node_t *gc_arr_node;    /* Pointer into the list of things to garbage collect */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_arr_gc", "");
+#endif
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_arr_node=H5FL_arr_gc_head.first;
@@ -1380,7 +1427,9 @@ H5FL_arr_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_arr_gc_head.mem_freed==0);
 
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_arr_gc() */
 
@@ -1491,10 +1540,9 @@ herr_t
 H5FL_garbage_coll(void)
 {
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
+#ifdef H5_DEBUG_API
     H5_trace(FALSE, "H5FL_garbage_coll", "");
-
-    /* Garbage collect the free lists for regular objects */
-    H5FL_gc();
+#endif
 
     /* Garbage collect the free lists for array objects */
     H5FL_arr_gc();
@@ -1502,7 +1550,12 @@ H5FL_garbage_coll(void)
     /* Garbage collect free lists for blocks */
     H5FL_blk_gc();
 
+    /* Garbage collect the free lists for regular objects */
+    H5FL_gc();
+
+#ifdef H5_DEBUG_API
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#endif
     return(SUCCEED);
 }   /* end H5FL_garbage_coll() */
 

@@ -45,6 +45,7 @@ typedef struct H5FL_head_t {
     uintn init;         /* Whether the free list has been initialized */
     uintn allocated;    /* Number of blocks allocated */
     uintn onlist;       /* Number of blocks on free list */
+    size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
     size_t size;        /* Size of the blocks in the list */
     H5FL_node_t *list;  /* List of free blocks */
@@ -54,7 +55,7 @@ typedef struct H5FL_head_t {
  * Macros for defining & using free lists for a type
  */
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_DEFINE(t)  H5FL_head_t t##_free_list={0,0,0,#t,sizeof(t),NULL}
+#define H5FL_DEFINE(t)  H5FL_head_t t##_free_list={0,0,0,0,#t,sizeof(t),NULL}
 
 /* Reference a free list for type 't' defined in another file */
 #define H5FL_EXTERN(t)  extern H5FL_head_t t##_free_list
