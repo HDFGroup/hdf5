@@ -3412,9 +3412,9 @@ H5T_set_size(H5T_t *dt, size_t size)
                  * The sign, mantissa, and exponent fields should be adjusted
                  * first when decreasing the size of a floating point type.
                  */
-                if (dt->shared->u.atomic.u.f.sign >= prec ||
-                        dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec ||
-                        dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec) {
+                if (dt->shared->u.atomic.u.f.sign >= prec+offset ||
+                        dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec+offset ||
+                        dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec+offset) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
                 }
                 break;

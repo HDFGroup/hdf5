@@ -65,6 +65,7 @@ const char *FILENAME[] = {
     "dtypes3",
     "dtypes4",
     "dtypes5",
+    "dtypes6",
     NULL
 };
 
@@ -2324,6 +2325,371 @@ test_query(void)
     } H5E_END_TRY;
     return 1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_derived_flt
+ *
+ * Purpose:     Tests user-define and query functions of floating-point types.
+ *
+ * Return:      Success:        0
+ *      
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Thursday, Jan 6, 2005
+ *  
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int 
+test_derived_flt(void)
+{
+    hid_t       file=-1, tid1=-1, tid2=-1;
+    hid_t       dxpl_id=-1;
+    char        filename[1024];
+    size_t      precision, spos, epos, esize, mpos, msize, size, ebias;
+    int         offset;
+    size_t      src_size, dst_size;
+    unsigned char        *buf=NULL, *saved_buf=NULL;
+    int         *aligned=NULL;
+    int		endian;			/*endianess	        */
+    size_t      nelmts = NTESTELEM;
+    unsigned int        fails_this_test = 0;
+    const size_t	max_fails=40;	/*max number of failures*/
+    char	str[256];		/*message string	*/
+    unsigned int         i, j;
+
+    TESTING("user-define and query functions of floating-point types");
+
+    /* Create File */
+    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+        H5_FAILED();
+        printf("Can't create file\n");
+        goto error; 
+    }
+
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) {
+        H5_FAILED();
+        printf("Can't create data transfer property list\n");
+        goto error; 
+    }
+
+    if((tid1 = H5Tcopy(H5T_IEEE_F64LE))<0) {
+        H5_FAILED();
+        printf("Can't copy data type\n");
+        goto error; 
+    }
+
+    if((tid2 = H5Tcopy(H5T_IEEE_F32LE))<0) {
+        H5_FAILED();
+        printf("Can't copy data type\n");
+        goto error; 
+    }
+
+    /*------------------------------------------------------------------------
+     *                   1st floating-point type
+     * size=7 byte, precision=42 bits, offset=3 bits, mantissa size=31 bits, 
+     * mantissa position=3, exponent size=10 bits, exponent position=34, 
+     * exponent bias=511.  It can be illustrated in little-endian order as 
+     *
+     *          6       5       4       3       2       1       0
+     *    ???????? ???SEEEE EEEEEEMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMM???
+     *
+     * To create a new floating-point type, the following properties must be 
+     * set in the order of 
+     *   set fields -> set offset -> set precision -> set size. 
+     * All these properties must be set before the type can function. Other 
+     * properties can be set anytime.  Derived type size cannot be expanded 
+     * bigger than original size but can be decreased.  There should be no 
+     * holes among the significant bits.  Exponent bias usually is set 
+     * 2^(n-1)-1, where n is the exponent size.
+     *-----------------------------------------------------------------------*/ 
+    if(H5Tset_fields(tid1, 44, 34, 10, 3, 31)<0) {
+        H5_FAILED();
+        printf("Can't set fields\n");
+        goto error;
+    }   
+    if(H5Tset_offset(tid1, 3)<0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error;
+    }
+    if(H5Tset_precision(tid1, 42)<0) {
+        H5_FAILED();
+        printf("Can't set precision\n");
+        goto error;
+    }
+    if(H5Tset_size(tid1, 7)<0) {
+        H5_FAILED();
+        printf("Can't set size\n");
+        goto error;
+    }
+    if(H5Tset_ebias(tid1, 511)<0) {
+        H5_FAILED();
+        printf("Can't set exponent bias\n");
+        goto error;
+    }
+    if(H5Tset_pad(tid1, H5T_PAD_ZERO, H5T_PAD_ZERO)<0) {
+        H5_FAILED();
+        printf("Can't set padding\n");
+        goto error;
+    }
+
+    if(H5Tcommit(file, "new float type 1", tid1)<0) {
+        H5_FAILED();
+        printf("Can't set inpad\n");
+        goto error;
+    }
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if((tid1 = H5Topen(file, "new float type 1"))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    }
+    if(H5Tget_fields(tid1, &spos, &epos, &esize, &mpos, &msize)<0) {
+        H5_FAILED();
+        printf("Can't get fields\n");
+        goto error;
+    }
+    if(spos!=44 || epos!=34 || esize!=10 || mpos!=3 || msize!=31) {
+        H5_FAILED();
+        printf("Wrong field values\n");
+        goto error;
+    }
+
+    if((precision = H5Tget_precision(tid1))!=42) {
+        H5_FAILED();
+        printf("Can't get precision or wrong precision\n");
+        goto error; 
+    }
+    if((offset = H5Tget_offset(tid1))!=3) {
+        H5_FAILED();
+        printf("Can't get offset or wrong offset\n");
+        goto error; 
+    }
+    if((size = H5Tget_size(tid1))!=7) {
+        H5_FAILED();
+        printf("Can't get size or wrong size\n");
+        goto error;
+    }
+    if((ebias = H5Tget_ebias(tid1))!=511) {
+        H5_FAILED();
+        printf("Can't get exponent bias or wrong bias\n");
+        goto error; 
+    }
+
+    /*--------------------------------------------------------------------------
+     *                   2nd floating-point type
+     * size=3 byte, precision=24 bits, offset=0 bits, mantissa size=16 bits, 
+     * mantissa position=0, exponent size=7 bits, exponent position=16, exponent 
+     * bias=63. It can be illustrated in little-endian order as
+     * 
+     *          2       1       0
+     *    SEEEEEEE MMMMMMMM MMMMMMMM
+     *--------------------------------------------------------------------------*/
+    if(H5Tset_fields(tid2, 23, 16, 7, 0, 16)<0) {
+        H5_FAILED();
+        printf("Can't set fields\n");
+        goto error;
+    }   
+    if(H5Tset_offset(tid2, 0)<0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error;
+    }
+    if(H5Tset_precision(tid2, 24)<0) {
+        H5_FAILED();
+        printf("Can't set precision\n");
+        goto error;
+    }
+    if(H5Tset_size(tid2, 3)<0) {
+        H5_FAILED();
+        printf("Can't set size\n");
+        goto error;
+    }
+    if(H5Tset_ebias(tid2, 63)<0) {
+        H5_FAILED();
+        printf("Can't set size\n");
+        goto error;
+    }
+    if(H5Tset_pad(tid2, H5T_PAD_ZERO, H5T_PAD_ZERO)<0) {
+        H5_FAILED();
+        printf("Can't set padding\n");
+        goto error;
+    }
+
+    if(H5Tcommit(file, "new float type 2", tid2)<0) {
+        H5_FAILED();
+        printf("Can't set inpad\n");
+        goto error;
+    }
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if((tid2 = H5Topen(file, "new float type 2"))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    }
+    if(H5Tget_fields(tid2, &spos, &epos, &esize, &mpos, &msize)<0) {
+        H5_FAILED();
+        printf("Can't get fields\n");
+        goto error;
+    }
+    if(spos!=23 || epos!=16 || esize!=7 || mpos!=0 || msize!=16) {
+        H5_FAILED();
+        printf("Wrong field values\n");
+        goto error;
+    }
+
+    if((precision = H5Tget_precision(tid2))!=24) {
+        H5_FAILED();
+        printf("Can't get precision or wrong precision\n");
+        goto error; 
+    }
+    if((offset = H5Tget_offset(tid2))!=0) {
+        H5_FAILED();
+        printf("Can't get offset or wrong offset\n");
+        goto error; 
+    }
+    if((size = H5Tget_size(tid2))!=3) {
+        H5_FAILED();
+        printf("Can't get size or wrong size\n");
+        goto error;
+    }
+    if((ebias = H5Tget_ebias(tid2))!=63) {
+        H5_FAILED();
+        printf("Can't get exponent bias or wrong bias\n");
+        goto error; 
+    }
+
+    /* Convert data from the 2nd to the 1st derived floating-point type.
+     * Then convert data from the 1st type back to the 2nd type.
+     * Compare the final data with the original data.
+     */
+    src_size = H5Tget_size(tid2);
+    dst_size = H5Tget_size(tid1);
+    endian = H5Tget_order(tid2);
+    buf = (unsigned char*)malloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char*)malloc(nelmts*src_size);
+
+    for(i=0; i<nelmts*src_size; i++)
+        buf[i] = saved_buf[i] = HDrand();
+
+    /* Convert data from the 2nd to the 1st derived floating-point type.
+     * The mantissa and exponent of the 2nd type are big enough to retain 
+     * the precision and exponent power. */
+    if(H5Tconvert(tid2, tid1, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+    /* Convert data from the 1st back to the 2nd derived floating-point type. */
+    if(H5Tconvert(tid1, tid2, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+
+    /* Are the values still the same?*/
+    for(i=0; i<nelmts; i++) {
+        for(j=0; j<src_size; j++)
+            if(buf[i*src_size+j]!=saved_buf[i*src_size+j])
+               break;
+        if(j==src_size)
+           continue; /*no error*/ 
+
+        /* If original value is NaN(exponent bits are all ones, 11..11), 
+         * the library simply sets all mantissa bits to ones.  So don't 
+         * compare values in this case.
+         */
+        if((buf[i*src_size+2]==0x7f && saved_buf[i*src_size+2]==0x7f) ||
+            (buf[i*src_size+2]==0xff && saved_buf[i*src_size+2]==0xff))
+            continue;
+
+        /* Print errors */
+        if (0==fails_this_test++) {
+	    sprintf(str, "\nTesting random sw derived floating-point -> derived floating-point conversions");
+	    printf("%-70s", str);
+	    HDfflush(stdout);
+            H5_FAILED();
+        }
+        printf("    test %u elmt %u: \n", 1, (unsigned)i);
+
+        printf("        src = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        printf("        dst = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        if (fails_this_test>=max_fails) {
+            HDputs("    maximum failures reached, aborting test...");
+            goto error;
+        }
+    }
+
+    if (buf) free(buf);
+    if (saved_buf) free(saved_buf);
+
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if(H5Pclose(dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't close property list\n");
+        goto error;
+    }
+
+    if(H5Fclose(file)<0) {
+        H5_FAILED();
+        printf("Can't close file\n");
+        goto error;
+    } /* end if */
+
+    PASSED();
+    reset_hdf5();	/*print statistics*/
+    
+    return 0;
+
+ error:
+    if (buf) free(buf);
+    if (saved_buf) free(saved_buf);
+    if (aligned) free(aligned);
+    HDfflush(stdout);
+    H5E_BEGIN_TRY {
+        H5Tclose (tid1);
+        H5Tclose (tid2);
+        H5Pclose (dxpl_id);
+        H5Fclose (file);
+    } H5E_END_TRY;
+    reset_hdf5(); /*print statistics*/
+    return MAX((int)fails_this_test, 1);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -5285,6 +5651,10 @@ main(void)
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();
     nerrors += test_opaque();
+
+    /* Test user-define, query functions and software conversion 
+     * for user-defined floating-point types */
+    nerrors += test_derived_flt();
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
