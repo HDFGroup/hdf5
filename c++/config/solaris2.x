@@ -17,7 +17,8 @@ fi
 
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
-    CXXFLAGS="-instances=global -Wc,-LANG:std"
+    CXXFLAGS="-instances=global"
+    CPPFLAGS="-LANG:std"
     LIBS="$LIBS -lsocket"
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
