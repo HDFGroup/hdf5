@@ -43,9 +43,9 @@ static int interface_initialize_g = 0;
  *      in memory.  The data is read from file F and the array's size and
  *      storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The sequence offset is 
- *      FILE_OFFSET in the file (offsets are
- *      in terms of bytes) and the size of the hyperslab is SEQ_LEN. The
- *		total size of the file array is implied in the LAYOUT argument.
+ *      DSET_OFFSET in the dataset (offsets are in terms of bytes) and the 
+ *      size of the hyperslab is SEQ_LEN. The total size of the file array 
+ *      is implied in the LAYOUT argument.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -61,7 +61,7 @@ herr_t
 H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
-        size_t seq_len, hsize_t file_offset, void *buf/*out*/)
+        size_t seq_len, hsize_t dset_offset, void *buf/*out*/)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -72,7 +72,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout);
     assert(buf);
 
-    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
+    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
 
 done:
@@ -87,9 +87,9 @@ done:
  *      in memory.  The data is written to file F and the array's size and
  *      storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The sequence offset is 
- *      FILE_OFFSET in the file (offsets are
- *      in terms of bytes) and the size of the hyperslab is SEQ_LEN. The
- *		total size of the file array is implied in the LAYOUT argument.
+ *      DSET_OFFSET in the dataset (offsets are in terms of bytes) and the 
+ *      size of the hyperslab is SEQ_LEN. The total size of the file array 
+ *      is implied in the LAYOUT argument.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -105,7 +105,7 @@ herr_t
 H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
-        size_t seq_len, hsize_t file_offset, const void *buf)
+        size_t seq_len, hsize_t dset_offset, const void *buf)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -116,7 +116,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     assert(layout);
     assert(buf);
 
-    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
+    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &dset_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
 
 done:
@@ -131,7 +131,7 @@ done:
  *      buffer in in memory.  The data is read from file F and the array's size
  *      and storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The vector of byte sequences
- *      offsets is in the FILE_OFFSET array into the dataset (offsets are in
+ *      offsets is in the DSET_OFFSET array into the dataset (offsets are in
  *      terms of bytes) and the size of each sequence is in the SEQ_LEN array.
  *      The total size of the file array is implied in the LAYOUT argument.
  *      Bytes read into BUF are sequentially stored in the buffer, each sequence
@@ -151,12 +151,12 @@ herr_t
 H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
-        size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
+        size_t nseq, size_t seq_len_arr[], hsize_t dset_offset_arr[],
         void *_buf/*out*/)
 {
     unsigned char *real_buf=(unsigned char *)_buf;   /* Local pointer to buffer to fill */
     unsigned char *buf;                         /* Local pointer to buffer to fill */
-    hsize_t file_offset;                /* Offset in dataset */
+    hsize_t dset_offset;                /* Offset in dataset */
     hsize_t seq_len;                    /* Number of bytes to read */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t    mem_offset[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in memory buffer */
@@ -257,8 +257,8 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    H5_CHECK_OVERFLOW(file_offset_arr[v],hsize_t,haddr_t);
-                    if (H5O_efl_read(f, &efl, (haddr_t)file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    H5_CHECK_OVERFLOW(dset_offset_arr[v],hsize_t,haddr_t);
+                    if (H5O_efl_read(f, &efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
 
                     /* Increment offset in buffer */
@@ -270,7 +270,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                     max_data *= layout->dim[u];
 
                 /* Pass along the vector of sequences to read */
-                if (H5F_contig_readv(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                if (H5F_contig_readv(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, dset_offset_arr, dxpl_id, real_buf)<0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
             } /* end else */
             break;
@@ -297,13 +297,13 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
-                file_offset=file_offset_arr[v];
+                dset_offset=dset_offset_arr[v];
                 seq_len=seq_len_arr[v];
                 buf=real_buf;
 
                 {
-                    /* Set location in dataset from the file_offset */
-                    addr=file_offset;
+                    /* Set location in dataset from the dset_offset */
+                    addr=dset_offset;
 
                     /* Convert the bytes into elements */
                     seq_len/=elmt_size;
@@ -501,7 +501,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         case H5D_COMPACT:
 
             /* Pass along the vector of sequences to read */
-            if (H5F_compact_readv(f, layout, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+            if (H5F_compact_readv(f, layout, nseq, seq_len_arr, dset_offset_arr, dxpl_id, real_buf)<0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
                                                         
             break;
@@ -522,7 +522,7 @@ done:
  *      a file dataset.  The data is written to file F and the array's size
  *      and storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The vector of byte sequences
- *      offsets is in the FILE_OFFSET array into the dataset (offsets are in
+ *      offsets is in the DSET_OFFSET array into the dataset (offsets are in
  *      terms of bytes) and the size of each sequence is in the SEQ_LEN array.
  *      The total size of the file array is implied in the LAYOUT argument.
  *      Bytes written from BUF are sequentially stored in the buffer, each sequence
@@ -542,12 +542,12 @@ herr_t
 H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
-        size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
+        size_t nseq, size_t seq_len_arr[], hsize_t dset_offset_arr[],
         const void *_buf)
 {
     const unsigned char *real_buf=(const unsigned char *)_buf;   /* Local pointer to buffer to fill */
     const unsigned char *buf;                         /* Local pointer to buffer to fill */
-    hsize_t file_offset;                /* Offset in dataset */
+    hsize_t dset_offset;                /* Offset in dataset */
     hsize_t seq_len;                    /* Number of bytes to read */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t    mem_offset[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in memory buffer */
@@ -647,8 +647,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    H5_CHECK_OVERFLOW(file_offset_arr[v],hsize_t,haddr_t);
-                    if (H5O_efl_write(f, &efl, (haddr_t)file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    H5_CHECK_OVERFLOW(dset_offset_arr[v],hsize_t,haddr_t);
+                    if (H5O_efl_write(f, &efl, (haddr_t)dset_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
 
                     /* Increment offset in buffer */
@@ -660,7 +660,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
                     max_data *= layout->dim[u];
 
                 /* Pass along the vector of sequences to write */
-                if (H5F_contig_writev(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                if (H5F_contig_writev(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, dset_offset_arr, dxpl_id, real_buf)<0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
             } /* end else */
             break;
@@ -687,13 +687,13 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
 
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
-                file_offset=file_offset_arr[v];
+                dset_offset=dset_offset_arr[v];
                 seq_len=seq_len_arr[v];
                 buf=real_buf;
 
                 {
-                    /* Set location in dataset from the file_offset */
-                    addr=file_offset;
+                    /* Set location in dataset from the dset_offset */
+                    addr=dset_offset;
 
                     /* Convert the bytes into elements */
                     seq_len/=elmt_size;
@@ -890,7 +890,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         case H5D_COMPACT:       
 
             /* Pass along the vector of sequences to write */
-            if (H5F_compact_writev(f, layout, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+            if (H5F_compact_writev(f, layout, nseq, seq_len_arr, dset_offset_arr, dxpl_id, real_buf)<0)
                  HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
                                                         
             break;
