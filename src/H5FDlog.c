@@ -30,7 +30,7 @@
 #endif /* MAX */
 
 /* The size of the buffer to track allocation requests */
-#define TRACK_BUFFER    38*(16*65536)
+#define TRACK_BUFFER    130*(1024*1024)
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
@@ -513,20 +513,41 @@ static herr_t
 H5FD_log_close(H5FD_t *_file)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval timeval_start,timeval_stop;
+    struct timeval timeval_diff;
+#endif /* H5_HAVE_GETTIMEOFDAY */
 
     FUNC_ENTER(H5FD_log_close, FAIL);
 
     if (H5FD_log_flush(_file)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
 
+#ifdef H5_HAVE_GETTIMEOFDAY
+    HDgettimeofday(&timeval_start,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
     if (close(file->fd)<0)
         HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
+#ifdef H5_HAVE_GETTIMEOFDAY
+    HDgettimeofday(&timeval_stop,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
 
     /* Dump I/O information */
     if(file->fa.verbosity>=0) {
         haddr_t addr;
         haddr_t last_addr;
         unsigned char last_val;
+
+#ifdef H5_HAVE_GETTIMEOFDAY
+         /* Calculate the elapsed gettimeofday time */
+         timeval_diff.tv_usec=timeval_stop.tv_usec-timeval_start.tv_usec;
+         timeval_diff.tv_sec=timeval_stop.tv_sec-timeval_start.tv_sec;
+         if(timeval_diff.tv_usec<0) {
+             timeval_diff.tv_usec+=1000000;
+             timeval_diff.tv_sec--;
+         } /* end if */
+        HDfprintf(file->logfp,"Close took: (%f s)\n",(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
+#endif /* H5_HAVE_GETTIMEOFDAY */
 
         /* Dump the write I/O information */
         HDfprintf(file->logfp,"Dumping write I/O information:\n");
@@ -702,8 +723,17 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
 
     FUNC_ENTER(H5FD_log_alloc, HADDR_UNDEF);
 
+    /* Compute the address for the block to allocate */
     addr = file->eoa;
-    file->eoa += size;
+
+    /* Check if we need to align this block */
+    if(size>=file->pub.threshold) {
+        /* Check for an already aligned block */
+        if(addr%file->pub.alignment!=0)
+            addr=((addr/file->pub.alignment)+1)*file->pub.alignment;
+    } /* end if */
+
+    file->eoa = addr+size;
 
 #ifdef QAK
 printf("%s: flavor=%s, size=%lu\n",FUNC,flavors[type],(unsigned long)size);
@@ -936,6 +966,12 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 {
     H5FD_log_t		*file = (H5FD_log_t*)_file;
     ssize_t		nbytes;
+    size_t      orig_size=size; /* Save the original size for later */
+    haddr_t     orig_addr=addr;
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval timeval_start,timeval_stop;
+    struct timeval timeval_diff;
+#endif /* H5_HAVE_GETTIMEOFDAY */
     
     FUNC_ENTER(H5FD_log_write, FAIL);
 
@@ -963,33 +999,47 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         assert((addr+size)<file->iosize);
         while(tmp_size-->0)
             file->nwrite[tmp_addr++]++;
-
-        /* Log information about the seek, if it's going to occur */
-        if(file->fa.verbosity>1 && (addr!=file->pos || OP_WRITE!=file->op))
-            HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
-
-        /* Log information about the write */
-        if(file->fa.verbosity>0) {
-            /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
-            if(file->flavor[addr]==H5FD_MEM_DEFAULT)
-                HDmemset(&file->flavor[addr],type,size);
-            HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) Written, flavor=%s\n",addr,addr+size-1,(unsigned long)size,flavors[file->flavor[addr]]);
-        } /* end if */
-    }
+    } /* end if */
 
     /* Seek to the correct location */
-    if ((addr!=file->pos || OP_WRITE!=file->op) &&
-            file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
-        file->pos = HADDR_UNDEF;
-        file->op = OP_UNKNOWN;
-        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
-		      "unable to seek to proper position");
-    }
+    if (addr!=file->pos || OP_WRITE!=file->op) {
+#ifdef H5_HAVE_GETTIMEOFDAY
+        HDgettimeofday(&timeval_start,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+        if(file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
+            file->pos = HADDR_UNDEF;
+            file->op = OP_UNKNOWN;
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
+                  "unable to seek to proper position");
+        } /* end if */
+#ifdef H5_HAVE_GETTIMEOFDAY
+        HDgettimeofday(&timeval_stop,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+        /* Log information about the seek */
+        if(file->fa.verbosity>1) {
+#ifdef H5_HAVE_GETTIMEOFDAY
+             /* Calculate the elapsed gettimeofday time */
+             timeval_diff.tv_usec=timeval_stop.tv_usec-timeval_start.tv_usec;
+             timeval_diff.tv_sec=timeval_stop.tv_sec-timeval_start.tv_sec;
+             if(timeval_diff.tv_usec<0) {
+                 timeval_diff.tv_usec+=1000000;
+                 timeval_diff.tv_sec--;
+             } /* end if */
+            HDfprintf(file->logfp,"Seek: From %10a To %10a (%f s)\n",file->pos,addr,(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
+#else /* H5_HAVE_GETTIMEOFDAY */
+            HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+        } /* end if */
+    } /* end if */
 
     /*
      * Write the data, being careful of interrupted system calls and partial
      * results
      */
+#ifdef H5_HAVE_GETTIMEOFDAY
+        HDgettimeofday(&timeval_start,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
     while (size>0) {
         do {
             nbytes = HDwrite(file->fd, buf, size);
@@ -1006,7 +1056,29 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         addr += (haddr_t)nbytes;
         buf = (const char*)buf + nbytes;
     }
+#ifdef H5_HAVE_GETTIMEOFDAY
+        HDgettimeofday(&timeval_stop,NULL);
+#endif /* H5_HAVE_GETTIMEOFDAY */
     
+    /* Log information about the write */
+    if(file->fa.verbosity>0) {
+        /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
+        if(file->flavor[orig_addr]==H5FD_MEM_DEFAULT)
+            HDmemset(&file->flavor[orig_addr],type,orig_size);
+#ifdef H5_HAVE_GETTIMEOFDAY
+             /* Calculate the elapsed gettimeofday time */
+             timeval_diff.tv_usec=timeval_stop.tv_usec-timeval_start.tv_usec;
+             timeval_diff.tv_sec=timeval_stop.tv_sec-timeval_start.tv_sec;
+             if(timeval_diff.tv_usec<0) {
+                 timeval_diff.tv_usec+=1000000;
+                 timeval_diff.tv_sec--;
+             } /* end if */
+        HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) (%s) Written (%f s)\n",orig_addr,orig_addr+orig_size-1,(unsigned long)orig_size,flavors[file->flavor[orig_addr]],(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
+#else /* H5_HAVE_GETTIMEOFDAY */
+        HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) (%s) Written\n",orig_addr,orig_addr+orig_size-1,(unsigned long)orig_size,flavors[file->flavor[orig_addr]]);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+    } /* end if */
+
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
