@@ -2431,7 +2431,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                     /* Convert VL sequence */
                     H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
-                    if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, bkg_stride, conv_buf, tmp_buf, dxpl_id)<0)
+                    if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, 0, conv_buf, tmp_buf, dxpl_id)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
                     /* Write sequence to destination location */
@@ -2455,6 +2455,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     }
                 } /* end else */
                 
+
                 /*
                  * If we had used a temporary buffer for the destination
                  * then we should copy the value to the true destination
