@@ -161,9 +161,9 @@ do_pio(parameters param)
     iotype      iot;
 
     char        fname[FILENAME_MAX];
-    int         maxprocs, nfiles, nf;
+    int         maxprocs;
+    int		nfiles, nf;
     long        ndsets, nelmts;
-    int         niters;
     int         color;                  /*for communicator creation     */
     char        *buffer = NULL;         /*data buffer pointer           */
     long	buf_size;		/*data buffer size in bytes     */
@@ -176,9 +176,7 @@ do_pio(parameters param)
 
     pio_comm_g = MPI_COMM_NULL;
 
-    /* Sanity check parameters */
-
-    /* IO type */
+    /* parameters sanity check */
     iot = param.io_type;
 
     switch (iot) {
@@ -204,9 +202,22 @@ do_pio(parameters param)
     nfiles = param.num_files;       /* number of files                      */
     ndsets = param.num_dsets;       /* number of datasets per file          */
     nelmts = param.num_elmts;       /* number of elements per dataset       */
-    niters = param.num_iters;       /* number of iterations of reads/writes */
     maxprocs = param.max_num_procs; /* max number of mpi-processes to use   */
     buf_size = param.buf_size;
+
+    if (nfiles < 0 ) {
+        fprintf(stderr,
+                "number of files must be >= 0 (%d)\n",
+                nfiles);
+        GOTOERROR(FAIL);
+    }
+
+    if (ndsets < 0 ) {
+        fprintf(stderr,
+                "number of datasets per file must be >= 0 (%ld)\n",
+                ndsets);
+        GOTOERROR(FAIL);
+    }
 
     if (nelmts <= 0 ) {
         fprintf(stderr,
@@ -242,7 +253,6 @@ do_pio(parameters param)
 fprintf(stderr, "nfiles=%d\n", nfiles);
 fprintf(stderr, "ndsets=%ld\n", ndsets);
 fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "niters=%d\n", niters);
 fprintf(stderr, "maxprocs=%d\n", maxprocs);
 fprintf(stderr, "buffer size=%ld\n", buf_size);
 fprintf(stderr, "total data size=%ld\n", ndsets*nelmts*sizeof(int));
