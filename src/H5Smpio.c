@@ -132,6 +132,8 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
  *		rky, ppw 2000-09-26 Freed old type after creating struct type.
  *		rky 2000-10-05 Changed displacements to be MPI_Aint.
  *		rky 2000-10-06 Added code for cases of empty hyperslab.
+ *		akc, rky 2000-11-16 Replaced hard coded dimension size with
+ *		    H5S_MAX_RANK.
  *
  *-------------------------------------------------------------------------
  */
@@ -148,13 +150,15 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 	hsize_t block;
 	hsize_t xtent;
 	hsize_t count;
-    } d[32];
+    } d[H5S_MAX_RANK];
 
     int			i, err, new_rank, num_to_collapse;
-    int			offset[32], max_xtent[32], block_length[2];
+    int			offset[H5S_MAX_RANK];
+    int			max_xtent[H5S_MAX_RANK];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
     intn		rank;
-    MPI_Datatype	inner_type, outer_type, old_type[32];
+    int			block_length[2];
+    MPI_Datatype	inner_type, outer_type, old_type[2];
     MPI_Aint            extent_len, displacement[2];
 
     FUNC_ENTER (H5S_mpio_hyper_type, FAIL);
@@ -305,7 +309,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
        ****************************************/
           err = MPI_Type_vector ( (int)(d[i].count),        /* count */
 		          	  (int)(d[i].block),        /* blocklength */
-				  (MPI_Aint)(d[i].strid),   /* stride */
+				  (int)(d[i].strid),   	    /* stride */
 				  inner_type,	            /* old type */
 				  &outer_type );            /* new type */
 
@@ -314,7 +318,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     	      HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI vector type");
 	  }
 
-          displacement[1] = elmt_size * max_xtent[i];
+          displacement[1] = (MPI_Aint)elmt_size * max_xtent[i];
           err = MPI_Type_extent(outer_type, &extent_len);
 
        /*************************************************
