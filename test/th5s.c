@@ -29,6 +29,9 @@
 
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"
+#define NULLFILE   "th5s2.h5"
+#define NULLDATASET  "null_dataset"
+#define NULLATTR   "null_attribute"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -191,6 +194,124 @@ test_h5s_basic(void)
     ret = H5Sclose(sid1);
     CHECK_I(ret, "H5Sclose");
 }				/* test_h5s_basic() */
+
+/****************************************************************
+**
+**  test_h5s_null(): Test NULL data space
+**
+****************************************************************/
+static void
+test_h5s_null(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t sid, sid2;    /* Dataspace IDs */
+    hid_t dset_sid, dset_sid2;    /* Dataspace IDs */
+    hid_t attr_sid;    /* Dataspace IDs */
+    hid_t did;          /* Dataset ID */
+    hid_t attr;          /*Attribute ID */
+    H5S_class_t class;  /* dataspace type */
+    herr_t ret;         /* Generic return value */
+    
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Null Dataspace\n"));
+   
+    /* Create the file */
+    fid = H5Fcreate(NULLFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    sid = H5Screate(H5S_NULL);
+    CHECK(sid, FAIL, "H5Screate");
+    
+    /* Create first dataset */
+    did = H5Dcreate(fid, NULLDATASET, H5T_STD_U32LE, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
+    
+    /* Create an attribute for the group */
+    attr=H5Acreate(did,NULLATTR,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+    
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+  
+    /* Close the dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+   
+    /*============================================
+     *  Reopen the file to check the data space 
+     *============================================
+     */  
+    fid = H5Fopen(NULLFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Reopen the dataset */
+    did = H5Dopen(fid, NULLDATASET);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Get the space of the dataset */
+    dset_sid = H5Dget_space(did);
+    CHECK(dset_sid, FAIL, "H5Dget_space");
+
+    /* Query the NULL dataspace */
+    dset_sid2 = H5Scopy(dset_sid);
+    CHECK(dset_sid2, FAIL, "H5Scopy");
+
+    /* Verify the class type of dataspace */
+    class = H5Sget_simple_extent_type(dset_sid2);
+    VERIFY(class, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Verify there is zero element in the dataspace */
+    ret = H5Sget_simple_extent_npoints(dset_sid2);
+    VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
+
+    /* Close the dataspace */
+    ret = H5Sclose(dset_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    ret = H5Sclose(dset_sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Open the attribute for the dataset */
+    attr=H5Aopen_name(did,NULLATTR);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Get the space of the dataset */
+    attr_sid = H5Aget_space(attr);
+    CHECK(attr_sid, FAIL, "H5Aget_space");
+    
+    /* Verify the class type of dataspace */
+    class = H5Sget_simple_extent_type(attr_sid);
+    VERIFY(class, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Verify there is zero element in the dataspace */
+    ret = H5Sget_simple_extent_npoints(attr_sid);
+    VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
+    
+    /* Close the dataspace */
+    ret = H5Sclose(attr_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+ 
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+    
+    /* Close the dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+  
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc20() */
 
 /****************************************************************
 **
@@ -566,6 +687,7 @@ test_h5s(void)
     MESSAGE(5, ("Testing Dataspaces\n"));
 
     test_h5s_basic();		/* Test basic H5S code */
+    test_h5s_null();		/* Test Null dataspace H5S code */
     test_h5s_scalar_write();	/* Test scalar H5S writing code */
     test_h5s_scalar_read();		/* Test scalar H5S reading code */
     test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
