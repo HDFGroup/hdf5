@@ -811,7 +811,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     hssize_t		    ret_value = -1;
 
     FUNC_ENTER(H5Sget_simple_extent_npoints, -1);
-    H5TRACE1("h","i",space_id);
+    H5TRACE1("Hs","i",space_id);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id))) {
