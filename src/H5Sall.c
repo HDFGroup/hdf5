@@ -115,7 +115,7 @@ H5S_all_init (const H5S_t *space, H5S_sel_iter_t *sel_iter)
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5S_all_favail (const H5S_t UNUSED *space, const H5S_sel_iter_t *sel_iter, hsize_t max)
+H5S_all_favail (const H5S_t * UNUSED space, const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
     FUNC_ENTER (H5S_all_favail, 0);
 
@@ -702,7 +702,7 @@ fall_through:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_release (H5S_t UNUSED *space)
+H5S_all_release (H5S_t * UNUSED space)
 {
     FUNC_ENTER (H5S_all_release, FAIL);
 
@@ -810,7 +810,7 @@ H5S_all_select_serialize (const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
+H5S_all_select_deserialize (H5S_t *space, const uint8_t * UNUSED buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 

@@ -43,11 +43,17 @@
 #define SPACE1_RANK	1
 #define SPACE1_DIM1	4
 
+typedef enum {
+    RET_ZERO,
+    RET_ONE,
+    RET_CHANGE
+} iter_enum;
+
 /* Custom group iteration callback data */
 typedef struct {
     char name[NAMELEN];     /* The name of the object */
     int type;               /* The type of the object */
-    enum {RET_ZERO, RET_ONE, RET_CHANGE} command;   /* The type of return value */
+    iter_enum command;      /* The type of return value */
 } iter_info;
 
 /* Local functions */

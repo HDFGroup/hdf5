@@ -92,7 +92,7 @@ static const char *multi_letters = "msbrglo";
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_errors(void UNUSED *client_data)
+h5_errors(void * UNUSED client_data)
 {
     H5_FAILED();
     H5Eprint (stdout);
@@ -150,7 +150,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		H5FD_mem_t mt;
 		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
 
-		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
+		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt=mt+1) {
 		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
 			       filename, multi_letters[mt]);
 		    HDremove(temp); /*don't care if it fails*/
@@ -438,7 +438,7 @@ h5_fileaccess(void)
 	HDmemset(memb_addr, 0, sizeof memb_addr);
 
 	assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=mt+1) {
 	    memb_fapl[mt] = H5P_DEFAULT;
 	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
 	    memb_name[mt] = sv[mt];

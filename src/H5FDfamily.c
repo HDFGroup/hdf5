@@ -628,7 +628,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_query(const H5FD_t UNUSED *_f, unsigned long *flags /* out */)
+H5FD_family_query(const H5FD_t * UNUSED _f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;
 

@@ -656,7 +656,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  */
 static herr_t
 H5F_istore_found(H5F_t UNUSED *f, haddr_t addr, const void *_lt_key,
-		 void *_udata, const void UNUSED *_rt_key)
+		 void *_udata, const void * UNUSED _rt_key)
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;

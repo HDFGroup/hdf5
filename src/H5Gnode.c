@@ -128,7 +128,7 @@ H5FL_BLK_DEFINE_STATIC(symbol_node);
  *-------------------------------------------------------------------------
  */
 static size_t
-H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED *udata)
+H5G_node_sizeof_rkey(H5F_t *f, const void * UNUSED udata)
 {
     return H5F_SIZEOF_SIZE(f);	/*the name offset */
 }
@@ -411,8 +411,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
-	      void UNUSED *_udata2)
+H5G_node_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
+	      void * UNUSED _udata2)
 {
     H5G_node_t		   *sym = NULL;
     size_t		    size = 0;
@@ -625,8 +625,8 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_found(H5F_t *f, haddr_t addr, const void UNUSED *_lt_key,
-	       void *_udata, const void UNUSED *_rt_key)
+H5G_node_found(H5F_t *f, haddr_t addr, const void * UNUSED _lt_key,
+	       void *_udata, const void * UNUSED _rt_key)
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_t		*sn = NULL;

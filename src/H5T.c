@@ -1328,7 +1328,7 @@ H5T_init_interface(void)
  *-------------------------------------------------------------------------
  */
 static int
-H5T_unlock_cb (void *_dt, const void UNUSED *key)
+H5T_unlock_cb (void *_dt, const void * UNUSED key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
@@ -6979,7 +6979,7 @@ done:
  */
 hid_t
 H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
-    const int UNUSED perm[/* ndims */])
+    const int * UNUSED perm/* ndims */)
 {
     H5T_t	*base = NULL;		/* base data type	*/
     H5T_t	*dt = NULL;		    /* new array data type	*/
@@ -7192,7 +7192,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t UNUSED *path, int UNUSED *nprint/*in,out*/)
+H5T_print_stats(H5T_path_t * UNUSED path, int * UNUSED nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;

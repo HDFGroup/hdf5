@@ -112,9 +112,10 @@ ReadGifHeader(GIFHEAD *GifHead, /* Pointer to GIF header structure  */
 **           otherwise 0 if no error occured.
 */
 int
-ReadGifImageDesc(GifImageDesc, MemGif2)
-GIFIMAGEDESC *GifImageDesc; /* Pointer to GIF image descriptor structure  */
-BYTE         **MemGif2;     /* GIF image file input FILE stream           */
+ReadGifImageDesc(
+    GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor structure  */
+    BYTE **MemGif2              /* GIF image file input FILE stream           */
+    )
 {
     WORD i;        /* Loop counter                               */
     WORD tableSize;         /* Number of entries in the Local Color Table */
@@ -208,9 +209,10 @@ BYTE         **MemGif2;     /* GIF image file input FILE stream           */
 **           otherwise 0 if no error occured.
 */
 int
-ReadGifGraphicControl(GifGraphicControl, MemGif2)
-GIFGRAPHICCONTROL *GifGraphicControl; /* Pointer to GC Extension structure */
-BYTE              **MemGif2;          /* GIF image file input FILE stream  */
+ReadGifGraphicControl(
+    GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Extension structure */
+    BYTE              **MemGif2           /* GIF image file input FILE stream  */
+    )
 {
     int i;
 
@@ -232,9 +234,10 @@ BYTE              **MemGif2;          /* GIF image file input FILE stream  */
 **           otherwise 0 if no error occured.
 */
 int
-ReadGifPlainText(GifPlainText, MemGif2)
-GIFPLAINTEXT *GifPlainText; /* Pointer to Plain Text Extension structure */
-BYTE         **MemGif2;       /* GIF image file input FILE stream          */
+ReadGifPlainText(
+    GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension structure */
+    BYTE         **MemGif2        /* GIF image file input FILE stream          */
+    )
 {
     int i;
 
@@ -270,9 +273,10 @@ BYTE         **MemGif2;       /* GIF image file input FILE stream          */
 **           otherwise 0 if no error occured.
 */
 int
-ReadGifApplication(GifApplication, MemGif2)
-GIFAPPLICATION *GifApplication; /* Pointer to Application Extension structure */
-BYTE           **MemGif2;          /* GIF image file input FILE stream           */
+ReadGifApplication(
+    GIFAPPLICATION *GifApplication, /* Pointer to Application Extension structure */
+    BYTE           **MemGif2           /* GIF image file input FILE stream           */
+    )
 {
     int i;
 
@@ -307,9 +311,10 @@ BYTE           **MemGif2;          /* GIF image file input FILE stream          
 **           otherwise 0 if no error occured.
 */
 int
-ReadGifComment(GifComment, MemGif2)
-GIFCOMMENT *GifComment; /* Pointer to GIF Comment Extension structure */
-BYTE       **MemGif2;      /* GIF image file input FILE stream           */
+ReadGifComment(
+    GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension structure */
+    BYTE       **MemGif2       /* GIF image file input FILE stream           */
+    )
 {
 	
     /* Read in the Plain Text data sub-blocks */

@@ -176,7 +176,7 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
 {
   hid_t did;  /* dataset identifier  */
   hid_t tid;  /* datatype identifier */
-  H5T_class_t class;
+  H5T_class_t t_class;
   hid_t pid;  /* data_property identifier */
   hsize_t chunk_dims_out[2];
 
@@ -216,22 +216,22 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
 	   (unsigned long)(chunk_dims_out[1]));
   } 
   else{
-    class = H5Tget_class(tid);
-    if(class < 0){ 
+    t_class = H5Tget_class(tid);
+    if(t_class < 0){ 
       puts(" Invalid datatype.\n");
     }
     else {
-      if(class == H5T_INTEGER)
+      if(t_class == H5T_INTEGER)
       puts(" Datatype is 'H5T_NATIVE_INTEGER'.\n");
-      if(class == H5T_FLOAT)
+      if(t_class == H5T_FLOAT)
       puts(" Datatype is 'H5T_NATIVE_FLOAT'.\n");
-      if(class == H5T_STRING)
+      if(t_class == H5T_STRING)
       puts(" Datatype is 'H5T_NATIVE_STRING'.\n");
-      if(class == H5T_BITFIELD)
+      if(t_class == H5T_BITFIELD)
       puts(" Datatype is 'H5T_NATIVE_BITFIELD'.\n");
-      if(class == H5T_OPAQUE)
+      if(t_class == H5T_OPAQUE)
       puts(" Datatype is 'H5T_NATIVE_OPAQUE'.\n");
-      if(class == H5T_COMPOUND)
+      if(t_class == H5T_COMPOUND)
       puts(" Datatype is 'H5T_NATIVE_COMPOUND'.\n");
     }
   }

@@ -178,7 +178,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shared_size (H5F_t *f, const void UNUSED *_mesg)
+H5O_shared_size (H5F_t *f, const void * UNUSED _mesg)
 {
     size_t	size;
     

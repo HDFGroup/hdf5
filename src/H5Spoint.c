@@ -127,7 +127,7 @@ H5S_point_init (const H5S_t *space, H5S_sel_iter_t *sel_iter)
 --------------------------------------------------------------------------*/
 herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t **_coord)
 {
-    H5S_pnt_node_t *top, *curr, *new; /* Point selection nodes */
+    H5S_pnt_node_t *top, *curr, *new_node; /* Point selection nodes */
     const hssize_t *coord=(const hssize_t *)_coord;     /* Pointer to the actual coordinates */
     unsigned i;                 /* Counter */
     herr_t ret_value=FAIL;  /* return value */
@@ -145,7 +145,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
     top=curr=NULL;
     for(i=0; i<num_elem; i++) {
         /* Allocate space for the new node */
-        if((new = H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
+        if((new_node = H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate point node");
 
@@ -153,7 +153,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 	printf("%s: check 1.1, rank=%d\n",
 	       FUNC,(int)space->extent.u.simple.rank);
 #endif /* QAK */
-        if((new->pnt = H5MM_malloc(space->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+        if((new_node->pnt = H5MM_malloc(space->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate coordinate information");
 #ifdef QAK
@@ -161,14 +161,14 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 #endif /* QAK */
 
         /* Copy over the coordinates */
-        HDmemcpy(new->pnt,coord+(i*space->extent.u.simple.rank),(space->extent.u.simple.rank*sizeof(hssize_t)));
+        HDmemcpy(new_node->pnt,coord+(i*space->extent.u.simple.rank),(space->extent.u.simple.rank*sizeof(hssize_t)));
 #ifdef QAK
 	printf("%s: check 1.3\n",FUNC);
 	{
 	    int j;
 
 	    for(j=0; j<space->extent.u.simple.rank; j++) {
-		printf("%s: pnt[%d]=%d\n",FUNC,(int)j,(int)new->pnt[j]);
+		printf("%s: pnt[%d]=%d\n",FUNC,(int)j,(int)new_node->pnt[j]);
 		printf("%s: coord[%d][%d]=%d\n",
 		       FUNC, (int)i, (int)j,
 		       (int)*(coord+(i*space->extent.u.simple.rank)+j));
@@ -177,12 +177,12 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 #endif /* QAK */
 
         /* Link into list */
-        new->next=NULL;
+        new_node->next=NULL;
         if(top==NULL)
-            top=new;
+            top=new_node;
         else
-            curr->next=new;
-        curr=new;
+            curr->next=new_node;
+        curr=new_node;
     } /* end for */
 #ifdef QAK
     printf("%s: check 2.0\n",FUNC);
@@ -198,13 +198,13 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
         space->select.sel_info.pnt_lst->head=top;
     }
     else {  /* op==H5S_SELECT_APPEND */
-        new=space->select.sel_info.pnt_lst->head;
-        if(new!=NULL)
-            while(new->next!=NULL)
-                new=new->next;
+        new_node=space->select.sel_info.pnt_lst->head;
+        if(new_node!=NULL)
+            while(new_node->next!=NULL)
+                new_node=new_node->next;
 
         /* Append new list to point selection */
-        new->next=top;
+        new_node->next=top;
     }
 
     /* Add the number of elements in the new selection */
@@ -234,7 +234,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5S_point_favail (const H5S_t UNUSED *space,
+H5S_point_favail (const H5S_t * UNUSED space,
 		  const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
     FUNC_ENTER (H5S_point_favail, 0);
@@ -728,7 +728,7 @@ H5S_point_npoints (const H5S_t *space)
 herr_t
 H5S_point_copy (H5S_t *dst, const H5S_t *src)
 {
-    H5S_pnt_node_t *curr, *new, *new_head;    /* Point information nodes */
+    H5S_pnt_node_t *curr, *new_node, *new_head;    /* Point information nodes */
     herr_t ret_value=SUCCEED;  /* return value */
 
     FUNC_ENTER (H5S_point_copy, FAIL);
@@ -748,30 +748,30 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
     new_head=NULL;
     while(curr!=NULL) {
         /* Create each point */
-        if((new=H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
+        if((new_node=H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate point node");
-        if((new->pnt = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+        if((new_node->pnt = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate coordinate information");
-        HDmemcpy(new->pnt,curr->pnt,(src->extent.u.simple.rank*sizeof(hssize_t)));
-        new->next=NULL;
+        HDmemcpy(new_node->pnt,curr->pnt,(src->extent.u.simple.rank*sizeof(hssize_t)));
+        new_node->next=NULL;
 
 #ifdef QAK
  printf("%s: check 5.0\n",FUNC);
     {
         int i;
         for(i=0; i<src->extent.u.simple.rank; i++)
-            printf("%s: check 5.1, new->pnt[%d]=%d\n",FUNC,i,(int)new->pnt[i]);
+            printf("%s: check 5.1, new_node->pnt[%d]=%d\n",FUNC,i,(int)new_node->pnt[i]);
     }
 #endif /* QAK */
 
         /* Keep the order the same when copying */
         if(new_head==NULL)
-            new_head=dst->select.sel_info.pnt_lst->head=new;
+            new_head=dst->select.sel_info.pnt_lst->head=new_node;
         else {
-            new_head->next=new;
-            new_head=new;
+            new_head->next=new_node;
+            new_head=new_node;
         } /* end else */
 
         curr=curr->next;

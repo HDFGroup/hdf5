@@ -2010,7 +2010,7 @@ done:
  */
 static herr_t
 H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
-	  const H5F_mprop_t UNUSED *plist)
+	  const H5F_mprop_t * UNUSED plist)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/

@@ -64,8 +64,8 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   char*    h5cimage_name;
   void*    image_data;
   HDF_CHUNK_DEF c_def_out;
-  int32    chunk_dims[2];
-  int32    chunk_dims24[3];
+  hsize_t    chunk_dims[2];
+  hsize_t    chunk_dims24[3];
   int32    c_flags;
   int32    interlace_mode;
 

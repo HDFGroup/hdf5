@@ -935,7 +935,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stream_query(const H5FD_t UNUSED *_f,
+H5FD_stream_query(const H5FD_t * UNUSED _f,
                   unsigned long *flags/*out*/)
 {
     FUNC_ENTER (H5FD_stream_query, SUCCEED);

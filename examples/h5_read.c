@@ -23,7 +23,7 @@ main (void)
     hid_t       file, dataset;         /* handles */
     hid_t       datatype, dataspace;   
     hid_t       memspace; 
-    H5T_class_t class;                 /* data type class */
+    H5T_class_t t_class;                 /* data type class */
     H5T_order_t order;                 /* data order */
     size_t      size;                  /*
 				        * size of the data element	       
@@ -59,8 +59,8 @@ main (void)
      * dataset class, order, size, rank and dimensions.
      */
     datatype  = H5Dget_type(dataset);     /* datatype handle */ 
-    class     = H5Tget_class(datatype);
-    if (class == H5T_INTEGER) printf("Data set has INTEGER type \n");
+    t_class     = H5Tget_class(datatype);
+    if (t_class == H5T_INTEGER) printf("Data set has INTEGER type \n");
     order     = H5Tget_order(datatype);
     if (order == H5T_ORDER_LE) printf("Little endian order \n");
 

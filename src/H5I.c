@@ -172,14 +172,14 @@ H5I_term_interface(void)
 
     if (interface_initialize_g) {
         /* How many groups are still being used? */
-        for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
+        for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp=grp+1) {
             if ((grp_ptr=H5I_id_group_list_g[grp]) && grp_ptr->id_list)
                 n++;
         }
 
         /* If no groups are used then clean  up */
         if (0==n) {
-            for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
+            for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp=grp+1) {
                 grp_ptr = H5I_id_group_list_g[grp];
                 H5MM_xfree(grp_ptr);
                 H5I_id_group_list_g[grp] = NULL;

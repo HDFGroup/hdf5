@@ -209,7 +209,7 @@ H5S_hyper_init (const H5S_t *space, H5S_sel_iter_t *sel_iter)
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5S_hyper_favail (const H5S_t UNUSED *space,
+H5S_hyper_favail (const H5S_t * UNUSED space,
 		  const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
     FUNC_ENTER (H5S_hyper_favail, 0);
@@ -4760,7 +4760,7 @@ herr_t
 H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
 {
     H5S_hyper_list_t *new_hyper=NULL;    /* New hyperslab selection */
-    H5S_hyper_node_t *curr, *new, *new_head;    /* Hyperslab information nodes */
+    H5S_hyper_node_t *curr, *new_node, *new_head;    /* Hyperslab information nodes */
     H5S_hyper_dim_t *new_diminfo=NULL;	/* New per-dimension info array[rank] */
     unsigned u;                    /* Counters */
     size_t v;                   /* Counters */
@@ -4842,33 +4842,33 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
         printf("%s: check 5.1\n", FUNC);
 #endif /* QAK */
             /* Create each point */
-            if((new = H5FL_ALLOC(H5S_hyper_node_t,0))==NULL)
+            if((new_node = H5FL_ALLOC(H5S_hyper_node_t,0))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "can't allocate point node");
-            HDmemcpy(new,curr,sizeof(H5S_hyper_node_t));    /* copy caching information */
-            if((new->start = H5FL_ARR_ALLOC(hsize_t,src->extent.u.simple.rank,0))==NULL)
+            HDmemcpy(new_node,curr,sizeof(H5S_hyper_node_t));    /* copy caching information */
+            if((new_node->start = H5FL_ARR_ALLOC(hsize_t,src->extent.u.simple.rank,0))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "can't allocate coordinate information");
-            if((new->end = H5FL_ARR_ALLOC(hsize_t,src->extent.u.simple.rank,0))==NULL)
+            if((new_node->end = H5FL_ARR_ALLOC(hsize_t,src->extent.u.simple.rank,0))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "can't allocate coordinate information");
-            HDmemcpy(new->start,curr->start,(src->extent.u.simple.rank*sizeof(hssize_t)));
-            HDmemcpy(new->end,curr->end,(src->extent.u.simple.rank*sizeof(hssize_t)));
-            new->next=NULL;
+            HDmemcpy(new_node->start,curr->start,(src->extent.u.simple.rank*sizeof(hssize_t)));
+            HDmemcpy(new_node->end,curr->end,(src->extent.u.simple.rank*sizeof(hssize_t)));
+            new_node->next=NULL;
 
             /* Insert into low & high bound arrays */
             for(u=0; u<src->extent.u.simple.rank; u++) {
-                new_hyper->lo_bounds[u][v].bound=new->start[u];
-                new_hyper->lo_bounds[u][v].node=new;
+                new_hyper->lo_bounds[u][v].bound=new_node->start[u];
+                new_hyper->lo_bounds[u][v].node=new_node;
             } /* end for */
             v++;    /* Increment the location of the next node in the boundary arrays */
 
             /* Keep the order the same when copying */
             if(new_head==NULL)
-                new_head=new_hyper->head=new;
+                new_head=new_hyper->head=new_node;
             else {
-                new_head->next=new;
-                new_head=new;
+                new_head->next=new_node;
+                new_head=new_node;
             } /* end else */
 
             curr=curr->next;
@@ -6044,7 +6044,7 @@ H5S_hyper_select_iterate_mem (int dim, H5S_hyper_iter_info_t *iter_info)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
+H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t * UNUSED iter, void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void *op_data)
 {
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */

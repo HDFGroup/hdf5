@@ -85,7 +85,7 @@ H5S_none_select_serialize (const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
+H5S_none_select_deserialize (H5S_t *space, const uint8_t * UNUSED buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 
@@ -208,8 +208,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_select_iterate(void UNUSED *buf, hid_t UNUSED type_id, H5S_t UNUSED *space, H5D_operator_t UNUSED op,
-        void UNUSED *operator_data)
+H5S_none_select_iterate(void * UNUSED buf, hid_t UNUSED type_id, H5S_t * UNUSED space, H5D_operator_t UNUSED op,
+        void * UNUSED operator_data)
 {
     herr_t ret_value=SUCCEED;      /* return value */
 

@@ -464,125 +464,125 @@ done:
  *-----------------------------------------------------------------------*/
 herr_t
 convert_group (hid_t gid, char *name, op_data_t *op_data) {
-H5G_stat_t statbuf;
+    H5G_stat_t statbuf;
 
-	int32 hfile_id;
-	int32 vgroup_id;
-	int32 obj_idx;
-	int32 status;
-	int idx, flag;
+    int32 hfile_id;
+    int32 vgroup_id;
+    int32 obj_idx;
+    int32 status;
+    int idx, flag;
 
-	hfile_id = op_data->hfile_id;
+    hfile_id = op_data->hfile_id;
 
-	if ((vgroup_id = Vattach(hfile_id, -1, "w")) <= 0 ) {
-		fprintf(stderr,"Error: Unable to create new vgroup\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-		return(vgroup_id);
-	}
+    if ((vgroup_id = Vattach(hfile_id, -1, "w")) <= 0 ) {
+            fprintf(stderr,"Error: Unable to create new vgroup\n");
+            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+            return(vgroup_id);
+    }
 
-	if ((status = Vsetname(vgroup_id, name)) != SUCCEED ) {
-		fprintf(stderr,"Error: Unable to set name on new vgroup\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-		return(status);
-	}
+    if ((status = Vsetname(vgroup_id, name)) != SUCCEED ) {
+            fprintf(stderr,"Error: Unable to set name on new vgroup\n");
+            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+            return(status);
+    }
 
-	if ((status = Vsetclass(vgroup_id, "HDF5")) != SUCCEED ) {
-		fprintf(stderr,"Error: Unable to set class on new vgroup\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-		return(status);
-	}
+    if ((status = Vsetclass(vgroup_id, "HDF5")) != SUCCEED ) {
+            fprintf(stderr,"Error: Unable to set class on new vgroup\n");
+            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+            return(status);
+    }
 
-	if (op_data->vgroup_id == 0) {
-		obj_idx = -1; /* Indexes assigned below start from 0 */
-	} else {
-		if ((obj_idx = Vinsert(op_data->vgroup_id, vgroup_id)) < 0) {
-			fprintf(stderr,"Error: Index %d of the new vgroup is illegal\n",(int)obj_idx);
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-			return(obj_idx);
-		}
-	}
-	op_data->vgroup_id = vgroup_id;
-	op_data->sds_id = 0;
-	op_data->vdata_id = 0;
-	op_data->obj_idx = obj_idx;
-		
+    if (op_data->vgroup_id == 0) {
+            obj_idx = -1; /* Indexes assigned below start from 0 */
+    } else {
+            if ((obj_idx = Vinsert(op_data->vgroup_id, vgroup_id)) < 0) {
+                    fprintf(stderr,"Error: Index %d of the new vgroup is illegal\n",(int)obj_idx);
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                    return(obj_idx);
+            }
+    }
+    op_data->vgroup_id = vgroup_id;
+    op_data->sds_id = 0;
+    op_data->vdata_id = 0;
+    op_data->obj_idx = obj_idx;
+            
 
-	/* hard link */
-	if ((status = H5Gget_objinfo(gid, ".", TRUE, &statbuf)) != SUCCEED ) {
-		fprintf(stderr,"Error: H5Gget_objinfo() did not work\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-		return (status);
-	}
+    /* hard link */
+    if ((status = H5Gget_objinfo(gid, ".", TRUE, &statbuf)) != SUCCEED ) {
+            fprintf(stderr,"Error: H5Gget_objinfo() did not work\n");
+            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+            return (status);
+    }
 
-        if (HDstrcmp(name,"/") == 0) { /* this is the root group, just iterate */
+    if (HDstrcmp(name,"/") == 0) { /* this is the root group, just iterate */
 
-		if ((status = H5Aiterate(gid, NULL, (H5A_operator_t)convert_attr, op_data)) != SUCCEED ) {
-			fprintf(stderr,"Error: Unable to iterate over all of the attributes\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-			return(status);
-		}
+            if ((status = H5Aiterate(gid, NULL, (H5A_operator_t)convert_attr, op_data)) != SUCCEED ) {
+                    fprintf(stderr,"Error: Unable to iterate over all of the attributes\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                    return(status);
+            }
 
-		if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
-			fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-			return(status);
-		}
+            if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
+                    fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                    return(status);
+            }
 
-	} else {
+    } else {
 
-		if ((idx = get_table_idx(group_table, statbuf.objno)) < 0 ) {
+            if ((idx = get_table_idx(group_table, statbuf.objno)) < 0 ) {
 
-			fprintf(stderr,"Error: object not found, %s\n",name);
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-			status = FAIL;
+                    fprintf(stderr,"Error: object not found, %s\n",name);
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                    status = FAIL;
 
-		} else if((flag = get_tableflag(group_table,idx)) < 0 ) {
-			
-			fprintf(stderr,"Error: get_tableflag() should never return < 0\n");
-			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-			status = FAIL;
+            } else if((flag = get_tableflag(group_table,idx)) < 0 ) {
+                    
+                    fprintf(stderr,"Error: get_tableflag() should never return < 0\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                    status = FAIL;
 
-		} else if(flag == TRUE ) { /* this has already been converted, don't convert the attributes again */
+            } else if(flag == TRUE ) { /* this has already been converted, don't convert the attributes again */
 
-			if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
-				fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-				return(status);
-			}
+                    if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
+                            fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
+                            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                            return(status);
+                    }
 
-		} else { /* flag == FALSE */
+            } else { /* flag == FALSE */
 
-			/* this is now being converted */
-			if ((status = set_tableflag(group_table,idx)) < 0 ) {
-				fprintf(stderr,"Error: set_tableflag should never return < 0\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-				return(status);
-			}
+                    /* this is now being converted */
+                    if ((status = set_tableflag(group_table,idx)) < 0 ) {
+                            fprintf(stderr,"Error: set_tableflag should never return < 0\n");
+                            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                            return(status);
+                    }
 
-			if ((status = H5Aiterate(gid, NULL, (H5A_operator_t)convert_attr, op_data)) != SUCCEED ) {
-				fprintf(stderr,"Error: Unable to iterate over all of the attributes\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-				return(status);
-			}
+                    if ((status = H5Aiterate(gid, NULL, (H5A_operator_t)convert_attr, op_data)) != SUCCEED ) {
+                            fprintf(stderr,"Error: Unable to iterate over all of the attributes\n");
+                            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                            return(status);
+                    }
 
-			if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
-				fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-				return(status);
-			}
+                    if ((status = H5Giterate(gid, ".", NULL, (H5G_operator_t)convert_all, op_data)) != SUCCEED ) {
+                            fprintf(stderr,"Error: Unable to iterate over all of the groups\n");
+                            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+                            return(status);
+                    }
 
-		}
+            }
 
-	}
+    }
 
 
-	if ((status = Vdetach(vgroup_id)) != SUCCEED ) {
-		fprintf(stderr,"Error: Unable to detach the new Vgroup\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
-		status = FAIL;
-	}
+    if ((status = Vdetach(vgroup_id)) != SUCCEED ) {
+            fprintf(stderr,"Error: Unable to detach the new Vgroup\n");
+            DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_group", __FILE__, __LINE__);
+            status = FAIL;
+    }
 
-	return status;
+    return status;
 
 }
  
@@ -601,36 +601,36 @@ H5G_stat_t statbuf;
  *-----------------------------------------------------------------------*/
 herr_t
 convert_dataset (hid_t did, char *name, op_data_t *op_data) {
-hid_t  type, space, class, mem_type, type2;
-/* H5G_stat_t statbuf; */
-size_t typesize;
-int i, idx;
-int32 dim_sizes[32], start[32], edges[32];
-int ndims;
-int ndimf;
-hsize_t dims[32], maxdims[32];
-hsize_t dimf[4];
-int permf[4];
-int32 hfile_id;
-int32 sd_id;
-int32 sds_id;
-int32 vdata_id;
-int32 vgroup_id;
-int32 n_values;
-int32 status;
-int32 h4_type;
-int32 recsize;
-int32 n_records, num_of_recs, record_pos;
-int nmembers;
-char *buffer=NULL; /* read/write buffer*/
-char fieldname_list[4096] = "\0";
-char *fieldname=NULL;
-hid_t fieldtype;
-int32 order;
-off_t offset;
-off_t offset_array[512];
-hid_t h4type_array[512], memtype_array[512];
-int32 order_array[512];
+    hid_t  type, space, t_class, mem_type, type2;
+    /* H5G_stat_t statbuf; */
+    size_t typesize;
+    int i, idx;
+    int32 dim_sizes[32], start[32], edges[32];
+    int ndims;
+    int ndimf;
+    hsize_t dims[32], maxdims[32];
+    hsize_t dimf[4];
+    int permf[4];
+    int32 hfile_id;
+    int32 sd_id;
+    int32 sds_id;
+    int32 vdata_id;
+    int32 vgroup_id;
+    int32 n_values;
+    int32 status;
+    int32 h4_type;
+    int32 recsize;
+    int32 n_records, num_of_recs, record_pos;
+    int nmembers;
+    char *buffer=NULL; /* read/write buffer*/
+    char fieldname_list[4096] = "\0";
+    char *fieldname=NULL;
+    hid_t fieldtype;
+    int32 order;
+    off_t offset;
+    off_t offset_array[512];
+    hid_t h4type_array[512], memtype_array[512];
+    int32 order_array[512];
 
 
     /* hard link */
@@ -670,14 +670,14 @@ int32 order_array[512];
         return status;
     }
 
-    if ((class = H5Tget_class(type)) < 0 ) {
+    if ((t_class = H5Tget_class(type)) < 0 ) {
         fprintf(stderr,"Error: problem with getting class\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-	status = class;
+	status = t_class;
         return status;
     }
 
-    switch (class) {
+    switch (t_class) {
     case H5T_INTEGER:
     case H5T_FLOAT:
         sd_id = op_data->sd_id;
@@ -1053,7 +1053,7 @@ int32 order_array[512];
 	}
 	break;
     default:
-        fprintf(stderr,"Error: %d class not found\n",class);
+        fprintf(stderr,"Error: %d class not found\n",t_class);
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     }
 
@@ -1094,20 +1094,20 @@ int32 order_array[512];
 herr_t
 convert_attr (hid_t attr, char *attr_name, op_data_t *op_data)
 {
-hid_t  attr_id, type, space, mem_type, class;
-size_t typesize;
-char   *attr_values=NULL;
-int32  status;
-int32  h4_type;
-int32  sds_id;
-int32  vdata_id;
-int32  vgroup_id;
-int32  n_values;
-int32  order;
-hid_t fxdlenstr;
-size_t lenstr;
-H5T_cset_t cset;
-H5T_str_t strpad;
+    hid_t  attr_id, type, space, mem_type, t_class;
+    size_t typesize;
+    char   *attr_values=NULL;
+    int32  status;
+    int32  h4_type;
+    int32  sds_id;
+    int32  vdata_id;
+    int32  vgroup_id;
+    int32  n_values;
+    int32  order;
+    hid_t fxdlenstr;
+    size_t lenstr;
+    H5T_cset_t cset;
+    H5T_str_t strpad;
 
 	sds_id = op_data->sds_id;
 	vdata_id = op_data->vdata_id;
@@ -1122,14 +1122,14 @@ H5T_str_t strpad;
 			return status;
 		}
 		
-    		if ((class = H5Tget_class(type)) < 0 ) {
+    		if ((t_class = H5Tget_class(type)) < 0 ) {
        			fprintf(stderr,"Error: problem with getting class\n");
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
-			status = class;
+			status = t_class;
        			return status;
     		}
 
-    		switch (class) {
+    		switch (t_class) {
     		case H5T_INTEGER:
     		case H5T_FLOAT:
 
@@ -1364,7 +1364,7 @@ H5T_str_t strpad;
         		fprintf(stderr,"Warning: H5T_COMPOUND attribute not implemented.\n");
         		break;
     		default:
-        		fprintf(stderr,"Error: %d class not found\n",class);
+        		fprintf(stderr,"Error: %d class not found\n",t_class);
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
 			status = FAIL;
     		}
@@ -1736,7 +1736,7 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
     int32 vdata_ref;
     int32 sds_index;
     int32 numtagref;
-    hid_t  type, space, class;
+    hid_t  type, space, t_class;
     hsize_t dims[32], maxdims[32];
     int n_values, ndims;
 
@@ -1782,14 +1782,14 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
        	return status;
     }
 
-    if ((class = H5Tget_class(type)) < 0 ) {
+    if ((t_class = H5Tget_class(type)) < 0 ) {
        	fprintf(stderr,"Error: problem with getting class\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_shared_dataset", __FILE__, __LINE__);
-	status = class;
+	status = t_class;
        	return status;
     }
 
-    switch (class) {
+    switch (t_class) {
     case H5T_INTEGER:
     case H5T_FLOAT:
 	sd_id = op_data->sd_id;
@@ -1857,7 +1857,7 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
        	}
         break;
     default:
-        fprintf(stderr,"Error: %d class not found\n",class);
+        fprintf(stderr,"Error: %d class not found\n",t_class);
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_shared_dataset", __FILE__, __LINE__);
 	status = FAIL;
     }
@@ -1981,16 +1981,16 @@ convert_dataset_string (hid_t did, char *name, op_data_t *op_data) {
     int32 hfile_id;
     int32 vgroup_id;
     int32 vdata_id;
-hid_t fxdlenstr, space, class, mem_type;
-const char* fieldname = {"string"};
-const char* fieldname_list = fieldname;
-char *buffer;
-int32 status;
-int32 h4_type;
-int32 recsize, n_records, n_values, num_of_recs, record_pos;
-size_t lenstr;
-H5T_cset_t cset;
-H5T_str_t strpad;
+    hid_t fxdlenstr, space, t_class, mem_type;
+    const char* fieldname = {"string"};
+    const char* fieldname_list = fieldname;
+    char *buffer;
+    int32 status;
+    int32 h4_type;
+    int32 recsize, n_records, n_values, num_of_recs, record_pos;
+    size_t lenstr;
+    H5T_cset_t cset;
+    H5T_str_t strpad;
 	
     if ((fxdlenstr = H5Dget_type(did)) <= 0) {
 	fprintf(stderr, "Error: H5Dget_type() didn't return appropriate value.\n");
@@ -1999,10 +1999,10 @@ H5T_str_t strpad;
         return status;
     }
 
-    if ((class = H5Tget_class(fxdlenstr)) != H5T_STRING ) {
+    if ((t_class = H5Tget_class(fxdlenstr)) != H5T_STRING ) {
        	fprintf(stderr,"Error: problem with getting class\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_shared_dataset", __FILE__, __LINE__);
-	status = class;
+	status = t_class;
        	return status;
     }
 
@@ -2172,18 +2172,18 @@ H5T_str_t strpad;
  *-----------------------------------------------------------------------*/
 static herr_t h5atomic_type_to_h4type(const hid_t h5type, hid_t* h5memtype, size_t* h5memsize, int32* h4type)
 {
-    H5T_class_t class;
+    H5T_class_t t_class;
     size_t h5typesize, h4typesize;
     H5T_sign_t sign;
     hid_t mem_datatype = FAIL;
 
-    if ((class = H5Tget_class(h5type)) < 0 ) {
+    if ((t_class = H5Tget_class(h5type)) < 0 ) {
         fprintf(stderr,"Error: problem with getting type class\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
         return FAIL;
     }
     
-    switch(class){
+    switch(t_class){
     case H5T_INTEGER:
 	if ((h5typesize = H5Tget_size(h5type)) == 0 ) {
 	    fprintf(stderr,"Error: problem with getting type size\n");

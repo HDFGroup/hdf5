@@ -1246,7 +1246,7 @@ dump_dataset_values(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
+list_attr (hid_t obj, const char *attr_name, void * UNUSED op_data)
 {
     hid_t	attr, space, type, p_type;
     hsize_t	size[64], nelmts=1;
@@ -1404,7 +1404,7 @@ dataset_list1(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dataset_list2(hid_t dset, const char UNUSED *name)
+dataset_list2(hid_t dset, const char * UNUSED name)
 {
     hid_t		dcpl;		/*dataset creation property list*/
     hid_t		type;		/*data type of dataset		*/
@@ -1591,7 +1591,7 @@ group_list2(hid_t grp, const char *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datatype_list2(hid_t type, const char UNUSED *name)
+datatype_list2(hid_t type, const char * UNUSED name)
 {
     if (verbose_g>0) {
 	printf("    %-10s ", "Type:");

@@ -83,8 +83,8 @@ static hid_t	fapl_g = -1;
  */
 static size_t
 counter (unsigned UNUSED flags, size_t UNUSED cd_nelmts,
-	 const unsigned UNUSED *cd_values, size_t nbytes,
-	 size_t UNUSED *buf_size, void UNUSED **buf)
+	 const unsigned * UNUSED cd_values, size_t nbytes,
+	 size_t * UNUSED buf_size, void ** UNUSED buf)
 {
     nio_g += nbytes;
     return nbytes;

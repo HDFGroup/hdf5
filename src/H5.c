@@ -732,7 +732,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
     int		prefix;
     char	modifier[8];
     int		conv;
-    char	*rest, template[128];
+    char	*rest, format_templ[128];
     const char	*s;
     va_list	ap;
     
@@ -844,19 +844,19 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    conv = *s++;
 
 	    /* Create the format template */
-	    sprintf (template, "%%%s%s%s%s%s",
+	    sprintf (format_templ, "%%%s%s%s%s%s",
 		     leftjust?"-":"", plussign?"+":"",
 		     ldspace?" ":"", prefix?"#":"", zerofill?"0":"");
 	    if (fwidth>0) {
-		sprintf (template+HDstrlen(template), "%d", fwidth);
+		sprintf (format_templ+HDstrlen(format_templ), "%d", fwidth);
 	    }
 	    if (prec>0) {
-		sprintf (template+HDstrlen(template), ".%d", prec);
+		sprintf (format_templ+HDstrlen(format_templ), ".%d", prec);
 	    }
 	    if (*modifier) {
-		sprintf (template+HDstrlen(template), "%s", modifier);
+		sprintf (format_templ+HDstrlen(format_templ), "%s", modifier);
 	    }
-	    sprintf (template+HDstrlen(template), "%c", conv);
+	    sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
 	    
 
 	    /* Conversion */
@@ -865,16 +865,16 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'i':
 		if (!HDstrcmp(modifier, "h")) {
 		    short x = va_arg (ap, int);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier) {
 		    int x = va_arg (ap, int);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else if (!HDstrcmp (modifier, "l")) {
 		    long x = va_arg (ap, long);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else {
 		    int64_t x = va_arg(ap, int64_t);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		}
 		break;
 
@@ -884,16 +884,16 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'X':
 		if (!HDstrcmp (modifier, "h")) {
 		    unsigned short x = va_arg (ap, unsigned int);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier) {
 		    unsigned int x = va_arg (ap, unsigned int);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else if (!HDstrcmp (modifier, "l")) {
 		    unsigned long x = va_arg (ap, unsigned long);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else {
 		    uint64_t x = va_arg(ap, uint64_t);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		}
 		break;
 
@@ -904,10 +904,10 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'G':
 		if (!HDstrcmp (modifier, "h")) {
 		    float x = va_arg (ap, double);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else if (!*modifier || !HDstrcmp (modifier, "l")) {
 		    double x = va_arg (ap, double);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		} else {
 		    /*
 		     * Some compilers complain when `long double' and
@@ -915,10 +915,10 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		     */
 #if SIZEOF_LONG_DOUBLE != SIZEOF_DOUBLE
 		    long double x = va_arg (ap, long double);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 #else
 		    double x = va_arg (ap, double);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 #endif
 		}
 		break;
@@ -927,30 +927,30 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		if (1) {
 		    haddr_t x = va_arg (ap, haddr_t);
 		    if (H5F_addr_defined(x)) {
-			sprintf(template, "%%%s%s%s%s%s",
+			sprintf(format_templ, "%%%s%s%s%s%s",
 				leftjust?"-":"", plussign?"+":"",
 				ldspace?" ":"", prefix?"#":"",
 				zerofill?"0":"");
 			if (fwidth>0) {
-			    sprintf(template+HDstrlen(template), "%d", fwidth);
+			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
 			}
 			if (sizeof(x)==SIZEOF_INT) {
-			    HDstrcat(template, "d");
+			    HDstrcat(format_templ, "d");
 			} else if (sizeof(x)==SIZEOF_LONG) {
-			    HDstrcat(template, "ld");
+			    HDstrcat(format_templ, "ld");
 			} else if (sizeof(x)==SIZEOF_LONG_LONG) {
-			    HDstrcat(template, PRINTF_LL_WIDTH);
-			    HDstrcat(template, "d");
+			    HDstrcat(format_templ, PRINTF_LL_WIDTH);
+			    HDstrcat(format_templ, "d");
 			}
-			n = fprintf(stream, template, x);
+			n = fprintf(stream, format_templ, x);
 		    } else {
-			HDstrcpy(template, "%");
-			if (leftjust) HDstrcat(template, "-");
+			HDstrcpy(format_templ, "%");
+			if (leftjust) HDstrcat(format_templ, "-");
 			if (fwidth) {
-			    sprintf(template+HDstrlen(template), "%d", fwidth);
+			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
 			}
-			HDstrcat(template, "s");
-			fprintf(stream, template, "UNDEF");
+			HDstrcat(format_templ, "s");
+			fprintf(stream, format_templ, "UNDEF");
 		    }
 		}
 		break;
@@ -958,7 +958,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'c':
 		if (1) {
 		    char x = (char)va_arg (ap, int);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		}
 		break;
 
@@ -966,20 +966,20 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'p':
 		if (1) {
 		    char *x = va_arg (ap, char*);
-		    n = fprintf (stream, template, x);
+		    n = fprintf (stream, format_templ, x);
 		}
 		break;
 
 	    case 'n':
 		if (1) {
-		    template[HDstrlen(template)-1] = 'u';
-		    n = fprintf (stream, template, nout);
+		    format_templ[HDstrlen(format_templ)-1] = 'u';
+		    n = fprintf (stream, format_templ, nout);
 		}
 		break;
 
 	    default:
-		HDfputs (template, stream);
-		n = (int)HDstrlen (template);
+		HDfputs (format_templ, stream);
+		n = (int)HDstrlen (format_templ);
 		break;
 	    }
 	    nout += n;
@@ -1413,10 +1413,10 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    fprintf(out, "NULL");
 		}
 	    } else {
-		hbool_t bool = va_arg (ap, hbool_t);
-		if (TRUE==bool) fprintf (out, "TRUE");
-		else if (!bool) fprintf (out, "FALSE");
-		else fprintf (out, "TRUE(%u)", (unsigned)bool);
+		hbool_t bool_var = va_arg (ap, hbool_t);
+		if (TRUE==bool_var) fprintf (out, "TRUE");
+		else if (!bool_var) fprintf (out, "FALSE");
+		else fprintf (out, "TRUE(%u)", (unsigned)bool_var);
 	    }
 	    break;
 

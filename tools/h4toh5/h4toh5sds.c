@@ -29,6 +29,12 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
 
 #include "h4toh5main.h"
 
+static int convert_zerosdsunlimit(int32 file_id,
+			 int32 sds_id,
+			 hid_t h5_group,
+			 hid_t h5_dimgroup,
+			 int h4_attr);
+
 /*-------------------------------------------------------------------------
  * Function:	Sds_h4_to_h5
  *
@@ -1707,7 +1713,7 @@ uint16 get_SDref(int32 file_id,uint16 tag,int32 sds_ref){
   return sd_ref;
 }
 
-int convert_zerosdsunlimit(int32 file_id,
+static int convert_zerosdsunlimit(int32 file_id,
 			 int32 sds_id,
 			 hid_t h5_group,
 			 hid_t h5_dimgroup,

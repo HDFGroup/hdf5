@@ -280,7 +280,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(H5F_t UNUSED *f, const void UNUSED *mesg)
+H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
 {
     FUNC_ENTER(H5O_mtime_size, 0);
 

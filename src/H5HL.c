@@ -200,8 +200,8 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
  *-------------------------------------------------------------------------
  */
 static H5HL_t *
-H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
-	  void UNUSED *udata2)
+H5HL_load(H5F_t *f, haddr_t addr, const void * UNUSED udata1,
+	  void * UNUSED udata2)
 {
     uint8_t		hdr[52];
     const uint8_t	*p = NULL;
