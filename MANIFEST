@@ -928,6 +928,7 @@
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
+./test/set_extend.c
 ./test/srb_append.c
 ./test/srb_read.c
 ./test/srb_write.c
