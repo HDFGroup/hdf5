@@ -22,7 +22,7 @@ RM=rm -f
 MOSTLYCLEAN=ParaEg1.h5 Eg1.h5 shdf5.c go
 
 # The default is to build the library and programs.
-all: testphdf5 shdf5
+all: testphdf5
 
 
 # These are our main targets. They should be listed in the order to be
