@@ -1442,19 +1442,19 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
         }
 #ifdef QAK
 printf("%s: check 6.0\n",FUNC);
-{
-    int i;
-    int *b;
+    {
+        int i;
+        int *b;
 
-    if(qak_debug) {
-        b=tconv_buf;
-        printf("\ntconv_buf:");
-        for (i=0; i<smine_nelmts; i++,b++) {
-            printf("(%d)%d ",i,*b);
+        if(qak_debug) {
+            b=tconv_buf;
+            printf("\ntconv_buf:");
+            for (i=0; i<smine_nelmts; i++,b++) {
+                printf("(%d)%d ",i,*b);
+            }
+            printf("\n");
         }
-        printf("\n");
     }
-}
 #endif /* QAK */
         if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
                 (!H5D_OPTIMIZE_PIPE && need_bkg)) {
@@ -1503,6 +1503,11 @@ printf("%s: check 9.0\n",FUNC);
     ret_value = SUCCEED;
     
  done:
+    /* Release selection iterators */
+    H5S_sel_iter_release(file_space,&file_iter);
+    H5S_sel_iter_release(mem_space,&mem_iter);
+    H5S_sel_iter_release(mem_space,&bkg_iter);
+
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
     if (tconv_buf && NULL==xfer_parms->tconv_buf)
@@ -1511,10 +1516,6 @@ printf("%s: check 9.0\n",FUNC);
         H5MM_xfree (bkg_buf);
     if (free_this_space)
         H5S_close (free_this_space);
-    /* Release selection iterators */
-    H5S_sel_iter_release(file_space,&file_iter);
-    H5S_sel_iter_release(mem_space,&mem_iter);
-    H5S_sel_iter_release(mem_space,&bkg_iter);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1761,25 +1762,25 @@ printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)n
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
         }
 #ifdef QAK
-{
-    int i;
-    int *b;
+    {
+        int i;
+        int *b;
 
-    if(qak_debug) {
-        b=buf;
-        b+=1430;
-        printf("buf:");
-        for (i=0; i<smine_nelmts; i++,b++) {
-            printf("(%d)%d ",i,*b);
+        if(qak_debug) {
+            b=buf;
+            b+=1430;
+            printf("buf:");
+            for (i=0; i<smine_nelmts; i++,b++) {
+                printf("(%d)%d ",i,*b);
+            }
+            b=tconv_buf;
+            printf("\ntconv_buf:");
+            for (i=0; i<smine_nelmts; i++,b++) {
+                printf("(%d)%d ",i,*b);
+            }
+            printf("\n");
         }
-        b=tconv_buf;
-        printf("\ntconv_buf:");
-        for (i=0; i<smine_nelmts; i++,b++) {
-            printf("(%d)%d ",i,*b);
-        }
-        printf("\n");
     }
-}
 printf("%s: check 6.0\n",FUNC);
 #endif /* QAK */
         if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
@@ -1829,6 +1830,11 @@ printf("%s: check 6.0\n",FUNC);
     ret_value = SUCCEED;
     
  done:
+    /* Release selection iterators */
+    H5S_sel_iter_release(file_space,&file_iter);
+    H5S_sel_iter_release(mem_space,&mem_iter);
+    H5S_sel_iter_release(mem_space,&bkg_iter);
+
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
     if (tconv_buf && NULL==xfer_parms->tconv_buf)
@@ -1837,10 +1843,6 @@ printf("%s: check 6.0\n",FUNC);
         H5MM_xfree (bkg_buf);
     if (free_this_space)
         H5S_close (free_this_space);
-    /* Release selection iterators */
-    H5S_sel_iter_release(file_space,&file_iter);
-    H5S_sel_iter_release(mem_space,&mem_iter);
-    H5S_sel_iter_release(mem_space,&bkg_iter);
     FUNC_LEAVE(ret_value);
 }
 

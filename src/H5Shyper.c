@@ -1114,7 +1114,8 @@ printf("%s: check 2.0\n",FUNC);
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
+static intn
+H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
 {
     intn lo, mid, hi;       /* Indices for the search */
     intn ret_value=-1;      /* Return value index */

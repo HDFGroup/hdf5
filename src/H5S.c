@@ -99,7 +99,8 @@ H5S_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5S_t *H5S_create(H5S_class_t type)
+H5S_t *
+H5S_create(H5S_class_t type)
 {
     H5S_t *ret_value = NULL;
 
@@ -136,7 +137,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Screate(H5S_class_t type)
+hid_t
+H5Screate(H5S_class_t type)
 {
     H5S_t  *new_ds=NULL;
     hid_t	ret_value = FAIL;
@@ -179,7 +181,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5S_close(H5S_t *ds)
+herr_t
+H5S_close(H5S_t *ds)
 {
     FUNC_ENTER(H5S_close, FAIL);
 
@@ -270,7 +273,8 @@ H5Sclose (hid_t space_id)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5S_release_simple(H5S_simple_t *simple)
+herr_t
+H5S_release_simple(H5S_simple_t *simple)
 {
     FUNC_ENTER(H5S_release_simple, FAIL);
 
@@ -343,7 +347,8 @@ H5Scopy (hid_t space_id)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
+herr_t
+H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
     int			    i;
 
@@ -403,7 +408,8 @@ herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
  *
  *-------------------------------------------------------------------------
  */
-H5S_t * H5S_copy(const H5S_t *src)
+H5S_t *
+H5S_copy(const H5S_t *src)
 {
     H5S_t		   *dst = NULL;
 

@@ -38,7 +38,8 @@ static void		        H5S_select_term(void);
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5S_select_init (void)
+herr_t
+H5S_select_init (void)
 {
     herr_t		    ret_value = SUCCEED;
     FUNC_ENTER (H5S_select_init, FAIL);
@@ -89,7 +90,8 @@ H5S_select_term(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src)
+herr_t
+H5S_select_copy (H5S_t *dst, const H5S_t *src)
 {
     FUNC_ENTER (H5S_select_copy, FAIL);
 
@@ -323,7 +325,8 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t H5Sselect_npoints (hid_t spaceid)
+hsize_t
+H5Sselect_npoints (hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     hsize_t ret_value=0;        /* return value */
@@ -358,7 +361,8 @@ hsize_t H5Sselect_npoints (hid_t spaceid)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t H5S_select_npoints (const H5S_t *space)
+hsize_t
+H5S_select_npoints (const H5S_t *space)
 {
     herr_t ret_value=FAIL;  /* return value */
 
