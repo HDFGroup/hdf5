@@ -170,16 +170,10 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5F_istore_debug_key,			/*debug			*/
 }};
 
-#define H5F_MIXUP(X)	{						      \
-    (X) += (X)<<12;							      \
-    (X) ^= (X)>>22;							      \
-    (X) += (X)<<4;							      \
-    (X) ^= (X)>>9;							      \
-    (X) += (X)<<10;							      \
-    (X) ^= (X)>>2;							      \
-    (X) += (X)<<7;							      \
-    (X) ^= (X)>>12;							      \
-}
+#define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
+                                /* This should be the same size as the alignment of */
+                                /* of the smallest file format object written to the file.  */
+#define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
 
 /* Declare a free list to manage the chunk information */
 H5FL_BLK_DEFINE_STATIC(istore_chunk);
@@ -1337,13 +1331,12 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 
     if (rdcc->nslots>0) {
 	/* We don't care about loss of precision in the following statement. */
-	idx = (uintn)(layout->addr.offset);
-	H5F_MIXUP(idx);
-	for (i=0; i<layout->ndims; i++) {
+	for (i=0, idx=0; i<layout->ndims; i++) {
+        idx *= layout->dim[i];
 	    idx += offset[i];
-	    H5F_MIXUP(idx);
 	}
-	idx %= rdcc->nslots;
+	idx += (uintn)(layout->addr);
+    idx=H5F_HASH(f,idx);
 	ent = rdcc->slot[idx];
     
 	if (ent &&
