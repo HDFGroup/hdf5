@@ -188,6 +188,14 @@ H5Pcreate(H5P_class_t type)
 	HDmemcpy(plist, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
 	break;
 
+    case H5P_MOUNT:
+	if (NULL==(plist = H5MM_malloc(sizeof(H5F_mprop_t)))) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed");
+	}
+	HDmemcpy(plist, &H5F_mount_dflt, sizeof(H5F_mprop_t));
+	break;
+
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "unknown property list class");
@@ -352,6 +360,10 @@ H5P_close (H5P_class_t type, void *plist)
 	break;
 
     case H5P_DATASET_XFER:
+	/*nothing to do*/
+	break;
+
+    case H5P_MOUNT:
 	/*nothing to do*/
 	break;
 
@@ -2712,10 +2724,12 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     H5T_conv_t		cfunc = NULL;		/*conversion function	*/
     void		*buf = NULL;		/*conversion buffer	*/
     void		*bkg = NULL;		/*conversion buffer	*/
-    H5_timer_t		timer;			/*conversion timer	*/
     hid_t		src_id = -1;		/*source data type id	*/
     herr_t		status;
     herr_t		ret_value = FAIL;
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;			/*conversion timer	*/
+#endif
     
     FUNC_ENTER(H5Pget_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
@@ -3150,6 +3164,10 @@ H5P_copy (H5P_class_t type, const void *src)
 	size = sizeof(H5D_xfer_t);
 	break;
 
+    case H5P_MOUNT:
+	size = sizeof(H5F_mprop_t);
+	break;
+
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
 		      "unknown property list class");
@@ -3220,6 +3238,11 @@ H5P_copy (H5P_class_t type, const void *src)
 	break;
 	
     case H5P_DATASET_XFER:
+	/* Nothing to do */
+	break;
+
+    case H5P_MOUNT:
+	/* Nothing to do */
 	break;
 
     default:

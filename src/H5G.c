@@ -1019,6 +1019,11 @@ H5G_basename(const char *name, size_t *size_p)
  *		FOLLOW_SLINK is false and the last component of the name is a
  *		symbolic link then that link is not followed.  At most NLINKS
  *		are followed and the next link generates an error.
+ *
+ *		Mounted files are handled by calling H5F_mountpoint() after
+ *		each step of the translation.  If the input argument to that
+ *		function is a mount point then the argument shall be replaced
+ *		with information about the root group of the mounted file.
  *		
  * Errors:
  *
@@ -1074,7 +1079,6 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     }
     HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
     H5F_addr_undef(&(grp_ent->header));
-
 
     /* traverse the name */
     while ((name = H5G_component(name, &nchars)) && *name) {
@@ -1132,6 +1136,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	}
 
 	/* next component */
+	H5F_mountpoint(obj_ent/*in,out*/);
 	name += nchars;
     }
     if (rest) *rest = name; /*final null */
@@ -1737,10 +1742,11 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
      * Insert the object into a symbol table.
      */
     if (H5O_link(ent, 1) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_LINK, FAIL, "link inc failure");
+	HRETURN_ERROR(H5E_SYM, H5E_LINK, FAIL,
+		      "unable to increment hard link count");
     }
     if (H5G_stab_insert(&grp, rest, ent) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert");
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to insert name");
     }
     FUNC_LEAVE(SUCCEED);
 }

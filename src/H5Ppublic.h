@@ -27,15 +27,16 @@
 #include <H5Fpublic.h>
 #include <H5Zpublic.h>
 
-/* Template classes */
+/* Property list classes */
 typedef enum H5P_class_t {
     H5P_NO_CLASS         = -1,  /*error return value                         */
-    H5P_FILE_CREATE      = 0,   /*file creation template                     */
-    H5P_FILE_ACCESS      = 1,   /*file access template                       */
-    H5P_DATASET_CREATE   = 2,   /*dataset creation template                  */
-    H5P_DATASET_XFER     = 3,   /*dataset transfer template                  */
+    H5P_FILE_CREATE      = 0,   /*file creation properties                   */
+    H5P_FILE_ACCESS      = 1,   /*file access properties                     */
+    H5P_DATASET_CREATE   = 2,   /*dataset creation properties                */
+    H5P_DATASET_XFER     = 3,   /*dataset transfer properties                */
+    H5P_MOUNT		 = 4,	/*file mounting properties		     */
 
-    H5P_NCLASSES         = 4    /*this must be last!                         */
+    H5P_NCLASSES         = 5    /*this must be last!                         */
 } H5P_class_t;
 
 #ifdef __cplusplus

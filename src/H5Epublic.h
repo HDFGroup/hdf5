@@ -100,6 +100,7 @@ typedef enum H5E_minor_t {
     H5E_NOTHDF5,                /*not an HDF5 format file                    */
     H5E_BADFILE,                /*bad file ID accessed                       */
     H5E_TRUNCATED,              /*file has been truncated                    */
+    H5E_MOUNT,			/*file mount error			     */
 
     /* Generic low-level file I/O errors */
     H5E_SEEKERROR,              /*seek failed                                */

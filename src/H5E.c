@@ -77,6 +77,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_NOTHDF5, 	"Not an HDF5 file"},
     {H5E_BADFILE, 	"Bad file ID accessed"},
     {H5E_TRUNCATED, 	"File has been truncated"},
+    {H5E_MOUNT,		"File mount error"},
     {H5E_SEEKERROR,	"Seek failed"},
     {H5E_READERROR, 	"Read failed"},
     {H5E_WRITEERROR, 	"Write failed"},

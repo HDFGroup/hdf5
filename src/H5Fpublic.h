@@ -85,6 +85,8 @@ herr_t H5Fflush(hid_t object_id);
 herr_t H5Fclose (hid_t file_id);
 hid_t H5Fget_create_plist (hid_t file_id);
 hid_t H5Fget_access_plist (hid_t file_id);
+herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+herr_t H5Funmount(hid_t loc, const char *name);
 
 #ifdef __cplusplus
 }

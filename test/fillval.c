@@ -228,10 +228,11 @@ test_getset(void)
 static int
 test_create(const char *filename, H5D_layout_t layout)
 {
-    hid_t	file, space, dcpl, dset;
+    hid_t	file, space, dcpl, dset1, dset2, dset3;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
     hsize_t	ch_size[5] = {1, 1, 1, 4, 2};
-    int		fillval = 0x4c70f1cd, fillval_rd=0;
+    short	rd_s, fill_s = 0x1234;
+    long	rd_l, fill_l = 0x4321;
     char	test[256];
 
     if (H5D_CHUNKED==layout) {
@@ -242,7 +243,11 @@ test_create(const char *filename, H5D_layout_t layout)
     printf("%-70s", test);
     fflush(stdout);
 
-    /* Create a file and dataset */
+    /*
+     * Create a file and three datasets.  The three datasets test three fill
+     * conversion paths: small to large, large to small, and no conversion.
+     * They depend on `short' being smaller than `long'.
+     */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC,
 			H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
     if ((space=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
@@ -250,33 +255,88 @@ test_create(const char *filename, H5D_layout_t layout)
     if (H5D_CHUNKED==layout) {
 	if (H5Pset_chunk(dcpl, 5, ch_size)<0) goto error;
     }
+
+    /* Small to large fill conversion */
 #ifndef NO_FILLING
-    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval)<0) goto error;
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_SHORT, &fill_s)<0) goto error;
 #endif
-    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_INT, space, dcpl))<0)
+    if ((dset1=H5Dcreate(file, "dset1", H5T_NATIVE_LONG, space, dcpl))<0)
 	goto error;
-    if (H5Dclose(dset)<0) goto error;
+
+    /* Large to small fill conversion */
+#ifndef NO_FILLING
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_LONG, &fill_l)<0) goto error;
+#endif
+    if ((dset2=H5Dcreate(file, "dset2", H5T_NATIVE_SHORT, space, dcpl))<0)
+	goto error;
+
+    /* No conversion */
+#ifndef NO_FILLING
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_LONG, &fill_l)<0) goto error;
+#endif
+    if ((dset3=H5Dcreate(file, "dset3", H5T_NATIVE_LONG, space, dcpl))<0)
+	goto error;
+    
+    /* Close everything */
+    if (H5Dclose(dset1)<0) goto error;
+    if (H5Dclose(dset2)<0) goto error;
+    if (H5Dclose(dset3)<0) goto error;
     if (H5Sclose(space)<0) goto error;
     if (H5Pclose(dcpl)<0) goto error;
     if (H5Fclose(file)<0) goto error;
 
-    /* Open the file and get the dataset fill value */
+    /* Open the file and get the dataset fill value from each dataset */
     if ((file=H5Fopen(FILE_NAME_1, H5F_ACC_RDONLY, H5P_DEFAULT))<0)
 	goto error;
-    if ((dset=H5Dopen(file, "dset"))<0) goto error;
-    if ((dcpl=H5Dget_create_plist(dset))<0) goto error;
+
+    /* Large to small conversion */
+    if ((dset1=H5Dopen(file, "dset1"))<0) goto error;
+    if ((dcpl=H5Dget_create_plist(dset1))<0) goto error;
+    if (H5Dclose(dset1)<0) goto error;
 #ifndef NO_FILLING
-    if (H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fillval_rd)<0) goto error;
-    if (fillval_rd!=fillval) {
+    if (H5Pget_fill_value(dcpl, H5T_NATIVE_SHORT, &rd_s)<0) goto error;
+    if (rd_s!=fill_s) {
 	puts("*FAILED*");
 	puts("   Got a different fill value than what was set.");
+	printf("   Got %d, set %d\n", rd_s, fill_s);
 	goto error;
     }
 #endif
     if (H5Pclose(dcpl)<0) goto error;
-    if (H5Dclose(dset)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
 
+    /* Small to large conversion */
+    if ((dset2=H5Dopen(file, "dset2"))<0) goto error;
+    if ((dcpl=H5Dget_create_plist(dset2))<0) goto error;
+    if (H5Dclose(dset2)<0) goto error;
+#ifndef NO_FILLING
+    if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
+    if (rd_l!=fill_l) {
+	puts("*FAILED*");
+	puts("   Got a different fill value than what was set.");
+	printf("   Got %ld, set %ld\n", rd_l, fill_l);
+	goto error;
+    }
+#endif
+    if (H5Pclose(dcpl)<0) goto error;
+    
+    /* No conversion */
+    if ((dset3=H5Dopen(file, "dset3"))<0) goto error;
+    if ((dcpl=H5Dget_create_plist(dset3))<0) goto error;
+    if (H5Dclose(dset3)<0) goto error;
+#ifndef NO_FILLING
+    if (H5Pget_fill_value(dcpl, H5T_NATIVE_LONG, &rd_l)<0) goto error;
+    if (rd_l!=fill_l) {
+	puts("*FAILED*");
+	puts("   Got a different fill value than what was set.");
+	printf("   Got %ld, set %ld\n", rd_l, fill_l);
+	goto error;
+    }
+#endif
+    if (H5Pclose(dcpl)<0) goto error;
+    
+
+    
+    if (H5Fclose(file)<0) goto error;
     puts(" PASSED");
     return 0;
 
@@ -284,7 +344,9 @@ test_create(const char *filename, H5D_layout_t layout)
     H5E_BEGIN_TRY {
 	H5Pclose(dcpl);
 	H5Sclose(space);
-	H5Dclose(dset);
+	H5Dclose(dset1);
+	H5Dclose(dset2);
+	H5Dclose(dset3);
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;

@@ -84,18 +84,25 @@ static herr_t H5I_init_interface(void);
 #  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
 #endif
 
-/* # of bits to use for Group ID in each atom (change if H5I_MAXID>32) */
-#define GROUP_BITS  5
-#define GROUP_MASK  0x1F
+/*
+ * Number of bits to use for Group ID in each atom. Increase if H5I_MAXID
+ * becomes too large (an assertion would fail in H5I_init_interface). This is
+ * the only number that must be changed since all other bit field sizes and
+ * masks are calculated from GROUP_BITS.
+ */
+#define GROUP_BITS	5
+#define GROUP_MASK	((1<<GROUP_BITS)-1)
 
-/* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
-#define ID_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
-#define ID_MASK   0x07FFFFFF
+/*
+ * Number of bits to use for the Atom index in each atom (assumes 8-bit
+ * bytes). We don't use the sign bit.
+ */
+#define ID_BITS		((sizeof(hid_t)*8)-(GROUP_BITS+1))
+#define ID_MASK		((1<<ID_BITS)-1)
 
 /* Map an atom to a Group number */
-#define H5I_GROUP(a)    ((H5I_type_t)					      \
-			 ((((hid_t)(a))>>				      \
-			   ((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
+#define H5I_GROUP(a)	((H5I_type_t)(((hid_t)(a)>>ID_BITS) & GROUP_MASK))
+
 
 #ifdef HASH_SIZE_POWER_2
 /*
@@ -107,11 +114,11 @@ static herr_t H5I_init_interface(void);
 /*
  * Map an ID to a hash location.
  */
-#  define H5I_LOC(a,s)    (((hid_t)(a)&ID_MASK)%(s))
+#  define H5I_LOC(a,s)	(((hid_t)(a)&ID_MASK)%(s))
 #endif
 
 /* Combine a Group number and an atom index into an atom */
-#define H5I_MAKE(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
+#define H5I_MAKE(g,i)	((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
                              ((hid_t)(i)&ID_MASK))
 
 #ifdef IDS_ARE_CACHED
@@ -148,8 +155,15 @@ H5I_init_interface(void)
     herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5I_init_interface, FAIL);
 
-    /* Make certain the ID types don't overflow the number of bits allocated for them in an ID */
+    /*
+     * Make certain the ID types don't overflow the number of bits allocated
+     * for them in an ID.
+     */
+#if 0
     assert((int)H5I_MAXID<=(int)pow((double)2.0,(double)GROUP_BITS));
+#else
+    assert(H5I_MAXID<=(1<<GROUP_BITS));
+#endif
 
     /* Registers the cleanup routine with the exit chain */
     ret_value = H5_add_exit(&H5I_term_interface);
@@ -554,9 +568,8 @@ H5I_get_type(hid_t id)
 
     FUNC_ENTER(H5I_get_type, H5I_BADID);
 
-    assert(id>H5I_BADID && id<H5I_MAXID);
-
     ret_value = H5I_GROUP(id);
+    assert(ret_value>H5I_BADID && ret_value<H5I_MAXID);
 
     FUNC_LEAVE(ret_value);
 }

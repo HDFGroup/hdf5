@@ -10,6 +10,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -296,7 +297,9 @@ H5O_fill_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
  * Function:	H5O_fill_convert
  *
  * Purpose:	Convert a fill value from whatever data type it currently has
- *		to the specified data type.
+ *		to the specified dataset type.  The `type' field of the fill
+ *		value struct will be set to NULL to indicate that it has the
+ *		same type as the dataset.
  *
  * Return:	Success:	SUCCEED
  *
@@ -312,6 +315,16 @@ H5O_fill_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 herr_t
 H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type)
 {
+    H5T_cdata_t		*cdata=NULL;		/*conversion data	*/
+    H5T_conv_t		cfunc=NULL;		/*conversion function	*/
+    void		*buf=NULL, *bkg=NULL;	/*conversion buffers	*/
+    herr_t		status;			/*conversion status	*/
+    hid_t		src_id=-1, dst_id=-1;	/*data type identifiers	*/
+    herr_t		ret_value=FAIL;		/*return value		*/
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;			/*debugging timer	*/
+#endif
+
     FUNC_ENTER(H5O_fill_convert, FAIL);
     assert(fill);
     assert(dset_type);
@@ -322,10 +335,69 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type)
 	fill->type = NULL;
 	HRETURN(SUCCEED);
     }
-    
-    
-    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-		  "fill value conversion not supported yet");
 
-    FUNC_LEAVE(SUCCEED);
+    /*
+     * Can we convert between source and destination data types?
+     */
+    if (NULL==(cfunc=H5T_find(fill->type, dset_type, H5T_BKG_NO, &cdata))) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "unable to convert between src and dst data types");
+    }
+    if ((src_id = H5I_register(H5I_DATATYPE,
+			       H5T_copy(fill->type, H5T_COPY_TRANSIENT)))<0 ||
+	(dst_id = H5I_register(H5I_DATATYPE,
+			       H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "unable to copy/register data type");
+    }
+
+    /*
+     * Data type conversions are always done in place, so we need a buffer
+     * that is large enough for both source and destination.
+     */
+    if (H5T_get_size(fill->type)>=H5T_get_size(dset_type)) {
+	buf = fill->buf;
+    } else {
+	if (NULL==(buf=H5MM_malloc(H5T_get_size(dset_type)))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"memory allocation failed for type conversion");
+	}
+	HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
+    }
+    if (cdata->need_bkg>=H5T_BKG_TEMP &&
+	NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type)))) {
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		    "memory allocation failed for type conversion");
+    }
+
+    /* Do the conversion */
+#ifdef H5T_DEBUG
+    H5T_timer_begin(&timer, cdata);
+#endif
+    cdata->command = H5T_CONV_CONV;
+    status = (cfunc)(src_id, dst_id, cdata, 1, buf, bkg);
+#ifdef H5T_DEBUG
+    H5T_timer_end(&timer, cdata, 1);
+#endif
+    if (status<0) {
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		    "data type conversion failed");
+    }
+
+    /* Update the fill message */
+    if (buf!=fill->buf) {
+	H5MM_xfree(fill->buf);
+	fill->buf = buf;
+    }
+    H5T_close(fill->type);
+    fill->type = NULL;
+    fill->size = H5T_get_size(dset_type);
+    ret_value = SUCCEED;
+
+ done:
+    if (src_id>=0) H5I_dec_ref(src_id);
+    if (dst_id>=0) H5I_dec_ref(dst_id);
+    if (buf!=fill->buf) H5MM_xfree(buf);
+    H5MM_xfree(bkg);
+    FUNC_LEAVE(ret_value);
 }

@@ -180,12 +180,6 @@ writer (int wrt_n)
     fflush(stdout);
     
     /*
-     * Make sure that `hsize_t' is large enough to represent the entire data
-     * space.
-     */
-    assert (sizeof(hsize_t)>4);
-
-    /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
      */
@@ -392,6 +386,12 @@ main (void)
 	puts("Test skipped because of quota (file size or num open files).");
 	exit(0);
     }
+    if (sizeof(hsize_t)<=4) {
+	puts("Test skipped because the hdf5 library was configured with the");
+	puts("--disable-hsizet flag in order to work around a compiler bug.");
+	exit(0);
+    }
+
     
     /* Set the error handler */
     H5Eset_auto (display_error_cb, NULL);

@@ -136,7 +136,7 @@ H5HG_create (H5F_t *f, size_t size)
     H5F_encode_length (f, p, size);
 
     /* The freespace object */
-    heap->obj[0].size = size - H5HG_SIZEOF_HDR (f);
+    heap->obj[0].size = size - H5HG_SIZEOF_HDR(f);
     heap->obj[0].begin = p;
     UINT16ENCODE(p, 0);	/*object ID*/
     UINT16ENCODE(p, 0);	/*reference count*/
@@ -294,10 +294,11 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	    p += 4; /*reserved*/
 	    H5F_decode_length (f, p, heap->obj[idx].size);
 	    heap->obj[idx].begin = begin;
-	    p = begin + heap->obj[idx].size;
+	    p = begin + H5HG_ALIGN(heap->obj[idx].size);
 	}
     }
-    assert (p==heap->chunk+heap->size);
+    assert(p==heap->chunk+heap->size);
+    assert(heap->obj[0].size==H5HG_ALIGN(heap->obj[0].size));
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -404,7 +405,9 @@ H5HG_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HG_heap_t *heap)
  *
  * Purpose:	Given a heap with enough free space, this function will split
  *		the free space to make a new empty heap object and initialize
- *		the header.
+ *		the header.  SIZE is the exact size of the object data to be
+ *		stored. It will be increased to make room for the object
+ *		header and then rounded up for alignment.
  *
  * Return:	Success:	The heap object ID of the new object.
  *
@@ -422,12 +425,13 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 {
     int		idx;
     uint8	*p = NULL;
-    
+    size_t	need = H5HG_ALIGN(H5HG_SIZEOF_OBJHDR(f) + size);
+
     FUNC_ENTER (H5HG_alloc, FAIL);
 
     /* Check args */
     assert (heap);
-    assert (heap->obj[0].size>=size);
+    assert (heap->obj[0].size>=need);
 
     /*
      * Find an ID for the new object. ID zero is reserved for the free space
@@ -449,7 +453,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     H5F_encode_length (f, p, size);
 
     /* Fix the free space object */
-    if (size==heap->obj[0].size) {
+    if (need==heap->obj[0].size) {
 	/*
 	 * All free space has been exhausted from this collection. Remove the
 	 * heap from the CWFS list.
@@ -462,13 +466,13 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 		       (f->shared->ncwfs-cwfsno)*sizeof(H5HG_heap_t*));
 	}
 		
-    } else if (heap->obj[0].size-size >= H5HG_SIZEOF_OBJHDR (f)) {
+    } else if (heap->obj[0].size-need >= H5HG_SIZEOF_OBJHDR (f)) {
 	/*
 	 * Some free space remains and it's larger than a heap object header,
 	 * so write the new free heap object header to the heap.
 	 */
-	heap->obj[0].size -= size;
-	heap->obj[0].begin += size;
+	heap->obj[0].size -= need;
+	heap->obj[0].begin += need;
 	p = heap->obj[0].begin;
 	UINT16ENCODE(p, 0);	/*id*/
 	UINT16ENCODE(p, 0);	/*nrefs*/
@@ -480,8 +484,8 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	 * Some free space remains but it's smaller than a heap object header,
 	 * so we don't write the header.
 	 */
-	heap->obj[0].size -= size;
-	heap->obj[0].begin += size;
+	heap->obj[0].size -= need;
+	heap->obj[0].begin += need;
     }
 
     heap->dirty = 1;
@@ -566,7 +570,7 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     }
     
     /* Split the free space to make room for the new object */
-    idx = H5HG_alloc (f, heap, cwfsno, need);
+    idx = H5HG_alloc (f, heap, cwfsno, size);
     assert (idx>0);
     
     /* Copy data into the heap */
@@ -683,7 +687,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
     }
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
-    size = heap->obj[hobj->idx].size - H5HG_SIZEOF_OBJHDR (f);
+    size = heap->obj[hobj->idx].size;
     p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
     if (!object && NULL==(object = H5MM_malloc (size))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -788,7 +792,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 {
     uint8	*p=NULL, *obj_start=NULL;
     H5HG_heap_t	*heap = NULL;
-    size_t	size;
+    size_t	need;
     intn	i;
     
     FUNC_ENTER (H5HG_remove, FAIL);
@@ -808,29 +812,29 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
-    size = heap->obj[hobj->idx].size;
+    need = H5HG_ALIGN(heap->obj[hobj->idx].size);
 
     /* Move the new free space to the end of the heap */
     for (i=0; i<heap->nalloc; i++) {
 	if (heap->obj[i].begin > heap->obj[hobj->idx].begin) {
-	    heap->obj[i].begin -= size;
+	    heap->obj[i].begin -= need;
 	}
     }
     if (NULL==heap->obj[0].begin) {
-	heap->obj[0].begin = heap->chunk + (heap->size-size);
-	heap->obj[0].size = size;
+	heap->obj[0].begin = heap->chunk + (heap->size-need);
+	heap->obj[0].size = need;
 	heap->obj[0].nrefs = 0;
     } else {
-	heap->obj[0].size += size;
+	heap->obj[0].size += need;
     }
-    HDmemmove (obj_start, obj_start+size,
-	       heap->size-((obj_start+size)-heap->chunk));
+    HDmemmove (obj_start, obj_start+need,
+	       heap->size-((obj_start+need)-heap->chunk));
     if (heap->obj[0].size>=H5HG_SIZEOF_OBJHDR (f)) {
 	p = heap->obj[0].begin;
 	UINT16ENCODE(p, 0); /*id*/
 	UINT16ENCODE(p, 0); /*nrefs*/
 	UINT32ENCODE(p, 0); /*reserved*/
-	H5F_encode_length (f, p, size);
+	H5F_encode_length (f, p, need);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
     heap->dirty = 1;
@@ -940,9 +944,11 @@ H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	    fprintf (stream, "%*s%-*s %d\n", indent+3, "", MIN(fwidth-3, 0),
 		     "Reference count:",
 		     h->obj[i].nrefs);
-	    fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MIN(fwidth-3, 0),
+	    fprintf (stream, "%*s%-*s %lu/%lu\n", indent+3, "",
+		     MIN(fwidth-3, 0),
 		     "Size of object body:",
-		     (unsigned long)(h->obj[i].size));
+		     (unsigned long)(h->obj[i].size),
+		     (unsigned long)H5HG_ALIGN(h->obj[i].size));
 	    size = h->obj[i].size - H5HG_SIZEOF_OBJHDR (f);
 	    p = h->obj[i].begin + H5HG_SIZEOF_OBJHDR (f);
 	    for (j=0; j<size; j+=16) {

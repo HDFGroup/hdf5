@@ -426,6 +426,25 @@ typedef struct H5F_rdcc_t {
     struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5F_rdcc_t;
 
+/* Mount property list */
+typedef struct H5F_mprop_t {
+    hbool_t		local;	/* Are absolute symlinks local to file?	*/
+} H5F_mprop_t;
+
+/* A record of the mount table */
+typedef struct H5F_mount_t {
+    struct H5G_t	*group;	/* Mount point group held open		*/
+    struct H5F_t	*file;	/* File mounted at that point		*/
+} H5F_mount_t;
+    
+/* The mount table */
+typedef struct H5F_mtab_t {
+    struct H5F_t	*parent;/* Parent file				*/
+    uintn		nmounts;/* Number of children which are mounted	*/
+    uintn		nalloc;	/* Number of mount slots allocated	*/
+    H5F_mount_t		*child;	/* An array of mount records		*/
+} H5F_mtab_t;
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen().
@@ -463,6 +482,7 @@ typedef struct H5F_t {
     struct H5G_cwgstk_t	*cwg_stack;	/* CWG stack for push/pop functions*/
     uintn		nopen;		/* Number of open object headers*/
     hbool_t		close_pending;	/* File close is pending	*/
+    H5F_mtab_t		mtab;		/* File mount table		*/
 } H5F_t;
 
 #ifdef NOT_YET
@@ -509,10 +529,12 @@ struct H5O_efl_t;
 struct H5O_pline_t;
 struct H5D_xfer_t;
 struct H5O_fill_t;
+struct H5G_entry_t;
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
 extern H5F_access_t H5F_access_dflt;
+extern const H5F_mprop_t H5F_mount_dflt;
 
 #ifdef HAVE_PARALLEL
 extern  hbool_t H5_mpi_1_metawrite_g;
@@ -529,6 +551,7 @@ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		 intn fwidth);
 herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 			intn indent, intn fwidth, int ndims);
+herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
 /* Functions that operate on array storage */
 herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);

@@ -1769,7 +1769,27 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_TEMPLATE_5:
 		    case H5I_TEMPLATE_6:
 		    case H5I_TEMPLATE_7:
-			fprintf (out, "H5I_TEMPLATE_%d",(int)(id_type-H5I_TEMPLATE_0));
+			switch (H5Pget_class(id_type)) {
+			case H5P_FILE_CREATE:
+			    fprintf(out, "H5P_FILE_CREATE");
+			    break;
+			case H5P_FILE_ACCESS:
+			    fprintf(out, "H5P_FILE_ACCESS");
+			    break;
+			case H5P_DATASET_CREATE:
+			    fprintf(out, "H5P_DATASET_CREATE");
+			    break;
+			case H5P_DATASET_XFER:
+			    fprintf(out, "H5P_DATASET_XFER");
+			    break;
+			case H5P_MOUNT:
+			    fprintf(out, "H5P_MOUNT");
+			    break;
+			default:
+			    fprintf (out, "H5I_TEMPLATE_%d",
+				     (int)(id_type-H5I_TEMPLATE_0));
+			    break;
+			}
 			break;
 		    case H5I_GROUP:
 			fprintf (out, "H5I_GROUP");

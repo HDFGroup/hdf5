@@ -191,7 +191,10 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     assert(grp_ent && grp_ent->file);
     assert(name && *name);
     assert(obj_ent && obj_ent->file);
-    assert(grp_ent->file->shared == obj_ent->file->shared);
+    if (grp_ent->file->shared != obj_ent->file->shared) {
+	HRETURN_ERROR(H5E_SYM, H5E_LINK, FAIL,
+		      "interfile hard links are not allowed");
+    }
 
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB, 0, &stab)) {
