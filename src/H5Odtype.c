@@ -1212,7 +1212,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             s = "array";
             break;
         case H5T_VLEN:
-            s = "variable-length sequence";
+            s = "vlen";
             break;
         default:
             sprintf(buf, "H5T_CLASS_%d", (int) (dt->type));
@@ -1269,8 +1269,35 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
 		"Fix dumping reference types!");
     } else if (H5T_VLEN==dt->type) {
-	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
-		"Fix dumping variable-length types!");
+        switch (dt->u.vlen.type) {
+            case H5T_VLEN_SEQUENCE:
+                s = "sequence";
+                break;
+            case H5T_VLEN_STRING:
+                s = "string";
+                break;
+            default:
+                sprintf(buf, "H5T_VLEN_%d", dt->u.vlen.type);
+                s = buf;
+                break;
+        }
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Vlen type:", s);
+
+        switch (dt->u.vlen.loc) {
+            case H5T_VLEN_MEMORY:
+                s = "memory";
+                break;
+            case H5T_VLEN_DISK:
+                s = "disk";
+                break;
+            default:
+                sprintf(buf, "H5T_VLEN_%d", dt->u.vlen.loc);
+                s = buf;
+                break;
+        }
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Location:", s);
     } else if (H5T_ARRAY==dt->type) {
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Rank:",
