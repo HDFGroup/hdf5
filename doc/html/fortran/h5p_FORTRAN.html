@@ -1437,7 +1437,7 @@ FORTRAN Property List API -- h5p
 </a>
 
 
-
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_buffer_f</strong>
 <pre>
 
          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
@@ -1770,13 +1770,13 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name="h5pset_small_data_block_size_f">
+<a name="h5pget_small_data_block_size_f">
 <p>&nbsp;
 </a>
 
 
 
-<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_small_data_block_size_f</strong>
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_small_data_block_size_f</strong>
 <pre>
 
          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
@@ -2093,7 +2093,7 @@ FORTRAN Property List API -- h5p
 <p>&nbsp;
 <hr>
 <p>&nbsp;
-<a name=" h5pcopy_prop_f">
+<a name="h5pcopy_prop_f">
 <p>&nbsp;
 </a>
 
@@ -2202,7 +2202,7 @@ FORTRAN Property List API -- h5p
             INTEGER, INTENT(OUT) :: hdferr      ! Error code
                                                 ! 0 on success and -1 on failure
           END SUBROUTINE h5pclose_close_f
-</dl>
+</pre>
 
 
 
@@ -2328,6 +2328,9 @@ FORTRAN Property List API -- h5p
                                                       ! 0 on success and -1 on failure
  
           END SUBROUTINE h5pset_fletcher32_f
+</pre>
+
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>
@@ -2340,7 +2343,7 @@ FORTRAN Property List API -- h5p
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  19 March 2003
+Last modified:  7 April 2003
 
 </body>
 </html>

@@ -106,14 +106,15 @@ facilitate moving easily between them.</i>
     <li><a href="#Dataset-Create">h5dcreate_f</a>
     <li><a href="#Dataset-Open">h5dopen_f</a>
     <li><a href="#Dataset-Close">h5dclose_f</a>
+    <li><a href="#Dataset-GetSpace">h5dget_space_f</a>
+    <li><a href="#Dataset-GetSpaceStatus">h5dget_space_status_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Dataset-GetSpace">h5dget_space_f</a>
     <li><a href="#Dataset-GetType">h5dget_type_f</a>
     <li><a href="#Dataset-GetCreatePlist">h5dget_create_plist_f</a>
-<!--<li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>      -->
-<!--<li><a href="#Dataset-VLGetBuf">h5dvlen_get_buf_size_f</a>           -->
+    <li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>
+    <li><a href="#Dataset-VLGetBuf">h5dvlen_get_max_len_f</a>
 <!--<li><a href="#Dataset-VLReclaim">h5dvlen_reclaim_f</a>               -->
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
@@ -123,6 +124,7 @@ facilitate moving easily between them.</i>
 <!--<li><a href="#Dataset-Iterate">h5diterate_f</a>                     -->
 <!--<li><a href="#Dataset-Debug">h5ddebug_f</a>                         -->
     <li><a href="#Dataset-Extend">h5dextend_f</a>
+    <li><a href="#Dataset-Fill">h5dfill_f</a>
 </ul>
 </td></tr>
 </table>
@@ -309,11 +311,9 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_space_f" 
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_space_status_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-	-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -411,11 +411,10 @@ facilitate moving easily between them.</i>
     <dd>Returns the amount of storage space allocated for the dataset, 
         not counting meta data; 
         otherwise returns 0 (zero).
-<!--
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_storage_size" 
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_storage_size_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -456,11 +455,16 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
-<!--
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dvlen_get_buf_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Dvlen_get_buf_size</code>;  
+        corresponding functionality is provided by the FORTRAN function
+        <a href="fortran/h5d_FORTRAN.html#h5dvlen_get_max_len_f" 
+        target="FortranWin"><code>h5dvlen_get_max_len_f</code></a>.
+        <br>
+        <a href="fortran/h5d_FORTRAN.html#h5dvlen_get_max_len_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0 ></a>
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1041,11 +1045,10 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5diterate_f" 
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dfill_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1092,7 +1095,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 28 March 2003
+Last modified: 8 April 2003
  
 </body>
 </html>
