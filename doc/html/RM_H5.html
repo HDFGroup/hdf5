@@ -127,7 +127,7 @@ facilitate moving easily between them.</i>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-<!--<li><a href="#Library-SetFreeListLimits">h5set_free_list_limits_f</a>-->
+    <li><a href="#Library-SetFreeListLimits">h5set_free_list_limits_f</a>
     <li><a href="#Library-GarbageCollect">h5garbage_collect_f</a>
     <li><a href="#Library-DontAtExit">h5dont_atexit_f</a>
 </ul>
@@ -211,10 +211,23 @@ facilitate moving easily between them.</i>
 <dt><strong>Description:</strong>
     <dd><code>H5set_free_list_limits</code> sets size limits 
         on all types of free lists.
-	Free lists are 
-	<b><font  color="red "size="+1">
-	        ... just what, exactly?
-		</font></b>
+	The HDF5 library uses free lists internally to manage memory.
+	There are three types of free lists:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage a single data structure.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage arrays of a data structure.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
+	<em>Alternate phrasing?</em>:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage data structures containing atomic data.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage data structures containing array data.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
 	<p>
 	These are global limits, but each limit applies only to 
         free lists of the specified type. 
@@ -227,33 +240,26 @@ facilitate moving easily between them.</i>
 	no limit is set for the specified type of free list.  
 <dt><strong>Parameters:</strong>
     <dl>
-    
-        <dt><b><font  color="red "size="+1">
-	        Why is <i>regular</i> quoted below?  
-	        What would be, say, <i>irregular</i>?
-		</font></b>
-
         <dt><em>int</em> <code>reg_global_lim</code>
-	    <dd>IN: The limit on all "regular" free list memory used
+	    <dd>IN: The limit on all regular free list memory used
         <dt><em>int</em> <code>reg_list_lim</code>
-	    <dd>IN: The limit on memory used in each "regular" free list
+	    <dd>IN: The limit on memory used in each regular free list
         <dt><em>int</em> <code>arr_global_lim</code>
-	    <dd>IN: The limit on all "array" free list memory used
+	    <dd>IN: The limit on all array free list memory used
         <dt><em>int</em> <code>arr_list_lim</code>
-	    <dd>IN: The limit on memory used in each "array" free list
+	    <dd>IN: The limit on memory used in each array free list
         <dt><em>int</em> <code>blk_global_lim</code>
-	    <dd>IN: The limit on all "block" free list memory used
+	    <dd>IN: The limit on all block free list memory used
         <dt><em>int</em> <code>blk_list_lim</code>
-	    <dd>IN: The limit on memory used in each "block" free list
+	    <dd>IN: The limit on memory used in each block free list
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5_FORTRAN.html#h5set_free_list_limits_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
