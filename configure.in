@@ -1644,7 +1644,51 @@ dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(fork frexpf frexpl gethostname getpwuid getrusage)
 AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
-AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
+AC_CHECK_FUNCS(signal snprintf vasprintf strdup system waitpid)
+
+dnl Check for vsnprintf() separately, so we can detect situations where it
+dnl doesn't return the correct size for formatted strings that are too large
+dnl for the buffer provided
+AC_CHECK_FUNCS(vsnprintf,
+
+    dnl Check if vsnprintf() returns correct size for strings that don't fit
+    dnl into the size allowed.  If vsnprintf() works correctly on this platform,
+    dnl it should return a value larger than 15 for the test below
+    AC_MSG_CHECKING([if vsnprintf returns correct value])
+
+    AC_CACHE_VAL([hdf5_cv_vsnprintf_works],
+        AC_TRY_RUN([
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+int test_vsnprintf(const char *fmt,...)
+{
+    va_list     ap;
+    char *s = malloc(16);
+    int ret;
+
+    va_start(ap, fmt);
+    ret=vsnprintf(s,16,"%s",ap);
+    va_end(ap);
+
+    return(ret==15 ? 1 : 0);
+}
+
+int main(void)
+{
+    exit(test_vsnprintf("%s","A string that is longer than 16 characters"));
+}
+   ],[hdf5_cv_vsnprintf_works=yes],[hdf5_cv_vsnprintf_works=no],))
+
+       if test ${hdf5_cv_vsnprintf_works} = "yes"; then
+          AC_MSG_RESULT([yes])
+          AC_DEFINE([VSNPRINTF_WORKS], [1],
+                    [Define if vsnprintf() returns the correct value for formatted strings that don't fit into size allowed])
+       else
+          AC_MSG_RESULT([no])
+       fi
+    ,)
 
 dnl ----------------------------------------------------------------------
 dnl Check compiler characteristics

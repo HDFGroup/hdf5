@@ -838,6 +838,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDva_arg(A,T)		va_arg(A,T)
 #define HDva_end(A)		va_end(A)
 #define HDva_start(A,P)		va_start(A,P)
+#define HDvasprintf(RET,FMT,A)  vasprintf(RET,FMT,A)
 #define HDvfprintf(F,FMT,A)	vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
