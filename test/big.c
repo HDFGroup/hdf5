@@ -33,8 +33,10 @@
 #define GB8LL		((unsigned long long)8*1024*1024*1024)
 #elif SIZEOF___INT64 > SIZEOF_LONG
 #define GB8LL		((unsigned __int64)8*1024*1024*1024)
+#elif SIZEOF_LONG >= 8
+#define GB8LL		((unsigned long)8*1024*1024*1024)
 #else
-#define GB8LL		((long)1)
+#define GB8LL		((unsigned long)0)	/* can not do the test */
 #endif
 
 static hsize_t
@@ -134,6 +136,10 @@ enough_room(void)
     int		fd[68];
     size_t	i, size = (size_t)1 << 30;
     char	name[32];
+
+    /* verify if this machine supports 8GB sizes */
+    if (GB8LL==0)
+	goto done;
 
     /* Initialize file descriptors */
     for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
