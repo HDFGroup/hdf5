@@ -101,6 +101,30 @@
 /* The number of bytes in a int8_t.  */
 #undef SIZEOF_INT8_T
 
+/* The number of bytes in a int_fast16_t.  */
+#undef SIZEOF_INT_FAST16_T
+
+/* The number of bytes in a int_fast32_t.  */
+#undef SIZEOF_INT_FAST32_T
+
+/* The number of bytes in a int_fast64_t.  */
+#undef SIZEOF_INT_FAST64_T
+
+/* The number of bytes in a int_fast8_t.  */
+#undef SIZEOF_INT_FAST8_T
+
+/* The number of bytes in a int_least16_t.  */
+#undef SIZEOF_INT_LEAST16_T
+
+/* The number of bytes in a int_least32_t.  */
+#undef SIZEOF_INT_LEAST32_T
+
+/* The number of bytes in a int_least64_t.  */
+#undef SIZEOF_INT_LEAST64_T
+
+/* The number of bytes in a int_least8_t.  */
+#undef SIZEOF_INT_LEAST8_T
+
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
 
@@ -130,6 +154,30 @@
 
 /* The number of bytes in a uint8_t.  */
 #undef SIZEOF_UINT8_T
+
+/* The number of bytes in a uint_fast16_t.  */
+#undef SIZEOF_UINT_FAST16_T
+
+/* The number of bytes in a uint_fast32_t.  */
+#undef SIZEOF_UINT_FAST32_T
+
+/* The number of bytes in a uint_fast64_t.  */
+#undef SIZEOF_UINT_FAST64_T
+
+/* The number of bytes in a uint_fast8_t.  */
+#undef SIZEOF_UINT_FAST8_T
+
+/* The number of bytes in a uint_least16_t.  */
+#undef SIZEOF_UINT_LEAST16_T
+
+/* The number of bytes in a uint_least32_t.  */
+#undef SIZEOF_UINT_LEAST32_T
+
+/* The number of bytes in a uint_least64_t.  */
+#undef SIZEOF_UINT_LEAST64_T
+
+/* The number of bytes in a uint_least8_t.  */
+#undef SIZEOF_UINT_LEAST8_T
 
 /* Define if you have the BSDgettimeofday function.  */
 #undef HAVE_BSDGETTIMEOFDAY
@@ -211,6 +259,9 @@
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
+
+/* Define if you have the <stdint.h> header file.  */
+#undef HAVE_STDINT_H
 
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H

@@ -97,24 +97,82 @@ hid_t H5T_NATIVE_HSIZE_g		= FAIL;
 hid_t H5T_NATIVE_HSSIZE_g		= FAIL;
 hid_t H5T_NATIVE_HERR_g			= FAIL;
 hid_t H5T_NATIVE_HBOOL_g		= FAIL;
+hid_t H5T_NATIVE_INT8_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT8_T_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST8_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST8_T_g	= FAIL;
+hid_t H5T_NATIVE_INT_FAST8_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST8_T_g		= FAIL;
+hid_t H5T_NATIVE_INT16_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT16_T_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST16_T_g	= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST16_T_g	= FAIL;
+hid_t H5T_NATIVE_INT_FAST16_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST16_T_g	= FAIL;
+hid_t H5T_NATIVE_INT32_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT32_T_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST32_T_g	= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST32_T_g	= FAIL;
+hid_t H5T_NATIVE_INT_FAST32_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST32_T_g	= FAIL;
+hid_t H5T_NATIVE_INT64_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT64_T_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST64_T_g	= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST64_T_g	= FAIL;
+hid_t H5T_NATIVE_INT_FAST64_T_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST64_T_g	= FAIL;
 
 /*
  * Alignment constraints for native types. These are initialized at run time
  * in H5Tinit.c
  */
-size_t	H5T_NATIVE_SCHAR_ALIGN_g	= 0;
-size_t	H5T_NATIVE_UCHAR_ALIGN_g	= 0;
-size_t	H5T_NATIVE_SHORT_ALIGN_g	= 0;
-size_t	H5T_NATIVE_USHORT_ALIGN_g	= 0;
-size_t	H5T_NATIVE_INT_ALIGN_g		= 0;
-size_t	H5T_NATIVE_UINT_ALIGN_g		= 0;
-size_t	H5T_NATIVE_LONG_ALIGN_g		= 0;
-size_t	H5T_NATIVE_ULONG_ALIGN_g	= 0;
-size_t	H5T_NATIVE_LLONG_ALIGN_g	= 0;
-size_t	H5T_NATIVE_ULLONG_ALIGN_g	= 0;
-size_t	H5T_NATIVE_FLOAT_ALIGN_g	= 0;
-size_t	H5T_NATIVE_DOUBLE_ALIGN_g	= 0;
-size_t	H5T_NATIVE_LDOUBLE_ALIGN_g	= 0;
+size_t H5T_NATIVE_SCHAR_ALIGN_g		= 0;
+size_t H5T_NATIVE_UCHAR_ALIGN_g		= 0;
+size_t H5T_NATIVE_SHORT_ALIGN_g		= 0;
+size_t H5T_NATIVE_USHORT_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT_ALIGN_g		= 0;
+size_t H5T_NATIVE_LONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_LLONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULLONG_ALIGN_g	= 0;
+size_t H5T_NATIVE_FLOAT_ALIGN_g		= 0;
+size_t H5T_NATIVE_DOUBLE_ALIGN_g	= 0;
+size_t H5T_NATIVE_LDOUBLE_ALIGN_g	= 0;
+
+/*
+ * Alignment constraints for C9x types. These are initialized at run time in
+ * H5Tinit.c if the types are provided by the system. Otherwise we set their
+ * values to 0 here (no alignment calculated).
+ */
+size_t H5T_NATIVE_INT8_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT8_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST8_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST8_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_FAST8_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST8_T_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT16_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT16_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST16_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST16_T_ALIGN_g= 0;
+size_t H5T_NATIVE_INT_FAST16_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST16_T_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT32_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT32_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST32_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST32_T_ALIGN_g= 0;
+size_t H5T_NATIVE_INT_FAST32_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST32_T_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT64_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT64_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST64_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST64_T_ALIGN_g= 0;
+size_t H5T_NATIVE_INT_FAST64_T_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST64_T_ALIGN_g	= 0;
+
 
 /*
  * The path database. Each path has a source and destination data type pair
@@ -201,6 +259,164 @@ H5T_init_interface(void)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to initialize interface");
     }
+
+    /*------------------------------------------------------------
+     * Defaults for C9x types
+     *------------------------------------------------------------ 
+     */
+
+    /* int8 */
+    if (H5T_NATIVE_INT8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT8_T_g = H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    if (H5T_NATIVE_UINT8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT8_T_g = H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    if (H5T_NATIVE_INT_LEAST8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_LEAST8_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    if (H5T_NATIVE_UINT_LEAST8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT_LEAST8_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    if (H5T_NATIVE_INT_FAST8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_FAST8_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    if (H5T_NATIVE_UINT_FAST8_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT_FAST8_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 1;
+	dt->u.atomic.prec = 8;
+    }
+    
+    /* int16 */
+    if (H5T_NATIVE_INT16_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT16_T_g = H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    if (H5T_NATIVE_UINT16_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT16_T_g = H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    if (H5T_NATIVE_INT_LEAST16_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_LEAST16_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    if (H5T_NATIVE_UINT_LEAST16_T_g<0) {
+	dt=H5I_object(H5T_NATIVE_UINT_LEAST16_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    if (H5T_NATIVE_INT_FAST16_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_FAST16_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    if (H5T_NATIVE_UINT_FAST16_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT_FAST16_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 2;
+	dt->u.atomic.prec = 16;
+    }
+    
+    /* int32 */
+    if (H5T_NATIVE_INT32_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT32_T_g = H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    if (H5T_NATIVE_UINT32_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT32_T_g = H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    if (H5T_NATIVE_INT_LEAST32_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_LEAST32_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    if (H5T_NATIVE_UINT_LEAST32_T_g<0) {
+	dt=H5I_object(H5T_NATIVE_UINT_LEAST32_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    if (H5T_NATIVE_INT_FAST32_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_FAST32_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    if (H5T_NATIVE_UINT_FAST32_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT_FAST32_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 4;
+	dt->u.atomic.prec = 32;
+    }
+    
+    /* int64 */
+    if (H5T_NATIVE_INT64_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT64_T_g = H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    if (H5T_NATIVE_UINT64_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT64_T_g = H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    if (H5T_NATIVE_INT_LEAST64_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_LEAST64_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    if (H5T_NATIVE_UINT_LEAST64_T_g<0) {
+	dt=H5I_object(H5T_NATIVE_UINT_LEAST64_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    if (H5T_NATIVE_INT_FAST64_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_INT_FAST64_T_g=H5Tcopy(H5T_NATIVE_INT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    if (H5T_NATIVE_UINT_FAST64_T_g<0) {
+	dt = H5I_object(H5T_NATIVE_UINT_FAST64_T_g=H5Tcopy(H5T_NATIVE_UINT_g));
+	dt->state = H5T_STATE_IMMUTABLE;
+	dt->size = 8;
+	dt->u.atomic.prec = 64;
+    }
+    
 
     /*------------------------------------------------------------
      * Native types
@@ -661,6 +877,7 @@ H5T_init_interface(void)
      * Pointer types
      *------------------------------------------------------------ 
      */
+
     /* Object pointer (i.e. object header address in file) */
     if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -680,6 +897,7 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to initialize H5T layer");
     }
+    
     /* Dataset Region pointer (i.e. selection inside a dataset) */
     if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -700,6 +918,10 @@ H5T_init_interface(void)
 		    "unable to initialize H5T layer");
     }
 
+    /*
+     * Register conversion functions beginning with the most general and
+     * ending with the most specific.
+     */
     fixedpt = H5T_NATIVE_INT;
     floatpt = H5T_NATIVE_FLOAT;
     string  = H5T_C_S1;
@@ -708,10 +930,7 @@ H5T_init_interface(void)
     enum_type = H5Tcreate(H5T_ENUM, 1);
     vlen_type = H5Tvlen_create(H5T_NATIVE_INT);
     status = 0;
-    /*
-     * Register conversion functions beginning with the most general and
-     * ending with the most specific.
-     */
+
     status |= H5Tregister(H5T_PERS_SOFT, "i_i",
 			  fixedpt, fixedpt,
 			  H5T_conv_i_i);

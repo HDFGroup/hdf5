@@ -46,6 +46,13 @@
 #endif
 
 /*
+ * C9x integer types
+ */
+#ifdef HAVE_STDINT_H
+#   include <stdint.h>
+#endif
+
+/*
  * The `struct stat' data type for stat() and fstat(). This is a Posix file
  * but often apears on non-Posix systems also.	The `struct stat' is required
  * for hdf5 to compile, although only a few fields are actually used.
