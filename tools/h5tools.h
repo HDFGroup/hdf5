@@ -18,6 +18,28 @@
  */
 typedef struct h5dump_t {
     /*
+     * Fields associated with compound data types.
+     *
+     *	 name:      How the name of the struct member is printed in the
+     *		    values. By default the name is not printed, but a
+     *		    reasonable setting might be "%s=" which prints the name
+     *		    followed by an equal sign and then the value.
+     *
+     *	 sep:	    A string that separates one member from another.  The
+     *		    default is a comma.
+     *
+     *	 pre:	    A string to print at the beginning of a compound type.
+     *		    The default is a left curly brace.
+     *
+     *	 suf:       A string to print at the end of each compound type.  The
+     *		    default is a right curly brace.
+     */
+    const char	*cmpd_name;
+    const char	*cmpd_sep;
+    const char	*cmpd_pre;
+    const char	*cmpd_suf;
+
+    /*
      * Fields associated with the individual elements.
      *
      *	 fmt:       A printf(3c) format to use to print the value string

@@ -27,6 +27,7 @@
 #define OPT(X,S)	((X)?(X):(S))
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
 #define NELMTS(X)	(sizeof(X)/sizeof(*X))
+#define ALIGN(A,Z)	((((A)+(Z)-1)/(Z))*(Z))
 
 
 /*-------------------------------------------------------------------------
@@ -102,8 +103,10 @@ h5dump_prefix(char *s/*out*/, const h5dump_t *info, hsize_t elmtno, int ndims,
 static void
 h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 {
-    size_t	i, n;
-    char	temp[1024];
+    size_t	i, n, offset;
+    char	temp[1024], *name;
+    hid_t	memb;
+    int		nmembs, j;
     
     if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
 	sprintf(temp, "%g", *((double*)vp));
@@ -111,9 +114,30 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	sprintf(temp, "%g", *((float*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_CHAR) ||
 	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
-	if ('\\'==*((char*)vp)) strcpy(temp, "\\\\");
-	else if (isprint(*((char*)vp))) sprintf(temp, "%c", *((char*)vp));
-	else sprintf(temp, "\\%03o", *((unsigned char*)vp));
+	switch (*((char*)vp)) {
+	case '\\':
+	    strcpy(temp, "\\\\");
+	    break;
+	case '\b':
+	    strcpy(temp, "\\b");
+	    break;
+	case '\f':
+	    strcpy(temp, "\\f");
+	    break;
+	case '\n':
+	    strcpy(temp, "\\n");
+	    break;
+	case '\r':
+	    strcpy(temp, "\\r");
+	    break;
+	case '\t':
+	    strcpy(temp, "\\t");
+	    break;
+	default:
+	    if (isprint(*((char*)vp))) sprintf(temp, "%c", *((char*)vp));
+	    else sprintf(temp, "\\%03o", *((unsigned char*)vp));
+	    break;
+	}
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
 	sprintf(temp, "%d", *((short*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
@@ -126,6 +150,24 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	sprintf(temp, "%ld", *((long*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
 	sprintf(temp, "%lu", *((unsigned long*)vp));
+    } else if (H5T_COMPOUND==H5Tget_class(type)) {
+	nmembs = H5Tget_nmembers(type);
+	strcpy(temp, OPT(info->cmpd_pre, "{"));
+	for (j=0; j<nmembs; j++) {
+	    if (j) strcat(temp, OPT(info->cmpd_sep, ","));
+
+	    /* The name */
+	    name = H5Tget_member_name(type, j);
+	    sprintf(temp+strlen(temp), OPT(info->cmpd_name, ""), name);
+	    free(name);
+
+	    /* The value */
+	    offset = H5Tget_member_offset(type, j);
+	    memb = H5Tget_member_type(type, j);
+	    h5dump_sprint(temp+strlen(temp), info, memb, (char*)vp+offset);
+	    H5Tclose(memb);
+	}
+	strcat(temp, OPT(info->cmpd_suf, "}"));
     } else {
 	strcpy(temp, "0x");
 	n = H5Tget_size(type);
@@ -243,7 +285,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
 	for (i=0; i<hs_nelmts; i++) {
 	    /* Render the element */
 	    h5dump_sprint(p_buf, info, p_type, sm_buf+i*p_type_nbytes);
-	    if (i+1<hs_nelmts) {
+	    if (elmtno+i+1<p_nelmts) {
 		strcat(p_buf, OPT(info->elmt_suf1, ","));
 	    }
 
@@ -297,6 +339,121 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	h5dump_fixtype
+ *
+ * Purpose:	Given a file data type choose a memory data type which is
+ *		appropriate for printing the data.
+ *
+ * Return:	Success:	Memory data type
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+h5dump_fixtype(hid_t f_type)
+{
+    hid_t	m_type=-1, f_memb;
+    hid_t	*memb=NULL;
+    char	**name=NULL;
+    int		nmembs, i;
+    size_t	size;
+
+    size = H5Tget_size(f_type);
+    switch (H5Tget_class(f_type)) {
+
+    case H5T_INTEGER:
+	/*
+	 * Use the smallest native integer type of the same sign as the file
+	 * such that the memory type is at least as large as the file type.
+	 * If there is no memory type large enough then use the largest
+	 * memory type available.
+	 */
+	if (size<=sizeof(char)) {
+	    m_type = H5Tcopy(H5T_NATIVE_CHAR);
+	} else if (size<=sizeof(short)) {
+	    m_type = H5Tcopy(H5T_NATIVE_SHORT);
+	} else if (size<=sizeof(int)) {
+	    m_type = H5Tcopy(H5T_NATIVE_INT);
+	} else if (size<=sizeof(long)) {
+	    m_type = H5Tcopy(H5T_NATIVE_LONG);
+	} else {
+	    m_type = H5Tcopy(H5T_NATIVE_LLONG);
+	}
+	H5Tset_sign(m_type, H5Tget_size(f_type));
+	break;
+	
+    case H5T_FLOAT:
+	/*
+	 * Use the smallest native floating point type available such that
+	 * its size is at least as large as the file type.  If there is not
+	 * native type large enough then use the largest native type.
+	 */
+	if (size<=sizeof(float)) {
+	    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
+	} else if (size<=sizeof(double)) {
+	    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
+	} else {
+	    m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
+	}
+	break;
+
+    case H5T_COMPOUND:
+	nmembs = H5Tget_nmembers(f_type);
+	memb = calloc(nmembs, sizeof(hid_t));
+	name = calloc(nmembs, sizeof(char*));
+	
+	for (i=0, size=0; i<nmembs; i++) {
+	    f_memb = H5Tget_member_type(f_type, i);
+	    memb[i] = h5dump_fixtype(f_memb);
+	    size = ALIGN(size, H5Tget_size(memb[i])) + H5Tget_size(memb[i]);
+	    H5Tclose(f_memb);
+	    name[i] = H5Tget_member_name(f_type, i);
+	    if (memb[i]<0 || NULL==name[i]) goto done;
+	}
+
+	m_type = H5Tcreate(H5T_COMPOUND, size);
+	for (i=0, size=0; i<nmembs; i++) {
+	    H5Tinsert(m_type, name[i], size, memb[i]);
+	    size = ALIGN(size, H5Tget_size(memb[i])) + H5Tget_size(memb[i]);
+	}
+	break;
+
+    case H5T_TIME:
+    case H5T_STRING:
+    case H5T_BITFIELD:
+    case H5T_OPAQUE:
+	/*
+	 * These type classes are not implemented yet.
+	 */
+	break;
+
+    default:
+	/* What the heck? */
+	break;
+    }
+
+ done:
+    /* Clean up temp buffers */
+    if (memb && name) {
+	for (i=0; i<nmembs; i++) {
+	    if (memb[i]>=0) H5Tclose(memb[i]);
+	    if (name[i]) free(name[i]);
+	}
+	free(memb);
+	free(name);
+    }
+    
+    return m_type;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	h5dump
  *
  * Purpose:	Print some values from a dataset.  The values to print are
@@ -315,13 +472,31 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
  *-------------------------------------------------------------------------
  */
 int
-h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
+h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
 {
     hid_t	f_space;
+    hid_t	p_type = _p_type;
+    hid_t	f_type;
+    int		status;
 
+    /* Check the data space */
     f_space = H5Dget_space(dset);
     if (H5Sis_simple(f_space)<=0) return -1;
     H5Sclose(f_space);
 
-    return h5dump_simple(stream, info, dset, p_type);
+    /*
+     * Check the data type.  If the caller didn't supply a data type then
+     * use an appropriate native data type.
+     */
+    if (p_type<0) {
+	f_type = H5Dget_type(dset);
+	p_type = h5dump_fixtype(f_type);
+	H5Tclose(f_type);
+	if (p_type<0) return -1;
+    }
+
+    /* Print the data */
+    status = h5dump_simple(stream, info, dset, p_type);
+    if (p_type!=_p_type) H5Tclose(p_type);
+    return status;
 }

@@ -78,9 +78,9 @@ usage: %s [OPTIONS] FILE [GROUP]\n\
 static void
 dump_dataset_values(hid_t dset)
 {
-    hid_t		f_type, m_type=-1;
+    hid_t		f_type = H5Dget_type(dset);
+    size_t		size = H5Tget_size(f_type);
     h5dump_t		info;
-    size_t		size;
 
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
@@ -88,62 +88,26 @@ dump_dataset_values(hid_t dset)
     info.line_ncols = width_g;
 
     /*
-     * Decide which data type to use for printing the values and make any
-     * necessary adjustments to the way the values will be formatted.
+     * If the dataset is a 1-byte integer type then format it as an ASCI
+     * character string instead of integers.
      */
-    f_type = H5Dget_type(dset);
-    size = H5Tget_size(f_type);
-    switch (H5Tget_class(f_type)) {
-    case H5T_INTEGER:
-	if (1==size) {
-	    /*
-	     * Assume that the dataset is being used to hold character values
-	     * and print the values as strings.
-	     */
-	    info.elmt_suf1 = "";
-	    info.elmt_suf2 = "";
-	    info.idx_fmt = "        (%s) \"";
-	    info.line_suf = "\"";
-	}
-
-	/*
-	 * For printing use an integer which is the same width and sign as
-	 * the file but in native byte order.
-	 */
-	m_type = H5Tcopy(H5T_NATIVE_INT);
-	H5Tset_offset(m_type, 0);
-	H5Tset_precision(m_type, size*8);
-	H5Tset_size(m_type, size);
-	H5Tset_sign(m_type, H5Tget_sign(f_type));
-	break;
-
-    case H5T_FLOAT:
-	if (size==sizeof(float)) {
-	    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
-	} else {
-	    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
-	}
-	break;
-
-    case H5T_COMPOUND:
-	printf("    Data: printing of compound data types is not implemented "
-	       "yet\n");
-	break;
-
-    default:
-	/*unable to print*/
-	printf("    Data: [unable to print]\n");
-	break;
+    if (1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+	info.elmt_suf1 = "";
+	info.elmt_suf2 = "";
+	info.idx_fmt = "        (%s) \"";
+	info.line_suf = "\"";
     }
-    H5Tclose(f_type);
-    if (m_type<0) return; /*not printable*/
+
     
     /*
      * Print all the values.
      */
     printf("    Data:\n");
-    h5dump(stdout, &info, dset, m_type);
-    H5Tclose(m_type);
+    if (h5dump(stdout, &info, dset, -1)<0) {
+	printf("        Unable to print data.\n");
+    }
+
+    H5Tclose(f_type);
 }
 
 
