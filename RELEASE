@@ -260,6 +260,19 @@ Configuration
 
 Tools
 -----
+    * h5dump now accepts both short and long command-line parameters. A
+      change from the old way is that multiple attributes, datasets,
+      groups, soft-links, and object-ids cannot be specified with just
+      one flag but you have to use a flag with each object. I.e., instead
+      of doing this:
+
+        h5dump -a /attr1 /attr2 foo.h5
+
+      do this:
+
+        h5dump -a /attr1 -a /attr2 foo.h5
+
+      The cases are similar for the other object types.
     * h5dump correctly displays compound datatypes.
     * Corrected an error in h5toh4 which did not convert the 32bits
       int from HDF5 to HDF4 corectly for the T3E platform.
