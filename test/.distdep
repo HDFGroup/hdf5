@@ -419,8 +419,7 @@ hyperslab.lo: \
    ../src/H5public.h \
    ../src/H5config.h \
    ../src/H5api_adpt.h \
-   ../src/H5MMprivate.h \
-   ../src/H5MMpublic.h
+   ../src/H5MMprivate.h
 iopipe.lo: \
    iopipe.c \
    ../src/hdf5.h \
