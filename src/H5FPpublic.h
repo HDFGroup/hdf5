@@ -20,7 +20,8 @@
 extern "C" {
 #endif
 
-H5_DLL herr_t H5FPinit(MPI_Comm comm, int sap_rank);
+H5_DLL herr_t H5FPinit(MPI_Comm comm, int sap_rank,
+                       MPI_Comm *FP_comm, MPI_Comm *FP_barrier_comm);
 H5_DLL herr_t H5FPfinalize(void);
 
 #ifdef __cplusplus

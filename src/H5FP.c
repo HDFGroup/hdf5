@@ -61,14 +61,14 @@ static herr_t H5FP_request_sap_stop(void);
  * Modifications:
  */
 herr_t
-H5FPinit(MPI_Comm comm, int sap_rank)
+H5FPinit(MPI_Comm comm, int sap_rank, MPI_Comm *sap_comm, MPI_Comm *sap_barrier_comm)
 {
     MPI_Group sap_group = MPI_GROUP_NULL, sap_barrier_group = MPI_GROUP_NULL;
     int mrc, comm_size, my_rank;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5FPinit, FAIL);
-    H5TRACE2("e","McIs",comm,sap_rank);
+    H5TRACE4("e","McIs*Mc*Mc",comm,sap_rank,sap_comm,sap_barrier_comm);
 
     /* initialize to NULL so that we can release if an error occurs */
     H5FP_request_t = MPI_DATATYPE_NULL;
@@ -76,8 +76,8 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     H5FP_read_t = MPI_DATATYPE_NULL;
     H5FP_alloc_t = MPI_DATATYPE_NULL;
 
-    H5FP_SAP_COMM = MPI_COMM_NULL;
-    H5FP_SAP_BARRIER_COMM = MPI_COMM_NULL;
+    *sap_comm = H5FP_SAP_COMM = MPI_COMM_NULL;
+    *sap_barrier_comm = H5FP_SAP_BARRIER_COMM = MPI_COMM_NULL;
 
     /* Set the global variable to track the SAP's rank */
     H5FP_sap_rank = sap_rank;
@@ -85,6 +85,8 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     /* Make a private copy of the communicator passed to us */
     if (MPI_Comm_dup(comm, &H5FP_SAP_COMM) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_dup failed");
+
+    *sap_comm = H5FP_SAP_COMM;
 
     if (MPI_Comm_group(H5FP_SAP_COMM, &sap_group) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_group failed");
@@ -98,6 +100,8 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     if (MPI_Comm_create(H5FP_SAP_COMM, sap_barrier_group,
                         &H5FP_SAP_BARRIER_COMM) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_create failed");
+
+    *sap_barrier_comm = H5FP_SAP_BARRIER_COMM;
 
     /* Get the size of all the processes (including the SAP) */
     if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
