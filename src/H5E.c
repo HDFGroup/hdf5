@@ -901,13 +901,13 @@ H5E_get_current_stack(void)
        
         /* Increment the IDs to indicate that they are used in this stack */
         if(H5I_inc_ref(current_error->cls_id)<0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to decrement ref count on error class")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error class")
         new_error->cls_id = current_error->cls_id;       
         if(H5I_inc_ref(current_error->maj_id)<0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to decrement ref count on error message")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->maj_id = current_error->maj_id;       
         if(H5I_inc_ref(current_error->min_id)<0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to decrement ref count on error message")
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->min_id = current_error->min_id;       
         if((new_error->func_name = HDstrdup(current_error->func_name))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")

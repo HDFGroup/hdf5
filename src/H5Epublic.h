@@ -80,11 +80,11 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 #define H5E_BEGIN_TRY {							      \
     H5E_auto_t H5E_saved_efunc;						      \
     void *H5E_saved_edata;						      \
-    H5Eget_auto(H5E_DEFAULT, &H5E_saved_efunc, &H5E_saved_edata);			      \
-    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+    (void)H5Eget_auto(H5E_DEFAULT, &H5E_saved_efunc, &H5E_saved_edata);			      \
+    (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
 #define H5E_END_TRY							      \
-    H5Eset_auto (H5E_DEFAULT, H5E_saved_efunc, H5E_saved_edata);			      \
+    (void)H5Eset_auto (H5E_DEFAULT, H5E_saved_efunc, H5E_saved_edata);			      \
 }
 
 /*

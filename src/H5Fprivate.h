@@ -268,19 +268,19 @@ typedef struct H5F_t H5F_t;
 #define H5F_CRT_OBJ_BYTE_NUM_DEF      sizeof(hsize_t)
 /* Definitions for version number of the superblock         */
 #define H5F_CRT_SUPER_VERS_NAME       "super_version"
-#define H5F_CRT_SUPER_VERS_SIZE       sizeof(int)
+#define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
 #define H5F_CRT_SUPER_VERS_DEF        HDF5_SUPERBLOCK_VERSION_DEF
 /* Definitions for free-space version number                */
 #define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version"
-#define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(int)
+#define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(unsigned)
 #define H5F_CRT_FREESPACE_VERS_DEF    HDF5_FREESPACE_VERSION
 /* Definitions for object directory version number          */
 #define H5F_CRT_OBJ_DIR_VERS_NAME     "obj_dir_version"
-#define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(int)
+#define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(unsigned)
 #define H5F_CRT_OBJ_DIR_VERS_DEF      HDF5_OBJECTDIR_VERSION
 /* Definitions for shared-header format version             */
 #define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version"  
-#define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(int)
+#define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 
 /* ========= File Access properties ============ */
@@ -386,8 +386,8 @@ H5_DLL herr_t H5F_init(void);
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
-H5_DLL int H5F_get_obj_count(H5F_t *f, unsigned types);
-H5_DLL int H5F_get_obj_ids(H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
+H5_DLL int H5F_get_obj_count(const H5F_t *f, unsigned types);
+H5_DLL int H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 
 /* Functions than check file mounting information */
@@ -401,9 +401,9 @@ H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 
 /* Functions that operate on blocks of bytes wrt super block */
-H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, void *buf/*out*/);
-H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
 
 /* Functions that operate on byte sequences */
@@ -458,8 +458,8 @@ H5_DLL herr_t H5F_istore_delete(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout);
 
 /* Address-related functions */
-H5_DLL void H5F_addr_encode(H5F_t *, uint8_t** /*in,out*/, haddr_t);
-H5_DLL void H5F_addr_decode(H5F_t *, const uint8_t** /*in,out*/,
+H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);
+H5_DLL void H5F_addr_decode(const H5F_t *, const uint8_t** /*in,out*/,
 			     haddr_t* /*out*/);
 
 /* Callback functions for file access class */
