@@ -25,7 +25,7 @@
  * them.
  */
 /* const hbool_t H5S_mpio_avail = FALSE; */
-#else	/* HAVE_PARALLEL */
+#else /* HAVE_PARALLEL */
 /* Interface initialization */
 #define PABLO_MASK      H5S_all_mask
 #define INTERFACE_INIT  NULL
@@ -197,11 +197,13 @@ H5S_mpio_hyper_type( const H5S_t *space, const hsize_t elmt_size,
 	/* d[rank-i-1].start stays unchanged */
 	/* d[rank-i-1].count stays unchanged */
     }
-    /* check for possibility to coalesce blocks of the innermost dimension */
-    if (d[new_rank-1].strid == d[new_rank-1].block) {
-	/* transform the smaller blocks to 1 larger block of combined size */
-	d[new_rank-1].block *= d[new_rank-1].count;
-	d[new_rank-1].count = 1;
+    /* check for possibility to coalesce blocks of the uncoalesced dimensions */
+    for (i=0; i<new_rank; ++i) {
+        if (d[i].strid == d[i].block) {
+	    /* transform smaller blocks to 1 larger block of combined size */
+	    d[i].block *= d[i].count;
+	    d[i].count = 1;
+	}
     }
 
     /* initialize induction variables */
@@ -412,6 +414,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
                      const H5D_transfer_t xfer_mode, void *buf /*out*/,
 		     const hbool_t do_write )
 {
+    herr_t	 ret_value = SUCCEED;
     int		 err;
     haddr_t	 disp, addr;
     size_t	 mpi_count;
@@ -433,7 +436,11 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     /* INCOMPLETE!!!  rky 980816 */
     /* Currently can only handle H5D_CONTIGUOUS layout */
     if (layout->type != H5D_CONTIGUOUS) {
-    	HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,"can only handle contiguous layout");
+#ifdef H5S_DEBUG
+        fprintf (stderr, "H5S: can only create MPI datatype for hyperslab selection when layout is contiguous.\n" );
+#endif
+	ret_value = FAIL;
+	goto done;
     }
 
     /* create the MPI buffer type */
@@ -503,7 +510,8 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
 	}
     }
 
-    FUNC_LEAVE (SUCCEED);
+    done:
+    FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_xfer() */
 
 /*-------------------------------------------------------------------------
@@ -568,4 +576,4 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
     FUNC_LEAVE (ret_value);
 } /* H5S_mpio_spaces_write() */
 
-#endif	/* HAVE_PARALLEL */
+#endif  /* HAVE_PARALLEL */
