@@ -729,7 +729,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * does not permit caching.  (maybe able to relax it for
 	 * read only open.)
 	 */
-	if (H5FD_MPIO==f->shared->lf->driver_id){
+	if (H5FD_MPIO==fapl->driver_id){
 	    f->shared->rdcc_nbytes = 0;
 	    f->shared->mdc_nelmts = 0;
 	}

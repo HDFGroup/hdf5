@@ -166,18 +166,6 @@ H5FD_mpio_init(void)
 {
     if (H5I_VFL!=H5Iget_type(H5FD_MPIO_g)) {
 	H5FD_MPIO_g = H5FDregister(&H5FD_mpio_g);
-
-#if 1
-	/*
-	 * To be removed after Albert proof reads this driver.
-	 * --rpm 1999-08-06
-	 */
-	fprintf(stderr, "\
-H5FD_MPIO: this driver is currently under construction and may\n\
-    not work as advertised. Please use hdf5-1.3.? if you need a\n\
-    more stable development version (or use the hdf5-1.2.x release\n\
-    version).\n");
-#endif
     }
     return H5FD_MPIO_g;
 }
@@ -1060,8 +1048,10 @@ H5FD_mpio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
 	}
     }
 
+#ifdef NO
     /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
     file->eof = HADDR_UNDEF;
+#endif
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])

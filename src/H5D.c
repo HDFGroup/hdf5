@@ -1509,14 +1509,14 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
 #ifdef HAVE_PARALLEL
     {
-	/* Collective access is not permissible with the MPIO driver */
+	/* Collective access is not permissible without the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
-	    H5FD_MPIO==xfer_parms->driver_id &&
+	if (H5FD_MPIO==xfer_parms->driver_id &&
 	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
-	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-			 "collective access not permissible");
+		if (H5FD_MPIO!=dataset->ent.file->shared->lf->driver_id)
+		    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+			     "collective access for MPIO driver only");
 	}
     }
 #endif
@@ -1916,14 +1916,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
 #ifdef HAVE_PARALLEL
     {
-	/* Collective access is not permissible with the MPIO driver */
+	/* Collective access is not permissible without the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
-	    H5FD_MPIO==xfer_parms->driver_id &&
+	if (H5FD_MPIO==xfer_parms->driver_id &&
 	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
-	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-			 "collective access not permissible");
+		if (H5FD_MPIO!=dataset->ent.file->shared->lf->driver_id)
+		    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+			     "collective access for MPIO driver only");
 	}
     }
 #endif
