@@ -72,9 +72,9 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define PIO_POSIX           0x10
-#define PIO_MPI             0x20
-#define PIO_HDF5            0x40
+#define PIO_POSIX           0x1
+#define PIO_MPI             0x2
+#define PIO_HDF5            0x4
 
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
@@ -361,21 +361,6 @@ run_test_loop(struct options *opts)
     parameters parms;
     int num_procs;
     int doing_pio;      /* if this process is doing PIO */
-    int io_runs = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* default to run all tests */
-
-    if (opts->io_types & ~0x7) {
-        /* we want to run only a select subset of these tests */
-        io_runs = 0;
-
-        if (opts->io_types & PIO_HDF5)
-            io_runs |= PIO_HDF5;
-
-        if (opts->io_types & PIO_MPI)
-            io_runs |= PIO_MPI;
-
-        if (opts->io_types & PIO_POSIX)
-            io_runs |= PIO_POSIX;
-    }
 
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
@@ -417,13 +402,13 @@ run_test_loop(struct options *opts)
                 output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
-                if (io_runs & PIO_POSIX)
+                if (opts->io_types & PIO_POSIX)
                     run_test(POSIXIO, parms, opts);
 
-                if (io_runs & PIO_MPI)
+                if (opts->io_types & PIO_MPI)
                     run_test(MPIO, parms, opts);
 
-                if (io_runs & PIO_HDF5)
+                if (opts->io_types & PIO_HDF5)
                     run_test(PHDF5, parms, opts);
 
                 /* Run the tests once if buf_size==0, but then break out */
@@ -1018,8 +1003,6 @@ parse_command_line(int argc, char *argv[])
             cl_opts->h5_alignment = parse_size_directive(opt_arg);
             break;
         case 'A':
-            cl_opts->io_types &= ~0x7;
-
             {
                 const char *end = opt_arg;
 
@@ -1164,9 +1147,8 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* set default if none specified yet */
-    if (!cl_opts->io_types){
+    if (!cl_opts->io_types)
 	cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
-    }
 
     return cl_opts;
 }
