@@ -839,6 +839,8 @@ typedef enum {
 
 typedef struct H5_debug_t {
     FILE		*trace;		/*API trace output stream	*/
+    hbool_t             ttop;           /*Show only top-level calls?    */
+    hbool_t             ttimes;         /*Show trace event times?       */
     struct {
 	const char	*name;		/*package name			*/
 	FILE		*stream;	/*output stream	or NULL		*/
@@ -865,41 +867,36 @@ extern H5_debug_t		H5_debug_g;
  *------------------------------------------------------------------------- 
  */
 #ifdef H5_DEBUG_API
-#define H5TRACE_DECL			   const char *RTYPE=NULL
-#define H5TRACE0(R,T)			   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T)
-#define H5TRACE1(R,T,A0)		   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0)
-#define H5TRACE2(R,T,A0,A1)		   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1)
-#define H5TRACE3(R,T,A0,A1,A2)		   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2)
-#define H5TRACE4(R,T,A0,A1,A2,A3)	   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3)
-#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3,#A4,A4)
-#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	   RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3,#A4,A4,     \
-						    #A5,A5)
-#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3,#A4,A4,     \
-						    #A5,A5,#A6,A6)
-#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7) RTYPE=R;			      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3,#A4,A4,     \
-						    #A5,A5,#A6,A6,#A7,A7)
-#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;		      \
-					   H5_trace(0,FUNC,T,#A0,A0,#A1,A1,   \
-						    #A2,A2,#A3,A3,#A4,A4,     \
-						    #A5,A5,#A6,A6,#A7,A7,#A8,A8)
-#define H5TRACE_RETURN(V)		   if (RTYPE) {			      \
-					      H5_trace(1,NULL,RTYPE,NULL,V);  \
-					      RTYPE=NULL;		      \
+#define H5TRACE_DECL			   const char *RTYPE=NULL;                                      \
+                                           double CALLTIME
+#define H5TRACE0(R,T)			   RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T)
+#define H5TRACE1(R,T,A0)		   RTYPE=R;			                                \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0)
+#define H5TRACE2(R,T,A0,A1)		   RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1)
+#define H5TRACE3(R,T,A0,A1,A2)		   RTYPE=R;			                                \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2)
+#define H5TRACE4(R,T,A0,A1,A2,A3)	   RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3)
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	   RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4)
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	   RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5)
+#define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6) RTYPE=R;                                                     \
+					   CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6)
+#define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7) RTYPE=R;                                                  \
+                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7)
+#define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
+                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
+#define H5TRACE_RETURN(V)		   if (RTYPE) {                                                 \
+					      H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
+					      RTYPE=NULL;                                               \
 					   }
 #else
 #define H5TRACE_DECL			                /*void*/
@@ -916,8 +913,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE_RETURN(V)		                /*void*/
 #endif
 
-__DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
-		      ...);
+__DLL__ double H5_trace(double *calltime, const char *func, const char *type, ...);
 
 
 /*-------------------------------------------------------------------------
