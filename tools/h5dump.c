@@ -2022,7 +2022,5 @@ static void
 dump_oid(hid_t oid)
 {
     indentation(indent + COL);
-    printf("%s %s ", OBJID, BEGIN);
-    printf("%d", oid);
-    printf(" %s\n", END);  
+    printf("%s %s %d %s\n", OBJID, BEGIN, oid, END);  
 }
