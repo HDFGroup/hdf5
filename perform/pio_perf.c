@@ -79,6 +79,13 @@
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
+#ifndef TRUE
+#define TRUE    1
+#endif  /* TRUE */
+#ifndef FALSE
+#define FALSE   (!TRUE)
+#endif  /* FALSE */
+
 /* global variables */
 FILE       *output;             /* output file                          */
 int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
@@ -103,9 +110,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:B:cD:f:P:p:X:x:nd:F:i:o:stT:";
+static const char *s_opts = "ha:A:B:cD:f:P:p:X:x:nd:F:i:o:stT:w";
 #else
-static const char *s_opts = "ha:A:bB:cD:f:P:p:X:x:nd:F:i:o:stT:";
+static const char *s_opts = "ha:A:bB:cD:f:P:p:X:x:nd:F:i:o:stT:w";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -222,6 +229,14 @@ static struct long_options l_opts[] = {
     { "thre", require_arg, 'T' },
     { "thr", require_arg, 'T' },
     { "th", require_arg, 'T' },
+    { "write-only", require_arg, 'w' },
+    { "write-onl", require_arg, 'w' },
+    { "write-on", require_arg, 'w' },
+    { "write-o", require_arg, 'w' },
+    { "write", require_arg, 'w' },
+    { "writ", require_arg, 'w' },
+    { "wri", require_arg, 'w' },
+    { "wr", require_arg, 'w' },
     { NULL, 0, '\0' }
 };
 
@@ -243,6 +258,7 @@ struct options {
     off_t h5_threshold;         /* threshold for alignment in HDF5 file */
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
     int h5_no_fill;        	/* Disable HDF5 writing fill values     */
+    int h5_write_only;        	/* Perform the write tests only         */
 };
 
 typedef struct _minmax {
@@ -380,6 +396,7 @@ run_test_loop(struct options *opts)
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
     parms.h5_no_fill = opts->h5_no_fill;
+    parms.h5_write_only = opts->h5_write_only;
 
     /* start with max_num_procs and decrement it by half for each loop. */
     /* if performance needs restart, fewer processes may be needed. */
@@ -490,10 +507,13 @@ run_test(iotype iot, parameters parms, struct options *opts)
     write_mm_table = calloc(parms.num_iters , sizeof(minmax));
     write_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
     write_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    read_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    read_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    read_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    read_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
+
+    if (!parms.h5_write_only) {
+        read_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
+        read_mm_table = calloc(parms.num_iters , sizeof(minmax));
+        read_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
+        read_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    }
 
     /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
@@ -526,29 +546,32 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
         write_raw_mm_table[i] = write_raw_mm;
 
-        /* gather all of the "mpi read" times */
-        t = get_time(res.timers, HDF5_MPI_READ);
-	get_minmax(&read_mpi_mm, t);
+        if (!parms.h5_write_only) {
+            /* gather all of the "mpi read" times */
+            t = get_time(res.timers, HDF5_MPI_READ);
+            get_minmax(&read_mpi_mm, t);
 
-        read_mpi_mm_table[i] = read_mpi_mm;
+            read_mpi_mm_table[i] = read_mpi_mm;
 
-        /* gather all of the "read" times */
-        t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
-	get_minmax(&read_mm, t);
+            /* gather all of the "read" times */
+            t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
+            get_minmax(&read_mm, t);
 
-        read_mm_table[i] = read_mm;
+            read_mm_table[i] = read_mm;
 
-        /* gather all of the "read" times from open to close */
-        t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
-	get_minmax(&read_gross_mm, t);
+            /* gather all of the "read" times from open to close */
+            t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+            get_minmax(&read_gross_mm, t);
 
-        read_gross_mm_table[i] = read_gross_mm;
+            read_gross_mm_table[i] = read_gross_mm;
 
-        /* gather all of the raw "read" times */
-        t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
-	get_minmax(&read_raw_mm, t);
+            /* gather all of the raw "read" times */
+            t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
+            get_minmax(&read_raw_mm, t);
 
-        read_raw_mm_table[i] = read_raw_mm;
+            read_raw_mm_table[i] = read_raw_mm;
+        }
+
         pio_time_destroy(res.timers);
     }
 
@@ -599,59 +622,67 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
     output_results(opts,"Write Open-Close",write_gross_mm_table,parms.num_iters,raw_size);
 
-    /* Read statistics	*/
-    /* Print the raw data throughput if desired */
-    if(opts->print_raw) {
-        /* accumulate and output the max, min, and average "raw read" times */
+    if (!parms.h5_write_only) {
+        /* Read statistics	*/
+        /* Print the raw data throughput if desired */
+        if (opts->print_raw) {
+            /* accumulate and output the max, min, and average "raw read" times */
+            if (pio_debug_level >= 3) {
+                /* output all of the times for all iterations */
+                print_indent(3);
+                output_report("Raw Data Read details:\n");
+                output_all_info(read_raw_mm_table, parms.num_iters, 4);
+            }
+
+            output_results(opts, "Raw Data Read", read_raw_mm_table,
+                           parms.num_iters, raw_size);
+        } /* end if */
+
+        /* show mpi read statics */
         if (pio_debug_level >= 3) {
             /* output all of the times for all iterations */
             print_indent(3);
-            output_report("Raw Data Read details:\n");
-            output_all_info(read_raw_mm_table, parms.num_iters, 4);
+            output_report("MPI Read details:\n");
+            output_all_info(read_mpi_mm_table, parms.num_iters, 4);
         }
 
-        output_results(opts,"Raw Data Read",read_raw_mm_table,parms.num_iters,raw_size);
-    } /* end if */
+        /* We don't currently output the MPI read results */
 
-    /* show mpi read statics */
-    if (pio_debug_level >= 3) {
-        /* output all of the times for all iterations */
-        print_indent(3);
-        output_report("MPI Read details:\n");
-        output_all_info(read_mpi_mm_table, parms.num_iters, 4);
+        /* accumulate and output the max, min, and average "read" times */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Read details:\n");
+            output_all_info(read_mm_table, parms.num_iters, 4);
+        }
+
+        output_results(opts, "Read", read_mm_table, parms.num_iters, raw_size);
+
+        /* accumulate and output the max, min, and average "gross read" times */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Read Open-Close details:\n");
+            output_all_info(read_gross_mm_table, parms.num_iters, 4);
+        }
+
+        output_results(opts, "Read Open-Close", read_gross_mm_table,
+                       parms.num_iters, raw_size);
     }
-
-    /* We don't currently output the MPI read results */
-
-    /* accumulate and output the max, min, and average "read" times */
-    if (pio_debug_level >= 3) {
-        /* output all of the times for all iterations */
-        print_indent(3);
-        output_report("Read details:\n");
-        output_all_info(read_mm_table, parms.num_iters, 4);
-    }
-
-    output_results(opts,"Read",read_mm_table,parms.num_iters,raw_size);
-
-    /* accumulate and output the max, min, and average "gross read" times */
-    if (pio_debug_level >= 3) {
-        /* output all of the times for all iterations */
-        print_indent(3);
-        output_report("Read Open-Close details:\n");
-        output_all_info(read_gross_mm_table, parms.num_iters, 4);
-    }
-
-    output_results(opts,"Read Open-Close",read_gross_mm_table,parms.num_iters,raw_size);
 
     /* clean up our mess */
     free(write_mpi_mm_table);
-    free(read_mpi_mm_table);
     free(write_mm_table);
-    free(read_mm_table);
     free(write_gross_mm_table);
-    free(read_gross_mm_table);
     free(write_raw_mm_table);
-    free(read_raw_mm_table);
+
+    if (!parms.h5_write_only) {
+        free(read_mpi_mm_table);
+        free(read_mm_table);
+        free(read_gross_mm_table);
+        free(read_raw_mm_table);
+    }
+
     return ret_value;
 }
 
@@ -1004,13 +1035,14 @@ parse_command_line(int argc, char *argv[])
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
-    cl_opts->block_size = 0;	/* no interleaved I/O */
-    cl_opts->print_times = 0;   /* Printing times is off by default */
-    cl_opts->print_raw = 0;     /* Printing raw data throughput is off by default */
-    cl_opts->h5_alignment = 1;  /* No alignment for HDF5 objects by default */
-    cl_opts->h5_threshold = 1;  /* No threshold for aligning HDF5 objects by default */
-    cl_opts->h5_use_chunks = 0; /* Don't chunk the HDF5 dataset by default */
-    cl_opts->h5_no_fill = 0;    /* Write fill values by default */
+    cl_opts->block_size = 0;        /* no interleaved I/O */
+    cl_opts->print_times = FALSE;   /* Printing times is off by default */
+    cl_opts->print_raw = FALSE;     /* Printing raw data throughput is off by default */
+    cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */
+    cl_opts->h5_threshold = 1;      /* No threshold for aligning HDF5 objects by default */
+    cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
+    cl_opts->h5_no_fill = FALSE;    /* Write fill values by default */
+    cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -1059,8 +1091,9 @@ parse_command_line(int argc, char *argv[])
         case 'B':
             cl_opts->block_size = parse_size_directive(opt_arg);
             break;
-        case 'c':       /* Turn on chunked HDF5 dataset creation */
-            cl_opts->h5_use_chunks = 1;
+        case 'c':
+            /* Turn on chunked HDF5 dataset creation */
+            cl_opts->h5_use_chunks = TRUE;
             break;
         case 'd':
             cl_opts->num_dsets = atoi(opt_arg);
@@ -1099,11 +1132,11 @@ parse_command_line(int argc, char *argv[])
                         switch (*buf) {
                         case 'r':
                             /* Turn on raw data throughput info */
-                            cl_opts->print_raw = 1;
+                            cl_opts->print_raw = TRUE;
                             break;
                         case 't':
                             /* Turn on time printing */
-                            cl_opts->print_times = 1;
+                            cl_opts->print_times = TRUE;
                             break;
                         default:
                             fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
@@ -1130,7 +1163,7 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'n':       /* Turn off writing fill values */
 #ifdef H5_HAVE_NOFILL
-            cl_opts->h5_no_fill = 1;
+            cl_opts->h5_no_fill = TRUE;
 #else
 	    fprintf(stderr, "pio_perf: --no-fill not supported\n");
             usage(progname);
@@ -1154,6 +1187,9 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'X':
             cl_opts->max_xfer_size = parse_size_directive(opt_arg);
+            break;
+        case 'w':
+            cl_opts->h5_write_only = TRUE;
             break;
         case 'h':
         case '?':
@@ -1262,6 +1298,7 @@ usage(const char *prog)
         printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
         printf("                                 [default: 1]\n");
+        printf("     -w, --write-only            Perform write tests not the read tests\n");
         printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
         printf("\n");
