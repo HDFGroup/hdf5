@@ -30,8 +30,7 @@ H5.lo: \
    H5Oprivate.h \
    H5Opublic.h \
    H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h
+   H5HGpublic.h
 H5A.lo: \
    H5A.c \
    H5private.h \
@@ -78,8 +77,7 @@ H5AC.lo: \
    H5Fpublic.h \
    H5Ipublic.h \
    H5FDpublic.h \
-   H5MMpublic.h \
-   H5Eprivate.h
+   H5MMpublic.h
 H5B.lo: \
    H5B.c \
    H5private.h \
@@ -98,7 +96,11 @@ H5B.lo: \
    H5Eprivate.h \
    H5Epublic.h \
    H5MFprivate.h \
-   H5MMprivate.h
+   H5MMprivate.h \
+   H5Pprivate.h \
+   H5Ppublic.h \
+   H5Dpublic.h \
+   H5Zpublic.h
 H5D.lo: \
    H5D.c \
    H5private.h \
@@ -157,8 +159,10 @@ H5F.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDpublic.h \
+   H5FDgass.h \
    H5FDmulti.h \
    H5FDsec2.h \
+   H5FDstdio.h \
    H5private.h \
    H5Aprivate.h \
    H5Apublic.h \
@@ -277,124 +281,60 @@ H5FD.lo: \
    H5Dpublic.h
 H5FDsec2.lo: \
    H5FDsec2.c \
-   hdf5.h \
+   H5private.h \
    H5public.h \
    H5config.h \
    H5api_adpt.h \
-   H5Ipublic.h \
-   H5Apublic.h \
-   H5ACpublic.h \
-   H5Bpublic.h \
-   H5Dpublic.h \
+   H5Eprivate.h \
    H5Epublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
    H5Fpublic.h \
    H5FDpublic.h \
-   H5Gpublic.h \
-   H5HGpublic.h \
-   H5HLpublic.h \
    H5MMpublic.h \
-   H5Opublic.h \
-   H5Ppublic.h \
-   H5Zpublic.h \
-   H5Rpublic.h \
-   H5RApublic.h \
-   H5Spublic.h \
-   H5Tpublic.h \
-   H5FDcore.h \
-   H5FDfamily.h \
-   H5FDmpio.h \
-   H5FDsec2.h \
-   H5FDmulti.h
+   H5FDsec2.h
 H5FDfamily.lo: \
    H5FDfamily.c \
-   hdf5.h \
+   H5private.h \
    H5public.h \
    H5config.h \
    H5api_adpt.h \
-   H5Ipublic.h \
-   H5Apublic.h \
-   H5ACpublic.h \
-   H5Bpublic.h \
-   H5Dpublic.h \
+   H5Eprivate.h \
    H5Epublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
    H5Fpublic.h \
    H5FDpublic.h \
-   H5Gpublic.h \
-   H5HGpublic.h \
-   H5HLpublic.h \
    H5MMpublic.h \
-   H5Opublic.h \
-   H5Ppublic.h \
-   H5Zpublic.h \
-   H5Rpublic.h \
-   H5RApublic.h \
-   H5Spublic.h \
-   H5Tpublic.h \
-   H5FDcore.h \
-   H5FDfamily.h \
-   H5FDmpio.h \
-   H5FDsec2.h \
-   H5FDmulti.h
+   H5FDfamily.h
 H5FDmpio.lo: \
    H5FDmpio.c \
-   hdf5.h \
+   H5private.h \
    H5public.h \
    H5config.h \
    H5api_adpt.h \
-   H5Ipublic.h \
-   H5Apublic.h \
-   H5ACpublic.h \
-   H5Bpublic.h \
-   H5Dpublic.h \
+   H5Eprivate.h \
    H5Epublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
    H5Fpublic.h \
    H5FDpublic.h \
-   H5Gpublic.h \
-   H5HGpublic.h \
-   H5HLpublic.h \
    H5MMpublic.h \
-   H5Opublic.h \
-   H5Ppublic.h \
-   H5Zpublic.h \
-   H5Rpublic.h \
-   H5RApublic.h \
-   H5Spublic.h \
-   H5Tpublic.h \
-   H5FDcore.h \
-   H5FDfamily.h \
-   H5FDmpio.h \
-   H5FDsec2.h \
-   H5FDmulti.h
+   H5FDmpio.h
 H5FDcore.lo: \
    H5FDcore.c \
-   hdf5.h \
+   H5private.h \
    H5public.h \
    H5config.h \
    H5api_adpt.h \
-   H5Ipublic.h \
-   H5Apublic.h \
-   H5ACpublic.h \
-   H5Bpublic.h \
-   H5Dpublic.h \
+   H5Eprivate.h \
    H5Epublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
    H5Fpublic.h \
    H5FDpublic.h \
-   H5Gpublic.h \
-   H5HGpublic.h \
-   H5HLpublic.h \
    H5MMpublic.h \
-   H5Opublic.h \
-   H5Ppublic.h \
-   H5Zpublic.h \
-   H5Rpublic.h \
-   H5RApublic.h \
-   H5Spublic.h \
-   H5Tpublic.h \
-   H5FDcore.h \
-   H5FDfamily.h \
-   H5FDmpio.h \
-   H5FDsec2.h \
-   H5FDmulti.h
+   H5FDcore.h
 H5FDmulti.lo: \
    H5FDmulti.c \
    hdf5.h \
@@ -424,6 +364,54 @@ H5FDmulti.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
+   H5FDstdio.h \
+   H5FDgass.h \
+   H5FDmulti.h
+H5FDgass.lo: \
+   H5FDgass.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5api_adpt.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5FDpublic.h \
+   H5MMpublic.h \
+   H5FDgass.h
+H5FDstdio.lo: \
+   H5FDstdio.c \
+   hdf5.h \
+   H5public.h \
+   H5config.h \
+   H5api_adpt.h \
+   H5Ipublic.h \
+   H5Apublic.h \
+   H5ACpublic.h \
+   H5Bpublic.h \
+   H5Dpublic.h \
+   H5Epublic.h \
+   H5Fpublic.h \
+   H5FDpublic.h \
+   H5Gpublic.h \
+   H5HGpublic.h \
+   H5HLpublic.h \
+   H5MMpublic.h \
+   H5Opublic.h \
+   H5Ppublic.h \
+   H5Zpublic.h \
+   H5Rpublic.h \
+   H5RApublic.h \
+   H5Spublic.h \
+   H5Tpublic.h \
+   H5FDcore.h \
+   H5FDfamily.h \
+   H5FDmpio.h \
+   H5FDsec2.h \
+   H5FDstdio.h \
+   H5FDgass.h \
    H5FDmulti.h
 H5G.lo: \
    H5G.c \
@@ -520,8 +508,7 @@ H5Gnode.lo: \
    H5Dpublic.h \
    H5Zprivate.h \
    H5Zpublic.h \
-   H5Pprivate.h \
-   H5Ppublic.h
+   H5Pprivate.h
 H5Gstab.lo: \
    H5Gstab.c \
    H5private.h \
@@ -554,8 +541,7 @@ H5Gstab.lo: \
    H5Rprivate.h \
    H5Rpublic.h \
    H5Sprivate.h \
-   H5Spublic.h \
-   H5Dpublic.h
+   H5Spublic.h
 H5HG.lo: \
    H5HG.c \
    H5private.h \
@@ -573,8 +559,7 @@ H5HG.lo: \
    H5Epublic.h \
    H5HGprivate.h \
    H5HGpublic.h \
-   H5MFprivate.h \
-   H5MMprivate.h
+   H5MFprivate.h
 H5HL.lo: \
    H5HL.c \
    H5private.h \
@@ -593,7 +578,11 @@ H5HL.lo: \
    H5HLprivate.h \
    H5HLpublic.h \
    H5MFprivate.h \
-   H5MMprivate.h
+   H5MMprivate.h \
+   H5Pprivate.h \
+   H5Ppublic.h \
+   H5Dpublic.h \
+   H5Zpublic.h
 H5I.lo: \
    H5I.c \
    H5private.h \
@@ -658,8 +647,7 @@ H5O.lo: \
    H5Rpublic.h \
    H5Sprivate.h \
    H5Spublic.h \
-   H5Dpublic.h \
-   H5Zprivate.h
+   H5Dpublic.h
 H5Oattr.lo: \
    H5Oattr.c \
    H5private.h \
@@ -1535,6 +1523,18 @@ H5Z.lo: \
    H5Rpublic.h \
    H5Sprivate.h \
    H5Spublic.h \
-   H5Dpublic.h \
+   H5Dpublic.h
+H5Zdeflate.lo: \
+   H5Zdeflate.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5api_adpt.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5MMprivate.h \
+   H5MMpublic.h \
    H5Zprivate.h \
-   H5Zpublic.h
+   H5Zpublic.h \
+   H5Fprivate.h
