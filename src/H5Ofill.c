@@ -35,6 +35,7 @@ const H5O_class_t H5O_FILL[1] = {{
     H5O_fill_copy,		/*copy the native value			*/
     H5O_fill_size,		/*raw message size			*/
     H5O_fill_reset,		/*free internal memory			*/
+    NULL,		            /* free method			*/
     NULL,			/*get share method			*/
     NULL,			/*set share method			*/
     H5O_fill_debug,		/*debug the message			*/

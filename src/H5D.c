@@ -21,13 +21,13 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5ACprivate.h>	/* Cache			  	*/
 #include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>		/* Group headers		  	*/
 #include <H5HLprivate.h>	/* Name heap				*/
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
-#include <H5TBprivate.h>	/* Temporary buffers        		*/
 #include <H5Vprivate.h>		/* Vector and array functions		*/
 #include <H5Zprivate.h>		/* Data filters				*/
 
@@ -83,6 +83,24 @@ static intn interface_initialize_g = 0;
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
 H5D_t * H5D_new(const H5D_create_t *create_parms);
+
+/* Declare a free list to manage the H5D_t struct */
+H5FL_DEFINE_STATIC(H5D_t);
+
+/* Declare a free list to manage blocks of type conversion data */
+H5FL_BLK_DEFINE_STATIC(type_conv);
+
+/* Declare a free list to manage blocks of background conversion data */
+H5FL_BLK_DEFINE_STATIC(bkgr_conv);
+
+/* Declare a free list to manage blocks of fill conversion data */
+H5FL_BLK_DEFINE_STATIC(fill_conv);
+
+/* Declare a free list to manage blocks of VL data */
+H5FL_BLK_DEFINE_STATIC(vlen_vl_buf);
+
+/* Declare a free list to manage other blocks of VL data */
+H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
 
 
 /*--------------------------------------------------------------------------
@@ -815,7 +833,7 @@ H5D_new(const H5D_create_t *create_parms)
     /* check args */
     /* Nothing to check */
     
-    if (NULL==(ret_value = H5MM_calloc(sizeof(H5D_t)))) {
+    if (NULL==(ret_value = H5FL_ALLOC(H5D_t,1))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -1113,7 +1131,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	    H5O_close(&(new_dset->ent));
 	}
 	new_dset->ent.file = NULL;
-	H5MM_xfree(new_dset);
+	H5FL_FREE(H5D_t,new_dset);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1369,7 +1387,7 @@ done:
             H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
         }
         dataset->ent.file = NULL;
-        H5MM_xfree(dataset);
+        H5FL_FREE(H5D_t,dataset);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1423,7 +1441,7 @@ H5D_close(H5D_t *dataset)
      * above).
      */
     dataset->ent.file = NULL;
-    H5MM_xfree(dataset);
+    H5FL_FREE(H5D_t,dataset);
 
     if (free_failed) {
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1468,8 +1486,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
-    hid_t		bkg_id=FAIL;		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
@@ -1667,18 +1683,15 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if ((tconv_id = H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
+        if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
-        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
-				 (void **)&bkg_buf))<0) {
+        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,request_nelmts*dst_type_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for type conversion");
-        }
+                 "memory allocation failed for background conversion");
     }
 
 #ifdef QAK
@@ -1809,8 +1822,10 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
+        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
     if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
@@ -1848,8 +1863,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
-    hid_t		bkg_id=FAIL;   		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
@@ -2080,18 +2093,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if ((tconv_id=H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
+        if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
-        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
-				 (void **)&bkg_buf))<0) {
+        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,request_nelmts*dst_type_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for type conversion");
-        }
+                 "memory allocation failed for background conversion");
     }
 
 #ifdef QAK
@@ -2233,8 +2243,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
+        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
     if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
@@ -2421,7 +2433,6 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
     hssize_t    	npoints, ptsperbuf;
     size_t		size, bufsize=8*1024;
-    hid_t		buf_id = -1;
     haddr_t		addr;
     herr_t		ret_value = FAIL;
     void		*buf = NULL;
@@ -2448,10 +2459,12 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	    ptsperbuf = (hssize_t)MAX(1,
 				      bufsize/dset->create_parms->fill.size);
 	    bufsize = ptsperbuf * dset->create_parms->fill.size;
-	    if ((buf_id=H5TB_get_buf(bufsize, TRUE, &buf))<0) {
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-			    "unable to get buffer for fill value");
-	    }
+
+        /* Allocate temporary buffer */
+        if ((buf=H5FL_BLK_ALLOC(fill_conv,bufsize,0))==NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for fill buffer");
+
 	    H5V_array_fill(buf, dset->create_parms->fill.buf,
 			   dset->create_parms->fill.size, ptsperbuf);
 	    if (dset->create_parms->efl.nused) {
@@ -2520,10 +2533,8 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     ret_value = SUCCEED;
 
  done:
-    if (buf_id>=0 && H5TB_release_buf(buf_id)<0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "unable to release fill value temporary buffer");
-    }
+    if (buf)
+        H5FL_BLK_FREE(fill_conv,buf);
     FUNC_LEAVE(ret_value);
 }
 
@@ -2763,15 +2774,14 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 void *H5D_vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)info;
-    void *ret_value=NULL;       /* Pointer to return */
 
     FUNC_ENTER(H5D_vlen_get_buf_size_alloc, NULL);
 
     /* Get a temporary pointer to space for the VL data */
-    if (H5TB_resize_buf(vlen_bufsize->vl_tbuf_id,size,&ret_value)>=0)
+    if ((vlen_bufsize->vl_tbuf=H5FL_BLK_REALLOC(vlen_vl_buf,vlen_bufsize->vl_tbuf,size))!=NULL)
         vlen_bufsize->size+=size;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(vlen_bufsize->vl_tbuf);
 } /* end H5D_vlen_get_buf_size_alloc() */
 
 
@@ -2787,7 +2797,7 @@ void *H5D_vlen_get_buf_size_alloc(size_t size, void *info)
  *
  * Implementation: This routine actually performs the read with a custom
  *      memory manager which basically just counts the bytes requested and
- *      uses a temporary memory buffer (through the H5TB API) to make certain
+ *      uses a temporary memory buffer (through the H5FL API) to make certain
  *      enough space is available to perform the read.  Then the temporary
  *      buffer is released and the number of bytes allocated is returned.
  *      Kinda kludgy, but easier than the other method of trying to figure out
@@ -2806,7 +2816,6 @@ herr_t
 H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t *point, void *op_data)
 {
     H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)op_data;
-    void *tbuf;         /* pointer to temporary buffer */
     H5T_t	*dt = NULL;
     herr_t ret_value=FAIL;
 
@@ -2820,7 +2829,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Make certain there is enough fixed-length buffer available */
-    if (H5TB_resize_buf(vlen_bufsize->fl_tbuf_id,H5T_get_size(dt),&tbuf)<0)
+    if ((vlen_bufsize->fl_tbuf=H5FL_BLK_REALLOC(vlen_fl_buf,vlen_bufsize->fl_tbuf,H5T_get_size(dt)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf");
 
     /* Select point to read in */
@@ -2828,7 +2837,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point");
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5Dread(vlen_bufsize->dataset_id,type_id,vlen_bufsize->mspace_id,vlen_bufsize->fspace_id,vlen_bufsize->xfer_pid,tbuf)<0)
+    if(H5Dread(vlen_bufsize->dataset_id,type_id,vlen_bufsize->mspace_id,vlen_bufsize->fspace_id,vlen_bufsize->xfer_pid,vlen_bufsize->fl_tbuf)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 
     /* Set the correct return value, if we get this far */
@@ -2851,7 +2860,7 @@ done:
  *
  * Implementation: This routine actually performs the read with a custom
  *      memory manager which basically just counts the bytes requested and
- *      uses a temporary memory buffer (through the H5TB API) to make certain
+ *      uses a temporary memory buffer (through the H5FL API) to make certain
  *      enough space is available to perform the read.  Then the temporary
  *      buffer is released and the number of bytes allocated is returned.
  *      Kinda kludgy, but easier than the other method of trying to figure out
@@ -2896,9 +2905,9 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't create dataspace");
 
     /* Grab the temporary buffers required */
-    if((vlen_bufsize.fl_tbuf_id=H5TB_get_buf(1,0,NULL))<0)
+    if((vlen_bufsize.fl_tbuf=H5FL_BLK_ALLOC(vlen_fl_buf,1,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
-    if((vlen_bufsize.vl_tbuf_id=H5TB_get_buf(1,0,NULL))<0)
+    if((vlen_bufsize.vl_tbuf=H5FL_BLK_ALLOC(vlen_vl_buf,1,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
 
     /* Change to the custom memory allocation routines for reading VL data */
@@ -2924,10 +2933,10 @@ done:
         H5Sclose(vlen_bufsize.fspace_id);
     if(vlen_bufsize.mspace_id>0)
         H5Sclose(vlen_bufsize.mspace_id);
-    if(vlen_bufsize.fl_tbuf_id>0)
-        H5TB_release_buf(vlen_bufsize.fl_tbuf_id);
-    if(vlen_bufsize.vl_tbuf_id>0)
-        H5TB_release_buf(vlen_bufsize.vl_tbuf_id);
+    if(vlen_bufsize.fl_tbuf!=NULL)
+        H5FL_BLK_FREE(vlen_fl_buf,vlen_bufsize.fl_tbuf);
+    if(vlen_bufsize.vl_tbuf!=NULL)
+        H5FL_BLK_FREE(vlen_vl_buf,vlen_bufsize.vl_tbuf);
     if(vlen_bufsize.xfer_pid>0)
         H5Pclose(vlen_bufsize.xfer_pid);
 

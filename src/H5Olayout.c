@@ -10,6 +10,7 @@
 #include <H5private.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -18,6 +19,7 @@ static void *H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_layout_free (void *_mesg);
 static herr_t H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream,
 			       intn indent, intn fwidth);
 
@@ -31,6 +33,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_copy,        	/*copy the native value         */
     H5O_layout_size,        	/*size of message on disk       */
     NULL,                   	/*reset method                  */
+    H5O_layout_free,        	/*free the struct         */
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     H5O_layout_debug,       	/*debug the message             */
@@ -42,6 +45,9 @@ const H5O_class_t H5O_LAYOUT[1] = {{
 #define PABLO_MASK      H5O_layout_mask
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
+
+/* Declare a free list to manage the H5O_layout_t struct */
+H5FL_DEFINE(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------
@@ -77,7 +83,7 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_layout_t)))) {
+    if (NULL==(mesg = H5FL_ALLOC(H5O_layout_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -92,8 +98,8 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* Dimensionality */
     mesg->ndims = *p++;
     if (mesg->ndims>H5O_LAYOUT_NDIMS) {
-	H5MM_xfree(mesg);
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+        H5FL_FREE(H5O_layout_t,mesg);
+        HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
 		      "dimensionality is too large");
     }
 
@@ -195,8 +201,8 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest=H5MM_calloc(sizeof(H5O_layout_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+    if (!dest && NULL==(dest=H5FL_ALLOC(H5O_layout_t,0))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     
@@ -245,6 +251,34 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
 
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_layout_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, March 11, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_layout_free (void *mesg)
+{
+    FUNC_ENTER (H5O_layout_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_layout_t,mesg);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_layout_debug

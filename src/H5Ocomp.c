@@ -9,6 +9,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -24,6 +25,7 @@ static void *H5O_pline_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_pline_copy (const void *_mesg, void *_dest);
 static size_t H5O_pline_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset (void *_mesg);
+static herr_t H5O_pline_free (void *_mesg);
 static herr_t H5O_pline_debug (H5F_t *f, const void *_mesg,
 			       FILE * stream, intn indent, intn fwidth);
 
@@ -37,11 +39,15 @@ const H5O_class_t H5O_PLINE[1] = {{
     H5O_pline_copy,		/* copy the native value	*/
     H5O_pline_size,		/* size of raw message		*/
     H5O_pline_reset,		/* reset method			*/
+    H5O_pline_free,		/* free method			*/
     NULL,			/* get share method		*/
     NULL, 			/* set share method		*/
     H5O_pline_debug,		/* debug the message		*/
 }};
 
+
+/* Declare a free list to manage the H5O_pline_t struct */
+H5FL_DEFINE(H5O_pline_t);
 
 
 /*-------------------------------------------------------------------------
@@ -75,7 +81,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
     assert(p);
 
     /* Decode */
-    if (NULL==(pline = H5MM_calloc(sizeof *pline))) {
+    if (NULL==(pline = H5FL_ALLOC(H5O_pline_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -137,14 +143,14 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
 
  done:
     if (NULL==ret_value && pline) {
-	if (pline->filter) {
-	    for (i=0; i<pline->nfilters; i++) {
-		H5MM_xfree(pline->filter[i].name);
-		H5MM_xfree(pline->filter[i].cd_values);
-	    }
-	    H5MM_xfree(pline->filter);
-	}
-	H5MM_xfree(pline);
+        if (pline->filter) {
+            for (i=0; i<pline->nfilters; i++) {
+                H5MM_xfree(pline->filter[i].name);
+                H5MM_xfree(pline->filter[i].cd_values);
+            }
+            H5MM_xfree(pline->filter);
+        }
+        H5FL_FREE(H5O_pline_t,pline);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -249,7 +255,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
     
     FUNC_ENTER (H5O_pline_copy, NULL);
 
-    if (!dst && NULL==(dst = H5MM_malloc (sizeof *dst))) {
+    if (!dst && NULL==(dst = H5FL_ALLOC (H5O_pline_t,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -293,7 +299,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	    }
 	    H5MM_xfree(dst->filter);
 	}
-	if (!_dst) H5MM_xfree(dst);
+	if (!_dst) H5FL_FREE(H5O_pline_t,dst);
     }
 
     FUNC_LEAVE (ret_value);
@@ -379,11 +385,38 @@ H5O_pline_reset (void *mesg)
 
     assert (pline);
     for (i=0; i<pline->nfilters; i++) {
-	H5MM_xfree(pline->filter[i].name);
-	H5MM_xfree(pline->filter[i].cd_values);
+        H5MM_xfree(pline->filter[i].name);
+        H5MM_xfree(pline->filter[i].cd_values);
     }
     H5MM_xfree(pline->filter);
     HDmemset(pline, 0, sizeof *pline);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_pline_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, March 11, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_pline_free (void *mesg)
+{
+    FUNC_ENTER (H5O_pline_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_pline_t,mesg);
 
     FUNC_LEAVE (SUCCEED);
 }

@@ -157,7 +157,6 @@ H5D.lo: \
    $(srcdir)/H5MMprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5TBprivate.h \
    $(srcdir)/H5Vprivate.h
 H5E.lo: \
    $(srcdir)/H5E.c \
@@ -1607,18 +1606,6 @@ H5Tvlen.lo: \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h
-H5TB.lo: \
-   $(srcdir)/H5TB.c \
-   $(srcdir)/H5private.h \
-   $(srcdir)/H5public.h \
-   H5pubconf.h \
-   $(srcdir)/H5api_adpt.h \
-   H5config.h \
-   $(srcdir)/H5Iprivate.h \
-   $(srcdir)/H5Ipublic.h \
-   $(srcdir)/H5Eprivate.h \
-   $(srcdir)/H5Epublic.h \
-   $(srcdir)/H5MMprivate.h
 H5V.lo: \
    $(srcdir)/H5V.c \
    $(srcdir)/H5private.h \

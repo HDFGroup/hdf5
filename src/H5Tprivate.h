@@ -74,13 +74,13 @@ typedef enum {
  * Internal data structure for passing information to H5T_vlen_get_buf_size
  */
 typedef struct {
-    hid_t dataset_id;       /* ID of the dataset we are working on */
-    hid_t fspace_id;        /* ID of the file dataset's dataspace we are working on */
-    hid_t mspace_id;        /* ID of the memory dataset's dataspace we are working on */
-    hid_t fl_tbuf_id;       /* ID of the temporary buffer we are using for fixed-length data */
-    hid_t vl_tbuf_id;       /* ID of the temporary buffer we are using for VL data */
-    hid_t xfer_pid;         /* ID of the dataset xfer property list */
-    hsize_t size;           /* Accumulated number of bytes for the selection */
+    hid_t dataset_id;   /* ID of the dataset we are working on */
+    hid_t fspace_id;    /* ID of the file dataset's dataspace we are working on */
+    hid_t mspace_id;    /* ID of the memory dataset's dataspace we are working on */
+    void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
+    void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
+    hid_t xfer_pid;     /* ID of the dataset xfer property list */
+    hsize_t size;       /* Accumulated number of bytes for the selection */
 } H5T_vlen_bufsize_t;
 
 /*

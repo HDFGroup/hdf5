@@ -20,6 +20,7 @@ static char             RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -46,6 +47,7 @@ const H5O_class_t H5O_ATTR[1] = {{
     H5O_attr_copy,		/* copy the native value        */
     H5O_attr_size,		/* size of raw message          */
     H5O_attr_reset,		/* reset method                 */
+    NULL,		        /* default free method			*/
     NULL,			/* get share method		*/
     NULL,			/* set share method		*/
     H5O_attr_debug,		/* debug the message            */
@@ -56,6 +58,12 @@ const H5O_class_t H5O_ATTR[1] = {{
 /* Interface initialization */
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
+
+/* Declare external the free list for H5S_t's */
+H5FL_EXTERN(H5S_t);
+
+/* Declare external the free list for H5S_simple_t's */
+H5FL_EXTERN(H5S_simple_t);
 
 /*--------------------------------------------------------------------------
  NAME
@@ -135,14 +143,14 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     p += H5O_ALIGN(attr->dt_size);
 
     /* decode the attribute dataspace */
-    if (NULL==(attr->ds = H5MM_calloc(sizeof(H5S_t)))) {
+    if (NULL==(attr->ds = H5FL_ALLOC(H5S_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
         attr->ds->extent.type = H5S_SIMPLE;
         HDmemcpy(&(attr->ds->extent.u.simple),simple, sizeof(H5S_simple_t));
-        H5MM_xfree(simple);
+        H5FL_FREE(H5S_simple_t,simple);
     } else {
         attr->ds->extent.type = H5S_SCALAR;
     }

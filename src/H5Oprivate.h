@@ -76,6 +76,7 @@ typedef struct H5O_class_t {
     void	*(*copy)(const void*, void*);    /*copy native value         */
     size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
     herr_t	(*reset)(void *);		 /*free nested data structs  */
+    herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);
     herr_t      (*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
     herr_t	(*debug)(H5F_t*, const void*, FILE*, intn, intn);

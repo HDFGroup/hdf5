@@ -25,6 +25,7 @@
 #include <H5Bprivate.h>		/*B-link trees				*/
 #include <H5Eprivate.h>		/*error handling			*/
 #include <H5Fprivate.h>		/*file access				*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gpkg.h>		/*me					*/
 #include <H5HLprivate.h>	/*local heap				*/
 #include <H5MFprivate.h>	/*file memory management		*/
@@ -96,6 +97,15 @@ H5B_class_t H5B_SNODE[1] = {{
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
+
+/* Declare a free list to manage the H5G_node_t struct */
+H5FL_DEFINE_STATIC(H5G_node_t);
+
+/* Declare a free list to manage arrays of H5G_entry_t's */
+H5FL_ARR_DEFINE_STATIC(H5G_entry_t,-1);
+
+/* Declare a free list to manage blocks of symbol node data */
+H5FL_BLK_DEFINE_STATIC(symbol_node);
 
 
 /*-------------------------------------------------------------------------
@@ -250,26 +260,26 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
     assert(f);
     assert(H5B_INS_FIRST == op);
 
-    if (NULL==(sym = H5MM_calloc(sizeof(H5G_node_t)))) {
+    if (NULL==(sym = H5FL_ALLOC(H5G_node_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
     size = H5G_node_size(f);
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, size))) {
-	H5MM_xfree(sym);
+	H5FL_FREE(H5G_node_t,sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to allocate file space");
     }
     sym->dirty = TRUE;
-    sym->entry = H5MM_calloc(2*H5G_NODE_K(f)*sizeof(H5G_entry_t));
+    sym->entry = H5FL_ARR_ALLOC(H5G_entry_t,2*H5G_NODE_K(f),1);
     if (NULL==sym->entry) {
-	H5MM_xfree (sym);
+	H5FL_FREE(H5G_node_t,sym);
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
     if (H5AC_set(f, H5AC_SNODE, *addr_p, sym) < 0) {
-	H5MM_xfree(sym->entry);
-	H5MM_xfree(sym);
+	H5FL_ARR_FREE(H5G_entry_t,sym->entry);
+	H5FL_FREE(H5G_node_t,sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to cache symbol table leaf node");
     }
@@ -333,46 +343,49 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
      * Write the symbol node to disk.
      */
     if (sym->dirty) {
-	size = H5G_node_size(f);
-	if (NULL==(buf = p = H5MM_malloc(size))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
+        size = H5G_node_size(f);
 
-	/* magic number */
-	HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
-	p += 4;
+        /* Allocate temporary buffer */
+        if ((buf=H5FL_BLK_ALLOC(symbol_node,size, 0))==NULL)
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                   "memory allocation failed");
+        p=buf;
 
-	/* version number */
-	*p++ = H5G_NODE_VERS;
+        /* magic number */
+        HDmemcpy(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
+        p += 4;
 
-	/* reserved */
-	*p++ = 0;
+        /* version number */
+        *p++ = H5G_NODE_VERS;
 
-	/* number of symbols */
-	UINT16ENCODE(p, sym->nsyms);
+        /* reserved */
+        *p++ = 0;
 
-	/* entries */
-	H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
-	HDmemset(p, 0, size - (p - buf));
+        /* number of symbols */
+        UINT16ENCODE(p, sym->nsyms);
+
+        /* entries */
+        H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
+        HDmemset(p, 0, size - (p - buf));
 
 #ifdef H5_HAVE_PARALLEL
-	if (IS_H5FD_MPIO(f))
-	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+        if (IS_H5FD_MPIO(f))
+            H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* H5_HAVE_PARALLEL */
-	status = H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, buf);
-	buf = H5MM_xfree(buf);
-	if (status < 0)
-	    HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
-			  "unable to write symbol table node to the file");
+        status = H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, buf);
+        if (status < 0)
+            HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
+                  "unable to write symbol table node to the file");
+        if (buf)
+            H5FL_BLK_FREE(symbol_node,buf);
     }
     /*
      * Destroy the symbol node?	 This might happen if the node is being
      * preempted from the cache.
      */
     if (destroy) {
-	sym->entry = H5MM_xfree(sym->entry);
-	H5MM_xfree(sym);
+	sym->entry = H5FL_ARR_FREE(H5G_entry_t,sym->entry);
+	H5FL_FREE(H5G_node_t,sym);
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -420,12 +433,12 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
      * Initialize variables.
      */
     size = H5G_node_size(f);
-    if (NULL==(p = buf = H5MM_malloc(size))) {
+    if ((buf=H5FL_BLK_ALLOC(symbol_node,size,0))==NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed for symbol table node");
-    }
-    if (NULL==(sym = H5MM_calloc(sizeof(H5G_node_t))) ||
-	NULL==(sym->entry=H5MM_calloc(2*H5G_NODE_K(f)*sizeof(H5G_entry_t)))) {
+    p=buf;
+    if (NULL==(sym = H5FL_ALLOC(H5G_node_t,1)) ||
+	NULL==(sym->entry=H5FL_ARR_ALLOC(H5G_entry_t,2*H5G_NODE_K(f),1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -456,17 +469,17 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL,
 		    "unable to decode symbol table entries");
     }
-    buf = H5MM_xfree(buf);
 
     ret_value = sym;
 
   done:
+    if (buf)
+        H5FL_BLK_FREE(symbol_node,buf);
     if (!ret_value) {
-	buf = H5MM_xfree(buf);
-	if (sym) {
-	    sym->entry = H5MM_xfree(sym->entry);
-	    sym = H5MM_xfree(sym);
-	}
+        if (sym) {
+            sym->entry = H5FL_ARR_FREE(H5G_entry_t,sym->entry);
+            sym = H5FL_FREE(H5G_node_t,sym);
+        }
     }
     FUNC_LEAVE(ret_value);
 }

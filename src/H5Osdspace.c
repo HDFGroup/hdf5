@@ -18,6 +18,7 @@ static char		RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -29,9 +30,10 @@ static void *H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_sdspace_copy(const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_sdspace_reset(void *_mesg);
+static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, const void *_mesg,
 				FILE * stream, intn indent, intn fwidth);
-static herr_t H5O_sdspace_reset(void *_mesg);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_SDSPACE[1] = {{
@@ -43,6 +45,7 @@ const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_sdspace_copy,	    	/* copy the native value		*/
     H5O_sdspace_size,	    	/* size of symbol table entry	    	*/
     H5O_sdspace_reset,	    	/* default reset method		    	*/
+    H5O_sdspace_free,		    /* free method			*/
     NULL,		    	/* get share method			*/
     NULL, 			/* set share method			*/
     H5O_sdspace_debug,	        /* debug the message		    	*/
@@ -53,6 +56,12 @@ const H5O_class_t H5O_SDSPACE[1] = {{
 /* Is the interface initialized? */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Declare external the free list for H5S_simple_t's */
+H5FL_EXTERN(H5S_simple_t);
+
+/* Declare external the free list for hsize_t arrays */
+H5FL_ARR_EXTERN(hsize_t);
 
 /*--------------------------------------------------------------------------
  NAME
@@ -96,7 +105,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     assert (!sh);
 
     /* decode */
-    if ((sdim = H5MM_calloc(sizeof(H5S_simple_t))) != NULL) {
+    if ((sdim = H5FL_ALLOC(H5S_simple_t,1)) != NULL) {
 	version = *p++;
 	if (version!=H5O_SDSPACE_VERSION) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
@@ -111,8 +120,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 	p += 5; /*reserved*/
 
 	if (sdim->rank > 0) {
-	    if (NULL==(sdim->size=H5MM_malloc(sizeof(sdim->size[0])*
-					      sdim->rank))) {
+	    if (NULL==(sdim->size=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
 	    }
@@ -120,8 +128,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 		H5F_decode_length (f, p, sdim->size[u]);
 	    }
 	    if (flags & H5S_VALID_MAX) {
-		if (NULL==(sdim->max=H5MM_malloc(sizeof(sdim->max[0])*
-						 sdim->rank))) {
+		if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
 		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 				 "memory allocation failed");
 		}
@@ -131,8 +138,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 	    }
 #ifdef LATER
 	    if (flags & H5S_VALID_PERM) {
-		if (NULL==(sdim->perm=H5MM_malloc(sizeof(sdim->perm[0])*
-						  sdim->rank))) {
+		if (NULL==(sdim->perm=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
 		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 				 "memory allocation failed");
 		}
@@ -145,7 +151,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     ret_value = (void*)sdim;	/*success*/
     
   done:
-    if (!ret_value) H5MM_xfree(sdim);
+    if (!ret_value) H5FL_FREE(H5S_simple_t,sdim);
     FUNC_LEAVE(ret_value);
 }
 
@@ -248,7 +254,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 
     /* check args */
     assert(src);
-    if (!dst && NULL==(dst = H5MM_calloc(sizeof(H5S_simple_t)))) {
+    if (!dst && NULL==(dst = H5FL_ALLOC(H5S_simple_t,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -257,14 +263,14 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     HDmemcpy(dst, src, sizeof(H5S_simple_t));
     
     if (src->size) {
-	if (NULL==(dst->size = H5MM_calloc(src->rank*sizeof(src->size[0])))) {
+	if (NULL==(dst->size = H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
 	HDmemcpy (dst->size, src->size, src->rank*sizeof(src->size[0]));
     }
     if (src->max) {
-	if (NULL==(dst->max=H5MM_calloc(src->rank*sizeof(src->max[0])))) {
+	if (NULL==(dst->max=H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
@@ -272,7 +278,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     }
 #ifdef LATER
     if (src->perm) {
-	if (NULL==(dst->perm=H5MM_calloc(src->rank*sizeof(src->perm[0])))) {
+	if (NULL==(dst->perm=H5FL_ARR_ALLOC(hsize_t,src->rank,0))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
@@ -281,36 +287,6 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 #endif
 
     FUNC_LEAVE((void *) dst);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_sdspace_reset
- *
- * Purpose:	Frees the inside of a dataspace message and resets it to some
- *		initial value.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 30, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_sdspace_reset(void *_mesg)
-{
-    H5S_simple_t	*mesg = (H5S_simple_t*)_mesg;
-    
-    FUNC_ENTER (H5O_sdspace_reset, FAIL);
-    mesg->size = H5MM_xfree (mesg->size);
-    mesg->max = H5MM_xfree (mesg->max);
-#ifdef LATER
-    mesg->perm = H5MM_xfree (mesg->perm);
-#endif
-    FUNC_LEAVE (SUCCEED);
 }
 
 /*--------------------------------------------------------------------------
@@ -358,6 +334,61 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
 #endif
 
     FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_sdspace_reset
+ *
+ * Purpose:	Frees the inside of a dataspace message and resets it to some
+ *		initial value.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_sdspace_reset(void *_mesg)
+{
+    H5S_simple_t	*mesg = (H5S_simple_t*)_mesg;
+    
+    FUNC_ENTER (H5O_sdspace_reset, FAIL);
+
+    H5S_release_simple(mesg);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_sdsdpace_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 30, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_sdspace_free (void *mesg)
+{
+    FUNC_ENTER (H5O_sdspace_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5S_simple_t,mesg);
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 /*--------------------------------------------------------------------------

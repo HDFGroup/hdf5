@@ -38,6 +38,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>
 #include <H5Iprivate.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 
 /* Interface initialialization? */
@@ -106,14 +107,14 @@ static H5I_id_info_t *H5I_cache_g[ID_CACHE_SIZE];
 /* Array of pointers to atomic groups */
 static H5I_id_group_t *H5I_id_group_list_g[H5I_NGROUPS];
 
-/* Pointer to the atom node free list */
-static H5I_id_info_t *H5I_id_free_list_g = NULL;
+/* Declare a free list to manage the H5I_id_info_t struct */
+H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
-static H5I_id_info_t *H5I_get_id_node(void);
-static herr_t H5I_release_id_node(H5I_id_info_t *id);
+#ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);
+#endif /* H5I_DEBUG_OUTPUT */
 
 
 /*-------------------------------------------------------------------------
@@ -169,37 +170,27 @@ intn
 H5I_term_interface(void)
 {
     H5I_id_group_t	*grp_ptr;
-    H5I_id_info_t	*curr;
     H5I_type_t		grp;
     intn		n=0;
 
     if (interface_initialize_g) {
+        /* How many groups are still being used? */
+        for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
+            if ((grp_ptr=H5I_id_group_list_g[grp]) && grp_ptr->id_list)
+                n++;
+        }
 
-	/* How many groups are still being used? */
-	for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
-	    if ((grp_ptr=H5I_id_group_list_g[grp]) && grp_ptr->id_list) {
-		n++;
-	    }
-	}
+        /* If no groups are used then clean  up */
+        if (0==n) {
+            for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
+                grp_ptr = H5I_id_group_list_g[grp];
+                H5MM_xfree(grp_ptr);
+                H5I_id_group_list_g[grp] = NULL;
+            }
+        }
 
-	/* If no groups are used then clean  up */
-	if (0==n) {
-	    for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
-		grp_ptr = H5I_id_group_list_g[grp];
-		H5MM_xfree(grp_ptr);
-		H5I_id_group_list_g[grp] = NULL;
-	    }
-
-	    /* Release the global free list */
-	    while (H5I_id_free_list_g) {
-		curr = H5I_id_free_list_g;
-		H5I_id_free_list_g = H5I_id_free_list_g->next;
-		H5MM_xfree(curr);
-	    }
-	}
-
-	/* Mark interface closed */
-	interface_initialize_g = 0;
+        /* Mark interface closed */
+        interface_initialize_g = 0;
     }
     return n;
 }
@@ -432,7 +423,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
 #endif /*H5I_DEBUG*/
 		    /* Add ID struct to free list */
 		    next = cur->next;
-		    H5I_release_id_node(cur);
+		    H5FL_FREE(H5I_id_info_t,cur);
 		} else {
 		    if (prev) prev->next = cur;
 		    else grp_ptr->id_list[i] = cur;
@@ -441,7 +432,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
 	    } else {
 		/* Add ID struct to free list */
 		next = cur->next;
-		H5I_release_id_node(cur);
+		H5FL_FREE(H5I_id_info_t,cur);
 	    }
 	}
 	if (!prev) grp_ptr->id_list[i]=NULL;
@@ -552,7 +543,7 @@ H5I_register(H5I_type_t grp, void *object)
     if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(FAIL);
     }
-    if ((id_ptr = H5I_get_id_node()) == NULL) {
+    if ((id_ptr = H5FL_ALLOC(H5I_id_info_t,0)) == NULL) {
 	HGOTO_DONE(FAIL);
     }
 
@@ -793,7 +784,7 @@ H5I_remove(hid_t id)
 	    last_id->next = curr_id->next;
 	}
 	ret_value = curr_id->obj_ptr;
-	H5I_release_id_node(curr_id);
+	H5FL_FREE(H5I_id_info_t,curr_id);
     } else {
 	/* couldn't find the ID in the proper place */
 	HGOTO_DONE(NULL);
@@ -883,7 +874,7 @@ H5I_dec_ref(hid_t id)
 		H5I_remove(id);
 		ret_value = 0;
 	    } else {
-		ret_value = FAIL;
+		ret_value = 1;
 	    }
 	} else {
 	    ret_value = --(id_ptr->count);
@@ -1076,69 +1067,6 @@ H5I_find_id(hid_t id)
 
   done:
     FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5I_get_id_node
- *
- * Purpose:	Either gets an ID node from the free list (if there is one
- *		available) or allocate a node.
- *
- * Return:	Success:	ID pointer
- *
- *		Failure:	NULL
- *
- * Programmer:	
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static H5I_id_info_t *
-H5I_get_id_node(void)
-{
-    H5I_id_info_t	*ret_value = NULL;
-
-    FUNC_ENTER(H5I_get_id_node, NULL);
-
-    if (H5I_id_free_list_g != NULL) {
-	ret_value = H5I_id_free_list_g;
-	H5I_id_free_list_g = H5I_id_free_list_g->next;
-    } else if (NULL==(ret_value = H5MM_malloc(sizeof(H5I_id_info_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
-
-    FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5I_release_id_node
- *
- * Purpose:	Release an ID node and return it to the free list.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5I_release_id_node(H5I_id_info_t *id)
-{
-    FUNC_ENTER(H5I_release_id_node, FAIL);
-
-    /* Insert the ID at the beginning of the free list */
-    id->next = H5I_id_free_list_g;
-    H5I_id_free_list_g = id;
-
-    FUNC_LEAVE(SUCCEED);
 }
 
 

@@ -19,6 +19,8 @@
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = 0;
 
+static herr_t H5S_select_none(H5S_t *space);
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -96,6 +98,86 @@ H5S_none_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_none_select_deserialize() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_none
+ PURPOSE
+    Specify that nothing is selected in the extent
+ USAGE
+    herr_t H5S_select_none(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function de-selects the entire extent for a dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t H5S_select_none (H5S_t *space)
+{
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_select_none, FAIL);
+
+    /* Check args */
+    assert(space);
+
+    /* Remove current selection first */
+    if(H5S_select_release(space)<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL,
+            "can't release hyperslab");
+    } /* end if */
+
+    /* Set selection type */
+    space->select.type=H5S_SEL_NONE;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_none() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_none
+ PURPOSE
+    Specify that nothing is selected in the extent
+ USAGE
+    herr_t H5Sselect_none(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function de-selects the entire extent for a dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Sselect_none (hid_t spaceid)
+{
+    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5Sselect_none, FAIL);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Change to "none" selection */
+    if((ret_value=H5S_select_none(space))<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    } /* end if */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_none() */
 
 
 /*--------------------------------------------------------------------------

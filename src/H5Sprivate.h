@@ -39,6 +39,9 @@ typedef struct H5S_simple_t {
     intn rank;          /* Number of dimensions */
     hsize_t *size;      /* Current size of the dimensions */
     hsize_t *max;       /* Maximum size of the dimensions */
+#ifdef LATER
+    hsize_t *perm;      /* Dimension permutation array */
+#endif /* LATER */
 } H5S_simple_t;
 
 /* Extent container */
@@ -82,8 +85,7 @@ typedef struct H5S_hyper_node_tag {
         size_t size;    /* Size of cached block (in elements) */
         uintn rleft;    /* Read elements left to access in block */
         uintn wleft;    /* Write elements left to access in block */
-        hid_t block_id; /* Temporary buffer ID */
-        uint8_t *block; /* Pointer into temporary buffer for cache */
+        uint8_t *block; /* Pointer into buffer for cache */
         uint8_t *rpos;  /* Pointer to current read location within block */
         uint8_t *wpos;  /* Pointer to current write location within block */
     } cinfo;
@@ -324,10 +326,6 @@ __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ herr_t H5S_select_release(H5S_t *space);
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
 				    H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
-				   size_t num_elem, const hssize_t **coord);
-__DLL__ herr_t H5S_select_all(H5S_t *space);
-__DLL__ herr_t H5S_select_none(H5S_t *space);
 __DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ intn H5S_extend(H5S_t *space, const hsize_t *size);
 __DLL__ herr_t H5S_set_extent_simple(H5S_t *space, int rank,

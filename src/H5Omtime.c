@@ -9,6 +9,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -18,6 +19,7 @@ static void *H5O_mtime_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_mtime_free (void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			     intn indent, intn fwidth);
 
@@ -31,6 +33,7 @@ const H5O_class_t H5O_MTIME[1] = {{
     H5O_mtime_copy,		/*copy the native value		*/
     H5O_mtime_size,		/*raw message size		*/
     NULL,			/*free internal memory		*/
+    H5O_mtime_free,		            /* free method			*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     H5O_mtime_debug,		/*debug the message		*/
@@ -39,6 +42,9 @@ const H5O_class_t H5O_MTIME[1] = {{
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
+
+/* Declare a free list to manage the time_t struct */
+H5FL_DEFINE(time_t);
 
 
 /*-------------------------------------------------------------------------
@@ -149,7 +155,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 #endif
     
     /* The return value */
-    if (NULL==(mesg = H5MM_calloc(sizeof(time_t)))) {
+    if (NULL==(mesg = H5FL_ALLOC(time_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -226,8 +232,8 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 
     /* check args */
     assert(mesg);
-    if (!dest && NULL==(dest = H5MM_calloc(sizeof(time_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+    if (!dest && NULL==(dest = H5FL_ALLOC(time_t,0))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     
@@ -267,6 +273,33 @@ H5O_mtime_size(H5F_t UNUSED *f, const void UNUSED *mesg)
     assert(mesg);
 
     FUNC_LEAVE(16);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_mtime_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 30, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_mtime_free (void *mesg)
+{
+    FUNC_ENTER (H5O_mtime_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(time_t,mesg);
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 

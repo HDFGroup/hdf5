@@ -20,6 +20,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5private.h>		/* Generic Functions			  */
 #include <H5Iprivate.h>		/* ID Functions		  */
 #include <H5Eprivate.h>		/* Error handling		  */
+#include <H5FLprivate.h>	/* Free Lists	  */
 #include <H5MMprivate.h>	/* Memory Management functions		  */
 #include <H5Oprivate.h>		/* object headers		  */
 #include <H5Sprivate.h>		/* Data-space functions			  */
@@ -43,6 +44,18 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 /* Global var whose value comes from environment variable */
 hbool_t         H5_mpi_opt_types_g = FALSE;
 #endif
+
+/* Declare a free list to manage the H5S_simple_t struct */
+H5FL_DEFINE(H5S_simple_t);
+
+/* Declare a free list to manage the H5S_t struct */
+H5FL_DEFINE(H5S_t);
+
+/* Declare a free list to manage the array's of hsize_t's */
+H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
+
+/* Declare a free list to manage the array's of hssize_t's */
+H5FL_ARR_DEFINE(hssize_t,H5S_MAX_RANK);
 
 
 /*--------------------------------------------------------------------------
@@ -327,7 +340,7 @@ H5S_create(H5S_class_t type)
     FUNC_ENTER(H5S_create, NULL);
 
     /* Create a new data space */
-    if((ret_value = H5MM_calloc(sizeof(H5S_t)))!=NULL)
+    if((ret_value = H5FL_ALLOC(H5S_t,1))!=NULL)
     {
         ret_value->extent.type = type;
         ret_value->select.type = H5S_SEL_ALL;  /* Entire extent selected by default */
@@ -455,7 +468,7 @@ H5S_close(H5S_t *ds)
 
     /* If there was a previous offset for the selection, release it */
     if(ds->select.offset!=NULL)
-        ds->select.offset=H5MM_xfree(ds->select.offset);
+        ds->select.offset=H5FL_ARR_FREE(hssize_t,ds->select.offset);
 
     /* Release selection (this should come before the extent release) */
     H5S_select_release(ds);
@@ -464,7 +477,7 @@ H5S_close(H5S_t *ds)
     H5S_extent_release(ds);
 
     /* Release the main structure */
-    H5MM_xfree(ds);
+    H5FL_FREE(H5S_t,ds);
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -526,9 +539,13 @@ H5S_release_simple(H5S_simple_t *simple)
     assert(simple);
 
     if(simple->size)
-        H5MM_xfree(simple->size);
+        H5FL_ARR_FREE(hsize_t,simple->size);
     if(simple->max)
-        H5MM_xfree(simple->max);
+        H5FL_ARR_FREE(hsize_t,simple->max);
+#ifdef LATER
+    if(simple->perm)
+        H5FL_ARR_FREE(hsize_t,simple->perm);
+#endif /* LATER */
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -649,15 +666,13 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 
         case H5S_SIMPLE:
             if (src->u.simple.size) {
-                dst->u.simple.size = H5MM_malloc(src->u.simple.rank *
-                                  sizeof(src->u.simple.size[0]));
+                dst->u.simple.size = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
                 for (i = 0; i < src->u.simple.rank; i++) {
                     dst->u.simple.size[i] = src->u.simple.size[i];
                 }
             }
             if (src->u.simple.max) {
-                dst->u.simple.max = H5MM_malloc(src->u.simple.rank *
-                                 sizeof(src->u.simple.max[0]));
+                dst->u.simple.max = H5FL_ARR_ALLOC(hsize_t,src->u.simple.rank,0);
                 for (i = 0; i < src->u.simple.rank; i++) {
                     dst->u.simple.max[i] = src->u.simple.max[i];
                 }
@@ -700,7 +715,7 @@ H5S_copy(const H5S_t *src)
 
     FUNC_ENTER(H5S_copy, NULL);
 
-    if (NULL==(dst = H5MM_malloc(sizeof(H5S_t)))) {
+    if (NULL==(dst = H5FL_ALLOC(H5S_t,0))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
     *dst = *src;
@@ -1132,7 +1147,7 @@ H5S_read(H5G_entry_t *ent)
     /* check args */
     assert(ent);
 
-    if (NULL==(ds = H5MM_calloc(sizeof(H5S_t)))) {
+    if (NULL==(ds = H5FL_ALLOC(H5S_t,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -1147,7 +1162,7 @@ H5S_read(H5G_entry_t *ent)
     ds->select.type=H5S_SEL_ALL;
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(ds->select.offset = H5MM_calloc(ds->extent.u.simple.rank*sizeof(hssize_t)))) {
+    if (NULL==(ds->select.offset = H5FL_ARR_ALLOC(hssize_t,ds->extent.u.simple.rank,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
@@ -1397,10 +1412,10 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
     
     /* If there was a previous offset for the selection, release it */
     if(space->select.offset!=NULL)
-        space->select.offset=H5MM_xfree(space->select.offset);
+        space->select.offset=H5FL_ARR_FREE(hssize_t,space->select.offset);
 
     /* Allocate space for the offset and set it to zeros */
-    if (NULL==(space->select.offset = H5MM_calloc(rank*sizeof(hssize_t)))) {
+    if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,rank,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -1435,12 +1450,12 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 
         /* Set the rank and copy the dims */
         space->extent.u.simple.rank = rank;
-        space->extent.u.simple.size = H5MM_malloc(rank*sizeof(hsize_t));
+        space->extent.u.simple.size = H5FL_ARR_ALLOC(hsize_t,rank,0);
         HDmemcpy(space->extent.u.simple.size, dims, sizeof(hsize_t) * rank);
 
         /* Copy the maximum dimensions if specified */
         if(max!=NULL) {
-            space->extent.u.simple.max = H5MM_malloc(rank*sizeof(hsize_t));
+            space->extent.u.simple.max = H5FL_ARR_ALLOC(hsize_t,rank,0);
             HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
@@ -1807,7 +1822,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
     /* Allocate space for new offset */
     if(space->select.offset==NULL) {
-        if (NULL==(space->select.offset = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))) {
+        if (NULL==(space->select.offset = H5FL_ARR_ALLOC(hssize_t,space->extent.u.simple.rank,0))) {
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
         }

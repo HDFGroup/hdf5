@@ -525,4 +525,9 @@ __DLL__ void H5F_addr_decode(H5F_t *, const uint8_t**/*in,out*/,
 __DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 			     const unsigned long objno[2]);
 
+/* Functions for allocation/releasing chunks */
+__DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);
+__DLL__ void * H5F_istore_chunk_free(void *chunk);
+__DLL__ void * H5F_istore_chunk_realloc(void *chunk, size_t new_size);
+
 #endif

@@ -18,6 +18,7 @@
 #include <H5ACprivate.h>
 #include <H5Eprivate.h>
 #include <H5Fprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>
 #include <H5MFprivate.h>
 #include <H5MMprivate.h>
@@ -84,6 +85,22 @@ static const H5O_class_t *const message_type_g[] = {
 static void *(*H5O_fast_g[H5G_NCACHED]) (const H5G_cache_t *,
 					 const H5O_class_t *,
 					 void *);
+
+/* Declare a free list to manage the H5O_t struct */
+H5FL_DEFINE_STATIC(H5O_t);
+
+/* Declare a PQ free list to manage the H5O_mesg_t array information */
+H5FL_ARR_DEFINE_STATIC(H5O_mesg_t,-1);
+
+/* Declare a PQ free list to manage the H5O_chunk_t array information */
+H5FL_ARR_DEFINE_STATIC(H5O_chunk_t,-1);
+
+/* Declare a PQ free list to manage the chunk image information */
+H5FL_BLK_DEFINE_STATIC(chunk_image);
+
+/* Declare external the free list for time_t's */
+H5FL_EXTERN(time_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_init_interface
@@ -159,7 +176,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     }
     
     /* allocate the object header and fill in header fields */
-    if (NULL==(oh = H5MM_calloc(sizeof(H5O_t)))) {
+    if (NULL==(oh = H5FL_ALLOC(H5O_t,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -170,7 +187,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the chunk list and initialize the first chunk */
     oh->nchunks = 1;
     oh->alloc_nchunks = H5O_NCHUNKS;
-    if (NULL==(oh->chunk=H5MM_malloc(oh->alloc_nchunks*sizeof(H5O_chunk_t)))) {
+    if (NULL==(oh->chunk=H5FL_ARR_ALLOC(H5O_chunk_t,oh->alloc_nchunks,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -178,7 +195,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     oh->chunk[0].dirty = TRUE;
     oh->chunk[0].addr = tmp_addr;
     oh->chunk[0].size = size_hint;
-    if (NULL==(oh->chunk[0].image = H5MM_calloc(size_hint))) {
+    if (NULL==(oh->chunk[0].image = H5FL_BLK_ALLOC(chunk_image,size_hint,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -186,7 +203,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the message list and initialize the first message */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
-    if (NULL==(oh->mesg=H5MM_calloc(oh->alloc_nmesgs*sizeof(H5O_mesg_t)))) {
+    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,oh->alloc_nmesgs,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -199,7 +216,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 
     /* cache it */
     if (H5AC_set(f, H5AC_OHDR, ent->header, oh) < 0) {
-	H5MM_xfree(oh);
+	H5FL_FREE(H5O_t,oh);
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
 		      "unable to cache object header");
     }
@@ -350,7 +367,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
     assert(!_udata2);
 
     /* allocate ohdr and init chunk list */
-    if (NULL==(oh = H5MM_calloc(sizeof(H5O_t)))) {
+    if (NULL==(oh = H5FL_ALLOC(H5O_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -385,7 +402,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
     /* build the message array */
     oh->alloc_nmesgs = MAX(H5O_NMESGS, nmesgs);
-    if (NULL==(oh->mesg=H5MM_calloc(oh->alloc_nmesgs*sizeof(H5O_mesg_t)))) {
+    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,oh->alloc_nmesgs,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -396,7 +413,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
 	    size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
-	    H5O_chunk_t *x = H5MM_realloc (oh->chunk, na*sizeof(H5O_chunk_t));
+	    H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 	    if (!x) {
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
@@ -410,7 +427,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	oh->chunk[chunkno].dirty = FALSE;
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
-	if (NULL==(oh->chunk[chunkno].image = H5MM_malloc(chunk_size))) {
+	if (NULL==(oh->chunk[chunkno].image = H5FL_BLK_ALLOC(chunk_image,chunk_size,0))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
@@ -478,18 +495,18 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
     }
     ret_value = oh;
 
-  done:
+done:
     if (!ret_value && oh) {
-	/*
-	 * Free resources.
-	 */
-	int i;
-	for (i = 0; i < oh->nchunks; i++) {
-	    oh->chunk[i].image = H5MM_xfree(oh->chunk[i].image);
-	}
-	oh->chunk = H5MM_xfree(oh->chunk);
-	oh->mesg = H5MM_xfree(oh->mesg);
-	oh = H5MM_xfree(oh);
+        /*
+         * Free resources.
+         */
+        int i;
+
+        for (i = 0; i < oh->nchunks; i++)
+            oh->chunk[i].image = H5FL_BLK_FREE(chunk_image,oh->chunk[i].image);
+        oh->chunk = H5FL_ARR_FREE(H5O_chunk_t,oh->chunk);
+        oh->mesg = H5FL_ARR_FREE(H5O_mesg_t,oh->mesg);
+        H5FL_FREE(H5O_t,oh);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -655,26 +672,25 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	  it calls its own version of malloc and free and does checks on the mem.
 	  causes problems with this code so i am taking it out for the win32 debug 
 	  version until i can figure out a way around it*/
-#if !defined(WIN32) && !defined(_DEBUG)
-	for (i = 0; i < oh->nchunks; i++) {
-	    oh->chunk[i].image = H5MM_xfree(oh->chunk[i].image);
-	}
-#endif
-	oh->chunk = H5MM_xfree(oh->chunk);
+/* I commented this back in to use the new free list routines - QAK 3/23/00 */
+/* #if !defined(WIN32) && !defined(_DEBUG) */
+	for (i = 0; i < oh->nchunks; i++)
+	    oh->chunk[i].image = H5FL_BLK_FREE(chunk_image,oh->chunk[i].image);
+/* #endif */
+	oh->chunk = H5FL_ARR_FREE(H5O_chunk_t,oh->chunk);
 
 	/* destroy messages */
 	for (i = 0; i < oh->nmesgs; i++) {
 	    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
-		H5O_reset (H5O_SHARED, oh->mesg[i].native);
+            H5O_free(H5O_SHARED, oh->mesg[i].native);
 	    } else {
-		H5O_reset(oh->mesg[i].type, oh->mesg[i].native);
+            H5O_free(oh->mesg[i].type, oh->mesg[i].native);
 	    }
-	    oh->mesg[i].native = H5MM_xfree(oh->mesg[i].native);
 	}
-	oh->mesg = H5MM_xfree(oh->mesg);
+	oh->mesg = H5FL_ARR_FREE(H5O_mesg_t,oh->mesg);
 
 	/* destroy object header */
-	H5MM_xfree(oh);
+	H5FL_FREE(H5O_t,oh);
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -739,8 +755,11 @@ H5O_free (const H5O_class_t *type, void *mesg)
     FUNC_ENTER (H5O_free, NULL);
     
     if (mesg) {
-	H5O_reset (type, mesg);
-	H5MM_xfree (mesg);
+        H5O_reset (type, mesg);
+        if (NULL!=(type->free))
+            (type->free)(mesg);
+        else
+            H5MM_xfree (mesg);
     }
 
     FUNC_LEAVE (NULL);
@@ -1195,7 +1214,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     intn		idx, sequence;
     intn		ret_value = FAIL;
     size_t		size = 0;
-    H5O_shared_t	*sh_mesg = NULL;
+    H5O_shared_t	sh_mesg = {0,{{0,0}}};
 
     FUNC_ENTER(H5O_modify, FAIL);
 
@@ -1241,27 +1260,23 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL,
 			     "message class is not sharable");
 	    }
-	    if (NULL==(sh_mesg = H5MM_calloc (sizeof *sh_mesg))) {
-		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			     "memory allocation failed");
-	    }
-	    if ((type->get_share)(ent->file, mesg, sh_mesg/*out*/)<0) {
+	    if ((type->get_share)(ent->file, mesg, &sh_mesg/*out*/)<0) {
 		/*
 		 * If the message isn't shared then turn off the shared bit
 		 * and treat it as an unshared message.
 		 */
 		H5E_clear ();
 		flags &= ~H5O_FLAG_SHARED;
-	    } else if (sh_mesg->in_gh) {
+	    } else if (sh_mesg.in_gh) {
 		/*
 		 * The shared message is stored in the global heap.
 		 * Increment the reference count on the global heap message.
 		 */
-		if (H5HG_link (ent->file, &(sh_mesg->u.gh), 1)<0) {
+		if (H5HG_link (ent->file, &(sh_mesg.u.gh), 1)<0) {
 		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
 				 "unable to adjust shared object link count");
 		}
-		size = (H5O_SHARED->raw_size)(ent->file, sh_mesg);
+		size = (H5O_SHARED->raw_size)(ent->file, &sh_mesg);
 	    } else {
 		/*
 		 * The shared message is stored in some other object header.
@@ -1269,15 +1284,15 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 * new object header. Increment the reference count on that
 		 * object header.
 		 */
-		if (sh_mesg->u.ent.file->shared != ent->file->shared) {
+		if (sh_mesg.u.ent.file->shared != ent->file->shared) {
 		    HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL,
 				"interfile hard links are not allowed");
 		}
-		if (H5O_link (&(sh_mesg->u.ent), 1)<0) {
+		if (H5O_link (&(sh_mesg.u.ent), 1)<0) {
 		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
 				 "unable to adjust shared object link count");
 		}
-		size = (H5O_SHARED->raw_size)(ent->file, sh_mesg);
+		size = (H5O_SHARED->raw_size)(ent->file, &sh_mesg);
 	    }
 	}
 	if (0==(flags & H5O_FLAG_SHARED)) {
@@ -1305,8 +1320,11 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 
     /* Copy the native value into the object header */
     if (flags & H5O_FLAG_SHARED) {
-	oh->mesg[idx].native = sh_mesg;
-	sh_mesg = NULL;
+	    if (NULL==(oh->mesg[idx].native = H5MM_malloc (sizeof (H5O_shared_t)))) {
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			     "memory allocation failed");
+	    }
+        HDmemcpy(oh->mesg[idx].native,&sh_mesg,sizeof(H5O_shared_t));
     } else {
 	if (oh->mesg[idx].native) {
 	    H5O_reset (oh->mesg[idx].type, oh->mesg[idx].native);
@@ -1327,7 +1345,6 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     ret_value = sequence;
 
   done:
-    H5MM_xfree(sh_mesg);
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0) {
 	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, FAIL,
 		      "unable to release object header");
@@ -1381,7 +1398,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 
     /* Update the native part */
     if (NULL==oh->mesg[idx].native) {
-	if (NULL==(oh->mesg[idx].native = H5MM_malloc(sizeof(time_t)))) {
+	if (NULL==(oh->mesg[idx].native = H5FL_ALLOC(time_t,0))) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
 			  "memory allocation failed for modification time "
 			  "message");
@@ -1627,9 +1644,8 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 	    old_addr = oh->chunk[chunkno].image;
 
 	    /* Be careful not to indroduce garbage */
-	    oh->chunk[chunkno].image = H5MM_realloc(old_addr,
-						    (oh->chunk[chunkno].size +
-						     delta));
+	    oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image,old_addr,
+						    (oh->chunk[chunkno].size + delta));
 	    if (NULL==oh->chunk[chunkno].image) {
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");
@@ -1654,7 +1670,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
 	size_t na = oh->alloc_nmesgs + H5O_NMESGS;
-	H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 	if (NULL==x) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
@@ -1677,7 +1693,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
     old_addr = oh->chunk[chunkno].image;
     old_size = oh->chunk[chunkno].size;
     oh->chunk[chunkno].size += delta;
-    oh->chunk[chunkno].image = H5MM_realloc(old_addr,
+    oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image,old_addr,
 					    oh->chunk[chunkno].size);
     if (NULL==oh->chunk[chunkno].image) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1793,7 +1809,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     if (oh->nchunks >= oh->alloc_nchunks) {
 	size_t na = oh->alloc_nchunks + H5O_NCHUNKS;
-	H5O_chunk_t *x = H5MM_realloc (oh->chunk, na*sizeof(H5O_chunk_t));
+	H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 	if (!x) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
@@ -1805,7 +1821,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     oh->chunk[chunkno].dirty = TRUE;
     oh->chunk[chunkno].addr = HADDR_UNDEF;
     oh->chunk[chunkno].size = size;
-    if (NULL==(oh->chunk[chunkno].image = p = H5MM_calloc(size))) {
+    if (NULL==(oh->chunk[chunkno].image = p = H5FL_BLK_ALLOC(chunk_image,size,1))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -1817,7 +1833,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
         int old_alloc=oh->alloc_nmesgs;
 	size_t na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
-	H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 	if (!x) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
@@ -1974,7 +1990,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
 	    int old_alloc=oh->alloc_nmesgs;
 	    size_t na = oh->alloc_nmesgs + H5O_NMESGS;
-	    H5O_mesg_t *x = H5MM_realloc (oh->mesg, na*sizeof(H5O_mesg_t));
+	    H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 	    if (!x) {
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");

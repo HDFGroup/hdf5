@@ -20,6 +20,7 @@ static char		RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -33,6 +34,7 @@ static void *H5O_dtype_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest);
 static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
+static herr_t H5O_dtype_free (void *_mesg);
 static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
 				   H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
@@ -50,6 +52,7 @@ const H5O_class_t H5O_DTYPE[1] = {{
     H5O_dtype_copy,		/* copy the native value	*/
     H5O_dtype_size,		/* size of raw message		*/
     H5O_dtype_reset,		/* reset method			*/
+    H5O_dtype_free,		    /* free method			*/
     H5O_dtype_get_share,	/* get share method		*/
     H5O_dtype_set_share,	/* set share method		*/
     H5O_dtype_debug,		/* debug the message		*/
@@ -60,6 +63,10 @@ const H5O_class_t H5O_DTYPE[1] = {{
 /* Interface initialization */
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
+
+/* Declare external the free list for H5T_t's */
+H5FL_EXTERN(H5T_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_dtype_decode_helper
@@ -201,24 +208,25 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
                 dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
                 dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
-                dt->u.compnd.memb[i].type = H5MM_calloc (sizeof(H5T_t));
+                dt->u.compnd.memb[i].type = H5FL_ALLOC (H5T_t,1);
+                if (NULL==dt->u.compnd.memb[i].type) {
+                    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                           "memory allocation failed");
+                }
 
                 /* Reserved */
                 *pp += 4;
                 
                 /* Dimension sizes */
-                for (j=0; j<4; j++) {
-                UINT32DECODE(*pp, dt->u.compnd.memb[i].dim[j]);
-                }
-                if (NULL==dt->u.compnd.memb[i].type) {
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                           "memory allocation failed");
-                }
+                for (j=0; j<4; j++)
+                    UINT32DECODE(*pp, dt->u.compnd.memb[i].dim[j]);
+
                 dt->u.compnd.memb[i].type->ent.header = HADDR_UNDEF;
                 if (H5O_dtype_decode_helper(f, pp, dt->u.compnd.memb[i].type)<0) {
-                for (j=0; j<=i; j++) H5MM_xfree(dt->u.compnd.memb[j].name);
-                H5MM_xfree(dt->u.compnd.memb);
-                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
+                    for (j=0; j<=i; j++)
+                        H5MM_xfree(dt->u.compnd.memb[j].name);
+                    H5MM_xfree(dt->u.compnd.memb);
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
                           "unable to decode member type");
                 }
 
@@ -231,9 +239,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 
                 /* Total member size */
                 dt->u.compnd.memb[i].size = dt->u.compnd.memb[i].type->size;
-                for (j=0; j<dt->u.compnd.memb[i].ndims; j++) {
+                for (j=0; j<dt->u.compnd.memb[i].ndims; j++)
                     dt->u.compnd.memb[i].size *= dt->u.compnd.memb[i].dim[j];
-                }
             }
             break;
 
@@ -243,7 +250,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              */
             dt->u.enumer.nmembs = dt->u.enumer.nalloc = flags & 0xffff;
             assert(dt->u.enumer.nmembs>=0);
-            if (NULL==(dt->parent=H5MM_calloc(sizeof(H5T_t)))) {
+            if (NULL==(dt->parent=H5FL_ALLOC(H5T_t,1))) {
                 HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                       "memory allocation failed");
             }
@@ -300,7 +307,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             dt->u.vlen.type = (H5T_vlen_type_t)(flags & 0x0f);
 
             /* Decode base type of VL information */
-            if (NULL==(dt->parent = H5MM_calloc(sizeof(H5T_t))))
+            if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
                 HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
@@ -691,15 +698,15 @@ H5O_dtype_decode(H5F_t *f, const uint8_t *p,
     /* check args */
     assert(p);
 
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     dt->ent.header = HADDR_UNDEF;
 
     if (H5O_dtype_decode_helper(f, &p, dt) < 0) {
-	H5MM_xfree(dt);
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
+        H5FL_FREE(H5T_t,dt);
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
 		      "can't decode type");
     }
     FUNC_LEAVE(dt);
@@ -771,14 +778,14 @@ H5O_dtype_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (dst = H5T_copy(src, H5T_COPY_ALL))) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't copy type");
-    }
+    if (NULL == (dst = H5T_copy(src, H5T_COPY_ALL)))
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't copy type");
+
     /* was result already allocated? */
     if (_dst) {
-	*((H5T_t *) _dst) = *dst;
-	H5MM_xfree(dst);
-	dst = (H5T_t *) _dst;
+        *((H5T_t *) _dst) = *dst;
+        H5FL_FREE(H5T_t,dst);
+        dst = (H5T_t *) _dst;
     }
     FUNC_LEAVE((void *) dst);
 }
@@ -884,15 +891,42 @@ H5O_dtype_reset(void *_mesg)
     FUNC_ENTER(H5O_dtype_reset, FAIL);
 
     if (dt) {
-	if (NULL==(tmp = H5MM_malloc(sizeof(H5T_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+        if (NULL==(tmp = H5FL_ALLOC(H5T_t,0))) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
-	}
-	*tmp = *dt;
-	H5T_close(tmp);
-	HDmemset(dt, 0, sizeof(H5T_t));
+        }
+        *tmp = *dt;
+        H5T_close(tmp);
+        HDmemset(dt, 0, sizeof(H5T_t));
     }
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 30, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_free (void *mesg)
+{
+    FUNC_ENTER (H5O_dtype_free, FAIL);
+
+    assert (mesg);
+
+    H5FL_FREE(H5T_t,mesg);
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 
