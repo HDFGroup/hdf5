@@ -1,4 +1,0 @@
-H5LTff.lo:          $(srcdir)/H5LTff.f90
-H5IMff.lo:          $(srcdir)/H5IMff.f90
-H5TBff.lo:          $(srcdir)/H5TBff.f90
-
