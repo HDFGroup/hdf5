@@ -58,6 +58,7 @@ struct H5D_t {
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
     hid_t               dcpl_id;        /* dataset creation property id */
+    H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* data layout                  */
     /* Cache some frequently accessed values from the DCPL */
     H5O_efl_t           efl;            /* External file list information */
@@ -73,6 +74,11 @@ typedef enum {
     H5D_ALLOC_EXTEND,           /* Dataset's dataspace is being extended */
     H5D_ALLOC_WRITE             /* Dataset is being extended */
 } H5D_time_alloc_t;
+
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
 /******************************/
 /* Package Private Prototypes */

@@ -79,25 +79,21 @@ static herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 static herr_t 
 H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dcpl_cache_t *dcpl_cache, 
             const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
 H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dcpl_cache_t *dcpl_cache, 
             const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, const void *buf);
 static herr_t
 H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dcpl_cache_t *dcpl_cache, 
             const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
 H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dcpl_cache_t *dcpl_cache, 
             const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, const void *buf);
 #ifdef H5_HAVE_PARALLEL
@@ -280,11 +276,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5D_get_dxpl_cache
+    H5D_get_dxpl_cache_real
  PURPOSE
     Get all the values for the DXPL cache.
  USAGE
-    herr_t H5D_get_dxpl_cache(dxpl_id, cache)
+    herr_t H5D_get_dxpl_cache_real(dxpl_id, cache)
         hid_t dxpl_id;          IN: DXPL to query
         H5D_dxpl_cache_t *cache;IN/OUT: DXPL cache to fill with values
  RETURNS
@@ -298,12 +294,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
+H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 {
     H5P_genplist_t *dx_plist;   /* Data transfer property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_get_dxpl_cache,FAIL)
+    FUNC_ENTER_NOAPI(H5D_get_dxpl_cache_real,FAIL)
 
     /* Check args */
     assert(cache);
@@ -356,58 +352,49 @@ H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5D_get_dxpl_cache() */
+}   /* H5D_get_dxpl_cache_real() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5D_get_dcpl_cache
+    H5D_get_dxpl_cache
  PURPOSE
-    Get all the values for the DCPL cache.
+    Get all the values for the DXPL cache.
  USAGE
-    herr_t H5D_get_dcpl_cache(dcpl_id, cache)
-        hid_t dcpl_id;          IN: DCPL to query
-        H5D_dcpl_cache_t *cache;IN/OUT: DCPL cache to fill with values
+    herr_t H5D_get_dxpl_cache(dxpl_id, cache)
+        hid_t dxpl_id;          IN: DXPL to query
+        H5D_dxpl_cache_t *cache;IN/OUT: DXPL cache to fill with values
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
-    Query all the values from a DCPL that are needed by internal routines
+    Query all the values from a DXPL that are needed by internal routines
     within the library.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
-H5D_get_dcpl_cache(hid_t dcpl_id, H5D_dcpl_cache_t *cache)
+herr_t
+H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 {
-    H5P_genplist_t *dc_plist;   /* Data transfer property list */
+    H5P_genplist_t *dx_plist;   /* Data transfer property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_get_dcpl_cache)
+    FUNC_ENTER_NOAPI(H5D_get_dxpl_cache,FAIL)
 
     /* Check args */
     assert(cache);
 
-    /* Get the dataset transfer property list */
-    if (NULL == (dc_plist = H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
-    /* Get I/O pipeline info */
-    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &cache->pline)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve I/O pipeline info")
-
-    /* Get fill value info */
-    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &cache->fill)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill value info")
-
-    /* Get fill time info */
-    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &cache->fill_time)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill time")
+    /* Check for the default DXPL */
+    if(dxpl_id==H5P_DATASET_XFER_DEFAULT)
+        HDmemcpy(cache,&H5D_def_dxpl_cache,sizeof(H5D_dxpl_cache_t));
+    else
+        if(H5D_get_dxpl_cache_real(dxpl_id,cache)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTGET, FAIL, "Can't retrieve DXPL values")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5D_get_dcpl_cache() */
+}   /* H5D_get_dxpl_cache() */
 
 
 /*-------------------------------------------------------------------------
@@ -658,7 +645,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
     H5D_dxpl_cache_t dxpl_cache;        /* Data transfer property cache */
-    H5D_dcpl_cache_t dcpl_cache;        /* Dataset creation property cache */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
@@ -679,10 +665,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if((snelmts = H5S_get_select_npoints(mem_space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
-
-    /* Fill the DCPL cache values for later use */
-    if (H5D_get_dcpl_cache(dataset->dcpl_id,&dcpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dcpl cache")
 
     /* Fill the DXPL cache values for later use */
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
@@ -717,20 +699,20 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
 
         /* Retrieve dataset's fill-value properties */
-        if(H5P_is_fill_value_defined(&dcpl_cache.fill, &fill_status)<0)
+        if(H5P_is_fill_value_defined(&dataset->dcpl_cache.fill, &fill_status)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
 
         /* Should be impossible, but check anyway... */
         if(fill_status == H5D_FILL_VALUE_UNDEFINED &&
-                (dcpl_cache.fill_time == H5D_FILL_TIME_ALLOC || dcpl_cache.fill_time == H5D_FILL_TIME_IFSET))
+                (dataset->dcpl_cache.fill_time == H5D_FILL_TIME_ALLOC || dataset->dcpl_cache.fill_time == H5D_FILL_TIME_IFSET))
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read failed: dataset doesn't exist, no data can be read")
 
         /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
-        if(dcpl_cache.fill_time == H5D_FILL_TIME_NEVER)
+        if(dataset->dcpl_cache.fill_time == H5D_FILL_TIME_NEVER)
             HGOTO_DONE(SUCCEED)
 
         /* Go fill the user's selection with the dataset's fill value */
-        if(H5D_fill(dcpl_cache.fill.buf,dataset->type,buf,mem_type,mem_space,dxpl_id)<0)
+        if(H5D_fill(dataset->dcpl_cache.fill.buf,dataset->type,buf,mem_type,mem_space,dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
         else
             HGOTO_DONE(SUCCEED)
@@ -782,12 +764,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
-        if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, &dcpl_cache, 
+        if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
                 &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
-        if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, &dcpl_cache, 
+        if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
                 &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end else */
@@ -869,7 +851,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
 #endif /*H5_HAVE_PARALLEL*/
     H5D_dxpl_cache_t dxpl_cache;        /* Data transfer property cache */
-    H5D_dcpl_cache_t dcpl_cache;        /* Dataset creation property cache */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
@@ -899,10 +880,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Check if we are allowed to write to this file */
     if (0==(H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
-
-    /* Fill the DCPL cache values for later use */
-    if (H5D_get_dcpl_cache(dataset->dcpl_id,&dcpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dcpl cache")
 
     /* Fill the DXPL cache values for later use */
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
@@ -998,19 +975,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         
 #ifdef H5_HAVE_PARALLEL
     /* Don't reset the transfer mode if we can't or won't use it */
-    if(!use_par_opt_io || !H5T_path_noop(tpath)) {
+    if(!use_par_opt_io || !H5T_path_noop(tpath))
         H5D_io_assist_mpio(dxpl_id, &dxpl_cache, &xfer_mode_changed);
-    } /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
-        if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, &dcpl_cache,
+        if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
                 &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
-        if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, &dcpl_cache,
+        if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
                 &dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
@@ -1069,7 +1045,7 @@ done:
 static herr_t 
 H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
     const H5S_t *mem_space, const H5S_t *file_space, H5T_path_t *tpath,
-    H5S_conv_t *sconv, const H5D_dcpl_cache_t *dcpl_cache,
+    H5S_conv_t *sconv,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
@@ -1108,7 +1084,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
         status = (sconv->read)(dataset->ent.file, &(dataset->layout), 
-             dcpl_cache, (H5D_storage_t *)&(dataset->efl), H5T_get_size(dataset->type), 
+             &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), H5T_get_size(dataset->type), 
              file_space, mem_space, dxpl_cache, dxpl_id, buf/*out*/);
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
@@ -1203,7 +1179,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
         n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                dcpl_cache, (H5D_storage_t *)&(dataset->efl), src_type_size, file_space, 
+                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), src_type_size, file_space, 
                 &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1297,7 +1273,6 @@ done:
 static herr_t
 H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dcpl_cache_t *dcpl_cache,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, const void *buf)
 {
@@ -1333,7 +1308,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 	H5_timer_begin(&timer);
 #endif
         status = (sconv->write)(dataset->ent.file, &(dataset->layout),
-                dcpl_cache, (H5D_storage_t *)&(dataset->efl), H5T_get_size(dataset->type),
+                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), H5T_get_size(dataset->type),
                 file_space, mem_space, dxpl_cache, dxpl_id, buf);
 #ifdef H5S_DEBUG
 	    H5_timer_end(&(sconv->stats[0].write_timer), &timer);
@@ -1443,7 +1418,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
             H5_timer_begin(&timer);
 #endif
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                 dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, 
+                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, 
                  &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -1468,7 +1443,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         H5_timer_begin(&timer);
 #endif
         status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-              dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, &file_iter,
+              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, &file_iter,
               smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -1528,7 +1503,6 @@ UNUSED
 #endif /* NDEBUG */
     nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dcpl_cache_t *dcpl_cache, 
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
@@ -1599,7 +1573,7 @@ UNUSED
 
             /* Perform the actual read operation */
             status = (sconv->read)(dataset->ent.file, &(dataset->layout),
-                    dcpl_cache, &store, H5T_get_size(dataset->type),
+                    &dataset->dcpl_cache, &store, H5T_get_size(dataset->type),
                     chunk_info->fspace, chunk_info->mspace, dxpl_cache, dxpl_id, buf);
         
             /* Check return value from optimized read */
@@ -1719,7 +1693,7 @@ UNUSED
             assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
                  dataset->layout.type==H5D_COMPACT);
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                    dcpl_cache, &store, src_type_size, chunk_info->fspace, 
+                    &dataset->dcpl_cache, &store, src_type_size, chunk_info->fspace, 
                     &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1791,11 +1765,6 @@ UNUSED
     } /* end while */
      
 done:
-    if (tconv_buf && NULL==dxpl_cache->tconv_buf)
-        H5FL_BLK_FREE(type_conv,tconv_buf);
-    if (bkg_buf && NULL==dxpl_cache->bkgr_buf)
-        H5FL_BLK_FREE(type_conv,bkg_buf);
-        
     /* Release selection iterators, if necessary */
     if(file_iter_init) {
         if(H5S_select_iter_release(&file_iter)<0)
@@ -1810,6 +1779,11 @@ done:
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
 
+    if (tconv_buf && NULL==dxpl_cache->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==dxpl_cache->bkgr_buf)
+        H5FL_BLK_FREE(type_conv,bkg_buf);
+        
     /* Release chunk mapping information */
     if(H5D_destroy_chunk_map(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping")
@@ -1842,7 +1816,6 @@ UNUSED
 #endif /* NDEBUG */
 nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dcpl_cache_t *dcpl_cache,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, const void *buf)
 {
@@ -1936,7 +1909,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
             /* Perform the actual write operation */
             status = (sconv->write)(dataset->ent.file, &(dataset->layout),
-                    dcpl_cache, &store, H5T_get_size(dataset->type),
+                    &dataset->dcpl_cache, &store, H5T_get_size(dataset->type),
                     chunk_info->fspace, chunk_info->mspace, dxpl_cache, dxpl_id, buf);
         
             /* Check return value from optimized write */
@@ -2088,7 +2061,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 H5_timer_begin(&timer);
 #endif
                 n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                        dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
                         &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -2114,7 +2087,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5_timer_begin(&timer);
 #endif
             status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-                        dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
                         &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -2148,11 +2121,6 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end while */
 
 done:
-    if (tconv_buf && NULL==dxpl_cache->tconv_buf)
-        H5FL_BLK_FREE(type_conv,tconv_buf);
-    if (bkg_buf && NULL==dxpl_cache->bkgr_buf)
-        H5FL_BLK_FREE(type_conv,bkg_buf);
-        
     /* Release selection iterators, if necessary */
     if(file_iter_init) {
         if(H5S_select_iter_release(&file_iter)<0)
@@ -2167,6 +2135,11 @@ done:
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
  
+    if (tconv_buf && NULL==dxpl_cache->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==dxpl_cache->bkgr_buf)
+        H5FL_BLK_FREE(type_conv,bkg_buf);
+        
     /* Release chunk mapping information */
     if(H5D_destroy_chunk_map(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release chunk mapping")

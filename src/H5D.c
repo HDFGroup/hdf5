@@ -75,6 +75,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_t H5D_def_dset;
 
+/* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
+H5D_dxpl_cache_t H5D_def_dxpl_cache;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_init
@@ -359,6 +362,13 @@ H5D_init_interface(void)
     /* Get the default fill value */
     if (H5P_get(def_dcpl, H5D_CRT_FILL_VALUE_NAME, &H5D_def_dset.fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value")
+
+    /* Reset the "default DXPL cache" information */
+    HDmemset(&H5D_def_dxpl_cache,0,sizeof(H5D_dxpl_cache_t));
+
+    /* Get the default DXPL cache information */
+    if (H5D_get_dxpl_cache_real(H5P_DATASET_XFER_DEFAULT, &H5D_def_dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve default DXPL info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -937,6 +947,57 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_xfer_close() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5D_get_dcpl_cache
+ PURPOSE
+    Get all the values for the DCPL cache.
+ USAGE
+    herr_t H5D_get_dcpl_cache(dcpl_id, cache)
+        hid_t dcpl_id;          IN: DCPL to query
+        H5D_dcpl_cache_t *cache;IN/OUT: DCPL cache to fill with values
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Query all the values from a DCPL that are needed by internal routines
+    within the library.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5D_get_dcpl_cache(hid_t dcpl_id, H5D_dcpl_cache_t *cache)
+{
+    H5P_genplist_t *dc_plist;   /* Data transfer property list */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_get_dcpl_cache)
+
+    /* Check args */
+    assert(cache);
+
+    /* Get the dataset transfer property list */
+    if (NULL == (dc_plist = H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+    /* Get I/O pipeline info */
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &cache->pline)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve I/O pipeline info")
+
+    /* Get fill value info */
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &cache->fill)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill value info")
+
+    /* Get fill time info */
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &cache->fill_time)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve fill time")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5D_get_dcpl_cache() */
 
 
 /*-------------------------------------------------------------------------
@@ -2080,6 +2141,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
 
+    /* Get the dataset's DCPL cache info */
+    if (H5D_get_dcpl_cache(new_dset->dcpl_id,&new_dset->dcpl_cache)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't fill DCPL cache")
+
     /* 
      * Give the dataset a name.  That is, create and add a new
      * "H5G_entry_t" object to the group this dataset is being initially
@@ -2443,6 +2508,10 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
         if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset,H5D_ALLOC_OPEN, TRUE, FALSE)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize file storage")
     }
+
+    /* Get the dataset's DCPL cache info */
+    if (H5D_get_dcpl_cache(dataset->dcpl_id,&dataset->dcpl_cache)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't fill DCPL cache")
 
     /* Success */
     ret_value = dataset;
