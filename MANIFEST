@@ -500,12 +500,6 @@
 ./fortran/configure
 ./fortran/configure.in
 
-./fortran/bin/config.guess
-./fortran/bin/config.sub
-./fortran/bin/install-sh
-./fortran/bin/ltconfig
-./fortran/bin/ltmain.sh
-
 ./fortran/config/BlankForm
 ./fortran/config/alphaev67-linux-gnu
 ./fortran/config/commence.in
@@ -639,12 +633,6 @@
 ./c++/aclocal.m4
 ./c++/configure
 ./c++/configure.in
-
-./c++/bin/config.guess
-./c++/bin/config.sub
-./c++/bin/install-sh
-./c++/bin/ltconfig
-./c++/bin/ltmain.sh
 
 ./c++/config/BlankForm
 ./c++/config/commence.in
