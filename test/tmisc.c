@@ -3385,6 +3385,13 @@ test_misc20(void)
 
 } /* end test_misc20() */
     
+/*
+    test_misc21 and test_misc22 should be executed only when SZIP is present
+    and encoder is available
+                             EIP 2004/8/04
+*/
+#ifdef H5_HAVE_FILTER_SZIP
+#ifdef H5_SZIP_CAN_ENCODE
 /****************************************************************
 **
 **  test_misc21(): Test that late allocation time is treated the same
@@ -3393,7 +3400,6 @@ test_misc20(void)
 **                      don't exactly match the dataspace.
 **
 ****************************************************************/
-#ifdef H5_HAVE_FILTER_SZIP
 static void
 test_misc21(void)
 {
@@ -3450,7 +3456,6 @@ test_misc21(void)
 
     HDfree(buf);
 } /* end test_misc21() */
-#endif /* H5_HAVE_FILTER_SZIP */
     
 /****************************************************************
 **
@@ -3459,8 +3464,6 @@ test_misc21(void)
 **                      Tests for precision and offset combo's.
 **
 ****************************************************************/
-#ifdef H5_HAVE_FILTER_SZIP
-#ifdef H5_SZIP_CAN_ENCODE
 static void
 test_misc22(void)
 {
@@ -3629,8 +3632,8 @@ test_misc(void)
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 #ifdef H5_HAVE_FILTER_SZIP
-    test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
 #ifdef H5_SZIP_CAN_ENCODE
+    test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
 #endif /* H5_SZIP_CAN_ENCODE */
 #endif /* H5_HAVE_FILTER_SZIP */

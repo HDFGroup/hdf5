@@ -915,7 +915,8 @@ TESTING("    addding shuffle filter to all");
 
  TESTING("    filter conversion from deflate to szip");
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE) \
+    && defined (H5_HAVE_FILTER_DEFLATE) \
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
  if (h5repack_init (&pack_options, 0)<0)
@@ -938,7 +939,8 @@ TESTING("    addding shuffle filter to all");
 
  TESTING("    filter conversion from szip to deflate");
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE) \
+    && defined (H5_HAVE_FILTER_DEFLATE) \
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
  if (h5repack_init (&pack_options, 0)<0)
