@@ -836,8 +836,8 @@ int HDFtraceFPUTS( const char *s, FILE *stream )
 void *HDFtraceMALLOC(size_t bytes )
 {
 	void *ptr;
-	size_t byte_req;
-	byte_req = bytes;
+	int byte_req;
+	byte_req = (int)bytes;
 	if ( IOtracingEnabled ) {
 	   HDFtraceIOEvent ( ID_malloc, NULL, 0 );
 	}
@@ -845,7 +845,7 @@ void *HDFtraceMALLOC(size_t bytes )
 	ptr = malloc( bytes );
 
 	if ( IOtracingEnabled ) {
-	   HDFtraceIOEvent ( -ID_malloc, &byte_req, sizeof(size_t) );
+	   HDFtraceIOEvent ( -ID_malloc, &byte_req, sizeof(int) );
 	}
 	
 	return ptr ;

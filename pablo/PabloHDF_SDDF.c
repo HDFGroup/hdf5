@@ -83,7 +83,7 @@ TR_RECORD *HDFprocEventRecord( int, TR_EVENT *, CLOCK, HDFsetInfo *, unsigned );
 TR_RECORD *miscEventRecord( int , TR_EVENT *, CLOCK, void *, unsigned );
 void _hdfMiscDescriptor( void );
 void _hdfProcNameDescriptor( void );
-int setEventRecordFunction( int, void * );
+int setEventRecordFunction( int, void *(*)() );
 void HDFtraceIOEvent( int, void *, unsigned );
 void initIOTrace( void );
 void enableIOdetail( void );
@@ -225,6 +225,7 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 	// tracing is available, this will be initialized also.  	*
 	//==============================================================*/
 #ifdef HAVE_PARALLEL
+	int myNode;
 	/*===============================================================
 	// in the parallel case, initialize MPI-IO tracing.  This will	*
 	// initialize the traceFileName and set the I/O tracing 	*
@@ -269,6 +270,7 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 //======================================================================*/
 void HDFendTrace_SDDF(void)
 {
+	HDFfinalTimeStamp();
 #ifdef HAVE_MPIOTRACE
 	/*===============================================================
 	// termintate MPI-IO tracing in the parallel case.  This will	*
@@ -279,7 +281,6 @@ void HDFendTrace_SDDF(void)
 	/*===============================================================
 	// terminate tracing 						*
 	//==============================================================*/
-	HDFfinalTimeStamp();
        	endIOTrace();
        	endTracing();
 #endif
@@ -333,9 +334,9 @@ int initHDFProcTrace( int numProcs, int *procEntryID )
 		procEvents[ procIndex ].exitID = -procEntryID[ procIndex ];
 
 		setEventRecordFunction( procEntryID[ procIndex ],
-					HDFprocEventRecord );
+					(void *(*)())HDFprocEventRecord );
 		setEventRecordFunction( -procEntryID[ procIndex ],
-					HDFprocEventRecord );
+					(void *(*)())HDFprocEventRecord );
 		procEntryCalled[ procIndex ] = 0;
 
 	}
@@ -347,12 +348,12 @@ int initHDFProcTrace( int numProcs, int *procEntryID )
 	//==============================================================*/
 	procEvents[ numProcs ].entryID = ID_malloc;
 	procEvents[ numProcs ].exitID = -ID_malloc;
-	setEventRecordFunction( ID_malloc, miscEventRecord );
-	setEventRecordFunction( -ID_malloc, miscEventRecord );
+	setEventRecordFunction( ID_malloc, (void *(*)())miscEventRecord );
+	setEventRecordFunction( -ID_malloc, (void *(*)())miscEventRecord );
 	procEvents[ numProcs+1 ].entryID = ID_free;
 	procEvents[ numProcs+1 ].exitID = -ID_free;
-	setEventRecordFunction( ID_free, miscEventRecord );
-	setEventRecordFunction( -ID_free, miscEventRecord );
+	setEventRecordFunction( ID_free, (void *(*)())miscEventRecord );
+	setEventRecordFunction( -ID_free, (void *(*)())miscEventRecord );
 
 	return SUCCESS;
 }
@@ -580,11 +581,10 @@ TR_RECORD *miscEventRecord( int recordType,
 	  break;
        case -ID_malloc:
        case -ID_free:
-	  miscRecord.bytes = *(size_t *)dataPointer;
+	  miscRecord.bytes = *(int *)dataPointer;
           miscRecord.duration = clockToSeconds( timeStamp) 
                                       - miscRecord.seconds;
           return &traceRecord;		/* generate trace record */
-	  break;
        default:
           fprintf( stderr, "miscEventRecord: unknown eventID %d\n", eventID );
 	  break;
