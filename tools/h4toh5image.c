@@ -144,8 +144,14 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
     return FAIL;
   }
 
-  for (i=0;i<2;i++) 
-      h5dims[i] = edges[i]-start[i];
+  /* change the order of image dimension:
+     due to the difference of hdf4 image specification and
+     hdf5 image specification. */
+     
+  
+
+  h5dims[0] = edges[1]-start[1];
+  h5dims[1] = edges[0]-start[0];
 
   gr_ref = GRidtoref(ri_id);
   if(gr_ref == 0) {
