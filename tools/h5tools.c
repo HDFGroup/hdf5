@@ -37,7 +37,12 @@ static void display_string(hsize_t hs_nelmts, hid_t p_type,
 static void display_compound_data(hsize_t hs_nelmts, hid_t p_type,
 				  unsigned char *sm_buf, size_t p_type_nbytes,
 				  hsize_t p_nelmts, hsize_t elmtno);
-
+#if 0
+static void display_reference_data(hsize_t hs_nelmts, hid_t p_type,
+				 unsigned char *sm_buf, size_t p_type_nbytes,
+				 hsize_t p_nelmts, hsize_t dim_n_size,
+				 hsize_t elmtno, hid_t container);
+#endif
 int h5dump_attr(hid_t oid, hid_t ptype);				  
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
@@ -1308,6 +1313,9 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		case H5T_REFERENCE:
 			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
 				      p_nelmts, dim_n_size, elmtno, dset);
+					  
+/*			display_reference_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
+				      p_nelmts, dim_n_size, elmtno, dset);*/
 	    default:
 		break;
 	    }
@@ -1737,6 +1745,11 @@ hsize_t i;
 char* out_buf = malloc(sizeof(char) * nCols);
 struct h5dump_str_t tempstr;
 int x;
+hbool_t isref = FALSE;
+int totalspace;
+hbool_t done;
+int temp;
+
 
 /******************************************************************************************/
     h5dump_t		info;
@@ -1756,7 +1769,12 @@ int x;
 /*********************************************************************************************/
 
 
+	/* i added this too*/
+	if (H5Tequal(p_type, H5T_STD_REF_DSETREG)) {
+		isref = TRUE;
+	}
 
+	
     out_buf[0] = '\0';
     if ((indent+COL) > nCols) indent = 0;
 	memset(&tempstr, 0, sizeof(h5dump_str_t));
@@ -1764,15 +1782,30 @@ int x;
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
 		h5dump_sprint(&tempstr, &info, container, p_type, sm_buf+i*p_type_nbytes);
-		for (x = 0; x <tempstr.len; x++){
-		/* removes the strange characters */
-			if (tempstr.s[x] == 1){
-				memmove(tempstr.s+x, tempstr.s+(x+1), strlen(tempstr.s+x));
-				tempstr.len --;
-			}
+		if (isref) {
+			for (x = 0; x <tempstr.len; x++){
+			/* removes the strange characters */
+				if (tempstr.s[x] == 1){
+					memmove(tempstr.s+x, tempstr.s+(x+1), strlen(tempstr.s+x));
+					tempstr.len --;
+				}
 
+			}
 		}
+		totalspace = nCols - indent - COL;
+
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
+			 if (isref){
+			/* i added this */
+				 temp = strlen(out_buf);
+				 if ((strlen(out_buf) + 7) < (totalspace)){ /* 7 for the word dataset */
+					 memcpy(out_buf+strlen(out_buf), tempstr.s, totalspace - strlen(out_buf));
+					 out_buf[totalspace] = '\0';
+					 memmove(tempstr.s, tempstr.s+(totalspace - temp), tempstr.len - (totalspace - temp));
+					 tempstr.s[tempstr.len - totalspace + temp] = '\0';
+					 tempstr.len = strlen(tempstr.s);
+				 }
+			 }
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
                  printf("%s\n", out_buf);
@@ -1781,6 +1814,28 @@ int x;
                  printf("%s\n", out_buf);
              }
              strcpy(out_buf, tempstr.s);
+
+			/* i added this too*/
+			 if (isref) {
+				 done = FALSE;
+				 while (!done) {
+					 if (tempstr.len > totalspace) {
+						 /* keep printing until we can fit in the totalspace */
+						 memmove(out_buf,tempstr.s, totalspace);
+						 out_buf[totalspace] = '\0';
+						 memmove(tempstr.s,tempstr.s+totalspace, strlen(tempstr.s + totalspace));
+						 tempstr.s[tempstr.len - totalspace] = '\0';
+						 tempstr.len = strlen(tempstr.s);
+						 indentation(indent+COL);
+						 printf(out_buf);
+						 
+					 } else {
+						 strcpy(out_buf, tempstr.s);
+						 done = TRUE;
+					 }
+				 }
+			 }
+
              if ((elmtno+i+1) % dim_n_size) 
                  strcat(out_buf, ", ");
              else { /* end of a row, flush out_buf */
@@ -1829,7 +1884,9 @@ int x;
              }
         }
     }
+#if !defined (WIN32) && !defined (_DEBUG)
 	free(out_buf);
+#endif
 }
 
 
@@ -2520,10 +2577,171 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	case H5T_REFERENCE:
 		display_numeric_data(nelmts, p_type, sm_buf, p_type_nbytes, 
 			nelmts, dim_n_size, 0, oid);
+	
+/*		display_reference_data(nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0, oid);*/
 		break;
 	default: break;
 	}
 	free(sm_buf);
 	return (status);
 }
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	display_numeric_data
+ *
+ * Purpose:	Display numeric data in ddl format.
+ *
+ * Return:	void
+ *
+ * Comment:     hs_nelmts     number of elements to be printed
+ *              p_type        memory data type
+ *              sm_buf        data buffer
+ *              p_type_nbytes size of p_type
+ *              p_nelmts      total number of elements
+ *              dim_n_size    size of dimemsion n
+ *              elmtno        element index
+ *
+ *-------------------------------------------------------------------------
+ */
+static void display_reference_data 
+(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
+ hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno, hid_t container) {
+
+hsize_t i;
+/*char p_buf[256];		*/
+char* out_buf = malloc(sizeof(char) * nCols);
+struct h5dump_str_t tempstr;
+int x;
+int totalspace;
+hbool_t done;
+int temp;
+
+/******************************************************************************************/
+    h5dump_t		info;
+
+    /* Set to all default values and then override */
+    memset(&info, 0, sizeof info);
+    info.idx_fmt = "(%s)";
+    info.line_ncols = nCols;
+    info.line_multi_new = 1;
+ 
+    /*
+     * If a compound datatype is split across multiple lines then add an
+     * ellipsis to the beginning of the continuation line.
+     */
+    info.line_pre  = "        %s ";
+    info.line_cont = "        %s  ";
+/*********************************************************************************************/
+
+
+    out_buf[0] = '\0';
+    if ((indent+COL) > nCols) indent = 0;
+	memset(&tempstr, 0, sizeof(h5dump_str_t));
+
+    for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+		h5dump_str_reset(&tempstr);  
+		h5dump_sprint(&tempstr, &info, container, p_type, sm_buf+i*p_type_nbytes);
+		for (x = 0; x <tempstr.len; x++){
+		/* removes the strange characters */
+			if (tempstr.s[x] == 1){
+				memmove(tempstr.s+x, tempstr.s+(x+1), strlen(tempstr.s+x));
+				tempstr.len --;
+			}
+
+		}
+		totalspace = nCols - indent - COL;
+
+		if ((int)(strlen(out_buf)+tempstr.len+1) > (totalspace)) {
+			/* first row of member */
+
+			/* i added this */
+			temp = strlen(out_buf);
+			if ((strlen(out_buf) + 7) < (totalspace)){ /* 7 for the word dataset */
+				memcpy(out_buf+strlen(out_buf), tempstr.s, totalspace - strlen(out_buf));
+				out_buf[totalspace] = '\0';
+				memmove(tempstr.s, tempstr.s+(totalspace - temp), tempstr.len - (totalspace - temp));
+				tempstr.s[tempstr.len - totalspace + temp] = '\0';
+				tempstr.len = strlen(tempstr.s);
+			}
+			/* first row of member */
+			if (compound_data && (elmtno+i+1) == dim_n_size)
+				printf("%s\n", out_buf);
+			else {
+				indentation(indent+COL);
+				printf("%s\n", out_buf);
+			}
+			strcpy(out_buf, tempstr.s);
+
+			/* i added this too*/
+			done = FALSE;
+			while (!done) {
+				if (tempstr.len > totalspace) {
+				/* keep printing until we can fit in the totalspace */
+					memmove(out_buf,tempstr.s, totalspace);
+					out_buf[totalspace] = '\0';
+					memmove(tempstr.s,tempstr.s+totalspace, strlen(tempstr.s + totalspace));
+					tempstr.s[tempstr.len - totalspace] = '\0';
+					tempstr.len = strlen(tempstr.s);
+					indentation(indent+COL);
+					printf(out_buf);
+
+				} else {
+					strcpy(out_buf, tempstr.s);
+					done = TRUE;
+				}
+			}
+
+             if ((elmtno+i+1) % dim_n_size) 
+                 strcat(out_buf, ", ");
+             else { /* end of a row, flush out_buf */
+                 indentation(indent+COL);
+                 printf("%s", out_buf);
+                 if ((elmtno+i+1) != p_nelmts) /* not last element */
+                     printf(",\n");
+                 else if (compound_data) { /* last element of member data*/
+                     if ((nCols-strlen(out_buf)-indent-COL) < 2) { 
+                          /* 2 for space and ] */
+                         printf("\n");
+                         indentation(indent+COL-3);
+                     }
+                 } else
+                     printf("\n"); /* last row */
+                 *out_buf = '\0';
+             }
+        } else {
+             strcat(out_buf, tempstr.s);
+             if ((elmtno+i+1) % dim_n_size) {
+                  if ((nCols-strlen(out_buf)-indent-COL-1) > 0)
+                      strcat(out_buf, ", ");
+                  else 
+                      strcat(out_buf, ",");
+             } else { /* end of a row */
+                 /* 1st row of member data */
+                 if (compound_data && (elmtno+i+1) == dim_n_size) 
+                     printf("%s", out_buf);
+                 else {
+                     indentation(indent+COL);
+                     printf("%s", out_buf);
+                 }
+
+                 /* if it's the last element */
+                 if ((elmtno+i+1) != p_nelmts)
+                     printf(",\n");
+                 else if (compound_data) { /* last row of member data*/
+                     /* 2 for space and ] */
+                     if ((nCols-strlen(out_buf)-indent-COL) < 2) { 
+                         printf("\n");
+                         indentation(indent+COL-3);
+                     }
+                 } else
+                     printf("\n"); /* last row */
+                 *out_buf = '\0';
+             }
+        }
+    }
+	free(out_buf);
+}
+#endif
 
