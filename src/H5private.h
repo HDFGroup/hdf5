@@ -944,36 +944,44 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
 #define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name)  					      \
+   static unsigned know_api=0, is_api=0;                \
    H5TRACE_DECL;							      \
 									      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
-   /* Initialize the library */						      \
-   H5_FIRST_THREAD_INIT                                                       \
-   H5_API_UNSET_CANCEL                                                        \
-   H5_API_LOCK_BEGIN                                                          \
-     if (!(H5_INIT_GLOBAL)) {                                                 \
-       H5_INIT_GLOBAL = TRUE;                                                 \
-       if (H5_init_library()<0) {					      \
-	  HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-		 	"library initialization failed");		      \
-       }								      \
-     }									      \
-   H5_API_LOCK_END                                                            \
-									      \
-   /* Initialize this interface or bust */				      \
-   if (!interface_initialize_g) {					      \
-      interface_initialize_g = 1;					      \
-      if (interface_init_func &&					      \
-	  ((herr_t(*)(void))interface_init_func)()<0) {			      \
-         interface_initialize_g = 0;					      \
-	 HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-			"interface initialization failed");		      \
-      }									      \
-   }									      \
+   /* Check if we know this is an API function or not */        \
+   /* (Also useful for wrapping the global and library checks) */ \
+   if(!know_api) {                          \
+       know_api=1;                          \
+       is_api=H5_IS_API(FUNC);              \
    									      \
+       /* Initialize the library */						      \
+       H5_FIRST_THREAD_INIT                                                       \
+       H5_API_UNSET_CANCEL                                                        \
+       H5_API_LOCK_BEGIN                                                          \
+         if (!(H5_INIT_GLOBAL)) {                                                 \
+           H5_INIT_GLOBAL = TRUE;                                                 \
+           if (H5_init_library()<0) {					      \
+          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+                "library initialization failed");		      \
+           }								      \
+         }									      \
+       H5_API_LOCK_END                                                            \
+                                              \
+       /* Initialize this interface or bust */				      \
+       if (!interface_initialize_g) {					      \
+          interface_initialize_g = 1;					      \
+          if (interface_init_func &&					      \
+          ((herr_t(*)(void))interface_init_func)()<0) {			      \
+             interface_initialize_g = 0;					      \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+                "interface initialization failed");		      \
+          }									      \
+       }									      \
+   }                                        \
+                                            \
    /* Clear thread error stack entering public functions */		      \
-   if (H5E_clearable_g && H5_IS_API (FUNC)) {				      \
+   if (is_api && H5E_clearable_g) {				      \
        H5E_clear ();							      \
    }									      \
    {
