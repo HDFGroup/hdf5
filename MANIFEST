@@ -358,6 +358,8 @@
 
 ./doc/html/Tutor/examples/java/Dependencies
 ./doc/html/Tutor/examples/java/Makefile.in
+./doc/html/Tutor/examples/java/Makefile.in.txt
+./doc/html/Tutor/examples/java/Makefile.txt
 
 ./doc/html/cpplus/CppInterfaces.html
 ./doc/html/cpplus/CppUserNotes.doc
