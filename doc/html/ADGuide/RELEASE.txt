@@ -37,20 +37,26 @@ CONTENTS
 New Features
 ============
 
-  * XML output option for h5dump utility
-   A new option --xml to output data in XML format has been added. 
-   The XML output contains a complete description of the file, marked up in XML. 
-   The XML conforms to the HDF5 Document Type Definition (DTD), 
-   which is available at:
+   * XML output option for h5dump utility.
+  
+     A new option --xml to output data in XML format has been added. The
+     XML output contains a complete description of the file, marked up in
+     XML. 
+
+     The XML conforms to the HDF5 Document Type Definition (DTD), which
+     is available at:
+
        http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd
 
-   The XML output is suitable for use with other tools, including the
-   Java Tools:
+     The XML output is suitable for use with other tools, including the
+     Java Tools:
+
        http://hdf.ncsa.uiuc.edu/java-hdf5-html
 
 
 Bug Fixes since HDF5-1.4.0 Release
 ==================================
+
    * h4toh5 utility: conversion of images is fixed
 
      Earlier releases of the h4toh5 utility produced images that did not
@@ -68,6 +74,11 @@ Bug Fixes since HDF5-1.4.0 Release
      slower I/O than necessary.
    * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
      causing errors during I/O
+   * The RCSID string in H5public.h was causing the C++ compiling problem
+     because when it was included multiple times, C++ did not like
+     multiple definitions of the same static variable. All occurance of
+     RCSID definition are removed since we have not used it consistently
+     before.
 
 
 Documentation
@@ -76,6 +87,7 @@ Documentation
    
 Platforms Tested
 ================
+
 Due to the nature of this release only C library and tools were tested.
 
     AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
@@ -100,7 +112,7 @@ Due to the nature of this release only C library and tools were tested.
     OSF1 V4.0                     DEC-V5.2-040
                                   Digital Fortran 90 V4.1-270
     SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
-    (Solaris 2.6)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
+     (Solaris 2.6)                WorkShop Compilers 5.0 99/10/25 Fortran 90
                                          2.0 Patch 107356-04
                                   Workshop Compilers 5.0 98/12/15 C++ 5.0
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
@@ -117,11 +129,13 @@ Due to the nature of this release only C library and tools were tested.
 
 Supported Configuration Features Summary
 ========================================
-    * See "Supported Configuration Features Summary" section for the HDF5 1.4.0 release
-      in the HISTORY.txt file.
+
+    * See "Supported Configuration Features Summary" section for the HDF5
+      1.4.0 release in the HISTORY.txt file.
 
 Known Problems
 ==============
-    * See "Known problems" section for the HDF5 1.4.0 release in the HISTORY.txt
-      file.
+
+    * See "Known problems" section for the HDF5 1.4.0 release in the
+      HISTORY.txt file.
       
