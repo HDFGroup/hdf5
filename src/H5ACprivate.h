@@ -77,7 +77,7 @@ typedef enum H5AC_subid_t {
 typedef void *(*H5AC_load_func_t)(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
 typedef herr_t (*H5AC_flush_func_t)(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing);
 typedef herr_t (*H5AC_dest_func_t)(H5F_t *f, void *thing);
-typedef herr_t (*H5AC_clear_func_t)(void *thing, hbool_t dest);
+typedef herr_t (*H5AC_clear_func_t)(H5F_t *f, void *thing, hbool_t dest);
 
 typedef struct H5AC_class_t {
     H5AC_subid_t	id;

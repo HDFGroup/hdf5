@@ -68,7 +68,7 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 			 void *udata2);
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
-static herr_t H5HL_clear(H5HL_t *heap, hbool_t destroy);
+static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -568,7 +568,7 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_clear(H5HL_t *heap, hbool_t destroy)
+H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
@@ -581,7 +581,7 @@ H5HL_clear(H5HL_t *heap, hbool_t destroy)
     heap->cache_info.dirty = 0;
 
     if (destroy)
-        if (H5HL_dest(NULL, heap) < 0)
+        if (H5HL_dest(f, heap) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap collection");
 
 done:

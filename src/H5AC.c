@@ -879,7 +879,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                 /* Clear the dirty flag only, if requested */
                 if(clear_only) {
                     /* Call the callback routine to clear all dirty flags for object */
-                    if(((*info)->type->clear)(*info, destroy)<0)
+                    if(((*info)->type->clear)(f, *info, destroy)<0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear cache");
                 } /* end if */
                 else {
@@ -982,7 +982,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
             /* Clear the dirty flag only, if requested */
             if(clear_only) {
                 /* Call the callback routine to clear all dirty flags for object */
-                if(((*info)->type->clear)(*info, destroy)<0)
+                if(((*info)->type->clear)(f, *info, destroy)<0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear cache");
             } /* end if */
             else {
@@ -1770,12 +1770,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
         (*info)->addr = addr;
     } /* end if */
     else {
-        /* Mark the thing as clean (prerequite for destroy routine) */
-        if((type->clear)(thing, FALSE)<0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear object");
-
         /* Destroy previously cached thing */
-        if ((type->dest)(f, thing)<0)
+        if ((type->clear)(f, thing, TRUE)<0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free object")
     } /* end else */
 

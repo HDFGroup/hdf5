@@ -28,17 +28,16 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5ACprivate.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5FSprivate.h"        /* Function Stack                           */
-#include "H5Iprivate.h"
-#include "H5MFprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                 */
-#include "H5Pprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #ifdef H5_HAVE_FPHDF5
 #include "H5FDfphdf5.h"         /* FPHDF5 File Descriptor                  */
@@ -87,7 +86,7 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
-static herr_t H5O_clear(H5O_t *oh, hbool_t destroy);
+static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -335,6 +334,9 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
      * We only want to initialize the object header if this isn't an
      * FPHDF5 driver or it is, but the captain only flag is set or if the
      * captain only flag just isn't set.
+     */
+    /* XXX: These conditions cover all possible boolean combinations and
+     * probably aren't what was meant... - QAK
      */
     if (!H5FD_is_fphdf5_driver(f->shared->lf) || !capt_only || (H5FD_fphdf5_is_captain(f->shared->lf) && capt_only))
         ;
@@ -895,7 +897,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_clear(H5O_t *oh, hbool_t destroy)
+H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy)
 {
     unsigned	u;      /* Local index variable */
     herr_t ret_value = SUCCEED;
@@ -917,7 +919,7 @@ H5O_clear(H5O_t *oh, hbool_t destroy)
     oh->cache_info.dirty=FALSE;
 
     if (destroy)
-        if (H5O_dest(NULL, oh) < 0)
+        if (H5O_dest(f, oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data");
 
 done:
