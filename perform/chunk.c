@@ -179,7 +179,7 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
     rdcc_nelmts = RM_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*(size_t)(SQUARE (CH_SIZE)), w0);
+		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
@@ -255,7 +255,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     rdcc_nelmts = DIAG_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*(size_t)(SQUARE (CH_SIZE)), w0);
+		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
