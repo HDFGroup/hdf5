@@ -618,8 +618,7 @@ test_multifill(size_t nx)
     dst = H5MM_malloc(nx * sizeof(*dst));
 #else
 /*
-	to match the HDfree I plan on using to free this memory
-  */
+	to match the HDfree I plan on using to free this memory */
 	src = malloc(nx * sizeof(*src));
     dst = malloc(nx * sizeof(*dst));
 #endif

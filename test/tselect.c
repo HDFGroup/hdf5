@@ -708,7 +708,7 @@ test_select_hyper_stride(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -728,7 +728,7 @@ test_select_hyper_stride(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Sort the locations into the proper order */
