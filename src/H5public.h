@@ -34,7 +34,9 @@ static char             RcsId[] = "@(#)$Revision$";
 #endif
 #ifdef HAVE_PARALLEL
 #   include <mpi.h>
+#ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already*/
 #   include <mpio.h>
+#endif
 #endif
 #include <H5api_adpt.h>
 

@@ -59,8 +59,6 @@
  */
 /* const hbool_t H5F_mpio_avail = FALSE; */
 #else	/* HAVE_PARALLEL */
-#include <mpi.h>
-#include <mpio.h>
 
 #define PABLO_MASK      H5Fmpio_mask
 static intn          interface_initialize_g = 0;
@@ -603,7 +601,8 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 	
     case H5D_XFER_COLLECTIVE:
 #ifdef H5Fmpio_DEBUG
-	printf("%s: using MPIO collective mode\n", FUNC);
+	if (H5F_mpio_Debug[(int)'t'])
+	    fprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
 #endif
 	mpierr = MPI_File_read_at_all ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, buf_type, &mpi_stat );
@@ -876,7 +875,8 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 	
     case H5D_XFER_COLLECTIVE:
 #ifdef H5Fmpio_DEBUG
-	printf("%s: using MPIO collective mode\n", FUNC);
+	if (H5F_mpio_Debug[(int)'t'])
+	    fprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
 #endif
 	mpierr = MPI_File_write_at_all( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, buf_type, &mpi_stat );

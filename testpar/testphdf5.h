@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <hdf5.h>
-#include <mpi.h>
-#include <mpio.h>
 
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
