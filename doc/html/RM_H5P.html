@@ -88,25 +88,25 @@ many different parameters to be easily manipulated.
 
     <i>File Access Properties</i>
     <ul>
-    <li><a href="#Property-GetDriver">H5Pget_driver</a>
-    <li><a href="#Property-SetStdio">H5Pset_stdio</a>
-    <li><a href="#Property-GetStdio">H5Pget_stdio</a>
-    <li><a href="#Property-SetSec2">H5Pset_sec2</a>
-    <li><a href="#Property-GetSec2">H5Pget_sec2</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-SetAlignment">H5Pset_alignment</a>
     <li><a href="#Property-GetAlignment">H5Pget_alignment</a>
-    <li><a href="#Property-SetCore">H5Pset_core</a>
-    <li><a href="#Property-GetCore">H5Pget_core</a>
-    <li><a href="#Property-SetMPI">H5Pset_mpi</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-GetMPI">H5Pget_mpi</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
 <!--  Not implemented.  Probably never will be.
-    <li><a href="#Property-SetFamily">H5Pset_family</a>
-    <li><a href="#Property-GetFamily">H5Pget_family</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
 -->
     <li><a href="#Property-SetCache">H5Pset_cache</a>
     <li><a href="#Property-GetCache">H5Pget_cache</a>
-    <li><a href="#Property-SetSplit">H5Pset_split</a>
-    <li><a href="#Property-GetSplit">H5Pget_split</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
     </ul>
@@ -154,8 +154,8 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
     <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
     <li><a href="#Property-GetBTreeRatios">H5Pget_btree_ratios</a>
-    <li><a href="#Property-SetXfer">H5Pset_xfer</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-GetXfer">H5Pget_xfer</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
     </ul>
 
 </td></tr>
@@ -617,171 +617,6 @@ facilitate moving easily between them.</i>
         otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pget_sizes_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetMPI">H5Pset_mpi</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_mpi</code>(<em>hid_t</em> <code>plist</code>,
-            <em>MPI_Comm</em> <code>comm</code>,
-            <em>MPI_Info</em> <code>info</code>
-        )
-  <dt><strong>Purpose:</strong>
-    <dd>Retrieves the access mode for parallel I/O and the user supplied
-	      communicator and info object.
-  <dt><strong>Description:</strong>
-        <dd><code>H5Pset_mpi</code> stores the access mode for MPIO call and the user supplied
-	      communicator and info in the access property list, which can then
-	      be used to open file.  This function is available only in the
-            parallel HDF5 library and is not a collective function.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to modify.
-        <dt><em>MPI_Comm</em> <code>comm</code>
-            <dd>IN: MPI communicator to be used for file open as defined in
-                MPI_FILE_OPEN of MPI-2.  This function  does not make a
-                duplicated <code>comm</code>. Any modification to <code>comm</code> after
-                this function call returns may have undetermined effect
-                to the access property list.  Users should call this function
-                again to setup the property list.
-        <dt><em>MPI_Info</em> <code>info</code>
-            <dd>IN: MPI info object to be used for file open as defined in
-                MPI_FILE_OPEN of MPI-2.  This function  does not make a
-                duplicated <code>info</code>. Any modification to <code>info</code> after
-                this function call returns may have undetermined effect
-                to the access property list.  Users should call this function
-                again to setup the property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_mpi_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetMPI">H5Pget_mpi</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_mpi</code>(<em>hid_t</em> <code>plist</code>,
-            <em>MPI_Comm</em> <code>*comm</code>,
-            <em>MPI_Info</em> <code>*info</code>
-        )
-  <dt><strong>Purpose:</strong>
-    <dd>Retrieves the communicator and info object.
-  <dt><strong>Description:</strong>
-        <dd><code>H5Pget_mpi</code> retrieves the communicator and info object
-	    that have been set by H5Pset_mpi.
-	    This function is available only in the parallel HDF5 library
-            and is not a collective function.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list that has been set
-	          successfully by H5Pset_mpi.
-        <dt><em>MPI_Comm *</em> <code>comm</code>
-            <dd>OUT: Pointer to location to return the communicator.
-        <dt><em>MPI_Info *</em> <code>info</code>
-            <dd>OUT: Pointer to location to return the info object.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set to the MPI.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_mpi_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetXfer">H5Pset_xfer</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_xfer</code>(<em>hid_t</em> <code>plist</code>,
-            <em>H5D_transfer_t</em> <code>data_xfer_mode</code>
-        )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the transfer mode of the dataset transfer property list.
-  <dt><strong>Description:</strong>
-        <dd><code>H5Pset_xfer</code> sets the transfer mode of the dataset transfer property list.
-            The list can then be used to control the I/O transfer mode
-            during dataset accesses.  This function is available only
-            in the parallel HDF5 library and is not a collective function.
-            <p>
-            Valid data transfer modes are:
-                <ul><dl>
-                    <dt>H5D_XFER_INDEPENDENT
-                        <dd>Use independent I/O access.
-                            (Currently the default mode.)
-                    <dt>H5D_XFER_COLLECTIVE
-                        <dd>Use MPI collective I/O access.
-                    <dt>H5D_XFER_DFLT
-                        <dd>User default I/O access.
-                </dl></ul>
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a dataset transfer property list
-        <dt><em>H5D_transfer_t</em> <code>data_xfer_mode</code>
-            <dd>IN: Data transfer mode.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_xfer_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetXfer">H5Pget_xfer</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_xfer</code>(<em>hid_t</em> <code>plist</code>,
-            <em>H5D_transfer_t *</em> <code>data_xfer_mode</code>
-        )
-  <dt><strong>Purpose:</strong>
-    <dd>Retrieves the transfer mode from the dataset transfer property list.
-  <dt><strong>Description:</strong>
-        <dd><code>H5Pget_xfer</code> retrieves the transfer mode from the 
-            dataset transfer property list.
-	    This function is available only in the parallel HDF5 library
-            and is not a collective function.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a dataset transfer property list.
-        <dt><em>H5D_transfer_t *</em> <code>data_xfer_mode</code>
-            <dd>OUT: Pointer to location to return the data transfer mode.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_xfer_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -1657,355 +1492,29 @@ facilitate moving easily between them.</i>
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-GetDriver">H5Pget_driver</a>
+  <dt><strong>Name:</strong> <a name="Property-xxx">xxx</a>
   <dt><strong>Signature:</strong>
-    <dd><em>H5F_driver_t</em> <code>H5Pget_driver</code>(<em>hid_t</em> <code>plist</code>
+    <dd><em>xxx</em> <code>xxx</code>(<em>xxx</em> <code>xxx</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Returns a low-level file driver identifier.
+    <dd>
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_driver</code> returns the identifier of the 
-        low-level file driver.  Valid identifiers are:
-        <ul>
-          <li>H5F_LOW_STDIO (0)
-          <li>H5F_LOW_SEC2 (1)
-          <li>H5F_LOW_MPIO (2)
-          <li>H5F_LOW_CORE (3)
-          <li>H5F_LOW_SPLIT (4)
-          <li>H5F_LOW_FAMILY (5)
-        </ul>
+    <dd><code>xxx</code>
+        
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
+        <dt><em>xxx</em> <code>xxx</code>
+            <dd>IN: 
+            <dd>OUT: 
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns a low-level driver identifier if successful.
-        Otherwise returns H5F_LOW_ERROR (-1).
+    <dd>Returns xxx if successful.
+        Otherwise returns xxx.
+  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_driver_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
         -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetStdio">H5Pset_stdio</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_stdio</code>(<em>hid_t</em> <code>plist</code>)
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the low level file driver to use the functions declared
-        in the stdio.h.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_stdio</code> sets the low level file driver to use 
-        the functions declared in the stdio.h file: fopen(), fseek() 
-        or fseek64(), fread(), fwrite(), and fclose().
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_stdio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetStdio">H5Pget_stdio</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_stdio</code>(<em>hid_t</em> <code>plist</code>)
-  <dt><strong>Purpose:</strong>
-    <dd>Determines whether the file access property list is set to 
-        the stdio driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_stdio</code> checks to determine whether the 
-        file access property list is set to the stdio driver.  
-        In the future, additional arguments may be added to this 
-        function to match those added to H5Pset_stdio().
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set 
-        to the stdio driver.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_stdio_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetSec2">H5Pset_sec2</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_sec2</code>(<em>hid_t</em> <code>plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the low-level file driver to use the declared functions.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_sec2</code> sets the low-level file driver to use 
-        the functions declared
-        in the unistd.h file: open(), lseek() or lseek64(), read(),
-        write(), and close().
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_sec2_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetSec2">H5Pget_sec2</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_sec2</code>(<em>hid_t</em> <code>plist</code>)
-  <dt><strong>Purpose:</strong>
-    <dd>Checks whether the file access property list is set 
-        to the sec2 driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_sec2</code> checks to determine whether the 
-        file access property list is set to the sec2 driver.
-        In the future, additional arguments may be
-        added to this function to match those added to H5Pset_sec2().
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set 
-        to the sec2 driver.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_sec2_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetCore">H5Pset_core</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_core</code>(<em>hid_t</em> <code>plist</code>,
-        <em>size_t</em> <code>increment</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the low-level file driver to use malloc() and free().
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_core</code> sets the low-level file driver to use 
-        <code>malloc()</code> and <code>free()</code>.  
-        This driver is restricted to temporary files which are not
-        larger than the amount of virtual memory available. 
-        The <code>increment</code> argument determines the file block size 
-        and memory will be allocated in multiples of <code>increment</code> bytes. 
-        A liberal <code>increment</code> results in fewer calls to 
-        <code>realloc()</code> and probably less memory fragmentation.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-        <dt><em>size_t</em> <code>increment</code>
-            <dd>IN: File block size in bytes.  
-                Must be a positive value.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_core_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetCore">H5Pget_core</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_core</code>(<em>hid_t</em> <code>plist</code>,
-        <em>size_t</em> <code>*increment</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Determines whether the file access property list is set 
-        to the core driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_core</code> checks to determine whether the 
-        file access property list is set to the core driver.
-        On success, the block size is returned through the 
-        <code>increment</code> if it is not the null pointer.
-        In the future, additional arguments may be added to this
-        function to match those added to <code>H5Pset_core()</code>. 
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>size_t</em> <code>*increment</code>
-            <dd>OUT: Pointer to a location to return the file block size (in bytes).
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set 
-        to the core driver.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_core_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetSplit">H5Pset_split</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_split</code>(<em>hid_t</em> <code>plist</code>,
-        <em>const char</em> <code>*meta_ext</code>,
-        <em>hid_t</em> <code>meta_plist</code>,
-        <em>const char</em> <code>*raw_ext</code>,
-        <em>hid_t</em> <code>raw_plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the low-level driver to split meta data from raw data.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_split</code> sets the low-level driver to 
-        split meta data from raw data, storing meta data in one file and 
-        raw data in another file.  The meta file will have a name 
-        which is formed by adding <em>meta_extension</em> (recommended 
-        default value: <code>.meta</code>) to the end of the base name 
-        and will be accessed according to the <em>meta_plist</em>. 
-        The raw file will have a name which is formed by appending 
-        <em>raw_extension</em> (recommended default value: 
-        <code>.raw</code>) to the base name and will be accessed according 
-        to the <em>raw_plist</em>.
-        Additional parameters may be added to this function in the future.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>const char</em> <code>*meta_ext</code>
-            <dd>IN: Name of the extension for the metafile filename.
-                Recommended default value: <code>.meta</code>.
-        <dt><em>hid_t</em> <code>meta_plist</code>
-            <dd>IN: Identifier of the meta file access property list.
-        <dt><em>const char</em> <code>*raw_ext</code>
-            <dd>IN: Name extension for the raw file filename.
-                Recommended default value: <code>.raw</code>.
-        <dt><em>hid_t</em> <code>raw_plist</code>
-            <dd>IN: Identifier of the raw file access property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_split_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetSplit">H5Pget_split</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_split</code>(<em>hid_t</em> <code>plist</code>,
-        <em>size_t</em> <code>meta_ext_size</code>,
-        <em>char</em> <code>*meta_ext</code>,
-        <em>hid_t</em> <code>*meta_plist</code>,
-        <em>size_t</em> <code>raw_ext_size</code>,
-        <em>char</em> <code>*raw_ext</code>,
-        <em>hid_t</em> <code>*raw_plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Determines whether the file access property list is set 
-        to the split driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_split</code> checks to determine whether the file  
-        access property list is set to the split driver.
-        On successful return,
-	<code>meta_plist</code> and <code>raw_plist</code> will
-	point to copies of the meta and raw access property lists
-	which should be closed by calling <code>H5Pclose()</code> when
-	the application is finished with them, but if the meta and/or
-	raw file has no property list then a negative value is
-	returned for that property list identifier. Also, if
-	<code>meta_extension</code> and/or <code>raw_extension</code> are
-	non-null pointers, at most <code>meta_ext_size</code> or
-	<code>raw_ext_size</code> characters of the meta or raw file name
-	extension will be copied to the specified buffer. If the
-	actual name is longer than what was requested then the result
-	will not be null terminated (similar to
-	<code>strncpy()</code>).  In the future, additional arguments
-	may be added to this function to match those added to
-	<code>H5Pset_split()</code>.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>size_t</em> <code>meta_ext_size</code>
-            <dd>IN: Number of characters of the meta file extension to be  
-                copied to the <code>meta_ext</code> buffer.
-        <dt><em>char</em> <code>*meta_ext</code>
-            <dd>OUT: Meta file extension.
-        <dt><em>hid_t</em> <code>*meta_plist</code>
-            <dd>OUT: Pointer to a copy of the meta file access property list.
-        <dt><em>size_t</em> <code>raw_ext_size</code>
-            <dd>IN: Number of characters of the raw file extension to be  
-                copied to the <code>raw_ext</code> buffer.
-        <dt><em>char</em> <code>*raw_ext</code>
-            <dd>OUT: Raw file extension.
-        <dt><em>hid_t</em> <code>*raw_plist</code>
-            <dd>OUT: Pointer to a copy of the raw file access property list.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set 
-        to the split driver.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_split_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -2093,109 +1602,6 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
-
-<!--  Not implemented.  Probably never will be.
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_family</code>(<em>hid_t</em> <code>plist</code>,
-        <em>hsize_t</em> <code>memb_size</code>,
-        <em>hid_t</em> <code>memb_plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets the file access properties list to the family driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_family</code> sets the file access properties 
-        to use the family driver; any previously defined 
-        driver properties are erased from the property list.  
-        See <a href="Files.html#File_Families">File Families</a>
-        in the <cite>HDF5 User's Guide</cite> for a discussion
-        of file families.
-        <p>
-        Each member of the file family will use <code>memb_plist</code>
-        as its file access property list. 
-        <p>
-        The <code>memb_size</code> argument gives the logical size
-	in bytes of each family member; the actual size could be
-	smaller depending on whether the file contains holes.
-        The member size is only used when creating a new file or
-	truncating an existing file; otherwise the member size comes
-	from the size of the first member of the family being
-	opened. 
-        <p>
-        Note: If the size of the <code>off_t</code> type is
-	four bytes, then the maximum family member size is usually
-	2^31-1 because the byte at offset 2,147,483,647 is generally
-	inaccessible.  
-        <p>
-        Additional parameters may be added to this function in the 
-        future.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>hsize_t</em> <code>memb_size</code>
-            <dd>IN: Logical size, in bytes, of each family member.
-        <dt><em>hid_t</em> <code>memb_plist</code>
-            <dd>IN: Identifier of the file access property list 
-                for each member of the family.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_family_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetFamily">H5Pget_family</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_family</code>(<em>hid_t</em> <code>tid</code>,
-        <em>hsize_t</em> <code>*memb_size</code>,
-        <em>hid_t</em> <code>*memb_plist</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Determines whether the file access property list 
-        is set to the family driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pget_family</code> checks to determine whether the 
-        file access property list is set to the family driver.
-        On successful return,
-	<em>access_properties</em> will point to a copy of the member
-	access property list which should be closed by calling
-	<code>H5Pclose()</code> when the application is finished with
-	it.  If <em>memb_size</em> is non-null then it will contain
-	the logical size in bytes of each family member.  In the
-	future, additional arguments may be added to this function to
-	match those added to <code>H5Pset_family()</code>.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>hsize_t</em> <code>*memb_size</code>
-            <dd>OUT: Logical size, in bytes, of each family member.
-        <dt><em>hid_t</em> <code>*memb_plist</code>
-            <dd>OUT: Identifier of the file access property list 
-                for each member of the family.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if the file access property list is set 
-        to the family driver.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_family_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-</dl>
--->
 
 
 <hr>
