@@ -56,7 +56,7 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
-H5D_t * H5D_new(const hid_t dcpl_id);
+H5D_t * H5D_new(hid_t dcpl_id);
 
 /* Declare a free list to manage the H5D_t struct */
 H5FL_DEFINE_STATIC(H5D_t);
