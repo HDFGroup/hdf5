@@ -6,7 +6,7 @@
 
 void multiple_dset_write(char *filename)
 {
-    int i, j, n, nprocs, rank;
+    int i, j, n, mpi_size, mpi_rank;
     hid_t iof, plist, dataset, memspace, filespace;
     hssize_t chunk_origin [DIM];
     hsize_t chunk_dims [DIM], file_dims [DIM];
@@ -15,14 +15,14 @@ void multiple_dset_write(char *filename)
     char dname [100];
 
 
-    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-    MPI_Comm_size (MPI_COMM_WORLD, &nprocs);
+    MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
-    VRFY((nprocs <= SIZE), "nprocs <= SIZE");
+    VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
-    chunk_origin [0] = rank * (SIZE / nprocs);
+    chunk_origin [0] = mpi_rank * (SIZE / mpi_size);
     chunk_origin [1] = 0;
-    chunk_dims [0] = SIZE / nprocs;
+    chunk_dims [0] = SIZE / mpi_size;
     chunk_dims [1] = SIZE;
 
     for (i = 0; i < DIM; i++)
@@ -45,7 +45,7 @@ void multiple_dset_write(char *filename)
 	/* calculate data to write */
 	for (i = 0; i < SIZE; i++)
 	    for (j = 0; j < SIZE; j++)
-	        outme [i][j] = n*1000 + rank;
+	        outme [i][j] = n*1000 + mpi_rank;
 
 	H5Dwrite (dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, outme);
 

@@ -21,14 +21,14 @@
 	}								      \
     }								      	      \
     else{								      \
+	printf("Proc %d: ", mpi_rank); \
         printf("*** PHDF5 Assertion failed (%s) at line %4d in %s\n",         \
 	    mesg, (int)__LINE__, __FILE__);     			      \
         nerrors++;                                                            \
-        H5Eprint (stdout);                                                    \
 	fflush(stdout);							      \
 	if (!verbose){							      \
 	    printf("aborting MPI process\n"); \
-	    MPI_Abort(MPI_COMM_WORLD, nerrors);			              \
+	    MPI_Finalize(); exit(nerrors); \
 	}								      \
     }                                                                         \
     H5Eclear();                                                               \
