@@ -32,7 +32,8 @@ AC_CONFIG_AUX_DIR([../bin])
 
 AC_OUTPUT_COMMANDS([
   echo "creating src/H5pubconf_fortran.h"
-  sed 's/#define /#define H5_/' < src/H5config_fortran.h |\
+  sed 's/PACKAGE/FORTRAN_PACKAGE/' < src/H5config_fortran.h |\
+    sed 's/#define /#define H5_/' |\
     sed 's/#undef /#undef H5_/' > pubconf_fortran
 
   if test ! -f src/H5pubconf_fortran.h; then
