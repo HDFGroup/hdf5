@@ -48,13 +48,10 @@ if [ -d ${COMPARE}/previous ]; then
     if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
         snapshot=no
 	for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
-	    if (diff -I H5_VERS_RELEASE -I " released on " \
-		${COMPARE}/previous/$src ${COMPARE}/current/$src); then
-	    else
+	    diff -I H5_VERS_RELEASE -I " released on " \
+		${COMPARE}/previous/$src ${COMPARE}/current/$src || \
 		snapshot=yes
 		# Don't break because we want to see all the diffs.
-		#break
-	    fi
 	done
     fi
 fi
