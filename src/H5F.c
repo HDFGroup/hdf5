@@ -3084,6 +3084,8 @@ H5Funmount(hid_t loc_id, const char *name)
  *              Friday, October 16, 1998
  *
  * Modifications:
+ *              Quincey Koziol, May 14, 2002
+ *              Keep old file's read/write intent in reopened file.
  *
  *-------------------------------------------------------------------------
  */
@@ -3099,8 +3101,14 @@ H5Freopen(hid_t file_id)
 
     if (H5I_FILE!=H5I_get_type(file_id) || NULL==(old_file=H5I_object(file_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+
+    /* Get a new "top level" file struct, sharing the same "low level" file struct */
     if (NULL==(new_file=H5F_new(old_file->shared, H5P_DEFAULT, H5P_DEFAULT)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file");
+
+    /* Keep old file's read/write intent in new file */
+    new_file->intent=old_file->intent;
+
     if ((ret_value=H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle");
 
