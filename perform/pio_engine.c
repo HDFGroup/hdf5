@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001
+ * Copyright (C) 2001, 2002
  *     National Center for Supercomputing Applications
  *     All rights reserved.
  * 
@@ -148,7 +148,6 @@ results
 do_pio(parameters param)
 {
     /* return codes */
-    int         mrc;            /*MPI return code                       */
     herr_t      ret_code = 0;   /*return code                           */
     results     res;
 
@@ -253,6 +252,8 @@ buf_size=MIN(1024*1024, buf_size);
         GOTOERROR(FAIL);
     }
 
+    set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
+
     for (nf = 1; nf <= nfiles; nf++) {
 	/*
 	 * Write performance measurement
@@ -268,9 +269,7 @@ fprintf(stderr, "filename=%s\n", fname);
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
 
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE);
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
@@ -281,9 +280,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_write failed");
 
         /* Close file for write */
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fclose(iot, &fd);
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
 
@@ -295,9 +292,7 @@ fprintf(stderr, "filename=%s\n", fname);
         /* Open file for read */
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
 
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_READ);
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
@@ -308,9 +303,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fclose(iot, &fd);
-        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
 
@@ -318,6 +311,8 @@ fprintf(stderr, "filename=%s\n", fname);
 
         do_cleanupfile(iot, fname);
     }
+
+    set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
 done:
     /* clean up */
