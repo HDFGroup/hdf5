@@ -914,6 +914,7 @@
 ./test/gass_append.c
 ./test/gass_read.c
 ./test/gass_write.c
+./test/getname.c
 ./test/gheap.c
 ./test/h5test.c
 ./test/h5test.h
