@@ -35,7 +35,7 @@ h5ls.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDgass.h \
-   $(top_srcdir)/src/H5FDdpss.h \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5FDmulti.h \
-   $(top_srcdir)/src/H5FDlog.h
+   $(top_srcdir)/src/H5FDlog.h \
+   $(top_srcdir)/tools/lib/h5tools_utils.h

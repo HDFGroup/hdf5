@@ -926,72 +926,6 @@ if test -n "$SRB"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Is Grid Storage present? If so then we can compile in the Grid
-dnl Storage driver.
-dnl
-AC_SUBST(GRIDSTORAGE) GRIDSTORAGE="yes"
-AC_SUBST(TESTGRIDSTORAGE) TESTGRIDSTORAGE='$(srcdir)/testgridstorage'
-AC_ARG_WITH(gridstorage,
-  [  --with-gridstorage[=DIR] Use the Globus Grid Storage driver [default=no]],,
-  withval=no)
-
-case "$withval" in
-  yes)
-    AC_CHECK_HEADERS(grid_storage_file.h,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-    AC_CHECK_LIB(grid_storage_client,main,,unset GRIDSTORAGE TESTGRIDSTORAGE)
-    AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
-                 unset GRIDSTORAGE TESTGRIDSTORAGE)
-    ;;
-  no)
-    AC_MSG_CHECKING(for GRIDSTORAGE)
-    AC_MSG_RESULT(suppressed)
-    unset GRIDSTORAGE TESTGRIDSTORAGE
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        gridstorage_inc="`echo $withval | cut -f1 -d,`"
-        gridstorage_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          gridstorage_inc="$withval/include"
-          gridstorage_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    if test -n "$gridstorage_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS -I$gridstorage_inc"
-      AC_CHECK_HEADERS(grid_storage_file.h,,
-                       CPPFLAGS="$saved_CPPFLAGS"
-                       unset GRIDSTORAGE TESTGRIDSTORAGE)
-    else
-      AC_CHECK_HEADERS(grid_storage_file.h)
-    fi
-
-    if test -n "$gridstorage_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$gridstorage_lib"
-      AC_CHECK_LIB(grid_storage_client,main,,
-                   unset GRIDSTORAGE TESTGRIDSTORAGE)
-      AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
-                   unset GRIDSTORAGE TESTGRIDSTORAGE)
-    else
-      AC_CHECK_LIB(grid_storage_client,main,,
-                   unset GRIDSTORAGE TESTGRIDSTORAGE)
-      AC_CHECK_LIB(grid_storage_file,grid_storage_open,,
-                   unset GRIDSTORAGE TESTGRIDSTORAGE)
-    fi
-    ;;
-esac
-
-if test -n "$GRIDSTORAGE"; then
-  AC_DEFINE(HAVE_GRIDSTORAGE)
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
 dnl
@@ -1918,9 +1852,6 @@ IF_YES_NO "$HDF_FORTRAN"
 
 PRINT_N "                           GASS"
 IF_YES_NO "$GASS"
-
-PRINT_N "                    GridStorage"
-IF_YES_NO "$GRIDSTORAGE"
 
 PRINT_N "                           HDF4"
 IF_YES_NO "$HAVE_HDF4"

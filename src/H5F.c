@@ -23,7 +23,6 @@
 #include "H5FDfamily.h"		/*family of files			  */
 #include "H5FDmpio.h"		/*MPI-2 I/O				  */
 #include "H5FDgass.h"           /*GASS I/O                                */
-#include "H5FDdpss.h"           /*Grid Storage I/O                        */
 #include "H5FDstream.h"         /*in-memory files streamed via sockets    */
 #include "H5FDsrb.h"            /*SRB I/O                                 */
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
@@ -204,9 +203,6 @@ H5F_init_interface(void)
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
 #ifdef H5_HAVE_GASS
 	if ((status=H5FD_GASS)<0) goto end_registration;
-#endif
-#ifdef H5_HAVE_GRIDSTORAGE
-	if ((status=H5FD_DPSS)<0) goto end_registration;
 #endif
 #ifdef H5_HAVE_SRB
 	if ((status=H5FD_SRB)<0) goto end_registration;

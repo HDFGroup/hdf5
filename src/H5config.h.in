@@ -86,9 +86,6 @@
 /* Define if the SRB is defined */
 #undef HAVE_SRB
 
-/* Define if the Grid Storage is defined */
-#undef HAVE_GRIDSTORAGE
-
 /* Define if the stream virtual file driver should be compiled */
 #undef HAVE_STREAM
 
@@ -281,9 +278,6 @@
 /* Define if you have the <globus_common.h> header file.  */
 #undef HAVE_GLOBUS_COMMON_H
 
-/* Define if you have the <grid_storage_file.h> header file.  */
-#undef HAVE_GRID_STORAGE_FILE_H
-
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
@@ -388,12 +382,6 @@
 
 /* Define if you have the globus_io library (-lglobus_io).  */
 #undef HAVE_LIBGLOBUS_IO
-
-/* Define if you have the grid_storage_client library (-lgrid_storage_client).  */
-#undef HAVE_LIBGRID_STORAGE_CLIENT
-
-/* Define if you have the grid_storage_file library (-lgrid_storage_file).  */
-#undef HAVE_LIBGRID_STORAGE_FILE
 
 /* Define if you have the jpeg library (-ljpeg).  */
 #undef HAVE_LIBJPEG

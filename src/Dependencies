@@ -212,7 +212,6 @@ H5F.lo: \
    $(srcdir)/H5FDmpio.h \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5FDgass.h \
-   $(srcdir)/H5FDdpss.h \
    $(srcdir)/H5FDstream.h \
    $(srcdir)/H5FDsrb.h \
    $(srcdir)/H5FDmulti.h \
@@ -600,46 +599,6 @@ H5FDcore.lo: \
    $(srcdir)/H5Spublic.h \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Sprivate.h
-H5FDdpss.lo: \
-   $(srcdir)/H5FDdpss.c \
-   $(srcdir)/hdf5.h \
-   $(srcdir)/H5public.h \
-   H5pubconf.h \
-   $(srcdir)/H5api_adpt.h \
-   $(srcdir)/H5Ipublic.h \
-   $(srcdir)/H5Apublic.h \
-   $(srcdir)/H5ACpublic.h \
-   $(srcdir)/H5Bpublic.h \
-   $(srcdir)/H5Dpublic.h \
-   $(srcdir)/H5Epublic.h \
-   $(srcdir)/H5Fpublic.h \
-   $(srcdir)/H5FDpublic.h \
-   $(srcdir)/H5Gpublic.h \
-   $(srcdir)/H5HGpublic.h \
-   $(srcdir)/H5HLpublic.h \
-   $(srcdir)/H5MMpublic.h \
-   $(srcdir)/H5Opublic.h \
-   $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5Zpublic.h \
-   $(srcdir)/H5Rpublic.h \
-   $(srcdir)/H5Spublic.h \
-   $(srcdir)/H5Tpublic.h \
-   $(srcdir)/H5FDcore.h \
-   $(srcdir)/H5FDfamily.h \
-   $(srcdir)/H5FDmpio.h \
-   $(srcdir)/H5FDsec2.h \
-   $(srcdir)/H5FDstdio.h \
-   $(srcdir)/H5FDsrb.h \
-   $(srcdir)/H5FDgass.h \
-   $(srcdir)/H5FDdpss.h \
-   $(srcdir)/H5FDstream.h \
-   $(srcdir)/H5FDmulti.h \
-   $(srcdir)/H5FDlog.h \
-   $(srcdir)/H5Eprivate.h \
-   $(srcdir)/H5private.h \
-   H5config.h \
-   $(srcdir)/H5FDprivate.h \
-   $(srcdir)/H5MMprivate.h
 H5FDmulti.lo: \
    $(srcdir)/H5FDmulti.c \
    $(srcdir)/hdf5.h \
@@ -671,7 +630,6 @@ H5FDmulti.lo: \
    $(srcdir)/H5FDstdio.h \
    $(srcdir)/H5FDsrb.h \
    $(srcdir)/H5FDgass.h \
-   $(srcdir)/H5FDdpss.h \
    $(srcdir)/H5FDstream.h \
    $(srcdir)/H5FDmulti.h \
    $(srcdir)/H5FDlog.h
@@ -824,7 +782,6 @@ H5FDstdio.lo: \
    $(srcdir)/H5FDstdio.h \
    $(srcdir)/H5FDsrb.h \
    $(srcdir)/H5FDgass.h \
-   $(srcdir)/H5FDdpss.h \
    $(srcdir)/H5FDstream.h \
    $(srcdir)/H5FDmulti.h \
    $(srcdir)/H5FDlog.h
