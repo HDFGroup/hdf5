@@ -1086,11 +1086,11 @@ H5P_free_prop(H5P_genprop_t *prop)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_free_all_prop_cb
+    H5P_free_prop_cb
  PURPOSE
-    Internal routine to remove all properties from a property skip list
+    Internal routine to properties from a property skip list
  USAGE
-    herr_t H5P_free_all_prop_cb(item, key, op_data)
+    herr_t H5P_free_prop_cb(item, key, op_data)
         void *item;             IN/OUT: Pointer to property
         void *key;              IN/OUT: Pointer to property key
         void *_make_cb;         IN: Whether to make property callbacks or not
@@ -1105,12 +1105,12 @@ H5P_free_prop(H5P_genprop_t *prop)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop_cb(void *item, void UNUSED *key, void *op_data)
+H5P_free_prop_cb(void *item, void UNUSED *key, void *op_data)
 {
     H5P_genprop_t *tprop=(H5P_genprop_t *)item;       /* Temporary pointer to property */
     unsigned make_cb=*(unsigned *)op_data;     /* Whether to make property 'close' callback */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_free_all_prop_cb);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_free_prop_cb);
 
     assert(tprop);
 
@@ -1122,44 +1122,42 @@ H5P_free_all_prop_cb(void *item, void UNUSED *key, void *op_data)
     H5P_free_prop(tprop);
 
     FUNC_LEAVE_NOAPI(0);
-}   /* H5P_free_all_prop_cb() */
+}   /* H5P_free_prop_cb() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_free_all_prop
+    H5P_free_del_name_cb
  PURPOSE
-    Internal routine to remove all properties from a property skip list
+    Internal routine to free 'deleted' property name
  USAGE
-    herr_t H5P_free_all_prop(slist, make_cb)
-        H5SL_t *slist;             IN/OUT: Pointer to property skip list
-        unsigned make_cb;          IN: Whether to make property callbacks or not
+    herr_t H5P_free_del_name_cb(item, key, op_data)
+        void *item;             IN/OUT: Pointer to deleted name
+        void *key;              IN/OUT: Pointer to key
+        void *op_data;          IN: Operator callback data (unused)
  RETURNS
-    Returns non-negative on success, negative on failure.
+    Returns zero on success, negative on failure.
  DESCRIPTION
-        Remove all the properties from a property list.  Calls the property
-    'close' callback for each property removed.
+    Frees the deleted property name
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop(H5SL_t *slist,unsigned make_cb)
+H5P_free_del_name_cb(void *item, void UNUSED *key, void UNUSED *op_data)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    char *del_name=(char *)item;       /* Temporary pointer to deleted name */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_free_all_prop);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_free_del_name_cb);
 
-    assert(slist);
+    assert(del_name);
 
-    /* Work through all the properties... */
-    if(H5SL_iterate(slist,H5P_free_all_prop_cb,&make_cb)<0)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTNEXT,FAIL,"can't iterate over properties");
+    /* Free the name */
+    H5MM_xfree(del_name);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5P_free_all_prop() */
+    FUNC_LEAVE_NOAPI(0);
+}   /* H5P_free_del_name_cb() */
 
 
 /*--------------------------------------------------------------------------
@@ -1237,11 +1235,11 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         H5MM_xfree(pclass->name);
 
         /* Free the class properties without making callbacks */
-        if(pclass->nprops>0)
-            H5P_free_all_prop(pclass->props,0);
+        if(pclass->props) {
+            unsigned make_cb=0;
 
-        /* Free the property skip list itself */
-        H5SL_close(pclass->props);
+            H5SL_destroy(pclass->props,H5P_free_prop_cb,&make_cb);
+        } /* end if */
 
         H5FL_FREE(H5P_genclass_t,pclass);
 
@@ -1604,11 +1602,12 @@ done:
         if(plist!=NULL) {
             /* Close & free any changed properties */
             if(plist->props) {
-                H5P_free_all_prop(plist->props,1);
-                H5SL_close(plist->props);
+                unsigned make_cb=1;
+
+                H5SL_destroy(plist->props,H5P_free_prop_cb,&make_cb);
             } /* end if */
 
-            /* Release the deleted property skip list */
+            /* Close the deleted property skip list */
             if(plist->del)
                 H5SL_close(plist->del);
 
@@ -5105,6 +5104,7 @@ H5P_close(void *_plist)
     ssize_t ndel;                   /* Number of items deleted */
     H5SL_node_t *curr_node;         /* Current node in skip list */
     H5P_genprop_t *tmp;             /* Temporary pointer to properties */
+    unsigned make_cb=0;             /* Operator data for property free callback */
     herr_t ret_value=SUCCEED;       /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_close);
@@ -5214,27 +5214,10 @@ H5P_close(void *_plist)
     seen=NULL;
 
     /* Free the list of deleted property names */
-    curr_node=H5SL_first(plist->del);
-    while(curr_node!=NULL) {
-        char *del_name;                 /* Pointer to deleted name */
-
-        /* Get pointer to name to free */
-        del_name=H5SL_item(curr_node);
-
-        /* Free deleted property name */
-        H5MM_xfree(del_name);
-
-        /* Go to next deleted property */
-        curr_node=H5SL_next(curr_node);
-    } /* end while */
-    H5SL_close(plist->del);
+    H5SL_destroy(plist->del,H5P_free_del_name_cb,NULL);
 
     /* Free the properties */
-    if(plist->nprops>0)
-        H5P_free_all_prop(plist->props,0);
-
-    /* Free the property skip list itself */
-    H5SL_close(plist->props);
+    H5SL_destroy(plist->props,H5P_free_prop_cb,&make_cb);
 
     /* Destroy property list object */
     H5FL_FREE(H5P_genplist_t,plist);
