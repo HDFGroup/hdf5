@@ -15,7 +15,7 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 ## Test programs and scripts.
 TEST_PROGS=
-TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
+TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@ @TESTH4TOH5@
 
 ## These are our main targets: library and tools. We link this library
 ## statically because some systems can only link executables to a single
@@ -23,7 +23,7 @@ TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
-PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @PDB2HDF@
+PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @H4TOH5@ @PDB2HDF@
 PROGS=$(PUB_PROGS) h5dumptst
 
 ## Source and object files for the library; do not install
@@ -31,11 +31,18 @@ LIB_SRC=h5tools.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
+## Source and object files for h4toh5 converter.
+H4TOH5_SRC=h4toh5main.c h4toh5vgroup.c h4toh5vdata.c h4toh5sds.c h4toh5image.c h4toh5pal.c \
+	h4toh5anno.c h4toh5util.c
+H4TOH5_OBJ=$(H4TOH5_SRC:.c=.lo)
+H4TOH5_HDR=h4toh5main.h h4toh5util.h
+
 ## Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c \
-	h5toh4.c h5dumptst.c pdb2hdf.c
-PROG_OBJ=$(PROG_SRC:.c=.lo)
-PRIVATE_HDR=h5tools.h
+	h5toh4.c h5dumptst.c pdb2hdf.c \
+	$(H4TOH5_SRC)
+PROG_OBJ=$(PROG_SRC:.c=.lo) $(H4TOH5_OBJ)
+PRIVATE_HDR=h5tools.h $(H4TOH5_HDR)
 
 ## Source and object files for the tests
 TEST_SRC=
@@ -68,6 +75,9 @@ h5toh4: h5toh4.lo
 
 h5dumptst: h5dumptst.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dumptst.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+h4toh5: $(H4TOH5_OBJ)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(H4TOH5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 pdb2hdf: pdb2hdf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ pdb2hdf.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
