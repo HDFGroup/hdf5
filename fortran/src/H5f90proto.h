@@ -896,7 +896,7 @@ extern int_f nh5eset_auto_c(int_f* printflag);
 #ifdef DF_CAPFNAMES 
 #   define nh5open_c         FNAME(H5OPEN_C)
 #   define nh5close_c         FNAME(H5CLOSE_C)
-#   define nh5init_type_c    FNAME(H5INIT_TYPES_C)
+#   define nh5init_types_c    FNAME(H5INIT_TYPES_C)
 #   define nh5close_types_c   FNAME(H5CLOSE_TYPES_C)
 #   define nh5init_flags_c    FNAME(H5INIT_FLAGS_C)
 #else 
