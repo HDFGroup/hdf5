@@ -11913,3 +11913,81 @@ touch ./config/stamp2
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 chmod 755 src/h5fc
+
+if test -z "$ECHO_N" -o -z "$ECHO_C"; then
+  if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
+    if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
+      ECHO_N=''
+      ECHO_C='
+'
+    else
+      ECHO_N=-n
+      ECHO_C=''
+    fi
+  else
+    ECHO_N=''
+    ECHO_C='\c'
+  fi
+fi
+
+PRINT_PLAIN() {
+  echo $ECHO_N "$1$ECHO_C"
+  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5.settings
+}
+
+PRINT_N() {
+  echo $ECHO_N "$1:  $ECHO_C"
+  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5.settings
+}
+
+PRINT() {
+  echo "$1"
+  echo "$1" 1>>src/libhdf5.settings
+}
+
+IF_YES_NO() {
+  if test $# -lt 1; then
+    PRINT "No"
+    return
+  else
+    while test $# -gt 0; do
+      if test "$1" != "yes"; then
+        PRINT "No"
+        return
+      fi
+      shift
+    done
+  fi
+  PRINT "Yes"
+}
+
+IF_ENABLED_DISABLED() {
+  if test "$1" = "yes"; then
+    PRINT "Enabled"
+  else
+    PRINT "Disabled"
+  fi
+}
+
+PRINT "Fortran Configure Summary"
+PRINT "Compiling Options:"
+
+PRINT_N "               Fortran Compiler"
+PRINT "$F9X"
+
+PRINT_N "                         FFLAGS"
+PRINT "$FFLAGS"
+
+PRINT_N "                     C Compiler"
+PRINT "$CC"
+
+PRINT_N "                         CFLAGS"
+PRINT "$CFLAGS"
+
+PRINT_N "                       CPPFLAGS"
+PRINT "$CPPFLAGS"
+
+PRINT_N "                        LDFLAGS"
+PRINT "$LDFLAGS"
+
+PRINT "Features:"
