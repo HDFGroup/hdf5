@@ -72,44 +72,42 @@ static herr_t H5P_init_interface(void)
     FUNC_LEAVE(H5P_mask, ID_H5P_init_interface, ret_value);
 }	/* H5P_init_interface */
 
-#ifdef NOT_YET
 /*--------------------------------------------------------------------------
  NAME
-    H5Tcreate
+    H5P_create
  PURPOSE
-    Create a new HDF5 data-type object
+    Create a new HDF5 dimensionality object
  USAGE
-    hatom_t H5Tcreate(owner_id, type, name)
+    hatom_t H5P_create(owner_id, type, name)
         hatom_t owner_id;       IN: Group/file which owns this object
         hobjtype_t type;        IN: Type of object to create
         const char *name;       IN: Name of the object
  RETURNS
     Returns ID (atom) on success, FAIL on failure
  DESCRIPTION
-        This function actually creates the data-type object.
+        This function actually creates the dimensionality object.
 --------------------------------------------------------------------------*/
-hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name)
+hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5T_create");     /* for HERROR */
-    h5_datatype_t *new_dt;            /* new data-type object to create */
+    CONSTR(FUNC, "H5P_create");     /* for HERROR */
+    H5P_dim_t *new_dim;               /* new dimensionality object to create */
     hatom_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tcreate, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5P_mask, ID_H5P_create, H5P_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
     /* Allocate space for the new data-type */
-    if((new_dt=HDmalloc(sizeof(h5_datatype_t)))==NULL)
+    if((new_dim=HDmalloc(sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     
-    /* Initialize the datatype */
-    new_dt->dt.base=0;           /* No Default datatype */
-    new_dt->name=HDstrdup(name); /* Make a copy of the datatype's name */
-    new_dt->ci=NULL;             /* Set the complex information to NULL */
+    /* Initialize the dimensionality object */
+    new_dim->rank=0;
+    new_dim->dims=NULL;
 
     /* Register the new datatype and get an ID for it */
-    if((ret_value=H5Aregister_atom(H5_DATATYPE, (const VOIDP)new_dt))==FAIL)
+    if((ret_value=H5Aregister_atom(H5_DATASPACE, (const VOIDP)new_dim))==FAIL)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
 
 done:
@@ -120,9 +118,8 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tcreate, ret_value);
-} /* end H5T_create() */
-#endif /* NOT_YET */
+    FUNC_LEAVE(H5P_mask, ID_H5P_create, ret_value);
+} /* end H5P_create() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -167,40 +164,36 @@ done:
     FUNC_LEAVE(H5P_mask, ID_H5Pnelem, ret_value);
 } /* end H5Pnelem() */
 
-#ifdef NOT_YET
 /*--------------------------------------------------------------------------
  NAME
-    H5Trelease
+    H5P_release
  PURPOSE
-    Release access to an HDF5 datatype object.
+    Release access to an HDF5 dimensionality object.
  USAGE
-    herr_t H5Trelease(oid)
+    herr_t H5P_release(oid)
         hatom_t oid;       IN: Object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-        This function releases a datatype from active use by a user.
+        This function releases a dimensionality from active use by a user.
 --------------------------------------------------------------------------*/
-herr_t H5T_release(hatom_t oid)
+herr_t H5P_release(hatom_t oid)
 {
-    CONSTR(FUNC, "H5T_release");    /* for HERROR */
-    h5_datatype_t *dt;         /* new data-type object to create */
+    CONSTR(FUNC, "H5P_release");    /* for HERROR */
+    H5P_dim_t *dim;         /* dimensionality object to release */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5Trelease, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5P_mask, ID_H5Prelease, H5P_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
     /* Chuck the object! :-) */
-    if((dt=H5Aremove_atom(oid))==NULL)
+    if((dim=H5Aremove_atom(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(dt->name!=NULL)
-        HDfree(dt->name);
-    if(dt->ci!=NULL)
-      {
-      } /* end if */
-    HDfree(dt);
+    if(dim->rank>0)
+        HDfree(dim->dims);
+    HDfree(dim);
 
 done:
   if(ret_value == FAIL)   
@@ -210,7 +203,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Trelease, ret_value);
-} /* end H5T_release() */
-#endif /* NOT_YET */
+    FUNC_LEAVE(H5P_mask, ID_H5P_release, ret_value);
+} /* end H5P_release() */
 

@@ -27,4 +27,3 @@ static herr_t H5P_init_interface(void);
 
 #endif /* H5PPRIVATE_H */
 
-
