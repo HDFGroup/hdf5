@@ -48,7 +48,7 @@
 ./config/hpux9.03
 ./config/intel-osf1
 ./config/irix5.3
-./config/irix6.2
+./config/irix6.x
 ./config/irix64
 ./config/linux
 ./config/powerpc-ibm-aix4.2.1.0
