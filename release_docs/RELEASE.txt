@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+	- Long double is assumed to be a supported C data type.  It is a
+	  stanadard C89 type. AKC - 2004/10/22
 	- The IA64 will use ecc as the C++ compiler by default.
         - Added some initial support for making purify (or similar memory
             checking products) happier by initializing buffers to zero and
