@@ -959,7 +959,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     /* check arguments */
     if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    if (!buf || buf_size<1)
+    if (!buf && buf_size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
 
     /* get the real attribute length */
@@ -970,10 +970,12 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     copy_len = MIN(buf_size-1, nbytes);
 
     /* Copy all/some of the name */
-    HDmemcpy(buf, attr->name, copy_len);
+    if(buf && copy_len>0) {
+        HDmemcpy(buf, attr->name, copy_len);
 
-    /* Terminate the string */
-    buf[copy_len]='\0';
+        /* Terminate the string */
+        buf[copy_len]='\0';
+    }
 
     /* Set return value */
     ret_value = (ssize_t)nbytes;
@@ -982,6 +984,81 @@ done:
     FUNC_LEAVE(ret_value);
 } /* H5Aget_type() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aget_storage_size
+ *
+ * Purpose:	Returns the amount of storage size that is required for this
+ *		attribute. 
+ *
+ * Return:	Success:	The amount of storage size allocated for the
+ *				attribute.  The return value may be zero 
+ *                              if no data has been stored.
+ *
+ *		Failure:	Zero
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5Aget_storage_size(hid_t attr_id)
+{
+    H5A_t	*attr=NULL;
+    hsize_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_API(H5Aget_storage_size, 0);
+    H5TRACE1("h","i",attr_id);
+
+    /* Check args */
+    if (NULL==(attr=H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute");
+
+    /* Set return value */
+    ret_value = H5A_get_storage_size(attr);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_get_storage_size
+ *
+ * Purpose:	Private function for H5Aget_storage_size.  Returns the 
+ *              amount of storage size that is required for this
+ *		attribute. 
+ *
+ * Return:	Success:	The amount of storage size allocated for the
+ *				attribute.  The return value may be zero 
+ *                              if no data has been stored.
+ *
+ *		Failure:	Zero
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5A_get_storage_size(H5A_t *attr)
+{
+    hsize_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5A_get_storage_size, 0);
+
+    /* Set return value */
+    ret_value = attr->data_size;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+ 
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1040,6 +1117,121 @@ H5Aget_num_attrs(hid_t loc_id)
 done:
     FUNC_LEAVE(ret_value);
 } /* H5Aget_num_attrs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Arename
+ *
+ * Purpose:     Rename an attribute	
+ *
+ * Return:	Success:             Non-negative	
+ *
+ *		Failure:             Negative
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Arename(hid_t loc_id, char *old_name, char *new_name)
+{
+    H5G_entry_t	*ent = NULL;	/*symtab ent of object to attribute */
+    herr_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_API(H5Arename, FAIL);
+    H5TRACE3("e","iss",loc_id,old_name,new_name);
+
+    /* check arguments */
+    if (!old_name || !new_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil");
+    if (H5I_FILE==H5I_get_type(loc_id) || H5I_ATTR==H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute");
+    if (NULL==(ent=H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+
+    /* Call private function */
+    ret_value = H5A_rename(ent, old_name, new_name);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_rename
+ *
+ * Purpose:     Private function for H5Arename.  Rename an attribute	
+ *
+ * Return:	Success:             Non-negative	
+ *
+ *		Failure:             Negative
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_rename(H5G_entry_t *ent, char *old_name, char *new_name)
+{
+    int         seq, idx=FAIL;  /* Index of attribute being querried */
+    H5A_t       *found_attr;    /* Attribute with OLD_NAME */
+    herr_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5A_rename, FAIL);
+
+    /* Check arguments */
+    assert(ent);
+    assert(old_name);
+    assert(new_name);
+    
+    /* Build the attribute information */
+    if((found_attr = HDcalloc(1, sizeof(H5A_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info");
+        
+    /* Read in the existing attributes to check for duplicates */
+    seq=0;
+    while(H5O_read(ent, H5O_ATTR, seq, found_attr)!=NULL) {
+        /*
+	 * Compare found attribute name.
+	 */
+	if(HDstrcmp(found_attr->name,old_name)==0) {
+            idx = seq;
+            break;
+	}
+	H5O_reset (H5O_ATTR, found_attr);
+	seq++;
+    }
+ 
+    if(idx<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute cannot be found");
+        
+    /* Copy the attribute name. */
+    if(found_attr->name)
+        HDfree(found_attr->name);
+    found_attr->name = HDstrdup(new_name); 
+    if(!found_attr->name) 
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "String copy failed");
+
+    /* Indicate entry is not opened and the attribute doesn't need fill-values. */
+    found_attr->ent_opened=FALSE;
+    found_attr->initialized=TRUE;
+
+    /* Modify the attribute message */
+    if (H5O_modify(ent, H5O_ATTR, idx, 0, found_attr) < 0) 
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
+   
+    /* Close the attribute */
+    if(found_attr) H5A_close(found_attr);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
 
 
 /*--------------------------------------------------------------------------
@@ -1309,7 +1501,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_close
  *
- * Purpose:	Frees a attribute and all associated memory.  
+ * Purpose:	Frees an attribute and all associated memory.  
  *
  * Return:	Non-negative on success/Negative on failure
  *

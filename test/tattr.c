@@ -1,13 +1,13 @@
 /****************************************************************************
- * NCSA HDF								                                    *
- * Software Development Group						                        *
- * National Center for Supercomputing Applications			                *
- * University of Illinois at Urbana-Champaign				                *
- * 605 E. Springfield, Champaign IL 61820				                    *
- *									                                        *
- * For conditions of distribution and use, see the accompanying		        *
- * hdf/COPYING file.							                            *
- *									                                        *
+ * NCSA HDF								    *
+ * Software Development Group						    *
+ * National Center for Supercomputing Applications			    *
+ * University of Illinois at Urbana-Champaign				    * 
+ * 605 E. Springfield, Champaign IL 61820				    *
+ *									    *
+ * For conditions of distribution and use, see the accompanying		    *
+ * hdf/COPYING file.							    *
+ *									    *
  ****************************************************************************/
 
 /* $Id$ */
@@ -26,6 +26,7 @@
 #define FILENAME   "tattr.h5"
 #define ATTR_NAME_LEN   16
 #define ATTR_MAX_DIMS   7
+#define ATTR_TMP_NAME   "temp_name"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -42,6 +43,10 @@
 #define ATTR1_RANK	1
 #define ATTR1_DIM1	3
 int attr_data1[ATTR1_DIM1]={512,-234,98123}; /* Test data for 1st attribute */
+
+/* rank & dimensions for another attribute */
+#define ATTR1A_NAME  "Attr1_a"
+int attr_data1a[ATTR1_DIM1]={256,11945,-22107}; 
 
 #define ATTR2_NAME  "Attr2"
 #define ATTR2_RANK	2
@@ -92,7 +97,10 @@ test_attr_basic_write(void)
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		group;	    /* Group ID			    */
     hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hid_t		attr;	    /* Attribute ID			*/
+    hid_t		attr, attr2;	    /* Attribute ID		*/
+    hsize_t             attr_size;  /* storage size for attribute       */
+    ssize_t             attr_name_size; /* size of attribute name       */
+    char                *attr_name;     /* name of attribute            */
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {ATTR1_DIM1};
     hsize_t		dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
@@ -134,6 +142,18 @@ test_attr_basic_write(void)
     ret=H5Awrite(attr,H5T_NATIVE_INT,attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
 
+    /* Create an another attribute for the dataset */
+    attr2=H5Acreate(dataset,ATTR1A_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+    
+    /* Write attribute information */
+    ret=H5Awrite(attr2,H5T_NATIVE_INT,attr_data1a);
+    CHECK(ret, FAIL, "H5Awrite");
+    
+    /* Check storage size for attribute */
+    attr_size=H5Aget_storage_size(attr);
+    VERIFY(attr_size, (ATTR1_DIM1*sizeof(int)), "H5A_get_storage_size");
+
     /* Read attribute information immediately, without closing attribute */
     ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
     CHECK(ret, FAIL, "H5Aread");
@@ -148,6 +168,87 @@ test_attr_basic_write(void)
     /* Close attribute */
     ret=H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close attribute */
+    ret=H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* change attribute name */
+    ret=H5Arename(dataset, ATTR1_NAME, ATTR_TMP_NAME);
+    CHECK(ret, FAIL, "H5Arename");
+
+    /* Open attribute again */
+    attr=H5Aopen_name(dataset, ATTR_TMP_NAME);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Verify new attribute name */
+    attr_name_size = H5Aget_name(attr, 0, NULL);
+    CHECK(attr_name_size, FAIL, "H5Aget_name");
+    
+    if(attr_name_size>0)
+        attr_name = (char*)HDcalloc(attr_name_size+1, sizeof(char));
+    
+    ret=H5Aget_name(attr, attr_name_size+1, attr_name);
+    CHECK(ret, FAIL, "H5Aget_name");
+    ret=HDstrcmp(attr_name, ATTR_TMP_NAME);
+    VERIFY(ret, 0, "HDstrcmp");
+
+    if(attr_name)
+        HDfree(attr_name);
+
+    /* Read attribute information immediately, without closing attribute */
+    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i=0; i<ATTR1_DIM1; i++)
+        if(attr_data1[i]!=read_data1[i]) {
+            printf("2. attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            num_errs++;
+        } /* end if */
+
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+
+    /* Open the second attribute again */
+    attr2=H5Aopen_name(dataset, ATTR1A_NAME); 
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Verify new attribute name */
+    attr_name_size = H5Aget_name(attr2, 0, NULL);
+    CHECK(attr_name_size, FAIL, "H5Aget_name");
+    
+    if(attr_name_size>0)
+        attr_name = (char*)HDcalloc(attr_name_size+1, sizeof(char));
+    
+    ret=H5Aget_name(attr2, attr_name_size+1, attr_name);
+    CHECK(ret, FAIL, "H5Aget_name");
+    ret=HDstrcmp(attr_name, ATTR1A_NAME);
+    VERIFY(ret, 0, "HDstrcmp");
+
+    if(attr_name)
+        HDfree(attr_name);
+
+    /* Read attribute information immediately, without closing attribute */
+    ret=H5Aread(attr2,H5T_NATIVE_INT,read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i=0; i<ATTR1_DIM1; i++)
+        if(attr_data1a[i]!=read_data1[i]) {
+            printf("2. attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",i,attr_data1[i],i,read_data1[i]);
+            num_errs++;
+        } /* end if */
+
+    /* Close attribute */
+    ret=H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+    
+    /* change first attribute back to the original name */
+    ret=H5Arename(dataset, ATTR_TMP_NAME, ATTR1_NAME);
+    CHECK(ret, FAIL, "H5Arename");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -170,6 +271,10 @@ test_attr_basic_write(void)
     attr=H5Acreate(group,ATTR2_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate");
 
+    /* Check storage size for attribute */
+    attr_size=H5Aget_storage_size(attr);
+    VERIFY(attr_size, (ATTR2_DIM1*ATTR2_DIM2*sizeof(int)), "H5Aget_storage_size");
+    
     /* Try to create the same attribute again (should fail) */
     ret=H5Acreate(group,ATTR2_NAME,H5T_NATIVE_INT,sid2,H5P_DEFAULT);
     VERIFY(ret, FAIL, "H5Acreate");
@@ -178,6 +283,10 @@ test_attr_basic_write(void)
     ret=H5Awrite(attr,H5T_NATIVE_INT,attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
 
+    /* Check storage size for attribute */
+    attr_size=H5Aget_storage_size(attr);
+    VERIFY(attr_size, (ATTR2_DIM1*ATTR2_DIM2*sizeof(int)), "H5A_get_storage_size");
+    
     /* Close attribute */
     ret=H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
@@ -225,7 +334,7 @@ test_attr_basic_read(void)
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(dataset);
-    VERIFY(ret, 1, "H5Aget_num_attrs");
+    VERIFY(ret, 2, "H5Aget_num_attrs");
 
     /* Open an attribute for the dataset */
     attr=H5Aopen_name(dataset,ATTR1_NAME);

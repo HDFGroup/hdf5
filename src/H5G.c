@@ -2415,7 +2415,8 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
             buf[0] = '\0';
 	ret_value = 0;
     } else {
-	HDstrncpy(buf, comment.s, bufsize);
+        if(buf && bufsize)
+	   HDstrncpy(buf, comment.s, bufsize);
 	ret_value = (int)HDstrlen(comment.s);
 	H5O_reset(H5O_NAME, &comment);
     }

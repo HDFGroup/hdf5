@@ -25,8 +25,10 @@ typedef struct H5A_t H5A_t;
 /* Private headers needed by this file */
 
 /* Functions defined in H5A.c */
-H5_DLL H5A_t * H5A_copy(const H5A_t *old_attr);
-H5_DLL herr_t H5A_close(H5A_t *attr);
+H5_DLL H5A_t       *H5A_copy(const H5A_t *old_attr);
+H5_DLL herr_t      H5A_close(H5A_t *attr);
 H5_DLL H5G_entry_t *H5A_entof(H5A_t *attr);
+H5_DLL hsize_t     H5A_get_storage_size(H5A_t *attr);
+H5_DLL herr_t      H5A_rename(H5G_entry_t *ent, char *old_name, char *new_name);
 
 #endif
