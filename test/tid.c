@@ -17,7 +17,8 @@ int id_test()
 	hid_t testID;
 	ssize_t testSize = -1;
 	herr_t err;
-	int num_ref, num_members;
+	int num_ref;
+        hsize_t num_members;
 
 	testObj = malloc(7 * sizeof(int));
 
