@@ -1686,12 +1686,23 @@ PRINT() {
   echo "$1" 1>>src/libhdf5.settings
 }
 
+dnl ----------------------------------------------------------------------
+dnl Print "Yes" if all arguments are "yes", otherwise "No"
+dnl
 IF_YES_NO() {
-  if test "$1" = "yes"; then
-    PRINT "Yes"
-  else
+  if test $# -lt 1; then
     PRINT "No"
+    return
+  else
+    while test $# -gt 0; do
+      if test "$1" != "yes"; then
+	PRINT "No"
+	return
+      fi
+      shift
+    done
   fi
+  PRINT "Yes"
 }
 
 IF_ENABLED_DISABLED() {
@@ -1778,5 +1789,6 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
 
+dnl Zlib compression depends on zlib.h header and compress2()
 PRINT_N "               Zlib-compression"
-IF_YES_NO "$HAVE_ZLIB"
+IF_YES_NO "$ac_cv_header_zlib_h" "$ac_cv_func_compress2"

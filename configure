@@ -30664,11 +30664,19 @@ PRINT() {
 }
 
 IF_YES_NO() {
-  if test "$1" = "yes"; then
-    PRINT "Yes"
-  else
+  if test $# -lt 1; then
     PRINT "No"
+    return
+  else
+    while test $# -gt 0; do
+      if test "$1" != "yes"; then
+	PRINT "No"
+	return
+      fi
+      shift
+    done
   fi
+  PRINT "Yes"
 }
 
 IF_ENABLED_DISABLED() {
@@ -30756,4 +30764,4 @@ PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT_N "               Zlib-compression"
-IF_YES_NO "$HAVE_ZLIB"
+IF_YES_NO "$ac_cv_header_zlib_h" "$ac_cv_func_compress2"
