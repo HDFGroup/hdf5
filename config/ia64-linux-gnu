@@ -21,14 +21,7 @@ fi
 
 case $CC_BASENAME in
     ecc|icc)
-	# Default to C99 standard.
-	CFLAGS="${CFLAGS:--std=c99}"
-	DEBUG_CFLAGS="-w2 -Wall -g -O0"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS=""		# ecc has -O2 as default
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-p"
-	PROFILE_CPPFLAGS=
+	. $srcdir/config/intel-flags
 	;;
 
     gcc)
@@ -108,9 +101,9 @@ fi
 
 # A patch to make g++ getting the default settings.
 # CXX_BASENAME should have been set in configure.
-if test $CXX = g++; then
+if test "X$CXX" = "Xg++"; then
     CXX_BASENAME=g++
-if
+fi
 
 
 case $CXX_BASENAME in
