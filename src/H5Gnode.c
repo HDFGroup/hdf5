@@ -1630,7 +1630,16 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
         loc_idx = bt_udata->idx - bt_udata->num_objs; 
-        bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id);  
+
+        /* Since H5G_get_type has to use header address in table entry and the
+         * header address for soft link is HADDR_UNDEF, make a special case for
+         * soft link here. 
+         */ 
+        if(sn->entry[loc_idx].type == H5G_CACHED_SLINK)
+            bt_udata->type = H5G_LINK;
+        else
+            bt_udata->type = H5G_get_type(&(sn->entry[loc_idx]), dxpl_id); 
+
         ret_value = H5B_ITER_STOP;
     } else {
         bt_udata->num_objs += sn->nsyms;
