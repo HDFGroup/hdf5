@@ -48,6 +48,8 @@ New features
      retrieved with H5Pget_sieve_buf_size().
    * Added new Virtual File Driver, Stream VFD, to send/receive entire
      HDF5 files via socket connections.
+   * Increased maximum number of dimensions for a dataset (H5S_MAX_RANK) from
+     31 to 32 to align with HDF4 & netCDF.
 
 Bug fixes since HDF5-1.2.0
 ==========================
