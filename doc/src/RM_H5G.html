@@ -53,7 +53,7 @@ of objects on disk.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Group-Stat">H5Gget_stat</a>
+    <li><a href="#Group-GetObjinfo">H5Gget_objinfo</a>
     <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
     <li><a href="#Group-SetComment">H5Gset_comment</a>
     <li><a href="#Group-GetComment">H5Gget_comment</a>
@@ -506,9 +506,9 @@ then be trivial.
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Stat">H5Gget_stat</a>
+  <dt><strong>Name:</strong> <a name="Group-GetObjinfo">H5Gget_objinfo</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Gget_stat</code>(<em>hid_t</em> <code>loc_id</code>,
+    <dd><em>herr_t</em> <code>H5Gget_objinfo</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char *</em><code>name</code>,
         <em>hbool_t</em> <code>follow_link</code>,
         <em>H5G_stat_t *</em><code>statbuf</code>
@@ -516,7 +516,7 @@ then be trivial.
   <dt><strong>Purpose:</strong>
     <dd>Returns information about an object.  
   <dt><strong>Description:</strong>
-    <dd><code>H5Gget_stat</code> returns information about the 
+    <dd><code>H5Gget_objinfo</code> returns information about the 
         specified object through the <code>statbuf</code> argument. 
         <code>loc_id</code> (a file, group, or dataset identifier) and 
         <code>name</code> together determine the object.  
@@ -530,7 +530,7 @@ then be trivial.
         The existence of an object can be tested by calling this function 
         with a null <code>statbuf</code>.
         <p>
-        <code>H5Gget_stat()</code> fills in the following data structure:
+        <code>H5Gget_objinfo()</code> fills in the following data structure:
         <pre>
                   typedef struct H5G_stat_t {
                       unsigned long fileno[2];
@@ -604,7 +604,7 @@ then be trivial.
         The presence of a symbolic link can be tested by passing zero for  
         <code>size</code> and NULL for <code>value</code>.  
         <p>
-        Use <code>H5Gget_stat()</code> to get the size of a link value.
+        Use <code>H5Gget_objinfo()</code> to get the size of a link value.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
