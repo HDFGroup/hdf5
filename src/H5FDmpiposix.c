@@ -42,17 +42,16 @@
 #include "H5Pprivate.h"		/*property lists			*/
 
 /* Features:
- *   USE_GPFS_HINTS -- issue gpfs_fcntl() calls to hopefully improve
+ *   H5_HAVE_GPFS   -- issue gpfs_fcntl() calls to hopefully improve
  *                     performance when accessing files on a GPFS
  *                     file system.
  *
  *   REPORT_IO      -- if set then report all POSIX file calls to stderr.
  *
  */
-/* #define USE_GPFS_HINTS */
 /* #define REPORT_IO */
 
-#ifdef USE_GPFS_HINTS
+#ifdef H5_HAVE_GPFS
 #   include <gpfs_fcntl.h>
 #endif
 
@@ -774,7 +773,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&sb, sizeof(h5_stat_t), MPI_BYTE, 0, comm_dup)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
 
-#ifdef USE_GPFS_HINTS
+#ifdef H5_HAVE_GPFS
     if (fa->use_gpfs) {
         /*
          * Free all byte range tokens. This is a good thing to do if raw data is aligned on 256kB boundaries (a GPFS page is
@@ -796,7 +795,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         if (gpfs_fcntl(fd, &hint)<0)
             HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
     }
-#endif
+#endif  /* H5_HAVE_GPFS */
 
     /* Build the file struct and initialize it */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpiposix_t))))
@@ -1320,7 +1319,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     if (0==file->naccess++) {
         /* First write access to this file */
-#ifdef USE_GPFS_HINTS
+#ifdef H5_HAVE_GPFS
         if (file->use_gpfs) {
             struct {
                 gpfsFcntlHeader_t           hdr;
@@ -1339,7 +1338,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             if (gpfs_fcntl(file->fd, &hint)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
         }
-#endif  /* USE_GPFS_HINTS */
+#endif  /* H5_HAVE_GPFS */
     }
     
     /* Seek to the correct location */
