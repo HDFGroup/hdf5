@@ -12,6 +12,7 @@
 #include "h5test.h"
 #include "H5private.h"
 #include "H5Dprivate.h"
+#include "H5Eprivate.h"
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 #include "H5Fpkg.h"

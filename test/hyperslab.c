@@ -12,6 +12,7 @@
  *		rewrite much of the hyperslab stuff.
  */
 #include "H5private.h"
+#include "H5Eprivate.h"
 #include "H5MMprivate.h"
 #include "H5Vprivate.h"
 
