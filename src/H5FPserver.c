@@ -692,7 +692,8 @@ H5FP_add_new_file_struct_to_list(unsigned int sap_file_id, char *filename)
 
     if ((fs = H5FP_new_file_struct_node(sap_file_id, filename)) != NULL) {
         if (!H5TB_dins(fs_tree, (void *)fs, NULL))
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL, "can't insert file structure into tree");
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
+                        "can't insert file structure into tree");
 
         ret_value = SUCCEED;
     }
@@ -797,7 +798,8 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
 
         if (H5FP_add_new_file_struct_to_list(new_file_id, mdata) != SUCCEED)
             /* FIXME: This should be a different error message */
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL, "can't insert file structure into tree");
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
+                        "can't insert file structure into tree");
 
         /* broadcast the file id to all processes */
         /* FIXME: Isn't there some way to broadcast this result to the barrier group? -QAK */

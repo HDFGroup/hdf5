@@ -13,10 +13,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5S_PACKAGE             /*suppress error about including H5Spkg */
+#define H5G_PACKAGE             /*suppress error about including H5Gpkg */
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Dprivate.h"         /* Dataset Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
+#include "H5Gpkg.h"             /* Group functions                      */
 #include "H5Iprivate.h"         /* ID Functions                         */
 #include "H5MMprivate.h"        /* Memory allocation                    */
 #include "H5Oprivate.h"         /* Object Headers                       */
@@ -87,7 +89,8 @@ H5FP_request_open(const char *mdata, int md_len, enum sap_obj_type obj_type,
         /* The first MPI_Send will have been sent before this one will be read. */
 
         if (H5FP_send_metadata(mdata, md_len, (int)H5FP_sap_rank))
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL, "can't send metadata to server");
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
+                        "can't send metadata to server");
     }
 
     if ((mrc = MPI_Recv(file_id, 1, MPI_UNSIGNED, (int)H5FP_sap_rank,
@@ -158,24 +161,6 @@ H5FP_request_lock(unsigned int sap_file_id, unsigned char *obj_oid,
         *status = sap_reply.status;
 
         if (sap_reply.status != H5FP_STATUS_LOCK_ACQUIRED)
-            /* FIXME: Shouldn't this issue an error also? - QAK */
-            /*
-             * XXX:
-             *      I'm not sure. It's not an "error", per se. The server
-             *      just couldn't get the lock. This requires some kind
-             *      of handling by the client code, obviously, but I
-             *      didn't think it needed to be reported in the HDF5
-             *      error stack...The same with the lock release below.
-             *      -BW
-             */
-            /* FIXME: Yes, but that's like saying that failing to open a
-             *          file 'is not an "error" per se' and letting the code
-             *          deal with it in the next layer up.  Currently,
-             *          pretty much everywhere in the code assumes that when
-             *          a function fails, it pushes a reason on the error
-             *          stack.  Changed to return error in lock release
-             *          function also.  - QAK
-             */
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTLOCK, FAIL, "can't lock object on server");
     }
 
@@ -393,11 +378,12 @@ static herr_t
 H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
 {
     herr_t ret_value = SUCCEED;
-    hid_t gid = FAIL, dset_id = FAIL;
-    H5G_entry_t *ent = NULL, *loc = NULL;
+    H5G_entry_t *ent = NULL;
     H5O_fphdf5_t *fmeta = NULL;
     H5S_t *space = NULL;
     H5F_t *file = NULL;
+    H5G_t *grp = NULL;
+    H5D_t *dset = NULL;
 
     FUNC_ENTER_NOINIT(H5FP_update_metadata_cache);
 
@@ -411,23 +397,12 @@ H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *ms
     if ((fmeta = H5O_FPHDF5[0].decode(file, msg, NULL)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
 
-    /* FIXME: These shouldn't be calling API functions. -QAK */
-    /*
-     * XXX:
-     *      Okay. Need to come up with good ways of getting the
-     *      information I need then that doesn't duplicate the API
-     *      functions. Will work on this later. -BW
-     */
+    if ((grp = H5G_open(file, fmeta->group->s)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
     switch (sap_sync->action) {
     case H5FP_ACT_CREATE:
         if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
-            if ((gid = H5Gopen(file_id, fmeta->group->s)) == FAIL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-
-            if ((loc = H5G_loc(gid)) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-
             if ((ent = H5MM_malloc(sizeof(H5G_entry_t))) == NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
 
@@ -439,7 +414,7 @@ H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *ms
                                       fmeta->sdim->size, fmeta->sdim->max) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
 
-            if (H5D_update_entry_cache(file, ent, loc,
+            if (H5D_update_entry_cache(file, ent, H5G_entof(grp),
                                        fmeta->dset->s, space,
                                        fmeta->plist, fmeta->layout, fmeta->dtype,
                                        FALSE, fmeta->header) == FAIL)
@@ -455,14 +430,11 @@ H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *ms
 
     case H5FP_ACT_EXTEND:
         if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
-            if ((gid = H5Gopen(file_id, fmeta->group->s)) == FAIL)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-
-            if ((dset_id = H5Dopen(gid, fmeta->dset->s)) == FAIL)
+            if ((dset = H5D_open(H5G_entof(grp), fmeta->dset->s)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset");
 
-            if (H5Dextend(dset_id, fmeta->sdim->size) != SUCCEED)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "metadata update failed");
+            if (H5D_extend(dset, fmeta->sdim->size) != SUCCEED)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset");
         }
 
         break;
@@ -476,11 +448,14 @@ done:
     if (fmeta)
         H5O_FPHDF5[0].free(fmeta);
 
-    if (gid != FAIL)
-        H5Gclose(gid);
+    if (dset)
+        H5D_close(dset);
+
+    if (grp)
+        H5G_close(grp);
 
     if (space)
-	H5S_close(space);
+        H5S_close(space);
 
     if (ret_value == FAIL)
         H5MM_xfree(ent);

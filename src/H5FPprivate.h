@@ -142,7 +142,7 @@ extern MPI_Datatype SAP_sync_t; /* MPI datatype for the SAP_sync obj    */
  * search for it after getting the appropriate request.
  */
 enum {
-    H5FP_TAG_REQUEST = 37,      /* FIXME: Why is this 37? -QAK */
+    H5FP_TAG_REQUEST,
     H5FP_TAG_REPLY,
     H5FP_TAG_SYNC,
     H5FP_TAG_METADATA,
