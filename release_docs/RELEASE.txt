@@ -35,6 +35,7 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Allow scalar dataspaces to be used for parallel I/O.  QAK - 2002/11/05
     * Fixed error condition where "none" selections were not being handled
       correctly in parallel.  QAK - 2002/10/29
     * New functions H5Gget_comment(modification), H5Aget_storage_size, 

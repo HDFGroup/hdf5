@@ -1181,7 +1181,7 @@ H5A_rename(H5G_entry_t *ent, char *old_name, char *new_name)
 {
     int         seq, idx=FAIL;  /* Index of attribute being querried */
     H5A_t       *found_attr;    /* Attribute with OLD_NAME */
-    herr_t	ret_value;      /* Return value */
+    herr_t	ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5A_rename, FAIL);
 
@@ -1227,7 +1227,7 @@ H5A_rename(H5G_entry_t *ent, char *old_name, char *new_name)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages");
    
     /* Close the attribute */
-    if(found_attr) H5A_close(found_attr);
+    H5A_close(found_attr);
 
 done:
     FUNC_LEAVE(ret_value);

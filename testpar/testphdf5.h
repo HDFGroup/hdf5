@@ -72,6 +72,7 @@
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"
 #define DATASETNAME3	"Data3"
+#define DATASETNAME4	"Data4"
 /* hyperslab layout styles */
 #define BYROW		1	/* divide into slabs of rows */
 #define BYCOL		2	/* divide into blocks of columns */

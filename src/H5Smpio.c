@@ -721,10 +721,6 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
     /* Creat MPI type based on the kind of selection */
     switch (space->extent.type) {
         case H5S_SCALAR:
-            /* not yet implemented */
-            ret_value = FAIL;
-            break;
-
         case H5S_SIMPLE:
             switch(space->select.type) {
                 case H5S_SEL_NONE:
@@ -1039,8 +1035,9 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     assert(mem_space);
     assert(file_space);
 
-    /* Check whether these are both simple dataspaces */
-    if (H5S_SIMPLE!=mem_space->extent.type || H5S_SIMPLE!=file_space->extent.type)
+    /* Check whether these are both simple or scalar dataspaces */
+    if (!((H5S_SIMPLE==mem_space->extent.type || H5S_SCALAR==mem_space->extent.type)
+         && (H5S_SIMPLE==file_space->extent.type || H5S_SCALAR==file_space->extent.type)))
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */

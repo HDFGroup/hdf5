@@ -4969,12 +4969,12 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 
 /****************************************************************
 **
-**  test_zero_none(): Test basic H5S (dataspace) selection code.
+**  test_select_none(): Test basic H5S (dataspace) selection code.
 **      Tests I/O on 0-sized point selections
 ** 
 ****************************************************************/
 static void 
-test_zero_none(void)
+test_select_none(void)
 {
     hid_t	fid1;		/* HDF5 File IDs		*/
     hid_t	dataset;	/* Dataset ID			*/
@@ -5046,7 +5046,165 @@ test_zero_none(void)
 
     /* Free memory buffers */
     free(wbuf);
-}   /* test_zero_none() */
+}   /* test_select_none() */
+
+/****************************************************************
+**
+**  test_scalar_select(): Test basic H5S (dataspace) selection code.
+**      Tests selections on scalar dataspaces
+** 
+****************************************************************/
+static void 
+test_scalar_select(void)
+{
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid1,sid2;	/* Dataspace ID			*/
+    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t	coord1[SPACE7_RANK]; /* Coordinates for point selection */
+    hssize_t    start[SPACE7_RANK]; /* Hyperslab start */
+    hsize_t     count[SPACE7_RANK]; /* Hyperslab block count */
+    uint8_t    *wbuf_uint8,     /* buffer to write to disk */
+                rval_uint8,     /* value read back in */
+               *tbuf_uint8;     /* temporary buffer pointer */
+    unsigned short *wbuf_ushort,/* another buffer to write to disk */
+                rval_ushort,    /* value read back in */
+               *tbuf_ushort;    /* temporary buffer pointer */
+    int         i,j;            /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing I/O on Selections in Scalar Dataspaces\n"));
+
+    /* Allocate write & read buffers */
+    wbuf_uint8=malloc(sizeof(uint8_t)*SPACE7_DIM1*SPACE7_DIM2);
+    wbuf_ushort=malloc(sizeof(unsigned short)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize write buffers */
+    for(i=0, tbuf_uint8=wbuf_uint8, tbuf_ushort=wbuf_ushort; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++) {
+            *tbuf_uint8++=(uint8_t)((i*SPACE7_DIM2)+j);
+            *tbuf_ushort++=(unsigned short)((j*SPACE7_DIM2)+i);
+        } /* end for */
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate(H5S_SCALAR);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE7_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Select one element in memory with a point selection */
+    coord1[0]=0; coord1[1]= 2;
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,1,(const hssize_t **)&coord1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Write single point to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf_uint8);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read scalar element from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid1,sid1,H5P_DEFAULT,&rval_uint8);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check value read back in */
+    if(rval_uint8!=*(wbuf_uint8+2)) {
+        printf("Error! rval=%u, should be: *(wbuf+2)=%u\n",(unsigned)rval_uint8,(unsigned)*(wbuf_uint8+2));
+        num_errs++;
+    } /* end if */
+
+    /* Write single point to disk (with a datatype conversion) */
+    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,wbuf_ushort);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read scalar element from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_USHORT,sid1,sid1,H5P_DEFAULT,&rval_ushort);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check value read back in */
+    if(rval_ushort!=*(wbuf_ushort+2)) {
+        printf("Error! rval=%u, should be: *(wbuf+2)=%u\n",(unsigned)rval_ushort,(unsigned)*(wbuf_ushort+2));
+        num_errs++;
+    } /* end if */
+
+    /* Select one element in memory with a hyperslab selection */
+    start[0]=4; start[1]=3;
+    count[0]=1; count[1]=1;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write single hyperslab element to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf_uint8);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read scalar element from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid1,sid1,H5P_DEFAULT,&rval_uint8);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check value read back in */
+    if(rval_uint8!=*(wbuf_uint8+(SPACE7_DIM2*4)+3)) {
+        printf("Error! rval=%u, should be: *(wbuf+(SPACE7_DIM2*4)+3)=%u\n",(unsigned)rval_uint8,(unsigned)*(wbuf_uint8+(SPACE7_DIM2*4)+3));
+        num_errs++;
+    } /* end if */
+
+    /* Write single hyperslab element to disk (with a datatype conversion) */
+    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,wbuf_ushort);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read scalar element from disk */
+    ret=H5Dread(dataset,H5T_NATIVE_USHORT,sid1,sid1,H5P_DEFAULT,&rval_ushort);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check value read back in */
+    if(rval_ushort!=*(wbuf_ushort+(SPACE7_DIM2*4)+3)) {
+        printf("Error! rval=%u, should be: *(wbuf+(SPACE7_DIM2*4)+3)=%u\n",(unsigned)rval_ushort,(unsigned)*(wbuf_ushort+(SPACE7_DIM2*4)+3));
+        num_errs++;
+    } /* end if */
+
+    /* Select no elements in memory & file with "none" selections */
+    ret = H5Sselect_none(sid1);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    ret = H5Sselect_none(sid2);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Write no data to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf_uint8);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Write no data to disk (with a datatype conversion) */
+    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,wbuf_ushort);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf_uint8);
+    free(wbuf_ushort);
+}   /* test_scalar_select() */
 
 /****************************************************************
 **
@@ -5171,7 +5329,10 @@ test_select(void)
     test_select_fill_hyper_irregular(offset);
 
     /* Test 0-sized selections */
-    test_zero_none();
+    test_select_none();
+
+    /* Test selections on scalar dataspaces */
+    test_scalar_select();
 
 }   /* test_select() */
 
