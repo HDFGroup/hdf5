@@ -33,7 +33,8 @@
 
 #define NPOINTS          4          /* Number of points that will be selected 
                                        and overwritten */ 
-int main (void)
+int 
+main (void)
 {
 
    hid_t   file, dataset;           /* File and dataset identifiers */

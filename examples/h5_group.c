@@ -1,8 +1,9 @@
 /*
- * This example creates a group in the file and dataset in the group. 
- * Hard link to the group object is created and the dataset is accessed
- * under different names. 
- * Iterator function is used to find the object names in the root group.
+ * This program creates a group in the file and two datasets in the group. 
+ * Hard link to the group object is created and one of the datasets is accessed
+ * under new name. 
+ * Iterator functions are used to find information about the objects
+ * in the root group and in the created group. 
  */ 
 
 
@@ -12,8 +13,9 @@
 #define FILE    "group.h5"
 #define RANK    2
 
- 
 herr_t file_info(hid_t loc_id, const char *name, void *opdata);
+                                     /* Operator function */
+herr_t group_info(hid_t loc_id, const char *name, void *opdata);
                                      /* Operator function */
 int
 main(void)
@@ -28,7 +30,7 @@ main(void)
     hsize_t  dims[2];
     hsize_t  cdims[2];
  
-    int      idx;
+    int      idx_f, idx_g;
 
     /*
      * Create a file.
@@ -56,9 +58,23 @@ main(void)
                 H5Pset_deflate( plist, 6); 
     dataset = H5Dcreate(file, "/Data/Compressed_Data", H5T_NATIVE_INT, 
                         dataspace, plist); 
- 
     /* 
-     * Close the dataset and the file.
+     * Close the first dataset .
+     */
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+
+    /* 
+     * Create the second dataset.
+     */
+    dims[0] = 500;
+    dims[1] = 20;
+    dataspace = H5Screate_simple(RANK, dims, NULL);
+    dataset = H5Dcreate(file, "/Data/Float_Data", H5T_NATIVE_FLOAT,
+			dataspace, H5P_DEFAULT);
+
+    /* 
+     *Close the second dataset and file.
      */
     H5Sclose(dataspace);
     H5Dclose(dataset);
@@ -74,7 +90,7 @@ main(void)
      * Access "Compressed_Data" dataset in the group. 
      */
     dataset = H5Dopen(grp, "Compressed_Data");
-    if( dataset < 0) printf(" Dataset is not found. \n");
+    if( dataset < 0) printf(" Dataset 'Compressed-Data' is not found. \n");
     printf("\"/Data/Compressed_Data\" dataset is open \n");
 
     /*
@@ -100,11 +116,11 @@ main(void)
      */
     status = H5Dclose(dataset);
 
+
     /* 
-     * Use iterator to see the names of the objects in the file
-     * root directory.
+     * Use iterator to see the names of the objects in the root group.
      */
-    idx = H5Giterate(file, "/", NULL, file_info, NULL);
+    idx_f = H5Giterate(file, "/", NULL, file_info, NULL);
 
     /*
      * Unlink  name "Data" and use iterator to see the names
@@ -115,8 +131,13 @@ main(void)
     else  
       printf("\"Data\" is unlinked \n");
 
-    idx = H5Giterate(file, "/", NULL, file_info, NULL);
-    
+    idx_f = H5Giterate(file, "/", NULL, file_info, NULL);
+
+    /* 
+     * Use iterator to see the names of the objects in the group 
+     * /Data_new.
+     */
+    idx_g = H5Giterate(grp, "/Data_new", NULL, group_info, NULL);
 
     /*
      * Close the file.
@@ -126,25 +147,96 @@ main(void)
 
     return 0;
 }
+
 /*
  * Operator function.
  */
-herr_t
-file_info(hid_t loc_id, const char *name, void *opdata)
+herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 {
-    hid_t grp;
     /*
-     * Open the group using its name.
-     */
-    grp = H5Gopen(loc_id, name);
- 
-    /*
-     * Display group name.
+     * Display group name. The name is passed to the function by 
+     * the Library. Some magic :-)
      */
     printf("\n");
     printf("Name : ");
     puts(name);
     
-    H5Gclose(grp);
     return 0;
  }
+
+
+/*
+ * Operator function.
+ */
+herr_t group_info(hid_t loc_id, const char *name, void *opdata)
+{
+  hid_t did;  /* dataset identifier  */
+  hid_t tid;  /* datatype identifier */
+  H5T_class_t class;
+  hid_t pid;  /* data_property identifier */
+  hsize_t chunk_dims_out[2];
+
+  int  rank_chunk;
+  /*
+   * Open the datasets using their names.
+   */
+  did = H5Dopen(loc_id, name);
+ 
+  /*
+   * Display dataset name.
+   */
+  printf("\n");
+  printf("Name : ");
+  puts(name);
+  
+  /*    
+   * Display dataset information.
+   */
+  tid = H5Dget_type(did);  /* get datatype*/
+  pid = H5Dget_create_plist(did); /* get creation property list */
+  
+  /*
+   * Check if dataset is chunked.
+   */
+  if(H5D_CHUNKED == H5Pget_layout(pid)){
+    /*
+     * get chunking information: rank and dimensions.
+     */
+    rank_chunk = H5Pget_chunk(pid, 2, chunk_dims_out);
+    printf("chunk rank %d, dimensions %lu x %lu\n", rank_chunk, 
+	   (unsigned long)(chunk_dims_out[0]),
+	   (unsigned long)(chunk_dims_out[1]));
+  } 
+  else{
+    class = H5Tget_class(tid);
+    if(class < 0){ 
+      puts(" Invalid datatype.\n");
+    }
+    else {
+      if(class == H5T_INTEGER)
+      puts(" Datatype is 'H5T_NATIVE_INTEGER'.\n");
+      if(class == H5T_FLOAT)
+      puts(" Datatype is 'H5T_NATIVE_FLOAT'.\n");
+      if(class == H5T_STRING)
+      puts(" Datatype is 'H5T_NATIVE_STRING'.\n");
+      if(class == H5T_BITFIELD)
+      puts(" Datatype is 'H5T_NATIVE_BITFIELD'.\n");
+      if(class == H5T_OPAQUE)
+      puts(" Datatype is 'H5T_NATIVE_OPAQUE'.\n");
+      if(class == H5T_COMPOUND)
+      puts(" Datatype is 'H5T_NATIVE_COMPOUND'.\n");
+    }
+  }
+    
+
+  H5Dclose(did);
+  H5Pclose(pid);
+  H5Tclose(tid);
+  return 0;
+ }
+
+
+
+
+
+
