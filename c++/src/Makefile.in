@@ -18,7 +18,7 @@ TRACE=perl $(top_srcdir)/bin/trace
 CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
 ## This is our main target
-LIB=hdf5_cpp.la
+LIB=libhdf5_cpp.la
 
 ## Source and object files for the library
 LIB_SRC=H5Exception.C H5RefCounter.C H5IdComponent.C H5Library.C	\

@@ -14,7 +14,8 @@ hdf5_builddir=$(top_builddir)/src
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
 LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
-LIB=../src/hdf5_cpp.la
+LIB=../src/libhdf5_cpp.la
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/../src @CPPFLAGS@
 HDF5LIB=$(hdf5_builddir)/libhdf5.la
 
 TEST_PROGS_SRC=
