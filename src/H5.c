@@ -42,7 +42,7 @@
 #ifdef H5_HAVE_THREADSAFE
 H5_api_t H5_g;
 #else
-hbool_t H5_libinit_g = FALSE;
+hbool_t H5_libinit_g = FALSE;   /* Library hasn't been initialized */
 #endif
 
 char			H5_lib_vers_info_g[] = H5_VERS_INFO;
@@ -110,7 +110,7 @@ H5_init_library(void)
     /*
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.  The file & dataset interfaces must be initialized because
-     * calling H5Pcreate() might require the file/dataset property classes to be
+     * calling H5P_create() might require the file/dataset property classes to be
      * initialized.  The property interface must be initialized before the file 
      * & dataset interfaces though, in order to provide them with the proper
      * property classes.
@@ -164,19 +164,15 @@ H5_term_library(void)
     char	loop[1024];
     H5E_auto_t func;
     
-    /* Don't do anything if the library is already closed */
 #ifdef H5_HAVE_THREADSAFE
-
     /* explicit locking of the API */
-    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-    H5TS_mutex_lock(&H5_g.init_lock);
-
-    if (!H5_g.H5_libinit_g)
-	return;
-#else
-    if (!H5_libinit_g)
-	return;
+    H5_FIRST_THREAD_INIT;
+    H5_LOCK_API_MUTEX;
 #endif
+
+    /* Don't do anything if the library is already closed */
+    if (!(H5_INIT_GLOBAL))
+	return;
 
     /* Check if we should display error output */
     H5Eget_auto(&func,NULL);
@@ -218,11 +214,9 @@ H5_term_library(void)
     }
     
     /* Mark library as closed */
+    H5_INIT_GLOBAL = FALSE;
 #ifdef H5_HAVE_THREADSAFE
-    H5_g.H5_libinit_g = FALSE;
-    H5TS_mutex_unlock(&H5_g.init_lock);
-#else
-    H5_libinit_g = FALSE;
+    H5_UNLOCK_API_MUTEX;
 #endif
 }
 
@@ -257,10 +251,10 @@ H5dont_atexit(void)
 {
     /* FUNC_ENTER_INIT() should not be called */
 
-  /* locking code explicitly since FUNC_ENTER is not called */
 #ifdef H5_HAVE_THREADSAFE
-    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-    H5TS_mutex_lock(&H5_g.init_lock);
+    /* locking code explicitly since FUNC_ENTER is not called */
+    H5_FIRST_THREAD_INIT;
+    H5_LOCK_API_MUTEX;
 #endif
     H5_trace(FALSE, "H5dont_atexit", "");
 
@@ -270,7 +264,7 @@ H5dont_atexit(void)
     dont_atexit_g = TRUE;
     H5_trace(TRUE, NULL, "e", SUCCEED);
 #ifdef H5_HAVE_THREADSAFE
-    H5TS_mutex_unlock(&H5_g.init_lock);
+    H5_UNLOCK_API_MUTEX;
 #endif
     return(SUCCEED);
 }
@@ -604,14 +598,14 @@ H5close (void)
      */
 #ifdef H5_HAVE_THREADSAFE
     /* Explicitly lock the call since FUNC_ENTER is not called */
-    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
-    H5TS_mutex_lock(&H5_g.init_lock);
+    H5_FIRST_THREAD_INIT;
+    H5_LOCK_API_MUTEX;
 #endif
 
     H5_term_library();
 
 #ifdef H5_HAVE_THREADSAFE
-    H5TS_mutex_unlock(&H5_g.init_lock);
+    H5_UNLOCK_API_MUTEX;
 #endif
     return SUCCEED;
 }
@@ -1741,19 +1735,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf (out, " (file)");
 			}
 			break;
-		    case H5I_TEMPLATE_0:
-		    case H5I_TEMPLATE_1:
-		    case H5I_TEMPLATE_2:
-		    case H5I_TEMPLATE_3:
-		    case H5I_TEMPLATE_4:
-		    case H5I_TEMPLATE_5:
-		    case H5I_TEMPLATE_6:
-		    case H5I_TEMPLATE_7:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "plist")) {
-			    fprintf (out, " (plist)");
-			}
-			break;
 		    case H5I_GROUP:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "group")) {
@@ -1962,15 +1943,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_FILE:
 			fprintf (out, "H5I_FILE");
 			break;
-		    case H5I_TEMPLATE_0:
-		    case H5I_TEMPLATE_1:
-		    case H5I_TEMPLATE_2:
-		    case H5I_TEMPLATE_3:
-		    case H5I_TEMPLATE_4:
-		    case H5I_TEMPLATE_5:
-		    case H5I_TEMPLATE_6:
-		    case H5I_TEMPLATE_7:
-			break;
 		    case H5I_GROUP:
 			fprintf (out, "H5I_GROUP");
 			break;
@@ -2116,9 +2088,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    } else {
 		hid_t pclass_id = va_arg (ap, hid_t);
                 char *class_name=NULL;
+                H5P_genclass_t *pclass;
 
                 /* Get the class name and print it */
-                if((class_name=H5Pget_class_name(pclass_id))!=NULL) {
+                if(NULL != (pclass = H5I_object(pclass_id)) &&
+                        (class_name=H5P_get_class_name(pclass))!=NULL) {
 		    fprintf (out, class_name);
                     H5MM_xfree(class_name);
                 } /* end if */
