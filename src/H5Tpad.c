@@ -19,12 +19,14 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5Tpkg.h"		/*data-type functions			  */
-
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Tpad_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -48,9 +50,9 @@ DESCRIPTION
 static herr_t
 H5T_init_pad_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_pad_interface);
+    FUNC_ENTER_NOINIT(H5T_init_pad_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_pad_interface() */
 
 
@@ -78,16 +80,16 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tget_pad, FAIL);
+    FUNC_ENTER_API(H5Tget_pad, FAIL)
     H5TRACE3("e","ixx",type_id,lsb,msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
     
     /* Get values */
     if (lsb)
@@ -96,7 +98,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
         *msb = dt->u.atomic.msb_pad;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -122,28 +124,28 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     H5T_t *dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_pad, FAIL);
+    FUNC_ENTER_API(H5Tset_pad, FAIL)
     H5TRACE3("e","iTpTp",type_id,lsb,msb);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
     if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type")
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
 
     /* Commit */
     dt->u.atomic.lsb_pad = lsb;
     dt->u.atomic.msb_pad = msb;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 

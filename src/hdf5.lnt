@@ -91,6 +91,9 @@
         H5FL.c
         H5FO.c
 
+        H5Topaque.c
+        H5Torder.c
+        H5Tpad.c
         H5Tprecis.c
         H5Tstrpad.c
         H5Tvlen.c

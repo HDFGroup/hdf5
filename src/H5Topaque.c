@@ -19,13 +19,15 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Tpkg.h"		/*data-type functions			  */
-
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Topaque_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -49,9 +51,9 @@ DESCRIPTION
 static herr_t
 H5T_init_opaque_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_opaque_interface);
+    FUNC_ENTER_NOINIT(H5T_init_opaque_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_opaque_interface() */
 
 
@@ -75,27 +77,27 @@ H5Tset_tag(hid_t type_id, const char *tag)
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_tag, FAIL);
+    FUNC_ENTER_API(H5Tset_tag, FAIL)
     H5TRACE2("e","is",type_id,tag);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_OPAQUE!=dt->type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type")
     if (!tag)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag")
 
     /* Commit */
     H5MM_xfree(dt->u.opaque.tag);
     dt->u.opaque.tag = H5MM_strdup(tag);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -120,21 +122,21 @@ H5Tget_tag(hid_t type_id)
     H5T_t	*dt=NULL;
     char	*ret_value;
 
-    FUNC_ENTER_API(H5Tget_tag, NULL);
+    FUNC_ENTER_API(H5Tget_tag, NULL)
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_OPAQUE != dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class")
     
     /* result */
     if (NULL==(ret_value=H5MM_strdup(dt->u.opaque.tag)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 

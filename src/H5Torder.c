@@ -19,12 +19,14 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5Tpkg.h"		/*data-type functions			  */
-
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Torder_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -48,9 +50,9 @@ DESCRIPTION
 static herr_t
 H5T_init_order_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_order_interface);
+    FUNC_ENTER_NOINIT(H5T_init_order_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_order_interface() */
 
 
@@ -78,22 +80,22 @@ H5Tget_order(hid_t type_id)
     H5T_t		*dt = NULL;
     H5T_order_t		ret_value;
 
-    FUNC_ENTER_API(H5Tget_order, H5T_ORDER_ERROR);
+    FUNC_ENTER_API(H5Tget_order, H5T_ORDER_ERROR)
     H5TRACE1("To","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified data type")
 
     /* Order */
     ret_value = dt->u.atomic.order;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -119,27 +121,27 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_order, FAIL);
+    FUNC_ENTER_API(H5Tset_order, FAIL)
     H5TRACE2("e","iTo",type_id,order);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
     if (order < 0 || order > H5T_ORDER_NONE)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order")
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (!H5T_IS_ATOMIC(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified data type")
 
     /* Commit */
     dt->u.atomic.order = order;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
