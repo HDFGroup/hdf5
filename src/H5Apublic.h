@@ -39,7 +39,7 @@ H5_DLL hid_t   H5Aget_type(hid_t attr_id);
 H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 H5_DLL hsize_t H5Aget_storage_size(hid_t attr_id);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
-H5_DLL herr_t  H5Arename(hid_t loc_id, char *old_name, char *new_name);
+H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 	  	          void *op_data);
 H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
