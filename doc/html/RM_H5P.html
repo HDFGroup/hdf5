@@ -94,6 +94,8 @@ many different parameters to be easily manipulated.
 
     <i>File Access Properties</i>
     <ul>
+    <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
+    <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
     <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
     <li><a href="#Property-GetFaplFamily">H5Pget_fapl_family</a>
     <li><a href="#Property-SetFaplLog">H5Pset_fapl_log</a>
@@ -3794,12 +3796,18 @@ facilitate moving easily between them.</i>
         <p>
         <code>increment</code> specifies the increment by which allocated memory
         is to be increased each time more memory is required.
-        
+        <p>
+        If <code>backing_store</code> is set to <code>1</code> 
+        (<code>TRUE</code>), the file contents are flushed to a file 
+        with the same name as this core file.
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>xxx</em> <code>xxx</code>
-            <dd>IN: 
-            <dd>OUT: 
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>size_t</em> <code>increment</code>
+            <dd>IN: Size, in bytes, of memory increments.
+        <dt><em>hbool_t</em> <code>backing_store</code>
+            <dd>IN: Boolean flag indicating whether to create file.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -3820,21 +3828,25 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetFaplCore">H5Pget_fapl_core</a>
   <dt><strong>Signature:</strong>
-    <dd><em>xxx</em> <code>H5Pget_fapl_core</code>(
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>,
-                     <em>xxx</em> <code>xxx</code>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_core</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>size_t</em> *<code>increment</code>,
+                     <em>hbool_t</em> *<code>backing_store</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Queries core file driver properties.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_fapl_core</code>
+    <dd><code>H5Pget_fapl_core</code> queries the <code>H5FD_CORE</code> 
+    driver properties as set by <code>H5Pset_fapl_core</code>.
         
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>xxx</em> <code>xxx</code>
-            <dd>IN: 
-            <dd>OUT: 
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>size_t</em> *<code>increment</code>
+            <dd>OUT: Size, in bytes, of memory increments.
+        <dt><em>hbool_t</em> *<code>backing_store</code>
+            <dd>OUT: Boolean flag indicating whether to create file.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
