@@ -35,6 +35,9 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed bug in parallel I/O routines where a collective I/O which used
+      MPI derived types, followed by an independent I/O would cause the library
+      to hang.  QAK 2002/06/24
     * Fixed bug in chunking routines where they were using internal allocation
       free routines, instead of malloc/free, preventing user filters from
       working correctly.  Chunks are now allocated/freed with malloc/free and

@@ -56,7 +56,6 @@ typedef struct H5FD_mpio_t {
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    unsigned	old_use_view;   /*remember value of use_view		*/
 } H5FD_mpio_t;
 
 /* Prototypes */
@@ -1178,6 +1177,11 @@ H5FD_mpio_get_eof(H5FD_t *_file)
  *              the address of the dataset in MPI_File_set_view() calls, as
  *              necessary.
  *
+ *              Quincey Koziol - 2002/06/24
+ *              Removed "lazy" MPI_File_set_view() calls, since they would fail
+ *              if the first I/O was a collective I/O using MPI derived types
+ *              and the next I/O was an independent I/O.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1191,7 +1195,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Status  		mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
-    unsigned			use_view_this_time=0, used_view_last_time;
+    unsigned			use_view_this_time=0;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
@@ -1256,7 +1260,8 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
          */
         mpi_disp=mpi_off;
         mpi_off=0;
-    } else {
+    } /* end if */
+    else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
          * btype, ftype, and disp fields are not used.
@@ -1264,23 +1269,17 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
         mpi_disp = 0;		/* mpi_off is alread set */
-    }
+    } /* end else */
 
     /*
-     * Don't bother to reset the view if we're not using the types this time,
-     * and did we didn't use them last time either.
+     * Set the file view when we are using MPI derived types
      */
-    used_view_last_time = file->old_use_view;
-    if (used_view_last_time || /* change to new ftype or MPI_BYTE */
-            use_view_this_time) { 	/* almost certainly a different ftype */
+    if (use_view_this_time) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native",  file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
-    }
+    } /* end if */
     
-    /* Keep the 'use view' flag around for the next I/O */
-    file->old_use_view = use_view_this_time;
-
     /* Read the data. */
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
     if (H5FD_MPIO_INDEPENDENT==dx->xfer_mode) {
@@ -1341,6 +1340,15 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     if (bytes_read<0 || bytes_read>size_i)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
+    /*
+     * Reset the file view when we used MPI derived types
+     */
+    if (use_view_this_time) {
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
+    } /* end if */
+    
     /*
      * This gives us zeroes beyond end of physical MPI file.  What about
      * reading past logical end of HDF5 file???
@@ -1471,6 +1479,11 @@ done:
  *              the address of the dataset in MPI_File_set_view() calls, as
  *              necessary.
  *
+ *              Quincey Koziol - 2002/06/24
+ *              Removed "lazy" MPI_File_set_view() calls, since they would fail
+ *              if the first I/O was a collective I/O using MPI derived types
+ *              and the next I/O was an independent I/O.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1484,7 +1497,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
-    unsigned			use_view_this_time=0, used_view_last_time;
+    unsigned			use_view_this_time=0;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
 
@@ -1549,7 +1562,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
          */
         mpi_disp=mpi_off;
         mpi_off=0;
-    } else {
+    } /* end if */
+    else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes.
          * The btype, ftype, and disp fields are not used.
@@ -1557,27 +1571,17 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
         mpi_disp = 0;		/* mpi_off is already set */
-    }
+    } /* end else */
 
     /*
-     * Don't bother to reset the view if we're not using the types this time,
-     * and did we didn't use them last time either.
+     * Set the file view when we are using MPI derived types
      */
-    used_view_last_time = file->old_use_view;
-    if (used_view_last_time ||	/* change to new ftype or MPI_BYTE */
-            use_view_this_time) {	/* almost certainly a different ftype */
+    if (use_view_this_time) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native", file->info))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
-    }
+    } /* end if */
     
-    /*
-     * We always set the use_view flag to 0 because the default is not to
-     * use types next time, unless someone explicitly requests it by setting
-     * this flag to !=0.
-     */
-    file->old_use_view = use_view_this_time;
-
     /* Only p<round> will do the actual write if all procs in comm write same data */
     if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
         if (file->mpi_rank != file->mpi_round) {
@@ -1654,6 +1658,15 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (bytes_written<0 || bytes_written>size_i)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
 
+    /*
+     * Reset the file view when we used MPI derived types
+     */
+    if (use_view_this_time) {
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
+    } /* end if */
+    
     /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
     file->eof = HADDR_UNDEF;
     
