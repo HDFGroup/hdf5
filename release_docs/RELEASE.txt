@@ -93,6 +93,8 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug (#789) where creating 1-D dataset region reference caused the
+        library to go into infinite loop.  QAK - 2002/06/10
     * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
         written to the file and then subsequently queried with the
         H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead

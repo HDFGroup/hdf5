@@ -4369,6 +4369,8 @@ for(i=0; i<ndims; i++)
                     temp_dim--;
                 } /* end while */
             } /* end if */
+            else
+                break;  /* Break out now, for 1-D selections */
 
             /* Re-compute offset array */
             for(i=0; i<ndims; i++) {
