@@ -412,6 +412,12 @@ dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
 test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
 test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 
+AC_SUBST(NCSA_LT_LINK_EXE)
+NCSA_LT_LINK_EXE=
+if test -d /usr/ncsa/lib; then
+    NCSA_LT_LINK_EXE="$NCSA_LT_LINK_EXE -rpath /usr/ncsa/lib"
+fi
+
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case $withval in
     yes)

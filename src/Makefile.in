@@ -51,10 +51,10 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
 
 ## Number format detection
 H5Tinit.c: H5detect
-	$(RUNSERIAL) ./H5detect >H5Tinit.c
+	$(LT_RUN) ./H5detect >H5Tinit.c
 
 ## no $(LIB) in the action below since that's being made now.
 H5detect: H5detect.o
-	$(CC) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
+	$(LT_LINK_EXE) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

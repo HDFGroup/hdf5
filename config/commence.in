@@ -9,7 +9,7 @@
 .SUFFIXES: .c .o .lo
 @SET_MAKE@
 
-## Directories to serch
+## Directories to search
 @SEARCH@
 
 ## Programs
@@ -26,6 +26,7 @@ CP=cp
 INSTALL=@INSTALL@
 INSTALL_PROGRAM=@INSTALL_PROGRAM@
 INSTALL_DATA=@INSTALL_DATA@
+NCSA_LT_LINK_EXE=@NCSA_LT_LINK_EXE@
 RUNSERIAL=@RUNSERIAL@
 RUNPARALLEL=@RUNPARALLEL@
 RUNTEST=$(RUNSERIAL)
@@ -44,7 +45,7 @@ PUB_LIB=$(LIB)
 LT=$(top_builddir)/libtool
 LT_COMPILE=$(LT) --mode=compile $(CC)
 LT_LINK_LIB=$(LT) --mode=link $(CC) -rpath $(libdir)
-LT_LINK_EXE=$(LT) --mode=link $(CC) -rpath $(bindir)
+LT_LINK_EXE=$(LT) --mode=link $(CC) -rpath $(bindir) $(NCSA_LT_LINK_EXE)
 LT_RUN=$(LT) --mode=execute
 LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
 LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
