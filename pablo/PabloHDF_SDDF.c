@@ -260,7 +260,7 @@ void HDFinitTrace_SDDF( char *traceFileName, int OUTSW )
 	   // MPIO initialization be performed and handle the naming of *
 	   // trace files.						*
 	   //===========================================================*/
-           initMPIOTrace( traceFileName, RUNTIME_TRACE ); 
+           initMPIOTrace( traceFileName, SUPPRESS_MPIO_TRACE ); 
 #else 
 	   /*============================================================
 	   // MPIO tracing is not supported.				*
