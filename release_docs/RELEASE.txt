@@ -327,6 +327,18 @@ Footnotes:  (1) Using mpich 1.2.4
 
 Known Problems
 ==============
+* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
+  messages like "INFO: 0031-XXX ...".  This is from the command poe.
+  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
+  and run the tests again.
+  The tests may fail with messages like "The socket name is already
+  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
+  due to problems of the poe command trying to set up the debug socket.
+  Check if there are many old /tmp/s.pedb.* staying around.  These are
+  sockets used by the poe command and left behind due to failed commands.
+  Ask your system administrator to clean them out.  Lastly, request IBM
+  to provide a mean to run poe without the debug socket.
+
 * h5fc and h5c++ compilation scripts have a bug: object files (*.o) cannot be
   created when source code is compiled using h5fc or h5c++. We will provide
   a fix. Please check ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/ 
