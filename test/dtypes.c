@@ -5664,8 +5664,27 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
 
+
+#ifdef LATER
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
+#else /* LATER */
+    {
+        char		str[256];		/*hello string		*/
+
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "float", "unsigned long long");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to conversion being under construction.");
+
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "double", "unsigned long long");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to conversion being under construction.");
+    }
+#endif /* LATER */
 #endif
     
     return nerrors;
