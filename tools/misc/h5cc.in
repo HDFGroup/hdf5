@@ -155,7 +155,7 @@ for arg in $@ ; do
       do_link="no"
       ;;
     -l*)
-      libraries="$libraries $arg"
+      libraries=" $libraries $arg "
       allargs="$allargs $arg"
       ;;
     -prefix=*)
@@ -202,6 +202,9 @@ for arg in $@ ; do
             do_link="yes"
             link_objs="$link_objs $arg"
           fi
+        elif test "x$ext" = "x.a"; then
+          # This is an archive that we're linking in
+          libraries=" $libraries $arg "
         else
           compile_args="$compile_args $arg"
           link_args="$link_args $arg"
@@ -229,8 +232,12 @@ fi
 
 if test "x$do_link" = "xyes"; then
   shared_link=""
+  libraries=" $libraries $LIBS "
+  link_args="$link_args -L${libdir}"
 
   if test "x$USE_SHARED_LIB" = "xyes"; then
+    libraries=" -lhdf5 $libraries "
+
     case "$kind" in
       gcc|linux*)           flag="-Wl,-rpath -Wl," ;;
       hpux*)                flag="-Wl,+b -Wl," ;;
@@ -243,20 +250,34 @@ if test "x$do_link" = "xyes"; then
     if test -n "$flag"; then
       shared_link="${flag}${libdir}"
     fi
-
-    libraries=" -lhdf5 $libraries "
-    link_args="$link_args -L${libdir}"
-
-    for l in $libraries; do
-      if ! echo $link_args | grep " $l " > /dev/null; then
-        link_args="$link_args $l "
-      fi
-    done
   else
-    link_args="$link_args ${libdir}/libhdf5.a"
+    if echo "$libraries" | grep " -lhdf5 " > /dev/null; then
+      new_libraries=""
+      for lib in $libraries; do
+        case "$lib" in
+          -lhdf5)
+            new_libraries="$new_libraries ${libdir}/libhdf5.a"
+            ;;
+          *)
+            new_libraries="$new_libraries $lib"
+            ;;
+        esac
+      done
+      libraries="$new_libraries"
+    else
+      link_args="$link_args ${libdir}/libhdf5.a"
+    fi
   fi
 
-  link_args="$link_args $LIBS"
+  for lib in $libraries; do
+    if echo $link_args | grep " $lib " > /dev/null ||
+       echo $link_args | grep " $lib$" > /dev/null; then
+      :
+    else
+      link_args="$link_args $lib "
+    fi
+  done
+
   $SHOW $CLINKER $LDFLAGS $clibpath $link_objs $link_args $shared_link
   status=$?
 fi
