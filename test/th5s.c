@@ -29,6 +29,7 @@
 
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"
+#define NULLFILE   "tnullspace.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -71,6 +72,10 @@ struct space4_struct {
     float f;
     char c2;
  } space4_data={'v',987123,(float)-3.14,'g'}; /* Test data for 4th dataspace */
+
+/* NULL dataspace info */
+#define NULLDATASET  "null_dataset"
+#define NULLATTR   "null_attribute"
 
 /****************************************************************
 **
@@ -557,6 +562,66 @@ test_h5s_chunk(void)
 
 /****************************************************************
 **
+**  test_h5s_null_space(): Attempt to access dataset and attribute
+**      with null dataspace.  This should fail, since the 1.6.x
+**      branch doesn't understand null dataspaces.
+** 
+****************************************************************/
+static void 
+test_h5s_null_space(void)
+{
+    hid_t fid;                  /* File ID */
+    hid_t gid;                  /* Group ID */
+    hid_t aid;                  /* Attribute ID */
+    hid_t did;                  /* Dataset ID */
+    char testfile[512]="";          /* Character buffer for corrected test file name */
+    char *srcdir = HDgetenv("srcdir");    /* Pointer to the directory the source code is located within */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Attempting to Read NULL Dataspaces\n"));
+
+    /* Generate the correct name for the test file, by prepending the source path */
+    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(NULLFILE) + 1) < sizeof(testfile))) {
+        HDstrcpy(testfile, srcdir);
+        HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, NULLFILE);
+
+    /* Open the testfile */
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK_I(fid, "H5Fopen");
+
+    /* Only try to proceed if the file is around */
+    if (fid >= 0) {
+        /* Open the root group */
+        gid = H5Gopen(fid,"/");
+        CHECK_I(gid, "H5Gopen");
+
+        /* Attempt to open attribute w/NULL dataspace */
+        H5E_BEGIN_TRY {
+            aid=H5Aopen_name(gid,NULLATTR);
+        } H5E_END_TRY;
+        VERIFY(aid, FAIL, "H5Aopen_name");
+
+        /* Attempt to open dataset w/NULL dataspace */
+        H5E_BEGIN_TRY {
+            did=H5Dopen(fid,NULLDATASET);
+        } H5E_END_TRY;
+        VERIFY(did, FAIL, "H5Dopen");
+
+        /* Close open objects */
+        ret=H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+        ret=H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* end if */
+    else
+        printf("***cannot open the pre-created NULL dataspace test file (%s)\n",testfile);
+} /* test_h5s_null_space() */
+
+/****************************************************************
+**
 **  test_h5s(): Main H5S (dataspace) testing routine.
 ** 
 ****************************************************************/
@@ -574,6 +639,9 @@ test_h5s(void)
 
     /* This test was added later to exercise a bug in chunked I/O */
     test_h5s_chunk();	        /* Exercise bug fix for chunked I/O */
+
+    /* This test is specific to the 1.6.x branch, to test backward compatibility w/null dataspaces */
+    test_h5s_null_space();
 } /* test_h5s() */
 
 
