@@ -22,6 +22,12 @@
 #include <H5Gprivate.h>
 #include <H5Oprivate.h>
 
+/*
+ * This file needs to access private datatypes from the H5G package.
+ */
+#define H5G_PACKAGE
+#include <H5Gpkg.h>
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_ohdr
