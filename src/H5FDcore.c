@@ -9,9 +9,10 @@
  *		only the HDF5 public API. This driver is useful for fast
  *		access to small, temporary hdf5 files.
  */
-#include <assert.h>
-#include <hdf5.h>
-#include <stdlib.h>
+#include <H5private.h>
+#include <H5Fprivate.h>
+#include <H5FDcore.h>
+#include <H5Pprivate.h>
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -155,8 +156,8 @@ herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment)
 {
     H5FD_core_fapl_t	fa;
-    
-    /*NO TRACE*/
+
+    /* NO TRACE */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
     fa.increment = increment;
     return H5Pset_driver(fapl_id, H5FD_CORE, &fa);
@@ -184,7 +185,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/)
 {
     H5FD_core_fapl_t	*fa;
 
-    /*NO TRACE*/
+    /* NO TRACE */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
     if (H5FD_CORE!=H5Pget_driver(fapl_id)) return -1;
     if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;

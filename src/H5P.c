@@ -2607,9 +2607,7 @@ H5P_copy (H5P_class_t type, const void *src)
     void		*dst = NULL;
     const H5D_create_t	*dc_src = NULL;
     H5D_create_t	*dc_dst = NULL;
-    const H5F_access_t	*fa_src = NULL;
     H5F_access_t	*fa_dst = NULL;
-    const H5F_xfer_t	*dx_src = NULL;
     H5F_xfer_t		*dx_dst = NULL;
     
     FUNC_ENTER (H5P_copy, NULL);
@@ -2654,7 +2652,6 @@ H5P_copy (H5P_class_t type, const void *src)
 	break;
 	
     case H5P_FILE_ACCESS:
-	fa_src = (const H5F_access_t*)src;
 	fa_dst = (H5F_access_t*)dst;
 
 	if (fa_dst->driver_id>=0) {
@@ -2691,7 +2688,6 @@ H5P_copy (H5P_class_t type, const void *src)
 	break;
 	
     case H5P_DATA_XFER:
-	dx_src = (const H5F_xfer_t*)src;
 	dx_dst = (H5F_xfer_t*)dst;
 
 	if (dx_dst->driver_id>=0) {

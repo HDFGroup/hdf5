@@ -1426,7 +1426,6 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
 		  hid_t space, void *mem)
 {
     hsize_t		i;			/*counters		*/
-    size_t		size;			/*size of each element	*/
     hsize_t		nelmts;			/*total selected elmts	*/
     h5dump_context_t	ctx;			/*printing context	*/
 
@@ -1447,7 +1446,6 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
 	nelmts *= ctx.p_max_idx[i] - ctx.p_min_idx[i];
     }
     if (0==nelmts) return 0; /*nothing to print*/
-    size = H5Tget_size(type);
 
     /* Print it */
     h5dump_simple_data(stream, info, -1/*no dataset*/, &ctx,

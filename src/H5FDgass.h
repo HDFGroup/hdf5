@@ -12,7 +12,6 @@
 
 #include <H5FDpublic.h>
 #include <H5Ipublic.h>
-#include <H5Eprivate.h>
 
 #include <string.h>
 
@@ -45,4 +44,5 @@ herr_t H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/);
 
 #endif
 
-#endif // H5FDgass_H
+#endif /* H5FDgass_H */
+

@@ -8,6 +8,8 @@
 #ifndef _H5FDpublic_H
 #define _H5FDpublic_H
 
+#include <H5public.h>
+
 /*
  * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
  * should not change other than adding new types to the end. These numbers
