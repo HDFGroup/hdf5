@@ -31,7 +31,7 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
     H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c H5Oshared.c \
     H5Ostab.c H5P.c H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c \
     H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c \
-    H5TB.c H5V.c H5Z.c PabloHDF.c PabloHDF_RT.c PabloHDF_SDDF.c
+    H5TB.c H5Tvlen.c H5V.c H5Z.c PabloHDF.c PabloHDF_RT.c PabloHDF_SDDF.c
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
@@ -1487,6 +1487,27 @@ HDFidList.h \
 ../src/H5Iprivate.h \
 ../src/H5Ipublic.h \
 ../src/H5Eprivate.h
+H5Tvlen.c:  ../src/H5Tvlen.c 
+H5Tvlen.o: \
+H5Tvlen.c \
+ProcIDs.h \
+HDFidList.h \
+../src/H5private.h \
+../src/H5public.h \
+../src/H5config.h \
+../src/H5Iprivate.h \
+../src/H5Ipublic.h \
+../src/H5Eprivate.h \
+../src/H5Epublic.h \
+../src/H5MMprivate.h \
+../src/H5MMpublic.h \
+../src/H5Tpkg.h \
+../src/H5HGprivate.h \
+../src/H5HGpublic.h \
+../src/H5Fprivate.h \
+../src/H5Fpublic.h \
+../src/H5Dpublic.h \
+../src/H5Tprivate.h
 H5V.c:  ../src/H5V.c 
 H5V.o: \
 H5V.c \
