@@ -22,18 +22,17 @@
 # Top-level HDF5 Makefile(.in)
 
 # pmake has issues if variables are undefined.  Solve this problem in
-# top-level Makefile by defining all variables it complains about.
+# top-level Makefile by defining .MAKEFLAGS target to -V before pmake can
+# encounter any undefined variables.
+# Automake resists putting anything but variable definitions first in
+# a Makefile.in, so we'll put a placebo comment here and use sed in
+# bin/reconfigure to turn it into the .MAKEFLAGS target.  Sigh.  -JL 2005
 # Configure should set AM_MAKEFLAGS to -V to solve this problem in
 # subdirectories.
 # NOTE: This means that invoking pmake in a subdirectory will not work.
-CONFIG_STATUS_DEPENDENCIES=
-TAGS_DEPENDENCIES=
-TAGS_FILES=
-HEADERS=
-SOURCES=
-TEXINFOS=
-EXTRA_DIST=
-LISP=
+#xxx.MAKEFLAGS:@AM_MAKEFLAGS@
+#xxx	$(MAKE) all
+#xxx
 
 include $(top_srcdir)/config/commence.am
 

@@ -29,16 +29,16 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test "X-" = "X-$F9X"; then
-  F9X=xlf
+if test "X-" = "X-$FC"; then
+  FC=xlf
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
   FSEARCH_DIRS="-I./ -I../src"
-  DEBUG_FFLAGS="-O"
-  PROD_FFLAGS="-O"
-  PROFILE_FFLAGS="-O"
+  DEBUG_FCFLAGS="-O"
+  PROD_FCFLAGS="-O"
+  PROFILE_FCFLAGS="-O"
   f9x_flags_set=yes
 fi

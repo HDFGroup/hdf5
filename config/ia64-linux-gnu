@@ -50,16 +50,16 @@ R_LARGE=18
 R_INTEGER=9
 
 # Use Intel Fortran compiler by default.
-if test "X-$F9X" = "X-"; then
-  F9X="ifort"
+if test "X-$FC" = "X-"; then
+  FC="ifort"
 fi
 
-case $F9X in
+case $FC in
   *efc|*ifort)
     # this is for efc v7.  Older efc do not work with these.
     # -Vaxlib is for non-standard fortran calls like exit().
-    MORE_FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
-    FFLAGS="$FFLAGS $MORE_FFLAGS"
+    MORE_FCFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
+    FCFLAGS="$FCFLAGS $MORE_FCFLAGS"
     HADDR_T='SELECTED_INT_KIND(R_LARGE)'
     HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
     HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
@@ -84,10 +84,10 @@ esac
 if test "X$f9x_flags_set" = "X"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="$FFLAGS"
-  DEBUG_FFLAGS=""
-  PROD_FFLAGS=""
-  PROFILE_FFLAGS=""
+  FCFLAGS="$FCFLAGS"
+  DEBUG_FCFLAGS=""
+  PROD_FCFLAGS=""
+  PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi
 

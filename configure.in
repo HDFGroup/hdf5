@@ -272,23 +272,21 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl General Fortran flags
   dnl
-  AC_SUBST([FFLAGS])
+  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  FC=${F9X}
   AC_SUBST([F9XSUFFIXFLAG])
   AC_SUBST([FSEARCH_DIRS])
 
   dnl --------------------------------------------------------------------
   dnl Check for a Fortran 9X compiler and how to include modules.
   dnl 
-  AC_PROG_F9X
+  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc],)
   AC_F9X_MODS
 
-  dnl Tell automake to use the F9X compiler
-  AC_SUBST(FC) FC=$F9X
-  AC_SUBST(F77) F77=$F9X
-
-  dnl Automake wants to build in F77 instead of F9X.  Kludge around this
-  dnl by telling it to use the same fortran compiler for both.
-  dnl AC_PROG_F77($FC)
+  dnl It seems that libtool (as of Libtool 1.5.14) is trying to
+  dnl configure itself for Fortran 77.
+  dnl Tell it that our F77 compiler is $FC (actually a F9X compiler)
+  F77=$FC
 
   dnl Change to the Fortran 90 language
   AC_LANG_FORTRAN9X
@@ -296,8 +294,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl See if the compiler will support the "-I." option
   dnl
-  FFLAGS_saved=$FFLAGS
-  FFLAGS="$FFLAGS -I."
+  FCFLAGS_saved=$FCFLAGS
+  FCFLAGS="${FCFLAGS} -I."
 
   AC_MSG_CHECKING(if compiler supports -I. option)
   AC_TRY_FCOMPILE([
@@ -305,7 +303,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       end
   ], AC_MSG_RESULT(yes),
      AC_MSG_RESULT(no)
-     FFLAGS="$FFLAGS_saved")
+     FCFLAGS="$FCFLAGS_saved")
 
   dnl Change to the C language
   AC_LANG_C
@@ -317,6 +315,13 @@ dnl ----------------------------------------------------------------------
 dnl Check if they would like the C++ interface compiled
 dnl
 AC_MSG_CHECKING([if c++ interface enabled])
+
+dnl We need to check for a C++ compiler unconditionally, since
+dnl AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
+dnl miss even if c++ is not enabled.
+  AC_PROG_CXX
+  AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
+
 AC_ARG_ENABLE([cxx],
               [AC_HELP_STRING([--enable-cxx],
                               [Compile the C++ interface [default=no]])],
@@ -325,8 +330,6 @@ AC_ARG_ENABLE([cxx],
 if test "X$HDF_CXX" = "Xyes"; then
   echo "yes"
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
-  AC_PROG_CXX
-  AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
 
   dnl Change to the C++ language
   AC_LANG_CPLUSPLUS
@@ -440,6 +443,7 @@ AC_SUBST([PERL]) PERL=""
 if test "X$GCC" = "Xyes"; then
   AC_CHECK_PROGS([PERL], [perl],, [$PATH])
 fi
+
 
 dnl ----------------------------------------------------------------------
 dnl Check which archiving tool to use. This needs to be done before
@@ -637,21 +641,21 @@ case "X-$enable_production" in
       CXXFLAGS=$CXXFLAGS_temp
     fi
 
-    FFLAGS_temp=""
-    if test -n "$FFLAGS"; then
-      for d in $FFLAGS ; do
+    FCFLAGS_temp=""
+    if test -n "$FCFLAGS"; then
+      for d in $FCFLAGS ; do
         if test "X$d" != "X-g"; then
-          FFLAGS_temp="$FFLAGS_temp $d"
+          FCFLAGS_temp="$FCFLAGS_temp $d"
         fi
       done
-      FFLAGS=$FFLAGS_temp
+      FCFLAGS=$FCFLAGS_temp
     fi
 
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
-    FFLAGS="$FFLAGS $PROD_FFLAGS"
+    FCFLAGS="$FCFLAGS $PROD_FCFLAGS"
     ;;
   X-|X-no)
     enable_production="no"
@@ -660,7 +664,7 @@ case "X-$enable_production" in
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
-    FFLAGS="$FFLAGS $DEBUG_FFLAGS"
+    FCFLAGS="$FCFLAGS $DEBUG_FCFLAGS"
     ;;
   X-pg|X-profile)
     enable_production="profile"
@@ -669,7 +673,7 @@ case "X-$enable_production" in
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
-    FFLAGS="$FFLAGS $PROFILE_FFLAGS"
+    FCFLAGS="$FCFLAGS $PROFILE_FCFLAGS"
     ;;
   *)
     enable_production="user-defined"
@@ -1984,7 +1988,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl Change to the Fortran 90 language
   AC_LANG_FORTRAN9X
 
-  case "$F9X" in
+  case "$FC" in
     *mpif90*)
       dnl The Fortran mpich compiler. Use mpirun from the same directory
       dnl if it exists.
@@ -1992,7 +1996,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       AC_MSG_CHECKING([for mpirun])
 
       dnl Find the path where mpif90 is located.
-      cmd=`echo $F9X |cut -f1 -d' '`
+      cmd=`echo $FC |cut -f1 -d' '`
       if (echo $cmd |grep / >/dev/null); then
         path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
       else
@@ -2018,7 +2022,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
     *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
       dnl The IBM compiler
-      PARALLEL="$F9X"
+      PARALLEL="$FC"
       ;;
 
     *)
@@ -3135,10 +3139,10 @@ PRINT_N "                        Fortran"
 IF_YES_NO "$HDF_FORTRAN"
 if test X$HDF_FORTRAN = Xyes; then
     PRINT_N "               Fortran Compiler"
-    PRINT "$F9X"
+    PRINT "$FC"
 
-    PRINT_N "                         FFLAGS"
-    PRINT "$FFLAGS"
+    PRINT_N "                         FCFLAGS"
+    PRINT "$FCFLAGS"
 fi
 
 PRINT "Features:"

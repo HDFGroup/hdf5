@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files
-AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
+AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 INCLUDES=-I$(top_srcdir)/src
 
 # Fortran libraries are linked statically to solve a build problem.
@@ -39,7 +39,7 @@ libh5test_fortran_la_SOURCES=fortranlib_test.f90 tH5F.f90 tH5D.f90 \
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
-fortranlib_test_FFLAGS=$(AM_FFLAGS)
+fortranlib_test_FCFLAGS=$(AM_FCFLAGS)
 fortranlib_test_CFLAGS=$(AM_CFLAGS)
 
 fortranlib_test_SOURCES = fortranlib_test.f90 \

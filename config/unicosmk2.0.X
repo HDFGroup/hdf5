@@ -156,8 +156,8 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_LARGE)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test "X-" = "X-$F9X"; then
-  F9X=f90
+if test "X-" = "X-$FC"; then
+  FC=f90
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
@@ -165,9 +165,9 @@ if test "X-" = "X-$f9x_flags_set"; then
   # number #. Warning 405 was stopping the executable from being built.
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="$FFLAGS -dp -Wl-M405"
-  DEBUG_FFLAGS=""
-  PROD_FFLAGS=""
-  PROFILE_FFLAGS=""
+  FCFLAGS="$FCFLAGS -dp -Wl-M405"
+  DEBUG_FCFLAGS=""
+  PROD_FCFLAGS=""
+  PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi

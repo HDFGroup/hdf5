@@ -12,19 +12,28 @@
 # and this machine has the right version of m4, this script should
 # be able to run the autotools.
 
+# Add the correct version of autoconf binaries to path (otherwise aclocal
+# may find an outdated version of autom4ate and complain about an
+# "unknown language": Autoconf-without-aclocal-m4.
+PATH=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin:$PATH
 
   # Run commands in order
-  echo /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
-  /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
 
-  echo /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/automake --foreign
-  /afs/ncsa/projects/hdf/packages/automake_1.6.3/Linux_2.4/bin/automake --foreign
+  echo /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign
+  /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake-1.9 --foreign
 
   echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
   /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
 
+  # Clean up Makefiles.in
+  # Right now, only the root-level Makefile.in is edited to allow configure
+  # to pass arguments to the .MAKEFLAGS target to pacify pmake.
+  sed "s/^#xxx//" Makefile.in > Makefile.in.new
+  mv Makefile.in.new Makefile.in
 
 exit 0

@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files
-AM_FFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
+AM_FCFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # Fortran libraries are linked statically to solve a build problem.
 AM_LDFLAGS=-static

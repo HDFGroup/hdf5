@@ -15,12 +15,12 @@ fi
 . $srcdir/config/gnu-flags
 
 # The default Fortran 90 compiler
-if test "X-" = "X-$F9X"; then
+if test "X-" = "X-$FC"; then
     # Assume Absoft compiler
-    F9X=xlf
-    F9X_BASENAME=xlf
+    FC=xlf
+    FC_BASENAME=xlf
   else
-    F9X_BASENAME=f95
+    FC_BASENAME=f95
     
 fi
 
@@ -41,14 +41,14 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-case $F9X_BASENAME in
+case $FC_BASENAME in
     xlf) 
         F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-        FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
+        FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
         FSEARCH_DIRS="-I./ -I../src"
-        DEBUG_FFLAGS="-g"
-        PROD_FFLAGS="-O"
-        PROFILE_FFLAGS="-g"
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g"
         f9x_flags_set=yes
         ;;
 
@@ -59,11 +59,11 @@ case $F9X_BASENAME in
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
 # (just in case since this should be a default EIP)
-        FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
+        FCFLAGS="$FCFLAGS -YEXT_NAMES=UCS"
         FSEARCH_DIRS=""
-        DEBUG_FFLAGS="-g"
-        PROD_FFLAGS="-O"
-        PROFILE_FFLAGS="-g -pg"
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g -pg"
         f9x_flags_set=yes
         ;;
 

@@ -46,9 +46,9 @@ CLEANFILES=*.h5 $(EXTRA_PROG)
 # Additional dependencies for the examples are listed below
 $(EXTRA_PROG): $(LIBHDF5) $(LIBH5F)
 if BUILD_PARALLEL_CONDITIONAL
-	$(H5FC_PP) $(FFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC_PP) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 else
-	$(H5FC) $(FFLAGS) -o $@ $(srcdir)/$@.f90;
+	$(H5FC) $(FCFLAGS) -o $@ $(srcdir)/$@.f90;
 endif
 
 # Tell automake how to install examples

@@ -12,17 +12,17 @@
 #   f9x_version:   Version number: 5.0-2, 5.2-2
 #
 if test X = "X$f9x_flags_set"; then
-    f9x_version="`$F9X $FFLAGS -v 2>&1 |grep 'gcc version' |\
+    f9x_version="`$FC $FCFLAGS -v 2>&1 |grep 'gcc version' |\
 	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     if test X != "X$f9x_version"; then
-#        is_mpi="`$F9X $FFLAGS -help 2>&1 |grep 'link MPI'`"
+#        is_mpi="`$FC $FCFLAGS -help 2>&1 |grep 'link MPI'`"
         f9x_vendor=`echo $f9x_version |sed 's/\([a-z]*\).*/\1/'`
         f9x_version=`echo $f9x_version |sed 's/[-a-z]//g'`
         if test X = "X$f9x_vendor" -a X != "X$f9x_version"; then
             f9x_vendor=gfortran
         fi
         if test "-" != "$f9x_vendor-$f9x_version"; then
-            echo "compiler '$F9X' is GNU $f9x_vendor-$f9x_version"
+            echo "compiler '$FC' is GNU $f9x_vendor-$f9x_version"
         fi
 
         # Some version numbers
@@ -59,19 +59,19 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     #esac
 
     # General
-    F9X_BASENAME=gfortran40
+    FC_BASENAME=gfortran40
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FFLAGS="$FFLAGS -pedantic -Wall -Wconversion -Wunderflow -Wimplicit-interface -W"
+    FCFLAGS="$FCFLAGS -pedantic -Wall -Wconversion -Wunderflow -Wimplicit-interface -W"
 
     # Production
-    PROD_FFLAGS="-O2 -s"
+    PROD_FCFLAGS="-O2 -s"
 
     # Debug
-    DEBUG_FFLAGS="-g -fbounds-check"
+    DEBUG_FCFLAGS="-g -fbounds-check"
 
     # Profile
-    PROFILE_FFLAGS="-g -pg"
+    PROFILE_FCFLAGS="-g -pg"
 
     # Flags are set
     f9x_flags_set=yes

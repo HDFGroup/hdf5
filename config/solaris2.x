@@ -54,17 +54,17 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test "X-" = "X-$F9X"; then
-  F9X=f90
+if test "X-" = "X-$FC"; then
+  FC=f90
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FFLAGS="$FFLAGS"
-  DEBUG_FFLAGS=""
-  PROD_FFLAGS=""
-  PROFILE_FFLAGS=""
+  FCFLAGS="$FCFLAGS"
+  DEBUG_FCFLAGS=""
+  PROD_FCFLAGS=""
+  PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi
 

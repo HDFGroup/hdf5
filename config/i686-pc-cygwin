@@ -22,23 +22,23 @@ fi
 . $srcdir/config/intel-flags
 
 # The default Fortran 90 compiler
-if test "X-" = "X-$F9X"; then
+if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*|pgcc*)
-            F9X=pgf90
-            F9X_BASENAME=pgf90
+            FC=pgf90
+            FC_BASENAME=pgf90
             ;;
         icc*)
-            F9X=ifort
-            F9X_BASENAME=ifort
+            FC=ifort
+            FC_BASENAME=ifort
             ;;
         mpicc*)
-            F9X=mpif90
-            F9X_BASENAME=mpif90
+            FC=mpif90
+            FC_BASENAME=mpif90
             ;;
     esac
 else
-    case $F9X in
+    case $FC in
         # The PGI and Intel compilers are automatically detected below
         ifc*|ifort*|pgf90*)
             ;;
@@ -47,13 +47,13 @@ else
             # Figure out which compiler we are using: pgf90 or Absoft f95
             RM='rm -f'
             tmpfile=/tmp/cmpver.$$
-            $F9X -V >$tmpfile
+            $FC -V >$tmpfile
             if test -s "$tmpfile"; then 
                 if( grep -s 'Absoft' $tmpfile > /dev/null) then
-                    F9X_BASENAME=f95
+                    FC_BASENAME=f95
                 fi 
                 if( grep -s 'pgf90' $tmpfile > /dev/null) then
-                    F9X_BASENAME=pgf90
+                    FC_BASENAME=pgf90
                 fi 
             fi
             $RM $tmpfile
@@ -84,7 +84,7 @@ OBJECT_NAMELEN_DEFAULT_F=-1
 # Figure out Intel F90 compiler flags
 . $srcdir/config/intel-fflags
 
-case $F9X_BASENAME in
+case $FC_BASENAME in
     #
     # Absoft compiler
     #
@@ -95,11 +95,11 @@ case $F9X_BASENAME in
         F9XSUFFIXFLAG=""
 # We force compiler to use upper case for external names 
 # (just in case since this should be a default EIP)
-        FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
+        FCFLAGS="$FCFLAGS -YEXT_NAMES=UCS"
         FSEARCH_DIRS=""
-        DEBUG_FFLAGS="-g"
-        PROD_FFLAGS="-O"
-        PROFILE_FFLAGS="-g -pg"
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g -pg"
         f9x_flags_set=yes
         ;;
 

@@ -467,7 +467,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F FFLAGS F9XSUFFIXFLAG FSEARCH_DIRS F9X F9XMODFLAG F9XMODEXT FC F77 CXX CXXFLAGS ac_ct_CXX CXXDEPMODE CXXCPP LT_STATIC_EXEC PERL AR EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP SRB TESTSRB BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F F9XSUFFIXFLAG FSEARCH_DIRS FC FCFLAGS ac_ct_FC F9XMODFLAG F9XMODEXT CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP LT_STATIC_EXEC PERL AR EGREP LN_S ECHO ac_ct_AR RANLIB ac_ct_RANLIB CPP F77 FFLAGS ac_ct_F77 LIBTOOL AM_MAKEFLAGS USE_FILTER_DEFLATE USE_FILTER_SZIP SRB TESTSRB BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT USE_FILTER_SCALEOFFSET H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -924,6 +924,14 @@ ac_env_CPPFLAGS_set=${CPPFLAGS+set}
 ac_env_CPPFLAGS_value=$CPPFLAGS
 ac_cv_env_CPPFLAGS_set=${CPPFLAGS+set}
 ac_cv_env_CPPFLAGS_value=$CPPFLAGS
+ac_env_FC_set=${FC+set}
+ac_env_FC_value=$FC
+ac_cv_env_FC_set=${FC+set}
+ac_cv_env_FC_value=$FC
+ac_env_FCFLAGS_set=${FCFLAGS+set}
+ac_env_FCFLAGS_value=$FCFLAGS
+ac_cv_env_FCFLAGS_set=${FCFLAGS+set}
+ac_cv_env_FCFLAGS_value=$FCFLAGS
 ac_env_CXX_set=${CXX+set}
 ac_env_CXX_value=$CXX
 ac_cv_env_CXX_set=${CXX+set}
@@ -1029,15 +1037,15 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-maintainer-mode enable make rules and dependencies not useful
-                          (and sometimes confusing) to the casual installer
+  --enable-maintainer-mode  enable make rules and dependencies not useful
+			  (and sometimes confusing) to the casual installer
   --disable-hsizet        Datasets can normally be larger than memory and/or
                           files but some compilers are unable to handle this
                           (including versions of GCC before 2.8.0). Disabling
                           the feature causes dataset sizes to be restricted to
                           the size of core memory, or 'size_t'.
-  --disable-dependency-tracking Speeds up one-time builds
-  --enable-dependency-tracking  Do not reject slow dependency extractors
+  --disable-dependency-tracking  speeds up one-time build
+  --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-fortran        Compile the Fortran interface [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-static-exec    Build only statically linked executables
@@ -1109,6 +1117,8 @@ Some influential environment variables:
               nonstandard directory <lib dir>
   CPPFLAGS    C/C++ preprocessor flags, e.g. -I<include dir> if you have
               headers in a nonstandard directory <include dir>
+  FC          Fortran compiler command
+  FCFLAGS     Fortran compiler flags
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
@@ -1566,11 +1576,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Add the stamp file to the list of files AC keeps track of,
-# along with our hook.
           ac_config_headers="$ac_config_headers src/H5config.h"
-
-
 
 
 ac_aux_dir=
@@ -1598,7 +1604,7 @@ ac_config_guess="$SHELL $ac_aux_dir/config.guess"
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"
 ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
-am__api_version="1.6"
+am__api_version="1.9"
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
 # incompatible versions:
@@ -1736,7 +1742,6 @@ _ACEOF
 program_transform_name=`echo $program_transform_name | sed -f conftest.sed`
 rm conftest.sed
 
-
 # expand $ac_aux_dir to an absolute path
 am_aux_dir=`cd $ac_aux_dir && pwd`
 
@@ -1748,6 +1753,39 @@ else
   am_missing_run=
   { echo "$as_me:$LINENO: WARNING: \`missing' script is too old or missing" >&5
 echo "$as_me: WARNING: \`missing' script is too old or missing" >&2;}
+fi
+
+if mkdir -p --version . >/dev/null 2>&1 && test ! -d ./--version; then
+  # We used to keeping the `.' as first argument, in order to
+  # allow $(mkdir_p) to be used without argument.  As in
+  #   $(mkdir_p) $(somedir)
+  # where $(somedir) is conditionally defined.  However this is wrong
+  # for two reasons:
+  #  1. if the package is installed by a user who cannot write `.'
+  #     make install will fail,
+  #  2. the above comment should most certainly read
+  #     $(mkdir_p) $(DESTDIR)$(somedir)
+  #     so it does not work when $(somedir) is undefined and
+  #     $(DESTDIR) is not.
+  #  To support the latter case, we have to write
+  #     test -z "$(somedir)" || $(mkdir_p) $(DESTDIR)$(somedir),
+  #  so the `.' trick is pointless.
+  mkdir_p='mkdir -p --'
+else
+  # On NextStep and OpenStep, the `mkdir' command does not
+  # recognize any option.  It will interpret all options as
+  # directories to create, and then abort because `.' already
+  # exists.
+  for d in ./-p ./--version;
+  do
+    test -d $d && rmdir $d
+  done
+  # $(mkinstalldirs) is defined by Automake if mkinstalldirs exists.
+  if test -f "$ac_aux_dir/mkinstalldirs"; then
+    mkdir_p='$(mkinstalldirs)'
+  else
+    mkdir_p='$(install_sh) -d'
+  fi
 fi
 
 for ac_prog in gawk mawk nawk awk
@@ -1819,7 +1857,16 @@ echo "${ECHO_T}no" >&6
   SET_MAKE="MAKE=${MAKE-make}"
 fi
 
- # test to see if srcdir already configured
+rm -rf .tst 2>/dev/null
+mkdir .tst 2>/dev/null
+if test -d .tst; then
+  am__leading_dot=.
+else
+  am__leading_dot=_
+fi
+rmdir .tst 2>/dev/null
+
+# test to see if srcdir already configured
 if test "`cd $srcdir && pwd`" != "`pwd`" &&
    test -f $srcdir/config.status; then
   { { echo "$as_me:$LINENO: error: source directory already configured; run \"make distclean\" there first" >&5
@@ -1827,9 +1874,19 @@ echo "$as_me: error: source directory already configured; run \"make distclean\"
    { (exit 1); exit 1; }; }
 fi
 
+# test whether we have cygpath
+if test -z "$CYGPATH_W"; then
+  if (cygpath --version) >/dev/null 2>/dev/null; then
+    CYGPATH_W='cygpath -w'
+  else
+    CYGPATH_W=echo
+  fi
+fi
+
+
 # Define the identity of the package.
- PACKAGE=hdf5
- VERSION=1.7.46
+ PACKAGE='hdf5'
+ VERSION='1.7.46'
 
 
 cat >>confdefs.h <<_ACEOF
@@ -1856,9 +1913,6 @@ AUTOHEADER=${AUTOHEADER-"${am_missing_run}autoheader"}
 
 
 MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
-
-
-AMTAR=${AMTAR-"${am_missing_run}tar"}
 
 install_sh=${install_sh-"$am_aux_dir/install-sh"}
 
@@ -1952,6 +2006,13 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
+# Always define AMTAR for backward compatibility.
+
+AMTAR=${AMTAR-"${am_missing_run}tar"}
+
+am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
+
+
 
 
 
@@ -3138,24 +3199,16 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-rm -f .deps 2>/dev/null
-mkdir .deps 2>/dev/null
-if test -d .deps; then
-  DEPDIR=.deps
-else
-  # MS-DOS does not allow filenames that begin with a dot.
-  DEPDIR=_deps
-fi
-rmdir .deps 2>/dev/null
-
+DEPDIR="${am__leading_dot}deps"
 
           ac_config_commands="$ac_config_commands depfiles"
 
 
 am_make=${MAKE-make}
 cat > confinc << 'END'
-doit:
+am__doit:
 	@echo done
+.PHONY: am__doit
 END
 # If we don't find an include directive, just comment out the code.
 echo "$as_me:$LINENO: checking for style of include used by $am_make" >&5
@@ -3170,7 +3223,7 @@ echo "include confinc" > confmf
 # In particular we don't look at `^make:' because GNU make might
 # be invoked under some other name (usually "gmake"), in which
 # case it prints its new name instead of `make'.
-if test "`$am_make -s -f confmf 2> /dev/null | fgrep -v 'ing directory'`" = "done"; then
+if test "`$am_make -s -f confmf 2> /dev/null | grep -v 'ing directory'`" = "done"; then
    am__include=include
    am__quote=
    _am_result=GNU
@@ -3230,18 +3283,34 @@ else
   # using a relative directory.
   cp "$am_depcomp" conftest.dir
   cd conftest.dir
+  # We will build objects and dependencies in a subdirectory because
+  # it helps to detect inapplicable dependency modes.  For instance
+  # both Tru64's cc and ICC support -MD to output dependencies as a
+  # side effect of compilation, but ICC will put the dependencies in
+  # the current directory while Tru64 will put them in the object
+  # directory.
+  mkdir sub
 
   am_cv_CC_dependencies_compiler_type=none
   if test "$am_compiler_list" = ""; then
      am_compiler_list=`sed -n 's/^#*\([a-zA-Z0-9]*\))$/\1/p' < ./depcomp`
   fi
   for depmode in $am_compiler_list; do
+    # Setup a source with many dependencies, because some compilers
+    # like to wrap large dependency lists on column 80 (with \), and
+    # we should not choose a depcomp mode which is confused by this.
+    #
     # We need to recreate these files for each test, as the compiler may
     # overwrite some of them when testing with obscure command lines.
     # This happens at least with the AIX C compiler.
-    echo '#include "conftest.h"' > conftest.c
-    echo 'int i;' > conftest.h
-    echo "${am__include} ${am__quote}conftest.Po${am__quote}" > confmf
+    : > sub/conftest.c
+    for i in 1 2 3 4 5 6; do
+      echo '#include "conftst'$i'.h"' >> sub/conftest.c
+      # Using `: > sub/conftst$i.h' creates only sub/conftst1.h with
+      # Solaris 8's {/usr,}/bin/sh.
+      touch sub/conftst$i.h
+    done
+    echo "${am__include} ${am__quote}sub/conftest.Po${am__quote}" > confmf
 
     case $depmode in
     nosideeffect)
@@ -3259,13 +3328,25 @@ else
     # mode.  It turns out that the SunPro C++ compiler does not properly
     # handle `-M -o', and we need to detect this.
     if depmode=$depmode \
-       source=conftest.c object=conftest.o \
-       depfile=conftest.Po tmpdepfile=conftest.TPo \
-       $SHELL ./depcomp $depcc -c conftest.c -o conftest.o >/dev/null 2>&1 &&
-       grep conftest.h conftest.Po > /dev/null 2>&1 &&
+       source=sub/conftest.c object=sub/conftest.${OBJEXT-o} \
+       depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
+       $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c \
+         >/dev/null 2>conftest.err &&
+       grep sub/conftst6.h sub/conftest.Po > /dev/null 2>&1 &&
+       grep sub/conftest.${OBJEXT-o} sub/conftest.Po > /dev/null 2>&1 &&
        ${MAKE-make} -s -f confmf > /dev/null 2>&1; then
-      am_cv_CC_dependencies_compiler_type=$depmode
-      break
+      # icc doesn't choke on unknown options, it will just issue warnings
+      # or remarks (even with -Werror).  So we grep stderr for any message
+      # that says an option was ignored or not supported.
+      # When given -MP, icc 7.0 and 7.1 complain thusly:
+      #   icc: Command line warning: ignoring option '-M'; no argument required
+      # The diagnosis changed in icc 8.0:
+      #   icc: Command line remark: option '-MP' not supported
+      if (grep 'ignoring option' conftest.err ||
+          grep 'not supported' conftest.err) >/dev/null 2>&1; then :; else
+        am_cv_CC_dependencies_compiler_type=$depmode
+        break
+      fi
     fi
   done
 
@@ -3279,6 +3360,18 @@ fi
 echo "$as_me:$LINENO: result: $am_cv_CC_dependencies_compiler_type" >&5
 echo "${ECHO_T}$am_cv_CC_dependencies_compiler_type" >&6
 CCDEPMODE=depmode=$am_cv_CC_dependencies_compiler_type
+
+
+
+if
+  test "x$enable_dependency_tracking" != xno \
+  && test "$am_cv_CC_dependencies_compiler_type" = gcc3; then
+  am__fastdepCC_TRUE=
+  am__fastdepCC_FALSE='#'
+else
+  am__fastdepCC_TRUE='#'
+  am__fastdepCC_FALSE=
+fi
 
 
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
@@ -3306,21 +3399,37 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
 
+      echo
+echo
+echo JAMES
+echo
+echo fflags ${FFLAGS}
+echo fcflags ${FCFLAGS}
+  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+echo
+echo fflags ${FFLAGS}
+echo fcflags ${FCFLAGS}
+echo
+  FC=${F9X}
 
 
 
-
-        for ac_prog in f90 pgf90 xlf90 f95 g95 xlf95 efc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
+        ac_ext=${FC_SRCEXT-f}
+ac_compile='$FC -c $FCFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $FCFLAGS_SRCEXT conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+if test -n "$ac_tool_prefix"; then
+  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc
+  do
+    # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
+set dummy $ac_tool_prefix$ac_prog; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_F9X+set}" = set; then
+if test "${ac_cv_prog_FC+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$F9X"; then
-  ac_cv_prog_F9X="$F9X" # Let the user override the test.
+  if test -n "$FC"; then
+  ac_cv_prog_FC="$FC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -3329,7 +3438,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_F9X="$ac_prog"
+    ac_cv_prog_FC="$ac_tool_prefix$ac_prog"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -3338,57 +3447,201 @@ done
 
 fi
 fi
-F9X=$ac_cv_prog_F9X
-if test -n "$F9X"; then
-  echo "$as_me:$LINENO: result: $F9X" >&5
-echo "${ECHO_T}$F9X" >&6
+FC=$ac_cv_prog_FC
+if test -n "$FC"; then
+  echo "$as_me:$LINENO: result: $FC" >&5
+echo "${ECHO_T}$FC" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
-  test -n "$F9X" && break
+    test -n "$FC" && break
+  done
+fi
+if test -z "$FC"; then
+  ac_ct_FC=$FC
+  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_ac_ct_FC+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ac_ct_FC"; then
+  ac_cv_prog_ac_ct_FC="$ac_ct_FC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_ac_ct_FC="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
 done
 
-test -z "$F9X" && { { echo "$as_me:$LINENO: error: no acceptable f9X compiler found in \$PATH" >&5
-echo "$as_me: error: no acceptable f9X compiler found in \$PATH" >&2;}
-   { (exit 1); exit 1; }; }
+fi
+fi
+ac_ct_FC=$ac_cv_prog_ac_ct_FC
+if test -n "$ac_ct_FC"; then
+  echo "$as_me:$LINENO: result: $ac_ct_FC" >&5
+echo "${ECHO_T}$ac_ct_FC" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  test -n "$ac_ct_FC" && break
+done
+
+  FC=$ac_ct_FC
+fi
 
 
-echo "$as_me:$LINENO: checking whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) works" >&5
-echo $ECHO_N "checking whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) works... $ECHO_C" >&6
-
-
-ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
-cross_compiling=$ac_cv_prog_f9x_cross
-
-
-cat > conftest.$ac_ext << EOF
-
-      program conftest
-      end
-
-EOF
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+# Provide some information about the compiler.
+echo "$as_me:3509:" \
+     "checking for Fortran compiler version" >&5
+ac_compiler=`set X $ac_compile; echo $2`
+{ (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
+  (eval $ac_compiler --version </dev/null >&5) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && test -s conftest${ac_exeext}; then
-  ac_cv_prog_f9x_works=yes
-  # If we can't run a trivial program, we are probably using a cross compiler.
-  if (./conftest; exit) 2>/dev/null; then
-    ac_cv_prog_f9x_cross=no
+  (exit $ac_status); }
+{ (eval echo "$as_me:$LINENO: \"$ac_compiler -v </dev/null >&5\"") >&5
+  (eval $ac_compiler -v </dev/null >&5) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+{ (eval echo "$as_me:$LINENO: \"$ac_compiler -V </dev/null >&5\"") >&5
+  (eval $ac_compiler -V </dev/null >&5) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+rm -f a.out
+
+# If we don't use `.F' as extension, the preprocessor is not run on the
+# input file.  (Note that this only needs to work for GNU compilers.)
+ac_save_ext=$ac_ext
+ac_ext=F
+echo "$as_me:$LINENO: checking whether we are using the GNU Fortran compiler" >&5
+echo $ECHO_N "checking whether we are using the GNU Fortran compiler... $ECHO_C" >&6
+if test "${ac_cv_fc_compiler_gnu+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+      program main
+#ifndef __GNUC__
+       choke me
+#endif
+
+      end
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_compiler_gnu=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_compiler_gnu=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+ac_cv_fc_compiler_gnu=$ac_compiler_gnu
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_fc_compiler_gnu" >&5
+echo "${ECHO_T}$ac_cv_fc_compiler_gnu" >&6
+ac_ext=$ac_save_ext
+ac_test_FFLAGS=${FCFLAGS+set}
+ac_save_FFLAGS=$FCFLAGS
+FCFLAGS=
+echo "$as_me:$LINENO: checking whether $FC accepts -g" >&5
+echo $ECHO_N "checking whether $FC accepts -g... $ECHO_C" >&6
+if test "${ac_cv_prog_fc_g+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  FCFLAGS=-g
+cat >conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_fc_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_prog_fc_g=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_prog_fc_g=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_prog_fc_g" >&5
+echo "${ECHO_T}$ac_cv_prog_fc_g" >&6
+if test "$ac_test_FFLAGS" = set; then
+  FCFLAGS=$ac_save_FFLAGS
+elif test $ac_cv_prog_fc_g = yes; then
+  if test "x$ac_cv_fc_compiler_gnu" = xyes; then
+    FCFLAGS="-g -O2"
   else
-    ac_cv_prog_f9x_cross=yes
+    FCFLAGS="-g"
   fi
 else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  ac_cv_prog_f9x_works=no
+  if test "x$ac_cv_fc_compiler_gnu" = xyes; then
+    FCFLAGS="-O2"
+  else
+    FCFLAGS=
+  fi
 fi
-rm -fr conftest*
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -3396,86 +3649,13 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-echo "$as_me:$LINENO: result: $ac_cv_prog_f9x_works" >&5
-echo "${ECHO_T}$ac_cv_prog_f9x_works" >&6
-if test $ac_cv_prog_f9x_works = no; then
-  { { echo "$as_me:$LINENO: error: installation or configuration problem: Fortran 9X compiler cannot create executables." >&5
-echo "$as_me: error: installation or configuration problem: Fortran 9X compiler cannot create executables." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-echo "$as_me:$LINENO: checking whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) is a cross-compiler" >&5
-echo $ECHO_N "checking whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) is a cross-compiler... $ECHO_C" >&6
-echo "$as_me:$LINENO: result: $ac_cv_prog_f9x_cross" >&5
-echo "${ECHO_T}$ac_cv_prog_f9x_cross" >&6
-cross_compiling=$ac_cv_prog_f9x_cross
-
-echo "$as_me:$LINENO: checking whether we are using GNU Fortran 95" >&5
-echo $ECHO_N "checking whether we are using GNU Fortran 95... $ECHO_C" >&6
-if test "${ac_cv_prog_g9x+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat > conftest.fpp <<EOF
-#ifdef __GNUC__
-  yes
-#endif
-EOF
-if { ac_try='$F9X -E conftest.fpp'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } | egrep yes >/dev/null 2>&1; then
-  ac_cv_prog_g9x=yes
-else
-  ac_cv_prog_g9x=no
-fi
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_g9x" >&5
-echo "${ECHO_T}$ac_cv_prog_g9x" >&6
-
-if test $ac_cv_prog_g9x = yes; then
-  G9X=yes
-        ac_test_FFLAGS="${FFLAGS+set}"
-  ac_save_FFLAGS="$FFLAGS"
-  FFLAGS=
-  echo "$as_me:$LINENO: checking whether $F9X accepts -g" >&5
-echo $ECHO_N "checking whether $F9X accepts -g... $ECHO_C" >&6
-if test "${ac_cv_prog_f9x_g+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat > conftest.f << EOF
-       program conftest
-       end
-EOF
-if test -z "`$F9X -g -c conftest.f 2>&1`"; then
-  ac_cv_prog_f9x_g=yes
-else
-  ac_cv_prog_f9x_g=no
-fi
-rm -f conftest*
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_f9x_g" >&5
-echo "${ECHO_T}$ac_cv_prog_f9x_g" >&6
-  if test "$ac_test_FFLAGS" = set; then
-    FFLAGS="$ac_save_FFLAGS"
-  elif test $ac_cv_prog_f9x_g = yes; then
-    FFLAGS="-g -O2"
-  else
-    FFLAGS="-O2"
-  fi
-else
-  G9X=
-  test "${FFLAGS+set}" = set || FFLAGS="-g"
-fi
-
-  echo "$as_me:$LINENO: checking what $F9X does with modules" >&5
-echo $ECHO_N "checking what $F9X does with modules... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking what $FC does with modules" >&5
+echo $ECHO_N "checking what $FC does with modules... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -3507,16 +3687,16 @@ done
 
 echo $modfiles 6>&1
 if test "$modfiles" = file.o; then
-  echo $ac_n "checking whether $F9X -em is saner""... $ac_c" 1>&6
-  OLD_FFLAGS=$FFLAGS
-  FFLAGS="$FFLAGS -em"
+  echo $ac_n "checking whether $FC -em is saner""... $ac_c" 1>&6
+  OLD_FCFLAGS=$FCFLAGS
+  FCFLAGS="$FCFLAGS -em"
   eval $ac_compile
   modfiles=""
   for f in file.o module.mod MODULE.mod module.M MODULE.M; do
     test -f $f && modfiles="$f"
   done
   if test "$modfiles" = "file.o"; then
-    FFLAGS=$OLD_FFLAGS
+    FCFLAGS=$OLD_FCFLAGS
     echo no 6>&1
   else
     echo yes 6>&1
@@ -3524,8 +3704,8 @@ if test "$modfiles" = file.o; then
 fi
 cd ..
 
-echo "$as_me:$LINENO: checking how $F9X finds modules" >&5
-echo $ECHO_N "checking how $F9X finds modules... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking how $FC finds modules" >&5
+echo $ECHO_N "checking how $FC finds modules... $ECHO_C" >&6
 
 for flag in "-I" "-M" "-p"; do
   cat >conftest.$ac_ext <<EOF
@@ -3534,7 +3714,7 @@ for flag in "-I" "-M" "-p"; do
       end program conftest
 EOF
 
-  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
+  ac_compile='${FC-f90} $FCFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
 
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
@@ -3548,7 +3728,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$F9XMODFLAG. $FFLAGS"
+  FCFLAGS="$F9XMODFLAG. $FCFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -3557,26 +3737,29 @@ fi
 rm -rf conftest*
 
 
-     FC=$F9X
-   F77=$F9X
+echo
+echo fflags ${FFLAGS}
+echo fcflags ${FCFLAGS}
+echo
 
+        F77=$FC
 
     ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
-        FFLAGS_saved=$FFLAGS
-  FFLAGS="$FFLAGS -I."
+        FCFLAGS_saved=$FCFLAGS
+  FCFLAGS="$FCFLAGS -I."
 
   echo "$as_me:$LINENO: checking if compiler supports -I. option" >&5
 echo $ECHO_N "checking if compiler supports -I. option... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -3603,7 +3786,7 @@ else
   :
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-     FFLAGS="$FFLAGS_saved"
+     FCFLAGS="$FCFLAGS_saved"
 fi
 cd ..
 rm -rf conftest*
@@ -3621,15 +3804,7 @@ fi
 
 echo "$as_me:$LINENO: checking if c++ interface enabled" >&5
 echo $ECHO_N "checking if c++ interface enabled... $ECHO_C" >&6
-# Check whether --enable-cxx or --disable-cxx was given.
-if test "${enable_cxx+set}" = set; then
-  enableval="$enable_cxx"
-  HDF_CXX=$enableval
-fi;
 
-if test "X$HDF_CXX" = "Xyes"; then
-  echo "yes"
-  HDF5_INTERFACES="$HDF5_INTERFACES c++"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4003,18 +4178,34 @@ else
   # using a relative directory.
   cp "$am_depcomp" conftest.dir
   cd conftest.dir
+  # We will build objects and dependencies in a subdirectory because
+  # it helps to detect inapplicable dependency modes.  For instance
+  # both Tru64's cc and ICC support -MD to output dependencies as a
+  # side effect of compilation, but ICC will put the dependencies in
+  # the current directory while Tru64 will put them in the object
+  # directory.
+  mkdir sub
 
   am_cv_CXX_dependencies_compiler_type=none
   if test "$am_compiler_list" = ""; then
      am_compiler_list=`sed -n 's/^#*\([a-zA-Z0-9]*\))$/\1/p' < ./depcomp`
   fi
   for depmode in $am_compiler_list; do
+    # Setup a source with many dependencies, because some compilers
+    # like to wrap large dependency lists on column 80 (with \), and
+    # we should not choose a depcomp mode which is confused by this.
+    #
     # We need to recreate these files for each test, as the compiler may
     # overwrite some of them when testing with obscure command lines.
     # This happens at least with the AIX C compiler.
-    echo '#include "conftest.h"' > conftest.c
-    echo 'int i;' > conftest.h
-    echo "${am__include} ${am__quote}conftest.Po${am__quote}" > confmf
+    : > sub/conftest.c
+    for i in 1 2 3 4 5 6; do
+      echo '#include "conftst'$i'.h"' >> sub/conftest.c
+      # Using `: > sub/conftst$i.h' creates only sub/conftst1.h with
+      # Solaris 8's {/usr,}/bin/sh.
+      touch sub/conftst$i.h
+    done
+    echo "${am__include} ${am__quote}sub/conftest.Po${am__quote}" > confmf
 
     case $depmode in
     nosideeffect)
@@ -4032,13 +4223,25 @@ else
     # mode.  It turns out that the SunPro C++ compiler does not properly
     # handle `-M -o', and we need to detect this.
     if depmode=$depmode \
-       source=conftest.c object=conftest.o \
-       depfile=conftest.Po tmpdepfile=conftest.TPo \
-       $SHELL ./depcomp $depcc -c conftest.c -o conftest.o >/dev/null 2>&1 &&
-       grep conftest.h conftest.Po > /dev/null 2>&1 &&
+       source=sub/conftest.c object=sub/conftest.${OBJEXT-o} \
+       depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
+       $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c \
+         >/dev/null 2>conftest.err &&
+       grep sub/conftst6.h sub/conftest.Po > /dev/null 2>&1 &&
+       grep sub/conftest.${OBJEXT-o} sub/conftest.Po > /dev/null 2>&1 &&
        ${MAKE-make} -s -f confmf > /dev/null 2>&1; then
-      am_cv_CXX_dependencies_compiler_type=$depmode
-      break
+      # icc doesn't choke on unknown options, it will just issue warnings
+      # or remarks (even with -Werror).  So we grep stderr for any message
+      # that says an option was ignored or not supported.
+      # When given -MP, icc 7.0 and 7.1 complain thusly:
+      #   icc: Command line warning: ignoring option '-M'; no argument required
+      # The diagnosis changed in icc 8.0:
+      #   icc: Command line remark: option '-MP' not supported
+      if (grep 'ignoring option' conftest.err ||
+          grep 'not supported' conftest.err) >/dev/null 2>&1; then :; else
+        am_cv_CXX_dependencies_compiler_type=$depmode
+        break
+      fi
     fi
   done
 
@@ -4052,6 +4255,18 @@ fi
 echo "$as_me:$LINENO: result: $am_cv_CXX_dependencies_compiler_type" >&5
 echo "${ECHO_T}$am_cv_CXX_dependencies_compiler_type" >&6
 CXXDEPMODE=depmode=$am_cv_CXX_dependencies_compiler_type
+
+
+
+if
+  test "x$enable_dependency_tracking" != xno \
+  && test "$am_cv_CXX_dependencies_compiler_type" = gcc3; then
+  am__fastdepCXX_TRUE=
+  am__fastdepCXX_FALSE='#'
+else
+  am__fastdepCXX_TRUE='#'
+  am__fastdepCXX_FALSE=
+fi
 
 
   ac_ext=cc
@@ -4283,6 +4498,16 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+# Check whether --enable-cxx or --disable-cxx was given.
+if test "${enable_cxx+set}" = set; then
+  enableval="$enable_cxx"
+  HDF_CXX=$enableval
+fi;
+
+if test "X$HDF_CXX" = "Xyes"; then
+  echo "yes"
+  HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
     ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -4623,6 +4848,7 @@ fi
 done
 
 fi
+
 
 if test -z "$AR"; then
   for ac_prog in ar xar
@@ -5333,7 +5559,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5336 "configure"' > conftest.$ac_ext
+  echo '#line 5562 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6447,7 +6673,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6450:" \
+echo "$as_me:6676:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7516,11 +7742,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7519: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7745: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7523: \$? = $ac_status" >&5
+   echo "$as_me:7749: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -7771,11 +7997,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7774: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8000: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7778: \$? = $ac_status" >&5
+   echo "$as_me:8004: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -7831,11 +8057,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7834: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8060: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7838: \$? = $ac_status" >&5
+   echo "$as_me:8064: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10031,7 +10257,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10034 "configure"
+#line 10260 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10129,7 +10355,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10132 "configure"
+#line 10358 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12349,11 +12575,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12352: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12578: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12356: \$? = $ac_status" >&5
+   echo "$as_me:12582: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12409,11 +12635,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12412: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12638: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12416: \$? = $ac_status" >&5
+   echo "$as_me:12642: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13772,7 +13998,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13775 "configure"
+#line 14001 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13870,7 +14096,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13873 "configure"
+#line 14099 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14725,11 +14951,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14728: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14954: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14732: \$? = $ac_status" >&5
+   echo "$as_me:14958: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14785,11 +15011,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14788: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15014: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14792: \$? = $ac_status" >&5
+   echo "$as_me:15018: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16841,11 +17067,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16844: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17070: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16848: \$? = $ac_status" >&5
+   echo "$as_me:17074: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -17096,11 +17322,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17099: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17325: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17103: \$? = $ac_status" >&5
+   echo "$as_me:17329: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -17156,11 +17382,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17159: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17385: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17163: \$? = $ac_status" >&5
+   echo "$as_me:17389: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19356,7 +19582,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19359 "configure"
+#line 19585 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19454,7 +19680,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19457 "configure"
+#line 19683 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20644,21 +20870,21 @@ echo "${ECHO_T}production" >&6
       CXXFLAGS=$CXXFLAGS_temp
     fi
 
-    FFLAGS_temp=""
-    if test -n "$FFLAGS"; then
-      for d in $FFLAGS ; do
+    FCFLAGS_temp=""
+    if test -n "$FCFLAGS"; then
+      for d in $FCFLAGS ; do
         if test "X$d" != "X-g"; then
-          FFLAGS_temp="$FFLAGS_temp $d"
+          FCFLAGS_temp="$FCFLAGS_temp $d"
         fi
       done
-      FFLAGS=$FFLAGS_temp
+      FCFLAGS=$FCFLAGS_temp
     fi
 
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
-    FFLAGS="$FFLAGS $PROD_FFLAGS"
+    FCFLAGS="$FCFLAGS $PROD_FCFLAGS"
     ;;
   X-|X-no)
     enable_production="no"
@@ -20668,7 +20894,7 @@ echo "${ECHO_T}development" >&6
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
-    FFLAGS="$FFLAGS $DEBUG_FFLAGS"
+    FCFLAGS="$FCFLAGS $DEBUG_FCFLAGS"
     ;;
   X-pg|X-profile)
     enable_production="profile"
@@ -20678,7 +20904,7 @@ echo "${ECHO_T}profile" >&6
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
     CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
-    FFLAGS="$FFLAGS $PROFILE_FFLAGS"
+    FCFLAGS="$FCFLAGS $PROFILE_FCFLAGS"
     ;;
   *)
     enable_production="user-defined"
@@ -45116,18 +45342,18 @@ esac
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
     ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
-  case "$F9X" in
+  case "$FC" in
     *mpif90*)
                   PARALLEL=mpif90
       echo "$as_me:$LINENO: checking for mpirun" >&5
 echo $ECHO_N "checking for mpirun... $ECHO_C" >&6
 
-            cmd=`echo $F9X |cut -f1 -d' '`
+            cmd=`echo $FC |cut -f1 -d' '`
       if (echo $cmd |grep / >/dev/null); then
         path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
       else
@@ -45153,7 +45379,7 @@ echo "${ECHO_T}none" >&6
       ;;
 
     *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-            PARALLEL="$F9X"
+            PARALLEL="$FC"
       ;;
 
     *)
@@ -45435,16 +45661,16 @@ rm -f conftest.err conftest.$ac_objext \
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
             ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45477,8 +45703,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45527,8 +45753,8 @@ rm -rf conftest*
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45561,8 +45787,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -47854,6 +48080,20 @@ echo "$as_me: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${BUILD_PDB2HDF_CONDITIONAL_TRUE}" && test -z "${BUILD_PDB2HDF_CONDITIONAL_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"BUILD_PDB2HDF_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -48487,6 +48727,7 @@ s,@LIBS@,$LIBS,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
+s,@CYGPATH_W@,$CYGPATH_W,;t t
 s,@PACKAGE@,$PACKAGE,;t t
 s,@VERSION@,$VERSION,;t t
 s,@ACLOCAL@,$ACLOCAL,;t t
@@ -48494,13 +48735,17 @@ s,@AUTOCONF@,$AUTOCONF,;t t
 s,@AUTOMAKE@,$AUTOMAKE,;t t
 s,@AUTOHEADER@,$AUTOHEADER,;t t
 s,@MAKEINFO@,$MAKEINFO,;t t
-s,@AMTAR@,$AMTAR,;t t
 s,@install_sh@,$install_sh,;t t
 s,@STRIP@,$STRIP,;t t
 s,@ac_ct_STRIP@,$ac_ct_STRIP,;t t
 s,@INSTALL_STRIP_PROGRAM@,$INSTALL_STRIP_PROGRAM,;t t
+s,@mkdir_p@,$mkdir_p,;t t
 s,@AWK@,$AWK,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
+s,@am__leading_dot@,$am__leading_dot,;t t
+s,@AMTAR@,$AMTAR,;t t
+s,@am__tar@,$am__tar,;t t
+s,@am__untar@,$am__untar,;t t
 s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
 s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
 s,@MAINT@,$MAINT,;t t
@@ -48527,6 +48772,8 @@ s,@AMDEP_TRUE@,$AMDEP_TRUE,;t t
 s,@AMDEP_FALSE@,$AMDEP_FALSE,;t t
 s,@AMDEPBACKSLASH@,$AMDEPBACKSLASH,;t t
 s,@CCDEPMODE@,$CCDEPMODE,;t t
+s,@am__fastdepCC_TRUE@,$am__fastdepCC_TRUE,;t t
+s,@am__fastdepCC_FALSE@,$am__fastdepCC_FALSE,;t t
 s,@HDF5_INTERFACES@,$HDF5_INTERFACES,;t t
 s,@R_LARGE@,$R_LARGE,;t t
 s,@R_INTEGER@,$R_INTEGER,;t t
@@ -48536,18 +48783,19 @@ s,@HSSIZE_T@,$HSSIZE_T,;t t
 s,@HID_T@,$HID_T,;t t
 s,@SIZE_T@,$SIZE_T,;t t
 s,@OBJECT_NAMELEN_DEFAULT_F@,$OBJECT_NAMELEN_DEFAULT_F,;t t
-s,@FFLAGS@,$FFLAGS,;t t
 s,@F9XSUFFIXFLAG@,$F9XSUFFIXFLAG,;t t
 s,@FSEARCH_DIRS@,$FSEARCH_DIRS,;t t
-s,@F9X@,$F9X,;t t
+s,@FC@,$FC,;t t
+s,@FCFLAGS@,$FCFLAGS,;t t
+s,@ac_ct_FC@,$ac_ct_FC,;t t
 s,@F9XMODFLAG@,$F9XMODFLAG,;t t
 s,@F9XMODEXT@,$F9XMODEXT,;t t
-s,@FC@,$FC,;t t
-s,@F77@,$F77,;t t
 s,@CXX@,$CXX,;t t
 s,@CXXFLAGS@,$CXXFLAGS,;t t
 s,@ac_ct_CXX@,$ac_ct_CXX,;t t
 s,@CXXDEPMODE@,$CXXDEPMODE,;t t
+s,@am__fastdepCXX_TRUE@,$am__fastdepCXX_TRUE,;t t
+s,@am__fastdepCXX_FALSE@,$am__fastdepCXX_FALSE,;t t
 s,@CXXCPP@,$CXXCPP,;t t
 s,@LT_STATIC_EXEC@,$LT_STATIC_EXEC,;t t
 s,@PERL@,$PERL,;t t
@@ -48559,6 +48807,8 @@ s,@ac_ct_AR@,$ac_ct_AR,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@CPP@,$CPP,;t t
+s,@F77@,$F77,;t t
+s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
 s,@LIBTOOL@,$LIBTOOL,;t t
 s,@AM_MAKEFLAGS@,$AM_MAKEFLAGS,;t t
@@ -49068,12 +49318,28 @@ echo "$as_me: error: cannot create directory \"$ac_dir\"" >&2;}
     cat $tmp/config.h
     rm -f $tmp/config.h
   fi
-  # Run the commands associated with the file.
-  case $ac_file in
-    src/H5config.h ) # update the timestamp
-echo 'timestamp for src/H5config.h' >"src/stamp-h1"
- ;;
+# Compute $ac_file's index in $config_headers.
+_am_stamp_count=1
+for _am_header in $config_headers :; do
+  case $_am_header in
+    $ac_file | $ac_file:* )
+      break ;;
+    * )
+      _am_stamp_count=`expr $_am_stamp_count + 1` ;;
   esac
+done
+echo "timestamp for $ac_file" >`(dirname $ac_file) 2>/dev/null ||
+$as_expr X$ac_file : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$ac_file : 'X\(//\)[^/]' \| \
+	 X$ac_file : 'X\(//\)$' \| \
+	 X$ac_file : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$ac_file |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`/stamp-h$_am_stamp_count
 done
 _ACEOF
 cat >>$CONFIG_STATUS <<\_ACEOF
@@ -49228,27 +49494,21 @@ echo X"$mf" |
   else
     continue
   fi
-  grep '^DEP_FILES *= *[^ #]' < "$mf" > /dev/null || continue
-  # Extract the definition of DEP_FILES from the Makefile without
-  # running `make'.
-  DEPDIR=`sed -n -e '/^DEPDIR = / s///p' < "$mf"`
+  # Extract the definition of DEPDIR, am__include, and am__quote
+  # from the Makefile without running `make'.
+  DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
   test -z "$DEPDIR" && continue
+  am__include=`sed -n 's/^am__include = //p' < "$mf"`
+  test -z "am__include" && continue
+  am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
   # When using ansi2knr, U may be empty or an underscore; expand it
-  U=`sed -n -e '/^U = / s///p' < "$mf"`
-  test -d "$dirpart/$DEPDIR" || mkdir "$dirpart/$DEPDIR"
-  # We invoke sed twice because it is the simplest approach to
-  # changing $(DEPDIR) to its actual value in the expansion.
-  for file in `sed -n -e '
-    /^DEP_FILES = .*\\\\$/ {
-      s/^DEP_FILES = //
-      :loop
-	s/\\\\$//
-	p
-	n
-	/\\\\$/ b loop
-      p
-    }
-    /^DEP_FILES = / s/^DEP_FILES = //p' < "$mf" | \
+  U=`sed -n 's/^U = //p' < "$mf"`
+  # Find all dependency output files, they are included files with
+  # $(DEPDIR) in their names.  We invoke sed twice because it is the
+  # simplest approach to changing $(DEPDIR) to its actual value in the
+  # expansion.
+  for file in `sed -n "
+    s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
        sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g' -e 's/\$U/'"$U"'/g'`; do
     # Make sure the directory exists.
     test -f "$dirpart/$file" && continue
@@ -49471,10 +49731,10 @@ PRINT_N "                        Fortran"
 IF_YES_NO "$HDF_FORTRAN"
 if test X$HDF_FORTRAN = Xyes; then
     PRINT_N "               Fortran Compiler"
-    PRINT "$F9X"
+    PRINT "$FC"
 
-    PRINT_N "                         FFLAGS"
-    PRINT "$FFLAGS"
+    PRINT_N "                         FCFLAGS"
+    PRINT "$FCFLAGS"
 fi
 
 PRINT "Features:"

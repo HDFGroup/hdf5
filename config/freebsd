@@ -22,19 +22,19 @@ CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE=1"
 . $srcdir/config/intel-flags
 
 # The default Fortran 90 compiler
-if test "X-" = "X-$F9X"; then
+if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*|pgcc*)
-            F9X=gfortran40
-            F9X_BASENAME=gfortran40
+            FC=gfortran40
+            FC_BASENAME=gfortran40
             ;;
         icc*)
-            F9X=ifort
-            F9X_BASENAME=ifort
+            FC=ifort
+            FC_BASENAME=ifort
             ;;
         mpicc*)
-            F9X=mpif90
-            F9X_BASENAME=mpif90
+            FC=mpif90
+            FC_BASENAME=mpif90
             ;;
     esac
 fi
