@@ -324,12 +324,13 @@ H5G_stat_t statbuf;
 		printf("H5T_REFERENCE");
 		break;
 	case H5T_ENUM:
-		printf("H5T_ENUM ");
+		printf("H5T_ENUM\n");
+		indentation(indent + 3);
+		printf("{ ");	
 		super = H5Tget_super(type);
 		print_datatype(super);
-		printf(" {");
+		printf(";");
 		print_enum(type);
-		printf("\n");
 		indentation (indent + 3);
 		printf("}\n");
 		break;
@@ -1669,6 +1670,7 @@ static void print_enum(hid_t type){
 	    printf("%"PRINTF_LL_WIDTH"d",
 		   *((long_long*)(value+i*dst_size)));
 	}
+	printf(";");
     }
 
     /* Release resources */
