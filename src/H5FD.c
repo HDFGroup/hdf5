@@ -199,7 +199,8 @@ H5FDregister(const H5FD_class_t *cls)
 
     /* Create the new class ID */
     if ((retval=H5I_register(H5I_VFL, saved))<0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+        H5MM_xfree(saved);
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register file driver ID");
     }
 

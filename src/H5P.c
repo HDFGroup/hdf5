@@ -1326,6 +1326,7 @@ H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
 	/* Remove old driver */
 	assert(fapl->driver_id>=0);
 	H5FD_fapl_free(fapl->driver_id, fapl->driver_info);
+    H5I_dec_ref(fapl->driver_id);
 
 	/* Add new driver */
 	H5I_inc_ref(driver_id);
