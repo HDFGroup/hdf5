@@ -277,6 +277,7 @@
 ./test/tselect.c
 ./test/tstab.c
 ./testpar/Makefile.ascired
+./testpar/Makefile.ibmsp
 ./testpar/Makefile.irix64
 ./testpar/README
 ./testpar/t_dset.c
