@@ -2428,6 +2428,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_path_t	*tpath;			/* Type conversion path		     */
     hbool_t     noop_conv=FALSE;        /* Flag to indicate a noop conversion */
     hbool_t     write_to_file=FALSE;    /* Flag to indicate writing to file */
+    hbool_t     parent_is_vlen;         /* Flag to indicate parent is vlen datatyp */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;		/*source data type		     */
     H5T_t	*dst = NULL;		/*destination data type		     */
@@ -2516,7 +2517,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 noop_conv=TRUE;
 
             /* Check if we need a temporary buffer for this conversion */
-            if(tpath->cdata.need_bkg || H5T_detect_class(dst->parent,H5T_VLEN)) {
+            parent_is_vlen=H5T_detect_class(dst->parent,H5T_VLEN);
+            if(tpath->cdata.need_bkg || parent_is_vlen) {
                 /* Set up initial background buffer */
                 tmp_buf_size=MAX(src_base_size,dst_base_size);
                 if ((tmp_buf=H5FL_BLK_MALLOC(vlen_seq,tmp_buf_size))==NULL)
@@ -2532,7 +2534,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 write_to_file=TRUE;
 
             /* Set the flag for nested VL case */
-            if(write_to_file && H5T_detect_class(dst->parent,H5T_VLEN) && bkg!=NULL)
+            if(write_to_file && parent_is_vlen && bkg!=NULL)
                 nested=1;
 
             /* The outer loop of the type conversion macro, controlling which */
