@@ -14,7 +14,7 @@ srcdir=@srcdir@
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 ## Test programs and scripts.
-TEST_PROGS=
+TEST_PROGS=talign
 TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@ @TESTH4TOH5@
 
 ## These are our main targets: library and tools. We link this library
@@ -32,16 +32,15 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
 ## Source and object files for h4toh5 converter.
-H4TOH5_SRC=h4toh5main.c h4toh5vgroup.c h4toh5vdata.c h4toh5sds.c h4toh5image.c h4toh5pal.c \
-	h4toh5anno.c h4toh5util.c
+H4TOH5_SRC=h4toh5main.c h4toh5vgroup.c h4toh5vdata.c h4toh5sds.c	\
+	   h4toh5image.c h4toh5pal.c h4toh5anno.c h4toh5util.c
 H4TOH5_OBJ=$(H4TOH5_SRC:.c=.lo)
 H4TOH5_HDR=h4toh5main.h h4toh5util.h
 
 ## Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c \
-	h5toh4.c h5dumptst.c pdb2hdf.c \
-	$(H4TOH5_SRC)
-PROG_OBJ=$(PROG_SRC:.c=.lo) $(H4TOH5_OBJ)
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5toh4.c	\
+	 h5dumptst.c pdb2hdf.c talign.c $(H4TOH5_SRC)
+PROG_OBJ=$(PROG_SRC:.c=.lo) talign.lo $(H4TOH5_OBJ)
 PRIVATE_HDR=h5tools.h $(H4TOH5_HDR)
 
 ## Source and object files for the tests
@@ -81,5 +80,8 @@ h4toh5: $(H4TOH5_OBJ)
 
 pdb2hdf: pdb2hdf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ pdb2hdf.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+talign: talign.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ talign.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
