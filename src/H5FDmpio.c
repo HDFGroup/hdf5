@@ -18,13 +18,6 @@
  *
  * Purpose:	This is the MPI-2 I/O driver.
  *
- * Limitations:
- *	H5FD_mpio_read
- *		One implementation of MPI/MPI-IO causes MPI_Get_count
- *		to return (incorrectly) a negative count. I (who?) added code
- *		to detect this, and a kludge to pretend that the number of
- *		bytes read is always equal to the number requested.  This
- *		kluge is activated by #ifdef MPI_KLUGE0202.
  */
 #include "H5private.h"		/*library functions			*/
 #include "H5ACprivate.h"        /* Metadata cache */
@@ -42,8 +35,7 @@
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIO
- * "constants" in their source code (it also makes this file strictly ANSI
- * compliant when H5_HAVE_PARALLEL isn't defined)
+ * "constants" in their source code.
  */
 static hid_t H5FD_MPIO_g = 0;
 
@@ -1452,6 +1444,10 @@ done:
  *              if the first I/O was a collective I/O using MPI derived types
  *              and the next I/O was an independent I/O.
  *
+ *              Quincey Koziol - 2003/10/22-31
+ *              Restructured code massively, straightening out logic and finally
+ *              getting the bytes_read stuff working.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1463,7 +1459,11 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Status  		mpi_stat;
     int				mpi_code;	/* mpi return code */
     MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
-    int         		size_i, bytes_read, n;
+    int         		size_i;         /* Integer copy of 'size' to read */
+    int         		bytes_read;     /* Number of bytes read in */
+    int         		n;
+    int                         type_size;      /* MPI datatype used for I/O's size */
+    int                         io_size;        /* Actual number of bytes requested */
     unsigned			use_view_this_time=0;
     herr_t              	ret_value=SUCCEED;
 
@@ -1546,81 +1546,41 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 #endif
         if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat )))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code);
+
+        /*
+         * Reset the file view when we used MPI derived types
+         */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } else {
         if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code);
     }
 
-    /* KLUDGE, Robb Matzke, 2000-12-29
-     * The LAM implementation of MPI_Get_count() says
-     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
-     * So I'm commenting this out until it can be investigated. The
-     * returned `bytes_written' isn't used anyway because of Kim's
-     * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_write(). */
-
-#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
-    /* Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
-     * Many systems don't support MPI_Get_count so we need to do a
-     * configure thingy to fix this. */
-
-    /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
-     * had the 'buf_type' set to MPI_BYTE -QAK
+    /* How many bytes were actually read? */
+    /* [This works because the "basic elements" we use for all our MPI derived
+     *  types are MPI_BYTE - QAK]
      */
-    if(use_view_this_time) {
-        /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
-         * If this gets fixed (and MPI_Get_count() is reliable), the
-         * kludge below where the 'bytes_read' value from MPI_Get_count() is
-         * overwritten with the 'size_i' parameter can be removed. -QAK
-         */
-    } /* end if */
-    else {
-        /* How many bytes were actually read? */
-        if (MPI_SUCCESS != (mpi_code=MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mpi_code);
-    } /* end else */
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'c'])
-    	fprintf(stdout,
-	    "In H5FD_mpio_read after Get_count size_i=%d bytes_read=%d\n",
-	    size_i, bytes_read );
-#endif
-#endif /* H5_HAVE_MPI_GET_COUNT */
+    if (MPI_SUCCESS != (mpi_code=MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-    /*
-     * KLUGE rky 1998-02-02
-     * MPI_Get_count incorrectly returns negative count; fake a complete
-     * read.
-     */
-    bytes_read = size_i;
+    /* Get the type's size */
+    if (MPI_SUCCESS != (mpi_code=MPI_Type_size(buf_type,&type_size)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+
+    /* Compute the actual number of bytes requested */
+    io_size=type_size*size_i;
 
     /* Check for read failure */
-    if (bytes_read<0 || bytes_read>size_i)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
+    if (bytes_read<0 || bytes_read>io_size)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
 
     /*
-     * Reset the file view when we used MPI derived types
+     * This gives us zeroes beyond end of physical MPI file.
      */
-    if (use_view_this_time) {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
-    } /* end if */
-    
-    /*
-     * This gives us zeroes beyond end of physical MPI file.  What about
-     * reading past logical end of HDF5 file???
-     */
-    if ((n=(size_i-bytes_read)) > 0) {
-        if (use_view_this_time) {
-            /*
-             * INCOMPLETE rky 1998-09-18
-             * Haven't implemented reading zeros beyond EOF. What to do???
-             */
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "eof file read failed");
-        } else {
-            memset((char*)buf+bytes_read, 0, (size_t)n);
-        }
-    }
+    if ((n=(io_size-bytes_read)) > 0)
+        HDmemset((char*)buf+bytes_read, 0, (size_t)n);
 
 done:
 #ifdef H5FDmpio_DEBUG
@@ -1747,6 +1707,10 @@ done:
  *              that all the processes must sync up before (one of them)
  *              writing metadata.
  *
+ *              Quincey Koziol - 2003/10/22-31
+ *              Restructured code massively, straightening out logic and finally
+ *              getting the bytes_written stuff working.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1759,6 +1723,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
     int			        mpi_code;	/* MPI return code */
     int         		size_i, bytes_written;
+    int                         type_size;      /* MPI datatype used for I/O's size */
+    int                         io_size;        /* Actual number of bytes requested */
     unsigned			use_view_this_time=0;
     H5P_genplist_t              *plist;                 /* Property list pointer */
     herr_t              	ret_value=SUCCEED;
@@ -1895,79 +1861,46 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != (mpi_code=MPI_File_write_at_all(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code);
+
+        /*
+         * Reset the file view when we used MPI derived types
+         */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } else {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code);
     }
 
-    /* KLUDGE, Robb Matzke, 2000-12-29
-     * The LAM implementation of MPI_Get_count() says
-     *    MPI_Get_count: invalid argument (rank 0, MPI_COMM_WORLD)
-     * So I'm commenting this out until it can be investigated. The
-     * returned `bytes_written' isn't used anyway because of Kim's
-     * kludge to avoid bytes_written<0. Likewise in H5FD_mpio_read(). */
-
-#ifdef H5_HAVE_MPI_GET_COUNT /* Bill and Albert's kludge*/
-    /* Yet Another KLUDGE, Albert Cheng & Bill Wendling, 2001-05-11.
-     * Many systems don't support MPI_Get_count so we need to do a
-     * configure thingy to fix this. */
-
-    /* Calling MPI_Get_count with "MPI_BYTE" is only valid when we actually
-     * had the 'buf_type' set to MPI_BYTE -QAK
+    /* How many bytes were actually written? */
+    /* [This works because the "basic elements" we use for all our MPI derived
+     *  types are MPI_BYTE - QAK]
      */
-    if(use_view_this_time) {
-        /* Figure out the mapping from the MPI 'buf_type' to bytes, someday...
-         * If this gets fixed (and MPI_Get_count() is reliable), the
-         * kludge below where the 'bytes_written' value from MPI_Get_count() is
-         * overwritten with the 'size_i' parameter can be removed. -QAK
-         */
-    } /* end if */
-    else {
-        /* How many bytes were actually written? */
-        if (MPI_SUCCESS!= (mpi_code=MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mpi_code);
-    } /* end else */
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_Debug[(int)'c'])
-    	fprintf(stdout,
-	    "In H5FD_mpio_write after Get_count size_i=%d bytes_written=%d\n",
-	    size_i, bytes_written );
-#endif
-#endif /* H5_HAVE_MPI_GET_COUNT */
+    if (MPI_SUCCESS != (mpi_code=MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-    /*
-     * KLUGE rky, 1998-02-02
-     * MPI_Get_count incorrectly returns negative count; fake a complete
-     * write.
-     */
-    bytes_written = size_i;
+    /* Get the type's size */
+    if (MPI_SUCCESS != (mpi_code=MPI_Type_size(buf_type,&type_size)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+
+    /* Compute the actual number of bytes requested */
+    io_size=type_size*size_i;
 
     /* Check for write failure */
-    if (bytes_written<0 || bytes_written>size_i)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
+    if (bytes_written != io_size)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
-    /*
-     * Reset the file view when we used MPI derived types
-     */
-    if (use_view_this_time) {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, (char*)"native",  file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
-    } /* end if */
-    
     /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
     file->eof = HADDR_UNDEF;
     
 done:
 #ifdef OLD_METADATA_WRITE
-    /* Guard against getting into metadate broadcast in failure cases */
-    if(ret_value!=FAIL) {
-        /* if only p<round> writes, need to broadcast the ret_value to other processes */
-        if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
-            if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
-        } /* end if */
+    /* if only p<round> writes, need to broadcast the ret_value to other processes */
+    if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
+        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
     } /* end if */
 #endif /* OLD_METADATA_WRITE */
 
@@ -1976,6 +1909,7 @@ done:
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
 	    file->mpi_rank, ret_value );
 #endif
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
