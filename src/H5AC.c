@@ -188,8 +188,8 @@ done:
 static herr_t
 H5AC_init_interface(void)
 {
-    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
 #ifdef H5_HAVE_PARALLEL
+    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
     unsigned block_before_meta_write; /* "block before meta write" property value */
     unsigned library_internal=1;    /* "library internal" property value */
@@ -199,6 +199,7 @@ H5AC_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT(H5AC_init_interface)
 
+#ifdef H5_HAVE_PARALLEL
     /* Sanity check */
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
 
@@ -210,7 +211,6 @@ H5AC_init_interface(void)
     if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
-#ifdef H5_HAVE_PARALLEL
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
@@ -228,13 +228,11 @@ H5AC_init_interface(void)
     xfer_mode=H5FD_MPIO_COLLECTIVE;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-#endif /* H5_HAVE_PARALLEL */
 
     /* Get an ID for the non-blocking, collective H5AC dxpl */
     if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
-#ifdef H5_HAVE_PARALLEL
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_noblock_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
@@ -252,13 +250,11 @@ H5AC_init_interface(void)
     xfer_mode=H5FD_MPIO_COLLECTIVE;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-#endif /* H5_HAVE_PARALLEL */
 
     /* Get an ID for the non-blocking, independent H5AC dxpl */
     if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
-#ifdef H5_HAVE_PARALLEL
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
@@ -276,6 +272,13 @@ H5AC_init_interface(void)
     xfer_mode=H5FD_MPIO_INDEPENDENT;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+#else /* H5_HAVE_PARALLEL */
+    /* Sanity check */
+    assert(H5P_LST_DATASET_XFER_g!=(-1));
+
+    H5AC_dxpl_id=H5P_DATASET_XFER_DEFAULT;
+    H5AC_noblock_dxpl_id=H5P_DATASET_XFER_DEFAULT;
+    H5AC_ind_dxpl_id=H5P_DATASET_XFER_DEFAULT;
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -308,6 +311,7 @@ H5AC_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_term_interface)
 
     if (interface_initialize_g) {
+#ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id>0 || H5AC_noblock_dxpl_id>0 || H5AC_ind_dxpl_id>0) {
             /* Indicate more work to do */
             n = 1; /* H5I */
@@ -328,6 +332,13 @@ H5AC_term_interface(void)
             } /* end else */
         } /* end if */
         else
+#else /* H5_HAVE_PARALLEL */
+            /* Reset static IDs */
+            H5AC_dxpl_id=(-1);
+            H5AC_noblock_dxpl_id=(-1);
+            H5AC_ind_dxpl_id=(-1);
+
+#endif /* H5_HAVE_PARALLEL */
             /* Reset interface initialization flag */
             interface_initialize_g = 0;
     } /* end if */
