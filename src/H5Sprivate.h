@@ -16,13 +16,13 @@
 #ifndef _H5Sprivate_H
 #define _H5Sprivate_H
 
-#include <H5Spublic.h>
+#include "H5Spublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Dpublic.h>
-#include <H5Fprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Dpublic.h"
+#include "H5Fprivate.h"
+#include "H5Oprivate.h"
 
 #define H5S_RESERVED_ATOMS  2
 

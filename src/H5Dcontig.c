@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2000 NCSA
- *		      All rights reserved.
+ * Copyright (C) 2000-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer: 	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       	Thursday, September 28, 2000
@@ -14,11 +14,11 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5MMprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fcontig_mask

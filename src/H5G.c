@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *			   All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -77,18 +77,18 @@
 
 
 /* Packages needed by this file... */
-#include <H5private.h>
-#include <H5Aprivate.h>
-#include <H5Bprivate.h>
-#include <H5Dprivate.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>         /*file access                             */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Gpkg.h>
-#include <H5HLprivate.h>
-#include <H5Iprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Aprivate.h"
+#include "H5Bprivate.h"
+#include "H5Dprivate.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"         /*file access                             */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Gpkg.h"
+#include "H5HLprivate.h"
+#include "H5Iprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
 
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0

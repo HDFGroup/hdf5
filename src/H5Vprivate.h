@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1997 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1997-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *             Friday, October 10, 1997
@@ -8,7 +8,7 @@
 #ifndef H5Vprivate_H
 #define H5Vprivate_H
 
-#include <H5private.h>
+#include "H5private.h"
 
 /* Vector comparison functions like Fortran66 comparison operators */
 #define H5V_vector_eq_s(N,V1,V2) (H5V_vector_cmp_s (N, V1, V2)==0)

@@ -19,10 +19,10 @@
 #ifndef _H5Iprivate_H
 #define _H5Iprivate_H
 
-#include <H5Ipublic.h>		/*include Public Definitions		     */
+#include "H5Ipublic.h"		/*include Public Definitions		     */
 
 /* Private headers needed by this file */
-#include <H5private.h>
+#include "H5private.h"
 
 /* Default sizes of the hash-tables for various atom groups */
 #define H5I_ERRSTACK_HASHSIZE		64

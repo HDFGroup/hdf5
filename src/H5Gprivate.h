@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997   National Center for Supercomputing Applications.
- *                      All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -17,12 +17,12 @@
 #ifndef _H5Gprivate_H
 #define _H5Gprivate_H
 
-#include <H5Gpublic.h>
+#include "H5Gpublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Bprivate.h>
-#include <H5Fprivate.h>
+#include "H5private.h"
+#include "H5Bprivate.h"
+#include "H5Fprivate.h"
 
 /*
  * Define this to enable debugging.

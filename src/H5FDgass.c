@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Saurabh Bagchi (bagchi@uiuc.edu)
  *              Thursday, August 12 -Tuesday, August 17, 1999
@@ -8,13 +8,13 @@
  * Purpose:	This is the GASS I/O driver.
  *
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDgass.h>       /* Core file driver */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDgass.h"       /* Core file driver */
+#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Pprivate.h"		/*property lists			*/
 
 
 #undef MAX

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997   National Center for Supercomputing Applications.
- *                      All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -14,8 +14,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <H5private.h>
-#include <H5Oprivate.h>
+#include "H5private.h"
+#include "H5Oprivate.h"
 
 #define PABLO_MASK      H5O_null_mask
 

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *			   All rights reserved
  *
  *-------------------------------------------------------------------------
  *
@@ -18,11 +18,11 @@
 #ifndef _H5ACprivate_H
 #define _H5ACprivate_H
 
-#include <H5ACpublic.h>		/*public prototypes			     */
+#include "H5ACpublic.h"		/*public prototypes			     */
 
 /* Pivate headers needed by this header */
-#include <H5private.h>
-#include <H5Fprivate.h>
+#include "H5private.h"
+#include "H5Fprivate.h"
 
 /*
  * Feature: Define H5AC_DEBUG on the compiler command line if you want to

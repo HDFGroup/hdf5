@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Thomas Radke <tradke@aei-potsdam.mpg.de>
  *              Monday, October 11, 1999
@@ -10,8 +10,8 @@
 #ifndef H5FDdpss_H
 #define H5FDdpss_H
 
-#include <H5public.h>          /* typedef for herr_t */
-#include <H5Ipublic.h>         /* typedef for hid_t  */
+#include "H5public.h"          /* typedef for herr_t */
+#include "H5Ipublic.h"         /* typedef for hid_t  */
 
 #ifdef H5_HAVE_GRIDSTORAGE 
 #define H5FD_DPSS              (H5FD_dpss_init())

@@ -1,6 +1,6 @@
 /*
- * Copyright © 2000 NCSA
- *                  All rights reserved.
+ * Copyright © 2000-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Monday, April 17, 2000
@@ -10,7 +10,7 @@
 #ifndef H5FDlog_H
 #define H5FDlog_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_LOG	(H5FD_log_init())
 

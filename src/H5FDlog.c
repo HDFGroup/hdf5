@@ -1,6 +1,6 @@
 /*
- * Copyright © 2000 NCSA
- *                  All rights reserved.
+ * Copyright © 2000-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Monday, April 17, 2000
@@ -14,14 +14,14 @@
  *          With custom modifications...
  */
 
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDlog.h>        /* logging file driver */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDlog.h"        /* logging file driver */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Pprivate.h"		/*property lists			*/
 
 
 #ifdef MAX

@@ -17,8 +17,8 @@
 #define _H5Dpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 /* Values for the H5D_LAYOUT property */
 typedef enum H5D_layout_t {

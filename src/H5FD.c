@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, July 26, 1999
@@ -15,14 +15,14 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fpkg.h>		/*files					*/
-#include <H5FDprivate.h>	/*virtual file driver			*/
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>		/*interface abstraction layer		*/
-#include <H5MMprivate.h>	/*memory management			*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"		/*files					*/
+#include "H5FDprivate.h"	/*virtual file driver			*/
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"		/*interface abstraction layer		*/
+#include "H5MMprivate.h"	/*memory management			*/
+#include "H5Pprivate.h"		/*property lists			*/
 
 /* Interface initialization */
 #define PABLO_MASK	H5FD_mask

@@ -19,8 +19,8 @@
 #include <stdio.h>              /*FILE arg of H5Eprint()                     */
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 /*
  * One often needs to temporarily disable automatic error reporting when

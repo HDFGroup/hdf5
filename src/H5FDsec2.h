@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, August  2, 1999
@@ -10,7 +10,7 @@
 #ifndef H5FDsec2_H
 #define H5FDsec2_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_SEC2	(H5FD_sec2_init())
 

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *			   All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -16,19 +16,19 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5ACprivate.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>
-#include <H5MFprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
-#include <H5Pprivate.h>
+#include "H5private.h"
+#include "H5ACprivate.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"
+#include "H5MFprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
+#include "H5Pprivate.h"
 
 /* The MPIO driver for H5FD_mpio_tas_allsame() */
-#include <H5FDmpio.h>
+#include "H5FDmpio.h"
 
 
 #define PABLO_MASK	H5O_mask

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 2000	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 2000-2001 National Center for Supercomputing Applications
+ *			   All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -19,7 +19,7 @@
 
 /* Public headers needed by this file */
 #ifdef LATER
-#include <H5TBpublic.h>		/*Public API prototypes */
+#include "H5TBpublic.h"		/*Public API prototypes */
 #endif /* LATER */
 
 /* Typedef for key comparison function */

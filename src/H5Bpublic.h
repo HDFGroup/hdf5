@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997   National Center for Supercomputing Applications.
- *                      All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -18,7 +18,7 @@
 #define _H5Bpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
+#include "H5public.h"
 
 #ifdef __cplusplus
 extern "C" {

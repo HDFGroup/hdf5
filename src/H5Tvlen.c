@@ -14,12 +14,12 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
-#include <H5private.h>		/* Generic Functions			*/
-#include <H5Eprivate.h>     /* Errors */
-#include <H5HGprivate.h>    /* Global Heaps */
-#include <H5Iprivate.h>     /* IDs */
-#include <H5MMprivate.h>    /* Memory Allocation */
-#include <H5Tpkg.h>         /* Datatypes */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"     /* Errors */
+#include "H5HGprivate.h"    /* Global Heaps */
+#include "H5Iprivate.h"     /* IDs */
+#include "H5MMprivate.h"    /* Memory Allocation */
+#include "H5Tpkg.h"         /* Datatypes */
 
 #define PABLO_MASK	H5Tvlen_mask
 

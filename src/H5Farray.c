@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *		      All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, January 15, 1998
@@ -14,20 +14,20 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Dprivate.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5Iprivate.h>
-#include <H5MFprivate.h>
-#include <H5MMprivate.h>	/*memory management			  */
-#include <H5Oprivate.h>
-#include <H5Pprivate.h>
-#include <H5Vprivate.h>
+#include "H5private.h"
+#include "H5Dprivate.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5Iprivate.h"
+#include "H5MFprivate.h"
+#include "H5MMprivate.h"	/*memory management			  */
+#include "H5Oprivate.h"
+#include "H5Pprivate.h"
+#include "H5Vprivate.h"
 
 /* MPIO driver functions are needed for some special checks */
-#include <H5FDmpio.h>
+#include "H5FDmpio.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Farray_mask

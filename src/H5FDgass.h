@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Saurabh Bagchi <bagchi@uiuc.edu>
  *              Tuesday, August 17, 1999
@@ -10,8 +10,8 @@
 #ifndef H5FDgass_H
 #define H5FDgass_H
 
-#include <H5FDpublic.h>
-#include <H5Ipublic.h>
+#include "H5FDpublic.h"
+#include "H5Ipublic.h"
 
 #include <string.h>
 

@@ -16,10 +16,10 @@
 #ifndef _H5Rprivate_H
 #define _H5Rprivate_H
 
-#include <H5Rpublic.h>
+#include "H5Rpublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
+#include "H5private.h"
 
 #define H5R_RESERVED_ATOMS  0
 

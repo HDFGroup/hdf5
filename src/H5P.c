@@ -1,44 +1,44 @@
 /****************************************************************************
-* NCSA HDF								                                    *
-* Software Development Group						                        *
-* National Center for Supercomputing Applications			                *
-* University of Illinois at Urbana-Champaign				                *
-* 605 E. Springfield, Champaign IL 61820				                    *
-*									                                        *
-* For conditions of distribution and use, see the accompanying		        *
-* hdf/COPYING file.							                                *
-*									                                        *
+* NCSA HDF				                                    *
+* Software Development Group			                            *
+* National Center for Supercomputing Applications	                    *
+* University of Illinois at Urbana-Champaign		                    *
+* 605 E. Springfield, Champaign IL 61820		                    *
+*							                    *
+* For conditions of distribution and use, see the accompanying		    *
+* hdf/COPYING file.							    *
+*									    *
 ****************************************************************************/
 
 /* $Id$ */
 
 /* Private header files */
-#include <H5private.h>		/* Generic Functions			*/
-#include <H5Iprivate.h>		/* IDs			  		*/
-#include <H5Bprivate.h>		/* B-tree subclass names	  	*/
-#include <H5Dprivate.h>		/* Datasets				*/
-#include <H5Eprivate.h>		/* Error handling		  	*/
-#include <H5Fprivate.h>		/* Files		  	*/
-#include <H5FDprivate.h>	/* File drivers				*/
-#include <H5FLprivate.h>	/* Free Lists	  */
-#include <H5MMprivate.h>	/* Memory management			*/
-#include <H5Pprivate.h>		/* Property lists		  	*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Bprivate.h"		/* B-tree subclass names	  	*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files		  	*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FLprivate.h"	/* Free Lists	  */
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists		  	*/
 
 /* Default file driver - see H5Pget_driver() */
-#include <H5FDsec2.h>		/* Posix unbuffered I/O	file driver	*/
+#include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 
 #ifdef WANT_H5_V1_2_COMPAT
 /* Other predefined file drivers */
-#include <H5FDcore.h>		/* Files stored entirely in memory	*/
-#include <H5FDfamily.h>		/* File families 			*/
-#include <H5FDmpio.h>		/* Parallel files using MPI-2 I/O	*/
-#include <H5FDstdio.h>		/* Standard C buffered I/O		*/
-#include <H5FDsrb.h>        /* Remote access using SRB              */
-#include <H5FDgass.h>		/* Remote files using GASS I/O		*/
-#include <H5FDdpss.h>       /* Remote access using Storage Client API */
-#include <H5FDstream.h>     /* in-memory files streamed via sockets */
-#include <H5FDmulti.h>		/* Usage-partitioned file family	*/
-#include <H5FDlog.h>        /* sec2 driver with I/O logging (for debugging) */
+#include "H5FDcore.h"		/* Files stored entirely in memory	*/
+#include "H5FDfamily.h"		/* File families 			*/
+#include "H5FDmpio.h"		/* Parallel files using MPI-2 I/O	*/
+#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#include "H5FDsrb.h"        /* Remote access using SRB              */
+#include "H5FDgass.h"		/* Remote files using GASS I/O		*/
+#include "H5FDdpss.h"       /* Remote access using Storage Client API */
+#include "H5FDstream.h"     /* in-memory files streamed via sockets */
+#include "H5FDmulti.h"		/* Usage-partitioned file family	*/
+#include "H5FDlog.h"        /* sec2 driver with I/O logging (for debugging) */
 #endif /* WANT_H5_V1_2_COMPAT */
 
 

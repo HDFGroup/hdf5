@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, March 27, 1998
@@ -9,7 +9,7 @@
 #define _H5HGpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
+#include "H5public.h"
 
 #ifdef __cplusplus
 extern "C" {

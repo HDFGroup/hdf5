@@ -12,30 +12,30 @@
 
 /* $Id$ */
 
-#include <H5private.h>		/* Generic Functions			*/
-#include <H5Iprivate.h>		/* IDs			  		*/
-#include <H5Dprivate.h>		/* Dataset functions			*/
-#include <H5Eprivate.h>		/* Error handling		  	*/
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Gprivate.h>		/* Group headers		  	*/
-#include <H5HLprivate.h>	/* Name heap				*/
-#include <H5MMprivate.h>	/* Memory management			*/
-#include <H5Oprivate.h>		/* Object headers		  	*/
-#include <H5Pprivate.h>		/* Property lists			*/
-#include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
-#include <H5Vprivate.h>		/* Vector and array functions		*/
-#include <H5Zprivate.h>		/* Data filters				*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Gprivate.h"		/* Group headers		  	*/
+#include "H5HLprivate.h"	/* Name heap				*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspace functions rky 980813       */
+#include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5Zprivate.h"		/* Data filters				*/
 
 /*
  * The MPIO driver is needed because there are kludges in this file and
  * places where we check for things that aren't handled by this driver.
  */
-#include <H5FDmpio.h>
+#include "H5FDmpio.h"
 
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
-#include <H5Rpublic.h>
+#   include "H5Rpublic.h"
 #endif
 
 #define PABLO_MASK	H5D_mask

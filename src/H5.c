@@ -13,26 +13,26 @@
 /* $Id$ */
 
 /* private headers */
-#include <H5private.h>          /*library                 		*/
-#include <H5Bprivate.h>         /*B-link trees                    	*/
-#include <H5Dprivate.h>         /*datasets          		    */
-#include <H5Eprivate.h>         /*error handling          		*/
-#include <H5FDprivate.h>	/*file driver				*/
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>		/*atoms					*/
-#include <H5MMprivate.h>        /*memory management               	*/
-#include <H5Pprivate.h>		/*property lists			*/
-#include <H5Rpublic.h>		/*references				*/
-#include <H5Sprivate.h>		/*data spaces				*/
-#include <H5Tprivate.h>         /*data types                      	*/
-#include <H5Zprivate.h>		/*filters				*/
+#include "H5private.h"          /*library                 		*/
+#include "H5Bprivate.h"         /*B-link trees                    	*/
+#include "H5Dprivate.h"         /*datasets          		    */
+#include "H5Eprivate.h"         /*error handling          		*/
+#include "H5FDprivate.h"	/*file driver				*/
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"		/*atoms					*/
+#include "H5MMprivate.h"        /*memory management               	*/
+#include "H5Pprivate.h"		/*property lists			*/
+#include "H5Rpublic.h"		/*references				*/
+#include "H5Sprivate.h"		/*data spaces				*/
+#include "H5Tprivate.h"         /*data types                      	*/
+#include "H5Zprivate.h"		/*filters				*/
 
 /* datatypes of predefined drivers needed by H5_trace() */
-#include <H5FDmpio.h>
+#include "H5FDmpio.h"
 
 /* we need this for the struct rusage declaration */
 #if defined(H5_HAVE_GETRUSAGE) && defined(linux)
-#include <sys/resource.h>
+#   include <sys/resource.h>
 #endif
 
 /* We need this on Irix64 even though we've included stdio.h as documented */

@@ -16,10 +16,10 @@
 #ifndef _H5Eprivate_H
 #define _H5Eprivate_H
 
-#include <H5Epublic.h>
+#include "H5Epublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
+#include "H5private.h"
 
 #define H5E_NSLOTS	32	/*number of slots in an error stack	     */
 

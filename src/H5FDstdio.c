@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *		      All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *		         All rights reserved.
  *
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *	       Wednesday, October 22, 1997
@@ -10,7 +10,6 @@
  * Notes:  Ported to the new H5FD architecture on 10/18/99 - QAK
  *
  */
-#include <hdf5.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -22,6 +21,8 @@
 #include <windows.h>
 #include <io.h>
 #endif
+
+#include "hdf5.h"
 
 #ifdef MAX
 #undef MAX

@@ -17,8 +17,8 @@
 #define _H5Rpublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
-#include <H5Ipublic.h>
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 /*
  * Reference types allowed.

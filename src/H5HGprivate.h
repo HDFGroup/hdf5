@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, March 27, 1998
@@ -8,9 +8,8 @@
 #ifndef _H5HGprivate_H
 #define _H5HGprivate_H
 
-#include <H5HGpublic.h>
-
-#include <H5Fprivate.h>
+#include "H5HGpublic.h"
+#include "H5Fprivate.h"
 
 /*
  * Each collection has a magic number for some redundancy.

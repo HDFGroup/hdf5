@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, March 27, 1998
@@ -26,15 +26,15 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>		/*library		  		*/
-#include <H5ACprivate.h>	/*caching				*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fpkg.h>         /*file access                             */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5HGprivate.h>	/*global heaps				*/
-#include <H5MFprivate.h>	/*file memory management		*/
-#include <H5MMprivate.h>	/*core memory management		*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library		  		*/
+#include "H5ACprivate.h"	/*caching				*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"         /*file access                             */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5HGprivate.h"	/*global heaps				*/
+#include "H5MFprivate.h"	/*file memory management		*/
+#include "H5MMprivate.h"	/*core memory management		*/
+#include "H5Pprivate.h"		/*property lists			*/
 
 #define PABLO_MASK	H5HG_mask
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Wednesday, September 30, 1998
@@ -8,12 +8,12 @@
  * Purpose:	The fill message indicates a bit pattern to use for
  *		uninitialized data points of a dataset.
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Iprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
-#include <H5Pprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Iprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
+#include "H5Pprivate.h"
 
 #define PABLO_MASK	H5O_fill_mask
 

@@ -1,14 +1,14 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, August 27, 1999
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
-#include <H5Zprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
+#include "H5Zprivate.h"
 
 #ifdef H5_HAVE_ZLIB_H
 #   include <zlib.h>

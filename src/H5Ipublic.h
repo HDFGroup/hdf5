@@ -18,7 +18,7 @@
 #define _H5Ipublic_H
 
 /* Public headers needed by this file */
-#include <H5public.h>
+#include "H5public.h"
 
 /*
  * Group values allowed.  Start with `1' instead of `0' because it makes the

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1997 National Center for Supercomputing Applications.
- *                    All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *             Thursday, September 18, 1997
@@ -16,8 +16,8 @@
 #ifndef _H5Gpkg_H
 #define _H5Gpkg_H
 
-#include <H5ACprivate.h>
-#include <H5Gprivate.h>
+#include "H5ACprivate.h"
+#include "H5Gprivate.h"
 
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_SIZE_HINT   1024            /*default root grp size hint         */

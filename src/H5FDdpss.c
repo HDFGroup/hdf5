@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Thomas Radke <tradke@aei-potsdam.mpg.de>
  *              Monday, October 11, 1999
@@ -9,16 +9,16 @@
  *
  */
 
-#include <hdf5.h>
-#include <H5Eprivate.h>         /* error handling    */
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDdpss.h>
-#include <H5MMprivate.h>        /* memory management */
+#include "hdf5.h"
+#include "H5Eprivate.h"         /* error handling    */
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDdpss.h"
+#include "H5MMprivate.h"        /* memory management */
 
 #ifdef COALESCE_READS
 /* Packages needed by this file.*/
-#include <H5Fprivate.h>
-#include <H5Iprivate.h>
+#include "H5Fprivate.h"
+#include "H5Iprivate.h"
 #endif
 
 

@@ -1,8 +1,8 @@
 /*keep this here -RPM*/
 static const char *FileHeader = "\n\
 /*-------------------------------------------------------------------------\n\
- * Copyright (C) 1997	National Center for Supercomputing Applications.   \n\
- *			All rights reserved.				   \n\
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications \n\
+ *			   All rights reserved.				   \n\
  *									   \n\
  *-------------------------------------------------------------------------";
 /*
@@ -30,7 +30,7 @@ static const char *FileHeader = "\n\
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
-#include <H5private.h>
+#include "H5private.h"
 
 #define MAXDETECT 64
 /*
@@ -392,12 +392,12 @@ print_results(int nd, detected_t *d)
 #define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
 #define PABLO_MASK	H5Tinit_mask\n\
 \n\
-#include <H5private.h>\n\
-#include <H5Iprivate.h>\n\
-#include <H5Eprivate.h>\n\
-#include <H5FLprivate.h>\n\
-#include <H5MMprivate.h>\n\
-#include <H5Tpkg.h>\n\
+#include \"H5private.h\"\n\
+#include \"H5Iprivate.h\"\n\
+#include \"H5Eprivate.h\"\n\
+#include \"H5FLprivate.h\"\n\
+#include \"H5MMprivate.h\"\n\
+#include \"H5Tpkg.h\"\n\
 \n\
 static intn interface_initialize_g = 0;\n\
 #define INTERFACE_INIT NULL\n\

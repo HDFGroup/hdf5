@@ -16,8 +16,8 @@
 #ifndef _H5Aprivate_H
 #define _H5Aprivate_H
 
-#include <H5Apublic.h>
-#include <H5Gprivate.h>
+#include "H5Apublic.h"
+#include "H5Gprivate.h"
 
 #define H5A_RESERVED_ATOMS  0
 typedef struct H5A_t H5A_t;

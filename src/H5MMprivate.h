@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997   National Center for Supercomputing Applications.
- *                      All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *                         All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -17,10 +17,10 @@
 #ifndef _H5MMprivate_H
 #define _H5MMprivate_h
 
-#include <H5MMpublic.h>
+#include "H5MMpublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
+#include "H5private.h"
 
 #define H5MM_malloc(Z)	HDmalloc(MAX(1,Z))
 #define H5MM_calloc(Z)	HDcalloc(1,MAX(1,Z))

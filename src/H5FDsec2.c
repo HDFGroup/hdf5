@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 29, 1999
@@ -12,14 +12,14 @@
  *		I/O from this driver with I/O from other parts of the
  *		application to the same file).
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDsec2.h>       /* Sec2 file driver */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDsec2.h"       /* Sec2 file driver */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Pprivate.h"		/*property lists			*/
 
 #ifdef MAX
 #undef MAX

@@ -16,12 +16,12 @@
 #ifndef _H5Tprivate_H
 #define _H5Tprivate_H
 
-#include <H5Tpublic.h>
+#include "H5Tpublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Gprivate.h>         /*for H5G_entry_t                            */
-#include <H5Rprivate.h>		/*for H5R_type_t			     */
+#include "H5private.h"
+#include "H5Gprivate.h"         /*for H5G_entry_t                            */
+#include "H5Rprivate.h"		/*for H5R_type_t			     */
 
 #define H5T_RESERVED_ATOMS 	8
 #define H5T_NAMELEN		32	/*length of debugging name buffer    */

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *		      All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Tuesday, March 31, 1998
@@ -8,17 +8,17 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include <H5private.h>		/*generic functions			  */
-#include <H5Dprivate.h>		/*datasets (for H5Tcopy)		  */
-#include <H5Iprivate.h>		/*ID functions		   		  */
-#include <H5Eprivate.h>		/*error handling			  */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Gprivate.h>		/*groups				  */
-#include <H5HGprivate.h>	/*global heap				  */
-#include <H5MMprivate.h>	/*memory management			  */
-#include <H5Pprivate.h>		/* Property Lists			  */
-#include <H5Sprivate.h>		/*data space				  */
-#include <H5Tpkg.h>		/*data-type functions			  */
+#include "H5private.h"		/*generic functions			  */
+#include "H5Dprivate.h"		/*datasets (for H5Tcopy)		  */
+#include "H5Iprivate.h"		/*ID functions		   		  */
+#include "H5Eprivate.h"		/*error handling			  */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Gprivate.h"		/*groups				  */
+#include "H5HGprivate.h"	/*global heap				  */
+#include "H5MMprivate.h"	/*memory management			  */
+#include "H5Pprivate.h"		/* Property Lists			  */
+#include "H5Sprivate.h"		/*data space				  */
+#include "H5Tpkg.h"		/*data-type functions			  */
 
 #define PABLO_MASK	H5T_mask
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1997 NCSA
- *		      All rights reserved.
+ * Copyright (C) 1997-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer: 	Robb Matzke <matzke@llnl.gov>
  *	       	Wednesday, October  8, 1997
@@ -32,20 +32,20 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-#include <H5private.h>
-#include <H5Dprivate.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>
-#include <H5MFprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
-#include <H5Pprivate.h>
-#include <H5Vprivate.h>
+#include "H5private.h"
+#include "H5Dprivate.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"
+#include "H5MFprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
+#include "H5Pprivate.h"
+#include "H5Vprivate.h"
 
 /* MPIO driver needed for special checks */
-#include <H5FDmpio.h>
+#include "H5FDmpio.h"
 
 /*
  * Feature: If this constant is defined then every cache preemption and load

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 Spizella Software
- *		      All rights reserved.
+ * Copyright (C) 1998-2001 Spizella Software
+ *		           All rights reserved.
  *
  * Programmer:	Robb Matzke <robb@arborea.spizella.com>
  *		Tuesday, January 13, 1998
@@ -10,12 +10,12 @@
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
 #define PABLO_MASK    H5Tconv_mask
-#include <H5Iprivate.h>
-#include <H5Eprivate.h>
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5MMprivate.h>
-#include <H5Pprivate.h>
-#include <H5Tpkg.h>
+#include "H5Iprivate.h"
+#include "H5Eprivate.h"
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5MMprivate.h"
+#include "H5Pprivate.h"
+#include "H5Tpkg.h"
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {

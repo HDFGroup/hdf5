@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2000 NCSA
- *		      All rights reserved.
+ * Copyright (C) 2000-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       Saturday, April 22, 2000
@@ -58,11 +58,11 @@
 
 /* $Id$ */
 
-#include <H5private.h>		/*library		  */
-#include <H5Eprivate.h>		/*error handling	  */
-#include <H5MMprivate.h>	/*Core memory management	  */
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5TBprivate.h>    /*Threaded, balanced, binary trees	  */
+#include "H5private.h"		/*library		  */
+#include "H5Eprivate.h"		/*error handling	  */
+#include "H5MMprivate.h"	/*Core memory management	  */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5TBprivate.h"    /*Threaded, balanced, binary trees	  */
 
 # define   KEYcmp(k1,k2,a) ((NULL!=compar) ? (*compar)( k1, k2, a) \
                  : HDmemcmp( k1, k2, 0<(a) ? (a) : HDstrlen(k1) )  )

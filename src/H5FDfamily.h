@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, August  4, 1999
@@ -10,7 +10,7 @@
 #ifndef H5FDfamily_H
 #define H5FDfamily_H
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 #define H5FD_FAMILY	(H5FD_family_init())
 

@@ -1,19 +1,19 @@
 /*
- * Copyright <A9> 1999 NCSA
- *                  All rights reserved.
+ * Copyright (c) 1999-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer: Raymond Lu <slu@ncsa.uiuc.edu>
  *             Wednesday, April 12, 2000
  *
  * Purpose:    SRB I/O driver.
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDsrb.h>            /* Core file driver                     */
-#include <H5MMprivate.h>        /* Memory allocation                    */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDsrb.h"            /* Core file driver                     */
+#include "H5MMprivate.h"        /* Memory allocation                    */
+#include "H5Pprivate.h"		/*property lists			*/
 
 
 /* The driver identification number, initialized at runtime */

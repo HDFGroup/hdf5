@@ -15,13 +15,13 @@
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
 #define _H5S_IN_H5S_C
-#include <H5private.h>		/* Generic Functions			  */
-#include <H5Iprivate.h>		/* ID Functions		  */
-#include <H5Eprivate.h>		/* Error handling		  */
-#include <H5FLprivate.h>	/* Free Lists	  */
-#include <H5MMprivate.h>	/* Memory Management functions		  */
-#include <H5Oprivate.h>		/* object headers		  */
-#include <H5Spkg.h>		    /* Data-space functions			  */
+#include "H5private.h"		/* Generic Functions			  */
+#include "H5Iprivate.h"		/* ID Functions		  */
+#include "H5Eprivate.h"		/* Error handling		  */
+#include "H5FLprivate.h"	/* Free Lists	  */
+#include "H5MMprivate.h"	/* Memory Management functions		  */
+#include "H5Oprivate.h"		/* object headers		  */
+#include "H5Spkg.h"		    /* Data-space functions			  */
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2000 NCSA
- *		      All rights reserved.
+ * Copyright (C) 2000-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       Thursday, March 23, 2000
@@ -17,10 +17,10 @@
 
 /* #define H5FL_DEBUG */
 
-#include <H5private.h>		/*library		  */
-#include <H5Eprivate.h>		/*error handling	  */
-#include <H5MMprivate.h>	/*Core memory management	  */
-#include <H5FLprivate.h>	/*Priority queues	  */
+#include "H5private.h"		/*library		  */
+#include "H5Eprivate.h"		/*error handling	  */
+#include "H5MMprivate.h"	/*Core memory management	  */
+#include "H5FLprivate.h"	/*Priority queues	  */
 
 #define PABLO_MASK	H5FL_mask
 static intn		interface_initialize_g = 0;

@@ -20,7 +20,7 @@
 
 #ifdef H5_HAVE_STREAM
 
-#include <H5Ipublic.h>
+#include "H5Ipublic.h"
 
 /* check what sockets type we have (Unix or Windows sockets)
    Note that only MS compilers require to use Windows sockets

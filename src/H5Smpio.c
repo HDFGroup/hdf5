@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  rky 980813
  *
@@ -13,12 +13,12 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fpkg.h>         /* Ugly, but necessary for the MPIO I/O accesses */
-#include <H5Spkg.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fpkg.h"         /* Ugly, but necessary for the MPIO I/O accesses */
+#include "H5Spkg.h"
 
-#include <H5FDmpio.h>		/*the MPIO file driver			*/
+#include "H5FDmpio.h"		/*the MPIO file driver			*/
 
 #ifndef H5_HAVE_PARALLEL
 /* 

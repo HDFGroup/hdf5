@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, July 26, 1999
@@ -8,7 +8,8 @@
 #ifndef _H5FDpublic_H
 #define _H5FDpublic_H
 
-#include <H5public.h>
+#include "H5public.h"
+
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
 

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *			   All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -14,9 +14,9 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
 
 /* Interface initialization? */
 #define PABLO_MASK H5MM_mask

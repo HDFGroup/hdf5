@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1998 NCSA HDF
- * 		      All rights reserved.
+ * Copyright (C) 1998-2001 NCSA HDF
+ * 		           All rights reserved.
  *		      
  * Purpose:	Provides error handling in the form of a stack.  The
  *		FUNC_ENTER() macro clears the error stack whenever an API
@@ -28,10 +28,10 @@
  *		errors within the H5E package.
  *
  */
-#include <H5private.h>		/* Generic Functions			  */
-#include <H5Iprivate.h>		/* IDs				  */
-#include <H5Eprivate.h>		/* Private error routines		  */
-#include <H5MMprivate.h>	/* Memory management			  */
+#include "H5private.h"		/* Generic Functions			  */
+#include "H5Iprivate.h"		/* IDs				  */
+#include "H5Eprivate.h"		/* Private error routines		  */
+#include "H5MMprivate.h"	/* Memory management			  */
 
 #define PABLO_MASK	H5E_mask
 

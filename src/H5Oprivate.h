@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
- *			All rights reserved.
+ * Copyright (C) 1997-2001 National Center for Supercomputing Applications
+ *			   All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
@@ -17,16 +17,16 @@
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
 
-#include <H5Opublic.h>
+#include "H5Opublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Fprivate.h>
-#include <H5Gprivate.h>
-#include <H5HGprivate.h>
-#include <H5Tprivate.h>
-#include <H5Spublic.h>
-#include <H5Zprivate.h>
+#include "H5private.h"
+#include "H5Fprivate.h"
+#include "H5Gprivate.h"
+#include "H5HGprivate.h"
+#include "H5Tprivate.h"
+#include "H5Spublic.h"
+#include "H5Zprivate.h"
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the

@@ -16,12 +16,12 @@
 #ifndef _H5Pprivate_H
 #define _H5Pprivate_H
 
-#include <H5Ppublic.h>
+#include "H5Ppublic.h"
 
 /* Private headers needed by this file */
-#include <H5private.h>
-#include <H5Fprivate.h>
-#include <H5Dprivate.h>
+#include "H5private.h"
+#include "H5Fprivate.h"
+#include "H5Dprivate.h"
 
 /* Define enum for modifications to class */
 typedef enum {

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 1997 NCSA
- *		      All rights reserved.
+ * Copyright (C) 1997-2001 NCSA
+ *		           All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Monday, November 10, 1997
@@ -21,13 +21,13 @@
  *		implement holes, like nfs).
  *		
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDfamily.h>     /* Family file driver */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDfamily.h"     /* Family file driver */
+#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Pprivate.h"		/*property lists			*/
 
 
 #undef MAX

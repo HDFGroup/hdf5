@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 29, 1999
@@ -20,13 +20,13 @@
  *		bytes read is always equal to the number requested.  This
  *		kluge is activated by #ifdef MPI_KLUGE0202.
  */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
-#include <H5FDprivate.h>	/*file driver				  */
-#include <H5FDmpio.h>       /* MPI I/O file driver */
-#include <H5MMprivate.h>    /* Memory allocation */
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fprivate.h"		/*files					*/
+#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDmpio.h"       /* MPI I/O file driver */
+#include "H5MMprivate.h"    /* Memory allocation */
+#include "H5Pprivate.h"		/*property lists			*/
 
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL

@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998-2001 NCSA
+ *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, April 16, 1998
  *
  * Purpose:	Functions for data filters.
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5MMprivate.h>
-#include <H5Oprivate.h>
-#include <H5Zprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5MMprivate.h"
+#include "H5Oprivate.h"
+#include "H5Zprivate.h"
 
 /* Interface initialization */
 #define PABLO_MASK	H5Z_mask

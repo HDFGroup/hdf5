@@ -21,17 +21,17 @@
  *
  */
 
-#include <H5public.h>                /* H5_HAVE_STREAM                      */
+#include "H5public.h"                /* H5_HAVE_STREAM                      */
 
 /* Only build this driver if it was configured with --with-Stream-VFD */
 #ifdef H5_HAVE_STREAM
 
-#include <H5Eprivate.h>               /* error handling                      */
-#include <H5FDpublic.h>               /* VFD structures                      */
-#include <H5MMprivate.h>              /* memory allocation                   */
-#include <H5Ppublic.h>                /* files                               */
-#include <H5Pprivate.h>               /* VFD prototypes                      */
-#include <H5FDstream.h>               /* Stream VFD header                   */
+#include "H5Eprivate.h"               /* error handling                      */
+#include "H5FDpublic.h"               /* VFD structures                      */
+#include "H5MMprivate.h"              /* memory allocation                   */
+#include "H5Ppublic.h"                /* files                               */
+#include "H5Pprivate.h"               /* VFD prototypes                      */
+#include "H5FDstream.h"               /* Stream VFD header                   */
 
 #ifdef H5FD_STREAM_HAVE_UNIX_SOCKETS
 #ifdef H5_HAVE_SYS_TYPES_H
