@@ -176,6 +176,11 @@ These tools enable the user to examine HDF5 files interactively.
 			  	<blockquote>
 			  		<code>h5dump -a /GroupFoo/GroupBar/Fnord/metadata quux.h5</code>
 			  	</blockquote></li>
+			<li>Dumping the attribute <code>metadata</code> which is an
+			    attribute of the root group in the file <code>quux.h5</code>:
+					<blockquote>
+						<code>h5dump -a /metadata quux.h5</code>
+					</blockquote></li>
 		</ol>
 <dt><strong>Current Status:</strong>
     <dd>The current version of <code>h5dump</code> displays the
