@@ -906,12 +906,11 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     hssize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t space_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
-    hsize_t *off=NULL;          /* Array to store sequence offsets */
+    hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
     hsize_t curr_off;           /* Current offset within sequence */
     hsize_t tmp_off;            /* Temporary offset within sequence */
-    size_t *len=NULL;           /* Array to store sequence lengths */
+    size_t len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
-    ssize_t vector_size;        /* Value for vector size */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequnce being worked on */
     size_t nbytes;              /* Number of bytes used in sequences */
@@ -929,15 +928,6 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     assert(H5I_DATATYPE == H5I_get_type(type_id));
     assert(space);
     assert(op);
-
-    /* Get the (default) hyperslab vector size */
-    vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
-
-    /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Get the datatype size */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -970,7 +960,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     /* Loop, while elements left in selection */
     while(max_bytes>0 && user_ret==0) {
         /* Get the sequences of bytes */
-        if((*space->select.get_seq_list)(space,0,&iter,elmt_size,(size_t)vector_size,max_bytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,0,&iter,elmt_size,H5D_XFER_HYPER_VECTOR_SIZE_DEF,max_bytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1017,12 +1007,6 @@ done:
         if (H5S_select_iter_release(&iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
-
-    /* Release length & offset vectors */
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_iterate() */
@@ -1349,9 +1333,8 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     uint8_t *buf;               /* Current location in buffer */
     void *fill=_fill;           /* Alias for fill-value buffer */
     hssize_t nelmts;            /* Number of elements in selection */
-    hsize_t *off=NULL;          /* Array to store sequence offsets */
-    size_t *len=NULL;           /* Array to store sequence lengths */
-    ssize_t vector_size;        /* Value for vector size */
+    hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
+    size_t len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
     size_t nseq;                /* Number of sequences generated */
     size_t curr_seq;            /* Current sequnce being worked on */
     size_t nbytes;              /* Number of bytes used in sequences */
@@ -1371,15 +1354,6 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "fill value buffer allocation failed");
     } /* end if */
 
-    /* Get the (default) hyperslab vector size */
-    vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
-
-    /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-
     /* Initialize iterator */
     if (H5S_select_iter_init(&iter, space, fill_size)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
@@ -1396,7 +1370,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     /* Loop, while elements left in selection */
     while(max_bytes>0) {
         /* Get the sequences of bytes */
-        if((*space->select.get_seq_list)(space,0,&iter,fill_size,(size_t)vector_size,max_bytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,0,&iter,fill_size,H5D_XFER_HYPER_VECTOR_SIZE_DEF,max_bytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Loop over sequences */
@@ -1419,12 +1393,6 @@ done:
         if (H5S_select_iter_release(&iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
-
-    /* Release length & offset vectors */
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
 
     /* Release fill value, if allocated */
     if(_fill==NULL && fill)
@@ -1460,13 +1428,14 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
-    hsize_t *off=NULL;             /* Array to store sequence offsets */
+    hsize_t _off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];             /* Array to store sequence offsets */
+    hsize_t *off=NULL;             /* Pointer to sequence offsets */
     hsize_t mem_off;               /* Offset in memory */
     size_t mem_curr_seq;           /* "Current sequence" in memory */
     size_t dset_curr_seq;          /* "Current sequence" in dataset */
+    size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];              /* Array to store sequence lengths */
     size_t *len=NULL;              /* Array to store sequence lengths */
     size_t mem_len;                /* Length of sequence in memory */
-    ssize_t vector_size;           /* Value for vector size */
     size_t maxbytes;               /* Number of bytes in the buffer */
     size_t  nseq;                  /* Number of sequences generated */
     size_t  nbytes;                /* Number of bytes used in sequences */
@@ -1485,14 +1454,18 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     assert (_buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        len=_len;
+        off=_off;
+    } /* end else */
+
 
     /* Compute the number of bytes available in buffer */
     H5_ASSIGN_OVERFLOW(maxbytes,nelmts*elmt_size,hsize_t,size_t);
@@ -1500,7 +1473,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     /* Loop until all elements are written */
     while(maxbytes>0) {
         /* Get list of sequences for selection to write */
-        if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,dxpl_cache->vec_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1521,10 +1494,12 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     } /* end while */
 
 done:
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(len!=NULL)
+            H5FL_SEQ_FREE(size_t,len);
+        if(off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,off);
+    } /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fscat() */
 
@@ -1560,13 +1535,14 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hid_t dxpl_id, void *_buf/*out*/)
 {
     uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
-    hsize_t *off=NULL;          /* Array to store sequence offsets */
+    hsize_t _off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
+    hsize_t *off=NULL;          /* Pointer to sequence offsets */
     hsize_t mem_off;            /* Offset in memory */
     size_t mem_curr_seq;        /* "Current sequence" in memory */
     size_t dset_curr_seq;       /* "Current sequence" in dataset */
-    size_t *len=NULL;           /* Array to store sequence lengths */
+    size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
+    size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t mem_len;             /* Length of sequence in memory */
-    ssize_t vector_size;        /* Value for vector size */
     size_t maxbytes;            /* Number of bytes in the buffer */
     size_t nseq;                /* Number of sequences generated */
     size_t nbytes;              /* Number of bytes used in sequences */
@@ -1584,14 +1560,17 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (nelmts>0);
     assert (_buf);
 
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
+        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        len=_len;
+        off=_off;
+    } /* end else */
 
     /* Compute the number of bytes available in buffer */
     H5_ASSIGN_OVERFLOW(maxbytes,nelmts*elmt_size,hsize_t,size_t);
@@ -1599,7 +1578,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /* Loop until all elements are written */
     while(maxbytes>0) {
         /* Get list of sequences for selection to write */
-        if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,H5S_GET_SEQ_LIST_SORTED,iter,elmt_size,dxpl_cache->vec_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Reset the current sequence information */
@@ -1620,10 +1599,12 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     } /* end while */
 
 done:
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(len!=NULL)
+            H5FL_SEQ_FREE(size_t,len);
+        if(off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,off);
+    } /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fgath() */
 
@@ -1652,9 +1633,10 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
 {
     uint8_t *buf=(uint8_t *)_buf;   /* Get local copies for address arithmetic */
     const uint8_t *tscat_buf=(const uint8_t *)_tscat_buf;
-    hsize_t *off=NULL;          /* Array to store sequence offsets */
-    ssize_t vector_size;        /* Value for vector size */
-    size_t *len=NULL;           /* Array to store sequence lengths */
+    hsize_t _off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
+    hsize_t *off=NULL;          /* Pointer to sequence offsets */
+    size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
+    size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
     size_t maxbytes;            /* Number of bytes in the buffer */
     size_t nseq;                /* Number of sequences generated */
@@ -1672,14 +1654,17 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     assert (nelmts>0);
     assert (buf);
 
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        len=_len;
+        off=_off;
+    } /* end else */
 
     /* Compute the number of bytes available in buffer */
     H5_ASSIGN_OVERFLOW(maxbytes,nelmts*elmt_size,hsize_t,size_t);
@@ -1687,7 +1672,7 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     /* Loop until all elements are written */
     while(maxbytes>0) {
         /* Get list of sequences for selection to write */
-        if((*space->select.get_seq_list)(space,0,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,0,iter,elmt_size,dxpl_cache->vec_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1707,10 +1692,12 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     } /* end while */
 
 done:
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(len!=NULL)
+            H5FL_SEQ_FREE(size_t,len);
+        if(off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,off);
+    } /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mscat() */
 
@@ -1741,9 +1728,10 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
 {
     const uint8_t *buf=(const uint8_t *)_buf;   /* Get local copies for address arithmetic */
     uint8_t *tgath_buf=(uint8_t *)_tgath_buf;
-    hsize_t *off=NULL;          /* Array to store sequence offsets */
-    ssize_t vector_size;        /* Value for vector size */
-    size_t *len=NULL;           /* Array to store sequence lengths */
+    hsize_t _off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
+    hsize_t *off=NULL;          /* Pointer to sequence offsets */
+    size_t _len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
+    size_t *len=NULL;           /* Pointer to sequence lengths */
     size_t curr_len;            /* Length of bytes left to process in sequence */
     size_t maxbytes;            /* Number of bytes in the buffer */
     size_t nseq;                /* Number of sequences generated */
@@ -1761,14 +1749,17 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     assert (nelmts>0);
     assert (tgath_buf);
 
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
-    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
+        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        len=_len;
+        off=_off;
+    } /* end else */
 
     /* Compute the number of bytes available in buffer */
     H5_ASSIGN_OVERFLOW(maxbytes,nelmts*elmt_size,hsize_t,size_t);
@@ -1776,7 +1767,7 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     /* Loop until all elements are written */
     while(maxbytes>0) {
         /* Get list of sequences for selection to write */
-        if((*space->select.get_seq_list)(space,0,iter,elmt_size,(size_t)vector_size,maxbytes,&nseq,&nbytes,off,len)<0)
+        if((*space->select.get_seq_list)(space,0,iter,elmt_size,dxpl_cache->vec_size,maxbytes,&nseq,&nbytes,off,len)<0)
             HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
         /* Loop, while sequences left to process */
@@ -1796,10 +1787,12 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     } /* end while */
 
 done:
-    if(len!=NULL)
-        H5FL_SEQ_FREE(size_t,len);
-    if(off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(len!=NULL)
+            H5FL_SEQ_FREE(size_t,len);
+        if(off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,off);
+    } /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mgath() */
 
@@ -1828,11 +1821,14 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t file_iter;   /* File selection iteration info */
     hbool_t file_iter_init=0;	/* File selection iteration info has been initialized */
-    hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
-    hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
-    ssize_t vector_size;        /* Value for vector size */
-    size_t *mem_len=NULL;       /* Array to store sequence lengths in memory */
-    size_t *file_len=NULL;      /* Array to store sequence lengths in the file */
+    hsize_t _mem_off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence offsets in memory */
+    hsize_t *mem_off=NULL;      /* Pointer to sequence offsets in memory */
+    hsize_t _file_off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];     /* Array to store sequence offsets in the file */
+    hsize_t *file_off=NULL;     /* Pointer to sequence offsets in the file */
+    size_t _mem_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];       /* Array to store sequence lengths in memory */
+    size_t *mem_len=NULL;       /* Pointer to sequence lengths in memory */
+    size_t _file_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence lengths in the file */
+    size_t *file_len=NULL;      /* Pointer to sequence lengths in the file */
     size_t maxbytes;            /* Number of bytes in selection */
     size_t mem_nseq;            /* Number of sequences generated in the file */
     size_t file_nseq;           /* Number of sequences generated in memory */
@@ -1861,18 +1857,23 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((mem_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((mem_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-    if((file_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((file_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((mem_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+        if((file_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((file_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        mem_len=_mem_len;
+        mem_off=_mem_off;
+        file_len=_file_len;
+        file_off=_file_off;
+    } /* end else */
 
     /* Get number of bytes in selection */
 #ifndef NDEBUG
@@ -1893,7 +1894,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
         /* Check if more file sequences are needed */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,elmt_size,(size_t)vector_size,maxbytes,&file_nseq,&file_nbytes,file_off,file_len)<0)
+            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,elmt_size,dxpl_cache->vec_size,maxbytes,&file_nseq,&file_nbytes,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -1903,7 +1904,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,elmt_size,(size_t)vector_size,maxbytes,&mem_nseq,&mem_nbytes,mem_off,mem_len)<0)
+            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,elmt_size,dxpl_cache->vec_size,maxbytes,&mem_nseq,&mem_nbytes,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -1941,14 +1942,16 @@ done:
     } /* end if */
 
     /* Free vector arrays */
-    if(file_len!=NULL)
-        H5FL_SEQ_FREE(size_t,file_len);
-    if(file_off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,file_off);
-    if(mem_len!=NULL)
-        H5FL_SEQ_FREE(size_t,mem_len);
-    if(mem_off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,mem_off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(file_len!=NULL)
+            H5FL_SEQ_FREE(size_t,file_len);
+        if(file_off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,file_off);
+        if(mem_len!=NULL)
+            H5FL_SEQ_FREE(size_t,mem_len);
+        if(mem_off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,mem_off);
+    } /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_read() */
 
@@ -1977,11 +1980,14 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t file_iter;   /* File selection iteration info */
     hbool_t file_iter_init=0;	/* File selection iteration info has been initialized */
-    hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
-    hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
-    ssize_t vector_size;        /* Value for vector size */
-    size_t *mem_len=NULL;       /* Array to store sequence lengths in memory */
-    size_t *file_len=NULL;      /* Array to store sequence lengths in the file */
+    hsize_t _mem_off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence offsets in memory */
+    hsize_t *mem_off=NULL;      /* Pointer to sequence offsets in memory */
+    hsize_t _file_off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];     /* Array to store sequence offsets in the file */
+    hsize_t *file_off=NULL;     /* Pointer to sequence offsets in the file */
+    size_t _mem_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];       /* Array to store sequence lengths in memory */
+    size_t *mem_len=NULL;       /* Pointer to sequence lengths in memory */
+    size_t _file_len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];      /* Array to store sequence lengths in the file */
+    size_t *file_len=NULL;      /* Pointer to sequence lengths in the file */
     size_t maxbytes;            /* Number of bytes in selection */
     size_t mem_nseq;            /* Number of sequences generated in the file */
     size_t file_nseq;           /* Number of sequences generated in memory */
@@ -2009,18 +2015,23 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
     assert(buf);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     
-    /* Get the hyperslab vector size */
-    vector_size=dxpl_cache->vec_size;
-
     /* Allocate the vector I/O arrays */
-    if((mem_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((mem_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-    if((file_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((file_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if((mem_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((mem_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+        if((file_len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((file_off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        mem_len=_mem_len;
+        mem_off=_mem_off;
+        file_len=_file_len;
+        file_off=_file_off;
+    } /* end else */
 
     /* Initialize file iterator */
     if (H5S_select_iter_init(&file_iter, file_space, elmt_size)<0)
@@ -2060,7 +2071,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
 #endif /* QAK */
         if(curr_file_seq>=file_nseq) {
             /* Get sequences for file selection */
-            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,elmt_size,(size_t)vector_size,maxbytes,&file_nseq,&file_nbytes,file_off,file_len)<0)
+            if((*file_space->select.get_seq_list)(file_space,H5S_GET_SEQ_LIST_SORTED,&file_iter,elmt_size,dxpl_cache->vec_size,maxbytes,&file_nseq,&file_nbytes,file_off,file_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -2079,7 +2090,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
         /* Check if more memory sequences are needed */
         if(curr_mem_seq>=mem_nseq) {
             /* Get sequences for memory selection */
-            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,elmt_size,(size_t)vector_size,maxbytes,&mem_nseq,&mem_nbytes,mem_off,mem_len)<0)
+            if((*mem_space->select.get_seq_list)(mem_space,0,&mem_iter,elmt_size,dxpl_cache->vec_size,maxbytes,&mem_nseq,&mem_nbytes,mem_off,mem_len)<0)
                 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
 
             /* Start at the beginning of the sequences again */
@@ -2132,14 +2143,16 @@ done:
     } /* end if */
 
     /* Free vector arrays */
-    if(file_len!=NULL)
-        H5FL_SEQ_FREE(size_t,file_len);
-    if(file_off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,file_off);
-    if(mem_len!=NULL)
-        H5FL_SEQ_FREE(size_t,mem_len);
-    if(mem_off!=NULL)
-        H5FL_SEQ_FREE(hsize_t,mem_off);
+    if(dxpl_cache->vec_size!=H5D_XFER_HYPER_VECTOR_SIZE_DEF) {
+        if(file_len!=NULL)
+            H5FL_SEQ_FREE(size_t,file_len);
+        if(file_off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,file_off);
+        if(mem_len!=NULL)
+            H5FL_SEQ_FREE(size_t,mem_len);
+        if(mem_off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,mem_off);
+    } /* end if */
 #ifdef QAK
 {
     int mpi_rank;
