@@ -154,6 +154,7 @@ static haddr_t H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *
     const hssize_t offset[], H5D_istore_ud1_t *_udata);
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
+static herr_t H5D_istore_page_free (void *page);
 
 /* B-tree iterator callbacks */
 static int H5D_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
@@ -286,9 +287,13 @@ H5D_istore_get_page(H5F_t UNUSED *f, const void *_udata)
 
     assert(udata);
     assert(udata->mesg);
-    assert(udata->mesg->u.chunk.raw_page);
+    assert(udata->mesg->u.chunk.rc_page);
 
-    FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.raw_page);
+    /* Increment reference count on B-tree node */
+    H5RC_INC(udata->mesg->u.chunk.rc_page);
+
+    /* Get the pointer to the ref-count object */
+    FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.rc_page);
 } /* end H5D_istore_get_page() */
 
 
@@ -906,6 +911,7 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
     size_t		sizeof_rkey;    /* Single raw key size */
     size_t              size;           /* Raw B-tree node size */
     H5D_rdcc_t	*rdcc = &(dset->cache.chunk);
+    void        *page;                  /* Buffer for raw B-tree node */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_init, FAIL);
@@ -927,8 +933,12 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
     assert(sizeof_rkey);
     size = H5B_nodesize(f, H5B_ISTORE, NULL, sizeof_rkey);
     assert(size);
-    if(NULL==(dset->layout.u.chunk.raw_page=H5FL_BLK_MALLOC(chunk_page,size)))
+    if(NULL==(page=H5FL_BLK_MALLOC(chunk_page,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+    /* Make page buffer reference counted */
+    if(NULL==(dset->layout.u.chunk.rc_page=H5RC_create(page,H5D_istore_page_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for page")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1225,11 +1235,37 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Free the raw B-tree node buffer */
-    H5FL_BLK_FREE(chunk_page,dset->layout.u.chunk.raw_page);
+    if(H5RC_DEC(dset->layout.u.chunk.rc_page)<0)
+	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_page_free
+ *
+ * Purpose:	Free a B-tree node
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July  8, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_istore_page_free (void *page)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_page_free)
+
+    H5FL_BLK_FREE(chunk_page,page);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_istore_page_free() */
 
 
 /*-------------------------------------------------------------------------

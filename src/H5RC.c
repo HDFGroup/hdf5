@@ -27,6 +27,10 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5RCprivate.h"        /* Reference-counted buffers            */
 
+/* Interface initialization */
+static int		interface_initialize_g = 0;
+#define INTERFACE_INIT	NULL
+
 /* Private typedefs & structs */
 
 /* Declare a free list to manage the H5RC_t struct */

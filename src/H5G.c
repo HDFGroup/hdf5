@@ -88,6 +88,10 @@
 #define H5G_PACKAGE     /*suppress error message about including H5Gpkg.h */
 #define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5G_mask
+
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
@@ -116,8 +120,6 @@
 #define H5G_TARGET_NORMAL	0x0000
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
-
-#define PABLO_MASK		H5G_mask
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -1064,8 +1066,8 @@ H5G_term_interface(void)
  *
  * Purpose:	Register a new object type so H5G_get_type() can detect it.
  *		One should always register a general type before a more
- *		specific type.  For instance, any object that has a data type
- *		message is a data type, but only some of those objects are
+ *		specific type.  For instance, any object that has a datatype
+ *		message is a datatype, but only some of those objects are
  *		datasets.
  *
  * Return:	Success:	Non-negative
@@ -1686,6 +1688,10 @@ H5G_mkroot (H5F_t *f, hid_t dxpl_id, H5G_entry_t *ent)
     if (f->shared->root_grp)
         HGOTO_DONE(SUCCEED);
 
+    /* Create information needed for group nodes */
+    if(H5G_node_init(f)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group node info")
+
     /*
      * If there is no root object then create one. The root group always has
      * a hard link count of one since it's pointed to by the boot block.
@@ -1763,7 +1769,7 @@ static H5G_t *
 H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
-    H5F_t       *file=NULL;     /* File new group will be in    */
+    H5F_t       *file = NULL;   /* File new group will be in    */
     unsigned    stab_init=0;    /* Flag to indicate that the symbol stable was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
@@ -2312,11 +2318,11 @@ H5G_loc (hid_t loc_id)
             if (NULL==(dt=H5I_object(loc_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
             if (NULL==(ret_value=H5T_entof(dt)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data type");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of datatype");
             break;
 
         case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data space");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of dataspace");
 
         case H5I_DATASET:
             if (NULL==(dset=H5I_object(loc_id)))
@@ -2482,7 +2488,6 @@ done:
     if(norm_new_name)
         H5MM_xfree(norm_new_name);
 
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -2586,7 +2591,6 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->nlink = 0;
 	    statbuf->type = H5G_LINK;
 	    statbuf->mtime = 0;
-	    
 	} else {
 	    /* Some other type of object */
 	    statbuf->objno[0] = (unsigned long)(obj_ent.header);
@@ -3332,7 +3336,7 @@ H5G_replace_name(int type, H5G_entry_t *loc,
             search_dataset=1;
             break;
 
-        /* Object is a named data type */
+        /* Object is a named datatype */
         case H5G_TYPE:
             /* Search and replace names through datatype IDs */
             search_datatype=1;

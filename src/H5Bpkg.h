@@ -31,6 +31,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5RCprivate.h"	/* Reference counted object functions	  */
 
 /**************************/
 /* Package Private Macros */
@@ -54,6 +55,7 @@ struct H5B_t {
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
     unsigned		nchildren;	/*number of child pointers	     */
+    H5RC_t		*rc_page;	/*ref-counted disk page		     */
     uint8_t		*raw_page;	/*disk page (shared)		     */
     uint8_t		*native;	/*array of keys in native format     */
     void		**nkey;		/*2k+1 key entries		     */

@@ -37,6 +37,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"          /* Generic functions                      */
 #include "H5HGprivate.h"        /* Global heap functions                  */
+#include "H5RCprivate.h"	/* Reference counted object functions	  */
 #include "H5Tprivate.h"		/* Datatype functions			  */
 #include "H5Zprivate.h"         /* I/O pipeline filters			  */
 
@@ -133,7 +134,7 @@ typedef struct H5O_layout_chunk_t {
     unsigned	ndims;			/* Num dimensions in chunk           */
     size_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     size_t      size;                   /* Size of chunk in bytes            */
-    void       *raw_page;               /* Buffer for raw B-tree page        */
+    H5RC_t     *rc_page;                /* Ref-counted buffer for raw B-tree page        */
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_compact_t {
