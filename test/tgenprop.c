@@ -1051,6 +1051,7 @@ test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
     return(SUCCEED);
 }
 
+#ifndef H5_WANT_H5_V1_6_COMPAT
 /****************************************************************
 **
 **  test_genprop_prop_cmp_cb1(): Property comparison callback for test_genprop_list_callback
@@ -1064,6 +1065,7 @@ test_genprop_prop_cmp_cb1(const void UNUSED *value1, const void UNUSED *value2, 
 
     return(0);
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /****************************************************************
 **
@@ -1292,12 +1294,14 @@ test_genprop_list_callback(void)
     VERIFY(cop_cb_struct.count, 1, "H5Pcopy");
     VERIFY(cop_cb_struct.id, lid2, "H5Pcopy");
 
+#ifndef H5_WANT_H5_V1_6_COMPAT
     /* Compare the two lists */
     ret = H5Pequal(lid1,lid2);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Verify compare callback information for properties tracked */
     VERIFY(prop1_cb_info.cmp_count, 1, "H5Pequal");
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Close first list */
     ret = H5Pclose(lid1);
