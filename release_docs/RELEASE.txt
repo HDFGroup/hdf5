@@ -60,6 +60,10 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Single hyperslab selections (which were set with only one call to
+            H5Sselect_hyperslab) that had dimensions that could be "flattened"
+            but were interspersed with dimensions that could not be flattened
+            were not correctly handled, causing core dumps.  QAK - 2003/10/25
         - Avoid metadata cache from preempting current dataset object header
             when looking up information about the named datatype that the
             dataset uses.  QAK - 2003/10/20
