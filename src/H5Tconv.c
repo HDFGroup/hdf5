@@ -3166,8 +3166,28 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
                         H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                         H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        /*If the destination no implied mantissa bit, we'll need to set 
+                         *the 1st bit of mantissa to 1.  The Intel-Linux long double is
+                         *this case.*/ 
+                        if (H5T_NORM_NONE==dst.u.f.norm)
+                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
                         goto padding;
-                    } 
+                    }
+                } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                                  H5T_BIT_LSB, TRUE)<0 && H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                                  H5T_BIT_LSB, FALSE)<0) {
+                    /*This is a special case for the source of no implied mantissa bit.
+                     *If the exponent bits are all 1s and only the 1st bit of mantissa 
+                     *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
+                    /* +Inf or -Inf */
+                    H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                    H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                    H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                    /*If the destination no implied mantissa bit, we'll need to set 
+                     *the 1st bit of mantissa to 1.*/ 
+                    if (H5T_NORM_NONE==dst.u.f.norm)
+                        H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                    goto padding;
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /*
