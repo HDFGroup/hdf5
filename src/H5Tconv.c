@@ -2240,7 +2240,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             }
 
             /* Check if we need a temporary buffer for this conversion */
-            if(tpath->cdata.need_bkg||H5T_detect_class(dst->parent,H5T_VLEN)) {
+            if(tpath->cdata.need_bkg || H5T_detect_class(dst->parent,H5T_VLEN)) {
                 /* Set up initial background buffer */
                 tmp_buf_size=MAX(src_base_size,dst_base_size);
                 if ((tmp_buf=H5FL_BLK_CALLOC(vlen_seq,tmp_buf_size))==NULL)
@@ -2276,8 +2276,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                 /* Check if temporary buffer is large enough, resize if necessary */      
                 /* (Chain off the conversion buffer size) */
-                if((tpath->cdata.need_bkg||H5T_detect_class(dst->parent,
-		    H5T_VLEN)) && tmp_buf_size<conv_buf_size) {
+                if((tpath->cdata.need_bkg || H5T_detect_class(dst->parent, H5T_VLEN))
+                        && tmp_buf_size<conv_buf_size) {
                     /* Set up initial background buffer */
                     tmp_buf_size=conv_buf_size;
                     if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)

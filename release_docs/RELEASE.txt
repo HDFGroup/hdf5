@@ -55,7 +55,8 @@ Bug Fixes since HDF5-1.6.0 release
 
 Library
 -------
-
+    - Returned H5T_BKG_TEMP support to library after it was accidentally
+        removed.  (2003/07/14 - QAK)
 
 Configuration
 -------------

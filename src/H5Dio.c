@@ -1080,7 +1080,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate background buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_MALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
     } /* end if */
 
@@ -1113,7 +1113,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
 	if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 	
-        if (need_bkg) {
+        if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
@@ -1307,15 +1307,15 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (H5T_path_bkg(tpath)) {
+    if(H5T_detect_class(dataset->type, H5T_VLEN)) {
+	/* Old data is retrieved into background buffer for VL datatype.  The 
+	 * data is used later for freeing heap objects. */
+        need_bkg = H5T_BKG_YES;
+    } else if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
         need_bkg = MAX (H5T_path_bkg(tpath), need_bkg);
-    } else if(H5T_detect_class(dataset->type, H5T_VLEN)) {
-	/* Old data is retrieved into background buffer for VL datatype.  The 
-	 * data is used later for freeing heap objects. */
-        need_bkg = H5T_BKG_YES;
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     } /* end else */
@@ -1355,7 +1355,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         if (n!=smine_nelmts)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
 
-        if (need_bkg) {
+        if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
@@ -1614,7 +1614,7 @@ UNUSED
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate background buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_MALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
+        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(size_t)(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
     } /* end if */
     
@@ -1685,7 +1685,7 @@ UNUSED
             if (n!=smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 
-            if (need_bkg) {
+            if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
@@ -1994,15 +1994,15 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (H5T_path_bkg(tpath)) {
+    if(H5T_detect_class(dataset->type, H5T_VLEN)) {
+	/* Old data is retrieved into background buffer for VL datatype.  The 
+	 * data is used later for freeing heap objects. */
+        need_bkg = H5T_BKG_YES;
+    } else if (H5T_path_bkg(tpath)) {
         /* Retrieve the bkgr buffer property */
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
         need_bkg = MAX (H5T_path_bkg(tpath), need_bkg);
-    } else if(H5T_detect_class(dataset->type, H5T_VLEN)) {
-	/* Old data is retrieved into background buffer for VL datatype.  The 
-	 * data is used later for freeing heap objects. */
-        need_bkg = H5T_BKG_YES;
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     } /* end else */
@@ -2081,7 +2081,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             if (n!=smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 
-            if (need_bkg) {
+            if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
