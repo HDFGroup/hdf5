@@ -71,7 +71,7 @@
 #include "SDDFparam.h"
 #include "TraceParam.h"
 #include "Trace.h"
-#include "HDF5Trace.h"
+#include "HDFTrace.h"
 void HDFendTrace_SDDF(int);
 void startHDFtraceEvent(int eventID);
 void endHDFtraceEvent(int , int , char *, int );

@@ -81,43 +81,6 @@
 #ifndef PROCTRACE_H		/* avoid re-inclusion */
 #define PROCTRACE_H
 #include <stdarg.h>
-/*======================================================================*
-// By default, all HDF procedures are traced.  Tracing of individual	*
-// procedures or all of the procedures in a particular source file in	*
-// the HDF 5 library can be done by calling the procedure PabloHDF5trace*
-// with the appropriate argument.  The call must be made prior to	*
-// calling HDF5initTrace.  As many calls as necessary may be made prior	*
-// to calling HDF5initTrace so several specific procedures can be 	*
-// traced. 								*
-// PabloHDF5trace has the following syntax.				*
-//   #include "ProcTrace.h"						*
-//   void PabloHDF5trace( int traceID );				*
-// where								*
-//   traceID specifies the procedure or procedures within an HDF 5 file	*
-//   that are to be traced.  If a single procedure named <proc> is to 	*
-//   be traced, then traceID should have the value ID_<proc>.  If all 	*
-//   of the procedures within the HDF 5 library routine <file>.c are to *
-//   be traced, then the value of traceID should be FID_<file>.  The	*
-//   constants ID_<proc> and FID_<file> are declared for all possible	*
-//   values of <proc> and <file> below.                         	*
-//      								*
-//   Example:								*
-//     To enable tracing of the individual procedures H5I_register and	*
-//     H5Topen and all of the procedures in the HDF 5 library source 	*
-//     files H5A.c and H5Gent.c the following code segements could be 	*
-//     used:								*
-//     									*
-//     #include "ProcTrace.h"						*
-//	 ...								*
-//     PabloHDF5trace( ID_H5I_register );				*
-//     PabloHDF5trace( ID_H5Topenr );					*
-//     PabloHDF5trace( FID_H5A );					*
-//     PabloHDF5trace( FID_H5Gent );					*
-//	...								*
-//     HDF5initTrace( ... );   						*
-//     									*
-// See the document PabloHDF5.doc for further information		*
-//======================================================================*/
 /*======================================================================*/
 /* Assign HDF identifier routine tags					*/
 /*======================================================================*/
@@ -131,68 +94,11 @@ MPI_RUNTIME_TRACE,
 MPI_SUMMARY_TRACE,
 NO_TRACE,
 #include "HDFidList.h"
-ID_HDF_Last_Entry,
-AllHDF5 = ID_HDF_Last_Entry,
-ID_H5_c,
-ID_H5A_c,
-ID_H5AC_c,
-ID_H5B_c,
-ID_H5D_c,
-ID_H5E_c,
-ID_H5F_c,
-ID_H5Farray_c,
-ID_H5Fcore_c,
-ID_H5Ffamily_c,
-ID_H5Fistore_c,
-ID_H5Flow_c,
-ID_H5Fmpio_c,
-ID_H5Fsec2_c,
-ID_H5Fsplit_c,
-ID_H5Fstdio_c,
-ID_H5G_c,
-ID_H5Gent_c,
-ID_H5Gnode_c,
-ID_H5Gstab_c,
-ID_H5HG_c,
-ID_H5HL_c,
-ID_H5I_c,
-ID_H5MF_c,
-ID_H5MM_c,
-ID_H5O_c,
-ID_H5Oattr_c,
-ID_H5Ocomp_c,
-ID_H5Ocont_c,
-ID_H5Odtype_c,
-ID_H5Oefl_c,
-ID_H5Ofill_c,
-ID_H5Olayout_c,
-ID_H5Omtime_c,
-ID_H5Oname_c,
-ID_H5Onull_c,
-ID_H5Osdspace_c,
-ID_H5Oshared_c,
-ID_H5Ostab_c,
-ID_H5P_c,
-ID_H5R_c,
-ID_H5RA_c,
-ID_H5S_c,
-ID_H5Sall_c,
-ID_H5Shyper_c,
-ID_H5Smpio_c,
-ID_H5Snone_c,
-ID_H5Spoint_c,
-ID_H5Sselect_c,
-ID_H5T_c,
-ID_H5TB_c,
-ID_H5Tbit_c,
-ID_H5Tconv_c,
-ID_H5Tinit_c,
-ID_H5V_c,
-ID_H5Z_c,
-NUM_HDF5_IDS
+NUM_HDF_IDS
 } ;
 
-void PabloHDF5Trace( int ) ;
-void HDF5initTrace( const char *, int trace_id, ... ); 
-void HDF5endTrace( void ); 
+#define ID_HDF_Last_Entry ID_ALLHDF
+
+void HDFinitTrace( const char *, int trace_id, ... ); 
+void HDFendTrace( void ); 
 #endif /* PROCTRACE_H */
