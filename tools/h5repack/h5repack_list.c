@@ -46,7 +46,7 @@ int check_objects(const char* fname,
  *-------------------------------------------------------------------------
  */
 
- /* disable error reporting */
+ /* disable out reporting */
  H5E_BEGIN_TRY {
  
  /* Open the files */
@@ -54,7 +54,7 @@ int check_objects(const char* fname,
   printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
   exit(1);
  }
- /* enable error reporting */
+ /* enable out reporting */
  } H5E_END_TRY;
 
 
@@ -95,7 +95,63 @@ int check_objects(const char* fname,
   }
   if (options->verbose)
    printf("...Found\n");
- }
+
+
+  /* check for extra filter conditions */
+  switch (options->op_tbl->objs[i].filter->filtn)
+  {
+
+   /* chunk size must be smaller than pixels per block */
+  case H5Z_FILTER_SZIP:
+   {
+    int     j;
+    int     csize=1;
+    int     ppb=options->op_tbl->objs[i].filter->cd_values[0];
+    hsize_t dims[H5S_MAX_RANK];
+    int     rank;
+    hid_t   did;     
+    hid_t   sid;    
+
+    if (options->op_tbl->objs[i].chunk.rank>0)
+    {
+     rank=options->op_tbl->objs[i].chunk.rank;
+     for (j=0; j<rank; j++) 
+      csize*=(int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+    }
+    else
+    {
+     if ((did=H5Dopen(fid,travt->objs[i].name))<0) 
+      goto out;
+     if ((sid=H5Dget_space(did))<0) 
+      goto out;
+     if ( (rank=H5Sget_simple_extent_ndims(sid))<0)
+      goto out;
+     HDmemset(dims, 0, sizeof dims);
+     if ( H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+      goto out;
+     for (j=0; j<rank; j++) 
+      csize*=(int)dims[j];
+     if (H5Sclose(sid)<0) 
+      goto out;
+     if (H5Dclose(did)<0) 
+      goto out;
+    }      
+        
+    if (csize < ppb )
+    {
+     printf("Warning: SZIP settins, chunk size is smaller than pixels per block...Exiting\n");
+     goto out;
+    }
+    
+    
+   }
+   break;
+
+  }
+
+
+
+ } /* i */
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
@@ -109,6 +165,7 @@ out:
  trav_table_free(travt);
  return -1;
 }
+
 
 
 
