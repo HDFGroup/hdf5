@@ -2658,6 +2658,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t operator,
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Diterate, FAIL);
+    H5TRACE5("e","xiixx",buf,type_id,space_id,operator,operator_data);
 
     /* Check args */
     if (NULL==operator)

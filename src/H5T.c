@@ -4396,6 +4396,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     H5T_t		*src=NULL, *dst=NULL;	/*unatomized types	*/
     
     FUNC_ENTER (H5Tconvert, FAIL);
+    H5TRACE6("e","iizxxi",src_id,dst_id,nelmts,buf,background,plist_id);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(src_id) || NULL==(src=H5I_object(src_id)) ||

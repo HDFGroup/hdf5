@@ -3080,6 +3080,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
     H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_vlen_mem_manager, FAIL);
+    H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
@@ -3118,6 +3119,8 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func,
     H5F_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_vlen_mem_manager, FAIL);
+    H5TRACE5("e","i*x*x*x*x",plist_id,alloc_func,alloc_info,free_func,
+             free_info);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
