@@ -55,6 +55,8 @@ New Features
     * Changed internal error handling macros to reduce code size of library by
       about 10%.
     * Parallel HDF5 now works on HP-UX platforms.
+    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+      support.
 
 
 Bug Fixes since HDF5-1.4.2 Release
