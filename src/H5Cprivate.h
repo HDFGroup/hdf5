@@ -43,7 +43,7 @@
  *
  *					JRM - 5/17/04
  */
-#define H5C_MAX_ENTRY_SIZE		((size_t)(100 * 1024))
+#define H5C_MAX_ENTRY_SIZE		((size_t)(10 * 1024 * 1024))
 
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
@@ -65,6 +65,25 @@
 #define H5C_COLLECT_CACHE_ENTRY_STATS	0
 
 #endif /* H5C_COLLECT_CACHE_STATS */
+
+
+#ifdef H5_HAVE_PARALLEL
+
+/* we must maintain the clean and dirty LRU lists when we are compiled
+ * with parallel support.
+ */
+#define H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  1
+
+#else /* H5_HAVE_PARALLEL */
+
+/* The clean and dirty LRU lists don't buy us anything here -- we may
+ * want them on for testing on occasion, but in general they should be
+ * off.
+ */
+#define H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  0
+
+#endif /* H5_HAVE_PARALLEL */
+
 
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
@@ -130,28 +149,28 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  * them generally accessable.
  */
 
-#define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(2 * 1024 * 1024))
-#define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(1 * 1024 * 1024))
+#define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
+#define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
 
 
 /****************************************************************************
  *
  * structure H5C_cache_entry_t
  *
- * Instances of the H5C_cache_entry_t structure are used to store meta data 
- * cache entries in an a threaded binary B-tree.  See H5TB.c for the 
- * particulars of the B-tree.
+ * Instances of the H5C_cache_entry_t structure are used to store cache 
+ * entries in a hash table and sometimes in a threaded balanced binary tree.  
+ * See H5TB.c for the particulars of the tree.
  *
  * In typical application, this structure is the first field in a 
  * structure to be cached.  For historical reasons, the external module
- * is responsible for managing the dirty field.  All other fields are
+ * is responsible for managing the is_dirty field.  All other fields are
  * managed by the cache.
  *
- * Note that our current implementation of a threaded binary B-tree will 
- * occasionaly change the node a particular datum is associated with.  Thus
- * this structure does not have a back pointer to its B-tree node.  If we
- * ever modify the threaded binary B-tree code to fix this, a back pointer 
- * would save us a few tree traversals.
+ * Note that our current implementation of a threaded balanced binary tree 
+ * will occasionaly change the node a particular datum is associated with.  
+ * Thus this structure does not have a back pointer to its tree node.  If we
+ * ever modify the threaded balanced binary tree code to fix this, a back 
+ * pointer would save us a few tree traversals.
  *
  * The fields of this structure are discussed individually below:
  *
@@ -194,6 +213,28 @@ typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
  *
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
+ *
+ * in_tree:	Boolean flag indicating whether the entry is in the threaded
+ *		balanced binary tree.  As a general rule, entries are placed
+ *		in the tree when they are marked dirty.  However they may
+ *		remain in the tree after being flushed.
+ *
+ *
+ * Fields supporting the hash table:
+ *
+ * Fields in the cache are indexed by a more or less conventional hash table.
+ * If there are multiple entries in any hash bin, they are stored in a doubly
+ * linked list.
+ *
+ * ht_next:	Next pointer used by the hash table to store multiple
+ *		entries in a single hash bin.  This field points to the
+ *		next entry in the doubly linked list of entries in the 
+ *		hash bin, or NULL if there is no next entry.
+ *
+ * ht_prev:     Prev pointer used by the hash table to store multiple
+ *              entries in a single hash bin.  This field points to the
+ *              previous entry in the doubly linked list of entries in 
+ *		the hash bin, or NULL if there is no previuos entry.
  *
  *
  * Fields supporting replacement policies:
@@ -281,6 +322,12 @@ typedef struct H5C_cache_entry_t
     const H5C_class_t *	type;
     hbool_t		is_dirty;
     hbool_t		is_protected;
+    hbool_t		in_tree;
+
+    /* fields supporting the hash table: */
+
+    struct H5C_cache_entry_t *	ht_next;
+    struct H5C_cache_entry_t *	ht_prev;
 
     /* fields supporting replacement policies: */
 
@@ -365,7 +412,6 @@ H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
                         hbool_t display_detailed_stats);
 
 H5_DLL void H5C_stats__reset(H5C_t * cache_ptr);
-
 
 H5_DLL herr_t H5C_set_skip_flags(H5C_t * cache_ptr,
                                  hbool_t skip_file_checks,

@@ -46,6 +46,25 @@
 #define H5AC_OHDR_ID	4	/*object header				     */
 #define H5AC_NTYPES	5	
 
+/* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when 
+ * H5C_COLLECT_CACHE_STATS is FALSE.  
+ *
+ * When H5C_COLLECT_CACHE_STATS is TRUE, H5AC_DUMP_STATS_ON_CLOSE must
+ * be FALSE for "make check" to succeed, but may be set to TRUE at other
+ * times for debugging purposes.
+ *
+ * Hence the following, somewhat odd set of #defines.
+ */
+#if H5C_COLLECT_CACHE_STATS
+
+#define H5AC_DUMP_STATS_ON_CLOSE	0
+
+#else /* H5C_COLLECT_CACHE_STATS */
+
+#define H5AC_DUMP_STATS_ON_CLOSE	0
+
+#endif /* H5C_COLLECT_CACHE_STATS */
+
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
  * have a constant variable with permanent life-span that describes how

@@ -95,7 +95,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
-
 
 /****************************************************************************
  *
@@ -121,29 +120,29 @@
 
 #if H5C_DO_SANITY_CHECKS
 
-#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size)   \
-if ( ( (head_ptr) == NULL ) ||                                             \
-     ( (tail_ptr) == NULL ) ||                                             \
-     ( (entry_ptr) == NULL ) ||                                            \
-     ( (len) <= 0 ) ||                                                     \
-     ( (Size) < (entry_ptr)->size ) ||                                     \
-     ( ( (Size) == (entry_ptr)->size ) && ( (len) != 1 ) ) ||              \
-     ( ( (entry_ptr)->prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) || \
-     ( ( (entry_ptr)->next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
-     ( ( (len) == 1 ) &&                                                   \
-       ( ! ( ( (head_ptr) == (entry_ptr) ) &&                              \
-             ( (tail_ptr) == (entry_ptr) ) &&                              \
-             ( (entry_ptr)->next == NULL ) &&                              \
-             ( (entry_ptr)->prev == NULL ) &&                              \
-             ( (Size) == (entry_ptr)->size )                               \
-           )                                                               \
-       )                                                                   \
-     )                                                                     \
-   ) {                                                                     \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "DLL pre remove SC failed")   \
+#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
+if ( ( (head_ptr) == NULL ) ||                                               \
+     ( (tail_ptr) == NULL ) ||                                               \
+     ( (entry_ptr) == NULL ) ||                                              \
+     ( (len) <= 0 ) ||                                                       \
+     ( (Size) < (entry_ptr)->size ) ||                                       \
+     ( ( (Size) == (entry_ptr)->size ) && ( (len) != 1 ) ) ||                \
+     ( ( (entry_ptr)->prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) ||   \
+     ( ( (entry_ptr)->next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||   \
+     ( ( (len) == 1 ) &&                                                     \
+       ( ! ( ( (head_ptr) == (entry_ptr) ) &&                                \
+             ( (tail_ptr) == (entry_ptr) ) &&                                \
+             ( (entry_ptr)->next == NULL ) &&                                \
+             ( (entry_ptr)->prev == NULL ) &&                                \
+             ( (Size) == (entry_ptr)->size )                                 \
+           )                                                                 \
+       )                                                                     \
+     )                                                                       \
+   ) {                                                                       \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre remove SC failed")     \
 }
 
-#define H5C__DLL_SC(head_ptr, tail_ptr, len, Size)                       \
+#define H5C__DLL_SC(head_ptr, tail_ptr, len, Size, fv)                   \
 if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
        ( (head_ptr) != (tail_ptr) )                                      \
      ) ||                                                                \
@@ -160,119 +159,122 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
        )                                                                 \
      )                                                                   \
    ) {                                                                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "DLL sanity check failed")  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL sanity check failed")  \
 }
 
-#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-if ( ( (entry_ptr) == NULL ) ||                                          \
-     ( (entry_ptr)->next != NULL ) ||                                    \
-     ( (entry_ptr)->prev != NULL ) ||                                    \
-     ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
-       ( (head_ptr) != (tail_ptr) )                                      \
-     ) ||                                                                \
-     ( (len) < 0 ) ||                                                    \
-     ( ( (len) == 1 ) &&                                                 \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||              \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )        \
-       )                                                                 \
-     ) ||                                                                \
-     ( ( (len) >= 1 ) &&                                                 \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->prev != NULL ) ||       \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->next != NULL )          \
-       )                                                                 \
-     )                                                                   \
-   ) {                                                                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "DLL pre insert SC failed") \
+#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
+if ( ( (entry_ptr) == NULL ) ||                                              \
+     ( (entry_ptr)->next != NULL ) ||                                        \
+     ( (entry_ptr)->prev != NULL ) ||                                        \
+     ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
+       ( (head_ptr) != (tail_ptr) )                                          \
+     ) ||                                                                    \
+     ( (len) < 0 ) ||                                                        \
+     ( ( (len) == 1 ) &&                                                     \
+       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                  \
+         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
+       )                                                                     \
+     ) ||                                                                    \
+     ( ( (len) >= 1 ) &&                                                     \
+       ( ( (head_ptr) == NULL ) || ( (head_ptr)->prev != NULL ) ||           \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->next != NULL )              \
+       )                                                                     \
+     )                                                                       \
+   ) {                                                                       \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "DLL pre insert SC failed")     \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
 
-#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size)
-#define H5C__DLL_SC(head_ptr, tail_ptr, len, Size)
-#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size)
+#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
+#define H5C__DLL_SC(head_ptr, tail_ptr, len, Size, fv)
+#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
 
-#define H5C__DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size)        \
-        H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-        if ( (head_ptr) == NULL )                                        \
-        {                                                                \
-           (head_ptr) = (entry_ptr);                                     \
-           (tail_ptr) = (entry_ptr);                                     \
-        }                                                                \
-        else                                                             \
-        {                                                                \
-           (tail_ptr)->next = (entry_ptr);                               \
-           (entry_ptr)->prev = (tail_ptr);                               \
-           (tail_ptr) = (entry_ptr);                                     \
-        }                                                                \
-        (len)++;                                                         \
+#define H5C__DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+        H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,    \
+                               fail_val)                                    \
+        if ( (head_ptr) == NULL )                                           \
+        {                                                                   \
+           (head_ptr) = (entry_ptr);                                        \
+           (tail_ptr) = (entry_ptr);                                        \
+        }                                                                   \
+        else                                                                \
+        {                                                                   \
+           (tail_ptr)->next = (entry_ptr);                                  \
+           (entry_ptr)->prev = (tail_ptr);                                  \
+           (tail_ptr) = (entry_ptr);                                        \
+        }                                                                   \
+        (len)++;                                                            \
         (Size) += (entry_ptr)->size;
 
-#define H5C__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size)       \
-        H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-        if ( (head_ptr) == NULL )                                        \
-        {                                                                \
-           (head_ptr) = (entry_ptr);                                     \
-           (tail_ptr) = (entry_ptr);                                     \
-        }                                                                \
-        else                                                             \
-        {                                                                \
-           (head_ptr)->prev = (entry_ptr);                               \
-           (entry_ptr)->next = (head_ptr);                               \
-           (head_ptr) = (entry_ptr);                                     \
-        }                                                                \
-        (len)++;                                                         \
+#define H5C__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+        H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,     \
+                               fail_val)                                     \
+        if ( (head_ptr) == NULL )                                            \
+        {                                                                    \
+           (head_ptr) = (entry_ptr);                                         \
+           (tail_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        else                                                                 \
+        {                                                                    \
+           (head_ptr)->prev = (entry_ptr);                                   \
+           (entry_ptr)->next = (head_ptr);                                   \
+           (head_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        (len)++;                                                             \
         (Size) += entry_ptr->size;
 
-#define H5C__DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size)        \
-        H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-        {                                                                \
-           if ( (head_ptr) == (entry_ptr) )                              \
-           {                                                             \
-              (head_ptr) = (entry_ptr)->next;                            \
-              if ( (head_ptr) != NULL )                                  \
-              {                                                          \
-                 (head_ptr)->prev = NULL;                                \
-              }                                                          \
-           }                                                             \
-           else                                                          \
-           {                                                             \
-              (entry_ptr)->prev->next = (entry_ptr)->next;               \
-           }                                                             \
-           if ( (tail_ptr) == (entry_ptr) )                              \
-           {                                                             \
-              (tail_ptr) = (entry_ptr)->prev;                            \
-              if ( (tail_ptr) != NULL )                                  \
-              {                                                          \
-                 (tail_ptr)->next = NULL;                                \
-              }                                                          \
-           }                                                             \
-           else                                                          \
-           {                                                             \
-              (entry_ptr)->next->prev = (entry_ptr)->prev;               \
-           }                                                             \
-           entry_ptr->next = NULL;                                       \
-           entry_ptr->prev = NULL;                                       \
-           (len)--;                                                      \
-           (Size) -= entry_ptr->size;                                    \
+#define H5C__DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+        H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size,    \
+                               fail_val)                                    \
+        {                                                                   \
+           if ( (head_ptr) == (entry_ptr) )                                 \
+           {                                                                \
+              (head_ptr) = (entry_ptr)->next;                               \
+              if ( (head_ptr) != NULL )                                     \
+              {                                                             \
+                 (head_ptr)->prev = NULL;                                   \
+              }                                                             \
+           }                                                                \
+           else                                                             \
+           {                                                                \
+              (entry_ptr)->prev->next = (entry_ptr)->next;                  \
+           }                                                                \
+           if ( (tail_ptr) == (entry_ptr) )                                 \
+           {                                                                \
+              (tail_ptr) = (entry_ptr)->prev;                               \
+              if ( (tail_ptr) != NULL )                                     \
+              {                                                             \
+                 (tail_ptr)->next = NULL;                                   \
+              }                                                             \
+           }                                                                \
+           else                                                             \
+           {                                                                \
+              (entry_ptr)->next->prev = (entry_ptr)->prev;                  \
+           }                                                                \
+           entry_ptr->next = NULL;                                          \
+           entry_ptr->prev = NULL;                                          \
+           (len)--;                                                         \
+           (Size) -= entry_ptr->size;                                       \
         }
 
 
 #if H5C_DO_SANITY_CHECKS
 
-#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size)   \
-if ( ( (head_ptr) == NULL ) ||                                                 \
+#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (hd_ptr) == NULL ) ||                                                   \
      ( (tail_ptr) == NULL ) ||                                                 \
      ( (entry_ptr) == NULL ) ||                                                \
      ( (len) <= 0 ) ||                                                         \
      ( (Size) < (entry_ptr)->size ) ||                                         \
      ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
-     ( ( (entry_ptr)->aux_prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) || \
+     ( ( (entry_ptr)->aux_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
      ( ( (entry_ptr)->aux_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
      ( ( (len) == 1 ) &&                                                       \
-       ( ! ( ( (head_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) && \
+       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
              ( (entry_ptr)->aux_next == NULL ) &&                              \
              ( (entry_ptr)->aux_prev == NULL ) &&                              \
              ( (Size) == (entry_ptr)->size )                                   \
@@ -280,10 +282,10 @@ if ( ( (head_ptr) == NULL ) ||                                                 \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "aux DLL pre remove SC failed")   \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "aux DLL pre remove SC failed")   \
 }
 
-#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size)                      \
+#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
 if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        ( (head_ptr) != (tail_ptr) )                                         \
      ) ||                                                                   \
@@ -300,58 +302,60 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        )                                                                    \
      )                                                                      \
    ) {                                                                      \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "AUX DLL sanity check failed") \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL sanity check failed") \
 }
 
-#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-if ( ( (entry_ptr) == NULL ) ||                                              \
-     ( (entry_ptr)->aux_next != NULL ) ||                                    \
-     ( (entry_ptr)->aux_prev != NULL ) ||                                    \
-     ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
-       ( (head_ptr) != (tail_ptr) )                                          \
-     ) ||                                                                    \
-     ( (len) < 0 ) ||                                                        \
-     ( ( (len) == 1 ) &&                                                     \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                  \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
-       )                                                                     \
-     ) ||                                                                    \
-     ( ( (len) >= 1 ) &&                                                     \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->aux_prev != NULL ) ||       \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->aux_next != NULL )          \
-       )                                                                     \
-     )                                                                       \
-   ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "AUX DLL pre insert SC failed") \
+#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (entry_ptr) == NULL ) ||                                                \
+     ( (entry_ptr)->aux_next != NULL ) ||                                      \
+     ( (entry_ptr)->aux_prev != NULL ) ||                                      \
+     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                   \
+       ( (hd_ptr) != (tail_ptr) )                                              \
+     ) ||                                                                      \
+     ( (len) < 0 ) ||                                                          \
+     ( ( (len) == 1 ) &&                                                       \
+       ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                      \
+         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (Size) )                  \
+       )                                                                       \
+     ) ||                                                                      \
+     ( ( (len) >= 1 ) &&                                                       \
+       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->aux_prev != NULL ) ||             \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->aux_next != NULL )            \
+       )                                                                       \
+     )                                                                         \
+   ) {                                                                         \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL pre insert SC failed")   \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
 
-#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size)
-#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size)
-#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size)
+#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
+#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size, fv)
+#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
 
-#define H5C__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size)        \
-        H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
-        if ( (head_ptr) == NULL )                                            \
-        {                                                                    \
-           (head_ptr) = (entry_ptr);                                         \
-           (tail_ptr) = (entry_ptr);                                         \
-        }                                                                    \
-        else                                                                 \
-        {                                                                    \
-           (tail_ptr)->aux_next = (entry_ptr);                               \
-           (entry_ptr)->aux_prev = (tail_ptr);                               \
-           (tail_ptr) = (entry_ptr);                                         \
-        }                                                                    \
-        (len)++;                                                             \
+#define H5C__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)\
+        H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,   \
+                                   fail_val)                                   \
+        if ( (head_ptr) == NULL )                                              \
+        {                                                                      \
+           (head_ptr) = (entry_ptr);                                           \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+           (tail_ptr)->aux_next = (entry_ptr);                                 \
+           (entry_ptr)->aux_prev = (tail_ptr);                                 \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        (len)++;                                                               \
         (Size) += entry_ptr->size;
 
-#define H5C__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size)       \
-        H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
+#define H5C__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fv)   \
+        H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
+                                   fv)                                       \
         if ( (head_ptr) == NULL )                                            \
         {                                                                    \
            (head_ptr) = (entry_ptr);                                         \
@@ -366,8 +370,9 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
         (len)++;                                                             \
         (Size) += entry_ptr->size;
 
-#define H5C__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size)        \
-        H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size) \
+#define H5C__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)    \
+        H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
+                                   fv)                                       \
         {                                                                    \
            if ( (head_ptr) == (entry_ptr) )                                  \
            {                                                                 \
@@ -405,7 +410,7 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  * Stats collection macros
  *
  * The following macros must handle stats collection when this collection
- * is encabled, and evaluate to the empty string when it is not.
+ * is enabled, and evaluate to the empty string when it is not.
  *
  ***********************************************************************/
 
@@ -416,10 +421,40 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )   \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;     \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size ) \
-	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;
+	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;   \
+        if ( (cache_ptr)->tree_len > (cache_ptr)->max_tree_len )     \
+	    (cache_ptr)->max_tree_len = (cache_ptr)->tree_len;       \
+        if ( (cache_ptr)->tree_size > (cache_ptr)->max_tree_size )   \
+	    (cache_ptr)->max_tree_size = (cache_ptr)->tree_size;     \
+        if ( (entry_ptr)->size >                                     \
+             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {      \
+            ((cache_ptr)->max_size)[(entry_ptr)->type->id]           \
+                 = (entry_ptr)->size;                                \
+        }
+
+#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)                   \
+        if ( (cache_ptr)->tree_len > (cache_ptr)->max_tree_len )     \
+	    (cache_ptr)->max_tree_len = (cache_ptr)->tree_len;       \
+        if ( (cache_ptr)->tree_size > (cache_ptr)->max_tree_size )   \
+	    (cache_ptr)->max_tree_size = (cache_ptr)->tree_size; 
 
 #define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr) \
 	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
+
+#define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr) \
+	(cache_ptr)->total_ht_insertions++;
+
+#define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr) \
+	(cache_ptr)->total_ht_deletions++;
+
+#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)  \
+	if ( success ) {                                            \
+	    (cache_ptr)->successful_ht_searches++;                  \
+	    (cache_ptr)->total_successful_ht_search_depth += depth; \
+	} else {                                                    \
+	    (cache_ptr)->failed_ht_searches++;                      \
+	    (cache_ptr)->total_failed_ht_search_depth += depth;     \
+	}
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -458,6 +493,11 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
             ((cache_ptr)->max_flushes)[(entry_ptr)->type->id]       \
                  = (entry_ptr)->flushes;                            \
         }                                                           \
+        if ( (entry_ptr)->size >                                    \
+             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {     \
+            ((cache_ptr)->max_size)[(entry_ptr)->type->id]          \
+                 = (entry_ptr)->size;                               \
+        }                                                           \
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
 	if ( hit )                                                   \
@@ -472,6 +512,11 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
             (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;           \
         if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )       \
             (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;         \
+        if ( (entry_ptr)->size >                                     \
+             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {      \
+            ((cache_ptr)->max_size)[(entry_ptr)->type->id]           \
+                 = (entry_ptr)->size;                                \
+        }                                                            \
         ((entry_ptr)->accesses)++;
 
 #else /* H5C_COLLECT_CACHE_ENTRY_STATS */
@@ -506,7 +551,11 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
 #else /* H5C_COLLECT_CACHE_STATS */
 
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) 
+#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
+#define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)
 #define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)
@@ -514,6 +563,997 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
 
 #endif /* H5C_COLLECT_CACHE_STATS */
+
+
+/***********************************************************************
+ *
+ * Hash table access and manipulation macros:
+ *
+ * The following macros handle searches, insertions, and deletion in
+ * the hash table.
+ *
+ * When modifying these macros, remember to modify the similar macros
+ * in tst/cache.c
+ *
+ ***********************************************************************/
+
+#define H5C__HASH_TABLE_LEN	(32 * 1024) /* must be a power of 2 */
+
+#define H5C__HASH_MASK		((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
+
+#define H5C__HASH_FCN(x)	(int)(((x) & H5C__HASH_MASK) >> 3)
+
+#if H5C_DO_SANITY_CHECKS
+
+#define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val) \
+if ( ( (cache_ptr) == NULL ) ||                               \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||            \
+     ( (entry_ptr) == NULL ) ||                               \
+     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||             \
+     ( (entry_ptr)->ht_next != NULL ) ||                      \
+     ( (entry_ptr)->ht_prev != NULL ) ||                      \
+     ( (entry_ptr)->size <= 0 ) ||                            \
+     ( (k = H5C__HASH_FCN((entry_ptr)->addr)) < 0 ) ||        \
+     ( k >= H5C__HASH_TABLE_LEN ) ) {                         \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
+               "Pre HT insert SC failed")                     \
+}
+
+#define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                     \
+if ( ( (cache_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                      \
+     ( (cache_ptr)->index_len < 1 ) ||                                  \
+     ( (entry_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
+     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
+     ( (entry_ptr)->size <= 0 ) ||                                      \
+     ( H5C__HASH_FCN((entry_ptr)->addr) < 0 ) ||                        \
+     ( H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ) ||     \
+     ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]         \
+       == NULL ) ||                                                     \
+     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]       \
+       != (entry_ptr) ) &&                                              \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
+     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))] ==    \
+         (entry_ptr) ) &&                                               \
+       ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
+}
+
+#define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
+     ( ! H5F_addr_defined(Addr) ) ||                                        \
+     ( H5C__HASH_FCN(Addr) < 0 ) ||                                         \
+     ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) {                     \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed") \
+}
+
+#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
+     ( (cache_ptr)->index_len < 1 ) ||                                      \
+     ( (entry_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                     \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                          \
+     ( (entry_ptr)->size <= 0 ) ||                                          \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                                 \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                                \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                                \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                                  \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                                  \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {               \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                            \
+                "Post successful HT search SC failed")                      \
+}
+
+#define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val) \
+if ( ( (cache_ptr) == NULL ) ||                                        \
+     ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                     \
+     ( (entry_ptr)->ht_prev != NULL ) ) {                              \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                       \
+               "Post HT shift to front SC failed")                     \
+}
+
+
+#else /* H5C_DO_SANITY_CHECKS */
+
+#define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)
+#define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)
+#define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)
+#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val)
+#define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)
+
+#endif /* H5C_DO_SANITY_CHECKS */
+
+
+#define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val) \
+{                                                            \
+    int k;                                                   \
+    H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)    \
+    k = H5C__HASH_FCN((entry_ptr)->addr);                    \
+    if ( ((cache_ptr)->index)[k] == NULL )                   \
+    {                                                        \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    else                                                     \
+    {                                                        \
+        (entry_ptr)->ht_next = ((cache_ptr)->index)[k];      \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr);         \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    (cache_ptr)->index_len++;                                \
+    (cache_ptr)->index_size += (entry_ptr)->size;            \
+    H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)            \
+}
+
+#define H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)          \
+{                                                             \
+    int k;                                                    \
+    H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)               \
+    k = H5C__HASH_FCN((entry_ptr)->addr);                     \
+    if ( (entry_ptr)->ht_next )                               \
+    {                                                         \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev; \
+    }                                                         \
+    if ( (entry_ptr)->ht_prev )                               \
+    {                                                         \
+        (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next; \
+    }                                                         \
+    if ( ((cache_ptr)->index)[k] == (entry_ptr) )             \
+    {                                                         \
+        ((cache_ptr)->index)[k] = (entry_ptr)->ht_next;       \
+    }                                                         \
+    (entry_ptr)->ht_next = NULL;                              \
+    (entry_ptr)->ht_prev = NULL;                              \
+    (cache_ptr)->index_len--;                                 \
+    (cache_ptr)->index_size -= (entry_ptr)->size;             \
+    H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)              \
+}
+
+#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)             \
+{                                                                           \
+    int k;                                                                  \
+    int depth = 0;                                                          \
+    H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                        \
+    k = H5C__HASH_FCN(Addr);                                                \
+    entry_ptr = ((cache_ptr)->index)[k];                                    \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )     \
+    {                                                                       \
+        (entry_ptr) = (entry_ptr)->ht_next;                                 \
+        (depth)++;                                                          \
+    }                                                                       \
+    if ( entry_ptr )                                                        \
+    {                                                                       \
+        H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                         \
+        {                                                                   \
+            if ( (entry_ptr)->ht_next )                                     \
+            {                                                               \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+            }                                                               \
+            HDassert( (entry_ptr)->ht_prev != NULL );                       \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;           \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                 \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                 \
+            (entry_ptr)->ht_prev = NULL;                                    \
+            ((cache_ptr)->index)[k] = (entry_ptr);                          \
+            H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)  \
+        }                                                                   \
+    }                                                                       \
+    H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, (entry_ptr != NULL), depth)  \
+} 
+
+
+/**************************************************************************
+ *
+ * Tree insertion and deletion macros:  
+ *
+ * These used to be functions, but I converted them to macros to avoid some
+ * function call overhead.
+ *
+ **************************************************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__INSERT_ENTRY_IN_TREE
+ *
+ * Purpose:     Insert the specified instance of H5C_cache_entry_t into 
+ *		the tree in the specified instance of H5C_t.  Update
+ *		the associated length and size fields.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/10/04
+ *
+ * Modifications:
+ *
+ *		JRM -- 7/21/04
+ *		Updated function to set the in_tree flag when inserting
+ *		an entry into the tree.  Also modified the function to 
+ *		update the tree size and len fields instead of the similar 
+ *		index fields.
+ *
+ *		All of this is part of the modifications to support the
+ *		hash table.
+ *
+ *		JRM -- 7/27/04
+ *		Converted the function H5C_insert_entry_in_tree() into
+ *		the macro H5C__INSERT_ENTRY_IN_TREE in the hopes of 
+ *		wringing a little more speed out of the cache.
+ *
+ *		Note that we don't bother to check if the entry is already
+ *		in the tree -- if it is, H5TB_dins() will fail.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)                        \
+{                                                                              \
+    H5TB_NODE *	loc_node_ptr = NULL;                                           \
+                                                                               \
+    HDassert( (cache_ptr) );                                                   \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+    HDassert( (entry_ptr) );                                                   \
+    HDassert( (entry_ptr)->size > 0 );                                         \
+    HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
+    HDassert( !((entry_ptr)->in_tree) );                                       \
+                                                                               \
+    loc_node_ptr = H5TB_dins((cache_ptr)->tree_ptr, (void *)(entry_ptr), NULL);\
+                                                                               \
+    if ( loc_node_ptr == NULL ) {                                              \
+                                                                               \
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert entry in tree") \
+    }                                                                          \
+                                                                               \
+    (entry_ptr)->in_tree = TRUE;                                               \
+    (cache_ptr)->tree_len++;                                                   \
+    (cache_ptr)->tree_size += (entry_ptr)->size;                               \
+                                                                               \
+    HDassert( (cache_ptr)->tree_len > 0 );                                     \
+    HDassert( (cache_ptr)->tree_size > 0 );                                    \
+                                                                               \
+} /* H5C__INSERT_ENTRY_IN_TREE */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__REMOVE_ENTRY_FROM_TREE
+ *
+ * Purpose:     Remove the specified instance of H5C_cache_entry_t from the 
+ *		index tree in the specified instance of H5C_t.  Update
+ *		the associated length and size fields.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/10/04
+ *
+ * Modifications:
+ *
+ *		JRM -- 7/21/04
+ *		Updated function for the addition of the hash table.
+ *
+ *		JRM - 7/27/04
+ *		Converted from the function H5C_remove_entry_from_tree()
+ *		to the macro H5C__REMOVE_ENTRY_FROM_TREE in the hopes of
+ *		wringing a little more performance out of the cache.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, node_ptr) \
+{                                                                   \
+    HDassert( (cache_ptr) );                                        \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );             \
+    HDassert( (entry_ptr) );                                        \
+    HDassert( !((entry_ptr)->is_protected) );                       \
+    HDassert( (node_ptr) );                                         \
+    HDassert( (node_ptr)->data == (entry_ptr) );                    \
+    HDassert( (entry_ptr)->size > 0 );                              \
+    HDassert( (entry_ptr)->in_tree );                               \
+    HDassert( (cache_ptr)->tree_ptr );                              \
+    HDassert( (cache_ptr)->tree_ptr->root );                        \
+                                                                    \
+    if ( H5TB_rem(&((cache_ptr)->tree_ptr->root), (node_ptr), NULL) \
+         != (entry_ptr) ) {                                         \
+                                                                    \
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                    \
+                    "Can't delete entry from tree.")                \
+                                                                    \
+    } else {                                                        \
+                                                                    \
+        HDassert( (cache_ptr)->tree_len > 0 );                      \
+        (cache_ptr)->tree_len--;                                    \
+        HDassert( (cache_ptr)->tree_size >= (entry_ptr)->size );    \
+        (cache_ptr)->tree_size -= (entry_ptr)->size;                \
+        (entry_ptr)->in_tree = FALSE;                               \
+    }                                                               \
+} /* H5C__REMOVE_ENTRY_FROM_TREE */
+
+
+/**************************************************************************
+ *
+ * Replacement policy update macros:  
+ *
+ * These used to be functions, but I converted them to macros to avoid some
+ * function call overhead.
+ *
+ **************************************************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_EVICTION
+ *
+ * Purpose:     Update the replacement policy data structures for an 
+ *		eviction of the specified cache entry.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  John Mainzer, 5/10/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_eviction() to the
+ *		macro H5C__UPDATE_RP_FOR_EVICTION in an effort to squeeze
+ *		a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		the pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
+{                                                                            \
+    HDassert( (cache_ptr) );                                                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    HDassert( (entry_ptr) );                                                 \
+    HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( (entry_ptr)->size > 0 );                                       \
+                                                                             \
+    /* modified LRU specific code */                                         \
+                                                                             \
+    /* remove the entry from the LRU list. */                                \
+                                                                             \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
+                    (cache_ptr)->LRU_list_size, (fail_val))                  \
+                                                                             \
+    /* If the entry is clean when it is evicted, it should be on the         \
+     * clean LRU list, if it was dirty, it should be on the dirty LRU list.  \
+     * Remove it from the appropriate list according to the value of the     \
+     * dirty flag.                                                           \
+     */                                                                      \
+                                                                             \
+    if ( (entry_ptr)->is_dirty ) {                                           \
+                                                                             \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,         \
+                            (cache_ptr)->dLRU_tail_ptr,                      \
+                            (cache_ptr)->dLRU_list_len,                      \
+                            (cache_ptr)->dLRU_list_size, (fail_val))         \
+    } else {                                                                 \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,         \
+                            (cache_ptr)->cLRU_tail_ptr,                      \
+                            (cache_ptr)->cLRU_list_len,                      \
+                            (cache_ptr)->cLRU_list_size, (fail_val))         \
+    }                                                                        \
+                                                                             \
+} /* H5C__UPDATE_RP_FOR_EVICTION */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
+{                                                                            \
+    HDassert( (cache_ptr) );                                                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    HDassert( (entry_ptr) );                                                 \
+    HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( (entry_ptr)->size > 0 );                                       \
+                                                                             \
+    /* modified LRU specific code */                                         \
+                                                                             \
+    /* remove the entry from the LRU list. */                                \
+                                                                             \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
+                    (cache_ptr)->LRU_list_size, (fail_val))                  \
+                                                                             \
+} /* H5C__UPDATE_RP_FOR_EVICTION */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_FLUSH
+ *
+ * Purpose:     Update the replacement policy data structures for a flush 
+ *		of the specified cache entry.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/6/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_flush() to the
+ *		macro H5C__UPDATE_RP_FOR_FLUSH in an effort to squeeze
+ *		a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+                                                                            \
+    /* modified LRU specific code */                                        \
+                                                                            \
+    /* remove the entry from the LRU list, and re-insert it at the head. */ \
+                                                                            \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,   \
+                    (cache_ptr)->LRU_list_size, (fail_val))                 \
+                                                                            \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,                \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,  \
+                     (cache_ptr)->LRU_list_size, (fail_val))                \
+                                                                            \
+    /* since the entry is being flushed or cleared, one would think that it \
+     * must be dirty -- but that need not be the case.  Use the dirty flag  \
+     * to infer whether the entry is on the clean or dirty LRU list, and    \
+     * remove it.  Then insert it at the head of the clean LRU list.        \
+     *                                                                      \
+     * The function presumes that a dirty entry will be either cleared or   \
+     * flushed shortly, so it is OK if we put a dirty entry on the clean    \
+     * LRU list.                                                            \
+     */                                                                     \
+                                                                            \
+    if ( (entry_ptr)->is_dirty ) {                                          \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,        \
+                            (cache_ptr)->dLRU_tail_ptr,                     \
+                            (cache_ptr)->dLRU_list_len,                     \
+                            (cache_ptr)->dLRU_list_size, (fail_val))        \
+    } else {                                                                \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,        \
+                            (cache_ptr)->cLRU_tail_ptr,                     \
+                            (cache_ptr)->cLRU_list_len,                     \
+                            (cache_ptr)->cLRU_list_size, (fail_val))        \
+    }                                                                       \
+                                                                            \
+    H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,           \
+                         (cache_ptr)->cLRU_tail_ptr,                        \
+                         (cache_ptr)->cLRU_list_len,                        \
+                         (cache_ptr)->cLRU_list_size, (fail_val))           \
+                                                                            \
+    /* End modified LRU specific code. */                                   \
+                                                                            \
+} /* H5C__UPDATE_RP_FOR_FLUSH */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+                                                                            \
+    /* modified LRU specific code */                                        \
+                                                                            \
+    /* remove the entry from the LRU list, and re-insert it at the head. */ \
+                                                                            \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,   \
+                    (cache_ptr)->LRU_list_size, (fail_val))                 \
+                                                                            \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,                \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,  \
+                     (cache_ptr)->LRU_list_size, (fail_val))                \
+                                                                            \
+    /* End modified LRU specific code. */                                   \
+                                                                            \
+} /* H5C__UPDATE_RP_FOR_FLUSH */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_INSERTION
+ *
+ * Purpose:     Update the replacement policy data structures for an
+ *		insertion of the specified cache entry.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/17/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_insertion() to the
+ *		macro H5C__UPDATE_RP_FOR_INSERTION in an effort to squeeze
+ *		a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
+{                                                                          \
+    HDassert( (cache_ptr) );                                               \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (entry_ptr) );                                               \
+    HDassert( !((entry_ptr)->is_protected) );                              \
+    HDassert( (entry_ptr)->size > 0 );                                     \
+                                                                           \
+    /* modified LRU specific code */                                       \
+                                                                           \
+    /* insert the entry at the head of the LRU list. */                    \
+                                                                           \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
+                     (cache_ptr)->LRU_list_size, (fail_val))               \
+                                                                           \
+    /* insert the entry at the head of the clean or dirty LRU list as      \
+     * appropriate.                                                        \
+     */                                                                    \
+                                                                           \
+    if ( entry_ptr->is_dirty ) {                                           \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,      \
+                             (cache_ptr)->dLRU_tail_ptr,                   \
+                             (cache_ptr)->dLRU_list_len,                   \
+                             (cache_ptr)->dLRU_list_size, (fail_val))      \
+    } else {                                                               \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
+                             (cache_ptr)->cLRU_tail_ptr,                   \
+                             (cache_ptr)->cLRU_list_len,                   \
+                             (cache_ptr)->cLRU_list_size, (fail_val))      \
+    }                                                                      \
+                                                                           \
+    /* End modified LRU specific code. */                                  \
+                                                                           \
+}
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
+{                                                                          \
+    HDassert( (cache_ptr) );                                               \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (entry_ptr) );                                               \
+    HDassert( !((entry_ptr)->is_protected) );                              \
+    HDassert( (entry_ptr)->size > 0 );                                     \
+                                                                           \
+    /* modified LRU specific code */                                       \
+                                                                           \
+    /* insert the entry at the head of the LRU list. */                    \
+                                                                           \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
+                     (cache_ptr)->LRU_list_size, (fail_val))               \
+                                                                           \
+    /* End modified LRU specific code. */                                  \
+                                                                           \
+}
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_PROTECT
+ *
+ * Purpose:     Update the replacement policy data structures for a 
+ *		protect of the specified cache entry.
+ *
+ *		To do this, unlink the specified entry from any data 
+ *		structures used by the replacement policy, and add the
+ *		entry to the protected list.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/17/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_protect() to the
+ *		macro H5C__UPDATE_RP_FOR_PROTECT in an effort to squeeze
+ *		a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
+{                                                                         \
+    HDassert( (cache_ptr) );                                              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (entry_ptr) );                                              \
+    HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( (entry_ptr)->size > 0 );                                    \
+                                                                          \
+    /* modified LRU specific code */                                      \
+                                                                          \
+    /* remove the entry from the LRU list. */                             \
+                                                                          \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
+                    (cache_ptr)->LRU_list_size, (fail_val))               \
+                                                                          \
+    /* Similarly, remove the entry from the clean or dirty LRU list       \
+     * as appropriate.                                                    \
+     */                                                                   \
+                                                                          \
+    if ( (entry_ptr)->is_dirty ) {                                        \
+                                                                          \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,      \
+                            (cache_ptr)->dLRU_tail_ptr,                   \
+                            (cache_ptr)->dLRU_list_len,                   \
+                            (cache_ptr)->dLRU_list_size, (fail_val))      \
+                                                                          \
+    } else {                                                              \
+                                                                          \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
+                            (cache_ptr)->cLRU_tail_ptr,                   \
+                            (cache_ptr)->cLRU_list_len,                   \
+                            (cache_ptr)->cLRU_list_size, (fail_val))      \
+    }                                                                     \
+                                                                          \
+    /* End modified LRU specific code. */                                 \
+                                                                          \
+    /* Regardless of the replacement policy, now add the entry to the     \
+     * protected list.                                                    \
+     */                                                                   \
+                                                                          \
+    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+                    (cache_ptr)->pl_tail_ptr,                             \
+                    (cache_ptr)->pl_len,                                  \
+                    (cache_ptr)->pl_size, (fail_val))                     \
+} /* H5C__UPDATE_RP_FOR_PROTECT */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
+{                                                                         \
+    HDassert( (cache_ptr) );                                              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (entry_ptr) );                                              \
+    HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( (entry_ptr)->size > 0 );                                    \
+                                                                          \
+    /* modified LRU specific code */                                      \
+                                                                          \
+    /* remove the entry from the LRU list. */                             \
+                                                                          \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len, \
+                    (cache_ptr)->LRU_list_size, (fail_val))               \
+                                                                          \
+    /* End modified LRU specific code. */                                 \
+                                                                          \
+    /* Regardless of the replacement policy, now add the entry to the     \
+     * protected list.                                                    \
+     */                                                                   \
+                                                                          \
+    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+                    (cache_ptr)->pl_tail_ptr,                             \
+                    (cache_ptr)->pl_len,                                  \
+                    (cache_ptr)->pl_size, (fail_val))                     \
+} /* H5C__UPDATE_RP_FOR_PROTECT */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_RENAME
+ *
+ * Purpose:     Update the replacement policy data structures for a 
+ *		rename of the specified cache entry.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/17/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_rename() to the
+ *		macro H5C__UPDATE_RP_FOR_RENAME in an effort to squeeze
+ *		a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, fail_val)           \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+                                                                            \
+    /* modified LRU specific code */                                        \
+                                                                            \
+    /* remove the entry from the LRU list, and re-insert it at the head. */ \
+                                                                            \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,   \
+                    (cache_ptr)->LRU_list_size, (fail_val))                 \
+                                                                            \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,                \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,  \
+                     (cache_ptr)->LRU_list_size, (fail_val))                \
+                                                                            \
+    /* move the entry to the head of either the clean or dirty LRU list     \
+     * as appropriate.                                                      \
+     */                                                                     \
+                                                                            \
+    if ( (entry_ptr)->is_dirty ) {                                          \
+                                                                            \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,        \
+                            (cache_ptr)->dLRU_tail_ptr,                     \
+                            (cache_ptr)->dLRU_list_len,                     \
+                            (cache_ptr)->dLRU_list_size, (fail_val))        \
+                                                                            \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,       \
+                             (cache_ptr)->dLRU_tail_ptr,                    \
+                             (cache_ptr)->dLRU_list_len,                    \
+                             (cache_ptr)->dLRU_list_size, (fail_val))       \
+                                                                            \
+    } else {                                                                \
+                                                                            \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,        \
+                            (cache_ptr)->cLRU_tail_ptr,                     \
+                            (cache_ptr)->cLRU_list_len,                     \
+                            (cache_ptr)->cLRU_list_size, (fail_val))        \
+                                                                            \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,       \
+                             (cache_ptr)->cLRU_tail_ptr,                    \
+                             (cache_ptr)->cLRU_list_len,                    \
+                             (cache_ptr)->cLRU_list_size, (fail_val))       \
+    }                                                                       \
+                                                                            \
+    /* End modified LRU specific code. */                                   \
+                                                                            \
+} /* H5C__UPDATE_RP_FOR_RENAME */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, fail_val)           \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+                                                                            \
+    /* modified LRU specific code */                                        \
+                                                                            \
+    /* remove the entry from the LRU list, and re-insert it at the head. */ \
+                                                                            \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+                    (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,   \
+                    (cache_ptr)->LRU_list_size, (fail_val))                 \
+                                                                            \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,                \
+                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,  \
+                     (cache_ptr)->LRU_list_size, (fail_val))                \
+                                                                            \
+    /* End modified LRU specific code. */                                   \
+                                                                            \
+} /* H5C__UPDATE_RP_FOR_RENAME */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__UPDATE_RP_FOR_UNPROTECT
+ *
+ * Purpose:     Update the replacement policy data structures for an
+ *		unprotect of the specified cache entry.
+ *
+ *		To do this, unlink the specified entry from the protected
+ *		list, and re-insert it in the data structures used by the
+ *		current replacement policy.
+ *
+ *		At present, we only support the modified LRU policy, so 
+ *		this function deals with that case unconditionally.  If
+ *		we ever support other replacement policies, the function
+ *		should switch on the current policy and act accordingly.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 5/19/04
+ *
+ * Modifications:
+ *
+ *		JRM - 7/27/04
+ *		Converted the function H5C_update_rp_for_unprotect() to 
+ *		the macro H5C__UPDATE_RP_FOR_UNPROTECT in an effort to 
+ *		squeeze a bit more performance out of the cache.
+ *
+ *		At least for the first cut, I am leaving the comments and
+ *		white space in the macro.  If they cause dificulties with
+ *		pre-processor, I'll have to remove them.
+ *
+ *		JRM - 7/28/04
+ *		Split macro into two version, one supporting the clean and
+ *		dirty LRU lists, and the other not.  Yet another attempt
+ *		at optimization.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)   \
+{                                                                      \
+    HDassert( (cache_ptr) );                                           \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    HDassert( (entry_ptr) );                                           \
+    HDassert( (entry_ptr)->is_protected);                              \
+    HDassert( (entry_ptr)->size > 0 );                                 \
+                                                                       \
+    /* Regardless of the replacement policy, remove the entry from the \
+     * protected list.                                                 \
+     */                                                                \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,             \
+                    (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,     \
+                    (cache_ptr)->pl_size, (fail_val))                  \
+                                                                       \
+    /* modified LRU specific code */                                   \
+                                                                       \
+    /* insert the entry at the head of the LRU list. */                \
+                                                                       \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                     (cache_ptr)->LRU_tail_ptr,                        \
+                     (cache_ptr)->LRU_list_len,                        \
+                     (cache_ptr)->LRU_list_size, (fail_val))           \
+                                                                       \
+    /* Similarly, insert the entry at the head of either the clean or  \
+     * dirty LRU list as appropriate.                                  \
+     */                                                                \
+                                                                       \
+    if ( (entry_ptr)->is_dirty ) {                                     \
+                                                                       \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
+                             (cache_ptr)->dLRU_tail_ptr,               \
+                             (cache_ptr)->dLRU_list_len,               \
+                             (cache_ptr)->dLRU_list_size, (fail_val))  \
+                                                                       \
+    } else {                                                           \
+                                                                       \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
+                             (cache_ptr)->cLRU_tail_ptr,               \
+                             (cache_ptr)->cLRU_list_len,               \
+                             (cache_ptr)->cLRU_list_size, (fail_val))  \
+    }                                                                  \
+                                                                       \
+    /* End modified LRU specific code. */                              \
+                                                                       \
+} /* H5C__UPDATE_RP_FOR_UNPROTECT */
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)   \
+{                                                                      \
+    HDassert( (cache_ptr) );                                           \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    HDassert( (entry_ptr) );                                           \
+    HDassert( (entry_ptr)->is_protected);                              \
+    HDassert( (entry_ptr)->size > 0 );                                 \
+                                                                       \
+    /* Regardless of the replacement policy, remove the entry from the \
+     * protected list.                                                 \
+     */                                                                \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,             \
+                    (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,     \
+                    (cache_ptr)->pl_size, (fail_val))                  \
+                                                                       \
+    /* modified LRU specific code */                                   \
+                                                                       \
+    /* insert the entry at the head of the LRU list. */                \
+                                                                       \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                     (cache_ptr)->LRU_tail_ptr,                        \
+                     (cache_ptr)->LRU_list_len,                        \
+                     (cache_ptr)->LRU_list_size, (fail_val))           \
+                                                                       \
+    /* End modified LRU specific code. */                              \
+                                                                       \
+} /* H5C__UPDATE_RP_FOR_UNPROTECT */
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 
 /****************************************************************************
@@ -536,6 +1576,27 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  * at present only a modified form of LRU is supported.  
  *
  *                                              JRM - 4/26/04
+ *
+ * Profiling has indicated that searches in the instance of H5TB_TREE are
+ * too expensive.  To deal with this issue, I have augmented the cache 
+ * with a hash table in which all entries will be stored.  Given the 
+ * advantages of flushing entries in increasing address order, the TBBT 
+ * is retained, but only dirty entries are stored in it.  At least for
+ * now, we will leave entries in the TBBT after they are flushed.
+ *
+ * Note that index_size and index_len now refer to the total size of
+ * and number of entries in the hash table.
+ *
+ *						JRM - 7/19/04
+ *
+ *           *********************************************
+ *
+ * WARNING:  A copy of H5C_t is in tst/cache.c (under the name "local_H5C_t"
+ *	     to allow the test code to access the internal fields of the 
+ *	     cache.  If you modify H5C_t, be sure to update local_H5C_t
+ *	     in cache.c as well.
+ *
+ *           *********************************************
  *
  * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  This
  *		field is used to validate pointers to instances of H5C_t.
@@ -590,11 +1651,11 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  * The cache requires an index to facilitate searching for entries.  The
  * following fields support that index.
  *
- * index_len:   Number of entries currently in the threaded binary B-tree
- *              used to index the cache.
+ * index_len:   Number of entries currently in the hash table used to index 
+ *		the cache.
  *
  * index_size:  Number of bytes of cache entries currently stored in the
- *              threaded binary B-tree used to index the cache.
+ *              hash table used to index the cache.
  *
  *              This value should not be mistaken for footprint of the
  *              cache in memory.  The average cache entry is small, and
@@ -602,21 +1663,50 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  *              index_size by two should yield a conservative estimate
  *              of the cache's memory footprint.
  *
- * index_tree_ptr: pointer to the instance of H5TB_TREE used to index
- *              the cache.  I use an instance of H5TB_TREE instead of
- *              a more conventional hash table based design for two
- *              reasons:
+ * index:	Array of pointer to H5C_cache_entry_t of size
+ *		H5C__HASH_TABLE_LEN.  At present, this value is a power
+ *		of two, not the usual prime number.  
  *
- *              a) the code is already present and tested.
+ *		I hope that the variable size of cache elements, the large 
+ *		hash table size, and the way in which HDF5 allocates space
+ *		will combine to avoid problems with periodicity.  If so, we 
+ *		can use a trivial hash function (a bit-and and a 3 bit left 
+ *		shift) with some small savings.  
  *
- *              b) the H5TB_TREE makes it easy to check for adjacent
- *                 cache entries so that writes can be combined and
- *                 thus optimized.
+ *		If not, it will become evident in the statistics. Changing
+ *		to the usual prime number length hash table will require 
+ *		changing the H5C__HASH_FCN macro and the deletion of the
+ *		H5C__HASH_MASK #define.  No other changes should be required.
  *
- *              If time permitted, a more efficient index could be
- *              constructed.  However, this should do for now.  If the
- *              additional lookup overhead proves excessive, I will
- *              write specialized code.
+ *
+ * When we flush the cache, we need to write entries out in increasing
+ * address order.  An instance of TBBT is used to store dirty entries in
+ * sorted order.  Whether it is cheaper to sort the dirty entries as needed,
+ * or to maintain the tree is an open question.  At a guess, it depends
+ * on how frequently the cache is flushed.  We will see how it goes.
+ *
+ * For now at least, I will not remove dirty entries from the tree as they
+ * are flushed.
+ *
+ * tree_len:    Number of entries currently in the threaded binary B-tree
+ *              used to maintain a sorted list of dirty entries in the 
+ *		cache.
+ *
+ * tree_size:   Number of bytes of cache entries currently stored in the
+ *              threaded binary B-tree used to maintain a sorted list of
+ *		dirty entries in the cache.
+ *
+ * tree_ptr:	pointer to the instance of H5TB_TREE used maintain a sorted
+ *		list of dirty entries in the cache.  This sorted list has
+ *		two uses:
+ *
+ *		a) It allows us to flush dirty entries in increasing address
+ *		   order, which results in significant savings.
+ *
+ *		b) It facilitates checking for adjacent dirty entries when
+ *		   attempting to evict entries from the cache.  While we
+ *		   don't use this at present, I hope that this will allow
+ *		   some optimizations when I get to it.
  *
  *
  * When a cache entry is protected, it must be removed from the LRU
@@ -797,10 +1887,36 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  *		id equal to the array index has been renamed in the current 
  *		epoch.
  *
+ * total_ht_insertions: Number of times entries have been inserted into the
+ *		hash table in the current epoch.
+ *
+ * total_ht_deletions: Number of times entries have been deleted from the
+ *              hash table in the current epoch.
+ *
+ * successful_ht_searches: int64 containing the total number of successful 
+ *		searches of the hash table in the current epoch.
+ *
+ * total_successful_ht_search_depth: int64 containing the total number of 
+ *		entries other than the targets examined in successful
+ *		searches of the hash table in the current epoch.
+ *
+ * failed_ht_searches: int64 containing the total number of unsuccessful
+ *              searches of the hash table in the current epoch.
+ *
+ * total_failed_ht_search_depth: int64 containing the total number of
+ *              entries examined in unsuccessful searches of the hash 
+ *		table in the current epoch.
+ *
  * max_index_len:  Largest value attained by the index_len field in the
  *              current epoch.
  *
  * max_index_size:  Largest value attained by the index_size field in the
+ *              current epoch.
+ *
+ * max_tree_len:  Largest value attained by the tree_len field in the
+ *              current epoch.
+ *
+ * max_tree_size:  Largest value attained by the tree_size field in the
  *              current epoch.
  *
  * max_pl_len:  Largest value attained by the pl_len field in the
@@ -832,6 +1948,11 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  *		entry with type id equal to the array index has been 
  *		flushed in the current epoch.
  *
+ * max_size:	Array of size_t of length H5C__MAX_NUM_TYPE_IDS.  The cells
+ *              are used to record the maximum size of any single entry 
+ *		with type id equal to the array index that has resided in
+ *		the cache in the current epoch.
+ *
  *
  * Fields supporting testing:
  *
@@ -856,8 +1977,8 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
  *
  ****************************************************************************/
 
-#define H5C__H5C_T_MAGIC		0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS		9
+#define H5C__H5C_T_MAGIC	0x005CAC0E
+#define H5C__MAX_NUM_TYPE_IDS	9
 
 struct H5C_t
 {
@@ -873,7 +1994,12 @@ struct H5C_t
 
     int32_t                     index_len;
     size_t                      index_size;
-    H5TB_TREE *                 index_tree_ptr;
+    H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
+
+
+    int32_t                     tree_len;
+    size_t                      tree_size;
+    H5TB_TREE *                 tree_ptr;
 
     int32_t                     pl_len;
     size_t                      pl_size;
@@ -906,8 +2032,18 @@ struct H5C_t
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS];
     int64_t                     renames[H5C__MAX_NUM_TYPE_IDS];
 
+    int64_t			total_ht_insertions;
+    int64_t			total_ht_deletions;
+    int64_t			successful_ht_searches;
+    int64_t			total_successful_ht_search_depth;
+    int64_t			failed_ht_searches;
+    int64_t			total_failed_ht_search_depth;
+
     int32_t                     max_index_len;
     size_t                      max_index_size;
+
+    int32_t                     max_tree_len;
+    size_t                      max_tree_size;
 
     int32_t                     max_pl_len;
     size_t                      max_pl_size;
@@ -918,6 +2054,7 @@ struct H5C_t
     int32_t                     min_accesses[H5C__MAX_NUM_TYPE_IDS];
     int32_t                     max_clears[H5C__MAX_NUM_TYPE_IDS];
     int32_t                     max_flushes[H5C__MAX_NUM_TYPE_IDS];
+    size_t                      max_size[H5C__MAX_NUM_TYPE_IDS];
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
@@ -949,10 +2086,7 @@ static herr_t H5C_flush_single_entry(H5F_t *             f,
                                      unsigned            flags,
                                      H5TB_NODE *         tgt_node_ptr,
                                      hbool_t *           first_flush_ptr,
-                                     hbool_t remove_entry_from_tree_on_destroy);
-
-static herr_t H5C_insert_entry_in_tree(H5C_t *             cache_ptr,
-                                       H5C_cache_entry_t * entry_ptr);
+                                     hbool_t    del_entry_from_tree_on_destroy);
 
 static void * H5C_load_entry(H5F_t *             f,
                              hid_t               dxpl_id,
@@ -968,28 +2102,6 @@ static herr_t H5C_make_space_in_cache(H5F_t * f,
                                       H5C_t * cache_ptr,
                                       size_t  space_needed,
                                       hbool_t write_permitted);
-
-static herr_t H5C_remove_entry_from_tree(H5C_t *             cache_ptr,
-                                         H5C_cache_entry_t * entry_ptr,
-                                         H5TB_NODE *         node_ptr);
-
-static herr_t H5C_update_rp_for_eviction(H5C_t *              cache_ptr,
-                                         H5C_cache_entry_t * entry_ptr);
-
-static herr_t H5C_update_rp_for_flush(H5C_t *             cache_ptr,
-                                      H5C_cache_entry_t * entry_ptr);
-
-static herr_t H5C_update_rp_for_insertion(H5C_t *             cache_ptr,
-                                          H5C_cache_entry_t * entry_ptr);
-
-static herr_t H5C_update_rp_for_protect(H5C_t *             cache_ptr,
-                                        H5C_cache_entry_t * entry_ptr);
-
-static herr_t H5C_update_rp_for_rename(H5C_t *             cache_ptr,
-                                       H5C_cache_entry_t * entry_ptr);
-
-static herr_t H5C_update_rp_for_unprotect(H5C_t *             cache_ptr,
-                                          H5C_cache_entry_t * entry_ptr);
 
 
 /*-------------------------------------------------------------------------
@@ -1015,6 +2127,9 @@ static herr_t H5C_update_rp_for_unprotect(H5C_t *             cache_ptr,
  *              6/2/04
  *
  * Modifications:
+ *
+ *		JRM -- 7/20/04
+ *		Updated for the addition of the hash table.
  *
  *-------------------------------------------------------------------------
  */
@@ -1052,7 +2167,7 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->index_tree_ptr = H5TB_fast_dmake(H5TB_FAST_HADDR_COMPARE)) 
+    if ( (cache_ptr->tree_ptr = H5TB_fast_dmake(H5TB_FAST_HADDR_COMPARE)) 
          == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create TBBT.")
@@ -1074,6 +2189,14 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->index_len		= 0;
     cache_ptr->index_size		= (size_t)0;
+
+    cache_ptr->tree_len			= 0;
+    cache_ptr->tree_size		= (size_t)0;
+
+    for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ )
+    {
+        (cache_ptr->index)[i] = NULL;
+    }
 
     cache_ptr->pl_len			= 0;
     cache_ptr->pl_size			= (size_t)0;
@@ -1109,12 +2232,12 @@ done:
 
         if ( cache_ptr != NULL ) {
 
-            if ( cache_ptr->index_tree_ptr != NULL ) {
+            if ( cache_ptr->tree_ptr != NULL ) {
 
                 /* the index tree should be empty, so we can pass in
                  * NULL for the fd & fk parameters.
                  */
-                H5TB_dfree(cache_ptr->index_tree_ptr, NULL, NULL);
+                H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
             }
 
             cache_ptr->magic = 0;
@@ -1176,13 +2299,13 @@ H5C_dest(H5F_t * f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     }
 
-    if ( cache_ptr->index_tree_ptr != NULL ) {
+    if ( cache_ptr->tree_ptr != NULL ) {
 
         /* the index tree should be empty, so we can pass in
          * NULL for the fd & fk parameters.
          */
-        H5TB_dfree(cache_ptr->index_tree_ptr, NULL, NULL);
-        cache_ptr->index_tree_ptr = NULL;
+        H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
+        cache_ptr->tree_ptr = NULL;
     }
 
     cache_ptr->magic = 0;
@@ -1232,13 +2355,13 @@ H5C_dest_empty(H5C_t * cache_ptr)
     }
 
 
-    if ( cache_ptr->index_tree_ptr != NULL ) {
+    if ( cache_ptr->tree_ptr != NULL ) {
 
-        /* the index tree should be empty, so we can pass in
+        /* the tree should be empty, so we can pass in
          * NULL for the fd & fk parameters.
          */
-        H5TB_dfree(cache_ptr->index_tree_ptr, NULL, NULL);
-        cache_ptr->index_tree_ptr = NULL;
+        H5TB_dfree(cache_ptr->tree_ptr, NULL, NULL);
+        cache_ptr->tree_ptr = NULL;
     }
 
     cache_ptr->magic = 0;
@@ -1277,6 +2400,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 7/20/04
+ *		Modified the function for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1291,11 +2417,12 @@ H5C_flush_cache(H5F_t *  f,
     hbool_t             destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
     hbool_t		first_flush = TRUE;
     int32_t		protected_entries = 0;
+    int32_t		i;
     H5TB_NODE * 	node_ptr;
     H5C_cache_entry_t *	entry_ptr;
 #if H5C_DO_SANITY_CHECKS
-    int32_t		actual_index_len = 0;
-    size_t              actual_index_size = 0;
+    int32_t		actual_tree_len = 0;
+    size_t              actual_tree_size = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_ENTER_NOAPI(H5C_flush_cache, FAIL)
@@ -1303,27 +2430,29 @@ H5C_flush_cache(H5F_t *  f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
+    HDassert( cache_ptr->tree_ptr );
 
-
-    if ( cache_ptr->index_tree_ptr->root == NULL ) {
+    if ( cache_ptr->tree_ptr->root == NULL ) {
 
         node_ptr = NULL;
-        HDassert( cache_ptr->index_len == 0 );
-        HDassert( cache_ptr->index_size == 0 );
+        HDassert( cache_ptr->tree_len == 0 );
+        HDassert( cache_ptr->tree_size == 0 );
 
     } else {
 
-        node_ptr = H5TB_first(cache_ptr->index_tree_ptr->root);
+        node_ptr = H5TB_first(cache_ptr->tree_ptr->root);
     }
 
     while ( node_ptr != NULL )
     {
         entry_ptr = (H5C_cache_entry_t *)(node_ptr->data);
+
         HDassert( entry_ptr != NULL );
+        HDassert( entry_ptr->in_tree );
 
 #if H5C_DO_SANITY_CHECKS
-        actual_index_len++;
-        actual_index_size += entry_ptr->size;
+        actual_tree_len++;
+        actual_tree_size += entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
 
         if ( entry_ptr->is_protected ) {
@@ -1359,11 +2488,9 @@ H5C_flush_cache(H5F_t *  f,
 
     } /* while */
 
-    HDassert( protected_entries == cache_ptr->pl_len );
-
 #if H5C_DO_SANITY_CHECKS
-    HDassert( actual_index_len == cache_ptr->index_len );
-    HDassert( actual_index_size == cache_ptr->index_size );
+    HDassert( actual_tree_len == cache_ptr->tree_len );
+    HDassert( actual_tree_size == cache_ptr->tree_size );
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if ( destroy ) {
@@ -1371,9 +2498,62 @@ H5C_flush_cache(H5F_t *  f,
         /* don't pass in any key or data free functions, as all
          * unprotected entries should have already been destroyed.
          */
-        H5TB_free(&(cache_ptr->index_tree_ptr->root), NULL, NULL);
-        cache_ptr->index_len = 0;
-        cache_ptr->index_size = 0;
+        H5TB_free(&(cache_ptr->tree_ptr->root), NULL, NULL);
+        cache_ptr->tree_len = 0;
+        cache_ptr->tree_size = 0;
+
+        /* Since we are doing a destroy, we must make a pass through
+         * the hash table and flush all entries that remain.  Note that
+         * all remaining entries entries must be clean, so this will
+         * not result in any writes to disk.
+         */
+        for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ )
+        {
+            while ( cache_ptr->index[i] )
+            {
+                entry_ptr = cache_ptr->index[i];
+
+                if ( entry_ptr->is_protected ) {
+
+                    /* we have major problems -- but lets flush and destroy
+                     * everything we can before we flag an error.
+                     */
+                    
+                    H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+
+                    if ( !entry_ptr->in_tree ) {
+
+	                protected_entries++;
+                        HDassert( !(entry_ptr->is_dirty) );
+                    }
+                } else {
+
+                    HDassert( !(entry_ptr->is_dirty) );
+                    HDassert( !(entry_ptr->in_tree) );
+
+                    status = H5C_flush_single_entry(f, 
+                                                    primary_dxpl_id, 
+                                                    secondary_dxpl_id, 
+                                                    cache_ptr,
+                                                    NULL, 
+                                                    entry_ptr->addr, 
+                                                    flags, 
+                                                    NULL, 
+                                                    &first_flush, 
+                                                    FALSE);
+                    if ( status < 0 ) {
+                
+                        /* This shouldn't happen -- if it does, we are toast so
+                         * just scream and die.
+                         */
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                    "Can't flush entry.")
+                    }
+                }
+            }
+        }
+
+        HDassert( protected_entries == cache_ptr->pl_len );
 
         if ( protected_entries > 0 )
         {
@@ -1381,23 +2561,28 @@ H5C_flush_cache(H5F_t *  f,
              * contains one or more protected entries.  Since we can't
              * flush protected entries, we haven't destroyed them either.
              * Since they are all on the protected list, just re-insert 
-             * them into the tree before we flag an error.
+             * them into the cache before we flag an error.
              */
             entry_ptr = cache_ptr->pl_head_ptr;
 
             while ( entry_ptr != NULL )
             {
-                if ( H5C_insert_entry_in_tree(cache_ptr, entry_ptr) < 0 ) {
+                entry_ptr->in_tree = FALSE;
 
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                "Can't re-insert protected entry.")
+                H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
+
+                if ( entry_ptr->is_dirty ) {
+
+                    H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
                 }
                 entry_ptr = entry_ptr->next;
             }
         }
     }
 
-    if ( protected_entries > 0 ) {
+    HDassert( protected_entries <= cache_ptr->pl_len );
+
+    if ( cache_ptr->pl_len > 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, "cache has protected items")
     }
@@ -1436,6 +2621,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 7/21/04
+ *		Updated function for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1452,7 +2640,7 @@ H5C_insert_entry(H5F_t * 	     f,
     herr_t		ret_value = SUCCEED;    /* Return value */
     hbool_t		write_permitted = TRUE;
     H5C_cache_entry_t *	entry_ptr;
-    H5TB_NODE *		node_ptr = NULL;
+    H5C_cache_entry_t *	test_entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_insert_entry, FAIL)
 
@@ -1478,14 +2666,20 @@ H5C_insert_entry(H5F_t * 	     f,
 
     HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE ); 
 
+    entry_ptr->in_tree = FALSE;
+
+    entry_ptr->ht_next = NULL;
+    entry_ptr->ht_prev = NULL;
+
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL; 
+
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
 
     H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) 
 
-    if ( (cache_ptr->index_size + entry_ptr->size) > cache_ptr->max_cache_size ){
+    if ((cache_ptr->index_size + entry_ptr->size) > cache_ptr->max_cache_size) {
 
         size_t space_needed;
 
@@ -1545,14 +2739,15 @@ H5C_insert_entry(H5F_t * 	     f,
         }
     }
 
-    /* verify the the new entry isn't already in the tree -- scream
+    /* verify that the new entry isn't already in the hash table -- scream
      * and die if it is.
      */
-    node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr, entry_ptr, NULL);
 
-    if ( node_ptr != NULL ) {
+    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
 
-        if ( node_ptr->key == ((void *)(entry_ptr)) ) {
+    if ( test_entry_ptr != NULL ) {
+
+        if ( test_entry_ptr == entry_ptr ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "entry already in cache.")
@@ -1561,7 +2756,6 @@ H5C_insert_entry(H5F_t * 	     f,
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "duplicate entry in cache.")
-       
         }
     }
 
@@ -1573,19 +2767,14 @@ H5C_insert_entry(H5F_t * 	     f,
 
     entry_ptr->is_protected = FALSE;
 
-    if ( H5C_insert_entry_in_tree(cache_ptr, entry_ptr) < 0 ) {
+    H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                    "Can't insert entry in tree.")
-       
+    if ( entry_ptr->is_dirty ) {
+
+        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
     }
 
-    if ( H5C_update_rp_for_insertion(cache_ptr, entry_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                    "Can't update replacement policy for insertion.")
-       
-    }
+    H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
@@ -1610,6 +2799,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 7/21/04
+ *		Updated function for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1621,9 +2813,9 @@ H5C_rename_entry(H5F_t *	     f,
 	         haddr_t 	     new_addr)
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
-    H5TB_NODE *		new_node_ptr = NULL;
     H5TB_NODE *		old_node_ptr = NULL;
-    H5C_cache_entry_t *	entry_ptr;
+    H5C_cache_entry_t *	entry_ptr = NULL;
+    H5C_cache_entry_t *	test_entry_ptr = NULL;
     H5C_cache_entry_t	search_target;
 
     FUNC_ENTER_NOAPI(H5C_rename_entry, FAIL)
@@ -1636,33 +2828,38 @@ H5C_rename_entry(H5F_t *	     f,
     HDassert( H5F_addr_defined(new_addr) );
     HDassert( H5F_addr_ne(old_addr, new_addr) );
 
-    search_target.addr = old_addr;
-    old_node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr, 
-                              (void *)(&search_target), 
-                              NULL);
+    H5C__SEARCH_INDEX(cache_ptr, old_addr, entry_ptr, FAIL)
 
-    if ( ( old_node_ptr == NULL ) || 
-         ( ((H5C_cache_entry_t *)(old_node_ptr->key))->type != type ) ) {
+    if ( ( entry_ptr == NULL ) || ( entry_ptr->type != type ) ) {
 
         /* the old item doesn't exist in the cache, so we are done. */
         HGOTO_DONE(SUCCEED)
 
     } else {
 
-        entry_ptr = old_node_ptr->key;
         HDassert( entry_ptr->addr == old_addr );
         HDassert( entry_ptr->type == type );
         HDassert( !(entry_ptr->is_protected) );
+
+        if ( entry_ptr->in_tree ) {
+
+            HDassert( cache_ptr->tree_ptr );
+            search_target.addr = old_addr;
+
+            old_node_ptr = H5TB_dfind(cache_ptr->tree_ptr, 
+                                      (void *)(&search_target), 
+                                      NULL);
+
+            HDassert( old_node_ptr != NULL );
+            HDassert( old_node_ptr->key == (void *)entry_ptr );
+        }
     }
 
-    search_target.addr = new_addr;
-    new_node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr, 
-                              (void *)&search_target, 
-                              NULL);
+    H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL)
 
-    if ( new_node_ptr != NULL ) { /* we are hosed */
+    if ( test_entry_ptr != NULL ) { /* we are hosed */
         
-        if ( ((H5C_cache_entry_t *)(new_node_ptr->key))->type == type ) {
+        if ( test_entry_ptr->type == type ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
                         "Target already renamed & reinserted???.")
@@ -1671,38 +2868,36 @@ H5C_rename_entry(H5F_t *	     f,
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
                         "New address already in use?.")
-
         }
     }
 
     /* If we get this far, we have work to do.  Remove *entry_ptr from
-     * the tree, change its address to the new address, and then re-insert.
+     * the hash table (and tree if necessary), change its address to the 
+     * new address, and then re-insert.
+     *
      * Update the replacement policy for a hit to avoid an eviction before
      * the renamed entry is touched.  Update stats for a rename.
      *
      * Note that we do not check the size of the cache, or evict anything.
      * Since this is a simple re-name, cache size should be unaffected.
      */
+    H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 
-    if ( H5C_remove_entry_from_tree(cache_ptr, entry_ptr, old_node_ptr) < 0 ) {
+    if ( old_node_ptr ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
-                    "Can't remove entry from tree.")
+        H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, old_node_ptr)
     }
 
     entry_ptr->addr = new_addr;
 
-    if ( H5C_insert_entry_in_tree(cache_ptr, entry_ptr) < 0 ) {
+    H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
-                    "Can't re-insert entry from tree.")
+    if ( entry_ptr->is_dirty ) {
+
+        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
     }
 
-    if ( H5C_update_rp_for_rename(cache_ptr, entry_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
-                    "Can't can't update replacement policy for a hit.")
-    }
+    H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, FAIL)
 
     H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
 
@@ -1748,6 +2943,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM - 7/21/04
+ *		Updated for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1764,9 +2962,7 @@ H5C_protect(H5F_t *	       f,
     hbool_t		hit = FALSE;
     void *		thing = NULL;
     H5C_cache_entry_t *	entry_ptr;
-    H5TB_NODE *         node_ptr = NULL;
     void *		ret_value;      /* Return value */
-    H5C_cache_entry_t	search_target;
 
     FUNC_ENTER_NOAPI(H5C_protect, NULL)
 
@@ -1780,16 +2976,12 @@ H5C_protect(H5F_t *	       f,
     HDassert( H5F_addr_defined(addr) );
 
     /* first check to see if the target is in cache */
-    search_target.addr = addr;
-    node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr,
-                          (void *)(&search_target),
-                          NULL);
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
 
-    if ( node_ptr != NULL ) {
+    if ( entry_ptr != NULL ) {
 
         hit = TRUE;
-        thing = node_ptr->key;
-        entry_ptr = (H5C_cache_entry_t *)thing;
+        thing = (void *)entry_ptr;
 
     } else { /* must try to load the entry from disk. */
 
@@ -1865,25 +3057,17 @@ H5C_protect(H5F_t *	       f,
             }
         }
 
-        /* insert the entry in the tree and in the protected list. */
-        if ( H5C_insert_entry_in_tree(cache_ptr, entry_ptr) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
-                        "Can't insert newly loaded entry in tree.")
-        }
+        /* Insert the entry in the hash table.  It can't be dirty yet, so 
+         * we don't even check to see if it should go in the tree.
+         */
+        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
          * the replacement policy for a protect, but this simplifies the
          * code.  If we do this often enough, we may want to optimize this.
          */
-
-        if ( H5C_update_rp_for_insertion(cache_ptr, entry_ptr) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
-                     "Can't update replacement policy for newly loaded entry.")
-
-        }
+        H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
     }
 
     HDassert( entry_ptr->addr == addr );
@@ -1895,11 +3079,7 @@ H5C_protect(H5F_t *	       f,
                     "Target already protected?!?.")
     }
 
-    if ( H5C_update_rp_for_protect(cache_ptr, entry_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
-                    "Can't update replacement policy for protect")
-    }
+    H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL)
 
     entry_ptr->is_protected = TRUE;
 
@@ -1951,6 +3131,11 @@ done:
  *
  * Modifications:
  *
+ *		JRM - 7/21/04
+ *		Updated the function for the addition of the hash table.
+ *		In particular, we now add dirty entries to the tree if
+ *		they aren't in the tree already.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1965,6 +3150,7 @@ H5C_unprotect(H5F_t *		  f,
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C_cache_entry_t *	entry_ptr;
+    H5C_cache_entry_t *	test_entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_unprotect, FAIL)
 
@@ -1988,13 +3174,18 @@ H5C_unprotect(H5F_t *		  f,
                         "Entry already unprotected??")
     }
 
-    if ( H5C_update_rp_for_unprotect(cache_ptr, entry_ptr) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Can't update replacement policy for unprotect.")
-    }
+    H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 
     entry_ptr->is_protected = FALSE;    
+
+    /* add the entry to the tree if it is dirty, and it isn't already in
+     * the tree.
+     */
+
+    if ( ( entry_ptr->is_dirty ) && ( ! (entry_ptr->in_tree) ) ) {
+
+        H5C__INSERT_ENTRY_IN_TREE(cache_ptr, entry_ptr)
+    }
 
     /* this implementation of the "deleted" option is a bit inefficient, as
      * we re-insert the entry to be deleted into the replacement policy
@@ -2013,16 +3204,20 @@ H5C_unprotect(H5F_t *		  f,
          * function call.
          */
         hbool_t		dummy_first_flush = TRUE;
-        H5TB_NODE *	node_ptr;
 
-        /* verify that the target entry is in the tree. */
+        /* verify that the target entry is in the cache. */
 
-        node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr, entry_ptr, NULL);
+        H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
 
-        if ( ( node_ptr == NULL ) || ( node_ptr->key != thing ) ) {
+        if ( test_entry_ptr == NULL ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "thing not in tree?!?.")
+                        "entry not in hash table?!?.")
+        }
+        else if ( test_entry_ptr != entry_ptr ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                        "hash table contains multiple entries for addr?!?.")
         }
 
         if ( H5C_flush_single_entry(f, 
@@ -2032,14 +3227,15 @@ H5C_unprotect(H5F_t *		  f,
                                     type, 
                                     addr, 
                                     (H5F_FLUSH_CLEAR_ONLY|H5F_FLUSH_INVALIDATE),
-                                    node_ptr, 
+                                    NULL, 
                                     &dummy_first_flush, 
                                     TRUE) < 0 ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "thing not in tree?!?.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
         }
     }
+
+    H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
 
 done:
 
@@ -2060,6 +3256,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 7/21/04
+ *		Updated function for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2067,12 +3266,13 @@ herr_t
 H5C_stats(H5C_t * cache_ptr,
           const char *  cache_name,
           hbool_t
-#ifndef H5C_COLLECT_CACHE_STATS
+#if !H5C_COLLECT_CACHE_STATS
           UNUSED
 #endif /* H5C_COLLECT_CACHE_STATS */
           display_detailed_stats)
 {
     herr_t	ret_value = SUCCEED;   /* Return value */
+
 #if H5C_COLLECT_CACHE_STATS
     int		i;
     int64_t     total_hits = 0;
@@ -2086,7 +3286,10 @@ H5C_stats(H5C_t * cache_ptr,
     int32_t     aggregate_min_accesses = 1000000;
     int32_t     aggregate_max_clears = 0;
     int32_t     aggregate_max_flushes = 0;
+    size_t      aggregate_max_size = 0;
     double      hit_rate;
+    double	average_successful_search_depth = 0.0;
+    double	average_failed_search_depth = 0.0;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     FUNC_ENTER_NOAPI(H5C_stats, FAIL)
@@ -2123,6 +3326,8 @@ H5C_stats(H5C_t * cache_ptr,
         aggregate_max_clears = cache_ptr->max_clears[i];
     if ( aggregate_max_flushes < cache_ptr->max_flushes[i] )
         aggregate_max_flushes = cache_ptr->max_flushes[i];
+    if ( aggregate_max_size < cache_ptr->max_size[i] )
+        aggregate_max_size = cache_ptr->max_size[i];
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
     }
 
@@ -2134,10 +3339,40 @@ H5C_stats(H5C_t * cache_ptr,
         hit_rate = 0.0;
     }
 
+    if ( cache_ptr->successful_ht_searches > 0 ) {
+
+        average_successful_search_depth = 
+            ((double)(cache_ptr->total_successful_ht_search_depth)) /
+            ((double)(cache_ptr->successful_ht_searches));
+    }
+
+    if ( cache_ptr->failed_ht_searches > 0 ) {
+
+        average_failed_search_depth = 
+            ((double)(cache_ptr->total_failed_ht_search_depth)) /
+            ((double)(cache_ptr->failed_ht_searches));
+    }
+        
+
     HDfprintf(stdout, "\nH5C: cache statistics for %s\n",
               cache_name);
 
     HDfprintf(stdout, "\n");
+
+    HDfprintf(stdout, 
+              "  hash table insertion / deletions   = %ld / %ld\n",
+              (long)(cache_ptr->total_ht_insertions),
+              (long)(cache_ptr->total_ht_deletions));
+
+    HDfprintf(stdout, 
+              "  HT successful / failed searches    = %ld / %ld\n",
+              (long)(cache_ptr->successful_ht_searches),
+              (long)(cache_ptr->failed_ht_searches));
+
+    HDfprintf(stdout, 
+              "  Av. HT suc / failed search depth   = %f / %f\n",
+              average_successful_search_depth,
+              average_failed_search_depth);
 
     HDfprintf(stdout, 
               "  current (max) index size / length  = %ld (%ld) / %ld (%ld)\n",
@@ -2145,6 +3380,13 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->max_index_size),
               (long)(cache_ptr->index_len),
               (long)(cache_ptr->max_index_len));
+
+    HDfprintf(stdout, 
+              "  current (max) tree size / length   = %ld (%ld) / %ld (%ld)\n",
+              (long)(cache_ptr->tree_size),
+              (long)(cache_ptr->max_tree_size),
+              (long)(cache_ptr->tree_len),
+              (long)(cache_ptr->max_tree_len));
 
     HDfprintf(stdout, 
               "  current (max) PL size / length     = %ld (%ld) / %ld (%ld)\n",
@@ -2193,6 +3435,10 @@ H5C_stats(H5C_t * cache_ptr,
     HDfprintf(stdout, "  aggregate max_clears / max_flushes = %d / %d\n",
               (int)aggregate_max_clears,
               (int)aggregate_max_flushes);
+
+    HDfprintf(stdout, "  aggregate max_size                 = %d\n",
+              (int)aggregate_max_size);
+
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
@@ -2243,6 +3489,11 @@ H5C_stats(H5C_t * cache_ptr,
                       cache_ptr->max_clears[i],
                       cache_ptr->max_flushes[i]);
 
+            HDfprintf(stdout, 
+                      "    entry max_size                 = %d\n",
+                      (int)(cache_ptr->max_size[i]));
+
+
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
         }
@@ -2270,6 +3521,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM - 7/21/04
+ *		Updated for hash table related statistics.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2286,20 +3540,30 @@ H5C_stats__reset(H5C_t * cache_ptr)
 #if H5C_COLLECT_CACHE_STATS
     for ( i = 0; i <= cache_ptr->max_type_id; i++ )
     {
-        cache_ptr->hits[i]		= 0;
-        cache_ptr->misses[i]		= 0;
-        cache_ptr->insertions[i]	= 0;
-        cache_ptr->clears[i]		= 0;
-        cache_ptr->flushes[i]		= 0;
-        cache_ptr->evictions[i]	 	= 0;
-        cache_ptr->renames[i]	 	= 0;
+        cache_ptr->hits[i]			= 0;
+        cache_ptr->misses[i]			= 0;
+        cache_ptr->insertions[i]		= 0;
+        cache_ptr->clears[i]			= 0;
+        cache_ptr->flushes[i]			= 0;
+        cache_ptr->evictions[i]	 		= 0;
+        cache_ptr->renames[i]	 		= 0;
     }
 
-    cache_ptr->max_index_len		= 0;
-    cache_ptr->max_index_size		= (size_t)0;
+    cache_ptr->total_ht_insertions		= 0;
+    cache_ptr->total_ht_deletions		= 0;
+    cache_ptr->successful_ht_searches		= 0;
+    cache_ptr->total_successful_ht_search_depth	= 0;
+    cache_ptr->failed_ht_searches		= 0;
+    cache_ptr->total_failed_ht_search_depth	= 0;
 
-    cache_ptr->max_pl_len		= 0;
-    cache_ptr->max_pl_size		= (size_t)0;
+    cache_ptr->max_index_len			= 0;
+    cache_ptr->max_index_size			= (size_t)0;
+
+    cache_ptr->max_tree_len			= 0;
+    cache_ptr->max_tree_size			= (size_t)0;
+
+    cache_ptr->max_pl_len			= 0;
+    cache_ptr->max_pl_size			= (size_t)0;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -2309,6 +3573,7 @@ H5C_stats__reset(H5C_t * cache_ptr)
         cache_ptr->min_accesses[i]		= 1000000; 
         cache_ptr->max_clears[i]		= 0;
         cache_ptr->max_flushes[i]		= 0;
+        cache_ptr->max_size[i]			= (size_t)0;
     }
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
@@ -2414,6 +3679,9 @@ done:
  *
  * Modifications:
  *
+ *		JRM -- 7/21/04
+ *		Updated function for the addition of the hash table.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2426,7 +3694,7 @@ H5C_flush_single_entry(H5F_t *		   f,
                        unsigned		   flags,
                        H5TB_NODE *	   tgt_node_ptr,
                        hbool_t *	   first_flush_ptr,
-                       hbool_t		   remove_entry_from_tree_on_destroy)
+                       hbool_t		   del_entry_from_tree_on_destroy)
 {
     hbool_t		destroy = ( (flags & H5F_FLUSH_INVALIDATE) != 0 );
     hbool_t		clear_only = ( (flags & H5F_FLUSH_CLEAR_ONLY) != 0);  
@@ -2444,14 +3712,17 @@ H5C_flush_single_entry(H5F_t *		   f,
     HDassert( H5F_addr_defined(addr) );
     HDassert( first_flush_ptr );
 
-    /* If tgt_node_ptr is NULL, look up the target entry in the tree.  
-     * If it doesn't exist, we are done.
-     */
+    /* attempt to find the target entry in the hash table */
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+
+    /* If tgt_node_ptr is NULL, look up the target entry in the tree. */
 
     if ( tgt_node_ptr == NULL ) {
 
+        HDassert( cache_ptr->tree_ptr );
         search_target.addr = addr;
-        node_ptr = H5TB_dfind(cache_ptr->index_tree_ptr, 
+
+        node_ptr = H5TB_dfind(cache_ptr->tree_ptr, 
                               (void *)&search_target, 
                               NULL);
 
@@ -2460,13 +3731,29 @@ H5C_flush_single_entry(H5F_t *		   f,
         node_ptr = tgt_node_ptr;
     }
 
+#if H5C_DO_SANITY_CHECKS
     if ( node_ptr != NULL ) {
 
-        entry_ptr = (H5C_cache_entry_t *)(node_ptr->data);
-        HDassert( entry_ptr != NULL );
-        HDassert( entry_ptr->addr == addr );
-        HDassert( node_ptr->data == node_ptr->key );
+        if ( ( entry_ptr == NULL ) ||
+             ( entry_ptr != (H5C_cache_entry_t *)(node_ptr->data) ) ||
+             ( ! (entry_ptr->in_tree) ) ||
+             ( entry_ptr->addr != addr ) ||
+             ( node_ptr->data != node_ptr->key ) ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "Hash table and tree out of sync.")
+        }
+    } else if ( entry_ptr != NULL ) {
+
+        if ( ( entry_ptr->in_tree ) ||
+             ( entry_ptr->is_dirty ) ||
+             ( entry_ptr->addr != addr ) ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "entry failed sanity checks.")
+        }
     }
+#endif /* H5C_DO_SANITY_CHECKS */
 
     if ( ( entry_ptr != NULL ) && ( entry_ptr->is_protected ) )
     {
@@ -2521,6 +3808,7 @@ H5C_flush_single_entry(H5F_t *		   f,
 
 #endif /* NDEBUG */
 #endif /* H5_HAVE_PARALLEL */
+
         if ( clear_only ) {
             H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
         } else {
@@ -2531,14 +3819,21 @@ H5C_flush_single_entry(H5F_t *		   f,
             H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)
         }
 
-        /* remove entry from tree if asked  -- must do this now as the
-         * callback routines will free the entry if destroy is true.
+        /* Always remove the entry from the hash table on a destroy.  On a 
+         * flush with destroy, it is cheaper to discard the tree all at once
+         * rather than remove the entries one by one, so we only delete from
+         * the tree if requested.
+         *
+         * We must do deletions now as the callback routines will free the 
+         * entry if destroy is true.
          */
-        if ( ( destroy ) && ( remove_entry_from_tree_on_destroy ) ) {
-            if ( H5C_remove_entry_from_tree(cache_ptr, entry_ptr, node_ptr)
-                 < 0 ) {
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "Can't delete entry from tree.")
+        if ( destroy ) {
+
+            H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+
+            if ( ( node_ptr ) && ( del_entry_from_tree_on_destroy ) ) {
+
+                H5C__REMOVE_ENTRY_FROM_TREE(cache_ptr, entry_ptr, node_ptr)
             }
         }
 
@@ -2546,16 +3841,13 @@ H5C_flush_single_entry(H5F_t *		   f,
          * Again, do this now so we don't have to reference freed 
          * memory in the destroy case.
          */
-
         if ( destroy ) { /* AKA eviction */
-            status = H5C_update_rp_for_eviction(cache_ptr, entry_ptr); 
-        } else { 
-            status = H5C_update_rp_for_flush(cache_ptr, entry_ptr);
-        }
 
-        if ( status < 0 ) {
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                        "Can't update replacement policy.")
+            H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
+
+        } else {
+
+            H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
         }
 
         /* Clear the dirty flag only, if requested */
@@ -2600,61 +3892,6 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_insert_entry_in_tree
- *
- * Purpose:     Insert the specified instance of H5C_cache_entry_t from the 
- *		index tree in the specified instance of H5C_t.  Update
- *		the associated length and size fields.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/10/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_insert_entry_in_tree(H5C_t *	     cache_ptr,
-			 H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-    H5TB_NODE *		node_ptr = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_insert_entry_in_tree)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( entry_ptr->size > 0 );
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
-
-    /* Don't bother to check if the entry is already in the tree -- if it
-     * is, H5TB_dins() will fail.
-     */
-    node_ptr = H5TB_dins(cache_ptr->index_tree_ptr, (void *)entry_ptr, NULL);
-
-    if ( node_ptr == NULL ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert entry in tree")
-
-    }
-
-    cache_ptr->index_len++;
-    cache_ptr->index_size += entry_ptr->size;
-    HDassert( cache_ptr->index_len > 0 );
-    HDassert( cache_ptr->index_size > 0 );
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_insert_entry_in_tree */
-
-
-/*-------------------------------------------------------------------------
- *
  * Function:    H5C_load_entry
  *
  * Purpose:     Attempt to load the entry at the specified disk address
@@ -2670,6 +3907,9 @@ done:
  * Programmer:  John Mainzer, 5/18/04
  *
  * Modifications:
+ *
+ *		JRM - 7/21/04
+ *		Updated function for the addition of the hash table.
  *
  *-------------------------------------------------------------------------
  */
@@ -2708,6 +3948,7 @@ H5C_load_entry(H5F_t *             f,
     entry_ptr->addr = addr;
     entry_ptr->type = type;
     entry_ptr->is_protected = FALSE;
+    entry_ptr->in_tree = FALSE;
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 
@@ -2717,8 +3958,12 @@ H5C_load_entry(H5F_t *             f,
 
     HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE ); 
 
+    entry_ptr->ht_next = NULL;
+    entry_ptr->ht_prev = NULL;
+
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL;
+
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
 
@@ -2767,6 +4012,10 @@ done:
  * Programmer:  John Mainzer, 5/14/04
  *
  * Modifications:
+ *
+ *		JRM --7/21/04
+ *		Minor modifications in support of the addition of a hash
+ *		table to facilitate lookups.
  *
  *-------------------------------------------------------------------------
  */
@@ -2846,6 +4095,8 @@ H5C_make_space_in_cache(H5F_t *	f,
             entry_ptr = prev_ptr;
         }
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
         initial_list_len = cache_ptr->dLRU_list_len;
         entry_ptr = cache_ptr->dLRU_tail_ptr;
 
@@ -2856,6 +4107,7 @@ H5C_make_space_in_cache(H5F_t *	f,
         {
             HDassert( ! (entry_ptr->is_protected) );
             HDassert( entry_ptr->is_dirty );
+            HDassert( entry_ptr->in_tree );
 
             prev_ptr = entry_ptr->aux_prev;
 
@@ -2878,7 +4130,12 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             entry_ptr = prev_ptr;
         }
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
     } else {
+
+        HDassert( H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS );
 
         initial_list_len = cache_ptr->cLRU_list_len;
         entry_ptr = cache_ptr->cLRU_tail_ptr;
@@ -2924,535 +4181,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_make_space_in_cache() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_remove_entry_from_tree
- *
- * Purpose:     Remove the specified instance of H5C_cache_entry_t from the 
- *		index tree in the specified instance of H5C_t.  Update
- *		the associated length and size fields.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/10/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_remove_entry_from_tree(H5C_t *	       cache_ptr,
-		           H5C_cache_entry_t * entry_ptr,
-                           H5TB_NODE *	       node_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_remove_entry_from_tree)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( node_ptr );
-    HDassert( node_ptr->data == entry_ptr );
-    HDassert( entry_ptr->size > 0 );
-
-    if ( H5TB_rem(&(cache_ptr->index_tree_ptr->root), node_ptr, NULL) 
-         != entry_ptr ) {
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                    "Can't delete entry from tree.")
-    } else {
-        HDassert( cache_ptr->index_len > 0 );
-
-        cache_ptr->index_len--;
-
-        HDassert( cache_ptr->index_size >= entry_ptr->size );
-
-        cache_ptr->index_size -= entry_ptr->size;
-    }
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_remove_entry_from_tree */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_eviction
- *
- * Purpose:     Update the replacement policy data structures for an 
- *		eviction of the specified cache entry.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/10/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_eviction(H5C_t *		cache_ptr,
-			    H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_eviction)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* modified LRU specific code */
-
-    /* remove the entry from the LRU list. */
-
-    H5C__DLL_REMOVE(entry_ptr, cache_ptr->LRU_head_ptr, \
-                     cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                     cache_ptr->LRU_list_size)
-
-    /* If the entry is clean when it is evicted, it should be on the 
-     * clean LRU list, if it was dirty, it should be on the dirty LRU list.  
-     * Remove it from the appropriate list according to the value of the 
-     * dirty flag.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                            cache_ptr->dLRU_tail_ptr, \
-                            cache_ptr->dLRU_list_len, \
-                            cache_ptr->dLRU_list_size)
-    } else {
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                             cache_ptr->cLRU_tail_ptr, \
-                             cache_ptr->cLRU_list_len, \
-                             cache_ptr->cLRU_list_size)
-    }
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_eviction() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_flush
- *
- * Purpose:     Update the replacement policy data structures for a flush 
- *		of the specified cache entry.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/6/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_flush(H5C_t *		    cache_ptr,
-		        H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_flush)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* modified LRU specific code */
-
-    /* remove the entry from the LRU list, and re-insert it at the head. */
-
-    H5C__DLL_REMOVE(entry_ptr, cache_ptr->LRU_head_ptr, \
-                     cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                     cache_ptr->LRU_list_size)
-
-    H5C__DLL_PREPEND(entry_ptr, cache_ptr->LRU_head_ptr, \
-                      cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                      cache_ptr->LRU_list_size)
-
-    /* since the entry is being flushed or cleared, one would think that it 
-     * must be dirty -- but that need not be the case.  Use the dirty flag
-     * to infer whether the entry is on the clean or dirty LRU list, and 
-     * remove it.  Then insert it at the head of the clean LRU list.  
-     *
-     * The function presumes that a dirty entry will be either cleared or 
-     * flushed shortly, so it is OK if we put a dirty entry on the clean
-     * LRU list.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                            cache_ptr->dLRU_tail_ptr, \
-                            cache_ptr->dLRU_list_len, \
-                            cache_ptr->dLRU_list_size)
-    } else {
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                            cache_ptr->cLRU_tail_ptr, \
-                            cache_ptr->cLRU_list_len, \
-                            cache_ptr->cLRU_list_size)
-    }
-
-    H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                          cache_ptr->cLRU_tail_ptr, cache_ptr->cLRU_list_len, \
-                          cache_ptr->cLRU_list_size)
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_flush() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_insertion
- *
- * Purpose:     Update the replacement policy data structures for an
- *		insertion of the specified cache entry.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/17/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_insertion(H5C_t *		cache_ptr,
-			    H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_insertion)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* modified LRU specific code */
-
-    /* insert the entry at the head of the LRU list. */
-
-    H5C__DLL_PREPEND(entry_ptr, cache_ptr->LRU_head_ptr, \
-                     cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                     cache_ptr->LRU_list_size)
-
-    /* insert the entry at the head of the clean or dirty LRU list as 
-     * appropriate.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                             cache_ptr->dLRU_tail_ptr, \
-                             cache_ptr->dLRU_list_len, \
-                             cache_ptr->dLRU_list_size)
-    } else {
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                              cache_ptr->cLRU_tail_ptr, \
-                              cache_ptr->cLRU_list_len, \
-                              cache_ptr->cLRU_list_size)
-    }
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_insertion() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_protect
- *
- * Purpose:     Update the replacement policy data structures for a 
- *		protect of the specified cache entry.
- *
- *		To do this, unlink the specified entry from any data 
- *		structures used by the replacement policy, and add the
- *		entry to the protected list.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/17/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_protect(H5C_t *	      cache_ptr,
-		          H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_protect)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* modified LRU specific code */
-
-    /* remove the entry from the LRU list. */
-
-    H5C__DLL_REMOVE(entry_ptr, cache_ptr->LRU_head_ptr, \
-                    cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                    cache_ptr->LRU_list_size)
-
-    /* Similarly, remove the entry from the clean or dirty LRU list
-     * as appropriate.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                            cache_ptr->dLRU_tail_ptr, \
-                            cache_ptr->dLRU_list_len, \
-                            cache_ptr->dLRU_list_size)
-
-    } else {
-
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                             cache_ptr->cLRU_tail_ptr, \
-                             cache_ptr->cLRU_list_len, \
-                             cache_ptr->cLRU_list_size)
-    }
-
-    /* End modified LRU specific code. */
-
-
-    /* Regardless of the replacement policy, now add the entry to the 
-     * protected list.
-     */
-
-    H5C__DLL_APPEND(entry_ptr, cache_ptr->pl_head_ptr, cache_ptr->pl_tail_ptr, \
-                     cache_ptr->pl_len, cache_ptr->pl_size)
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_protect() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_rename
- *
- * Purpose:     Update the replacement policy data structures for a 
- *		rename of the specified cache entry.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/17/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_rename(H5C_t *	     cache_ptr,
-		         H5C_cache_entry_t * entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_rename)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( !entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* modified LRU specific code */
-
-    /* remove the entry from the LRU list, and re-insert it at the head. */
-
-    H5C__DLL_REMOVE(entry_ptr, cache_ptr->LRU_head_ptr, \
-                    cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                    cache_ptr->LRU_list_size)
-
-    H5C__DLL_PREPEND(entry_ptr, cache_ptr->LRU_head_ptr, \
-                     cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                     cache_ptr->LRU_list_size)
-
-    /* move the entry to the head of either the clean or dirty LRU list
-     * as appropriate.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                            cache_ptr->dLRU_tail_ptr, \
-                            cache_ptr->dLRU_list_len, \
-                            cache_ptr->dLRU_list_size)
-
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                             cache_ptr->dLRU_tail_ptr, \
-                             cache_ptr->dLRU_list_len, \
-                             cache_ptr->dLRU_list_size)
-
-    } else {
-
-        H5C__AUX_DLL_REMOVE(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                            cache_ptr->cLRU_tail_ptr, \
-                            cache_ptr->cLRU_list_len, \
-                            cache_ptr->cLRU_list_size)
-
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                             cache_ptr->cLRU_tail_ptr, \
-                             cache_ptr->cLRU_list_len, \
-                             cache_ptr->cLRU_list_size)
-    }
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_rename() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_update_rp_for_unprotect
- *
- * Purpose:     Update the replacement policy data structures for an
- *		unprotect of the specified cache entry.
- *
- *		To do this, unlink the specified entry from the protected
- *		list, and re-insert it in the data structures used by the
- *		current replacement policy.
- *
- *		At present, we only support the modified LRU policy, so 
- *		this function deals with that case unconditionally.  If
- *		we ever support other replacement policies, the function
- *		should switch on the current policy and act accordingly.
- *
- * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer, 5/19/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static herr_t
-H5C_update_rp_for_unprotect(H5C_t *		cache_ptr,
-		            H5C_cache_entry_t *	entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5C_update_rp_for_unprotect)
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr );
-    HDassert( entry_ptr->is_protected);
-    HDassert( entry_ptr->size > 0 );
-
-    /* Regardless of the replacement policy, remove the entry from the 
-     * protected list.
-     */
-    H5C__DLL_REMOVE(entry_ptr, cache_ptr->pl_head_ptr, \
-                    cache_ptr->pl_tail_ptr, cache_ptr->pl_len, \
-                    cache_ptr->pl_size)
-
-
-    /* modified LRU specific code */
-
-    /* insert the entry at the head of the LRU list. */
-
-    H5C__DLL_PREPEND(entry_ptr, cache_ptr->LRU_head_ptr, \
-                     cache_ptr->LRU_tail_ptr, cache_ptr->LRU_list_len, \
-                     cache_ptr->LRU_list_size)
-
-    /* Similarly, insert the entry at the head of either the clean or 
-     * dirty LRU list as appropriate.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->dLRU_head_ptr, \
-                             cache_ptr->dLRU_tail_ptr, \
-                             cache_ptr->dLRU_list_len, \
-                             cache_ptr->dLRU_list_size)
-
-    } else {
-
-        H5C__AUX_DLL_PREPEND(entry_ptr, cache_ptr->cLRU_head_ptr, \
-                             cache_ptr->cLRU_tail_ptr, \
-                             cache_ptr->cLRU_list_len, \
-                             cache_ptr->cLRU_list_size)
-    }
-
-    /* End modified LRU specific code. */
-
-#if H5C_DO_SANITY_CHECKS
-done:
-#endif /* H5C_DO_SANITY_CHECKS */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_update_rp_for_unprotect() */
-
