@@ -1,4 +1,4 @@
-HDF5 version 1.6.2-post7 released on Sun Jun 20 20:54:35 CDT 2004
+HDF5 version 1.6.2-post8 released on Sun Jul  4 20:54:07 CDT 2004
 ================================================================================
 
 
@@ -41,10 +41,23 @@ New Features
 
     Library:
     --------
+        - A new API function H5Fget_name was added.  It returns the name
+          of the file by object(file, group, data set, named data type,
+          attribute) ID.  SLU - 2004/06/29
+        - A new API function H5Fget_filesize was added.  It returns the
+          actual file size of the opened file.  SLU - 2004/06/24
 	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
 	  will suppress all library version mismatch warning messages.
 	  AKC - 2004/4/14
-
+        - HDF5 can now link to SZIP with or without szip's encoder.
+          The new API function H5Zget_filter_info can be used to check
+          szip's status.  Attempting to assign szip to a dataset property
+          list or attempting to write with szip will generate an error if
+          szip's encoder is disabled.  JL/NF - 2004/6/30
+        - SZIP always uses K13 compression.  This flag no longer needs to
+          be set when calling H5Pset_szip.  If the flag for CHIP
+          compression is set, it will be ignored (since the two are mutually
+          exclusive).  JL/NF - 2004/6/30
 
     Parallel Library:
     -----------------
