@@ -1,10 +1,10 @@
-HDF5 version 1.6.4 released on Tue Mar 15 20:38:48 CST 2005
+HDF5 version 1.6.4-post0 released on Wed Mar 30 21:17:05 CST 2005
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.3 and
-HDF5-1.6.4, and contains information on the platforms tested and
+This document describes the differences between HDF5-1.6.4 and
+HDF5-1.6.4-post*, and contains information on the platforms tested and
 known problems in HDF5-1.6.4. For more details check the HISTORY.txt
 file in the HDF5 source.
 
@@ -26,7 +26,7 @@ CONTENTS
 ========
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.6.3
+- Bug Fixes since HDF5-1.6.4
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -38,42 +38,21 @@ New Features
     Source code distribution:
     -------------------------
 
-    The High-Level (HL) C APIs were added to the source code distribution.
-    For HL documentation, see
-    http://hdf.ncsa.uiuc.edu/HDF5/hdf5_hl/doc/RM_hdf5hl.html.
-
-    The HL library, libhdf5_hl.a(so), is built and installed by default. 
-    Use --disable-hl configure flag to disable the HL library.
 
     Library:
     --------
-        - We recommend you to use SZIP v2.0 with this release. 
-          For more information see
-          http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/ 
-        - The compound datatype has been enhanced with a new feature of size 
-            adjustment.  The size can be increased and decreased (without
-            cutting the last member).  No API change is involved.  SLU - 
-            2004/10/1
-        - Removed PABLO support.  2005/01/20 EIP 
 
     Parallel Library:
     -----------------
-        - Allow compressed, chunked datasets to be read in parallel.
-            QAK - 2004/10/04
 
     Tools:
     ------
-	- New tool, h5jam.  See HDF5 Reference Manual.  2004/10/08	      
 
     F90 API:
     --------
-          No new features in this release.
 
     C++ API:
     --------
-	- Started using C library's reference counting in place of the class
-	  RefCounter, which existed before the C mechanism was available.  
-	  As a result, RefCounter has been removed.  2005/03/12 BMR
 
 
 Support for new platforms, languages and compilers.
@@ -81,72 +60,32 @@ Support for new platforms, languages and compilers.
 
     Configuration
     -------------
-	- Upgraded from GNU autoconf 2.53 to autoconf 2.59.  JML - 2005/01/31
 
 
-Bug Fixes since HDF5-1.6.3 release
+Bug Fixes since HDF5-1.6.4 release
 ==================================
 
     Library
     -------
-        - Fixed a racing condition in MPIPOSIX virtual file drive close
-	  function.  Now all processes must completed the close before any
-	  of them is returned.  This prevents some "faster" processes start
-	  accessing the file for another purpose (e.g., open with truncate)
-	  while other "slower" processes have not closed the same file with
-	  the previous purpose.  AKC - 2005/03/01
-	- H5Tget_member_value calls for enum datatype didn't return correct 
-          value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
-          2005/02/08
-        - For variable-length string, H5Tget_class returned H5T_STRING as its
-          class.  But H5Tdetect_class and H5Tget_member_class considered it
-          as H5T_VLEN.  This is fixed to let all these 3 functions treat it
-          as H5T_STRING.  SLU - 2005/02/08
-        - The byte order of all 1-byte integer types was fixed as
-          little-endian even on a big-endian machine.  It's corrected.
-          SLU - 2005/02/07
-        - Fixed segmentation fault when calling H5Fflush with an attribute that
-          hasn't had a value written to it open.  QAK - 2004/10/18
-        - Backed out support for bitfield and time types in H5Tget_native_type.
-          Leave it to future support.  The function simply returns error 
-          message of "not support" for bitfield and time types. SLU - 2004/10/5
-        - Fixed address check in Core VFL driver to avoid spurious address/size
-          overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
-        - Fixed problem where chunked datasets were not able to be deleted
-          from a file under certain circumstances.  QAK - 2004/09/27/
+        - Fixed error in opening object in group that was opened in mounted
+            file which has been unmounted.  QAK - 2005/03/17
 
     Configuration
     -------------
-	- IRIX64 MIPSpro compiler of 7.4.x supports C99 features.  Default
-	  to use the 'c99' compiler if available. AKC - 2004/12/13
-	- Intel v8.0 compiler would infinite loop when compiling some test
-	  code with -O3 option.  Changed enable-production default compiler
-	  option to -O2. AKC - 2004/12/06
-	- Long double is assumed to be a supported C data type.  It is a
-	  standard C89 type. AKC - 2004/10/22
 
     Performance
     -------------
-    Many changes were made to the library to improve performance,
-    especially for the variable-length datatypes and metadata cache.
+        - Optimized I/O for enumerated datatypes that are a superset of source
+            enumerated datatype.  QAK - 2005/03/19
    
     Tools
     -----
-        - h5fc and h5c++ work correctly when -c compiler flag
-          is used.  EIP - 2005/03/14        
-	- Fixed h5dump to print attributes data in ASCII if -r option is used.
-	  AKC - 2004/11/18
-        - Fixed space utilization reported in h5ls to correct error 
-          in formula used.  QAK - 2004/10/22
 
     Documentation 
     ------------- 
 
     F90 API
     -------
-       - On windows, previously Fortran DLL built and tested failed.
-         Now Fortran DLL has been built and tested successfully
-         with Dec Fortran 6.6c or Dec Fortran 6.0.
 
     C++ API
     -------
@@ -155,21 +94,6 @@ Bug Fixes since HDF5-1.6.3 release
 Documentation
 =============
 
-    HDF5 Library documentation
-    --------------------------
-    No substantive changes to the structure or types of content in the 
-    HDF5 Library documentation.
-
-    Windows installation documentation
-    ----------------------------------
-    1. On Windows zlib has been updated to 1.2.2. You may find the binary at
-       either http://www.zlib.net/zlib122-dll.zip or
-              ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/bin/windows
-
-    2. Only DLLs of external libraries (zlib and szip) are linked with the 
-       HDF5 Library. We will no longer provide binary to link static library 
-       with HDF5. For details, please check INSTALL_Windows in this directory.
-        
 
 Platforms Tested
 ================
