@@ -141,6 +141,9 @@ typedef enum {
     H5G_COPY_DEEP       /* Deep copy from source to destination, including duplicating name & old name fields */
 } H5G_ent_copy_depth_t;
 
+/* Forward declarations for prototype arguments */
+struct H5O_stab_t;
+
 /*
  * Library prototypes...  These are the ones that other packages routinely
  * call.
@@ -168,6 +171,11 @@ H5_DLL  herr_t H5G_replace_name(int type, H5G_entry_t *loc,
         H5RS_str_t *src_name, H5G_entry_t *src_loc,
         H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
 H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);
+
+/*
+ * These functions operate on symbol tables themselves.
+ */
+H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr);
 
 /*
  * These functions operate on symbol table nodes.

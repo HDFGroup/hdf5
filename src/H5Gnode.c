@@ -48,19 +48,18 @@
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
-				  void *_key);
-static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
-				  void *_key);
-static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
-                                    int indent, int fwidth, const void *key,
-                                    const void *udata);
 static size_t H5G_node_size(H5F_t *f);
+
+/* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 				 void *_udata2);
 static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
+static herr_t H5G_node_clear(H5G_node_t *sym);
+
+/* B-tree callbacks */
+static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -78,7 +77,13 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_l
 static H5B_ins_t H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
+static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
+				  void *_key);
+static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
+				  void *_key);
+static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
+                                    int indent, int fwidth, const void *key,
+                                    const void *udata);
 
 /* H5G inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SNODE[1] = {{
@@ -86,6 +91,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     (H5AC_load_func_t)H5G_node_load,
     (H5AC_flush_func_t)H5G_node_flush,
     (H5AC_dest_func_t)H5G_node_dest,
+    (H5AC_clear_func_t)H5G_node_clear,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -515,6 +521,43 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_node_clear
+ *
+ * Purpose:	Mark a symbol table node in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 20 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_clear(H5G_node_t *sym)
+{
+    int i;              /* Local index variable */
+
+    FUNC_ENTER_NOINIT(H5G_node_clear);
+
+    /*
+     * Check arguments.
+     */
+    assert(sym);
+
+
+    /* Look for dirty entries and reset the dirty flag.  */
+    for (i=0; i<sym->nsyms; i++)
+        sym->entry[i].dirty=FALSE;
+    sym->cache_info.dirty = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_node_clear() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_node_create
  *
  * Purpose:	Creates a new empty symbol table node.	This function is
@@ -788,7 +831,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
         HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "internal erorr (unknown symbol find operation)");
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn) < 0 && ret_value>=0)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -960,7 +1003,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     insert_into->nsyms += 1;
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn) < 0 && ret_value!=H5B_INS_ERROR)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0 && ret_value!=H5B_INS_ERROR)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -975,6 +1018,14 @@ done:
  *		function removes the name from the symbol table and
  *		decrements the link count on the object to which the name
  *		points.
+ *
+ *              If the udata->name parameter is set to NULL, then remove
+ *              all entries in this symbol table node.  This only occurs
+ *              during the deletion of the entire group, so don't bother
+ *              freeing individual name entries in the local heap, the group's
+ *              symbol table removal code will just free the entire local
+ *              heap eventually.  Do reduce the link counts for each object
+ *              however.
  *
  * Return:	Success:	If all names are removed from the symbol
  *				table node then H5B_INS_REMOVE is returned;
@@ -991,6 +1042,9 @@ done:
  *
  *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
  *      Added `id to name' support.
+ *
+ *	Quincey Koziol, 2003-03-22
+ *	Added support for deleting all the entries at once.
  *
  *-------------------------------------------------------------------------
  */
@@ -1026,98 +1080,130 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     if (NULL == (base = H5HL_peek(f, dxpl_id, bt_udata->heap_addr, 0)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to read symbol name");
 
-    /* Find the name with a binary search */
-    rt = sn->nsyms;
-    while (lt<rt && cmp) {
-	idx = (lt+rt)/2;
-        s=base+sn->entry[idx].name_off;
-	cmp = HDstrcmp(bt_udata->name, s);
-	if (cmp<0) {
-	    rt = idx;
-	} else {
-	    lt = idx+1;
-	}
-    }
-    if (cmp)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found");
+    /* "Normal" removal of a single entry from the symbol table node */
+    if(bt_udata->name!=NULL) {
+        /* Find the name with a binary search */
+        rt = sn->nsyms;
+        while (lt<rt && cmp) {
+            idx = (lt+rt)/2;
+            s=base+sn->entry[idx].name_off;
+            cmp = HDstrcmp(bt_udata->name, s);
+            if (cmp<0) {
+                rt = idx;
+            } else {
+                lt = idx+1;
+            }
+        }
+        if (cmp)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found");
 
-    if (H5G_CACHED_SLINK==sn->entry[idx].type) {
-	/* Remove the symbolic link value */
-	if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset)))
-	    H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset, HDstrlen(s)+1);
-	H5E_clear(); /*no big deal*/
-    } else {
-	/* Decrement the reference count */
-	assert(H5F_addr_defined(sn->entry[idx].header));
-	if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count");
-    }
-    
-    /* Remove the name from the local heap */
-    if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off)))
-	H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off, HDstrlen(s)+1);
-    H5E_clear(); /*no big deal*/
+        if (H5G_CACHED_SLINK==sn->entry[idx].type) {
+            /* Remove the symbolic link value */
+            if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset)))
+                H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset, HDstrlen(s)+1);
+            H5E_clear(); /*no big deal*/
+        } else {
+            /* Decrement the reference count */
+            assert(H5F_addr_defined(sn->entry[idx].header));
+            if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count");
+        }
+        
+        /* Remove the name from the local heap */
+        if ((s=H5HL_peek(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off)))
+            H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off, HDstrlen(s)+1);
+        H5E_clear(); /*no big deal*/
 
-    /* Remove the entry from the symbol table node */
-    if (1==sn->nsyms) {
-	/*
-	 * We are about to remove the only symbol in this node. Copy the left
-	 * key to the right key and mark the right key as dirty.  Free this
-	 * node and indicate that the pointer to this node in the B-tree
-	 * should be removed also.
-	 */
-	assert(0==idx);
-	*rt_key = *lt_key;
-	*rt_key_changed = TRUE;
-	sn->nsyms = 0;
-	sn->cache_info.dirty = TRUE;
-	if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn)<0 ||
-                H5AC_flush(f, dxpl_id, H5AC_SNODE, addr, H5F_FLUSH_INVALIDATE)<0 ||
-                H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0) {
-	    sn = NULL;
-	    HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
-	}
-	sn = NULL;
-	ret_value = H5B_INS_REMOVE;
-	
-    } else if (0==idx) {
-	/*
-	 * We are about to remove the left-most entry from the symbol table
-	 * node but there are other entries to the right.  No key values
-	 * change.
-	 */
-	sn->nsyms -= 1;
-	sn->cache_info.dirty = TRUE;
-	HDmemmove(sn->entry+idx, sn->entry+idx+1,
-		  (sn->nsyms-idx)*sizeof(H5G_entry_t));
-	ret_value = H5B_INS_NOOP;
-	
-    } else if (idx+1==sn->nsyms) {
-	/*
-	 * We are about to remove the right-most entry from the symbol table
-	 * node but there are other entries to the left.  The right key
-	 * should be changed to reflect the new right-most entry.
-	 */
-	sn->nsyms -= 1;
-	sn->cache_info.dirty = TRUE;
-	rt_key->offset = sn->entry[sn->nsyms-1].name_off;
-	*rt_key_changed = TRUE;
-	ret_value = H5B_INS_NOOP;
-	
-    } else {
-	/*
-	 * We are about to remove an entry from the middle of a symbol table
-	 * node.
-	 */
-	sn->nsyms -= 1;
-	sn->cache_info.dirty = TRUE;
-	HDmemmove(sn->entry+idx, sn->entry+idx+1,
-		  (sn->nsyms-idx)*sizeof(H5G_entry_t));
-	ret_value = H5B_INS_NOOP;
-    }
+        /* Remove the entry from the symbol table node */
+        if (1==sn->nsyms) {
+            /*
+             * We are about to remove the only symbol in this node. Copy the left
+             * key to the right key and mark the right key as dirty.  Free this
+             * node and indicate that the pointer to this node in the B-tree
+             * should be removed also.
+             */
+            assert(0==idx);
+            *rt_key = *lt_key;
+            *rt_key_changed = TRUE;
+            sn->nsyms = 0;
+            sn->cache_info.dirty = TRUE;
+            if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
+                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, TRUE)<0) {
+                sn = NULL;
+                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
+            }
+            sn = NULL;
+            ret_value = H5B_INS_REMOVE;
+            
+        } else if (0==idx) {
+            /*
+             * We are about to remove the left-most entry from the symbol table
+             * node but there are other entries to the right.  No key values
+             * change.
+             */
+            sn->nsyms -= 1;
+            sn->cache_info.dirty = TRUE;
+            HDmemmove(sn->entry+idx, sn->entry+idx+1,
+                      (sn->nsyms-idx)*sizeof(H5G_entry_t));
+            ret_value = H5B_INS_NOOP;
+            
+        } else if (idx+1==sn->nsyms) {
+            /*
+             * We are about to remove the right-most entry from the symbol table
+             * node but there are other entries to the left.  The right key
+             * should be changed to reflect the new right-most entry.
+             */
+            sn->nsyms -= 1;
+            sn->cache_info.dirty = TRUE;
+            rt_key->offset = sn->entry[sn->nsyms-1].name_off;
+            *rt_key_changed = TRUE;
+            ret_value = H5B_INS_NOOP;
+            
+        } else {
+            /*
+             * We are about to remove an entry from the middle of a symbol table
+             * node.
+             */
+            sn->nsyms -= 1;
+            sn->cache_info.dirty = TRUE;
+            HDmemmove(sn->entry+idx, sn->entry+idx+1,
+                      (sn->nsyms-idx)*sizeof(H5G_entry_t));
+            ret_value = H5B_INS_NOOP;
+        }
+    } /* end if */
+    /* Remove all entries from node, during B-tree deletion */
+    else {
+        /* Reduce the link count for all entries in this node */
+        for(idx=0; idx<sn->nsyms; idx++) {
+            if (H5G_CACHED_SLINK!=sn->entry[idx].type) {
+                /* Decrement the reference count */
+                assert(H5F_addr_defined(sn->entry[idx].header));
+                if (H5O_link(sn->entry+idx, -1, dxpl_id)<0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to decrement object link count");
+            } /* end if */
+        } /* end for */
+
+        /*
+         * We are about to remove all the symbols in this node. Copy the left
+         * key to the right key and mark the right key as dirty.  Free this
+         * node and indicate that the pointer to this node in the B-tree
+         * should be removed also.
+         */
+        *rt_key = *lt_key;
+        *rt_key_changed = TRUE;
+        sn->nsyms = 0;
+        sn->cache_info.dirty = TRUE;
+        if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0
+                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, TRUE)<0) {
+            sn = NULL;
+            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");
+        }
+        sn = NULL;
+        ret_value = H5B_INS_REMOVE;
+    } /* end else */
     
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn)<0 && ret_value!=H5B_INS_ERROR)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE)<0 && ret_value!=H5B_INS_ERROR)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1433,7 +1519,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 	H5G_ent_debug(f, dxpl_id, sn->entry + i, stream, indent, fwidth, heap);
     }
 
-    H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn);
+    H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -408,3 +408,48 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_delete
+ *
+ * Purpose:	Delete entire symbol table information from file
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_delete(H5F_t *f, hid_t dxpl_id, haddr_t btree_addr, haddr_t heap_addr)
+{
+    H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
+    herr_t  ret_value = SUCCEED;       
+ 
+    FUNC_ENTER_NOAPI(H5G_stab_delete, FAIL);
+
+    assert(f);
+    assert(H5F_addr_defined(btree_addr));
+    assert(H5F_addr_defined(heap_addr));
+
+    /* Set up user data for B-tree deletion */
+    HDmemset(&udata, 0, sizeof udata);
+    udata.operation = H5G_OPER_REMOVE;
+    udata.name = NULL;
+    udata.heap_addr = heap_addr;
+
+    /* Delete entire B-tree */
+    if(H5B_delete(f, dxpl_id, H5B_SNODE, btree_addr, &udata)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table B-tree");
+
+    /* Delete local heap for names */
+    if(H5HL_delete(f, dxpl_id, heap_addr)<0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table heap");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_stab_delete() */
+
