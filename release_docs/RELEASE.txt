@@ -50,6 +50,39 @@ New Features
     Tools:
     ------
 
+    C++ API:
+    --------
+        - Added overloaded functions read and write to H5::Attribute.
+          BMR - 2003/04/21
+        - Added an overloaded constructor H5::StrType so the need to separately
+          set the length of the string type can be eliminated. BMR - 2003/04/21
+        - Added overloaded functions read and write to H5::DataSet.
+          BMR - 2003/04/27
+
+        The following items were added but not documented in previous releases:
+
+        - On windows, any application, that uses the C++ API dll, must
+          include the name HDF5CPP_USEDLL in its project setting. (Feb 17, 2002)
+          BMR - 2003/10/10
+        - Added missing default constructor H5::H5File. (Apr 26, 2002)
+          BMR - 2003/10/10
+        - Added new member function H5::DataSet::fillMemBuf per the new C
+          API H5Dfill, which fills the elements in a selection for a memory
+          buffer with a fill value. (May 16, 2002) BMR - 2003/10/10
+        - Added the new member function getMemberIndex to H5::EnumType
+          and H5::CompType to match the new C API H5Tget_member_index.  Given
+          the name of a member of an enumeration or compound datatype, this
+          new function queries the index of the member. (May 16, 2002)
+          BMR - 2003/10/10
+        - Added these member functions to H5::Group per the new C functions
+          H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx:
+          + getNumObjs: Returns the number of objects in the group.
+          + getObjnameByIdx: Retrieves the name of an object in a group,
+                             given an index
+          + getObjTypeByIdx: Returns the type of an object in a group,
+                             given an index
+          (Jan 20, 2003) BMR - 2003/10/10
+
 
 Support for new platforms, languages and compilers.
 =======================================
