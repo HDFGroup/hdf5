@@ -34,7 +34,10 @@
 /* Macro definitions */
 
 /* sizes of various items. these sizes won't change during program execution */
+/* The following three must have the same type */
 #define ELMT_SIZE           (sizeof(int))          /* we're doing ints */
+#define ELMT_MPI_TYPE       MPI_INT
+#define ELMT_H5_TYPE        H5T_NATIVE_INT
 
 #define GOTOERROR(errcode)	{ ret_code = errcode; goto done; }
 #define GOTODONE		{ goto done; }
@@ -555,7 +558,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 #endif
 
             sprintf(dname, "Dataset_%ld", ndset);
-            h5ds_id = H5Dcreate(fd->h5fd, dname, H5T_NATIVE_INT,
+            h5ds_id = H5Dcreate(fd->h5fd, dname, ELMT_H5_TYPE,
                                 h5dset_space_id, dcpl);
 
             if (h5ds_id < 0) {
@@ -672,16 +675,14 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 nelmts_toxfer = elmts_count - nelmts_xfer;
             }
 
-#ifdef AKCDEBUG
-            /*Prepare write data*/
-            {
+	    if (parms->verify) {
+		/*Prepare write data for verify later*/
                 int *intptr = (int *)buffer;
                 register int i;
 
                 for (i = 0; i < nelmts_toxfer; ++i)
-                    *intptr++ = nelmts_toxfer + i;
+                    *intptr++ = pio_mpi_rank_g;
             }
-#endif
 
             /* Write */
             /* Calculate offset of write within a dataset/file */
@@ -750,7 +751,7 @@ HDfprintf(output,
             case MPIO:
                 mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
                 mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
-                                        (int)(nelmts_toxfer*ELMT_SIZE), MPI_CHAR,
+                                        (int)(nelmts_toxfer), ELMT_MPI_TYPE,
                                         &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
                 break;
@@ -772,7 +773,7 @@ HDfprintf(output,
                 }
 
                 /* set write time here */
-                hrc = H5Dwrite(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
+                hrc = H5Dwrite(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
                                h5dset_space_id, H5P_DEFAULT, buffer);
                 VRFY((hrc >= 0), "H5Dwrite");
                 break;
@@ -1088,7 +1089,7 @@ HDfprintf(output,
                 mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
-                                       (int)(nelmts_toxfer*ELMT_SIZE), MPI_CHAR,
+                                       (int)(nelmts_toxfer), ELMT_MPI_TYPE,
                                        &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_read");
                 break;
@@ -1111,24 +1112,37 @@ HDfprintf(output,
                 }
 
                 /* set read time here */
-                hrc = H5Dread(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
+                hrc = H5Dread(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
                               h5dset_space_id, H5P_DEFAULT, buffer);
                 VRFY((hrc >= 0), "H5Dread");
                 break;
-            }
+            } /* switch (parms->io_type) */
 
-#ifdef AKCDEBUG
-            /*verify read data*/
-            {
+	    if (parms->verify) {
+		/*verify read data*/
                 int *intptr = (int *)buffer;
                 register int i;
+		register int nerror=0;
 
-                for (i = 0; i < nelmts_toxfer; ++i)
-                    /* TO BE IMPLEMENTED */
-		    #error "NOT IMPLEMENTED YET"
-                    ;
-            }
-#endif
+                for (i = 0; i < nelmts_toxfer; ++i){
+                    if (*intptr++ != pio_mpi_rank_g){
+			if (++nerror < 20){
+			    /* report at most 20 errors */
+			    HDprint_rank(output);
+			    HDfprintf(output, "read data error, expected (%Hd), "
+				     "got (%Hd)\n",
+				     (long_long)pio_mpi_rank_g,
+				     (long_long)*(intptr-1));
+			}
+		    }
+		}
+		if (nerror >= 20) {
+		    HDprint_rank(output);
+		    HDfprintf(output, "...");
+		    HDfprintf(output, "total read data errors=%Hd\n",
+			    nerror);
+		}
+            }	/* if (parms->verify) */
 
             nelmts_xfer += nelmts_toxfer;
         }
