@@ -74,6 +74,8 @@ documented below.
 <ul>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
+    <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
+    <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
 </ul>
 </td></tr>
 </table>
@@ -415,6 +417,43 @@ facilitate moving easily between them.</i>
 
 <hr>
 <dl>
+<dt><strong>Name:</strong> <a name="File-GetAccessPlist">H5Fget_access_plist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fget_access_plist</code>(<em>hid_t</em> <code>file_id</code>)
+<dt><strong>Purpose:</strong>
+        <dd>Returns a file access property list identifier.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fget_access_plist</code> returns the 
+            file access property list identifier of the specified file.
+            <p>
+            See "File Access Properties" in 
+            <a href="RM_H5P.html">H5P: Property List Interface</a> 
+            in this reference manual and 
+            "File Access Property Lists" 
+            in <a href="Files.html"><cite>Files</cite></a> in the 
+            <cite>HDF5 User's Guide</cite> for 
+            additional information and related functions.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of file to get access property list of
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file access property list identifier if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_access_plist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
 <dt><strong>Name:</strong> <a name="File-GetCreatePlist">H5Fget_create_plist</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Fget_create_plist</code>(<em>hid_t</em> <code>file_id</code>
@@ -455,14 +494,17 @@ facilitate moving easily between them.</i>
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-GetAccessPlist">H5Fget_access_plist</a>
+<dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Fget_access_plist</code>(<em>hid_t</em> <code>file_id</code>)
+    <dd><em>herr_t </em><code>H5Fget_obj_count</code>(<em>hid_t</em> <code>file_id</code>,
+	    <em>unsigned</em> <code>types</code>,
+		<em>unsigned *</em><code>obj_id_count</code>
+		)
 <dt><strong>Purpose:</strong>
-        <dd>Returns a file access property list identifier.
+        <dd>Returns the number of open object identifiers for an open file.
 <dt><strong>Description:</strong>
-        <dd><code>H5Fget_access_plist</code> returns the 
-            file access property list identifier of the specified file.
+        <dd><code>H5Fget_obj_count</code> returns the 
+            number of open object identifiers for the open file specified by <code>file_id</code>.
             <p>
             See "File Access Properties" in 
             <a href="RM_H5P.html">H5P: Property List Interface</a> 
@@ -487,6 +529,13 @@ facilitate moving easily between them.</i>
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
+
 </dl>
 
 
@@ -732,7 +781,7 @@ H5F&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  5 December 2001
+Last modified:  13 December 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
