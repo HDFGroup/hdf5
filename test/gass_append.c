@@ -25,7 +25,7 @@ int main(void)
 }
 #else
 
-#define URL    "ftp://bagchi:bagchi12@hdfspare1/scratch-fuga/home/bagchi/junk.w"
+#define URL    "ftp://acheng:acheng12@eirene/tmp/acheng/junk.w"
 #define DATASETNAME "Int1Array"
 #define NX     5                      /* dataset dimensions */
 #define NY     6
