@@ -358,6 +358,9 @@ int main(int argc, char **argv)
     MPI_BANNER("test_fapl_mpio_dup...");
     test_fapl_mpio_dup();
 
+    MPI_BANNER("test_fapl_mpiposix_dup...");
+    test_fapl_mpiposix_dup();
+
     if (ndatasets){
 	MPI_BANNER("multiple datasets write ...");
         multiple_dset_write(filenames[3], ndatasets);

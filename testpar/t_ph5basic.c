@@ -52,7 +52,7 @@ test_fapl_mpio_dup(void)
     int nkeys, nkeys_tmp;
 
     if (verbose)
-	printf("Delete communicator and INFO object\n");
+	printf("Verify fapl_mpio duplicates communicator and INFO objects\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -189,4 +189,119 @@ test_fapl_mpio_dup(void)
 	mrc = MPI_Info_free(&info_tmp);
 	VRFY((mrc==MPI_SUCCESS), "MPI_Info_free");
     }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_fapl_mpiposix_dup
+ *
+ * Purpose:     Test if fapl_mpiposix property list keeps a duplicate of the
+ * 		communicator object given when set; and returns a duplicate
+ * 		of its component when H5Pget_fapl_mpiposix is called.
+ * 		Note that fapl_mpiposix does not use INFO object.
+ *
+ * Return:      Success:        None
+ *
+ *              Failure:        Abort
+ *
+ * Programmer:  Albert Cheng
+ *              January 9, 2003
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+void
+test_fapl_mpiposix_dup(void)
+{
+    int mpi_size, mpi_rank;
+    MPI_Comm comm, comm_tmp;
+    int mpi_size_old, mpi_rank_old;
+    int mpi_size_tmp, mpi_rank_tmp;
+    int mrc;			/* MPI return value */
+    hid_t acc_pl;		/* File access properties */
+    herr_t ret;			/* hdf5 return value */
+    int nkeys, nkeys_tmp;
+
+    if (verbose)
+	printf("Verify fapl_mpiposix duplicates communicator object\n");
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    if (verbose)
+	printf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
+
+    /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
+     * Use MPI_Comm_split because it is simplier than MPI_Comm_create
+     */
+    mrc = MPI_Comm_split(MPI_COMM_WORLD, 0, 0, &comm);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_split");
+    MPI_Comm_size(comm,&mpi_size_old);
+    MPI_Comm_rank(comm,&mpi_rank_old);
+    if (verbose)
+	printf("rank/size of comm are %d/%d\n", mpi_rank_old, mpi_size_old);
+
+    acc_pl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_pl >= 0), "H5P_FILE_ACCESS");
+
+    ret = H5Pset_fapl_mpiposix(acc_pl, comm);
+    VRFY((ret >= 0), "");
+
+    /* Case 1:
+     * Free the created communicator object. 
+     * Check if the access property list is still valid and can return
+     * valid communicator object.
+     */
+    mrc = MPI_Comm_free(&comm);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
+
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+    VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
+    MPI_Comm_size(comm_tmp,&mpi_size_tmp);
+    MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
+    if (verbose)
+	printf("After H5Pget_fapl_mpiposix: rank/size of comm are %d/%d\n",
+	mpi_rank_tmp, mpi_size_tmp);
+    VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
+    VRFY((mpi_rank_tmp==mpi_rank), "MPI_Comm_rank");
+
+    /* Case 2:
+     * Free the retrieved communicator object.
+     * Check if the access property list is still valid and can return
+     * valid communicator object.
+     * Also verify the NULL argument option.
+     */
+    mrc = MPI_Comm_free(&comm_tmp);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
+
+    /* check NULL argument options. */
+    ret = H5Pget_fapl_mpiposix(acc_pl, NULL);
+    VRFY((ret >= 0), "H5Pget_fapl_mpiposix neither");
+
+    /* now get it again and check validity too. */
+    /* Donot free the returned object which are used in the next case. */
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+    VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
+    MPI_Comm_size(comm_tmp,&mpi_size_tmp);
+    MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
+    if (verbose)
+	printf("After second H5Pget_fapl_mpiposix: rank/size of comm are %d/%d\n",
+	mpi_rank_tmp, mpi_size_tmp);
+    VRFY((mpi_size_tmp==mpi_size), "MPI_Comm_size");
+    VRFY((mpi_rank_tmp==mpi_rank), "MPI_Comm_rank");
+
+    /* Case 3:
+     * Close the property list and verify the retrieved communicator 
+     * object is still valid.
+     */
+    H5Pclose(acc_pl);
+    MPI_Comm_size(comm_tmp,&mpi_size_tmp);
+    MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
+    if (verbose)
+	printf("After Property list closed: rank/size of comm are %d/%d\n",
+	mpi_rank_tmp, mpi_size_tmp);
+
+    /* clean up */
+    mrc = MPI_Comm_free(&comm_tmp);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 }
