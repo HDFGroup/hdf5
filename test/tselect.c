@@ -87,6 +87,9 @@
 #define SPACE7_DIM1	10
 #define SPACE7_DIM2	10
 #define SPACE7_FILL     254
+#define SPACE7_CHUNK_DIM1 5
+#define SPACE7_CHUNK_DIM2 5
+#define SPACE7_NPOINTS  8
 
 /* 4-D dataset with fixed dimensions */
 #define SPACE8_NAME  "Space8"
@@ -3993,6 +3996,201 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 
 /****************************************************************
 **
+**  test_select_point_chunk(): Test basic H5S (dataspace) selection code.
+**      Tests combinations of hyperslab and point selections on
+**      chunked datasets.
+** 
+****************************************************************/
+static void 
+test_select_point_chunk(void)
+{
+    hsize_t     dimsf[SPACE7_RANK];     /* dataset dimensions */
+    hsize_t     chunk_dimsf[SPACE7_RANK] = {SPACE7_CHUNK_DIM1,SPACE7_CHUNK_DIM2};    /* chunk sizes */
+    unsigned    *data;                   /* data to write */
+    unsigned    *tmpdata;                /* data to write */
+
+    /* 
+     * Data  and output buffer initialization. 
+     */
+    hid_t       file, dataset;         /* handles */
+    hid_t       dataspace;   
+    hid_t       pnt1_space;                     /* Dataspace to hold 1st point selection */
+    hid_t       pnt2_space;                     /* Dataspace to hold 2nd point selection */
+    hid_t       hyp1_space;                     /* Dataspace to hold 1st hyperslab selection */
+    hid_t       hyp2_space;                     /* Dataspace to hold 2nd hyperslab selection */
+    hid_t       dcpl;                 
+    herr_t      ret;                            /* Generic return value */
+
+    unsigned    *data_out;			/* output buffer */
+#ifdef LATER
+    unsigned    *tmpdata_out;			/* output buffer */
+#endif /* LATER */
+   
+    hssize_t    start[SPACE7_RANK];             /* hyperslab offset */
+    hsize_t     count[SPACE7_RANK];             /* size of the hyperslab */
+    hssize_t    points[SPACE7_NPOINTS][SPACE7_RANK];   /* points for selection */
+    unsigned    i, j;                           /* Local index variables */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Point Selections on Chunked Datasets\n"));
+
+    /* Allocate the transfer buffers */
+    data = (unsigned*)HDmalloc(sizeof(unsigned)*SPACE7_DIM1*SPACE7_DIM2);
+    data_out = (unsigned*)HDcalloc(SPACE7_DIM1*SPACE7_DIM2,sizeof(unsigned));
+ 
+    /* 
+     * Data buffer initialization. 
+     */
+    tmpdata = data;
+    for (i = 0; i < SPACE7_DIM1; i++)
+	for (j = 0; j < SPACE7_DIM1; j++)
+            *tmpdata++ = ((i*SPACE7_DIM2)+j)%256;
+
+    /*
+     * Create a new file using H5F_ACC_TRUNC access,
+     * the default file creation properties and file
+     * access properties.
+     */
+    file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create file dataspace */
+    dimsf[0] = SPACE7_DIM1;
+    dimsf[1] = SPACE7_DIM2;
+    dataspace = H5Screate_simple (SPACE7_RANK, dimsf, NULL); 
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * chunking properties.
+     */
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk (dcpl, SPACE7_RANK, chunk_dimsf);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, dcpl); 
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Create 1st point selection */
+    pnt1_space = H5Scopy (dataspace);
+    CHECK(pnt1_space, FAIL, "H5Scopy");
+
+    points[0][0]=3;
+    points[0][1]=3;
+    points[1][0]=3;
+    points[1][1]=8;
+    points[2][0]=8;
+    points[2][1]=3;
+    points[3][0]=8;
+    points[3][1]=8;
+    points[4][0]=1;    /* In same chunk as point #0, but "earlier" in chunk */
+    points[4][1]=1;
+    points[5][0]=1;    /* In same chunk as point #1, but "earlier" in chunk */
+    points[5][1]=6;
+    points[6][0]=6;    /* In same chunk as point #2, but "earlier" in chunk */
+    points[6][1]=1;
+    points[7][0]=6;    /* In same chunk as point #3, but "earlier" in chunk */
+    points[7][1]=6;
+    ret = H5Sselect_elements(pnt1_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hssize_t **)points);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Create 1st hyperslab selection */
+    hyp1_space = H5Scopy (dataspace);
+    CHECK(hyp1_space, FAIL, "H5Scopy");
+
+    start[0]=2; start[1]=2;
+    count[0]=4; count[1]=2;
+    ret = H5Sselect_hyperslab(hyp1_space,H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write out data using 1st point selection for file & hyperslab for memory */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UINT,hyp1_space,pnt1_space,H5P_DEFAULT,data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create 2nd point selection */
+    pnt2_space = H5Scopy (dataspace);
+    CHECK(pnt2_space, FAIL, "H5Scopy");
+
+    points[0][0]=4;
+    points[0][1]=4;
+    points[1][0]=4;
+    points[1][1]=9;
+    points[2][0]=9;
+    points[2][1]=4;
+    points[3][0]=9;
+    points[3][1]=9;
+    points[4][0]=2;    /* In same chunk as point #0, but "earlier" in chunk */
+    points[4][1]=2;
+    points[5][0]=2;    /* In same chunk as point #1, but "earlier" in chunk */
+    points[5][1]=7;
+    points[6][0]=7;    /* In same chunk as point #2, but "earlier" in chunk */
+    points[6][1]=2;
+    points[7][0]=7;    /* In same chunk as point #3, but "earlier" in chunk */
+    points[7][1]=7;
+    ret = H5Sselect_elements(pnt2_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hssize_t **)points);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Create 2nd hyperslab selection */
+    hyp2_space = H5Scopy (dataspace);
+    CHECK(hyp2_space, FAIL, "H5Scopy");
+
+    start[0]=2; start[1]=4;
+    count[0]=4; count[1]=2;
+    ret = H5Sselect_hyperslab(hyp2_space,H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write out data using 2nd hyperslab selection for file & point for memory */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UINT,pnt2_space,hyp2_space,H5P_DEFAULT,data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close everything (except selections) */
+    ret=H5Pclose (dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret=H5Sclose (dataspace);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Dclose (dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret=H5Fclose (file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open file & dataset */
+    file = H5Fopen (FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+    dataset = H5Dopen (file, DATASETNAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    /* Read data using 1st point selection for file and hyperslab for memory */
+    ret=H5Dread(dataset,H5T_NATIVE_UINT,hyp1_space,pnt1_space,H5P_DEFAULT,data_out);
+    CHECK(ret, FAIL, "H5Dread");
+
+/* Verify data (later) */
+
+    /* Read data using 2nd hyperslab selection for file and point for memory */
+    ret=H5Dread(dataset,H5T_NATIVE_UINT,pnt2_space,hyp2_space,H5P_DEFAULT,data_out);
+    CHECK(ret, FAIL, "H5Dread");
+
+/* Verify data (later) */
+
+    /* Close everything (inclusing selections) */
+    ret=H5Sclose (pnt1_space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Sclose (pnt2_space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Sclose (hyp1_space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Sclose (hyp2_space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret=H5Dclose (dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret=H5Fclose (file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    free (data);
+    free (data_out);
+}   /* test_select_point_chunk() */
+
+/****************************************************************
+**
 **  test_select_valid(): Test basic H5S (dataspace) selection code.
 **      Tests selection validity
 ** 
@@ -6279,6 +6477,9 @@ test_select(void)
 
     /* Test "same shape" routine */
     test_shape_same();
+
+    /* Test point selections in chunked datasets */
+    test_select_point_chunk();
 
 }   /* test_select() */
 
