@@ -31,6 +31,10 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
+#ifdef H5_HAVE_SZLIB_H
+#   include "szlib.h"
+#endif
+
 /* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
