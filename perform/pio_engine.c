@@ -52,14 +52,6 @@
     }                                                   \
 } while(0)
 
-#ifndef HDmalloc
-#define HDmalloc(x)             malloc(x)
-#endif
-
-#ifndef HDfree
-#define HDfree(x)		free(x)
-#endif
-
 #ifndef HDopen
 #ifdef O_BINARY
 #define HDopen(S,F,M)           open(S,F|_O_BINARY,M)
@@ -98,6 +90,21 @@ enum {
     PIO_READ = 4
 };
 
+/*
+ * In a parallel machine, the filesystem suitable for compiling is
+ * unlikely a parallel file system that is suitable for parallel I/O.
+ * There is no standard pathname for the parallel file system.  /tmp
+ * is about the best guess.
+ */
+#ifndef HDF5_PARAPREFIX
+#  ifdef __PUMAGON__
+     /* For the PFS of TFLOPS */
+#    define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1"
+#  else
+#    define HDF5_PARAPREFIX "/tmp"
+#  endif    /* __PUMAGON__ */
+#endif  /* !HDF5_PARAPREFIX */
+
 /* the different types of file descriptors we can expect */
 typedef union _file_descr {
     int         rawfd;      /* raw/Unix file    */
@@ -106,8 +113,10 @@ typedef union _file_descr {
 } file_descr;
 
 /* local functions */
+static char  *pio_create_filename(iotype iot, const char *base_name,
+                                  char *fullname, size_t size);
 static herr_t do_write(file_descr fd, iotype iot, unsigned long ndsets,
-                       unsigned long nelmts, hid_t h5dset_space_id, char * buffer);
+                       unsigned long nelmts, hid_t h5dset_space_id, char *buffer);
 static herr_t do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags);
 static herr_t do_close(iotype iot, file_descr fd);
 
@@ -122,7 +131,7 @@ do_pio(parameters param)
     file_descr      fd;
     iotype          iot;
 
-    char            fname[256];
+    char            fname[FILENAME_MAX];
     unsigned int    maxprocs, nfiles, nf;
     unsigned long   ndsets;
     unsigned long   nelmts;
@@ -144,21 +153,27 @@ do_pio(parameters param)
     MPI_Comm	    comm = MPI_COMM_NULL;
     int		    myrank, nprocs = 1;
 
+    pio_time       *timer = NULL;
+
     /* Sanity check parameters */
 
     /* IO type */
     iot = param.io_type;
 
     switch (iot) {
-    case RAW:
     case MPIO:
+        timer = pio_time_new(MPI_TIMER);
+        break;
+
+    case RAW:
     case PHDF5:
-	/* nothing */
-	break;
+        timer = pio_time_new(SYS_TIMER);
+        break;
+
     default:
-	/* unknown request */
-	fprintf(stderr, "Unknown IO type request (%d)\n", iot);
-	GOTOERROR(FAIL);
+        /* unknown request */
+        fprintf(stderr, "Unknown IO type request (%d)\n", iot);
+        GOTOERROR(FAIL);
     }
 
     nfiles = param.num_files;       /* number of files                      */
@@ -167,14 +182,14 @@ do_pio(parameters param)
     niters = param.num_iters;       /* number of iterations of reads/writes */
     maxprocs = param.max_num_procs; /* max number of mpi-processes to use   */
 
-    if (nelmts == 0 ){
+    if (nelmts == 0 ) {
         fprintf(stderr,
                 "number of elements per dataset must be > 0 (%lu)\n",
                 nelmts);
         GOTOERROR(FAIL);
     }
 
-    if (maxprocs == 0 ){
+    if (maxprocs == 0 ) {
         fprintf(stderr,
                 "maximun number of process to use must be > 0 (%u)\n",
                 maxprocs);
@@ -183,7 +198,7 @@ do_pio(parameters param)
 
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-    if (maxprocs > nprocs){
+    if (maxprocs > nprocs) {
         fprintf(stderr,
                 "maximun number of process(%d) must be <= process in MPI_COMM_WORLD(%d)\n",
                 maxprocs, nprocs);
@@ -203,7 +218,7 @@ nfiles=3;
      * processes. */
     MPI_Comm_rank(comm, &myrank);
     color = (myrank < maxprocs);
-    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, myrank, &comm);
+    mrc = MPI_Comm_split(MPI_COMM_WORLD, color, myrank, &comm);
 
     if (mrc != MPI_SUCCESS) {
         fprintf(stderr, "MPI_Comm_split failed\n");
@@ -221,7 +236,7 @@ nfiles=3;
     MPI_Comm_rank(comm, &myrank);
 
     /* allocate data buffer */
-    buffer = HDmalloc(BUFFER_SIZE);
+    buffer = malloc(BUFFER_SIZE);
 
     if (buffer == NULL){
         fprintf(stderr, "malloc for data buffer failed\n");
@@ -243,20 +258,11 @@ nfiles=3;
 
     for (nf = 1; nf <= nfiles; nf++) {
         /* Open file for write */
-MSG("creating file");
-        sprintf(fname, "#pio_tmp_%u", nf);
+        char base_name[256];
 
-        switch (iot) {
-        case RAW:
-            strcat(fname, ".raw");
-            break;
-        case MPIO:
-            strcat(fname, ".mpio");
-            break;
-        case PHDF5:
-            strcat(fname, ".h5");
-            break;
-        }
+MSG("creating file");
+        sprintf(base_name, "#pio_tmp_%u", nf);
+        pio_create_filename(iot, base_name, fname, sizeof(fname));
 
         rc = do_open(iot, fname, fd, PIO_CREATE | PIO_WRITE);
         VRFY((rc == SUCCESS), "do_open failed\n");
@@ -291,12 +297,13 @@ MSG("opening file to read");
 MSG("closing read file");
         rc = do_close(iot, fd);
         VRFY((rc == SUCCESS), "do_close failed\n");
+        remove(fname);
     }
 
 done:
     /* clean up */
     /* release HDF5 objects */
-    if (h5dset_space_id != -1){
+    if (h5dset_space_id != -1) {
         rc = H5Sclose(h5dset_space_id);
 
         if (rc < 0){
@@ -307,10 +314,10 @@ done:
         }
     }
 
-    if (h5mem_space_id != -1){
+    if (h5mem_space_id != -1) {
         rc = H5Sclose(h5mem_space_id);
 
-        if (rc < 0){
+        if (rc < 0) {
             fprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         } else {
@@ -322,15 +329,127 @@ done:
     rc = do_close(iot, fd);
 
     /* release generic resources */
-    HDfree(buffer);
+    free(buffer);
+    pio_time_destroy(timer);
 
 fprintf(stderr, "returning with ret_code=%d\n", ret_code);
     return ret_code;
 }
 
 /*
+ * Function:    pio_create_filename
+ * Purpose:     Create a new filename to write to. Determine the correct
+ *              suffix to append to the filename by the type of I/O we're
+ *              doing. Also, place in the /tmp/{$USER,$LOGIN} directory if
+ *              USER or LOGIN are specified in the environment.
+ * Return:      Pointer to filename or NULL
+ * Programmer:  Bill Wendling, 21. November 2001
+ * Modifications:
+ */
+static char *
+pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
+{
+    const char *prefix, *suffix;
+    char *ptr, last = '\0';
+    size_t i, j;
+
+    if (!base_name || !fullname || size < 1)
+        return NULL;
+
+    memset(fullname, 0, size);
+
+    switch (iot) {
+    case RAW:
+        suffix = ".raw";
+        break;
+    case MPIO:
+        suffix = ".mpio";
+        break;
+    case PHDF5:
+        suffix = ".h5";
+        break;
+    }
+
+    /* First use the environment variable and then try the constant */
+    prefix = getenv("HDF5_PARAPREFIX");
+
+#ifdef HDF5_PARAPREFIX
+    if (!prefix)
+        prefix = HDF5_PARAPREFIX;
+#endif  /* HDF5_PARAPREFIX */
+
+    /* Prepend the prefix value to the base name */
+    if (prefix && *prefix) {
+        /* If the prefix specifies the HDF5_PARAPREFIX directory, then
+         * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
+         * directory instead. */
+        register char *user, *login, *subdir;
+
+        user = getenv("USER");
+        login = getenv("LOGIN");
+        subdir = (user ? user : login);
+
+        if (subdir) {
+            for (i = 0; i < size && prefix[i]; i++)
+                fullname[i] = prefix[i];
+
+            fullname[i++] = '/';
+
+            for (j = 0; i < size && subdir[j]; i++, j++)
+                fullname[i] = subdir[j];
+        } else {
+            /* We didn't append the prefix yet */
+            strncpy(fullname, prefix, MIN(strlen(prefix), size));
+        }
+
+        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
+            /* Append the base_name with a slash first. Multiple slashes are
+             * handled below. */
+            struct stat buf;
+
+            if (stat(fullname, &buf) < 0)
+                /* The directory doesn't exist just yet */
+                if (mkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
+                    /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
+                     * Default to PREFIX's original prefix value. */
+                    strcpy(fullname, prefix);
+                }
+
+            strcat(fullname, "/");
+            strcat(fullname, base_name);
+        } else {
+            /* Buffer is too small */
+            return NULL;
+        }
+    } else if (strlen(base_name) >= size) {
+        /* Buffer is too small */
+        return NULL;
+    } else {
+        strcpy(fullname, base_name);
+    }
+
+    /* Append a suffix */
+    if (suffix) {
+        if (strlen(fullname) + strlen(suffix) >= size)
+            return NULL;
+
+        strcat(fullname, suffix);
+    }
+
+    /* Remove any double slashes in the filename */
+    for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
+        if (*ptr != '/' || last != '/')
+            fullname[j++] = *ptr;
+
+        last = *ptr;
+    }
+
+    return fullname;
+}
+
+/*
  * Function:    do_write
- * Purpose:     Write 
+ * Purpose:     Write the required amount of data to the file.
  * Return:      SUCCESS or FAIL
  * Programmer:  Bill Wendling, 14. November 2001
  * Modifications:
@@ -366,7 +485,12 @@ do_write(file_descr fd, iotype iot, unsigned long ndsets,
             sprintf(dname, "Dataset_%lu", ndset);
             h5ds_id = H5Dcreate(fd.h5fd, dname, H5T_NATIVE_INT,
                                 h5dset_space_id, H5P_DEFAULT);
-            VRFY((h5ds_id >= 0), "H5Dcreate");
+
+            if (h5ds_id < 0) {
+                fprintf(stderr, "HDF5 Dataset Create failed\n");
+                GOTOERROR(FAIL);
+            }
+
             break;
         }
 
@@ -384,7 +508,7 @@ do_write(file_descr fd, iotype iot, unsigned long ndsets,
 
             /*Prepare write data*/
             {
-                int *intptr = (int*)buffer;
+                int *intptr = (int *)buffer;
                 register int i;
 
                 for (i = 0; i < nelmts_towrite; ++i)
@@ -401,12 +525,9 @@ do_write(file_descr fd, iotype iot, unsigned long ndsets,
                 break;
 
             case MPIO:
-                break;
-
             case PHDF5:
                 break;
             }
-
 
             nelmts_written += nelmts_towrite;
 fprintf(stderr, "wrote %lu elmts, %lu written\n", nelmts_towrite, nelmts_written);
@@ -418,7 +539,11 @@ fprintf(stderr, "wrote %lu elmts, %lu written\n", nelmts_towrite, nelmts_written
         if (iot == PHDF5){
             herr_t hrc = H5Dclose(h5ds_id);
 
-            VRFY((hrc >= 0), "HDF5 Dataset Close failed\n");
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Dataset Close failed\n");
+                GOTOERROR(FAIL);
+            }
+
             h5ds_id = -1;
         }
     }
@@ -427,6 +552,13 @@ done:
     return ret_code;
 }
 
+/*
+ * Function:    do_open
+ * Purpose:     Open the specified file.
+ * Return:      SUCCESS or FAIL
+ * Programmer:  Bill Wendling, 14. November 2001
+ * Modifications:
+ */
 static herr_t
 do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags)
 {
@@ -439,7 +571,7 @@ do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags)
         if ((flags | PIO_CREATE) || (flags | PIO_WRITE)) {
             fd.rawfd = RAWCREATE(fname);
         } else {
-	    fd.rawfd = RAWOPEN(fname, O_RDONLY);
+            fd.rawfd = RAWOPEN(fname, O_RDONLY);
         }
 
         if (fd.rawfd < 0 ) {
@@ -454,7 +586,7 @@ do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags)
             mrc = MPI_File_open(comm, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
                                 MPI_INFO_NULL, &fd.mpifd);
         } else {
-	    mrc = MPI_File_open(comm, fname, MPI_MODE_RDONLY,
+            mrc = MPI_File_open(comm, fname, MPI_MODE_RDONLY,
                                 MPI_INFO_NULL, &fd.mpifd);
         }
 
@@ -467,26 +599,39 @@ do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags)
 
     case PHDF5:
         acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((acc_tpl >= 0), "");
+
+        if (acc_tpl < 0) {
+            fprintf(stderr, "HDF5 Property List Create failed\n");
+            GOTOERROR(FAIL);
+        }
+
         hrc = H5Pset_fapl_mpio(acc_tpl, comm, MPI_INFO_NULL);     
-        VRFY((hrc >= 0), "");
+
+        if (hrc < 0) {
+            fprintf(stderr, "HDF5 Property List Set failed\n");
+            GOTOERROR(FAIL);
+        }
 
         /* create the parallel file */
         if ((flags | PIO_CREATE) || (flags | PIO_WRITE)) {
             fd.h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
         } else {
-	    fd.h5fd = H5Fopen(fname, H5P_DEFAULT, acc_tpl);
+            fd.h5fd = H5Fopen(fname, H5P_DEFAULT, acc_tpl);
         }
 
         hrc = H5Pclose(acc_tpl);
 
         if (fd.h5fd < 0) {
-            fprintf(stderr, "HDF5 file Create failed(%s)\n", fname);
+            fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
 
         /* verifying the close of the acc_tpl */
-        VRFY((hrc >= 0), "H5Pclose");
+        if (hrc < 0) {
+            fprintf(stderr, "HDF5 Property List Close failed\n");
+            GOTOERROR(FAIL);
+        }
+
         break;
     } 
 

@@ -26,35 +26,35 @@
 #define MILLISECOND     1000000.0
 
 /*
- * Function:    perf_time_new
+ * Function:    pio_time_new
  * Purpose:     Build us a brand, spankin', new performance time object.
  *              The object is a black box to the user. They just tell us
  *              what type of timer they want (MPI_TIMER for MPI_Wtime or
  *              SYS_TIMER for system time).
- * Return:      Pointer to perf_time object
+ * Return:      Pointer to pio_time object
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
-perf_time *
-perf_time_new(unsigned int type)
+pio_time *
+pio_time_new(unsigned int type)
 {
-    perf_time *pt = (perf_time *)calloc(1, sizeof(struct perf_time_));
+    pio_time *pt = (pio_time *)calloc(1, sizeof(struct pio_time_));
 
     pt->type = type;
     return pt;
 }
 
 /*
- * Function:    perf_time_destroy
- * Purpose:     Remove the memory allocated for the perf_time object. Only
- *              need to call on a pointer allocated with the ``perf_time_new''
+ * Function:    pio_time_destroy
+ * Purpose:     Remove the memory allocated for the pio_time object. Only
+ *              need to call on a pointer allocated with the ``pio_time_new''
  *              function.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 void
-perf_time_destroy(perf_time *pt)
+pio_time_destroy(pio_time *pt)
 {
     free(pt);
 }
@@ -63,13 +63,13 @@ perf_time_destroy(perf_time *pt)
  * Function:    set_timer_type
  * Purpose:     Set the type of the timer to either MPI_TIMER or SYS_TIMER.
  *              This really only needs to be called if you didn't construct a
- *              timer with the perf_timer_new function (shame!).
+ *              timer with the pio_timer_new function (shame!).
  * Return:      Nothing
  * Programmer:  Bill Wendling, 04. October 2001
  * Modifications:
  */
 void
-set_timer_type(perf_time *pt, timer_type type)
+set_timer_type(pio_time *pt, timer_type type)
 {
     pt->type = type;
 }
@@ -82,20 +82,20 @@ set_timer_type(perf_time *pt, timer_type type)
  * Modifications:
  */
 timer_type
-get_timer_type(perf_time *pt)
+get_timer_type(pio_time *pt)
 {
     return pt->type;
 }
 
 /*
  * Function:    set_time
- * Purpose:     Set the time in a ``perf_time'' object.
- * Return:      Pointer to the passed in ``perf_time'' object.
+ * Purpose:     Set the time in a ``pio_time'' object.
+ * Return:      Pointer to the passed in ``pio_time'' object.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
-perf_time *
-set_time(perf_time *pt, timer_type t, int start_stop)
+pio_time *
+set_time(pio_time *pt, timer_type t, int start_stop)
 {
     if (pt) {
         if (pt->type == MPI_TIMER) {
@@ -122,13 +122,13 @@ set_time(perf_time *pt, timer_type t, int start_stop)
 
 /*
  * Function:    get_time
- * Purpose:     Get the time from a ``perf_time'' object.
+ * Purpose:     Get the time from a ``pio_time'' object.
  * Return:      The number of seconds as a DOUBLE.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 double
-get_time(perf_time *pt, timer_type t)
+get_time(pio_time *pt, timer_type t)
 {
     return pt->total_time[t];
 }

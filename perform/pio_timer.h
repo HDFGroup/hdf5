@@ -39,23 +39,23 @@ enum {
 };
 
 /* The performance time structure */
-typedef struct perf_time_ {
+typedef struct pio_time_ {
     unsigned int type : 1;
     double total_time[NUM_TIMERS];
     double mpi_timer[NUM_TIMERS];
     struct timeval sys_timer[NUM_TIMERS];
-} perf_time;
+} pio_time;
 
 /* External function declarations */
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-extern perf_time   *perf_time_new(unsigned int);
-extern void         perf_time_destroy(perf_time *pt);
-extern void         set_timer_type(perf_time *pt, timer_type type);
-extern timer_type   get_timer_type(perf_time *pt);
-extern perf_time   *set_time(perf_time *pt, timer_type t, int start_stop);
-extern double       get_time(perf_time *pt, timer_type t);
+extern pio_time    *pio_time_new(unsigned int);
+extern void         pio_time_destroy(pio_time *pt);
+extern void         set_timer_type(pio_time *pt, timer_type type);
+extern timer_type   get_timer_type(pio_time *pt);
+extern pio_time    *set_time(pio_time *pt, timer_type t, int start_stop);
+extern double       get_time(pio_time *pt, timer_type t);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
