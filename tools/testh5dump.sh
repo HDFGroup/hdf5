@@ -7,6 +7,12 @@ diff='diff -c'
 nerrors=0
 verbose=yes
 
+# The build (current) directory might be different than the source directory.
+if test "X$srcdir" = X; then
+    srcdir=.
+fi
+mkdir testfiles >/dev/null 2>&1
+
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 TESTING()
@@ -27,6 +33,7 @@ DUMP()
     expect=testfiles/$1
     actual="testfiles/`basename $1 .ddl`.out"
     shift
+    full=`pwd`/$h5dump
 
     # Run test.
     TESTING $h5dump $@
@@ -34,8 +41,8 @@ DUMP()
 	echo "#############################"
 	echo "Expected output for '$h5dump $@'" 
 	echo "#############################"
-	cd testfiles
-        ../$h5dump "$@" 2>/dev/null
+	cd $srcdir/testfiles
+        $full "$@" 2>/dev/null
     ) >$actual
     
     # Results. We normalize the result to account for different output 
@@ -43,7 +50,7 @@ DUMP()
     # differences are in white space. We have to do this the hard way
     # because diff isn't always smart enough.
     tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
-    tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
+    tr '\n' ' ' <$srcdir/$expect |tr -s ' \t' |fold >$expect-norm
 
     if $cmp $expect-norm $actual-norm; then
 	echo " PASSED"
@@ -51,7 +58,7 @@ DUMP()
 	echo "*FAILED*"
 	echo "    Actual result (*.out) differs from expected result (*.ddl)"
 	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
+	test yes = "$verbose" && $diff $srcdir/$expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file

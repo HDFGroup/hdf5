@@ -29,7 +29,6 @@ RUNTEST=$(RUNSERIAL)
 TRACE=:
 
 # Installation points
-ROOT=@ROOT@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 bindir=@bindir@
@@ -37,7 +36,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 # Shared libraries
-LT=$(top_srcdir)/libtool
+LT=$(top_builddir)/libtool
 LT_COMPILE=$(LT) --mode=compile $(CC)
 LT_LINK_LIB=$(LT) --mode=link $(CC) -rpath $(libdir)
 LT_LINK_EXE=$(LT) --mode=link $(CC)
@@ -86,30 +85,31 @@ all:
 # the user may want to occassionally type `make Makefile' in any source
 # directory.
 #
-STAMP1=$(ROOT)/config/stamp1
-STAMP2=$(ROOT)/config/stamp2
+STAMP1=$(top_builddir)/config/stamp1
+STAMP2=$(top_builddir)/config/stamp2
 
-MAKEFILE_PARTS=$(ROOT)/config/commence.in Makefile.in			      \
-	       $(ROOT)/config/conclude.in $(ROOT)/config/depend.in
+MAKEFILE_PARTS=$(srcdir)/Makefile.in					      \
+	       $(top_srcdir)/config/commence.in				      \
+	       $(top_srcdir)/config/conclude.in				      \
+	       $(top_srcdir)/config/depend.in
 
-$(STAMP1): $(ROOT)/configure.in
-	-(cd $(ROOT);							      \
-	  touch $(STAMP1);						      \
-	  autoheader)
+$(STAMP1): $(top_srcdir)/configure.in
+	touch $(STAMP1)
+	-cd $(top_srcdir); autoheader
 
-$(STAMP2): $(STAMP1) $(ROOT)/config.status
-	-(cd $(ROOT);							      \
-	  touch $(STAMP2);						      \
-	  CONFIG_FILES= CONFIG_HEADERS=src/H5config.h ./config.status)
+$(STAMP2): $(STAMP1) $(top_builddir)/config.status
+	touch $(STAMP2)
+	-cd $(top_builddir); \
+	   CONFIG_FILES= CONFIG_HEADERS=src/H5config.h ./config.status
 
-$(ROOT)/configure: $(ROOT)/configure.in
-	-(cd $(ROOT); autoconf)
+$(top_srcdir)/configure: $(top_srcdir)/configure.in
+	-cd $(top_srcdir); autoconf
 
-$(ROOT)/config.status: $(ROOT)/configure
-	-(cd $(ROOT); ./config.status --recheck)
+$(top_srcdir)/config.status: $(top_builddir)/configure
+	-cd $(top_builddir); ./config.status --recheck
 
-Makefile: $(MAKEFILE_PARTS) $(ROOT)/config.status $(STAMP2)
-	-(cd $(ROOT); CONFIG_HEADERS= ./config.status)
+Makefile: $(MAKEFILE_PARTS) $(top_builddir)/config.status $(STAMP2)
+	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
 
 #------------------------------------------------------------------------------
 # The following section of this makefile comes from the middle of `Makefile.in'

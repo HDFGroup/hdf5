@@ -13,7 +13,7 @@ if test "X-" =  "X-$CC"; then
 fi
 
 # Try gcc compiler flags
-. ./config/gnu-flags
+. $srcdir/config/gnu-flags
 
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then

@@ -78,6 +78,7 @@ main(int argc, char **argv)
 	int status = 0;
 	int status2 = 0;
 
+	optind = 1;
 	fargv = argv + optind;
 	argc -= optind;
 

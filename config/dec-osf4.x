@@ -13,8 +13,8 @@ if test "X-" =  "X-$CC"; then
 fi
 
 # Try GNU compiler flags.
-. ./config/gnu-flags
+. $srcdir/config/gnu-flags
 
 # Try native DEC compiler
 ARCH=${ARCH:='-arch host -tune host'}
-. ./config/dec-flags
+. $srcdir/config/dec-flags

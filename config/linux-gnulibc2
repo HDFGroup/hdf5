@@ -7,4 +7,4 @@
 # See BlankForm in this directory for details.
 
 # Same as with gnulibc1 for now
-. ./config/linux-gnulibc1
+. $srcdir/config/linux-gnulibc1

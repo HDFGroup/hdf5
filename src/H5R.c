@@ -708,13 +708,14 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn
+int
 H5Rget_object_type(hid_t dataset, void *_ref)
 {
     H5D_t *dset = NULL;     /* dataset object */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rget_object_type, FAIL);
+    H5TRACE2("Is","ix",dataset,_ref);
 
     /* Check args */
     if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))

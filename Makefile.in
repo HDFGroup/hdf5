@@ -8,8 +8,11 @@
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
 #
-@COMMENCE@
 top_srcdir=@top_srcdir@
+top_builddir=.
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
 
 # Subdirectories in build-order
 SUBDIRS=src test tools @TESTPARALLEL@
@@ -88,6 +91,7 @@ clean mostlyclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
+	-$(RM) conftest conftest.c
 
 distclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
@@ -95,7 +99,7 @@ distclean:
 	done
 	-$(RM) config/commence config/conclude config/depend
 	-$(RM) config.cache config.log config.status src/H5config.h
-	-$(RM) Makefile
+	-$(RM) config/stamp1 config/stamp2 libtool Makefile
 	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:

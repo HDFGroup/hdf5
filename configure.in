@@ -87,8 +87,8 @@ for f in $host_cpu-$host_vendor-$host_os \
 	 $host_vendor \
 	 $host_cpu ; do
    AC_MSG_CHECKING(for config $f)
-   if test -f config/$f; then
-      host_config=config/$f
+   if test -f $srcdir/config/$f; then
+      host_config=$srcdir/config/$f
       AC_MSG_RESULT(found)
       break
    fi
@@ -288,7 +288,7 @@ dnl
 AC_SUBST(H5TOH4)
 H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4)
-TESTH5TOH4=testh5toh4
+TESTH5TOH4='$(srcdir)/testh5toh4'
 
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case $withval in
@@ -734,10 +734,18 @@ else
 fi
 AC_SUBST(ROOT) ROOT=`$pwd`
 
-dnl Touch the time-stamp files for src/H5config.h.in and src/H5config.h
-dnl before we generate them or the Makefiles.
-touch ./config/stamp1 ./config/stamp2
+dnl Some cleanup stuff
+rm -f conftest conftest.o conftest.c dummy.o
 
+dnl Build config.status, then touch the stamp files, then build all
+dnl the Makefiles.  The order is such that the first `make' does not
+dnl need to call config.status.
+no_create=yes
 AC_OUTPUT(config/depend config/commence config/conclude \
           Makefile src/Makefile pablo/Makefile test/Makefile \
           testpar/Makefile tools/Makefile examples/Makefile)
+sleep 1
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1 ./config/stamp2
+sleep 1
+${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1

@@ -111,7 +111,9 @@ static void
 h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 {
     size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts;
+#ifndef NDEBUG
     unsigned	overflow = 0xaaaaaaaa;
+#endif
     char	temp[8192];
     char	*name, quote='\0';
     hid_t	memb;

@@ -715,8 +715,8 @@ for f in $host_cpu-$host_vendor-$host_os \
 	 $host_cpu ; do
    echo $ac_n "checking for config $f""... $ac_c" 1>&6
 echo "configure:718: checking for config $f" >&5
-   if test -f config/$f; then
-      host_config=config/$f
+   if test -f $srcdir/config/$f; then
+      host_config=$srcdir/config/$f
       echo "$ac_t""found" 1>&6
       break
    fi
@@ -3213,7 +3213,7 @@ esac
 
 H5TOH4=h5toh4
 
-TESTH5TOH4=testh5toh4
+TESTH5TOH4='$srcdir/testh5toh4'
 
 # Check whether --with-hdf4 or --without-hdf4 was given.
 if test "${with_hdf4+set}" = set; then
@@ -4786,8 +4786,9 @@ else
 fi
  ROOT=`$pwd`
 
-touch ./config/stamp1 ./config/stamp2
+rm -f conftest conftest.o conftest.c dummy.o
 
+no_create=yes
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -5176,3 +5177,8 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
+sleep 1
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1 ./config/stamp2
+sleep 1
+${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1

@@ -18,4 +18,4 @@ ARCH=
 NOFP=${NOFP:=-fomit-frame-pointer}
 
 # Figure out compiler flags
-. ./config/gnu-flags
+. $srcdir/config/gnu-flags

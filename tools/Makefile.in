@@ -4,16 +4,19 @@
 #                    All rights reserved.
 #
 # 
-@COMMENCE@
 top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
 
 # Add include directory to the C preprocessor flags, add -lh5tools and
 # -lhdf5 to the list of libraries.
-CPPFLAGS=-I../src -I. @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
 # Test programs and scripts.
 TEST_PROGS=
-TEST_SCRIPTS=testh5dump.sh @TESTH5TOH4@
+TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 
 # These are our main targets: library and tools. We link this library
 # statically because some systems can only link executables to a single

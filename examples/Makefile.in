@@ -1,15 +1,18 @@
-# HDF5 Library Examples Makefile(.in)			       -*- makefile -*-
+# HDF5 Library Examples Makefile(.in)
 #
 # Copyright (C) 1997 National Center for Supercomputing Applications.
 #                    All rights reserved.
 #
-# 
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
 @COMMENCE@
 
 # Add include directory to the C preprocessor flags and the hdf5 library
 # to the library list.
-CPPFLAGS=-I. -I../src @CPPFLAGS@
-LIBS=../src/libhdf5.a @LIBS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
+LIBHDF5=../src/libhdf5.la
 
 # These are the programs that `make all' will build, `make install'
 # will copy to the binaries directory, and `make uninstall' will
@@ -33,29 +36,29 @@ PROG_OBJ=$(PROG_SRC:.c=.o)
 
 
 # How to build the programs... they all depend on the hdf5 library
-$(PROGS): ../src/libhdf5.a
+$(PROGS): $(LIBHDF5)
 h5_chunk_read: h5_chunk_read.o
-	$(CC) $(CFLAGS) -o $@ h5_chunk_read.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_compound: h5_compound.o
-	$(CC) $(CFLAGS) -o $@ h5_compound.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_compound.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_extend_write: h5_extend_write.o
-	$(CC) $(CFLAGS) -o $@ h5_extend_write.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_extend_write.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_group: h5_group.o
-	$(CC) $(CFLAGS) -o $@ h5_group.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_group.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_write: h5_write.o
-	$(CC) $(CFLAGS) -o $@ h5_write.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_write.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_read: h5_read.o
-	$(CC) $(CFLAGS) -o $@ h5_read.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_read.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_select: h5_select.o
-	$(CC) $(CFLAGS) -o $@ h5_select.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_select.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5_attribute: h5_attribute.o
-	$(CC) $(CFLAGS) -o $@ h5_attribute.o $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_attribute.o $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

@@ -26,7 +26,9 @@ check test _test: tests
 	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
-	      $(RUNTEST) ./$$test $(TEST_FLAGS) || exit 1;		      \
+	      PATH=".:$$PATH" srcdir=$(srcdir)				      \
+		 $(RUNTEST) $$test $(TEST_FLAGS) ||			      \
+		 exit 1;						      \
 	      echo "";							      \
 	   fi;								      \
 	done;
@@ -35,7 +37,9 @@ check test _test: tests
 	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
-	      $(RUNTEST) /bin/sh ./$$test $(TEST_FLAGS) || exit 1;	      \
+	      srcdir=$(srcdir)						      \
+		 $(RUNTEST) /bin/sh $$test $(TEST_FLAGS) ||		      \
+		 exit 1;						      \
 	      echo "";							      \
 	   fi;								      \
 	done;
@@ -99,9 +103,10 @@ clean: mostlyclean
 #
 distclean: clean
 	-$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
-	@if test -f Makefile.in; then					      \
+	@if test -f $(srcdir)/Makefile.in; then				      \
 	   (set -x; $(RM) Makefile);					      \
 	fi
+
 
 # Like `distclean' except it deletes all files that can be regenerated from
 # the makefile, including those generated from autoheader and autoconf.

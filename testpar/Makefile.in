@@ -4,12 +4,15 @@
 #                    All rights reserved
 #
 #
-@COMMENCE@
 top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
 
 # Add the include directory to the C preprocessor flags the the hdf5 library
 # to the library list.
-CPPFLAGS=-I. -I../src @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 
 # These tests are parallel

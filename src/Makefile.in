@@ -4,12 +4,16 @@
 #                    All rights reserved.
 #
 # 
-@COMMENCE@
 top_srcdir=@top_srcdir@
-TRACE=perl ../bin/trace
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+TRACE=perl $(top_srcdir)/bin/trace
 
 # Add `-I.' to the C preprocessor flags.
-CPPFLAGS=-I. @CPPFLAGS@
+CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
 
 # This is our main target:
 LIB=libhdf5.la

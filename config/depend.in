@@ -25,7 +25,7 @@ dep depend: .distdep
 
 .distdep: .depend
 	touch .distdep
-	-perl -p $(ROOT)/bin/distdep .depend >.distdep
+	-srcdir=$(srcdir) perl -p $(top_srcdir)/bin/distdep .depend >.distdep
 
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
@@ -33,12 +33,12 @@ dep depend: .distdep
 	   if [ $$dep != "dummy" ]; then				      \
 	      echo Building dependencies for $$dep;			      \
 	      obj=`echo $$dep | sed 's/\.c/\\\\.o/'`;			      \
-	      sed "/$$obj/,/[^\\]$$/d" <$@ >$@- && mv $@- $@;		      \
+	      sed '\%$$obj%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;		      \
 	      $(TRACE) $$dep;						      \
 	      $(CC) -M -MG $(CPPFLAGS) $$dep >>$@;			      \
 	   fi;								      \
 	done;
-	-perl -p $(ROOT)/bin/distdep .depend >.distdep
+	-perl -p $(top_srcdir)/bin/distdep .depend >.distdep
 
 -include .depend
 
