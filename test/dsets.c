@@ -19,7 +19,9 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
+#include <stdlib.h>
 #include <time.h>
+
 #include "h5test.h"
 
 /*
@@ -174,6 +176,7 @@ test_create(hid_t file)
      * Open the dataset we created above and then close it.  This is how
      * existing datasets are accessed.
      */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
     if ((dataset = H5Dopen(file, DSET_DEFAULT_NAME))<0) goto error;
     if (H5Dclose(dataset) < 0) goto error;
     
@@ -320,6 +323,7 @@ test_simple_io(hid_t file, char *fname)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
     f = HDopen(fname, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
     HDread(f, rdata, sizeof(int)*100*200);
@@ -420,6 +424,7 @@ test_userblock_offset(hid_t fapl)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
     f = HDopen(filename, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
     HDread(f, rdata, sizeof(int)*100*200);
@@ -438,6 +443,7 @@ test_userblock_offset(hid_t fapl)
 
     HDclose(f);
 
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
     H5Dclose(dataset);
     H5Fclose(file);
     PASSED();
