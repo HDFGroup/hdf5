@@ -195,30 +195,35 @@
           !
           ! Verify that SZIP exists and has an encoder
           !
-          CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flag, error)
-              CALL check("h5zget_filter_info", error, total_error)
-          if ( IAND(config_flag,  H5Z_FILTER_ENCODE_ENABLED_F) .EQ. 0 ) then
-              szip_flag = .FALSE.
-              total_error = -1
-              return
-          endif
-          CALL h5zfilter_avail_f(H5Z_FILTER_SZIP_F, flag, error)
+          CALL h5zfilter_avail_f(H5Z_FILTER_SZIP_F, szip_flag, error)
               CALL check("h5zfilter_avail", error, total_error)
 
+          ! Quit if failed
+          if (error .ne. 0) return
+
+          ! Skip if no SZIP available
+          if (.NOT. szip_flag)then
+              return
+
+          else  !SZIP available
+
+          ! Continue
+          CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flag, error)
+              CALL check("h5zget_filter_info_f", error, total_error)
+          ! Quit if failed
+          if (error .ne. 0) return 
           !
           ! Make sure h5zget_filter_info_f returns the right flag
           !
-          if( flag ) then
-              if ( config_flag .NE. IOR( H5Z_FILTER_ENCODE_ENABLED_F, H5Z_FILTER_DECODE_ENABLED_F) ) then
+          if( szip_flag ) then
+              if ( config_flag .NE. IOR(H5Z_FILTER_ENCODE_ENABLED_F, H5Z_FILTER_DECODE_ENABLED_F))  then
                   error = -1
-                  CALL check("h5zget_filter_info config_flag", error, total_error)
-              endif
-          else
-              if ( config_flag .NE. 0 ) then
-                  error = -1
-                  CALL check("h5zget_filter_info config_flag", error, total_error)
+                  CALL check("h5zget_filter_info_f config_flag", error, total_error)
               endif
           endif    
+
+          ! Continue only when encoder is available
+          if ( IAND(config_flag,  H5Z_FILTER_ENCODE_ENABLED_F) .EQ. 0 ) return 
 
           options_mask = H5_SZIP_NN_OM_F
           pix_per_block = 32
@@ -384,6 +389,7 @@
               CALL check("h5fclose_f", error, total_error)
           if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
+          endif ! SZIP available
      
           RETURN
         END SUBROUTINE szip_test
