@@ -65,6 +65,7 @@
 #include <mpi.h>
 #include <mpio.h>
 
+#include "MPIO_Trace.h"
 #define PABLO_MASK      H5F_mpio
 static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
 #define INTERFACE_INIT  NULL
