@@ -772,7 +772,8 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     H5Eclear();
 
     /* Name and version number */
-    strcpy(name, "NCSAmulti");
+    strncpy(name, "NCSAmulti",8);
+    name[8] = '\0';
 
     assert(7==H5FD_MEM_NTYPES);
     for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m=(H5FD_mem_t)(m+1))
