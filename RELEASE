@@ -62,6 +62,8 @@ Library
    * Fixed another H5Giterate bug which was causes groups with large numbers
      of objects in them to misbehave when the callback function returned
      non-zero values.
+   * Changed return type of H5Aiterate and H5A_operator_t typedef to be
+     herr_t, to align them with the dataset and group iterator functions.
 
 Configuration
 -------------
