@@ -375,7 +375,7 @@ main(void)
     assert (status>=0);
 
     unlink("dataset.h5");
-    file = H5Fcreate("dataset.h5", H5ACC_DEFAULT, H5C_DEFAULT, H5C_DEFAULT);
+    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     assert(file >= 0);
 
     status = test_create(file);
