@@ -998,6 +998,9 @@ Optional Features:
   --enable-static-exec    Build only statically linked executables default=no
   --enable-linux-lfs      Enable support for large (64-bit) files on Linux.
                           [default=check]
+  --enable-filters=all    Turn on all internal I/O filters. One may also
+                          specify a comma-separated list of filters or the
+                          word no. The default is all internal I/O filters.
   --enable-parallel=TYPE  Search for MPI-IO and MPI support files
 
 Optional Packages:
@@ -1005,7 +1008,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-pic              try to use only PIC/non-PIC objects default=use both
-  --with-zlib=DIR       Use the GNU zlib compression
+  --with-zlib=DIR         Use GNU zlib compression [default=yes]
 
 Some influential environment variables:
   CC          C compiler command
@@ -3882,7 +3885,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3885 "configure"' > conftest.$ac_ext
+  echo '#line 3888 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4423,7 +4426,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4426: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4429: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6234,7 +6237,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6237 "configure"
+#line 6240 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6332,7 +6335,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6335 "configure"
+#line 6338 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7581,8 +7584,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-ac_cv_lib_z_compress=""
-
 # Check whether --with-zlib or --without-zlib was given.
 if test "${with_zlib+set}" = set; then
   withval="$with_zlib"
@@ -7591,8 +7592,9 @@ else
   withval=yes
 fi;
 
-case "$withval" in
+case $withval in
   yes)
+    HAVE_ZLIB="yes"
 
 for ac_header in zlib.h
 do
@@ -7702,7 +7704,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
-
+ HAVE_ZLIB_H="yes"
 fi
 
 done
@@ -7770,16 +7772,94 @@ _ACEOF
 
   LIBS="-lz $LIBS"
 
+else
+  unset HAVE_ZLIB
 fi
 
+    echo "$as_me:$LINENO: checking for compress2" >&5
+echo $ECHO_N "checking for compress2... $ECHO_C" >&6
+if test "${ac_cv_func_compress2+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char compress2 (); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char compress2 ();
+char (*f) ();
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_compress2) || defined (__stub___compress2)
+choke me
+#else
+f = compress2;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_compress2=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_func_compress2=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_compress2" >&5
+echo "${ECHO_T}$ac_cv_func_compress2" >&6
+if test $ac_cv_func_compress2 = yes; then
+  HAVE_COMPRESS2="yes"
+fi
+
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find zlib library" >&5
+echo "$as_me: error: couldn't find zlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
     ;;
   no)
+    HAVE_ZLIB="no"
     echo "$as_me:$LINENO: checking for GNU zlib" >&5
 echo $ECHO_N "checking for GNU zlib... $ECHO_C" >&6
     echo "$as_me:$LINENO: result: suppressed" >&5
 echo "${ECHO_T}suppressed" >&6
     ;;
   *)
+    HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
         zlib_inc="`echo $withval |cut -f1 -d,`"
@@ -7792,6 +7872,13 @@ echo "${ECHO_T}suppressed" >&6
         fi
         ;;
     esac
+
+            if test "X$zlib_inc" = "X/usr/include"; then
+      zlib_inc=""
+    fi
+    if test "X$zlib_lib" = "X/usr/lib"; then
+      zlib_lib=""
+    fi
 
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -7909,7 +7996,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
-
+ HAVE_ZLIB_H="yes"
 else
   CPPFLAGS="$saved_CPPFLAGS"
 fi
@@ -7985,11 +8072,94 @@ _ACEOF
   LIBS="-lz $LIBS"
 
 else
-  LDFLAGS="$saved_LDFLAGS"
+  LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB
 fi
 
+    echo "$as_me:$LINENO: checking for compress2" >&5
+echo $ECHO_N "checking for compress2... $ECHO_C" >&6
+if test "${ac_cv_func_compress2+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char compress2 (); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char compress2 ();
+char (*f) ();
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_compress2) || defined (__stub___compress2)
+choke me
+#else
+f = compress2;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_compress2=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_func_compress2=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_compress2" >&5
+echo "${ECHO_T}$ac_cv_func_compress2" >&6
+if test $ac_cv_func_compress2 = yes; then
+  HAVE_COMPRESS2="yes"
+fi
+
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find zlib library" >&5
+echo "$as_me: error: couldn't find zlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
     ;;
 esac
+
+if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FILTER_DEFLATE 1
+_ACEOF
+
+fi
+
 
 
 cat >confcache <<\_ACEOF
@@ -8138,6 +8308,52 @@ echo "${ECHO_T}none" >&6
   *)
             ;;
 esac
+
+echo "$as_me:$LINENO: checking for I/O filters" >&5
+echo $ECHO_N "checking for I/O filters... $ECHO_C" >&6
+# Check whether --enable-filters or --disable-filters was given.
+if test "${enable_filters+set}" = set; then
+  enableval="$enable_filters"
+  FILTERS=$enableval
+fi;
+
+
+all_filters="shuffle,fletcher32"
+case "X-$FILTERS" in
+  X-|X-all)
+    FILTERS=$all_filters
+    echo "$as_me:$LINENO: result: all ($FILTERS)" >&5
+echo "${ECHO_T}all ($FILTERS)" >&6
+    ;;
+  X-no|X-none)
+    echo "$as_me:$LINENO: result: none" >&5
+echo "${ECHO_T}none" >&6
+    FILTERS="none"
+    ;;
+  *)
+    echo "$as_me:$LINENO: result: $FILTERS" >&5
+echo "${ECHO_T}$FILTERS" >&6
+    ;;
+esac
+
+if test -n "$FILTERS"; then
+  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+    if test $filter = "SHUFFLE"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FILTER_SHUFFLE 1
+_ACEOF
+
+    fi
+    if test $filter = "FLETCHER32"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FILTER_FLETCHER32 1
+_ACEOF
+
+    fi
+  done
+fi
 
 # Check whether --enable-parallel or --disable-parallel was given.
 if test "${enable_parallel+set}" = set; then
@@ -9307,6 +9523,7 @@ s,@PARALLEL@,$PARALLEL,;t t
 s,@RUNSERIAL@,$RUNSERIAL,;t t
 s,@RUNPARALLEL@,$RUNPARALLEL,;t t
 s,@TESTPARALLEL@,$TESTPARALLEL,;t t
+s,@FILTERS@,$FILTERS,;t t
 s,@ADD_PARALLEL_FILES@,$ADD_PARALLEL_FILES,;t t
 /@DEPEND@/r $DEPEND
 s,@DEPEND@,,;t t

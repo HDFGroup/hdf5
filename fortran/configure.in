@@ -394,30 +394,35 @@ dnl ----------------------------------------------------------------------
 dnl Checks for libraries.
 dnl
 
-dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
-dnl `-lz' and their locations might be specified with the `--enable-zlib'
-dnl command-line switch.  The value is an include path and/or a library path.
+dnl ----------------------------------------------------------------------
+dnl Is the GNU zlib present? It has a header file `zlib.h' and a library
+dnl `-lz' and their locations might be specified with the `--with-zlib'
+dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
+dnl
+AC_ARG_WITH([zlib],
+            [AC_HELP_STRING([--with-zlib=DIR],
+                            [Use GNU zlib compression [default=yes]])],,
+            withval=yes)
 
-dnl If the presence of zlib is already cached by the top-level configure,
-dnl then "uncache" it so that we will go through this logic in any case.
-dnl Some systems where you need to specify exactly where the zlib is need
-dnl this.
-ac_cv_lib_z_compress=""
-AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]       Use the GNU zlib compression],,
-  withval=yes)
-
-case "$withval" in
+case $withval in
   yes)
-    AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress2)
+    HAVE_ZLIB="yes"
+    AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"])
+    AC_CHECK_LIB([z], [compress2],, [unset HAVE_ZLIB])
+    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find zlib library])
+    fi
     ;;
   no)
-    AC_MSG_CHECKING(for GNU zlib)
-    AC_MSG_RESULT(suppressed)
+    HAVE_ZLIB="no"
+    AC_MSG_CHECKING([for GNU zlib])
+    AC_MSG_RESULT([suppressed])
     ;;
   *)
+    HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
         zlib_inc="`echo $withval |cut -f1 -d,`"
@@ -431,6 +436,15 @@ case "$withval" in
         ;;
     esac
 
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$zlib_inc" = "X/usr/include"; then
+      zlib_inc=""
+    fi
+    if test "X$zlib_lib" = "X/usr/lib"; then
+      zlib_lib=""
+    fi
+
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
 
@@ -438,15 +452,29 @@ case "$withval" in
       CPPFLAGS="$CPPFLAGS -I$zlib_inc"
     fi
 
-    AC_CHECK_HEADERS(zlib.h,, CPPFLAGS="$saved_CPPFLAGS")
+    AC_CHECK_HEADERS([zlib.h],
+                     [HAVE_ZLIB_H="yes"],
+                     [CPPFLAGS="$saved_CPPFLAGS"])
 
     if test -n "$zlib_lib"; then
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB(z, compress2,, LDFLAGS="$saved_LDFLAGS")
+    AC_CHECK_LIB([z], [compress2],,
+                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB])
+    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find zlib library])
+    fi
     ;;
 esac
+
+if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
+  AC_DEFINE(HAVE_FILTER_DEFLATE, 1,
+            [Define if support for deflate filter is enabled])
+fi
+
 
 dnl ----------------------------------------------------------------------
 dnl Checks for header files.
@@ -561,6 +589,57 @@ case "$F9X" in
     dnl is defined below then we're still building a parallel hdf5.
     ;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Turn on internal I/O filters by setting macros in header files
+dnl Internal I/O filters are contained entirely within the library and do
+dnl not depend on external headers or libraries.  The shuffle filter is
+dnl an example of an internal filter, while the gzip filter is an example of
+dnl an external filter.  Each external filter is controlled with an
+dnl "--with-foo=" configure flag.
+dnl
+AC_MSG_CHECKING(for I/O filters)
+AC_ARG_ENABLE([filters],
+              [AC_HELP_STRING([--enable-filters=all],
+                              [Turn on all internal I/O filters. One may
+                               also specify a comma-separated list of filters
+                               or the word no.  The default is all internal
+                               I/O filters.])],
+              [FILTERS=$enableval])
+
+AC_SUBST([FILTERS])
+dnl Eventually: all_filters="shuffle,foo,bar,baz"
+all_filters="shuffle,fletcher32"
+case "X-$FILTERS" in
+  X-|X-all)
+    FILTERS=$all_filters
+    AC_MSG_RESULT(all ($FILTERS))
+    ;;
+  X-no|X-none)
+    AC_MSG_RESULT(none)
+    FILTERS="none"
+    ;;
+  *)
+    AC_MSG_RESULT($FILTERS)
+    ;;
+esac
+
+if test -n "$FILTERS"; then
+  for filter in `echo $FILTERS | tr 'a-z,' 'A-Z '`; do
+dnl ----------------------------------------------------------------------
+dnl Have to use separate 'if' construct for each filter, so that autoheader
+dnl can detect the AC_DEFINE for each one...
+dnl
+    if test $filter = "SHUFFLE"; then
+        AC_DEFINE(HAVE_FILTER_SHUFFLE, 1,
+                [Define if support for shuffle filter is enabled])
+    fi
+    if test $filter = "FLETCHER32"; then
+        AC_DEFINE(HAVE_FILTER_FLETCHER32, 1,
+                [Define if support for Fletcher32 checksum is enabled])
+    fi
+  done
+fi
 
 dnl ----------------------------------------------------------------------
 dnl What header files and libraries do we have to look for for parallel
