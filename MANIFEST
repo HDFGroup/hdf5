@@ -396,6 +396,7 @@
 ./doc/html/cpplus/Dependencies
 ./doc/html/cpplus/Makefile.in
 
+./doc/html/ed_libs/Dependencies
 ./doc/html/ed_libs/Footer.lbi
 ./doc/html/ed_libs/Makefile.in
 ./doc/html/ed_libs/NavBar_ADevG.lbi
@@ -411,6 +412,7 @@
 ./doc/html/ed_libs/styles_RM.lbi
 ./doc/html/ed_libs/styles_UG.lbi
 
+./doc/html/ed_styles/Dependencies
 ./doc/html/ed_styles/FormatElect.css
 ./doc/html/ed_styles/FormatPrint.css
 ./doc/html/ed_styles/GenElect.css
