@@ -1,8 +1,16 @@
-/*
- * Copyright (C) 2002
- *     National Center for Supercomputing Applications
- *     All rights reserved.
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* @(#) $Id$ */
 
@@ -65,6 +73,7 @@
 
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)
+#define ONE_GB              (ONE_MB * ONE_KB)
 
 #define MICROSECOND         1000000.0
 
@@ -92,6 +101,7 @@ static char *filename;
 static int compress_level = Z_DEFAULT_COMPRESSION;
 static int output, random_test = FALSE;
 static int report_once_flag;
+static double compression_time;
 
 /* internal functions */
 static void error(const char *fmt, ...);
@@ -186,6 +196,7 @@ write_file(Bytef *source, uLongf sourceLen)
 {
     Bytef *d_ptr, *dest;
     uLongf d_len, destLen;
+    struct timeval timer_start, timer_stop;
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
@@ -195,7 +206,14 @@ write_file(Bytef *source, uLongf sourceLen)
     if (!dest)
         error("out of memory");
 
+    gettimeofday(&timer_start, NULL);
     compress_buffer(dest, &destLen, source, sourceLen);
+    gettimeofday(&timer_stop, NULL);
+
+    compression_time += ((double)timer_stop.tv_sec +
+                            ((double)timer_stop.tv_usec) / MICROSECOND) -
+                        ((double)timer_start.tv_sec +
+                            ((double)timer_start.tv_usec) / MICROSECOND);
 
     if (report_once_flag) {
         printf("\tCompression Ratio: %g\n", ((double)destLen) / sourceLen);
@@ -207,7 +225,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* loop to make sure we write everything out that we want to write */
     for (;;) {
-        int rc = write(output, d_ptr, d_len);
+        int rc = write(output, d_ptr, (size_t)d_len);
 
         if (rc == -1)
             error(strerror(errno));
@@ -337,6 +355,7 @@ usage(void)
     printf("\n");
     printf("          K - Kilobyte (%d)\n", ONE_KB);
     printf("          M - Megabyte (%d)\n", ONE_MB);
+    printf("          G - Gigabyte (%d)\n", ONE_GB);
     printf("\n");
     printf("      Example: 37M = 37 Megabytes = %d bytes\n", 37 * ONE_MB);
     printf("\n");
@@ -378,6 +397,10 @@ parse_size_directive(const char *size)
             case 'm':
                 s *= ONE_MB;
                 break;
+            case 'G':
+            case 'g':
+                s *= ONE_GB;
+                break;
             default:
                 error("illegal size specifier '%c'", *endptr);
                 break;
@@ -407,10 +430,12 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
             error("out of memory");
         }
 
+        compression_time = 0.0;
+
         if (random_test)
             /* fill the buffer with random data */
             for (i = 0; i < src_len; ++i)
-                src[i] = 0xff | (int) (255.0 * rand()/(RAND_MAX + 1.0));
+                src[i] = 0xff | (1 + (int)(255.0 * rand()/(RAND_MAX + 1.0)));
 
         printf("Buffer size == ");
 
@@ -428,7 +453,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
         /* do uncompressed data write */
         gettimeofday(&timer_start, NULL);
-        output = open(filename, O_RDWR | O_TRUNC);
+        output = open(filename, O_RDWR | O_CREAT);
 
         if (output == -1)
             error(strerror(errno));
@@ -464,13 +489,16 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         printf("\tUncompressed Write Throughput: %.2fMB/s\n",
                MB_PER_SEC(file_size, total_time));
 
+        unlink(filename);
+
         /* do compressed data write */
-        output = open(filename, O_RDWR | O_TRUNC);
+        output = open(filename, O_RDWR | O_CREAT);
 
         if (output == -1)
             error(strerror(errno));
 
         report_once_flag = 1;
+        gettimeofday(&timer_start, NULL);
 
         for (total_len = 0; total_len < file_size; total_len += src_len)
             write_file(src, src_len);
@@ -486,7 +514,9 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         printf("\tCompressed Write Time: %.2fs\n", total_time);
         printf("\tCompressed Write Throughput: %.2fMB/s\n",
                MB_PER_SEC(file_size, total_time));
+        printf("\tCompression Time: %gs\n", compression_time);
 
+        unlink(filename);
         free(src);
     }
 }
