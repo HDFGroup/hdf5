@@ -6,7 +6,53 @@
 #
 # See BlankForm in this directory for details.
 
-RUNPARALLEL=${RUNPARALLEL="MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"}
+# Use AIX supplied C compiler by default, xlc for serial, mpcc_r for parallel.
+# Use -D_LARGE_FILES by default to support large file size.
+if test "X-" =  "X-$CC"; then
+  if test "X-$enable_parallel" = "X-yes"; then
+    CC='mpcc_r -D_LARGE_FILES'
+    CC_BASENAME=mpcc_r
+    RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 MP_TASKS_PER_NODE=3 poe"}
+  else
+    CC='xlc -D_LARGE_FILES'
+    CC_BASENAME=xlc
+  fi
+fi
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+
+case $CC_BASENAME in
+    xlc|mpcc_r)
+	# Turn off shared lib option.  It causes some test suite to fail.
+	enable_shared="${enable_shared:-no}"
+	# CFLAGS must be set else configure set it to -g
+	CFLAGS="$CFLAGS"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	# -O causes test/dtypes to fail badly. Turn it off for now.
+	PROD_CFLAGS=""
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    gcc)
+	. $srcdir/config/gnu-flags
+	;;
+
+    *)
+	CFLAGS="$CFLAGS -ansi"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+esac
 
 # Cross compiling defaults
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
