@@ -686,7 +686,8 @@ H5O_peek (hdf5_file_t *f, haddr_t addr, const H5O_class_t *type,
  *		optional symbol table entry ENT can be supplied in which
  *		case the cache fields in that symbol table are updated if
  *		appropriate.  If the symbol table entry changes then the
- *		optional ENT_MODIFIED arg will point to a non-zero value.
+ *		optional ENT_MODIFIED arg will point to a non-zero value,
+ *		otherwise ENT_MODIFIED isn't changed.
  *
  * 		The OVERWRITE argument is either a sequence number of a
  *		message to overwrite (usually zero) or the constant
@@ -759,7 +760,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    /* Copy into the symbol table entry */
    if (oh->nlink<=1 && ent && type->cache) {
       hbool_t modified = (type->cache)(ent, mesg);
-      if (ent_modified) *ent_modified = modified;
+      if (modified && ent_modified) *ent_modified = modified;
    }
 
    FUNC_LEAVE (sequence);

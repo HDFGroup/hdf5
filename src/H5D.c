@@ -300,19 +300,17 @@ herr_t H5D_flush(hatom_t oid)
 	  /*
 	   * Write the necessary messages to the header.
 	   */
-	            /*
-		     * Quincey?  It should be just a matter of filling in the
-		     * appropriate H5O_*_t struct and passing it to
-		     * H5O_modify() along with &d_sym.
-		     */
+/*-------------------------------------------------------------------------
+ * Quincey?  It should be just a matter of filling in the
+ * appropriate H5O_*_t struct and passing it to
+ * H5O_modify() along with &d_sym.
+ *-------------------------------------------------------------------------
+ */
 
 
 	  /*
 	   * Give the object header a name so others can access it.
 	   */
-#if 1 /* SEE_BELOW */
-	  d_sym.type = H5G_NOTHING_CACHED;
-#endif
 	  if (H5G_insert (file, file->root_sym, NULL, dataset->name,
 			  &d_sym)<0) {
 	     HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't name header*/
@@ -324,22 +322,45 @@ herr_t H5D_flush(hatom_t oid)
 	   * Update existing header messages if necessary.  If updating the
 	   * header messages changes the symbol table entry because new
 	   * info is cached, then we must re-insert the symbol entry into
-	   * the directory.  I'm still working on caching things in symbol
-	   * table entries, so the easiest thing to do is:
-	   *
-	   * 	A. Don't change any messages, or
-	   *	B. Don't let the message cache anything, or
-	   *	C. Uncomment the `SEE_BELOW' statement above.
+	   * the directory.
 	   */
-	  
-	             /*
-		      *	Quincey? It should be just a matter of filling in the
-		      *	appropriate H5O_*_t structs and passing them to
-		      *	H5O_modify(). Don't worry about caching things in
-		      *	the symbol table entry yet (pass NULL for the
-		      *	symbol table entry).
-		      */
+	  hbool_t entry_changed = FALSE;
 
+/*-------------------------------------------------------------------------
+ * Quincey, you can get rid of this statement if either of the
+ * following are true:  You don't change any messages or the
+ * changed messages aren't cached in the symbol table entry.
+ *-------------------------------------------------------------------------
+ */
+	  if (H5G_find (file, file->root_sym, NULL, dataset->name, &d_sym)<0) {
+	     HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+	  }
+
+	  /*
+	   * Change any messaages that need to be updated.
+	   */
+
+#if 0
+	  H5O_modify (file, d_sym.header, &d_sym, &entry_changed,
+		      H5O_WHATEVER, 0, &the_message);
+	  H5O_modify (file, d_sym.header, &d_sym, &entry_changed,
+		      H5O_WHATEVER, 0, &the_message);
+	  H5O_modify (file, d_sym.header, &d_sym, &entry_changed,
+		      H5O_WHATEVER, 0, &the_message);
+#endif
+
+/*-------------------------------------------------------------------------
+ * Quincey, you can get rid of this `if' statement and the
+ * H5G_modify() call subject to the same constraints as above.
+ *-------------------------------------------------------------------------
+ */
+	  if (entry_changed) {
+	     /*
+	      *	Make sure the symbol table entry as modified by the
+	      *	changing of messages gets back to the file.
+	      */
+	     H5G_modify (file, file->root_sym, NULL, dataset->name, &d_sym);
+	  }
        }
        dataset->modified = FALSE;
     }
