@@ -4608,11 +4608,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_exist
+    H5P_exist_plist
  PURPOSE
     Internal routine to query the existance of a property in a property list.
  USAGE
-    herr_t H5P_exist(plist, name)
+    herr_t H5P_exist_plist(plist, name)
         H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
@@ -4627,11 +4627,11 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_exist(H5P_genplist_t *plist, const char *name)
+static htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value=FAIL;     /* return value */
 
-    FUNC_ENTER (H5P_exist, FAIL);
+    FUNC_ENTER (H5P_exist_plist, FAIL);
 
     assert(plist);
     assert(name);
@@ -4643,17 +4643,17 @@ static htri_t H5P_exist(H5P_genplist_t *plist, const char *name)
         ret_value=1;
 
     FUNC_LEAVE (ret_value);
-}   /* H5P_exist() */
+}   /* H5P_exist_plist() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pexist
+    H5P_exist_pclass
  PURPOSE
-    Routine to query the existance of a property in a property list.
+    Internal routine to query the existance of a property in a property class.
  USAGE
-    htri_t H5P_exist(plist_id, name)
-        hid_t plist_id;         IN: Property list ID to check
+    herr_t H5P_exist_pclass(pclass, name)
+        H5P_genclass_t *pclass;  IN: Property class to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Success: Positive if the property exists in the property list, zero
@@ -4667,22 +4667,77 @@ static htri_t H5P_exist(H5P_genplist_t *plist, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t H5Pexist(hid_t plist_id, const char *name)
+static htri_t H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
 {
-    H5P_genplist_t	*plist;    /* Property list to modify */
+    htri_t ret_value=FAIL;     /* return value */
+
+    FUNC_ENTER (H5P_exist_pclass, FAIL);
+
+    assert(pclass);
+    assert(name);
+
+    /* Check for property in property list */
+    if(H5P_find_prop(pclass->props,pclass->hashsize,name)==NULL)
+        ret_value=0;
+    else
+        ret_value=1;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_exist_pclass() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pexist
+ PURPOSE
+    Routine to query the existance of a property in a property object.
+ USAGE
+    htri_t H5P_exist(id, name)
+        hid_t id;           IN: Property object ID to check
+        const char *name;   IN: Name of property to check for
+ RETURNS
+    Success: Positive if the property exists in the property object, zero
+            if the property does not exist.
+    Failure: negative value
+ DESCRIPTION
+        This routine checks if a property exists within a property list or
+    class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t H5Pexist(hid_t id, const char *name)
+{
+    H5P_genplist_t	*plist;    /* Property list to query */
+    H5P_genclass_t	*pclass;   /* Property class to query */
     htri_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5Pexist, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
-    /* Create the new property list class */
-    if ((ret_value=H5P_exist(plist,name))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
+    /* Check for the existance of the property in the list or class */
+    if(H5I_GENPROP_LST == H5I_get_type(id)) {
+        if (NULL == (plist = H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if ((ret_value=H5P_exist_plist(plist,name))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to existance of property in plist");
+    } /* end if */
+    else 
+        if(H5I_GENPROP_CLS == H5I_get_type(id)) {
+            if (NULL == (pclass = H5I_object(id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+            if ((ret_value=H5P_exist_pclass(pclass,name))<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to existance of property in pclass");
+        } /* end if */
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
     FUNC_LEAVE (ret_value);
@@ -5380,6 +5435,99 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_iterate_props
+ PURPOSE
+    Internal routine to iterate over a hashtable of properties 
+ USAGE
+    herr_t H5P_iterate_props(id, hash, hashsize, idx, iter_func, iter_data)
+        hid_t id;                   IN: ID of property object iterating over
+        H5P_gen_prop_t *hash[];     IN: Pointer to array of properties for hash table
+        uintn hashsize;             IN: Size of hash table
+        int *idx;                   IN/OUT: Index of the property to begin with
+        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+                                        called with each property iterated over.
+        void *iter_data;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC if it was
+                non-zero, or zero if all properties have been processed.
+    Failure: negative value
+ DESCRIPTION
+    This routine iterates over the properties in the property object specified
+with ID.  For each property in the object, the ITER_DATA and some
+additional information, specified below, are passed to the ITER_FUNC function.
+The iteration begins with the IDX property in the object and the next element
+to be processed by the operator is returned in IDX.  If IDX is NULL, then the
+iterator starts at the first property; since no stopping point is returned in
+this case, the iterator cannot be restarted if one of the calls to its operator
+returns non-zero. 
+
+The prototype for H5P_iterate_t is: 
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The operation receives the property list or class identifier for the object
+being iterated over, ID, the name of the current property within the object,
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+
+The return values from an operator are: 
+    Zero causes the iterator to continue, returning zero when all properties
+        have been processed. 
+    Positive causes the iterator to immediately return that positive value,
+        indicating short-circuit success. The iterator can be restarted at the
+        index of the next property. 
+    Negative causes the iterator to immediately return that value, indicating
+        failure. The iterator can be restarted at the index of the next
+        property.
+
+H5Piterate assumes that the properties in the object identified by ID remains
+unchanged through the iteration.  If the membership changes during the
+iteration, the function's behavior is undefined. 
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], uintn hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
+{
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    uintn u;                    /* Local index variable */
+    int curr_idx=0;             /* Current iteration index */
+    int ret_value=0;            /* Return value */
+
+    FUNC_ENTER (H5P_iterate_props, FAIL);
+
+    assert(hash);
+    assert(hashsize>0);
+    assert(idx);
+    assert(iter_func);
+
+    /* Cycle through the properties and compare them also */
+    for(u=0; u<hashsize && ret_value==0; u++) {
+        prop=hash[u];
+
+        /* Check the actual properties */
+        while(prop!=NULL && ret_value==0) {
+            /* Check if we are at the object to start iterating over */
+            if(curr_idx>=*idx)
+                ret_value=(*iter_func)(id,prop->name,iter_data);
+
+            /* Increment the iteration index if iteration function succeeded */
+            if(ret_value==0)
+                curr_idx++;
+
+            /* Advance the pointer */
+            prop=prop->next;
+        } /* end while */
+    } /* end for */
+
+    /* Set the index we stopped at */
+    *idx=curr_idx;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_iterate_props() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_iterate_plist
  PURPOSE
     Internal routine to iterate over the properties in a property list
@@ -5432,9 +5580,6 @@ iteration, the function's behavior is undefined.
 static int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
-    uintn u;                    /* Local index variable */
-    int curr_idx=0;             /* Current iteration index */
     int ret_value=0;            /* Return value */
 
     FUNC_ENTER (H5P_iterate_plist, FAIL);
@@ -5446,27 +5591,8 @@ static int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, 
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    /* Cycle through the properties and compare them also */
-    for(u=0; u<plist->pclass->hashsize && ret_value==0; u++) {
-        prop=plist->props[u];
-
-        /* Check the actual properties */
-        while(prop!=NULL && ret_value==0) {
-            /* Check if we are at the object to start iterating over */
-            if(curr_idx>=*idx)
-                ret_value=(*iter_func)(plist_id,prop->name,iter_data);
-
-            /* Increment the iteration index if iteration function succeeded */
-            if(ret_value==0)
-                curr_idx++;
-
-            /* Advance the pointer */
-            prop=prop->next;
-        } /* end while */
-    } /* end for */
-
-    /* Set the index we stopped at */
-    *idx=curr_idx;
+    /* Iterate through the properties in the property list */
+    ret_value=H5P_iterate_props(plist_id, plist->props, plist->pclass->hashsize, idx, iter_func, iter_data);
 
 done:
     FUNC_LEAVE (ret_value);
@@ -5527,9 +5653,6 @@ iteration, the function's behavior is undefined.
 static int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genclass_t *pclass;     /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
-    uintn u;                    /* Local index variable */
-    int curr_idx=0;             /* Current iteration index */
     int ret_value=0;            /* Return value */
 
     FUNC_ENTER (H5P_iterate_pclass, FAIL);
@@ -5541,27 +5664,8 @@ static int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func
     if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
-    /* Cycle through the properties and compare them also */
-    for(u=0; u<pclass->hashsize && ret_value==0; u++) {
-        prop=pclass->props[u];
-
-        /* Check the actual properties */
-        while(prop!=NULL && ret_value==0) {
-            /* Check if we are at the object to start iterating over */
-            if(curr_idx>=*idx)
-                ret_value=(*iter_func)(pclass_id,prop->name,iter_data);
-
-            /* Increment the iteration index if iteration function succeeded */
-            if(ret_value==0)
-                curr_idx++;
-
-            /* Advance the pointer */
-            prop=prop->next;
-        } /* end while */
-    } /* end for */
-
-    /* Set the index we stopped at */
-    *idx=curr_idx;
+    /* Iterate through the properties in the property list */
+    ret_value=H5P_iterate_props(pclass_id, pclass->props, pclass->hashsize, idx, iter_func, iter_data);
 
 done:
     FUNC_LEAVE (ret_value);
