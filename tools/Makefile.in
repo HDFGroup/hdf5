@@ -24,7 +24,7 @@ LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
 PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @H4TOH5@ @H4TOH5TEST@ @PDB2HDF@
-PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst h4toh5test
+PROGS=$(PUB_PROGS) $(TEST_PROGS) h5dumptst 
 
 ## Source and object files for the library; do not install
 LIB_SRC=h5tools.c
