@@ -72,6 +72,13 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   hsize_t*  chunk_dims;
   int32   c_flags;
 
+  /* for checking compression */
+
+  sp_info_block_t info_block;
+  int16           special_code;
+  int32           access_id;
+  uint16          sd_ref;
+  int             gzip_level;
   /* define varibles for hdf5. */
 
   hid_t   h5dset;
@@ -79,39 +86,47 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
+  hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-  
+  hsize_t bufsize;
   char*   h5csds_name;
-
   herr_t  ret;
+
+  special_code = -1;
   /* zeroing out the memory for sdsname and sdslabel.*/
 
   h4toh5_ZeroMemory(sdsname,MAX_NC_NAME);
   h4toh5_ZeroMemory(sdslabel,MAX_NC_NAME);
+
   /* check whether the sds is empty. */
-
   if(SDcheckempty(sds_id,&sds_empty)== FAIL) {
-      printf("error in running SDcheckempty routine. \n");
-      return FAIL;
-    }
-
-  if(sds_empty != 0) return SUCCEED;
-
-
-  /*check whether the sds is created with unlimited dimension. */
-  
-  if(SDgetchunkinfo(sds_id,&c_def_out, &c_flags)== FAIL) {
-    printf("error in getting chunking information. \n");
+    printf("error in running SDcheckempty routine. \n");
     return FAIL;
   }
 
+  /*check whether the sds is created with unlimited dimension. */
+  
+
   /*obtain name,rank,dimsizes,datatype and num of attributes of sds */
-    if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
-		  &num_sdsattrs)==FAIL) {
-      printf("unable to get information of sds h5dset.\n"); 
+  if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
+		&num_sdsattrs)==FAIL) {
+    printf("unable to get information of sds h5dset.\n"); 
+    return FAIL;
+  }
+  if(sds_empty !=0) {
+    if(convert_sdsfillvalue(file_id,sds_id,h5_group,h5_dimgroup)==FAIL) {
+      printf("cannot convert fill value successfully.\n");
       return FAIL;
     }
+    return SUCCEED;
+  }
+         
+  if(SDgetchunkinfo(sds_id,&c_def_out, &c_flags)== FAIL) {                                     
+    printf("error in getting chunking information. \n");                                       
+    return FAIL;                                                                             
+  }   
+
 
   /* obtain start,edge, stride and number of sds data. */
 
@@ -138,31 +153,31 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
 
   count_sdsdata = 1;
   for (i=0;i<sds_rank;i++){
-      sds_stride[i] = 1;
-      sds_start[i]  = 0;
-      sds_edge[i]   = sds_dimsizes[i];
-      count_sdsdata = count_sdsdata*sds_dimsizes[i];
+    sds_stride[i] = 1;
+    sds_start[i]  = 0;
+    sds_edge[i]   = sds_dimsizes[i];
+    count_sdsdata = count_sdsdata*sds_dimsizes[i];
 
   }
 
   for (i=0;i<sds_rank;i++) {
-      h5dims[i] = sds_edge[i]-sds_start[i];
-      max_h5dims[i] = h5dims[i];
+    h5dims[i] = sds_edge[i]-sds_start[i];
+    max_h5dims[i] = h5dims[i];
   }
   if(SDisrecord(sds_id)) max_h5dims[0] = H5S_UNLIMITED;
   
   /* convert hdf4 data type to hdf5 data type. */
   if  (h4type_to_h5type(sds_dtype,&h5_memtype,&h4memsize,&h4size,
-		       &h5ty_id) == FAIL) {
-      printf("failed to translate datatype. \n");
-      free(sds_start);
-      free(sds_edge);
-      free(sds_stride);
-      return FAIL;
+			&h5ty_id) == FAIL) {
+    printf("failed to translate datatype. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    return FAIL;
   }
 
-   /* check whether the datatype is string, if we find string format,
-    we will change them back into integer format.*/
+  /* check whether the datatype is string, if we find string format,
+     we will change them back into integer format.*/
 
   if (h5ty_id == H5T_STRING) {
     /* rechange string datatype into numerical datatype.*/
@@ -177,6 +192,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   }
  
   sds_data = malloc(h4memsize*count_sdsdata);
+
   if(sds_data == NULL) {
     printf("error in allocating memory. \n");
     free(sds_start);
@@ -188,12 +204,12 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   istat    = SDreaddata(sds_id, sds_start, sds_stride, sds_edge, 
 			(VOIDP)sds_data);
   if (istat == FAIL)  { 
-     printf("unable to read data from h5dset. \n");
-     free(sds_start);
-     free(sds_edge);
-     free(sds_stride);
-     free(sds_data);
-     return FAIL;
+    printf("unable to read data from h5dset. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    return FAIL;
   }
 
   /* obtaining reference number and name of h5 dataset 
@@ -211,30 +227,30 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   
   h5csds_name = get_name(sds_ref,2*num_sds,sds_hashtab,&check_sdsname);
   if (h5csds_name == NULL && check_sdsname == 0 ) {
-     free(sds_start);
-     free(sds_edge);
-     free(sds_stride);
-     free(sds_data);
-     printf("error,cannot find sds name \n");
-     return FAIL;
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    printf("error,cannot find sds name \n");
+    return FAIL;
   }
 
   if (h5csds_name == NULL && check_sdsname == -1) {
-     free(sds_start);
-     free(sds_edge);
-     free(sds_stride);
-     free(sds_data);
-     printf("error,sds name is not defined.\n");
-     return FAIL;
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    printf("error,sds name is not defined.\n");
+    return FAIL;
   }
 
   if (h5csds_name == NULL && check_sdsname == -2) {
-     free(sds_start);
-     free(sds_edge);
-     free(sds_stride);
-     free(sds_data);
-     printf("error,not enough memory for allocating sds name.\n");
-     return FAIL;
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    printf("error,not enough memory for allocating sds name.\n");
+    return FAIL;
   }
  
   h5d_sid = H5Screate_simple(sds_rank,h5dims,max_h5dims);	
@@ -253,50 +269,143 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   create_plist = H5Pcreate(H5P_DATASET_CREATE);
   chunk_dims   = malloc(sizeof(hsize_t)*sds_rank);
 
-  /* if the sds is not chunked, but with unlimited dimension, we have to
-     provide a chunk size for the corresponding hdf5 dataset. we will choose
-     1/2 dimension size right now. */
+  
+  sd_ref = get_SDref(file_id,DFTAG_NDG,sds_ref);
+  if(sd_ref == 0) 
+    sd_ref = get_SDref(file_id,DFTAG_SDG,sds_ref);
+  if(sd_ref >0 )
+    access_id = Hstartread(file_id,DFTAG_SD,sd_ref);
 
-  if(c_flags == HDF_NONE && SDisrecord(sds_id))
- {
-   for(i=0;i<sds_rank;i++){
-      chunk_dims[i] = (hsize_t)(h5dims[i]/2);
-   }
-    if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
-       printf("failed to set up chunking information for ");
-       printf("property list.\n");
-       free(sds_start);
-       free(sds_edge);
-       free(sds_stride);
-       free(sds_data);
-       free(chunk_dims);
-       H5Sclose(h5d_sid);
-       H5Pclose(create_plist);
-       return FAIL;	
+  if(sd_ref == 0) 
+    access_id = FAIL;
+ 
+  if(access_id != FAIL) {
+    istat = Hinquire(access_id,NULL,NULL,NULL,NULL,NULL,NULL,NULL,&special_code);
+    if(istat == FAIL) {
+      printf("failed to inquire information \n ");
+      free(sds_start);
+      free(sds_edge);
+      free(sds_stride);
+      free(sds_data);
+      free(chunk_dims);
+      H5Sclose(h5d_sid);
+      H5Pclose(create_plist);
+      return FAIL;	
     }
 
- }
+    if(special_code >0){
+      
+      if(HDget_special_info(access_id,&info_block)==FAIL){
+	printf("fail to get special info.\n");
+	free(sds_start);
+	free(sds_edge);
+	free(sds_stride);
+	free(sds_data);
+	free(chunk_dims);
+	H5Sclose(h5d_sid);
+	H5Pclose(create_plist);
+	return FAIL;	
+      }
+
+      /*      free(info_block.cdims);*/
+      if(info_block.key == SPECIAL_COMP) {
+   
+	if(c_flags == HDF_NONE){
+	  /* 1. if the first dimension is unlimited dimension,
+	     we have to provide a chunking size.
+	     2. the current HDF5 will not handle compression case itself, 
+	     in order that the converted HDF5 is compressed, we have to
+	     provide a chunking size. currently it is set to h5dim[i].*/
+
+	  for(i=0;i<sds_rank;i++){
+	    chunk_dims[i] = (hsize_t)(h5dims[i]);
+	  }
+	  if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
+	    printf("failed to set up chunking information for ");
+	    printf("property list.\n");
+	    free(sds_start);
+	    free(sds_edge);
+	    free(sds_stride);
+	    free(sds_data);
+	    free(chunk_dims);
+	    H5Sclose(h5d_sid);
+	    H5Pclose(create_plist);
+	    return FAIL;	
+	  }
+       
+	  printf("okay compressed \n");
+	  if(H5Pset_deflate(create_plist,GZIP_COMLEVEL)<0){
+	    /*    if(H5Pset_deflate(create_plist,2)<0){*/
+	    printf("fail to set compression method for HDF5 file.\n"); 
+	    free(sds_start);
+	    free(sds_edge);
+	    free(sds_stride);
+	    free(sds_data);
+	    free(chunk_dims);
+	    H5Sclose(h5d_sid);
+	    H5Pclose(create_plist);
+	  }
+	}
+
+      }
+      else if(c_flags == HDF_NONE && SDisrecord(sds_id))
+    {
+      for(i=0;i<sds_rank;i++){
+	chunk_dims[i] = (hsize_t)(sds_dimsizes[i]);
+      }
+      if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
+	printf("failed to set up chunking information for ");
+	printf("property list.\n");
+	free(chunk_dims);
+	H5Pclose(create_plist);
+	return FAIL;	
+      }
+    }
+
+    }
+
+  }
+    
+  /* HDF4 can support various compression methods including simple RLE, NBIT, Skip Huffman, gzip,Jpeg , HDF5 currently only supports gzip compression. 
+     By default, we will compress HDF5 dataset by using gzip compression if HDF5 file is compressed. */
+   
+
   if(c_flags == HDF_CHUNK || c_flags == (HDF_CHUNK | HDF_COMP)
      || c_flags == (HDF_CHUNK | HDF_NBIT)  ){
      
-    for(i=0;i<sds_rank;i++) 
-      chunk_dims[i] = (hsize_t)c_def_out.chunk_lengths[i]; 
-       
-    if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
-       printf("failed to set up chunking information for ");
-       printf("property list.\n");
-       free(sds_start);
-       free(sds_edge);
-       free(sds_stride);
-       free(sds_data);
-       free(chunk_dims);
-       H5Sclose(h5d_sid);
-       H5Pclose(create_plist);
-       return FAIL;	
-     }
+    if(c_def_out.comp.comp_type == COMP_CODE_RLE || c_def_out.comp.comp_type == COMP_CODE_NBIT || c_def_out.comp.comp_type == COMP_CODE_SKPHUFF || c_def_out.comp.comp_type == COMP_CODE_DEFLATE || c_def_out.comp.comp_type == COMP_CODE_JPEG) {
+      
+      for(i=0;i<sds_rank;i++)
+	chunk_dims[i] = (hsize_t)c_def_out.chunk_lengths[i];
+   
+      if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
+	printf("failed to set up chunking information for ");
+	printf("property list.\n");
+	free(sds_start);
+	free(sds_edge);
+	free(sds_stride);
+	free(sds_data);
+	free(chunk_dims);
+	H5Sclose(h5d_sid);
+	H5Pclose(create_plist);
+	return FAIL;	
+      }
+      if(c_def_out.comp.comp_type == COMP_CODE_DEFLATE)
+	gzip_level = c_def_out.comp.cinfo.deflate.level;
+      else gzip_level = GZIP_COMLEVEL;
+	if(H5Pset_deflate(create_plist,gzip_level)<0){
+	  printf("fail to set compression method for HDF5 file.\n"); 
+	  free(sds_start);
+	  free(sds_edge);
+	  free(sds_stride);
+	  free(sds_data);
+	  free(chunk_dims);
+	  H5Sclose(h5d_sid);
+	  H5Pclose(create_plist);
+	}
+    }
   }
-
-
+   
   h5dset = H5Dcreate(h5_group,h5csds_name,h5ty_id,h5d_sid,create_plist);    
 
   if (h5dset < 0) {							      
@@ -310,8 +419,24 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
     H5Pclose(create_plist);
     return FAIL;							      
   }									      
-									      
-  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
+
+  write_plist = H5Pcreate(H5P_DATASET_XFER);
+  bufsize = h4memsize;
+  for(i=1;i<sds_rank;i++)
+    bufsize *= h5dims[i];
+  if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
+    printf("fail to create data transfer property list.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    free(chunk_dims);
+    H5Sclose(h5d_sid);
+    H5Pclose(create_plist);
+    return FAIL;		
+  }
+
+  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
 	       (void *)sds_data)<0) {				      
     printf("failed to write data into hdf5 dataset");	
     printf(" converted from SDS.\n");
@@ -501,149 +626,149 @@ int sds_transattrs(int32 ssds_id, hid_t sh5_dset,int snum_sdsattrs,
 
   for (i = 0;i < snum_sdsattrs; i++) {
 
-     if (SDattrinfo(ssds_id,i,ssdsatrr_name,&ssds_atype,
-		    &count_ssdsadata)==FAIL){  
-        printf("unable to obtain SDS attribute information. \n"); 
-        return FAIL;
-     }
+    if (SDattrinfo(ssds_id,i,ssdsatrr_name,&ssds_atype,
+		   &count_ssdsadata)==FAIL){  
+      printf("unable to obtain SDS attribute information. \n"); 
+      return FAIL;
+    }
 
-     /* make a table for the attribute type, to do the corresponding type. */
+    /* make a table for the attribute type, to do the corresponding type. */
 
-     if(h4type_to_h5type(ssds_atype,&sh5_amemtype,&sh4_amemsize,
-		      &sh4_asize,&sh5_atype)== FAIL) {
-       printf("fail to translate sds attribute data type from H4 to H5. \n");
-       return FAIL;
-     }
+    if(h4type_to_h5type(ssds_atype,&sh5_amemtype,&sh4_amemsize,
+			&sh4_asize,&sh5_atype)== FAIL) {
+      printf("fail to translate sds attribute data type from H4 to H5. \n");
+      return FAIL;
+    }
     
-     ssds_adata = malloc(sh4_amemsize * count_ssdsadata);
-     if(ssds_adata == NULL) {
-       printf("error, cannot allocate memory for sds attribute data. \n");
-       return FAIL;
-     }
+    ssds_adata = malloc(sh4_amemsize * count_ssdsadata);
+    if(ssds_adata == NULL) {
+      printf("error, cannot allocate memory for sds attribute data. \n");
+      return FAIL;
+    }
 
-     if(SDreadattr(ssds_id,i,(VOIDP)ssds_adata)== FAIL) {
-       printf("error in reading attributes of sds object. \n");
-       free(ssds_adata);
-       return FAIL;
-     }
+    if(SDreadattr(ssds_id,i,(VOIDP)ssds_adata)== FAIL) {
+      printf("error in reading attributes of sds object. \n");
+      free(ssds_adata);
+      return FAIL;
+    }
 	
-      /* if attribute doesn't have name, a default name is set. */
-     if(ssdsatrr_name[0] == '\0') {
-       sdsrepattr_name = trans_obj_name(DFTAG_NDG,i);
-       strcpy(ssdsatrr_name,sdsrepattr_name);
-       free(sdsrepattr_name);
-     }
+    /* if attribute doesn't have name, a default name is set. */
+    if(ssdsatrr_name[0] == '\0') {
+      sdsrepattr_name = trans_obj_name(DFTAG_NDG,i);
+      strcpy(ssdsatrr_name,sdsrepattr_name);
+      free(sdsrepattr_name);
+    }
 
-     /* if the sds attribute is a file attribute. */
-     if(check_gloflag == 1){
-       strcpy(sdsglo,GLOSDS);
-       strcat(ssdsatrr_name,"_");
-       strcat(ssdsatrr_name,sdsglo);
-     }
+    /* if the sds attribute is a file attribute. */
+    if(check_gloflag == 1){
+      strcpy(sdsglo,GLOSDS);
+      strcat(ssdsatrr_name,"_");
+      strcat(ssdsatrr_name,sdsglo);
+    }
        
-     /* now do attribute-transferring.
+    /* now do attribute-transferring.
        1. deal with string data type
        2. set attribute space.
        3. get attribute name, set property list. */
            
-     if (sh5_atype == H5T_STRING) {
+    if (sh5_atype == H5T_STRING) {
+
+      sh5a_sid = H5Screate(H5S_SCALAR);
+
+      if (sh5a_sid < 0) {
+	printf("failed to create attribute space for"); 
+	printf(" HDF4_OBJECT_TYPE SDS. \n"); 
+	free(ssds_adata);
+	return FAIL;
+      }
+
+      if ((sh5str_type = mkstr(count_ssdsadata,
+			       H5T_STR_SPACEPAD))<0) {
+	printf("error in making string. \n");
+	H5Sclose(sh5a_sid);
+	free(ssds_adata);
+	return FAIL;
+      }
+
+      /* check this line later. */
+      if ((sh5str_memtype = mkstr(count_ssdsadata*sh4_amemsize,
+				  H5T_STR_SPACEPAD))<0) {
+	printf("error in making memory string. \n");
+	H5Sclose(sh5a_sid);
+	free(ssds_adata);
+	return FAIL;
+      }
+
+      sh5a_id = H5Acreate(sh5_dset,ssdsatrr_name,sh5str_type,
+			  sh5a_sid,H5P_DEFAULT);
+
+      if (sh5a_id <0) {
+	printf("failed to obtain attribute id for"); 
+	printf(" HDF4_OBJECT_TYPE SDS. \n");
+	H5Sclose(sh5a_sid);
+	free(ssds_adata);
+	return FAIL;
+      }
+
+      sret = H5Awrite(sh5a_id,sh5str_memtype,(void *)ssds_adata);
+        
+      if (sret <0) {
+	printf("failed to write attribute data for"); 
+	printf(" HDF4_OBJECT_TYPE SDS. \n");
+	H5Sclose(sh5a_sid);
+	H5Aclose(sh5a_id);
+	free(ssds_adata);
+	return FAIL;
+      }
+
+      sret = H5Sclose(sh5a_sid);
+      sret = H5Aclose(sh5a_id);
+    }
+	 
+    else {
+      
+      if(count_ssdsadata == 1) {
 
 	sh5a_sid = H5Screate(H5S_SCALAR);
-
 	if (sh5a_sid < 0) {
-	   printf("failed to create attribute space for"); 
-           printf(" HDF4_OBJECT_TYPE SDS. \n"); 
-	   free(ssds_adata);
-	   return FAIL;
-	}
-
-	if ((sh5str_type = mkstr(count_ssdsadata,
-				 H5T_STR_SPACEPAD))<0) {
-           printf("error in making string. \n");
-	   H5Sclose(sh5a_sid);
-	   free(ssds_adata);
-           return FAIL;
-	}
-
-        /* check this line later. */
-       	if ((sh5str_memtype = mkstr(count_ssdsadata*sh4_amemsize,
-				    H5T_STR_SPACEPAD))<0) {
-	  printf("error in making memory string. \n");
-	  H5Sclose(sh5a_sid);
+	  printf("failed to create space id. \n");
 	  free(ssds_adata);
 	  return FAIL;
 	}
-
-        sh5a_id = H5Acreate(sh5_dset,ssdsatrr_name,sh5str_type,
-			    sh5a_sid,H5P_DEFAULT);
-
-        if (sh5a_id <0) {
-	   printf("failed to obtain attribute id for"); 
-           printf(" HDF4_OBJECT_TYPE SDS. \n");
-	   H5Sclose(sh5a_sid);
-	   free(ssds_adata);
-	   return FAIL;
-	}
-
-        sret = H5Awrite(sh5a_id,sh5str_memtype,(void *)ssds_adata);
-        
-	if (sret <0) {
-	  printf("failed to write attribute data for"); 
-          printf(" HDF4_OBJECT_TYPE SDS. \n");
-	  H5Sclose(sh5a_sid);
-	  H5Aclose(sh5a_id);
-	  free(ssds_adata);
-	  return FAIL;
-	}
-
-        sret = H5Sclose(sh5a_sid);
-        sret = H5Aclose(sh5a_id);
-     }
-	 
-     else {
-      
-       if(count_ssdsadata == 1) {
-
-	 sh5a_sid = H5Screate(H5S_SCALAR);
-	 if (sh5a_sid < 0) {
-	   printf("failed to create space id. \n");
-	   free(ssds_adata);
-	   return FAIL;
-	 }
-       }
-       else {
-          sh5dims[0] = count_ssdsadata;
-	  sh5a_sid =  H5Screate_simple(1,sh5dims,NULL);
+      }
+      else {
+	sh5dims[0] = count_ssdsadata;
+	sh5a_sid =  H5Screate_simple(1,sh5dims,NULL);
           
-	  if (sh5a_sid < 0)  {
-	    printf("failed to create attribute space. \n");
-	    free(ssds_adata);
-	    return FAIL;
-	  }
-       }
-       sh5a_id = H5Acreate(sh5_dset,ssdsatrr_name,sh5_atype,
-			   sh5a_sid,H5P_DEFAULT);
+	if (sh5a_sid < 0)  {
+	  printf("failed to create attribute space. \n");
+	  free(ssds_adata);
+	  return FAIL;
+	}
+      }
+      sh5a_id = H5Acreate(sh5_dset,ssdsatrr_name,sh5_atype,
+			  sh5a_sid,H5P_DEFAULT);
     
-       if(sh5a_id <0) {
-	 printf("failed to obtain attribute id. \n");
-	 H5Sclose(sh5a_sid);
-	 free(ssds_adata);
-         return FAIL;
-       }
+      if(sh5a_id <0) {
+	printf("failed to obtain attribute id. \n");
+	H5Sclose(sh5a_sid);
+	free(ssds_adata);
+	return FAIL;
+      }
 
-       sret = H5Awrite(sh5a_id,sh5_amemtype,(void *)ssds_adata);
+      sret = H5Awrite(sh5a_id,sh5_amemtype,(void *)ssds_adata);
 
-       if(sret <0) {
-	 printf("failed to write attribute data.\n ");
-	 H5Sclose(sh5a_sid);
-	 H5Aclose(sh5a_id);
-	 free(ssds_adata);
-	 return FAIL;
-       }
-       sret = H5Sclose(sh5a_sid);
-       sret = H5Aclose(sh5a_id);
-     }
-     free(ssds_adata);
+      if(sret <0) {
+	printf("failed to write attribute data.\n ");
+	H5Sclose(sh5a_sid);
+	H5Aclose(sh5a_id);
+	free(ssds_adata);
+	return FAIL;
+      }
+      sret = H5Sclose(sh5a_sid);
+      sret = H5Aclose(sh5a_id);
+    }
+    free(ssds_adata);
   }
   return SUCCEED;
 }
@@ -670,7 +795,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   int32   sdsdim_type = 0;
   int32   sds_dimscasize[1];
   int32   istat;
-  int     i;
+  int     i,k;
   int     count_h5objref;/* this counter updates the number of h5 object reference. */
   int     count_h5attrname;/*this counter updates the number of h5 dimensional name attribute.*/
 
@@ -686,6 +811,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 
   HDF_CHUNK_DEF c_def_out;
   int32   c_flags;
+  int32*   sdsdimempty;
 
   /* define varibles for hdf5. */
 
@@ -708,6 +834,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   hsize_t h5dimscas[1];
   hsize_t max_h5dimscas[1];
   hsize_t h5dim_dims[1];
+  hsize_t h5dimname_dims[1];
   hsize_t attr_refDims[1];
   hsize_t h5dim_chunkdim[1];
   hobj_ref_t  dim_refdat;
@@ -720,7 +847,11 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   char    h5dimpath_name[MAX_DIM_NAME];
   herr_t  ret;
 
-  
+  sdsdimempty = malloc(sds_rank *sizeof(int32));
+
+  for(i=0;i<sds_rank;i++) 
+    sdsdimempty[i] = 0;
+
   /*zero out memory for h5sdsdim_allname and h5dimpath_name */
   h4toh5_ZeroMemory(h5sdsdim_allname,(MAX_VAR_DIMS*MAX_DIM_NAME)*sizeof(char));
   h4toh5_ZeroMemory(h5dimpath_name,MAX_DIM_NAME*sizeof(char));
@@ -740,7 +871,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   count_h5attrname = 0;
 
   for (i = 0; i<sds_rank;i++) {						      
-								      
+    
     sdsdim_id    = SDgetdimid(sds_id,i);	
       
     if(sdsdim_id == FAIL) {
@@ -756,7 +887,10 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       SDendaccess(sdsdim_id);		
       return FAIL;							      
     }	
-
+    if(sdsdim_type == 0) {
+      if(strncmp(sdsdim_name,fakeDim,strlen(fakeDim))==0)
+	 continue;
+    }
     /* for unlimited sds dimension, grab the current dimensional size. */
     if(sds_dimscasize[0] == 0) sds_dimscasize[0] = firstdimsize;
  
@@ -790,7 +924,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
        hdf4(netcdf) will use unique fake dimension name, fakedim + unique 
        number, so check_sdsdim will never be 1 if the dimension name is fake
        name. Under this case, count_h5objref and count_h5attrname
-        will not increase if this dimension doesnot
+       will not increase if this dimension doesnot
        have dimensional scale data. That assures the object reference of sds is
        correct. */
       
@@ -810,11 +944,11 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;							      
     }									      
 
-     /* if this sds dimension has no dimensional scale data. skip it.*/
-    if(sdsdim_type == 0) 
-      continue;
-    
-
+    if(sdsdim_type == 0) {
+	count_h5attrname = count_h5attrname + 1;
+	sdsdimempty[i] = 1;
+	continue;
+    }
     /* get h5 dimensional scale data type. */
     if(h4type_to_h5type(sdsdim_type,&h5dim_memtype,&h4dim_memsize,	      
 			&h4dim_size,&h5dim_tid)== FAIL) {
@@ -825,7 +959,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     }
 
     /* dimensional scale dataset cannot be H5T_STRING data type.
-	 So transferring back to int8 */
+       So transferring back to int8 */
 
     if (h5dim_tid == H5T_STRING) {					      
       if(h5string_to_int(sdsdim_type,&h5dim_memtype,h4dim_memsize,
@@ -870,50 +1004,50 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 
     /* create property list, for chunked sds or unlimited dimension cases */
 
-  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+    create_plist = H5Pcreate(H5P_DATASET_CREATE);
 
-  if(create_plist == -1) {
-    printf("failed to create property list. \n");
-    SDendaccess(sdsdim_id);		
-    free(h5sdsdim_name);
-    free(dim_scadata);
-    H5Sclose(h5dim_sid);
-  }
-
-    
-  if(c_flags == HDF_NONE && SDisrecord(sds_id) && i == 0)
- {
-      h5dim_chunkdim[0] = (hsize_t)(h5dimscas[0]/2);
-   
-    if(H5Pset_chunk(create_plist,1, h5dim_chunkdim)<0) {
-       printf("failed to set up chunking information for ");
-       printf("dimensional scale property list.\n");
-       SDendaccess(sdsdim_id);		
-       free(h5sdsdim_name);
-       free(dim_scadata);
-       H5Sclose(h5dim_sid);
-       H5Pclose(create_plist);
-       return FAIL;	
+    if(create_plist == -1) {
+      printf("failed to create property list. \n");
+      SDendaccess(sdsdim_id);		
+      free(h5sdsdim_name);
+      free(dim_scadata);
+      H5Sclose(h5dim_sid);
     }
 
- }
+    
+    if(c_flags == HDF_NONE && SDisrecord(sds_id) && i == 0)
+      {
+	h5dim_chunkdim[0] = (hsize_t)(h5dimscas[0]/2);
+   
+	if(H5Pset_chunk(create_plist,1, h5dim_chunkdim)<0) {
+	  printf("failed to set up chunking information for ");
+	  printf("dimensional scale property list.\n");
+	  SDendaccess(sdsdim_id);		
+	  free(h5sdsdim_name);
+	  free(dim_scadata);
+	  H5Sclose(h5dim_sid);
+	  H5Pclose(create_plist);
+	  return FAIL;	
+	}
 
-  if(c_flags == HDF_CHUNK || c_flags == (HDF_CHUNK | HDF_COMP)
-     || c_flags == (HDF_CHUNK | HDF_NBIT)  ){
+      }
+
+    if(c_flags == HDF_CHUNK || c_flags == (HDF_CHUNK | HDF_COMP)
+       || c_flags == (HDF_CHUNK | HDF_NBIT)  ){
      
       h5dim_chunkdim[0] = (hsize_t)c_def_out.chunk_lengths[0]; 
        
-    if(H5Pset_chunk(create_plist,1, h5dim_chunkdim)<0) {
-       printf("failed to set up chunking information for ");
-       printf("property list.\n");
-       SDendaccess(sdsdim_id);		
-       free(h5sdsdim_name);
-       free(dim_scadata);
-       H5Sclose(h5dim_sid);
-       H5Pclose(create_plist);
-       return FAIL;	
-     }
-  }
+      if(H5Pset_chunk(create_plist,1, h5dim_chunkdim)<0) {
+	printf("failed to set up chunking information for ");
+	printf("property list.\n");
+	SDendaccess(sdsdim_id);		
+	free(h5sdsdim_name);
+	free(dim_scadata);
+	H5Sclose(h5dim_sid);
+	H5Pclose(create_plist);
+	return FAIL;	
+      }
+    }
   
     /* create h5 dataset under group HDF4_DIMG*/
     h5dim_dset   = H5Dcreate(sh5_dimgroup,h5sdsdim_name,h5dim_tid,	      
@@ -966,61 +1100,66 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   /*1. create object reference number to dimensional scale dataset.
     2. store absolute name of dimensional name into 
      dimensional list. */
-  
+
   if ( count_h5objref != 0) {
 
-     h5dim_dims[0]   = count_h5objref;
-     attr_refDims[0] = count_h5objref;
-     attr_refSpace   = H5Screate_simple(1,attr_refDims,NULL);
-     attr_refType    = H5Tcopy(H5T_STD_REF_OBJ);
-     alldim_refdat   = calloc((size_t)count_h5objref,sizeof(hobj_ref_t));
+    h5dim_dims[0]   = count_h5objref;
 
-     if(alldim_refdat == NULL) {
-       printf("error in allocating memory. \n");
-       H5Sclose(attr_refSpace);
-       H5Tclose(attr_refType);
-       return FAIL;
-     }
+    attr_refDims[0] = count_h5objref;
+    attr_refSpace   = H5Screate_simple(1,attr_refDims,NULL);
+    attr_refType    = H5Tcopy(H5T_STD_REF_OBJ);
+    alldim_refdat   = calloc((size_t)count_h5objref,sizeof(hobj_ref_t));
 
-     for(i=0;i<count_h5objref;i++){
-       h4toh5_ZeroMemory(h5newsdsdim_name,MAX_DIM_NAME);
-       strcpy(h5newsdsdim_name,&h5sdsdim_allname[i*MAX_DIM_NAME]);
+    if(alldim_refdat == NULL) {
+      printf("error in allocating memory. \n");
+      H5Sclose(attr_refSpace);
+      H5Tclose(attr_refType);
+      return FAIL;
+    }
+    k =0;
+    for(i=0;i<count_h5objref;i++){
+      h4toh5_ZeroMemory(h5newsdsdim_name,MAX_DIM_NAME);
+      if(sdsdimempty[i])
+	k = k +1;
+      strcpy(h5newsdsdim_name,&h5sdsdim_allname[k*MAX_DIM_NAME]);
        
-       ret              = H5Rcreate(&dim_refdat,sh5_dimgroup,h5newsdsdim_name,
-				    H5R_OBJECT,-1);
-       if(ret <0) {
-	 free(alldim_refdat);
-	 H5Sclose(attr_refSpace);
-	 H5Tclose(attr_refType);	 
-	 printf("error in generating H5 reference. \n");
-	 return FAIL;
-       }
-       alldim_refdat[i] = dim_refdat;
-       
-     }
+      ret              = H5Rcreate(&dim_refdat,sh5_dimgroup,h5newsdsdim_name,
+				   H5R_OBJECT,-1);
+      if(ret <0) {
+	free(alldim_refdat);
+	H5Sclose(attr_refSpace);
+	H5Tclose(attr_refType);	 
+	printf("error in generating H5 reference. \n");
+	return FAIL;
+      }
+      alldim_refdat[i] = dim_refdat;
+      k = k +1;
+    }
 
-     attribID      = H5Acreate(sh5dset,DIMSCALE,attr_refType,attr_refSpace,
-				H5P_DEFAULT);
-     if(attribID < 0) {
-       free(alldim_refdat);
-       H5Sclose(attr_refSpace);
-       H5Tclose(attr_refType);
-       H5Aclose(attribID);
-       printf("error in generating H5 attribute ID. \n");
-       return FAIL;
-     }
+    attribID      = H5Acreate(sh5dset,DIMSCALE,attr_refType,attr_refSpace,
+			      H5P_DEFAULT);
+    if(attribID < 0) {
+      free(alldim_refdat);
+      H5Sclose(attr_refSpace);
+      H5Tclose(attr_refType);
+      H5Aclose(attribID);
+      printf("error in generating H5 attribute ID. \n");
+      return FAIL;
+    }
 
-     ret           = H5Awrite(attribID,attr_refType,(void *)alldim_refdat);
+    ret           = H5Awrite(attribID,attr_refType,(void *)alldim_refdat);
      
-     H5Sclose(attr_refSpace);
-     H5Tclose(attr_refType);
-     H5Aclose(attribID);
-     free(alldim_refdat);
+    H5Sclose(attr_refSpace);
+    H5Tclose(attr_refType);
+    H5Aclose(attribID);
+    free(alldim_refdat);
   }
 
   if(count_h5attrname!= 0) {
 
-    h5dim_namesid    = H5Screate_simple(1,h5dim_dims,NULL);	
+    h5dimname_dims[0] = count_h5attrname;
+
+    h5dim_namesid    = H5Screate_simple(1,h5dimname_dims,NULL);	
 
     if(h5dim_namesid <0) {
       printf("error in creating sds dimensionlist space.\n");
@@ -1056,30 +1195,411 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
     ret = H5Aclose(h5dim_nameaid);
 
   }
+  free(sdsdimempty);
+  return SUCCEED;
+}
+
+int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
+
+
+  int32   sds_dtype;
+  int32   sds_rank;
+  int32   sds_dimsizes[MAX_VAR_DIMS];
+  int32*  sds_start;
+  int32*  sds_edge;
+  int32*  sds_stride;
+  int32   count_sdsdata;
+  int32   sds_ref;
+  int32   istat;
+  int     i;
+  int32   num_sdsattrs;
+  void*   fill_value;
+
+  int     check_sdsname;
+  int     check_gloattr;
+  
+  char    sdsname[MAX_NC_NAME];
+  char    sdslabel[MAX_NC_NAME];
+  size_t  h4size;
+  size_t  h4memsize;
+  HDF_CHUNK_DEF c_def_out;
+  hsize_t*  chunk_dims;
+  int32   c_flags;
+
+  /* define varibles for hdf5. */
+
+  hid_t   h5dset;
+  hid_t   h5d_sid;
+  hid_t   h5ty_id;
+  hid_t   h5_memtype;
+  hid_t   create_plist;
+  hid_t   write_plist;
+  hsize_t h5dims[MAX_VAR_DIMS];
+  hsize_t max_h5dims[MAX_VAR_DIMS];
+  hsize_t bufsize;
+  char*   h5csds_name;
+
+  if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
+		&num_sdsattrs)==FAIL) {
+    printf("unable to get information of sds h5dset.\n"); 
+    return FAIL;
+  }
+
+  /* obtain start,edge, stride and number of sds data. */
+
+  sds_start     = malloc(sizeof(int32)*sds_rank);
+  if(sds_start == NULL) {
+    printf("error in allocating memory for sds start.\n");
+    return FAIL;
+  }
+
+  sds_edge      = malloc(sizeof(int32)*sds_rank);
+  if(sds_edge == NULL) {
+    printf("error in allocating memory for sds edge.\n");
+    free(sds_start);
+    return FAIL;
+  }
+
+  sds_stride    = malloc(sizeof(int32)*sds_rank);
+  if(sds_stride == NULL) {
+    printf("error in allocating memory for sds stride. \n");
+    free(sds_start);
+    free(sds_edge);
+    return FAIL;
+  }
+
+  count_sdsdata = 1;
+  for (i=0;i<sds_rank;i++){
+    sds_stride[i] = 1;
+    sds_start[i]  = 0;
+    sds_edge[i]   = sds_dimsizes[i];
+    count_sdsdata = count_sdsdata*sds_dimsizes[i];
+
+  }
+
+  for (i=0;i<sds_rank;i++) {
+    h5dims[i] = sds_edge[i]-sds_start[i];
+    max_h5dims[i] = h5dims[i];
+  }
+
+  /* convert hdf4 data type to hdf5 data type. */
+  if  (h4type_to_h5type(sds_dtype,&h5_memtype,&h4memsize,&h4size,
+			&h5ty_id) == FAIL) {
+    printf("failed to translate datatype. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    return FAIL;
+  }
+
+  /* check whether the datatype is string, if we find string format,
+     we will change them back into integer format.*/
+
+  if (h5ty_id == H5T_STRING) {
+    /* rechange string datatype into numerical datatype.*/
+    if(h5string_to_int(sds_dtype,&h5_memtype,h4memsize,
+		       &h5ty_id)== FAIL) {
+      printf("error in translating H5T_STRING to int.\n");
+      free(sds_start);
+      free(sds_edge);
+      free(sds_stride);
+      return FAIL;
+    }
+  }
+  /* Since we know this SDS dataset fills with fill value, so currently
+     we will comment this out. */
+  /*
+  sds_data = malloc(h4memsize*count_sdsdata);
+  if(sds_data == NULL) {
+    printf("error in allocating memory. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    return FAIL;
+  }
+
+  istat    = SDreaddata(sds_id, sds_start, sds_stride, sds_edge, 
+			(VOIDP)sds_data);
+  if (istat == FAIL)  { 
+    printf("unable to read data from h5dset. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    return FAIL;
+  }
+
+  */
+
+  fill_value = malloc(h4memsize);
+  h4toh5_ZeroMemory(fill_value,h4memsize*sizeof(char));
+  if(num_sdsattrs != 0)
+    if(SDgetfillvalue(sds_id,fill_value)==FAIL) 
+      printf("unable to get fill value, fill value will be set to zero \n");
+  
+
+  sds_ref = SDidtoref(sds_id);
+  if(sds_ref == FAIL) {
+    printf("error in obtaining sds reference number. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    return FAIL;
+  }
+  
+  h5csds_name = get_name(sds_ref,2*num_sds,sds_hashtab,&check_sdsname);
+  if (h5csds_name == NULL && check_sdsname == 0 ) {
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    printf("error,cannot find sds name \n");
+    return FAIL;
+  }
+
+  if (h5csds_name == NULL && check_sdsname == -1) {
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    printf("error,sds name is not defined.\n");
+    return FAIL;
+  }
+
+  if (h5csds_name == NULL && check_sdsname == -2) {
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    printf("error,not enough memory for allocating sds name.\n");
+    return FAIL;
+  }
+
+  h5d_sid = H5Screate_simple(sds_rank,h5dims,max_h5dims);	
+									      
+  if (h5d_sid < 0) {							      
+    printf("failed to create hdf5 data space converted from SDS. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    return FAIL;							      
+  }									      
+	
+  /* set creation property list. */
+
+   create_plist = H5Pcreate(H5P_DATASET_CREATE);
+   if(create_plist <0) {
+     printf("failed to create hdf5 creation list.\n");
+     free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    return FAIL;							      
+  }		
+ 
+   if(H5Pset_fill_value(create_plist,h5ty_id,fill_value)<0){
+     printf("failed to set property list fill value.\n");
+     free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Pclose(create_plist);
+    return FAIL;
+   }
+
+  h5dset = H5Dcreate(h5_group,h5csds_name,h5ty_id,h5d_sid,create_plist);    
+
+  if (h5dset < 0) {							      
+    printf("failed to create hdf5 dataset converted from SDS. \n");	
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Pclose(create_plist);
+    return FAIL;							      
+  }									      
+  /* Before HDF5 library make the optimzation of dealing with fill value
+     data, leave this alone. */
+  /*  write_plist = H5Pcreate(H5P_DATASET_XFER);
+  bufsize = h4memsize;
+  for(i=1;i<sds_rank;i++)
+    bufsize *= h5dims[i];
+
+  if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
+    printf("fail to create data transfer property list.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Pclose(create_plist);
+    return FAIL;		
+  }
+
+  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
+	       (void *)sds_data)<0) {				      
+    printf("failed to write data into hdf5 dataset");	
+    printf(" converted from SDS.\n");
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    H5Pclose(write_plist);
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    return FAIL;							      
+  }							      
+									      
+  */
+  /* convert sds annotation into attribute of sds dataset.
+     Since there is no routines to find the exact tag of sds object,
+     we will check three possible object tags of sds objects, that is:
+     DFTAG_SD,DFTAG_SDG,DFTAG_NDG. If the object tag of sds object is 
+     falling out of this scope, we will not convert annotations into
+     hdf5 attributes; it is user's responsibility to make sure object tags
+     for sds objects are only one of the above three tags.*/
+
+  if(Annoobj_h4_to_h5(file_id,sds_ref,DFTAG_SD,h5dset)== FAIL){
+    printf("failed to convert sds annotation into hdf5 attribute.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    return FAIL;
+  }
+
+  if(Annoobj_h4_to_h5(file_id,sds_ref,DFTAG_SDG,h5dset)== FAIL){
+    printf("failed to convert sds annotation into hdf5 attribute.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    return FAIL;
+  }
+
+  if(Annoobj_h4_to_h5(file_id,sds_ref,DFTAG_NDG,h5dset)== FAIL){
+    printf("failed to convert sds annotation into hdf5 attribute.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    return FAIL;
+  }
+
+   check_gloattr = 0;
+
+
+  if (sds_transattrs(sds_id,h5dset,num_sdsattrs,check_gloattr)==FAIL) {
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    free(chunk_dims);
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    printf(" Error in obtaining sds attributes. \n");
+    return FAIL;
+  }
+
+  /********************************************/
+  /*  handle extra attributes of sds : sds label, object type 
+      and reference num */
+
+  strcpy(sdslabel,SDSLABEL);
+
+  if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,sdslabel)==FAIL) {
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    free(chunk_dims);
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    printf("unable to transfer sds label to HDF4 OBJECT TYPE.\n");
+    return FAIL;
+  }
+
+  if(sdsname[0] != '\0') {
+    if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,sdsname)==FAIL){
+      free(sds_start);
+      free(sds_edge);
+      free(sds_stride);
+
+      free(chunk_dims);
+      H5Sclose(h5d_sid);
+      H5Dclose(h5dset);
+      H5Pclose(create_plist);
+      printf("unable to transfer sds name to HDF5 dataset attribute.\n");
+      return FAIL;
+    }
+  }
+
+  if(h4_transnumattr(h5dset,HDF4_REF_NUM,sds_ref)==FAIL){
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+
+    free(chunk_dims);
+    H5Sclose(h5d_sid);
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    printf("unable to transfer sds ref. to HDF5 dataset attribute.\n");
+    return FAIL;
+  }
+
+  free(sds_start);
+  free(sds_edge);
+  free(sds_stride);
+  free(fill_value);
+  H5Sclose(h5d_sid);
+  H5Dclose(h5dset);
+  H5Pclose(create_plist);
   return SUCCEED;
 }
 
 
+uint16 get_SDref(int32 file_id,uint16 tag,int32 sds_ref){
 
+  DFdi di;
+  int32 found,GroupID;
+  int sd_ref = 0;
+  
 
+  if((GroupID = DFdiread(file_id,tag,(uint16)sds_ref))<0){
+    printf("cannot find sd_ref\n");
+    return sd_ref;
+  }
 
+  found = 0;
+  di.tag = DFTAG_NULL;
+  di.ref = 0;
+  while((found == 0) &&(DFdiget(GroupID,&di.tag,&di.ref)==0)){
+    if(di.tag == DFTAG_SD)
+      found = 1;
+  }
 
+  sd_ref = di.ref;
+  if(!found) 
+    printf("cannot find sd_ref\n");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  DFdifree(GroupID);
+  return sd_ref;
+}
 
 
 
