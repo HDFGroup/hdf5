@@ -200,8 +200,8 @@ Please check your Makefile.
 #include <sys/stat.h>
 #define DF_MT          DFMT_HP9000
 typedef char           *_fcd;
-typedef long           hsize_t_f;
-typedef long           hssize_t_f;
+typedef long long           hsize_t_f;
+typedef long long          hssize_t_f;
 typedef long           size_t_f;
 typedef int            int_f;
 typedef int            hid_t_f;
