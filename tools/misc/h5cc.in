@@ -218,7 +218,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $CC $CPPFLAGS $CFLAGS -I$includedir $compile_args
+  $SHOW $CC -I$includedir $CPPFLAGS $CFLAGS $compile_args
   status=$?
 
   if test "$status" != "0"; then
