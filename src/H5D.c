@@ -1181,7 +1181,7 @@ H5Dget_create_plist(hid_t dset_id)
 done:
     if(ret_value<0) {
         if(new_dcpl_id>0)
-            (void)H5Pclose(new_dcpl_id);
+            (void)H5I_dec_ref(new_dcpl_id);
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
