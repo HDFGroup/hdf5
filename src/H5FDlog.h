@@ -26,4 +26,3 @@ __DLL__ herr_t H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity);
 #endif
 
 #endif
-

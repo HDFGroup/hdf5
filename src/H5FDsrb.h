@@ -26,9 +26,17 @@ typedef struct SRB_Info {    /* Define the SRB info object.                  */
     int  size;               /* File Size-Only valid for HPSS, -1 is default */
 } SRB_Info;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 __DLL__ hid_t  H5FD_srb_init(void);
 __DLL__ herr_t H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info);
 __DLL__ herr_t H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info);
+
+#ifdef __cplusplus
+}
+#endif
 
 #else
 #define H5FD_SRB   (-1)

@@ -22,11 +22,18 @@
 /* Function prototypes */
 #ifdef H5_HAVE_GRIDSTORAGE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 hid_t H5FD_dpss_init(void);
 herr_t H5Pset_fapl_dpss (hid_t fapl_id);
 herr_t H5Pget_fapl_dpss (hid_t fapl_id);
 
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 #endif /* H5FDdpss_H */
-  
