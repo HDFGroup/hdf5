@@ -1,0 +1,35 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/Tutor/examples
+
+TRACE=perl $(top_srcdir)/bin/trace
+
+# Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
+
+# Temporary files
+MOSTLYCLEAN=
+
+# Public doc files (to be installed)...
+PUB_DOCS= Makefile h5_compound.c h5_copy.c h5_crtatt.c h5_crtdat.c \
+    h5_crtfile.c h5_crtgrp.c h5_crtgrpar.c h5_crtgrpd.c h5_extend.c \
+    h5_hyperslab.c h5_iterate.c h5_mount.c h5_rdwt.c h5_read.c \
+    h5_ref2objr.c h5_ref2objw.c h5_ref2regr.c h5_ref2regw.c \
+    h5_reference.c
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
+
+@CONCLUDE@
