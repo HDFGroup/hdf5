@@ -96,13 +96,19 @@ Documentation
 =============
 
     * The H5T_conv_t and H5T_cdata_t structures are now properly defined
-      in the Reference Manual (H5T) and descriped in detail in the User's 
-      Guide (Datatypes).
-    * The new tools h52gif and gif2h5 have been added to the Tools section
+      in the H5Tregister entry in the "H5T" section of the "HDF5 Reference 
+      Manual" and described in detail in section 12, "Data Conversions," in 
+      the "Datatypes" chapter of the "HDF5 User's Guide."
+    * The new tools h52gif and gif2h5 have been added to the "Tools" section
       of the Reference Manual.
-    * A "Freespace Management" section has been added to the Performance 
+    * A "Freespace Management" section has been added to the "Performance" 
       chapter of the User's Guide.
     * Several user-reported bugs have been fixed since Release 1.4.1.
+    * The "HDF5 Image and Palette Specification" (in the "HDF5 Application
+      Developer's Guide") has been heavily revised.  Based on extensive user 
+      feedback and input from visualization software developers, Version 1.2 
+      of the image specification is substantially different from prior 
+      versions.
 
 
 Platforms Tested
