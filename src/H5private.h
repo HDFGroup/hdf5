@@ -1325,6 +1325,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #  define PABLO_TRACE_OFF(m, f) /*void */
 #endif
 
+/* Macro for "glueing" together items, for re-scanning macros */
+#define H5_GLUE(x,y)       x##y
+#define H5_GLUE3(x,y,z)    x##y##z
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void H5_term_library(void);

@@ -63,14 +63,19 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 /*
  * These macros are for the bodies of functions that convert buffers of one
- * integer type to another using hardware.  They all start with `H5T_CONV_'
- * and end with two letters that represent the source and destination types,
- * respectively. The letters `s' and `S' refer to signed values while the
- * letters `u' and `U' refer to unsigned values. The letter which is
- * capitalized indicates that the corresponding type (source or destination)
- * is at least as large as the other type.  Certain conversions may
- * experience overflow conditions which arise when the source value has a
- * magnitude that cannot be represented by the destination type.
+ * atomic type to another using hardware.
+ *
+ * They all start with `H5T_CONV_' and end with two letters that represent the
+ * source and destination types, respectively. The letters `s' and `S' refer to
+ * signed integers while the letters `u' and `U' refer to unsigned integers, and
+ * the letters `f' and `F' refer to floating-point values.
+ *
+ * The letter which is capitalized indicates that the corresponding type
+ * (source or destination) is at least as large as the other type.
+ *
+ * Certain conversions may experience overflow conditions which arise when the
+ * source value has a magnitude that cannot be represented by the destination
+ * type.
  *
  * Suffix	Description
  * ------	-----------
@@ -116,14 +121,22 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *		occurs when the source magnitude is too large for the
  *		destination.
  *
+ * fF:		Floating-point values to floating-point values where the
+ *              destination is at least as wide as the source.	 This case
+ *              cannot generate overflows.
+ *
+ * Ff:		Floating-point values to floating-point values the source is at
+ *		least as large as the destination.  Overflows can occur when
+ *		the destination is narrower than the source.
+ *
  * The macros take a subset of these arguments in the order listed here:
  *
  * CDATA:	A pointer to the H5T_cdata_t structure that was passed to the
  *		conversion function.
  *
- * S_ID:	The hid_t value for the source data type.
+ * STYPE:	The hid_t value for the source data type.
  *
- * D_ID:	The hid_t value for the destination data type.
+ * DTYPE:	The hid_t value for the destination data type.
  *
  * BUF:		A pointer to the conversion buffer.
  *
@@ -142,169 +155,163 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * D_MAX:	The maximum possible destination value. Source values which
  *		are larger than D_MAX generate overflows.
  * 
+ * The macros are implemented with a generic programming technique, similar
+ * to templates in C++.  The macro which defines the "core" part of the
+ * conversion (which actually moves the data from the source to the destination)
+ * is invoked inside the H5T_CONV "template" macro by "gluing" it together,
+ * which allows the core conversion macro to be invoked as necessary.
+ * 
+ * The generic "core" macros are: (others are specific to particular conversion)
+ * 
+ * Suffix	Description
+ * ------	-----------
+ * xX:		Generic Conversion where the destination is at least as
+ *              wide as the source.  This case cannot generate overflows.
+ *
+ * Xx:		Generic signed conversion where the source is at least as large
+ *              as the destination.  Overflows can occur when the destination is
+ *              narrower than the source.
+ *
+ * SU:		Generic signed to unsigned conversion where the source is 
+ *              the same size or smaller than the destination.  Overflow occurs
+ *		when the source value is negative.
+ *
+ * Ux:		Generic conversion for the `Us', `Uu' & `us' cases
+ *		Overflow occurs when the source magnitude is too large for the
+ *		destination.
+ *
  */
-#define H5T_CONV_sS(S_ALIGN,D_ALIGN,ST,DT) {				      \
-    assert(sizeof(ST)<=sizeof(DT));					      \
-    CI_BEGIN(S_ALIGN, D_ALIGN, ST, DT, nelmts-1) {			      \
-	*((DT*)d) = (DT)(*((ST*)s));					      \
-    } CI_END;								      \
+#define H5T_CONV_xX_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_sU(STYPE,DTYPE,ST,DT) {				      \
-    assert(sizeof(ST)<=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1) {				      \
-	if (*((ST*)s)<0) {						      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = 0;						      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+#define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else if (*((ST*)S) < (D_MIN)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MIN);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MAX) {				      \
-    assert(sizeof(ST)<=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1) {				      \
-	if (*((ST*)s) > (D_MAX)) {					      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+#define H5T_CONV_SU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S)<0) {							      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = 0;						      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
-#define H5T_CONV_uU(STYPE,DTYPE,ST,DT) {				      \
+#define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1) {				      \
-	*((DT*)d) = (DT)(*((ST*)s));					      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+}
+
+#define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+}
+
+#define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+}
+
+#define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) > (DT)(D_MAX)) {					      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else if (*((ST*)s) < (D_MIN)) {				      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MIN);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MAX) {				      \
+#define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) < 0) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = 0;						      \
+    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S)>(ST)(D_MAX)) {	      \
+        /*sign vs. unsign ok in previous line*/				      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) < 0) {						      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = 0;						      \
-	    }								      \
-	} else if (sizeof(ST)>sizeof(DT) && *((ST*)s)>(ST)(D_MAX)) {	      \
-	    /*sign vs. unsign ok in previous line*/			      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MAX) {				      \
+#define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) > (D_MAX)) {					      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MAX) {				      \
+#define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) > (D_MAX)) {					      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_su(STYPE,DTYPE,ST,DT) {				      \
+#define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) < 0) {						      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = 0;						      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MAX) {				      \
+#define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    CI_BEGIN(STYPE, DTYPE, ST, DT, 0) {					      \
-	if (*((ST*)s) > (D_MAX)) {					      \
-	    if (!H5T_overflow_g ||					      \
-		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
-		*((DT*)d) = (D_MAX);					      \
-	    }								      \
-	} else {							      \
-	    *((DT*)d) = (DT)(*((ST*)s));				      \
-	}								      \
-    } CI_END;								      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-/* The first part of every integer hardware conversion macro */
-#define CI_BEGIN(STYPE,DTYPE,ST,DT,STRT) {				      \
+#define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)<=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+}
+
+#define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    assert(sizeof(ST)>=sizeof(DT));					      \
+    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+}
+
+/* The main part of every integer hardware conversion macro */
+#define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,STRT) {	      \
     hsize_t	elmtno;			/*element number		*/    \
-    void	*src, *s;		/*source buffer			*/    \
-    void	*dst, *d;		/*destination buffer		*/    \
+    uint8_t	*src, *s;		/*source buffer			*/    \
+    uint8_t	*dst, *d;		/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
-    long_long	aligned;		/*largest integer type, aligned	*/    \
+    ATYPE	aligned;		/*aligned type			*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
-    size_t      dt_size=sizeof(DT);	/*needed by CI_END macro	*/    \
     size_t	s_stride, d_stride;	/*src and dst strides		*/    \
-    int		direction;		/*1=left-to-right, -1=rt-to-lt	*/    \
 									      \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
 	/* Sanity check and initialize statistics */			      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
-	if (NULL==(st=H5I_object(src_id)) ||	                	      \
-                NULL==(dt=H5I_object(dst_id))) {	        	      \
+	if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
-			  "unable to dereference data type object ID");	      \
-	}								      \
-	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT)) {		      \
+			  "unable to dereference datatype object ID")	      \
+	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT))		      \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
-			  "disagreement about data type size");		      \
-	}								      \
+			  "disagreement about datatype size")		      \
 	CI_ALLOC_PRIV	                                                      \
 	break;								      \
 									      \
@@ -318,19 +325,17 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	/* Initialize pointers */					      \
 	if (buf_stride) {						      \
 	    s_stride = d_stride = buf_stride;				      \
-	    src = dst = buf;						      \
-	    direction = 1;						      \
-	} else if (STRT) {						      \
-	    s_stride = sizeof(ST);					      \
-	    d_stride = sizeof(DT);					      \
-	    src = (uint8_t*)buf+(STRT)*s_stride;			      \
-	    dst = (uint8_t*)buf+(STRT)*d_stride;			      \
-            direction = -1;						      \
 	} else {							      \
-	    s_stride = sizeof(ST);					      \
-	    d_stride = sizeof(DT);					      \
+            s_stride = sizeof(ST);					      \
+            d_stride = sizeof(DT);					      \
+        }								      \
+        if (STRT) {							      \
+            src = (uint8_t*)buf+(STRT)*s_stride;			      \
+            dst = (uint8_t*)buf+(STRT)*d_stride;			      \
+            s_stride = -s_stride;					      \
+            d_stride = -d_stride;					      \
+        } else {							      \
             src = dst = buf;						      \
-            direction = 1;						      \
         }								      \
 									      \
 	/* Is alignment required for source or dest? */			      \
@@ -342,31 +347,24 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
                ((size_t)buf%H5T_NATIVE_##DTYPE##_ALIGN_g ||		      \
      /* Cray */ ((size_t)((DT*)buf)!=(size_t)buf) ||			      \
                 d_stride%H5T_NATIVE_##DTYPE##_ALIGN_g);			      \
-    CI_INC_SRC(s_mv)                                     \
-    CI_INC_DST(d_mv)                                     \
+	CI_INC_SRC(s_mv)						      \
+	CI_INC_DST(d_mv)						      \
 									      \
-	for (elmtno=0; elmtno<nelmts; elmtno++) {			      \
-	    /* Alignment */						      \
-	    if (s_mv) {							      \
-		HDmemcpy(&aligned, src, sizeof(ST));			      \
-		s = (uint8_t*)&aligned;					      \
-	    } else {							      \
-		s = src;						      \
-	    }								      \
-	    if (d_mv) {							      \
-		d = (uint8_t*)&aligned;					      \
-	    } else {							      \
-		d = dst;						      \
-	    }								      \
-	    /* ... user-defined stuff here -- the conversion ... */
-#define CI_END								      \
-	    /* Copy destination to final location */			      \
-            if (d_mv) HDmemcpy(dst, &aligned, dt_size);			      \
-									      \
-	    /* Advance pointers */					      \
-	    src = (char *)src + direction * s_stride;			      \
-	    dst = (char *)dst + direction * d_stride;			      \
-        }								      \
+        if (s_mv && d_mv) {						      \
+            /* Alignment is required for both source and dest */	      \
+            s = (uint8_t*)&aligned;					      \
+            H5T_CONV_LOOP(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else if(s_mv) {						      \
+            /* Alignment is required only for source */			      \
+            s = (uint8_t*)&aligned;					      \
+            H5T_CONV_LOOP(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else if(d_mv) {						      \
+            /* Alignment is required only for destination */		      \
+            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else {							      \
+            /* Alignment is not required for both source and destination */   \
+            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        }	 	 	 	 	 	 	 	      \
         break;								      \
 									      \
     default:								      \
@@ -374,6 +372,65 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 		      "unknown conversion command");			      \
     }									      \
 }
+
+/* Macro defining action on source data which needs to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_SALIGN(ST) {					      \
+    HDmemcpy(&aligned, src, sizeof(ST));				      \
+}
+
+/* Macro defining action on source data which doesn't need to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_SNOALIGN(ST) {				      \
+}
+
+/* Macro defining action on destination data which needs to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_DALIGN(DT) {					      \
+    d = (uint8_t*)&aligned;						      \
+}
+
+/* Macro defining action on destination data which doesn't need to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_DNOALIGN(DT) {				      \
+}
+
+/* Macro defining action on source data which needs to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_SALIGN(ST) {					      \
+}
+
+/* Macro defining action on source data which doesn't need to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_SNOALIGN(ST) {				      \
+}
+
+/* Macro defining action on destination data which needs to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_DALIGN(DT) {					      \
+    HDmemcpy(dst, &aligned, sizeof(DT));				      \
+}
+
+/* Macro defining action on destination data which doesn't need to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_DNOALIGN(DT) {				      \
+}
+
+/* The inner loop of the type conversion macro */
+#define H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+    for (elmtno=0; elmtno<nelmts; elmtno++) {				      \
+        /* Handle source pre-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,PRE_SALIGN_GUTS)(ST)			      \
+									      \
+        /* Handle destination pre-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,PRE_DALIGN_GUTS)(DT)			      \
+									      \
+        /* ... user-defined stuff here -- the conversion ... */		      \
+        H5_GLUE(GUTS,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)		      \
+									      \
+        /* Handle source post-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,POST_SALIGN_GUTS)(ST)			      \
+									      \
+        /* Handle destination post-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,POST_DALIGN_GUTS)(DT)			      \
+									      \
+        /* Advance pointers */						      \
+        src += s_stride;						      \
+        dst += d_stride;						      \
+    }
+
 
 #ifdef H5T_DEBUG
 
@@ -3537,7 +3594,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_uchar, FAIL);
 
-    H5T_CONV_su(SCHAR, UCHAR, signed char, unsigned char);
+    H5T_CONV_su(SCHAR, UCHAR, signed char, unsigned char, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3570,7 +3627,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_schar, FAIL);
 
-    H5T_CONV_us(UCHAR, SCHAR, unsigned char, signed char, SCHAR_MAX);
+    H5T_CONV_us(UCHAR, SCHAR, unsigned char, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3603,7 +3660,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_short, FAIL);
 
-    H5T_CONV_sS(SCHAR, SHORT, signed char, short);
+    H5T_CONV_sS(SCHAR, SHORT, signed char, short, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3636,7 +3693,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ushort, FAIL);
 
-    H5T_CONV_sU(SCHAR, USHORT, signed char, unsigned short);
+    H5T_CONV_sU(SCHAR, USHORT, signed char, unsigned short, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3669,7 +3726,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_short, FAIL);
 
-    H5T_CONV_uS(UCHAR, SHORT, unsigned char, short, SHRT_MAX);
+    H5T_CONV_uS(UCHAR, SHORT, unsigned char, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3702,7 +3759,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ushort, FAIL);
 
-    H5T_CONV_uU(UCHAR, USHORT, unsigned char, unsigned short);
+    H5T_CONV_uU(UCHAR, USHORT, unsigned char, unsigned short, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3734,7 +3791,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_int, FAIL);
 
-    H5T_CONV_sS(SCHAR, INT, signed char, int);
+    H5T_CONV_sS(SCHAR, INT, signed char, int, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3766,7 +3823,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_uint, FAIL);
 
-    H5T_CONV_sU(SCHAR, UINT, signed char, unsigned);
+    H5T_CONV_sU(SCHAR, UINT, signed char, unsigned, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3798,7 +3855,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_int, FAIL);
 
-    H5T_CONV_uS(UCHAR, INT, unsigned char, int, INT_MAX);
+    H5T_CONV_uS(UCHAR, INT, unsigned char, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3830,7 +3887,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_uint, FAIL);
 
-    H5T_CONV_uU(UCHAR, UINT, unsigned char, unsigned);
+    H5T_CONV_uU(UCHAR, UINT, unsigned char, unsigned, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3862,7 +3919,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_long, FAIL);
 
-    H5T_CONV_sS(SCHAR, LONG, signed char, long);
+    H5T_CONV_sS(SCHAR, LONG, signed char, long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3895,7 +3952,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ulong, FAIL);
 
-    H5T_CONV_sU(SCHAR, ULONG, signed char, unsigned long);
+    H5T_CONV_sU(SCHAR, ULONG, signed char, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3927,7 +3984,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_long, FAIL);
 
-    H5T_CONV_uS(UCHAR, LONG, unsigned char, long, LONG_MAX);
+    H5T_CONV_uS(UCHAR, LONG, unsigned char, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3960,7 +4017,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ulong, FAIL);
 
-    H5T_CONV_uU(UCHAR, ULONG, unsigned char, unsigned long);
+    H5T_CONV_uU(UCHAR, ULONG, unsigned char, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3993,7 +4050,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_llong, FAIL);
 
-    H5T_CONV_sS(SCHAR, LLONG, signed char, long_long);
+    H5T_CONV_sS(SCHAR, LLONG, signed char, long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4026,7 +4083,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ullong, FAIL);
 
-    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long_long);
+    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4059,7 +4116,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_llong, FAIL);
 
-    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long_long, LLONG_MAX);
+    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long_long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4092,7 +4149,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ullong, FAIL);
 
-    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long_long);
+    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4158,7 +4215,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_uchar, FAIL);
 
-    H5T_CONV_Su(SHORT, UCHAR, short, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(SHORT, UCHAR, short, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4191,7 +4248,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_schar, FAIL);
     
-    H5T_CONV_Us(USHORT, SCHAR, unsigned short, signed char, SCHAR_MAX);
+    H5T_CONV_Us(USHORT, SCHAR, unsigned short, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4224,7 +4281,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_uchar, FAIL);
 
-    H5T_CONV_Uu(USHORT, UCHAR, unsigned short, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(USHORT, UCHAR, unsigned short, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4257,7 +4314,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ushort, FAIL);
     
-    H5T_CONV_su(SHORT, USHORT, short, unsigned short);
+    H5T_CONV_su(SHORT, USHORT, short, unsigned short, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4290,7 +4347,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_short, FAIL);
 
-    H5T_CONV_us(USHORT, SHORT, unsigned short, short, SHRT_MAX);
+    H5T_CONV_us(USHORT, SHORT, unsigned short, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4323,7 +4380,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_int, FAIL);
 
-    H5T_CONV_sS(SHORT, INT, short, int);
+    H5T_CONV_sS(SHORT, INT, short, int, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4356,7 +4413,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_uint, FAIL);
 
-    H5T_CONV_sU(SHORT, UINT, short, unsigned);
+    H5T_CONV_sU(SHORT, UINT, short, unsigned, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4389,7 +4446,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_int, FAIL);
 
-    H5T_CONV_uS(USHORT, INT, unsigned short, int, INT_MAX);
+    H5T_CONV_uS(USHORT, INT, unsigned short, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4422,7 +4479,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_uint, FAIL);
 
-    H5T_CONV_uU(USHORT, UINT, unsigned short, unsigned);
+    H5T_CONV_uU(USHORT, UINT, unsigned short, unsigned, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4455,7 +4512,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_long, FAIL);
 
-    H5T_CONV_sS(SHORT, LONG, short, long);
+    H5T_CONV_sS(SHORT, LONG, short, long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4488,7 +4545,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ulong, FAIL);
 
-    H5T_CONV_sU(SHORT, ULONG, short, unsigned long);
+    H5T_CONV_sU(SHORT, ULONG, short, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4521,7 +4578,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_long, FAIL);
 
-    H5T_CONV_uS(USHORT, LONG, unsigned short, long, LONG_MAX);
+    H5T_CONV_uS(USHORT, LONG, unsigned short, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4554,7 +4611,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ulong, FAIL);
 
-    H5T_CONV_uU(USHORT, ULONG, unsigned short, unsigned long);
+    H5T_CONV_uU(USHORT, ULONG, unsigned short, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4587,7 +4644,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_llong, FAIL);
 
-    H5T_CONV_sS(SHORT, LLONG, short, long_long);
+    H5T_CONV_sS(SHORT, LLONG, short, long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4620,7 +4677,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ullong, FAIL);
 
-    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long_long);
+    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4653,7 +4710,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_llong, FAIL);
 
-    H5T_CONV_uS(USHORT, LLONG, unsigned short, long_long, LLONG_MAX);
+    H5T_CONV_uS(USHORT, LLONG, unsigned short, long_long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4686,7 +4743,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ullong, FAIL);
 
-    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long_long);
+    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4752,7 +4809,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_uchar, FAIL);
 
-    H5T_CONV_Su(INT, UCHAR, int, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(INT, UCHAR, int, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4785,7 +4842,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_schar, FAIL);
 
-    H5T_CONV_Us(UINT, SCHAR, unsigned, signed char, SCHAR_MAX);
+    H5T_CONV_Us(UINT, SCHAR, unsigned, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4818,7 +4875,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_uchar, FAIL);
     
-    H5T_CONV_Uu(UINT, UCHAR, unsigned, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(UINT, UCHAR, unsigned, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4884,7 +4941,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ushort, FAIL);
 
-    H5T_CONV_Su(INT, USHORT, int, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(INT, USHORT, int, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4917,7 +4974,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_short, FAIL);
 
-    H5T_CONV_Us(UINT, SHORT, unsigned, short, SHRT_MAX);
+    H5T_CONV_Us(UINT, SHORT, unsigned, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4950,7 +5007,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ushort, FAIL);
 
-    H5T_CONV_Uu(UINT, USHORT, unsigned, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(UINT, USHORT, unsigned, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4982,7 +5039,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_uint, FAIL);
 
-    H5T_CONV_su(INT, UINT, int, unsigned);
+    H5T_CONV_su(INT, UINT, int, unsigned, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5014,7 +5071,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_int, FAIL);
 
-    H5T_CONV_us(UINT, INT, unsigned, int, INT_MAX);
+    H5T_CONV_us(UINT, INT, unsigned, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5046,7 +5103,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_long, FAIL);
 
-    H5T_CONV_sS(INT, LONG, int, long);
+    H5T_CONV_sS(INT, LONG, int, long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5078,7 +5135,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ulong, FAIL);
 
-    H5T_CONV_sU(INT, LONG, int, unsigned long);
+    H5T_CONV_sU(INT, LONG, int, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5110,7 +5167,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_long, FAIL);
 
-    H5T_CONV_uS(UINT, LONG, unsigned, long, LONG_MAX);
+    H5T_CONV_uS(UINT, LONG, unsigned, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5142,7 +5199,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ulong, FAIL);
 
-    H5T_CONV_uU(UINT, ULONG, unsigned, unsigned long);
+    H5T_CONV_uU(UINT, ULONG, unsigned, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5174,7 +5231,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_llong, FAIL);
 
-    H5T_CONV_sS(INT, LLONG, int, long_long);
+    H5T_CONV_sS(INT, LLONG, int, long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5206,7 +5263,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ullong, FAIL);
 
-    H5T_CONV_sU(INT, ULLONG, int, unsigned long_long);
+    H5T_CONV_sU(INT, ULLONG, int, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5238,7 +5295,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_llong, FAIL);
 
-    H5T_CONV_uS(UINT, LLONG, unsigned, long_long, LLONG_MAX);
+    H5T_CONV_uS(UINT, LLONG, unsigned, long_long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5271,7 +5328,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ullong, FAIL);
 
-    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long_long);
+    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5335,7 +5392,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_uchar, FAIL);
 
-    H5T_CONV_Su(LONG, UCHAR, long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(LONG, UCHAR, long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5368,7 +5425,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_schar, FAIL);
 
-    H5T_CONV_Us(ULONG, SCHAR, unsigned long, signed char, SCHAR_MAX);
+    H5T_CONV_Us(ULONG, SCHAR, unsigned long, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5401,7 +5458,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_uchar, FAIL);
 
-    H5T_CONV_Uu(ULONG, UCHAR, unsigned long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(ULONG, UCHAR, unsigned long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5466,7 +5523,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ushort, FAIL);
 
-    H5T_CONV_Su(LONG, USHORT, long, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(LONG, USHORT, long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5498,7 +5555,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_short, FAIL);
 
-    H5T_CONV_Us(ULONG, SHORT, unsigned long, short, SHRT_MAX);
+    H5T_CONV_Us(ULONG, SHORT, unsigned long, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5531,7 +5588,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ushort, FAIL);
 
-    H5T_CONV_Uu(ULONG, USHORT, unsigned long, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(ULONG, USHORT, unsigned long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5595,7 +5652,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_uint, FAIL);
 
-    H5T_CONV_Su(LONG, UINT, long, unsigned, UINT_MAX);
+    H5T_CONV_Su(LONG, UINT, long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5627,7 +5684,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_int, FAIL);
 
-    H5T_CONV_Us(ULONG, INT, unsigned long, int, INT_MAX);
+    H5T_CONV_Us(ULONG, INT, unsigned long, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5659,7 +5716,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_uint, FAIL);
 
-    H5T_CONV_Uu(ULONG, UINT, unsigned long, unsigned, UINT_MAX);
+    H5T_CONV_Uu(ULONG, UINT, unsigned long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5691,7 +5748,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ulong, FAIL);
 
-    H5T_CONV_su(LONG, ULONG, long, unsigned long);
+    H5T_CONV_su(LONG, ULONG, long, unsigned long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5723,7 +5780,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_long, FAIL);
 
-    H5T_CONV_us(ULONG, LONG, unsigned long, long, LONG_MAX);
+    H5T_CONV_us(ULONG, LONG, unsigned long, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5755,7 +5812,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL);
 
-    H5T_CONV_sS(LONG, LLONG, long, long_long);
+    H5T_CONV_sS(LONG, LLONG, long, long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5788,7 +5845,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ullong, FAIL);
 
-    H5T_CONV_sU(LONG, ULLONG, long, unsigned long_long);
+    H5T_CONV_sU(LONG, ULLONG, long, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5821,7 +5878,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL);
 
-    H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, LLONG_MAX);
+    H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5854,7 +5911,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ullong, FAIL);
 
-    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long_long);
+    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5920,7 +5977,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uchar, FAIL);
 
-    H5T_CONV_Su(LLONG, UCHAR, long_long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(LLONG, UCHAR, long_long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5953,7 +6010,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_schar, FAIL);
 
-    H5T_CONV_Us(ULLONG, SCHAR, unsigned long_long, signed char, SCHAR_MAX);
+    H5T_CONV_Us(ULLONG, SCHAR, unsigned long_long, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -5986,7 +6043,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uchar, FAIL);
 
-    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long_long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long_long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6052,7 +6109,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ushort, FAIL);
 
-    H5T_CONV_Su(LLONG, USHORT, long_long, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(LLONG, USHORT, long_long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6085,7 +6142,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_short, FAIL);
 
-    H5T_CONV_Us(ULLONG, SHORT, unsigned long_long, short, SHRT_MAX);
+    H5T_CONV_Us(ULLONG, SHORT, unsigned long_long, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6118,7 +6175,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ushort, FAIL);
 
-    H5T_CONV_Uu(ULLONG, USHORT, unsigned long_long, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(ULLONG, USHORT, unsigned long_long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6182,7 +6239,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uint, FAIL);
 
-    H5T_CONV_Su(LLONG, UINT, long_long, unsigned, UINT_MAX);
+    H5T_CONV_Su(LLONG, UINT, long_long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6214,7 +6271,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_int, FAIL);
 
-    H5T_CONV_Us(ULLONG, INT, unsigned long_long, int, INT_MAX);
+    H5T_CONV_Us(ULLONG, INT, unsigned long_long, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6247,7 +6304,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uint, FAIL);
 
-    H5T_CONV_Uu(ULLONG, UINT, unsigned long_long, unsigned, UINT_MAX);
+    H5T_CONV_Uu(ULLONG, UINT, unsigned long_long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6312,7 +6369,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ulong, FAIL);
 
-    H5T_CONV_Su(LLONG, ULONG, long_long, unsigned long, ULONG_MAX);
+    H5T_CONV_Su(LLONG, ULONG, long_long, unsigned long, -, ULONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6345,7 +6402,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_long, FAIL);
 
-    H5T_CONV_Us(ULLONG, LONG, unsigned long_long, long, LONG_MAX);
+    H5T_CONV_Us(ULLONG, LONG, unsigned long_long, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6378,7 +6435,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ulong, FAIL);
 
-    H5T_CONV_Uu(ULLONG, ULONG, unsigned long_long, unsigned long, ULONG_MAX);
+    H5T_CONV_Uu(ULLONG, ULONG, unsigned long_long, unsigned long, -, ULONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6411,7 +6468,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ullong, FAIL);
 
-    H5T_CONV_su(LLONG, ULLONG, long_long, unsigned long_long);
+    H5T_CONV_su(LLONG, ULLONG, long_long, unsigned long_long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6444,7 +6501,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_llong, FAIL);
 
-    H5T_CONV_us(ULLONG, LLONG, unsigned long_long, long_long, LLONG_MAX);
+    H5T_CONV_us(ULLONG, LLONG, unsigned long_long, long_long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6476,92 +6533,11 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    hsize_t	elmtno;			/*element number		*/
-    uint8_t	*src, *s;		/*source buffer			*/
-    uint8_t	*dst, *d;		/*destination buffer		*/
-    H5T_t	*st, *dt;		/*type descriptors		*/
-    hbool_t	src_mv, dst_mv;		/*align data?			*/
-    double	aligned;		/*aligned data			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-    switch (cdata->command) {
-        case H5T_CONV_INIT:
-            cdata->need_bkg = H5T_BKG_NO;
-            if (NULL==(st=H5I_object(src_id)) ||
-                    NULL==(dt=H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference data type object ID");
-            if (st->size!=sizeof(float) || dt->size!=sizeof(double))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about data type size");
-            CI_ALLOC_PRIV
-            break;
-
-        case H5T_CONV_FREE:
-            CI_PRINT_STATS(FLOAT, DOUBLE);
-            CI_FREE_PRIV
-            break;
-
-        case H5T_CONV_CONV:
-            if (buf_stride) {
-                src = dst = (uint8_t*)buf + buf_stride*(nelmts-1);
-            } else {
-                src = (uint8_t*)buf + sizeof(float)*(nelmts-1);
-                dst = (uint8_t*)buf + sizeof(double)*(nelmts-1);
-            }
-            
-            /* Need alignment? */
-            if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
-                src_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(float)) %
-                      H5T_NATIVE_FLOAT_ALIGN_g);
-            } else {
-                src_mv = FALSE;
-            }
-            if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
-                dst_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(double)) %
-                      H5T_NATIVE_DOUBLE_ALIGN_g);
-            } else {
-                dst_mv = FALSE;
-            }
-            CI_INC_SRC(src_mv)
-            CI_INC_DST(dst_mv)
-            
-            for (elmtno=0; elmtno<nelmts; elmtno++) {
-                /* Align source and/or destination */
-                if (src_mv) {
-                    HDmemcpy(&aligned, src, sizeof(float));
-                    s = (uint8_t*)&aligned;
-                } else {
-                    s = src;
-                }
-                if (dst_mv)
-                    d = (uint8_t*)&aligned;
-                else
-                    d = dst;
-
-                /* Conversion */
-                *((double*)d) = *((float*)s);
-
-                /* Unalign destination */
-                if (dst_mv)
-                    HDmemcpy(dst, &aligned, sizeof(double));
-
-                /* Advance buffer pointers */
-                if (buf_stride) {
-                    src -= buf_stride;
-                    dst -= buf_stride;
-                } else {
-                    src -= sizeof(float);
-                    dst -= sizeof(double);
-                }
-            }
-            break;
-            
-        default:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");
-    }
+    H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6596,100 +6572,11 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    hsize_t	elmtno;			/*element number		*/
-    uint8_t	*src, *s;		/*source buffer			*/
-    uint8_t	*dst, *d;		/*destination buffer		*/
-    H5T_t	*st, *dt;		/*type descriptors		*/
-    hbool_t	src_mv, dst_mv;		/*align data?			*/
-    double	aligned;		/*aligned data			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
-    switch (cdata->command) {
-        case H5T_CONV_INIT:
-            cdata->need_bkg = H5T_BKG_NO;
-            if (NULL==(st=H5I_object(src_id)) ||
-                    NULL==(dt=H5I_object(dst_id)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference data type object ID");
-            if (st->size!=sizeof(double) || dt->size!=sizeof(float))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about data type size");
-            CI_ALLOC_PRIV
-            break;
+    FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-        case H5T_CONV_FREE:
-            CI_PRINT_STATS(DOUBLE, FLOAT);
-            CI_FREE_PRIV
-            break;
-
-        case H5T_CONV_CONV:
-            src = (uint8_t*)buf;
-            dst = (uint8_t*)buf;
-
-            /* Need alignment? */
-            if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
-                src_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(double)) %
-                      H5T_NATIVE_DOUBLE_ALIGN_g);
-            } else {
-                src_mv = FALSE;
-            }
-            if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
-                dst_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-                     ((buf_stride?buf_stride:sizeof(float)) %
-                      H5T_NATIVE_FLOAT_ALIGN_g);
-            } else {
-                dst_mv = FALSE;
-            }
-            CI_INC_SRC(src_mv)
-            CI_INC_DST(dst_mv)
-            
-            for (elmtno=0; elmtno<nelmts; elmtno++) {
-                /* Align source and/or destination */
-                if (src_mv) {
-                    HDmemcpy(&aligned, src, sizeof(double));
-                    s = (uint8_t*)&aligned;
-                } else {
-                    s = src;
-                }
-                if (dst_mv)
-                    d = (uint8_t*)&aligned;
-                else
-                    d = dst;
-
-                /* Conversion */
-                if (*((double*)s) > FLT_MAX) {
-                    if (!H5T_overflow_g ||
-                        (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-                        *((float*)d) = FLT_MAX;
-                    }
-                } else if (*((double*)s) < -FLT_MAX) {
-                    if (!H5T_overflow_g ||
-                        (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
-                        *((float*)d) = -FLT_MAX;
-                    }
-                } else {
-                    *((float*)d) = (float) *((double*)s);
-                }
-
-                /* Unalign destination */
-                if (dst_mv)
-                    HDmemcpy(dst, &aligned, sizeof(float));
-
-                    /* Advance pointers */
-                if (buf_stride) {
-                    src += buf_stride;
-                    dst += buf_stride;
-                } else {
-                    src += sizeof(double);
-                    dst += sizeof(float);
-                }
-            }
-            break;
-            
-        default:
-            HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");
-    }
+    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, FLT_MIN, FLT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
