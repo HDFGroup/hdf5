@@ -676,7 +676,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
   if (H5P_DEFAULT != fapl_id)
   {
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     fapl = H5P_get_driver_info (plist);
   }
   if (fapl == NULL)
