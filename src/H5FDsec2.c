@@ -140,9 +140,9 @@ static haddr_t H5FD_sec2_get_eoa(H5FD_t *_file);
 static herr_t H5FD_sec2_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_sec2_get_eof(H5FD_t *_file);
 static herr_t H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     hsize_t size, void *buf);
+			     size_t size, void *buf);
 static herr_t H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      hsize_t size, const void *buf);
+			      size_t size, const void *buf);
 static herr_t H5FD_sec2_flush(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_sec2_g = {
@@ -549,7 +549,7 @@ H5FD_sec2_get_eof(H5FD_t *_file)
  */
 static herr_t
 H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       hsize_t size, void *buf/*out*/)
+	       size_t size, void *buf/*out*/)
 {
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
@@ -582,8 +582,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
      */
     while (size>0) {
         do {
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDread(file->fd, buf, (size_t)size);
+            nbytes = HDread(file->fd, buf, size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
@@ -593,13 +592,12 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         }
         if (0==nbytes) {
             /* end of file but not end of format address space */
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            HDmemset(buf, 0, (size_t)size);
+            HDmemset(buf, 0, size);
             size = 0;
         }
         assert(nbytes>=0);
-        assert((hsize_t)nbytes<=size);
-        size -= (hsize_t)nbytes;
+        assert((size_t)nbytes<=size);
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
@@ -631,7 +629,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
  */
 static herr_t
 H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-		hsize_t size, const void *buf)
+		size_t size, const void *buf)
 {
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
@@ -664,8 +662,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
      */
     while (size>0) {
         do {
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDwrite(file->fd, buf, (size_t)size);
+            nbytes = HDwrite(file->fd, buf, size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
@@ -674,8 +671,8 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
         }
         assert(nbytes>0);
-        assert((hsize_t)nbytes<=size);
-        size -= (hsize_t)nbytes;
+        assert((size_t)nbytes<=size);
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf = (const char*)buf + nbytes;
     }

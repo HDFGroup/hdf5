@@ -161,10 +161,10 @@ static herr_t  H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr);
 static haddr_t H5FD_stream_get_eof (H5FD_t *_stream);
 static herr_t  H5FD_stream_read (H5FD_t *_stream, H5FD_mem_t type,
                                  hid_t fapl_id, haddr_t addr,
-                                 hsize_t size, void *buf);
+                                 size_t size, void *buf);
 static herr_t  H5FD_stream_write (H5FD_t *_stream, H5FD_mem_t type,
                                   hid_t fapl_id, haddr_t addr,
-                                  hsize_t size, const void *buf);
+                                  size_t size, const void *buf);
 
 /* The Stream VFD's class information structure */
 static const H5FD_class_t H5FD_stream_g =
@@ -1067,11 +1067,11 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
                                 H5FD_mem_t UNUSED type,
                                 hid_t UNUSED dxpl_id,
                                 haddr_t addr,
-                                hsize_t size,
+                                size_t size,
                                 void *buf /*out*/)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
-  ssize_t        nbytes;
+  size_t        nbytes;
 
   FUNC_ENTER (H5FD_stream_read, FAIL);
 
@@ -1095,8 +1095,8 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
   /* Read the part which is before the EOF marker */
   if (addr < stream->eof)
   {
-    nbytes = (ssize_t) MIN (size, stream->eof - addr);
-    HDmemcpy (buf, stream->mem + addr, (size_t) nbytes);
+    nbytes = MIN (size, stream->eof - addr);
+    HDmemcpy (buf, stream->mem + addr, nbytes);
     size -= nbytes;
     addr += nbytes;
     buf = (char *) buf + nbytes;
@@ -1105,7 +1105,7 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
   /* Read zeros for the part which is after the EOF markers */
   if (size > 0)
   {
-    HDmemset (buf, 0, (size_t) size);
+    HDmemset (buf, 0, size);
   }
 
   FUNC_LEAVE (SUCCEED);
@@ -1133,11 +1133,10 @@ static herr_t H5FD_stream_write (H5FD_t *_stream,
                                  H5FD_mem_t UNUSED type,
                                  hid_t UNUSED dxpl_id,
                                  haddr_t addr,
-                                 hsize_t size,
+                                 size_t size,
                                  const void *buf)
 {
   H5FD_stream_t                *stream = (H5FD_stream_t *) _stream;
-
 
   FUNC_ENTER (H5FD_stream_write, FAIL);
 
@@ -1189,7 +1188,7 @@ static herr_t H5FD_stream_write (H5FD_t *_stream,
   }
 
   /* Write from BUF to memory */
-  HDmemcpy (stream->mem + addr, buf, (size_t) size);
+  HDmemcpy (stream->mem + addr, buf, size);
   stream->dirty = TRUE;
 
   FUNC_LEAVE (SUCCEED);

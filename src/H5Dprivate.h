@@ -53,22 +53,22 @@ typedef struct H5D_create_t {
 
 /* Data transfer property list */
 typedef struct H5D_xfer_t {
-    hsize_t		buf_size;	/*max temp buffer size		     */
-    void		*tconv_buf;	/*type conversion buffer or null     */
-    void		*bkg_buf;	/*background buffer or null	     */
+    size_t	buf_size;	/*max temp buffer size		     */
+    void	*tconv_buf;	/*type conversion buffer or null     */
+    void	*bkg_buf;	/*background buffer or null	     */
     H5T_bkg_t	need_bkg;	/*type of background buffer needed   */
-    double		split_ratios[3];/*B-tree node splitting ratios	     */
+    double	split_ratios[3];/*B-tree node splitting ratios	     */
     uintn       cache_hyper;    /*cache hyperslab blocks during I/O? */
     uintn       block_limit;    /*largest hyperslab block to cache   */
+    size_t      vector_size;    /*Max. # of I/O vectors for hyperslabs */
     H5MM_allocate_t 	vlen_alloc; 	/*VL datatype allocation function    */
     void		*alloc_info;    /*VL datatype allocation information */
     H5MM_free_t	vlen_free;      /*VL datatype free function	     */
     void		*free_info;	/*VL datatype free information	     */
-    hid_t		driver_id;	/*File driver ID		     */
-    void		*driver_info;	/*File driver specific information   */
+    hid_t	driver_id;	/*File driver ID		     */
+    void	*driver_info;	/*File driver specific information   */
 #ifdef COALESCE_READS
-    uintn               gather_reads;   /*coalesce single reads into a read  */
-                                        /*transaction                        */
+    uintn       gather_reads;   /*coalesce single reads into a read transaction */
 #endif
 } H5D_xfer_t;
 

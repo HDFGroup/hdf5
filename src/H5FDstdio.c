@@ -136,9 +136,9 @@ static haddr_t H5FD_stdio_get_eoa(H5FD_t *_file);
 static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_stdio_get_eof(H5FD_t *_file);
 static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-                hsize_t size, void *buf);
+                size_t size, void *buf);
 static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-                hsize_t size, const void *buf);
+                size_t size, const void *buf);
 static herr_t H5FD_stdio_flush(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_stdio_g = {
@@ -589,7 +589,7 @@ H5FD_stdio_get_eof(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
     void *buf/*out*/)
 {
     size_t		n;
@@ -615,8 +615,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
     if (0 == size)
         return(0);
 	if ((haddr_t)addr >= file->eof) {
-        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-        memset(buf, 0, (size_t)size);
+        memset(buf, 0, size);
         return(0);
     }
 
@@ -657,15 +656,13 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
      * will advance the file position by N.  If N is negative or an error
      * occurs then the file position is undefined.
      */
-    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-    n = fread(buf, 1, (size_t)size, file->fp);
+    n = fread(buf, 1, size, file->fp);
     if (n <= 0 && ferror(file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_READERROR, "fread failed", -1);
     } else if (n < size) {
-        assert((size-n)==(hsize_t)((size_t)(size-n))); /*check for overflow*/
-        memset((unsigned char *)buf + n, 0, (size_t)(size - n));
+        memset((unsigned char *)buf + n, 0, (size - n));
     }
     
     /*
@@ -702,7 +699,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
  */
 static herr_t
 H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-		hsize_t size, const void *buf)
+		size_t size, const void *buf)
 {
     H5FD_stdio_t		*file = (H5FD_stdio_t*)_file;
     static const char *func="H5FD_stdio_write";  /* Function Name for error reporting */
@@ -750,8 +747,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * advanced by the number of bytes read.  Otherwise nobody knows where it
      * is.
      */
-    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-    if (size != fwrite(buf, 1, (size_t)size, file->fp)) {
+    if (size != fwrite(buf, 1, size, file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1);

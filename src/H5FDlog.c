@@ -174,9 +174,9 @@ static haddr_t H5FD_log_get_eoa(H5FD_t *_file);
 static herr_t H5FD_log_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_log_get_eof(H5FD_t *_file);
 static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     hsize_t size, void *buf);
+			     size_t size, void *buf);
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      hsize_t size, const void *buf);
+			      size_t size, const void *buf);
 static herr_t H5FD_log_flush(H5FD_t *_file);
 
 /*
@@ -825,7 +825,7 @@ H5FD_log_get_eof(H5FD_t *_file)
  */
 static herr_t
 H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       hsize_t size, void *buf/*out*/)
+	       size_t size, void *buf/*out*/)
 {
     H5FD_log_t		*file = (H5FD_log_t*)_file;
     ssize_t		nbytes;
@@ -845,7 +845,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
 
     /* Log the I/O information about the read */
     if(file->fa.verbosity>=0) {
-        hsize_t tmp_size=size;
+        size_t tmp_size=size;
         haddr_t tmp_addr=addr;
 
         assert((addr+size)<file->iosize);
@@ -876,8 +876,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
      */
     while (size>0) {
         do {
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDread(file->fd, buf, (size_t)size);
+            nbytes = HDread(file->fd, buf, size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
@@ -887,13 +886,12 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
         }
         if (0==nbytes) {
             /* end of file but not end of format address space */
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            HDmemset(buf, 0, (size_t)size);
+            HDmemset(buf, 0, size);
             size = 0;
         }
         assert(nbytes>=0);
-        assert((hsize_t)nbytes<=size);
-        size -= (hsize_t)nbytes;
+        assert((size_t)nbytes<=size);
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
@@ -925,7 +923,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
  */
 static herr_t
 H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-		hsize_t size, const void *buf)
+		size_t size, const void *buf)
 {
     H5FD_log_t		*file = (H5FD_log_t*)_file;
     ssize_t		nbytes;
@@ -950,7 +948,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     
     /* Log the I/O information about the write */
     if(file->fa.verbosity>=0) {
-        hsize_t tmp_size=size;
+        size_t tmp_size=size;
         haddr_t tmp_addr=addr;
 
         assert((addr+size)<file->iosize);
@@ -965,7 +963,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         if(file->fa.verbosity>0) {
             /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
             if(file->flavor[addr]==H5FD_MEM_DEFAULT)
-                HDmemset(&file->flavor[addr],type,(size_t)size);
+                HDmemset(&file->flavor[addr],type,size);
             HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) Written, flavor=%s\n",addr,addr+size-1,(unsigned long)size,flavors[file->flavor[addr]]);
         } /* end if */
     }
@@ -985,8 +983,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
      */
     while (size>0) {
         do {
-            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-            nbytes = HDwrite(file->fd, buf, (size_t)size);
+            nbytes = HDwrite(file->fd, buf, size);
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
@@ -995,8 +992,8 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
         }
         assert(nbytes>0);
-        assert((hsize_t)nbytes<=size);
-        size -= (hsize_t)nbytes;
+        assert((size_t)nbytes<=size);
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf = (const char*)buf + nbytes;
     }

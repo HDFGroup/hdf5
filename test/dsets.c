@@ -200,7 +200,7 @@ test_simple_io(hid_t file)
     tconv_buf = malloc (1000);
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
-    if (H5Pset_buffer (xfer, (hsize_t)1000, tconv_buf, NULL)<0) goto error;
+    if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
@@ -385,7 +385,7 @@ test_compression(hid_t file)
      */
     if ((xfer = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
-    if (H5Pset_buffer (xfer, (hsize_t)1000, tconv_buf, NULL)<0) goto error;
+    if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
     /* Use chunked storage with compression */
     if ((dc = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;

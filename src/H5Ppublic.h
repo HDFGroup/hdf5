@@ -182,7 +182,7 @@ __DLL__ herr_t H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode);
 __DLL__ hid_t H5Pget_driver(hid_t plist_id);
 #endif /* WANT_H5_V1_2_COMPAT */
 __DLL__ void *H5Pget_driver_info(hid_t plist_id);
-__DLL__ herr_t H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv,
+__DLL__ herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
         void *bkg);
 __DLL__ hsize_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
         void **bkg/*out*/);
@@ -198,10 +198,10 @@ __DLL__ H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]);
 __DLL__ herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
-__DLL__ herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, int rdcc_nelmts,
+__DLL__ herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts, size_t rdcc_nelmts,
        size_t rdcc_nbytes, double rdcc_w0);
 __DLL__ herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts/*out*/,
-       int *rdcc_nelmts/*out*/,
+       size_t *rdcc_nelmts/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
 __DLL__ herr_t H5Pset_hyper_cache(hid_t plist_id, unsigned cache,
       unsigned limit);
@@ -227,10 +227,12 @@ __DLL__ herr_t H5Pget_vlen_mem_manager(hid_t plist_id,
                                        void **alloc_info,
                                        H5MM_free_t *free_func,
                                        void **free_info);
-__DLL__ herr_t H5Pset_meta_block_size(hid_t fapl_id, hsize_t size);
-__DLL__ herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/);
-__DLL__ herr_t H5Pset_sieve_buf_size(hid_t fapl_id, hsize_t size);
-__DLL__ herr_t H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/);
+__DLL__ herr_t H5Pset_meta_block_size(hid_t fapl_id, size_t size);
+__DLL__ herr_t H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/);
+__DLL__ herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
+__DLL__ herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
+__DLL__ herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
+__DLL__ herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 
 #ifdef __cplusplus
 }

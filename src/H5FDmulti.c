@@ -124,9 +124,9 @@ static haddr_t H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size);
 static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr,
 			      hsize_t size);
 static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-			      hsize_t size, void *_buf/*out*/);
+			      size_t size, void *_buf/*out*/);
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-			       hsize_t size, const void *_buf);
+			       size_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file);
 
 /* The class struct */
@@ -1574,7 +1574,7 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr, hsize_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		 void *_buf/*out*/)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
@@ -1629,7 +1629,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		  const void *_buf)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;

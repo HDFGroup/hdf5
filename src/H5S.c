@@ -23,6 +23,10 @@
 #include "H5Oprivate.h"		/* object headers		  */
 #include "H5Spkg.h"		    /* Data-space functions			  */
 
+/* Local static function prototypes */
+herr_t H5S_set_extent_simple (H5S_t *space, uintn rank, const hsize_t *dims,
+		       const hsize_t *max);
+
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
 #define INTERFACE_INIT	H5S_init_interface
@@ -1372,7 +1376,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     }
 
     /* Do it */
-    if (H5S_set_extent_simple(space, rank, dims, max)<0) {
+    if (H5S_set_extent_simple(space, (uintn)rank, dims, max)<0) {
 	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		      "unable to set simple extent");
     }
@@ -1397,13 +1401,13 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
+H5S_set_extent_simple (H5S_t *space, uintn rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
     FUNC_ENTER(H5S_set_extent_simple, FAIL);
 
     /* Check args */
-    assert(rank>=0 && rank<=H5S_MAX_RANK);
+    assert(rank<=H5S_MAX_RANK);
     assert(0==rank || dims);
     
     /* If there was a previous offset for the selection, release it */
@@ -1725,7 +1729,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL,
 		     "can't create simple dataspace");
     }
-    if(H5S_set_extent_simple(space,rank,dims,maxdims)<0) {
+    if(H5S_set_extent_simple(space,(uintn)rank,dims,maxdims)<0) {
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		     "can't set dimensions");
     }

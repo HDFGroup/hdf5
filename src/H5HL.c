@@ -219,7 +219,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     assert(!udata1);
     assert(!udata2);
 
-    if (H5F_block_read(f, H5FD_MEM_LHEAP, addr, (hsize_t)H5HL_SIZEOF_HDR(f), H5P_DEFAULT,
+    if (H5F_block_read(f, H5FD_MEM_LHEAP, addr, H5HL_SIZEOF_HDR(f), H5P_DEFAULT,
 		       hdr) < 0) {
 	HRETURN_ERROR(H5E_HEAP, H5E_READERROR, NULL,
 		      "unable to read heap header");
@@ -259,7 +259,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 		     "memory allocation failed");
     }
     if (heap->disk_alloc &&
-	H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->disk_alloc),
+	H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->disk_alloc,
 		       H5P_DEFAULT, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 		    "unable to read heap data");
@@ -399,7 +399,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
 	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr,
-				(hsize_t)(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
+				(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
 				H5P_DEFAULT, heap->chunk) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			    "unable to write heap header and data to file");
@@ -409,7 +409,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
-	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, addr, H5HL_SIZEOF_HDR(f),
 				H5P_DEFAULT, heap->chunk)<0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap header to file");
@@ -418,7 +418,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame( f->shared->lf, TRUE ); /* only p0 writes */
 #endif /* H5_HAVE_PARALLEL */
-	    if (H5F_block_write(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->disk_alloc),
+	    if (H5F_block_write(f, H5FD_MEM_LHEAP, heap->addr, heap->disk_alloc,
 				H5P_DEFAULT,
 				heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
@@ -722,7 +722,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
 	heap->chunk = H5FL_BLK_REALLOC(heap_chunk,heap->chunk,
-				   (hsize_t)(H5HL_SIZEOF_HDR(f) + heap->mem_alloc));
+				   (H5HL_SIZEOF_HDR(f) + heap->mem_alloc));
 	if (NULL==heap->chunk) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
 			   "memory allocation failed");

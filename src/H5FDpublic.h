@@ -129,9 +129,9 @@ typedef struct H5FD_class_t {
     haddr_t (*get_eoa)(H5FD_t *file);
     herr_t (*set_eoa)(H5FD_t *file, haddr_t addr);
     haddr_t (*get_eof)(H5FD_t *file);
-    herr_t (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size,
+    herr_t (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size,
 		   void *buffer);
-    herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size,
+    herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, size_t size,
 		    const void *buffer);
     herr_t (*flush)(H5FD_t *file);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
@@ -164,8 +164,8 @@ struct H5FD_t {
     /* Metadata accumulator fields */
     unsigned char *meta_accum;  /* Buffer to hold the accumulated metadata */
     haddr_t accum_loc;      /* File location (offset) of the accumulated metadata */
-    hsize_t accum_size;     /* Size of the accumulated metadata buffer used (in bytes) */
-    hsize_t accum_buf_size; /* Size of the accumulated metadata buffer allocated (in bytes) */
+    size_t accum_size;      /* Size of the accumulated metadata buffer used (in bytes) */
+    size_t accum_buf_size;  /* Size of the accumulated metadata buffer allocated (in bytes) */
     unsigned accum_dirty;   /* Flag to indicate that the accumulated metadata is dirty */
 
     haddr_t		maxaddr;	/*for this file, overrides class*/
@@ -192,9 +192,9 @@ __DLL__ haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
 __DLL__ haddr_t H5FDget_eoa(H5FD_t *file);
 __DLL__ herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
 __DLL__ haddr_t H5FDget_eof(H5FD_t *file);
-__DLL__ herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		void *buf/*out*/);
-__DLL__ herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		 const void *buf);
 __DLL__ herr_t H5FDflush(H5FD_t *file);
 

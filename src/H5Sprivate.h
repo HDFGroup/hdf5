@@ -81,8 +81,7 @@ typedef struct H5S_fconv_t {
     H5S_sel_type	type;
     
     /* Initialize file element numbering information */
-    herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
-		   H5S_sel_iter_t *iter);
+    herr_t (*init)(const H5S_t *space, H5S_sel_iter_t *iter);
 
     /* Determine optimal number of elements to transfer */
     hsize_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
@@ -111,8 +110,7 @@ typedef struct H5S_mconv_t {
     H5S_sel_type	type;
     
     /* Initialize memory element numbering information */
-    herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
-		   H5S_sel_iter_t *iter);
+    herr_t (*init)(const H5S_t *space, H5S_sel_iter_t *iter);
 
     /* Gather elements from app buffer to type conversion buffer */
     hsize_t (*gath)(const void *buf, size_t elmt_size,
@@ -221,8 +219,6 @@ __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ herr_t H5S_select_release(H5S_t *space);
 __DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ intn H5S_extend(H5S_t *space, const hsize_t *size);
-__DLL__ herr_t H5S_set_extent_simple(H5S_t *space, int rank,
-				     const hsize_t *dims, const hsize_t *max);
 __DLL__ htri_t H5S_select_valid(const H5S_t *space);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 intn indent, intn fwidth);

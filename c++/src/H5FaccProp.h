@@ -66,7 +66,7 @@ class FileAccPropList : public PropList {
 
 	// Retrieves maximum sizes of data caches and the preemption 
 	// policy value.
-	void getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
+	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
 
 	// Sets the low-level driver to split meta data from raw data.
 	// void setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, 

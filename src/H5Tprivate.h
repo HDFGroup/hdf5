@@ -114,7 +114,7 @@ __DLL__ herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
 __DLL__ herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
 __DLL__ herr_t H5T_pack(H5T_t *dt);
-__DLL__ herr_t H5T_debug(H5T_t *dt, FILE * stream);
+__DLL__ herr_t H5T_debug(const H5T_t *dt, FILE * stream);
 __DLL__ H5G_entry_t *H5T_entof(H5T_t *dt);
 __DLL__ H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
 				  const char *name, H5T_conv_t func);

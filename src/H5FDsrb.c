@@ -56,9 +56,9 @@ static haddr_t H5FD_srb_get_eoa(H5FD_t *_file);
 static herr_t  H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_srb_get_eof(H5FD_t *_file);
 static herr_t  H5FD_srb_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     hsize_t size, void *buf);
+			     size_t size, void *buf);
 static herr_t  H5FD_srb_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      hsize_t size, const void *buf);
+			      size_t size, const void *buf);
 static herr_t  H5FD_srb_flush(H5FD_t *_file);
 
 /* The description of a file belonging to this driver. */ 
@@ -483,7 +483,7 @@ H5FD_srb_get_eof(H5FD_t *_file)
  */
 static herr_t
 H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr, 
-              hsize_t size, void *buf)
+              size_t size, void *buf)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
     ssize_t    nbytes;
@@ -512,7 +512,7 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
      */
     while(size>0) {
         if((nbytes=srbFileRead(file->srb_conn, (int)file->fd, (char*)buf,
-                             (int)size))<0) {
+                             size))<0) {
             file->pos = HADDR_UNDEF;
             srbFileClose(file->srb_conn, file->fd);
             clFinish(file->srb_conn);    
@@ -522,10 +522,10 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
 
         if (0==nbytes) {
             /*end of file but not end of format address space*/
-            memset(buf, 0, size);
+            HDmemset(buf, 0, size);
             size = 0;
         }
-        size -= (hsize_t)nbytes;
+        size -= nbytes;
         addr += (haddr_t)nbytes;
         buf = (char*)buf + nbytes;
     }
@@ -553,7 +553,7 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
  */
 static herr_t
 H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr, 
-               hsize_t size, const void *buf)
+               size_t size, const void *buf)
 {
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
     ssize_t    nbytes;
@@ -578,7 +578,7 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     while(size>0) {
         if( (nbytes=srbFileWrite(file->srb_conn, (int)file->fd, (char*)buf, 
-                                (int)size)) < 0 ) {
+                                size)) < 0 ) {
             file->pos = HADDR_UNDEF;
             srbObjClose(file->srb_conn, file->fd);
             clFinish(file->srb_conn);    
@@ -586,7 +586,7 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
                           "srb file write failed");
         }
       
-        size -= (hsize_t)nbytes; 
+        size -= nbytes; 
         addr += (haddr_t)nbytes;
         buf  =  (const char*)buf + nbytes;
     }

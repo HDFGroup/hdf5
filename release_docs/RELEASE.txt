@@ -58,6 +58,8 @@ Library
       correctly now.
     * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
       when --enable-hdf5v1_2 configure flag is enabled.
+    * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
+      'hsize_t', which may cause errors in some cases.
 
 Configuration
 -------------
@@ -109,6 +111,7 @@ New Features
     * Modified the Pablo build procedure to permit building of the instrumented
       library to link either with the Trace libraries as before or with the
       Pablo Performance Caputure Facility.
+    * Improved regular hyperslab I/O by about a factor of 6 or so.
 
 Platforms Tested
 ================

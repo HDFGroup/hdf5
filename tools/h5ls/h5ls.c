@@ -14,6 +14,7 @@
  */
 #include "H5private.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 /*
  * If defined then include the file name as part of the object name when

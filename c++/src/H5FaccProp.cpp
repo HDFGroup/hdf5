@@ -198,7 +198,7 @@ void FileAccPropList::setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nby
    }
 }
 
-void FileAccPropList::getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const
+void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const
 {
    herr_t ret_value = H5Pget_cache( id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0 );
    if( ret_value < 0 )

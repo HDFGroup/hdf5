@@ -89,7 +89,7 @@ typedef struct H5O_mesg_t {
     void		*native;	/*native format message		     */
     uint8_t		*raw;		/*ptr to raw data		     */
     size_t		raw_size;	/*size with alignment		     */
-    intn		chunkno;	/*chunk number for this mesg	     */
+    uintn		chunkno;	/*chunk number for this mesg	     */
 } H5O_mesg_t;
 
 typedef struct H5O_chunk_t {
@@ -105,11 +105,11 @@ typedef struct H5O_t {
     hbool_t	dirty;			/*out of data wrt disk		     */
     intn	version;		/*version number		     */
     intn	nlink;			/*link count			     */
-    intn	nmesgs;			/*number of messages		     */
-    intn	alloc_nmesgs;	/*number of message slots	     */
+    uintn	nmesgs;			/*number of messages		     */
+    uintn	alloc_nmesgs;	/*number of message slots	     */
     H5O_mesg_t	*mesg;		/*array of messages		     */
-    intn	nchunks;		/*number of chunks		     */
-    intn	alloc_nchunks;	/*chunks allocated		     */
+    uintn	nchunks;		/*number of chunks		     */
+    uintn	alloc_nchunks;	/*chunks allocated		     */
     H5O_chunk_t *chunk;		/*array of chunks		     */
 } H5O_t;
 
@@ -253,7 +253,7 @@ typedef struct H5O_cont_t {
     size_t	size;			/*size of continuation block	     */
 
     /* the following field(s) do not appear on disk */
-    intn	chunkno;		/*chunk this mesg refers to	     */
+    uintn	chunkno;		/*chunk this mesg refers to	     */
 } H5O_cont_t;
 
 /*
@@ -297,9 +297,9 @@ __DLL__ herr_t H5O_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
 /* EFL operators */
 __DLL__ hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 __DLL__ herr_t H5O_efl_read(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
-			    hsize_t size, uint8_t *buf);
+			    size_t size, uint8_t *buf);
 __DLL__ herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
-			     hsize_t size, const uint8_t *buf);
+			     size_t size, const uint8_t *buf);
 
 /* Fill value operators */
 __DLL__ herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);

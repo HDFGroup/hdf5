@@ -404,7 +404,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
  */
 herr_t
 H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
-	      hsize_t size, uint8_t *buf)
+	      size_t size, uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_read, cur, skip=0;
@@ -489,7 +489,7 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
  */
 herr_t
 H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
-	       hsize_t size, const uint8_t *buf)
+	       size_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
     size_t	to_write, cur, skip=0;

@@ -316,12 +316,14 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                  *  file offsets, totally mixing up the data sieve buffer information. -QAK
                  */
                 if (efl && efl->nused>0) {
-                    if (H5O_efl_read(f, efl, addr, elmt_size, buf)<0) {
+                    H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
+                    if (H5O_efl_read(f, efl, addr, (size_t)elmt_size, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                               "external data read failed");
                     }
                 } else {
-                    if (H5F_contig_read(f, max_data, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
+                    H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
+                    if (H5F_contig_read(f, max_data, H5FD_MEM_DRAW, addr, (size_t)elmt_size, dxpl_id, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                                   "block read failed");
                     }
@@ -575,12 +577,14 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
                 /* Write to file */
                 if (efl && efl->nused>0) {
-                    if (H5O_efl_write(f, efl, addr, elmt_size, buf)<0) {
+                    H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
+                    if (H5O_efl_write(f, efl, addr, (size_t)elmt_size, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                               "external data write failed");
                     }
                 } else {
-                    if (H5F_contig_write(f, max_data, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
+                    H5_CHECK_OVERFLOW(elmt_size,hsize_t,size_t);
+                    if (H5F_contig_write(f, max_data, H5FD_MEM_DRAW, addr, (size_t)elmt_size, dxpl_id, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                   "block write failed");
                     }

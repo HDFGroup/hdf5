@@ -84,9 +84,9 @@ static haddr_t H5FD_core_get_eoa(H5FD_t *_file);
 static herr_t H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_core_get_eof(H5FD_t *_file);
 static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     hsize_t size, void *buf);
+			     size_t size, void *buf);
 static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      hsize_t size, const void *buf);
+			      size_t size, const void *buf);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
@@ -577,7 +577,7 @@ H5FD_core_get_eof(H5FD_t *_file)
  */
 static herr_t
 H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       hsize_t size, void *buf/*out*/)
+	       size_t size, void *buf/*out*/)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
@@ -596,10 +596,9 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     /* Read the part which is before the EOF marker */
     if (addr < file->eof) {
-		hsize_t nbytes = MIN(size, file->eof-addr);
+        size_t nbytes = MIN(size, file->eof-addr);
 
-        assert(nbytes==(hsize_t)((size_t)nbytes)); /*check for overflow*/
-        HDmemcpy(buf, file->mem + addr, (size_t)nbytes);
+        HDmemcpy(buf, file->mem + addr, nbytes);
         size -= nbytes;
         addr += nbytes;
         buf = (char *)buf + nbytes;
@@ -607,8 +606,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     /* Read zeros for the part which is after the EOF markers */
     if (size > 0) {
-        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-        HDmemset(buf, 0, (size_t)size);
+        HDmemset(buf, 0, size);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -635,7 +633,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
  */
 static herr_t
 H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-		hsize_t size, const void *buf)
+		size_t size, const void *buf)
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     
@@ -660,9 +658,12 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         unsigned char *x;
         size_t new_eof = file->increment * ((addr+size)/file->increment);
 
-        if ((addr+size) % file->increment) new_eof += file->increment;
-        if (NULL==file->mem) x = H5MM_malloc(new_eof);
-        else x = H5MM_realloc(file->mem, new_eof);
+        if ((addr+size) % file->increment)
+            new_eof += file->increment;
+        if (NULL==file->mem)
+            x = H5MM_malloc(new_eof);
+        else
+            x = H5MM_realloc(file->mem, new_eof);
         if (!x)
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			  "unable to allocate memory block");
@@ -671,8 +672,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     }
 
     /* Write from BUF to memory */
-    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-    HDmemcpy(file->mem+addr, buf, (size_t)size);
+    HDmemcpy(file->mem+addr, buf, size);
     file->dirty = TRUE;
 
     FUNC_LEAVE(SUCCEED);

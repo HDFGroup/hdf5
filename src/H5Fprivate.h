@@ -274,13 +274,13 @@ typedef struct H5F_create_t {
  */
 typedef struct H5F_access_t {
     intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
-    intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
+    size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations) */
-    hsize_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
+    size_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
     uintn	gc_ref;		/* Garbage-collect references?		*/
     hid_t	driver_id;	/* File driver ID			*/
     void	*driver_info;	/* File driver specific information	*/
@@ -332,22 +332,34 @@ __DLL__ herr_t H5F_arr_write (H5F_t *f, hid_t dxpl_id,
 			      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on blocks of bytes wrt boot block */
-__DLL__ herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
-			      hid_t dxpl_id, void *buf/*out*/);
+__DLL__ herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+                size_t size, hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
-                  hsize_t size, hid_t dxpl_id, const void *buf);
+                size_t size, hid_t dxpl_id, const void *buf);
 
 /* Functions that operate on byte sequences */
 __DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
-        const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
+        const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
-        const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
+        const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, const void *_buf);
+
+/* Functions that operate on vectors of byte sequences */
+__DLL__ herr_t H5F_seq_readv(H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
+        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
+        size_t seq_len[], hsize_t file_offset[], void *_buf/*out*/);
+__DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
+        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
+        size_t seq_len[], hsize_t file_offset[], const void *_buf);
 
 
 /* Functions that operate on indexed storage */

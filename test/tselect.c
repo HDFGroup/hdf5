@@ -1170,7 +1170,7 @@ test_select_hyper_contig(void)
 
     /* Compare data read with data written out */
     if(HDmemcmp(rbuf,wbuf,sizeof(uint16_t)*30*12)) {
-        printf("hyperslab values don't match!\n");
+        printf("hyperslab values don't match! Line=%d\n",__LINE__);
         num_errs++;
 #ifdef QAK
         for(i=0, tbuf=wbuf; i<12; i++)
@@ -1319,8 +1319,14 @@ test_select_hyper_copy(void)
 
     /* Compare data read with data written out */
     if(HDmemcmp(rbuf,rbuf2,sizeof(uint16_t)*SPACE3_DIM1*SPACE3_DIM2)) {
-        printf("hyperslab values don't match!\n");
+        printf("hyperslab values don't match! Line=%d\n",__LINE__);
         num_errs++;
+#ifdef QAK
+        for(i=0; i<SPACE3_DIM1; i++)
+            for(j=0; j<SPACE3_DIM2; j++)
+                if((unsigned)*(rbuf+i*SPACE3_DIM2+j)!=(unsigned)*(rbuf2+i*SPACE3_DIM2+j))
+                    printf("i=%d, j=%d, *rbuf=%u, *rbuf2=%u\n",i,j,(unsigned)*(rbuf+i*SPACE3_DIM2+j),(unsigned)*(rbuf2+i*SPACE3_DIM2+j));
+#endif /* QAK */
     } /* end if */
 
     /* Close memory dataspace */
@@ -3155,7 +3161,7 @@ test_select(void)
     hid_t plist_id;     /* Property list for reading random hyperslabs */
     hid_t fapl;         /* Property list accessing the file */
     int mdc_nelmts;     /* Metadata number of elements */
-    int rdcc_nelmts;    /* Raw data number of elements */
+    unsigned rdcc_nelmts;   /* Raw data number of elements */
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
     herr_t	ret;	/* Generic return value		*/
@@ -3168,7 +3174,7 @@ test_select(void)
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     /* test I/O with a very small buffer for reads */
-    ret=H5Pset_buffer(plist_id,(hsize_t)128,NULL,NULL);
+    ret=H5Pset_buffer(plist_id,128,NULL,NULL);
     CHECK(ret, FAIL, "H5Pset_buffer");
 
     /* These next tests use the same file */

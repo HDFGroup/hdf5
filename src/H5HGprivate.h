@@ -91,7 +91,7 @@
 
 typedef struct H5HG_t {
     haddr_t		addr;		/*address of collection		*/
-    intn		idx;		/*object ID within collection	*/
+    uintn		idx;		/*object ID within collection	*/
 } H5HG_t;
 
 typedef struct H5HG_heap_t H5HG_heap_t;

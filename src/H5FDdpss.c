@@ -99,9 +99,9 @@ static haddr_t H5FD_dpss_get_eoa (H5FD_t *_file);
 static herr_t H5FD_dpss_set_eoa (H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_dpss_get_eof (H5FD_t *_file);
 static herr_t H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-                              hsize_t size, void *buf);
+                              size_t size, void *buf);
 static herr_t H5FD_dpss_write (H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED fapl_id,haddr_t addr,
-                               hsize_t size, const void *buf);
+                               size_t size, const void *buf);
 
 /* The Grid Storage I/O driver information */
 static const H5FD_class_t H5FD_dpss_g = {
@@ -513,7 +513,7 @@ H5FD_dpss_get_eof (H5FD_t *_file)
  */
 static herr_t
 H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t addr,
-                hsize_t size, void *buf/*out*/)
+                size_t size, void *buf/*out*/)
 {
     H5FD_dpss_t *file = (H5FD_dpss_t *) _file;
     globus_result_t  globus_result;
@@ -525,8 +525,8 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     FUNC_ENTER (H5FD_dpss_read, FAIL);
 
 #ifdef DEBUG
-    fprintf (stdout, "H5FD_dpss_read: addr 0x%lx, size %ld\n",
-             (unsigned long int) addr, (unsigned long int) size);
+    fprintf (stdout, "H5FD_dpss_read: addr 0x%lx, size %u\n",
+             (unsigned long int) addr, (unsigned) size);
 #endif
 
     /* Check parameters */
@@ -569,7 +569,7 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
 
     /* do the (synchronuous) write operation */
     globus_result = grid_storage_read (&file->handle, (unsigned char *) buf,
-                                       (size_t) addr, (size_t) size, NULL);
+                                       (size_t) addr, size, NULL);
     if (GLOBUS_SUCCESS != globus_result) {
         PRINT_GLOBUS_ERROR_MSG (globus_result);
         HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
@@ -598,7 +598,7 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
  */
 static herr_t
 H5FD_dpss_write (H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
-                 hsize_t size, const void *buf)
+                 size_t size, const void *buf)
 {
     H5FD_dpss_t  *file = (H5FD_dpss_t *) _file;
     globus_result_t  globus_result;
@@ -606,8 +606,8 @@ H5FD_dpss_write (H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t a
     FUNC_ENTER (H5FD_dpss_write, FAIL);
 
 #ifdef DEBUG
-    fprintf (stdout, "H5FD_dpss_write: addr 0x%lx, size %ld\n",
-             (unsigned long int) addr, (unsigned long int) size);
+    fprintf (stdout, "H5FD_dpss_write: addr 0x%lx, size %u\n",
+             (unsigned long int) addr, (unsigned) size);
 #endif
 
     /* Check parameters */
@@ -626,7 +626,7 @@ H5FD_dpss_write (H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t a
 
     /* do the (synchronuous) write operation */
     globus_result = grid_storage_write (&file->handle, (unsigned char *) buf,
-                                        (size_t) addr, (size_t) size, NULL);
+                                        (size_t) addr, size, NULL);
     if (GLOBUS_SUCCESS != globus_result) {
         PRINT_GLOBUS_ERROR_MSG (globus_result);
         HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,

@@ -596,7 +596,7 @@ H5F_locate_signature(H5FD_t *file)
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to set EOA value for file signature");
 	}
-	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DEFAULT, addr, (hsize_t)H5F_SIGNATURE_LEN, buf)<0) {
+	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DEFAULT, addr, H5F_SIGNATURE_LEN, buf)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to read file signature");
 	}
@@ -956,9 +956,9 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     H5FD_t		*lf=NULL;	/*file driver part of `shared'	*/
     uint8_t		buf[256];	/*temporary I/O buffer		*/
     const uint8_t	*p;		/*ptr into temp I/O buffer	*/
-    hsize_t		fixed_size=24;	/*fixed sizeof superblock	*/
-    hsize_t		variable_size;	/*variable sizeof superblock	*/
-    hsize_t		driver_size;	/*size of driver info block	*/
+    size_t		fixed_size=24;	/*fixed sizeof superblock	*/
+    size_t		variable_size;	/*variable sizeof superblock	*/
+    size_t		driver_size;	/*size of driver info block	*/
     H5G_entry_t		root_ent;	/*root symbol table entry	*/
     haddr_t		eof;		/*end of file address		*/
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
@@ -1217,7 +1217,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	if (H5F_addr_defined(shared->driver_addr)) {
 	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
 	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr, (hsize_t)16, buf)<0) {
+		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr, 16, buf)<0) {
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			    "unable to read driver information block");
 	    }
@@ -1629,7 +1629,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 {
     uint8_t		sbuf[2048], dbuf[2048], *p=NULL;
     uintn		nerrors=0, i;
-    hsize_t		superblock_size, driver_size;
+    size_t		superblock_size, driver_size;
     char		driver_name[9];
     
     FUNC_ENTER(H5F_flush, FAIL);
@@ -2565,7 +2565,7 @@ H5F_get_driver_id(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
+H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_id,
 	       void *buf/*out*/)
 {
     haddr_t		    abs_addr;
@@ -2616,7 +2616,7 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
+H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         hid_t dxpl_id, const void *buf)
 {
     haddr_t		    abs_addr;

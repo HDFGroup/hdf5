@@ -7413,7 +7413,7 @@ H5T_print_stats(H5T_path_t UNUSED *path, intn UNUSED *nprint/*in,out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_debug(H5T_t *dt, FILE *stream)
+H5T_debug(const H5T_t *dt, FILE *stream)
 {
     const char	*s1="", *s2="";
     int		i;

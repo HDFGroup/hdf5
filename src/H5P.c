@@ -2680,7 +2680,7 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
  */
 herr_t
 H5Pset_cache(hid_t plist_id, int mdc_nelmts,
-	     int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
+	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
@@ -2697,10 +2697,6 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     if (mdc_nelmts<0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "meta data cache size must be non-negative");
-    }
-    if (rdcc_nelmts<0) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "raw data chunk cache nelmts must be non-negative");
     }
     if (rdcc_w0<0.0 || rdcc_w0>1.0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -2738,7 +2734,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
  */
 herr_t
 H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
-	     int *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
+	     size_t *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
 {
     H5F_access_t	*fapl = NULL;
     
@@ -2791,7 +2787,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv, void *bkg)
+H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 {
     H5D_xfer_t		*plist = NULL;
     
@@ -3772,12 +3768,12 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
+H5Pset_meta_block_size(hid_t fapl_id, size_t size)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","ih",fapl_id,size);
+    H5TRACE2("e","iz",fapl_id,size);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
@@ -3809,7 +3805,7 @@ H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/)
+H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/)
 {
     H5F_access_t	*fapl = NULL;
 
@@ -3856,12 +3852,12 @@ H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sieve_buf_size(hid_t fapl_id, hsize_t size)
+H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
 {
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
-    H5TRACE2("e","ih",fapl_id,size);
+    H5TRACE2("e","iz",fapl_id,size);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
@@ -3893,7 +3889,7 @@ H5Pset_sieve_buf_size(hid_t fapl_id, hsize_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/)
+H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/)
 {
     H5F_access_t	*fapl = NULL;
 
@@ -3913,6 +3909,93 @@ H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/)
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5Pget_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_hyper_vector_size
+ *
+ * Purpose:	Given a dataset transfer property list, set the number of
+ *              "I/O vectors" (offset and length pairs) which are to be
+ *              accumulated in memory before being issued to the lower levels
+ *              of the library for reading or writing the actual data.
+ *              Increasing the number should give better performance, but use
+ *              more memory during hyperslab I/O.  The vector size must be
+ *              greater than 1.
+ *
+ *		The default is to use 1024 vectors for I/O during hyperslab
+ *              reading/writing.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 9, 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_hyper_vector_size, FAIL);
+    H5TRACE2("e","iz",plist_id,vector_size);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+            NULL == (plist = H5I_object (plist_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+
+    if (vector_size<1) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+		    "vector size too small");
+    }
+
+    /* Update property list */
+    plist->vector_size = vector_size;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5Pset_hyper_vector_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_hyper_vector_size
+ *
+ * Purpose:	Reads values previously set with H5Pset_hyper_vector_size().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 9, 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pget_hyper_vector_size, FAIL);
+    H5TRACE2("e","ix",plist_id,vector_size);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+            NULL == (plist = H5I_object (plist_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+
+    /* Return values */
+    if (vector_size)
+        *vector_size = plist->vector_size;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5Pget_hyper_vector_size() */
 
 
 /*--------------------------------------------------------------------------
