@@ -89,6 +89,7 @@
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/DatatypesEnum.html
+./doc/html/Dependencies
 ./doc/html/ddl.html
 ./doc/html/Debugging.html
 ./doc/html/EnumMap.gif
@@ -136,6 +137,7 @@
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
 ./doc/html/Tools.html
+./doc/html/Tutor/Dependencies
 ./doc/html/Tutor/Makefile.in
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
@@ -200,6 +202,7 @@
 ./doc/tgif/UserView.obj			_DO_NOT_DISTRIBUTE_
 
 ./examples/Attributes.txt
+./examples/Dependencies
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
@@ -226,8 +229,8 @@
 ./pablo/ProcTrace.inc
 ./pablo/READ_ME
 
-./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
+./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
 ./src/H5A.c
@@ -346,7 +349,7 @@
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 
-./test/.distdep
+./test/Dependencies
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
@@ -391,6 +394,7 @@
 ./test/tvltypes.c
 ./test/unlink.c
 
+./testpar/Dependencies
 ./testpar/Makefile.in
 ./testpar/README
 ./testpar/t_dset.c
@@ -399,6 +403,7 @@
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
+./tools/Dependencies
 ./tools/Makefile.in
 ./tools/h5debug.c
 ./tools/h5dump.c
