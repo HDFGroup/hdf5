@@ -1,4 +1,3 @@
-
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -19,7 +18,7 @@
 !    all the hdf5 fortran tests
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF4_DLL)
 !DEC$attributes dllexport :: check
 !DEC$endif
 
