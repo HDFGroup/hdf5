@@ -35,6 +35,9 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Compares this property list or class against the given list or class.
 	bool operator==(const PropList& rhs) const;
 
+	// Close this property list.
+	virtual void close();
+
 	// Close a property list class.
 	void closeClass() const;
 
@@ -91,11 +94,6 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	// Copy constructor: creates a copy of a PropList object.
 	PropList(const PropList& original);
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to close the property list.
-	void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor: properly terminates access to this property list.
 	virtual ~PropList();

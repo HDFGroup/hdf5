@@ -69,6 +69,7 @@ class H5_DLLCPP CommonFG {
 	// Retrieves the name of an object in this group, given the
 	// object's index.
 	ssize_t getObjnameByIdx(hsize_t idx, string& name, size_t size) const;
+	string getObjnameByIdx(hsize_t idx) const;
 
 	// Returns the type of an object in this group, given the
 	// object's index.

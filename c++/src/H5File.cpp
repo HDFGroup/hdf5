@@ -184,8 +184,8 @@ bool H5File::isHdf5(const string& name )
 // Note:        This wrapper doesn't seem right regarding the 'id' and should
 //              be investigated.  BMR - 2/20/2005
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by QAK, Feb 20, 2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 void H5File::reOpen()
 {
@@ -531,25 +531,22 @@ hid_t H5File::getLocId() const
    return( getId() );
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:    H5File::p_close (private)
-// Purpose:     Closes this HDF5 file.
-// Exception    H5::FileIException
-// Description
-//              This function will be obsolete because its functionality
-//              is recently handled by the C library layer. - May, 2004
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	H5File::close
+///\brief	Closes this HDF5 file.
+///\exception	H5::FileIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
-void H5File::p_close() const
+void H5File::close()
 {
    herr_t ret_value = H5Fclose( id );
    if( ret_value < 0 )
    {
-      throw FileIException(0, "H5Fclose failed");
+      throw FileIException("H5File::close", "H5Fclose failed");
    }
+   // reset the id because the file that it represents is now closed
+   id = 0;
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File::throwException
@@ -577,8 +574,8 @@ void H5File::throwException(const string func_name, const string msg) const
 ///\brief	Properly terminates access to this file. 
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by QAK, Feb 20, 2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 H5File::~H5File() 
 {  

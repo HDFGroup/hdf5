@@ -116,22 +116,18 @@ DSetCreatPropList DataSet::getCreatePlist() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataSet::getStorageSize
-///\brief	Returns the amount of storage required for a dataset.  
-///\return	Amount of storage
-///\exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    DataSet::getStorageSize
+///\brief       Returns the amount of storage required for a dataset.
+///\return      Size of the storage or 0, for no data
+///\exception   H5::DataSetIException
+// Note:        H5Dget_storage_size returns 0 when there is no data.  This
+//              function should have no failure. (from SLU)
+// Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 hsize_t DataSet::getStorageSize() const
 {
-   hsize_t storage_size = H5Dget_storage_size( id );
-
-   if( storage_size > 0 )  // checking with Quincey for failure value - BMR
-      return( storage_size );
-   else
-   {
-      throw DataSetIException("DataSet::getStorageSize", "H5Dget_storage_size failed");
-   }
+   hsize_t storage_size = H5Dget_storage_size(id);
+   return(storage_size);
 }
 
 //--------------------------------------------------------------------------
@@ -478,33 +474,30 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
    return(dataspace);
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:    DataSet::p_close (private)
-// Purpose:     Closes this dataset.
-// Exception    H5::DataSetIException
-// Description
-//              This function will be obsolete because its functionality
-//              is recently handled by the C library layer. - May, 2004
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	DataSet::close
+///\brief	Closes this dataset.
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
-void DataSet::p_close() const
+void DataSet::close()
 {
    herr_t ret_value = H5Dclose( id );
    if( ret_value < 0 )
    {
-      throw DataSetIException(0, "H5Dclose failed");
+      throw DataSetIException("DataSet::close", "H5Dclose failed");
    }
+   // reset the id because the group that it represents is now closed
+   id = 0;
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSet destructor
 ///\brief	Properly terminates access to this dataset.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by QAK, Feb 20, 2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 DataSet::~DataSet()
 {

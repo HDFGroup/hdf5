@@ -756,6 +756,40 @@ hsize_t CommonFG::getNumObjs() const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjnameByIdx
+///\brief	Returns the name of an object in this group, given the
+///		object's index.
+///\param	idx  -     IN: Transient index of the object
+///\return	Object name
+///\exception	H5::FileIException or H5::GroupIException
+///\par Description
+///		The value of idx can be any nonnegative number less than the
+///		total number of objects in the group, which is returned by
+///		the function \c CommonFG::getNumObjs.  Note that this is a
+///		transient index; thus, an object may have a different index
+///		each time the group is opened.
+// Programmer	Binh-Minh Ribler - Mar, 2005
+//--------------------------------------------------------------------------
+string CommonFG::getObjnameByIdx(hsize_t idx) const
+{
+    // call H5Gget_objname_by_idx with name as NULL to get its length
+    ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, NULL, 0);
+    if(name_len < 0)
+    {
+      throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
+    }
+
+    // now, allocate C buffer to get the name
+    char* name_C = new char[name_len];
+    name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, name_len);
+
+    // clean up and return the string
+    string name = string(name_C);
+    delete [] name_C;
+    return (name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjnameByIdx
 ///\brief	Retrieves the name of an object in this group, given the
 ///		object's index.
 ///\param	idx  -     IN: Transient index of the object

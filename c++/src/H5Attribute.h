@@ -30,6 +30,9 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Gets a copy of the dataspace for this attribute.
 	virtual DataSpace getSpace() const;
 
+	// Returns the amount of storage size required for this attribute.
+	virtual hsize_t getStorageSize() const;
+
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
 	void read( const DataType& mem_type, string& strg ) const;
@@ -44,10 +47,11 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to appropriately close an attribute
-	virtual void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
+	// Default constructor
+	Attribute();
+
+	// Close this attribute.
+	virtual void close();
 
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
@@ -59,11 +63,11 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// sub-types
 	virtual hid_t p_get_type() const;
 
-	// do not inherit iterateAttrs from H5Object
+	// do not inherit 'iterateAttrs' from H5Object
 	int iterateAttrs() { return 0; }
 
-	// Default constructor
-	Attribute();
+        // do not inherit 'rename' from H5Object
+        void rename() {}
 };
 #ifndef H5_NO_NAMESPACE
 }

@@ -22,6 +22,9 @@ namespace H5 {
 
 class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
+	// Close this group.
+	virtual void close();
+
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
 
@@ -46,11 +49,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// Copy constructor: makes a copy of the original object
 	Group(const Group& original);
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to appropriately close a group - will be obsolete.
-	void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor
 	virtual ~Group();

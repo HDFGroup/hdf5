@@ -41,8 +41,6 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator
 	IdComponent& operator=( const IdComponent& rhs );
 
-	void reset();
-
 	// Sets the identifier of this object to a new value.
 	void setId( hid_t new_id );
 
@@ -55,12 +53,10 @@ class H5_DLLCPP IdComponent {
 	// Gets the value of IdComponent's data member.
 	virtual hid_t getId () const;
 
-	// Pure virtual function so appropriate close function can
-	// be called by subclasses' for the corresponding object
-	// This function will be obsolete because its functionality
-	// is recently handled by the C library layer.
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	virtual void p_close() const = 0;
+	// Pure virtual function for there are various H5*close for the
+	// subclasses.
+	virtual void close() = 0;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor

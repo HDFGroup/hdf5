@@ -47,6 +47,10 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// dataset        
 	H5T_class_t getTypeClass() const;
 
+	// Returns the amount of storage size required for this abstract
+	// dataset - pure virtual.
+	virtual hsize_t getStorageSize() const = 0;
+
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
 
@@ -60,11 +64,8 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	AbstractDs( const hid_t ds_id );
 
    private:
-	// This member function is implemented by DataSet and Attribute
+	// This member function is implemented by DataSet and Attribute.
 	virtual hid_t p_get_type() const = 0;
-
-	// This member function is implemented by DataSet and Attribute
-        virtual void p_close() const = 0;
 };
 #ifndef H5_NO_NAMESPACE
 }

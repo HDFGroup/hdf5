@@ -28,6 +28,9 @@ class H5_DLLCPP DataType : public H5Object {
 	// Copy constructor: makes a copy of the original object
 	DataType( const DataType& original );
 
+	// Closes this datatype.
+        virtual void close();
+
 	// Copies an existing datatype to this datatype object
 	void copy( const DataType& like_type );
 
@@ -111,11 +114,6 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Default constructor
 	DataType();
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to appropriately close a datatype
-        void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();

@@ -95,8 +95,8 @@ DataType::DataType(const DataType& original) : H5Object(original)
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by QAK, Feb 20, 2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
@@ -615,37 +615,36 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
    return(dataspace);
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:    DataType::p_close (private)
-// Purpose:     Closes the datatype if it is not a predefined type.
-// Exception    H5::DataTypeIException
-// Description
-//              This function will be obsolete because its functionality
-//              is recently handled by the C library layer. - May, 2004
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	DataType::close
+///\brief	Closes the datatype if it is not a predefined type.
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Mar 9, 2005
 //--------------------------------------------------------------------------
-void DataType::p_close() const
+void DataType::close()
 {
    // If this datatype is not a predefined type, call H5Tclose on it.
    if( is_predtype == false )
    {
-      herr_t ret_value = H5Tclose( id );
+      herr_t ret_value = H5Tclose(id);
       if( ret_value < 0 )
       {
-         throw DataTypeIException(0, "H5Tclose failed");
+         throw DataTypeIException("DataType::close", "H5Tclose failed");
       }
+      // reset the id because the datatype that it represents is now closed
+      id = 0;
    }
+   else // cannot close a predefined type
+      throw DataTypeIException("DataType::close", "Cannot close a predefined type");
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataType destructor
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//              Replaced resetIdComponent with decRefCount to use new ID
-//              reference counting mechanisms by QAK, Feb 20, 2005
+//		Replaced resetIdComponent with decRefCount to use C library
+//		ID reference counting mechanism - BMR, Feb 20, 2005
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {  
