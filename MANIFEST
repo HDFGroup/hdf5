@@ -47,6 +47,7 @@
 ./bin/versinc				_DO_NOT_DISTRIBUTE_
 
 ./config/BlankForm
+./config/alphaev67-linux-gnu
 ./config/commence.in
 ./config/conclude.in
 ./config/dec-flags
@@ -447,6 +448,7 @@
 ./fortran/bin/ltmain.sh
 
 ./fortran/config/BlankForm
+./fortran/config/alphaev67-linux-gnu
 ./fortran/config/commence.in
 ./fortran/config/conclude.in
 ./fortran/config/dec-flags
