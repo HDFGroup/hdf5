@@ -36,18 +36,29 @@ static char		RcsId[] = "$Revision$";
 /* Number of attributes for group iteration test */
 #define NATTR 50
 
+/* Number of groups for second group iteration test */
+#define NGROUPS 150
+
 /* General maximum length of names used */
 #define NAMELEN     80
 
+/* 1-D dataset with fixed dimensions */
+#define SPACE1_NAME  "Space1"
+#define SPACE1_RANK	1
+#define SPACE1_DIM1	4
+
 /* Custom group iteration callback data */
 typedef struct {
-    enum {RET_ZERO, RET_ONE, RET_CHANGE} command;
-    char name[NAMELEN];
+    char name[NAMELEN];     /* The name of the object */
+    int type;               /* The type of the object */
+    enum {RET_ZERO, RET_ONE, RET_CHANGE} command;   /* The type of return value */
 } iter_info;
 
 /* Local functions */
 int iter_strcmp(const void *s1, const void *s2);
+int iter_strcmp2(const void *s1, const void *s2);
 herr_t giter_cb(hid_t group, const char *name, void *op_data);
+herr_t giter_cb2(hid_t group, const char *name, void *op_data);
 herr_t aiter_cb(hid_t loc_id, const char *name, void *op_data);
 
 /****************************************************************
@@ -358,6 +369,161 @@ static void test_iter_attr(void)
 
 /****************************************************************
 **
+**  iter_strcmp2(): String comparison routine for qsort
+** 
+****************************************************************/
+int iter_strcmp2(const void *s1, const void *s2)
+{
+    return(strcmp((const char *)s1,(const char *)s2));
+}
+
+/****************************************************************
+**
+**  giter_cb2(): Custom group iteration callback routine.
+** 
+****************************************************************/
+herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
+{
+    const iter_info *test_info=(const iter_info *)opdata;
+    herr_t		ret;		/* Generic return value		*/
+    H5G_stat_t statbuf;
+
+    if(strcmp(name,test_info->name)) {
+        num_errs++;
+        printf("name=%s, test_info=%s\n",name,test_info->name);
+        return(-1);
+    } /* end if */
+
+    /*
+     * Get type of the object and check it.
+     */
+    ret=H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+
+    if(test_info->type!=statbuf.type) {
+        num_errs++;
+        printf("test_info->type=%d, statbuf.type=%d\n",test_info->type,statbuf.type);
+        return(-1);
+    } /* end if */
+
+    return(1);
+} /* giter_cb2() */
+
+/****************************************************************
+**
+**  test_iter_group_large(): Test group iteration functionality
+**          for groups with large #'s of objects
+** 
+****************************************************************/
+static void test_iter_group_large(void)
+{
+    hid_t		file;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		group;      /* Group ID             */
+    hid_t		sid;       /* Dataspace ID			*/
+    hid_t		tid;       /* Datatype ID			*/
+    hsize_t		dims[] = {SPACE1_DIM1};
+    herr_t		ret;		/* Generic return value		*/
+    char gname[20];         /* Temporary group name */
+    iter_info names[NGROUPS+2]={0}; /* Names of objects in the root group */
+    iter_info *curr_name;        /* Pointer to the current name in the root group */
+    int                 i;
+
+    /* Compound datatype */
+    typedef struct s1_t {
+        unsigned int a;
+        unsigned int b;
+        float c;
+    } s1_t;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
+
+    /* Create file */
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create a bunch of groups */
+    for (i=0; i<NGROUPS; i++) {
+        sprintf(gname, "Group_%d", i); 
+
+        /* Add the name to the list of objects in the root group */
+        strcpy(names[i].name,gname);
+        names[i].type=H5G_GROUP;
+
+        /* Create a group */
+        group=H5Gcreate(file,gname,0);
+        CHECK(group, FAIL, "H5Gcreate");
+
+        /* Close a group */
+        ret = H5Gclose(group);
+        CHECK(ret, FAIL, "H5Gclose");
+    }
+
+    /* Create a dataset  */
+    dataset=H5Dcreate(file,"Dataset1",H5T_STD_U32LE,sid,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Add the name to the list of objects in the root group */
+    strcpy(names[NGROUPS].name,"Dataset1");
+    names[NGROUPS].type=H5G_DATASET;
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close Dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create a datatype */
+    tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    CHECK(tid, FAIL, "H5Tcreate");
+
+    /* Insert fields */
+    ret=H5Tinsert (tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret=H5Tinsert (tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret=H5Tinsert (tid, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* Save datatype for later */
+    ret=H5Tcommit (file, "Datatype1", tid);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Add the name to the list of objects in the root group */
+    strcpy(names[NGROUPS+1].name,"Datatype1");
+    names[NGROUPS+1].type=H5G_TYPE;
+
+    /* Close datatype */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Need to sort the names in the root group, cause that's what the library does */
+    qsort(names,NGROUPS+2,sizeof(iter_info),iter_strcmp2);
+
+    /* Iterate through the file to see members of the root group */
+    curr_name=&names[0];
+    H5Giterate(file, "/", NULL, giter_cb2, curr_name);
+    for (i=1; i<100; ) {
+        curr_name=&names[i];
+        H5Giterate(file, "/", &i, giter_cb2, curr_name);
+    } /* end for */
+
+    /* Close file */
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* test_iterate_group_large() */
+
+/****************************************************************
+**
 **  test_iterate(): Main iteration testing routine.
 ** 
 ****************************************************************/
@@ -369,6 +535,7 @@ test_iterate(void)
 
     /* These next tests use the same file */
     test_iter_group();       /* Test group iteration */
+    test_iter_group_large(); /* Test group iteration for large # of objects */
     test_iter_attr();        /* Test attribute iteration */
 }   /* test_iterate() */
 
