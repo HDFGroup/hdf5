@@ -1,20 +1,12 @@
-/****************************************************************************
- * NCSA HDF								    *
- * Software Development Group						    *
- * National Center for Supercomputing Applications			    *
- * University of Illinois at Urbana-Champaign				    *
- * 605 E. Springfield, Champaign IL 61820				    *
- *									    *
- * For conditions of distribution and use, see the accompanying		    *
- * hdf/COPYING file.							    *
- *									    *
- ****************************************************************************/
-
-/* $Id$ */
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ *
+ */
 
 /***********************************************************
 *
-* Test program:	 th5p
+* Test program:	 th5s
 *
 * Test the dataspace functionality
 *
@@ -73,11 +65,20 @@ struct space4_struct {
     char c2;
  } space4_data={'v',987123,-3.14,'g'}; /* Test data for 4th dataspace */
 
-/****************************************************************
-**
-**  test_h5s_basic(): Test basic H5S (dataspace) code.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s_basic
+ *
+ * Purpose:	Test basic H5S (dataspace) code
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 static void 
 test_h5s_basic(void)
 {
@@ -164,7 +165,6 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenating the th5s.h5 file.
      */
-    //{
     char testfile[512]="";
     char *srcdir = getenv("srcdir");
     if (srcdir && ((strlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))){
@@ -194,7 +194,7 @@ test_h5s_basic(void)
     }
 
     // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure
-			// in the p_close see how this will handle it. ???
+		// in the p_close see how this will handle it. - BMR
 
     /* Verify that incorrect dimensions don't work */
     dims1[0] = 0;
@@ -217,11 +217,20 @@ test_h5s_basic(void)
     }
 }				/* test_h5s_basic() */
 
-/****************************************************************
-**
-**  test_h5s_scalar_write(): Test scalar H5S (dataspace) writing code.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s_scalar_write
+ *
+ * Purpose:	Test scalar H5S (dataspace) writing code
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 static void 
 test_h5s_scalar_write(void)
 {
@@ -233,39 +242,26 @@ test_h5s_scalar_write(void)
     {
 	// Create file
 	H5File fid1(FILE, H5F_ACC_TRUNC);
-	//    CHECK(fid1, FAIL, "H5Fcreate");
 
 	/* Create scalar dataspace */
-	//sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
 	DataSpace sid1(SPACE3_RANK, NULL);
 
 	//n = H5Sget_simple_extent_npoints(sid1);
 	hssize_t	n;	 	/* Number of dataspace elements */
 	n = sid1.getSimpleExtentNpoints();
 	VERIFY(n, 1, "DataSpace::getSimpleExtentNpoints");
-	//VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
 	int	rank;		/* Logical rank of dataspace	*/
 	rank = sid1.getSimpleExtentNdims();
-	//VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 	VERIFY(rank, SPACE3_RANK, "DataSpace::getSimpleExtentNdims");
 
 	// Retrieves dimension size of dataspace sid1 and verify it
 	int ndims;		/* Number of dimensions		*/
 	hsize_t	tdims[4];	/* Dimension array to test with */
 	ndims = sid1.getSimpleExtentDims( tdims );
-	//VERIFY(ndims, 0, "H5Sget_simple_extent_dims");
 	VERIFY(ndims, 0, "DataSpace::getSimpleExtentDims");
 
-	//    rank = H5Sget_simple_extent_ndims(sid1);
-	//VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
-
-	//    ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
-	//    VERIFY(ret, 0, "H5Sget_simple_extent_dims");
-
 	/* Verify extent type */
-	//ext_type = H5Sget_simple_extent_type(sid1);
-	//VERIFY(ext_type, H5S_SCALAR, "H5Sget_simple_extent_type");
 	H5S_class_t ext_type;   /* Extent type */
 	ext_type = sid1.getSimpleExtentType();
 	VERIFY(ext_type, H5S_SCALAR, "DataSpace::getSimpleExtentType");
@@ -281,11 +277,20 @@ test_h5s_scalar_write(void)
     }
 }				/* test_h5s_scalar_write() */
 
-/****************************************************************
-**
-**  test_h5s_scalar_read(): Test scalar H5S (dataspace) reading code.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s_scalar_read
+ *
+ * Purpose:	Test scalar H5S (dataspace) reading code
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 static void 
 test_h5s_scalar_read(void)
 {
@@ -298,33 +303,25 @@ test_h5s_scalar_read(void)
     {
 	/* Create file */
 	H5File fid1(FILE, H5F_ACC_RDWR);
-	//CHECK(fid1, FAIL, "H5Fopen");
 
 	/* Create a dataset */
 	DataSet dataset = fid1.openDataSet("Dataset1");
-	//CHECK(dataset, FAIL, "H5Dopen");
 
 	DataSpace sid1 = dataset.getSpace();
-	//CHECK(sid1, FAIL, "H5Dget_space");
 
 	// Get the number of dataspace elements
 	hssize_t n = sid1.getSimpleExtentNpoints();
-	//hssize_t n = H5Sget_simple_extent_npoints(sid1);
-	//CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
 	VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
 	// Get the logical rank of the dataspace
 	int ndims = sid1.getSimpleExtentNdims();
-	//CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
 	VERIFY(ndims, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
 	ndims = sid1.getSimpleExtentDims(tdims);
-	//ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
 	VERIFY(ndims, 0, "H5Sget_simple_extent_dims");
 
 	unsigned      	rdata;      	/* Scalar data read in 		*/
 	dataset.read(&rdata, PredType::NATIVE_UINT);
-	//CHECK(ret, FAIL, "H5Dread");
 	VERIFY(rdata, space3_data, "H5Dread");
     }   // end of try block
     catch (Exception error)
@@ -335,12 +332,21 @@ test_h5s_scalar_read(void)
     
 }				/* test_h5s_scalar_read() */
 
-/****************************************************************
-**
-**  test_h5s_compound_scalar_write(): Test scalar H5S (dataspace) writing for
-**          compound datatypes.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s_compound_scalar_write
+ *
+ * Purpose:	Test scalar H5S (dataspace) writing for compound 
+ *		datatypes
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 static void 
 test_h5s_compound_scalar_write(void)
 {
@@ -351,64 +357,42 @@ test_h5s_compound_scalar_write(void)
     try
     {
 	/* Create file */
-	//fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	H5File fid1(FILE, H5F_ACC_TRUNC);
-	//CHECK(fid1, FAIL, "H5Fcreate");
 
 	/* Create the compound datatype.  */
 	CompType tid1(sizeof(struct space4_struct));
-	//tid1 = H5Tcreate (H5T_COMPOUND, sizeof(struct space4_struct));
-	//CHECK(tid1, FAIL, "H5Tcreate");
 	space4_field1_off=HOFFSET(struct space4_struct, c1);
-	//ret = H5Tinsert(tid1, SPACE4_FIELDNAME1, space4_field1_off,
-		    //H5T_NATIVE_SCHAR);
 	tid1.insertMember(SPACE4_FIELDNAME1, space4_field1_off,
 		    PredType::NATIVE_SCHAR);
-	//CHECK(ret, FAIL, "H5Tinsert");
 	space4_field2_off=HOFFSET(struct space4_struct, u);
-	//ret = H5Tinsert(tid1, SPACE4_FIELDNAME2, space4_field2_off,
-	//	    H5T_NATIVE_UINT);
 	tid1.insertMember(SPACE4_FIELDNAME2, space4_field2_off,
 		    PredType::NATIVE_UINT);
-	//CHECK(ret, FAIL, "H5Tinsert");
 	space4_field3_off=HOFFSET(struct space4_struct, f);
 	tid1.insertMember(SPACE4_FIELDNAME3, space4_field3_off,
 		    PredType::NATIVE_FLOAT);
-	//CHECK(ret, FAIL, "H5Tinsert");
 	space4_field4_off=HOFFSET(struct space4_struct, c2);
 	tid1.insertMember(SPACE4_FIELDNAME4, space4_field4_off,
 		    PredType::NATIVE_SCHAR);
-	//CHECK(ret, FAIL, "H5Tinsert");
 
 	/* Create scalar dataspace */
 	DataSpace sid1(SPACE3_RANK, NULL);
-	//sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
-	//CHECK(sid1, FAIL, "H5Screate_simple");
 
 	// Get the number of dataspace elements
 	hssize_t n = sid1.getSimpleExtentNpoints();
-	//hssize_t n = H5Sget_simple_extent_npoints(sid1);
-	//CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
 	VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
 	// Get the logical rank of the dataspace
 	int ndims = sid1.getSimpleExtentNdims();
-	//CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
 	VERIFY(ndims, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
 	hsize_t		tdims[4];	/* Dimension array to test with */
 	ndims = sid1.getSimpleExtentDims(tdims);
-	//ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
 	VERIFY(ndims, 0, "H5Sget_simple_extent_dims");
 
 	/* Create a dataset */
 	DataSet dataset = fid1.createDataSet("Dataset1", tid1, sid1);
-	//dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-	//CHECK(dataset, FAIL, "H5Dcreate");
 
 	dataset.write(&space4_data, tid1);
-	//ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space4_data);
-	//CHECK(ret, FAIL, "H5Dwrite");
     }	// end of try block
     catch (Exception error)
     {
@@ -418,12 +402,21 @@ test_h5s_compound_scalar_write(void)
 
 }				/* test_h5s_compound_scalar_write() */
 
-/****************************************************************
-**
-**  test_h5s_compound_scalar_read(): Test scalar H5S (dataspace) reading for
-**          compound datatypes.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s_compound_scalar_read
+ *
+ * Purpose:	Test scalar H5S (dataspace) reading for compound 
+ *		datatypes
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 static void 
 test_h5s_compound_scalar_read(void)
 {
@@ -442,56 +435,41 @@ test_h5s_compound_scalar_read(void)
     {
 	/* Create file */
 	H5File fid1(FILE, H5F_ACC_RDWR);
-	//CHECK(fid1, FAIL, "H5Fopen");
 
 	/* Create a dataset */
 	DataSet dataset = fid1.openDataSet("Dataset1");
-	//CHECK(dataset, FAIL, "H5Dopen");
 
 	DataSpace sid1 = dataset.getSpace();
-	//CHECK(sid1, FAIL, "H5Dget_space");
 
 	// Get the number of dataspace elements
 	hssize_t n = sid1.getSimpleExtentNpoints();
-	//hssize_t n = H5Sget_simple_extent_npoints(sid1);
-	//CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
 	VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
 	// Get the logical rank of the dataspace
 	int ndims = sid1.getSimpleExtentNdims();
-	//CHECK(rank, UFAIL, "H5Sget_simple_extent_ndims");
 	VERIFY(ndims, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
 	ndims = sid1.getSimpleExtentDims(tdims);
-	//ret = H5Sget_simple_extent_dims(sid1, tdims, NULL);
 	VERIFY(ndims, 0, "H5Sget_simple_extent_dims");
 
 	// Get the datatype of this dataset.
 	CompType type(dataset);
-    //type=H5Dget_type(dataset);
-    //CHECK(type, FAIL, "H5Dget_type");
      
-    struct space4_struct rdata; 	/* Scalar data read in 		*/
+	struct space4_struct rdata; 	/* Scalar data read in 		*/
 	dataset.read(&rdata, type);
-	//CHECK(ret, FAIL, "H5Dread");
-    //ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
 
 	// Verify read data
 	if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct)))
 	{
             cout << "scalar data different: space4_data.c1=" 
 		<< space4_data.c1 << ", read_data4.c1=" << rdata.c1 << endl;
-        //printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c1);
             cout << "scalar data different: space4_data.u="
 		<< space4_data.u << ", read_data4.u=" << rdata.u << endl;
-        //printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n",space4_data.u,rdata.u);
             cout << "scalar data different: space4_data.f="
 		<< space4_data.f << ", read_data4.f=" << rdata.f << endl;
-        //printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",space4_data.f,rdata.f);
             cout << "scalar data different: space4_data.c1="
 		<< space4_data.c1 << ", read_data4.c1=" << rdata.c2 << endl;
-        //printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
-        num_errs++;
+            num_errs++;
 	} /* end if */
     }   // end of try block
     catch (Exception error)
@@ -501,11 +479,20 @@ test_h5s_compound_scalar_read(void)
     }
 }				/* test_h5s_compound_scalar_read() */
 
-/****************************************************************
-**
-**  test_h5s(): Main H5S (dataspace) testing routine.
-** 
-****************************************************************/
+/*-------------------------------------------------------------------------
+ *  
+ * Function:	test_h5s
+ *
+ * Purpose:	Main H5S (dataspace) testing routine
+ *
+ * Return:	none
+ *
+ * Programmer:	Binh-Minh Ribler (using C version)
+ *              Mar 2001
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
 void 
 test_h5s(void)
 {

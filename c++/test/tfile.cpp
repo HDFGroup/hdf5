@@ -4,15 +4,13 @@
  *
  */
 
-/*
- * Test program:	 tfile
- *
- * Test the low-level file I/O features.
- */
-
-//#include "H5private.h"
-//#include "H5Bprivate.h"
-//#include "H5Pprivate.h"
+/***********************************************************
+*
+* Test program:  tfile
+*
+* Test the low-level file I/O features
+*
+*************************************************************/
 
 #include <iostream>
 #include "H5Cpp.h"
@@ -20,7 +18,7 @@
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif  /* !H5_NO_NAMESPACE */
+#endif
 
 #define F1_USERBLOCK_SIZE       (hsize_t)0
 #define F1_OFFSET_SIZE          sizeof(haddr_t)
@@ -51,7 +49,7 @@ using namespace H5;
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2001
  *
  * Modifications:
@@ -237,7 +235,7 @@ test_file_create(void)
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2001
  *
  * Modifications:
@@ -287,7 +285,7 @@ test_file_open(void)
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January 2001
  *
  * Modifications:
@@ -312,8 +310,7 @@ test_file(void)
  *
  * Return:	none
  *
- * Programmer:  Binh-Minh Ribler
- *              January 2001
+ * Programmer:  (use C version)
  *
  * Modifications:
  *

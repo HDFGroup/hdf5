@@ -1,20 +1,14 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ *
+ */
 
 /***********************************************************
 *
 * Test program:  dsets
 *
-* Test the dataset interface (H5D)
+* Test the dataset interface
 *
 *************************************************************/
 
@@ -51,7 +45,7 @@ const char *FILENAME[] = {
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -203,7 +197,7 @@ check_values (hsize_t i, hsize_t j, int apoint, int acheck)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -284,7 +278,7 @@ test_simple_io( H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -396,7 +390,7 @@ bogus(unsigned int flags, size_t cd_nelmts,
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -701,7 +695,7 @@ test_compression(H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Saturday, February 17, 2001
  *
  * Modifications:
@@ -782,7 +776,7 @@ test_multiopen (H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:  Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:  Binh-Minh Ribler (using C version)
  *              February 17, 2001
  *
  * Modifications:
@@ -804,8 +798,29 @@ test_types(H5File& file)
 	unsigned char	buf[32];
 	hsize_t nelmts = sizeof(buf);
 	DataType type;
-	try { // block 1
+	try { // block of bitfield_1
+	    // test copying a predefined type
 	    type.copy (PredType::STD_B8LE);
+
+	    // Test copying a user-defined type using DataType::copy
+	    DataType copied_type;
+	    copied_type.copy(type);
+	    // Test copying a user-defined type using DataType::operator=
+	    DataType another_copied_type;
+	    another_copied_type = type;
+
+	    // Test copying a user-defined int type using DataType::operator=
+	    IntType orig_int(PredType::STD_B8LE);
+	    DataType generic_type;
+	    generic_type = orig_int;
+
+	    // Test copying an integer predefined type
+	    IntType new_int_type(PredType::STD_B8LE);
+
+	    // Test copying an int predefined type using DataType::operator=
+	    IntType another_int_type;
+	    another_int_type = new_int_type;
+
 	    DataSpace space (1, &nelmts);
 	    DataSet* dset = new DataSet(grp.createDataSet("bitfield_1", type, space));
 
@@ -826,12 +841,15 @@ test_types(H5File& file)
 	} // end try block of bitfield_1
 
 	// catch exceptions thrown in try block of bitfield_1
-	catch (Exception E) { goto error; }
+	catch (Exception E) { 
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
 
 	/* bitfield_2 */
 	nelmts = sizeof(buf)/2;
 	try { // bitfield_2 block
-
 	    type.copy (PredType::STD_B16LE);
 	    DataSpace space (1, &nelmts);
 	    DataSet* dset = new DataSet(grp.createDataSet("bitfield_2", type, space));
@@ -845,6 +863,8 @@ test_types(H5File& file)
 	    try { dset->write (buf, type); }
 	    catch(DataSetIException E) 
 	    {
+	    	cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
 		delete dset;
 		goto error;
 	    }
@@ -852,7 +872,11 @@ test_types(H5File& file)
 	} // end try block of bitfield_2
 
 	// catch exceptions thrown in try block of bitfield_2
-	catch (Exception E) { goto error; }
+	catch (Exception E) {
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
 
         /* opaque_1 */
 	DataType* optype = new DataType(H5T_OPAQUE, 1);
@@ -879,8 +903,17 @@ test_types(H5File& file)
 	} // end try block of opaque_1
 
 	// catch exceptions thrown in try block of opaque_1
-	catch (DataSetIException E) { delete optype; goto error; }
-	catch (Exception E) { goto error; }
+	catch (DataSetIException E) { 
+	    delete optype;
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
+	catch (Exception E) {
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
     
 	/* opaque_2 */
 	try { // block opaque_2
@@ -905,13 +938,27 @@ test_types(H5File& file)
 	    delete dset;
 	    delete optype;
 	} //end try block of opaque_2
-	catch (DataSetIException E) { delete optype; goto error; }
-	catch (Exception E) { goto error; }
+	catch (DataSetIException E) { 
+	    delete optype;
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
+	catch (Exception E) {
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+	}
     
     PASSED();
     return 0;
     } // end top try block
-    catch (Exception E) { goto error; } // Group and DataType exceptions
+
+    catch (Exception E) { // Group and DataType exceptions
+	    cout << "Failure in " << E.getFuncName() << " - " 
+		 << E.getDetailMsg() << endl;
+	    goto error;
+    }
 
  error:
     return -1;
@@ -965,22 +1012,27 @@ int test_report( int nerrors )
  *
  *		Failure:	exit(1)
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
+static hid_t tempid = H5T_STD_B8LE;
+// the following statement caused seg. fault, need to check into - BMR
+//static PredType temp = PredType::STD_B8LE;
+// because PredType::STD_B8LE was not defined yet, so ref_counter is nil
+// and it'll fail when the ref_counter is being incremented
+// this can be a problem; must check ref_counter before increment or decrement
+
 int
 main(void)
 {
-
     h5_reset(); // in h5test.c, resets the library by closing it
 
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
-			// should create an object from this id - BMR
     
 #if 0
 /* BMR: leave paralell stuff out!  */
@@ -1035,11 +1087,7 @@ main(void)
 	h5_cleanup(FILENAME, fapl_id);
 	return( test_report( nerrors ));
    }
-   catch (FileIException error) 
-   {
-	return( test_report( nerrors ));
-   }
-   catch (GroupIException error )
+   catch (Exception E) 
    {
 	return( test_report( nerrors ));
    }
