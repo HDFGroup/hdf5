@@ -723,6 +723,23 @@
 ./tools/testfiles/tstr2.h5
 ./tools/testfiles/vg.hdf
 
+# Expected output from h5ls tests
+./tools/testfiles/help-1.ls
+./tools/testfiles/help-2.ls
+./tools/testfiles/help-3.ls
+./tools/testfiles/tall-1.ls
+./tools/testfiles/tall-2.ls
+./tools/testfiles/tcomp-1.ls
+./tools/testfiles/tdset-1.ls
+./tools/testfiles/tgroup-1.ls
+./tools/testfiles/tgroup.ls
+./tools/testfiles/thlink-1.ls
+./tools/testfiles/tloop-1.ls
+./tools/testfiles/tnestcomp-1.ls
+./tools/testfiles/tsaf.ls
+./tools/testfiles/tslink-1.ls
+./tools/testfiles/tstr-1.ls
+
 ./tools/testfiles/Expected/tall.hdf
 ./tools/testfiles/Expected/tattr.hdf
 ./tools/testfiles/Expected/tcompound.hdf
