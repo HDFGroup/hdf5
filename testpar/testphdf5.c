@@ -356,6 +356,12 @@ int main(int argc, char **argv)
 	goto finish;
     }
 
+    if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
+	printf("===================================\n"
+	       "   Using MPIPOSIX driver\n"
+	       "===================================\n");
+    }
+
     MPI_BANNER("test_fapl_mpio_dup...");
     test_fapl_mpio_dup();
 
