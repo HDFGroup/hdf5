@@ -821,10 +821,10 @@ PabloMPI_File_open( MPI_Comm comm,
    struct mpiOpenBeginArgs mpiOpenBeginArguments;
    struct mpiOpenEndArgs mpiOpenEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "PabloMPI_File_open\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    MPI_Comm_rank( comm, &HDFlocalNode );
    MPI_Comm_rank( MPI_COMM_WORLD, &HDFmyNode );
@@ -864,10 +864,10 @@ PabloMPI_File_close( MPI_File *fh )
    struct mpiCloseBeginArgs mpiCloseBeginArguments;
    struct mpiCloseEndArgs mpiCloseEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_close\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiCloseBeginArguments.localNode = HDFlocalNode;
    mpiCloseBeginArguments.globalNode = HDFmyNode;
@@ -900,10 +900,10 @@ PabloMPI_File_set_size( MPI_File fh, MPI_Offset size )
    struct mpiSetSizeBeginArgs mpiSetSizeBeginArguments;
    struct mpiSetSizeEndArgs mpiSetSizeEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_set_size\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiSetSizeBeginArguments.localNode = HDFlocalNode;
    mpiSetSizeBeginArguments.globalNode = HDFmyNode;
@@ -939,10 +939,10 @@ PabloMPI_File_get_size( MPI_File fh, MPI_Offset *size )
    struct mpiGetSizeBeginArgs mpiGetSizeBeginArguments;
    struct mpiGetSizeEndArgs mpiGetSizeEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_get_size\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiGetSizeBeginArguments.localNode = HDFlocalNode;
    mpiGetSizeBeginArguments.globalNode = HDFmyNode;
@@ -984,10 +984,10 @@ PabloMPI_File_set_view( MPI_File fh,
    struct mpiSetViewBeginArgs mpiSetViewBeginArguments;
    struct mpiSetViewEndArgs mpiSetViewEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_set_view\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiSetViewBeginArguments.localNode = HDFlocalNode;
    mpiSetViewBeginArguments.globalNode = HDFmyNode;
@@ -1036,10 +1036,10 @@ PabloMPI_File_get_view( MPI_File fh,
    struct mpiGetViewBeginArgs mpiGetViewBeginArguments;
    struct mpiGetViewEndArgs mpiGetViewEndArguments;
 
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_get_view\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiGetViewBeginArguments.localNode = HDFlocalNode;
    mpiGetViewBeginArguments.globalNode = HDFmyNode;
@@ -1083,10 +1083,10 @@ PabloMPI_File_read_at( MPI_File fh,
    struct mpiReadAtBeginArgs mpiReadAtBeginArguments;
    struct mpiReadAtEndArgs mpiReadAtEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_read_at\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiReadAtBeginArguments.localNode = HDFlocalNode;
    mpiReadAtBeginArguments.globalNode = HDFmyNode;
@@ -1143,10 +1143,10 @@ PabloMPI_File_read_at_all( MPI_File fh,
    struct mpiReadAtAllBeginArgs mpiReadAtAllBeginArguments;
    struct mpiReadAtAllEndArgs mpiReadAtAllEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_read_at_all\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiReadAtAllBeginArguments.localNode = HDFlocalNode;
    mpiReadAtAllBeginArguments.globalNode = HDFmyNode;
@@ -1208,10 +1208,10 @@ PabloMPI_File_write_at( MPI_File fh,
    struct mpiWriteAtBeginArgs mpiWriteAtBeginArguments;
    struct mpiWriteAtEndArgs mpiWriteAtEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_write_at\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiWriteAtBeginArguments.localNode = HDFlocalNode;
    mpiWriteAtBeginArguments.globalNode = HDFmyNode;
@@ -1266,10 +1266,10 @@ PabloMPI_File_write_at_all( MPI_File fh,
    struct mpiWriteAtAllBeginArgs mpiWriteAtAllBeginArguments;
    struct mpiWriteAtAllEndArgs mpiWriteAtAllEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_write_at\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiWriteAtAllBeginArguments.localNode = HDFlocalNode;
    mpiWriteAtAllBeginArguments.globalNode = HDFmyNode;
@@ -1326,10 +1326,10 @@ PabloMPI_File_sync( MPI_File fh )
    struct mpiSyncBeginArgs mpiSyncBeginArguments;
    struct mpiSyncEndArgs mpiSyncEndArguments;
    
-#ifdef DEBUG
+#ifdef PABLODEBUG
    fprintf( debugFile, "MPI_File_sync\n" );
    fflush( debugFile );
-#endif /* DEBUG */
+#endif /* PABLODEBUG */
    
    mpiSyncBeginArguments.localNode = HDFlocalNode;
    mpiSyncBeginArguments.globalNode = HDFmyNode;

@@ -164,7 +164,7 @@ PABLO_CLEAN=HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt            \
 
 HDFentries.txt: $(top_srcdir)/src/*.c
 	grep "FUNC_ENTER[_INIT ]*(" $(top_srcdir)/src/*.c |                   \
-	   sed "s/.*FUNC_ENTER[_INIT ]*(//;s/[,)].*//" | sort -u > $@
+          sed "s/.*FUNC_ENTER[_INIT ]*( *//;s/[,)].*//" | sort -u > $@
 
 HDFentryNames.h: HDFentries.txt
 	sed "s/.*/\"&\",/" $? > $@

@@ -151,12 +151,12 @@ void endHDFtraceEvent (int , int , char *, int );
 void hdfCaptureInit( const char* name, int captureType );
 void hdfCaptureEnd( void );
 #else
-void HDFinitTrace_RT ( const char *, int );
-void HDFinitTrace_SDDF ( const char *, int );
+void HDFinitTrace_RT ( const char * );
+void HDFinitTrace_SDDF ( const char * );
 void hinittracex_ ( char [], int *, int[], int *,unsigned * );
 void hdfendtrace_ ( void ) ;
-void HDFendTrace_RT (int);
-void HDFendTrace_SDDF(int);
+void HDFendTrace_RT (void );
+void HDFendTrace_SDDF( void );
 void HDFfinalTimeStamp( void );
 void HDFtraceEvent_RT ( int , HDFsetInfo *, unsigned );
 void HDFtraceIOEvent( int , void *, unsigned );
@@ -246,13 +246,13 @@ hinittracex_( char *file,
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
                         || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
-      HDFinitTrace_SDDF( traceFileName, OUTPUT_SWITCH );
+      HDFinitTrace_SDDF( traceFileName );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
                         || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
    {
-      HDFinitTrace_RT( traceFileName, OUTPUT_SWITCH );
+      HDFinitTrace_RT( traceFileName );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == NO_TRACE ) 
@@ -328,13 +328,13 @@ HDFinitTrace( const char *traceFileName, int id_flag, ... )
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
                         || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
-      HDFinitTrace_SDDF( traceFileName, OUTPUT_SWITCH );
+      HDFinitTrace_SDDF( traceFileName );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
                         || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
    {
-      HDFinitTrace_RT( traceFileName, OUTPUT_SWITCH );
+      HDFinitTrace_RT( traceFileName );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == NO_TRACE ) 
@@ -370,14 +370,14 @@ void HDFendTrace(void)
    hdfCaptureEnd();
 #else
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
-	                     || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
+                     || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
-      HDFendTrace_SDDF( OUTPUT_SWITCH );
+      HDFendTrace_SDDF( );
    } 
    else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
-                   || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
+                  || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
    {
-      HDFendTrace_RT( OUTPUT_SWITCH );
+      HDFendTrace_RT();
    }
 #endif /* PCF_BUILD */
 }
@@ -773,7 +773,6 @@ HDFtraceREAD( int fd, void *buf, size_t nbyte )
 #else
    struct read_write_args readArgs;  
    int bytes;
-   CLOCK t1, t2, incDur;
 
    if ( IOtracingEnabled ) 
    {
@@ -784,10 +783,7 @@ HDFtraceREAD( int fd, void *buf, size_t nbyte )
       HDFtraceIOEvent( readBeginID, (void *) &readArgs, sizeof(readArgs) );
    }
 
-   t1 = getClock();
    ret = read( fd, buf, nbyte );
-   t2 = getClock();
-   incDur = clockSubtract(t2,t1);
 
    if ( IOtracingEnabled ) 
    {
@@ -826,7 +822,6 @@ HDFtraceFREAD( void *ptr, size_t size, size_t nitems, FILE *stream )
    struct read_write_args readArgs;  
    int nbytes;
    int fd = fileno( stream );
-   CLOCK t1, t2, incDur;
 
    if ( IOtracingEnabled ) 
    {
@@ -836,10 +831,7 @@ HDFtraceFREAD( void *ptr, size_t size, size_t nitems, FILE *stream )
       HDFtraceIOEvent( freadBeginID, (void *) &readArgs, sizeof(readArgs) );
    }
 
-   t1 = getClock();
    ret = fread( ptr, size, nitems, stream );
-   t2 = getClock();
-   incDur = clockSubtract(t2,t1);
 
    if ( IOtracingEnabled ) 
    {
@@ -1039,7 +1031,6 @@ HDFtraceWRITE( int fd, const void *buf, size_t nbyte )
 #else
    struct read_write_args writeArgs;
    int bytes;
-   CLOCK t1, t2, incDur;
 
    if ( IOtracingEnabled ) 
    {
@@ -1050,10 +1041,7 @@ HDFtraceWRITE( int fd, const void *buf, size_t nbyte )
       HDFtraceIOEvent( writeBeginID, (void *) &writeArgs, sizeof(writeArgs) );
    }
 
-   t1 = getClock();
    ret = write( fd, buf, nbyte );
-   t2 = getClock();
-   incDur = clockSubtract(t2,t1);
 
    if ( IOtracingEnabled ) 
    {
@@ -1092,7 +1080,6 @@ HDFtraceFWRITE(const void *ptr,size_t size,size_t nitems,FILE *stream )
    struct read_write_args writeArgs;
    int nbytes;
    int fd = fileno( stream );
-   CLOCK t1, t2, incDur;
 
    if ( IOtracingEnabled ) 
    {
@@ -1103,10 +1090,7 @@ HDFtraceFWRITE(const void *ptr,size_t size,size_t nitems,FILE *stream )
       HDFtraceIOEvent(fwriteBeginID, (void *)&writeArgs, sizeof(writeArgs));
    }
 
-   t1 = getClock();
    ret = fwrite( ptr, size, nitems, stream );
-   t2 = getClock();
-   incDur = clockSubtract(t2,t1);
 
    if ( IOtracingEnabled ) 
    {
