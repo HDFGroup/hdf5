@@ -164,8 +164,8 @@ test_h5s_basic(void)
      * Try reading a file that has been prepared that has a dataset with a
      * higher dimensionality than what the library can handle.
      */
-    fid1 = H5Fopen("th5s.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK_I(fid1, "H5Fopen(th5s.h5)");
+    fid1 = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK_I(fid1, "H5Fopen");
     dset1 = H5Dopen(fid1, "dset");
     VERIFY(dset1, FAIL, "H5Dopen");
     ret = H5Fclose(fid1);
