@@ -1071,13 +1071,9 @@ int  test_ras24() {
   int32 start[2], edges[2],dims[2];
   int8 image_data24[Y_LENGTH][X_LENGTH][3];
   uint8 image_datau24[Y_LENGTH][X_LENGTH][3];
-<<<<<<< h4toh5test.c
   unsigned char t24[13][15][3],tl24[13][3][15],tp24[3][13][15];
   int32 dimst24[2];
   intn i, j,k,m,n,p,q,co;
-=======
-  int i, j;
->>>>>>> 1.3.2.5
   int32 CUB_SIZE;
 
 
