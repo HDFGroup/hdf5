@@ -25,6 +25,10 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* The fill_new.h5 is generated from gen_new_fill.c in HDF5 'test' directory
+ * from v1.5 and thereafter.  To get this data file, simply compile 
+ * gen_new_file.c with HDF5 library(v1.5 or thereafter) and run it. */
+#define FILE_COMPATIBLE "fill_new.h5"
 #define FILE_NAME_RAW	"fillval.raw"
 
 
@@ -679,7 +683,119 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     return 0;
 }
     
-    
+/*-------------------------------------------------------------------------
+ * Function:    test_compatible
+ *
+ * Purpose:     Tests fill value and dataspace for datasets created by v1.5
+ *		library.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu 
+ *              Feb 27, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compatible(void)
+{
+  hid_t      file=-1, dset1=-1, dset2=-1;
+  hid_t      dcpl1=-1, dcpl2=-1, fspace=-1, mspace=-1;
+  int        rd_fill=0, fill_val1=4444, val_rd=0, fill_val2=5555;
+  hsize_t    dims[2], one[2]={1,1};
+  hssize_t   hs_offset[2]={3,4};
+
+  TESTING("contiguous dataset compatibility with v. 1.5"); 
+  if((file=H5Fopen(FILE_COMPATIBLE, H5F_ACC_RDONLY, H5P_DEFAULT))<0) goto error;
+
+  if((dset1=H5Dopen(file, "dset1"))<0) goto error;
+  if ((dcpl1=H5Dget_create_plist(dset1))<0) goto error;
+  if (H5Pget_fill_value(dcpl1, H5T_NATIVE_INT, &rd_fill)<0) goto error;
+  if (rd_fill != fill_val1) {
+      H5_FAILED();
+      puts("    Got a different fill value than what was set.");
+      printf("    Got %ld, set %ld\n", (long)rd_fill, (long)fill_val1);
+      goto error;
+  }
+  if((fspace = H5Dget_space(dset1))<0) goto error;
+  if(H5Sget_simple_extent_dims(fspace, dims, NULL)<0) goto error;
+  if(dims[0] != 8 || dims[1] != 8) {
+      H5_FAILED();
+      puts("    Got a different dimension size than what was set.");
+      printf("    Got dims[0]=%ld, dims[1]=%ld, set 8x8\n", (long)dims[0], (long)dims[1]);
+      goto error;
+  }
+  if((mspace=H5Screate_simple(2, one, NULL))<0) goto error;
+  if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL)<0)
+      goto error;
+  if(H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd)<0) 
+      goto error;
+  if (val_rd != fill_val1) {
+      H5_FAILED();
+      puts("    Got a different value than what was set.");
+      printf("    Got %ld, set %ld\n", (long)val_rd, (long)fill_val1);
+      goto error;
+  }
+  if(H5Pclose(dcpl1)<0) goto error;
+  if(H5Sclose(fspace)<0) goto error;
+  if(H5Sclose(mspace)<0) goto error;
+  if(H5Dclose(dset1)<0) goto error;
+
+
+  if((dset2=H5Dopen(file, "dset2"))<0) goto error;
+  if ((dcpl2=H5Dget_create_plist(dset2))<0) goto error;
+  if (H5Pget_fill_value(dcpl2, H5T_NATIVE_INT, &rd_fill)<0) goto error;
+  if (rd_fill != fill_val2) {
+      H5_FAILED();
+      puts("    Got a different fill value than what was set.");
+      printf("    Got %ld, set %ld\n", (long)rd_fill, (long)fill_val2);
+      goto error;
+  }
+  fspace = -1;
+  if((fspace = H5Dget_space(dset2))<0) goto error;
+  dims[0] = dims[1] = -1;
+  if(H5Sget_simple_extent_dims(fspace, dims, NULL)<0) goto error;
+  if(dims[0] != 8 || dims[1] != 8) {
+      H5_FAILED();
+      puts("    Got a different dimension size than what was set.");
+      printf("    Got dims[0]=%ld, dims[1]=%ld, set 8x8\n", (long)dims[0], (long)dims[1]);
+      goto error;
+  }
+  if((mspace=H5Screate_simple(2, one, NULL))<0) goto error;
+  if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL)<0)
+      goto error;
+  /* Should fail, there's no data to read */
+  H5E_BEGIN_TRY {
+      if(H5Dread(dset2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd)>=0) 
+          goto error;
+    } H5E_END_TRY;
+  if(H5Pclose(dcpl2)<0) goto error;
+  if(H5Sclose(fspace)<0) goto error;
+  if(H5Sclose(mspace)<0) goto error;
+  if(H5Dclose(dset2)<0) goto error;
+
+  if(H5Fclose(file)<0) goto error;
+  PASSED();
+  return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl1);
+        H5Sclose(fspace);
+        H5Sclose(mspace);
+        H5Dclose(dset1);
+        H5Pclose(dcpl2);
+        H5Sclose(fspace);
+        H5Dclose(dset2);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -734,6 +850,7 @@ main(int argc, char *argv[])
 	nerrors += test_create(fapl, FILENAME[1], H5D_CONTIGUOUS);
 	nerrors += test_rdwr  (fapl, FILENAME[3], H5D_CONTIGUOUS);
 	nerrors += test_extend(fapl, FILENAME[5], H5D_CONTIGUOUS);
+	nerrors += test_compatible();
     }
     
     if (nerrors) goto error;
