@@ -14,6 +14,9 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 PROGS=testhdf5  hyperslab istore dtypes dsets cmpd_dset
 TESTS=$(PROGS)
 
+# Temporary files
+MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 istore.h5
+
 # Source and object files for programs...  The PROG_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
