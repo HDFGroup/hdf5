@@ -20,6 +20,7 @@
 #endif
 #ifdef WIN32
 #include <windows.h>
+#include <io.h>
 #endif
 
 #ifdef MAX
@@ -267,6 +268,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 #ifdef WIN32
 	HFILE filehandle;
 	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+        int fd;
 	int results;   
 #else /* WIN32 */
     struct stat		    sb;
@@ -325,8 +327,9 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     /* The unique key */
 #ifdef WIN32
 /*#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"*/
-    filehandle = _get_osfhandle(f);
-    results = GetFileInformationByHandle(filehandle, &fileinfo);
+    fd = _fileno(f);
+    filehandle = _get_osfhandle(fd);
+    results = GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
 #else
