@@ -32,16 +32,16 @@ extern "C" {
  */
 
 hid_t H5PTcreate_fl ( hid_t loc_id,
-                              const char *dset_name,
-                              hid_t dtype_id,
-                              hsize_t chunk_size );
+                      const char *dset_name,
+                      hid_t dtype_id,
+                      hsize_t chunk_size );
 
 hid_t H5PTcreate_vl ( hid_t loc_id,
-                                 const char *dset_name,
-                                 hsize_t chunk_size );
+                      const char *dset_name,
+                      hsize_t chunk_size );
 
 hid_t H5PTopen( hid_t loc_id,
-                             char *dset_name );
+                char *dset_name );
 
 herr_t H5PTclose( hid_t table_id );
 
@@ -54,11 +54,8 @@ herr_t H5PTclose( hid_t table_id );
  */
 
 herr_t H5PTappend( hid_t table_id,
-                           hsize_t nrecords,
-                           const void * data );
-
-herr_t H5PTappend_single_packet( hid_t table_id,
-                                 const void * data );
+                   hsize_t nrecords,
+                   const void * data );
 
 /*-------------------------------------------------------------------------
  *
@@ -69,8 +66,8 @@ herr_t H5PTappend_single_packet( hid_t table_id,
 
 
 herr_t H5PTget_next( hid_t table_id,
-                             hsize_t nrecords,
-                             void * data );
+                     hsize_t nrecords,
+                     void * data );
 
 herr_t H5PTread_packets( hid_t table_id,
                          hsize_t start,
@@ -84,9 +81,6 @@ herr_t H5PTread_packets( hid_t table_id,
  *-------------------------------------------------------------------------
  */
 
-
-herr_t H5PTget_num_records( hid_t dataset_id,
-                            hsize_t *nrecords );
 
 herr_t H5PTget_num_packets( hid_t table_id,
                             hsize_t *nrecords );
