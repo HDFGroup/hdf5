@@ -84,7 +84,7 @@ __DLL__ hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
             H5P_cls_create_func_t cls_create, void *create_data,
             H5P_cls_close_func_t cls_close, void *close_data);
 __DLL__ hid_t H5Pcreate_list(hid_t cls_id);
-__DLL__ herr_t H5Pregister(hid_t class, const char *name, size_t size,
+__DLL__ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
             H5P_prp_close_func_t prp_close);
