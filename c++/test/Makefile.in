@@ -37,11 +37,13 @@ LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
 ## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
 
-TEST_SRC=dsets.cpp testhdf5.cpp tfile.cpp th5s.cpp h5cpputil.cpp
+TESTHDF5_SRC=testhdf5.cpp tfile.cpp th5s.cpp h5cpputil.cpp
+TESTHDF5_OBJ=$(TESTHDF5_SRC:.cpp=.lo)
+
+TEST_SRC=dsets.cpp $(TESTHDF5_SRC)
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 TEST_PROGS=dsets testhdf5
 
-TESTHDF5_OBJ=testhdf5.lo tfile.lo th5s.lo
 
 TEST_SCRIPTS=
 
