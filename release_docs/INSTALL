@@ -265,14 +265,11 @@
 	To configure AIX 64 bits including fortran API and C++,
 	(Remark: need to hardset $AR to 'ar -X 64'.)
 	Serial:
-	    $ CC='xlc -q64' F9X='xlf -q64' CXX='xlC -q64' AR='ar -X 64'\
+	    $ CFLAGS=-q64 FFLAGS=-q64 CXXFLAGS=-q64 AR='ar -X 64'\
 	    $ ./configure --enable-fortran
 	Parallel:
-	    $ CC='mpcc_r -q64' F9X='mpxlf_r -q64' AR='ar -X 64'\
-	    $ ./configure --enable-fortran
-
-	Specifying these machine architecture flags in the CFLAGS variable
-	(see below) will not work correctly.
+	    $ CFLAGS=-q64 FFLAGS=-q64 AR='ar -X 64'\
+	    $ ./configure --enable-fortran --enable-parallel
 
 5.3.3. Additional compilation flags
 	If addtional flags must be passed to the compilation commands

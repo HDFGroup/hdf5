@@ -344,7 +344,3 @@ Known Problems
   If -ieee is not used, the converted double values are mostly 0.0 but
   occassionaly as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
-
-* On AIX 5.1 when 64-bit parallel C Library is built with zlib configured in,
-  compilation fails for H5Zdeflate.c. To bypass the problem, remove "const"
-  definition in front of H5Z_DEFLATE in H5Zpkg.h line 29.
