@@ -49486,9 +49486,6 @@ IF_YES_NO "$FPHDF5"
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"
 
-PRINT_N "                           GASS"
-IF_YES_NO "$GASS"
-
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
 
