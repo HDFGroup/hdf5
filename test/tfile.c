@@ -61,8 +61,9 @@ static void test_file_create(void)
 {
     hid_t fid1,fid2,fid3;    /* HDF5 File IDs */
     hid_t tmpl1,tmpl2;       /* File creation templates */
-    uintn parm;           /* File-creation parameters */
-    uint8 parm2;          /* File-creation parameters */
+    size_t parm;           /* File-creation parameters */
+    size_t parm2;          /* File-creation parameters */
+    int iparm;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -81,25 +82,25 @@ static void test_file_create(void)
     CHECK(tmpl1,FAIL,"H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret=H5Cgetparm(tmpl1,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_USERBLOCK_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_USERBLOCK, &parm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm,F1_USERBLOCK_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_OFFSET_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F1_OFFSET_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_ADDR, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F1_OFFSET_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_LENGTH_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F1_LENGTH_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_SIZE, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F1_LENGTH_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_LEAF_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_SYM_LEAF_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_LEAF_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F1_SYM_LEAF_K,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_INTERN_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_SYM_INTERN_K,"H5Cgetparm");
+    ret =H5Cget_prop (tmpl1, H5F_SYM_INTERN_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F1_SYM_INTERN_K,"H5Cget_prop");
 
     /* Release file-creation template */
     ret=H5Mclose(tmpl1);
@@ -115,24 +116,22 @@ static void test_file_create(void)
 
     /* Set the new file-creation parameters */
     parm=F2_USERBLOCK_SIZE;
-    ret=H5Csetparm(tmpl1,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl1, H5F_SIZEOF_USERBLOCK, parm);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
     parm2=F2_OFFSET_SIZE;
-    ret=H5Csetparm(tmpl1,H5F_OFFSET_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl1, H5F_SIZEOF_ADDR, parm2);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
     parm2=F2_LENGTH_SIZE;
-    ret=H5Csetparm(tmpl1,H5F_LENGTH_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl1, H5F_SIZEOF_SIZE, parm2);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
-    parm=F2_SYM_LEAF_K;
-    ret=H5Csetparm(tmpl1,H5F_SYM_LEAF_K,&parm);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl1, H5F_SYM_LEAF_K, F2_SYM_LEAF_K);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
-    parm=F2_SYM_INTERN_K;
-    ret=H5Csetparm(tmpl1,H5F_SYM_INTERN_K,&parm);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl1, H5F_SYM_INTERN_K, F2_SYM_INTERN_K);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
     /* Try to create second file, with non-standard file-creation template params */
     fid2=H5Fcreate(FILE2,H5ACC_OVERWRITE,tmpl1,0);
@@ -147,25 +146,25 @@ static void test_file_create(void)
     CHECK(tmpl1,FAIL,"H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret=H5Cgetparm(tmpl1,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_USERBLOCK, &parm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_OFFSET_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_SIZE, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_LENGTH_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_ADDR, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_LEAF_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_LEAF_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F2_SYM_LEAF_K,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_INTERN_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_INTERN_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F2_SYM_INTERN_K,"H5Cget_prop");
 
     /* Clone the file-creation template */
     tmpl2=H5Mcopy(tmpl1);
@@ -177,8 +176,8 @@ static void test_file_create(void)
 
     /* Set the new file-creation parameter */
     parm=F3_USERBLOCK_SIZE;
-    ret=H5Csetparm(tmpl2,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Csetparm");
+    ret = H5Cset_prop (tmpl2, H5F_SIZEOF_USERBLOCK, parm);
+    CHECK(ret,FAIL,"H5Cset_prop");
 
     /* Try to create second file, with non-standard file-creation template params */
     fid3=H5Fcreate(FILE3,H5ACC_OVERWRITE,tmpl2,0);
@@ -193,25 +192,25 @@ static void test_file_create(void)
     CHECK(tmpl1,FAIL,"H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret=H5Cgetparm(tmpl1,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_USERBLOCK_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_USERBLOCK, &parm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm,F3_USERBLOCK_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_OFFSET_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F3_LENGTH_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_ADDR, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F3_LENGTH_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_LENGTH_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F3_OFFSET_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_SIZE, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F3_OFFSET_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_LEAF_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_SYM_LEAF_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_LEAF_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F3_SYM_LEAF_K,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_INTERN_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_SYM_INTERN_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_INTERN_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F3_SYM_INTERN_K,"H5Cget_prop");
 
     /* Release file-creation template */
     ret=H5Mclose(tmpl1);
@@ -240,8 +239,9 @@ static void test_file_open(void)
 {
     hid_t fid1;    /* HDF5 File IDs */
     hid_t tmpl1;       /* File creation templates */
-    uintn parm;           /* File-creation parameters */
-    uint8 parm2;          /* File-creation parameters */
+    size_t parm;           /* File-creation parameters */
+    size_t parm2;          /* File-creation parameters */
+    int iparm;
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -256,25 +256,25 @@ static void test_file_open(void)
     CHECK(tmpl1,FAIL,"H5Fget_create_template");
 
     /* Get the file-creation parameters */
-    ret=H5Cgetparm(tmpl1,H5F_USERBLOCK_SIZE,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_USERBLOCK, &parm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_OFFSET_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_ADDR, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_LENGTH_SIZE,&parm2);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SIZEOF_SIZE, &parm2);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_LEAF_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_LEAF_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F2_SYM_LEAF_K,"H5Cget_prop");
 
-    ret=H5Cgetparm(tmpl1,H5F_SYM_INTERN_K,&parm);
-    CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
+    ret = H5Cget_prop (tmpl1, H5F_SYM_INTERN_K, &iparm);
+    CHECK(ret,FAIL,"H5Cget_prop");
+    VERIFY(iparm,F2_SYM_INTERN_K,"H5Cget_prop");
 
     /* Release file-creation template */
     ret=H5Mclose(tmpl1);

@@ -16,6 +16,9 @@
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 
+#define DSET_DEFAULT_NAME	"default"
+#define DSET_CHUNKED_NAME	"chunked"
+#define DSET_SIMPLE_IO_NAME	"simple_io"
 
 
 /*-------------------------------------------------------------------------
@@ -37,9 +40,10 @@
 static herr_t
 test_create (hid_t file)
 {
-   hid_t	dataset, space;
+   hid_t	dataset, space, create_parms;
    intn		dims[2];
    herr_t	status;
+   size_t	csize[2];
    
    printf ("%-70s", "Testing create/open/close");
 
@@ -51,8 +55,11 @@ test_create (hid_t file)
    status = H5Pset_space (space, 2, dims);
    assert (status>=0);
 
-   /* Create the dataset */
-   dataset = H5Dcreate (file, "dataset_01", H5T_NATIVE_DOUBLE, space,
+   /*
+    * Create a dataset using the default dataset creation properties.  We're
+    * not sure what they are, so we won't check.
+    */
+   dataset = H5Dcreate (file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space,
 			H5C_DEFAULT);
    if (dataset<0) {
       puts ("*FAILED*");
@@ -73,8 +80,11 @@ test_create (hid_t file)
       goto error;
    }
 
-   /* Try creating a dataset that already exists.  This should fail. */
-   dataset = H5Dcreate (file, "dataset_01", H5T_NATIVE_DOUBLE, space,
+   /*
+    * Try creating a dataset that already exists.  This should fail since a
+    * dataset can only be created once.
+    */
+   dataset = H5Dcreate (file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space,
 			H5C_DEFAULT);
    if (dataset>=0) {
       puts ("*FAILED*");
@@ -85,13 +95,16 @@ test_create (hid_t file)
       goto error;
    }
 
-   /* Try opening and closing an existing dataset */
-   dataset = H5Dopen (file, "dataset_01");
+   /*
+    * Open the dataset we created above and then close it.  This is how
+    * existing datasets are accessed.
+    */
+   dataset = H5Dopen (file, DSET_DEFAULT_NAME);
    if (dataset<0) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
-	 printf ("   Cannot open dataset `dataset_01'.\n");
+	 printf ("   Cannot open dataset `%s'.\n", DSET_DEFAULT_NAME);
       }
       goto error;
    }
@@ -104,7 +117,10 @@ test_create (hid_t file)
       goto error;
    }
 
-   /* Try opening a non-existent dataset. This should fail */
+   /*
+    * Try opening a non-existent dataset. This should fail since new datasets
+    * cannot be created with this function.
+    */
    dataset = H5Dopen (file, "does_not_exist");
    if (dataset>=0) {
       puts ("*FAILED*");
@@ -114,6 +130,48 @@ test_create (hid_t file)
       }
       goto error;
    }
+
+   /*
+    * Create a new dataset that uses chunked storage instead of the default
+    * layout.
+    */
+   create_parms = H5Ccreate (H5C_DATASET_CREATE);
+   assert (create_parms>=0);
+   status = H5Cset_prop (create_parms, H5D_LAYOUT, H5D_CHUNKED);
+   assert (status>=0);
+   status = H5Cset_prop (create_parms, H5D_CHUNK_NDIMS, 2);
+   assert (status>=0);
+   csize[0] = 5;
+   csize[1] = 100;
+   status = H5Cset_prop (create_parms, H5D_CHUNK_SIZE, csize);
+   assert (status>=0);
+
+   dataset = H5Dcreate (file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space,
+			create_parms);
+   if (dataset<0) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Could not create a chunked dataset.\n");
+      }
+      goto error;
+   }
+
+   /*
+    * Close the chunked dataset.
+    */
+   if (H5Dclose (dataset)<0) {
+      puts ("*FAILED*");
+      if (!isatty (1)) {
+	 AT ();
+	 printf ("   Cannot close chunked dataset.\n");
+      }
+      goto error;
+   }
+   
+   
+   
+
    
    puts (" PASSED");
    return SUCCEED;
@@ -167,7 +225,7 @@ test_simple_io (hid_t file)
    assert (status>=0);
 
    /* Create the dataset */
-   dataset = H5Dcreate (file, "dataset_02", H5T_NATIVE_INT, space,
+   dataset = H5Dcreate (file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
 			H5C_DEFAULT);
    assert (dataset>=0);
 

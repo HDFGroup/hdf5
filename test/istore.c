@@ -523,7 +523,7 @@ main (int argc, char *argv[])
    herr_t	status;
    int		nerrors = 0;
    uintn	size_of_test;
-   uint8	offset_size;
+   size_t	offset_size;
    H5G_entry_t	*ent = NULL;
    hid_t	template_id;
    H5F_create_t	*creation_template = NULL;
@@ -559,7 +559,7 @@ main (int argc, char *argv[])
     */
    offset_size = 8;
    template_id = H5Ccreate (H5C_FILE_CREATE);
-   H5Csetparm (template_id, H5F_OFFSET_SIZE, &offset_size);
+   H5Cset_prop (template_id, H5F_SIZEOF_ADDR, offset_size);
    creation_template = H5Aatom_object (template_id);
    
    /* Create the test file */
