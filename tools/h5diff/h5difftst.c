@@ -14,17 +14,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "hdf5.h"
-
-#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define UNUSED /*void*/
-#else
-#   define UNUSED __attribute__((unused))
-#endif
-
+#include "H5private.h" 
 
 
 /* diff test*/
@@ -85,6 +76,7 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
  /* Close */
  status = H5Dclose(dataset_id);
  status = H5Sclose(space_id);
+ assert(status>=0);
 
  return status;
 
@@ -210,6 +202,12 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
 # 5.6
  file6.h5 file6.h5 dset6a dset6b
+
+# 5.7
+ file6.h5 file6.h5 dset7a dset7b
+
+# 5.8
+ file6.h5 file6.h5 dset8a dset8b
 
 # ##############################################################################
 # # Error messages
@@ -672,8 +670,12 @@ int do_test_5(const char *file1, const char UNUSED *file2)
   */
  char          buf7a[3][2] = {{-1,-128},{-1,-1},{-1,-1}};
  unsigned char buf7b[3][2] = {{1,128},{1,1},{1,1}};
- unsigned char buf8a[3][2] = {{1,1},{1,1},{1,1}};
- unsigned char buf8b[3][2] = {{1,1},{3,4},{5,6}};
+ 
+ /* long_long test */
+ long_long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
+ long_long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
+ unsigned long_long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
+ unsigned long_long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
  
  
 /*-------------------------------------------------------------------------
@@ -742,12 +744,21 @@ int do_test_5(const char *file1, const char UNUSED *file2)
  write_dataset(file1_id,2,dims,"dset7b",H5T_NATIVE_UCHAR,buf7b);
 
 /*-------------------------------------------------------------------------
- * H5T_NATIVE_UCHAR
+ * H5T_NATIVE_LLONG
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset8a",H5T_NATIVE_UCHAR,buf8a);
- write_dataset(file1_id,2,dims,"dset8b",H5T_NATIVE_UCHAR,buf8b);
+ write_dataset(file1_id,2,dims,"dset8a",H5T_NATIVE_LLONG,buf8a);
+ write_dataset(file1_id,2,dims,"dset8b",H5T_NATIVE_LLONG,buf8b);
+
+/*-------------------------------------------------------------------------
+ * H5T_NATIVE_ULLONG
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,2,dims,"dset9a",H5T_NATIVE_ULLONG,buf9a);
+ write_dataset(file1_id,2,dims,"dset9b",H5T_NATIVE_ULLONG,buf9b);
+
 
 /*-------------------------------------------------------------------------
  * Close 

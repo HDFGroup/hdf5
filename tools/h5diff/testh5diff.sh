@@ -216,6 +216,9 @@ TOOLTEST h5diff_56.txt file6.h5 file6.h5 dset6a dset6b
 # 5.7
 TOOLTEST h5diff_57.txt file6.h5 file6.h5 dset7a dset7b
 
+# 5.8 long_long test; different format of long_long print  in Linux and IRIX
+#TOOLTEST h5diff_58.txt file6.h5 file6.h5 dset8a dset8b
+
 # ##############################################################################
 # # Error messages
 # ##############################################################################

@@ -22,6 +22,8 @@ file1     file2
     x      x    /dset7b        
     x      x    /dset8a        
     x      x    /dset8b        
+    x      x    /dset9a        
+    x      x    /dset9b        
 
 Comparing </dset0a> with </dset0a>
 0 differences found
@@ -75,6 +77,12 @@ Comparing </dset8a> with </dset8a>
 0 differences found
 
 Comparing </dset8b> with </dset8b>
+0 differences found
+
+Comparing </dset9a> with </dset9a>
+0 differences found
+
+Comparing </dset9b> with </dset9b>
 0 differences found
 
 
