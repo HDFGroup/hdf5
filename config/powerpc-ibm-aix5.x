@@ -30,7 +30,8 @@ case $CC_BASENAME in
 	CFLAGS="$CFLAGS"
 	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O"
+	# -O causes test/dtypes to fail badly. Turn it off for now.
+	PROD_CFLAGS=""
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
 	PROFILE_CPPFLAGS=
