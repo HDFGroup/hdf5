@@ -24,7 +24,14 @@
 
 int indent = 0;
 int compound_data=0;
-
+int nCols = 80;
+ProgType programtype = UNKNOWN;
+static void display_numeric_data(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, 
+		size_t p_type_nbytes, hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno);
+static void display_string(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, 
+		size_t p_type_nbytes, hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno);
+static void display_compound_data(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, 
+		size_t p_type_nbytes, hsize_t p_nelmts, hsize_t elmtno);
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -456,7 +463,7 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 */
 static char *
 h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
-	      hid_t type, void *vp, const int repeat_threshold)
+	      hid_t type, void *vp)
 {
     size_t	i, n, offset, size, dims[H5S_MAX_RANK], nelmts, start;
     char	*name, quote='\0';
@@ -464,7 +471,14 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     int		nmembs, j, k, ndims;
     static char	fmt_llong[8], fmt_ullong[8];
 	H5T_str_t pad;
+	int repeat_threshold;
 
+	if ((programtype == UNKNOWN) || (programtype == H5LS)) {
+		repeat_threshold = H5DEFAULT_REPEAT_THRESHOLD;
+	}
+	else if (programtype == H5DUMP){
+		repeat_threshold = -1;
+	}
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
 	sprintf(fmt_llong, "%%%sd", PRINTF_LL_WIDTH);
@@ -685,7 +699,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 						OPT(info->arr_sep,
 						"," OPTIONAL_LINE_BREAK));
 				}
-				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size, repeat_threshold);
+				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size);
 			}
 			if (nelmts>1) {
 				h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
@@ -849,7 +863,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info,
 	
 	/* Render the element */
 	h5dump_str_reset(&buffer);
-	h5dump_sprint(&buffer, info, type, mem+i*size, H5DEFAULT_REPEAT_THRESHOLD);
+	h5dump_sprint(&buffer, info, type, mem+i*size);
 	if (i+1<nelmts || 0==(flags & END_OF_DATA)) {
 	    h5dump_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 	}
@@ -955,7 +969,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info,
  */
 static int
 h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
-		   hid_t p_type)
+		   hid_t p_type, int obj_data)
 {
     hid_t		f_space;		/*file data space	*/
     hsize_t		elmtno, i;		/*counters		*/
@@ -980,7 +994,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
 
-
+	hsize_t dim_n_size;
 
     /*
      * Check that everything looks okay.  The dimensionality must not be too
@@ -989,7 +1003,17 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      */
     memset(&ctx, 0, sizeof ctx);
     ctx.need_prefix = 1;
-    f_space = H5Dget_space(dset);
+
+	if (programtype == H5DUMP) {	
+	    if (obj_data == DATASET_DATA) 
+		    f_space = H5Dget_space(dset);
+		else 
+			f_space = H5Aget_space(dset);
+	}
+	else {
+		f_space = H5Dget_space(dset);
+	}
+	
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
     if ((size_t)(ctx.ndims)>NELMTS(sm_size)) return -1;
 
@@ -1031,23 +1055,79 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 				hs_size, NULL);
 	    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
 				&hs_nelmts, NULL);
+        dim_n_size = ctx.p_max_idx[ctx.ndims-1];
 	} else {
 	    H5Sselect_all(f_space);
 	    H5Sselect_all(sm_space);
 	    hs_nelmts = 1;
+	    dim_n_size = 1;
 	}
 	
 	/* Read the data */
-	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
-	    return -1;
+	if (programtype == H5LS) {
+		if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
+		    return -1;
+		}
 	}
+	else if (programtype == H5DUMP){
+	    if (obj_data == DATASET_DATA) {
+            if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) <0)
+                return -1;
+        } else {
+            if (H5Aread(dset, p_type, sm_buf) < 0) 
+                return -1;
+        }
 
+	}
+	else if (programtype == UNKNOWN) {
+		return (FAIL);
+	}
 	/* Print the data */
 	flags = ((0==elmtno?START_OF_DATA:0) |
 		 (elmtno+hs_nelmts>=p_nelmts?END_OF_DATA:0));
-	h5dump_simple_data(stream, info, &ctx, flags, hs_nelmts, p_type,
-			   sm_buf);
-	
+	if (programtype == UNKNOWN){
+		return FAIL;
+	}
+	else if (programtype == H5LS){
+		h5dump_simple_data(stream, info, &ctx, flags, hs_nelmts, p_type,
+			sm_buf);
+	}
+	else if (programtype == H5DUMP){
+		switch (H5Tget_class(p_type)) {
+        case H5T_INTEGER:
+			display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+				p_nelmts, dim_n_size, elmtno);
+			break;
+			
+        case H5T_FLOAT:
+			display_numeric_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+				p_nelmts, dim_n_size, elmtno);
+			break;
+			
+        case H5T_TIME:
+			break;
+			
+        case H5T_STRING:
+			display_string (hs_nelmts, p_type, sm_buf, p_type_nbytes, 
+				p_nelmts, dim_n_size, elmtno);
+			break;
+			
+        case H5T_BITFIELD:
+			break;
+			
+        case H5T_OPAQUE:
+			break;
+			
+        case H5T_COMPOUND:
+			compound_data = 1;
+			display_compound_data (hs_nelmts, p_type, sm_buf, p_type_nbytes, p_nelmts, elmtno);
+			compound_data = 0;
+			break;
+			
+        default: break;
+        }
+		
+	}
 	/* Calculate the next hyperslab offset */
 	for (i=ctx.ndims, carry=1; i>0 && carry; --i) {
 	    hs_offset[i-1] += hs_size[i-1];
@@ -1149,13 +1229,9 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
  *
  *-------------------------------------------------------------------------
  */
-/*
-	strDUAction is TRUE when we want the dumputil way of
-	handling the string and is FALSE when we want the tools.c
-	way.
-*/
+
 hid_t
-h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
+h5dump_fixtype(hid_t f_type)
 {
     hid_t	m_type = FAIL, f_memb;
     hid_t	*memb = NULL;
@@ -1210,7 +1286,7 @@ h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
 	original action here.
 
 */
-	if (strDUAction == TRUE) {
+	if (programtype == H5DUMP) {
 		m_type = H5Tcopy(H5T_C_S1);
         H5Tset_size(m_type, size);
         strpad = H5Tget_strpad(f_type) ;
@@ -1226,9 +1302,12 @@ h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
         } 
 
 	}
-	else {
+	else if (programtype == H5LS) {
 		m_type = H5Tcopy(f_type);
 		H5Tset_cset(m_type, H5T_CSET_ASCII);
+	}
+	else if (programtype == UNKNOWN){
+		return FAIL;
 	}
 	break;
 
@@ -1250,7 +1329,7 @@ h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
 
 	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
-	    memb[i] = h5dump_fixtype(f_memb,strDUAction);
+	    memb[i] = h5dump_fixtype(f_memb);
 	    H5Tclose(f_memb);
 	    if (memb[i]<0) goto done;
 
@@ -1351,7 +1430,7 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     }
     if (p_type<0) {
 	f_type = H5Dget_type(dset);
-	p_type = h5dump_fixtype(f_type,FALSE);
+	p_type = h5dump_fixtype(f_type);
 	H5Tclose(f_type);
 	if (p_type<0) return -1;
     }
@@ -1362,7 +1441,7 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     H5Sclose(f_space);
 
     /* Print the data */
-    status = h5dump_simple_dset(stream, info, dset, p_type);
+    status = h5dump_simple_dset(stream, info, dset, p_type, 0);
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
 }
@@ -1447,7 +1526,7 @@ static void display_numeric_data
 
 hsize_t i;
 /*char p_buf[256];		*/
-char out_buf[NCOLS];
+char* out_buf = malloc(sizeof(char) * nCols);
 struct h5dump_str_t tempstr;
 
 /******************************************************************************************/
@@ -1456,7 +1535,7 @@ struct h5dump_str_t tempstr;
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
     info.idx_fmt = "(%s)";
-    info.line_ncols = NCOLS;
+    info.line_ncols = nCols;
     info.line_multi_new = 1;
  
     /*
@@ -1470,13 +1549,13 @@ struct h5dump_str_t tempstr;
 
 
     out_buf[0] = '\0';
-    if ((indent+COL) > NCOLS) indent = 0;
+    if ((indent+COL) > nCols) indent = 0;
 	memset(&tempstr, 0, sizeof(h5dump_str_t));
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes, -1);
-         if ((int)(strlen(out_buf)+tempstr.len+1) > (NCOLS-indent-COL)) {
+		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes);
+         if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
                  printf("%s\n", out_buf);
@@ -1493,7 +1572,7 @@ struct h5dump_str_t tempstr;
                  if ((elmtno+i+1) != p_nelmts) /* not last element */
                      printf(",\n");
                  else if (compound_data) { /* last element of member data*/
-                     if ((NCOLS-strlen(out_buf)-indent-COL) < 2) { 
+                     if ((nCols-strlen(out_buf)-indent-COL) < 2) { 
                           /* 2 for space and ] */
                          printf("\n");
                          indentation(indent+COL-3);
@@ -1505,7 +1584,7 @@ struct h5dump_str_t tempstr;
         } else {
              strcat(out_buf, tempstr.s);
              if ((elmtno+i+1) % dim_n_size) {
-                  if ((NCOLS-strlen(out_buf)-indent-COL-1) > 0)
+                  if ((nCols-strlen(out_buf)-indent-COL-1) > 0)
                       strcat(out_buf, ", ");
                   else 
                       strcat(out_buf, ",");
@@ -1523,7 +1602,7 @@ struct h5dump_str_t tempstr;
                      printf(",\n");
                  else if (compound_data) { /* last row of member data*/
                      /* 2 for space and ] */
-                     if ((NCOLS-strlen(out_buf)-indent-COL) < 2) { 
+                     if ((nCols-strlen(out_buf)-indent-COL) < 2) { 
                          printf("\n");
                          indentation(indent+COL-3);
                      }
@@ -1556,7 +1635,7 @@ static void display_string
 	hsize_t i, row_size=0;
 	int j, m, x, y, z,  first_row=1;
 	int free_space, long_string = 0;
-	char out_buf[NCOLS];
+	char* out_buf =  malloc(sizeof(char) * nCols);
 	struct h5dump_str_t tempstr;
 	int temp;
 
@@ -1566,7 +1645,7 @@ static void display_string
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
     info.idx_fmt = "(%s)";
-    info.line_ncols = NCOLS;
+    info.line_ncols = nCols;
     info.line_multi_new = 1;
  
     /*
@@ -1586,13 +1665,13 @@ static void display_string
 		row_size++;
 		
 		h5dump_str_reset(&tempstr);		
-		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes,-1);
+		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes);
 
 		memmove(tempstr.s, tempstr.s + 1, tempstr.len -1);
 		tempstr.s[tempstr.len - 2] = '\0';
 		tempstr.len = tempstr.len - 2;
 
-		free_space = NCOLS - indent - COL - strlen(out_buf);
+		free_space = nCols - indent - COL - strlen(out_buf);
 
          if ((elmtno+i+1) == p_nelmts) { /* last element */
             /* 2 for double quotes */
@@ -1626,7 +1705,7 @@ static void display_string
                  } else {
                      indentation(indent+COL);     
 					 printf("%s\"", out_buf);
-					 memset(out_buf, '\0', NCOLS); 
+					 memset(out_buf, '\0', nCols); 
 					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
 					 printf("%s\" //\n", out_buf);
@@ -1634,7 +1713,7 @@ static void display_string
                  }
              }
 
-             y = NCOLS - indent -COL - 5;
+             y = nCols - indent -COL - 5;
 
              m = (tempstr.len - x)/y;
 
@@ -1649,7 +1728,7 @@ static void display_string
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
-                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -2)) { /* 2 for double quotes */
+                  if ((int)strlen(tempstr.s+x+j*y) > (nCols - indent - COL -2)) { /* 2 for double quotes */
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
@@ -1657,7 +1736,7 @@ static void display_string
                      indentation(indent+COL);
                      printf("\"%s\"", tempstr.s+x+m*y);
                      if (compound_data) {
-                         if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
+                         if ((nCols-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
                               indentation(indent+COL-3);
                          }
@@ -1668,7 +1747,7 @@ static void display_string
                      indentation(indent+COL);
                      printf("\"%s\"", tempstr.s+x+j*y);
                      if (compound_data) {
-                         if ((NCOLS-strlen(out_buf)-indent-COL) < 2) {
+                         if ((nCols-strlen(out_buf)-indent-COL) < 2) {
                               printf("\n");
                               indentation(indent+COL-3);
                          }
@@ -1678,7 +1757,7 @@ static void display_string
                   }
                   out_buf[0] = '\0';
              } else if ( row_size == dim_n_size) {
-                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
+                  if ((int)strlen(tempstr.s+x+j*y) > (nCols - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
@@ -1694,7 +1773,7 @@ static void display_string
                   row_size = 0;
 
              } else {
-                  if ((int)strlen(tempstr.s+x+j*y) > (NCOLS - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
+                  if ((int)strlen(tempstr.s+x+j*y) > (nCols - indent - COL -3)) { /* 3 for 2 "'s and 1 , */
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
@@ -1702,12 +1781,12 @@ static void display_string
                      strcpy(out_buf, "\"");
                      strcat(out_buf, tempstr.s+x+m*y);
                      strcat(out_buf, "\",");
-                     if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
+                     if ((int)strlen(out_buf) < (nCols-indent-COL)) strcat(out_buf, " "); 
                   } else {
 					 strcpy(out_buf, "\"");
                      strcat (out_buf, tempstr.s+x+j*y);
                      strcat(out_buf, "\",");
-                     if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
+                     if ((int)strlen(out_buf) < (nCols-indent-COL)) strcat(out_buf, " "); 
                   }
              }
              long_string = 0;
@@ -1729,7 +1808,7 @@ static void display_string
                if ((elmtno+i+1) != p_nelmts) 
                    printf(",\n");
                else if (compound_data) {
-                       if ((NCOLS-strlen(out_buf)-tempstr.len-indent-COL) < 2) {
+                       if ((nCols-strlen(out_buf)-tempstr.len-indent-COL) < 2) {
                            /* 2 for space and ] */
                            printf("\n");
                            indentation(indent+COL-3);
@@ -1743,7 +1822,7 @@ static void display_string
                  strcat(out_buf, "\""); 
                  strcat(out_buf, tempstr.s);
                  strcat(out_buf, "\",");
-                 if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " ");
+                 if ((int)strlen(out_buf) < (nCols-indent-COL)) strcat(out_buf, " ");
             }
 
          }
@@ -1770,7 +1849,7 @@ hsize_t nelmts, dim_n_size=0;
 hid_t   memb;
 int     nmembs, i, j, k, ndims, perm[4];
 
-    if ((indent+COL) > NCOLS) indent = 0;
+    if ((indent+COL) > nCols) indent = 0;
 
     for (i=0; i<(int)hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 
@@ -1851,6 +1930,7 @@ int     nmembs, i, j, k, ndims, perm[4];
  *
  *-------------------------------------------------------------------------
  */
+
 static int
 h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
 {
@@ -2038,7 +2118,7 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
 
         if (f_type < 0) return status;
 
-	p_type = h5dump_fixtype(f_type,TRUE);
+	p_type = h5dump_fixtype(f_type);
 
 	H5Tclose(f_type);
 
@@ -2054,7 +2134,9 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
     if (f_space < 0) return status;
  
     if (H5Sis_simple(f_space) >= 0) 
-        status = h5dump_simple(oid, p_type, obj_data);
+		status = h5dump_simple_dset(NULL,NULL, oid, p_type, obj_data);
+/*      status = h5dump_simple(oid, p_type, obj_data);
+*/
 
     H5Sclose(f_space);
 
@@ -2136,4 +2218,3 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace){
 	if (x == 0) x = FAIL;
 	return(x);
 }
-
