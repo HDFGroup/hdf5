@@ -66,6 +66,7 @@
      INTEGER :: len ! Lenght of the name of the compound datatype member 
      LOGICAL :: flag
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
+     INTEGER :: array_dims_range = 3
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
      INTEGER(SIZE_T) :: sizechar
      INTEGER, DIMENSION(7) :: data_dims
@@ -243,7 +244,7 @@
      CALL h5tinsert_f(dtarray_id, "char_field", offset, H5T_NATIVE_CHARACTER, error)
          CALL check("h5tinsert_f", error, total_error)
      offset = type_sizec
-     CALL h5tarray_create_f(H5T_NATIVE_REAL, size(array_dims), array_dims, arrayt_id, error)
+     CALL h5tarray_create_f(H5T_NATIVE_REAL, array_dims_range, array_dims, arrayt_id, error)
          CALL check("h5tarray_create_f", error, total_error)
      CALL h5tinsert_f(dtarray_id,"array_field", offset, arrayt_id, error)
          CALL check("h5tinsert_f", error, total_error)
