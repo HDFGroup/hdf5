@@ -231,6 +231,12 @@ H5FD_multi_init(void)
  *              Wednesday, August 11, 1999
  *
  * Modifications:
+ *	Albert Cheng, Sep 17, 2001
+ *	Added feature that if the raw or meta extension string contains
+ *	a "%s", it will be substituted by the filename given for H5Fopen
+ *	or H5Fcreate.  This is same as the multi-file syntax.  If no %s
+ *	is found, one is inserted at the beginning.  This is the previous
+ *	behavior.
  *
  *-------------------------------------------------------------------------
  */
@@ -262,9 +268,26 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     memb_fapl[H5FD_MEM_DRAW] = raw_plist_id;
 
     /* The names */
-    sprintf(meta_name, "%%s%s", meta_ext?meta_ext:".meta");
+    /* process meta filename */
+    if (meta_ext){
+	if (strstr(meta_ext, "%s"))
+	    strcpy(meta_name, meta_ext);
+	else
+	    sprintf(meta_name, "%%s%s", meta_ext);
+    }
+    else
+	strcpy(meta_name, "%s.meta");
     memb_name[H5FD_MEM_SUPER] = meta_name;
-    sprintf(raw_name, "%%s%s", raw_ext?raw_ext:".raw");
+
+    /* process raw filename */
+    if (raw_ext){
+	if (strstr(raw_ext, "%s"))
+	    strcpy(raw_name, raw_ext);
+	else
+	    sprintf(raw_name, "%%s%s", raw_ext);
+    }
+    else
+	strcpy(raw_name, "%s.raw");
     memb_name[H5FD_MEM_DRAW] = raw_name;
 
     /* The sizes */
