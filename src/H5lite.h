@@ -15,6 +15,16 @@
 #ifndef _H5Lite_H
 #define _H5Lite_H
 
+#include "H5private.h"
+#include "H5Ipublic.h"
+#include "H5Fpublic.h"
+#include "H5Tpublic.h"
+#include "H5Ppublic.h"
+#include "H5Spublic.h"
+#include "H5Gpublic.h"
+#include "H5Apublic.h"
+
+
 
 herr_t H5Lmake_dataset( hid_t loc_id, 
                         const char *dset_name, 

@@ -10,14 +10,14 @@
  *                                                                          *
  ****************************************************************************/
 
-#include <hdf5.h>
+
 
 #include "H5Lite.h"
 
 /*local operator functions */
 
-static herr_t count_groups( hid_t UNUSED loc_id, const char *name, void *op_data);
-static herr_t get_name_group    ( hid_t UNUSED loc_id, const char *name, void *op_data);
+static herr_t count_groups( hid_t loc_id, const char *name, void *op_data);
+static herr_t get_name_group( hid_t  loc_id, const char *name, void *op_data);
 
 
 
@@ -161,7 +161,7 @@ herr_t H5Lattach_attribute( hid_t loc_id,
    break;
 
   default:
-   return FAIL;
+   return FAIL; 
 
  }
 
@@ -260,7 +260,7 @@ herr_t H5Lattach_attribute_numerical( hid_t loc_id,
    break;
 
   default:
-   return FAIL;
+   return -1;
 
  }
 
@@ -412,7 +412,7 @@ herr_t H5Lget_groups( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-static herr_t count_groups( hid_t UNUSED loc_id, const char *name, void *op_data)
+static herr_t count_groups( hid_t  loc_id, const char *name, void *op_data)
 {
 
  /* Define a default zero value for return. This will cause the iterator to continue */
@@ -457,7 +457,7 @@ static herr_t count_groups( hid_t UNUSED loc_id, const char *name, void *op_data
  *-------------------------------------------------------------------------
  */
 
-static herr_t get_name_group( hid_t UNUSED loc_id, const char *name, void *op_data)
+static herr_t get_name_group( hid_t  loc_id, const char *name, void *op_data)
 {
 
  /* Define a default 1 value for return. This will cause the iterator to break */
