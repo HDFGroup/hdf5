@@ -4828,7 +4828,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t * UNUSED sset)
     indent += COL;
     H5Aiterate(did, NULL, dump_function_table->dump_attribute_function, NULL);
     indent -= COL;
-    i = H5Dget_storage_size(did);
+    i = (int)H5Dget_storage_size(did);
 
     if (display_data && (i > 0)) {
 	switch (H5Tget_class(type)) {
