@@ -350,7 +350,7 @@ int diff_datasetid( hid_t dset1_id,
  *-------------------------------------------------------------------------
  */
 
- diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
+ nfound=diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
 
 /*-------------------------------------------------------------------------
  * close

@@ -32,7 +32,7 @@ herr_t get_name_type( hid_t loc_id,
                       const char *group_name, 
                       int idx, 
                       char **name, 
-                      int *type );
+                      H5G_obj_t *type );
 
 /*-------------------------------------------------------------------------
  * Function: h5trav_getinfo
@@ -246,7 +246,11 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name, int *type ) 
+herr_t get_name_type( hid_t loc_id, 
+                      const char *group_name, 
+                      int idx, 
+                      char **name, 
+                      H5G_obj_t *type ) 
 {
 
  trav_info_t info;

@@ -103,7 +103,6 @@ int main(int argc, const char *argv[])
     case 'v': 
      options.verbose = 1;
      break;
-    break;
     case 'r': 
      options.r = 1;
      break;

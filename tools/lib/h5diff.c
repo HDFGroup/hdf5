@@ -253,13 +253,33 @@ int diff_match( hid_t file1_id,
  for (i = 0; i < table->nobjs; i++)
  {
   if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
-   nfound+=diff( file1_id, table->objs[i].objname, 
-                 file2_id, table->objs[i].objname, 
-                 options, table->objs[i].type );
+   nfound+=diff( file1_id, 
+                 table->objs[i].objname, 
+                 file2_id, 
+                 table->objs[i].objname, 
+                 options, 
+                 table->objs[i].type );
  }
 
  /* free table */
  trav_table_free(table);
+
+ 
+/*-------------------------------------------------------------------------
+ * do the diff for the root.
+ * this is a special case, we get an ID for the root group and call diff() 
+ * with this ID; it compares only the root group attributes
+ *-------------------------------------------------------------------------
+ */
+
+ nfound+=diff( file1_id, 
+               "/", 
+               file2_id, 
+               "/", 
+               options, 
+               H5G_GROUP );
+
+
  return nfound;
 }
 
@@ -398,7 +418,7 @@ int diff( hid_t      file1_id,
   nfound = (ret>0) ? 0 : 1;
   
   /* compare attributes */
-  diff_attr(type1_id,type2_id,path1,path2,options);
+  nfound=diff_attr(type1_id,type2_id,path1,path2,options);
   
   if ( H5Tclose(type1_id)<0)
    goto out;
@@ -426,7 +446,7 @@ int diff( hid_t      file1_id,
   nfound = (ret!=0) ? 1 : 0;
   
   /* compare attributes */
-  diff_attr(grp1_id,grp2_id,path1,path2,options);
+  nfound=diff_attr(grp1_id,grp2_id,path1,path2,options);
   
   if ( H5Gclose(grp1_id)<0)
    goto out;
