@@ -683,6 +683,7 @@ H5T_term_interface(void)
     intn	nprint=0;
     hsize_t	nbytes;
     H5T_cdata_t	*cdata;
+    char	bandwidth[32];
 #endif
     
     /* Unregister all conversion functions */
@@ -704,30 +705,27 @@ H5T_term_interface(void)
 		if (0==nprint++) {
 		    HDfprintf (stderr, "H5T: type conversion statistics "
 			       "accumulated over life of library:\n");
-		    HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
-			       H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
+		    HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			       "Conversion", "Elmts", "Calls", "User",
 			       "System", "Elapsed", "Bandwidth");
-		    HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
-			       H5T_NAMELEN-1, "----", "-----", "-----", "----",
+		    HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			       "----------", "-----", "-----", "----",
 			       "------", "-------", "---------");
 		}
 		nbytes = MAX (H5T_get_size (path->src),
 			      H5T_get_size (path->dst));
 		nbytes *= path->cdata.stats->nelmts;
+		H5_bandwidth(bandwidth, (double)nbytes,
+			     path->cdata.stats->timer.etime);
 		HDfprintf (stderr,
-			   "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f",
-			   H5T_NAMELEN-1, path->name,
+			   "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
+			   path->name,
 			   path->cdata.stats->nelmts,
 			   path->cdata.stats->ncalls,
 			   path->cdata.stats->timer.utime, 
 			   path->cdata.stats->timer.stime, 
-			   path->cdata.stats->timer.etime);
-		if (path->cdata.stats->timer.etime>0) {
-		    HDfprintf (stderr, " %15g\n", 
-			       nbytes / path->cdata.stats->timer.etime);
-		} else {
-		    HDfprintf (stderr, " %15s\n", "Inf");
-		}
+			   path->cdata.stats->timer.etime,
+			   bandwidth);
 	    }
 #endif
 	    H5T_close (path->src);
@@ -745,28 +743,24 @@ H5T_term_interface(void)
 	    if (0==nprint++) {
 		HDfprintf (stderr, "H5T: type conversion statistics "
 			   "accumulated over life of library:\n");
-		HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
-			   H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
+		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			   "Conversion", "Elmts", "Calls", "User",
 			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
-			   H5T_NAMELEN-1, "----", "-----", "-----", "----",
+		HDfprintf (stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			   "----------", "-----", "-----", "----",
 			   "------", "-------", "---------");
 	    }
 	    nbytes = cdata->stats->nelmts;
+	    H5_bandwidth(bandwidth, (double)nbytes, cdata->stats->timer.etime);
 	    HDfprintf (stderr,
-		       "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f",
-		       H5T_NAMELEN-1, "no-op",
+		       "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
+		       "no-op",
 		       cdata->stats->nelmts,
 		       cdata->stats->ncalls,
 		       cdata->stats->timer.utime, 
 		       cdata->stats->timer.stime, 
-		       cdata->stats->timer.etime);
-	    if (cdata->stats->timer.etime>0) {
-		HDfprintf (stderr, " %15g\n",
-			   nbytes / cdata->stats->timer.etime);
-	    } else {
-		HDfprintf (stderr, " %15s\n", "Inf");
-	    }
+		       cdata->stats->timer.etime,
+		       bandwidth);
 	}
     }
 #endif
