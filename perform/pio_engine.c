@@ -445,7 +445,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
          off_t nelmts, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
-    long        rc;             /*routine return code                   */
+    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     MPI_Offset	mpi_offset;
     MPI_Status	mpi_status;
@@ -618,14 +618,17 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_written)*ELMT_SIZE;
 
 #if AKCDEBUG
-fprintf(stderr, "proc %d: writes %ld bytes at file-offset %ld\n",
-        pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, file_offset);
+HDfprintf(stderr, "proc %d: write %Hd bytes at file-offset %Hd\n",
+        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
 #endif
 
-                rc = POSIXSEEK(fd->posixfd, file_offset);
-                VRFY((rc>=0), "POSIXSEEK");
-                rc = POSIXWRITE(fd->posixfd, buffer, (size_t)(nelmts_towrite * ELMT_SIZE));
-                VRFY((rc == (nelmts_towrite*ELMT_SIZE)), "POSIXWRITE");
+		/* only care if seek returns error */
+                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+                VRFY((rc==0), "POSIXSEEK");
+		/* check if all bytes are written */
+                rc = ((nelmts_towrite*ELMT_SIZE) ==
+		    POSIXWRITE(fd->posixfd, buffer, nelmts_towrite*ELMT_SIZE));
+                VRFY((rc != 0), "POSIXWRITE");
                 break;
 
             case MPIO:
@@ -726,7 +729,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         off_t nelmts, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
-    long        rc;             /*routine return code                   */
+    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     MPI_Offset  mpi_offset;
     MPI_Status  mpi_status;
@@ -849,14 +852,17 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_read)*ELMT_SIZE;
 
 #if AKCDEBUG
-fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",
-        pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, file_offset);
+HDfprintf(stderr, "proc %d: read %Hd bytes at file-offset %Hd\n",
+        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
 #endif
 
-                rc = POSIXSEEK(fd->posixfd, file_offset);
-                VRFY((rc>=0), "POSIXSEEK");
-                rc = POSIXREAD(fd->posixfd, buffer, (size_t)(nelmts_toread*ELMT_SIZE));
-                VRFY((rc==(nelmts_toread*ELMT_SIZE)), "POSIXREAD");
+		/* only care if seek returns error */
+                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+                VRFY((rc==0), "POSIXSEEK");
+		/* check if all bytes are read */
+                rc = ((nelmts_toread*ELMT_SIZE) ==
+		    POSIXREAD(fd->posixfd, buffer, nelmts_toread*ELMT_SIZE));
+                VRFY((rc != 0), "POSIXREAD");
                 break;
 
             case MPIO:
