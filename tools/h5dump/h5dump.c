@@ -601,6 +601,7 @@ usage: %s [OPTIONS] file\n\
       -x, --xml           Output in XML\n\
       -D U, --xml-dtd=U   Use the DTD at U\n\
 \n\
+ EXPERIMENTAL:\n\
  Subsetting is available by using the following options with a dataset\n\
  attribute. Subsetting is done by selecting a hyperslab from the data.\n\
  Thus, the options mirror those for performing a hyperslab selection.\n\
