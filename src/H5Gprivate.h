@@ -35,6 +35,7 @@
     4 +				/*entry type				*/    \
     24)				/*scratch pad space			*/
     
+#define H5G_DEFAULT_ROOT_SIZE  32
 
 /*
  * Various types of object header information can be cached in a symbol
@@ -61,7 +62,11 @@ typedef struct H5G_entry_t {
 
    union {
       struct {
-	 uint32	nt;		/*number type				*/
+	 struct	{
+        uint8 length;
+        uint8 arch;
+        uint16 type;
+     }nt ;		/*number type				*/
 	 uint32 ndim;		/*number of dimensions			*/
 	 uint32 dim[4];		/*dimension sizes			*/
       } sdata;
@@ -143,6 +148,7 @@ herr_t H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 		   const char *name, H5G_entry_t *ent);
 herr_t H5G_modify (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 		   const char *name, H5G_entry_t *ent);
+herr_t H5G_set_root (hdf5_file_t *f, const char *name, H5G_entry_t *ent);
 
 /* functions that understand symbol tables */
 haddr_t H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init);

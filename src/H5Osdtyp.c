@@ -179,7 +179,7 @@ H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
       if (!sdtype)
           if((sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t)))!=NULL)
             {
-              p=&(uint8 *)ent->cache.sdata.nt;
+              p=(const uint8 *)&ent->cache.sdata.nt;
               sdtype->length=*p++;
               sdtype->arch=*p++;
               UINT16DECODE(p,sdtype->type);
@@ -213,7 +213,7 @@ static hbool_t
 H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
 {
     const H5O_sim_dtype_t *sdtype = (const H5O_sim_dtype_t *)mesg;
-    const uint8 *p;
+    uint8 *p;
     hbool_t modified = BFALSE;
    
     FUNC_ENTER (H5O_sim_dtype_cache, NULL, BFAIL);
@@ -238,22 +238,22 @@ H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
       } /* end if */
     else
       {
-        if(ent->cache.sdata.length= sdtype->length)
+        if(ent->cache.sdata.nt.length != sdtype->length)
           {
             modified = BTRUE;
-            ent->cache.sdata.length = sdtype->length;
+            ent->cache.sdata.nt.length = sdtype->length;
           } /* end if */
 
-        if (ent->cache.sdata.arch != sdtype->arch)
+        if (ent->cache.sdata.nt.arch != sdtype->arch)
           {
            modified = BTRUE;
-           ent->cache.sdata.arch = sdtype->arch;
+           ent->cache.sdata.nt.arch = sdtype->arch;
           } /* end if */
 
-        if (ent->cache.sdata.type != sdtype->type)
+        if (ent->cache.sdata.nt.type != sdtype->type)
           {
            modified = BTRUE;
-           ent->cache.sdata.type = sdtype->type;
+           ent->cache.sdata.nt.type = sdtype->type;
           } /* end if */
       } /* end else */
 
@@ -288,7 +288,7 @@ H5O_sim_dtype_copy (const void *mesg, void *dest)
    if (!dst) dst = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t));
 
    /* copy */
-   HDmempcy(dst,src,sizeof(H5O_sim_dtype_t));
+   HDmemcpy(dst,src,sizeof(H5O_sim_dtype_t));
 
    FUNC_LEAVE ((void*)dst);
 } /* end H5O_sim_dtype_copy() */

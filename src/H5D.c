@@ -34,6 +34,9 @@ static char RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>  /* Generic Functions */
 #include <H5Aprivate.h> /* Atoms */
+#include <H5Gprivate.h> /* Groups */
+#include <H5Oprivate.h> /* Object Headers */
+#include <H5Mprivate.h> /* Meta-Object API */
 #include <H5Dprivate.h> /* Dataset functions */
 #include <H5Eprivate.h> /* Error handling */
 #include <H5Mprivate.h> /* Meta data */
@@ -299,21 +302,9 @@ herr_t H5D_flush(hatom_t oid)
             if(dset_parent!=H5_FILE ||
                     (dset_parent==H5_FILE && root_type==H5F_ROOT_DIRECTORY))
               {
-                uintn namelen;  /* length of parent directory's name */
-                char *name;     /* pointer to parent directory's name */
-
-                /* Get the name of the parent directory */
-                if((namelen=H5Mname_len(dataset->parent))==UFAIL)
-                    HGOTO_ERROR(H5E_DIRECTORY, H5E_BADVALUE, FAIL);
-                if((name=HDmalloc(namelen+1))==NULL);
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-                if(H5Mget_name(dataset->parent,name)==FAIL)
-                    HGOTO_ERROR(H5E_DIRECTORY, H5E_NOTFOUND, FAIL);
-
                 /* Insert the dataset into the parent directory */
-                if(H5G_insert (file, NULL, name, dataset->name, &d_sym)==FAIL)
+                if(H5G_insert (file, NULL, NULL, dataset->name, &d_sym)==FAIL)
                     HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTINSERT, FAIL);
-                HDfree(name);
               } /* end if */
             else    /* insert dataset as root-object, or into root-directory */
               {

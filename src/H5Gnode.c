@@ -926,8 +926,14 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
       case H5G_CACHED_SDATA:
 	 fprintf (stream, "S-data\n");
 	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  "Number type:",
-		  (unsigned)(sn->entry[i].cache.sdata.nt));
+		  "Number type length:",
+		  (unsigned)(sn->entry[i].cache.sdata.nt.length));
+	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		  "Number type architecture:",
+		  (unsigned)(sn->entry[i].cache.sdata.nt.arch));
+	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		  "Number type type:",
+		  (unsigned)(sn->entry[i].cache.sdata.nt.type));
 	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 		  "Dimensionality:",
 		  (unsigned)(sn->entry[i].cache.sdata.ndim));

@@ -122,7 +122,9 @@ H5O_sim_dim_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
           } /* end if */
       } /* end if */
 
+#ifdef LATER
 done:
+#endif /* LATER */
   if(sdim == NULL)   
     { /* Error condition cleanup */
 
@@ -162,7 +164,7 @@ H5O_sim_dim_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *mesg)
     assert (f);
     assert (raw_size >= 8); /* at least the rank & flags must be present */
     assert (p);
-    assert (sdtype);
+    assert (sdim);
 
     /* encode */
     UINT32ENCODE(p,sdim->rank);
@@ -221,7 +223,7 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
       if (!sdim)
           if((sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t)))!=NULL)
             {
-              p=&(uint8 *)ent->cache.sdata.ndim;
+              p=(const uint8 *)&ent->cache.sdata.ndim;
               UINT32DECODE(p,sdim->rank);
               sdim->dim_flags=0;    /* cached dimensions never have max. dims or permutation vectors */
               sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
@@ -256,16 +258,16 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
 static hbool_t
 H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
 {
-    const H5O_sim_dim_t *sdtype = (const H5O_sim_dim_t *)mesg;
+    const H5O_sim_dim_t *sdim = (const H5O_sim_dim_t *)mesg;
     uintn u;        /* Local counting variable */
-    const uint8 *p;
+    uint8 *p;
     hbool_t modified = BFALSE;
    
     FUNC_ENTER (H5O_sim_dim_cache, NULL, BFAIL);
 
     /* check args */
     assert (ent);
-    assert (sdtype);
+    assert (sdim);
 
     /*
      * We do this in two steps so Purify doesn't complain about
@@ -283,10 +285,10 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
       } /* end if */
     else
       {
-        if(ent->cache.sdata.rank= sdim->rank)
+        if(ent->cache.sdata.ndim!= sdim->rank)
           {
             modified = BTRUE;
-            ent->cache.sdata.rank = sdim->rank;
+            ent->cache.sdata.ndim = sdim->rank;
           } /* end if */
 
         /* Check each dimension */
@@ -299,73 +301,82 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
       } /* end else */
 
     FUNC_LEAVE (modified);
-} /* end H5O_sim_dtype_cache() */
+} /* end H5O_sim_dim_cache() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_sim_dtype_copy
+    H5O_sim_dim_copy
  PURPOSE
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
-    void *H5O_sim_dtype_copy(mesg, dest)
-        const void *mesg;       IN: Pointer to the source simple datatype struct
-        const void *dest;       IN: Pointer to the destination simple datatype struct
+    void *H5O_sim_dim_copy(mesg, dest)
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
+        const void *dest;       IN: Pointer to the destination simple dimensionality struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
-        This function copies a native (memory) simple datatype message,
+        This function copies a native (memory) simple dimensionality message,
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sim_dtype_copy (const void *mesg, void *dest)
+H5O_sim_dim_copy (const void *mesg, void *dest)
 {
-   const H5O_sim_dtype_t	*src = (const H5O_sim_dtype_t *)mesg;
-   H5O_sim_dtype_t		*dst = (H5O_sim_dtype_t *)dest;
+   const H5O_sim_dim_t	*src = (const H5O_sim_dim_t *)mesg;
+   H5O_sim_dim_t		*dst = (H5O_sim_dim_t *)dest;
    
-   FUNC_ENTER (H5O_sim_dtype_copy, NULL, NULL);
+   FUNC_ENTER (H5O_sim_dim_copy, NULL, NULL);
 
    /* check args */
    assert (src);
-   if (!dst) dst = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t));
+   if (!dst)
+       dst = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
 
    /* copy */
-   HDmempcy(dst,src,sizeof(H5O_sim_dtype_t));
+   HDmemcpy(dst,src,sizeof(H5O_sim_dim_t));
 
    FUNC_LEAVE ((void*)dst);
-} /* end H5O_sim_dtype_copy() */
+} /* end H5O_sim_dim_copy() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_sim_dtype_size
+    H5O_sim_dim_size
  PURPOSE
     Return the raw message size in bytes
  USAGE
-    void *H5O_sim_dtype_copy(f, mesg)
+    void *H5O_sim_dim_copy(f, mesg)
         hdf5_file_t *f;         IN: pointer to the HDF5 file struct
-        const void *mesg;       IN: Pointer to the source simple datatype struct
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
  RETURNS
     Size of message on success, FAIL on failure
  DESCRIPTION
-        This function returns the size of the raw simple datatype message on
+        This function returns the size of the raw simple dimensionality message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sim_dtype_size (hdf5_file_t *f, const void *mesg)
+H5O_sim_dim_size (hdf5_file_t *f, const void *mesg)
 {
+   const H5O_sim_dim_t	*sdim = (const H5O_sim_dim_t *)mesg;
+   size_t ret_value=8;  /* all dimensionality messages are at least 8 bytes long (rank and flags) */
+
    FUNC_ENTER (H5O_sim_dtype_size, NULL, FAIL);
-   FUNC_LEAVE (4);
-} /* end H5O_sim_dtype_size() */
+
+   ret_value+=sdim->rank*4; /* add in the dimension sizes */
+   ret_value+=((sdim->dim_flags&0x01)>0)*sdim->rank*4;  /* add in the space for the maximum dimensions, if they are present */
+   ret_value+=((sdim->dim_flags&0x02)>0)*sdim->rank*4;  /* add in the space for the dimension permutations, if they are present */
+
+   FUNC_LEAVE (ret_value);
+} /* end H5O_sim_dim_size() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5O_sim_dtype_debug
+    H5O_sim_dim_debug
  PURPOSE
-    Prints debugging information for a simple datatype message
+    Prints debugging information for a simple dimensionality message
  USAGE
-    void *H5O_sim_dtype_debug(f, mesg, stream, indent, fwidth)
+    void *H5O_sim_dim_debug(f, mesg, stream, indent, fwidth)
         hdf5_file_t *f;         IN: pointer to the HDF5 file struct
-        const void *mesg;       IN: Pointer to the source simple datatype struct
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
         FILE *stream;           IN: Pointer to the stream for output data
         intn indent;            IN: Amount to indent information by
         intn fwidth;            IN: Field width (?)
@@ -376,30 +387,42 @@ H5O_sim_dtype_size (hdf5_file_t *f, const void *mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sim_dtype_debug (hdf5_file_t *f, const void *mesg, FILE *stream,
+H5O_sim_dim_debug (hdf5_file_t *f, const void *mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
-   const H5O_sim_dtype_t	*sdtype = (const H5O_sim_dtype_t *)mesg;
+   const H5O_sim_dim_t	*sdim = (const H5O_sim_dim_t *)mesg;
+   uintn u;     /* local counting variable */
    
-   FUNC_ENTER (H5O_sim_dtype_debug, NULL, FAIL);
+   FUNC_ENTER (H5O_sim_dim_debug, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (sdtype);
+   assert (sdim);
    assert (stream);
    assert (indent>=0);
    assert (fwidth>=0);
 
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Length:",
-	    (unsigned long)(sdtype->length));
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Architecture:",
-	    (unsigned long)(sdtype->arch));
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Data-Type:",
-	    (unsigned long)(sdtype->type));
+	    "Rank:",
+	    (unsigned long)(sdim->rank));
+   fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
+	    "Flags:",
+	    (unsigned long)(sdim->dim_flags));
+    for(u=0; u<sdim->rank; u++)
+       fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
+            "Dim Size:",
+            (unsigned long)(sdim->size[u]));
+    if(sdim->dim_flags&0x01)
+        for(u=0; u<sdim->rank; u++)
+           fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
+                "Dim Max:",
+                (unsigned long)(sdim->max[u]));
+    if(sdim->dim_flags&0x02)
+        for(u=0; u<sdim->rank; u++)
+           fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
+                "Dim Perm:",
+                (unsigned long)(sdim->perm[u]));
 
    FUNC_LEAVE (SUCCEED);
-} /* end H5O_sim_dtype_debug() */
+} /* end H5O_sim_dim_debug() */
 

@@ -1117,7 +1117,9 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_SDATA:
-      UINT32DECODE (*pp, ent->cache.sdata.nt);
+      ent->cache.sdata.nt.length= *(*pp)++;
+      ent->cache.sdata.nt.arch= *(*pp)++;
+      UINT16DECODE (*pp, ent->cache.sdata.nt.type);
       UINT32DECODE (*pp, ent->cache.sdata.ndim);
       UINT32DECODE (*pp, ent->cache.sdata.dim[0]);
       UINT32DECODE (*pp, ent->cache.sdata.dim[1]);
@@ -1228,7 +1230,9 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_SDATA:
-      UINT32ENCODE (*pp, ent->cache.sdata.nt);
+      *(*pp)++= ent->cache.sdata.nt.length;
+      *(*pp)++= ent->cache.sdata.nt.arch;
+      UINT16ENCODE (*pp, ent->cache.sdata.nt.type);
       UINT32ENCODE (*pp, ent->cache.sdata.ndim);
       UINT32ENCODE (*pp, ent->cache.sdata.dim[0]);
       UINT32ENCODE (*pp, ent->cache.sdata.dim[1]);
