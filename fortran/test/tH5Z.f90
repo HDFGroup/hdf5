@@ -24,6 +24,7 @@
      LOGICAL :: status, status1
      INTEGER(HID_T)    :: crtpr_id, xfer_id
      INTEGER           :: error
+     INTEGER           :: nfilters
      INTEGER(HSIZE_T)  :: ch_dims(2)
      INTEGER           :: RANK = 2
      INTEGER           :: dlevel = 6
@@ -90,6 +91,58 @@
         CALL h5pclose_f(xfer_id, error)
               CALL check("h5pclose_f", error, total_error)
 
+     endif
+
+!
+! Verify h5premove_filter_f
+!
+     CALL h5zfilter_avail_f(H5Z_FILTER_FLETCHER32_F, status, error)
+              CALL check("h5zfilter_avail_f", error, total_error)
+     if(status) then
+         CALL h5zfilter_avail_f(H5Z_FILTER_SHUFFLE_F, status, error)
+                  CALL check("h5zfilter_avail_f", error, total_error)
+         if(status) then
+            CALL h5pcreate_f(H5P_DATASET_CREATE_F, crtpr_id, error)
+                  CALL check("h5pcreate_f", error, total_error)
+            CALL h5pset_fletcher32_f(crtpr_id, error)
+                  CALL check("h5pset_fletcher32_f", error, total_error) 
+            CALL h5pset_shuffle_f(crtpr_id, error)
+                  CALL check("h5pset_shuffle_f", error, total_error) 
+            CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
+                  CALL check("h5pget_nfilters_f", error, total_error) 
+
+            ! Verify the correct number of filters
+            if (nfilters .ne. 2) then
+                  write(*,*) "number of filters is wrong"
+                  total_error = total_error + 1
+            endif
+
+            ! Delete a single filter
+            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_SHUFFLE_F, error)
+                  CALL check("h5pset_shuffle_f", error, total_error) 
+
+            ! Verify the correct number of filters now
+            CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
+                  CALL check("h5pget_nfilters_f", error, total_error) 
+            if (nfilters .ne. 1) then
+                  write(*,*) "number of filters is wrong"
+                  total_error = total_error + 1
+            endif
+
+            ! Delete all filters
+            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_ALL_F, error)
+                  CALL check("h5premove_filter_f", error, total_error) 
+
+            ! Verify the correct number of filters now
+            CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
+                  CALL check("h5pget_nfilters_f", error, total_error) 
+            if (nfilters .ne. 0) then
+                  write(*,*) "number of filters is wrong"
+                  total_error = total_error + 1
+            endif
+            CALL h5pclose_f(crtpr_id,error)
+                  CALL check("h5pclose_f", error, total_error)
+         endif
      endif
 
      RETURN

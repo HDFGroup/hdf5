@@ -31,6 +31,7 @@
           
 
      INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: new_file_id   ! File identifier
      INTEGER(HID_T) :: group_id      ! group identifier  
      INTEGER(HID_T) :: dset_id       ! Dataset identifier 
      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
@@ -52,6 +53,7 @@
      INTEGER     ::   error ! Error flag
      INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
      CHARACTER(LEN=80) name_buf
+     CHARACTER(LEN=280) name_buf1
      INTEGER(SIZE_T)   buf_size
      INTEGER(SIZE_T)   name_size
      INTEGER    ::    ref_count ! Reference count for IDs
@@ -98,6 +100,20 @@
               total_error = total_error + 1
           endif
       endif
+     
+     ! 
+     ! Get file identifier from dataset identifier and then get file name
+     !
+     CALL h5iget_file_id_f(dset_id, new_file_id, error)
+     CALL check("h5iget_file_id_f",error,total_error)
+     name_size = 280
+     CALL h5fget_name_f(new_file_id, name_buf1, name_size, error)
+     CALL check("h5fget_name_f",error,total_error)
+          if (name_buf1(1:name_size) .ne. fix_filename(1:name_size)) then
+              write(*,*) "h5fget_name returned wrong file name"
+              total_error = total_error + 1
+          endif
+
 
      !
      ! Write data_in to the dataset
@@ -206,6 +222,8 @@
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
+     CALL check("h5fclose_f",error,total_error)
+     CALL h5fclose_f(new_file_id, error)
      CALL check("h5fclose_f",error,total_error)
 
      !
