@@ -654,7 +654,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
 herr_t
 H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
-    uint u;
+    uintn u;
 
     FUNC_ENTER(H5S_extent_copy, FAIL);
 
