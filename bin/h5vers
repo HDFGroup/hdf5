@@ -172,14 +172,6 @@ die "unable to read file: $RELEASE\n" unless -r $file;
 my $CONFIGURE = $file;
 $CONFIGURE =~ s/[^\/]*$/..\/configure.in/;
 die "unable to read file: $CONFIGURE\n" unless -r $file;
-# fortran/configure.in
-my $FORTRAN_CONFIGURE = $file;
-$FORTRAN_CONFIGURE =~ s/[^\/]*$/..\/fortran\/configure.in/;
-die "unable to read file: $FORTRAN_CONFIGURE\n" unless -r $file;
-# c++/configure.in
-my $CXX_CONFIGURE = $file;
-$CXX_CONFIGURE =~ s/[^\/]*$/..\/c++\/configure.in/;
-die "unable to read file: $CXX_CONFIGURE\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -227,8 +219,6 @@ if ($set) {
   $README = "";
   $RELEASE = "";
   $CONFIGURE = "";
-  $FORTRAN_CONFIGURE = "";
-  $CXX_CONFIGURE = "";
   @newver = @curver;
 }
 
@@ -310,8 +300,6 @@ sub gen_configure {
 
 # Update the configure.in files and regenerate them
 gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
-gen_configure("HDF5 Fortran", $FORTRAN_CONFIGURE) if $FORTRAN_CONFIGURE;
-gen_configure("HDF5 C++", $CXX_CONFIGURE) if $CXX_CONFIGURE;
 
 # Print the new version number
 if ($verbose) {
