@@ -359,10 +359,10 @@ __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
 __DLL__ void * H5F_istore_chunk_free(void *chunk);
 
 /* Address-related functions */
-__DLL__ void H5F_addr_encode(H5F_t *, uint8_t**/*in,out*/, haddr_t);
-__DLL__ void H5F_addr_decode(H5F_t *, const uint8_t**/*in,out*/,
-			     haddr_t*/*out*/);
-__DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
+__DLL__ void H5F_addr_encode(H5F_t *, uint8_t** /*in,out*/, haddr_t);
+__DLL__ void H5F_addr_decode(H5F_t *, const uint8_t** /*in,out*/,
+			     haddr_t* /*out*/);
+__DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p /*out*/,
 			     const unsigned long objno[2]);
 
 #endif
