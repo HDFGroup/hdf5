@@ -1,20 +1,42 @@
 // Turn off warnings about not using the return value from these functions
--esym(534, H5E_clear, H5E_push, H5I_clear_group, H5I_destroy_group)
+-esym(534, HDfprintf, H5E_clear, H5E_push, H5I_clear_group, H5I_destroy_group)
 -esym(534, H5MM_xfree)
 
-// Don't whine about our use of 'goto' in our error macros
+// Suppress message about our use of 'goto' in our error macros
 -emacro(801,HGOTO_DONE)
+
+// Suppress message about using 'goto' in a few functions
+-efunc(801,H5_term_library,H5_trace)
 
 // Suppress message about "boolean test of a paranthesized assignment"
 -e820
 
 // Suppress message about "Constant value boolean" in FUNC_ENTER* macros
--emacro(506,FUNC_ENTER_API)
--emacro(506,FUNC_ENTER_NOAPI)
+-emacro(506,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
+
+// Suppress message about "Suspicious cast" in FUNC_ENTER* macros
+-emacro(611,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
+
+// Suppress message about "Boolean within 'if' always evaluates false" in FUNC_ENTER* macros
+-emacro(774,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
+
+// Suppress message about "Shift right of signed quantity" in H5I_GRP macro
+-emacro(702,H5I_GRP)
 
 // Suppress message about "enum constant not used within defaulted switch"
 -e788
 
+// Indicate functions that are like printf()
+-printf(2,HDfprintf)
+
+// Tell lint about additional printf() format codes that HDfprintf understands
+-printf_code(a,haddr_t)
+-printf_code(Hu,hsize_t)
+-printf_code(Hd,hssize_t)
+-printf_code(Zu,size_t)
+-printf_code(Zd,ssize_t)
+
 /* So far, the following files have been linted with these options:
+        H5.c
         H5A.c
 */
