@@ -3313,6 +3313,44 @@ H5Tget_member_offset(hid_t type_id, int membno)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tget_member_class
+ *
+ * Purpose:	Returns the datatype class of a member of a compound datatype.
+ *
+ * Return:	Success: Non-negative
+ *
+ *		Failure: H5T_NO_CLASS
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, November  9, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_class_t
+H5Tget_member_class(hid_t type_id, int membno)
+{
+    H5T_t	*dt = NULL;
+    H5T_class_t	ret_value = H5T_NO_CLASS;
+
+    FUNC_ENTER(H5Tget_member_class, H5T_NO_CLASS);
+
+    /* Check args */
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
+            NULL == (dt = H5I_object(type_id)) || H5T_COMPOUND != dt->type)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound data type");
+    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
+
+    /* Value */
+    ret_value = dt->u.compnd.memb[membno].type->type;
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Tget_member_class() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tget_member_type
  *
  * Purpose:	Returns the data type of the specified member.	The caller

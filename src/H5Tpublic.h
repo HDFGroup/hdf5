@@ -458,11 +458,6 @@ __DLL__ htri_t H5Tcommitted(hid_t type_id);
 /* Operations defined on compound data types */
 __DLL__ herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
 			 hid_t member_id);
-#ifdef QAK
-__DLL__ herr_t H5Tinsert_array(hid_t parent_id, const char *name,
-			       size_t offset, int ndims, const size_t dim[],
-			       const int *perm, hid_t member_id);
-#endif /* QAK */
 __DLL__ herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration data types */
@@ -506,10 +501,7 @@ __DLL__ H5T_str_t H5Tget_strpad(hid_t type_id);
 __DLL__ int H5Tget_nmembers(hid_t type_id);
 __DLL__ char *H5Tget_member_name(hid_t type_id, int membno);
 __DLL__ size_t H5Tget_member_offset(hid_t type_id, int membno);
-#ifdef QAK
-__DLL__ int H5Tget_member_dims(hid_t type_id, int membno, size_t dims[]/*out*/,
-			       int perm[]/*out*/);
-#endif /* QAK */
+__DLL__ H5T_class_t H5Tget_member_class(hid_t type_id, int membno);
 __DLL__ hid_t H5Tget_member_type(hid_t type_id, int membno);
 __DLL__ herr_t H5Tget_member_value(hid_t type_id, int membno,
 				   void *value/*out*/);
