@@ -10,8 +10,9 @@
 #include <fcntl.h>
 #include <hdf5.h>
 #include <stdlib.h>
+#if !defined(WIN32)
 #include <unistd.h>
-
+#endif
 /*
  * Define NO_FILLING if you want to compare how this test works when there is
  * no fill value (that is, when the fill value is zero).
@@ -35,7 +36,10 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
-
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	cleanup

@@ -20,6 +20,11 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
+
 #define TEST_FILE_NAME0		"shtype0.h5"
 #define TEST_FILE_NAME1		"shtype1.h5"
 #define TEST_FILE_NAME2A	"shtype2a.h5"

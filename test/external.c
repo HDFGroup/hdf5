@@ -13,7 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if !defined(WIN32)
 #include <unistd.h>
+#endif
 
 #include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
@@ -22,6 +24,11 @@
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
+#endif
+
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
 #endif
 
 #define TEST_FILE_NAME1		"extern_1.h5"

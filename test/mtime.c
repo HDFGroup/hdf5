@@ -13,7 +13,9 @@
 #include <assert.h>
 #include <hdf5.h>
 #include <math.h>
+#if !defined(WIN32)
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 #define FALSE		0
@@ -28,7 +30,10 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
-
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	display_error_cb

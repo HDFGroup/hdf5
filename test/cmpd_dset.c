@@ -21,6 +21,11 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
+
 #define TEST_FILE_NAME	"cmpd_dset.h5"
 
 /* The first dataset */

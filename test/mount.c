@@ -26,6 +26,10 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	cleanup

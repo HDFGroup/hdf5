@@ -25,6 +25,11 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
+
 #define FILE_NAME	"chunk.h5"
 #define LINESPOINTS	"lines"
 #define CH_SIZE		100		/*squared in terms of bytes    	*/
@@ -235,7 +240,12 @@ static double
 test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
 {
     hid_t	file, dset, mem_space, file_space;
-    hsize_t	i, hs_size[2], nio=0;
+    hsize_t	i, hs_size[2];
+#if defined(WIN32)
+	hssize_t nio = 0;
+#else
+	hsize_t nio = 0;
+#endif
     hssize_t	hs_offset[2];
     char	*buf = calloc (1, SQUARE (io_size));
     int		mdc_nelmts, rdcc_nelmts;

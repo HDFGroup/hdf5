@@ -18,6 +18,10 @@
 #else
 #   define __unused__ __attribute__((unused))
 #endif
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
+#endif
 
 #define FILE_NAME_1	"unlink.h5"
 #define THE_OBJECT	"/foo"

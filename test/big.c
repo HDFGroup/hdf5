@@ -21,8 +21,11 @@
 #define WRT_N		50
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
+#if defined(WIN32)
+#define GB8LL		((unsigned __int64)8*1024*1024*1024)
+#else
 #define GB8LL		((unsigned long long)8*1024*1024*1024)
-
+#endif
 static hsize_t
 randll (hsize_t limit)
 {
@@ -87,7 +90,11 @@ is_sparse(void)
     if (5!=write(fd, "hello", 5)) return 0;
     if (stat("x.h5", &sb)<0) return 0;
     if (unlink("x.h5")<0) return 0;
+#if !defined(WIN32)
     return (sb.st_blocks*512 < (unsigned)sb.st_size);
+#else
+	return (0);
+#endif
 }
 
 

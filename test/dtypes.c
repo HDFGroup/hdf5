@@ -15,8 +15,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#if !defined (WIN32)
 #include <sys/wait.h>
 #include <unistd.h>
+#endif
+
 
 #define H5T_PACKAGE
 #include <H5Tpkg.h>		/*to turn off hardware conversions*/
@@ -28,6 +31,10 @@
 #   define __unused__ /*void*/
 #else
 #   define __unused__ __attribute__((unused))
+#endif
+#if defined(WIN32)
+#undef __unused__
+#define __unused__
 #endif
 
 #if SIZEOF_DOUBLE != SIZEOF_LONG_DOUBLE
