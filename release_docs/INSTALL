@@ -80,11 +80,13 @@
 	situations that are known not to work, but it limits the hdf5
 	address space to 2GB.
 
-2.2. DEC
+2.2. COMPAQ/DEC
 	The V5.2-038 compiler (and possibly others) occasionally
 	generates incorrect code for memcpy() calls when optimizations
 	are enabled, resulting in unaligned access faults. HDF5 works
 	around the problem by casting the second argument to `char *'.
+	The fortran module (5.4.1a) fails in compiling some fortran
+	programs.  Need to use 5.5.0 or more.
 
 2.3. SGI (Irix64 6.2)
 	The Mongoose 7.00 compiler has serious optimization bugs and
