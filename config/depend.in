@@ -38,7 +38,9 @@ dep depend: .distdep
 	      $(CC) -M -MG $(CPPFLAGS) $$dep |sed 's/\.o/.lo/' >>$@;	      \
 	   fi;								      \
 	done;
-	-perl -p $(top_srcdir)/bin/distdep .depend >$(srcdir)/.distdep
+	@if test "$(srcdir)" = "."; then				      \
+	    perl -p $(top_srcdir)/bin/distdep .depend >.distdep;    \
+	fi
 
 -include .depend
 
