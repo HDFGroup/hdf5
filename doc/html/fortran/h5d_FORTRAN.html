@@ -193,11 +193,15 @@ FORTRAN Dataset API -- h5d
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
             TYPE, INTENT(INOUT) :: buf          ! Data buffer; may be a scalar or an array
-            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
-                                                ! dimension sizes of data buffer buf;
-                                                ! dim(k) has value of the k-th dimension
-                                                ! of buffer buf;
+            DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+                                                ! Array to hold corresponding dimension 
+                                                ! sizes of data buffer buf; dim(k) has 
+                                                ! value of the k-th dimension of buffer buf;
                                                 ! values are ignored if buf is a scalar
+                                                ! 
+                                                ! Deprecated type, will be removed in 
+                                                ! Release 1.6:
+                                                ! INTEGER, INTENT(IN)  :: dims(7)     
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
                                                 ! 0 on success and -1 on failure
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
@@ -265,11 +269,15 @@ FORTRAN Dataset API -- h5d
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
             TYPE, INTENT(IN) :: buf             ! Data buffer; may be a scalar or an array
-            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
-                                                ! dimension sizes of data buffer buf;
-                                                ! dim(k) has value of the k-th dimension
-                                                ! of buffer buf;
+            DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+                                                ! Array to hold corresponding dimension 
+                                                ! sizes of data buffer buf; dim(k) has 
+                                                ! value of the k-th dimension of buffer buf;
                                                 ! values are ignored if buf is a scalar
+                                                ! 
+                                                ! Deprecated type, will be removed in 
+                                                ! Release 1.6:
+                                                ! INTEGER, INTENT(IN)  :: dims(7)     
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
                                                 ! 0 on success and -1 on failure
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
