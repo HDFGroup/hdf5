@@ -32,6 +32,7 @@
 #define AT() printf ("	 at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 
+#define TEST_FILE_NAME		"dataset.h5"
 #define DSET_DEFAULT_NAME	"default"
 #define DSET_CHUNKED_NAME	"chunked"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
@@ -671,6 +672,26 @@ test_compression(hid_t file)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -699,8 +720,7 @@ main(void)
     /* Automatic error reporting to standard output */
     H5Eset_auto (display_error_cb, NULL);
 
-    unlink("dataset.h5");
-    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		     H5P_DEFAULT, H5P_DEFAULT);
     assert(file >= 0);
 
@@ -733,5 +753,6 @@ main(void)
     status = H5close ();
     assert (status>=0);
     
+    cleanup();
     return 0;
 }

@@ -19,6 +19,12 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#define TEST_FILE_NAME0		"shtype0.h5"
+#define TEST_FILE_NAME1		"shtype1.h5"
+#define TEST_FILE_NAME2A	"shtype2a.h5"
+#define TEST_FILE_NAME2B	"shtype2b.h5"
+#define TEST_FILE_NAME3		"shtype3.h5"
+
 
 /*-------------------------------------------------------------------------
  * Function:	display_error_cb
@@ -72,7 +78,7 @@ test_1 (void)
     printf ("%-70s", "...creating/quering datasets with shared type");
     fflush (stdout);
 
-    f = H5Fcreate ("shtype1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    f = H5Fcreate (TEST_FILE_NAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (f<0) goto error;
     if ((s1 = H5Screate_simple (1, size, size))<0) goto error;
     if ((t1 = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
@@ -131,9 +137,9 @@ test_2 (void)
     printf ("%-70s", "...compare shared and unshared types");
     fflush (stdout);
 
-    f1 = H5Fcreate ("shtype2a.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    f1 = H5Fcreate (TEST_FILE_NAME2A, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (f1<0) goto error;
-    f2 = H5Fcreate ("shtype2b.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    f2 = H5Fcreate (TEST_FILE_NAME2B, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (f2<0) goto error;
     s1 = H5Screate_simple (1, size, size);
     if (s1<0) goto error;
@@ -207,7 +213,7 @@ test_3 (void)
      * access.  Add a dataset with a shared type. Then close it and open it
      * for read-only.  The shared type causes a global heap to be allocated.
      */
-    f1 = H5Fcreate ("shtype3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    f1 = H5Fcreate (TEST_FILE_NAME3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (f1<0) goto error;
     if ((s1 = H5Screate_simple (1, size, size))<0) goto error;
     if ((t1 = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
@@ -216,7 +222,7 @@ test_3 (void)
     if (H5Sclose (s1)<0) goto error;
     if (H5Dclose (d1)<0) goto error;
     if (H5Fclose (f1)<0) goto error;
-    f1 = H5Fopen ("shtype3.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+    f1 = H5Fopen (TEST_FILE_NAME3, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (f1<0) goto error;
     assert (0==H5Tis_shared (f1, t1));
 
@@ -252,6 +258,30 @@ test_3 (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME0);
+    remove(TEST_FILE_NAME1);
+    remove(TEST_FILE_NAME2A);
+    remove(TEST_FILE_NAME2B);
+    remove(TEST_FILE_NAME3);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	
@@ -274,7 +304,7 @@ main (void)
     hid_t	f1, g1;
 
     /* Make sure diagnostics get emitted before we start doing real stuff */
-    f1 = H5Fcreate ("shtype0.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    f1 = H5Fcreate (TEST_FILE_NAME0, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     g1 = H5Gcreate (f1, "howdy", 0);
     H5Gclose (g1);
     H5Fclose (f1);
@@ -292,6 +322,7 @@ main (void)
 	puts ("*** Shared data type test(s) failed ***");
     } else {
 	puts ("All shared data type tests passed.");
+	cleanup();
     }
     return nerrors ? 1 : 0;
 }

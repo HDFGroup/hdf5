@@ -24,6 +24,10 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#define TEST_FILE_NAME1		"extern_1.h5"
+#define TEST_FILE_NAME2		"extern_2.h5"
+#define TEST_FILE_NAME3		"extern_3.h5"
+
 static int nerrors_g = 0;
 
 
@@ -131,7 +135,7 @@ test_1 (void)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    file = H5Fcreate ("extern_1.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate (TEST_FILE_NAME1, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
     grp = H5Gcreate (file, "emit-diagnostics", 8);
@@ -521,7 +525,7 @@ test_2 (void)
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    file = H5Fcreate ("extern_2.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate (TEST_FILE_NAME2, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
     grp = H5Gcreate (file, "emit-diagnostics", 8);
@@ -660,7 +664,7 @@ test_3 (void)
     /*
      * Create another file
      */
-    file = H5Fcreate ("extern_3.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate (TEST_FILE_NAME3, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
@@ -767,6 +771,39 @@ test_3 (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME1);
+    remove(TEST_FILE_NAME2);
+    remove(TEST_FILE_NAME3);
+    /* not sure if the following file names can be #defined */
+    /* because some of them are created during runtime. */
+    /* List them out this way for now. */
+    remove("extern_1.raw");
+    remove("extern_1b.raw");
+    remove("extern_2.raw");
+    remove("extern_2b.raw");
+    remove("extern_3.raw");
+    remove("extern_3b.raw");
+    remove("extern_4.raw");
+    remove("extern_4b.raw");
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Runs external dataset tests.
@@ -793,6 +830,7 @@ main (void)
 
     if (0==nerrors_g) {
 	printf ("All external storage tests passed.\n");
+	cleanup();
     } else {
 	printf ("%d TEST%s FAILED.\n", nerrors_g, 1==nerrors_g?"":"s");
     }

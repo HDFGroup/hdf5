@@ -527,6 +527,26 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(FILENAME);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests indexed storage stuff.
@@ -675,5 +695,6 @@ main(int argc, char *argv[])
     }
     H5Pclose (template_id);
     printf("All i-store tests passed.\n");
+    cleanup();
     return 0;
 }

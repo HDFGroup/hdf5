@@ -10,9 +10,30 @@
 #include <assert.h>
 #include <hdf5.h>
 
+#define TEST_FILE_NAME	"extend.h5"
 #define NX	100		/* USE AN EVEN NUMBER!*/
 #define NY	100		/* USE AN EVEN NUMBER!*/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME);
+}
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -54,7 +75,7 @@ main (void)
     assert (mem_space>=0);
 
     /* Create the file */
-    file = H5Fcreate ("extend.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
@@ -126,6 +147,7 @@ main (void)
     H5Dclose (dataset);
     H5Fclose (file);
     
+    cleanup();
     return 0;
 }
 

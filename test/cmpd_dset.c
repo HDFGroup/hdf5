@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define TEST_FILE_NAME	"cmpd_dset.h5"
+
 /* The first dataset */
 typedef struct s1_t {
     unsigned int a;
@@ -62,6 +64,26 @@ typedef struct s5_t {
 #endif
 
 
+/*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME);
+}
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -131,7 +153,7 @@ main (void)
     hsize_t 		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
-    file = H5Fcreate ("cmpd_dset.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		      H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
@@ -591,5 +613,6 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     H5Dclose (dataset);
     H5Fclose (file);
 
+    cleanup();
     return 0;
 }

@@ -21,6 +21,12 @@
 #   define __FUNCTION__ ""
 #endif
 
+#define TEST_FILE_NAME0		"gheap0.h5"
+#define TEST_FILE_NAME1		"gheap1.h5"
+#define TEST_FILE_NAME2		"gheap2.h5"
+#define TEST_FILE_NAME3		"gheap3.h5"
+#define TEST_FILE_NAME4		"gheap4.h5"
+
 #define FAILED(S) {							      \
     puts ("*FAILED*");							      \
     printf ("    Failed at %s:%d in %s()%s%s\n",			      \
@@ -49,7 +55,7 @@
 static void
 emit_diagnostics (void)
 {
-    H5F_t *f = H5F_open ("gheap0.h5", H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    H5F_t *f = H5F_open (TEST_FILE_NAME0, H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
 			 NULL, NULL);
     H5G_t *g = H5G_create (f->shared->root_grp, "emit", 0);
     H5G_close (g);
@@ -91,7 +97,7 @@ test_1 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap1.h5",
+    f = H5F_open (TEST_FILE_NAME1,
 		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
@@ -174,7 +180,7 @@ test_2 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap2.h5",
+    f = H5F_open (TEST_FILE_NAME2,
 		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
@@ -251,7 +257,7 @@ test_3 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap3.h5",
+    f = H5F_open (TEST_FILE_NAME3,
 		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
@@ -320,7 +326,7 @@ test_4 (void)
 
     /* Open a clean file */
     H5Eclear ();
-    f = H5F_open ("gheap4.h5",
+    f = H5F_open (TEST_FILE_NAME4,
 		  H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 		  NULL, NULL);
     if (!f) {
@@ -364,6 +370,30 @@ test_4 (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME0);
+    remove(TEST_FILE_NAME1);
+    remove(TEST_FILE_NAME2);
+    remove(TEST_FILE_NAME3);
+    remove(TEST_FILE_NAME4);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests global heap.
@@ -397,6 +427,7 @@ main (void)
 		nfailed, 1==nfailed?"":"s");
     } else {
 	printf ("All global heap tests passed.\n");
+	cleanup();
     }
     return nfailed?-1:0;
 }

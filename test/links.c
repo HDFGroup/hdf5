@@ -9,6 +9,28 @@
  */
 #include <hdf5.h>
 
+#define TEST_FILE_NAME	"links.h5"
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Cleanup temporary test files
+ *
+ * Return:	none
+ *
+ * Programmer:	Albert Cheng
+ *              May 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup(void)
+{
+    remove(TEST_FILE_NAME);
+}
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -33,7 +55,7 @@ main (void)
     hsize_t	size[1] = {1};
 
     /* Create a file */
-    file = H5Fcreate ("links.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate (TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     scalar = H5Screate_simple (1, size, size);
 
     /* Create a group */
@@ -59,5 +81,6 @@ main (void)
     /* Close */
     H5Sclose (scalar);
     H5Fclose (file);
+    cleanup();
     return 0;
 }
