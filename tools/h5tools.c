@@ -44,6 +44,9 @@ static void display_reference_data(hsize_t hs_nelmts, hid_t p_type,
 				 hsize_t elmtno, hid_t container);
 #endif
 int h5dump_attr(hid_t oid, hid_t ptype);				  
+
+int print_data(hid_t oid, hid_t _p_type, int obj_data);
+
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -610,12 +613,10 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     static char	fmt_llong[8], fmt_ullong[8];
     H5T_str_t 	pad;
     H5G_stat_t	sb;
-    int		repeat_threshold; /*-1 means any amount of repeat allowed*/
+    int		repeat_threshold = H5DEFAULT_REPEAT_THRESHOLD;
 
-    if ((programtype == UNKNOWN) || (programtype == H5LS)) {
-	repeat_threshold = H5DEFAULT_REPEAT_THRESHOLD;
-    } else if (programtype == H5DUMP){
-	repeat_threshold = -1;
+	if (programtype == H5DUMP){
+		repeat_threshold = -1; /*-1 means any amount of repeat allowed*/
     }
     
     /* Build default formats for long long types */
@@ -1776,9 +1777,9 @@ hsize_t i;
 /*char p_buf[256];		*/
 char* out_buf = malloc(sizeof(char) * nCols);
 struct h5dump_str_t tempstr;
-int x;
+hsize_t x;
 hbool_t isref = FALSE;
-int totalspace;
+hsize_t totalspace;
 hbool_t done;
 int temp;
 
@@ -2225,6 +2226,7 @@ int     nmembs, i, j, k, ndims, perm[4];
     }
 
 }
+#if 0
 /*-------------------------------------------------------------------------
  * Function:	h5dump_simple
  *
@@ -2390,7 +2392,7 @@ h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
     H5Sclose(f_space);
     return 0;
 }
-
+#endif
 /*-------------------------------------------------------------------------
  * Function:	print_data	
  *
@@ -2435,19 +2437,19 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
     /* Check the data space */
     if (obj_data == DATASET_DATA) 
         f_space = H5Dget_space(oid);
-    else
+    else 
         f_space = H5Aget_space(oid);
 
     if (f_space < 0) return status;
  
-    if (H5Sis_simple(f_space) >= 0) 
+    if (H5Sis_simple(f_space) >= 0) {
 		if (obj_data == DATASET_DATA) {
 			status = h5dump_simple_dset(NULL,NULL, oid,p_type);
 		}
 		else { /*attribute data*/
 			status = h5dump_attr(oid,p_type);
 		}
-
+	}
     H5Sclose(f_space);
 
     if (p_type != _p_type) H5Tclose(p_type);
