@@ -527,29 +527,45 @@ H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction,
     assert(size>0);
     
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {         
-        if(size==sizeof(char))
+        if(size<=sizeof(char))
             match=H5T_NATIVE_INT_MATCH_CHAR;
-        else if(size==sizeof(short))
+        else if(size<=sizeof(short))
             match=H5T_NATIVE_INT_MATCH_SHORT;
-        else if(size==sizeof(int))
+        else if(size<=sizeof(int))
             match=H5T_NATIVE_INT_MATCH_INT;
-        else if(size==sizeof(long))
+        else if(size<=sizeof(long))
             match=H5T_NATIVE_INT_MATCH_LONG;
-        else if(size==sizeof(long_long))
+        else if(size<=sizeof(long_long))
             match=H5T_NATIVE_INT_MATCH_LLONG;
         else   /* If no native type matches the querried datatype, simply choose the type of biggest size. */
             match=H5T_NATIVE_INT_MATCH_LLONG;
     } else if(direction == H5T_DIR_DESCEND) {         
-        if(size==sizeof(long_long))
+        if(size>=sizeof(long_long))
             match=H5T_NATIVE_INT_MATCH_LLONG;
-        else if(size==sizeof(long))
-            match=H5T_NATIVE_INT_MATCH_LONG;
-        else if(size==sizeof(int))
-            match=H5T_NATIVE_INT_MATCH_INT;
-        else if(size==sizeof(short))
-            match=H5T_NATIVE_INT_MATCH_SHORT;
-        else if(size==sizeof(char))
-            match=H5T_NATIVE_INT_MATCH_CHAR;
+        else if(size>=sizeof(long)) {
+            if(size==sizeof(long))
+                match=H5T_NATIVE_INT_MATCH_LONG;
+            else 
+                match=H5T_NATIVE_INT_MATCH_LLONG;
+        }
+        else if(size>=sizeof(int)) {
+            if(size==sizeof(int))
+                match=H5T_NATIVE_INT_MATCH_INT;
+            else
+                match=H5T_NATIVE_INT_MATCH_LONG;
+        }
+        else if(size>=sizeof(short)) {
+            if(size==sizeof(short))
+                match=H5T_NATIVE_INT_MATCH_SHORT;
+            else
+                match=H5T_NATIVE_INT_MATCH_INT;
+        }
+        else if(size>=sizeof(char)) {
+            if(size==sizeof(char))
+                match=H5T_NATIVE_INT_MATCH_CHAR;
+            else
+                match=H5T_NATIVE_INT_MATCH_SHORT;
+        }
         else   /* If no native type matches the querried datatype, simple choose the type of smallest size. */
             match=H5T_NATIVE_INT_MATCH_CHAR;
     }
@@ -657,21 +673,29 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     assert(size>0);
     
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {        
-        if(size==sizeof(float))
+        if(size<=sizeof(float))
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-        else if(size==sizeof(double))
+        else if(size<=sizeof(double))
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-        else if(size==sizeof(long double))
+        else if(size<=sizeof(long double))
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
         else   /* If not match, return the biggest datatype */
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
     } else {
-        if(size==sizeof(long double))
+        if(size>=sizeof(long double))
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-        else if(size==sizeof(double))
-            match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-        else if(size==sizeof(float))
-            match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+        else if(size>=sizeof(double)) {
+            if(size==sizeof(double))
+                match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+            else
+                match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
+        }
+        else if(size>=sizeof(float)) {
+            if(size==sizeof(float))
+                match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+            else
+                match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+        }    
         else
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
     }

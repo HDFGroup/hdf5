@@ -114,7 +114,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_INT)) 
         TEST_ERROR;
-    if(sizeof(int)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(H5T_STD_I32BE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -152,7 +152,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_LLONG)) 
         TEST_ERROR;
-    if(sizeof(long_long)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(H5T_STD_I64LE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -173,7 +173,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_CHAR)) 
         TEST_ERROR;
-    if(sizeof(char)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(H5T_NATIVE_CHAR))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -194,7 +194,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT)) 
         TEST_ERROR;
-    if(sizeof(float)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(H5T_NATIVE_FLOAT))
         TEST_ERROR;
     if(H5T_FLOAT!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -215,7 +215,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_DOUBLE)) 
         TEST_ERROR;
-    if(sizeof(double)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(H5T_IEEE_F64BE))
         TEST_ERROR;
     if(H5T_FLOAT!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -350,11 +350,6 @@ test_compound_dtype2(hid_t file)
     /* Close dataset */
     if(H5Dclose(dataset)<0) TEST_ERROR;
 
-    /* Close temporary datatypes */
-    if(H5Tclose(tid2)<0) TEST_ERROR;
-    if(H5Tclose(tid)<0) TEST_ERROR;
-    if(H5Tclose(tid_m2)<0) TEST_ERROR;
-        
     /* Close dataspace */
     if(H5Sclose(space)<0) TEST_ERROR; 
 
@@ -367,7 +362,7 @@ test_compound_dtype2(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         TEST_ERROR;
         
-    if(sizeof(s1)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(tid_m))
         TEST_ERROR;
     if(!H5Tequal(native_type, tid_m)) 
         TEST_ERROR;
@@ -391,6 +386,11 @@ test_compound_dtype2(hid_t file)
 	    }
 	}
     }
+
+    /* Close temporary datatypes */
+    if(H5Tclose(tid2)<0) TEST_ERROR;
+    if(H5Tclose(tid)<0) TEST_ERROR;
+    if(H5Tclose(tid_m2)<0) TEST_ERROR;
 
     /* Close HDF5 objects */
     H5Dclose(dataset);
@@ -493,9 +493,6 @@ test_compound_dtype(hid_t file)
     /* Close dataset */
     if(H5Dclose(dataset)<0) TEST_ERROR;
 
-    /* Close datatype */
-    if(H5Tclose(tid)<0) TEST_ERROR;
-
     /* Close dataspace */
     if(H5Sclose(space)<0) TEST_ERROR; 
 
@@ -508,7 +505,7 @@ test_compound_dtype(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         TEST_ERROR;
     
-    if(sizeof(s1)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(tid2))
         TEST_ERROR;
     if(!H5Tequal(native_type, tid2)) 
         TEST_ERROR;
@@ -530,6 +527,9 @@ test_compound_dtype(hid_t file)
 	    }
 	}
     }
+
+    /* Close datatype */
+    if(H5Tclose(tid)<0) TEST_ERROR;
 
     H5Dclose(dataset);
     H5Tclose(dtype);
@@ -650,7 +650,7 @@ test_compound_dtype3(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         TEST_ERROR;
     
-    if(sizeof(s1)!=H5Tget_size(native_type))
+    if(H5Tget_size(native_type) != H5Tget_size(tid_m))
         TEST_ERROR;
     if(!H5Tequal(native_type, tid_m)) 
         TEST_ERROR;
