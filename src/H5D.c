@@ -929,7 +929,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     new_dset->layout.type = new_dset->create_parms->layout;
     new_dset->layout.ndims = H5S_get_simple_extent_ndims(space) + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
-    new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(type);
+    new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(new_dset->type);
 
     switch (new_dset->create_parms->layout) {
     case H5D_CONTIGUOUS:
@@ -1856,6 +1856,28 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(xfer_parms);
     assert(buf);
 
+#ifdef HAVE_PARALLEL
+    /* If MPIO is used, no VL datatype support yet. */
+    /* This is because they use the global heap in the file and we don't */
+    /* support parallel access of that yet */
+    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+            H5T_get_class(mem_type)==H5T_VLEN) {
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+		     "Parallel IO does not support writing VL datatypes yet");
+    }
+#endif
+#ifdef HAVE_PARALLEL
+    /* If MPIO is used, no dataset region reference support yet. */
+    /* This is because they use the global heap in the file and we don't */
+    /* support parallel access of that yet */
+    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+            H5T_get_class(mem_type)==H5T_REFERENCE &&
+            H5R_get_ref_type(mem_type)==H5R_DATASET_REGION) {
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+		     "Parallel IO does not support writing VL datatypes yet");
+    }
+#endif
+
     /* Initialize these before any errors can occur */
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
@@ -2548,6 +2570,44 @@ H5D_get_storage_size(H5D_t *dset)
     }
 	
     FUNC_LEAVE(size);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dvlen_reclaim
+ *
+ * Purpose:	Frees the buffers allocated for storing variable-length data
+ *      in memory.  Only frees the VL data in the selection defined in the
+ *      dataspace.  The dataset transfer property list is required to find the
+ *      correct allocation/free methods for the VL data in the buffer.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, June 10, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
+{
+    herr_t ret_value=FAIL;
+
+    FUNC_ENTER(H5Dvlen_reclaim, FAIL);
+
+    /* Check args */
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
+        H5I_DATASPACE!=H5I_get_type(space_id) ||
+        (H5I_TEMPLATE_0<=H5I_get_type(plist_id) && H5I_TEMPLATE_MAX>H5I_get_type(plist_id)) ||
+        buf==NULL) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
+    }
+
+/* Call H5Diterate with args, etc. */
+
+    FUNC_LEAVE(ret_value);
 }
 
 

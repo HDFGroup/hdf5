@@ -436,7 +436,7 @@ H5TB_resize_buf(hid_t tbuf_id, hsize_t size, void **ptr)
     if(ptr!=NULL)
         *ptr=tbuf->buf;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 } /* H5TB_resize_buf() */
 
 /*--------------------------------------------------------------------------

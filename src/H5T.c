@@ -3903,6 +3903,7 @@ H5Tvlen_create(hid_t base_id)
     if (NULL==(dt=H5MM_calloc(sizeof(H5T_t)))) {
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
+    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_VLEN;
     dt->parent = H5T_copy(base, H5T_COPY_ALL);
 
@@ -6942,3 +6943,41 @@ H5T_debug(H5T_t *dt, FILE *stream)
 
     FUNC_LEAVE(SUCCEED);
 }
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5R_get_ref_type
+ PURPOSE
+    Retrieves the type of reference for a datatype
+ USAGE
+    H5R_type_t H5Tget_ref_type(dt)
+        H5T_t *dt;  IN: datatype pointer for the reference datatype
+        
+ RETURNS
+    Success:	A reference type defined in H5Rpublic.h
+    Failure:	H5R_BADTYPE
+ DESCRIPTION
+    Given a reference datatype object, this function returns the reference type
+        of the datatype.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+H5R_type_t
+H5T_get_ref_type(H5T_t *dt)
+{
+    H5R_type_t ret_value = H5R_BADTYPE;
+
+    FUNC_ENTER(H5T_get_ref_type, H5R_BADTYPE);
+
+    assert(dt);
+
+    if(dt->type==H5T_REFERENCE)
+        ret_value=dt->u.atomic.u.r.rtype;
+
+#ifdef LATER
+done:
+#endif /* LATER */
+    FUNC_LEAVE(ret_value);
+}   /* end H5T_get_ref_type() */

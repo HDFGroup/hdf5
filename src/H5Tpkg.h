@@ -535,4 +535,7 @@ __DLL__ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *_buf, size_t le
 __DLL__ herr_t H5T_vlen_disk_alloc(H5F_t *f, void *vl_addr, hsize_t seq_len, hsize_t base_size);
 __DLL__ herr_t H5T_vlen_disk_write(H5F_t *f, void *vl_addr, void *_buf, size_t len);
 
+/* Reference specific functions */
+__DLL__ H5R_type_t H5T_get_ref_type(H5T_t *dt);
+
 #endif

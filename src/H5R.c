@@ -741,3 +741,4 @@ H5Rget_object_type(hid_t dataset, void *_ref)
 done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Rget_object_type() */
+
