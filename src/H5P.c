@@ -1282,7 +1282,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P_check_class(void *_obj, hid_t id, const void *_key)
+H5P_check_class(void *_obj, hid_t id, void *_key)
 {
     H5P_genclass_t *obj=(H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
     const H5P_check_class_t *key=(const H5P_check_class_t *)_key; /* Pointer to key information for comparison */

@@ -53,7 +53,7 @@
 typedef herr_t (*H5I_free_t)(void*);
 
 /* Type of the function to compare objects & keys */
-typedef int (*H5I_search_func_t)(void *obj, hid_t id, const void *key);
+typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);
 
 /* Private Functions in H5I.c */
 H5_DLL int H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
@@ -66,8 +66,7 @@ H5_DLL void *H5I_object(hid_t id);
 H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
 H5_DLL H5I_type_t H5I_get_type(hid_t id);
 H5_DLL void *H5I_remove(hid_t id);
-H5_DLL void *H5I_search(H5I_type_t grp, H5I_search_func_t func,
-			 const void *key);
+H5_DLL void *H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key);
 H5_DLL int H5I_inc_ref(hid_t id);
 H5_DLL int H5I_dec_ref(hid_t id);
 #endif

@@ -183,7 +183,7 @@ static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs, hid_t dxpl_id);
 static ssize_t H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
 static int H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
-static herr_t H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key);
+static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
                   H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
 static herr_t H5G_set_comment(H5G_entry_t *loc, const char *name,
@@ -3288,8 +3288,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
+static int
+H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
 {
     const H5G_names_t *names = (const H5G_names_t *)key;        /* Get operation's information */
     H5G_entry_t *ent = NULL;    /* Group entry for object that the ID refers to */

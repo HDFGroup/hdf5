@@ -1064,7 +1064,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
+H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/

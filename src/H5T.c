@@ -1853,7 +1853,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
+H5T_unlock_cb (void *_dt, hid_t UNUSED id, void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
