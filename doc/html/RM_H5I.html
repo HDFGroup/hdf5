@@ -423,7 +423,17 @@ END SUBROUTINE h5idec_ref_f
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier on success, negative on failure.
 <dt><strong>Fortran90 Interface:</strong>
-    <dd>This function is currently not supported in FORTRAN 90.
+    <dd>
+    <pre>
+SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr) 
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: obj_id     ! Object identifier 
+  INTEGER(HID_T), INTENT(OUT) :: file_id    ! File identifier
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+END SUBROUTINE h5iget_file_id_f
+    </pre>
 
 <!--<dt><strong>Non-C API(s):</strong>
     <dd>
@@ -1158,7 +1168,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 August 2004");
+document.writeln("Last modified: 8 September 2004");
 -->
 </SCRIPT>
 
