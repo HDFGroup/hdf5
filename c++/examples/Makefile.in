@@ -53,24 +53,24 @@ CLEAN=
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
 compound: $(srcdir)/compound.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/compound.cpp
 
 h5group: $(srcdir)/h5group.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/h5group.cpp
 
 create: $(srcdir)/create.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/create.cpp
 
 readdata: $(srcdir)/readdata.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/readdata.cpp
 
 chunks: $(srcdir)/chunks.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/chunks.cpp
 
 extend_ds: $(srcdir)/extend_ds.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/extend_ds.cpp
 
 writedata: $(srcdir)/writedata.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/writedata.cpp
 
 @CONCLUDE@
