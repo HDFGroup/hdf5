@@ -3511,8 +3511,28 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
                         H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
                         H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        /*If the destination no implied mantissa bit, we'll need to set 
+                         *the 1st bit of mantissa to 1.  The Intel-Linux long double is
+                         *this case.*/ 
+                        if (H5T_NORM_NONE==dst.u.f.norm)
+                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
                         goto padding;
                     }
+                } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                                  H5T_BIT_LSB, TRUE)<0 && H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                                  H5T_BIT_LSB, FALSE)<0) {
+                    /*This is a special case for the source of no implied mantissa bit.
+                     *If the exponent bits are all 1s and only the 1st bit of mantissa 
+                     *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
+                    /* +Inf or -Inf */
+                    H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                    H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                    H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                    /*If the destination no implied mantissa bit, we'll need to set 
+                     *the 1st bit of mantissa to 1.*/ 
+                    if (H5T_NORM_NONE==dst.u.f.norm)
+                        H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                    goto padding;
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /*
@@ -9663,7 +9683,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /*
-                     * NaN. There are many NaN values, so we just set all bits to zero. 
+                     * NaN.  Just set all bits to zero. 
                      */
                     goto padding;
                 }
@@ -9802,7 +9822,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 H5T_bit_dec(int_buf, 0, 8*buf_size);
                                 H5T_bit_neg(int_buf, 0, 8*buf_size);
 
-                                /*copy source value into destiny*/    
+                                /*copy source value into destination*/    
                                 H5T_bit_copy (d, dst.offset, int_buf, 0, dst.prec-1);
                                 H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
                             } else if(except_ret == H5T_CONV_ABORT)
@@ -9966,7 +9986,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
-    hsize_t	expo;			/*destiny exponent		*/
+    hsize_t	expo;			/*destination exponent		*/
     hsize_t	expo_max;		/*maximal possible exponent value       */
     size_t      sign;                   /*source sign bit value         */
     hbool_t     is_max_neg;             /*source is maximal negative value*/
@@ -10151,7 +10171,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		     * step. */
                     H5T_bit_set(int_buf, src.prec, buf_size*8-src.prec, 0);
 
-                    /* Set sign bit in destiny */
+                    /* Set sign bit in destination */
                     H5T_bit_set_d(d, dst.u.f.sign, 1, (hsize_t)sign);
                 }
 
@@ -10269,10 +10289,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 if(except_ret == H5T_CONV_UNHANDLED) {
-                    /* Set exponent in destiny */
+                    /* Set exponent in destination */
                     H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, expo);
 
-                    /* Copy mantissa into destiny */
+                    /* Copy mantissa into destination */
                     H5T_bit_copy(d, dst.u.f.mpos, int_buf, 0, buf_size*8 > dst.u.f.msize ? dst.u.f.msize : buf_size*8);
                 }
 
