@@ -17,8 +17,7 @@ LIBHDF5=../src/libhdf5.la
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=ph5example
 TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
-	h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
-	$(TEST_PROGS_PARA)
+	h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
@@ -35,7 +34,7 @@ TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5)
+$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 h5_chunk_read: h5_chunk_read.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
