@@ -99,12 +99,7 @@ void TestInit(void)
      * half the functions this test calls are private, so automatic error
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
-#ifdef H5_WANT_H5_V1_6_COMPAT
     H5Eset_auto (NULL, NULL);
-#else
-    H5Eset_auto (H5E_DEFAULT, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-
 }
 
 

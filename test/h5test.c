@@ -89,14 +89,6 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
-/*
- * Global variables used by InitTest().
- * The code should be revised so that these do not need to be
- * global.
- */
-struct TestStruct Test[MAXNUMOFTESTS];
-int    Index = 0;
-
 
 /*-------------------------------------------------------------------------
  * Function:	h5_errors
@@ -786,25 +778,20 @@ h5_get_file_size(const char *filename)
     return(0);
 } /* end get_file_size() */
 
-
 /*
- * Setup a test function.  It must have no parameters and returns void.
+ * This routine is designed to provide equivalent functionality to 'printf'
+ * and allow easy replacement for environments which don't have stdin/stdout
+ * available.  (i.e. Windows & the Mac)
  */
-void 
-InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
+int 
+print_func(const char *format,...)
 {
-    if (Index >= MAXNUMOFTESTS) {
-        printf("Too many tests added, increase MAXNUMOFTEST(%d).\n",
-		MAXNUMOFTESTS);
-        exit(-1);
-    }                           /* end if */
-    HDstrcpy(Test[Index].Description, TheDescr);
-    HDstrcpy(Test[Index].Name, TheName);
-    Test[Index].Call = TheCall;
-    Test[Index].Cleanup = Cleanup;
-    Test[Index].NumErrors = -1;
-    Test[Index].SkipFlag = 0;
-    Index++;
-}
+    va_list                 arglist;
+    int                     ret_value;
 
+    va_start(arglist, format);
+    ret_value = vprintf(format, arglist);
+    va_end(arglist);
+    return (ret_value);
+}
 
