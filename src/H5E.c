@@ -344,6 +344,8 @@ H5Eclear(void)
  * Modifications:
  *	Albert Cheng, 2000/12/02
  *	Show MPI process rank id if applicable.
+ *	Albert Cheng, 2001/07/14
+ *	Show HDF5 library version information string too.
  *
  *-------------------------------------------------------------------------
  */
