@@ -135,6 +135,9 @@ Bug Fixes since HDF5-1.4.2 Release
     * Fixed bug where a preempted chunk in the chunk data could still be
       used by an internal pointer and cause an assertion failure or core
       dump. QAK - 2/13/02
+    * Fixed bug where non-zero fill-value was not being read correctly from
+      certain chunked datasets when using an "all" or contiguous hyperslab
+      selection.  QAK - 2/14/02
 
 
 Documentation
