@@ -257,6 +257,10 @@ case $basic_machine in
 		basic_machine=cray2-cray
 		os=-unicos
 		;;
+        cray-t3e | t3e | t3e-cray)
+                basic_machine=t3e-cray
+                os=-unicosmk
+                ;;
 	[ctj]90-cray)
 		basic_machine=c90-cray
 		os=-unicos

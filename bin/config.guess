@@ -448,6 +448,9 @@ EOF
     CRAY*TS:*:*:*)
 	echo t90-cray-unicos${UNAME_RELEASE}
 	exit 0 ;;
+    CRAY*T3E:*:*:*)
+        echo t3e-cray-unicosmk
+        exit 0 ;;
     CRAY-2:*:*:*)
 	echo cray2-cray-unicos
         exit 0 ;;
