@@ -190,7 +190,16 @@ TEST tattr-4.ddl -a attr4 tattr.h5
 TEST tslink-1.ddl tslink.h5
 TEST tslink-2.ddl -l slink2 tslink.h5
 
-#TEST thlink-1.ddl thlink.h5
+TEST thlink-1.ddl thlink.h5
+TEST thlink-2.ddl -d /g1/link2 /dset /g1/link1/link3 thlink.h5
+TEST thlink-3.ddl -d /dset /g1/link1/link3 /g1/link2 thlink.h5
+TEST thlink-4.ddl -g /g1 thlink.h5
+TEST thlink-5.ddl -d /dset -g /g2 -d /g1/link2 thlink.h5
+
+TEST tcomp-1.ddl tcompound.h5
+TEST tcomp-2.ddl -t /type1 /type2 /group1/type3 tcompound.h5
+TEST tcomp-3.ddl -d /group2/dset5 -g /group1 tcompound.h5
+TEST tcomp-4.ddl -t /#3432:0 -g /group2 tcompound.h5
 
 TEST tall-1.ddl tall.h5
 TEST tall-2.ddl -header -g /g1/g1.1 -a attr2 tall.h5

@@ -27,21 +27,12 @@
 #define ATTRIBUTE_DATA	0
 #define DATASET_DATA	1
 
+#define H5DUMP_MAX_NDIMS	64
 
 #define begin_obj(obj,name)	printf("%s \"%s\" %s\n", obj, name, BEGIN)
 #define end_obj()		printf("%s\n", END);
 
 #define col 3
-
-
-/*
-typedef enum
-  {
-     h, bb, header, a, d, g, l
-  }
-command_t;
-*/
-
 
 #endif
 

@@ -33,6 +33,8 @@
 #define NELMTS(X)	(sizeof(X)/sizeof(*X))
 #define ALIGN(A,Z)	((((A)+(Z)-1)/(Z))*(Z))
 
+extern int indent;
+extern int ischar;
 
 
 /*-------------------------------------------------------------------------
@@ -231,7 +233,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
     hsize_t		elmtno, i;		/*counters		*/
     int			carry;			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
-  /*  int			need_prefix=1;*/		/*indices need printing	*/
+    int			need_prefix=1;		/*indices need printing	*/
 
     /* Print info */
     hsize_t		p_min_idx[8];		/*min selected index	*/
@@ -239,9 +241,9 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
     size_t		p_type_nbytes;		/*size of memory type	*/
     hsize_t		p_nelmts;		/*total selected elmts	*/
     char		p_buf[256];		/*output string		*/
-  /*  size_t		p_column=0;*/		/*output column		*/
+    size_t		p_column=0;		/*output column		*/
     size_t		p_ncolumns=80;		/*default num columns	*/
-  /*  char 		p_prefix[1024];*/		/*line prefix string	*/
+    char 		p_prefix[1024];		/*line prefix string	*/
 
     /* Stripmine info */
     hsize_t		sm_size[8];		/*stripmine size	*/
@@ -254,7 +256,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
     hssize_t		hs_offset[8];		/*starting offset	*/
     hsize_t		hs_size[8];		/*size this pass	*/
     hsize_t		hs_nelmts;		/*elements in request	*/
-
+int j, print_once=1;
     /*
      * Check that everything looks okay.  The dimensionality must not be too
      * great and the dimensionality of the items selected for printing must
@@ -331,7 +333,6 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
 	    }
 
 	    /* Print the prefix */
-/*
 	    if ((p_column +
 		 strlen(p_buf) +
 		 strlen(OPT(info->elmt_suf2, " ")) +
@@ -339,26 +340,34 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
 		need_prefix = 1;
 	    }
 	    if (need_prefix) {
+/*
 		h5dump_prefix(p_prefix, info, elmtno+i, ndims,
 			      p_min_idx, p_max_idx);
+*/
+
 		if (p_column) {
 		    fputs(OPT(info->line_suf, ""), stream);
 		    putc('\n', stream);
 		    fputs(OPT(info->line_sep, ""), stream);
+                    
 		}
+                for (j=0;j<indent+col;j++) putc(' ', stream);
+                if (ischar && print_once) {
+                    putc('"', stream);
+                    print_once=0;
+                }
+/*
 		fputs(p_prefix, stream);
+*/
 		p_column = strlen(p_prefix);
 		need_prefix = 0;
 	    } else {
 		fputs(OPT(info->elmt_suf2, " "), stream);
 		p_column += strlen(OPT(info->elmt_suf2, " "));
 	    }
-*/
 	    
 	    fputs(p_buf, stream);
-/*
 	    p_column += strlen(p_buf);
-*/
 
 	}
 	
@@ -373,13 +382,17 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type, int 
 	}
     }
 
-/*
     if (p_column) {
+/*
 	fputs(OPT(info->line_suf, ""), stream);
-	putc('\n', stream);
-	fputs(OPT(info->line_sep, ""), stream);
-    }
 */
+        if (ischar) 
+            putc('"',stream);
+	putc('\n', stream);
+/*
+	fputs(OPT(info->line_sep, ""), stream);
+*/
+    }
     H5Sclose(sm_space);
     H5Sclose(f_space);
     return 0;
@@ -559,6 +572,9 @@ h5dump1(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type, int data_
     int		status;
     h5dump_t	info_dflt;
 
+    char		p_buf[256], sm_buf[256];		/*tmp for scala */
+    int j;
+
     /* Use default values */
     if (!stream) stream = stdout;
     if (!info) {
@@ -584,10 +600,24 @@ h5dump1(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type, int data_
         f_space = H5Aget_space(dset);
  
     if (H5Sis_simple(f_space)<=0) return -1;
+
+
+    if ( H5Sget_simple_extent_ndims(f_space) == 0){
+           if (data_flag == ATTRIBUTE_DATA) {
+               if (H5Aread(dset, p_type, sm_buf) < 0) 
+                   return -1;
+           } else return -1;
+           h5dump_sprint(p_buf, info, p_type, sm_buf);
+           for (j=0;j<indent+col;j++) putc(' ', stream);
+	   fputs(p_buf, stream);
+           putc('\n', stream);
+           H5Sclose(f_space);
+    } else {
     H5Sclose(f_space);
 
     /* Print the data */
     status = h5dump_simple(stream, info, dset, p_type, data_flag);
+    }
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
 }
