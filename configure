@@ -3643,13 +3643,13 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-  echo "$as_me:$LINENO: checking what $F9X does with modules" >&5
-echo $ECHO_N "checking what $F9X does with modules... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking what $FC does with modules" >&5
+echo $ECHO_N "checking what $FC does with modules... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -3681,16 +3681,16 @@ done
 
 echo $modfiles 6>&1
 if test "$modfiles" = file.o; then
-  echo $ac_n "checking whether $F9X -em is saner""... $ac_c" 1>&6
-  OLD_FFLAGS=$FFLAGS
-  FFLAGS="$FFLAGS -em"
+  echo $ac_n "checking whether $FC -em is saner""... $ac_c" 1>&6
+  OLD_FCFLAGS=$FCFLAGS
+  FCFLAGS="$FCFLAGS -em"
   eval $ac_compile
   modfiles=""
   for f in file.o module.mod MODULE.mod module.M MODULE.M; do
     test -f $f && modfiles="$f"
   done
   if test "$modfiles" = "file.o"; then
-    FFLAGS=$OLD_FFLAGS
+    FCFLAGS=$OLD_FCFLAGS
     echo no 6>&1
   else
     echo yes 6>&1
@@ -3698,8 +3698,8 @@ if test "$modfiles" = file.o; then
 fi
 cd ..
 
-echo "$as_me:$LINENO: checking how $F9X finds modules" >&5
-echo $ECHO_N "checking how $F9X finds modules... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking how $FC finds modules" >&5
+echo $ECHO_N "checking how $FC finds modules... $ECHO_C" >&6
 
 for flag in "-I" "-M" "-p"; do
   cat >conftest.$ac_ext <<EOF
@@ -3708,7 +3708,7 @@ for flag in "-I" "-M" "-p"; do
       end program conftest
 EOF
 
-  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
+  ac_compile='${FC-f90} $FCFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
 
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
@@ -3722,7 +3722,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$F9XMODFLAG. $FFLAGS"
+  FCFLAGS="$F9XMODFLAG. $FCFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -3734,8 +3734,8 @@ rm -rf conftest*
         F77=$FC
 
     ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -3747,8 +3747,8 @@ echo $ECHO_N "checking if compiler supports -I. option... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45331,8 +45331,8 @@ esac
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
     ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45650,16 +45650,16 @@ rm -f conftest.err conftest.$ac_objext \
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
             ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45692,8 +45692,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45742,8 +45742,8 @@ rm -rf conftest*
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45776,8 +45776,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 

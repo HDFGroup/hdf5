@@ -25,30 +25,30 @@ dnl	Check for a Fortran 9X compiler.
 dnl
 AC_DEFUN(AC_PROG_F9X,
 [AC_CHECK_PROGS(F9X, f90 pgf90 xlf90 f95 g95 xlf95 efc)
-test -z "$F9X" && AC_MSG_ERROR([no acceptable f9X compiler found in \$PATH])
+test -z "$FC" && AC_MSG_ERROR([no acceptable f9X compiler found in \$PATH])
 
 AC_PROG_F9X_WORKS
 AC_PROG_F9X_GNU
 
 if test $ac_cv_prog_g9x = yes; then
   G9X=yes
-  dnl Check whether -g works, even if FFLAGS is set, in case the package
-  dnl plays around with FFLAGS (such as to build both debugging and
+  dnl Check whether -g works, even if FCFLAGS is set, in case the package
+  dnl plays around with FCFLAGS (such as to build both debugging and
   dnl normal versions of a library), tasteless as that idea is.
-  ac_test_FFLAGS="${FFLAGS+set}"
-  ac_save_FFLAGS="$FFLAGS"
-  FFLAGS=
+  ac_test_FCFLAGS="${FCFLAGS+set}"
+  ac_save_FCFLAGS="$FCFLAGS"
+  FCFLAGS=
   AC_PROG_F9X_G
-  if test "$ac_test_FFLAGS" = set; then
-    FFLAGS="$ac_save_FFLAGS"
+  if test "$ac_test_FCFLAGS" = set; then
+    FCFLAGS="$ac_save_FCFLAGS"
   elif test $ac_cv_prog_f9x_g = yes; then
-    FFLAGS="-g -O2"
+    FCFLAGS="-g -O2"
   else
-    FFLAGS="-O2"
+    FCFLAGS="-O2"
   fi
 else
   G9X=
-  test "${FFLAGS+set}" = set || FFLAGS="-g"
+  test "${FCFLAGS+set}" = set || FCFLAGS="-g"
 fi
 ])
 
@@ -84,8 +84,8 @@ dnl	Generic macro to setup the Fortran 9X specific env variables.
 dnl
 m4_define([AC_LANG(FORTRAN9X)],
 [ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AS_MESSAGE_LOG_FD'
+ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
+ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AS_MESSAGE_LOG_FD'
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
 
@@ -97,7 +97,7 @@ dnl
 dnl	It would be nice if the compiler actually works.
 dnl
 AC_DEFUN(AC_PROG_F9X_WORKS, [
-AC_MSG_CHECKING([whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) works])
+AC_MSG_CHECKING([whether the Fortran 9X compiler ($FC $FCFLAGS $LDFLAGS) works])
 AC_LANG_SAVE
 AC_LANG_FORTRAN9X
 AC_TRY_F9X_COMPILER([
@@ -109,7 +109,7 @@ AC_MSG_RESULT($ac_cv_prog_f9x_works)
 if test $ac_cv_prog_f9x_works = no; then
   AC_MSG_ERROR([installation or configuration problem: Fortran 9X compiler cannot create executables.])
 fi
-AC_MSG_CHECKING([whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) is a cross-compiler])
+AC_MSG_CHECKING([whether the Fortran 9X compiler ($FC $FCFLAGS $LDFLAGS) is a cross-compiler])
 AC_MSG_RESULT($ac_cv_prog_f9x_cross)
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
@@ -128,7 +128,7 @@ AC_DEFUN(AC_PROG_F9X_GNU,
   yes
 #endif
 EOF
-if AC_TRY_COMMAND($F9X -E conftest.fpp) | egrep yes >/dev/null 2>&1; then
+if AC_TRY_COMMAND($FC -E conftest.fpp) | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_g9x=yes
 else
   ac_cv_prog_g9x=no
@@ -141,12 +141,12 @@ dnl	Test whether the Fortran 9X compiler can accept the `-g' option
 dnl	to enable debugging.
 dnl
 AC_DEFUN(AC_PROG_F9X_G,
-[AC_CACHE_CHECK(whether $F9X accepts -g, ac_cv_prog_f9x_g,
+[AC_CACHE_CHECK(whether $FC accepts -g, ac_cv_prog_f9x_g,
 [cat > conftest.f << EOF
        program conftest
        end
 EOF
-if test -z "`$F9X -g -c conftest.f 2>&1`"; then
+if test -z "`$FC -g -c conftest.f 2>&1`"; then
   ac_cv_prog_f9x_g=yes
 else
   ac_cv_prog_f9x_g=no
@@ -160,7 +160,7 @@ dnl
 dnl	Check for optimizer flags the Fortran compiler can use.
 dnl
 AC_DEFUN(AC_F9X_OPT_FLAGS,
-[AC_MSG_CHECKING([for $F9X optimizer flags])
+[AC_MSG_CHECKING([for $FC optimizer flags])
 AC_LANG_SAVE
 AC_LANG_FORTRAN9X
 
@@ -169,10 +169,10 @@ for flags in "-fast" "-O3" "-O" "";do
       program main
       end
 EOF
-  ac_compile='${F9X-f90} -c $flag $FFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
+  ac_compile='${FC-f90} -c $flag $FCFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
   if AC_TRY_EVAL(ac_compile); then
     if grep 'passed to ld' conftest.out > /dev/null 2>&1; then :; else
-      FFLAGS="$FFLAGS $flags"
+      FCFLAGS="$FCFLAGS $flags"
       break
     fi
   fi
@@ -193,7 +193,7 @@ dnl	Check how F9X handles modules. This macro also checks which
 dnl	command-line option to use to include the module once it's built.
 dnl
 AC_DEFUN(AC_F9X_MODS,
-[AC_MSG_CHECKING(what $F9X does with modules)
+[AC_MSG_CHECKING(what $FC does with modules)
 AC_LANG_SAVE
 AC_LANG_FORTRAN9X
 
@@ -225,16 +225,16 @@ done
 
 echo $modfiles 6>&1
 if test "$modfiles" = file.o; then
-  echo $ac_n "checking whether $F9X -em is saner""... $ac_c" 1>&6
-  OLD_FFLAGS=$FFLAGS
-  FFLAGS="$FFLAGS -em"
+  echo $ac_n "checking whether $FC -em is saner""... $ac_c" 1>&6
+  OLD_FCFLAGS=$FCFLAGS
+  FCFLAGS="$FCFLAGS -em"
   eval $ac_compile
   modfiles=""
   for f in file.o module.mod MODULE.mod module.M MODULE.M; do
     test -f $f && modfiles="$f"
   done
   if test "$modfiles" = "file.o"; then
-    FFLAGS=$OLD_FFLAGS
+    FCFLAGS=$OLD_FCFLAGS
     echo no 6>&1
   else
     echo yes 6>&1
@@ -242,7 +242,7 @@ if test "$modfiles" = file.o; then
 fi
 cd ..
 
-AC_MSG_CHECKING(how $F9X finds modules)
+AC_MSG_CHECKING(how $FC finds modules)
 
 for flag in "-I" "-M" "-p"; do
   cat >conftest.$ac_ext <<EOF
@@ -251,7 +251,7 @@ for flag in "-I" "-M" "-p"; do
       end program conftest
 EOF
 
-  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
+  ac_compile='${FC-f90} $FCFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
 
   if AC_TRY_EVAL(ac_compile); then
     F9XMODFLAG=$flag
@@ -261,7 +261,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$F9XMODFLAG. $FFLAGS"
+  FCFLAGS="$F9XMODFLAG. $FCFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -391,7 +391,7 @@ dnl 		print '(a)','NO'
 dnl 	end if
 dnl end program conftest
 dnl EOF
-dnl $ac_cv_prog_F90 $FFLAGS -o conftest conftest.f90 > /dev/null 2>&1
+dnl $ac_cv_prog_F90 $FCFLAGS -o conftest conftest.f90 > /dev/null 2>&1
 dnl if test "`./conftest | head -1`" = YES; then
 dnl 	echo "yes" 1>&6
 dnl 	AC_DEFINE(HIPREC)
@@ -410,7 +410,7 @@ dnl 		print '(a)','NO'
 dnl 	end if
 dnl end program conftest
 dnl EOF
-dnl $ac_cv_prog_F90 $FFLAGS -o conftest conftest.f90 > /dev/null 2>&1
+dnl $ac_cv_prog_F90 $FCFLAGS -o conftest conftest.f90 > /dev/null 2>&1
 dnl if test "`./conftest | head -1`" = YES; then
 dnl 	echo "OK" 1>&6
 dnl 	AC_DEFINE(REALOK)
@@ -440,7 +440,7 @@ dnl 		print '(a)','NO'
 dnl 	end if
 dnl end program conftest
 dnl EOF
-dnl $ac_cv_prog_F90 $FFLAGS -o conftest conftest.f90 > /dev/null 2>&1
+dnl $ac_cv_prog_F90 $FCFLAGS -o conftest conftest.f90 > /dev/null 2>&1
 dnl if test "`./conftest | head -1`" = YES; then
 dnl 	echo "OK" 1>&6
 dnl 	AC_DEFINE(ARITHOK)
@@ -492,7 +492,7 @@ dnl 	end if
 dnl 	print *,ya,yb
 dnl end program conftest
 dnl EOF
-dnl $ac_cv_prog_F90 $FFLAGS -o conftest conftest.f90 > /dev/null 2>&1
+dnl $ac_cv_prog_F90 $FCFLAGS -o conftest conftest.f90 > /dev/null 2>&1
 dnl if test "`./conftest | head -1`" = YES; then
 dnl 	echo "yes" 1>&6
 dnl 	AC_DEFINE(USEINT)
