@@ -15,6 +15,8 @@
 #ifndef H5FPPRIVATE_H__
 #define H5FPPRIVATE_H__ 0
 
+#ifdef H5_HAVE_FPHDF5
+
 #include "H5ACpublic.h"         /* Metadata Cache                       */
 #include "H5FPpublic.h"         /* Flexible Parallel HDF5               */
 #include "H5Oprivate.h"         /* Object Headers                       */
@@ -295,5 +297,7 @@ extern herr_t H5FP_read_metadata(char **mdata, int len, int from);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
+
+#endif  /* H5_HAVE_FPHDF5 */
 
 #endif  /* H5FPPRIVATE_H__ */

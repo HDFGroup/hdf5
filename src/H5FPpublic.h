@@ -16,6 +16,8 @@
 
 #include "H5public.h"
 
+#ifdef H5_HAVE_FPHDF5
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,4 +29,7 @@ H5_DLL herr_t H5FPfinalize(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif  /* H5_HAVE_FPHDF5 */
+
 #endif  /* H5FPPUBLIC_H__ */
