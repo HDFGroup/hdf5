@@ -110,6 +110,10 @@
 ./src/.distdep
 ./src/.indent.pro
 ./src/H5.c
+./src/H5A.c
+./src/H5Aprivate.h
+./src/H5Apublic.h
+./src/H5Apkg.h
 ./src/H5AC.c
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
@@ -119,6 +123,7 @@
 ./src/H5D.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
+./src/H5Dpkg.h
 ./src/H5E.c
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
@@ -157,6 +162,7 @@
 ./src/H5MMprivate.h
 ./src/H5MMpublic.h
 ./src/H5O.c
+./src/H5Oattr.c
 ./src/H5Ocomp.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
@@ -210,6 +216,7 @@
 ./test/shtype.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/tattr.c
 ./test/tfile.c
 ./test/th5s.c
 ./test/theap.c
