@@ -40,6 +40,8 @@
 using namespace H5;
 #endif
 
+#include "h5cpputil.h"
+
 const char *FILENAME[] = {
     "dataset",
     NULL
@@ -257,7 +259,6 @@ test_simple_io( H5File& file)
 	/* Create a small conversion buffer to test strip mining */
 	DSetMemXferPropList xfer;
 
-	//if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 	xfer.setBuffer (1000, tconv_buf, NULL);
 
 	/* Create the dataset */
@@ -516,7 +517,6 @@ test_compression(H5File& file)
 	    }
 	}
 
-	//if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0) goto error;
 	dataset->write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
     PASSED();
@@ -581,7 +581,6 @@ test_compression(H5File& file)
     
 	delete dataset;
     
-	//if ((dataset = H5Dopen (file, DSET_COMPRESS_NAME))<0) goto error;
 	dataset = new DataSet (file.openDataSet (DSET_COMPRESS_NAME));
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
@@ -649,7 +648,6 @@ test_compression(H5File& file)
 	*/
 	TESTING("compression (app-defined method)");
 
-	// BMR: not sure how to handle this yet
 #ifdef H5_WANT_H5_V1_4_COMPAT
         if (H5Zregister (H5Z_FILTER_BOGUS, "bogus", bogus)<0) goto error;
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -669,7 +667,8 @@ test_compression(H5File& file)
 	    for (j = 0; j < size[1]; j++)
 	    {
 		int status = check_values (i, j, points[i][j], check[i][j]);
-		if (status == -1) goto error;
+		if (status == -1) 
+		    goto error;
 	    }
 
 	PASSED();
@@ -733,11 +732,7 @@ test_multiopen (H5File& file)
 	// Create first dataset
 	DataSet dset1 = file.createDataSet ("multiopen", PredType::NATIVE_INT, *space, dcpl);
     
-	//BMR: Quincey said Rob gave a tweak to have dataset being the first
-	// argument in this call but actually shouldn't be valid, so just 
-	// ignore the argument dset1.  Just open the first dataset again
-	// from the file to another DataSet object.
-	// if ((dset2=H5Dopen (dset1, "."))<0) goto error;
+	// Open again the first dataset from the file to another DataSet object.
 	DataSet dset2 = file.openDataSet ("multiopen");
 
 	// Relieve the dataspace
@@ -748,11 +743,9 @@ test_multiopen (H5File& file)
 	dset1.extend (cur_size);
 
 	/* Get the size from the second handle */
-	//if ((space = H5Dget_space (dset2))<0) goto error;
 	space = new DataSpace (dset2.getSpace());
 
 	hsize_t		tmp_size[1];
-	//if (H5Sget_simple_extent_dims (space, tmp_size, NULL)<0) goto error;
 	space->getSimpleExtentDims (tmp_size);
 	if (cur_size[0]!=tmp_size[0]) 
 	{
@@ -780,7 +773,7 @@ test_multiopen (H5File& file)
 /*-------------------------------------------------------------------------
  * Function:	test_types
  *
- * Purpose:	Make some datasets with various types so we can test h5ls.
+ * Purpose:	Test various types - should be moved to dtypes.cpp
  *
  * Return:	Success:	0
  *
@@ -973,45 +966,6 @@ test_types(H5File& file)
  error:
     return -1;
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	test_report
- *
- * Purpose:	Prints out the number of errors for dataset tests if there  
- *		were any failures occurred.  If no failure, test_report
- *		prints out the "All dataset tests passed" message 
- *
- * Return:	if any failure has occurred:	1
- *
- *		if no failure occurs:	0
- *
- * Programmer:	Binh-Minh Ribler (using C code segment for reporting tests)
- *		Friday, February 6, 2001
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int test_report( int nerrors )
-{
-   if (nerrors)
-   {
-      nerrors = MAX(1, nerrors);
-	if (1 == nerrors)
-	    cout << "***** " << nerrors << " DATASET TEST" 
-					<< " FAILED! *****" << endl;
-	else
-	    cout << "***** " << nerrors << " DATASET TESTS" 
-					<< " FAILED! *****" << endl;
-      return 1;
-   }
-   else 
-   {
-      cout << "All dataset tests passed." << endl;
-      return 0;
-   }
-}
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -1076,11 +1030,11 @@ main(void)
     }
     catch (Exception E) 
     {
-	return( test_report( nerrors ));
+	return(test_report(nerrors, string(" DATASET TESTS")));
     }
     /* use C test utility routine to clean up data files */
     h5_cleanup(FILENAME, fapl_id);
 
     /* print out dsets test results */
-    return( test_report( nerrors ));
+    return(test_report(nerrors, string(" DATASET TESTS")));
 }
