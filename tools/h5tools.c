@@ -509,8 +509,10 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		} else if (H5T_STRING==H5Tget_class(type)) {
 			size = H5Tget_size(type);
 			quote = '\0';
-			
-			for (i=0; i<size; i++) {
+			if (str->s == '"') {
+				quote = 'a';
+			}
+			for (i=0; i<size && ((char*)vp)[i] != '\0'; i++) {
 				
 				/* Count how many times the next character repeats */
 				j=1;
@@ -702,95 +704,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 
 	}
-	else {
-/*
-	this is just my first step in copmbining these 2 functions
-	this is ripped straight out of h5dumputil.c
-*/
-		char temp[1024];
-		H5T_str_t str_pad;
-	//	char *s = str->s;
-		if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-			sprintf(str->s, "%g", *((double*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-			sprintf(str->s, "%g", *((float*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-			sprintf(str->s, "%d", *((short*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-			sprintf(str->s, "%u", *((unsigned short*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_INT)) {
-			sprintf(str->s, "%d", *((int*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-			sprintf(str->s, "%u", *((unsigned*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-			sprintf(str->s, "%ld", *((long*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-			sprintf(str->s, "%lu", *((unsigned long*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-			sprintf(str->s, "%d", *((signed char*)vp));
-		} else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-			sprintf(str->s, "%u", *((unsigned char*)vp));
-		} else if (H5T_STRING==H5Tget_class(type)) {
-			str_pad = H5Tget_strpad(type) ;
-			j = 0;
-			for (i = 0; i < H5Tget_size(type); i++) {
-				switch (*((char*)vp+i)) {
-				case '"':
-					strcpy(str->s+j, "\\\"");
-					j += strlen("\\\"");
-					break;
-				case '\\':
-					strcpy(str->s+j, "\\\\");
-					j += strlen("\\\\");
-					break;
-				case '\b':
-					strcpy(str->s+j, "\\b");
-					j += strlen("\\b");
-					break;
-				case '\f':
-					strcpy(str->s+j, "\\f");
-					j += strlen("\\f");
-					break;
-				case '\n':
-					strcpy(str->s+j, "\\n");
-					j += strlen("\\n");
-					break;
-				case '\r':
-					strcpy(str->s+j, "\\r");
-					j += strlen("\\r");
-					break;
-				case '\t':
-					strcpy(str->s+j, "\\t");
-					j += strlen("\\t");
-					break;
-				default:
-                    if (isprint(*((char*)vp+i))){
-                        sprintf(str->s+j, "%c", *((char*)vp+i));
-                        j += strlen(str->s+j);
-                    } else { 
-                        if (str_pad == H5T_STR_NULLTERM &&
-                            *((unsigned char*)vp+i) == '\0' ) {
-                            sprintf(str->s+j, "%c", *((unsigned char*)vp+i));
-                            i = H5Tget_size(type);
-                        } else {
-                            sprintf(str->s+j, "\\%03o", *((unsigned char*)vp+i));
-                            j += strlen(str->s+j);
-                        }
-                    }
-					break;
-				}
-			}
-		} else {
-			strcpy(temp, "0x");
-			n = H5Tget_size(type);
-			for (i=0; i<n; i++) {
-				sprintf(temp+strlen(temp), "%02x", ((unsigned char*)vp)[i]);
-			}
-			sprintf(str->s,  "%s", temp);
-			
-			
-		}
-	}
+	else {}
 }
 
 
@@ -1478,9 +1392,24 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 }
 
 
+
+
+
 /*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+
 /*from h5dumputil.c*/
 
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
+/*************************************************************************/
 
 /*-------------------------------------------------------------------------
  * Function:	display_numeric_data
@@ -1508,6 +1437,24 @@ hsize_t i;
 char out_buf[NCOLS];
 struct h5dump_str_t tempstr;
 
+/******************************************************************************************/
+    h5dump_t		info;
+
+    /* Set to all default values and then override */
+    memset(&info, 0, sizeof info);
+    info.idx_fmt = "(%s)";
+    info.line_ncols = 80;
+    info.line_multi_new = 1;
+ 
+    /*
+     * If a compound datatype is split across multiple lines then add an
+     * ellipsis to the beginning of the continuation line.
+     */
+    info.line_pre  = "        %s ";
+    info.line_cont = "        %s  ";
+/*********************************************************************************************/
+
+
 
     out_buf[0] = '\0';
     if ((indent+COL) > NCOLS) indent = 0;
@@ -1515,7 +1462,7 @@ struct h5dump_str_t tempstr;
 
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
-		h5dump_sprint(&tempstr, NULL,p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes);
          if ((int)(strlen(out_buf)+strlen(tempstr.s)+1) > (NCOLS-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
@@ -1598,7 +1545,22 @@ static void display_string
 	int free_space, long_string = 0;
 	char out_buf[NCOLS];
 	struct h5dump_str_t tempstr;
-	
+	/******************************************************************************************/
+    h5dump_t		info;
+
+    /* Set to all default values and then override */
+    memset(&info, 0, sizeof info);
+    info.idx_fmt = "(%s)";
+    info.line_ncols = 80;
+    info.line_multi_new = 1;
+ 
+    /*
+     * If a compound datatype is split across multiple lines then add an
+     * ellipsis to the beginning of the continuation line.
+     */
+    info.line_pre  = "        %s ";
+    info.line_cont = "        %s  ";
+/*********************************************************************************************/
     out_buf[0] = '\0';
 	
 	memset(&tempstr, 0, sizeof(h5dump_str_t));
@@ -1609,7 +1571,7 @@ static void display_string
 		row_size++;
 		
 		h5dump_str_reset(&tempstr);		
-		h5dump_sprint(&tempstr, NULL,p_type, sm_buf+i*p_type_nbytes);
+		h5dump_sprint(&tempstr, &info,p_type, sm_buf+i*p_type_nbytes);
 		
 		free_space = NCOLS - indent - COL - strlen(out_buf);
 
@@ -1733,11 +1695,17 @@ static void display_string
             /* flush out_buf if it's end of a row */
             if (row_size == dim_n_size) {
                 if (compound_data && (elmtno+i+1) == dim_n_size) { /* 1st row */
+/*
                     printf("%s\"%s\"", out_buf, tempstr.s);
+*/
+					printf("%s%s", out_buf, tempstr.s);
                     first_row = 0;
                 } else {
                     indentation(indent+COL); 
-                    printf("%s\"%s\"", out_buf, tempstr.s);
+/*
+					printf("%s\"%s\"", out_buf, tempstr.s);
+*/
+                    printf("%s%s", out_buf, tempstr.s);
                 }
 
                if ((elmtno+i+1) != p_nelmts) 
