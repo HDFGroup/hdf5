@@ -209,7 +209,7 @@
       obvious way is to reduce the number of chunks by choosing a larger chunk
       size (doubling the chunk size will cut the number of B-tree nodes in
       half).  Another method is to adjust the split ratios for the B-tree by
-      calling <code>H5Pset_split_ratios()</code>, but this method typically
+      calling <code>H5Pset_btree_ratios()</code>, but this method typically
       results in only a slight improvement over the default settings.
       Finally, the out-degree of each node can be increased by calling
       <code>H5Pset_istore_k()</code> (increasing the out degree actually
@@ -273,11 +273,11 @@
 
 <!-- Created: Tue Oct 20 12:38:40 EDT 1998 -->
 <!-- hhmts start -->
-Last modified:  13 December 1999
+Last modified:  16 February 2001
 <!-- hhmts end -->
 
 <br>
-Describes HDF5 Release 1.4, February 2001
+Describes HDF5 Release 1.4.1, April 2001
 
 
 

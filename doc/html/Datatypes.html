@@ -608,34 +608,9 @@
 	respect to the beginning of the containing compound datum is
 	returned by this function.  A zero is returned on failure
 	which is also a valid offset, but this function is guaranteed
-	to succeed if a call to <code>H5Tget_member_dims()</code>
+	to succeed if a call to <code>H5Tget_member_class()</code>
 	succeeds when called with the same <em>type</em> and
 	<em>membno</em> arguments.
-
-	<br><br>
-      <dt><code>int H5Tget_member_dims (hid_t <em>type</em>, int
-	  <em>membno</em>, int <em>dims</em>[4], int
-	  <em>perm</em>[4])</code>
-      <dd>Each member can be a small array of up to four dimensions,
-	making it convenient to describe things like transposition
-	matrices.  The dimensionality of the member is returned (or
-	negative for failure) and the size in each dimension is
-	returned through the <em>dims</em> argument.  The
-	<em>perm</em> argument describes how the array's elements are
-	mapped to the linear address space of memory with respect to
-	some reference order (the reference order is specified in
-	natural language documentation which describes the compound
-	datatype). The application which "invented" the type will
-	often use the identity permutation and other applications will
-	use a permutation that causes the elements to be rearranged to
-	the desired order.  Only the first few elements of
-	<em>dims</em> and <em>perm</em> are initialized according to
-	the dimensionality of the member.  Scalar members have
-	dimensionality zero.
-
-	<b>The only permutations supported at this
-	  time are the identity permutation and the transpose
-	  permutation (in the 4d case, {0,1,2,3} and {3,2,1,0}).</b>
 
 	<br><br>
       <dt><code>hid_t H5Tget_member_type (hid_t <em>type</em>, int
@@ -2214,13 +2189,13 @@ reclaiming memory space.
       <pre>
 #include &lt;hdf5.h&gt;
 
-#define FILE   "tvltypes.h5"
+#define FILE   "vltypes.h5"
 #define MAX(X,Y)        ((X)&gt;(Y)?(X):(Y))
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
+#define SPACE_NAME  "Space"
+#define SPACE_RANK	1
+#define SPACE_DIM	4
 
 void *vltypes_alloc_custom(size_t size, void *info);
 void vltypes_free_custom(void *mem, void *info);
@@ -2235,6 +2210,7 @@ void vltypes_free_custom(void *mem, void *info);
 ****************************************************************/
 void *vltypes_alloc_custom(size_t size, void *info)
 {
+
     void *ret_value=NULL;       /* Pointer to return */
     int *mem_used=(int *)info;  /* Get the pointer to the memory used */
     size_t extra;               /* Extra space needed */
@@ -2245,62 +2221,58 @@ void *vltypes_alloc_custom(size_t size, void *info)
      */
     extra=MAX(sizeof(void *),sizeof(int));
 
-    if((ret_value=malloc(extra+size))!=NULL) {
+    if((ret_value=(void *)malloc(extra+size))!=NULL) {
         *(int *)ret_value=size;
         *mem_used+=size;
     } /* end if */
     ret_value=((unsigned char *)ret_value)+extra;
     return(ret_value);
 }
-
-/****************************************************************
-**
+/******************************************************************
 **  vltypes_free_custom(): VL datatype custom memory
 **      allocation routine.  This routine just uses free to
 **      release the memory and decrements the amount of memory
 **      allocated.
-** 
-****************************************************************/
+** ****************************************************************/
 void vltypes_free_custom(void *_mem, void *info)
-{
+
+{  
     unsigned char *mem;
     int *mem_used=(int *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
-
+    size_t extra;               /* Extra space needed */    
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct. 
-     */
+     *  alignment correct.      
+     */ 
     extra=MAX(sizeof(void *),sizeof(int));
-
-    if(_mem!=NULL) {
+    if(_mem!=NULL) {        
         mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(int *)mem;
-        free(mem);
+       *mem_used-=*(int *)mem; 
+       free(mem); 
     } /* end if */
 }
 
 int main(void)
-{
-    hvl_t wdata[SPACE1_DIM1];   /* Information to write */
-    hvl_t rdata[SPACE1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
+
+{   
+    hvl_t wdata[SPACE_DIM];   /* Information to write */
+    hvl_t rdata[SPACE_DIM];   /* Information read in */
+    hid_t		fid;	   /* HDF5 File IDs */  
+    hid_t		dataset;   /* Dataset ID */
+    hid_t		sid;       /* Dataspace ID */
+    hid_t		tid;       /* Datatype ID	   	 */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t		dims1[] = {SPACE1_DIM1};
+    hsize_t		dims[] = {SPACE_DIM};
     uint       i,j;        /* counting variables */
     int         mem_used=0; /* Memory used during allocation */
-    herr_t		ret;		/* Generic return value		*/
-
+    herr_t		ret;		/* Generic return value	 */
 
     /*
      * Allocate and initialize VL data to write 
      */
-    for(i=0; i&lt;SPACE1_DIM1; i++) {
+    for(i=0; i&lt;SPACE_DIM; i++) {
 
-        wdata[i].p=malloc((i+1)*sizeof(unsigned int));
+        wdata[i].p= (unsigned int *)malloc((i+1)*sizeof(unsigned int));
         wdata[i].len=i+1;
         for(j=0; j&lt;(i+1); j++)
             ((unsigned int *)wdata[i].p)[j]=i*10+j;
@@ -2309,65 +2281,67 @@ int main(void)
     /* 
      * Create file. 
      */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* 
      * Create dataspace for datasets. 
      */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    sid = H5Screate_simple(SPACE_RANK, dims, NULL);
 
     /* 
      * Create a datatype to refer to. 
      */
-    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    tid = H5Tvlen_create (H5T_NATIVE_UINT);
 
     /* 
      * Create a dataset. 
      */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid, "Dataset", tid, sid, H5P_DEFAULT);
 
     /* 
      * Write dataset to disk. 
      */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret=H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
 
     /* 
-     * Change to the custom memory allocation routines for reading VL data 
+     * Change to the custom memory allocation routines for reading 
+     * VL data 
      */
     xfer_pid=H5Pcreate(H5P_DATASET_XFER);
 
-    ret=H5Pset_vlen_mem_manager(xfer_pid,vltypes_alloc_custom,
-                                &mem_used,vltypes_free_custom,&mem_used);
+    ret=H5Pset_vlen_mem_manager(xfer_pid, vltypes_alloc_custom,
+                                &mem_used, vltypes_free_custom, 
+                                &mem_used);
 
     /* 
      * Read dataset from disk. vltypes_alloc_custom and
-     * will be used to manage memory. 
+     * will be used to manage memory.
      */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+    ret=H5Dread(dataset, tid, H5S_ALL, H5S_ALL, xfer_pid, rdata);   
 
     /* 
      * Display data read in 
      */
-    for(i=0; i&lt;SPACE1_DIM1; i++) {
-        printf("%d-th element length is %d \n", i, (unsigned) rdata[i].len);
+    for(i=0; i&lt;SPACE_DIM; i++) {
+        printf("%d-th element length is %d \n", i, 
+                                   (unsigned) rdata[i].len);
         for(j=0; j&lt;rdata[i].len; j++) {
-            printf(" %d ",((unsigned int *)rdata[i].p)[j] ); 
-            } 
-        printf("\n");
+            printf(" %d ",((unsigned int *)rdata[i].p)[j] );   
+        } 
+        printf("\n"); 
     } /* end for */
 
     /* 
      * Reclaim the read VL data. vltypes_free_custom will be used 
      * to reclaim the space. 
      */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-
+    ret=H5Dvlen_reclaim(tid, sid, xfer_pid, rdata);
 
     /* 
-     * Reclaim the write VL data.  C language free function will be used 
-     * to reclaim space. 
+     * Reclaim the write VL data.  C language free function will be 
+     * used to reclaim space. 
      */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    ret=H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, wdata);
 
     /* 
      * Close Dataset 
@@ -2377,12 +2351,12 @@ int main(void)
     /* 
      * Close datatype 
      */
-    ret = H5Tclose(tid1);
+    ret = H5Tclose(tid);
 
     /* 
      * Close disk dataspace 
      */
-    ret = H5Sclose(sid1);
+    ret = H5Sclose(sid);
     
     /* 
      * Close dataset transfer property list 
@@ -2392,7 +2366,7 @@ int main(void)
     /* 
      * Close file 
      */
-    ret = H5Fclose(fid1);
+    ret = H5Fclose(fid);
 
 } 
       </pre>
@@ -2528,9 +2502,10 @@ when they are read in.
 
 <h3>10.3 Code Example</h3>
 
-The following example creates an array datatype and creates and writes 
-a dataset to the HDF5 file.  The elements of the dataset have the 
-array datatype.
+The following example creates an array datatype and a dataset 
+containing elements of the array datatype in an HDF5 file.
+It then writes the dataset to the file.  
+<p>
 
 <center>
 <table border align=center width="100%">
@@ -2538,12 +2513,7 @@ array datatype.
   <tr>
     <td>
       <pre>
-/*  
- *  This example creates and writes dataset to the HDF5 file.
- *  Elements of the datasets have an array datatype.
- */
- 
-#include <hdf5.h>
+#include &lt;hdf5.h&gt;
 
 #define FILE        "SDS_array_type.h5"
 #define DATASETNAME "IntArray" 
@@ -2569,9 +2539,9 @@ main (void)
     /* 
      * Data  and output buffer initialization. 
      */
-    for (k = 0; k < SPACE_DIM; k++) {
-      for (j = 0; j < ARRAY_DIM1; j++) {
-	for (i = 0; i < ARRAY_DIM2; i++)
+    for (k = 0; k &lt; SPACE_DIM; k++) {
+      for (j = 0; j &lt; ARRAY_DIM1; j++) {
+	for (i = 0; i &lt; ARRAY_DIM2; i++)
                data[k][j][i] = k;
       }
     }     
@@ -3093,11 +3063,11 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  9 February 2001
+Last modified:  16 February 2001
 <!-- hhmts end -->
 
 <br>
-Describes HDF5 Release 1.4, February 2001
+Describes HDF5 Release 1.4.1, April 2001
 
 
 

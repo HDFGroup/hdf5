@@ -194,19 +194,17 @@
 	<code>lseek()</code>, <code>read()</code>, <code>write()</code>, and
 	<code>close()</code>.  The <code>lseek64()</code> function is used
 	on operating systems that support it. This driver is enabled and
-	configured with <code>H5Pset_sec2()</code>, and queried with
-	<code>H5Pget_sec2()</code>.
+	configured with <code>H5Pset_fapl_sec2()</code>.
 
 	<br><br>
       <dt>Buffered I/O
       <dd>Local permanent files can be accessed with the functions declared
-	in the <code>stdio.h</code> header file, namely
+	in the standard C header file <code>stdio.h</code>, namely
 	<code>fopen()</code>, <code>fseek()</code>, <code>fread()</code>,
 	<code>fwrite()</code>, and <code>fclose()</code>.  The
 	<code>fseek64()</code> function is used on operating systems that
 	support it.  This driver is enabled and configured with
-	<code>H5Pset_stdio()</code>, and queried with
-	<code>H5Pget_stdio()</code>.
+	<code>H5Pset_fapl_stdio()</code>.
 	
 	<br><br>
       <dt>Memory I/O
@@ -230,8 +228,8 @@
 	remove the access_mode parameter and have access control specified
 	via the raw data transfer property list of <code>H5Dread()</code>
 	and <code>H5Dwrite()</code>.)  These parameters are set and queried
-	with the <code>H5Pset_mpi()</code> and <code>H5Pget_mpi()</code>
-	calls.
+	with the <code>H5Pset_fapl_mpi()</code> and 
+        <code>H5Pget_fapl_mpi()</code> calls.
 
 	<br><br>
       <dt>Data Alignment
@@ -273,7 +271,7 @@
         hid_t file_id;
 
         access_plist = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_mpi(access_plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+        H5Pset_fapl_mpi(access_plist, MPI_COMM_WORLD, MPI_INFO_NULL);
 
 	/* H5Fopen must be called collectively */
         file_id = H5Fopen("test.h5", H5F_ACC_RDWR, access_plist);
@@ -307,25 +305,19 @@
       buffered again by the lowest layers of the HDF5 library.
 
     <dl>
-      <dt><code>H5F_driver_t H5Pget_driver (hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_SEC2</code> if the
+      <dt><code>hid_t H5Pget_driver (hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_SEC2</code> if the
 	<em>sec2</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_sec2 (hid_t <em>access_properties</em>)</code>
+      <dt><code>herr_t H5Pset_fapl_sec2 
+          (hid_t <em>access_properties</em>)</code>
       <dd>The file access properties are set to use the <em>sec2</em>
 	driver. Any previously defined driver properties are erased from the
 	property list.  Additional parameters may be added to this function in
 	the future.
 
-	<br><br>
-      <dt><code>herr_t H5Pget_sec2 (hid_t <em>access_properties</em>)</code>
-      <dd>If the file access property list is set to the <em>sec2</em> driver
-	then this function returns zero; otherwise it returns a negative
-	value. In the future, additional arguments may be added to this
-	function to match those added to <code>H5Pset_sec2()</code>.
     </dl>
 
     <h3>6.2. Buffered Permanent Files</h3>
@@ -339,25 +331,19 @@
       introduces an additional layer of buffering beneath the HDF5 library.
 
     <dl>
-      <dt><code>H5F_driver_t H5Pget_driver(hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_STDIO</code> if the
+      <dt><code>hid_t H5Pget_driver(hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_STDIO</code> if the
 	<em>stdio</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_stdio (hid_t <em>access_properties</em>)</code>
+      <dt><code>herr_t H5Pset_fapl_stdio 
+          (hid_t <em>access_properties</em>)</code>
       <dd>The file access properties are set to use the <em>stdio</em>
 	driver.  Any previously defined driver properties are erased from the
 	property list.  Additional parameters may be added to this function in
 	the future.
 
-	<br><br>
-      <dt><code>herr_t H5Pget_stdio (hid_t <em>access_properties</em>)</code>
-      <dd>If the file access property list is set to the <em>stdio</em> driver
-	then this function returns zero; otherwise it returns a negative
-	value.  In the future, additional arguments may be added to this
-	function to match those added to <code>H5Pset_stdio()</code>.
     </dl>
 
     <h3>6.3. Buffered Temporary Files</h3>
@@ -371,15 +357,15 @@
       file is insignificant and <code>H5Fopen()</code> always fails).
 
     <dl>
-      <dt><code>H5F_driver_t H5Pget_driver (hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_CORE</code> if the
+      <dt><code>hid_t H5Pget_driver (hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_CORE</code> if the
 	<em>core</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_core (hid_t <em>access_properties</em>, size_t
-	  <em>block_size</em>)</code>
+      <dt><code>herr_t H5Pset_fapl_core (hid_t <em>access_properties</em>, 
+          size_t <em>block_size</em>, 
+          hbool_t <em>backing_store</em>)</code>
       <dd>The file access properties are set to use the <em>core</em>
 	driver and any previously defined driver properties are erased from
 	the property list.  Memory for the file will always be allocated in
@@ -387,13 +373,14 @@
 	be added to this function in the future.
 
 	<br><br>
-      <dt><code>herr_t H5Pget_core (hid_t <em>access_properties</em>, size_t
-	  *<em>block_size</em>)</code>
+      <dt><code>herr_t H5Pget_fapl_core (hid_t <em>access_properties</em>, 
+          size_t *<em>block_size</em>),
+          hbool_t *<em>backing_store</em>)</code>
       <dd>If the file access property list is set to the <em>core</em> driver
 	then this function returns zero and <em>block_size</em> is set to the
 	block size used for the file; otherwise it returns a negative
 	value. In the future, additional arguments may be added to this
-	function to match those added to <code>H5Pset_core()</code>.
+	function to match those added to <code>H5Pset_fapl_core()</code>.
     </dl>
 
     <h3>6.4. Parallel Files</h3>
@@ -401,14 +388,13 @@
     <p>This driver uses MPI I/O to provide parallel access to a file.
 
     <dl>
-      <dt><code>H5F_driver_t H5Pget_driver (hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_MPI</code> if the
+      <dt><code>hid_t H5Pget_driver (hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_MPI</code> if the
 	<em>mpi</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_mpi (hid_t <em>access_properties</em>, MPI_Comm
+      <dt><code>herr_t H5Pset_fapl_mpi (hid_t <em>access_properties</em>, MPI_Comm
 	  <em>comm</em>, MPI_info <em>info</em>)</code>
       <dd>The file access properties are set to use the <em>mpi</em>
 	driver and any previously defined driver properties are erased from
@@ -416,14 +402,16 @@
 	function in the future.
 
 	<br><br>
-      <dt><code>herr_t H5Pget_mpi (hid_t <em>access_properties</em>, MPI_Comm
-	  *<em>comm</em>, MPI_info *<em>info</em>)</code>
+      <dt><code>herr_t H5Pget_fapl_mpi 
+          (hid_t <em>access_properties</em>, 
+	  MPI_Comm *<em>comm</em>, 
+          MPI_info *<em>info</em>)</code>
       <dd>If the file access property list is set to the <em>mpi</em> driver
 	then this function returns zero and <em>comm</em>, and <em>info</em>
 	are set to the values stored in the property
 	list; otherwise the function returns a negative value. In the future,
 	additional arguments may be added to this function to match those
-	added to <code>H5Pset_mpi()</code>.
+	added to <code>H5Pset_fapl_mpi()</code>.
     </dl>
 
     <a name="Files_Families">
@@ -469,14 +457,13 @@
 	or kB respectively.
 
 	<br><br>
-      <dt><code>H5F_driver_t H5Pget_driver (hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_FAMILY</code> if
+      <dt><code>hid_t H5Pget_driver (hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_FAMILY</code> if
 	the <em>family</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_family (hid_t <em>access_properties</em>,
+      <dt><code>herr_t H5Pset_fapl_family (hid_t <em>access_properties</em>,
 	  hsize_t <em>memb_size</em>, hid_t <em>member_properties</em>)</code>
       <dd>The file access properties are set to use the <em>family</em>
 	driver and any previously defined driver properties are erased
@@ -495,9 +482,9 @@
 	function in the future.
 
 	<br><br>
-      <dt><code>herr_t H5Pget_family (hid_t <em>access_properties</em>,
-	  hsize_t *<em>memb_size</em>, hid_t
-	  *<em>member_properties</em>)</code>
+      <dt><code>herr_t H5Pget_fapl_family (hid_t <em>access_properties</em>,
+	  hsize_t *<em>memb_size</em>, 
+	  hid_t *<em>member_properties</em>)</code>
       <dd>If the file access property list is set to the <em>family</em>
 	driver then this function returns zero; otherwise the function
 	returns a negative value.  On successful return,
@@ -507,7 +494,7 @@
 	it.  If <em>memb_size</em> is non-null then it will contain
 	the logical size in bytes of each family member.  In the
 	future, additional arguments may be added to this function to
-	match those added to <code>H5Pset_family()</code>.
+	match those added to <code>H5Pset_fapl_family()</code>.
     </dl>
 
     <h3>6.6. Split Meta/Raw Files</h3>
@@ -524,17 +511,16 @@
       the <em>sec2</em> driver.
 
     <dl>
-      <dt><code>H5F_driver_t H5Pget_driver (hid_t
-	  <em>access_properties</em>)</code>
-      <dd>This function returns the constant <code>H5F_LOW_SPLIT</code> if
+      <dt><code>hid_t H5Pget_driver (hid_t <em>access_properties</em>)</code>
+      <dd>This function returns the constant <code>H5FD_SPLIT</code> if
 	the <em>split</em> driver is defined as the low-level driver for the
 	specified access property list.
 
 	<br><br>
-      <dt><code>herr_t H5Pset_split (hid_t <em>access_properties</em>,
-	  const char *<em>meta_extension</em>, hid_t
-	  <em>meta_properties</em>, const char *<em>raw_extension</em>, hid_t
-	  <em>raw_properties</em>)</code>
+      <dt><code>herr_t H5Pset_fapl_split (hid_t <em>access_properties</em>,
+	  const char *<em>meta_extension</em>, 
+	  hid_t <em>meta_properties</em>, const char *<em>raw_extension</em>, 
+	  hid_t <em>raw_properties</em>)</code>
       <dd>The file access properties are set to use the <em>split</em>
 	driver and any previously defined driver properties are erased from
 	the property list.  The meta file will have a name which is formed by
@@ -545,29 +531,6 @@
 	name and will be accessed according to the <em>raw_properties</em>.
 	Additional parameters may be added to this function in the future.
 
-	<br><br>
-      <dt><code>herr_t H5Pget_split (hid_t <em>access_properties</em>,
-	  size_t <em>meta_ext_size</em>, const char *<em>meta_extension</em>,
-	  hid_t <em>meta_properties</em>, size_t <em>raw_ext_size</em>, const
-	  char *<em>raw_extension</em>, hid_t *<em>raw_properties</em>)</code>
-      <dd>If the file access property list is set to the <em>split</em>
-	driver then this function returns zero; otherwise the function
-	returns a negative value. On successful return,
-	<em>meta_properties</em> and <em>raw_properties</em> will
-	point to copies of the meta and raw access property lists
-	which should be closed by calling <code>H5Pclose()</code> when
-	the application is finished with them, but if the meta and/or
-	raw file has no property list then a negative value is
-	returned for that property list handle. Also, if
-	<em>meta_extension</em> and/or <em>raw_extension</em> are
-	non-null pointers, at most <em>meta_ext_size</em> or
-	<em>raw_ext_size</em> characters of the meta or raw file name
-	extension will be copied to the specified buffer. If the
-	actual name is longer than what was requested then the result
-	will not be null terminated (similar to
-	<code>strncpy()</code>).  In the future, additional arguments
-	may be added to this function to match those added to
-	<code>H5Pset_split()</code>.
     </dl>
 
 
@@ -619,11 +582,11 @@
 
 <!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
 <!-- hhmts start -->
-Last modified:  9 December 2000
+Last modified:  16 February 2001
 <!-- hhmts end -->
 
 <br>
-Describes HDF5 Release 1.4, February 2001
+Describes HDF5 Release 1.4.1, April 2001
 
 
   </body>
