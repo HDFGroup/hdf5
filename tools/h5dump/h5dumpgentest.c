@@ -108,7 +108,7 @@ typedef struct s1_t {
 #define ARRAY3_DIM1 6
 #define ARRAY3_DIM2 3
 
-static void test_group(void)
+static void gent_group(void)
 {
     hid_t fid, group;
   
@@ -153,7 +153,7 @@ static void test_group(void)
     H5Fclose(fid);
 }
 
-static void test_dataset(void)
+static void gent_dataset(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
@@ -192,7 +192,7 @@ static void test_dataset(void)
     H5Fclose(fid);
 }
 
-static void test_dataset2(void)
+static void gent_dataset2(void)
 {
     hid_t fid, dataset, space, create_plist;
     hsize_t dims[2];
@@ -239,7 +239,7 @@ static void test_dataset2(void)
 }
 
 
-static void test_attribute(void)
+static void gent_attribute(void)
 {
     hid_t fid, root, space, attr, type;
     hsize_t dims[2];
@@ -304,7 +304,7 @@ static void test_attribute(void)
     H5Fclose(fid);
 }
 
-static void test_softlink(void)
+static void gent_softlink(void)
 {
     hid_t fid, root;
   
@@ -330,7 +330,7 @@ static void test_softlink(void)
              dset3
 */
 
-static void test_hardlink(void)
+static void gent_hardlink(void)
 {
     hid_t fid, group, dataset, space;
     hsize_t dim = 5;
@@ -369,7 +369,7 @@ static void test_hardlink(void)
           dset2
 
 */
-static void test_compound_dt(void) {       /* test compound data type */
+static void gent_compound_dt(void) {       /* test compound data type */
     hid_t fid, group, dataset, space, space3, type, type2;
     hid_t array_dt;
     typedef struct {
@@ -556,7 +556,7 @@ static void test_compound_dt(void) {       /* test compound data type */
           dset2
 
 */
-static void test_compound_dt2(void) {       /* test compound data type */
+static void gent_compound_dt2(void) {       /* test compound data type */
     hid_t fid, group, dataset, space, type, create_plist, type2;
     hid_t array_dt;
 
@@ -743,7 +743,7 @@ g2	: dset2.1  dset2.2
 
 */
 
-static void test_all(void) {
+static void gent_all(void) {
 hid_t fid, group, attr, dataset, space;
 hsize_t dims[2];
 int data[2][2], dset1[10][10], dset2[20];
@@ -878,7 +878,7 @@ o - group objects
 
 */
 
-static void test_loop(void) {
+static void gent_loop(void) {
 hid_t fid, group;
 
   fid = H5Fcreate(FILE10, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -894,7 +894,7 @@ hid_t fid, group;
   H5Fclose(fid);
 }
 
-static void test_loop2(void) {
+static void gent_loop2(void) {
 hid_t fid, group;
 
   fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -928,7 +928,7 @@ hid_t fid, group;
       (dset1)
 */
 
-static void test_many(void) {
+static void gent_many(void) {
     hid_t fid, group, attr, dataset, space, space2, type, create_plist, type2;
     hid_t array_dt;
     hsize_t dims[2];
@@ -1125,7 +1125,7 @@ hid_t type;
   return type;
 }
 
-static void test_str(void) {
+static void gent_str(void) {
     hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
     hid_t array_dt;
 
@@ -1265,7 +1265,7 @@ static void test_str(void) {
          string2       string4       string6
 */
 
-static void test_str2(void)
+static void gent_str2(void)
 {
 hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space;
 hid_t fxdlenstr, fxdlenstr2, memtype;
@@ -1421,7 +1421,7 @@ hsize_t sdim;
   H5Fclose(fid);
 }
 
-static void test_enum(void)
+static void gent_enum(void)
 {
     /*some code is taken from enum.c in the test dir */
     hid_t file, type, space, dset;
@@ -1452,7 +1452,7 @@ static void test_enum(void)
     H5Fclose(file);
 }
 
-static void test_objref(void)
+static void gent_objref(void)
 {
 /*some code is taken from enum.c in the test dir */
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -1557,7 +1557,7 @@ static void test_objref(void)
 
 }
 
-static void test_datareg(void)
+static void gent_datareg(void)
 {
     /*some code is taken from enum.c in the test dir */
 
@@ -1665,7 +1665,7 @@ static void test_datareg(void)
 }
 
 /*taken from Elena's compound test file*/
-static void test_nestcomp(void)
+static void gent_nestcomp(void)
 {
    /* Compound memeber of the compound datatype*/
     typedef struct cmp_t {
@@ -1754,7 +1754,7 @@ static void test_nestcomp(void)
      */
     status = H5Dwrite(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
     if (status < 0)
-	fprintf(stderr, "test_nestcomp H5Dwrite failed\n");
+	fprintf(stderr, "gent_nestcomp H5Dwrite failed\n");
 
     /*
      * Release resources
@@ -1767,7 +1767,7 @@ static void test_nestcomp(void)
     H5Fclose(file);
 }
 
-static void test_opaque(void)
+static void gent_opaque(void)
 {
     hid_t file, type, dataset, space;
     char test[100][2];
@@ -1811,7 +1811,7 @@ static void test_opaque(void)
     H5Fclose(file);	
 }
 
-static void test_bitfields(void)
+static void gent_bitfields(void)
 {
     hid_t		file, grp=-1, type=-1, space=-1, dset=-1;
     size_t		i;
@@ -1860,7 +1860,7 @@ static void test_bitfields(void)
     } H5E_END_TRY;
 }
 
-static void test_vldatatypes(void)
+static void gent_vldatatypes(void)
 {
     hvl_t adata, wdata[SPACE1_DIM1];
     hid_t file, dset, space, type;
@@ -1950,7 +1950,7 @@ static void test_vldatatypes(void)
     assert(ret>=0);
 }
 
-static void test_vldatatypes2(void)
+static void gent_vldatatypes2(void)
 {
     hvl_t wdata[SPACE1_DIM1];   /* Information to write */
     hvl_t *t1;              /* Temporary pointer to VL information */
@@ -2019,7 +2019,7 @@ static void test_vldatatypes2(void)
 
 }
 
-static void test_vldatatypes3(void)
+static void gent_vldatatypes3(void)
 {
     typedef struct {             /* Struct that the VL sequences are composed of */
         int i;
@@ -2089,7 +2089,7 @@ static void test_vldatatypes3(void)
     assert(ret>=0);
 }
 
-static void test_vldatatypes4(void)
+static void gent_vldatatypes4(void)
 {
     typedef struct {             /* Struct that the VL sequences are composed of */
         int i;
@@ -2156,7 +2156,7 @@ static void test_vldatatypes4(void)
     assert(ret>=0);
 }
 
-static void test_array1(void)
+static void gent_array1(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2200,7 +2200,7 @@ static void test_array1(void)
     assert(ret>=0);
 }
 
-static void test_array2(void)
+static void gent_array2(void)
 {
     int wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information to write */
     hid_t		fid;        /* HDF5 File IDs		*/
@@ -2246,7 +2246,7 @@ static void test_array2(void)
     assert(ret>=0);
 }
 
-static void test_array3(void)
+static void gent_array3(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information to write */
     hid_t		fid;        /* HDF5 File IDs		*/
@@ -2299,7 +2299,7 @@ static void test_array3(void)
     assert(ret>=0);
 }
 
-static void test_array4(void)
+static void gent_array4(void)
 {
     typedef struct {        /* Typedef for compound datatype */
         int i;
@@ -2365,7 +2365,7 @@ static void test_array4(void)
     assert(ret>=0);
 }
 
-static void test_array5(void)
+static void gent_array5(void)
 {
     typedef struct {        /* Typedef for compound datatype */
         int i;
@@ -2440,7 +2440,7 @@ static void test_array5(void)
     assert(ret>=0);
 }
 
-static void test_array6(void)
+static void gent_array6(void)
 {
     hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2500,7 +2500,7 @@ static void test_array6(void)
     assert(ret>=0);
 }
 
-static void test_array7(void)
+static void gent_array7(void)
 {
     hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -2569,7 +2569,7 @@ static void test_array7(void)
     assert(ret>=0);
 }
 
-static void test_empty(void)
+static void gent_empty(void)
 {
     typedef struct {
         int a;
@@ -2633,7 +2633,7 @@ static void test_empty(void)
     assert(ret>=0);
 }
 
-static void test_group_comments(void)
+static void gent_group_comments(void)
 {
     hid_t fid, group;
   
@@ -2692,7 +2692,7 @@ static void test_group_comments(void)
 }
 
 static
-void test_split_file(void)
+void gent_split_file(void)
 {
     hid_t fapl, fid, root, attr, space, dataset, atype;
     char meta[] = "this is some metadata on this file";
@@ -2735,7 +2735,7 @@ void test_split_file(void)
 }
 
 static
-void test_family(void)
+void gent_family(void)
 {
     hid_t fapl, fid, space, dataset;
     hsize_t dims[2];
@@ -2768,7 +2768,7 @@ void test_family(void)
 static const char *multi_letters = "msbrglo";
 
 static
-void test_multi(void)
+void gent_multi(void)
 {
     hid_t fapl, fid, space, dataset;
     hsize_t dims[2];
@@ -2819,7 +2819,7 @@ void test_multi(void)
     H5Pclose(fapl);
 }
 
-static void test_large_objname(void)
+static void gent_large_objname(void)
 {
     hid_t fid, group;
     char grp_name[128];
@@ -2840,54 +2840,54 @@ static void test_large_objname(void)
 
 int main(void)
 {
-    test_group();
-    test_attribute();
-    test_softlink();
-    test_dataset();
-    test_hardlink();
-    test_compound_dt();
-    test_all();
-    test_loop();
+    gent_group();
+    gent_attribute();
+    gent_softlink();
+    gent_dataset();
+    gent_hardlink();
+    gent_compound_dt();
+    gent_all();
+    gent_loop();
 
-    test_dataset2();
-    test_compound_dt2();
-    test_loop2();
-    test_many();
+    gent_dataset2();
+    gent_compound_dt2();
+    gent_loop2();
+    gent_many();
 
-    test_str();
-    test_str2();
+    gent_str();
+    gent_str2();
 
-    test_enum();
+    gent_enum();
 
-    test_objref();
-    test_datareg();
+    gent_objref();
+    gent_datareg();
 
-    test_nestcomp();
+    gent_nestcomp();
 
-    test_opaque();
+    gent_opaque();
 
-    test_bitfields();
+    gent_bitfields();
 
-    test_vldatatypes();
-    test_vldatatypes2();
-    test_vldatatypes3();
-    test_vldatatypes4();
+    gent_vldatatypes();
+    gent_vldatatypes2();
+    gent_vldatatypes3();
+    gent_vldatatypes4();
 
-    test_array1();
-    test_array2();
-    test_array3();
-    test_array4();
-    test_array5();
-    test_array6();
-    test_array7();
+    gent_array1();
+    gent_array2();
+    gent_array3();
+    gent_array4();
+    gent_array5();
+    gent_array6();
+    gent_array7();
 
-    test_empty();
-    test_group_comments();
-    test_split_file();
-    test_family();
-    test_multi();
+    gent_empty();
+    gent_group_comments();
+    gent_split_file();
+    gent_family();
+    gent_multi();
 
-    test_large_objname();
+    gent_large_objname();
 
     return 0;
 }
