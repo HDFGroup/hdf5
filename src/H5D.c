@@ -1703,7 +1703,7 @@ printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
      * mem-and-file-dataspace-xfer functions
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
-    if (H5_mpi_opt_types_g &&
+    if (H5S_mpi_opt_types_g &&
         IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.
@@ -2190,7 +2190,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * mem-and-file-dataspace-xfer functions
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
-    if (H5_mpi_opt_types_g &&
+    if (H5S_mpi_opt_types_g &&
         IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.

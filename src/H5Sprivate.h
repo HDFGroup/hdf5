@@ -262,8 +262,10 @@ __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 				     const void *buf,
 				     hbool_t *must_convert /*out*/ );
 #ifndef _H5S_IN_H5S_C
-/* Global var whose value comes from environment variable */
-__DLLVAR__ hbool_t		H5_mpi_opt_types_g;
+/* Global vars whose value comes from environment variable */
+/* (Defined in H5S.c) */
+__DLLVAR__ hbool_t		H5S_mpi_opt_types_g;
+__DLLVAR__ hbool_t		H5S_mpi_prefer_derived_types_g;
 #endif /* _H5S_IN_H5S_C */
 
 #endif /* H5_HAVE_PARALLEL */
