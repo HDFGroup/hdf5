@@ -1,0 +1,24 @@
+#                                                       -*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+if test -z "$CXX"; then
+    CXX=aCC
+    CXX_BASENAME=aCC
+fi
+
+if test -z "$cxx_flags_set"; then
+# +Z for PIC, +A for using archived libraries
+    CXXFLAGS="+Z +A"
+    CFLAGS="-g +O2"
+    DEBUG_CXXFLAGS=-g
+    DEBUG_CPPFLAGS=
+    PROD_CXXFLAGS="-O -s"
+    PROD_CPPFLAGS=
+    PROFILE_CPPFLAGS=
+    cxx_flags_set=yes
+fi
