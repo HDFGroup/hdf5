@@ -513,10 +513,10 @@ case $withval in
 	if test "X" != "$hdf4_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
-        AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
-        AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
-        AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
-        AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
+            AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
+            AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+            AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
+            AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
 	else
 	    AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
 	    AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
@@ -532,8 +532,6 @@ dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
-
-ZLIB_DIR=/usr/lib
 
 AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
             ,withval=yes)
@@ -560,15 +558,12 @@ case $withval in
 	if test "X" != "$zlib_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$zlib_lib"
-	    ZLIB_DIR=$zlib_lib
 	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
 	else
 	    AC_CHECK_LIB(z, compress)
 	fi
 	;;
 esac
-
-AC_SUBST(ZLIB_DIR)
 
 dnl ----------------------------------------------------------------------
 dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage 
@@ -1331,6 +1326,28 @@ else
     fi
 fi
 
+dnl ----------------------------------------------------------------------
+dnl Determine the runtime libraries we may need to include in the
+dnl libtools command so that executables will find the correct dynamic
+dnl libraries.
+dnl 
+DYNAMIC_DIRS=""
+if test -n $LDFLAGS; then
+   for d in $LDFLAGS ; do
+      d=`echo $d | sed -e 's/-L/-R/g'`
+
+      dnl If the path isn't absolute, make it so by prepending the pwd
+      dnl to it.
+      case "$d" in
+         .*)
+	    d=`pwd`/$d
+	    ;;
+      esac
+
+      DYNAMIC_DIRS="$d $DYNAMIC_DIRS"
+   done
+fi
+AC_SUBST(DYNAMIC_DIRS)
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
