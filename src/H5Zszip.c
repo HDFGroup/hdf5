@@ -88,6 +88,7 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     size_t cd_nelmts=H5Z_SZIP_USER_NPARMS;     /* Number of filter parameters */
     unsigned cd_values[H5Z_SZIP_TOTAL_NPARMS];  /* Filter parameters */
     hsize_t dims[H5O_LAYOUT_NDIMS];     /* Dataspace (i.e. chunk) dimensions */
+    int ndims;                          /* Number of (chunk) dimensions */
     int dtype_size;                     /* Datatype's size (in bits) */
     H5T_order_t dtype_order;            /* Datatype's endianness order */
     hsize_t scanline;                   /* Size of dataspace's fastest changing dimension */
@@ -121,11 +122,12 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid datatype endianness order");
 
     /* Get dimensions for dataspace */
-    if (H5Sget_simple_extent_dims(space_id, dims, NULL)<0)
+    if ((ndims=H5Sget_simple_extent_dims(space_id, dims, NULL))<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get dataspace dimensions");
 
     /* Get "local" parameter for this dataset's "pixels-per-scanline" */
-    scanline=dims[0];
+    /* (Use the chunk's fastest changing dimension size) */
+    scanline=dims[ndims-1];
 
     /* Range check the scanline's size */
     if(scanline > SZ_MAX_PIXELS_PER_SCANLINE)
@@ -162,6 +164,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     size_t cd_nelmts=H5Z_SZIP_USER_NPARMS;     /* Number of filter parameters */
     unsigned cd_values[H5Z_SZIP_TOTAL_NPARMS];  /* Filter parameters */
     hsize_t dims[H5O_LAYOUT_NDIMS];             /* Dataspace (i.e. chunk) dimensions */
+    int ndims;                  /* Number of (chunk) dimensions */
     H5T_order_t dtype_order;    /* Datatype's endianness order */
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -176,15 +179,16 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of szip parameters");
 
     /* Get dimensions for dataspace */
-    if (H5Sget_simple_extent_dims(space_id, dims, NULL)<0)
+    if ((ndims=H5Sget_simple_extent_dims(space_id, dims, NULL))<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get dataspace dimensions");
 
     /* Set "local" parameter for this dataset's "bits-per-pixel" */
-    if((cd_values[H5Z_SZIP_PARM_BPP]=(sizeof(unsigned char)*H5Tget_size(type_id)))==0)
+    if((cd_values[H5Z_SZIP_PARM_BPP]=(8*sizeof(unsigned char)*H5Tget_size(type_id)))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Set "local" parameter for this dataset's "pixels-per-scanline" */
-    cd_values[H5Z_SZIP_PARM_PPS]=dims[0];
+    /* (Use the chunk's fastest changing dimension size) */
+    cd_values[H5Z_SZIP_PARM_PPS]=dims[ndims-1];
 
     /* Get datatype's endianness order */
     if((dtype_order=H5Tget_order(type_id))==H5T_ORDER_ERROR)
@@ -254,10 +258,10 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level");
 
     /* Copy the filter parameters into the szip parameter block */
-    sz_param.options_mask        = cd_values[0];
-    sz_param.bits_per_pixel      = cd_values[1];
-    sz_param.pixels_per_block    = cd_values[2];
-    sz_param.pixels_per_scanline = cd_values[3];
+    sz_param.options_mask        = cd_values[H5Z_SZIP_PARM_MASK];
+    sz_param.bits_per_pixel      = cd_values[H5Z_SZIP_PARM_BPP];
+    sz_param.pixels_per_block    = cd_values[H5Z_SZIP_PARM_PPB];
+    sz_param.pixels_per_scanline = cd_values[H5Z_SZIP_PARM_PPS];
 
     /* Input; uncompress */
     if (flags & H5Z_FLAG_REVERSE) {
