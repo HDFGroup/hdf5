@@ -1411,21 +1411,7 @@ printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #ifdef H5D_DEBUG
     {
 	/* Strip mine diagnostics.... */
-	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
-	if (smine_nelmts<nelmts) {
-	    fprintf (stderr, "H5D: strip mine");
-	    if (smine_nelmts!=request_nelmts) {
-		fprintf (stderr, " got %lu of %lu",
-			 (unsigned long)smine_nelmts,
-			 (unsigned long)request_nelmts);
-	    }
-	    if (buffer_size!=target_size) {
-		fprintf (stderr, " (%1.1f%% of buffer)",
-			 100.0*(double)buffer_size/(double)target_size);
-	    }
-	    fprintf (stderr, " %1.1f iterations\n",
-		     (double)nelmts/(double)smine_nelmts);
-	}
+    /* removed because the algorithm changed significantly - QAK */
     }
 #endif
 
@@ -1749,21 +1735,7 @@ printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
 #ifdef H5D_DEBUG
     {
 	/* Strip mine diagnostics.... */
-	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
-	if (smine_nelmts<nelmts) {
-	    fprintf (stderr, "H5D: strip mine");
-	    if (smine_nelmts!=request_nelmts) {
-		fprintf (stderr, " got %lu of %lu",
-			 (unsigned long)smine_nelmts,
-			 (unsigned long)request_nelmts);
-	    }
-	    if (buffer_size!=target_size) {
-		fprintf (stderr, " (%1.1f%% of buffer)",
-			 100.0*(double)buffer_size/(double)target_size);
-	    }
-	    fprintf (stderr, " %1.1f iterations\n",
-		     (double)nelmts/(double)smine_nelmts);
-	}
+    /* removed because the algorithm changed significantly - QAK */
     }
 #endif
 #ifdef QAK
