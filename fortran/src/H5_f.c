@@ -342,3 +342,103 @@ nh5close_c()
     ret_value = 0; 
     return ret_value;
 }    
+
+
+/*---------------------------------------------------------------------------
+ * Name:              h5get_libversion_c
+ * Purpose:           Calls H5get_libversion function
+ *		      to retrieve library version info. 
+ * Inputs:            
+ *                    None
+ * Outputs:           
+ *                    majnum - the major version of the library
+ *                    minnum - the minor version of the library
+ *                    relnum - the release version of the library
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Tuesday, September 24, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5get_libversion_c( int_f *majnum, int_f *minnum, int_f *relnum)
+{
+
+    int ret_value = -1;
+    unsigned c_majnum, c_minnum, c_relnum; 
+
+    if (H5get_libversion(&c_majnum, &c_minnum, &c_relnum) < 0) return ret_value;
+
+    *majnum = (int_f)c_majnum;
+    *minnum = (int_f)c_minnum;
+    *relnum = (int_f)c_relnum;
+    ret_value = 0; 
+    return ret_value;
+}    
+
+
+/*---------------------------------------------------------------------------
+ * Name:              h5check_version_c
+ * Purpose:           Calls H5check_version function
+ *		      to verify library version info. 
+ * Inputs:            
+ *                    majnum - the major version of the library
+ *                    minnum - the minor version of the library
+ *                    relnum - the release version of the library
+ * Outputs:           
+ *                    None
+ * Returns:           0 on success, aborts on failure
+ * Programmer:        Elena Pourmal  
+ *                    Tuesday, September 24, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5check_version_c( int_f *majnum, int_f *minnum, int_f *relnum)
+{
+
+    int ret_value = -1;
+    unsigned c_majnum, c_minnum, c_relnum; 
+    c_majnum = (unsigned) *majnum;
+    c_minnum = (unsigned) *minnum;
+    c_relnum = (unsigned) *relnum;
+
+    H5check_version(c_majnum, c_minnum, c_relnum);
+
+    ret_value = 0; 
+    return ret_value;
+}    
+
+/*---------------------------------------------------------------------------
+ * Name:              h5garbage_collect_c
+ * Purpose:           Calls H5garbage_collect to collect on all free-lists of all types
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Tuesday, September 24, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5garbage_collect_c()
+{
+
+    int ret_value = -1;
+    if (H5garbage_collect() < 0) return ret_value;  
+    ret_value = 0; 
+    return ret_value;
+}    
+
+/*---------------------------------------------------------------------------
+ * Name:              h5dont_atexit_c
+ * Purpose:           Calls H5dont_atexit not to install atexit cleanup routine
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Tuesday, September 24, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dont_atexit_c()
+{
+
+    int ret_value = -1;
+    if (H5dont_atexit() < 0) return ret_value;  
+    ret_value = 0; 
+    return ret_value;
+}    

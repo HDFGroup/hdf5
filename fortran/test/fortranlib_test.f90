@@ -41,6 +41,7 @@
      INTEGER :: identifier_total_error = 0
      INTEGER :: group_total_error = 0
      INTEGER :: error_total_error = 0
+     INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
      CHARACTER(LEN=8) :: failure = '*FAILED*'
@@ -52,10 +53,25 @@
      write(*,*) '                       ==========================                            '
      write(*,*) '                              FORTRAN tests '
      write(*,*) '                       ==========================                            '
+
+     CALL h5get_libversion_f(majnum, minnum, relnum, total_error)
+     if(total_error .eq. 0) then
+
+     write(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
+     write(*, '(I1)', advance="NO") majnum
+     write(*, '(".")', advance="NO") 
+     write(*, '(I1)', advance="NO") minnum
+     write(*, '(" release ")', advance="NO")
+     write(*, '(I3)') relnum
+     else
+        total_error = total_error + 1
+     endif
+     write(*,*)
+!     CALL h5check_version_f(1,4,4,total_error)
+
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing FILE Interface                   '
 !     write(*,*) '========================================='
-
      error_string = failure
      CALL mountingtest(cleanup, mounting_total_error)
      IF (mounting_total_error == 0) error_string = success

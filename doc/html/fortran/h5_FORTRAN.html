@@ -61,7 +61,104 @@ FORTRAN General Library API -- h5i
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5garbage_collect_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5gabage_collect_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Garbage collects on all free-lists of all types
+
+<pre>
+          SUBROUTINE h5garbage_collect_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5garbage_collect_f
+</pre>
+
 </dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dont_atexit_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5dont_atexit_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Instructs library not to install atexit cleanup routine. 
+
+<pre>
+          SUBROUTINE h5dont_atexit_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5dont_atexit_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5get_libversion_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5get_libversion_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Returns the HDF5 library version and release numbers. 
+
+<pre>
+          SUBROUTINE h5get_libversion_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: majnum      ! The major version of the library
+            INTEGER, INTENT(OUT) :: minnum      ! The minor version of the library
+            INTEGER, INTENT(OUT) :: relnum      ! The release number 
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5get_libversion_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5check_version_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5check_version_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Verifies that library versions are consistent. 
+
+<pre>
+          SUBROUTINE h5check_version_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(IN)  :: majnum      ! The major version of the library
+            INTEGER, INTENT(IN)  :: minnum      ! The minor version of the library
+            INTEGER, INTENT(IN)  :: relnum      ! The release number 
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5check_version_f
+</pre>
 
 <p>&nbsp;
 <p>&nbsp;
@@ -73,7 +170,7 @@ FORTRAN General Library API -- h5i
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  19 February 2001
+Last modified:  24 September, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

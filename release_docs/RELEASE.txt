@@ -67,6 +67,8 @@ Library
       written to the file and then subsequently queried with the
       H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
       of H5S_SCALAR. EIP - 2002/06/04
+C
+C
     * Clear symbol table node "dirty" flag when flushing symbol tables to
       disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain obscure
@@ -383,6 +385,12 @@ New Features
           type.  Module subroutines that accept "dims" as INTEGER array of size
           7 will be deprecated in 1.6 release. 
           EIP - 2002/05/06 
+        - Added the following functions to the
+              Library APIs:
+                      h5get_libversion_f  h5dont_atexit_f
+                      h5check_version_f   h5garbage_collect_f
+          EIP - 2002/09/24
+                      
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member

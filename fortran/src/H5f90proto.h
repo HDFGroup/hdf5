@@ -894,17 +894,25 @@ H5_DLL int_f nh5eset_auto_c(int_f* printflag);
 #ifndef H5_FNAMES
 #    define H5_FNAMES
 #ifdef DF_CAPFNAMES 
-#   define nh5open_c         FNAME(H5OPEN_C)
+#   define nh5open_c          FNAME(H5OPEN_C)
 #   define nh5close_c         FNAME(H5CLOSE_C)
 #   define nh5init_types_c    FNAME(H5INIT_TYPES_C)
 #   define nh5close_types_c   FNAME(H5CLOSE_TYPES_C)
 #   define nh5init_flags_c    FNAME(H5INIT_FLAGS_C)
+#   define nh5get_libversion_c  FNAME(H5GET_LIBVERSION_C)
+#   define nh5check_version_c   FNAME(H5CHECK_VERSION_C)
+#   define nh5garbage_collect_c FNAME(H5GARBAGE_COLLECT_C)
+#   define nh5dont_atexit_c     FNAME(H5DONT_ATEXIT_C)
 #else 
 #   define nh5open_c         FNAME(h5open_c)
 #   define nh5close_c         FNAME(h5close_c)
 #   define nh5init_types_c    FNAME(h5init_types_c)
 #   define nh5close_types_c   FNAME(h5close_types_c)
 #   define nh5init_flags_c    FNAME(h5init_flags_c)
+#   define nh5get_libversion_c  FNAME(h5get_libversion_c)
+#   define nh5check_version_c   FNAME(h5check_version_c)
+#   define nh5garbage_collect_c FNAME(h5garbage_collect_c)
+#   define nh5dont_atexit_c     FNAME(h5dont_atexit_c)
 #endif
 #endif
 H5_DLL int_f nh5open_c(void);
@@ -916,4 +924,12 @@ H5_DLL int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_fla
                               int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
                               int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                               int_f *h5t_flags); 
+H5_DLL int_f nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
+
+H5_DLL int_f nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum);
+
+H5_DLL int_f nh5garbage_collect_c(void);
+
+H5_DLL int_f nh5dont_atexit_c(void);
+
 #endif /* _H5f90proto_H */

@@ -169,3 +169,181 @@
 
       END SUBROUTINE h5close_f
         
+!----------------------------------------------------------------------
+! Name:		h5get_libversion_f 
+!
+! Purpose:	Returns the HDF5 LIbrary release number
+!
+! Inputs:  
+! Outputs:  
+!		majnum:		- major version of the library
+!		minum:		- minor version of the library
+!		relnum:		- release version of the library
+!		error:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		September 24, 2002
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+      SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5get_libversion_f
+!DEC$endif
+!
+        USE H5GLOBAL
+
+        IMPLICIT NONE
+        INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
+        INTERFACE
+          INTEGER FUNCTION h5get_libversion_c(majnum, minnum, relnum)
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+          !MS$ATTRIBUTES C,reference,alias:'_H5GET_LIBVERSION_C'::h5get_libversion_c
+          !DEC$ ENDIF
+          INTEGER, INTENT(OUT) :: majnum, minnum, relnum
+          END FUNCTION h5get_libversion_c
+        END INTERFACE
+
+        error = h5get_libversion_c(majnum, minnum, relnum)
+
+      END SUBROUTINE h5get_libversion_f
+
+!----------------------------------------------------------------------
+! Name:		h5check_version_f 
+!
+! Purpose:	Verifies that library versions are consistent.
+!
+! Inputs:  
+!		majnum:		- major version of the library
+!		minum:		- minor version of the library
+!		relnum:		- release version of the library
+! Outputs:  
+!		error:		- error code		
+!				 	Success:  0
+!				 	Failure:  application aborts
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		September 24, 2002
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+      SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5check_version_f
+!DEC$endif
+!
+        USE H5GLOBAL
+
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: majnum, minnum, relnum
+        INTEGER, INTENT(OUT) :: error
+        INTERFACE
+          INTEGER FUNCTION h5check_version_c(majnum, minnum, relnum)
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+          !MS$ATTRIBUTES C,reference,alias:'_H5CHECK_VERSION_C'::h5check_version_c
+          !DEC$ ENDIF
+          INTEGER, INTENT(IN) :: majnum, minnum, relnum
+          END FUNCTION h5check_version_c
+        END INTERFACE
+
+        error = h5check_version_c(majnum, minnum, relnum)
+
+      END SUBROUTINE h5check_version_f
+
+!----------------------------------------------------------------------
+! Name:		h5garbage_collect_f 
+!
+! Purpose:	Garbage collects on all free-lists of all types.
+!
+! Inputs:  
+! Outputs:  
+!		error:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		September 24, 2002
+!
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+      SUBROUTINE h5garbage_collect_f(error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5garbage_collect_f
+!DEC$endif
+!
+        USE H5GLOBAL
+
+        IMPLICIT NONE
+        INTEGER, INTENT(OUT) :: error
+        INTERFACE
+          INTEGER FUNCTION h5garbage_collect_c()
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+          !MS$ATTRIBUTES C,reference,alias:'_H5GARBAGE_COLLECT_C'::h5garbage_collect_c
+          !DEC$ ENDIF
+          END FUNCTION h5garbage_collect_c
+        END INTERFACE
+
+        error = h5garbage_collect_c()
+
+      END SUBROUTINE h5garbage_collect_f
+
+!----------------------------------------------------------------------
+! Name:		h5dont_atexit_f 
+!
+! Purpose:	Instructs library not to install atexit cleanup routine. 
+!
+! Inputs:  
+! Outputs:  
+!		error:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Elena Pourmal
+!		September 24, 2002
+!
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+      SUBROUTINE h5dont_atexit_f(error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dont_atexit_f
+!DEC$endif
+!
+        USE H5GLOBAL
+
+        IMPLICIT NONE
+        INTEGER, INTENT(OUT) :: error
+        INTERFACE
+          INTEGER FUNCTION h5dont_atexit_c()
+          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+          !MS$ATTRIBUTES C,reference,alias:'_H5dont_atexit_C'::h5dont_atexit_c
+          !DEC$ ENDIF
+          END FUNCTION h5dont_atexit_c
+        END INTERFACE
+
+        error = h5dont_atexit_c()
+
+      END SUBROUTINE h5dont_atexit_f
