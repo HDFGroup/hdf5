@@ -184,6 +184,7 @@
 ./doc/html/Graphics/Makefile.in
 ./doc/html/Graphics/OtherAPIs.gif
 
+./doc/html/Intro/Dependencies
 ./doc/html/Intro/IntroExamples.html
 ./doc/html/Intro/Makefile.in
 
