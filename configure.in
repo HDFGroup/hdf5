@@ -1228,6 +1228,31 @@ AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
 AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH,"$hdf5_cv_printf_ll")
 
 dnl ----------------------------------------------------------------------
+dnl Check if malloc(0) returns valid pointer
+dnl
+AC_MSG_CHECKING(if malloc of zero bytes returns valid pointer)
+AC_CACHE_VAL(hdf5_cv_malloc_works,
+AC_TRY_RUN([
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
+
+int main(void)
+{
+	exit(malloc (0) ? 0 : 1);
+}
+   ], hdf5_cv_malloc_works=yes,hdf5_cv_malloc_works=no,)
+)
+
+if test ${hdf5_cv_malloc_works} = "yes"; then
+    AC_DEFINE(MALLOC_WORKS, 1,
+        [Define if your system has a working `malloc' function.])
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
+    
+dnl ----------------------------------------------------------------------
 dnl Turn on debugging by setting compiler flags
 dnl
 AC_MSG_CHECKING(for debug flags)

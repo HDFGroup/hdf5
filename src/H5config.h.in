@@ -53,6 +53,9 @@
 /* Width for printf() for type `long long' or `__int64', us. `ll' */
 #undef PRINTF_LL_WIDTH
 
+/* Define if `malloc(0)' returns a non-NULL pointer value*/
+#undef MALLOC_WORKS
+
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
