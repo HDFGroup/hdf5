@@ -1,0 +1,116 @@
+===============================================================================
+     HDF5 C++ Library Build and Testing Instructions for Windows NT/98
+     with Microsoft Visual C++ V 6.0
+===============================================================================
+
+     This is applicable to the development version of HDF5 libraries.
+
+Preconditions
+-------------
+
+    1. These instructions are for users who wish to build the C and 
+       C++ libraries.  If you are interested only in the C library, 
+       refer to INSTAll_Windows.txt or INSTAll_codewarrior.txt.
+
+    2. MicroSoft Developer Studio,Visual C++ 6.0 and WinZip must be 
+       installed prior to building the HDF5 library.
+
+    3. Set up a directory structure to unpack the library.
+      For example:
+
+            c:\                         (any drive of your choice)
+           MyHDFstuff\                  (any folder name)
+
+    4. Download the hdf5xxx distribution archive and use WinZip to 
+       extract the hdf5 package into c:\MyHDFstuff.  This creates a 
+       directory called 'hdf5xxx' under MyHDFstuff which contains 
+       several files and directories. Rename "hdf5xxx" to "hdf5". 
+
+    5. HDF5 uses the zlib library, which is distributed with the HDF5 
+       Windows source code.  
+
+
+Building the HDF5 C and C++ libraries (both static and shared)
+-------------------------------------
+
+    1. Unpack all.zip, found in the c:\MyHDFstuff\hdf5\windows directory, 
+       into c:\MyHDFstuff.
+
+    2. Go to the hdf5\proj\ directory and double-click on the file all.dsw. 
+       This will invoke MS VC++.
+     
+    3. Make sure that "all" is "Set as Active Project" by selecting
+       "Project"/"Set Active Project", or right-clicking on "all" then
+       selecting "Set as Active Project."
+
+    4. Select "Project"/"Dependencies", then enable the desired projects:
+
+	hdf5_cpp: to build the C++ API static library
+	dsets_cpp: to build the test dsets.cpp, must also select hdf5_cpp
+	testhdf5_cpp: to build the test testhdf5.cpp, must also select hdf5_cpp
+
+	hdf5_cppdll: to build the C++ API dynamic-linked library
+        dsets_cppdll: to build the DLL dsets test, must also select hdf5_cppdll
+        testhdf5_cppdll: to build the DLL testhdf5 test, must also select
+                        hdf5_cppdll
+
+    5. Select "Build", then select "Set Active Configuration".
+
+            "all -- Win32 Debug" to build debug versions of
+                single-threaded static libraries, debug multithreaded DLLs,
+                and tests.
+
+            "all -- Win32 Release" to build release versions of
+                single-threaded static libraries, multithreaded DLLs,
+                and tests.
+
+    NOTE: "all" is a dummy target, "all.exe" is never created.
+
+    When the debug or release build is completed, the directories 
+    listed below will contain the following files:
+
+           hdf5\proj\hdf5\debug - 
+           hdf5\proj\hdf5\release - 
+               hdf5.lib- the C hdf5 static library
+
+           hdf5\proj\hdf5dll\debug - 
+               hdf5ddll.dll- the C hdf5 library
+               hdf5ddll.lib- the dll export library                  
+
+           hdf5\proj\hdf5dll\release - 
+               hdf5dll.dll- the C hdf5 library
+               hdf5dll.lib- the dll export library
+
+           hdf5\proj\hdf5_cpp\debug - 
+           hdf5\proj\hdf5_cpp\release - 
+               hdf5_cpp.lib- the hdf5 C++ API static library
+
+           hdf5\proj\hdf5_cppdll\debug - 
+               hdf5_cppddll.dll- the hdf5 C++ API dll library
+               hdf5_cppddll.lib- the C++ API dll export library                  
+           hdf5\proj\hdf5_cppdll\release - 
+               hdf5_cppdll.dll- the hdf5 C++ API dll library
+               hdf5_cppdll.lib- the C++ API dll export library
+
+
+Testing libraries and tools
+---------------------------
+
+    1. See the file INSTALL_Windows.txt (STEP 2) for instruction on 
+       testing the C HDF5 library and non-hdf4-related tools.
+
+    2. To test C++ HDF5 Library, you first need to copy the appropriate
+       DLL files to the Windows system directory.
+
+         The system directory can usually be found under the path
+                C:\WINNT\system or C:\WINDOWS\system
+
+       You can now run hdf5cpptest.bat in the hdf5\c++\test directory 
+       at the command prompt as below:
+
+	hdf5cpptest release
+	hdf5cpptest release dll
+	hdf5cpptest debug
+	hdf5cpptest debug dll
+
+Please send mail to hdfhelp@ncsa.uiuc.edu for further assistance.
