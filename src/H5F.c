@@ -61,11 +61,12 @@ static herr_t H5F_init_interface(void);
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
-    H5I_type_t obj_type;
-    hid_t      *obj_id_list;
-    unsigned   *obj_id_count;
-    H5F_file_t *shared;
-    unsigned   list_index;
+    H5I_type_t obj_type;        /* Type of object to look for */
+    hid_t      *obj_id_list;    /* Pointer to the list of open IDs to return */
+    unsigned   *obj_id_count;   /* Number of open IDs */
+    H5F_file_t *shared;         /* Pointer to file to look inside */
+    unsigned   list_index;      /* Current index in open ID array */
+    int   max_index;            /* Maximum # of IDs to put into array */
 } H5F_olist_t;    
 
 /* PRIVATE PROTOTYPES */
@@ -83,8 +84,7 @@ static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
-static herr_t H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
-				unsigned *obj_id_count);
+static int H5F_get_objects(H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
 static herr_t H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 
@@ -952,25 +952,25 @@ done:
  *		Wednesday, Dec 5, 2001
  *
  * Modification:
- *	
+ *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Fget_obj_count(hid_t file_id, unsigned types, unsigned *obj_id_count)
+int
+H5Fget_obj_count(hid_t file_id, unsigned types)
 {
     H5F_t    *f=NULL;
-    herr_t   ret_value;
+    int   ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_count, FAIL);
-    H5TRACE3("e","iIu*Iu",file_id,types,obj_id_count);
+    H5TRACE2("e","iIu",file_id,types);
 
     if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
     if( (types&H5F_OBJ_ALL)==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type");
-    assert(obj_id_count);
 
-    ret_value = H5F_get_obj_count(f, types, obj_id_count);
+    if((ret_value = H5F_get_obj_count(f, types))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOUNT, FAIL, "can't get object count");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -992,16 +992,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_get_obj_count(H5F_t *f, unsigned types, unsigned *obj_id_count)
+int
+H5F_get_obj_count(H5F_t *f, unsigned types)
 {
-    herr_t   ret_value = SUCCEED;
+    int   ret_value;            /* Return value */
 
     FUNC_ENTER_NOINIT(H5F_get_obj_count);
 
-    *obj_id_count = 0;
-
-    if(H5F_get_objects(f, types, NULL, obj_id_count) < 0)
+    if((ret_value=H5F_get_objects(f, types, -1, NULL)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get counts of opened file IDs and object IDs in the file");
 
 done:
@@ -1024,13 +1022,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *oid_list)
+H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *oid_list)
 {
     herr_t   ret_value;
     H5F_t    *f=NULL;
 
     FUNC_ENTER_API(H5Fget_obj_ids, FAIL);
-    H5TRACE3("e","iIu*i",file_id,types,oid_list);
+    H5TRACE4("e","iIuIs*i",file_id,types,max_objs,oid_list);
 
     if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
@@ -1038,7 +1036,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *oid_list)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type");
     assert(oid_list);
 
-    ret_value = H5F_get_obj_ids(f, types, oid_list);
+    ret_value = H5F_get_obj_ids(f, types, max_objs, oid_list);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1059,14 +1057,14 @@ done:
  *      
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *oid_list)
+int
+H5F_get_obj_ids(H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
 {
-    herr_t      ret_value = SUCCEED;
+    int ret_value;              /* Return value */
  
     FUNC_ENTER_NOINIT(H5F_get_obj_ids);
 
-    if(H5F_get_objects(f, types, oid_list, NULL) < 0)
+    if((ret_value=H5F_get_objects(f, types, max_objs, oid_list)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object IDs opened in the file");  
 
 done:
@@ -1078,8 +1076,8 @@ done:
  * Function:	H5F_get_objects
  *
  * Purpose:	This function is called by H5F_get_obj_count or 
- *		H5F_get_obj_ids to get either number of object IDs or a 
- *		list of opened object IDs.
+ *		H5F_get_obj_ids to get number of object IDs and/or a 
+ *		list of opened object IDs (in return value).
  * Return:	Non-negative on success; negative on failure. 
  *
  * Programmer:  Raymond Lu
@@ -1089,59 +1087,68 @@ done:
  *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
-		unsigned *obj_id_count)
+static int
+H5F_get_objects(H5F_t *f, unsigned types, int max_index, hid_t *obj_id_list)
 {
-    herr_t      ret_value = SUCCEED;
-    H5F_olist_t *olist = NULL;
+    unsigned obj_id_count=0;    /* Number of open IDs */
+    H5F_olist_t olist;          /* Structure to hold search results */
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOINIT(H5F_get_object);
 
-    olist = H5MM_malloc(sizeof(H5F_olist_t));
-    olist->obj_id_list  = obj_id_list;
-    olist->obj_id_count = obj_id_count;
-    olist->list_index   = 0;
+    /* Set up search information */
+    olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);
+    olist.obj_id_count = &obj_id_count;
+    olist.list_index   = 0;
+    olist.max_index   = max_index;
     /* Shared file structure is used to verify if file IDs refer to the same 
      * file. */
     if(f != NULL)
-        olist->shared = f->shared;
+        olist.shared = f->shared;
     else
-	olist->shared = NULL;
+	olist.shared = NULL;
 
     /* Search through file IDs to count the number, and put their
      * IDs on the object list */
     if( (types & H5F_OBJ_FILE) && H5I_nmembers(H5I_FILE) > 0 ) {
-        olist->obj_type = H5I_FILE;
-        H5I_search(H5I_FILE, (H5I_search_func_t)H5F_get_objects_cb, olist);
+        olist.obj_type = H5I_FILE;
+        H5I_search(H5I_FILE, (H5I_search_func_t)H5F_get_objects_cb, &olist);
     }
 
-    /* Search through dataset IDs to count number of dataset, and put their 
+    /* Search through dataset IDs to count number of datasets, and put their 
      * IDs on the object list */
-    if( (types & H5F_OBJ_DATASET) && H5I_nmembers(H5I_DATASET) > 0 ) {
-        olist->obj_type = H5I_DATASET;
-        H5I_search(H5I_DATASET, (H5I_search_func_t)H5F_get_objects_cb, olist);
+    if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_DATASET) && H5I_nmembers(H5I_DATASET) > 0 ) {
+        olist.obj_type = H5I_DATASET;
+        H5I_search(H5I_DATASET, (H5I_search_func_t)H5F_get_objects_cb, &olist);
     }
 
-    /* Search through group IDs to count number of group, and put their 
+    /* Search through group IDs to count number of groups, and put their 
      * IDs on the object list */
-    if( (types & H5F_OBJ_GROUP) && H5I_nmembers(H5I_GROUP) > 0 ) {
-        olist->obj_type = H5I_GROUP;
-        H5I_search(H5I_GROUP, (H5I_search_func_t)H5F_get_objects_cb, olist);
+    if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_GROUP) && H5I_nmembers(H5I_GROUP) > 0 ) {
+        olist.obj_type = H5I_GROUP;
+        H5I_search(H5I_GROUP, (H5I_search_func_t)H5F_get_objects_cb, &olist);
     }
 
-    /* Search through datatype IDs to count number of datatype, and put their 
+    /* Search through datatype IDs to count number of named datatypes, and put their 
      * IDs on the object list */
-    if( (types & H5F_OBJ_DATATYPE) && H5I_nmembers(H5I_DATATYPE) > 0 ) {
-        olist->obj_type = H5I_DATATYPE;
-        H5I_search(H5I_DATATYPE, (H5I_search_func_t)H5F_get_objects_cb, olist);
+    if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_DATATYPE) && H5I_nmembers(H5I_DATATYPE) > 0 ) {
+        olist.obj_type = H5I_DATATYPE;
+        H5I_search(H5I_DATATYPE, (H5I_search_func_t)H5F_get_objects_cb, &olist);
     }
+
+    /* Search through attribute IDs to count number of attributes, and put their 
+     * IDs on the object list */
+    if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_ATTR) && H5I_nmembers(H5I_ATTR) > 0 ) {
+        olist.obj_type = H5I_ATTR;
+        H5I_search(H5I_ATTR, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+    }
+
+    /* Set the number of objects currently open */
+    ret_value=obj_id_count;
 
 #ifdef LATER
 done:
 #endif /* LATER */
-    if(olist!=NULL)
-	H5MM_xfree(olist);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1163,9 +1170,8 @@ done:
 static herr_t
 H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
-    herr_t      ret_value = SUCCEED;
-    H5F_olist_t *olist = key;
-    H5G_entry_t *ent = NULL;
+    H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
+    herr_t      ret_value = SUCCEED;    /* Return value */
  
     FUNC_ENTER_NOINIT(H5F_get_objects_cb);
 
@@ -1174,17 +1180,28 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     /* Count file IDs */ 
     if(olist->obj_type == H5I_FILE) {
-	if( !olist->shared || (olist->shared && ((H5F_t*)obj_ptr)->shared == 
-	    olist->shared) ) {
+	if( !olist->shared || (olist->shared && ((H5F_t*)obj_ptr)->shared == olist->shared) ) {
+            /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
                 olist->obj_id_list[olist->list_index] = obj_id;
 		olist->list_index++;
 	    }
+
+            /* Increment the number of open objects */
 	    if(olist->obj_id_count)
 	    	(*olist->obj_id_count)++;
-	}    
+
+            /* Check if we've filled up the array */
+            if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
+                HGOTO_DONE(SUCCEED);
+	}
     } else { /* either count opened object IDs or put the IDs on the list */
+        H5G_entry_t *ent;        /* Group entry info for object */
+
     	switch(olist->obj_type) {
+	    case H5I_ATTR:
+	        ent = H5A_entof((H5A_t*)obj_ptr);
+                break;
 	    case H5I_GROUP:
 	        ent = H5G_entof((H5G_t*)obj_ptr);
                 break;
@@ -1192,22 +1209,31 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	        ent = H5D_entof((H5D_t*)obj_ptr);
 		break;
 	    case H5I_DATATYPE:
-	        ent = H5T_entof((H5T_t*)obj_ptr);
+                if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
+                    ent = H5T_entof((H5T_t*)obj_ptr);
+                else
+                    ent = NULL;
 		break;
             default:
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                              "unknown data object");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object");
 	}
 
     	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
                 || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
                 || (ent && ent->file->shared == olist->shared) ) {
+            /* Add the object's ID to the ID list, if appropriate */
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
 		olist->list_index++;
 	    }
+
+            /* Increment the number of open objects */
 	    if(olist->obj_id_count)
             	(*olist->obj_id_count)++;
+
+            /* Check if we've filled up the array */
+            if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
+                HGOTO_DONE(SUCCEED);
     	}
     }
 
@@ -2848,9 +2874,8 @@ static herr_t
 H5F_close(H5F_t *f)
 {
     H5F_close_degree_t	fc_degree;      /* What action to take when closing the last file ID for a file */
-    hid_t		*oid_list;      /* List of IDs still open */
-    unsigned		i;              /* Local index variable */
     unsigned	        closing=0;      /* Indicate that the file will be closed */
+    unsigned		u;              /* Local index variable */
     herr_t	        ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_close, FAIL);
@@ -2883,10 +2908,10 @@ H5F_close(H5F_t *f)
      * Unmount and close each child before closing the current file.
      */
     assert(NULL==f->mtab.parent);
-    for (i=0; i<f->mtab.nmounts; i++) {
-	f->mtab.child[i].file->mtab.parent = NULL;
-	H5G_close(f->mtab.child[i].group);
-	H5F_close(f->mtab.child[i].file);
+    for (u=0; u<f->mtab.nmounts; u++) {
+	f->mtab.child[u].file->mtab.parent = NULL;
+	H5G_close(f->mtab.child[u].group);
+	H5F_close(f->mtab.child[u].file);
     } /* end if */
     f->mtab.nmounts = 0;
 
@@ -2966,25 +2991,47 @@ H5F_close(H5F_t *f)
 
         case H5F_CLOSE_STRONG:
             /* Forcefully close all opened objects in file */
-            while(f->nopen_objs > 0)
-            {
-                /* Allocate space for the IDs of objects still currently open */
-                if((oid_list = H5MM_malloc(f->nopen_objs*sizeof(hid_t)))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            while(f->nopen_objs > 0) {
+                int obj_count;          /* # of open objects */
+                hid_t objs[128];        /* Array of objects to close */
+                int i;                  /* Local index variable */
 
-                /* Get the list of IDs of open objects */
-                if(H5F_get_obj_ids(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE, oid_list) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object list in file");
+                /* Get the list of IDs of open dataset objects */
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATASET, (sizeof(objs)/sizeof(objs[0])), objs))) {
                
-                /* Try to close all the open objects */
-                for(i=0; i<f->nopen_objs; i++)
-                    if(H5I_dec_ref(oid_list[i]) < 0)
-                        HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
+                    /* Try to close all the open objects */
+                    for(i=0; i<obj_count; i++)
+                        if(H5I_dec_ref(objs[i]) < 0)
+                            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
+                } /* end while */
 
-                /* Free the ID list */
-                if(oid_list != NULL)
-                    H5MM_xfree(oid_list);
-            }
+                /* Get the list of IDs of open group objects */
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_GROUP, (sizeof(objs)/sizeof(objs[0])), objs))) {
+               
+                    /* Try to close all the open objects */
+                    for(i=0; i<obj_count; i++)
+                        if(H5I_dec_ref(objs[i]) < 0)
+                            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
+                } /* end while */
+
+                /* Get the list of IDs of open named datatype objects */
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_DATATYPE, (sizeof(objs)/sizeof(objs[0])), objs))) {
+               
+                    /* Try to close all the open objects */
+                    for(i=0; i<obj_count; i++)
+                        if(H5I_dec_ref(objs[i]) < 0)
+                            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
+                } /* end while */
+
+                /* Get the list of IDs of open attribute objects */
+                while((obj_count=H5F_get_obj_ids(f, H5F_OBJ_ATTR, (sizeof(objs)/sizeof(objs[0])), objs))) {
+               
+                    /* Try to close all the open objects */
+                    for(i=0; i<obj_count; i++)
+                        if(H5I_dec_ref(objs[i]) < 0)
+                            HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object");
+                } /* end while */
+            } /* end while */
 
             /* Indicate that the file will be closing */
             closing=1;
@@ -3083,7 +3130,7 @@ H5Fclose(hid_t file_id)
      * be closed.
      */
     if (H5I_dec_ref (file_id)<0)
-	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
+	HGOTO_ERROR (H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed");
 
 done:
     FUNC_LEAVE_API(ret_value);
