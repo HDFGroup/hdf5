@@ -578,7 +578,6 @@ main(int argc, char *argv[])
 {
     hid_t		file, dcpl, ra;
     hsize_t		ch_size[2];		/*chunk size		*/
-    struct sigaction	act;			/*alarm signal handler	*/
     hsize_t		rows_at_once=100;	/*row aggregation	*/
     int			argno=1;
 
@@ -591,11 +590,18 @@ main(int argc, char *argv[])
     H5Eset_auto(display_error_cb, NULL);
 
     /* Get a SIGALRM every few seconds */
-    act.sa_handler = catch_alarm;
-    sigemptyset(&(act.sa_mask));
-    act.sa_flags = 0;
-    sigaction(SIGALRM, &act, NULL);
-    alarm(1);
+#ifdef HAVE_SIGACTION
+    {
+	struct sigaction act;
+	act.sa_handler = catch_alarm;
+	sigemptyset(&(act.sa_mask));
+	act.sa_flags = 0;
+	sigaction(SIGALRM, &act, NULL);
+	alarm(1);
+    }
+#else
+    puts("No sigaction().  This test may run for a *long* time.");
+#endif
 
     /* Create the file and ragged array */
     if ((file=H5Fcreate("ragged.h5", H5F_ACC_TRUNC, H5P_DEFAULT,
