@@ -63,8 +63,9 @@ herr_t H5DSget_label(hid_t did,
                      char *label,
                      unsigned int idx);
 
-herr_t H5DSget_scale_name(hid_t did, 
-                          char *buf);
+ssize_t H5DSget_scale_name(hid_t did, 
+                           char *name,
+                           size_t size);
 
 herr_t H5DSis_scale(hid_t did);
 
@@ -74,9 +75,9 @@ herr_t H5DSiterate_scales(hid_t did,
                           H5DS_iterate_t visitor, 
                           void *visitor_data);
 
-htri_t H5DS_is_attached(hid_t did,
-                        hid_t dsid,
-                        unsigned int idx);
+htri_t H5DSis_attached(hid_t did,
+                       hid_t dsid,
+                       unsigned int idx);
 
 
 #ifdef __cplusplus

@@ -10,7 +10,7 @@
  *                                                                          *
  ****************************************************************************/
 
-
+#include "H5private.h"
 #include "H5DS.h"
 #include "H5LT.h"
 #include <stdlib.h>
@@ -1329,11 +1329,17 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5DSget_scale_name(hid_t did, 
-                          char *buf) 
+ssize_t H5DSget_scale_name(hid_t did, 
+                           char *name,
+                           size_t size) 
 {  
- H5I_type_t it;           /* ID type */
- int has_name;
+ hid_t      aid;      /* attribute ID  */
+ hid_t      tid;      /* attribute type ID */
+ hid_t      sid;      /* space ID  */
+ H5I_type_t it;       /* ID type */
+ size_t     len;
+ int        has_name;
+ char       *buf=NULL;
 
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -1358,14 +1364,72 @@ herr_t H5DSget_scale_name(hid_t did,
  if ((has_name = H5LT_find_attribute(did,"NAME"))<0)
   return FAIL;
 
- if (has_name == 1)
+ if (has_name == 0)
+  return FAIL;
+
+/*-------------------------------------------------------------------------
+ * open the attribute
+ *-------------------------------------------------------------------------
+ */
+ 
+ if ((aid = H5Aopen_name(did,"NAME"))<0)
+  return FAIL;
+
+ /* get space */
+ if ((sid = H5Aget_space(aid))<0)
+  goto out;
+
+ /* get type */
+ if ((tid = H5Aget_type(aid))<0)
+  goto out;
+
+ /* get the size */
+ if ((len = H5Tget_size(tid))<0)
+  goto out;
+
+ /* allocate a temporary buffer */
+ buf = (char*)malloc(len * sizeof(char));
+ if (buf == NULL)
+  goto out;
+ 
+ /* read */
+ if (H5Aread(aid,tid,buf)<0)
+  goto out;
+
+ /* compute the string length which will fit into the user's buffer, copy all/some of the name */
+ if(name) 
  {
-  /* get the attribute */
-  if (H5LT_get_attribute_disk(did,"NAME",buf)<0)
-   return FAIL;
+  HDstrncpy(name, buf, MIN(len+1,size));
+  if(len >= size)
+   name[size-1]='\0';
+ } /* end if */
+ 
+ /* close */
+ if (H5Tclose(tid)<0)
+  goto out;
+ if (H5Aclose(aid)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
+  goto out;
+ if (buf)
+ {
+  free(buf);
+  buf=NULL;
  }
 
- return SUCCESS;
+
+ return (ssize_t) len;
+
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Aclose(aid);
+  H5Tclose(tid);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ if (buf)
+  free(buf);
+ return FAIL;
 }
 
 
@@ -1618,15 +1682,8 @@ out:
 } 
 
 
-
 /*-------------------------------------------------------------------------
- * private functions
- *-------------------------------------------------------------------------
- */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5DS_is_attached
+ * Function: H5DSis_attached
  *
  * Purpose: Checks if the dataset named DNAME has a pointer in the REFERENCE_LIST
  *  attribute and the the dataset named DSNAME (scale ) has a pointer in the 
@@ -1648,9 +1705,9 @@ out:
  *-------------------------------------------------------------------------
  */
 
-htri_t H5DS_is_attached(hid_t did,
-                        hid_t dsid,
-                        unsigned int idx)  
+htri_t H5DSis_attached(hid_t did,
+                       hid_t dsid,
+                       unsigned int idx)  
 { 
  int        has_dimlist;
  int        has_reflist;
