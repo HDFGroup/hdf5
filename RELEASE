@@ -507,3 +507,10 @@ applicable, are systems that HDF5 1.2.0beta was tested.
                                 mpt.1.3
 
   Windows/NT 4.0/SP3            MSVC++ 5.0 and 6.0
+
+  Cygwin                        gcc egcs-2.91.57
+
+
+
+
+
