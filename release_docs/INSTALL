@@ -10,7 +10,6 @@
 	2.1. GNU (Intel platforms)
 	2.2. DEC
 	2.3. SGI (Irix64 6.2)
-	2.4. Windows/NT
 
 	3. Quick installation
 	3.1. TFLOPS
@@ -54,9 +53,8 @@
 
 1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
-	ftp://hdf.ncsa.uiuc.edu/HDF5/current/src.  For Unix platforms, it is
-	available in tar format compressed with gzip.  For Microsoft Windows,
-        it is in ZIP format.
+	ftp://hdf.ncsa.uiuc.edu/HDF5/current/src.  It is
+	available in tar format compressed with gzip. 
 
 	The HDF team also makes snapshots of the source code available on
 	a regular basis. These snapshots are unsupported (that is, the
@@ -97,23 +95,17 @@
 	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
 	from SGI.
 
-2.4. Windows/NT
-	The MicroSoft Win32 5.0 compiler is unable to cast unsigned long
-	long values to doubles. HDF5 works around this bug by first
-	casting to signed long long and then to double.
-
-	A link warning: defaultlib "LIBC" conflicts with use of other libs
-	appears for debug version of VC++ 6.0. This warning will not affect
-	building and testing hdf5 libraries. 
-
 
 3. Quick installation
 	For those that don't like to read ;-) the following steps can be
 	used to configure, build, test, and install the HDF5 library,
-	header files, and support programs.
+	header files, and support programs. "#" in "hdf5-1.6.#" below stands
+        for the release number, for example "3" for hdf5-1.6.3, or
+        for release and subrelease versions, for example,
+        "3-snap4" for hdf5-1.6.3-snap4.
 
-	    $ gunzip < hdf5-1.6.0.tar.gz | tar xf -
-	    $ cd hdf5-1.6.0
+	    $ gunzip < hdf5-1.6.#.tar.gz | tar xf -
+	    $ cd hdf5-1.6.#
 	    $ make check
 	    $ make install
 
@@ -143,9 +135,9 @@
 	The HDF5 library has a predefined compression filter that uses
 	the extended-Rice lossless compression algorithm for chunked 
         datatsets. For more information about Szip compression and license terms
-        see http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html.
+        see http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/index.html.
         Precompiled szip binaries for each supported platform and source tar ball
-        file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
+        file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/szip/
 
 4.3. MPI and MPI-IO
 	The parallel version of the library is built upon the foundation
@@ -158,23 +150,23 @@
 5.1. Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats which
 	can be unpacked with the following commands, each of which
-	creates an `hdf5-1.6.0' directory.
+	creates an `hdf5-1.6.#' directory.
 
 5.1.1. Non-compressed tar archive (*.tar)
 
-	    $ tar xf hdf5-1.6.0.tar
+	    $ tar xf hdf5-1.6.#.tar
 
 5.1.2. Compressed tar archive (*.tar.Z)
 
-	    $ uncompress -c < hdf5-1.6.0.tar.Z | tar xf -
+	    $ uncompress -c < hdf5-1.6.#.tar.Z | tar xf -
 
 5.1.3. Gzip'd tar archive (*.tar.gz)
 
-	    $ gunzip < hdf5-1.6.0.tar.gz | tar xf -
+	    $ gunzip < hdf5-1.6.#.tar.gz | tar xf -
 
 5.1.4. Bzip'd tar archive (*.tar.bz2)
 
-	    $ bunzip2 < hdf5-1.6.0.tar.bz2 | tar xf -
+	    $ bunzip2 < hdf5-1.6.#.tar.bz2 | tar xf -
 
 5.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than the
@@ -222,10 +214,11 @@
 
 5.3.1. Specifying the installation directories
 	Typing `make install' will install the HDF5 library, header
-	files, examples, and support programs in /usr/local/lib,
-	/usr/local/include, /usr/local/doc/hdf5/examples, and 
-        /usr/local/bin. To use a path other than
-	/usr/local specify the path with the `--prefix=PATH' switch:
+	files, examples, and support programs in hdf5/lib,
+	hdf5/include, hdf5/examples and hdf5/bin under the directory where it
+        was built (hdf5-1.6.# or build directory mentioned in 5.2)
+        To use a path other than hdf5 specify the path with 
+        the `--prefix=PATH' switch:
 
 	    $ ./configure --prefix=$HOME
 
@@ -234,7 +227,8 @@
 	before the library and executables are built.
 
 5.3.2. Using an alternate C compiler
-	By default, configure will look for the C compiler by trying
+	By default, configure will look for the C compiler specified
+        in the host configuration file in the config directory or by trying
 	`gcc' and `cc'. However, if the environment variable "CC" is set
 	then its value is used as the C compiler (users of csh and
 	derivatives will need to prefix the commands below with `env').
@@ -243,8 +237,8 @@
 
 	    $ CC=cc ./configure
 
-	A parallel version of hdf5 can be built by specifying `mpicc'
-	as the C compiler (the `--enable-parallel' flag documented
+	A parallel version of hdf5 can be built by specifying parallel compiler,
+        usually `mpicc', as the C compiler (the `--enable-parallel' flag documented
 	below is optional in this case).  Using the `mpicc' compiler
 	will insure that the correct MPI and MPI-IO header files and
 	libraries are used.
@@ -287,17 +281,23 @@
 	    $ ./configure --enable-fortran
 	    $ ./configure --enable-cxx
 	
-	Configuration will halt if a working Fortran 90 or 95 compiler or
-	C++ compiler is not found. Currently, the Fortran configure tests
+        Configure uses Fortran compiler specified in the host configuration
+        file in the fortran/config directory and C++ compiler specified in the
+        host configuration file under the c++/config directory. 
+        Configuration will halt if a working Fortran 90 or 95 compiler or 
+        C++ compiler is not found. Currently, the Fortran configure tests
 	for these compilers in order: f90, pgf90, f95. To use an
-	alternative compiler specify it with the F9X variable:
+	alternative Fortran compiler specify it with the F9X variable,
+        for example:
 
-	    $ F9X=/usr/local/bin/g95 ./configure --enable-fortran
+	    $ F9X=/mycompiler/bin/g95 ./configure --enable-fortran
 
-	Note: The Fortran and C++ interfaces are not supported on all the
-	platforms the main HDF5 library supports. Also, the Fortran
-	interface supports parallel HDF5 while the C++ interface does
-	not.
+        To use an alternative C++ compiler specify it with the CXX variable:
+
+            $ CXX=/mycompiler/bin/c++ ./configure --enable-cxx 
+
+	Note: Fortran interface supports parallel HDF5 while the 
+              C++ interface does not.
           
         Note:  On Crays the following files should be modified before
                building the Fortran Library:
@@ -362,28 +362,20 @@
 	specified above with CPPFLAGS and LDFLAGS variables) for the zlib
 	headers and library. The search can be disabled by specifying
 	`--without-zlib' or alternate directories can be specified with
-	`--with-zlib=INCDIR,LIBDIR' or through the CPPFLAGS and LDFLAGS
+	`--with-zlib=/PATH_TO_ZLIB' or through the CPPFLAGS and LDFLAGS
 	variables:
 
-	    $ ./configure --with-zlib=/usr/unsup/include,/usr/unsup/lib
+	    $ ./configure --with-zlib=/PATH_TO_ZLIB
 
-	    $ CPPFLAGS=-I/usr/unsup/include \
-	      LDFLAGS=-L/usr/unsup/lib \
+	    $ CPPFLAGS=-I/PATH_TO_ZLIB/include \
+	      LDFLAGS=-L/PATH_TO_ZLIB/lib \
 	      ./configure
 
-	The HDF5-to-HDF4 and HDF4-to-HDF5 conversion tool requires the
-	HDF4 library and header files which are detected the same way as
-	zlib. The switch to give to configure is `--with-hdf4'.  Note
-	that HDF5 requires a newer version of zlib than the one shipped
-	with some versions of HDF4. Also, unless you have the "correct"
-	version of hdf4 the confidence testing will fail in the tools
-	directory.
-        
 	HDF5 has Szip predefined compression method (see 4.2).  To enable
 	Szip compression, HDF5 library has to be configured and build using 
 	Szip Library
 
-        $ ./configure --with-szlib=/Szip_Install_Directory
+        $ ./configure --with-szlib=/PATH_TO_SZIP
 
 5.3.7. Static versus shared linking
 	The build process will create static libraries on all systems and
@@ -420,7 +412,8 @@
 	packages (such as type conversion execution times, and extensive
 	invariant condition checking). To enable this debugging supply a
 	comma-separated list of package names to to the `--enable-debug'
-	switch (see Debugging.html for a list of package names).
+	switch (see doc/html/Debugging.html in the source directory
+        for a list of package names).
 	Debugging can be disabled by saying `--disable-debug'. The
 	default debugging level for snapshots is a subset of the
 	available packages; the default for supported releases is no
@@ -458,8 +451,8 @@
 	large scale) with the with the `--enable-threadsafe' flag to
         the configure script.  Some platforms may also require the 
         '-with-pthread=INC,LIB' (or '--with-pthread=DIR') flag to the configure
-        script as well.  Read the file doc/TechNotes/ThreadSafeLibrary.html
-        for further details.
+        script as well.  Read the file doc/html/TechNotes/ThreadSafeLibrary.html
+         in the source directory for further details.
 
 5.3.12. Backward compatibility
 	The 1.6 version of the HDF5 library can be configured to operate
@@ -474,7 +467,8 @@
 	driver with the `--enable-stream-vfd' configure flag. This option
 	compiles the "stream" Virtual File Driver into the main library.
 	See the documentation on the Virtual File Layer for more details
-	about the use of this driver.
+	about the use of this driver. This option is ON by default. Use
+        --disable-stream-vfd configuration flag to turn it OFF.
 
 5.4. Building
 	The library, confidence tests, and programs can be build by
@@ -513,9 +507,10 @@
 	The HDF5 library, include files, and support programs can be
 	installed in a (semi-)public place by saying `make install'. The
 	files are installed under the directory specified with
-	`--prefix=DIR' (or '/usr/local') in directories named `lib',
-	`include', and `bin'. The prefix directory must exist prior to
-	`make install', but its subdirectories are created automatically.
+	`--prefix=DIR' (or 'hdf5' in the build directory) in directories named `lib',
+	`include', 'doc', and `bin'. The prefix directory DIR must exist prior to
+	`make install', but its subdirectories are created automatically. 
+        'hdf5' directory under the build directory is created automatically.
 
 	If `make install' fails because the install command at your site
 	somehow fails, you may use the install-sh that comes with the
@@ -523,18 +518,6 @@
 
             $ INSTALL="$PWD/bin/install-sh -c" ./configure ...
             $ make install
-
-	If you want to install HDF5 in a location other than the location
-	specified by the `--prefix=DIR' flag during configuration (or
-	instead of the default location, `/usr/local'), you can do that
-	by issuing the command:
-
-	    $ make install prefix=NEW_DIR
-
-	where NEW_DIR is the new directory you wish to install HDF5. If
-	you do this, you should run h5redeploy in NEW_DIR/bin directory.
-        This utility will fix h5cc, h5fc and h5c++ scripts to reflect new
-        NEW_DIR location.
 
 	The library can be used without installing it by pointing the
 	compiler at the `src' and 'src/.libs' directory for include files and
@@ -545,7 +528,9 @@
 		./src/.libs/libhdf5.a
 
 	    The public header files:
-		./src/H5*public.h
+		./src/H5*public.h, ./src/H5public.h
+                ./src/H5FD*.h except ./src/H5FDprivate.h,
+                ./src/H5api_adpt.h
 
 	    The main header file:
 		./src/hdf5.h
@@ -641,8 +626,12 @@
 	support for compression, etc. was compiled into the hdf5 library.
 
 	A summary of the hdf5 installation can be found in the
-	libhdf5.settings file in the same directory as the static and/or
-	shared hdf5 libraries.
+	libhdf5.settings and libhdf5_fortran.settings files in the bin
+        subdirectory. 
+
+        Users are encouraged to use helper compiler scripts h5cc, h5fc, and
+        h5c++ to build HDF5 C, Fortran and C++ applications correspondigly. Those
+        scripts are installed under bin subdirectory when make install is run.
 
 
 7. Support
