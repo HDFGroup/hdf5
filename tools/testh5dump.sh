@@ -1,8 +1,13 @@
-#!/bin/sh
+#! /bin/sh
+# 
+#  Copyright (C) 1998 - 2001
+#      National Center for Supercomputing Applications
+#      All rights reserved.
+#
 # Tests for the h5dump tool
 
-h5tool=h5dump			# The tool name
-h5tool_bin=`pwd`/$h5tool	# The path of the tool binary
+DUMPER=h5dump			# The tool name
+DUMPER_BIN=`pwd`/$DUMPER	# The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -10,17 +15,18 @@ nerrors=0
 verbose=yes
 
 # The build (current) directory might be different than the source directory.
-if test "X$srcdir" = X; then
-    srcdir=.
+if test -z "$srcdir"; then
+   srcdir=.
 fi
+
 test -d testfiles || mkdir testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
-TESTING()
-{
-    SPACES="                                                               "
-    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
@@ -30,41 +36,37 @@ TESTING()
 # the actual output file is calculated by replacing the `.ddl' with
 # `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
 # non-zero value.
-TOOLTEST()
-{
-    expect=$srcdir/testfiles/$1
-    actual="testfiles/`basename $1 .ddl`.out"
-    shift
-    full=`pwd`/$h5tool
+#
+TOOLTEST() {
+   expect=$srcdir/testfiles/$1
+   actual="testfiles/`basename $1 .ddl`.out"
+   shift
 
-    # Run test.
-    # Stderr is included in stdout so that the diff can detect
-    # any unexpected output from that stream too.
-    TESTING $h5tool $@
-    (
-	echo "#############################"
-	echo "Expected output for '$h5tool $@'" 
-	echo "#############################"
-	cd $srcdir/testfiles
-        $RUNSERIAL $h5tool_bin "$@"
-    ) >$actual 2>& 1
+   # Run test.
+   TESTING $DUMPER $@
+
+   (
+      echo "#############################"
+      echo "Expected output for '$DUMPER $@'" 
+      echo "#############################"
+      cd $srcdir/testfiles
+      $RUNSERIAL $DUMPER_BIN "$@"
+   ) >$actual 2>&1
     
-    if $CMP $expect $actual; then
-	echo " PASSED"
-    else
-	echo "*FAILED*"
-	echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
+   if $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
 
-    # Clean up output file
-    if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-	rm -f $actual
-    fi
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual
+   fi
 }
-
-
 
 ##############################################################################
 ##############################################################################
@@ -75,7 +77,7 @@ TOOLTEST()
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups
-TOOLTEST tgroup-2.ddl -g /g2 -g / -g /y tgroup.h5
+TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
 
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl tdset.h5
@@ -85,9 +87,9 @@ TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 # test for displaying attributes
 TOOLTEST tattr-1.ddl tattr.h5
 # test for displaying the selected attributes of string type and scalar space
-TOOLTEST tattr-2.ddl -a attr1 --attribute attr4 --attribute=attr5 tattr.h5
+TOOLTEST tattr-2.ddl -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
-TOOLTEST tattr-3.ddl --header -a attr2 --attribute=attr tattr.h5
+TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
 
 # test for displaying soft links
 TOOLTEST tslink-1.ddl tslink.h5
@@ -144,8 +146,52 @@ TOOLTEST tarray7.ddl tarray7.h5
 # test for files with empty data
 TOOLTEST tempty.ddl tempty.h5
 
+# test XML
+TOOLTEST tall.h5.xml --xml tall.h5
+TOOLTEST tattr.h5.xml --xml tattr.h5
+TOOLTEST tbitfields.h5.xml --xml tbitfields.h5
+TOOLTEST tcompound.h5.xml --xml tcompound.h5
+TOOLTEST tcompound2.h5.xml --xml tcompound2.h5
+TOOLTEST tdatareg.h5.xml --xml tdatareg.h5
+TOOLTEST tdset.h5.xml --xml tdset.h5
+TOOLTEST tdset2.h5.xml --xml tdset2.h5
+TOOLTEST tenum.h5.xml --xml tenum.h5
+TOOLTEST tgroup.h5.xml --xml tgroup.h5
+TOOLTEST thlink.h5.xml --xml thlink.h5
+TOOLTEST tloop.h5.xml --xml tloop.h5
+TOOLTEST tloop2.h5.xml --xml tloop2.h5
+TOOLTEST tmany.h5.xml --xml tmany.h5
+TOOLTEST tnestedcomp.h5.xml --xml tnestedcomp.h5
+TOOLTEST tobjref.h5.xml --xml tobjref.h5
+TOOLTEST topaque.h5.xml --xml topaque.h5
+TOOLTEST tslink.h5.xml --xml tslink.h5
+TOOLTEST tstr.h5.xml --xml tstr.h5
+TOOLTEST tstr2.h5.xml --xml tstr2.h5
+TOOLTEST tref.h5.xml --xml tref.h5
+TOOLTEST tname-amp.h5.xml --xml tname-amp.h5
+TOOLTEST tname-apos.h5.xml --xml tname-apos.h5
+TOOLTEST tname-gt.h5.xml --xml tname-gt.h5
+TOOLTEST tname-lt.h5.xml --xml tname-lt.h5
+TOOLTEST tname-quot.h5.xml --xml tname-quot.h5
+TOOLTEST tname-sp.h5.xml --xml tname-sp.h5
+TOOLTEST tstring.h5.xml --xml tstring.h5
+TOOLTEST tstring-at.h5.xml --xml tstring-at.h5
+TOOLTEST tref-escapes.h5.xml --xml tref-escapes.h5
+TOOLTEST tref-escapes-at.h5.xml --xml tref-escapes-at.h5
+TOOLTEST tnodata.h5.xml --xml tnodata.h5
+TOOLTEST tarray1.h5.xml --xml tarray1.h5
+TOOLTEST tarray2.h5.xml --xml tarray2.h5
+TOOLTEST tarray3.h5.xml --xml tarray3.h5
+TOOLTEST tarray6.h5.xml --xml tarray6.h5
+TOOLTEST tarray7.h5.xml --xml tarray7.h5
+TOOLTEST tvldtypes1.h5.xml --xml tvldtypes1.h5
+TOOLTEST tvldtypes2.h5.xml --xml tvldtypes2.h5
+TOOLTEST tvldtypes3.h5.xml --xml tvldtypes3.h5
+TOOLTEST tsaf.h5.xml --xml tsaf.h5
+TOOLTEST tempty.h5.xml --xml tempty.h5
+
 if test $nerrors -eq 0 ; then
-	echo "All $h5tool tests passed."
+   echo "All $DUMPER tests passed."
 fi
 
 exit $nerrors
