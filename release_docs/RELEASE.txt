@@ -43,6 +43,9 @@ New Features
 
     Library:
     --------
+        - Added H5Iget_ref, H5Iinc_ref and H5Idec_ref routines to the C
+          library and the FORTRAN wrapper.  See the reference manual for a
+          full description of these new routines.  QAK - 2003/12/11
 
     Parallel Library:
     -----------------
