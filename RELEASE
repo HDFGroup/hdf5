@@ -336,6 +336,9 @@ Known Problems
   done manually by copying the *.mod files from the fortran/src
   directory.
 
+* Fortran modules are not installed when created. This should be done
+  manually by copying the modules from the fortran/src directory.
+
 * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
 
