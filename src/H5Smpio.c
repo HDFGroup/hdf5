@@ -152,7 +152,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 
     /* Check and abbreviate args */
     assert (space);
-    diminfo = space->select.sel_info.hyper.diminfo;
+    diminfo = space->select.sel_info.hslab.diminfo;
     assert (diminfo);
     rank = space->extent.u.simple.rank;
     assert (rank >= 0);

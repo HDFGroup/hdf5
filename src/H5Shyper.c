@@ -640,7 +640,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     /* Get a sorted list (in the next dimension down) of the regions which */
     /*  overlap the current index in this dim */
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
-            fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
+            fhyper_info->space->select.sel_info.hslab.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
             fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
@@ -843,8 +843,8 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         this is the correct place to change the order of the array iterations)
     */
     for(i=0; i<file_space->extent.u.simple.rank; i++) {
-        lo_bounds[i]=file_space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
-        hi_bounds[i]=file_space->select.sel_info.hyper.hyper_lst->hi_bounds[i];
+        lo_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
+        hi_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
     } /* end for */
 
     /* Initialize parameter block for recursive calls */
@@ -921,7 +921,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     /* Get a sorted list (in the next dimension down) of the regions which */
     /*  overlap the current index in this dim */
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
-            fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
+            fhyper_info->space->select.sel_info.hslab.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
             fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
@@ -1105,8 +1105,8 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * correct place to change the order of the array iterations)
      */
     for(i=0; i<file_space->extent.u.simple.rank; i++) {
-        lo_bounds[i]=file_space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
-        hi_bounds[i]=file_space->select.sel_info.hyper.hyper_lst->hi_bounds[i];
+        lo_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
+        hi_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
     } /* end for */
 
     /* Initialize parameter block for recursive calls */
@@ -1181,7 +1181,7 @@ H5S_hyper_mread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     /* Get a sorted list (in the next dimension down) of the regions which */
     /*  overlap the current index in this dim */
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
-            fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
+            fhyper_info->space->select.sel_info.hslab.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
             fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
@@ -1374,12 +1374,12 @@ H5S_hyper_mgath (const void *_buf, size_t elmt_size,
     printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
     for(i=0; i<mem_space->extent.u.simple.rank; i++) {
-        lo_bounds[i]=mem_space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
-        hi_bounds[i]=mem_space->select.sel_info.hyper.hyper_lst->hi_bounds[i];
+        lo_bounds[i]=mem_space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
+        hi_bounds[i]=mem_space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
 #ifdef QAK
 	printf("%s: check 3.1, lo[%d]=%p, hi[%d]=%p\n",
 	       FUNC,i,lo_bounds[i],i,hi_bounds[i]);
-        for(j=0; j<(int)mem_space->select.sel_info.hyper.hyper_lst->count; j++)
+        for(j=0; j<(int)mem_space->select.sel_info.hslab.hyper_lst->count; j++)
 	    printf("%s: check 3.2, lo[%d][%d]=%d, hi[%d][%d]=%d\n",
 		   FUNC, i, j, (int)lo_bounds[i][j].bound, i, j,
 		   (int)hi_bounds[i][j].bound);
@@ -1454,7 +1454,7 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
     /* Get a sorted list (in the next dimension down) of the regions which */
     /*  overlap the current index in this dim */
     if((reg_id=H5S_hyper_get_regions(&num_regions,dim,
-            fhyper_info->space->select.sel_info.hyper.hyper_lst->count,
+            fhyper_info->space->select.sel_info.hslab.hyper_lst->count,
             fhyper_info->lo_bounds, fhyper_info->hi_bounds,
             fhyper_info->iter->hyp.pos,fhyper_info->space->select.offset))>=0) {
 
@@ -1626,8 +1626,8 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
      * correct place to change the order of the array iterations)
      */
     for(i=0; i<mem_space->extent.u.simple.rank; i++) {
-        lo_bounds[i]=mem_space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
-        hi_bounds[i]=mem_space->select.sel_info.hyper.hyper_lst->hi_bounds[i];
+        lo_bounds[i]=mem_space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
+        hi_bounds[i]=mem_space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
     } /* end for */
 
     /* Initialize parameter block for recursive calls */
@@ -1889,26 +1889,26 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
 
 #ifdef QAK
     printf("%s: check 3.0, lo_bounds=%p, hi_bounds=%p\n",
-	   FUNC, space->select.sel_info.hyper.hyper_lst->lo_bounds,
-	   space->select.sel_info.hyper.hyper_lst->hi_bounds);
+	   FUNC, space->select.sel_info.hslab.hyper_lst->lo_bounds,
+	   space->select.sel_info.hslab.hyper_lst->hi_bounds);
 #endif /* QAK */
     /* Increase size of boundary arrays for dataspace's selection */
     for(i=0; i<space->extent.u.simple.rank; i++) {
-        tmp=space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
+        tmp=space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
 #ifdef QAK
-	printf("%s: check 3.1, i=%d, space->sel_info.count=%d, tmp=%p\n",FUNC,(int)i, space->select.sel_info.hyper.hyper_lst->count,tmp);
+	printf("%s: check 3.1, i=%d, space->sel_info.count=%d, tmp=%p\n",FUNC,(int)i, space->select.sel_info.hslab.hyper_lst->count,tmp);
 #endif /* QAK */
-        if((space->select.sel_info.hyper.hyper_lst->lo_bounds[i]=H5MM_realloc(tmp,sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hyper.hyper_lst->count+1)))==NULL) {
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i]=tmp;
+        if((space->select.sel_info.hslab.hyper_lst->lo_bounds[i]=H5MM_realloc(tmp,sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hslab.hyper_lst->count+1)))==NULL) {
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i]=tmp;
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate hyperslab lo boundary array");
         } /* end if */
 #ifdef QAK
 	printf("%s: check 3.2, i=%d\n",FUNC,(int)i);
 #endif /* QAK */
-        tmp=space->select.sel_info.hyper.hyper_lst->hi_bounds[i];
-        if((space->select.sel_info.hyper.hyper_lst->hi_bounds[i]=H5MM_realloc(tmp,sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hyper.hyper_lst->count+1)))==NULL) {
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i]=tmp;
+        tmp=space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
+        if((space->select.sel_info.hslab.hyper_lst->hi_bounds[i]=H5MM_realloc(tmp,sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hslab.hyper_lst->count+1)))==NULL) {
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i]=tmp;
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate hyperslab hi boundary array");
         } /* end if */
@@ -1920,13 +1920,13 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
         intn j;
         
         for(i=0; i<space->extent.u.simple.rank; i++) {
-            for(j=0; j<(int)space->select.sel_info.hyper.hyper_lst->count; j++) {
+            for(j=0; j<(int)space->select.sel_info.hslab.hyper_lst->count; j++) {
 		printf("%s: lo_bound[%d][%d]=%d(%p), "
 		       "hi_bound[%d][%d]=%d(%p)\n",FUNC,
-        i,j,(int)space->select.sel_info.hyper.hyper_lst->lo_bounds[i][j].bound,
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i][j].node,
-        i,j,(int)space->select.sel_info.hyper.hyper_lst->hi_bounds[i][j].bound,
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i][j].node);
+        i,j,(int)space->select.sel_info.hslab.hyper_lst->lo_bounds[i][j].bound,
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][j].node,
+        i,j,(int)space->select.sel_info.hslab.hyper_lst->hi_bounds[i][j].bound,
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i][j].node);
             }
         }
     }
@@ -1934,29 +1934,29 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
     /* Insert each boundary of the hyperslab into the sorted lists of bounds */
     for(i=0; i<space->extent.u.simple.rank; i++) {
         /* Check if this is the first hyperslab inserted */
-        if(space->select.sel_info.hyper.hyper_lst->count==0) {
+        if(space->select.sel_info.hslab.hyper_lst->count==0) {
 #ifdef QAK
 	    printf("%s: check 4.1, start[%d]=%d, end[%d]=%d\n",
 		   FUNC, i, (int)slab->start[i],i,(int)slab->end[i]);
-	    printf("%s: check 4.1,.hyper.hyper_lst->count=%d\n",
-		   FUNC,(int)space->select.sel_info.hyper.hyper_lst->count);
+	    printf("%s: check 4.1,.hslab.hyper_lst->count=%d\n",
+		   FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
 #endif /* QAK */
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i][0].bound=slab->start[i];
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i][0].node=slab;
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i][0].bound=slab->end[i];
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i][0].node=slab;
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][0].bound=slab->start[i];
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][0].node=slab;
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i][0].bound=slab->end[i];
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i][0].node=slab;
         } /* end if */
         else {
 #ifdef QAK
 	    printf("%s: check 4.3, start[%d]=%d, end[%d]=%d\n",
 		   FUNC,i,(int)slab->start[i],i,(int)slab->end[i]);
-	    printf("%s: check 4.3,.hyper.hyper_lst->count=%d\n",
-		   FUNC,(int)space->select.sel_info.hyper.hyper_lst->count);
+	    printf("%s: check 4.3,.hslab.hyper_lst->count=%d\n",
+		   FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
 #endif /* QAK */
             /* Take care of the low boundary first */
             /* Find the location to insert in front of */
-            if((bound_loc=H5S_hyper_bsearch(slab->start[i],space->select.sel_info.hyper.hyper_lst->lo_bounds[i],
-                    space->select.sel_info.hyper.hyper_lst->count))<0)
+            if((bound_loc=H5S_hyper_bsearch(slab->start[i],space->select.sel_info.hslab.hyper_lst->lo_bounds[i],
+                    space->select.sel_info.hslab.hyper_lst->count))<0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "can't find location to insert hyperslab boundary");
 
@@ -1964,41 +1964,41 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
 	    printf("%s: check 4.5, bound_loc=%d\n",FUNC,(int)bound_loc);
 #endif /* QAK */
             /* Check if we need to move boundary elements */
-            if(bound_loc!=(intn)space->select.sel_info.hyper.hyper_lst->count) {
-                HDmemmove(&space->select.sel_info.hyper.hyper_lst->lo_bounds[i][bound_loc+1],
-                    &space->select.sel_info.hyper.hyper_lst->lo_bounds[i][bound_loc],
-                    sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hyper.hyper_lst->count-bound_loc));
+            if(bound_loc!=(intn)space->select.sel_info.hslab.hyper_lst->count) {
+                HDmemmove(&space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc+1],
+                    &space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc],
+                    sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hslab.hyper_lst->count-bound_loc));
             } /* end if */
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i][bound_loc].bound=slab->start[i];
-            space->select.sel_info.hyper.hyper_lst->lo_bounds[i][bound_loc].node=slab;
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc].bound=slab->start[i];
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc].node=slab;
 
             /* Take care of the high boundary next */
             /* Find the location to insert in front of */
-            if((bound_loc=H5S_hyper_bsearch(slab->end[i],space->select.sel_info.hyper.hyper_lst->hi_bounds[i],
-                    space->select.sel_info.hyper.hyper_lst->count))<0)
+            if((bound_loc=H5S_hyper_bsearch(slab->end[i],space->select.sel_info.hslab.hyper_lst->hi_bounds[i],
+                    space->select.sel_info.hslab.hyper_lst->count))<0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "can't find location to insert hyperslab boundary");
 
             /* Check if we need to move boundary elements */
-            if(bound_loc!=(intn)space->select.sel_info.hyper.hyper_lst->count) {
-                HDmemmove(&space->select.sel_info.hyper.hyper_lst->hi_bounds[i][bound_loc+1],
-                    &space->select.sel_info.hyper.hyper_lst->hi_bounds[i][bound_loc],
-                    sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hyper.hyper_lst->count-bound_loc));
+            if(bound_loc!=(intn)space->select.sel_info.hslab.hyper_lst->count) {
+                HDmemmove(&space->select.sel_info.hslab.hyper_lst->hi_bounds[i][bound_loc+1],
+                    &space->select.sel_info.hslab.hyper_lst->hi_bounds[i][bound_loc],
+                    sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hslab.hyper_lst->count-bound_loc));
             } /* end if */
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i][bound_loc].bound=slab->end[i];
-            space->select.sel_info.hyper.hyper_lst->hi_bounds[i][bound_loc].node=slab;
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i][bound_loc].bound=slab->end[i];
+            space->select.sel_info.hslab.hyper_lst->hi_bounds[i][bound_loc].node=slab;
         } /* end else */
     } /* end for */
 
     /* Increment the number of bounds in the array */
-    space->select.sel_info.hyper.hyper_lst->count++;
+    space->select.sel_info.hslab.hyper_lst->count++;
 #ifdef QAK
-    printf("%s: check 5.0, count=%d\n",FUNC,(int)space->select.sel_info.hyper.hyper_lst->count);
+    printf("%s: check 5.0, count=%d\n",FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
 #endif /* QAK */
     
     /* Prepend on list of hyperslabs for this selection */
-    slab->next=space->select.sel_info.hyper.hyper_lst->head;
-    space->select.sel_info.hyper.hyper_lst->head=slab;
+    slab->next=space->select.sel_info.hslab.hyper_lst->head;
+    space->select.sel_info.hslab.hyper_lst->head=slab;
 
     /* Increment the number of elements in the hyperslab selection */
     space->select.num_elem+=elem_count;
@@ -2008,10 +2008,10 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
         intn j;
         
         for(i=0; i<space->extent.u.simple.rank; i++) {
-            for(j=0; j<(int)space->select.sel_info.hyper.hyper_lst->count; j++) {
+            for(j=0; j<(int)space->select.sel_info.hslab.hyper_lst->count; j++) {
                 printf("%s: lo_bound[%d][%d]=%d, hi_bound[%d][%d]=%d\n", FUNC,
-                    i,j,(int)space->select.sel_info.hyper.hyper_lst->lo_bounds[i][j].bound,
-                    i,j,(int)space->select.sel_info.hyper.hyper_lst->hi_bounds[i][j].bound);
+                    i,j,(int)space->select.sel_info.hslab.hyper_lst->lo_bounds[i][j].bound,
+                    i,j,(int)space->select.sel_info.hslab.hyper_lst->hi_bounds[i][j].bound);
             }
         }
     }
@@ -2143,7 +2143,7 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
         node->next=NULL;    /* just to be safe */
 
         overlapped=0;       /* Reset overlapped flag */
-        region=space->select.sel_info.hyper.hyper_lst->head;
+        region=space->select.sel_info.hslab.hyper_lst->head;
         while(region!=NULL && overlapped==0) {
             /* Check for intersection */
             for(i=0, non_intersect=0; i<rank && non_intersect==0; i++) {
@@ -2307,24 +2307,24 @@ H5S_hyper_release (H5S_t *space)
     space->select.num_elem=0;
 
     /* Release the per-dimension selection info */
-    if(space->select.sel_info.hyper.diminfo!=NULL)
-        H5MM_xfree(space->select.sel_info.hyper.diminfo);
-    space->select.sel_info.hyper.diminfo = NULL;
+    if(space->select.sel_info.hslab.diminfo!=NULL)
+        H5MM_xfree(space->select.sel_info.hslab.diminfo);
+    space->select.sel_info.hslab.diminfo = NULL;
 
     /* Release hi and lo boundary information */
     for(i=0; i<space->extent.u.simple.rank; i++) {
-        H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds[i]);
-        space->select.sel_info.hyper.hyper_lst->lo_bounds[i] = NULL;
-        H5MM_xfree(space->select.sel_info.hyper.hyper_lst->hi_bounds[i]);
-        space->select.sel_info.hyper.hyper_lst->hi_bounds[i] = NULL;
+        H5MM_xfree(space->select.sel_info.hslab.hyper_lst->lo_bounds[i]);
+        space->select.sel_info.hslab.hyper_lst->lo_bounds[i] = NULL;
+        H5MM_xfree(space->select.sel_info.hslab.hyper_lst->hi_bounds[i]);
+        space->select.sel_info.hslab.hyper_lst->hi_bounds[i] = NULL;
     } /* end for */
-    H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds);
-    space->select.sel_info.hyper.hyper_lst->lo_bounds = NULL;
-    H5MM_xfree(space->select.sel_info.hyper.hyper_lst->hi_bounds);
-    space->select.sel_info.hyper.hyper_lst->hi_bounds = NULL;
+    H5MM_xfree(space->select.sel_info.hslab.hyper_lst->lo_bounds);
+    space->select.sel_info.hslab.hyper_lst->lo_bounds = NULL;
+    H5MM_xfree(space->select.sel_info.hslab.hyper_lst->hi_bounds);
+    space->select.sel_info.hslab.hyper_lst->hi_bounds = NULL;
 
     /* Release list of selected regions */
-    curr=space->select.sel_info.hyper.hyper_lst->head;
+    curr=space->select.sel_info.hslab.hyper_lst->head;
     while(curr!=NULL) {
         next=curr->next;
         curr->start = H5MM_xfree(curr->start);
@@ -2334,8 +2334,8 @@ H5S_hyper_release (H5S_t *space)
     } /* end while */
 
     /* Release hyperslab selection node itself */
-    H5MM_xfree(space->select.sel_info.hyper.hyper_lst);
-    space->select.sel_info.hyper.hyper_lst=NULL;
+    H5MM_xfree(space->select.sel_info.hslab.hyper_lst);
+    space->select.sel_info.hslab.hyper_lst=NULL;
 
 #ifdef QAK
     printf("%s: check 2.0\n",FUNC);
@@ -2469,20 +2469,20 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
 #ifdef QAK
     printf("%s: check 3.0\n", FUNC);
 #endif /* QAK */
-    if(src->select.sel_info.hyper.diminfo!=NULL) {
+    if(src->select.sel_info.hslab.diminfo!=NULL) {
         /* Create the per-dimension selection info */
         if((new_diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*src->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension array");
 
         /* Copy the per-dimension selection info */
         for(i=0; i<src->extent.u.simple.rank; i++) {
-            new_diminfo[i].start = src->select.sel_info.hyper.diminfo[i].start;
-            new_diminfo[i].stride = src->select.sel_info.hyper.diminfo[i].stride;
-            new_diminfo[i].count = src->select.sel_info.hyper.diminfo[i].count;
-            new_diminfo[i].block = src->select.sel_info.hyper.diminfo[i].block;
+            new_diminfo[i].start = src->select.sel_info.hslab.diminfo[i].start;
+            new_diminfo[i].stride = src->select.sel_info.hslab.diminfo[i].stride;
+            new_diminfo[i].count = src->select.sel_info.hslab.diminfo[i].count;
+            new_diminfo[i].block = src->select.sel_info.hslab.diminfo[i].block;
         } /* end for */
     } /* end if */
-    dst->select.sel_info.hyper.diminfo = new_diminfo;
+    dst->select.sel_info.hslab.diminfo = new_diminfo;
 
     /* Create the new hyperslab information node */
     if((new_hyper = H5MM_malloc(sizeof(H5S_hyper_list_t)))==NULL)
@@ -2490,10 +2490,10 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
             "can't allocate point node");
 
     /* Copy the basic hyperslab selection information */
-    *new_hyper=*(src->select.sel_info.hyper.hyper_lst);
+    *new_hyper=*(src->select.sel_info.hslab.hyper_lst);
 
     /* Attach the hyperslab information to the destination dataspace */
-    dst->select.sel_info.hyper.hyper_lst=new_hyper;
+    dst->select.sel_info.hslab.hyper_lst=new_hyper;
     
 #ifdef QAK
     printf("%s: check 4.0\n", FUNC);
@@ -2506,10 +2506,10 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
             "can't allocate point node");
     for(i=0; i<src->extent.u.simple.rank; i++) {
-        if((new_hyper->lo_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hyper.hyper_lst->count))==NULL)
+        if((new_hyper->lo_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hslab.hyper_lst->count))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate point node");
-        if((new_hyper->hi_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hyper.hyper_lst->count))==NULL)
+        if((new_hyper->hi_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hslab.hyper_lst->count))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate point node");
     } /* end for */
@@ -2518,7 +2518,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     printf("%s: check 5.0\n", FUNC);
 #endif /* QAK */
     /* Copy the hyperslab selection nodes, adding them to the lo & hi bound arrays also */
-    curr=src->select.sel_info.hyper.hyper_lst->head;
+    curr=src->select.sel_info.hslab.hyper_lst->head;
     new_head=NULL;
     u=0;
     while(curr!=NULL) {
@@ -2610,7 +2610,7 @@ H5S_hyper_select_valid (const H5S_t *space)
     assert(space);
 
     /* Check each point to determine whether selection+offset is within extent */
-    curr=space->select.sel_info.hyper.hyper_lst->head;
+    curr=space->select.sel_info.hslab.hyper_lst->head;
     while(curr!=NULL && ret_value==TRUE) {
         /* Check each dimension */
         for(i=0; i<space->extent.u.simple.rank; i++) {

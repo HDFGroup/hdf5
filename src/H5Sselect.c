@@ -376,12 +376,12 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
     /* Allocate space for the hyperslab selection information if necessary */
-    if(space->select.type!=H5S_SEL_HYPERSLABS || space->select.sel_info.hyper.hyper_lst==NULL) {
-        if((space->select.sel_info.hyper.hyper_lst = H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
+    if(space->select.type!=H5S_SEL_HYPERSLABS || space->select.sel_info.hslab.hyper_lst==NULL) {
+        if((space->select.sel_info.hslab.hyper_lst = H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
-        if((space->select.sel_info.hyper.hyper_lst->lo_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
+        if((space->select.sel_info.hslab.hyper_lst->lo_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab lo bound information");
-        if((space->select.sel_info.hyper.hyper_lst->hi_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
+        if((space->select.sel_info.hslab.hyper_lst->hi_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab lo bound information");
     } /* end if */
 
@@ -439,7 +439,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                     diminfo[i].count = count[i];
                     diminfo[i].block = block[i];
                 } /* end for */
-                space->select.sel_info.hyper.diminfo = diminfo;
+                space->select.sel_info.hslab.diminfo = diminfo;
             } /* end else */
             break;
 
