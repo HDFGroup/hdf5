@@ -42,7 +42,7 @@ hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
 ac_cv_header_stdc=${ac_cv_header_stdc='yes'}
 ac_cv_header_sys_ioctl_h=${ac_cv_header_sys_ioctl_h=yes}
-RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 poe"}
+RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 MP_TASKS_PER_NODE=3 poe"}
 
 # cache the sizeof of "standard C types" so that configure can run faster.
 ac_cv_sizeof_char=${ac_cv_sizeof_char=1}
@@ -78,5 +78,5 @@ ac_cv_sizeof_int_least64_t=${ac_cv_sizeof_int_least64_t=8}
 ac_cv_sizeof_uint_least64_t=${ac_cv_sizeof_uint_least64_t=8}
 ac_cv_sizeof_int_fast64_t=${ac_cv_sizeof_int_fast64_t=8}
 ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
-ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
-ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
+#ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
+#ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
