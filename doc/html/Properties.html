@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Property List Interface (H5P)</title>
+  </head>
+
+  <body>
+    <h1>Property List Interface (H5P)</h1>
+
+    <h2>1. Introduction</h2>
+
+    <p>The property list (a.k.a., template) interface provides a
+      mechanism for default named arguments for a C function
+      interface. A property list is a collection of name/value pairs
+      which can be passed to various other HDF5 functions to control
+      features that are typically unimportant or whose default values
+      are usually used.
+
+    <p>For instance, file creation needs to know various things such
+      as the size of the user-block at the beginning of the file, or
+      the size of various file data structures.  Wrapping this
+      information in a property list simplifies the API by reducing
+      the number of arguments to <code>H5Fcreate()</code>.
+
+    <h2>2. General Property List Operations</h2>
+
+    <p>Property lists follow the same create/open/close paradigm as
+      the rest of the library.
+
+    <dl>
+      <dt><code>hid_t H5Pcreate (H5P_class_t <em>class</em>)</code>
+      <dd>A new property list can be created as an instance of some
+	property list class.  The new property list is initialized
+	with default values for the specified class. The classes are:
+
+	<br><br>
+	<dl>
+	  <dt><code>H5P_FILE_CREATE</code>
+	  <dd>Properties for file creation.  See <a href="Files.html">H5F</a>
+	    for details about the file creation properties.
+	  <dt><code>H5P_FILE_ACCESS</code>
+	  <dd>Properties for file access. See <a href="Files.html">H5F</a>
+	    for details about the file creation properties.
+	  <dt><code>H5P_DATASET_CREATE</code>
+	  <dd>Properties for dataset creation.  See
+	    <a href="Datasets.html">H5D</a> for details about dataset
+	    creation properties.
+	  <dt><code>H5P_DATASET_XFER</code>
+	  <dd>Properties for raw data transfer.  See
+	    <a href="Datasets.html">H5D</a> for details about raw data
+	    transfer properties.
+	</dl>
+
+	<br><br>
+      <dt><code>hid_t H5Pcopy (hid_t <em>plist</em>)</code>
+      <dd>A property list can be copied to create a new property
+	list. The new property list has the same properties and values
+	as the original property list.
+
+	<br><br>
+      <dt><code>herr_t H5Pclose (hid_t <em>plist</em>)</code>
+      <dd>All property lists should be closed when the application is
+	finished accessing them.  This frees resources used by the
+	property list.
+
+	<br><br>
+      <dt><code>H5P_class_t H5Pget_class (hid_t <em>plist</em>)</code>
+      <dd>The class of which the property list is a member can be
+	obtained by calling this function.  The property list classes
+	are defined above for <code>H5Pcreate()</code>.
+    </dl>
+
+    <hr>
+    <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
+    <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
+<!-- Created: Tue Feb 10 17:06:58 PST 1998 -->
+<!-- hhmts start -->
+Last modified: Tue Feb 10 17:26:41 PST 1998
+<!-- hhmts end -->
+  </body>
+</html>

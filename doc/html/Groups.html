@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Groups</title>
+  </head>
+
+  <body>
+    <h1>Groups</h1>
+
+    <h2>1. Introduction</h2>
+
+    <p>An object in HDF5 consists of an object header at a fixed file
+      address that contains messages describing various properties of
+      the object such as its storage location, layout, compression,
+      etc. and some of these messages point to other data such as the
+      raw data of a dataset. The address of the object header is also
+      known as an <em>OID</em> and HDF5 has facilities for translating
+      names to OIDs.
+
+    <p>Every HDF5 object has at least one name and a set of names can
+      be stored together in a group.  Each group implements a name
+      space where the names are any length and unique with respect to
+      other names in the group.
+
+    <p>Since a group is a type of HDF5 object it has an object header
+      and a name which exists as a member of some other group. In this
+      way, groups can be linked together to form a directed graph.
+      One particular group is called the <em>Root Group</em> and is
+      the group to which the HDF5 file boot block points.  Its name is
+      "/" by convention.  The <em>full name</em> of an object is
+      created by joining component names with slashes much like Unix.
+
+    <p>
+      <center>
+	<img alt="Group Graph Example" src="group_p1.gif">
+      </center>
+
+    <p>However, unlike Unix which arranges directories hierarchically,
+      HDF5 arranges groups in a directed graph.  Therefore, there is
+      no ".." entry in a group since a group can have more than one
+      parent. There is no "." entry either but the library understands
+      it internally.
+
+    <h2>2. Names</h2>
+
+    <p>HDF5 places few restrictions on names: component names may be
+      any length except zero and may contain any character except
+      slash ("/") and the null terminator.  A full name may be
+      composed of any number of component names separated by slashes,
+      with any of the component names being the special name ".".  A
+      name which begins with a slash is an <em>absolute</em> name
+      which is looked up beginning at the root group of the file while
+      all other <em>relative</em> names are looked up beginning at the
+      current working group (described below) or a specified group.
+      Multiple consecutive slashes in a full name are treated as
+      single slashes and trailing slashes are not significant.  A
+      special case is the name "/" (or equivalent) which refers to the
+      root group.
+
+    <p>Functions which operate on names generally take a location
+      identifier which is either a file ID or a group ID and perform
+      the lookup with respect to that location.  Some possibilities
+      are:
+
+    <p>
+      <center>
+	<table border cellpadding=4>
+	  <tr>
+	    <th>Location Type</th>
+	    <th>Object Name</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>File ID</td>
+	    <td><code>/foo/bar</code></td>
+	    <td>The object <code>bar</code> in group <code>foo</code>
+	      in the root group of the specified file.</td>
+	  </tr>
+
+	  <tr>
+	    <td>Group ID</td>
+	    <td><code>/foo/bar</code></td>
+	    <td>The object <code>bar</code> in group <code>foo</code>
+	      in the root group of the file containing the specified
+	      group.  In other words, the group ID's only purpose is
+	      to supply a file.</td>
+	  </tr>
+
+	  <tr>
+	    <td>File ID</td>
+	    <td><code>/</code></td>
+	    <td>The root group of the specified file.</td>
+	  </tr>
+
+	  <tr>
+	    <td>Group ID</td>
+	    <td><code>/</code></td>
+	    <td>The root group of the file containing the specified
+	      group.</td>
+	  </tr>
+
+	  <tr>
+	    <td>File ID</td>
+	    <td><code>foo/bar</code></td>
+	    <td>The object <code>bar</code> in group <code>foo</code>
+	      in the current working group of the specified file.  The
+	      initial current working group is the root group of the
+	      file as described below.</td>
+	  </tr>
+
+	  <tr>
+	    <td>Group ID</td>
+	    <td><code>foo/bar</code></td>
+	    <td>The object <code>bar</code> in group <code>foo</code>
+	      in the specified group.</td>
+	  </tr>
+
+	  <tr>
+	    <td>File ID</td>
+	    <td><code>.</code></td>
+	    <td>The current working group of the specified file.</td>
+	  </tr>
+
+	  <tr>
+	    <td>Group ID</td>
+	    <td><code>.</code></td>
+	    <td>The specified group.</td>
+	  </tr>
+
+	  <tr>
+	    <td>Other ID</td>
+	    <td><code>.</code></td>
+	    <td>The specified object.</td>
+	  </tr>
+
+	</table>
+      </center>
+
+
+    <h2>3. Creating, Opening, and Closing Groups</h2>
+
+    <p>Groups are created with the <code>H5Gcreate()</code> function,
+      and existing groups can be access with
+      <code>H5Gopen()</code>. Both functions return an object ID which
+      should be eventually released by calling
+      <code>H5Gclose()</code>.
+
+    <dl>
+      <dt><code>hid_t H5Gcreate (hid_t <em>location_id</em>, const char
+	  *<em>name</em>, size_t <em>size_hint</em>)</code>
+      <dd>This function creates a new group with the specified
+	name at the specified location which is either a file ID or a
+	group ID.  The name must not already be taken by some other
+	object and all parent groups must already exist.  The
+	<em>size_hint</em> is a hint for the number of bytes to
+	reserve to store the names which will be eventually added to
+	the new group.  Passing a value of zero for <em>size_hint</em>
+	is usually adequate since the library is able to dynamically
+	resize the name heap, but a correct hint may result in better
+	performance.  The return value is a handle for the open group
+	and it should be closed by calling <code>H5Gclose()</code>
+	when it's no longer needed. A negative value is returned for
+	failure.
+
+	<br><br>
+      <dt><code>hid_t H5Gopen (hid_t <em>location_id</em>, const char
+	  *<em>name</em>)</code>
+      <dd>This function opens an existing group with the specified
+	name at the specified location which is either a file ID or a
+	group ID and returns an object ID.  The object ID should be
+	released by calling <code>H5Gclose()</code> when it is no
+	longer needed.  A negative value is returned for failure.
+
+	<br><br>
+      <dt><code>herr_t H5Gclose (hid_t <em>group_id</em>)</code>
+      <dd>This function releases resources used by an group which was
+	opened by <code>H5Gcreate()</code> or
+	<code>H5Gopen()</code>. After closing a group the
+	<em>group_id</em> should not be used again.  This function
+	returns zero for success or a negative value for failure.
+    </dl>
+
+    <h2>4. Current Working Group</h2>
+
+    <p>Each file handle (<code>hid_t <em>file_id</em></code>) has a
+      current working group, initially the root group of the file.
+      Names which do not begin with a slash are relative to the
+      specified group or to the current working group as described
+      above.  For instance, the name "/Foo/Bar/Baz" is resolved by
+      first looking up "Foo" in the root group.  But the name
+      "Foo/Bar/Baz" is resolved by first looking up "Foo" in the
+      current working group.
+
+    <dl>
+      <dt><code>herr_t H5Gset (hid_t <em>location_id</em>, const char
+	  *<em>name</em>)</code>
+      <dd>The group with the specified name is made the current
+	working group for the file which contains it. The
+	<em>location_id</em> can be a file handle or a group handle
+	and the name is resolved as described above.  Each file handle
+	has it's own current working group and if the
+	<em>location_id</em> is a group handle then the file handle is
+	derived from the group handle. This function returns zero for
+	success or negative for failure.
+
+	<br><br>
+      <dt><code>herr_t H5Gpush (hid_t <em>location_id</em>, const char
+	  *<em>name</em>)</code>
+      <dd>Each file handle has a stack of groups and the top group on
+	that stack is the current working group.  The stack initially
+	contains only the root group.  This function pushes a new
+	group onto the stack and returns zero for success or negative
+	for failure.
+
+	<br><br>
+      <dt><code>herr_t H5Gpop (hid_t <em>location_id</em>)</code>
+      <dd>This function pops one group off the group stack for the
+	specified file (if the <em>location_id</em> is a group then
+	the file is derived from that group), changing the current
+	working group to the new top-of-stack group.  The function
+	returns zero for success or negative for failure (failure
+	includes attempting to pop from an empty stack).  If the last
+	item is popped from the stack then the current working group
+	is set to the root group.
+    </dl>
+
+    <h2>5. Objects with Multiple Names</h2>
+
+    <p>An object (including a group) can have more than one
+      name. Creating the object gives it the first name, and then
+      functions described here can be used to give it additional
+      names.  The association between a name and the object is called
+      a <em>link</em> and HDF5 supports two types of links: a <em>hard
+      link</em> is a direct association between the name and the
+      object where both exist in a single HDF5 address space, and a
+      <em>soft link</em> is an indirect association.
+
+    <p>
+      <center>
+	<img alt="Hard Link Example" src="group_p2.gif">
+      </center>
+
+    <p>
+      <center>
+	<img alt="Soft Link Example" src="group_p3.gif">
+      </center>
+
+    <dl>
+      <dt>Object Creation</dt>
+      <dd>The creation of an object creates a hard link which is
+	indistinguishable from other hard links that might be added
+	later.
+
+	<br><br>
+      <dt><code>herr_t H5Glink (hid_t <em>file_id</em>, H5G_link_t
+	  <em>link_type</em>, const char *<em>current_name</em>,
+	  const char *<em>new_name</em>)</code>
+      <dd>Creates a new name for an object that has some current name
+	(possibly one of many names it currently has).  If the
+	<em>link_type</em> is <code>H5G_LINK_HARD</code> then a new
+	hard link is created.  Otherwise if <em>link_type</em> is
+	<code>H5T_LINK_SOFT</code> a soft link is created which is an
+	alias for the <em>current_name</em>.  When creating a soft
+	link the object need not exist.  This function returns zero
+	for success or negative for failure. <b>This function is not
+	part of the prototype API.</b>
+
+	<br><br>
+      <dt><code>herr_t H5Gunlink (hid_t <em>file_id</em>, const char
+	  *<em>name</em>)</code>
+      <dd>This function removes an association between a name and an
+	object. Object headers keep track of how many hard links refer
+	to the object and when the hard link count reaches zero the
+	object can be removed from the file (but objects which are
+	open are not removed until all handles to the object are
+	closed).  <b>This function is not part of the prototype
+	API.</b>
+    </dl>
+
+    <hr>
+    <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
+<!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
+<!-- hhmts start -->
+Last modified: Tue Mar 24 15:52:14 EST 1998
+<!-- hhmts end -->
+  </body>
+</html>

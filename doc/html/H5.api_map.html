@@ -1,0 +1,849 @@
+<html><head><title>
+HDF5 Legacy API Equivalence
+</title></head><body>
+
+<center>
+<h1>HDF5: API Mapping to legacy APIs</h1>
+</center>
+
+<table border=1 cellpadding=2 cellspacing=0>
+<tr>
+<th>Functionality</th>
+<th>netCDF</th>
+<th>SD</th>
+<th>AIO</th>
+<th>HDF5</th>
+<th>Comments</th>
+</tr>
+
+<tr align=center>
+<td>Open existing file for read/write</td>
+<td>ncopen</td>
+<td>SDstart</td>
+<td>AIO_open</td>
+<td>H5Fopen</td>
+</tr>
+
+<tr align=center>
+<td>Creates new file for read/write.</td>
+<td>nccreate</td>
+<td><hr></td>
+<td><hr></td>
+<td>H5Fcreate</td>
+<td>SD API handles this with SDopen</td>
+</tr>
+
+<tr align=center>
+<td>Close file</td>
+<td>ncclose</td>
+<td>SDend</td>
+<td>AIO_close</td>
+<td>H5Fclose</td>
+</tr>
+
+<tr align=center>
+<td>Redefine parameters</td>
+<td>ncredef</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>Unneccessary under SD & HDF5 data-models</td>
+</tr>
+
+<tr align=center>
+<td>End "define" mode</td>
+<td>ncendef</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>Unneccessary under SD & HDF5 data-models</td>
+</tr>
+
+<tr align=center>
+<td>Query the number of datasets, dimensions and attributes in a file</td>
+<td>ncinquire</td>
+<td>SDfileinfo</td>
+<td><hr></td>
+<td>H5Dget_info<br>H5Rget_num_relations<br>H5Gget_num_contents</td>
+<td>HDF5 interface is more granular and flexible</td>
+</tr>
+
+<tr align=center>
+<td>Update a writeable file with current changes</td>
+<td>ncsync</td>
+<td><hr></td>
+<td>AIO_flush</td>
+<td>H5Mflush</td>
+<td>HDF5 interface is more flexible because it can be applied to parts of the
+file hierarchy instead of the whole file at once.  The SD interface does not
+have this feature, although most of the lower HDF library supports it.</td>
+</tr>
+
+<tr align=center>
+<td>Close file access without applying recent changes</td>
+<td>ncabort</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>How useful is this feature?</td>
+</tr>
+
+<tr align=center>
+<td>Create new dimension</td>
+<td>ncdimdef</td>
+<td>SDsetdimname</td>
+<td><hr></td>
+<td>H5Mcreate</td>
+<td>SD interface actually creates dimensions with datasets, this just allows
+naming them</td>
+</tr>
+
+<tr align=center>
+<td>Get ID of existing dimension</td>
+<td>ncdimid</td>
+<td>SDgetdimid</td>
+<td><hr></td>
+<td>H5Maccess</td>
+<td>SD interface looks up dimensions by index and the netCDF interface uses
+names, but they are close enough.  The HDF5 interface does not current allow
+access to particular dimensions, only the dataspace as a whole.</td>
+</tr>
+
+<tr align=center>
+<td>Get size & name of dimension</td>
+<td>ncdiminq</td>
+<td>SDdiminfo</td>
+<td><hr></td>
+<td>H5Mget_name<br>H5Sget_lrank</td>
+<td>Only a rough match</td>
+</tr>
+
+<tr align=center>
+<td>Rename dimension</td>
+<td>ncdimrename</td>
+<td>SDsetdimname</td>
+<td><hr></td>
+<td>H5Mset_name</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Create a new dataset</td>
+<td>ncvardef</td>
+<td>SDcreate</td>
+<td>AIO_mkarray</td>
+<td>H5Mcreate</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Attach to an existing dataset</td>
+<td>ncvarid</td>
+<td>SDselect</td>
+<td>AIO_arr_load</td>
+<td>H5Maccess</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Get basic information about a dataset</td>
+<td>ncvarinq</td>
+<td>SDgetinfo</td>
+<td>AIO_arr_get_btype<br>AIO_arr_get_nelmts<br>AIO_arr_get_nbdims<br>AIO_arr_get_bdims<br>AIO_arr_get_slab</td>
+<td>H5Dget_info</td>
+<td>All interfaces have different levels of information that they return, some
+use of auxilliary functions is required to get equivalent amount of information</td>
+</tr>
+
+<tr align=center>
+<td>Write a single value to a dataset</td>
+<td>ncvarput1</td>
+<td>SDwritedata</td>
+<td>AIO_write</td>
+<td>H5Dwrite</td>
+<td>What is this useful for?</td>
+</tr>
+
+<tr align=center>
+<td>Read a single value from a dataset</td>
+<td>ncvarget1</td>
+<td>SDreaddata</td>
+<td>AIO_read</td>
+<td>H5Dread</td>
+<td>What is this useful for?</td>
+</tr>
+
+<tr align=center>
+<td>Write a solid hyperslab of data (i.e. subset) to a dataset</td>
+<td>ncvarput</td>
+<td>SDwritedata</td>
+<td>AIO_write</td>
+<td>H5Dwrite</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Read a solid hyperslab of data (i.e. subset) from a dataset</td>
+<td>ncvarget</td>
+<td>SDreaddata</td>
+<td>AIO_read</td>
+<td>H5Dread</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Write a general hyperslab of data (i.e. possibly subsampled) to a dataset</td>
+<td>ncvarputg</td>
+<td>SDwritedata</td>
+<td>AIO_write</td>
+<td>H5Dwrite</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Read a general hyperslab of data (i.e. possibly subsampled) from a dataset</td>
+<td>ncvargetg</td>
+<td>SDreaddata</td>
+<td>AIO_read</td>
+<td>H5Dread</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Rename a dataset variable</td>
+<td>ncvarrename</td>
+<td><hr></td>
+<td><hr></td>
+<td>H5Mset_name</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Add an attribute to a dataset</td>
+<td>ncattput</td>
+<td>SDsetattr</td>
+<td><hr></td>
+<td>H5Rattach_oid</td>
+<td>HDF5 requires creating a seperate object to attach to a dataset, but it also
+allows objects to be attributes of any other object, even nested.</td>
+</tr>
+
+<tr align=center>
+<td>Get attribute information</td>
+<td>ncattinq</td>
+<td>SDattrinfo</td>
+<td><hr></td>
+<td>H5Dget_info</td>
+<td>HDF5 has no specific function for attributes, they are treated as all other
+objects in the file.</td>
+</tr>
+
+<tr align=center>
+<td>Retrieve attribute for a dataset</td>
+<td>ncattget</td>
+<td>SDreadattr</td>
+<td><hr></td>
+<td>H5Dread</td>
+<td>HDF5 uses general dataset I/O for attributes.</td>
+</tr>
+
+<tr align=center>
+<td>Copy attribute from one dataset to another</td>
+<td>ncattcopy</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>What is this used for?</td>
+</tr>
+
+<tr align=center>
+<td>Get name of attribute</td>
+<td>ncattname</td>
+<td>SDattrinfo</td>
+<td><hr></td>
+<td>H5Mget_name</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Rename attribute</td>
+<td>ncattrename</td>
+<td><hr></td>
+<td><hr></td>
+<td>H5Mset_name</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Delete attribute</td>
+<td>ncattdel</td>
+<td><hr></td>
+<td><hr></td>
+<td>H5Mdelete</td>
+<td>This can be faked in current HDF interface with lower-level calls</td>
+</tr>
+
+<tr align=center>
+<td>Compute # of bytes to store a number-type</td>
+<td>nctypelen</td>
+<td>DFKNTsize</td>
+<td><hr></td>
+<td><hr></td>
+<td>Hmm, the HDF5 Datatype interface needs this functionality.</td>
+</tr>
+
+<tr align=center>
+<td>Indicate that fill-values are to be written to dataset</td>
+<td>ncsetfill</td>
+<td>SDsetfillmode</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 Datatype interface should work on this functionality</td>
+</tr>
+
+<tr align=center>
+<td>Get information about "record" variables (Those datasets which share the
+same unlimited dimension</td>
+<td>ncrecinq</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>This should probably be wrapped in a higher layer interface, if it's
+needed for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get a record from each dataset sharing the unlimited dimension</td>
+<td>ncrecget</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>This is somewhat equivalent to reading a vdata with non-interlaced
+fields, only in a dataset oriented way.  This should also be wrapped in a
+higher layer interface if it's necessary for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Put a record from each dataset sharing the unlimited dimension</td>
+<td>ncrecput</td>
+<td><hr></td>
+<td><hr></td>
+<td><hr></td>
+<td>This is somewhat equivalent to writing a vdata with non-interlaced
+fields, only in a dataset oriented way.  This should also be wrapped in a
+higher layer interface if it's necessary for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Map a dataset's name to an index to reference it with</td>
+<td><hr></td>
+<td>SDnametoindex</td>
+<td><hr></td>
+<td>H5Mfind_name</td>
+<td>Equivalent functionality except HDF5 call returns an OID instead of an
+index.</td>
+</tr>
+
+<tr align=center>
+<td>Get the valid range of values for data in a dataset</td>
+<td><hr></td>
+<td>SDgetrange</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Release access to a dataset</td>
+<td><hr></td>
+<td>SDendaccess</td>
+<td>AIO_arr_destroy</td>
+<td>H5Mrelease</td>
+<td>Odd that the netCDF API doesn't have this...</td>
+</tr>
+
+<tr align=center>
+<td>Set the valid range of data in a dataset</td>
+<td><hr></td>
+<td>SDsetrange</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the label, units, format, etc. of the data values in a dataset</td>
+<td><hr></td>
+<td>SDsetdatastrs</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get the label, units, format, etc. of the data values in a dataset</td>
+<td><hr></td>
+<td>SDgetdatastrs</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the label, units, format, etc. of the dimensions in a dataset</td>
+<td><hr></td>
+<td>SDsetdimstrs</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get the label, units, format, etc. of the dimensions in a dataset</td>
+<td><hr></td>
+<td>SDgetdimstrs</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the scale of the dimensions in a dataset</td>
+<td><hr></td>
+<td>SDsetdimscale</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get the scale of the dimensions in a dataset</td>
+<td><hr></td>
+<td>SDgetdimscale</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the calibration parameters of the data values in a dataset</td>
+<td><hr></td>
+<td>SDsetcal</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get the calibration parameters of the data values in a dataset</td>
+<td><hr></td>
+<td>SDgetcal</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented with attributes at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the fill value for the data values in a dataset</td>
+<td><hr></td>
+<td>SDsetfillvalue</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 needs something like this, I'm not certain where to put it.</td>
+</tr>
+
+<tr align=center>
+<td>Get the fill value for the data values in a dataset</td>
+<td><hr></td>
+<td>SDgetfillvalue</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 needs something like this, I'm not certain where to put it.</td>
+</tr>
+
+<tr align=center>
+<td>Move/Set the dataset to be in an 'external' file</td>
+<td><hr></td>
+<td>SDsetexternalfile</td>
+<td><hr></td>
+<td>H5Dset_storage</td>
+<td>HDF5 has simple functions for this, but needs an API for setting up the
+storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Move/Set the dataset to be stored using only certain bits from the dataset</td>
+<td><hr></td>
+<td>SDsetnbitdataset</td>
+<td><hr></td>
+<td>H5Dset_storage</td>
+<td>HDF5 has simple functions for this, but needs an API for setting up the
+storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Move/Set the dataset to be stored in compressed form</td>
+<td><hr></td>
+<td>SDsetcompress</td>
+<td><hr></td>
+<td>H5Dset_storage</td>
+<td>HDF5 has simple functions for this, but needs an API for setting up the
+storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Search for an dataset attribute with particular name</td>
+<td><hr></td>
+<td>SDfindattr</td>
+<td><hr></td>
+<td>H5Mfind_name<br>H5Mwild_search</td>
+<td>HDF5 can handle wildcard searchs for this feature.</td>
+</tr>
+
+<tr align=center>
+<td>Map a run-time dataset handle to a persistant disk reference</td>
+<td><hr></td>
+<td>SDidtoref</td>
+<td><hr></td>
+<td><hr></td>
+<td>I'm not certain this is needed for HDF5.</td>
+</tr> 
+
+<tr align=center>
+<td>Map a persistant disk reference for a dataset to an index in a group</td>
+<td><hr></td>
+<td>SDreftoindex</td>
+<td><hr></td>
+<td><hr></td>
+<td>I'm not certain this is needed for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Determine if a dataset is a 'record' variable (i.e. it has an unlimited dimension)</td>
+<td><hr></td>
+<td>SDisrecord</td>
+<td><hr></td>
+<td><hr></td>
+<td>Easily implemented by querying the dimensionality at a higher level for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Determine if a dataset is a 'coordinate' variable (i.e. it is used as a dimension)</td>
+<td><hr></td>
+<td>SDiscoord</td>
+<td><hr></td>
+<td><hr></td>
+<td>I'm not certain this is needed for HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set the access type (i.e. parallel or serial) for dataset I/O</td>
+<td><hr></td>
+<td>SDsetaccesstype</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 has functions for reading the information about this, but needs a better
+API for setting up the storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Set the size of blocks used to store a dataset with unlimited dimensions</td>
+<td><hr></td>
+<td>SDsetblocksize</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 has functions for reading the information about this, but needs a better
+API for setting up the storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Sets backward compatibility of dimensions created.</td>
+<td><hr></td>
+<td>SDsetdimval_comp</td>
+<td><hr></td>
+<td><hr></td>
+<td>Unneccessary in HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Checks backward compatibility of dimensions created.</td>
+<td><hr></td>
+<td>SDisdimval_comp</td>
+<td><hr></td>
+<td><hr></td>
+<td>Unneccessary in HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Move/Set the dataset to be stored in chunked form</td>
+<td><hr></td>
+<td>SDsetchunk</td>
+<td><hr></td>
+<td>H5Dset_storage</td>
+<td>HDF5 has simple functions for this, but needs an API for setting up the
+storage flow.</td>
+</tr>
+
+<tr align=center>
+<td>Get the chunking information for a dataset stored in chunked form</td>
+<td><hr></td>
+<td>SDgetchunkinfo</td>
+<td><hr></td>
+<td>H5Dstorage_detail</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Read/Write chunks of a dataset using a chunk index</td>
+<td><hr></td>
+<td>SDreadchunk<br>SDwritechunk</td>
+<td><hr></td>
+<td><hr></td>
+<td>I'm not certain that HDF5 needs something like this.</td>
+</tr>
+
+<tr align=center>
+<td>Tune chunk caching parameters for chunked datasets</td>
+<td><hr></td>
+<td>SDsetchunkcache</td>
+<td><hr></td>
+<td><hr></td>
+<td>HDF5 needs something like this.</td>
+</tr>
+
+<tr align=center>
+<td>Change some default behavior of the library</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_defaults</td>
+<td><hr></td>
+<td>Something like this would be useful in HDF5, to tune I/O pipelines, etc.</td>
+</tr>
+
+<tr align=center>
+<td>Flush and close all open files</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_exit</td>
+<td><hr></td>
+<td>Something like this might be useful in HDF5, although it could be
+    encapsulated with a higher-level function.</td>
+</tr>
+
+<tr align=center>
+<td>Target an architecture for data-type storage</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_target</td>
+<td><hr></td>
+<td>There are some rough parallels with using the data-type in HDF5 to create
+    data-type objects which can be used to write out future datasets.</td>
+</tr>
+
+<tr align=center>
+<td>Map a filename to a file ID</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_filename</td>
+<td>H5Mget_name</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Get the active directory (where new datasets are created)</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_getcwd</td>
+<td><hr></td>
+<td>HDF5 allows multiple directories (groups) to be attached to, any of which
+    can have new datasets created within it.</td>
+</tr>
+
+<tr align=center>
+<td>Change active directory</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_chdir</td>
+<td><hr></td>
+<td>Since HDF5 has a slightly different access method for directories (groups),
+    this functionality can be wrapped around calls to H5Gget_oid_by_name.</td>
+</tr>
+
+<tr align=center>
+<td>Create directory</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_mkdir</td>
+<td>H5Mcreate</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Return detailed information about an object</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_stat</td>
+<td>H5Dget_info<br>H5Dstorage_detail</td>
+<td>Perhaps more information should be provided through another function in
+    HDF5?</td>
+</tr>
+
+<tr align=center>
+<td>Get "flag" information</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_getflags</td>
+<td><hr></td>
+<td>Not required in HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Set "flag" information</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_setflags</td>
+<td><hr></td>
+<td>Not required in HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Get detailed information about all objects in a directory</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_ls</td>
+<td>H5Gget_content_info_mult<br>H5Dget_info<br>H5Dstorage_detail</td>
+<td>Only roughly equivalent functionality in HDF5, perhaps more should be
+    added?</td>
+</tr>
+
+<tr align=center>
+<td>Get base type of object</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_BASIC</td>
+<td>H5Gget_content_info</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Set base type of dataset</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_set_btype</td>
+<td>H5Mcreate(DATATYPE)</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Set dimensionality of dataset</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_set_bdims</td>
+<td>H5Mcreate(DATASPACE)</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Set slab of dataset to write</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_set_slab</td>
+<td><hr></td>
+<td>This is similar to the process of creating a dataspace for use when
+    performing I/O on an HDF5 dataset</td>
+</tr>
+
+<tr align=center>
+<td>Describe chunking of dataset to write</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_set_chunk</td>
+<td>H5Dset_storage</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Describe array index permutation of dataset to write</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_set_perm</td>
+<td>H5Dset_storage</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Create a new dataset with dataspace and datatype information from an
+    existing dataset.</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_arr_copy</td>
+<td><hr></td>
+<td>This can be mimicked in HDF5 by attaching to the datatype and dataspace of
+an existing dataset and using the IDs to create new datasets.</td>
+</tr>
+
+<tr align=center>
+<td>Create a new directory to group objects within</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_mkgroup</td>
+<td>H5Mcreate(GROUP)</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Read name of objects in directory</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_read_group</td>
+<td>H5Gget_content_info_mult</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Add objects to directory</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_write_group</td>
+<td>H5Ginsert_item_mult</td>
+<td></td>
+</tr>
+
+<tr align=center>
+<td>Combine an architecture and numeric type to derive the format's datatype</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_COMBINE</td>
+<td><hr></td>
+<td>This is a nice feature to add to HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Derive an architecture from the format's datatype</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_ARCH</td>
+<td><hr></td>
+<td>This is a nice feature to add to HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Derive a numeric type from the format's datatype</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_PNT</td>
+<td><hr></td>
+<td>This is a nice feature to add to HDF5.</td>
+</tr>
+
+<tr align=center>
+<td>Register error handling function for library to call when errors occur</td>
+<td><hr></td>
+<td><hr></td>
+<td>AIO_error_handler</td>
+<td><hr></td>
+<td>This should be added to HDF5.</td>
+</tr>
+
+</table>
+

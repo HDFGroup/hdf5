@@ -1,0 +1,1370 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>The Data Type Interface (H5T)</title>
+  </head>
+
+  <body>
+    <h1>The Data Type Interface (H5T)</h1>
+
+    <h2>1. Introduction</h2>
+    
+    <p>The data type interface provides a mechanism to describe the
+      storage format of individual data points of a data set and is
+      hopefully designed in such a way as to allow new features to be
+      easily added without disrupting applications that use the data
+      type interface.  A dataset (the H5D interface) is composed of a
+      collection or raw data points of homogeneous type organized
+      according to the data space (the H5S interface).
+
+    <p>A data type is a collection of data type properties, all of
+      which can be stored on disk, and which when taken as a whole,
+      provide complete information for data conversion to or from that
+      data type.  The interface provides functions to set and query
+      properties of a data type.
+      
+    <p>A <em>data point</em> is an instance of a <em>data type</em>,
+      which is an instance of a <em>type class</em>.  We have defined
+      a set of type classes and properties which can be extended at a
+      later time.  The atomic type classes are those which describe
+      types which cannot be decomposed at the data type interface
+      level; all other classes are compound.
+
+    <h2>2. General Data Type Operations</h2>
+
+    <p>The functions defined in this section operate on data types as
+      a whole. New data types can be created from scratch or copied
+      from existing data types.  When a data type is no longer needed
+      its resources should be released by calling <code>H5Tclose()</code>.
+
+    <p>Data types come in two flavors: named data types and transient
+      data types. A named data type is stored in a file while the
+      transient flavor is independent of any file. Named data types
+      are always read-only, but transient types come in three
+      varieties: modifiable, read-only, and immutable.  The difference 
+      between read-only and immutable types is that immutable types
+      cannot be closed except when the entire library is closed (the
+      predefined types like <code>H5T_NATIVE_INT</code> are immutable
+      transient types).
+
+    <dl>
+      <dt><code>hid_t H5Tcreate (H5T_class_t <em>class</em>, size_t
+	  <em>size</em>)</code>
+      <dd>Data types can be created by calling this
+	function, where <em>class</em> is a data type class
+	identifier.  However, the only class currently allowed is
+	<code>H5T_COMPOUND</code> to create a new empty compound data
+	type where <em>size</em> is the total size in bytes of an
+	instance of this data type.  Other data types are created with
+	<code>H5Tcopy()</code>. All functions that return data type
+	identifiers return a negative value for failure.
+
+	<br><br>
+      <dt><code>hid_t H5Topen (hid_t <em>location</em>, const char
+	  *<em>name</em>)</code>
+      <dd>A named data type can be opened by calling this function,
+	which returns a handle to the data type.  The handle should
+	eventually be closed by calling <code>H5Tclose()</code> to
+	release resources. The named data type returned by this
+	function is read-only or a negative value is returned for
+	failure.  The <em>location</em> is either a file or group
+	handle.
+
+	<br><br>
+      <dt><code>herr_t H5Tcommit (hid_t <em>location</em>, const char
+	  *<em>name</em>, hid_t <em>type</em>)</code>
+      <dd>A transient data type (not immutable) can be committed to a
+	file and turned into a named data type by calling this
+	function.  The <em>location</em> is either a file or group
+	handle and when combined with <em>name</em> refers to a new
+	named data type.
+
+	<br><br>
+      <dt><code>hbool_t H5Tcommitted (hid_t <em>type</em>)</code>
+      <dd>A type can be queried to determine if it is a named type or
+	a transient type.  If this function returns a positive value
+	then the type is named (that is, it has been committed perhaps 
+	by some other application).  Datasets which return committed
+	data types with <code>H5Dget_type()</code> are able to share
+	the data type with other datasets in the same file.
+
+	<br><br>
+      <dt><code>hid_t H5Tcopy (hid_t <em>type</em>)</code>
+      <dd>This function returns a modifiable transient data type
+	which is a copy of <em>type</em> or a negative value for
+	failure.  If <em>type</em> is a dataset handle then the type
+	returned is a modifiable transient copy of the data type of
+	the specified dataset.
+
+	<br><br>
+      <dt><code>herr_t H5Tclose (hid_t <em>type</em>)</code>
+      <dd>Releases resources associated with a data type.  The data
+	type identifier should not be subsequently used since the
+	results would be unpredictable.  It is illegal to close an
+	immutable transient data type.
+
+	<br><br>
+      <dt><code>hbool_t H5Tequal (hid_t <em>type1</em>, hid_t
+	  <em>type2</em>)</code>
+      <dd>Determines if two types are equal.  If <em>type1</em> and
+	<em>type2</em> are the same then this function returns
+	<code>TRUE</code>, otherwise it returns <code>FALSE</code> (an
+	error results in a negative return value).
+
+	<br><br>
+      <dt><code>herr_t H5Tlock (hid_t <em>type</em>)</code>
+      <dd>A transient data type can be locked, making it immutable
+	(read-only and not closable). The library does this to all
+	predefined types to prevent the application from inadvertently
+	modifying or deleting (closing) them, but the application is
+	also allowed to do this for its own data types.  Immutable
+	data types are closed when the library closes (either by
+	<code>H5close()</code> or by normal program termination).
+    </dl>
+
+    <h2>3. Properties of Atomic Types</h2>
+
+    <p>An atomic type is a type which cannot be decomposed into
+      smaller units at the API level.  All atomic types have a common
+      set of properties which are augmented by properties specific to
+      a particular type class.  Some of these properties also apply to
+      compound data types, but we discuss them only as they apply to
+      atomic data types here. The properties and the functions that
+      query and set their values are:
+
+    <dl>
+      <dt><code>H5T_class_t H5Tget_class (hid_t <em>type</em>)</code>
+      <dd>This property holds one of the class names:
+	<code>H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING,
+	H5T_BITFIELD</code>, or <code>H5T_OPAQUE</code>.  This
+	property is read-only and is set when the datatype is
+	created or copied (see <code>H5Tcreate()</code>,
+	<code>H5Tcopy()</code>). If this function fails it returns
+	<code>H5T_NO_CLASS</code> which has a negative value (all
+	other class constants are non-negative).
+
+	<br><br>
+      <dt><code>size_t H5Tget_size (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_size (hid_t <em>type</em>, size_t
+	  <em>size</em>)</code>
+      <dd>This property is total size of the datum in bytes, including
+	padding which may appear on either side of the actual value.
+	If this property is reset to a smaller value which would cause
+	the significant part of the data to extend beyond the edge of
+	the data type then the <code>offset</code> property is
+	decremented a bit at a time.  If the offset reaches zero and
+	the significant part of the data still extends beyond the edge
+	of the data type then the <code>precision</code> property is
+	decremented a bit at a time.  Decreasing the size of a data
+	type may fail if the precesion must be decremented and the
+	data type is of the <code>H5T_OPAQUE</code> class or the
+	<code>H5T_FLOAT</code> bit fields would extend beyond the
+	significant part of the type.  Increasing the size of an
+	<code>H5T_STRING</code> automatically increases the precision
+	as well.  On error, <code>H5Tget_size()</code> returns zero
+	which is never a valid size.
+
+	<br><br>
+      <dt><code>H5T_order_t H5Tget_order (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_order (hid_t <em>type</em>, H5T_order_t
+	  <em>order</em>)</code>
+      <dd>All atomic data types have a byte order which describes how
+	the bytes of the data type are layed out in memory.  If the
+	lowest memory address contains the least significant byte of
+	the datum then it is said to be <em>little-endian</em> or
+	<code>H5T_ORDER_LE</code>.  If the bytes are in the oposite
+	order then they are said to be <em>big-endian</em> or
+	<code>H5T_ORDER_BE</code>. Some data types have the same byte
+	order on all machines and are <code>H5T_ORDER_NONE</code>
+	(like character strings).  If <code>H5Tget_order()</code>
+	fails then it returns <code>H5T_ORDER_ERROR</code> which is a
+	negative value (all successful return values are
+	non-negative).
+
+	<br><br>
+      <dt><code>size_t H5Tget_precision (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_precision (hid_t <em>type</em>, size_t
+	  <em>precision</em>)</code>
+      <dd>Some data types occupy more bytes than what is needed to
+	store the value.  For instance, a <code>short</code> on a Cray
+	is 32 significant bits in an eight-byte field.  The
+	<code>precision</code> property identifies the number of
+	significant bits of a datatype and the <code>offset</code>
+	property (defined below) identifies its location.  The
+	<code>size</code> property defined above represents the entire
+	size (in bytes) of the data type.  If the precision is
+	decreased then padding bits are inserted on the MSB side of
+	the significant bits (this will fail for
+	<code>H5T_FLOAT</code> types if it results in the sign,
+	mantissa, or exponent bit field extending beyond the edge of
+	the significant bit field).  On the other hand, if the
+	precision is increased so that it "hangs over" the edge of the
+	total size then the <code>offset</code> property is
+	decremented a bit at a time.  If the <code>offset</code>
+	reaches zero and the significant bits still hang over the
+	edge, then the total size is increased a byte at a time.  The
+	precision of an <code>H5T_STRING</code> is read-only and is
+	always eight times the value returned by
+	<code>H5Tget_size()</code>.  <code>H5Tget_precision()</code>
+	returns zero on failure since zero is never a valid precision.
+
+	<br><br>
+      <dt><code>size_t H5Tget_offset (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_offset (hid_t <em>type</em>, size_t
+	  <em>offset</em>)</code>
+      <dd>While the <code>precision</code> property defines the number
+	of significant bits, the <code>offset</code> property defines
+	the location of those bits within the entire datum.  The bits
+	of the entire data are numbered beginning at zero at the least
+	significant bit of the least significant byte (the byte at the
+	lowest memory address for a little-endian type or the byte at
+	the highest address for a big-endian type).  The
+	<code>offset</code> property defines the bit location of the
+	least signficant bit of a bit field whose length is
+	<code>precision</code>.  If the offset is increased so the
+	significant bits "hang over" the edge of the datum, then the
+	<code>size</code> property is automatically incremented.  The
+	offset is a read-only property of an <code>H5T_STRING</code>
+	and is always zero.  <code>H5Tget_offset()</code> returns zero
+	on failure which is also a valid offset, but is guaranteed to
+	succeed if a call to <code>H5Tget_precision()</code> succeeds
+	with the same arguments.
+	
+	<br><br>
+      <dt><code>herr_t H5Tget_pad (hid_t <em>type</em>, H5T_pad_t
+	  *<em>lsb</em>, H5T_pad_t *<em>msb</em>)</code>
+      <dt><code>herr_t H5Tset_pad (hid_t <em>type</em>, H5T_pad_t
+	  <em>lsb</em>, H5T_pad_t <em>msb</em>)</code>
+      <dd>The bits of a datum which are not significant as defined by
+	the <code>precision</code> and <code>offset</code> properties
+	are called <em>padding</em>.  Padding falls into two
+	categories: padding in the low-numbered bits is <em>lsb</em>
+	padding and padding in the high-numbered bits is <em>msb</em>
+	padding (bits are numbered according to the description for
+	the <code>offset</code> property).  Padding bits can always be
+	set to zero (<code>H5T_PAD_ZERO</code>) or always set to one
+	(<code>H5T_PAD_ONE</code>). The current pad types are returned
+	through arguments of <code>H5Tget_pad()</code> either of which
+	may be null pointers.
+    </dl>
+
+    <h3>3.1. Properties of Integer Atomic Types</h3>
+
+    <p>Integer atomic types (<code>class=H5T_INTEGER</code>)
+      describe integer number formats. Such types include the
+      following information which describes the type completely and
+      allows conversion between various integer atomic types.
+
+    <dl>
+      <dt><code>H5T_sign_t H5Tget_sign (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_sign (hid_t <em>type</em>, H5T_sign_t
+	  <em>sign</em>)</code>
+      <dd>Integer data can be signed two's complement
+	(<code>H5T_SGN_2</code>) or unsigned
+	(<code>H5T_SGN_NONE</code>). Whether data is signed or not
+	becomes important when converting between two integer data
+	types of differing sizes as it determines how values are
+	truncated and sign extended.
+    </dl>
+
+    <h3>3.2. Properties of Floating-point Atomic Types</h3>
+
+    <p>The library supports floating-point atomic types
+      (<code>class=H5T_FLOAT</code>) as long as the bits of the
+      exponent are contiguous and stored as a biased positive number,
+      the bits of the mantissa are contiguous and stored as a positive
+      magnitude, and a sign bit exists which is set for negative
+      values.  Properties specific to floating-point types are:
+
+    <dl>
+      <dt><code>herr_t H5Tget_fields (hid_t <em>type</em>, size_t
+	  *<em>spos</em>, size_t *<em>epos</em>, size_t
+	  *<em>esize</em>, size_t *<em>mpos</em>, size_t
+	  *<em>msize</em>)</code>
+      <dt><code>herr_t H5Tset_fields (hid_t <em>type</em>, size_t
+	  <em>spos</em>, size_t <em>epos</em>, size_t <em>esize</em>,
+	  size_t <em>mpos</em>, size_t <em>msize</em>)</code>
+      <dd>A floating-point datum has bit fields which are the exponent
+	and mantissa as well as a mantissa sign bit.  These properties
+	define the location (bit position of least significant bit of
+	the field) and size (in bits) of each field.  The bit
+	positions are numbered beginning at zero at the beginning of
+	the significant part of the datum (see the descriptions of the
+	<code>precision</code> and <code>offset</code>
+	properties). The sign bit is always of length one and none of
+	the fields are allowed to overlap.  When expanding a
+	floating-point type one should set the precision first; when
+	decreasing the size one should set the field positions and
+	sizes first.
+	
+	<br><br>
+      <dt><code>size_t H5Tget_ebias (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_ebias (hid_t <em>type</em>, size_t
+	  <em>ebias</em>)</code>
+      <dd>The exponent is stored as a non-negative value which is
+	<code>ebias</code> larger than the true exponent.
+	<code>H5Tget_ebias()</code> returns zero on failure which is
+	also a valid exponent bias, but the function is guaranteed to
+	succeed if <code>H5Tget_precision()</code> succeeds when
+	called with the same arguments.
+
+	<br><br>
+      <dt><code>H5T_norm_t H5Tget_norm (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_norm (hid_t <em>type</em>, H5T_norm_t
+	  <em>norm</em>)</code>
+      <dd>This property determines the normalization method of the
+	mantissa.
+	<ul>
+	  <li>If the value is <code>H5T_NORM_MSBSET</code> then the
+	    mantissa is shifted left (if non-zero) until the first bit
+	    after the radix point is set and the exponent is adjusted
+	    accordingly.  All bits of the mantissa after the radix
+	    point are stored.
+
+	  <li>If its value is <code>H5T_NORM_IMPLIED</code> then the
+	    mantissa is shifted left (if non-zero) until the first bit
+	    after the radix point is set and the exponent is adjusted
+	    accordingly. The first bit after the radix point is not stored
+	    since it's always set.
+
+	  <li>If its value is <code>H5T_NORM_NONE</code> then the fractional
+	    part of the mantissa is stored without normalizing it.
+	</ul>
+
+	<br><br>
+      <dt><code>H5T_pad_t H5Tget_inpad (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_inpad (hid_t <em>type</em>, H5T_pad_t
+	  <em>inpad</em>)</code>
+      <dd>If any internal bits (that is, bits between the sign bit,
+	the mantissa field, and the exponent field but within the
+	precision field) are unused, then they will be filled
+	according to the value of this property.  The <em>inpad</em>
+	argument can be <code>H5T_PAD_ZERO</code> if the internal
+	padding should always be set to zero, or <code>H5T_PAD_ONE</code>
+	if it should always be set to one.
+	<code>H5Tget_inpad()</code> returns <code>H5T_PAD_ERROR</code>
+	on failure which is a negative value (successful return is
+	always non-negative).
+    </dl>
+
+    <h3>3.3. Properties of Date and Time Atomic Types</h3>
+
+    <p>Dates and times (<code>class=H5T_TIME</code>) are stored as
+      character strings in one of the ISO-8601 formats like
+      "<em>1997-12-05 16:25:30</em>"; as character strings using the
+      Unix asctime(3) format like "<em>Thu Dec 05 16:25:30 1997</em>";
+      as an integer value by juxtaposition of the year, month, and
+      day-of-month, hour, minute and second in decimal like
+      <em>19971205162530</em>; as an integer value in Unix time(2)
+      format; or other variations.
+
+    <p>I'm deferring definition until later since they're probably not
+      as important as the other data types.
+
+    <h3>3.4. Properties of Character String Atomic Types</h3>
+
+    <p>Fixed-length character string types are used to store textual
+      information.  The <code>offset</code> property of a string is
+      always zero and the <code>precision</code> property is eight
+      times as large as the value returned by
+      <code>H5Tget_size()</code> (since precision is measured in bits
+      while size is measured in bytes).  Both properties are
+      read-only.
+
+    <dl>
+      <dt><code>H5T_cset_t H5Tget_cset (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_cset (hid_t <em>type</em>, H5T_cset_t
+	  <em>cset</em>)</code>
+      <dd>HDF5 is able to distinguish between character sets of
+	different nationalities and to convert between them to the
+	extent possible.  The only character set currently supported
+	is <code>H5T_CSET_ASCII</code>.
+
+	<br><br>
+      <dt><code>H5T_str_t H5Tget_strpad (hid_t <em>type</em>)</code>
+      <dt><code>herr_t H5Tset_strpad (hid_t <em>type</em>, H5T_str_t
+	  <em>strpad</em>)</code>
+      <dd>The method used to store character strings differs with the
+	programming language: C usually null terminates strings while
+	Fortran left-justifies and space-pads strings.  This property
+	defines the storage mechanism and can be
+	<code>H5T_STR_NULL</code> for C-style strings or
+	<code>H5T_STR_SPACE</code> for Fortran-style
+	strings. <code>H5Tget_strpad()</code> returns
+	<code>H5T_STR_ERROR</code> on failure, a negative value (all
+	successful return values are non-negative).
+    </dl>
+
+    <h3>3.5. Properties of Bit Field Atomic Types</h3>
+
+    <p>Converting a bit field (<code>class=H5T_BITFIELD</code>) from
+      one type to another simply copies the significant bits.  If the
+      destination is smaller than the source then bits are truncated.
+      Otherwise new bits are filled according to the <code>msb</code>
+      padding type.
+
+    <h3>3.6. Properties of Opaque Atomic Types</h3>
+
+    <p>Opaque atomic types (<code>class=H5T_OPAQUE</code>) act like
+      bit fields except conversions which change the precision are not
+      allowed.  However, padding can be added or removed from either
+      end and the bytes can be reordered.  Opaque types can be used to
+      create novel data types not directly supported by the library,
+      but the application is responsible for data conversion of these
+      types.
+
+    <h2>4. Properties of Compound Types</h2>
+
+    <p>A compound data type is similar to a <code>struct</code> in C
+      or a common block in Fortran: it is a collection of one or more
+      atomic types or small arrays of such types.  Each
+      <em>member</em> of a compound type has a name which is unique
+      within that type, and a byte offset that determines the first
+      byte (smallest byte address) of that member in a compound datum.
+      A compound data type has the following properties:
+
+    <dl>
+      <dt><code>H5T_class_t H5Tget_class (hid_t <em>type</em>)</code>
+      <dd>All compound data types belong to the type class
+      <code>H5T_COMPOUND</code>.  This property is read-only and is
+      defined when a data type is created or copied (see
+      <code>H5Tcreate()</code> or <code>H5Tcopy()</code>).
+
+	<br><br>
+      <dt><code>size_t H5Tget_size (hid_t <em>type</em>)</code>
+      <dd>Compound data types have a total size in bytes which is
+	returned by this function.  All members of a compound data
+	type must exist within this size.  A value of zero is returned
+	for failure; all successful return values are positive.
+
+	<br><br>
+      <dt><code>int H5Tget_nmembers (hid_t <em>type</em>)</code>
+      <dd>A compound data type consists of zero or more members
+	(defined in any order) with unique names and which occupy
+	non-overlapping regions within the datum.  In the functions
+	that follow, individual members are referenced by an index
+	number between zero and <em>N</em>-1, inclusive, where
+	<em>N</em> is the value returned by this function.
+	<code>H5Tget_nmembers()</code> returns -1 on failure.
+
+	<br><br>
+      <dt><code>char *H5Tget_member_name (hid_t <em>type</em>, int
+	  <em>membno</em>)</code>
+      <dd>Each member has a name which is unique among its siblings in
+	a compound data type.  This function returns a pointer to a
+	null-terminated copy of the name allocated with
+	<code>malloc()</code> or the null pointer on failure.  The
+	caller is responsible for freeing the memory returned by this
+	function.
+
+	<br><br>
+      <dt><code>size_t H5Tget_member_offset (hid_t <em>type</em>, int
+	  <em>membno</em>)</code>
+      <dd>The byte offset of member number <em>membno</em> with
+	respect to the beginning of the containing compound datum is
+	returned by this function.  A zero is returned on failure
+	which is also a valid offset, but this function is guaranteed
+	to succeed if a call to <code>H5Tget_member_dims()</code>
+	succeeds when called with the same <em>type</em> and
+	<em>membno</em> arguments.
+
+	<br><br>
+      <dt><code>int H5Tget_member_dims (hid_t <em>type</em>, int
+	  <em>membno</em>, int <em>dims</em>[4], int
+	  <em>perm</em>[4])</code>
+      <dd>Each member can be a small array of up to four dimensions,
+	making it convenient to describe things like transposition
+	matrices.  The dimensionality of the member is returned (or
+	negative for failure) and the size in each dimension is
+	returned through the <em>dims</em> argument.  The
+	<em>perm</em> argument describes how the array's elements are
+	mapped to the linear address space of memory with respect to
+	some reference order (the reference order is specified in
+	natural language documentation which describes the compound
+	data type). The application which "invented" the type will
+	often use the identity permutation and other applications will
+	use a permutation that causes the elements to be rearranged to
+	the desired order.  Only the first few elements of
+	<em>dims</em> and <em>perm</em> are initialized according to
+	the dimensionality of the member.  Scalar members have
+	dimensionality zero.
+
+	<b>The only permutations supported at this
+	  time are the identity permutation and the transpose
+	  permutation (in the 4d case, {0,1,2,3} and {3,2,1,0}).</b>
+
+	<br><br>
+      <dt><code>hid_t H5Tget_member_type (hid_t <em>type</em>, int
+	  <em>membno</em>)</code>
+      <dd>Each member has its own data type, a copy of which is
+	returned by this function.  The returned data type identifier
+	should be released by eventually calling
+	<code>H5Tclose()</code> on that type.
+    </dl>
+
+    <p>Properties of members of a compound data type are
+      defined when the member is added to the compound type (see
+      <code>H5Tinsert()</code>) and cannot be subsequently modified.
+      This makes it imposible to define recursive data structures.
+
+    <h2>5. Predefined Atomic Data Types</h2>
+
+    <p>The library predefines a modest number of data types having
+      names like <code>H5T_<em>arch</em>_<em>base</em></code> where
+      <em>arch</em> is an architecture name and <em>base</em> is a
+      programming type name.  New types can be derived from the
+      predifined types by copying the predefined type (see
+      <code>H5Tcopy()</code>) and then modifying the result.
+
+    <p>
+      <center>
+	<table align=center width="80%">
+	  <tr>
+	    <th align=left width="20%">Architecture Name</th>
+	    <th align=left width="80%">Description</th>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>IEEE</code></td>
+	    <td>This architecture defines standard floating point
+	      types in various byte orders.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>STD</code></td>
+	    <td>This is an architecture that contains semi-standard
+	      datatypes like signed two's complement integers,
+	      unsigned integers, and bitfields in various byte
+	      orders.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>UNIX</code></td>
+	    <td>Types which are specific to Unix operating systems are 
+	      defined in this architecture.  The only type currently
+	      defined is the Unix date and time types
+	      (<code>time_t</code>).</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>C<br>FORTRAN</code></td>
+	    <td>Types which are specific to the C or Fortran
+	      programming languages are defined in these
+	      architectures.  For instance, <code>H5T_C_STRING</code>
+	      defines a base string type with null termination which
+	      can be used to derive string types of other
+	      lengths.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>NATIVE</code></td>
+	    <td>This architecture contains C-like data types for the
+	      machine on which the library was compiled.  The types
+	      were actually defined by running the
+	      <code>H5detect</code> program when the library was
+	      compiled. In order to be portable, applications should
+	      almost always use this architecture to describe things
+	      in memory.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>CRAY</code></td>
+	    <td>Cray architectures.  These are word-addressable,
+	      big-endian systems with non-IEEE floating point.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>INTEL</code></td>
+	    <td>All Intel and compatible CPU's including 80286, 80386,
+	      80486, Pentium, Pentium-Pro, and Pentium-II. These are
+	      little-endian systems with IEEE floating-point.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>MIPS</code></td>
+	    <td>All MIPS CPU's commonly used in SGI systems.  These
+	      are big-endian systems with IEEE floating-point.</td>
+	  </tr>
+
+	  <tr valign=top>
+	    <td><code>ALPHA</code></td>
+	    <td>All DEC Alpha CPU's, little-endian systems with IEEE
+	    floating-point.</td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>The base name of most types consists of a letter, a precision
+      in bits, and an indication of the byte order.  The letters are:
+
+    <p>
+      <center>
+	<table border align=center width="40%">
+	  <tr>
+	    <td align=center width="30%">B</td>
+	    <td width="70%">Bitfield</td>
+	  </tr>
+	  <tr>
+	    <td align=center>D</td>
+	    <td>Date and time</td>
+	  </tr>
+	  <tr>
+	    <td align=center>F</td>
+	    <td>Floating point</td>
+	  </tr>
+	  <tr>
+	    <td align=center>I</td>
+	    <td>Signed integer</td>
+	  </tr>
+	  <tr>
+	    <td align=center>S</td>
+	    <td>Character string</td>
+	  </tr>
+	  <tr>
+	    <td align=center>U</td>
+	    <td>Unsigned integer</td>
+	  </tr>
+	</table>
+      </center>
+	
+    <p>The byte order is a two-letter sequence:
+
+    <p>
+      <center>
+	<table border align=center width="40%">
+	  <tr>
+	    <td align=center width="30%">BE</td>
+	    <td width="70%">Big endian</td>
+	  </tr>
+	  <tr>
+	    <td align=center>LE</td>
+	    <td>Little endian</td>
+	  </tr>
+	  <tr>
+	    <td align=center>VX</td>
+	    <td>Vax order</td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>
+      <center>
+	<table align=center width="80%">
+	  <tr>
+	    <th align=left><br><br>Example</th>
+	    <th align=left><br><br>Description</th>
+	  </tr>
+	  
+	  <tr valign=top>
+	    <td><code>H5T_IEEE_F64LE</code></td>
+	    <td>Eight-byte, little-endian, IEEE floating-point</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_IEEE_F32BE</code></td>
+	    <td>Four-byte, big-endian, IEEE floating point</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_STD_I32LE</code></td>
+	    <td>Four-byte, little-endian, signed two's complement integer</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_STD_U16BE</code></td>
+	    <td>Two-byte, big-endian, unsigned integer</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_UNIX_D32LE</code></td>
+	    <td>Four-byte, little-endian, time_t</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_C_S1</code></td>
+	    <td>One-byte, null-terminated string of eight-bit characters</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_INTEL_B64</code></td>
+	    <td>Eight-byte bit field on an Intel CPU</td>
+	  </tr>
+	  <tr valign=top>
+	    <td><code>H5T_CRAY_F64</code></td>
+	    <td>Eight-byte Cray floating point</td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>The <code>NATIVE</code> architecture has base names which don't 
+      follow the same rules as the others.  Instead, native type names 
+      are similar to the C type names.  Here are some examples:
+
+    <p>
+      <center>
+	<table align=center width="80%">
+	  <tr>
+	    <th align=left><br><br>Example</th>
+	    <th align=left><br><br>Corresponding C Type</th>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_CHAR</code></td>
+	    <td><code>signed char</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_UCHAR</code></td>
+	    <td><code>unsigned char</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_SHORT</code></td>
+	    <td><code>short</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_USHORT</code></td>
+	    <td><code>unsigned short</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_INT</code></td>
+	    <td><code>int</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_UINT</code></td>
+	    <td><code>unsigned</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_LONG</code></td>
+	    <td><code>long</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_ULONG</code></td>
+	    <td><code>unsigned long</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_LLONG</code></td>
+	    <td><code>long long</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_ULLONG</code></td>
+	    <td><code>unsigned long long</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_FLOAT</code></td>
+	    <td><code>float</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_DOUBLE</code></td>
+	    <td><code>double</code></td>
+	  </tr>
+	  <tr>
+	    <td><code>H5T_NATIVE_LDOUBLE</code></td>
+	    <td><code>long double</code></td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+ 	  <caption align=bottom><h4>Example:  A 128-bit
+	      integer</h4></caption>
+	  <tr>
+	    <td>
+	      <p>To create a 128-bit, little-endian signed integer
+		type one could use the following (increasing the
+		precision of a type automatically increases the total
+		size):
+
+	      <p><code><pre>
+hid_t new_type = H5Tcopy (H5T_NATIVE_INT);
+H5Tset_precision (new_type, 128);
+H5Tset_order (new_type, H5T_ORDER_LE);
+	      </pre></code>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+    
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: An 80-character
+	      string</h4></caption> 
+	  <tr>
+	    <td>
+	      <p>To create an 80-byte null terminated string type one
+		might do this (the offset of a character string is
+		always zero and the precision is adjusted
+		automatically to match the size):
+
+	      <p><code><pre>
+hid_t str80 = H5Tcopy (H5T_C_S1);
+H5Tset_size (str80, 80);
+	      </pre></code>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <h2>6. Defining Compound Data Types</h2>
+
+    <p>Unlike atomic data types which are derived from other atomic
+      data types, compound data types are created from scratch. First,
+      one creates an empty compound data type and specifies it's total
+      size.  Then members are added to the compound data type in any
+      order.
+
+    <p>Usually a C struct will be defined to hold a data point in
+      memory, and the offsets of the members in memory will be the
+      offsets of the struct members from the beginning of an instance
+      of the struct.
+
+    <dl>
+      <dt><code>HOFFSET(s,m)</code>
+      <dd>This macro computes the offset of member <em>m</em> within
+	a struct <em>s</em>.
+      <dt><code>offsetof(s,m)</code>
+      <dd>This macro defined in <code>stddef.h</code> does
+	exactly the same thing as the <code>HOFFSET()</code> macro.
+    </dl>
+
+    <p>Each member must have a descriptive name which is the
+      key used to uniquely identify the member within the compound
+      data type.  A member name in an HDF5 data type does not
+      necessarily have to be the same as the name of the member in the
+      C struct, although this is often the case.  Nor does one need to
+      define all members of the C struct in the HDF5 compound data
+      type (or vice versa).
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: A simple struct</h4></caption>
+	  <tr>
+	    <td>
+	      <p>An HDF5 data type is created to describe complex
+		numbers whose type is defined by the
+		<code>complex_t</code> struct.
+
+	      <p><code><pre>
+typedef struct {
+   double re;   /*real part*/
+   double im;   /*imaginary part*/
+} complex_t;
+
+hid_t complex_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
+H5Tinsert (complex_id, "real", HOFFSET(complex_t,re),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (complex_id, "imaginary", HOFFSET(complex_t,im),
+           H5T_NATIVE_DOUBLE);
+	      </pre></code>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>Member alignment is handled by the <code>HOFFSET</code>
+      macro.  However, data stored on disk does not require alignment,
+      so unaligned versions of compound data structures can be created
+      to improve space efficiency on disk.  These unaligned compound
+      data types can be created by computing offsets by hand to
+      eliminate inter-member padding, or the members can be packed by
+      calling <code>H5Tpack()</code> (which modifies a data type
+      directly, so it is usually preceded by a call to
+      <code>H5Tcopy()</code>):
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: A packed struct</h4></caption>
+	  <tr>
+	    <td>
+	      <p>This example shows how to create a disk version of a
+		compound data type in order to store data on disk in
+		as compact a form as possible.  Packed compound data
+		types should generally not be used to describe memory
+		as they may violate alignment constraints for the
+		architecture being used.  Note also that using a
+		packed data type for disk storage may involve a higher
+		data conversion cost.
+	      <p><code><pre>
+hid_t complex_disk_id = H5Tcopy (complex_id);
+H5Tpack (complex_disk_id);
+	      </pre></code>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: A flattened struct</h4></caption>
+	  <tr>
+	    <td>
+	      <p>Compound data types that have a compound data type
+		member can be handled two ways.  This example shows
+		that the compound data type can be flattened,
+		resulting in a compound type with only atomic
+		members.
+
+	      <p><code><pre>
+typedef struct {
+   complex_t x;
+   complex_t y;
+} surf_t;
+
+hid_t surf_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
+H5Tinsert (surf_id, "x-re", HOFFSET(surf_t,x.re),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (surf_id, "x-im", HOFFSET(surf_t,x.im),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (surf_id, "y-re", HOFFSET(surf_t,y.re),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (surf_id, "y-im", HOFFSET(surf_t,y.im),
+           H5T_NATIVE_DOUBLE);
+	      </code></pre>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: A nested struct</h4></caption>
+	  <tr>
+	    <td>
+	      <p>However, when the <code>complex_t</code> is used
+		often it becomes inconvenient to list its members over
+		and over again.  So the alternative approach to
+		flattening is to define a compound data type and then
+		use it as the type of the compound members, as is done
+		here (the typedefs are defined in the previous
+		examples).
+
+	      <p><code><pre>
+hid_t complex_id, surf_id; /*hdf5 data types*/
+
+complex_id = H5Tcreate (H5T_COMPOUND, sizeof c);
+H5Tinsert (complex_id, "re", HOFFSET(complex_t,re),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (complex_id, "im", HOFFSET(complex_t,im),
+           H5T_NATIVE_DOUBLE);
+
+surf_id = H5Tcreate (H5T_COMPOUND, sizeof s);
+H5Tinsert (surf_id, "x", HOFFSET(surf_t,x), complex_id);
+H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
+	      </code></pre>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <h2>7. Sharing Data Types among Datasets</h2>
+
+    <p>If a file has lots of datasets which have a common data type
+      then the file could be made smaller by having all the datasets
+      share a single data type.  Instead of storing a copy of the data
+      type in each dataset object header, a single data type is stored
+      and the object headers point to it.  The space savings is
+      probably only significant for datasets with a compound data type
+      since the simple data types can be described with just a few
+      bytes anyway.
+
+    <p>To create a bunch of datasets that share a single data type
+      just create the datasets with a committed (named) data type.
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: Shared Types</h4></caption>
+	  <tr>
+	    <td>
+	      <p>To create two datasets that share a common data type
+		one just commits the data type, giving it a name, and
+		then uses that data type to create the datasets.
+
+	      <p><code><pre>
+hid_t t1 = ...some transient type...;
+H5Tcommit (file, "shared_type", t1);
+hid_t dset1 = H5Dcreate (file, "dset1", t1, space, H5P_DEFAULT);
+hid_t dset2 = H5Dcreate (file, "dset2", t1, space, H5P_DEFAULT);
+	      </code></pre>
+
+	      <p>And to create two additional datasets later which
+		share the same type as the first two datasets:
+
+	      <p><code><pre>
+hid_t dset1 = H5Dopen (file, "dset1");
+hid_t t2 = H5Dget_type (dset1);
+hid_t dset3 = H5Dcreate (file, "dset3", t2, space, H5P_DEFAULT);
+hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
+	      </code></pre>
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <h2>8. Data Conversion</h2>
+
+    <p>The library is capable of converting data from one type to
+      another and does so automatically when reading or writing the
+      raw data of a dataset.  The data type interface does not provide
+      functions to the application for changing data types directly,
+      but the user is allowed a certain amount of control over the
+      conversion process.
+
+    <p>In order to insure that data conversion exceeds disk I/O rates,
+      common data conversion paths can be hand-tuned and optimized for
+      performance.  If a hand-tuned conversion function is not
+      available, then the library falls back to a slower but more
+      general conversion function.  Although conversion paths include
+      data space conversion, only data type conversions are described
+      here.  Most applications will not be concerned with data type
+      conversions since the library will contain hand-tuned conversion
+      functions for many common conversion paths.  In fact, if an
+      application does define a conversion function which would be of
+      general interest, we request that the function be submitted to
+      the HDF5 development team for inclusion in the library (there
+      might be less overhead involved with calling an internal
+      conversion functions than calling an application-defined
+      conversion function).
+
+    <p><b>Note:</b> The alpha version of the library does not contain
+      a full set of conversions.  It can convert from one integer
+      format to another and one struct to another.  It can also
+      perform byte swapping when the source and destination types are
+      otherwise the same.
+
+    <p>A conversion path contains a source and destination data type
+      and each path contains a <em>hard</em> conversion function
+      and/or a <em>soft</em> conversion function.  The only difference
+      between hard and soft functions is the way in which the library
+      chooses which function applies: A hard function applies to a
+      specific conversion path while a soft function may apply to
+      multiple paths.  When both hard and soft functions apply to a
+      conversion path, then the hard function is favored and when
+      multiple soft functions apply, the one defined last is favored.
+
+    <p>A data conversion function is of type <code>H5T_conv_t</em>
+	which is defined as:
+
+    <p>
+      <code><pre>
+typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
+                             hid_t <em>dest_type</em>,
+			     H5T_cdata_t *<em>cdata</em>,
+			     size_t <em>nelmts</em>,
+			     void *<em>buffer</em>,
+                             void *<em>background</em>);
+    </pre></code>
+
+    <p>The conversion function is called with the source and
+      destination data types (<em>src_type</em> and
+      <em>dst_type</em>), path-constant data (<em>cdata</em>), the
+      number of instances of the data type to convert
+      (<em>nelmts</em>), a buffer which initially contains an array of
+      data having the source type and on return will contain an array
+      of data having the destination type (<em>buffer</em>), and a
+      temporary or background buffer (<em>background</em>).  Functions
+      return a negative value on failure and some other value on
+      success.
+
+    <p>The <code>command</code> field of the <em>cdata</em> argument
+      determines what happens within the conversion function.  It's
+      values can be:
+
+    <dl>
+      <dt><code>H5T_CONV_INIT</code>
+      <dd>This command is to hard conversion functions when they're
+	registered or soft conversion functions when the library is
+	determining if a conversion can be used for a particular path.
+	The <em>src_type</em> and <em>dst_type</em> are the end-points
+	of the path being queried and <em>cdata</em> is all zero.  The
+	library should examine the source and destination types and
+	return zero if the conversion is possible and negative
+	otherwise (hard conversions need not do this since they've
+	presumably been registered only on paths they support).  If
+	the conversion is possible the library may allocate and
+	initialize private data and assign the pointer to the
+	<code>priv</code> field of <em>cdata</em> (or private data can
+	be initialized later). It should also initialize the
+	<code>need_bkg</code> field described below.  The <em>buf</em>
+	and <em>background</em> pointers will be null pointers.
+
+	<br><br>
+      <dt><code>H5T_CONV_CONV</code>
+      <dd>This is the usually command which indicates that
+	data points should be converted.  The conversion function
+	should initialize the <code>priv</code> field of
+	<em>cdata</em> if it wasn't initialize during the
+	<code>H5T_CONV_INIT</code> command and then convert
+	<em>nelmts</em> instances of the <em>src_type</em> to the
+	<em>dst_type</em>. The <em>buffer</em> serves as both input
+	and output.  The <em>background</em> buffer is supplied
+	according to the value of the <code>need_bkg</code> field of
+	<em>cdata</em> (the values are described below).
+
+	<br><br>
+      <dt><code>H5T_CONV_FREE</code>
+      <dd>The conversion function is about to be removed from some
+	path and the private data (the
+	<code><em>cdata</em>->priv</code> pointer) should be freed and
+	set to null.  All other pointer arguments are null and the
+	<em>nelmts</em> argument is zero.
+
+	<br><br>
+      <dt><em>Others...</em>
+      <dd>Other commands might be implemented later and conversion
+	functions that don't support those commands should return a
+	negative value.
+    </dl>
+
+
+    <p>Whether a background buffer is supplied to a conversion
+      function, and whether the background buffer is initialized
+      depends on the value of <code><em>cdata</em>->need_bkg</code>
+      which the conversion function should have initialized during the
+      H5T_CONV_INIT command.  It can have one of these values:
+
+    <dl>
+      <dt><code>H5T_BKG_NONE</code>
+      <dd>No background buffer will be supplied to the conversion
+	function. This is the default.
+
+	<br><br>
+      <dt><code>H5T_BKG_TEMP</code>
+      <dd>A background buffer will be supplied but it will not be
+	initialized. This is useful for those functions requiring some
+	extra buffer space as the buffer can probably be allocated
+	more efficiently by the library (the application can supply
+	the buffer as part of the dataset transfer template).
+
+	<br><br>
+      <dt><code>H5T_BKG_YES</code>
+      <dd>An initialized background buffer is passed to the conversion
+	function.  The buffer is initialized with the current values
+	of the destination for the data which is passed in through the
+	<em>buffer</em> argument. It can be used to "fill in between
+	the cracks".  For instance, if the destination type is a
+	compound data type and we are initializing only part of the
+	compound data type from the source type then the background
+	buffer can be used to initialize the other part of the
+	destination.
+    </dl>
+
+    <p>Other fields of <em>cdata</em> can be read or written by
+      the conversion functions.  Many of these contain
+      performance-measuring fields which can be printed by the
+      conversion function during the <code>H5T_CONV_FREE</code>
+      command which is issued whenever the function is removed from a
+      conversion path.
+
+    <dl>
+      <dt><code>hbool_t recalc</code>
+      <dd>This field is set by the library when any other data type
+	conversion function is registered or unregistered.  It allows
+	conversion functions to cache pointers to other conversion
+	functions and be notified when the cache should be
+	recalculated.
+
+	<br><br>
+      <dt><code>unsigned long ncalls</code>
+      <dd>This field contains the number of times the conversion
+	function was called with the command
+	<code>H5T_CONV_CONV</code>.  It is updated automatically by
+	the library.
+
+	<br><br>
+      <dt><code>unsigned long nelmts</code>
+      <dd>This is the total number of data points converted by this
+	function and is updated automatically by the library.
+    </dl>
+
+
+
+    <p>Once a conversion function is written it can be registered and
+      unregistered with these functions:
+
+    <dl>
+      <dt><code>herr_t H5Tregister_hard (const char *<em>name</em>,
+	  hid_t <em>src_type</em>, hid_t <em>dest_type</em>,
+	  H5T_conv_t <em>func</em>)</code>
+      <dd>Once a conversion function is written, the library must be
+	notified so it can be used.  The function can be registered as a
+	hard conversion for one or more conversion paths by calling
+	<code>H5Tregister_hard()</code>, displacing any previous hard
+	conversion for those paths.  The <em>name</em> is used only
+	for debugging but must be supplied.
+
+	<br><br>
+      <dt><code>herr_t H5Tregister_soft (const char *<em>name</em>,
+	  H5T_class_t <em>src_class</em>, H5T_class_t <em>dest_class</em>,
+	  H5T_conv_t <em>func</em>)</code>
+      <dd>The function can be registered as a generic function which
+	will be automatically added to any conversion path for which
+	it returns an indication that it applies.  The name is used
+	only for debugging but must be supplied.
+
+	<br><br>
+      <dt><code>herr_t H5Tunregister (H5T_conv_t <em>func</em>)</code>
+      <dd>A function can be removed from the set of known conversion
+	functions by calling <code>H5Tunregister()</code>.  The
+	function is removed from all conversion paths.
+    </dl>
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: A conversion
+	      function</h4></caption>
+	  <tr>
+	    <td>
+	      <p>Here's an example application-level function that
+		converts Cray <code>unsigned short</code> to any other
+		16-bit unsigned big-endian integer.  A cray
+		<code>short</code> is a big-endian value which has 32
+		bits of precision in the high-order bits of a 64-bit
+		word.
+
+	      <p><code><pre>
+ 1 typedef struct {
+ 2     size_t dst_size;
+ 3     int direction;
+ 4 } cray_ushort2be_t;
+ 5 
+ 6 herr_t
+ 7 cray_ushort2be (hid_t src, hid_t dst,
+ 8                 H5T_cdata_t *cdata,
+ 9                 size_t nelmts, void *buf,
+10                 const void *background)
+11 {
+12     unsigned char *src = (unsigned char *)buf;
+13     unsigned char *dst = src;
+14     cray_ushort2be_t *priv = NULL;
+15 
+16     switch (cdata->command) {
+17     case H5T_CONV_INIT:
+18         /*
+19          * We are being queried to see if we handle this
+20          * conversion.  We can handle conversion from
+21          * Cray unsigned short to any other big-endian
+22          * unsigned integer that doesn't have padding.
+23          */
+24         if (!H5Tequal (src, H5T_CRAY_USHORT) ||
+25             H5T_ORDER_BE != H5Tget_order (dst) ||
+26             H5T_SGN_NONE != H5Tget_signed (dst) ||
+27             8*H5Tget_size (dst) != H5Tget_precision (dst)) {
+28             return -1;
+29         }
+30 
+31         /*
+32          * Initialize private data.  If the destination size
+33          * is larger than the source size, then we must
+34          * process the elements from right to left.
+35          */
+36         cdata->priv = priv = malloc (sizeof(cray_ushort2be_t));
+37         priv->dst_size = H5Tget_size (dst);
+38         if (priv->dst_size&gt;8) {
+39             priv->direction = -1;
+40         } else {
+41             priv->direction = 1;
+42         }
+43         break;
+44 
+45     case H5T_CONV_FREE:
+46         /*
+47          * Free private data.
+48          */
+49         free (cdata->priv);
+50         cdata->priv = NULL;
+51         break;
+52 
+53     case H5T_CONV_CONV:
+54         /*
+55          * Convert each element, watch out for overlap src
+56          * with dst on the left-most element of the buffer.
+57          */
+58         priv = (cray_ushort2be_t *)(cdata->priv);
+59         if (priv->direction&lt;0) {
+60             src += (nelmts - 1) * 8;
+61             dst += (nelmts - 1) * dst_size;
+62         }
+63         for (i=0; i&lt;n; i++) {
+64             if (src==dst && dst_size&lt;4) {
+65                 for (j=0; j&lt;dst_size; j++) {
+66                     dst[j] = src[j+4-dst_size];
+67                 }
+68             } else {
+69                 for (j=0; j&lt;4 && j&lt;dst_size; j++) {
+70                     dst[dst_size-(j+1)] = src[3-j];
+71                 }
+72                 for (j=4; j&lt;dst_size; j++) {
+73                     dst[dst_size-(j+1)] = 0;
+74                 }
+75             }
+76             src += 8 * direction;
+77             dst += dst_size * direction;
+78         }
+79         break;
+80 
+81     default:
+82         /*
+83          * Unknown command.
+84          */
+85         return -1;
+86     }
+87     return 0;
+88 }
+	      </pre></code>
+
+	      <p>The <em>background</em> argument is ignored since
+		it's generally not applicable to atomic data types.
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+    <p>
+      <center>
+	<table border align=center width="100%">
+	  <caption align=bottom><h4>Example: Soft
+	      Registration</h4></caption>
+	  <tr>
+	    <td>
+	      <p>The convesion function described in the previous
+		example applies to more than one conversion path.
+		Instead of enumerating all possible paths, we register
+		it as a soft function and allow it to decide which
+		paths it can handle.
+
+	      <p><code><pre>
+H5Tregister_soft ("cus2be", H5T_INTEGER, H5T_INTEGER, cray_ushort2be);
+	      </pre></code>
+
+	      <p>This causes it to be consulted for any conversion
+		from an integer type to another integer type.  The
+		first argument is just a short identifier which will
+		be printed with the data type conversion statistics.
+	    </td>
+	  </tr>
+	</table>
+      </center>
+
+
+    <p><b>NOTE:</b> The idea of a master soft list and being able to
+      query conversion functions for their abilities tries to overcome
+      problems we saw with AIO.  Namely, that there was a dichotomy
+      between generic conversions and specific conversions that made
+      it very difficult to write a conversion function that operated
+      on, say, integers of any size and order as long as they don't
+      have zero padding.  The AIO mechanism required such a function
+      to be explicitly registered (like
+      <code>H5Tregister_hard()</code>) for each an every possible
+      conversion path whether that conversion path was actually used
+      or not.
+
+    <hr>
+    <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
+    <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
+<!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
+<!-- hhmts start -->
+Last modified: Thu Jun 18 13:59:12 EDT 1998
+<!-- hhmts end -->
+  </body>
+</html>
