@@ -23,6 +23,9 @@
 namespace H5 {
 #endif
 
+// Default constructor
+H5File::H5File() : IdComponent() {}
+
 // Creates or opens an HDF5 file depending on the parameter flags.
 H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {

@@ -8,6 +8,9 @@ namespace H5 {
 
 class __DLLCPP__ H5File : public IdComponent, public CommonFG {
    public:
+	// Default constructor
+	H5File();
+
 	// copy constructor: makes a copy of the original H5File object.
 	H5File(const H5File& original );
 
