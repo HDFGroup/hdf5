@@ -1117,10 +1117,7 @@ hid_t  type, space;
          dump_data(did, DATASET_DATA);
          break;
     case H5T_BITFIELD:
-         indent += COL;
-         indentation (indent);
-         indent -= COL;
-         printf("DATA{ not yet implemented.}\n");
+         dump_data(did, DATASET_DATA);
          break;
     case H5T_OPAQUE:
         /* indent += COL;
