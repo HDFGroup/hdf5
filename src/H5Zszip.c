@@ -250,8 +250,13 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
     /* Sanity check to make certain that we haven't drifted out of date with
      * the mask options from the szlib.h header */
-    assert(H5_SZIP_RAW_OPTION_MASK==SZ_RAW_OPTION_MASK);
+    assert(H5_SZIP_ALLOW_K13_OPTION_MASK==SZ_ALLOW_K13_OPTION_MASK);
+    assert(H5_SZIP_CHIP_OPTION_MASK==SZ_CHIP_OPTION_MASK);
+    assert(H5_SZIP_EC_OPTION_MASK==SZ_EC_OPTION_MASK);
+    assert(H5_SZIP_LSB_OPTION_MASK==SZ_LSB_OPTION_MASK);
+    assert(H5_SZIP_MSB_OPTION_MASK==SZ_MSB_OPTION_MASK);
     assert(H5_SZIP_NN_OPTION_MASK==SZ_NN_OPTION_MASK);
+    assert(H5_SZIP_RAW_OPTION_MASK==SZ_RAW_OPTION_MASK);
 
     /* Check arguments */
     if (cd_nelmts!=4)

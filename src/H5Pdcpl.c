@@ -1020,6 +1020,13 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    /* Always set "raw" (no szip header) flag for data */
+    options_mask |= H5_SZIP_RAW_OPTION_MASK;
+
+    /* Mask off the LSB and MSB options, if they were given */
+    /* (The HDF5 library sets them internally, as needed) */
+    options_mask &= ~(H5_SZIP_LSB_OPTION_MASK|H5_SZIP_MSB_OPTION_MASK);
+
     /* Set the parameters for the filter */
     cd_values[0]=options_mask;
     cd_values[1]=pixels_per_block;

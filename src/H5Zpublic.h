@@ -51,8 +51,10 @@ typedef int H5Z_filter_t;
 /* [These are aliases for the similar definitions in szlib.h, which we can't
  * include directly due to the duplication of various symbols with the zlib.h
  * header file] */
-#define H5_SZIP_RAW_OPTION_MASK 128
-#define H5_SZIP_NN_OPTION_MASK   32
+#define H5_SZIP_ALLOW_K13_OPTION_MASK   1
+#define H5_SZIP_CHIP_OPTION_MASK        2 
+#define H5_SZIP_EC_OPTION_MASK          4
+#define H5_SZIP_NN_OPTION_MASK          32
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
 
 /* Values to decide if EDC is enabled for reading data */

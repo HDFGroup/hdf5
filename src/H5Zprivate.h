@@ -30,6 +30,14 @@ typedef struct {
     unsigned		*cd_values;	/*client data values		     */
 } H5Z_filter_info_t;
 
+/* Special parameters for szip compression */
+/* [These are aliases for the similar definitions in szlib.h, which we can't
+ * include directly due to the duplication of various symbols with the zlib.h
+ * header file] */
+#define H5_SZIP_LSB_OPTION_MASK         8
+#define H5_SZIP_MSB_OPTION_MASK         16
+#define H5_SZIP_RAW_OPTION_MASK         128
+
 struct H5O_pline_t; /*forward decl*/
 
 /* Internal API routines */

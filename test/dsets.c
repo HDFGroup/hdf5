@@ -1637,7 +1637,7 @@ test_filters(hid_t file)
 
 #ifdef H5_HAVE_FILTER_SZIP
     hsize_t     szip_size;       /* Size of dataset with szip filter */
-    unsigned szip_options_mask=H5_SZIP_RAW_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
+    unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
 #endif /* H5_HAVE_FILTER_SZIP */
 
@@ -2587,7 +2587,7 @@ file)
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
     hid_t       dcpl;           /* Dataspace creation property list ID */
-    unsigned szip_options_mask=H5_SZIP_RAW_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
+    unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block;
     const hsize_t dims[2] = {500, 4096};        /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
