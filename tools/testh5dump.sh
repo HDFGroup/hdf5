@@ -104,6 +104,9 @@ DUMP tcomp-2.ddl -t /type1 /type2 /group1/type3 tcompound.h5
 # test for unamed type 
 DUMP tcomp-3.ddl -t /#5992:0 -g /group2 tcompound.h5
 
+#test for the nested compound type
+DUMP tnestcomp-1.ddl tnestedcomp.h5
+
 # test for options
 DUMP tall-1.ddl tall.h5
 DUMP tall-2.ddl -header -g /g1/g1.1 -a attr2 tall.h5
