@@ -349,13 +349,10 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
          */
         flags = dt->u.compnd.nmembs & 0xffff;
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
+	    HDstrcpy (*pp, dt->u.compnd.memb[i].name);
             n = strlen(dt->u.compnd.memb[i].name);
-            for (j = 0; j <= n && j % 8; j++) {
-                if (j < n)
-                    *(*pp)++ = dt->u.compnd.memb[i].name[j];
-                else
-                    *(*pp)++ = '\0';
-            }
+	    for (j=n+1; j%8; j++) (*pp)[j] = '\0';
+	    *pp += j;
             UINT32ENCODE(*pp, dt->u.compnd.memb[i].offset);
             *(*pp)++ = dt->u.compnd.memb[i].ndims;
             assert(dt->u.compnd.memb[i].ndims <= 4);
