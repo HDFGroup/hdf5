@@ -47,7 +47,7 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-   if test -n "$RUNPARALLEL"; then
+   if test -z "$RUNPARALLEL"; then
 	echo $* SKIPPED
    else
    expect="$srcdir/../testfiles/$1"
