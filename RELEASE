@@ -99,7 +99,9 @@ Platforms tested
                                 mpt.1.4
 
   Linux 2.2.10 SMP              gcc 2.95.1 
-                                || compiler version egcs-1.1.2 
+                                mpicc(gcc-2.95.1)
+                                gcc (egcs-2.91.66)
+                                mpicc (egcs-2.91.66)
   Linux 2.2.16 (RedHat 6.2)     gcc 2.95.2
 
   OSF1 V4.0                     DEC-V5.2-040
