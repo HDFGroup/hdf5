@@ -1,5 +1,5 @@
 #! /usr/local/bin/perl -w
-$foo;
+$foo=0;
 require 5.003;
 
 $hdr = "./src/H5public.h";
