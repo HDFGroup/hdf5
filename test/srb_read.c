@@ -114,7 +114,7 @@ int main(void)
     
     status = H5Pset_fapl_srb(fapl, srb_info);
     if (status < 0) {
-      printf ("H5Pset_fapl_gass failed. \n");
+      printf ("H5Pset_fapl_srb failed. \n");
       return -1;
     }
 
