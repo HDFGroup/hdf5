@@ -14,16 +14,13 @@
 #
 my $depend_file;
 my $new_depend_file;
+
 my $srcdir;
 my $top_srcdir;
 my $top_builddir;
 
 while ($_ = shift @ARGV) {
-    if (/^--srcdir=([^ \t\n]*)/) {
-        $srcdir = $1;
-        $srcdir =~ s/\+/\\\+/g;
-        $srcdir =~ s/\./\\\./g;
-    } elsif (/^--top_srcdir=([^ \t\n]*)/) {
+    if (/^--top_srcdir=([^ \t\n]*)/) {
         $top_srcdir = $1;
         $top_srcdir =~ s/\+/\\\+/g;
         $top_srcdir =~ s/\./\\\./g;
@@ -43,7 +40,6 @@ open(NEW, ">$new_depend_file") || die "cannot open file $new_depend_file: $!\n";
 
 while (<DEPEND>) {
     s/\.o(\b)/\.lo$1/g;
-    s/ $srcdir/ \$\(srcdir\)/g;
     s/ $top_srcdir/ \$\(top_srcdir\)/g;
     s/ $top_builddir/ \$\(top_builddir\)/g;
     print NEW $_;
