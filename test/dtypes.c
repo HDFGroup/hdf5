@@ -4500,8 +4500,8 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                     }
                 }
             }
-/* On some machines (notably the SGI machines) unsigned long values
- * are not converted to float or double values correctly, they are
+/* On some machines (notably the SGI and Solaris 64-bit machines) unsigned long 
+ * values are not converted to float or double values correctly, they are
  * consistently off by the lowest bit being rounded oppositely to our
  * software conversion routines output.  So, on those machines, we allow
  * the converted value to be +/- 1 from the machine's value.  -QAK
