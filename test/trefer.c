@@ -64,6 +64,8 @@ test_reference_obj(void)
                *tbuf;       /* temp. buffer read from disk */
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     intn        i;          /* counting variables */
+    const char *write_comment="Foo!"; /* Comments for group */
+    char read_comment[10];
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -86,12 +88,12 @@ test_reference_obj(void)
     group=H5Gcreate(fid1,"Group1",-1);
     CHECK(group, FAIL, "H5Gcreate");
 
-    /* Close group */
-    ret = H5Gclose(group);
-    CHECK(ret, FAIL, "H5Gclose");
+    /* Set group's comment */
+    ret=H5Gset_comment(group,".",write_comment);
+    CHECK(ret, FAIL, "H5Gset_comment");
 
-    /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
+    /* Create a dataset (inside Group1) */
+    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     for(tu32=(uint32_t *)wbuf,i=0; i<SPACE1_DIM1; i++)
@@ -105,25 +107,29 @@ test_reference_obj(void)
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Create another dataset */
-    dataset=H5Dcreate(fid1,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    /* Create another dataset (inside Group1) */
+    dataset=H5Dcreate(group,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
+    /* Close group */
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
+
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dcreate");
 
     /* Create references */
-    ret = H5Rcreate(&wbuf[0],fid1,"/Dataset1",H5R_OBJECT,-1);
+    ret = H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_object_type(dataset,&wbuf[0]);
     VERIFY(ret, H5G_DATASET, "H5Rcreate");
 
-    ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_OBJECT,-1);
+    ret = H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_object_type(dataset,&wbuf[1]);
     VERIFY(ret, H5G_DATASET, "H5Rcreate");
@@ -161,7 +167,7 @@ test_reference_obj(void)
     ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Try to open objects */
+    /* Open dataset object */
     dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
     CHECK(dset2, FAIL, "H5Rdereference");
 
@@ -182,6 +188,24 @@ test_reference_obj(void)
     /* Close dereferenced Dataset */
     ret = H5Dclose(dset2);
     CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open group object */
+    group = H5Rdereference(dataset,H5R_OBJECT,&rbuf[2]);
+    CHECK(group, FAIL, "H5Rdereference");
+
+    /* Get group's comment */
+    ret=H5Gget_comment(group,".",10,read_comment);
+    CHECK(ret, FAIL, "H5Gget_comment");
+
+    /* Check for correct comment value */
+    if(HDstrcmp(write_comment,read_comment)!=0) {
+        num_errs++;
+        MESSAGE(0, ("Error! Incorrect group comment, wanted: %s, got: %s",write_comment,read_comment));
+    }
+
+    /* Close group */
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
