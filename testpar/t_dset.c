@@ -33,8 +33,8 @@ slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	/* Each process takes a slabs of rows. */
 	stride[0] = 1;
 	stride[1] = 1;
-	count[0] = DIM1/mpi_size;
-	count[1] = DIM2;
+	count[0] = dim0/mpi_size;
+	count[1] = dim1;
 	start[0] = mpi_rank*count[0];
 	start[1] = 0;
 if (verbose) printf("slab_set BYROW\n");
@@ -43,8 +43,8 @@ if (verbose) printf("slab_set BYROW\n");
 	/* Each process takes a block of columns. */
 	stride[0] = 1;
 	stride[1] = 1;
-	count[0] = DIM1;
-	count[1] = DIM2/mpi_size;
+	count[0] = dim0;
+	count[1] = dim1/mpi_size;
 	start[0] = 0;
 	start[1] = mpi_rank*count[1];
 #ifdef DISABLED
@@ -61,15 +61,15 @@ if (verbose) printf("slab_set BYCOL\n");
 	printf("unknown slab_set mode (%d)\n", mode);
 	stride[0] = 1;
 	stride[1] = 1;
-	count[0] = DIM1;
-	count[1] = DIM2;
+	count[0] = dim0;
+	count[1] = dim1;
 	start[0] = 0;
 	start[1] = 0;
 if (verbose) printf("slab_set wholeset\n");
 	break;
     }
 if (verbose){
-    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
+    printf("start[]=(%ld,%ld), count[]=(%lu,%lu), total datapoints=%lu\n",
 	start[0], start[1], count[0], count[1], count[0]*count[1]);
     }
 }
@@ -106,13 +106,13 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE
     /* print the column heading */
     printf("%-8s", "Cols:");
     for (j=0; j < count[1]; j++){
-	printf("%3d ", start[1]+j);
+	printf("%3ld ", start[1]+j);
     }
     printf("\n");
 
     /* print the slab data */
     for (i=0; i < count[0]; i++){
-	printf("Row %2d: ", (int)(i*stride[0]+start[0]));
+	printf("Row %2ld: ", i*stride[0]+start[0]);
 	for (j=0; j < count[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -135,7 +135,7 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
     /* print it if verbose */
     if (verbose) {
 	printf("dataset_vrfy dumping:::\n");
-	printf("start(%d, %d), count(%d, %d), stride(%d, %d)\n",
+	printf("start(%ld, %ld), count(%lu, %lu), stride(%lu, %lu)\n",
 	    start[0], start[1], count[0], count[1], stride[0], stride[1]);
 	printf("original values:\n");
 	dataset_print(start, count, stride, original);
@@ -173,8 +173,8 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
 /*
  * Example of using the parallel HDF5 library to create two datasets
  * in one HDF5 files with parallel MPIO access support.
- * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
- * Each process controls only a slab of size DIM1 x DIM2 within each
+ * The Datasets are of sizes (number-of-mpi-processes x dim0) x dim1.
+ * Each process controls only a slab of size dim0 x dim1 within each
  * dataset.
  */
 
@@ -187,9 +187,8 @@ dataset_writeInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[RANK] = {DIM1,DIM2};		/* dataset dim sizes */
-    hsize_t dimslocal1[RANK] = {DIM1,DIM2}; 	/* local dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;	/* data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -208,6 +207,10 @@ dataset_writeInd(char *filename)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* ----------------------------------------
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
@@ -233,6 +236,8 @@ dataset_writeInd(char *filename)
      * and the slabs local to the MPI process.
      * ------------------------------------------- */
     /* setup dimensionality object */
+    dims[0] = dim0;
+    dims[1] = dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -258,7 +263,7 @@ dataset_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
 
     /* create a file dataspace independently */
@@ -294,6 +299,9 @@ dataset_writeInd(char *filename)
 
     /* close the file collectively */					    
     H5Fclose(fid);							    
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
 }
 
 /* Example of using the parallel HDF5 library to read a dataset */
@@ -306,9 +314,8 @@ dataset_readInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
-    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+    DATATYPE *data_array1 = NULL;	/* data buffer */
+    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];	/* for hyperslab setting */
@@ -326,6 +333,12 @@ dataset_readInd(char *filename)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
 
     /* setup file access template */
@@ -367,7 +380,7 @@ dataset_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    dataset_fill(start, count, stride, data_origin1);
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -375,7 +388,7 @@ dataset_readInd(char *filename)
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     if (ret) nerrors++;
 
     /* read data independently */
@@ -384,7 +397,7 @@ dataset_readInd(char *filename)
     VRFY((ret >= 0), "");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     if (ret) nerrors++;
 
     /* close dataset collectively */
@@ -398,6 +411,10 @@ dataset_readInd(char *filename)
 
     /* close the file collectively */
     H5Fclose(fid);
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
+    if (data_origin1) free(data_origin1);
 }
 
 
@@ -408,9 +425,9 @@ dataset_readInd(char *filename)
 /*
  * Example of using the parallel HDF5 library to create two datasets
  * in one HDF5 file with collective parallel access support.
- * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
- * Each process controls only a slab of size DIM1 x DIM2 within each
- * dataset. [Note: not so yet.  Datasets are of sizes DIM1xDIM2 and
+ * The Datasets are of sizes (number-of-mpi-processes x dim0) x dim1.
+ * Each process controls only a slab of size dim0 x dim1 within each
+ * dataset. [Note: not so yet.  Datasets are of sizes dim0xdim1 and
  * each process controls a hyperslab within.]
  */
 
@@ -425,8 +442,8 @@ dataset_writeAll(char *filename)
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
     hid_t datatype;		/* Datatype ID */
-    hsize_t dims[RANK] = {DIM1,DIM2};	/* dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;	/* data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -443,6 +460,10 @@ dataset_writeAll(char *filename)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* -------------------
      * START AN HDF5 FILE 
@@ -468,6 +489,8 @@ dataset_writeAll(char *filename)
      * and create the dataset
      * ------------------------- */
     /* setup dimensionality object */
+    dims[0] = dim0;
+    dims[1] = dim1;
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -502,11 +525,11 @@ dataset_writeAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill the local slab with some trivial data */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -531,11 +554,11 @@ dataset_writeAll(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* create a file dataspace independently */
@@ -549,11 +572,11 @@ dataset_writeAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill the local slab with some trivial data */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -586,14 +609,17 @@ dataset_writeAll(char *filename)
 
     /* close the file collectively */					    
     H5Fclose(fid);							    
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
 }
 
 /*
  * Example of using the parallel HDF5 library to read two datasets
  * in one HDF5 file with collective parallel access support.
- * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
- * Each process controls only a slab of size DIM1 x DIM2 within each
- * dataset. [Note: not so yet.  Datasets are of sizes DIM1xDIM2 and
+ * The Datasets are of sizes (number-of-mpi-processes x dim0) x dim1.
+ * Each process controls only a slab of size dim0 x dim1 within each
+ * dataset. [Note: not so yet.  Datasets are of sizes dim0xdim1 and
  * each process controls a hyperslab within.]
  */
 
@@ -607,9 +633,8 @@ dataset_readAll(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
-    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+    DATATYPE *data_array1 = NULL;	/* data buffer */
+    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -626,6 +651,12 @@ dataset_readAll(char *filename)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     /* -------------------
      * OPEN AN HDF5 FILE 
@@ -675,11 +706,11 @@ dataset_readAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    dataset_fill(start, count, stride, data_origin1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_origin1[0][0]);
+	dataset_print(start, count, stride, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -694,7 +725,7 @@ dataset_readAll(char *filename)
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     if (ret) nerrors++;
 
     /* release all temporary handles. */
@@ -718,11 +749,11 @@ dataset_readAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    dataset_fill(start, count, stride, data_origin1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_origin1[0][0]);
+	dataset_print(start, count, stride, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -737,7 +768,7 @@ dataset_readAll(char *filename)
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     if (ret) nerrors++;
 
     /* release all temporary handles. */
@@ -756,6 +787,10 @@ dataset_readAll(char *filename)
 
     /* close the file collectively */					    
     H5Fclose(fid);							    
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
+    if (data_origin1) free(data_origin1);
 }
 
 
@@ -766,8 +801,8 @@ dataset_readAll(char *filename)
 /*
  * Example of using the parallel HDF5 library to create two extendible
  * datasets in one HDF5 file with independent parallel MPIO access support.
- * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
- * Each process controls only a slab of size DIM1 x DIM2 within each
+ * The Datasets are of sizes (number-of-mpi-processes x dim0) x dim1.
+ * Each process controls only a slab of size dim0 x dim1 within each
  * dataset.
  */
 
@@ -780,12 +815,11 @@ extend_writeInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[RANK] = {DIM1,DIM2};		/* dataset initial dim sizes */
+    hsize_t dims[RANK];   	/* dataset dim sizes */
     hsize_t max_dims[RANK] =
 		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
-    hsize_t	dimslocal1[RANK] = {DIM1,DIM2};	/* local dataset dim sizes */
-    DATATYPE	data_array1[DIM1][DIM2];	/* data buffer */
-    hsize_t	chunk_dims[RANK] = {7, 13};	/* chunk sizes */
+    DATATYPE	*data_array1 = NULL;		/* data buffer */
+    hsize_t	chunk_dims[RANK];		/* chunk sizes */
     hid_t	dataset_pl;			/* dataset create prop. list */
 
     hssize_t	start[RANK];	/* for hyperslab setting */
@@ -806,6 +840,14 @@ extend_writeInd(char *filename)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* setup chunk-size. Make sure sizes are > 0 */
+    chunk_dims[0] = (dim0+9)/10;
+    chunk_dims[1] = (dim1+9)/10;
+
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* -------------------
      * START AN HDF5 FILE 
@@ -832,7 +874,7 @@ extend_writeInd(char *filename)
 
     /* set up dataset storage chunk sizes and creation property list */
     if (verbose)
-	printf("chunks[]=%d,%d\n", chunk_dims[0], chunk_dims[1]);
+	printf("chunks[]=%lu,%lu\n", chunk_dims[0], chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
@@ -864,11 +906,11 @@ extend_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -876,8 +918,8 @@ extend_writeInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* Extend its current dim sizes before writing */
-    dims[0] = DIM1;
-    dims[1] = DIM2;
+    dims[0] = dim0;
+    dims[1] = dim1;
     ret = H5Dextend (dataset1, dims);
     VRFY((ret >= 0), "H5Dextend succeeded");
 
@@ -904,11 +946,11 @@ extend_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, &data_array1[0][0]);
+    dataset_fill(start, count, stride, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -941,8 +983,8 @@ extend_writeInd(char *filename)
 #endif
 
     /* Extend dataset2 and try again.  Should succeed. */
-    dims[0] = DIM1;
-    dims[1] = DIM2;
+    dims[0] = dim0;
+    dims[1] = dim1;
     ret = H5Dextend (dataset2, dims);
     VRFY((ret >= 0), "H5Dextend succeeded");
 
@@ -972,6 +1014,9 @@ extend_writeInd(char *filename)
 
     /* close the file collectively */					    
     H5Fclose(fid);							    
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
 }
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
@@ -984,10 +1029,10 @@ extend_readInd(char *filename)
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
-    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
-    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
-    DATATYPE data_array2[DIM1][DIM2];	/* data buffer */
-    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    DATATYPE *data_array1 = NULL;	/* data buffer */
+    DATATYPE *data_array2 = NULL;	/* data buffer */
+    DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -1006,6 +1051,13 @@ extend_readInd(char *filename)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
+    /* allocate memory for data buffer */
+    data_array1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
+    data_array2 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_array2 != NULL), "data_array2 malloc succeeded");
+    data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
+    VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     /* -------------------
      * OPEN AN HDF5 FILE 
@@ -1066,10 +1118,10 @@ extend_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    dataset_fill(start, count, stride, data_origin1);
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* read data independently */
@@ -1078,7 +1130,7 @@ extend_readInd(char *filename)
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     VRFY((ret == 0), "dataset1 read verified correct");
     if (ret) nerrors++;
 
@@ -1101,10 +1153,10 @@ extend_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    dataset_fill(start, count, stride, data_origin1);
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, &data_array1[0][0]);
+	dataset_print(start, count, stride, data_array1);
     }
 
     /* read data independently */
@@ -1113,7 +1165,7 @@ extend_readInd(char *filename)
     VRFY((ret >= 0), "H5Dread succeeded");
 
     /* verify the read data with original expected data */
-    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    ret = dataset_vrfy(start, count, stride, data_array1, data_origin1);
     VRFY((ret == 0), "dataset2 read verified correct");
     if (ret) nerrors++;
 
@@ -1129,4 +1181,9 @@ extend_readInd(char *filename)
 
     /* close the file collectively */
     H5Fclose(fid);
+
+    /* release data buffers */
+    if (data_array1) free(data_array1);
+    if (data_array2) free(data_array2);
+    if (data_origin1) free(data_origin1);
 }

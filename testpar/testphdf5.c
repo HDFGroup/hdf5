@@ -7,6 +7,8 @@
 #include <testphdf5.h>
 
 /* global variables */
+int dim0 = DIM0;
+int dim1 = DIM1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
@@ -81,12 +83,14 @@ void pause_proc(MPI_Comm comm, int argc, char **argv)
 void
 usage(void)
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v] [-f <prefix>]\n");
-    printf("\t-f <prefix>\tfilename prefix\n");
+    printf("Usage: testphdf5 [-r] [-w] [-v] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read\n");
     printf("\t-w\t\tno write\n");
     printf("\t-v\t\tverbose on\n");
-    printf("\tdefault do write then read\n");
+    printf("\t-f <prefix>\tfilename prefix\n");
+    printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
+    printf("\tDefault: do write then read with dimensions %dx%d\n",
+	DIM0, DIM1);
     printf("\n");
 }
 
@@ -95,7 +99,13 @@ usage(void)
  * parse the command line options
  */
 int
-parse_options(int argc, char **argv){
+parse_options(int argc, char **argv)
+{
+    int mpi_size, mpi_rank;				/* mpi variables */
+
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
     while (--argc){
 	if (**(++argv) != '-'){
 	    break;
@@ -107,7 +117,7 @@ parse_options(int argc, char **argv){
 			    break;
 		case 'v':   verbose = 1;
 			    break;
-		case 'f':   if (--argc <= 0) {
+		case 'f':   if (--argc < 1) {
 				nerrors++;
 				return(1);
 			    }
@@ -117,11 +127,38 @@ parse_options(int argc, char **argv){
 			    }
 			    fileprefix = *argv;
 			    break;
+		case 'd':   /* dimensizes */
+			    if (--argc < 2){
+				nerrors++;
+				return(1);
+			    }
+			    dim0 = atoi(*(++argv));
+			    argc--;
+			    dim1 = atoi(*(++argv));
+			    break;
+		case 'h':   /* print help message--return with nerrors set */
+			    return(1);
 		default:    nerrors++;
 			    return(1);
 	    }
 	}
     } /*while*/
+
+    /* check validity of dimension sizes */
+    if (dim0 <= 0 || dim1 <= 0){
+	printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+	nerrors++;
+	return(1);
+    }
+
+    /* Make sure datasets can be divided into equal portions by the processes */
+    if ((dim0 % mpi_size) || (dim1 % mpi_size)){
+	if (MAINPROCESS)
+	    printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
+		    dim0, dim1, mpi_size);
+	nerrors++;
+	return(1);
+    }
 
     /* compose the filenames if file prefix is defined */
     if (fileprefix != NULL) {
@@ -161,21 +198,13 @@ main(int argc, char **argv)
 	printf("===================================\n");
     }
 
-    /* Make sure datasets can be divided into equal chunks by the processes */
-    if ((DIM1 % mpi_size) || (DIM2 % mpi_size)){
-	if (MAINPROCESS)
-	    printf("DIM1(%d) and DIM2(%d) must be multiples of processes(%d)\n",
-		    DIM1, DIM2, mpi_size);
-	nerrors++;
-	goto finish;
-    }
-
 #ifdef USE_PAUSE
     pause_proc(MPI_COMM_WORLD, argc, argv);
 #endif
 
     if (parse_options(argc, argv) != 0){
-	usage();
+	if (MAINPROCESS)
+	    usage();
 	goto finish;
     }
 

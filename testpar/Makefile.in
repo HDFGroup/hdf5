@@ -28,7 +28,7 @@ DISTCLEAN=go
 # Test source files
 TEST_SRC=testphdf5.c t_dset.c t_file.c t_mpi.c
 TEST_OBJ=$(TEST_SRC:.c=.lo)
-PRIVATE_HDR=testphdf5.h
+TEST_HDR=testphdf5.h
 
 # How to build the tests... They all depend on the hdf5 library
 $(TEST_PROGS): ../src/libhdf5.la
@@ -36,4 +36,5 @@ $(TEST_PROGS): ../src/libhdf5.la
 testphdf5: $(TEST_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJ) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
+$(TEST_OBJ): $(TEST_HDR)
 @CONCLUDE@
