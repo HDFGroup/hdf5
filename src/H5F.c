@@ -1859,7 +1859,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
 	if (tent_flags == flags)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
-        H5E_clear(H5E_get_my_stack());
+        H5E_clear(NULL);
 	tent_flags = flags;
 	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
@@ -4159,43 +4159,6 @@ H5F_addr_decode(H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
     }
     if (all_zero)
         *addr_p = HADDR_UNDEF;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_pack
- *
- * Purpose:	Converts a long[2] array (usually returned from
- *		H5G_get_objinfo) back into a haddr_t
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, October  23, 1998
- *
- * Modifications:
- *		Albert Cheng, 1999-02-18
- *		Changed objno to unsigned long type to be consistent with
- *      	addr->offset and how it is being called.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
-	      const unsigned long objno[2])
-{
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_addr_pack);
-
-    assert(f);
-    assert(objno);
-    assert(addr_p);
-
-    *addr_p = objno[0];
-#if H5_SIZEOF_LONG<H5_SIZEOF_UINT64_T
-    *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
-#endif
-    
-    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
