@@ -44,6 +44,9 @@ static herr_t H5S_hyper_free_span (H5S_hyper_span_t *span);
 static H5S_hyper_span_info_t *H5S_hyper_copy_span (H5S_hyper_span_info_t *spans);
 static herr_t H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value);
 static herr_t H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size);
+static herr_t H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
+    const hssize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
+static herr_t H5S_hyper_generate_spans(H5S_t *space);
 /* Needed for use in hyperslab code (H5Shyper.c) */
 #ifdef NEW_HYPERSLAB_API
 static herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
@@ -190,7 +193,6 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
     /* Check args */
     assert(space && H5S_SEL_HYPERSLABS==space->select.type);
     assert(iter);
-    assert(space->select.sel_info.hslab.span_lst);
 
     /* Initialize the number of points to iterate over */
     iter->elmt_left=space->select.num_elem;
@@ -312,6 +314,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
     } /* end if */
     else {
 /* Initialize the information needed for non-regular hyperslab I/O */
+        assert(space->select.sel_info.hslab.span_lst);
         /* Make a copy of the span tree to iterate over */
         iter->u.hyp.spans=H5S_hyper_copy_span(space->select.sel_info.hslab.span_lst);
 
@@ -3736,7 +3739,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t 
-H5S_hyper_intersect_block (const H5S_t *space, hssize_t *start, hssize_t *end)
+H5S_hyper_intersect_block (H5S_t *space, hssize_t *start, hssize_t *end)
 {
     htri_t ret_value=FAIL;      /* Return value */
 
@@ -3754,7 +3757,8 @@ H5S_hyper_intersect_block (const H5S_t *space, hssize_t *start, hssize_t *end)
 
     /* Check that the space selections both have span trees */
     if(space->select.sel_info.hslab.span_lst==NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+        if(H5S_hyper_generate_spans(space)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
 
     /* Perform the span-by-span intersection check */
     if((ret_value=H5S_hyper_intersect_block_helper(space->select.sel_info.hslab.span_lst,space->select.offset,start,end))<0)
@@ -5305,6 +5309,56 @@ H5S_hyper_rebuild (H5S_t *space)
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_rebuild() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_generate_spans
+ PURPOSE
+    Create span tree for a regular hyperslab selection
+ USAGE
+    herr_t H5S_hyper_generate_spans(space)
+        H5S_t *space;           IN/OUT: Pointer to dataspace
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Create a span tree representation of a regular hyperslab selection and
+    add it to the information for the hyperslab selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_generate_spans(H5S_t *space)
+{
+    hssize_t tmp_start[H5O_LAYOUT_NDIMS];   /* Temporary start information */
+    hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
+    hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
+    hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+    unsigned u;                             /* Counter */
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_generate_spans);
+
+    assert(space);
+    assert(space->select.type==H5S_SEL_HYPERSLABS);
+
+    /* Get the diminfo */
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        tmp_start[u]=space->select.sel_info.hslab.opt_diminfo[u].start;
+        tmp_stride[u]=space->select.sel_info.hslab.opt_diminfo[u].stride;
+        tmp_count[u]=space->select.sel_info.hslab.opt_diminfo[u].count;
+        tmp_block[u]=space->select.sel_info.hslab.opt_diminfo[u].block;
+    } /* end for */
+
+    /* Build the hyperslab information also */
+    if(H5S_generate_hyperslab (space, H5S_SELECT_SET, tmp_start, tmp_stride, tmp_count, tmp_block)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_generate_spans() */
+
 #ifndef NEW_HYPERSLAB_API
 
 /*-------------------------------------------------------------------------
@@ -5707,6 +5761,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Save the diminfo */
+        space->select.num_elem=1;
         for(u=0; u<space->extent.u.simple.rank; u++) {
             space->select.sel_info.hslab.app_diminfo[u].start = start[u];
             space->select.sel_info.hslab.app_diminfo[u].stride = stride[u];
@@ -5717,18 +5772,23 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             space->select.sel_info.hslab.opt_diminfo[u].stride = opt_stride[u];
             space->select.sel_info.hslab.opt_diminfo[u].count = opt_count[u];
             space->select.sel_info.hslab.opt_diminfo[u].block = opt_block[u];
+            space->select.num_elem*=(opt_count[u]*opt_block[u]);
         } /* end for */
 
         /* Indicate that the dimension information is valid */
         space->select.sel_info.hslab.diminfo_valid=TRUE;
 
-        /* Build the hyperslab information also */
-        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, opt_stride, opt_count, opt_block)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
+        /* Indicate that there's no slab information */
+        space->select.sel_info.hslab.span_lst=NULL;
     } /* end if */
     else if(op>=H5S_SELECT_OR && op<=H5S_SELECT_NOTA) {
         /* Sanity check */
         assert(space->select.type==H5S_SEL_HYPERSLABS);
+
+        /* Check if there's no hyperslab span information currently */
+        if(space->select.sel_info.hslab.span_lst==NULL)
+            if(H5S_hyper_generate_spans(space)<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
 
         /* Indicate that the regular dimensions are no longer valid */
         space->select.sel_info.hslab.diminfo_valid=FALSE;
@@ -6024,22 +6084,6 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
         } /* end else */
     } /* end else */
 
-    /* Set selection type */
-    result->select.type=H5S_SEL_HYPERSLABS;
-
-    /* Set selection methods */
-    result->select.get_seq_list=H5S_hyper_get_seq_list;
-    result->select.get_npoints=H5S_hyper_npoints;
-    result->select.release=H5S_hyper_release;
-    result->select.is_valid=H5S_hyper_is_valid;
-    result->select.serial_size=H5S_hyper_serial_size;
-    result->select.serialize=H5S_hyper_serialize;
-    result->select.bounds=H5S_hyper_bounds;
-    result->select.is_contiguous=H5S_hyper_is_contiguous;
-    result->select.is_single=H5S_hyper_is_single;
-    result->select.is_regular=H5S_hyper_is_regular;
-    result->select.iter_init=H5S_hyper_iter_init;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_operate_hyperslab() */
@@ -6278,11 +6322,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         if((*space->select.release)(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
-        /* Build the hyperslab information also */
-        if(H5S_generate_hyperslab (space, H5S_SELECT_SET, start, opt_stride, opt_count, opt_block)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
-
         /* Save the diminfo */
+        space->select.num_elem=1;
         for(u=0; u<space->extent.u.simple.rank; u++) {
             space->select.sel_info.hslab.app_diminfo[u].start = start[u];
             space->select.sel_info.hslab.app_diminfo[u].stride = stride[u];
@@ -6293,6 +6334,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             space->select.sel_info.hslab.opt_diminfo[u].stride = opt_stride[u];
             space->select.sel_info.hslab.opt_diminfo[u].count = opt_count[u];
             space->select.sel_info.hslab.opt_diminfo[u].block = opt_block[u];
+
+            space->select.num_elem*=(opt_count[u]*opt_block[u]);
         } /* end for */
 
         /* Indicate that the dimension information is valid */
@@ -6301,6 +6344,11 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     else if(op>=H5S_SELECT_OR && op<=H5S_SELECT_NOTA) {
         /* Sanity check */
         assert(space->select.type==H5S_SEL_HYPERSLABS);
+
+        /* Check if there's no hyperslab span information currently */
+        if(space->select.sel_info.hslab.span_lst==NULL)
+            if(H5S_hyper_generate_spans(space)<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
 
         /* Add in the new hyperslab information */
         if(H5S_generate_hyperslab (space, op, start, opt_stride, opt_count, opt_block)<0)
@@ -6311,6 +6359,22 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+
+    /* Set selection type */
+    space->select.type=H5S_SEL_HYPERSLABS;
+
+    /* Set selection methods */
+    space->select.get_seq_list=H5S_hyper_get_seq_list;
+    space->select.get_npoints=H5S_hyper_npoints;
+    space->select.release=H5S_hyper_release;
+    space->select.is_valid=H5S_hyper_is_valid;
+    space->select.serial_size=H5S_hyper_serial_size;
+    space->select.serialize=H5S_hyper_serialize;
+    space->select.bounds=H5S_hyper_bounds;
+    space->select.is_contiguous=H5S_hyper_is_contiguous;
+    space->select.is_single=H5S_hyper_is_single;
+    space->select.is_regular=H5S_hyper_is_regular;
+    space->select.iter_init=H5S_hyper_iter_init;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -6432,7 +6496,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     /* Copy the first dataspace */
-    if (NULL==(new_space=H5S_copy (space)))
+    if (NULL==(new_space=H5S_copy (space, TRUE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy data space");
 
     /* Go modify the selection in the new dataspace */
@@ -6479,8 +6543,16 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     assert(space2);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     
+    /* Check that the space selections both have span trees */
+    if(space1->select.sel_info.hslab.span_lst==NULL)
+        if(H5S_hyper_generate_spans(space1)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+    if(space2->select.sel_info.hslab.span_lst==NULL)
+        if(H5S_hyper_generate_spans(space2)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+
     /* Copy the first dataspace */
-    if (NULL==(new_space=H5S_copy (space1)))
+    if (NULL==(new_space=H5S_copy (space1, TRUE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy data space");
 
     /* Free the current selection for the new dataspace */
@@ -6595,6 +6667,14 @@ H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     assert(space2);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     
+    /* Check that the space selections both have span trees */
+    if(space1->select.sel_info.hslab.span_lst==NULL)
+        if(H5S_hyper_generate_spans(space1)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+    if(space2->select.sel_info.hslab.span_lst==NULL)
+        if(H5S_hyper_generate_spans(space2)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+
     /* Take ownership of the dataspace's hyperslab spans */
     /* (These are freed later) */
     tmp_spans=space1->select.sel_info.hslab.span_lst;

@@ -110,7 +110,7 @@ static herr_t H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
 static void H5D_free_chunk_info(void *chunk_info);
-static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
+static herr_t H5D_create_chunk_file_map_hyper(fm_map *fm);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, hsize_t ndims,
     hssize_t *coords, void *fm);
@@ -2646,7 +2646,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_create_chunk_file_map_hyper(const fm_map *fm)
+H5D_create_chunk_file_map_hyper(fm_map *fm)
 {
     hssize_t    sel_points;                 /* Number of elements in file selection */
     hssize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
