@@ -40,7 +40,7 @@ static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
 static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
-static int H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
+static H5G_obj_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -337,7 +337,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
     H5T_t *datatype;            /* Pointer to datatype to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    int oid_type;              /* type of object being dereferenced */
+    H5G_obj_t oid_type;         /* type of object being dereferenced */
     hid_t ret_value;
 
     FUNC_ENTER_NOINIT(H5R_dereference);
@@ -647,13 +647,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int
+static H5G_obj_t
 H5R_get_object_type(H5F_t *file, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
     uint8_t *p;                 /* Pointer to OID to store */
-    int ret_value;
+    H5G_obj_t ret_value;
 
     FUNC_ENTER_NOINIT(H5R_get_object_type);
 
@@ -752,12 +752,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int
+static H5G_obj_t
 H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    int ret_value;
+    H5G_obj_t ret_value;
 
     FUNC_ENTER_NOINIT(H5R_get_obj_type);
 

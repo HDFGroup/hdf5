@@ -126,7 +126,7 @@ typedef struct H5G_bt_ud3_t {
     hsize_t      idx;           /*index of group member to be querried       */
     char         *name;         /*member name to be returned                 */
     hsize_t      num_objs;      /*the number of objects having been traversed*/
-    int          type;          /*member type to be returned                 */
+    H5G_obj_t    type;          /*member type to be returned                 */
 } H5G_bt_ud3_t;
 
 /*
