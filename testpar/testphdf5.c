@@ -200,13 +200,18 @@ main(int argc, char **argv)
 	MPI_BANNER("testing dataset using split communicators...");
 	test_split_comm_access(filenames);
 
+#ifdef MPIOTEST
+	MPI_BANNER("testing MPIO independent overlapping writes...");
+	test_mpio_overlap_writes(filenames);
+#endif
+
 	MPI_BANNER("testing dataset independent write...");
 	dataset_writeInd(filenames[0]);
 
 	MPI_BANNER("testing dataset collective write...");
 	dataset_writeAll(filenames[1]);
 
-	MPI_BANNER("testing extendable dataset independent write...");
+	MPI_BANNER("testing extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
     }
     if (doread){
@@ -216,7 +221,7 @@ main(int argc, char **argv)
 	MPI_BANNER("testing dataset collective read...");
 	dataset_readAll(filenames[1]);
 
-	MPI_BANNER("testing extendable dataset independent read...");
+	MPI_BANNER("testing extendible dataset independent read...");
 	extend_readInd(filenames[2]);
     }
 
