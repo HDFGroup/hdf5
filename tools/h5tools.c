@@ -2202,6 +2202,7 @@ static void display_string
 			 switch (H5Tget_class(memb)) {
 			 case H5T_INTEGER:
 				 indentation(indent+COL);
+				 indent += 2;
 				 if (nelmts > 1) {
 					 printf("[ ");
 				 }
@@ -2210,10 +2211,12 @@ static void display_string
 				 if (nelmts > 1) {
 					 printf(" ]");
 				 }
+				 indent -= 2;
                  break;
 				 
 			 case H5T_FLOAT:
 				 indentation(indent+COL);
+				 indent += 2;
 				 if (nelmts > 1) {
 					 printf("[ ");
 				 }                
@@ -2222,6 +2225,7 @@ static void display_string
 				 if (nelmts > 1) {
 					 printf(" ]");
 				 }
+				 indent -= 2;
                  break;
 				 
 			 case H5T_TIME:
@@ -2230,10 +2234,17 @@ static void display_string
 				 
 			 case H5T_STRING:
 				 indentation(indent+COL);
-                 display_string
+				 indent += 2;				 
+				 if (nelmts > 1) {
+					 printf("[ ");
+				 }                               
+				 display_string
 					 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0 ) ;
-	
-                 break;
+				 if (nelmts > 1) {
+					 printf(" ]");
+				 }	
+				 indent -= 2;                 
+				 break;
 				 
 			 case H5T_BITFIELD:
 
@@ -2250,8 +2261,8 @@ static void display_string
 				 
 			 }
 
-			 if ( j == nmembs-1) printf(" \n");
-			 else printf(" ,\n");
+			 if ( j == nmembs-1) printf("\n");
+			 else printf(",\n");
 
 			 H5Tclose(memb);
 		 }
