@@ -269,29 +269,15 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         UINT32DECODE(newbuf,stored_nalloc);
         H5_ASSIGN_OVERFLOW(nalloc,stored_nalloc,uint32_t,size_t);
         
-        /* Check for uncompressed buffer */
-        if(nalloc==0) {
-            /* Set the correct number of bytes to allocate */
-            nalloc=nbytes-4;
+        /* Allocate space for the uncompressed buffer */
+        if(NULL==(outbuf = H5MM_malloc(nalloc)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
 
-            /* Allocate space for the uncompressed buffer */
-            if(NULL==(outbuf = H5MM_malloc(nalloc)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
-
-            /* Copy over the uncompressed data */
-            HDmemcpy((void*)outbuf, (void*)newbuf, nalloc);
-        } /* end if */
-        else {
-            /* Allocate space for the uncompressed buffer */
-            if(NULL==(outbuf = H5MM_malloc(nalloc)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
-
-            /* Decompress the buffer */
-            size_out=nalloc;
-            if(SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes-4, &sz_param) != SZ_OK)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
-            assert(size_out==nalloc);
-        } /* end else */
+        /* Decompress the buffer */
+        size_out=nalloc;
+        if(SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes-4, &sz_param) != SZ_OK)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
+        assert(size_out==nalloc);
 
         /* Free the input buffer */
         H5MM_xfree(*buf);
@@ -306,18 +292,19 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     else {
         unsigned char *dst = NULL;    /* Temporary pointer to new output buffer */
 
-        /* Allocate space for the compressed buffer (assume it won't get bigger) */
+        /* Allocate space for the compressed buffer & header (assume data won't get bigger) */
         if(NULL==(dst=outbuf = H5MM_malloc(nbytes+4)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer");
-
-        /* Compress the buffer */
-        size_out = nbytes;
-        if(SZ_OK!= SZ_BufftoBuffCompress(outbuf+4, &size_out, *buf, nbytes, &sz_param))
-	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "overflow");
 
         /* Encode the uncompressed length */
         H5_CHECK_OVERFLOW(nbytes,size_t,uint32_t);
         UINT32ENCODE(dst,nbytes);
+
+        /* Compress the buffer */
+        size_out = nbytes;
+        if(SZ_OK!= SZ_BufftoBuffCompress(dst, &size_out, *buf, nbytes, &sz_param))
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "overflow");
+        assert(size_out<=nbytes);
 
         /* Free the input buffer */
         H5MM_xfree(*buf);
