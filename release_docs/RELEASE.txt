@@ -195,7 +195,7 @@ Platforms Tested
     OSF1 V5.1                     Compaq C V6.5-303 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-040  
-				  MPI_64bit_R13
+				  MPIX200_64_r13.4
     SunOS 5.7(32 and 64 bit)      WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
