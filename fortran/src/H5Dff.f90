@@ -2,7 +2,7 @@
 ! This file contains Fortran90 interfaces for H5D functions.
 ! 
       MODULE H5D
-        USE H5GLOBAL
+!        USE H5GLOBAL
         USE H5R
 
           INTERFACE h5dwrite_f
