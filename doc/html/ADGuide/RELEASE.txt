@@ -1,4 +1,4 @@
-HDF5 version 1.5.28 released on Tue May 28 09:05:50 CDT 2002
+HDF5 version 1.5.29 released on Sat Jun  1 23:08:45 CDT 2002
 ================================================================================
 
 
@@ -30,12 +30,14 @@ CONTENTS
 - Platforms Tested
 - Known Problems
 
-Bug Fixes since HDF5-1.4.2
+Bug Fixes since HDF5-1.4.0
 ==========================
 
 Library
 -------
 
+    * Fixed bug where an object's header could get corrupted in certain obscure
+      situations where many objects were created in the file.  QAK - 2002/05/31
     * Fixed bug where read/write intent in file IDs created with H5Freopen
       was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where selection offsets were not being used when iterating
