@@ -1584,7 +1584,7 @@ herr_t H5DSiterate_scales(hid_t did,
                           H5DS_iterate_t visitor, 
                           void *visitor_data )
 {
- hid_t        scale_id=0;
+ hid_t        scale_id;
  int          rank;
  hobj_ref_t   ref;          /* reference to the DS */
  hid_t        sid;          /* space ID */
@@ -1664,16 +1664,32 @@ herr_t H5DSiterate_scales(hid_t did,
     /* get the reference */
     ref = ((hobj_ref_t *)buf[dim].p)[ i ];
 
-    /* get the DS id */
-    if ((scale_id = H5Rdereference(did,H5R_OBJECT,&ref))<0)
-     goto out;
-    
+    /* disable error reporting, the ID might refer to a deleted dataset */
+    H5E_BEGIN_TRY {
+     /* get the DS id */
+     if ((scale_id = H5Rdereference(did,H5R_OBJECT,&ref))<0)
+      goto out;
+    } H5E_END_TRY;
+        
     if((ret_value=(visitor)(did,dim,scale_id,visitor_data))!=0)
     {
      /* set the return IDX OUT value at current scale index and break */
-     if (idx!=NULL) *idx = i;
+     if (idx!=NULL) 
+     {
+      *idx = i;
+     }
+     
+     /* close the DS id */
+     if (H5Dclose(scale_id)<0)
+      goto out;
+
      break;
     }
+
+    /* close the DS id */
+    if (H5Dclose(scale_id)<0)
+     goto out;
+
    } /* i */
   } /* if */
   
@@ -1686,8 +1702,6 @@ herr_t H5DSiterate_scales(hid_t did,
    goto out;
   if (H5Aclose(aid)<0)
    goto out;
-  if (scale_id && H5Dclose(scale_id)<0)
-   goto out;
   if (buf)
    free(buf);
     
@@ -1696,6 +1710,14 @@ herr_t H5DSiterate_scales(hid_t did,
  return ret_value;
       
 out:
+ H5E_BEGIN_TRY {
+  H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+  H5Sclose(sid);
+  H5Aclose(aid);
+  H5Tclose(tid);
+ } H5E_END_TRY;
+ if (buf)
+  free(buf);
  return FAIL;
 } 
 

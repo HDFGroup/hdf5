@@ -65,7 +65,6 @@ static int test_iterators(void);
 
 
 
-
 /*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
@@ -2383,9 +2382,33 @@ static int test_iterators(void)
  if (H5Gclose(gid)<0)
   goto out;
 
+ PASSED();
 
+
+/*-------------------------------------------------------------------------
+ * iterate in deleted scales
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("iterate in deleted scales ");
+
+ if (H5Gunlink(fid,"ds_0")<0)
+  goto out;
+
+ /* open the previously written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+ 
+ /* iterate  */
+ if (H5DSiterate_scales(did,0,NULL,op_bogus,NULL)==SUCCESS)
+  goto out;
+ 
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
 
  PASSED();
+
 
  /* close */
  if (H5Fclose(fid)<0)
@@ -2402,5 +2425,4 @@ out:
  H5_FAILED();
  return FAIL;
 }
-
 
