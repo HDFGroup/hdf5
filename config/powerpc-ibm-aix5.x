@@ -149,3 +149,10 @@ fi
 
 # Use AIX supplied C++ compiler by default.
 CXX=${CXX=xlC}
+# IBM MPI-IO implementation has a bug, 
+#it cannot generate correct MPI derived datatype.
+hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+
+
+
+
