@@ -73,6 +73,21 @@ New Features
       with any other compression method will be converted into an HDF5 file in 
       gzip compression. 
     * correct the order or reading HDF4 image array in H4->H5 conversion.  
+    * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
+      filesystem or the MPI-IO can really handle greater than 2GB files.
+      If it fails, it prints information message only without failing the
+      test.
+    * Added a parallel HDF5 example examples/ph5example.c to illustrate
+      the basic way of using parallel HDF5.
+    * Added a new public macro, H5_VERS_INFO, which is a string holding
+      the HDF5 library version information.  This string is also compiled
+      into all HDF5 binary code which helps to identify the version information
+      of the binary code.  One may use the Unix strings command on the binary
+      file and looks for the pattern "HDF5 library version".
+    * Added new checking in H5check_version() to verify the five HDF5 version
+      information macros (H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+      H5_VERS_SUBRELEASE and H5_VERS_INFO) are consistent.
+      
          
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
@@ -99,6 +114,14 @@ Bug Fixes since HDF5-1.4.1 Release
     * Fixed various bugs releated to SDS dimensional scale conversions in H4->H5 
       converter.
     * Fixed a bug to correctly convert HDF4 objects with fill value into HDF5.
+    * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
+      more than once.  hdf5.h now includes H5public.h which includes
+      H5pubconf.h.  Applications should #include hdf5.h which handles multiple
+      inclusion correctly.
+    * Fixed H5FDmpio.h to be C++ friendly by making Parallel HDF5 API's to be
+      external to C++.
+    * Fixed a bug in H5FD_mpio_flush() that might result in negative file seek
+      if both MPIO and Split-file drivers are used together.
 
 
 
@@ -281,4 +304,9 @@ Known Problems
 
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
+
+    * The HDF5_MPI_OPT_TYPES optimization code in the parallel HDF5 will cause
+      a hang in some cases when chunked storage is used.  This is now set to
+      be off by default.  One may turn it on by setting environment variable
+      HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
 
