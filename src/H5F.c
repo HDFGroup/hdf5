@@ -2487,7 +2487,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
 
     if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
         TRUE != H5Pisa_class(plist_id, H5P_MOUNT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
 
     /*
      * Check that the child isn't mounted, that the mount point exists, and
@@ -2942,7 +2942,7 @@ H5F_sizeof_addr(const H5F_t *f)
     FUNC_ENTER(H5F_sizeof_addr, 0);
     assert(f);
     if(H5P_get(f->shared->fcpl_id, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
                       "can't get byte number for address");
     FUNC_LEAVE(sizeof_addr);
 }
@@ -2977,7 +2977,7 @@ H5F_sizeof_size(const H5F_t *f)
     assert(f);
 
     if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
                       "can't get byte number for object size");
     FUNC_LEAVE(sizeof_size);
 }
