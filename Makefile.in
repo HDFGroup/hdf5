@@ -19,6 +19,8 @@ SUBDIRS=src test
 # all:		Build libraries, header files, and programs in the various
 #		subdirectories but do not install them.
 #
+# test:		Test the uninstalled library to make sure it works.
+#
 # install:	Installs libraries, header files, programs, and documentation
 #		in the various directories under the prefix directory (lib,
 #		include, bin, man, info).  Use the `--prefix=PATH' option
@@ -55,7 +57,8 @@ SUBDIRS=src test
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-all install uninstall TAGS dep depend:
+.PHONY: test
+all lib progs test install uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
@@ -84,4 +87,6 @@ maintainer-clean:
 
 
 # This file does not end with the `CONCLUDE' statement since it has
-# redefined all the standard targets anyway.
+# redefined all the standard targets anyway.  However, we do need the
+# `DEPEND' so we can automatically rerun configure if we have GNU make.
+@DEPEND@

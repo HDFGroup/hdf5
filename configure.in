@@ -133,4 +133,20 @@ else
    AC_SUBST(SETX) SETX="set -x"
 fi
 
-AC_OUTPUT(config/depend config/commence config/conclude Makefile src/Makefile test/Makefile)
+dnl Where is the root of the source tree.  Give an absolute address so
+dnl we can find it no matter which directory of the distribution is our
+dnl current directory.  The built-in pwd fails on some systems, but the
+dnl /bin/pwd version works OK.
+if test -x /bin/pwd; then
+   pwd=/bin/pwd
+else
+   pwd=pwd
+fi
+AC_SUBST(ROOT) ROOT=`$pwd`
+
+dnl Touch the time-stamp files for src/H5config.h.in and src/H5config.h
+dnl before we generate them or the Makefiles.
+touch ./config/stamp1 ./config/stamp2
+
+AC_OUTPUT(config/depend config/commence config/conclude \
+          Makefile src/Makefile test/Makefile)

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in Id
+# From configure.in Id: configure.in
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.7 
 # Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
@@ -1354,6 +1354,15 @@ else
     SETX="set -x"
 fi
 
+if test -x /bin/pwd; then
+   pwd=/bin/pwd
+else
+   pwd=pwd
+fi
+ ROOT=`$pwd`
+
+touch ./config/stamp1 ./config/stamp2
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -1441,7 +1450,8 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "config/depend config/commence config/conclude Makefile src/Makefile test/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "config/depend config/commence config/conclude \
+          Makefile src/Makefile test/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -1489,12 +1499,14 @@ s%@CONCLUDE@%%g
 /@DEPEND@/r $DEPEND
 s%@DEPEND@%%g
 s%@SETX@%$SETX%g
+s%@ROOT@%$ROOT%g
 
 CEOF
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"config/depend config/commence config/conclude Makefile src/Makefile test/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"config/depend config/commence config/conclude \
+          Makefile src/Makefile test/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
