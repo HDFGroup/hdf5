@@ -257,7 +257,7 @@ of its raw data and write the dataset to the file.
     /* Construct array of OIDs for other datasets in the file */
     /* somewhat hokey and artificial, but demonstrates the point */
     for(i=0; i<10; i++)
-        for(j=0; j<10; i++)
+        for(j=0; j<10; j++)
           {
             sprintf(buf,"/Group/Linked Set %d-%d",i,j);
             if(H5Rcreate(&link,file1,buf,H5R_OBJECT,-1)>0)
@@ -645,7 +645,7 @@ Notes:
 Describes HDF5 Release 1.4.5, February 2003
 </address><!-- #EndLibraryItem -->
  
-Last modified: 3 March 2000
+Last modified: 2 August 2004
  
 </body>
 </html>
