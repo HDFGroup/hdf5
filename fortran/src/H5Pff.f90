@@ -6450,5 +6450,56 @@
 
             hdferr = h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values )
           END SUBROUTINE h5pmodify_filter_f
+!----------------------------------------------------------------------
+! Name:		h5premove_filter_f 
+!
+! Purpose: 	Removes filter from the dataset creation property list. 
+!
+! Inputs:  
+!		prp_id		- data creation property list 
+!				  identifier
+!		filter		- filter to be removed
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        August 23, 2004	
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5premove_filter_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property list
+                                                 ! identifier
+            INTEGER, INTENT(IN) :: filter        ! Filter to be removed
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5premove_filter_c(prp_id, filter)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PREMOVE_FILTER_C'::h5premove_filter_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id 
+              INTEGER, INTENT(IN) :: filter 
+              END FUNCTION h5premove_filter_c
+            END INTERFACE
+
+            hdferr = h5premove_filter_c(prp_id, filter)
+          END SUBROUTINE h5premove_filter_f
+
 
      END MODULE H5P

@@ -3309,3 +3309,32 @@ DONE:
      return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5premove_filter_c
+ * Purpose:     Call H5Premove_filter to remove a filter
+ * Inputs:      prp_id - dataset creation property list identifier 
+ *              filter - filter to be removed
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 24, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5premove_filter_c (hid_t_f *prp_id, int_f* filter)
+{
+     int_f ret_value = -1;
+     hid_t c_prp_id;
+     herr_t ret;
+     H5Z_filter_t c_filter;
+     
+     c_filter = (H5Z_filter_t)*filter;
+     c_prp_id = (hid_t)*prp_id;
+     /*
+      * Call H5Premove_filter function.
+      */
+     if((ret = H5Premove_filter(c_prp_id, c_filter)) < 0) goto DONE;
+     ret_value = 0;
+
+DONE:
+     return ret_value;
+}

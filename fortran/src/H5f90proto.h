@@ -798,6 +798,7 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_fapl_multi_sc          FNAME(H5PSET_FAPL_MULTI_SC)
 #   define nh5pset_szip_c                 FNAME(H5PSET_SZIP_C)
 #   define nh5pall_filters_avail_c        FNAME(H5PALL_FILTERS_AVAIL_C)
+#   define nh5premove_filter_c            FNAME(H5PREMOVE_FILTER_C)
 
 #else
 #   define nh5pcreate_c       FNAME(h5pcreate_c)
@@ -906,6 +907,7 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_fapl_multi_sc          FNAME(h5pset_fapl_multi_sc)
 #   define nh5pset_szip_c                 FNAME(h5pset_szip_c)
 #   define nh5pall_filters_avail_c        FNAME(h5pall_filters_avail_c)
+#   define nh5premove_filter_c            FNAME(h5premove_filter_c)
 
 
 #endif
@@ -1103,6 +1105,7 @@ H5_DLL int_f nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag);
 H5_DLL int_f nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block);
 H5_DLL int_f nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status); 
 H5_DLL int_f nh5pfill_value_defined_c ( hid_t_f *prp_id , int_f *flag);
+H5_DLL int_f nh5premove_filter_c ( hid_t_f *prp_id , int_f *filter);
 
 /*
  * Functions frome H5Rf.c 
@@ -1156,12 +1159,14 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type);
 #  define nh5iinc_ref_c     FNAME(H5IINC_REF_C)
 #  define nh5idec_ref_c     FNAME(H5IDEC_REF_C)
 #  define nh5iget_ref_c     FNAME(H5IGET_REF_C)
+#  define nh5iget_file_id_c FNAME(H5IGET_FILE_ID_C)
 #else
 #  define nh5iget_type_c    FNAME(h5iget_type_c)
 #  define nh5iget_name_c    FNAME(h5iget_name_c)
 #  define nh5iinc_ref_c     FNAME(h5iinc_ref_c)
 #  define nh5idec_ref_c     FNAME(h5idec_ref_c)
 #  define nh5iget_ref_c     FNAME(h5iget_ref_c)
+#  define nh5iget_file_id_c FNAME(h5iget_file_id_c)
 #endif
 #endif
 
@@ -1170,6 +1175,7 @@ H5_DLL int_f nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_
 H5_DLL int_f nh5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count);
 H5_DLL int_f nh5idec_ref_c(hid_t_f *obj_id, int_f *ref_count);
 H5_DLL int_f nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count);
+H5_DLL int_f nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id);
 
 
 #ifndef H5Ef90_FNAMES

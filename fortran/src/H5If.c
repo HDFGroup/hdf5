@@ -176,3 +176,32 @@ nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
 done:
       return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5iget_file_id_c
+ * Purpose:     Call H5Iget_file_id to obtain file identifier from object identifier
+ * Inputs:      obj_id - object identifier 
+ * Outputs:     file_id - file identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 24, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
+{
+     int ret_value;
+     hid_t c_file_id;
+
+     /*
+      * Call H5Iget_file_id
+      */
+     if ((c_file_id = H5Iget_file_id(*obj_id)) < 0)
+         HGOTO_DONE(FAIL);
+
+    /* Set output & return values */
+    *file_id=(hid_t_f)c_file_id;
+    ret_value=0;
+
+done:
+      return ret_value;
+}
