@@ -273,7 +273,6 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
     long_long	aligned;		/*largest integer type, aligned	*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
     size_t      dt_size=sizeof(DT);	/*needed by CI_END macro	*/    \
-    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/    \
     size_t	s_stride, d_stride;	/*src and dst strides		*/    \
     int		direction;		/*1=left-to-right, -1=rt-to-lt	*/    \
 									      \
@@ -389,10 +388,10 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
         cdata->priv = H5MM_xfree(cdata->priv);
 
 /* Increment source alignment counter */
-#   define CI_INC_SRC(s)   if (s) priv->s_aligned += nelmts;
+#   define CI_INC_SRC(s)   if (s) cdata->priv->s_aligned += nelmts;
 
 /* Increment destination alignment counter */
-#   define CI_INC_DST(d)   if (d) priv->d_aligned += nelmts;
+#   define CI_INC_DST(d)   if (d) cdata->priv->d_aligned += nelmts;
 #else
 #   define CI_PRINT_STATS(STYPE,DTYPE) /*void*/
 #   define CI_ALLOC_PRIV cdata->priv=NULL;
@@ -5826,7 +5825,6 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     H5T_t	*st, *dt;		/*type descriptors		*/
     hbool_t	src_mv, dst_mv;		/*align data?			*/
     double	aligned;		/*aligned data			*/
-    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/
     
     FUNC_ENTER (H5T_conv_float_double, FAIL);
 
@@ -5947,7 +5945,6 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     H5T_t	*st, *dt;		/*type descriptors		*/
     hbool_t	src_mv, dst_mv;		/*align data?			*/
     double	aligned;		/*aligned data			*/
-    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/
     
     FUNC_ENTER (H5T_conv_double_float, FAIL);
 

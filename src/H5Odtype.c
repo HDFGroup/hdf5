@@ -201,10 +201,10 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                        "memory allocation failed");
             }
             for (i = 0; i < dt->u.compnd.nmembs; i++) {
-                intn ndims;     /* Number of dimensions of the array field */
+                intn ndims=0;     /* Number of dimensions of the array field */
                 hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
                 int perm[H5O_LAYOUT_NDIMS];     /* Dimension permutations */
-                uintn perm_word;    /* Dimension permutation information */
+                uintn perm_word=0;    /* Dimension permutation information */
                 H5T_t *array_dt;    /* Temporary pointer to the array datatype */
                 H5T_t *temp_type;   /* Temporary pointer to the field's datatype */
 
