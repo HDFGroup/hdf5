@@ -26,14 +26,9 @@
 debug="-g -UH5O_DEBUG -DH5F_OPT_SEEK=0"
 default_mode="-DDOS386 $debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
-MPICH=""
-ROMIO="/usr/community/mpi-io/romio/current"
-
-# new version by Daniel Sands
-# /scratch/acheng/mpich-1.1.2 is a symbolic pointer.
-# It is set to different value in different machines because
-# Daniel Sands' $HOME path is different too.  *sigh*
-ROMIO="/scratch/acheng/mpich-1.1.2"
+# Using the MPICH libary by Daniel Sands.
+# It contains both MPI-1 and MPI-IO functions.
+ROMIO="${HOME}/MPIO/mpich"
 if [ ! -d $ROMIO ]
 then
     echo "ROMIO directory ($ROMIO) not found"
@@ -43,7 +38,7 @@ fi
 mpi1_inc=""
 mpi1_lib=""
 mpio_inc="-I$ROMIO/include"
-mpio_lib="-L$ROMIO/build/tflops/ptls/lib"
+mpio_lib="-L$ROMIO/lib"
 
 
 MPI_INC="$mpi1_inc $mpio_inc"
