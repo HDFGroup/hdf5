@@ -55,7 +55,7 @@ hid_t DataSet::p_getType() const
       return( type_id );
    else
    {
-      throw DataSetIException(NULL, "H5Dget_type failed");
+      throw DataSetIException(0, "H5Dget_type failed");
    }
 }
 
@@ -187,7 +187,7 @@ void DataSet::p_close() const
    herr_t ret_value = H5Dclose( id );
    if( ret_value < 0 )
    {
-      throw DataSetIException(NULL, "H5Dclose failed");
+      throw DataSetIException(0, "H5Dclose failed");
    }
 }
 

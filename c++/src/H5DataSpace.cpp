@@ -326,7 +326,7 @@ void DataSpace::p_close() const
       herr_t ret_value = H5Sclose( space_id );
       if( ret_value < 0 )
       {
-         throw DataSpaceIException(NULL, "H5Sclose failed");
+         throw DataSpaceIException(0, "H5Sclose failed");
       }
    }
 }

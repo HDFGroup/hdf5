@@ -61,7 +61,7 @@ void Group::p_close() const
    herr_t ret_value = H5Gclose( id );
    if( ret_value < 0 )
    {
-      throw GroupIException(NULL, "H5Gclose failed");
+      throw GroupIException(0, "H5Gclose failed");
    }
 }
 

@@ -15,7 +15,7 @@ class __DLLCPP__ Exception {
 
 	// Creates an exception with a function name where the failure occurs
 	// and an optional detailed message
-	Exception( const string& func_name, const string& message = NULL);
+	Exception( const string& func_name, const string& message = 0);
 	Exception( const char* func_name, const char* message = NULL);
 
 	// copy constructor

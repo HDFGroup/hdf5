@@ -104,7 +104,7 @@ void PropList::p_close() const
       herr_t ret_value = H5Pclose( id );
       if( ret_value < 0 )
       {
-         throw PropListIException(NULL, "property list close failed" );
+         throw PropListIException(0, "property list close failed" );
       }
    }
 }

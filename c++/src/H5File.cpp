@@ -155,7 +155,7 @@ void H5File::p_close() const
    herr_t ret_value = H5Fclose( id );
    if( ret_value < 0 )
    {
-      throw FileIException(NULL, "H5Fclose failed");
+      throw FileIException(0, "H5Fclose failed");
    }
 }
 

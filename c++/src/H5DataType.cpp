@@ -322,7 +322,7 @@ void DataType::p_close() const
       herr_t ret_value = H5Tclose( id );
       if( ret_value < 0 )
       {
-         throw DataTypeIException(NULL, "H5Tclose failed");
+         throw DataTypeIException(0, "H5Tclose failed");
       }
    }
 }

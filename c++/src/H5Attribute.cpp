@@ -72,7 +72,7 @@ hid_t Attribute::p_getType() const
       return( type_id );
    else
    {
-      throw AttributeIException(NULL, "H5Aget_type failed");
+      throw AttributeIException(0, "H5Aget_type failed");
    }
 }
 
@@ -111,7 +111,7 @@ void Attribute::p_close() const
    herr_t ret_value = H5Aclose( id );
    if( ret_value < 0 )
    {
-      throw AttributeIException(NULL, "H5Aclose failed");
+      throw AttributeIException(0, "H5Aclose failed");
    }
 }
 
