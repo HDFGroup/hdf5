@@ -175,7 +175,7 @@ TOOLTEST tdset2-1s.ddl -d "/dset1[;3,2;4,4;1,4]" tdset2.h5
 
 # test failure handling
 # Missing file name
-TOOLTEST nofilename.ddl
+TOOLTEST tnofilename.ddl
 
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
