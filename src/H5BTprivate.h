@@ -30,16 +30,40 @@
 #include "H5BTpublic.h"
 
 /* Private headers needed by this file */
+#include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5Fprivate.h"		/* File access				*/
 
 /**************************/
 /* Library Private Macros */
 /**************************/
 
+/* Define return values from operator callback function for H5BT_iterate */
+/* (Actually, any positive value will cause the iterator to stop and pass back
+ *      that positive value to the function that called the iterator)
+ */
+#define H5BT_ITER_ERROR  H5B2_ITER_ERROR
+#define H5BT_ITER_CONT   H5B2_ITER_CONT
+#define H5BT_ITER_STOP   H5B2_ITER_STOP
+
      
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
+/* Info for a single block (stored as record in B-tree) */
+typedef struct H5BT_blk_info_t {
+    haddr_t     addr;           /* Address (offset) of block in file */
+    hsize_t     len;            /* Length of block in file */
+} H5BT_blk_info_t;
+
+/* Define the operator callback function pointer for H5BT_iterate() */
+typedef int (*H5BT_operator_t)(const H5BT_blk_info_t *record, void *op_data);
+
+/* Comparisons for H5BT_neighbor() call */
+typedef enum H5BT_compare_t {
+    H5BT_COMPARE_LESS = H5B2_COMPARE_LESS,            /* Records with keys less than query value */
+    H5BT_COMPARE_GREATER = H5B2_COMPARE_GREATER       /* Records with keys greater than query value */
+} H5BT_compare_t;
 
 
 /***************************************/
@@ -54,6 +78,10 @@ H5_DLL herr_t H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     hsize_t *tot_size);
 H5_DLL herr_t H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size,
     haddr_t *locate_addr, hsize_t *locate_size);
+H5_DLL herr_t H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    H5BT_operator_t op, void *op_data);
+H5_DLL herr_t H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    H5BT_compare_t range, haddr_t range_addr, H5BT_blk_info_t *found_block);
 H5_DLL herr_t H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 #endif /* _H5BTprivate_H */

@@ -37,6 +37,35 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
+ * Function:	iter_cb
+ *
+ * Purpose:	Block tracker iterator callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+iter_cb(const H5BT_blk_info_t *record, void *_op_data)
+{
+    haddr_t *addr = (haddr_t *)_op_data;
+
+    if(record->addr != *addr)
+        return(H5B2_ITER_ERROR);
+
+    *addr *= 2;
+    return(H5B2_ITER_CONT);
+} /* end iter_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_create
  *
  * Purpose:	Basic tests for the block tracker code
@@ -1439,7 +1468,7 @@ error:
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
- *              Monday, March 24, 2005
+ *              Thursday, March 24, 2005
  *
  * Modifications:
  *
@@ -1543,6 +1572,181 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_locate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_neighbor
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March 28, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_neighbor(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    H5BT_blk_info_t block;              /* Block located */
+    haddr_t     search_addr;            /* Address of block to search for neighbor of */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert blocks */
+    block.addr = 2048;
+    block.len = 8;
+    for(u = 0; u < 10; u++) {
+        if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, block.addr, block.len)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+
+        /* Increment block address & size for next insertion */
+        block.addr *= 2;
+        block.len *= 2;
+    } /* end for */
+
+    TESTING("attempt to find neighbor of a block");
+
+    search_addr = 4097;
+    if (H5BT_neighbor(f, H5P_DATASET_XFER_DEFAULT, bt_addr, H5BT_COMPARE_LESS, search_addr, &block)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(block.addr != 4096) TEST_ERROR;
+    if(block.len != 16) TEST_ERROR;
+
+    search_addr = 4096;
+    if (H5BT_neighbor(f, H5P_DATASET_XFER_DEFAULT, bt_addr, H5BT_COMPARE_LESS, search_addr, &block)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(block.addr != 2048) TEST_ERROR;
+    if(block.len != 8) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_locate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_iterate
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 25, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_iterate(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    haddr_t     block_addr;             /* Address of block to insert */
+    hsize_t     block_size;             /* Size of block to insert */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert blocks */
+    block_addr = 2048;
+    block_size = 8;
+    for(u = 0; u < 10; u++) {
+        if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, block_addr, block_size)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+
+        /* Increment block address & size for next insertion */
+        block_addr *= 2;
+        block_size *= 2;
+    } /* end for */
+
+    TESTING("iterating over blocks");
+
+    block_addr = 2048;
+    if (H5BT_iterate(f, H5P_DATASET_XFER_DEFAULT, bt_addr, iter_cb, &block_addr)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -1716,8 +1920,12 @@ main(void)
     nerrors += test_remove_whole(fapl);
     nerrors += test_remove_partial_begin(fapl);
 
-    /* Test block tracker locate */
+    /* Test block tracker search functions */
     nerrors += test_locate(fapl);
+    nerrors += test_neighbor(fapl);
+
+    /* Test block tracker iterate */
+    nerrors += test_iterate(fapl);
 
     /* Test block tracker deletion */
     nerrors += test_delete(fapl);

@@ -32,7 +32,6 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 
 /**************************/
@@ -86,12 +85,6 @@ typedef struct H5BT_t {
     hsize_t     tot_block_size; /* Total size of all blocks tracked */
     haddr_t     bt2_addr;       /* Address of v2 B-tree that holds block info */
 } H5BT_t;
-
-/* Info for a single block */
-typedef struct H5BT_blk_info_t {
-    haddr_t     addr;           /* Address (offset) of block in file */
-    hsize_t     len;            /* Length of block in file */
-} H5BT_blk_info_t;
 
 
 /*****************************/

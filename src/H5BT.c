@@ -655,14 +655,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5BT_locate_cb
  *
- * Purpose:	v2 B-tree find callback
+ * Purpose:	Block tracker "locate" callback
  *
  * Return:	Success:	0
  *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
- *              Friday, March 11, 2005
+ *              Friday, March 25, 2005
  *
  * Modifications:
  *
@@ -718,14 +718,14 @@ H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the block tracker header */
-    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_WRITE)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
 
     /* Iterate through blocks, looking for first one that is large enough */
     found.search_size = size;
     found.found.addr = HADDR_UNDEF;
     if (H5B2_iterate(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, H5BT_locate_cb, &found) < 0)
-	HGOTO_ERROR(H5E_BLKTRK, H5E_NOTFOUND, FAIL, "unable to locate block")
+	HGOTO_ERROR(H5E_BLKTRK, H5E_NOTFOUND, FAIL, "unable to iterate over blocks")
 
     /* Update user's information, if block was found */
     if(H5F_addr_defined(found.found.addr)) {
@@ -744,6 +744,140 @@ done:
     
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_locate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_iterate
+ *
+ * Purpose:	Iterate over blocks in tracker, making callback for each
+ *
+ *              If the callback returns non-zero, the iteration breaks out
+ *              without finishing all the records.
+ *
+ * Return:	Value from callback: non-negative on success, negative on error
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 25 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_iterate(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_operator_t op, void *op_data)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    herr_t ret_value;
+
+    FUNC_ENTER_NOAPI(H5BT_iterate, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(op);
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Iterate through blocks, passing along op & op_data */
+    if ((ret_value = H5B2_iterate(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, (H5B2_operator_t)op, op_data)) < 0)
+	HGOTO_ERROR(H5E_BLKTRK, H5E_NOTFOUND, FAIL, "unable to iterate over blocks")
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_neighbor_cb
+ *
+ * Purpose:	Block tracker "neighbor" callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March 28, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5BT_neighbor_cb(const void *_record, void *_op_data)
+{
+    const H5BT_blk_info_t *record = (const H5BT_blk_info_t *)_record;
+    H5BT_blk_info_t *search = (H5BT_blk_info_t *)_op_data;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_neighbor_cb)
+
+    /* Save block information for later */
+    *search = *record;
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5BT_neighbor_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_neighbor
+ *
+ * Purpose:	Locate block that is related to a given address
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 28 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_neighbor(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5BT_compare_t range,
+    haddr_t range_addr, H5BT_blk_info_t *found_block)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    H5BT_blk_info_t find;               /* Information for locating block */
+    H5BT_blk_info_t found;              /* Block info found */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5BT_neighbor, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Iterate through blocks, looking for first one that is large enough */
+    find.addr = range_addr;
+    find.len = 0;
+    found.addr = HADDR_UNDEF;
+    if (H5B2_neighbor(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, (H5B2_compare_t)range,
+            &find, H5BT_neighbor_cb, &found) < 0)
+	HGOTO_ERROR(H5E_BLKTRK, H5E_NOTFOUND, FAIL, "unable to find neighbor for block")
+
+    /* Update user's information, if block was found */
+    if(H5F_addr_defined(found.addr))
+        *found_block = found;
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_neighbor() */
 
 
 /*-------------------------------------------------------------------------
