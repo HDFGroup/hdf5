@@ -152,6 +152,8 @@
 ./examples/h5_group.c
 ./examples/h5_read.c
 ./examples/h5_write.c
+./examples/h5_select.c
+./examples/h5_attribute.c
 ./src/.distdep
 ./src/.indent.pro
 ./src/H5.c

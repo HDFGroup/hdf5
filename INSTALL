@@ -9,7 +9,13 @@ can do the following:
 
 	$ tar xf hdf5-1.0.0a.tar
 	$ cd hdf5-1.0.0a
-	$ make test
+        
+        $ sh configure
+        $ make                  # Builds library and tools
+	$ make test             # Builds and runs confidence tests.
+                                # NOTE: if fails, run the
+                                # command in the test directory
+
 	$ make install		# Optional
 
 Note:
