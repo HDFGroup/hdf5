@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 1997 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 1997-2001 National Center for Supercomputing Applications
+dnl                         All rights reserved.
 
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
@@ -365,13 +365,6 @@ done
 rm maketest
 
 dnl ----------------------------------------------------------------------
-dnl Turn on warning flags for gcc.
-dnl
-if test "X$GCC" = "Xyes"; then
-   CFLAGS="$CFLAGS -ansi -pedantic -Wchar-subscripts -Wall -W -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Production flags?  Save the value in $CONFIG_MODE so we have it for
 dnl the record.
 dnl
@@ -435,6 +428,37 @@ case "$host" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Test for 64bit stuff before the data types and their sizes. The
+dnl result could effect the outcome of the sizeof macros below.
+dnl
+case "$host_cpu-$host_vendor-$host_os" in
+   *linux*)
+      AC_CHECK_FUNCS(getdents64,
+        dnl Add the large file support flags to the CPPFLAGS macro if
+        dnl we're on a Linux system which austensibly supports LFS. (We
+        dnl think it does if it has the ``getdents64'' syscall).
+        CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
+        if test $cc_vers_all -gt 2095000 -a $cc_vers_all -lt 2096000; then
+           dnl For GCC compilers 2.95.x, the -malign-double flag plays
+           dnl havoc with the LFS stuff. Remove it. It apparently works
+           dnl for 2.96, though, so...
+           CFLAGS_saved=$CFLAGS
+           CFLAGS=""
+           for flag in X $CFLAGS_saved; do
+              if test "$flag" != "X" -a "$flag" != "-malign-double"; then
+                 CFLAGS="$CFLAGS $flag"
+              fi
+           done
+        fi)
+      ;;
+esac
+
+AC_TRY_COMPILE([#include <sys/types.h>],
+	       [off64_t n = 0;],
+	       AC_CHECK_FUNCS(lseek64 fseek64),
+	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
+
+dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.
 dnl
 AC_TYPE_OFF_T
@@ -494,6 +518,7 @@ AC_CHECK_SIZEOF(  int_fast64_t, 8)
 AC_CHECK_SIZEOF( uint_fast64_t, 8)
 
 AC_CHECK_SIZEOF(size_t, 4)
+AC_CHECK_SIZEOF(ssize_t, 4)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
@@ -528,7 +553,7 @@ AC_SUBST(H5TOH4) H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4.sh'
 
 AC_SUBST(H4TOH5) H4TOH5=h4toh5
-AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test 
+AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
@@ -1033,14 +1058,9 @@ AC_MSG_RESULT(no))
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(getpwuid gethostname system getrusage fork waitpid)
-AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime snprintf vsnprintf)
-AC_CHECK_FUNCS(compress2 setsysinfo longjmp signal sigaction strdup)
-AC_TRY_COMPILE([#include<sys/types.h>],
-	       [off64_t n = 0;],
-	       AC_CHECK_FUNCS(lseek64 fseek64),
-	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
-
+AC_CHECK_FUNCS(compress2 difftime fork gethostname getpwuid getrusage)
+AC_CHECK_FUNCS(gettimeofday BSDgettimeofday longjmp setsysinfo sigaction)
+AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
 
 dnl ----------------------------------------------------------------------
 dnl Check compiler characteristics
@@ -1554,6 +1574,10 @@ dnl things need to be done.
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
+# Then the config.status file (but not makefiles)
+saved_no_create=$no_create
+no_create=yes
+
 PARALLEL_MAKE=
 
 if test -n "$TESTPARALLEL"; then
@@ -1570,9 +1594,6 @@ if test -n "$H5TOH4"; then
    EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h5toh4/Makefile"
 fi
 
-# Then the config.status file (but not makefiles)
-saved_no_create=$no_create
-no_create=yes
 AC_OUTPUT(src/libhdf5.settings
           config/depend1
           config/depend2

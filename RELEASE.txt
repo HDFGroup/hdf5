@@ -37,9 +37,13 @@ CONTENTS
 New Features
 ============
 
+    * File sizes greater than 2GB are now supported on Linux systems with
+      version 2.4.x or higher kernels.
+
 
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
+
     * Fixed bug with non-zero userblock sizes causing raw data to not
       write correctly.
     * Fixed problems with Pablo build and linking with non-standard MPI I/O.
@@ -86,6 +90,7 @@ Supported Configuration Features Summary
 
     * See "Supported Configuration Features Summary" section for the HDF5
       1.4.0 release in the HISTORY.txt file.
+
 
 Known Problems
 ==============

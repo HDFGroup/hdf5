@@ -164,6 +164,9 @@
 /* The number of bytes in a size_t.  */
 #undef SIZEOF_SIZE_T
 
+/* The number of bytes in a ssize_t.  */
+#undef SIZEOF_SSIZE_T
+
 /* The number of bytes in a uint16_t.  */
 #undef SIZEOF_UINT16_T
 
@@ -223,6 +226,9 @@
 
 /* Define if you have the fseek64 function.  */
 #undef HAVE_FSEEK64
+
+/* Define if you have the getdents64 function.  */
+#undef HAVE_GETDENTS64
 
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
