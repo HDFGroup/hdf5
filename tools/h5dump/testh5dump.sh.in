@@ -224,7 +224,7 @@ TOOLTEST tcontents.ddl -n tfilters.h5
 # compact
 TOOLTEST tcompact.ddl -H -p -d compact tfilters.h5
 # contiguous
-TOOLTEST tcontiguos.ddl -H -p -d contiguos tfilters.h5
+TOOLTEST tcontiguos.ddl -H -p -d contiguous tfilters.h5
 # chunked
 TOOLTEST tchunked.ddl -H -p -d chunked tfilters.h5
 # external 
