@@ -331,7 +331,7 @@ H5G_stat_t statbuf;
 		print_enum(type);
 		printf("\n");
 		indentation (indent + COL);
-		printf("}\n");
+		printf("}");
 		break;
     default:
         printf( "unknown data type");
