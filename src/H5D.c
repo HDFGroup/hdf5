@@ -2091,7 +2091,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				mem_space, dxpl_id, buf, &must_convert/*out*/);
         if (status<0) {
 	    /* Supports only no conversion, type or space, for now. */
-	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
 		        "optimized write failed");
 	}
 	if (must_convert) {
