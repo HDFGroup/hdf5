@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -d /group2/dset5 -g /group1 tcompound.h5'
+Expected output for 'h5dump -d /group2/dset5 -g /group1 tcompound.h5'
 #############################
 HDF5 "tcompound.h5" {
 DATASET "/group2/dset5" {

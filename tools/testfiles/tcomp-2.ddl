@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -t /type1 /type2 /group1/type3 tcompound.h5'
+Expected output for 'h5dump -t /type1 /type2 /group1/type3 tcompound.h5'
 #############################
 HDF5 "tcompound.h5" {
 DATATYPE "/type1" {

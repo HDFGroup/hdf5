@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -d dset3 tdset.h5'
+Expected output for 'h5dump -d dset3 tdset.h5'
 #############################
 HDF5 "tdset.h5" {
 DATASET "dset3" {

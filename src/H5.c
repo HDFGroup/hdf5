@@ -98,7 +98,7 @@ H5_init_library(void)
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.
      */
-    if (H5T_init_interface() < 0) {
+    if (H5T_init()<0) {
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to initialize type interface");
     }
@@ -931,7 +931,9 @@ H5_timer_begin (H5_timer_t *timer)
 #ifdef HAVE_GETRUSAGE
     struct rusage	rusage;
 #endif
+#ifdef HAVE_GETTIMEOFDAY
     struct timeval	etime;
+#endif
 
     assert (timer);
 
@@ -947,8 +949,10 @@ H5_timer_begin (H5_timer_t *timer)
 #endif
 #ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&etime, NULL);
-#endif
     timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
+#else
+    timer->etime = 0.0;
+#endif
 }
 
 
@@ -2032,6 +2036,32 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			break;
 		    default:
 			fprintf (out, "%ld", (long)cset);
+			break;
+		    }
+		}
+		break;
+
+	    case 'e':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5T_pers_t pers = va_arg(ap, H5T_pers_t);
+		    switch (pers) {
+		    case H5T_PERS_DONTCARE:
+			fprintf(out, "H5T_PERS_DONTCARE");
+			break;
+		    case H5T_PERS_SOFT:
+			fprintf(out, "H5T_PERS_SOFT");
+			break;
+		    case H5T_PERS_HARD:
+			fprintf(out, "H5T_PERS_HARD");
+			break;
+		    default:
+			fprintf(out, "%ld", (long)pers);
 			break;
 		    }
 		}

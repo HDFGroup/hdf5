@@ -1444,21 +1444,21 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	 void *buf/*out*/)
 {
-    hssize_t    nelmts;			/*number of elements	*/
+    hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
+    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
+    hid_t		bkg_id=FAIL;		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
-    H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
+    H5T_path_t		*tpath = NULL;		/*type conversion info	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t		*sconv=NULL;		/*space conversion funcs*/
     H5S_sel_iter_t 	mem_iter;        /* mem selection iteration info*/
     H5S_sel_iter_t	bkg_iter;	     /*background iteration info*/
     H5S_sel_iter_t	file_iter;            /*file selection iter info*/
-    H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
-    herr_t		ret_value = FAIL;
-    herr_t		status;
+    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t		status;			/*function return status*/
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;	      /*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
@@ -1522,11 +1522,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type,
-				       xfer_parms->need_bkg, &cdata))) {
+    if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL))) {
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
-    } else if (H5T_conv_noop!=tconv_func) {
+    } else if (!H5T_IS_NOOP(tpath)) {
         if ((src_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
 	    (dst_id=H5I_register(H5I_DATATYPE,
@@ -1556,7 +1555,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If there is no type conversion then try reading directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if (H5T_conv_noop==tconv_func && sconv->read) {
+    if (H5T_IS_NOOP(tpath) && sconv->read) {
         status = (sconv->read)(dataset->ent.file, &(dataset->layout),
 			       &(dataset->create_parms->pline),
 			       &(dataset->create_parms->efl),
@@ -1619,8 +1618,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (cdata->need_bkg) {
-        need_bkg = MAX (cdata->need_bkg, xfer_parms->need_bkg);
+    if (tpath->cdata.need_bkg) {
+        need_bkg = MAX(tpath->cdata.need_bkg, xfer_parms->need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
@@ -1720,16 +1719,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         /*
          * Perform data type conversion.
          */
-#ifdef H5T_DEBUG
-        H5T_timer_begin (&timer, cdata);
-#endif
-        cdata->command = H5T_CONV_CONV;
-        status = (tconv_func)(src_id, dst_id, cdata, smine_nelmts, tconv_buf,
-			      bkg_buf);
-#ifdef H5T_DEBUG
-        H5T_timer_end (&timer, cdata, smine_nelmts);
-#endif
-        if (status<0) {
+	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, tconv_buf,
+			bkg_buf)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
         }
@@ -1803,27 +1794,28 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, const H5D_xfer_t *xfer_parms,
 	  const void *buf)
 {
-    hssize_t	nelmts;			/*total number of elmts	*/
+    hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
+    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
+    hid_t		bkg_id=FAIL;   		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
-    H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
+    H5T_path_t		*tpath = NULL;		/*type conversion info	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t		*sconv=NULL;		/*space conversion funcs*/
     H5S_sel_iter_t	mem_iter;      /*memory selection iteration info*/
     H5S_sel_iter_t	bkg_iter;            /*background iteration info*/
     H5S_sel_iter_t	file_iter;       /*file selection iteration info*/
-    H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
-    herr_t		ret_value = FAIL, status;
+    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t		status;			/*function return status*/
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;	      /*size of destination type*/
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
-    hbool_t             must_convert;           /*have to xfer the slow way */
+    hbool_t             must_convert;        /*have to xfer the slow way*/
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1889,11 +1881,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type,
-				       xfer_parms->need_bkg, &cdata))) {
+    if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
-    } else if (H5T_conv_noop!=tconv_func) {
+    } else if (!H5T_IS_NOOP(tpath)) {
 	if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
 	    (dst_id = H5I_register(H5I_DATATYPE,
@@ -1926,7 +1917,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If there is no type conversion then try writing directly from
      * application buffer to file.
      */
-    if (H5T_conv_noop==tconv_func && sconv->write) {
+    if (H5T_IS_NOOP(tpath) && sconv->write) {
 	status = (sconv->write)(dataset->ent.file, &(dataset->layout),
 				&(dataset->create_parms->pline),
 				&(dataset->create_parms->efl),
@@ -1990,8 +1981,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * malloc() is usually less resource-intensive if we allocate/free the
      * same size over and over.
      */
-    if (cdata->need_bkg) {
-        need_bkg = MAX (cdata->need_bkg, xfer_parms->need_bkg);
+    if (tpath->cdata.need_bkg) {
+        need_bkg = MAX (tpath->cdata.need_bkg, xfer_parms->need_bkg);
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
@@ -2088,16 +2079,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         /*
          * Perform data type conversion.
          */
-#ifdef H5T_DEBUG
-        H5T_timer_begin (&timer, cdata);
-#endif
-        cdata->command = H5T_CONV_CONV;
-        status = (tconv_func) (src_id, dst_id, cdata, smine_nelmts, tconv_buf,
-			       bkg_buf);
-#ifdef H5T_DEBUG
-        H5T_timer_end (&timer, cdata, smine_nelmts);
-#endif
-        if (status<0) {
+	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, tconv_buf,
+			bkg_buf)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
         }

@@ -20,14 +20,14 @@
  * Offset from alinged memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
-#define ALIGNMENT	0
+#define ALIGNMENT	1
 
 /*
  * Define if you want to test alignment code on a machine that doesn't
  * normally require alignment. When set, all native data types must be aligned
  * on a byte boundary equal to the data size.
  */
-#undef TEST_ALIGNMENT
+#define TEST_ALIGNMENT
 
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
@@ -2828,6 +2828,11 @@ main(void)
     reset_hdf5();
     fapl = h5_fileaccess();
 
+    if (ALIGNMENT) {
+	printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n",
+	       ALIGNMENT);
+    }
+    
     /* Do the tests */
     nerrors += test_classes()<0 ? 1 : 0;
     nerrors += test_copy()<0 ? 1 : 0;
@@ -2836,7 +2841,7 @@ main(void)
     nerrors += test_named (fapl)<0 ? 1 : 0;
     h5_cleanup (fapl); /*must happen before first reset*/
     reset_hdf5();
-    
+
     nerrors += test_conv_str_1()<0 ? 1 : 0;
     nerrors += test_conv_str_2()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;

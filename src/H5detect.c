@@ -475,7 +475,7 @@ iprint(detected_t *d)
     } else if (1==d->align) {
         printf("    * Alignment: none\n");
     } else {
-        printf("    * Alignemtn: %lu\n", (unsigned long)(d->align));
+        printf("    * Alignment: %lu\n", (unsigned long)(d->align));
     }
 }
 

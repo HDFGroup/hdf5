@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -d /g1/link2 /dset /g1/link1/link3 thlink.h5'
+Expected output for 'h5dump -d /g1/link2 /dset /g1/link1/link3 thlink.h5'
 #############################
 HDF5 "thlink.h5" {
 DATASET "/g1/link2" {

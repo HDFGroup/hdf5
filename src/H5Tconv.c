@@ -17,13 +17,18 @@
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
-    intn	*src2dst;		/*mapping from src to dst memb ID    */
+    intn	*src2dst;		/*mapping from src to dst member num */
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
-    H5T_conv_t	*memb_conv;		/*array of membr conversion functions*/
-    H5T_cdata_t	**memb_cdata;		/*array of member cdata pointers     */
+    H5T_path_t	**memb_path;		/*conversion path for each member    */
     size_t	*memb_nelmts;		/*member element count		     */
 } H5T_conv_struct_t;
+
+/* Conversion data for the hardware conversion functions */
+typedef struct H5T_conv_hw_t {
+    hsize_t	s_aligned;		/*number source elements aligned     */
+    hsize_t	d_aligned;		/*number destination elements aligned*/
+} H5T_conv_hw_t;
 
 /* Interface initialization */
 static intn interface_initialize_g = 0;
@@ -253,33 +258,47 @@ static intn interface_initialize_g = 0;
     size_t	elmtno;			/*element number		*/    \
     ST		*src, *s;		/*source buffer			*/    \
     DT		*dst, *d;		/*destination buffer		*/    \
-    H5T_t	*st, *dt;		/*src and dest data types	*/    \
+    H5T_t	*st, *dt;		/*data type descriptors		*/    \
     long_long	aligned;		/*largest integer type, aligned	*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
+    size_t      dt_size=sizeof(DT);	/*needed by CI_END macro	*/    \
+    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/    \
 									      \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
+	if (NULL==(st=H5I_object(src_id)) ||				      \
+	    NULL==(dt=H5I_object(dst_id))) {				      \
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
+			  "unable to dereference data type object ID");	      \
+	}								      \
+	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT)) {		      \
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
+			  "disagreement about data type size");		      \
+	}								      \
+	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {	      \
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,		      \
+			  "memory allocation failed");			      \
+	}								      \
 	break;								      \
     case H5T_CONV_FREE:							      \
+	CI_PRINT_STATS(STYPE,DTYPE);					      \
+	cdata->priv = H5MM_xfree(cdata->priv);				      \
 	break;								      \
     case H5T_CONV_CONV:							      \
 	src = (ST*)buf+(STRT);						      \
 	dst = (DT*)buf+(STRT);						      \
-	st = H5I_object(src_id);					      \
-	dt = H5I_object(dst_id);					      \
-	assert(st && dt);						      \
 	s_mv = H5T_NATIVE_##STYPE##_ALIGN_g>1 &&			      \
                ((size_t)buf%H5T_NATIVE_##STYPE##_ALIGN_g ||		      \
-		st->size%H5T_NATIVE_##STYPE##_ALIGN_g);			      \
+		sizeof(ST)%H5T_NATIVE_##STYPE##_ALIGN_g);		      \
 	d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g>1 &&			      \
                ((size_t)buf%H5T_NATIVE_##DTYPE##_ALIGN_g ||		      \
-                dt->size%H5T_NATIVE_##DTYPE##_ALIGN_g);			      \
-        CI_DEBUG(s_mv, STYPE, ST);					      \
-        CI_DEBUG(d_mv, DTYPE, DT);					      \
+                sizeof(DT)%H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
+	if (s_mv) priv->s_aligned += nelmts;				      \
+	if (d_mv) priv->d_aligned += nelmts;				      \
 	for (elmtno=0; elmtno<nelmts; elmtno++, DIR src,  DIR dst) {	      \
 	    if (s_mv) {							      \
-		memcpy(&aligned, src, st->size);			      \
+		memcpy(&aligned, src, sizeof(ST));			      \
 		s = (ST*)&aligned;					      \
 	    } else {							      \
 		s = src;						      \
@@ -291,7 +310,7 @@ static intn interface_initialize_g = 0;
 	    }
 	    /* ... user-defined stuff here ... */
 #define CI_END								      \
-            if (d_mv) memcpy(dst, &aligned, dt->size);			      \
+            if (d_mv) memcpy(dst, &aligned, dt_size);			      \
         }								      \
         break;								      \
     default:								      \
@@ -300,16 +319,24 @@ static intn interface_initialize_g = 0;
     }									      \
 }
 
-/* Print alignment information */
+/* Print alignment statistics */
 #ifdef H5T_DEBUG
-#   define CI_DEBUG(MV,HDF_TYPE,C_TYPE) {				      \
-    if (MV && H5DEBUG(T)) {						      \
-	fprintf(H5DEBUG(T), "<%d-byte alignment for %s>",		      \
-		H5T_NATIVE_##HDF_TYPE##_ALIGN_g, #C_TYPE);		      \
+#   define CI_PRINT_STATS(STYPE,DTYPE) {				      \
+    if (H5DEBUG(T) && priv->s_aligned) {				      \
+	HDfprintf(H5DEBUG(T),						      \
+		  "      %Hu src elements aligned on %lu-byte boundaries\n",  \
+		  priv->s_aligned,					      \
+		  (unsigned long)H5T_NATIVE_##STYPE##_ALIGN_g);		      \
+    }									      \
+    if (H5DEBUG(T) && priv->d_aligned) {				      \
+	HDfprintf(H5DEBUG(T),						      \
+		  "      %Hu dst elements aligned on %lu-byte boundaries\n",  \
+		  priv->d_aligned,					      \
+		  (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
     }									      \
 }
 #else
-#   define CI_DEBUG(MV,HDF_TYPE,C_TYPE) /*void*/
+#   define CI_PRINT_STATS /*void*/
 #endif
 
 /*-------------------------------------------------------------------------
@@ -344,7 +371,6 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	break;
 
     case H5T_CONV_FREE:
-	cdata->stats = H5MM_xfree (cdata->stats);
 	break;
 	
     default:
@@ -467,6 +493,16 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *		already initialized then the member conversion functions
  *		are recalculated.
  *
+ *		Priv fields are indexed by source member number or
+ *		destination member number depending on whether the field
+ *		contains information about the source data type or the
+ *		destination data type (fields that contains the same
+ *		information for both source and destination are indexed by
+ *		source member number).  The src2dst[] priv array maps source
+ *		member numbers to destination member numbers, but if the
+ *		source member doesn't have a corresponding destination member
+ *		then the src2dst[i]=-1.
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -488,26 +524,21 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     
     if (!priv) {
 	/*
-	 * Notice: the thing marked with `!' below really is `dst' and not
-	 *	   `src' because we're only interested in the members of the
-	 *	   source type that are also in the destination type.
+	 * Allocate private data structure and arrays.
 	 */
-	cdata->priv = priv = H5MM_calloc (sizeof(H5T_conv_struct_t));
-	if (NULL==priv) {
+	if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(H5T_conv_struct_t))) ||
+	    NULL==(priv->src2dst=H5MM_malloc(src->u.compnd.nmembs *
+					     sizeof(intn))) ||
+	    NULL==(priv->src_memb_id=H5MM_malloc(src->u.compnd.nmembs *
+		         			sizeof(hid_t))) ||
+	    NULL==(priv->dst_memb_id=H5MM_malloc(dst->u.compnd.nmembs *
+		         			sizeof(hid_t))) ||
+	    NULL==(priv->memb_nelmts=H5MM_malloc(src->u.compnd.nmembs *
+						 sizeof(size_t)))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	priv->src2dst = H5MM_malloc (src->u.compnd.nmembs * sizeof(intn));
-	priv->src_memb_id = H5MM_malloc (/*!*/dst->u.compnd.nmembs *
-					 sizeof(hid_t));
-	priv->dst_memb_id = H5MM_malloc (dst->u.compnd.nmembs *
-					 sizeof(hid_t));
-	if (NULL==priv->src2dst ||
-	    NULL==priv->src_memb_id ||
-	    NULL==priv->dst_memb_id) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
+	src2dst = priv->src2dst;
 
 	/*
 	 * Insure that members are sorted.
@@ -523,25 +554,25 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	 * member data type conversion functions later.
 	 */
 	for (i=0; i<src->u.compnd.nmembs; i++) {
-	    priv->src2dst[i] = -1;
+	    src2dst[i] = -1;
 	    for (j=0; j<dst->u.compnd.nmembs; j++) {
 		if (!HDstrcmp (src->u.compnd.memb[i].name,
-			   dst->u.compnd.memb[j].name)) {
-		    priv->src2dst[i] = j;
+			       dst->u.compnd.memb[j].name)) {
+		    src2dst[i] = j;
 		    break;
 		}
 	    }
-	    if (priv->src2dst[i]>=0) {
+	    if (src2dst[i]>=0) {
 		type = H5T_copy (src->u.compnd.memb[i].type, H5T_COPY_ALL);
 		tid = H5I_register (H5I_DATATYPE, type);
 		assert (tid>=0);
-		priv->src_memb_id[priv->src2dst[i]] = tid;
+		priv->src_memb_id[i] = tid;
 
-		type = H5T_copy (dst->u.compnd.memb[priv->src2dst[i]].type,
+		type = H5T_copy (dst->u.compnd.memb[src2dst[i]].type,
 				 H5T_COPY_ALL);
 		tid = H5I_register (H5I_DATATYPE, type);
 		assert (tid>=0);
-		priv->dst_memb_id[priv->src2dst[i]] = tid;
+		priv->dst_memb_id[src2dst[i]] = tid;
 	    }
 	}
 
@@ -550,9 +581,9 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	 * the same size and shape arrays.
 	 */
 	for (i=0; i<src->u.compnd.nmembs; i++) {
-	    if (priv->src2dst[i]>=0) {
+	    if (src2dst[i]>=0) {
 		H5T_member_t *src_memb = src->u.compnd.memb + i;
-		H5T_member_t *dst_memb = dst->u.compnd.memb + priv->src2dst[i];
+		H5T_member_t *dst_memb = dst->u.compnd.memb + src2dst[i];
 		if (src_memb->ndims != dst_memb->ndims) {
 		    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 				  "source and dest members have incompatible "
@@ -576,7 +607,6 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	}
 
 	/* Calculate number of elements of each member */
-	priv->memb_nelmts = H5MM_malloc(src->u.compnd.nmembs*sizeof(size_t));
 	for (i=0; i<src->u.compnd.nmembs; i++) {
 	    priv->memb_nelmts[i] = 1;
 	    for (j=0; j<src->u.compnd.memb[i].ndims; j++) {
@@ -589,34 +619,30 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * (Re)build the cache of member conversion functions and pointers to
      * their cdata entries.
      */
-    priv->memb_conv = H5MM_xfree (priv->memb_conv);
-    priv->memb_cdata = H5MM_xfree (priv->memb_cdata);
-    priv->memb_conv = H5MM_malloc (dst->u.compnd.nmembs *
-				   sizeof(H5T_conv_t));
-    priv->memb_cdata = H5MM_calloc (dst->u.compnd.nmembs *
-				     sizeof(H5T_cdata_t*));
-    if (NULL==priv->memb_conv || NULL==priv->memb_cdata) {
+    src2dst = priv->src2dst;
+    H5MM_xfree(priv->memb_path);
+    if (NULL==(priv->memb_path=H5MM_malloc(src->u.compnd.nmembs *
+					   sizeof(H5T_path_t*)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
-    src2dst = priv->src2dst;
 
     for (i=0; i<src->u.compnd.nmembs; i++) {
-	if (priv->src2dst[i]>=0) {
-	    H5T_conv_t tconv_func;
-	    tconv_func = H5T_find(src->u.compnd.memb[i].type,
+	if (src2dst[i]>=0) {
+	    H5T_path_t *tpath;
+	    tpath = H5T_path_find(src->u.compnd.memb[i].type,
 				  dst->u.compnd.memb[src2dst[i]].type,
-				  H5T_BKG_NO, priv->memb_cdata+src2dst[i]);
-	    if (!tconv_func) {
-		H5MM_xfree (priv->src2dst);
-		H5MM_xfree (priv->src_memb_id);
-		H5MM_xfree (priv->dst_memb_id);
-		H5MM_xfree (priv->memb_conv);
+				  NULL, NULL);
+	    if (NULL==(priv->memb_path[i] = tpath)) {
+		H5MM_xfree(priv->src2dst);
+		H5MM_xfree(priv->src_memb_id);
+		H5MM_xfree(priv->dst_memb_id);
+		H5MM_xfree(priv->memb_path);
+		H5MM_xfree(priv->memb_nelmts);
 		cdata->priv = priv = H5MM_xfree (priv);
 		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 			       "unable to convert member data type");
 	    }
-	    priv->memb_conv[src2dst[i]] = tconv_func;
 	}
     }
 
@@ -701,8 +727,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	H5MM_xfree(priv->src2dst);
 	H5MM_xfree(priv->src_memb_id);
 	H5MM_xfree(priv->dst_memb_id);
-	H5MM_xfree(priv->memb_conv);
-	H5MM_xfree(priv->memb_cdata);
+	H5MM_xfree(priv->memb_path);
 	H5MM_xfree(priv->memb_nelmts);
 	cdata->priv = priv = H5MM_xfree (priv);
 	break;
@@ -761,20 +786,21 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		dst_memb = dst->u.compnd.memb + src2dst[i];
 
 		if (dst_memb->size <= src_memb->size) {
-		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
-		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
-		    memb_cdata->command = H5T_CONV_CONV;
-		    (tconv_func)(priv->src_memb_id[src2dst[i]],
-				 priv->dst_memb_id[src2dst[i]],
-				 memb_cdata, priv->memb_nelmts[i],
-				 buf + src_memb->offset,
-				 bkg + dst_memb->offset);
-
-		    HDmemmove (buf + offset, buf + src_memb->offset,
+		    if (H5T_convert(priv->memb_path[i],
+				    priv->src_memb_id[i],
+				    priv->dst_memb_id[src2dst[i]],
+				    priv->memb_nelmts[i],
+				    buf + src_memb->offset,
+				    bkg + dst_memb->offset)<0) {
+			HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+				      "unable to convert compound data type "
+				      "member");
+		    }
+		    HDmemmove (buf+offset, buf+src_memb->offset,
 			       dst_memb->size);
 		    offset += dst_memb->size;
 		} else {
-		    HDmemmove (buf + offset, buf + src_memb->offset,
+		    HDmemmove (buf+offset, buf+src_memb->offset,
 			       src_memb->size);
 		    offset += src_memb->size;
 		}
@@ -793,14 +819,16 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		dst_memb = dst->u.compnd.memb + src2dst[i];
 
 		if (dst_memb->size > src_memb->size) {
-		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
-		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
 		    offset -= src_memb->size;
-		    memb_cdata->command = H5T_CONV_CONV;
-		    (tconv_func)(priv->src_memb_id[src2dst[i]],
-				 priv->dst_memb_id[src2dst[i]],
-				 memb_cdata, priv->memb_nelmts[i],
-				 buf+offset, bkg+dst_memb->offset);
+		    if (H5T_convert(priv->memb_path[i],
+				    priv->src_memb_id[i],
+				    priv->dst_memb_id[src2dst[i]],
+				    priv->memb_nelmts[i],
+				    buf+offset, bkg+dst_memb->offset)<0) {
+			HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+				      "unable to convert compound data type "
+				      "member");
+		    }
 		} else {
 		    offset -= dst_memb->size;
 		}
@@ -4327,44 +4355,57 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     H5T_t	*st, *dt;		/*type descriptors		*/
     hbool_t	src_mv, dst_mv;		/*align data?			*/
     double	aligned;		/*aligned data			*/
+    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/
     
     FUNC_ENTER (H5T_conv_float_double, FAIL);
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
 	cdata->need_bkg = H5T_BKG_NO;
+	if (NULL==(st=H5I_object(src_id)) ||
+	    NULL==(dt=H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "unable to dereference data type object ID");
+	}
+	if (st->size!=sizeof(float) || dt->size!=sizeof(double)) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "disagreement about data type size");
+	}
+	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed");
+	}
 	break;
 
     case H5T_CONV_FREE:
+	CI_PRINT_STATS(FLOAT, DOUBLE);
+	cdata->priv = H5MM_xfree(cdata->priv);
 	break;
 
     case H5T_CONV_CONV:
 	src = (float*)buf + nelmts-1;
 	dst = (double*)buf + nelmts-1;
-	st = H5I_object(src_id);
-	dt = H5I_object(dst_id);
-	assert(st && dt);
 
 	/* Need alignment? */
 	if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
 	    src_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-		     (st->size % H5T_NATIVE_FLOAT_ALIGN_g);
+		     (sizeof(float) % H5T_NATIVE_FLOAT_ALIGN_g);
 	} else {
 	    src_mv = FALSE;
 	}
 	if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
 	    dst_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-		     (dt->size % H5T_NATIVE_DOUBLE_ALIGN_g);
+		     (sizeof(double) % H5T_NATIVE_DOUBLE_ALIGN_g);
 	} else {
 	    dst_mv = FALSE;
 	}
-	CI_DEBUG(src_mv, FLOAT, float);
-	CI_DEBUG(dst_mv, DOUBLE, double);
+	if (src_mv) priv->s_aligned += nelmts;
+	if (dst_mv) priv->d_aligned += nelmts;
 	
 	for (elmtno=0; elmtno<nelmts; elmtno++, --src, --dst) {
 	    /* Align source and/or destination */
 	    if (src_mv) {
-		memcpy(&aligned, src, st->size);
+		memcpy(&aligned, src, sizeof(float));
 		s = (float*)&aligned;
 	    } else {
 		s = src;
@@ -4376,7 +4417,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    *d = *s;
 
 	    /* Unalign destination */
-	    if (dst_mv) memcpy(dst, &aligned, dt->size);
+	    if (dst_mv) memcpy(dst, &aligned, sizeof(double));
 	}
 	break;
 	    
@@ -4417,44 +4458,57 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     H5T_t	*st, *dt;		/*type descriptors		*/
     hbool_t	src_mv, dst_mv;		/*align data?			*/
     double	aligned;		/*aligned data			*/
+    H5T_conv_hw_t *priv = cdata->priv;	/*private data			*/
     
     FUNC_ENTER (H5T_conv_double_float, FAIL);
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
 	cdata->need_bkg = H5T_BKG_NO;
+	if (NULL==(st=H5I_object(src_id)) ||
+	    NULL==(dt=H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "unable to dereference data type object ID");
+	}
+	if (st->size!=sizeof(double) || dt->size!=sizeof(float)) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "disagreement about data type size");
+	}
+	if (NULL==(cdata->priv=H5MM_calloc(sizeof(H5T_conv_hw_t)))) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "memory allocation failed");
+	}
 	break;
 
     case H5T_CONV_FREE:
+	CI_PRINT_STATS(DOUBLE, FLOAT);
+	cdata->priv = H5MM_xfree(cdata->priv);
 	break;
 
     case H5T_CONV_CONV:
 	src = (double*)buf;
 	dst = (float*)buf;
-	st = H5I_object(src_id);
-	dt = H5I_object(dst_id);
-	assert(st && dt);
 
 	/* Need alignment? */
 	if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
 	    src_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
-		     (st->size % H5T_NATIVE_DOUBLE_ALIGN_g);
+		     (sizeof(double) % H5T_NATIVE_DOUBLE_ALIGN_g);
 	} else {
 	    src_mv = FALSE;
 	}
 	if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
 	    dst_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
-		     (dt->size % H5T_NATIVE_FLOAT_ALIGN_g);
+		     (sizeof(float) % H5T_NATIVE_FLOAT_ALIGN_g);
 	} else {
 	    dst_mv = FALSE;
 	}
-	CI_DEBUG(src_mv, DOUBLE, double);
-	CI_DEBUG(dst_mv, FLOAT, float);
+	if (src_mv) priv->s_aligned += nelmts;
+	if (dst_mv) priv->d_aligned += nelmts;
 	
 	for (elmtno=0; elmtno<nelmts; elmtno++, src++, dst++) {
 	    /* Align source and/or destination */
 	    if (src_mv) {
-		memcpy(&aligned, src, st->size);
+		memcpy(&aligned, src, sizeof(double));
 		s = (double*)&aligned;
 	    } else {
 		s = src;
@@ -4478,7 +4532,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    }
 
 	    /* Unalign destination */
-	    if (dst_mv) memcpy(dst, &aligned, dt->size);
+	    if (dst_mv) memcpy(dst, &aligned, sizeof(float));
 	}
 	break;
 	    

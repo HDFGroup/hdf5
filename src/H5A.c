@@ -604,17 +604,13 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
 {
     uint8_t		*tconv_buf = NULL;	/* data type conv buffer */
     size_t		nelmts;		    	/* elements in attribute */
-    H5T_conv_t		tconv_func = NULL;	/* conversion function	*/
-    H5T_cdata_t		*cdata = NULL;		/* type conversion data	*/
+    H5T_path_t		*tpath = NULL;		/* conversion information*/
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms */
     size_t		src_type_size;		/* size of source type	*/
     size_t		dst_type_size;		/* size of destination type*/
     size_t		buf_size;		/* desired buffer size	*/
     int         	idx;	      /* index of attribute in object header */
     herr_t		ret_value = FAIL;
-#ifdef H5T_DEBUG
-    H5_timer_t		timer;
-#endif
 
     FUNC_ENTER(H5A_write, FAIL);
 
@@ -641,11 +637,10 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
 
     /* Convert memory buffer into disk buffer */
     /* Set up type conversion function */
-    if (NULL == (tconv_func = H5T_find(mem_type, attr->dt,
-				       H5T_BKG_NO, &cdata))) {
+    if (NULL == (tpath = H5T_path_find(mem_type, attr->dt, NULL, NULL))) {
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
-    } else if (H5T_conv_noop!=tconv_func) {
+    } else if (!H5T_IS_NOOP(tpath)) {
         if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
 	    (dst_id = H5I_register(H5I_DATATYPE,
@@ -655,18 +650,11 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
         }
     }
 
-    /* Perform data type conversion.  */
-#ifdef H5T_DEBUG
-    H5T_timer_begin (&timer, cdata);
-#endif
-    cdata->command = H5T_CONV_CONV;
-    if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, NULL)<0) {
+    /* Perform data type conversion */
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, tconv_buf, NULL)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
-#ifdef H5T_DEBUG
-    H5T_timer_end (&timer, cdata, nelmts);
-#endif
 
     /* Free the previous attribute data buffer, if there is one */
     if(attr->data)
@@ -775,16 +763,12 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
 {
     uint8_t		*tconv_buf = NULL;	/* data type conv buffer*/
     size_t		nelmts;			/* elements in attribute*/
-    H5T_conv_t		tconv_func = NULL;	/* conversion function 	*/
-    H5T_cdata_t		*cdata = NULL;		/* type conversion data	*/
+    H5T_path_t		*tpath = NULL;		/* type conversion info	*/
     hid_t		src_id = -1, dst_id = -1;/* temporary type atoms*/
     size_t		src_type_size;		/* size of source type 	*/
     size_t		dst_type_size;		/* size of destination type */
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = FAIL;
-#ifdef H5T_DEBUG
-    H5_timer_t		timer;
-#endif
 
     FUNC_ENTER(H5A_read, FAIL);
 
@@ -811,11 +795,10 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
 
     /* Convert memory buffer into disk buffer */
     /* Set up type conversion function */
-    if (NULL == (tconv_func = H5T_find(attr->dt, mem_type,
-				       H5T_BKG_NO, &cdata))) {
+    if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL))) {
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
-    } else if (H5T_conv_noop!=tconv_func) {
+    } else if (!H5T_IS_NOOP(tpath)) {
         if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
 	    (dst_id = H5I_register(H5I_DATATYPE,
@@ -826,17 +809,10 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     }
 
     /* Perform data type conversion.  */
-#ifdef H5T_DEBUG
-    H5T_timer_begin (&timer, cdata);
-#endif
-    cdata->command = H5T_CONV_CONV;
-    if ((tconv_func) (src_id, dst_id, cdata, nelmts, tconv_buf, NULL)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, tconv_buf, NULL)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
-#ifdef H5T_DEBUG
-    H5T_timer_end (&timer, cdata, nelmts);
-#endif
 
     /* Copy the converted data into the user's buffer */
     HDmemcpy(buf,tconv_buf,dst_type_size*nelmts);

@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump tgroup.h5'
+Expected output for 'h5dump tgroup.h5'
 #############################
 HDF5 "tgroup.h5" {
 GROUP "/" {

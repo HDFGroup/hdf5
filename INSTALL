@@ -68,11 +68,13 @@ Step 2. Configure.
 	RANLIB	  Name of the `ranlib' program or `:' if none.
 	MAKE	  Name of the `make' program (GNU make is preferred)
 
-    * This version of HDF5 is normally built with various debugging
-      code enabled.  To turn it off add the `--disable-debug' switch
-      to the configure command. Even if debugging support is compiled
-      into the library one must still enable the code at runtime with
-      the HDF5_DEBUG environment variable (see Debugging.html).
+    * This version of HDF5 is normally built with various debugging code
+      enabled.  To turn it off add the `--disable-debug' switch to the
+      configure command. Even if debugging support is compiled into the
+      library one must still enable the code at runtime with the HDF5_DEBUG
+      environment variable (see Debugging.html). Including debugging support
+      in the library (whether it's enabled or not) may incur a significant
+      run-time penalty.
 
     * This version of HDF5 is normally built with support for symbolic 
       debugging with dbx or gdb and without compiler optimization

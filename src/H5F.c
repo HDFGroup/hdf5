@@ -100,6 +100,7 @@ const H5F_mprop_t	H5F_mount_dflt = {
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5F_init_interface
+static herr_t H5F_init_interface(void);
 
 /* PRIVATE PROTOTYPES */
 static H5F_t *H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl,
@@ -109,6 +110,31 @@ static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate);
 static herr_t H5F_locate_signature(H5F_low_t *f_handle,
 				   const H5F_access_t *access_parms,
 				   haddr_t *addr/*out*/);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_init
+ *
+ * Purpose:	Initialize the interface from some other layer.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_init(void)
+{
+    FUNC_ENTER(H5F_init, FAIL);
+    /* FUNC_ENTER() does all the work */
+    FUNC_LEAVE(SUCCEED);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -132,12 +158,11 @@ static herr_t H5F_locate_signature(H5F_low_t *f_handle,
  *	Added .disp, .btype, .ftype to H5F_access_t.
  *-------------------------------------------------------------------------
  */
-herr_t 
+static herr_t 
 H5F_init_interface(void)
 {
     herr_t	ret_value = SUCCEED;
     
-    interface_initialize_g = TRUE;
     FUNC_ENTER(H5F_init_interface, FAIL);
 
 #ifdef HAVE_PARALLEL

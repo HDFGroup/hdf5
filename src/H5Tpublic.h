@@ -145,8 +145,14 @@ typedef struct H5T_cdata_t {
     H5T_bkg_t		need_bkg;/*is the background buffer needed?	     */
     hbool_t		recalc;	/*recalculate private data		     */
     void		*priv;	/*private data				     */
-    struct H5T_stats_t	*stats;	/*statistics for the conversion		     */
 } H5T_cdata_t;
+
+/* Conversion function persistence */
+typedef enum H5T_pers_t {
+    H5T_PERS_DONTCARE	= -1, 	/*wild card				     */
+    H5T_PERS_HARD	= 0,	/*hard conversion function		     */
+    H5T_PERS_SOFT	= 1 	/*soft conversion function		     */
+} H5T_pers_t;
 
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
@@ -433,11 +439,10 @@ herr_t H5Tset_cset (hid_t type_id, H5T_cset_t cset);
 herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
-herr_t H5Tregister_hard (const char *name, hid_t src_id, hid_t dst_id,
-			 H5T_conv_t func);
-herr_t H5Tregister_soft (const char *name, H5T_class_t src, H5T_class_t dst,
-			 H5T_conv_t func);
-herr_t H5Tunregister (H5T_conv_t func);
+herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
+		   hid_t dst_id, H5T_conv_t func);
+herr_t H5Tunregister (H5T_pers_t pers, const char *name, hid_t src_id,
+		      hid_t dst_id, H5T_conv_t func);
 H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 		   void *background);

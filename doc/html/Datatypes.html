@@ -1060,39 +1060,34 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
 
     <p>The library is capable of converting data from one type to
       another and does so automatically when reading or writing the
-      raw data of a dataset.  The data type interface does not provide
-      functions to the application for changing data types directly,
-      but the user is allowed a certain amount of control over the
-      conversion process.
+      raw data of a dataset, attribute data, or fill values. The
+      application can also change the type of data stored in an array.
 
     <p>In order to insure that data conversion exceeds disk I/O rates,
       common data conversion paths can be hand-tuned and optimized for
-      performance.  If a hand-tuned conversion function is not
+      performance.  The library contains very efficient code for
+      conversions between most native data types and a few non-native
+      data types, but if a hand-tuned conversion function is not
       available, then the library falls back to a slower but more
-      general conversion function.  Although conversion paths include
-      data space conversion, only data type conversions are described
-      here.  Most applications will not be concerned with data type
-      conversions since the library will contain hand-tuned conversion
-      functions for many common conversion paths.  In fact, if an
-      application does define a conversion function which would be of
-      general interest, we request that the function be submitted to
-      the HDF5 development team for inclusion in the library (there
-      might be less overhead involved with calling an internal
-      conversion functions than calling an application-defined
-      conversion function).
+      general conversion function.  The application programmer can
+      define additional conversion functions when the libraries
+      repertoire is insufficient. In fact, if an application does
+      define a conversion function which would be of general interest,
+      we request that the function be submitted to the HDF5
+      development team for inclusion in the library.
 
     <p><b>Note:</b> The HDF5 library contains a deliberately limited
       set of conversion routines.  It can convert from one integer
       format to another, from one floating point format to another,
-      and from one struct to another.  It can also perform byte 
-      swapping when the source and destination types are otherwise 
-      the same.  The library does not contain any functions for
-      converting data between integer and floating point formats.
-      It is anticipated that some users will find it necessary to
-      develop float to integer or integer to float conversion functions 
-      at the application level; if they wish, users are invited to 
-      submit those functions to be considered for inclusion in future 
-      versions of the library.
+      and from one struct to another.  It can also perform byte
+      swapping when the source and destination types are otherwise the
+      same.  The library does not contain any functions for converting
+      data between integer and floating point formats.  It is
+      anticipated that some users will find it necessary to develop
+      float to integer or integer to float conversion functions at the
+      application level; users are invited to submit those functions
+      to be considered for inclusion in future versions of the
+      library.
 
     <p>A conversion path contains a source and destination data type
       and each path contains a <em>hard</em> conversion function
@@ -1152,24 +1147,25 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 
 	<br><br>
       <dt><code>H5T_CONV_CONV</code>
-      <dd>This is the usually command which indicates that
-	data points should be converted.  The conversion function
-	should initialize the <code>priv</code> field of
-	<em>cdata</em> if it wasn't initialize during the
-	<code>H5T_CONV_INIT</code> command and then convert
-	<em>nelmts</em> instances of the <em>src_type</em> to the
-	<em>dst_type</em>. The <em>buffer</em> serves as both input
-	and output.  The <em>background</em> buffer is supplied
-	according to the value of the <code>need_bkg</code> field of
-	<em>cdata</em> (the values are described below).
+      <dd>This command indicates that data points should be converted.
+	The conversion function should initialize the
+	<code>priv</code> field of <em>cdata</em> if it wasn't
+	initialize during the <code>H5T_CONV_INIT</code> command and
+	then convert <em>nelmts</em> instances of the
+	<em>src_type</em> to the <em>dst_type</em>. The
+	<em>buffer</em> serves as both input and output.  The
+	<em>background</em> buffer is supplied according to the value
+	of the <code>need_bkg</code> field of <em>cdata</em> (the
+	values are described below).
 
 	<br><br>
       <dt><code>H5T_CONV_FREE</code>
       <dd>The conversion function is about to be removed from some
 	path and the private data (the
 	<code><em>cdata</em>->priv</code> pointer) should be freed and
-	set to null.  All other pointer arguments are null and the
-	<em>nelmts</em> argument is zero.
+	set to null.  All other pointer arguments are null, the
+	<em>src_type</em> and <em>dst_type</em> are invalid
+	(negative), and the <em>nelmts</em> argument is zero.
 
 	<br><br>
       <dt><em>Others...</em>
@@ -1211,64 +1207,56 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 	destination.
     </dl>
 
-    <p>Other fields of <em>cdata</em> can be read or written by
-      the conversion functions.  Many of these contain
-      performance-measuring fields which can be printed by the
-      conversion function during the <code>H5T_CONV_FREE</code>
-      command which is issued whenever the function is removed from a
-      conversion path.
-
-    <dl>
-      <dt><code>hbool_t recalc</code>
-      <dd>This field is set by the library when any other data type
-	conversion function is registered or unregistered.  It allows
-	conversion functions to cache pointers to other conversion
-	functions and be notified when the cache should be
-	recalculated.
-
-	<br><br>
-      <dt><code>unsigned long ncalls</code>
-      <dd>This field contains the number of times the conversion
-	function was called with the command
-	<code>H5T_CONV_CONV</code>.  It is updated automatically by
-	the library.
-
-	<br><br>
-      <dt><code>unsigned long nelmts</code>
-      <dd>This is the total number of data points converted by this
-	function and is updated automatically by the library.
-    </dl>
-
+    <p>The <code>recalc</code> field of <em>cdata</em> is set when the 
+      conversion path table changes. It can be used by conversion
+      function that cache other conversion paths so they know when
+      their cache needs to be recomputed.
 
 
     <p>Once a conversion function is written it can be registered and
       unregistered with these functions:
 
     <dl>
-      <dt><code>herr_t H5Tregister_hard (const char *<em>name</em>,
-	  hid_t <em>src_type</em>, hid_t <em>dest_type</em>,
-	  H5T_conv_t <em>func</em>)</code>
+      <dt><code>herr_t H5Tregister(H5T_pers_t <em>pers</em>, const
+	  char *<em>name</em>, hid_t <em>src_type</em>, hid_t
+	  <em>dest_type</em>, H5T_conv_t <em>func</em>)</code>
       <dd>Once a conversion function is written, the library must be
-	notified so it can be used.  The function can be registered as a
-	hard conversion for one or more conversion paths by calling
-	<code>H5Tregister_hard()</code>, displacing any previous hard
-	conversion for those paths.  The <em>name</em> is used only
-	for debugging but must be supplied.
+	notified so it can be used.  The function can be registered as
+	a hard (<code>H5T_PERS_HARD</code>) or soft
+	(<code>H5T_PERS_SOFT</code>) conversion depending on the value
+	of <em>pers</em>, displacing any previous conversions for all
+	applicable paths.  The <em>name</em> is used only for
+	debugging but must be supplied.  If <em>pers</em> is
+	<code>H5T_PERS_SOFT</code> then only the type classes of the
+	<em>src_type</em> and <em>dst_type</em> are used. For
+	instance, to register a general soft conversion function that
+	can be applied to any integer to integer conversion one could
+	say: <code>H5Tregister(H5T_PERS_SOFT, "i2i", H5T_NATIVE_INT,
+	H5T_NATIVE_INT, convert_i2i)</code>.  One special conversion
+	path called the "no-op" conversion path is always defined by
+	the library and used as the conversion function when no data
+	transformation is necessary. The application can redefine this 
+	path by specifying a new hard conversion function with a
+	negative value for both the source and destination data types, 
+	but the library might not call the function under certain
+	circumstances.
 
 	<br><br>
-      <dt><code>herr_t H5Tregister_soft (const char *<em>name</em>,
-	  H5T_class_t <em>src_class</em>, H5T_class_t <em>dest_class</em>,
-	  H5T_conv_t <em>func</em>)</code>
-      <dd>The function can be registered as a generic function which
-	will be automatically added to any conversion path for which
-	it returns an indication that it applies.  The name is used
-	only for debugging but must be supplied.
-
-	<br><br>
-      <dt><code>herr_t H5Tunregister (H5T_conv_t <em>func</em>)</code>
-      <dd>A function can be removed from the set of known conversion
-	functions by calling <code>H5Tunregister()</code>.  The
-	function is removed from all conversion paths.
+      <dt><code>herr_t H5Tunregister (H5T_pers_t <em>pers</em>, const
+	  char *<em>name</em>, hid_t <em>src_type</em>, hid_t
+	  <em>dest_type</em>, H5T_conv_t <em>func</em>)</code>
+      <dd>Any conversion path or function that matches the critera
+	specified by a call to this function is removed from the type
+	conversion table. All fields have the same interpretation as
+	for <code>H5Tregister()</code> with the added feature that any
+	(or all) may be wild cards.  The
+	<code>H5T_PERS_DONTCARE</code> constant should be used to
+	indicate a wild card for the <em>pers</em> argument. The wild
+	card <em>name</em> is the null pointer or empty string, the
+	wild card for the <em>src_type</em> and <em>dest_type</em>
+	arguments is any negative value, and the wild card for the
+	<em>func</em> argument is the null pointer.  The special no-op 
+	conversion path is never removed by this function.
     </dl>
 
     <p>
@@ -1397,7 +1385,9 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 		paths it can handle.
 
 	      <p><code><pre>
-H5Tregister_soft ("cus2be", H5T_INTEGER, H5T_INTEGER, cray_ushort2be);
+H5Tregister(H5T_PERS_SOFT, "cus2be",
+            H5T_NATIVE_INT, H5T_NATIVE_INT,
+            cray_ushort2be);
 	      </pre></code>
 
 	      <p>This causes it to be consulted for any conversion
@@ -1422,22 +1412,15 @@ H5Tregister_soft ("cus2be", H5T_INTEGER, H5T_INTEGER, cray_ushort2be);
       conversion path whether that conversion path was actually used
       or not.
 
-<!--
+
     <hr>
-    <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
-    <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
--->
+    <address>
+      <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+    </address>
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: Wed Nov 25 12:25:49 EST 1998
+Last modified: Wed Dec 16 13:04:58 EST 1998
 <!-- hhmts end -->
-
-<hr>
-<address>
-<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
-</address>
-
-Last modified:  27 October 1998
-
+    
   </body>
 </html>

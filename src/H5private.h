@@ -850,7 +850,7 @@ extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
 									      \
    /* Initialize this interface or bust */				      \
    if (!interface_initialize_g) {					      \
-      interface_initialize_g = TRUE;					      \
+      interface_initialize_g = 1;					      \
       if (interface_init_func &&					      \
           ((herr_t(*)(void))interface_init_func)()<0) {			      \
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \

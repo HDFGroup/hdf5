@@ -544,7 +544,7 @@ extern  hbool_t H5_mpi_1_metawrite_g;
 #endif /* HAVE_PARALLEL */
 
 /* Private functions, not part of the publicly documented API */
-herr_t H5F_init_interface(void);
+herr_t H5F_init(void);
 void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 H5F_t *H5F_open(const char *name, uintn flags,
 		const H5F_create_t *create_parms,

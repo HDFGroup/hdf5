@@ -58,7 +58,7 @@ H5P_init_interface(void)
      * initialized since this might be done at run-time instead of compile
      * time.
      */
-    if (H5F_init_interface ()<0) {
+    if (H5F_init()<0) {
 	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		       "unable to initialize H5F and H5P interfaces");
     }
@@ -2643,18 +2643,13 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 herr_t
 H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 {
-    H5D_create_t	*plist = NULL;
-    H5T_t		*type = NULL;
-    H5T_cdata_t		*cdata = NULL;		/*conversion data	*/
-    H5T_conv_t		cfunc = NULL;		/*conversion function	*/
+    H5D_create_t	*plist = NULL;		/*property list		*/
+    H5T_t		*type = NULL;		/*data type		*/
+    H5T_path_t		*tpath = NULL;		/*type conversion info	*/
     void		*buf = NULL;		/*conversion buffer	*/
     void		*bkg = NULL;		/*conversion buffer	*/
     hid_t		src_id = -1;		/*source data type id	*/
-    herr_t		status;
-    herr_t		ret_value = FAIL;
-#ifdef H5T_DEBUG
-    H5_timer_t		timer;			/*conversion timer	*/
-#endif
+    herr_t		ret_value = FAIL;	/*return value		*/
     
     FUNC_ENTER(H5Pget_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
@@ -2686,7 +2681,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     /*
      * Can we convert between the source and destination data types?
      */
-    if (NULL==(cfunc=H5T_find(plist->fill.type, type, H5T_BKG_NO, &cdata))) {
+    if (NULL==(tpath=H5T_path_find(plist->fill.type, type, NULL, NULL))) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to convert between src and dst data types");
     }
@@ -2704,7 +2699,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      */
     if (H5T_get_size(type)>=H5T_get_size(plist->fill.type)) {
 	buf = value;
-	if (cdata->need_bkg>=H5T_BKG_TEMP &&
+	if (tpath->cdata.need_bkg>=H5T_BKG_TEMP &&
 	    NULL==(bkg=H5MM_malloc(H5T_get_size(type)))) {
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			"memory allocation failed for type conversion");
@@ -2714,20 +2709,12 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			"memory allocation failed for type conversion");
 	}
-	if (cdata->need_bkg>=H5T_BKG_TEMP) bkg = value;
+	if (tpath->cdata.need_bkg>=H5T_BKG_TEMP) bkg = value;
     }
     HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
     
     /* Do the conversion */
-#ifdef H5T_DEBUG
-    H5T_timer_begin(&timer, cdata);
-#endif
-    cdata->command = H5T_CONV_CONV;
-    status = (cfunc)(src_id, type_id, cdata, 1, buf, bkg);
-#ifdef H5T_DEBUG
-    H5T_timer_end(&timer, cdata, 1);
-#endif
-    if (status<0) {
+    if (H5T_convert(tpath, src_id, type_id, 1, buf, bkg)<0) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }

@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -g /g2 /y tgroup.h5'
+Expected output for 'h5dump -g /g2 /y tgroup.h5'
 #############################
 HDF5 "tgroup.h5" {
 GROUP "/g2" {

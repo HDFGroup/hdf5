@@ -46,6 +46,7 @@ $Source = "";
                "H5T_norm_t"                => "Tn",
                "H5T_order_t"               => "To",
                "H5T_pad_t"                 => "Tp",
+	       "H5T_pers_t"		   => "Te",
                "H5T_sign_t"                => "Ts",
                "H5T_class_t"               => "Tt",
                "H5T_str_t"                 => "Tz",

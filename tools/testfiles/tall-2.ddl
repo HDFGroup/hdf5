@@ -1,5 +1,5 @@
 #############################
-Expected output for '../h5dump -header -g /g1/g1.1 -a attr2 tall.h5'
+Expected output for 'h5dump -header -g /g1/g1.1 -a attr2 tall.h5'
 #############################
 HDF5 "tall.h5" {
 GROUP "/g1/g1.1" {
