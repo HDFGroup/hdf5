@@ -172,6 +172,7 @@ static H5G_t *H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, h
 static H5G_t *H5G_reopen(H5G_t *grp);
 #endif /* NOT_YET */
 static htri_t H5G_isa(H5G_entry_t *ent, hid_t dxpl_id);
+static htri_t H5G_link_isa(H5G_entry_t *ent, hid_t dxpl_id);
 static herr_t H5G_link(H5G_entry_t *cur_loc, const char *cur_name, 
 			H5G_entry_t *new_loc, const char *new_name, 
 			H5G_link_t type, unsigned namei_flags, hid_t dxpl_id);
@@ -998,6 +999,7 @@ H5G_init_interface(void)
     H5G_register_type(H5G_TYPE,    H5T_isa,  "data type");
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
+    H5G_register_type(H5G_LINK,    H5G_link_isa,  "link");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1844,7 +1846,43 @@ H5G_isa(H5G_entry_t *ent, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_link_isa
+ *
+ * Purpose:	Determines if an object has the requisite form for being
+ *		a soft link.
+ *
+ * Return:	Success:	TRUE if the symbol table entry is of type
+ *				H5G_LINK; FALSE otherwise.
+ *
+ *		Failure:	Shouldn't fail.
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, June 23, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5G_link_isa(H5G_entry_t *ent, hid_t UNUSED dxpl_id)
+{
+    htri_t	ret_value;
     
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_isa);
+
+    assert(ent);
+
+    if(ent->type == H5G_CACHED_SLINK)
+        ret_value=TRUE;
+    else
+        ret_value=FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_link_isa() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_open
