@@ -176,6 +176,9 @@
 /* Define if you have the lseek64 function.  */
 #undef HAVE_LSEEK64
 
+/* Define if you have the setsysinfo function.  */
+#undef HAVE_SETSYSINFO
+
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
 
@@ -200,11 +203,20 @@
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/proc.h> header file.  */
+#undef HAVE_SYS_PROC_H
+
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
 
 /* Define if you have the <sys/stat.h> header file.  */
 #undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/sysinfo.h> header file.  */
+#undef HAVE_SYS_SYSINFO_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H

@@ -18,9 +18,39 @@ can do the following:
 
 	$ make install		# Optional
 
-Note:
-For the users of the Intel TFLOPS machine, a special sequence of steps
-for the install may be found in the file:  INSTALL.ascired.
+Note: For the users of the Intel TFLOPS machine, a special sequence of
+steps for the install may be found in the file: INSTALL.ascired.
+
+OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY SUSPECT WHEN
+USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF OPTIMIZATIONS ARE
+ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK AROUND THE COMPILER BUGS
+BUT THE HDF5 DEVELOPMENT TEAM MAKES NO GUARANTEES THAT THERE ARE OTHER 
+CODE GENERATION PROBLEMS.
+
+    * GNU (Intel platforms)
+	Versions before 2.8.1 have serious problems allocating
+	registers when functions contain operations on `long long'
+	data types. Supplying the `--disable-hsizet' switch to
+	configure (documented below) will prevent hdf5 from using
+	`long long' data types in situations that are known not to
+	work, but it limits the hdf5 address space to 2GB.
+
+    * DEC
+	The V5.2-038 compiler (and possibly others) occasionally
+	generates incorrect code for memcpy() calls when optimizations
+	are enabled, resulting in unaligned access faults. HDF5 works
+	around the problem by casting the second argument to `char*'.
+
+    * SGI (Irix64 6.2)
+	The Mongoose 7.00 compiler has serious optimization bugs and
+	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
+	from SGI.
+
+    * Windows/NT
+	The MicroSoft Win32 5.0 compiler is unable to cast unsigned
+	long long values to doubles. HDF5 works around this bug by
+	first casting to signed long long and then to double.
+
 
 =======
 Step 0: Install optional third-party packages.

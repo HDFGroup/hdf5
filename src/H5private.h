@@ -90,6 +90,23 @@
 #endif
 
 /*
+ * System information. These are needed on the DEC Alpha to turn off fixing
+ * of unaligned accesses by the operating system during detection of
+ * alignment constraints in H5detect.c:main(). The <sys/param.h> must be
+ * included before <sys/proc.h> on FreeBSD even though we never use anything
+ * from either header file on that system.
+ */
+#ifdef HAVE_SYS_SYSINFO_H
+#   include <sys/sysinfo.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#   include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_PROC_H
+#   include <sys/proc.h>
+#endif
+
+/*
  * Win32 is severely broken when it comes to ANSI-C and Posix.1 compliance.
  */
 #ifdef HAVE_IO_H
@@ -540,8 +557,12 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmbtowc(P,S,Z)		mbtowc(P,S,Z)
 #define HDmemchr(S,C,Z)		memchr(S,C,Z)
 #define HDmemcmp(X,Y,Z)		memcmp(X,Y,Z)
-#define HDmemcpy(X,Y,Z)		memcpy(X,Y,Z)
-#define HDmemmove(X,Y,Z)	memmove(X,Y,Z)
+/*
+ * The (char*) casts are required for the DEC when optimizations are turned
+ * on and the source and/or destination are not aligned.
+ */
+#define HDmemcpy(X,Y,Z)		memcpy((char*)(X),(const char*)(Y),Z)
+#define HDmemmove(X,Y,Z)	memmove((char*)(X),(const char*)(Y),Z)
 #define HDmemset(X,C,Z)		memset(X,C,Z)
 #define HDmkdir(S,M)		mkdir(S,M)
 #define HDmkfifo(S,M)		mkfifo(S,M)

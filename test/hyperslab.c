@@ -284,7 +284,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
  * Purpose:	Tests H5V_hyper_copy().
  *
  *		The NX, NY, and NZ arguments are the size for the source and
- *		destination arrays.  You map pass zero for NZ or for NY and
+ *		destination arrays.  You may pass zero for NZ or for NY and
  *		NZ to test the 2-d and 1-d cases respectively.
  *
  *		A hyperslab is copied from/to (depending on MODE) various
@@ -384,12 +384,12 @@ test_copy(int mode,
     dst = H5MM_calloc(nx*ny*nz);
     init_full(src, nx, ny, nz);
 
-    for (i = 0; i < nx; i += di) {
-	for (j = 0; j < ny; j += dj) {
-	    for (k = 0; k < nz; k += dk) {
-		for (dx = 1; dx <= nx - i; dx += ddx) {
-		    for (dy = 1; dy <= ny - j; dy += ddy) {
-			for (dz = 1; dz <= nz - k; dz += ddz) {
+    for (i=0; i<nx; i+=di) {
+	for (j=0; j<ny; j+=dj) {
+	    for (k=0; k<nz; k+=dk) {
+		for (dx=1; dx<=nx-i; dx+=ddx) {
+		    for (dy=1; dy<=ny-j; dy+=ddy) {
+			for (dz=1; dz<=nz-k; dz+=ddz) {
 
 			    /*
 			     * Describe the source and destination hyperslabs
@@ -451,10 +451,10 @@ test_copy(int mode,
 			     * Set all loc values to 1 so we can detect writing
 			     * outside the hyperslab.
 			     */
-			    for (u = 0; u < nx; u++) {
-				for (v = 0; v < ny; v++) {
-				    for (w = 0; w < nz; w++) {
-					dst[u * ny * nz + v * nz + w] = 1;
+			    for (u=0; u<nx; u++) {
+				for (v=0; v<ny; v++) {
+				    for (w=0; w<nz; w++) {
+					dst[u*ny*nz + v*nz + w] = 1;
 				    }
 				}
 			    }
@@ -476,10 +476,10 @@ test_copy(int mode,
 				for (v=dst_offset[1];
 				     v<dst_offset[1]+dy;
 				     v++) {
-				    for (w = dst_offset[2];
-					 w < dst_offset[2] + dz;
+				    for (w=dst_offset[2];
+					 w<dst_offset[2]+dz;
 					 w++) {
-					acc += dst[u * ny * nz + v * nz + w];
+					acc += dst[u*ny*nz + v*nz + w];
 				    }
 				}
 			    }
@@ -512,14 +512,21 @@ test_copy(int mode,
 			     * we added the border of 1's to the hyperslab.
 			     */
 			    acc = 0;
-			    for (u = 0; u < nx; u++) {
-				for (v = 0; v < ny; v++) {
-				    for (w = 0; w < nz; w++) {
-					acc += dst[u * ny * nz + v * nz + w];
+			    for (u=0; u<nx; u++) {
+				for (v=0; v<ny; v++) {
+				    for (w=0; w<nz; w++) {
+					acc += dst[u*ny*nz + v*nz + w];
 				    }
 				}
 			    }
-			    if (acc != ref_value + nx*ny*nz - dx*dy*dz) {
+
+			    /*
+			     * The following casts are to work around an
+			     * optimization bug in the Mongoose 7.20 Irix64
+			     * compiler.
+			     */
+			    if (acc+(unsigned)dx*(unsigned)dy*(unsigned)dz !=
+				ref_value + nx*ny*nz) {
 				puts("*FAILED*");
 				if (!isatty(1)) {
 				    /*

@@ -71,10 +71,11 @@ if [ "$snapshot" = "yes" ]; then
     (cd ${COMPARE}/current; make distclean)
 fi
 
-# Release snapshot, update version, and commit to cvs
+# Release snapshot, update version, and commit to cvs and tag
 if [ "$snapshot" = "yes" ]; then
     (
 	cd ${COMPARE}/current
+	cvs -Q tag hdf5-`./bin/h5vers |tr . _`
 	./bin/release -d $ARCHIVES $METHODS
 	./bin/h5vers -i
 	cvs -Q commit -m Snapshot

@@ -449,7 +449,7 @@ H5O_pline_debug (H5F_t __unused__ *f, const void *mesg, FILE *stream,
 		(unsigned long)(pline->filter[i].cd_nelmts));
 	for (j=0; j<pline->filter[i].cd_nelmts; j++) {
 	    char	field_name[32];
-	    sprintf(field_name, "CD value %d", j);
+	    sprintf(field_name, "CD value %lu", (unsigned long)j);
 	    fprintf(stream, "%*s%-*s %lu\n", indent+6, "", MAX(0, fwidth-6),
 		    field_name,
 		    (unsigned long)(pline->filter[i].cd_values[j]));

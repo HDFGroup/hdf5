@@ -1294,7 +1294,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     unsigned char	dst_bits[32];		/*dest value in LE order*/
     size_t		src_nbits;		/*source length in bits	*/
     size_t		dst_nbits;		/*dst length in bits	*/
-    long_long		aligned;		/*restrictive alignment	*/
+    void		*aligned=NULL;		/*aligned temp buffer	*/
     signed char		hw_char;
     unsigned char	hw_uchar;
     short		hw_short;
@@ -1395,6 +1395,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    aligned = malloc(sizeof(long_long));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
@@ -1428,47 +1429,49 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_char;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j, sizeof(char));
-		    hw_char = (char)(*((signed char*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_char = (char)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j, sizeof(char));
-		    hw_char = (char)(*((unsigned char*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_char = (char)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_char = (char)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_char = (char)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_char = (char)(*((unsigned short*)&aligned));
+		    hw_char = (char)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_char = (char)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_char = (char)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_char = (char)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_char = (char)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_char = (char)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_char = (char)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_char = (char)(*((unsigned long*)&aligned));
+		    hw_char = (char)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_char = (char)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_char = (char)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_char = (char)(*((unsigned long_long*)&aligned));
+		    hw_char = (char)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1477,50 +1480,52 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_uchar;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
-		    hw_uchar = (unsigned char)(*((signed char*)&aligned));
+		    hw_uchar = (unsigned char)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_uchar = (unsigned char)(*((unsigned char*)&aligned));
+		    hw_uchar = (unsigned char)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_uchar = (unsigned char)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_uchar = (unsigned char)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_uchar = (unsigned char)(*((unsigned short*)&aligned));
+		    hw_uchar = (unsigned char)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_uchar = (unsigned char)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_uchar = (unsigned char)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_uchar = (unsigned char)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_uchar = (unsigned char)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_uchar = (unsigned char)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_uchar = (unsigned char)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_uchar = (unsigned char)(*((unsigned long*)&aligned));
+		    hw_uchar = (unsigned char)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_uchar = (unsigned char)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_uchar = (unsigned char)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
 		    hw_uchar = (unsigned char)(*((unsigned long_long*)
-						 &aligned));
+						 aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1529,49 +1534,50 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_short;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
-			   sizeof(signed char));
-		    hw_short = (short)(*((signed char*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		    hw_short = (short)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_short = (short)(*((unsigned char*)&aligned));
+		    hw_short = (short)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_short = (short)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_short = (short)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_short = (short)(*((unsigned short*)&aligned));
+		    hw_short = (short)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_short = (short)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_short = (short)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_short = (short)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_short = (short)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_short = (short)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_short = (short)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_short = (short)(*((unsigned long*)&aligned));
+		    hw_short = (short)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_short = (short)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_short = (short)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_short = (short)(*((unsigned long_long*)&aligned));
+		    hw_short = (short)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1580,50 +1586,51 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_ushort;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
-			   sizeof(signed char));
-		    hw_ushort = (unsigned short)(*((signed char*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		    hw_ushort = (unsigned short)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_ushort = (unsigned short)(*((unsigned char*)&aligned));
+		    hw_ushort = (unsigned short)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_ushort = (unsigned short)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_ushort = (unsigned short)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_ushort = (unsigned short)(*((unsigned short*)&aligned));
+		    hw_ushort = (unsigned short)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_ushort = (unsigned short)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_ushort = (unsigned short)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_ushort = (unsigned short)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_ushort = (unsigned short)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_ushort = (unsigned short)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_ushort = (unsigned short)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_ushort = (unsigned short)(*((unsigned long*)&aligned));
+		    hw_ushort = (unsigned short)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_ushort = (unsigned short)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_ushort = (unsigned short)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
 		    hw_ushort = (unsigned short)(*((unsigned long_long*)
-						   &aligned));
+						   aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1632,49 +1639,50 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_int;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
-			   sizeof(signed char));
-		    hw_int = (int)(*((signed char*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		    hw_int = (int)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_int = (int)(*((unsigned char*)&aligned));
+		    hw_int = (int)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_int = (int)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_int = (int)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_int = (int)(*((unsigned short*)&aligned));
+		    hw_int = (int)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_int = (int)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_int = (int)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_int = (int)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_int = (int)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_int = (int)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_int = (int)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_int = (int)(*((unsigned long*)&aligned));
+		    hw_int = (int)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_int = (int)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_int = (int)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_int = (int)(*((unsigned long_long*)&aligned));
+		    hw_int = (int)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1683,49 +1691,51 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_uint;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
-		    hw_uint = (unsigned int)(*((signed char*)&aligned));
+		    hw_uint = (unsigned int)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_uint = (unsigned int)(*((unsigned char*)&aligned));
+		    hw_uint = (unsigned int)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_uint = (unsigned int)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_uint = (unsigned int)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_uint = (unsigned int)(*((unsigned short*)&aligned));
+		    hw_uint = (unsigned int)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_uint = (unsigned int)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_uint = (unsigned int)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_uint = (unsigned int)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_uint = (unsigned int)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_uint = (unsigned int)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_uint = (unsigned int)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_uint = (unsigned int)(*((unsigned long*)&aligned));
+		    hw_uint = (unsigned int)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_uint = (unsigned int)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_uint = (unsigned int)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_uint = (unsigned int)(*((unsigned long_long*)&aligned));
+		    hw_uint = (unsigned int)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1734,49 +1744,51 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_long;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
-		    hw_long = (long int)(*((signed char*)&aligned));
+		    hw_long = (long int)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_long = (long int)(*((unsigned char*)&aligned));
+		    hw_long = (long int)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_long = (long int)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_long = (long int)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_long = (long int)(*((unsigned short*)&aligned));
+		    hw_long = (long int)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_long = (long int)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_long = (long int)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_long = (long int)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_long = (long int)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_long = (long int)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_long = (long int)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_long = (long int)(*((unsigned long*)&aligned));
+		    hw_long = (long int)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_long = (long int)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_long = (long int)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_long = (long int)(*((unsigned long_long*)&aligned));
+		    hw_long = (long int)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1785,50 +1797,52 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_ulong;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
-		    hw_ulong = (unsigned long)(*((signed char*)&aligned));
+		    hw_ulong = (unsigned long)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_ulong = (unsigned long)(*((unsigned char*)&aligned));
+		    hw_ulong = (unsigned long)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_ulong = (unsigned long)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_ulong = (unsigned long)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_ulong = (unsigned long)(*((unsigned short*)&aligned));
+		    hw_ulong = (unsigned long)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_ulong = (unsigned long)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_ulong = (unsigned long)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_ulong = (unsigned long)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_ulong = (unsigned long)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_ulong = (unsigned long)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_ulong = (unsigned long)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_ulong = (unsigned long)(*((unsigned long*)&aligned));
+		    hw_ulong = (unsigned long)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_ulong = (unsigned long)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_ulong = (unsigned long)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
 		    hw_ulong = (unsigned long)(*((unsigned long_long*)
-						 &aligned));
+						 aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1837,49 +1851,51 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_llong;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
-		    hw_llong = (long_long)(*((signed char*)&aligned));
+		    hw_llong = (long_long)(*((signed char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
-		    hw_llong = (long_long)(*((unsigned char*)&aligned));
+		    hw_llong = (long_long)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_llong = (long_long)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_llong = (long_long)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
-		    hw_llong = (long_long)(*((unsigned short*)&aligned));
+		    hw_llong = (long_long)(*((unsigned short*)aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_llong = (long_long)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_llong = (long_long)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_llong = (long_long)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_llong = (long_long)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_llong = (long_long)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_llong = (long_long)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
-		    hw_llong = (long_long)(*((unsigned long*)&aligned));
+		    hw_llong = (long_long)(*((unsigned long*)aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_llong = (long_long)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_llong = (long_long)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
-		    hw_llong = (long_long)(*((unsigned long_long*)&aligned));
+		    hw_llong = (long_long)(*((unsigned long_long*)aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -1888,54 +1904,56 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_ullong;
 		switch (src_type) {
 		case INT_CHAR:
-		    memcpy(&aligned, (signed char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(signed char));
 		    hw_ullong = (unsigned long_long)(*((signed char*)
-						       &aligned));
+						       aligned));
 		    break;
 		case INT_UCHAR:
-		    memcpy(&aligned, (unsigned char*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(char),
 			   sizeof(unsigned char));
 		    hw_ullong = (unsigned long_long)(*((unsigned char*)
-						       &aligned));
+						       aligned));
 		    break;
 		case INT_SHORT:
-		    memcpy(&aligned, (short*)saved+j, sizeof(short));
-		    hw_ullong = (unsigned long_long)(*((short*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		    hw_ullong = (unsigned long_long)(*((short*)aligned));
 		    break;
 		case INT_USHORT:
-		    memcpy(&aligned, (unsigned short*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(short),
 			   sizeof(unsigned short));
 		    hw_ullong = (unsigned long_long)(*((unsigned short*)
-						       &aligned));
+						       aligned));
 		    break;
 		case INT_INT:
-		    memcpy(&aligned, (int*)saved+j, sizeof(int));
-		    hw_ullong = (unsigned long_long)(*((int*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		    hw_ullong = (unsigned long_long)(*((int*)aligned));
 		    break;
 		case INT_UINT:
-		    memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		    hw_ullong = (unsigned long_long)(*((unsigned*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(unsigned),
+			   sizeof(unsigned));
+		    hw_ullong = (unsigned long_long)(*((unsigned*)aligned));
 		    break;
 		case INT_LONG:
-		    memcpy(&aligned, (long*)saved+j, sizeof(long));
-		    hw_ullong = (unsigned long_long)(*((long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		    hw_ullong = (unsigned long_long)(*((long*)aligned));
 		    break;
 		case INT_ULONG:
-		    memcpy(&aligned, (unsigned long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long),
 			   sizeof(unsigned long));
 		    hw_ullong = (unsigned long_long)(*((unsigned long*)
-						       &aligned));
+						       aligned));
 		    break;
 		case INT_LLONG:
-		    memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		    hw_ullong = (unsigned long_long)(*((long_long*)&aligned));
+		    memcpy(aligned, saved+j*sizeof(long_long),
+			   sizeof(long_long));
+		    hw_ullong = (unsigned long_long)(*((long_long*)aligned));
 		    break;
 		case INT_ULLONG:
-		    memcpy(&aligned, (unsigned long_long*)saved+j,
+		    memcpy(aligned, saved+j*sizeof(long_long),
 			   sizeof(unsigned long_long));
 		    hw_ullong = (unsigned long_long)(*((unsigned long_long*)
-						       &aligned));
+						       aligned));
 		    break;
 		case INT_OTHER:
 		    break;
@@ -2073,49 +2091,47 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
 	    switch (src_type) {
 	    case INT_CHAR:
-		memcpy(&aligned, (signed char*)saved+j, sizeof(signed char));
-		printf(" %29d\n", *((signed char*)&aligned));
+		memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		printf(" %29d\n", *((signed char*)aligned));
 		break;
 	    case INT_UCHAR:
-		memcpy(&aligned, (unsigned char*)saved+j,
-		       sizeof(unsigned char));
-		printf(" %29u\n", *((unsigned char*)&aligned));
+		memcpy(aligned, saved+j*sizeof(char), sizeof(unsigned char));
+		printf(" %29u\n", *((unsigned char*)aligned));
 		break;
 	    case INT_SHORT:
-		memcpy(&aligned, (short*)saved+j, sizeof(short));
-		printf(" %29d\n", *((short*)&aligned));
+		memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		printf(" %29d\n", *((short*)aligned));
 		break;
 	    case INT_USHORT:
-		memcpy(&aligned, (unsigned short*)saved+j,
+		memcpy(aligned, saved+j*sizeof(short),
 		       sizeof(unsigned short));
-		printf(" %29u\n", *((unsigned short*)&aligned));
+		printf(" %29u\n", *((unsigned short*)aligned));
 		break;
 	    case INT_INT:
-		memcpy(&aligned, (int*)saved+j, sizeof(int));
-		printf(" %29d\n", *((int*)&aligned));
+		memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		printf(" %29d\n", *((int*)aligned));
 		break;
 	    case INT_UINT:
-		memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		printf(" %29u\n", *((unsigned*)&aligned));
+		memcpy(aligned, saved+j*sizeof(unsigned), sizeof(unsigned));
+		printf(" %29u\n", *((unsigned*)aligned));
 		break;
 	    case INT_LONG:
-		memcpy(&aligned, (long*)saved+j, sizeof(long));
-		printf(" %29ld\n", *((long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		printf(" %29ld\n", *((long*)aligned));
 		break;
 	    case INT_ULONG:
-		memcpy(&aligned, (unsigned long*)saved+j,
-		       sizeof(unsigned long));
-		printf(" %29lu\n", *((unsigned long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long), sizeof(unsigned long));
+		printf(" %29lu\n", *((unsigned long*)aligned));
 		break;
 	    case INT_LLONG:
-		memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		printf(" %29"PRINTF_LL_WIDTH"d\n", *((long_long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
+		printf(" %29"PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
 		break;
 	    case INT_ULLONG:
-		memcpy(&aligned, (unsigned long_long*)saved+j,
+		memcpy(aligned, saved+j*sizeof(long_long),
 		       sizeof(unsigned long_long));
 		printf(" %29"PRINTF_LL_WIDTH"u\n",
-		       *((unsigned long_long*)&aligned));
+		       *((unsigned long_long*)aligned));
 		break;
 	    case INT_OTHER:
 		break;
@@ -2128,49 +2144,46 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
 	    switch (dst_type) {
 	    case INT_CHAR:
-		memcpy(&aligned, (signed char*)saved+j, sizeof(signed char));
-		printf(" %29d\n", *((signed char*)&aligned));
+		memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		printf(" %29d\n", *((signed char*)aligned));
 		break;
 	    case INT_UCHAR:
-		memcpy(&aligned, (unsigned char*)saved+j,
-		       sizeof(unsigned char));
-		printf(" %29u\n", *((unsigned char*)&aligned));
+		memcpy(aligned, saved+j*sizeof(char), sizeof(unsigned char));
+		printf(" %29u\n", *((unsigned char*)aligned));
 		break;
 	    case INT_SHORT:
-		memcpy(&aligned, (short*)saved+j, sizeof(short));
-		printf(" %29d\n", *((short*)&aligned));
+		memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		printf(" %29d\n", *((short*)aligned));
 		break;
 	    case INT_USHORT:
-		memcpy(&aligned, (unsigned short*)saved+j,
-		       sizeof(unsigned short));
-		printf(" %29u\n", *((unsigned short*)&aligned));
+		memcpy(aligned, saved+j*sizeof(short), sizeof(unsigned short));
+		printf(" %29u\n", *((unsigned short*)aligned));
 		break;
 	    case INT_INT:
-		memcpy(&aligned, (int*)saved+j, sizeof(int));
-		printf(" %29d\n", *((int*)&aligned));
+		memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		printf(" %29d\n", *((int*)aligned));
 		break;
 	    case INT_UINT:
-		memcpy(&aligned, (unsigned*)saved+j, sizeof(unsigned));
-		printf(" %29u\n", *((unsigned*)&aligned));
+		memcpy(aligned, saved+j*sizeof(unsigned), sizeof(unsigned));
+		printf(" %29u\n", *((unsigned*)aligned));
 		break;
 	    case INT_LONG:
-		memcpy(&aligned, (long*)saved+j, sizeof(long));
-		printf(" %29ld\n", *((long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		printf(" %29ld\n", *((long*)aligned));
 		break;
 	    case INT_ULONG:
-		memcpy(&aligned, (unsigned long*)saved+j,
-		       sizeof(unsigned long));
-		printf(" %29lu\n", *((unsigned long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long), sizeof(unsigned long));
+		printf(" %29lu\n", *((unsigned long*)aligned));
 		break;
 	    case INT_LLONG:
-		memcpy(&aligned, (long_long*)saved+j, sizeof(long_long));
-		printf(" %29"PRINTF_LL_WIDTH"d\n", *((long_long*)&aligned));
+		memcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
+		printf(" %29"PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
 		break;
 	    case INT_ULLONG:
-		memcpy(&aligned, (unsigned long_long*)saved+j,
+		memcpy(aligned, saved+j*sizeof(long_long),
 		       sizeof(unsigned long_long));
 		printf(" %29"PRINTF_LL_WIDTH"u\n",
-		       *((unsigned long_long*)&aligned));
+		       *((unsigned long_long*)aligned));
 		break;
 	    case INT_OTHER:
 		break;
@@ -2233,6 +2246,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
  done:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
+    if (aligned) free(aligned);
     fflush(stdout);
     reset_hdf5();	/*print statistics*/
     return (int)fails_all_tests;
@@ -2240,6 +2254,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
  error:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
+    if (aligned) free(aligned);
     fflush(stdout);
     reset_hdf5();	/*print statistics*/
     return MAX((int)fails_all_tests, 1);
@@ -2350,11 +2365,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     char		str[256];		/*hello string		*/
     float		hw_f;			/*hardware-converted 	*/
     double		hw_d;			/*hardware-converted	*/
+    void		*aligned=NULL;		/*aligned buffer	*/
 #if SIZEOF_LONG_DOUBLE!=SIZEOF_DOUBLE
     long double		hw_ld;			/*hardware-converted	*/
-    long double		aligned;		/*aligned value		*/
-#else
-    double		aligned;		/*aligned value		*/
 #endif
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     size_t		i, j, k;		/*counters		*/
@@ -2444,6 +2457,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    aligned = malloc(16); /*should be big enough for any type*/
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
@@ -2516,44 +2530,45 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
 	    /* The hardware conversion */
 	    if (FLT_FLOAT==src_type) {
-		memcpy(&aligned, (float*)saved+j, sizeof(float));
+		memcpy(aligned, saved+j*sizeof(float), sizeof(float));
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((float*)&aligned);
+		    hw_f = *((float*)aligned);
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((float*)&aligned);
+		    hw_d = *((float*)aligned);
 		    hw = (unsigned char*)&hw_d;
 #if SIZEOF_LONG_DOUBLE!=SIZEOF_DOUBLE
 		} else {
-		    hw_ld = *((float*)&aligned);
+		    hw_ld = *((float*)aligned);
 		    hw = (unsigned char*)&hw_ld;
 #endif
 		}
 	    } else if (FLT_DOUBLE==src_type) {
-		memcpy(&aligned, (double*)saved+j, sizeof(double));
+		memcpy(aligned, saved+j*sizeof(double), sizeof(double));
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((double*)&aligned);
+		    hw_f = *((double*)aligned);
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((double*)&aligned);
+		    hw_d = *((double*)aligned);
 		    hw = (unsigned char*)&hw_d;
 #if SIZEOF_LONG_DOUBLE!=SIZEOF_DOUBLE
 		} else {
-		    hw_ld = *((double*)&aligned);
+		    hw_ld = *((double*)aligned);
 		    hw = (unsigned char*)&hw_ld;
 #endif
 		}
 #if SIZEOF_LONG_DOUBLE!=SIZEOF_DOUBLE
 	    } else {
-		memcpy(&aligned, (long double*)saved+j, sizeof(long double)); 
+		memcpy(aligned, saved+j*sizeof(long double),
+		       sizeof(long double)); 
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = *((long double*)&aligned); 
+		    hw_f = *((long double*)aligned); 
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = *((long double*)&aligned); 
+		    hw_d = *((long double*)aligned); 
 		    hw = (unsigned char*)&hw_d;
 		} else {
-		    hw_ld = *((long double*)&aligned);
+		    hw_ld = *((long double*)aligned);
 		    hw = (unsigned char*)&hw_ld;
 		}
 #endif
@@ -2709,8 +2724,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 
  done:
-    if (buf) aligned_free (buf);
-    if (saved) aligned_free (saved);
+    if (buf) aligned_free(buf);
+    if (saved) aligned_free(saved);
+    if (aligned) free(aligned);
     fflush(stdout);
 #ifdef HANDLE_SIGFPE
     exit(MIN((int)fails_all_tests, 254));
@@ -2720,8 +2736,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 
  error:
-    if (buf) aligned_free (buf);
-    if (saved) aligned_free (saved);
+    if (buf) aligned_free(buf);
+    if (saved) aligned_free(saved);
+    if (aligned) free(aligned);
     fflush(stdout);
 #ifdef HANDLE_SIGFPE
     exit(MIN(MAX((int)fails_all_tests, 1), 254));

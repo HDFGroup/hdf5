@@ -46,7 +46,9 @@ case "X-$CC_BASENAME" in
 	# (notice the peculiar syntax)
 	#      47:  branch instructions that degrade performance on R4000
 	#      84:  a library is not used
-	CFLAGS="$CFLAGS -Wl,-woff,47 -Wl,-woff,84"
+	#      85:  duplicate definition preemption (from -lnsl)
+	#     134:  duplicate weak definition preemption (from -lnsl)
+	CFLAGS="$CFLAGS -Wl,-woff,47,-woff,84,-woff,85,-woff,134"
 
 	# Extra debugging flags
 	DEBUG_CFLAGS="-g -fullwarn"

@@ -305,7 +305,7 @@ static intn interface_initialize_g = 0;
 	if (d_mv) priv->d_aligned += nelmts;				      \
 	for (elmtno=0; elmtno<nelmts; elmtno++, DIR src,  DIR dst) {	      \
 	    if (s_mv) {							      \
-		memcpy(&aligned, src, sizeof(ST));			      \
+		HDmemcpy(&aligned, src, sizeof(ST));			      \
 		s = (ST*)&aligned;					      \
 	    } else {							      \
 		s = src;						      \
@@ -317,7 +317,7 @@ static intn interface_initialize_g = 0;
 	    }
 	    /* ... user-defined stuff here ... */
 #define CI_END								      \
-            if (d_mv) memcpy(dst, &aligned, dt_size);			      \
+            if (d_mv) HDmemcpy(dst, &aligned, dt_size);			      \
         }								      \
         break;								      \
     default:								      \
@@ -4718,7 +4718,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	for (elmtno=0; elmtno<nelmts; elmtno++, --src, --dst) {
 	    /* Align source and/or destination */
 	    if (src_mv) {
-		memcpy(&aligned, src, sizeof(float));
+		HDmemcpy(&aligned, src, sizeof(float));
 		s = (float*)&aligned;
 	    } else {
 		s = src;
@@ -4730,7 +4730,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    *d = *s;
 
 	    /* Unalign destination */
-	    if (dst_mv) memcpy(dst, &aligned, sizeof(double));
+	    if (dst_mv) HDmemcpy(dst, &aligned, sizeof(double));
 	}
 	break;
 	    
@@ -4821,7 +4821,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	for (elmtno=0; elmtno<nelmts; elmtno++, src++, dst++) {
 	    /* Align source and/or destination */
 	    if (src_mv) {
-		memcpy(&aligned, src, sizeof(double));
+		HDmemcpy(&aligned, src, sizeof(double));
 		s = (double*)&aligned;
 	    } else {
 		s = src;
@@ -4845,7 +4845,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    }
 
 	    /* Unalign destination */
-	    if (dst_mv) memcpy(dst, &aligned, sizeof(float));
+	    if (dst_mv) HDmemcpy(dst, &aligned, sizeof(float));
 	}
 	break;
 	    
