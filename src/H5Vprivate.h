@@ -95,7 +95,7 @@ H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline hsize_t 
+static H5_inline hsize_t UNUSED
 H5V_vector_reduce_product(unsigned n, const hsize_t *v)
 {
     hsize_t                  ret_value = 1;
