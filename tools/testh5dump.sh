@@ -49,9 +49,9 @@ DUMP()
 	echo " PASSED"
     else
 	echo "*FAILED*"
-	echo "    Actual result (*.out) differs from expected result (*.ddl)"
+	echo "    Expected result (*.ddl) differs from actual result (*.out)"
 	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $diff $srcdir/$expect $actual |sed 's/^/    /'
+	test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
