@@ -82,9 +82,11 @@ typedef struct H5AC_slot_t {
    const H5AC_class_t *type;	/*type of object stored here		*/
    haddr_t	addr;		/*file address for object		*/
    void		*thing;		/*the thing which is cached		*/
+#ifdef H5AC_DEBUG
    intn		nprots;		/*number of things protected		*/
    intn		aprots;		/*nelmts of `prot' array		*/
    H5AC_prot_t	*prot;		/*array of protected things		*/
+#endif
 } H5AC_slot_t;
 
 typedef struct H5AC_t {

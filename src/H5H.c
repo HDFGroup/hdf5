@@ -106,7 +106,8 @@ H5H_create (H5F_t *f, H5H_type_t heap_type, size_t size_hint,
    assert (addr);
    if (H5H_GLOBAL==heap_type) {
 #ifndef NDEBUG
-      fprintf (stderr, "H5H_create: a local heap is used as the global heap\n");
+      fprintf (stderr, "H5H_create: a local heap is used as the global "
+	       "heap\n");
 #endif
    }
    
@@ -888,7 +889,8 @@ H5H_remove (H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent, intn fwidth)
+H5H_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
+	   intn fwidth)
 {
    H5H_t	*h = NULL;
    int		i, j, overlap;
