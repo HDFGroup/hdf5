@@ -47,12 +47,8 @@
  *****************************************************************/
  
 
-#include <stdio.h>
 #include "gif.h"
-#include <stdlib.h>
-#include <string.h>
 
-typedef BYTE		byte;
 typedef long int	count_int;
 
 /* indicies into conv24MB */
@@ -100,13 +96,8 @@ static void xvbzero(char *s, size_t len)
 }
 
 /*************************************************************/
-int hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, pc2ncmap,  numcols, colorstyle, BitsPerPixel)
-    FILE *fp;
-    byte *pic;
-    int   ptype, w,h;
-    byte *rmap, *gmap, *bmap , *pc2ncmap;
-    int   numcols, colorstyle;
-    int	  BitsPerPixel;
+int
+hdfWriteGIF(FILE *fp, byte *pic, int w, int h, byte *pc2ncmap, int BitsPerPixel)
 {
   int   InitCodeSize;
   int   i;
@@ -368,7 +359,7 @@ int code;
   cur_bits += n_bits;
 
   while( cur_bits >= 8 ) {
-    char_out( (unsigned int) (cur_accum & 0xff) );
+    char_out( (int) (cur_accum & 0xff) );
     cur_accum >>= 8;
     cur_bits -= 8;
   }
@@ -396,7 +387,7 @@ int code;
   if( code == EOFCode ) {
     /* At EOF, write the rest of the buffer */
     while( cur_bits > 0 ) {
-      char_out( (unsigned int)(cur_accum & 0xff) );
+      char_out( (int)(cur_accum & 0xff) );
       cur_accum >>= 8;
       cur_bits -= 8;
     }
@@ -427,14 +418,14 @@ static void cl_block ()             /* table clear for block compress */
 
 
 /********************************/
-static void cl_hash(hsize)          /* reset code table */
-register count_int hsize;
+static void cl_hash(hashsize)          /* reset code table */
+register count_int hashsize;
 {
-  register count_int *htab_p = htab+hsize;
+  register count_int *htab_p = htab+hashsize;
   register long i;
   register long m1 = -1;
 
-  i = hsize - 16;
+  i = hashsize - 16;
   do {                            /* might use Sys V memset(3) here */
     *(htab_p-16) = m1;
     *(htab_p-15) = m1;
@@ -469,7 +460,7 @@ register count_int hsize;
 /*
  * Number of characters so far in this 'packet'
  */
-static int a_count;
+static size_t a_count;
 
 /*
  * Set up the 'byte output' routine
@@ -502,7 +493,7 @@ int c;
 static void flush_char()
 {
   if( a_count > 0 ) {
-    fputc( a_count, g_outfile );
+    fputc( (int)a_count, g_outfile );
     fwrite( accum, 1, a_count, g_outfile );
     a_count = 0;
   }

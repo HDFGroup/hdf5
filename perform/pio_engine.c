@@ -352,7 +352,7 @@ done:
 static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
 {
-    const char *prefix, *suffix;
+    const char *prefix, *suffix="";
     char *ptr, last = '\0';
     size_t i, j;
 
@@ -470,11 +470,11 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     off_t       nelmts_xfer;
     size_t      nelmts_toxfer;
     char        dname[64];
-    off_t       dset_offset;    /*dataset offset in a file              */
+    off_t       dset_offset=0;    /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
     size_t      nelmts_in_buf;  /*how many element the buffer holds     */
-    size_t      nelmts_in_blk;  /*how many element a block holds        */
+    size_t      nelmts_in_blk=0;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
     hid_t       dcpl = -1;      /* Dataset creation property list       */
@@ -688,7 +688,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 	    if (parms->verify) {
 		/*Prepare write data for verify later*/
                 int *intptr = (int *)buffer;
-                register int i;
+                size_t i;
 
                 for (i = 0; i < nelmts_toxfer; ++i)
                     *intptr++ = pio_mpi_rank_g;
@@ -855,11 +855,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     off_t       nelmts_xfer;
     size_t      nelmts_toxfer;
     char        dname[64];
-    off_t       dset_offset;    /*dataset offset in a file              */
+    off_t       dset_offset=0;    /*dataset offset in a file              */
     off_t       file_offset;	/*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
     size_t      nelmts_in_buf;  /*how many element the buffer holds     */
-    size_t      nelmts_in_blk;  /*how many element a block holds        */
+    size_t      nelmts_in_blk=0;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
 
@@ -1131,8 +1131,8 @@ HDfprintf(output,
 	    if (parms->verify) {
 		/*verify read data*/
                 int *intptr = (int *)buffer;
-                register int i;
-		register int nerror=0;
+                size_t i;
+		int nerror=0;
 
                 for (i = 0; i < nelmts_toxfer; ++i){
                     if (*intptr++ != pio_mpi_rank_g){

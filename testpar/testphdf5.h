@@ -17,10 +17,6 @@
 #ifndef PHDF5TEST_H
 #define PHDF5TEST_H
 
-#include <assert.h>
-#include <stdlib.h>
-
-#include "hdf5.h"
 #include "h5test.h"
 
 /* Define some handy debugging shorthands, routines, ... */
@@ -116,7 +112,7 @@ extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 
 /* prototypes */
-hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type );
+hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type );
 void multiple_dset_write(char *filename, int ndatasets);
 void multiple_group_write(char *filename, int ngroups);
 void multiple_group_read(char *filename, int ngroups);

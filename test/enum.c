@@ -375,7 +375,7 @@ static int
 test_value_dsnt_exist(void)
 {
 
-    hid_t       datatype_id;  /* identifiers */
+    hid_t       datatype_id=(-1);  /* identifiers */
     int val;
     char nam[100];
     size_t size = 100;

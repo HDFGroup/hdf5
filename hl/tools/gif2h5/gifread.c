@@ -6,8 +6,6 @@ static BYTE *
 ReadDataSubBlocks(BYTE **MemGif2 , WORD *DSize);
 
 int EndianOrder;
-int i;
-
 
 WORD 
 GetWord (MemGif)
@@ -49,7 +47,7 @@ ReadGifHeader(GifHead, MemGif2)
 GIFHEAD *GifHead;       /* Pointer to GIF header structure  */
 BYTE    **MemGif2;       /* GIF image file input FILE stream */
 {
-    register WORD i;    /* Loop counter                                */
+    WORD i;    /* Loop counter                                */
     WORD tableSize;     /* Number of entires in the Global Color Table */
 	
 	GifHead->TableSize = 0;
@@ -213,7 +211,7 @@ ReadGifGraphicControl(GifGraphicControl, MemGif2)
 GIFGRAPHICCONTROL *GifGraphicControl; /* Pointer to GC Extension structure */
 BYTE              **MemGif2;          /* GIF image file input FILE stream  */
 {
-
+    int i;
     
 	for (i = 0 ; i < 5 ; i++) {
 		GifGraphicControl->GCEDump[i] = *(*MemGif2)++;
@@ -237,6 +235,8 @@ ReadGifPlainText(GifPlainText, MemGif2)
 GIFPLAINTEXT *GifPlainText; /* Pointer to Plain Text Extension structure */
 BYTE         **MemGif2;       /* GIF image file input FILE stream          */
 {
+    int i;
+
 	for (i = 0 ; i < 13 ; i++) {
 		GifPlainText->PTEDump[i] = *(*MemGif2)++;
 	}
@@ -273,6 +273,8 @@ ReadGifApplication(GifApplication, MemGif2)
 GIFAPPLICATION *GifApplication; /* Pointer to Application Extension structure */
 BYTE           **MemGif2;          /* GIF image file input FILE stream           */
 {
+    int i;
+
 	for (i = 0 ; i < 12 ; i++) {
 		GifApplication->AEDump[i] = *(*MemGif2)++;
 	}
@@ -336,7 +338,7 @@ WORD *DSize;
 {
     BYTE *ptr1;     /* Pointer used to "walk the heap"               */
     BYTE *ptr2;     /* Pointer used to mark the top of the heap      */
-    BYTE dataSize;  /* Size of the current data sub-block being read */
+    size_t dataSize;  /* Size of the current data sub-block being read */
     WORD bufSize;   /* Total size of the Plain Text data buffer      */
 	int tempcount = 0;
 

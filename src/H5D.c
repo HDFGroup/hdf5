@@ -1606,7 +1606,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hbool_t     must_convert;       /*have to xfer the slow way*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_dxpl_t	*dx = NULL;
-    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
+    H5FD_mpio_xfer_t	xfer_mode=H5FD_MPIO_INDEPENDENT;	/*xfer_mode for this request */
     hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
     hbool_t		doing_mpio=0;		/*This is an MPIO access */
 #endif
@@ -1654,7 +1654,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==xfer_parms->driver_id){
 	doing_mpio++;
-	if (dx=xfer_parms->driver_info){
+	if ((dx=xfer_parms->driver_info)!=NULL){
 	    xfer_mode = dx->xfer_mode;
 	}else
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -2060,7 +2060,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hbool_t     must_convert;       /*have to xfer the slow way*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_dxpl_t	*dx = NULL;
-    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
+    H5FD_mpio_xfer_t	xfer_mode=H5FD_MPIO_INDEPENDENT;	/*xfer_mode for this request */
     hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
     hbool_t		doing_mpio=0;		/*This is an MPIO access */
 #endif
@@ -2137,7 +2137,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==xfer_parms->driver_id){
 	doing_mpio++;
-	if (dx=xfer_parms->driver_info){
+	if ((dx=xfer_parms->driver_info)!=NULL){
 	    xfer_mode = dx->xfer_mode;
 	}else
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,

@@ -138,7 +138,7 @@ set_time(pio_time *pt, timer_type t, int start_stop)
         }
 
         if (pio_debug_level >= 4) {
-            char *msg;
+            const char *msg;
             int myrank;
 
             MPI_Comm_rank(pio_comm_g, &myrank);

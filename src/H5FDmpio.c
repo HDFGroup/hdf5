@@ -428,7 +428,7 @@ H5FD_mpio_communicator(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
 
-    FUNC_ENTER(H5FD_mpio_communicator, NULL);
+    FUNC_ENTER(H5FD_mpio_communicator, MPI_COMM_NULL);
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
@@ -612,11 +612,14 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
     char msgbuf[1];
-    MPI_Status rcvstat = {0};
+    MPI_Status rcvstat;
 
     FUNC_ENTER(H5FD_mpio_wait_for_left_neighbor, FAIL);
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+
+    /* Portably initialize MPI status variable */
+    HDmemset(&rcvstat,0,sizeof(MPI_Status));
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {
@@ -785,7 +788,7 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
  */
 static H5FD_t *
 H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
-	       haddr_t maxaddr/*unused*/)
+	       haddr_t UNUSED maxaddr)
 {
     H5FD_mpio_t			*file=NULL;
     MPI_File			fh;
@@ -991,16 +994,11 @@ H5FD_mpio_close(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
+H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
 {
-#ifndef NDEBUG
-    const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-#endif /* NDEBUG */
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_query, FAIL);
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {

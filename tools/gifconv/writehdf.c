@@ -7,7 +7,8 @@
 ** Function:	write_text_attribute
 ** Use:			Just a small wrapper to write text attributes easily
 ********************************************************************/
-int write_text_attribute(hid_t dataset_id , char *attr_name , char *attr_value) {
+static int write_text_attribute(hid_t dataset_id , const char *attr_name , const char *attr_value)
+{
 	
 	/* variables for the attributes */
 	hsize_t attr_dims_size;		/* dimensions for the attribute */

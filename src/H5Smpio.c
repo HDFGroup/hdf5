@@ -120,7 +120,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
 		     hbool_t *is_derived_type )
 {
     hsize_t	total_bytes;
-    int		i;
+    unsigned		u;
 
     FUNC_ENTER (H5S_mpio_all_type, FAIL);
 
@@ -129,8 +129,8 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
 
     /* Just treat the entire extent as a block of bytes */
     total_bytes = (hsize_t)elmt_size;
-    for (i=0; i<space->extent.u.simple.rank; ++i)
-	total_bytes *= space->extent.u.simple.size[i];
+    for (u=0; u<space->extent.u.simple.rank; ++u)
+	total_bytes *= space->extent.u.simple.size[u];
 
     /* fill in the return values */
     *new_type = MPI_BYTE;

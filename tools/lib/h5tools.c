@@ -198,7 +198,7 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
 #define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
 
     static int          initialized = 0;
-    register int        drivernum;
+    size_t        drivernum;
     hid_t               fid = FAIL;
 #ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;

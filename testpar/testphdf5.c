@@ -107,7 +107,7 @@ int MPI_Init(int *argc, char ***argv)
 /*
  * Show command usage
  */
-void
+static void
 usage(void)
 {
     printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] [-n<n_groups>] "
@@ -132,7 +132,7 @@ usage(void)
 /*
  * parse the command line options
  */
-int
+static int
 parse_options(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
@@ -258,7 +258,7 @@ parse_options(int argc, char **argv)
  * Create the appropriate File access property list
  */
 hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type )
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type )
 {
     hid_t ret_pl = -1;
     herr_t ret;                 /* generic return value */
@@ -270,17 +270,17 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type )
     ret_pl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((ret_pl >= 0), "H5P_FILE_ACCESS");
 
-    if (facc_type == FACC_DEFAULT)
+    if (l_facc_type == FACC_DEFAULT)
 	return (ret_pl);
 
-    if (facc_type == FACC_MPIO){
+    if (l_facc_type == FACC_MPIO){
 	/* set Parallel access with communicator */
 	ret = H5Pset_fapl_mpio(ret_pl, comm, info);     
 	VRFY((ret >= 0), "");
 	return(ret_pl);
     }
 
-    if (facc_type == (FACC_MPIO | FACC_SPLIT)){
+    if (l_facc_type == (FACC_MPIO | FACC_SPLIT)){
 	hid_t mpio_pl;
 
 	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
@@ -304,7 +304,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type )
 }
 
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
 

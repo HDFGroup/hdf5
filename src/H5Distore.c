@@ -2317,7 +2317,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
     /* Allocate chunk buffer for processes to use when writing fill values */
-    if (NULL==(chunk = H5MM_malloc(chunk_size)))
+    H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
+    if (NULL==(chunk = H5MM_malloc((size_t)chunk_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
 
     /* Fill the chunk with the proper values */
@@ -2326,12 +2327,12 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
          * Replicate the fill value throughout the chunk.
          */
         assert(0==chunk_size % fill->size);
-        H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
+        H5V_array_fill(chunk, fill->buf, fill->size, (size_t)chunk_size/fill->size);
     } else {
         /*
          * No fill value was specified, assume all zeros.
          */
-        HDmemset (chunk, 0, chunk_size);
+        HDmemset (chunk, 0, (size_t)chunk_size);
     } /* end else */
 
     /* Retrieve up MPI parameters */
@@ -2359,7 +2360,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             /* Round-robin write the chunks out from only one process */
             if(mpi_round==mpi_rank) {
-                if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, (hsize_t)udata.key.nbytes, dxpl_id, chunk)<0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
             } /* end if */
             mpi_round=(++mpi_round)%mpi_size;

@@ -28,7 +28,7 @@ main(int argv , char *argc[])
 	
 	/* replacing int32 with long */
 	long i,ImageCount;
-	long filesize;
+	size_t filesize;
 
 	BYTE *MemGif;
 	BYTE *StartPos;
@@ -69,7 +69,7 @@ main(int argv , char *argc[])
 
 	/* Get the whole file into memory. Mem's much faster than I/O */
 	fseek(fpGif, 0L , 2);
-	filesize = ftell(fpGif);
+	filesize = (size_t)ftell(fpGif);
 	fseek(fpGif, 0L , 0);
 	if (filesize == 0) printf("File Size Zero");
 	if (!(MemGif = StartPos = (BYTE *)malloc(filesize))) {

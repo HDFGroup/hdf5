@@ -3235,12 +3235,12 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		break;
 	    case INT_LLONG:
 		memcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
-		printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
 		break;
 	    case INT_ULLONG:
 		memcpy(aligned, saved+j*sizeof(long_long),
 		       sizeof(unsigned long_long));
-		printf(" %29"H5_PRINTF_LL_WIDTH"u\n",
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n",
 		       *((unsigned long_long*)aligned));
 		break;
 	    case INT_OTHER:
@@ -3288,12 +3288,12 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		break;
 	    case INT_LLONG:
 		memcpy(aligned, buf+j*sizeof(long_long), sizeof(long_long));
-		printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
 		break;
 	    case INT_ULLONG:
 		memcpy(aligned, buf+j*sizeof(long_long),
 		       sizeof(unsigned long_long));
-		printf(" %29"H5_PRINTF_LL_WIDTH"u\n",
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n",
 		       *((unsigned long_long*)aligned));
 		break;
 	    case INT_OTHER:
@@ -3332,10 +3332,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		printf(" %29lu\n", *((unsigned long*)hw));
 		break;
 	    case INT_LLONG:
-		printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)hw));
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)hw));
 		break;
 	    case INT_ULLONG:
-		printf(" %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
+		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
 		break;
 	    case INT_OTHER:
 		break;
@@ -3836,7 +3836,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    } else {
 		long double x;
 		memcpy(&x, (long double*)saved+j, sizeof(long double));
-		printf(" %29.20Le\n", x);
+		HDfprintf(stdout," %29.20Le\n", x);
 #endif
 	    }
 
@@ -3858,7 +3858,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    } else {
 		long double x;
 		memcpy(&x, (long double*)buf+j, sizeof(long double));
-		printf(" %29.20Le\n", x);
+		HDfprintf(stdout," %29.20Le\n", x);
 #endif
 	    }
 
@@ -3874,7 +3874,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		printf(" %29.20e\n", hw_d);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
 	    } else {
-		printf(" %29.20Le\n", hw_ld);
+		HDfprintf(stdout," %29.20Le\n", hw_ld);
 #endif
 	    }
 

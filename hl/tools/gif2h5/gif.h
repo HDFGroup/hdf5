@@ -22,6 +22,7 @@
 
 /* typedef H5T_NATIVE_UINT8  BYTE; */
 typedef unsigned char BYTE;
+typedef BYTE		byte;
 
 /* typedef H5T_NATIVE_UINT16  WORD; */
 typedef unsigned long WORD;
@@ -174,5 +175,10 @@ BYTE GetByte(BYTE *);
 WORD GetWord(BYTE *);
 
 void cleanup(BYTE*);
+
+/* HDFGIFWR.C */
+extern int
+hdfWriteGIF(FILE *fp, byte *pic, int w, int h, byte *pc2ncmap, int BitsPerPixel);
+
 #endif  /* GIF_H */
 

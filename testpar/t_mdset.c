@@ -200,7 +200,9 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
    if(! ((counter+1) % 10)) {
+#ifdef VERBOSE
         printf("created %dth child groups\n", counter+1);
+#endif /* VERBOSE */
         MPI_Barrier(MPI_COMM_WORLD);
    }
  

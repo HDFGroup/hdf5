@@ -778,7 +778,7 @@ test_compatible(void)
   }
   fspace = -1;
   if((fspace = H5Dget_space(dset2))<0) goto error;
-  dims[0] = dims[1] = -1;
+  dims[0] = dims[1] = (hsize_t)-1;
   if(H5Sget_simple_extent_dims(fspace, dims, NULL)<0) goto error;
   if(dims[0] != 8 || dims[1] != 8) {
       H5_FAILED();
