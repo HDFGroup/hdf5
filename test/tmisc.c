@@ -51,6 +51,12 @@ typedef struct {
 #define MISC3_FILL_VALUE        2
 #define MISC3_DSET_NAME         "/chunked"
 
+/* Definitions for misc. test #4 */
+#define MISC4_FILE_1            "tmisc4a.h5"
+#define MISC4_FILE_2            "tmisc4b.h5"
+#define MISC4_GROUP_1           "/Group1"
+#define MISC4_GROUP_2           "/Group2"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -359,6 +365,78 @@ test_misc3(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc3() */
 
+/****************************************************************
+**
+**  test_misc4(): Test the that 'fileno' field in H5G_stat_t is
+**      valid.
+**
+****************************************************************/
+static void
+test_misc4(void)
+{
+    hid_t file1, file2, group1, group2, group3;
+    H5G_stat_t stat1, stat2, stat3;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing fileno working in H5G_stat_t\n"));
+
+    file1 = H5Fcreate(MISC4_FILE_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1, FAIL, "H5Fcreate");
+
+    /* Create the first group */
+    group1 = H5Gcreate(file1, MISC4_GROUP_1, 0);
+    CHECK(group1, FAIL, "H5Gcreate");
+
+    /* Create the second group */
+    group2 = H5Gcreate(file1, MISC4_GROUP_2, 0);
+    CHECK(group2, FAIL, "H5Gcreate");
+
+    file2 = H5Fcreate(MISC4_FILE_2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file2, FAIL, "H5Fcreate");
+
+    /* Create the first group */
+    group3 = H5Gcreate(file2, MISC4_GROUP_1, 0);
+    CHECK(group3, FAIL, "H5Gcreate");
+
+    /* Get the stat information for each group */
+    ret = H5Gget_objinfo(file1,MISC4_GROUP_1,0,&stat1);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    ret = H5Gget_objinfo(file1,MISC4_GROUP_2,0,&stat2);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    ret = H5Gget_objinfo(file2,MISC4_GROUP_1,0,&stat3);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+
+    /* Verify that the fileno values are the same for groups from file1 */
+    VERIFY(stat1.fileno[0],stat2.fileno[0],"H5Gget_objinfo");
+    VERIFY(stat1.fileno[1],stat2.fileno[1],"H5Gget_objinfo");
+
+    /* Verify that the fileno values are not the same between file1 & file2 */
+    if(stat1.fileno[0]==stat3.fileno[0] && stat1.fileno[1]==stat3.fileno[1]) {
+        num_errs++;
+        printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
+    } /* end if */
+    if(stat2.fileno[0]==stat3.fileno[0] && stat2.fileno[1]==stat3.fileno[1]) {
+        num_errs++;
+        printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
+    } /* end if */
+
+    /* Close the objects */
+    ret = H5Gclose(group1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(group2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(group3);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Fclose(file2);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc4() */
 
 /****************************************************************
 **
@@ -374,6 +452,7 @@ test_misc(void)
     test_misc1();       /* Test unlinking a dataset & immediately re-using name */
     test_misc2();       /* Test storing a VL-derived datatype in two different files */
     test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
+    test_misc4();       /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
 
 } /* test_misc() */
 
@@ -399,4 +478,6 @@ cleanup_misc(void)
     remove(MISC2_FILE_1);
     remove(MISC2_FILE_2);
     remove(MISC3_FILE);
+    remove(MISC4_FILE_1);
+    remove(MISC4_FILE_2);
 }
