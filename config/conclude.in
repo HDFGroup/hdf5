@@ -12,7 +12,7 @@ $(LIB) __no_library__: $(LIB_OBJ)
 	$(AR) -rc $@ $(LIB_OBJ)
 	$(RANLIB) $@
 
-progs: $(PROGS)
+progs: $(LIB) $(PROGS)
 
 # Build a tags file in this directory.
 TAGS: $(LIB_SRC)
@@ -20,7 +20,7 @@ TAGS: $(LIB_SRC)
 	-etags $(LIB_SRC)
 
 # Runs each test in order, passing $(TEST_FLAGS) to the program.
-tests: $(TESTS)
+tests: $(LIB) $(TESTS)
 test _test: tests
 	@for test in $(TESTS) dummy; do			                      \
 	   if test $$test != dummy; then				      \
