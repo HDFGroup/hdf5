@@ -777,9 +777,6 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 			} else if (sizeof(x->offset)==SIZEOF_LONG_LONG) {
 			    HDstrcat(template, PRINTF_LL_WIDTH);
 			    HDstrcat(template, "d");
-			} else if (sizeof(x->offset)==SIZEOF___INT64) {
-			    HDstrcat(template, PRINTF_LL_WIDTH);
-			    HDstrcat(template, "d");
 			}
 			n = fprintf(stream, template, x->offset);
 		    } else {

@@ -196,94 +196,159 @@
 #endif
 
 /*
+ * Although `long long' is part of the revised ANSI-C some compilers don't
+ * support it yet.  We define `long_long' as the longest integral integer type
+ * supported by the compiler, usually 64 bits.  It must be legal to qualify
+ * `long_long' with `unsigned'.
+ */
+#if SIZEOF_LONG_LONG>0
+#   define long_long	long long
+#elif SIZEOF___INT64>0
+#   define long_long	__int64	/*Win32*/
+#   undef SIZEOF_LONG_LONG
+#   define SIZEOF_LONG_LONG SIZEOF___INT64
+#else
+#   define long_long	long int
+#   undef SIZEOF_LONG_LONG
+#   define SIZEOF_LONG_LONG SIZEOF_LONG
+#endif
+
+/*
  * Numeric data types.  Some of these might be defined in Posix.1g, otherwise
  * we define them with the closest available type which is at least as large
- * as the number of bits indicated in the type name.
+ * as the number of bits indicated in the type name.  The `int8' types *must*
+ * be exactly one byte wide because we use it for pointer calculations to
+ * void* memory.
+ *
+ * For int16_t and uint16_t we use `short' only if it's exactly 2 bytes.
+ * Otherwise we use `int' because it's probably faster.
  */
 #if SIZEOF_INT8_T==0
-typedef signed char int8_t;
+    typedef signed char int8_t;
+#   undef SIZEOF_INT8_T
+#   define SIZEOF_INT8_T SIZEOF_CHAR
+#elif SIZEOF_INT8_T==1
+#else
+#   error "the int8_t type must be 1 byte wide"
 #endif
 
 #if SIZEOF_UINT8_T==0
-typedef unsigned char uint8_t;
-#endif
-
-#if SIZEOF_INT16_T==0
-#   if SIZEOF_SHORT==2
-typedef short int16_t;
-#   else
-typedef int int16_t;		/*not really */
-#   endif
-#endif
-
-#if SIZEOF_UINT16_T==0
-#   if SIZEOF_SHORT==2
-typedef unsigned short uint16_t;
-#   else
-typedef unsigned uint16_t;	/*not really */
-#   endif
-#endif
-
-#if SIZEOF_INT32_T==0
-#   if SIZEOF_INT==4
-typedef int int32_t;
-#   elif SIZEOF_LONG==4
-typedef long int32_t;
-#   else
-typedef int int32_t;		/*not really */
-#   endif
-#endif
-
-#if SIZEOF_UINT32_T==0
-#   if SIZEOF_INT==4
-typedef unsigned int uint32_t;
-#   elif SIZEOF_LONG==4
-typedef unsigned long uint32_t;
-#   else
-typedef unsigned uint32_t;	/*not really */
-#   endif
-#endif
-
-#if SIZEOF_INT64_T==0
-#   if SIZEOF_INT==8
-typedef int int64_t;
-#   elif SIZEOF_LONG==8
-typedef long int64_t;
-#   elif SIZEOF_LONG_LONG==8
-typedef long long int64_t;
-#   elif SIZEOF___INT64==8
-typedef __int64 int64_t;
-#   else
-#       error "no signed 64-bit integer type"
-#   endif
-#endif
-
-#if SIZEOF_UINT64_T==0
-#   if SIZEOF_INT==8
-typedef unsigned uint64_t;
-#   elif SIZEOF_LONG==8
-typedef unsigned long uint64_t;
-#   elif SIZEOF_LONG_LONG==8
-typedef unsigned long long uint64_t;
-#   elif SIZEOF___INT64==8
-typedef unsigned __int64 uint64_t;
-#   else
-#       error "no unsigned 64-bit integer type"
-#   endif
-#endif
-
-#if SIZEOF_FLOAT==4
-typedef float float32;
+    typedef unsigned char uint8_t;
+#   undef SIZEOF_UINT8_T
+#   define SIZEOF_UINT8_T SIZEOF_CHAR
+#elif SIZEOF_UINT8_T==1
 #else
-typedef float float32;          /*not really */
+#   error "the uint8_t type must be 1 byte wide"
 #endif
 
-#if SIZEOF_FLOAT==8
+#if SIZEOF_INT16_T>=2
+#elif SIZEOF_SHORT==2
+    typedef short int16_t
+#   undef SIZEOF_INT16_T
+#   define SIZEOF_INT16_T SIZEOF_SHORT
+#elif SIZEOF_INT>=2
+    typedef int int16_t
+#   undef SIZEOF_INT16_T
+#   define SIZEOF_INT16_T SIZEOF_INT
+#else
+#   error "nothing appropriate for int16_t"
+#endif
+
+#if SIZEOF_UINT16_T>=2
+#elif SIZEOF_SHORT>=2
+    typedef unsigned short uint16_t;
+#   undef SIZEOF_UINT16_T
+#   define SIZEOF_UINT16_T SIZEOF_SHORT
+#elif SIZEOF_INT>=2
+    typedef unsigned uint16_t;
+#   undef SIZEOF_UINT16_T
+#   define SIZEOF_UINT16_T SIZEOF_INT
+#else
+#   error "nothing appropriate for uint16_t"
+#endif
+
+#if SIZEOF_INT32_T>=4
+#elif SIZEOF_SHORT>=4
+    typedef short int32_t
+#   undef SIZEOF_INT32_T
+#   define SIZEOF_INT32_T SIZEOF_SHORT
+#elif SIZEOF_INT>=4
+    typedef int int32_t;
+#   undef SIZEOF_INT32_T
+#   define SIZEOF_INT32_T SIZEOF_INT
+#elif SIZEOF_LONG>=4
+    typedef long int32_t;
+#   undef SIZEOF_INT32_T
+#   define SIZEOF_INT32_T SIZEOF_LONG
+#else
+#   error "nothing appropriate for int32_t"
+#endif
+
+#if SIZEOF_UINT32_T>=4
+#elif SIZEOF_SHORT>=4
+    typedef short uint32_t;
+#   undef SIZEOF_UINT32_T
+#   define SIZEOF_UINT32_T SIZEOF_SHORT
+#elif SIZEOF_INT>=4
+    typedef unsigned int uint32_t;
+#   undef SIZEOF_UINT32_T
+#   define SIZEOF_UINT32_T SIZEOF_INT
+#elif SIZEOF_LONG>=4
+    typedef unsigned long uint32_t;
+#   undef SIZEOF_UINT32_T
+#   define SIZEOF_UINT32_T SIZEOF_LONG
+#else
+#   error "nothing appropriate for uint32_t"
+#endif
+
+#if SIZEOF_INT64_T>=8
+#elif SIZEOF_INT>=8
+    typedef int int64_t;
+#   undef SIZEOF_INT64_T
+#   define SIZEOF_INT64_T SIZEOF_INT
+#elif SIZEOF_LONG>=8
+    typedef long int64_t;
+#   undef SIZEOF_INT64_T
+#   define SIZEOF_INT64_T SIZEOF_LONG
+#elif SIZEOF_LONG_LONG>=8
+    typedef long_long int64_t;
+#   undef SIZEOF_INT64_T
+#   define SIZEOF_INT64_T SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for int64_t"
+#endif
+
+#if SIZEOF_UINT64_T>=8
+#elif SIZEOF_INT>=8
+    typedef unsigned uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_INT
+#elif SIZEOF_LONG>=8
+    typedef unsigned long uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_LONG
+#elif SIZEOF_LONG_LONG>=8
+    typedef unsigned long_long uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for uint64_t"
+#endif
+
+#if SIZEOF_FLOAT>=4
+typedef float float32;
+#elif SIZEOF_DOUBLE>=4
+typedef double float32;
+#else
+#   error "nothing appropriate for float32"
+#endif
+
+#if SIZEOF_FLOAT>=8
 typedef float float64;
-#elif SIZEOF_DOUBLE==8
+#elif SIZEOF_DOUBLE>=8
 typedef double float64;
 #else
-#  error "no 64-bit floating point type"
+#  error "nothing appropriate for float64"
 #endif
 
 /*
@@ -307,9 +372,9 @@ typedef struct {
  * most part.
  */
 #ifndef LLONG_MAX
-#   define LLONG_MAX	((long long)(((unsigned long long)1		      \
-				      <<(8*sizeof(long long)-1))-1))
-#   define ULLONG_MAX	((unsigned long long)((long long)(-1)))
+#   define LLONG_MAX	((long_long)(((unsigned long_long)1		      \
+				      <<(8*sizeof(long_long)-1))-1))
+#   define ULLONG_MAX	((unsigned long_long)((long_long)(-1)))
 #endif
 #ifndef SIZET_MAX
 #   define SIZET_MAX	((hsize_t)(size_t)(ssize_t)(-1))

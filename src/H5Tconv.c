@@ -2354,7 +2354,7 @@ H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_char_llong
  *
- * Purpose:	Converts `signed char' to `long long'
+ * Purpose:	Converts `signed char' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2373,7 +2373,7 @@ H5T_conv_char_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		    void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_char_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, signed char, long long);
+    H5T_CONV_sS(cdata, buf, nelmts, signed char, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2381,7 +2381,7 @@ H5T_conv_char_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_char_ullong
  *
- * Purpose:	Converts `signed char' to `unsigned long long'
+ * Purpose:	Converts `signed char' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2400,7 +2400,7 @@ H5T_conv_char_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_char_ullong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
-		signed char, unsigned long long);
+		signed char, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2408,7 +2408,7 @@ H5T_conv_char_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uchar_llong
  *
- * Purpose:	Converts `unsigned char' to `long long'
+ * Purpose:	Converts `unsigned char' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2427,7 +2427,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_uchar_llong, FAIL);
     H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, long long, LLONG_MAX);
+		unsigned char, long_long, LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2435,7 +2435,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uchar_ullong
  *
- * Purpose:	Converts `unsigned char' to `unsigned long long'
+ * Purpose:	Converts `unsigned char' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2454,7 +2454,7 @@ H5T_conv_uchar_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		      void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned long long);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2838,7 +2838,7 @@ H5T_conv_ushort_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_short_llong
  *
- * Purpose:	Converts `short' to `long long'
+ * Purpose:	Converts `short' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2857,7 +2857,7 @@ H5T_conv_short_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		     void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, short, long long);
+    H5T_CONV_sS(cdata, buf, nelmts, short, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2865,7 +2865,7 @@ H5T_conv_short_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_short_ullong
  *
- * Purpose:	Converts `short' to `unsigned long long'
+ * Purpose:	Converts `short' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2884,7 +2884,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_short_ullong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
-		short, unsigned long long);
+		short, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2892,7 +2892,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ushort_llong
  *
- * Purpose:	Converts `unsigned short' to `long long'
+ * Purpose:	Converts `unsigned short' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2911,7 +2911,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ushort_llong, FAIL);
     H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, long long, LLONG_MAX);
+		unsigned short, long_long, LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2919,7 +2919,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ushort_ullong
  *
- * Purpose:	Converts `unsigned short' to `unsigned long long'
+ * Purpose:	Converts `unsigned short' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -2938,7 +2938,7 @@ H5T_conv_ushort_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		       void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned long long);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3323,7 +3323,7 @@ H5T_conv_uint_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_int_llong
  *
- * Purpose:	Converts `int' to `long long'
+ * Purpose:	Converts `int' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3342,7 +3342,7 @@ H5T_conv_int_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		   void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, int, long long);
+    H5T_CONV_sS(cdata, buf, nelmts, int, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3350,7 +3350,7 @@ H5T_conv_int_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_int_ullong
  *
- * Purpose:	Converts `int' to `unsigned long long'
+ * Purpose:	Converts `int' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3369,7 +3369,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_int_ullong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
-		int, unsigned long long);
+		int, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3377,7 +3377,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uint_llong
  *
- * Purpose:	Converts `unsigned int' to `long long'
+ * Purpose:	Converts `unsigned int' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3396,7 +3396,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_uint_llong, FAIL);
     H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, long long, LLONG_MAX);
+		unsigned, long_long, LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3404,7 +3404,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uint_ullong
  *
- * Purpose:	Converts `unsigned int' to `unsigned long long'
+ * Purpose:	Converts `unsigned int' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3423,7 +3423,7 @@ H5T_conv_uint_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		     void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned, unsigned long long);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3809,7 +3809,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_long_llong
  *
- * Purpose:	Converts `long' to `long long'
+ * Purpose:	Converts `long' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3828,7 +3828,7 @@ H5T_conv_long_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		    void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, long, long long);
+    H5T_CONV_sS(cdata, buf, nelmts, long, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3836,7 +3836,7 @@ H5T_conv_long_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_long_ullong
  *
- * Purpose:	Converts `long' to `unsigned long long'
+ * Purpose:	Converts `long' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3855,7 +3855,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_long_ullong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
-		long, unsigned long long);
+		long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3863,7 +3863,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ulong_llong
  *
- * Purpose:	Converts `unsigned long' to `long long'
+ * Purpose:	Converts `unsigned long' to `long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3882,7 +3882,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
     H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, long long, LLONG_MAX);
+		unsigned long, long_long, LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3890,7 +3890,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ulong_ullong
  *
- * Purpose:	Converts `unsigned long' to `unsigned long long'
+ * Purpose:	Converts `unsigned long' to `unsigned long_long'
  *
  * Return:	Success:	Non-negative
  *
@@ -3909,7 +3909,7 @@ H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		      void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned long, unsigned long long);
+    H5T_CONV_uU(cdata, buf, nelmts, unsigned long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3917,7 +3917,7 @@ H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_char
  *
- * Purpose:	Converts `long long' to `signed char'
+ * Purpose:	Converts `long_long' to `signed char'
  *
  * Return:	Success:	Non-negative
  *
@@ -3936,7 +3936,7 @@ H5T_conv_llong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_char, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long long, signed char, CHAR_MIN, CHAR_MAX);
+		long_long, signed char, CHAR_MIN, CHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3944,7 +3944,7 @@ H5T_conv_llong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_uchar
  *
- * Purpose:	Converts `long long' to `unsigned char'
+ * Purpose:	Converts `long_long' to `unsigned char'
  *
  * Return:	Success:	Non-negative
  *
@@ -3963,7 +3963,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_uchar, FAIL);
     H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long long, unsigned char, UCHAR_MAX);
+		long_long, unsigned char, UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3971,7 +3971,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_char
  *
- * Purpose:	Converts `unsigned long long' to `signed char'
+ * Purpose:	Converts `unsigned long_long' to `signed char'
  *
  * Return:	Success:	Non-negative
  *
@@ -3990,7 +3990,7 @@ H5T_conv_ullong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_char, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, signed char, CHAR_MAX);
+		unsigned long_long, signed char, CHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3998,7 +3998,7 @@ H5T_conv_ullong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_uchar
  *
- * Purpose:	Converts `unsigned long long' to `unsigned char'
+ * Purpose:	Converts `unsigned long_long' to `unsigned char'
  *
  * Return:	Success:	Non-negative
  *
@@ -4017,7 +4017,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_uchar, FAIL);
     H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, unsigned char, UCHAR_MAX);
+		unsigned long_long, unsigned char, UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4025,7 +4025,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_short
  *
- * Purpose:	Converts `long long' to `short'
+ * Purpose:	Converts `long_long' to `short'
  *
  * Return:	Success:	Non-negative
  *
@@ -4044,7 +4044,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_short, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long long, short, SHRT_MIN, SHRT_MAX);
+		long_long, short, SHRT_MIN, SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4052,7 +4052,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ushort
  *
- * Purpose:	Converts `long long' to `unsigned short'
+ * Purpose:	Converts `long_long' to `unsigned short'
  *
  * Return:	Success:	Non-negative
  *
@@ -4071,7 +4071,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_ushort, FAIL);
     H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long long, unsigned short, USHRT_MAX);
+		long_long, unsigned short, USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4079,7 +4079,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_short
  *
- * Purpose:	Converts `unsigned long long' to `short'
+ * Purpose:	Converts `unsigned long_long' to `short'
  *
  * Return:	Success:	Non-negative
  *
@@ -4098,7 +4098,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_short, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, short, SHRT_MAX);
+		unsigned long_long, short, SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4106,7 +4106,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_ushort
  *
- * Purpose:	Converts `unsigned long long' to `unsigned short'
+ * Purpose:	Converts `unsigned long_long' to `unsigned short'
  *
  * Return:	Success:	Non-negative
  *
@@ -4125,7 +4125,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_ushort, FAIL);
     H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, unsigned short, USHRT_MAX);
+		unsigned long_long, unsigned short, USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4133,7 +4133,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_int
  *
- * Purpose:	Converts `long long' to `int'
+ * Purpose:	Converts `long_long' to `int'
  *
  * Return:	Success:	Non-negative
  *
@@ -4152,7 +4152,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_int, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long long, int, INT_MIN, INT_MAX);
+		long_long, int, INT_MIN, INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4160,7 +4160,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_uint
  *
- * Purpose:	Converts `long long' to `unsigned int'
+ * Purpose:	Converts `long_long' to `unsigned int'
  *
  * Return:	Success:	Non-negative
  *
@@ -4179,7 +4179,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_uint, FAIL);
     H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long long, unsigned, UINT_MAX);
+		long_long, unsigned, UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4187,7 +4187,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_int
  *
- * Purpose:	Converts `unsigned long long' to `int'
+ * Purpose:	Converts `unsigned long_long' to `int'
  *
  * Return:	Success:	Non-negative
  *
@@ -4206,7 +4206,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_int, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, int, INT_MAX);
+		unsigned long_long, int, INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4214,7 +4214,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_uint
  *
- * Purpose:	Converts `unsigned long long' to `unsigned int'
+ * Purpose:	Converts `unsigned long_long' to `unsigned int'
  *
  * Return:	Success:	Non-negative
  *
@@ -4233,7 +4233,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_uint, FAIL);
     H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, unsigned, UINT_MAX);
+		unsigned long_long, unsigned, UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4241,7 +4241,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_long
  *
- * Purpose:	Converts `long long' to `long'
+ * Purpose:	Converts `long_long' to `long'
  *
  * Return:	Success:	Non-negative
  *
@@ -4260,7 +4260,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_long, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long long, long, LONG_MIN, LONG_MAX);
+		long_long, long, LONG_MIN, LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4268,7 +4268,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ulong
  *
- * Purpose:	Converts `long long' to `unsigned long'
+ * Purpose:	Converts `long_long' to `unsigned long'
  *
  * Return:	Success:	Non-negative
  *
@@ -4287,7 +4287,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_ulong, FAIL);
     H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long long, unsigned long, ULONG_MAX);
+		long_long, unsigned long, ULONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4295,7 +4295,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_long
  *
- * Purpose:	Converts `unsigned long long' to `long'
+ * Purpose:	Converts `unsigned long_long' to `long'
  *
  * Return:	Success:	Non-negative
  *
@@ -4314,7 +4314,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_long, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, long, LONG_MAX);
+		unsigned long_long, long, LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4322,7 +4322,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_ulong
  *
- * Purpose:	Converts `unsigned long long' to `unsigned long'
+ * Purpose:	Converts `unsigned long_long' to `unsigned long'
  *
  * Return:	Success:	Non-negative
  *
@@ -4341,7 +4341,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_ulong, FAIL);
     H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, unsigned long, ULONG_MAX);
+		unsigned long_long, unsigned long, ULONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4349,7 +4349,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ullong
  *
- * Purpose:	Converts `long long' to `unsigned long long'
+ * Purpose:	Converts `long_long' to `unsigned long_long'
  *
  * Return:	Success:	non-negative
  *
@@ -4368,7 +4368,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_ullong, FAIL);
     H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
-		long long, unsigned long long);
+		long_long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4376,7 +4376,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_llong
  *
- * Purpose:	Converts `unsigned long long' to `long long'
+ * Purpose:	Converts `unsigned long_long' to `long_long'
  *
  * Return:	Success:	non-negative
  *
@@ -4395,7 +4395,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_llong, FAIL);
     H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long long, long long, LLONG_MAX);
+		unsigned long_long, long_long, LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 

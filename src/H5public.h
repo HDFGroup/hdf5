@@ -70,10 +70,10 @@ typedef int htri_t;
  * memory objects.
  */
 #ifdef HAVE_LARGE_HSIZET
-#   if SIZEOF_LONG_LONG==8
+#   if SIZEOF_LONG_LONG>=8
 typedef unsigned long long 	hsize_t;
 typedef signed long long	hssize_t;
-#   elif SIZEOF___INT64==8
+#   elif SIZEOF___INT64>=8
 typedef unsigned __int64	hsize_t;
 typedef signed __int64		hssize_t;
 #   endif

@@ -326,7 +326,7 @@ extern hid_t H5T_FORTRAN_S1_g;
  * precision and byte order as the last component, they have a C-like type
  * name.  If the type begins with `U' then it is the unsigned version of the
  * integer type; other integer types are signed.  The type LLONG corresponds
- * to C's `long long' and LDOUBLE is `long double' (these types might be the
+ * to C's `long_long' and LDOUBLE is `long double' (these types might be the
  * same as `LONG' and `DOUBLE' respectively.
  */
 #define H5T_NATIVE_CHAR         (H5open(), H5T_NATIVE_CHAR_g)

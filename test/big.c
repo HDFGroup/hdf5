@@ -21,7 +21,7 @@
 #endif
 
 #include <hdf5.h>
-#include <H5private.h> /*needed for HDfprintf() */
+#include <H5private.h> /*needed for HDfprintf() and long_long*/
 
 #define FNAME		"big%05d.h5"
 #define DNAME		"big.data"
@@ -30,7 +30,7 @@
 #define FAMILY_SIZE	1024*1024*1024
 
 #if SIZEOF_LONG_LONG > SIZEOF_LONG
-#define GB8LL		((unsigned long long)8*1024*1024*1024)
+#define GB8LL		((unsigned long_long)8*1024*1024*1024)
 #elif SIZEOF___INT64 > SIZEOF_LONG
 #define GB8LL		((unsigned __int64)8*1024*1024*1024)
 #elif SIZEOF_LONG >= 8

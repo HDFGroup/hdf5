@@ -20,7 +20,7 @@ TAGS: $(LIB_SRC)
 	-etags $(LIB_SRC)
 
 # Runs each test in order, passing $(TEST_FLAGS) to the program.
-tests: $(TEST_PROGS)
+tests: $(TEST_PROGS) $(LIB)
 test _test: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \

@@ -176,14 +176,14 @@ display_native_type(hid_t type, int __unused__ indent)
 	printf("native char");
     } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
 	printf("native unsigned char");
-    } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-	printf("native short");
-    } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-	printf("native unsigned short");
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
 	printf("native int");
     } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
 	printf("native unsigned int");
+    } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+	printf("native short");
+    } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+	printf("native unsigned short");
     } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
 	printf("native long");
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {

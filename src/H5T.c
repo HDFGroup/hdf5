@@ -703,7 +703,7 @@ H5T_init_interface(void)
 		      "unable to register conversion function");
     }
 
-    /* from long long */
+    /* from long_long */
     if (H5Tregister_hard("llong_ullong", H5T_NATIVE_LLONG, H5T_NATIVE_ULLONG,
 			 H5T_conv_llong_ullong)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,

@@ -30,41 +30,9 @@ static const char *FileHeader = "\n\
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
-#include <H5config.h>
-
-/* See H5private.h for how to include files */
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <math.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <string.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-#ifdef _POSIX_VERSION
-#   include <pwd.h>
-#endif
-
-#if defined(TIME_WITH_SYS_TIME)
-#   include <sys/time.h>
-#   include <time.h>
-#elif defined(HAVE_SYS_TIME_H)
-#   include <sys/time.h>
-#else
-#   include <time.h>
-#endif
+#include <H5private.h>
 
 #define MAXDETECT 16
-
-#ifndef MIN
-#  define MIN(X,Y) ((X)<(Y)?(X):(Y))
-#  define MIN3(X,Y,Z) MIN(X,MIN(Y,Z))
-#endif
-
 /*
  * This structure holds information about a type that
  * was detected.
@@ -976,12 +944,9 @@ main(void)
     DETECT_I(long,		  LONG,	   d[nd]); nd++;
     DETECT_I(unsigned long,	  ULONG,   d[nd]); nd++;
 
-#if SIZEOF_LONG_LONG > SIZEOF_LONG
-    DETECT_I(long long,           LLONG,   d[nd]); nd++;
-    DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;
-#elif SIZEOF___INT64 > SIZEOF_LONG
-    DETECT_I(__int64,             LLONG,   d[nd]); nd++;
-    DETECT_I(unsigned __int64,    ULLONG,  d[nd]); nd++;
+#if SIZEOF_LONG_LONG>0
+    DETECT_I(long_long,           LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned long_long,  ULLONG,  d[nd]); nd++;
 #else
     /*
      * This architecture doesn't support an integer type larger than `long'
