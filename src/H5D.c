@@ -589,23 +589,15 @@ H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
 
     /* Get the driver information */
     if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID")
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
     if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info")
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info")
 
     /* Check if we have a valid driver ID */
     if(driver_id>0) {
-        /* Increment the reference count on the driver and copy the driver info */
-        if(H5I_inc_ref(driver_id)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "Can't increment VFL driver ID")
-        if(H5FD_dxpl_copy(driver_id, driver_info, &driver_info)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "Can't copy VFL driver")
-        
-        /* Set the driver information for the new property list */
-        if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID")
-        if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info")
+        /* Set the driver for the property list */
+        if(H5FD_dxpl_open(plist, driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } /* end if */
 
 done:
@@ -633,15 +625,32 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5D_xfer_copy(hid_t new_plist_id, hid_t UNUSED old_plist_id, 
-                void *copy_data)
+H5D_xfer_copy(hid_t new_dxpl_id, hid_t old_dxpl_id, void UNUSED *copy_data)
 {
+    hid_t          driver_id;
+    void*          driver_info;
+    H5P_genplist_t *new_plist;              /* New property list */
+    H5P_genplist_t *old_plist;              /* Old property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_xfer_copy, FAIL)
 
-    if(H5D_xfer_create(new_plist_id, copy_data) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy property list")
+    if(NULL == (new_plist = H5I_object(new_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(NULL == (old_plist = H5I_object(old_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* Get values from old property list */
+    if(H5P_get(old_plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
+    if(H5P_get(old_plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info")
+    
+    if(driver_id > 0) {
+        /* Set the driver for the property list */
+        if(H5FD_dxpl_open(new_plist, driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -688,10 +697,9 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
     if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info")
     if(driver_id>0) {
-        if(H5FD_dxpl_free(driver_id, driver_info)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free VFL driver")
-        if(H5I_dec_ref(driver_id)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement VFL driver ID")
+        /* Close the driver for the property list */
+        if(H5FD_dxpl_close(driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
     } /* end if */
 
 done:

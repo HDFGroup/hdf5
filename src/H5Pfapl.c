@@ -182,7 +182,6 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
 {
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
-    void *copied_driver_info;      /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
@@ -191,58 +190,33 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
-        /* Remove old driver */
+        /* Get the current driver information */
         if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
         if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
-        assert(driver_id>=0);
-        H5FD_fapl_free(driver_id, driver_info);
-        H5I_dec_ref(driver_id);
 
-        /* Add new driver */
-        H5I_inc_ref(new_driver_id);
-        driver_id   = new_driver_id;
-        driver_info = H5FD_fapl_copy(new_driver_id, new_driver_info);
- 
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID");
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set driver info");
-        
+        /* Close the driver for the property list */
+        if(H5FD_fapl_close(driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
+
+        /* Set the driver for the property list */
+        if(H5FD_fapl_open(plist, new_driver_id, new_driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
         /* Get the current driver information */
         if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID");
         if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info");
 
-        /* Remove old driver */
+        /* Close the driver for the property list */
+        if(H5FD_dxpl_close(driver_id, driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
 
-        /* Double-check value... */
-        assert(driver_id>=0);
-
-        /* Free any driver information stored */
-        H5FD_dxpl_free(driver_id, driver_info);
-
-        /* Decrement reference count for old driver */
-        H5I_dec_ref(driver_id);
-
-        /* Add new driver */
-
-        /* Increment reference count for new driver */
-        H5I_inc_ref(new_driver_id);
-
-        /* Make a copy of the driver information */
-        if(H5FD_dxpl_copy(new_driver_id, new_driver_info, &copied_driver_info)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "Can't copy VFL driver");
-
-        /* Set the driver info for the property list */
-        if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &new_driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID");
-        if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &copied_driver_info) < 0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info");
-        
+        /* Set the driver for the property list */
+        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } else {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
     }

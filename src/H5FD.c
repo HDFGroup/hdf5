@@ -51,6 +51,10 @@ static int interface_initialize_g = 0;
 
 /* static prototypes */
 static herr_t H5FD_init_interface(void);
+static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,
+    const void *old_pl, void **copied_pl);
+static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
+    void *pl);
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
 static haddr_t H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
                                          H5FD_mem_t mapped_type, hsize_t size);
@@ -468,6 +472,92 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_pl_copy
+ *
+ * Purpose:	Copies the driver-specific part of the a property list.
+ *              This is common code, used by both the dataset transfer and
+ *              file access property list routines.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 23, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size, const void *old_pl, void **copied_pl)
+{
+    void *new_pl = NULL;        /* Copy of property list */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5FD_pl_copy)
+
+    /* Copy old pl, if one exists */
+    if (old_pl) {
+        /* Allow the driver to copy or do it ourselves */
+        if (copy_func) {
+            new_pl = (copy_func)(old_pl);
+        } else if (pl_size>0) {
+            if((new_pl = H5MM_malloc(pl_size))==NULL)
+                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "property list allocation failed")
+            HDmemcpy(new_pl, old_pl, pl_size);
+        } else
+            HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "no way to copy driver property list")
+    } /* end if */
+
+    /* Set copied value */
+    *copied_pl=new_pl;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_pl_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_pl_close
+ *
+ * Purpose:	Closes a driver for a property list
+ *              This is common code, used by both the dataset transfer and
+ *              file access property list routines.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 23, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOINIT(H5FD_pl_close)
+
+    /* Allow driver to free or do it ourselves */
+    if (pl && free_func) {
+	if ((free_func)(pl)<0)
+	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
+    } else
+	H5MM_xfree(pl);
+
+    /* Decrement reference count for driver */
+    H5I_dec_ref(driver_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_pl_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_fapl_get
  *
  * Purpose:	Gets the file access property list associated with a file.
@@ -507,7 +597,48 @@ H5FD_fapl_get(H5FD_t *file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_fapl_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fapl_open
+ *
+ * Purpose:	Mark a driver as used by a file access property list
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 23, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, void *driver_info)
+{
+    void *copied_driver_info;           /* Temporary VFL driver info */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_fapl_open, FAIL)
+
+    /* Increment the reference count on driver and copy driver info */
+    if(H5I_inc_ref(driver_id)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
+    if(H5FD_fapl_copy(driver_id, driver_info, &copied_driver_info)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
+
+    /* Set the driver properties for the list */
+    if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID")
+    if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &copied_driver_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_fapl_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -515,58 +646,6 @@ done:
  *
  * Purpose:	Copies the driver-specific part of the file access property
  *		list.
- *
- * Return:	Success:	Pointer to new driver-specific file access
- *				properties.
- *
- *		Failure:	NULL, but also returns null with no error
- *				pushed onto the error stack if the OLD_FAPL
- *				is null.
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  3, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
-{
-    void		*new_fapl = NULL;
-    H5FD_class_t	*driver=NULL;
-    void        *ret_value;       /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5FD_fapl_copy, NULL)
-
-    /* Check args */
-    if (NULL==(driver=H5I_object(driver_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID")
-    if (!old_fapl)
-        HGOTO_DONE(NULL); /*but no error*/
-
-    /* Allow the driver to copy or do it ourselves */
-    if (driver->fapl_copy) {
-	new_fapl = (driver->fapl_copy)(old_fapl);
-    } else if (driver->fapl_size>0) {
-	if((new_fapl = H5MM_malloc(driver->fapl_size))==NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "fapl allocation failed")
-	HDmemcpy(new_fapl, old_fapl, driver->fapl_size);
-    } else
-	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "no way to copy driver file access property list")
-
-    /* Set return value */
-    ret_value=new_fapl;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_fapl_free
- *
- * Purpose:	Frees the driver-specific file access property list.
  *
  * Return:	Success:	non-negative
  *
@@ -580,28 +659,103 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_fapl_free(hid_t driver_id, void *fapl)
+H5FD_fapl_copy(hid_t driver_id, const void *old_fapl, void **copied_fapl)
 {
     H5FD_class_t	*driver=NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_fapl_free, FAIL)
+    herr_t ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_fapl_copy, FAIL)
 
     /* Check args */
     if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-    
-    /* Allow driver to free or do it ourselves */
-    if (fapl && driver->fapl_free) {
-	if ((driver->fapl_free)(fapl)<0)
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
-    } else {
-	H5MM_xfree(fapl);
-    }
+
+    /* Copy the file access property list */
+    if(H5FD_pl_copy(driver->fapl_copy,driver->fapl_size,old_fapl,copied_fapl)<0)
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fapl_close
+ *
+ * Purpose:	Closes a driver for a dataset transfer property list
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_fapl_close(hid_t driver_id, void *fapl)
+{
+    H5FD_class_t	*driver=NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_fapl_close, FAIL)
+
+    /* Check args */
+    if(driver_id>0) {
+        if (NULL==(driver=H5I_object(driver_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
+        
+        /* Close the driver for the property list */
+        if(H5FD_pl_close(driver_id,driver->fapl_free,fapl)<0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_fapl_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_dxpl_open
+ *
+ * Purpose:	Mark a driver as used by a data transfer property list
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 23, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, void *driver_info)
+{
+    void *copied_driver_info;           /* Temporary VFL driver info */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_dxpl_open, FAIL)
+
+    /* Increment the reference count on the driver and copy the driver info */
+    if(H5I_inc_ref(driver_id)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
+    if(H5FD_dxpl_copy(driver_id, driver_info, &copied_driver_info)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
+    
+    /* Set the driver information for the new property list */
+    if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFL driver ID")
+    if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &copied_driver_info)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFL driver info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_dxpl_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -610,12 +764,9 @@ done:
  * Purpose:	Copies the driver-specific part of the data transfer property
  *		list.
  *
- * Return:	Success:	Pointer to new driver-specific data transfer
- *				properties.
+ * Return:	Success:	non-negative
  *
- *		Failure:	NULL, but also returns null with no error
- *				pushed onto the error stack if the OLD_DXPL
- *				is null.
+ *		Failure:	negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
@@ -627,7 +778,6 @@ done:
 herr_t
 H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
 {
-    void		*new_dxpl = NULL;
     H5FD_class_t	*driver=NULL;
     herr_t ret_value=SUCCEED;       /* Return value */
     
@@ -637,34 +787,21 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
     if (NULL==(driver=H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
-    /* Copy old dxpl, if one exists */
-    if (old_dxpl) {
-        /* Allow the driver to copy or do it ourselves */
-        if (driver->dxpl_copy) {
-            new_dxpl = (driver->dxpl_copy)(old_dxpl);
-        } else if (driver->dxpl_size>0) {
-            new_dxpl = H5MM_malloc(driver->dxpl_size);
-            assert(new_dxpl);
-            HDmemcpy(new_dxpl, old_dxpl, driver->dxpl_size);
-        } else
-            HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "no way to copy driver file access property list")
-    } /* end if */
-
-    /* Set copied value */
-    *copied_dxpl=new_dxpl;
+    /* Copy the file access property list */
+    if(H5FD_pl_copy(driver->dxpl_copy,driver->dxpl_size,old_dxpl,copied_dxpl)<0)
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver data transfer property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_dxpl_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_dxpl_free
+ * Function:	H5FD_dxpl_close
  *
- * Purpose:	Frees the driver-specific data transfer property list.
+ * Purpose:	Closes a driver for a dataset transfer property list
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
@@ -675,28 +812,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_dxpl_free(hid_t driver_id, void *dxpl)
+H5FD_dxpl_close(hid_t driver_id, void *dxpl)
 {
     H5FD_class_t	*driver=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_dxpl_free, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_dxpl_close, FAIL)
 
     /* Check args */
-    if (NULL==(driver=H5I_object(driver_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-    
-    /* Allow driver to free or do it ourselves */
-    if (dxpl && driver->dxpl_free) {
-	if ((driver->dxpl_free)(dxpl)<0)
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver dxpl_free request failed")
-    } else {
-	H5MM_xfree(dxpl);
-    }
+    if(driver_id>0) {
+        if (NULL==(driver=H5I_object(driver_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
+        
+        /* Close the driver for the property list */
+        if(H5FD_pl_close(driver_id,driver->dxpl_free,dxpl)<0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_dxpl_close() */
 
 
 /*-------------------------------------------------------------------------

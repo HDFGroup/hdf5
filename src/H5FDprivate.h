@@ -45,10 +45,12 @@ H5_DLL hsize_t H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
 H5_DLL herr_t H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf);
 H5_DLL void *H5FD_fapl_get(H5FD_t *file);
-H5_DLL void *H5FD_fapl_copy(hid_t driver_id, const void *fapl);
-H5_DLL herr_t H5FD_fapl_free(hid_t driver_id, void *fapl);
+H5_DLL herr_t H5FD_fapl_open(struct H5P_genplist_t *plist, hid_t driver_id, void *driver_info);
+H5_DLL herr_t H5FD_fapl_copy(hid_t driver_id, const void *fapl, void **copied_fapl);
+H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, void *fapl);
+H5_DLL herr_t H5FD_dxpl_open(struct H5P_genplist_t *plist, hid_t driver_id, void *driver_info);
 H5_DLL herr_t H5FD_dxpl_copy(hid_t driver_id, const void *dxpl, void **copied_dxpl);
-H5_DLL herr_t H5FD_dxpl_free(hid_t driver_id, void *dxpl);
+H5_DLL herr_t H5FD_dxpl_close(hid_t driver_id, void *dxpl);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
