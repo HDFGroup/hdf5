@@ -26,7 +26,7 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#define PABLO_MASK H5F_family
+#define PABLO_MASK H5F_family_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 

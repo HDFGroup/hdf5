@@ -19,7 +19,7 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#define PABLO_MASK	H5F_sec2
+#define PABLO_MASK	H5F_sec2_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 

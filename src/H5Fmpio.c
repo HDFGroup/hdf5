@@ -62,7 +62,7 @@
 #include <mpi.h>
 #include <mpio.h>
 
-#define PABLO_MASK      H5F_mpio
+#define PABLO_MASK      H5F_mpio_mask
 static intn          interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 

@@ -21,7 +21,7 @@
 
 #define H5F_CORE_DEV	0xffff	/*pseudo dev for core until we fix things */
 
-#define PABLO_MASK	H5F_core
+#define PABLO_MASK	H5F_core_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 

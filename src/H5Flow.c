@@ -17,7 +17,7 @@
 
 #define addr_defined(X) (((uint64_t)(-1)!=(X)->offset) ? TRUE : FALSE)
 
-#define PABLO_MASK	H5F_low
+#define PABLO_MASK	H5F_low_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
