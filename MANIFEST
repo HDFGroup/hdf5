@@ -747,8 +747,8 @@
 ./pablo/ProcTrace.h
 ./pablo/READ_ME
 
-./perform/Makefile.in
 ./perform/Dependencies
+./perform/Makefile.in
 ./perform/chunk.c
 ./perform/iopipe.c
 ./perform/mpi-perf.c
@@ -1056,13 +1056,14 @@
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
-./tools/testfiles/tdset2.h5
 ./tools/testfiles/tdset2-1s.ddl
+./tools/testfiles/tdset2.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tempty.ls
 ./tools/testfiles/tenum.h5
 ./tools/testfiles/tenum.ddl
+./tools/testfiles/tfamily.ddl
 ./tools/testfiles/tfamily00000.h5
 ./tools/testfiles/tfamily00001.h5
 ./tools/testfiles/tfamily00002.h5
@@ -1074,7 +1075,6 @@
 ./tools/testfiles/tfamily00008.h5
 ./tools/testfiles/tfamily00009.h5
 ./tools/testfiles/tfamily00010.h5
-./tools/testfiles/tfamily.ddl
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
 ./tools/testfiles/tgroup.h5
@@ -1086,6 +1086,8 @@
 ./tools/testfiles/thlink-4.ddl
 ./tools/testfiles/thlink-5.ddl
 ./tools/testfiles/thlink.h5
+./tools/testfiles/tlarge_objname.ddl
+./tools/testfiles/tlarge_objname.h5
 ./tools/testfiles/tloop-1.ddl
 ./tools/testfiles/tloop.h5
 ./tools/testfiles/tloop2.h5
@@ -1108,9 +1110,9 @@
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.h5
-./tools/testfiles/tsplit_file.ddl
 ./tools/testfiles/tsplit_file-m.h5
 ./tools/testfiles/tsplit_file-r.h5
+./tools/testfiles/tsplit_file.ddl
 ./tools/testfiles/tstr-1.ddl
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.h5
@@ -1124,25 +1126,6 @@
 ./tools/testfiles/tvldtypes3.h5
 ./tools/testfiles/tvldtypes4.ddl
 ./tools/testfiles/tvldtypes4.h5
-
-# new hdf4 files for testing h4toh5 converter
-./tools/testfiles/anno_test.hdf
-./tools/testfiles/gr_typ_test.hdf
-./tools/testfiles/grnameclash_test.hdf
-./tools/testfiles/image_attr_test.hdf
-./tools/testfiles/ras_24_test.hdf
-./tools/testfiles/ras_8_test.hdf
-./tools/testfiles/ras24il.hdf
-./tools/testfiles/sds_attr_test.hdf
-./tools/testfiles/sds_dim_test.hdf
-./tools/testfiles/sds_typ_test.hdf
-./tools/testfiles/sdsnameclash_test.hdf
-./tools/testfiles/vdata_test.hdf
-./tools/testfiles/vdnameclash_test.hdf
-./tools/testfiles/vg_all_test.hdf
-./tools/testfiles/vg_hl_test.hdf
-./tools/testfiles/vg_loop_test.hdf
-./tools/testfiles/vgnameclash_test.hdf
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1160,40 +1143,6 @@
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tslink-1.ls
 ./tools/testfiles/tstr-1.ls
-
-./tools/testfiles/Expected/tall.hdf
-./tools/testfiles/Expected/tattr.hdf
-./tools/testfiles/Expected/tcompound.hdf
-./tools/testfiles/Expected/tcompound2.hdf
-./tools/testfiles/Expected/tdset.hdf
-./tools/testfiles/Expected/tdset2.hdf
-./tools/testfiles/Expected/tgroup.hdf
-./tools/testfiles/Expected/thlink.hdf
-./tools/testfiles/Expected/tloop.hdf
-./tools/testfiles/Expected/tmany.hdf
-./tools/testfiles/Expected/tslink.hdf
-./tools/testfiles/Expected/tstr.hdf
-./tools/testfiles/Expected/tstr2.hdf
-
-#new expected hdf5 files from converter,2/15/01
-./tools/testfiles/Expected/anno_test.h5
-./tools/testfiles/Expected/gr_typ_test.h5
-./tools/testfiles/Expected/grnameclash_test.h5
-./tools/testfiles/Expected/image_attr_test.h5
-./tools/testfiles/Expected/ras_24_test.h5
-./tools/testfiles/Expected/ras_8_test.h5
-./tools/testfiles/Expected/ras24il.h5
-./tools/testfiles/Expected/sds_attr.h5
-./tools/testfiles/Expected/sds_attr_test.h5
-./tools/testfiles/Expected/sds_dim_test.h5
-./tools/testfiles/Expected/sds_typ_test.h5
-./tools/testfiles/Expected/sdsnameclash_test.h5
-./tools/testfiles/Expected/vdata_test.h5
-./tools/testfiles/Expected/vdnameclash_test.h5
-./tools/testfiles/Expected/vg_all_test.h5
-./tools/testfiles/Expected/vg_hl_test.h5
-./tools/testfiles/Expected/vg_loop_test.h5
-./tools/testfiles/Expected/vgnameclash_test.h5
 
 #additional test input and output for h5dump XML
 ./tools/testfiles/tall.h5.xml
