@@ -2715,7 +2715,7 @@ main(int argc, const char *argv[])
     info.dset_table = dset_table;
     info.status = d_status;
 
-    If (doxml) {
+    if (doxml) {
 	/* initialize XML */
 	thefile = fid;
 
