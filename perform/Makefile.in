@@ -32,7 +32,7 @@ TEST_SRC=iopipe.c chunk.c overhead.c \
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5)
+$(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 
 perf: perf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) \
