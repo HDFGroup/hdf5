@@ -563,3 +563,43 @@ H5S_all_npoints (const H5S_t *space)
     
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_select_serialize
+ PURPOSE
+    Serialize the current selection into a user-provided buffer.
+ USAGE
+    herr_t H5S_all_select_serialize(space, buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to serialize
+        uint8 *buf;             OUT: Buffer to put serialized selection into
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Serializes the current element selection into a buffer.  (Primarily for
+    storing on disk).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_select_serialize (const H5S_t *space, uint8 *buf)
+{
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_all_select_serialize, FAIL);
+
+    assert(space);
+
+    /* Store the preamble information */
+    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
+    UINT32ENCODE(buf, (uint32)0);  /* Store the additional information length */
+
+    /* Set success */
+    ret_value=SUCCEED;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_all_select_serialize() */

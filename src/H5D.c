@@ -880,7 +880,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
     intn		i, ndims;
-    hsize_t		max_dim[H5O_LAYOUT_NDIMS];
+    hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5O_efl_t		*efl = NULL;
     H5F_t		*f = NULL;
 

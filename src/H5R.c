@@ -22,6 +22,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Eprivate.h>		/* Error handling */
 #include <H5Fprivate.h>		/* Files */
 #include <H5Gprivate.h>		/* Groups */
+#include <H5MMprivate.h>    /* Memory Management */
 #include <H5Rprivate.h>		/* References */
 #include <H5Sprivate.h>		/* Dataspaces */
 
@@ -120,7 +121,7 @@ H5R_term_interface(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, H5S_t __unused__ *space)
+H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space)
 {
     H5G_stat_t sb;              /* Stat buffer for retrieving OID */
     herr_t ret_value = FAIL;
@@ -150,6 +151,40 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
         }
 
         case H5R_DATASET_REGION:
+        {
+            haddr_t addr;
+            hdset_reg_ref_t *ref=(hdset_reg_ref_t *)_ref; /* Get pointer to correct type of reference struct */
+            hssize_t buf_size;  /* Size of buffer needed to serialize selection */
+            uint8 *p;       /* Pointer to OID to store */
+            uint8 *buf;     /* Buffer to store serialized selection in */
+
+            /* Set information for dataset OID */
+            p=(uint8 *)ref->oid;
+            H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
+            H5F_addr_encode(loc->file,&p,&addr);
+
+            /* Set up information for dataset region */
+            ref->region[0]=ref->region[1]=0;    /* Zero the heap ID out, may leak heap space if user is re-using reference */
+
+            /* Get the amount of space required to serialize the selection */
+            if ((buf_size = H5S_select_serial_size(space)) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL,
+                  "Invalid amount of space for serializing selection");
+
+            /* Allocate the space to store the serialized information */
+            if (NULL==(buf = H5MM_malloc(buf_size))) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                       "memory allocation failed");
+            }
+
+            /* Serialize the selection */
+            if (H5S_select_serialize(space,buf) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL,
+                  "Unable to serialize selection");
+/* Save the serialized buffer for later */
+            break;
+        }
+
         case H5R_INTERNAL:
             HRETURN_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL,
                   "Dataset region and internal references are not supported yet");
@@ -215,7 +250,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     if(ref_type<=H5R_BADTYPE || ref_type>=H5R_MAXTYPE)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
-    if(ref_type!=H5R_OBJECT)
+    if(ref_type!=H5R_OBJECT && ref_type!=H5R_DATASET_REGION)
         HRETURN_ERROR (H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported");
     if (space_id!=(-1) && (H5I_DATASPACE!=H5I_get_type (space_id) || NULL==(space=H5I_object (space_id))))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");

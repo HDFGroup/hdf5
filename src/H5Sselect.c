@@ -421,7 +421,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
                     } /* end if */
                 } /* end for */
-            } /* end if */
+            } /* end else */
 
             /* Clip list of new blocks to add against current selection */
             if(op==H5S_SELECT_OR) {
@@ -928,3 +928,114 @@ H5S_select_valid (const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_valid() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_serial_size
+ PURPOSE
+    Determine the number of bytes needed to serialize the current selection
+    offset defined.
+ USAGE
+    hssize_t H5S_select_serial_size(space)
+        H5S_t *space;             IN: Dataspace pointer to query
+ RETURNS
+    The number of bytes required on success, negative on an error.
+ DESCRIPTION
+    Determines the number of bytes required to serialize the current selection
+    information for storage on disk.  This routine just hands off to the
+    appropriate routine for each type of selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5S_select_serial_size (const H5S_t *space)
+{
+    hssize_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_serial_size, FAIL);
+
+    assert(space);
+
+    switch(space->select.type) {
+    case H5S_SEL_POINTS:         /* Sequence of points selected */
+        ret_value=H5S_point_select_serial_size(space);
+        break;
+
+    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+        ret_value=H5S_hyper_select_serial_size(space);
+        break;
+
+    case H5S_SEL_ALL:            /* Entire extent selected */
+    case H5S_SEL_NONE:           /* Nothing selected */
+        ret_value=16;            /* replace with real function call at some point */
+        break;
+
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+        break;
+    }
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_serial_size() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_serialize
+ PURPOSE
+    Serialize the current selection into a user-provided buffer.
+ USAGE
+    herr_t H5S_select_serialize(space, buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to serialize
+        uint8 *buf;             OUT: Buffer to put serialized selection into
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Serializes the current selection into a buffer.  (Primarily for storing
+    on disk).  This routine just hands off to the appropriate routine for each
+    type of selection.
+    The serialized information for all types of selections follows this format:
+        <type of selection> = uint32
+        <version #>         = uint32
+        <padding, not-used> = 4 bytes
+        <length of selection specific information> = uint32
+        <selection specific information> = ? bytes (depends on selection type)
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_serialize (const H5S_t *space, uint8 *buf)
+{
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_serialize, FAIL);
+
+    assert(space);
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_serialize(space,buf);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_serialize(space,buf);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_select_serialize(space,buf);
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=H5S_none_select_serialize(space,buf);
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
+    }
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_serialize() */

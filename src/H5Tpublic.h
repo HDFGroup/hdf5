@@ -210,6 +210,7 @@ extern hid_t H5T_IEEE_F64LE_g;
 #define H5T_STD_B64BE		(H5open(), H5T_STD_B64BE_g)
 #define H5T_STD_B64LE		(H5open(), H5T_STD_B64LE_g)
 #define H5T_STD_REF_OBJ	    (H5open(), H5T_STD_REF_OBJ_g)
+#define H5T_STD_REF_DSETREG (H5open(), H5T_STD_REF_DSETREG_g)
 extern hid_t H5T_STD_I8BE_g;
 extern hid_t H5T_STD_I8LE_g;
 extern hid_t H5T_STD_I16BE_g;
@@ -235,6 +236,7 @@ extern hid_t H5T_STD_B32LE_g;
 extern hid_t H5T_STD_B64BE_g;
 extern hid_t H5T_STD_B64LE_g;
 extern hid_t H5T_STD_REF_OBJ_g;
+extern hid_t H5T_STD_REF_DSETREG_g;
 
 /*
  * Types which are particular to Unix.

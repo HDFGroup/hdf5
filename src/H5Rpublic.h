@@ -45,6 +45,14 @@ typedef struct {
     unsigned long oid[2];       /* OID of object referenced */
 } hobj_ref_t;
 
+/* Dataset Region reference structure for user's code */
+typedef struct {
+    unsigned long oid[2];       /* OID of object referenced */
+    unsigned long region[2];    /* heap ID of region in object */
+    unsigned long bsize;        /* Memory buffer size */
+    unsigned char *buf;         /* Serialized selection information */
+} hdset_reg_ref_t;
+
 /* Publicly visible datastructures */
 
 #ifdef __cplusplus

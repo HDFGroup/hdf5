@@ -1814,6 +1814,41 @@ H5S_hyper_node_prepend (H5S_hyper_node_t **head, H5S_hyper_node_t *node)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_hyper_node_release
+ PURPOSE
+    Free the memory for a hyperslab node
+ USAGE
+    herr_t H5S_hyper_node_release(node)
+        H5S_hyper_node_t *node;   IN: Pointer to node to free
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Frees a hyperslab node.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_node_release (H5S_hyper_node_t *node)
+{
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER (H5S_hyper_node_release, FAIL);
+
+    /* Check args */
+    assert (node);
+
+    /* Free the hyperslab node */
+    node->start = H5MM_xfree(node->start);
+    node->end = H5MM_xfree(node->end);
+    H5MM_xfree(node);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_node_release() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_hyper_add
  PURPOSE
     Add a block to hyperslab selection
@@ -2027,7 +2062,7 @@ done:
  PURPOSE
     Clip a list of nodes against the current selection
  USAGE
-    herr_t H5S_hyper_add(space, nodes, uniq, overlap)
+    herr_t H5S_hyper_clip(space, nodes, uniq, overlap)
         H5S_t *space;       	  IN: Pointer to dataspace
         H5S_hyper_node_t *nodes;  IN: Pointer to list of nodes
         H5S_hyper_node_t **uniq;  IN: Handle to list of non-overlapping nodes
@@ -2120,6 +2155,7 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
     /* Check args */
     assert (space);
     assert (nodes);
+    assert (uniq || overlap);
 
     /* Allocate space for the temporary starts & sizes */
     if((start = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
@@ -2233,6 +2269,9 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
                             if(H5S_hyper_node_prepend(overlap,node)<0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
                         }
+                        else {  /* Free the node if we aren't going to keep it */
+                            H5S_hyper_node_release(node);
+                        } /* end else */
                         overlapped=1;   /* stop the algorithm for this block */
                     } /* end if */
                 } /* end for */
@@ -2248,6 +2287,9 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
                 if(H5S_hyper_node_prepend(uniq,node)<0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
             }
+            else {  /* Free the node if we aren't going to keep it */
+                H5S_hyper_node_release(node);
+            } /* end else */
         } /* end if */
 
         /* Advance to next hyperslab node */
@@ -2327,9 +2369,7 @@ H5S_hyper_release (H5S_t *space)
     curr=space->select.sel_info.hslab.hyper_lst->head;
     while(curr!=NULL) {
         next=curr->next;
-        curr->start = H5MM_xfree(curr->start);
-        curr->end = H5MM_xfree(curr->end);
-        H5MM_xfree(curr);
+        H5S_hyper_node_release(curr);
         curr=next;
     } /* end while */
 
@@ -2630,4 +2670,122 @@ H5S_hyper_select_valid (const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 } /* end H5S_hyper_select_valid() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_serial_size
+ PURPOSE
+    Determine the number of bytes needed to store the serialized hyperslab
+        selection information.
+ USAGE
+    hssize_t H5S_hyper_select_serial_size(space)
+        H5S_t *space;             IN: Dataspace pointer to query
+ RETURNS
+    The number of bytes required on success, negative on an error.
+ DESCRIPTION
+    Determines the number of bytes required to serialize the current hyperslab
+    selection information for storage on disk.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5S_hyper_select_serial_size (const H5S_t *space)
+{
+    H5S_hyper_node_t *curr;     /* Hyperslab information nodes */
+    hssize_t ret_value=FAIL;    /* return value */
 
+    FUNC_ENTER (H5S_hyper_select_serial_size, FAIL);
+
+    assert(space);
+
+    /* Basic number of bytes required to serialize point selection:
+     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> + 
+     *      <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (4 bytes)> = 24 bytes
+     */
+    ret_value=24;
+
+    /* Spin through hyperslabs to total the space needed to store them */
+    curr=space->select.sel_info.hslab.hyper_lst->head;
+    while(curr!=NULL) {
+        /* Add 8 bytes times the rank for each element selected */
+        ret_value+=8*space->extent.u.simple.rank;
+        curr=curr->next;
+    } /* end while */
+
+    FUNC_LEAVE (ret_value);
+} /* end H5S_hyper_select_serial_size() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_serialize
+ PURPOSE
+    Serialize the current selection into a user-provided buffer.
+ USAGE
+    herr_t H5S_hyper_select_serialize(space, buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to serialize
+        uint8 *buf;             OUT: Buffer to put serialized selection into
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Serializes the current element selection into a buffer.  (Primarily for
+    storing on disk).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_select_serialize (const H5S_t *space, uint8 *buf)
+{
+    H5S_hyper_node_t *curr;     /* Hyperslab information nodes */
+    uint8 *lenp;            /* pointer to length location for later storage */
+    uint32 len=0;           /* number of bytes used */
+    intn i;                 /* local counting variable */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_serialize, FAIL);
+
+    assert(space);
+
+    /* Store the preamble information */
+    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
+    lenp=buf;           /* keep the pointer to the length location for later */
+    buf+=4;             /* skip over space for length */
+
+    /* Encode number of dimensions */
+    UINT32ENCODE(buf, (uint32)space->extent.u.simple.rank);
+    len+=4;
+
+    /* Encode number of elements */
+    UINT32ENCODE(buf, (uint32)space->select.sel_info.hslab.hyper_lst->count);
+    len+=4;
+
+    /* Encode each point in selection */
+    curr=space->select.sel_info.hslab.hyper_lst->head;
+    while(curr!=NULL) {
+        /* Add 8 bytes times the rank for each element selected */
+        len+=8*space->extent.u.simple.rank;
+
+        /* Encode starting point */
+        for(i=0; i<space->extent.u.simple.rank; i++)
+            UINT32ENCODE(buf, (uint32)curr->start[i]);
+
+        /* Encode starting point */
+        for(i=0; i<space->extent.u.simple.rank; i++)
+            UINT32ENCODE(buf, (uint32)curr->end[i]);
+
+        curr=curr->next;
+    } /* end while */
+
+    /* Encode length */
+    UINT32ENCODE(lenp, (uint32)len);  /* Store the length of the extra information */
+    
+    /* Set success */
+    ret_value=SUCCEED;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_serialize() */

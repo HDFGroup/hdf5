@@ -831,4 +831,118 @@ H5S_point_select_valid (const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 } /* end H5S_point_select_valid() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_serial_size
+ PURPOSE
+    Determine the number of bytes needed to store the serialized point selection
+    information.
+ USAGE
+    hssize_t H5S_point_select_serial_size(space)
+        H5S_t *space;             IN: Dataspace pointer to query
+ RETURNS
+    The number of bytes required on success, negative on an error.
+ DESCRIPTION
+    Determines the number of bytes required to serialize the current point
+    selection information for storage on disk.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hssize_t
+H5S_point_select_serial_size (const H5S_t *space)
+{
+    H5S_pnt_node_t *curr;       /* Point information nodes */
+    hssize_t ret_value=FAIL;    /* return value */
 
+    FUNC_ENTER (H5S_point_select_serial_size, FAIL);
+
+    assert(space);
+
+    /* Basic number of bytes required to serialize point selection:
+     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> + 
+     *      <length (4 bytes)> + <rank (4 bytes)> + <# of points (4 bytes)> = 24 bytes
+     */
+    ret_value=24;
+
+    /* Count points in selection */
+    curr=space->select.sel_info.pnt_lst->head;
+    while(curr!=NULL) {
+        /* Add 4 bytes times the rank for each element selected */
+        ret_value+=4*space->extent.u.simple.rank;
+        curr=curr->next;
+    } /* end while */
+
+    FUNC_LEAVE (ret_value);
+} /* end H5S_point_select_serial_size() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_serialize
+ PURPOSE
+    Serialize the current selection into a user-provided buffer.
+ USAGE
+    herr_t H5S_point_select_serialize(space, buf)
+        H5S_t *space;           IN: Dataspace pointer of selection to serialize
+        uint8 *buf;             OUT: Buffer to put serialized selection into
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Serializes the current element selection into a buffer.  (Primarily for
+    storing on disk).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_select_serialize (const H5S_t *space, uint8 *buf)
+{
+    H5S_pnt_node_t *curr;       /* Point information nodes */
+    uint8 *lenp;            /* pointer to length location for later storage */
+    uint32 len=0;           /* number of bytes used */
+    intn i;                 /* local counting variable */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_serialize, FAIL);
+
+    assert(space);
+
+    /* Store the preamble information */
+    UINT32ENCODE(buf, (uint32)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32)0);  /* Store the un-used padding */
+    lenp=buf;           /* keep the pointer to the length location for later */
+    buf+=4;             /* skip over space for length */
+
+    /* Encode number of dimensions */
+    UINT32ENCODE(buf, (uint32)space->extent.u.simple.rank);
+    len+=4;
+
+    /* Encode number of elements */
+    UINT32ENCODE(buf, (uint32)space->select.num_elem);
+    len+=4;
+
+    /* Encode each point in selection */
+    curr=space->select.sel_info.pnt_lst->head;
+    while(curr!=NULL) {
+        /* Add 4 bytes times the rank for each element selected */
+        len+=4*space->extent.u.simple.rank;
+
+        /* Encode each point */
+        for(i=0; i<space->extent.u.simple.rank; i++)
+            UINT32ENCODE(buf, (uint32)curr->pnt[i]);
+
+        curr=curr->next;
+    } /* end while */
+
+    /* Encode length */
+    UINT32ENCODE(lenp, (uint32)len);  /* Store the length of the extra information */
+    
+    /* Set success */
+    ret_value=SUCCEED;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_select_serialize() */

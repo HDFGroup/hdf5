@@ -325,6 +325,8 @@ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 		 intn fwidth);
 herr_t H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
 		    const H5S_mconv_t *mconv);
+hssize_t H5S_select_serial_size(const H5S_t *space);
+herr_t H5S_select_serialize(const H5S_t *space, uint8 *buf);
 
 /* Point select functions */
 herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t **coord);
@@ -332,10 +334,13 @@ herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
 herr_t H5S_point_copy (H5S_t *dst, const H5S_t *src);
 htri_t H5S_point_select_valid (const H5S_t *space);
+hssize_t H5S_point_select_serial_size(const H5S_t *space);
+herr_t H5S_point_select_serialize(const H5S_t *space, uint8 *buf);
 
 /* "All" select functions */
 herr_t H5S_all_release (H5S_t *space);
 hsize_t H5S_all_npoints (const H5S_t *space);
+herr_t H5S_all_select_serialize(const H5S_t *space, uint8 *buf);
 
 /* Hyperslab selection functions */
 herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end);
@@ -348,6 +353,11 @@ herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
 htri_t H5S_hyper_select_valid (const H5S_t *space);
 herr_t H5S_hyper_node_add (H5S_hyper_node_t **head, intn endflag, intn rank, const hssize_t *start, const hsize_t *size);
 herr_t H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq, H5S_hyper_node_t **overlap);
+hssize_t H5S_hyper_select_serial_size(const H5S_t *space);
+herr_t H5S_hyper_select_serialize(const H5S_t *space, uint8 *buf);
+
+/* "None" selection functions */
+herr_t H5S_none_select_serialize(const H5S_t *space, uint8 *buf);
 
 #ifdef HAVE_PARALLEL
     /* MPI-IO function to read directly from app buffer to file rky980813 */

@@ -60,6 +60,7 @@ hid_t H5T_STD_B32LE_g = FAIL;
 hid_t H5T_STD_B64BE_g = FAIL;
 hid_t H5T_STD_B64LE_g = FAIL;
 hid_t H5T_STD_REF_OBJ_g = FAIL;
+hid_t H5T_STD_REF_DSETREG_g = FAIL;
 
 hid_t H5T_UNIX_D32BE_g = FAIL;
 hid_t H5T_UNIX_D32LE_g = FAIL;
@@ -621,6 +622,25 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to initialize H5T layer");
     }
+    /* Dataset Region pointer (i.e. selection inside a dataset) */
+    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    }
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
+    dt->type = H5T_REFERENCE;
+    dt->size = sizeof(haddr_t);
+    dt->u.atomic.order = H5T_ORDER_NONE;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8 * dt->size;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.r.rtype = H5R_DATASET_REGION;
+    if ((H5T_STD_REF_DSETREG_g = H5I_register(H5I_DATATYPE, dt)) < 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to initialize H5T layer");
+    }
+
 
     /*
      * Register conversion functions beginning with the most general and
