@@ -608,7 +608,7 @@ usage(const char *prog)
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
-    fprintf(stdout, "     -r, --string         Print 1-bytes integer datasets as ASCII\n");
+    fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
