@@ -1,8 +1,8 @@
 /*
- * Copyright ©  1999 Spizella Software
+ * Copyright ©  1999 NCSA
  *              All rights reserved.
  *
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, October 12, 1999
  *
  * Purpose:	Creates an HDF5 file from a PDB file.  The raw data can be
