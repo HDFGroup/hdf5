@@ -1,20 +1,14 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
+/*
+ * Copyright (C) 2001 National Center for Supercomputing Applications
+ *                    All rights reserved.
+ *
+ */
 
 /***********************************************************
 *
 * Test program:  dsets
 *
-* Test the dataset interface (H5D)
+* Test the dataset interface
 *
 *************************************************************/
 
@@ -51,7 +45,7 @@ const char *FILENAME[] = {
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -203,7 +197,7 @@ check_values (hsize_t i, hsize_t j, int apoint, int acheck)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -284,7 +278,7 @@ test_simple_io( H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -396,7 +390,7 @@ bogus(unsigned int flags, size_t cd_nelmts,
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -701,7 +695,7 @@ test_compression(H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Saturday, February 17, 2001
  *
  * Modifications:
@@ -782,7 +776,7 @@ test_multiopen (H5File& file)
  *
  *		Failure:	-1
  *
- * Programmer:  Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:  Binh-Minh Ribler (using C version)
  *              February 17, 2001
  *
  * Modifications:
@@ -965,7 +959,7 @@ int test_report( int nerrors )
  *
  *		Failure:	exit(1)
  *
- * Programmer:	Binh-Minh Ribler (using Robb Matzke's C version)
+ * Programmer:	Binh-Minh Ribler (using C version)
  *		Friday, January 5, 2001
  *
  * Modifications:
@@ -1035,11 +1029,7 @@ main(void)
 	h5_cleanup(FILENAME, fapl_id);
 	return( test_report( nerrors ));
    }
-   catch (FileIException error) 
-   {
-	return( test_report( nerrors ));
-   }
-   catch (GroupIException error )
+   catch (Exception E) 
    {
 	return( test_report( nerrors ));
    }

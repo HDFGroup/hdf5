@@ -167,18 +167,19 @@ main(int argc, char *argv[])
 
     // testing file creation and opening in tfile.cpp
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");
+    InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
 
-    // Comment out tests that are not done yet. - BMR, Feb 2001
-    //InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
-    //InitTest("attr", test_attr, cleanup_attr,  "Attributes");
-    //InitTest("select", test_select, cleanup_select,  "Selections");
-    //InitTest("time", test_time, cleanup_time,  "Time Datatypes");
-    //InitTest("reference", test_reference, cleanup_reference,  "References");
-    //InitTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
-    //InitTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings");
-    //InitTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
-    //InitTest("array", test_array, cleanup_array,  "Array Datatypes");
-    //InitTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
+    /* Comment out tests that are not done yet. - BMR, Feb 2001
+    InitTest("attr", test_attr, cleanup_attr,  "Attributes");
+    InitTest("select", test_select, cleanup_select,  "Selections");
+    InitTest("time", test_time, cleanup_time,  "Time Datatypes");
+    InitTest("reference", test_reference, cleanup_reference,  "References");
+    InitTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
+    InitTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings");
+    InitTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
+    InitTest("array", test_array, cleanup_array,  "Array Datatypes");
+    InitTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
+Comment out tests that are not done yet */
 
     Verbosity = 4;  /* Default Verbosity is Low */
     uintn major, minor, release;

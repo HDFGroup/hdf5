@@ -4,15 +4,13 @@
  *
  */
 
-/*
- * Test program:	 tfile
- *
- * Test the low-level file I/O features.
- */
-
-//#include "H5private.h"
-//#include "H5Bprivate.h"
-//#include "H5Pprivate.h"
+/***********************************************************
+*
+* Test program:  tfile
+*
+* Test the low-level file I/O features
+*
+*************************************************************/
 
 #include <iostream>
 #include "H5Cpp.h"
@@ -20,7 +18,7 @@
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif  /* !H5_NO_NAMESPACE */
+#endif
 
 #define F1_USERBLOCK_SIZE       (hsize_t)0
 #define F1_OFFSET_SIZE          sizeof(haddr_t)
@@ -51,7 +49,7 @@ using namespace H5;
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2001
  *
  * Modifications:
@@ -78,12 +76,17 @@ test_file_create(void)
 	* try to create the same file with H5F_ACC_TRUNC. This should fail
 	* because fid1 is the same file and is currently open.
 	*/
-	try { H5File fid2 (FILE1, H5F_ACC_TRUNC); }
-	catch( FileIException error ) {
-	    // cannot use fid2 here (out of scope), but the exception was
-	    // thrown only if file id was < 0, so -1 is used to verify - 1/15/01
-            VERIFY(-1, FAIL, "H5File constructor");
-        }
+	try {
+	    H5File fid2 (FILE1, H5F_ACC_TRUNC);  // should throw E
+
+	    // Should FAIL but didn't - BMR (Note 1): a macro, with a diff 
+	    // name, that skips the comparison b/w the 1st & 2nd args would 
+	    // be more appropriate, but VERIFY can be used for now - Mar 13, 01
+	    // also, more text about what is testing would be better.
+	    VERIFY(fid2.getId(), FAIL, "H5File constructor"); 
+	}
+	catch( FileIException E ) {} // do nothing, FAIL expected
+
 	// Close file fid1 
 	delete fid1;
 
@@ -91,8 +94,11 @@ test_file_create(void)
 	* Try again with H5F_ACC_EXCL. This should fail because the file already
 	* exists from the previous steps.
 	*/
-	try { fid1 = new H5File( FILE1, H5F_ACC_EXCL ); }
-	catch( FileIException error ){ VERIFY(-1, FAIL, "H5File constructor"); }
+	try { 
+	    fid1 = new H5File( FILE1, H5F_ACC_EXCL );  // should throw E
+	    VERIFY(fid1->getId(), FAIL, "H5File constructor"); 
+	}
+	catch( FileIException E ) {} // do nothing, FAIL expected
 
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	fid1 = new H5File (FILE1, H5F_ACC_TRUNC);
@@ -101,21 +107,27 @@ test_file_create(void)
      	* Try to truncate first file again. This should fail because fid1 is the
      	* same file and is currently open.
      	*/
-    	try { H5File fid2 (FILE1, H5F_ACC_TRUNC); }
-    	catch( FileIException error ) { VERIFY(-1, FAIL, "H5File constructor"); }
+    	try {
+	    H5File fid2 (FILE1, H5F_ACC_TRUNC);   // should throw E
+	    VERIFY(fid2.getId(), FAIL, "H5File constructor"); 
+	}
+	catch( FileIException E ) {} // do nothing, FAIL expected
 
     	/*
      	* Try with H5F_ACC_EXCL. This should fail too because the file already
      	* exists.
      	*/
-    	try { H5File fid3 (FILE1, H5F_ACC_EXCL); }
-    	catch( FileIException error ) { VERIFY(-1, FAIL, "H5File constructor"); }
+    	try {
+	    H5File fid3 (FILE1, H5F_ACC_EXCL);  // should throw E
+	    VERIFY(fid3.getId(), FAIL, "H5File constructor"); 
+    	}
+	catch( FileIException E ) {} // do nothing, FAIL expected
 
     	/* Get the file-creation template */
 	FileCreatPropList tmpl1 = fid1->getCreatePlist();
 
 	hsize_t ublock = tmpl1.getUserblock();
-	VERIFY(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::H5Pget_userblock"); 
+	VERIFY(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock"); 
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
@@ -133,11 +145,11 @@ test_file_create(void)
 	/* Close first file */
 	delete fid1;
     }
-    catch( PropListIException error ) {
-	CHECK(-1, FAIL, error.getCFuncName());
+    catch( PropListIException E ) {
+	CHECK(FAIL, FAIL, E.getCFuncName());
     }
-    catch( FileIException error ) {
-	CHECK(-1, FAIL, error.getCFuncName());
+    catch( FileIException E ) {
+	CHECK(FAIL, FAIL, E.getCFuncName());
     }
 
     try
@@ -158,7 +170,6 @@ test_file_create(void)
 
     	/* Release file-creation template */
 	delete tmpl1;
-// here is still good
 
 	/* Get the file-creation template */
 	tmpl1 = new FileCreatPropList (fid2.getCreatePlist());
@@ -211,8 +222,8 @@ test_file_create(void)
 	/* Dynamically release file-creation template */
 	delete tmpl1;
     }
-    catch( PropListIException error ) {
-	CHECK(-1, FAIL, error.getCFuncName());
+    catch( PropListIException E ) {
+	CHECK(FAIL, FAIL, E.getCFuncName());
     }
 } /* test_file_create() */
 
@@ -224,7 +235,7 @@ test_file_create(void)
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January, 2001
  *
  * Modifications:
@@ -261,8 +272,8 @@ test_file_open(void)
 	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
     }   // end of try block
 
-    catch( Exception error ) {
-        CHECK(FAIL, FAIL, error.getCFuncName());
+    catch( Exception E ) {
+        CHECK(FAIL, FAIL, E.getCFuncName());
     }
 } /* test_file_open() */
 
@@ -274,7 +285,7 @@ test_file_open(void)
  *
  * Return:      None
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer:  Binh-Minh Ribler (use C version)
  *              January 2001
  *
  * Modifications:
@@ -299,8 +310,7 @@ test_file(void)
  *
  * Return:	none
  *
- * Programmer:  Binh-Minh Ribler
- *              January 2001
+ * Programmer:  (use C version)
  *
  * Modifications:
  *
