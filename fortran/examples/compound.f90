@@ -48,6 +48,8 @@
      DOUBLE PRECISION, DIMENSION(dimsize) :: double_member
      REAL, DIMENSION(dimsize)             :: real_member
      INTEGER :: i
+     INTEGER, DIMENSION(7) :: data_dims 
+     data_dims(1) = dimsize
      !
      ! Initialize data buffer.
      !
@@ -145,10 +147,10 @@
      !
      ! Write data by fields in the datatype. Fields order is not important.
      !
-     CALL h5dwrite_f(dset_id, dt4_id, real_member, error, xfer_prp = plist_id)
-     CALL h5dwrite_f(dset_id, dt1_id, char_member, error, xfer_prp = plist_id)
-     CALL h5dwrite_f(dset_id, dt3_id, double_member, error, xfer_prp = plist_id)
-     CALL h5dwrite_f(dset_id, dt2_id, int_member, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt4_id, real_member, data_dims, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt1_id, char_member, data_dims, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt3_id, double_member, data_dims, error, xfer_prp = plist_id)
+     CALL h5dwrite_f(dset_id, dt2_id, int_member, data_dims, error, xfer_prp = plist_id)
 
      !   
      ! End access to the dataset and release resources used by it.
@@ -195,7 +197,7 @@
      !
      ! Read part of the datatset and display it.
      !
-     CALL h5dread_f(dset_id, dt1_id, char_member_out, error)
+     CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error)
      write(*,*) (char_member_out(i), i=1, dimsize)
 
      !

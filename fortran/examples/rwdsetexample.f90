@@ -22,6 +22,7 @@
      INTEGER     ::  i, j
 
      INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
+     INTEGER, DIMENSION(7) :: data_dims
      
      !
      ! Initialize the dset_data array.
@@ -50,12 +51,14 @@
      !
      ! Write the dataset.
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, error)
+     data_dims(1) = 4
+     data_dims(2) = 6 
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
 
      !
      ! Read the dataset.
      !
-     CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error)
+     CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
 
      !
      ! Close the dataset.

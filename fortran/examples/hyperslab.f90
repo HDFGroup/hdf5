@@ -38,6 +38,7 @@
      INTEGER :: i, j, k 
 
      INTEGER :: error, error_n  ! Error flags
+     INTEGER, DIMENSION(7) :: data_dims
 
 
    !
@@ -84,7 +85,9 @@
      !
      ! Write the dataset.
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error)
+     data_dims(1) = 5
+     data_dims(2) = 6 
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
 
      !
      ! Close the dataspace for the dataset.
@@ -109,9 +112,9 @@
      !
      ! Initialize data_out array.
      !
-     do i = 1, 7
+     do k = 1, 3 
           do j = 1, 7
-              do k = 1,3
+              do i = 1, 7
                   data_out(i,j,k) = 0;
               end do
           end do
@@ -154,7 +157,10 @@
      ! Read data from hyperslab in the file into the hyperslab in 
      ! memory and display.
      !
-     CALL H5Dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error, &
+     data_dims(1) = 7
+     data_dims(2) = 7
+     data_dims(3) = 3 
+     CALL H5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                     memspace, dataspace)
      
      !

@@ -68,6 +68,7 @@
      ! Data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_in, data_out
+     INTEGER, DIMENSION(7) :: data_dims
 
      !
      ! Initialize FORTRAN interface. 
@@ -118,7 +119,9 @@
      !
      ! Write data_in to the dataset
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
+     data_dims(1) = NX
+     data_dims(2) = NY
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
 
      !
      ! Close file, dataset and dataspace identifiers.
@@ -152,7 +155,7 @@
      !
      ! Read the dataset.
      ! 
-     CALL h5dread_f(dset_id, dtype_id, data_out, error)
+     CALL h5dread_f(dset_id, dtype_id, data_out, data_dims, error)
 
      !
      ! Print out the data.

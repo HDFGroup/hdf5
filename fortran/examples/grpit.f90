@@ -33,9 +33,11 @@
      INTEGER, DIMENSION(3,3) :: dset1_data  ! Arrays to hold data
      INTEGER, DIMENSION(2,10) :: dset2_data !
      
+     
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Dataset dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
      INTEGER     ::   rank = 2 ! Datasets rank 
+     INTEGER, DIMENSION(7) :: data_dims
 
      !
      ! Initialize dset1_data array.
@@ -90,7 +92,9 @@
      !
      ! Write the first dataset.
      !
-     CALL h5dwrite_f(dataset1_id, H5T_NATIVE_INTEGER, dset1_data, error)
+     data_dims(1) = 3
+     data_dims(2) = 3
+     CALL h5dwrite_f(dataset1_id, H5T_NATIVE_INTEGER, dset1_data, data_dims, error)
 
      !
      ! Create the data space for the second dataset. 
@@ -106,7 +110,9 @@
      !
      ! Write the second dataset
      !
-     CALL h5dwrite_f(dataset2_id, H5T_NATIVE_INTEGER, dset2_data, error)
+     data_dims(1) = 2
+     data_dims(2) = 10
+     CALL h5dwrite_f(dataset2_id, H5T_NATIVE_INTEGER, dset2_data, data_dims, error)
 
      !
      ! Get number of members in the root group.

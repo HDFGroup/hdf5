@@ -29,6 +29,7 @@
      
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Datasets dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
+     INTEGER, DIMENSION(7) :: data_dims
 
      INTEGER     ::   rank = 2 ! Datasets rank
 
@@ -75,7 +76,9 @@
      !
      ! Write the first dataset.
      !
-     CALL h5dwrite_f(dataset_id, H5T_NATIVE_INTEGER, dset1_data, error)
+     data_dims(1) = 3
+     data_dims(2) = 3
+     CALL h5dwrite_f(dataset_id, H5T_NATIVE_INTEGER, dset1_data, data_dims, error)
 
      !
      ! Close the dataspace for the first dataset.
@@ -106,7 +109,9 @@
      !
      ! Write the second dataset.
      !
-     CALL h5dwrite_f(dataset_id, H5T_NATIVE_INTEGER, dset2_data, error)
+     data_dims(1) = 2
+     data_dims(1) = 10 
+     CALL h5dwrite_f(dataset_id, H5T_NATIVE_INTEGER, dset2_data, data_dims, error)
 
      !
      ! Close the dataspace for the second dataset.
