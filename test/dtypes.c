@@ -19,6 +19,7 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 
+#include <time.h>
 #include "h5test.h"
 
 /* Number of times to run each test */
@@ -4113,6 +4114,9 @@ main(void)
 {
     unsigned long	nerrors = 0;
     hid_t		fapl=-1;
+
+    /* Set the random # seed */
+    HDsrandom((unsigned long)time(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();
