@@ -40,12 +40,6 @@ $(TEST_OBJ): $(TEST_HDR)
 t_mpi: t_mpi.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ t_mpi.lo $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-mpi-perf: mpi-perf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ mpi-perf.lo $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-perf: perf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
 testphdf5: $(TEST_PHDF5_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_PHDF5_OBJ) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
