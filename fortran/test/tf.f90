@@ -18,9 +18,9 @@
 !    all the hdf5 fortran tests
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: check
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: check
+!FooDECSendif
 
          SUBROUTINE check(string,error,total_error)
             CHARACTER(LEN=*) :: string
@@ -65,9 +65,9 @@
           SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5_fixname_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5_fixname_f
+!FooDECSendif
             USE H5GLOBAL           
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name 
@@ -83,11 +83,11 @@
               INTEGER FUNCTION h5_fixname_c(base_name, base_namelen, fapl, &
                                full_name, full_namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_FIXNAME_C':: h5_fixname_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: base_name 
-              !DEC$ATTRIBUTES reference :: full_name 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5_FIXNAME_C':: h5_fixname_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: base_name 
+              !FooDECSATTRIBUTES reference :: full_name 
               CHARACTER(LEN=*), INTENT(IN) :: base_name
               INTEGER :: base_namelen
               INTEGER(HID_T), INTENT(IN) :: fapl
@@ -125,9 +125,9 @@
           SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5_cleanup_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5_cleanup_f
+!FooDECSendif
             USE H5GLOBAL           
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name 
@@ -139,10 +139,10 @@
             INTERFACE
               INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_CLEANUP_C':: h5_cleanup_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: base_name 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5_CLEANUP_C':: h5_cleanup_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: base_name 
               CHARACTER(LEN=*), INTENT(IN) :: base_name
               INTEGER :: base_namelen
               INTEGER(HID_T), INTENT(IN) :: fapl

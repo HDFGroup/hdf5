@@ -49,9 +49,9 @@
           SUBROUTINE h5eclear_f(hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5eclear_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5eclear_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -62,9 +62,9 @@
             INTERFACE
               INTEGER FUNCTION h5eclear_c()
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5ECLEAR_C'::h5eclear_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5ECLEAR_C'::h5eclear_c
+              !FooDECS ENDIF
               END FUNCTION h5eclear_c
             END INTERFACE
             hdferr = h5eclear_c()
@@ -97,9 +97,9 @@
           SUBROUTINE h5eprint_f(hdferr, name)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5eprint_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5eprint_f
+!FooDECSendif
 !
             CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
@@ -111,10 +111,10 @@
             INTERFACE
               INTEGER FUNCTION h5eprint_c1(name, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5EPRINT_C1'::h5eprint_c1
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5EPRINT_C1'::h5eprint_c1
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER :: namelen
               CHARACTER(LEN=*),INTENT(IN) :: name
               END FUNCTION h5eprint_c1
@@ -124,9 +124,9 @@
             INTERFACE
               INTEGER FUNCTION h5eprint_c2()
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5EPRINT_C2'::h5eprint_c2
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5EPRINT_C2'::h5eprint_c2
+              !FooDECS ENDIF
               END FUNCTION h5eprint_c2
             END INTERFACE
             namelen = LEN(NAME)
@@ -165,9 +165,9 @@
           SUBROUTINE h5eget_major_f(error_no, name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5eget_major_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5eget_major_f
+!FooDECSendif
 !
             INTEGER, INTENT(IN) :: error_no !Major error number
             CHARACTER(LEN=*), INTENT(OUT) :: name ! Character string describing
@@ -180,10 +180,10 @@
             INTERFACE
               INTEGER FUNCTION h5eget_major_c(error_no, name)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5EGET_MAJOR_C'::h5eget_major_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5EGET_MAJOR_C'::h5eget_major_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER :: error_no
                CHARACTER(LEN=*) :: name 
               END FUNCTION h5eget_major_c
@@ -223,9 +223,9 @@
           SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5eget_minor_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5eget_minor_f
+!FooDECSendif
 !
             INTEGER, INTENT(IN) :: error_no !Major error number
             CHARACTER(LEN=*), INTENT(OUT) :: name ! Character string describing
@@ -238,10 +238,10 @@
             INTERFACE
               INTEGER FUNCTION h5eget_minor_c(error_no, name)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5EGET_MINOR_C'::h5eget_minor_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5EGET_MINOR_C'::h5eget_minor_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER :: error_no
                CHARACTER(LEN=*) :: name 
               END FUNCTION h5eget_minor_c
@@ -281,9 +281,9 @@
           SUBROUTINE h5eset_auto_f(printflag, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5eset_auto_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5eset_auto_f
+!FooDECSendif
 !
             INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
                                               !printing on or off
@@ -298,9 +298,9 @@
             INTERFACE
               INTEGER FUNCTION h5eset_auto_c(printflag)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5ESET_AUTO_C'::h5eset_auto_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5ESET_AUTO_C'::h5eset_auto_c
+              !FooDECS ENDIF
               INTEGER :: printflag
               END FUNCTION h5eset_auto_c
             END INTERFACE

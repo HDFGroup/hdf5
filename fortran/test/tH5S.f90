@@ -58,7 +58,7 @@
 
           LOGICAL     ::   flag  !flag to test datyspace is simple or not
           INTEGER     :: i, j    !general purpose integers
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
           !
           ! Initialize the dset_data array.

@@ -127,8 +127,8 @@
           INTEGER     ::   num_errors = 0 ! Number of data errors
 
           INTEGER     :: i, j    !general purpose integers
-          INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
-          INTEGER, DIMENSION(7) :: data_dims
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims_b
+          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HID_T) ::  crp_list
           INTEGER :: options_mask, pix_per_block 
           LOGICAL :: flag

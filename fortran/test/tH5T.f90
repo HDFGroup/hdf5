@@ -85,7 +85,7 @@
      INTEGER :: array_dims_range = 3
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
      INTEGER(SIZE_T) :: sizechar
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(1) :: data_dims
      LOGICAL :: flag = .TRUE.
      data_dims(1) = dimsize
      !

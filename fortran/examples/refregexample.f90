@@ -50,8 +50,8 @@
      INTEGER(HSSIZE_T) , DIMENSION(2,3) :: coord
      INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
      INTEGER :: i, j
-     INTEGER, DIMENSION(7) :: ref_size
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(1) :: ref_size
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      coord = reshape((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points
      data = reshape ((/1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6/), (/2,9/))
      !

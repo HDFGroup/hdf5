@@ -43,7 +43,7 @@
      
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Datasets dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
      INTEGER     ::   rank = 2 ! Datasets rank
 

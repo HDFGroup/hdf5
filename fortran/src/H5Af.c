@@ -117,9 +117,10 @@ DONE:
      return ret_value;
 }      
 
+
 /*----------------------------------------------------------------------------
  * Name:        h5awritec_c
- * Purpose:     Call h5awrite_c to write a character  attribute
+ * Purpose:     Call h5awrite_c_b to write a character  attribute
  * Inputs:      attr_id - dataset identifier 
  *              mem_type_id - memory datatype identifier
  *              buf      - character data buffer
@@ -127,12 +128,10 @@ DONE:
  *                         by Fortran routine.
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
- *              Thursday , August 12, 1999
- * Modifications: dims paramete added.
- *                April 4, 2001
+ *              Tuesday, May 14, 2002
  *---------------------------------------------------------------------------*/
 int_f
-nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims)
+nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
 {
      int ret_value = -1;
      
@@ -154,73 +153,10 @@ nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims)
  *                         by Fortran routine.
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
- *              Thursday, August 12, 1999
- * Modifications: dims parameter added
- *                April 4, 2001 
- *---------------------------------------------------------------------------*/
-int_f
-nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims)
-{
-     int ret_value = -1;
-     herr_t ret;
-     hid_t c_attr_id;
-     hid_t c_mem_type_id;
-
-     /*
-      * Call H5Awrite function.
-      */
-     c_attr_id = *attr_id;
-     c_mem_type_id = *mem_type_id;
-     ret = H5Awrite(c_attr_id, c_mem_type_id, buf);
-
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
-}      
-
-/*----------------------------------------------------------------------------
- * Name:        h5awritec_c_b
- * Purpose:     Call h5awrite_c_b to write a character  attribute
- * Inputs:      attr_id - dataset identifier 
- *              mem_type_id - memory datatype identifier
- *              buf      - character data buffer
- *              dims     - array to store dimensions sizes of buf; used only
- *                         by Fortran routine.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5awrite_f call with
- *                dims buffer being of INTEGER(HSIZE_T) type
  *---------------------------------------------------------------------------*/
 int_f
-nh5awritec_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
-{
-     int ret_value = -1;
-     
-     /*
-      * Call h5awrite_c  function.
-      */
-     ret_value = nh5awrite_c_b(attr_id, mem_type_id, _fcdtocp(buf), dims);
-
-     return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5awrite_c_b
- * Purpose:     Call H5Awrite to write a attribute 
- * Inputs:      attr_id - attribute identifier 
- *              mem_type_id - memory datatype identifier
- *              buf      - data buffer
- *              dims     - array to store dimensions sizes of buf; used only
- *                         by Fortran routine.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5awrite_f call with
- *                dims buffer being of INTEGER(HSIZE_T) type
- *---------------------------------------------------------------------------*/
-int_f
-nh5awrite_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
+nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -243,7 +179,7 @@ nh5awrite_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dim
 
 /*----------------------------------------------------------------------------
  * Name:        h5areadc_c
- * Purpose:     Call h5aread_c to read character  attribute
+ * Purpose:     Call h5aread_c_b to read character  attribute
  * Inputs:      dset_id - dataset identifier 
  *              mem_type_id - memory datatype identifier
  *              dims     - array to store dimensions sizes of buf; used only
@@ -251,12 +187,10 @@ nh5awrite_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dim
  * Outputs:     buf      - character data buffer
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
- *              Thursday, August 12, 1999
- * Modifications: dims parameter added.
- *                April 4, 2001
+ *              Tuesday, May 14, 2002
  *---------------------------------------------------------------------------*/
 int_f
-nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims)
+nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
 {
      int ret_value = -1;
      
@@ -270,66 +204,6 @@ nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, int_f *dims)
 
 /*----------------------------------------------------------------------------
  * Name:        h5aread_c
- * Purpose:     Call H5Araed to read an attribute 
- * Inputs:      dset_id - dataset identifier 
- *              mem_type_id - memory datatype identifier
- *              dims     - array to store dimensions sizes of buf; used only
- *                         by Fortran routine.
- * Outputs:     buf      - data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Thursday, August 12, 1999
- * Modifications: dims paramete added.
- *                April 4, 2001
- *---------------------------------------------------------------------------*/
-int_f
-nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims)
-{
-     int ret_value = -1;
-     herr_t ret;
-     hid_t c_attr_id;
-     hid_t c_mem_type_id;
-
-     /*
-      * Call H5Aread function.
-      */
-     c_attr_id = *attr_id;
-     c_mem_type_id = *mem_type_id;
-     ret = H5Aread(c_attr_id, c_mem_type_id, buf);
-
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
-}
-/*----------------------------------------------------------------------------
- * Name:        h5areadc_c_b
- * Purpose:     Call h5aread_c_b to read character  attribute
- * Inputs:      dset_id - dataset identifier 
- *              mem_type_id - memory datatype identifier
- *              dims     - array to store dimensions sizes of buf; used only
- *                         by Fortran routine.
- * Outputs:     buf      - character data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5aread_f call with
- *                dims buffer being of INTEGER(HSIZE_T) type
- *---------------------------------------------------------------------------*/
-int_f
-nh5areadc_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
-{
-     int ret_value = -1;
-     
-     /*
-      * Call h5aread_c  function.
-      */
-     ret_value = nh5aread_c_b(attr_id, mem_type_id, (_fcdtocp(buf)), dims);
-
-     return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5aread_c_b
  * Purpose:     Call H5Aread to read an attribute 
  * Inputs:      dset_id - dataset identifier 
  *              mem_type_id - memory datatype identifier
@@ -339,11 +213,9 @@ nh5areadc_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5awrite_f call with
- *                dims buffer being of INTEGER(HSIZE_T) type
  *---------------------------------------------------------------------------*/
 int_f
-nh5aread_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
+nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
 {
      int ret_value = -1;
      herr_t ret;

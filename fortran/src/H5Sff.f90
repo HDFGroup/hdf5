@@ -49,9 +49,9 @@
           SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5screate_simple_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5screate_simple_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -72,9 +72,9 @@
             INTERFACE
               INTEGER FUNCTION h5screate_simple_c(rank, dims, maxdims, space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCREATE_SIMPLE_C'::h5screate_simple_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCREATE_SIMPLE_C'::h5screate_simple_c
+              !FooDECS ENDIF
               INTEGER, INTENT(IN) :: rank
               INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
               INTEGER(HSIZE_T), DIMENSION(:),INTENT(IN) :: maxdims(rank)
@@ -124,9 +124,9 @@
           SUBROUTINE h5sclose_f(space_id, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sclose_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sclose_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -139,9 +139,9 @@
             INTERFACE
               INTEGER FUNCTION h5sclose_c(space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCLOSE_C'::h5sclose_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCLOSE_C'::h5sclose_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               END FUNCTION h5sclose_c
             END INTERFACE
@@ -178,9 +178,9 @@
           SUBROUTINE h5screate_f(classtype, space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5screate_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5screate_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -198,9 +198,9 @@
             INTERFACE
               INTEGER FUNCTION h5screate_c(classtype, space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCREATE_C'::h5screate_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCREATE_C'::h5screate_c
+              !FooDECS ENDIF
               INTEGER, INTENT(IN) :: classtype
               INTEGER(HID_T), INTENT(OUT) :: space_id
               END FUNCTION h5screate_c
@@ -238,9 +238,9 @@
           SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5scopy_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5scopy_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -255,9 +255,9 @@
             INTERFACE
               INTEGER FUNCTION h5scopy_c(space_id, new_space_id)  
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCOPY_C'::h5scopy_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCOPY_C'::h5scopy_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HID_T), INTENT(OUT):: new_space_id
               END FUNCTION h5scopy_c
@@ -295,9 +295,9 @@
           SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_hyper_nblocks_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_hyper_nblocks_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -314,9 +314,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_select_hyper_nblocks_c (space_id, num_blocks)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_NBLOCKS_C'::h5sget_select_hyper_nblocks_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+!FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_NBLOCKS_C'::h5sget_select_hyper_nblocks_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSSIZE_T), INTENT(OUT) :: num_blocks 
               END FUNCTION h5sget_select_hyper_nblocks_c
@@ -357,9 +357,9 @@
                                                     num_blocks, buf, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_hyper_blocklist_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_hyper_blocklist_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -382,9 +382,9 @@
               INTEGER FUNCTION h5sget_select_hyper_blocklist_c(space_id, startblock, &
                                                               num_blocks, buf )
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-            !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_BLOCKLIST_C'::h5sget_select_hyper_blocklist_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+            !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_BLOCKLIST_C'::h5sget_select_hyper_blocklist_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id 
               INTEGER(HSIZE_T), INTENT(IN) :: startblock 
               INTEGER(HSIZE_T), INTENT(IN) :: num_blocks 
@@ -428,9 +428,9 @@
           SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_bounds_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_bounds_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -449,9 +449,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_select_bounds_c(space_id, start, end)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+!FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
               INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
@@ -490,9 +490,9 @@
           SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_elem_npoints_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_elem_npoints_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -509,9 +509,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_select_elem_npoints_c (space_id, num_points)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_NPOINTS_C'::h5sget_select_elem_npoints_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+!FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_NPOINTS_C'::h5sget_select_elem_npoints_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSSIZE_T), INTENT(OUT) :: num_points 
               END FUNCTION h5sget_select_elem_npoints_c
@@ -552,9 +552,9 @@
                                                     num_points, buf, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_elem_pointlist_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_elem_pointlist_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
@@ -573,9 +573,9 @@
               INTEGER FUNCTION h5sget_select_elem_pointlist_c(space_id, startpoint, &
                                                               num_points, buf )
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_POINTLIST_C'::h5sget_select_elem_pointlist_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+!FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_POINTLIST_C'::h5sget_select_elem_pointlist_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSIZE_T), INTENT(IN) :: startpoint 
               INTEGER(HSIZE_T), INTENT(IN) :: num_points 
@@ -622,9 +622,9 @@
                                           num_elements, coord, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_elements_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_elements_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
@@ -650,9 +650,9 @@
               INTEGER FUNCTION h5sselect_elements_c(space_id, operator,&
                                num_elements,c_c_coord)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_ELEMENTS_C'::h5sselect_elements_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_ELEMENTS_C'::h5sselect_elements_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(IN) :: operator
               INTEGER(SIZE_T), INTENT(IN) :: num_elements
@@ -702,9 +702,9 @@
           SUBROUTINE h5sselect_all_f(space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_all_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_all_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
@@ -716,9 +716,9 @@
             INTERFACE
               INTEGER FUNCTION h5sselect_all_c(space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_ALL_C'::h5sselect_all_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_ALL_C'::h5sselect_all_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               END FUNCTION h5sselect_all_c
             END INTERFACE
@@ -755,9 +755,9 @@
           SUBROUTINE h5sselect_none_f(space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_none_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_none_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -770,9 +770,9 @@
             INTERFACE
               INTEGER FUNCTION h5sselect_none_c(space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_NONE_C'::h5sselect_none_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_NONE_C'::h5sselect_none_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id 
               END FUNCTION h5sselect_none_c
             END INTERFACE
@@ -809,9 +809,9 @@
           SUBROUTINE h5sselect_valid_f(space_id, status, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_valid_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_valid_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -828,9 +828,9 @@
             INTERFACE
               INTEGER FUNCTION h5sselect_valid_c(space_id, flag) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_VALID_C'::h5sselect_valid_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_VALID_C'::h5sselect_valid_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER :: flag
               END FUNCTION h5sselect_valid_c 
@@ -870,9 +870,9 @@
           SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_simple_extent_npoints_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_simple_extent_npoints_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -887,9 +887,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_simple_extent_npoints_c( space_id, npoints) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NPOINTS_C'::h5sget_simple_extent_npoints_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NPOINTS_C'::h5sget_simple_extent_npoints_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSIZE_T), INTENT(OUT) :: npoints
               END FUNCTION h5sget_simple_extent_npoints_c
@@ -927,9 +927,9 @@
           SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_npoints_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_npoints_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -944,9 +944,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_select_npoints_c(space_id, npoints) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_NPOINTS_C'::h5sget_select_npoints_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_NPOINTS_C'::h5sget_select_npoints_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSSIZE_T), INTENT(OUT) :: npoints
               END FUNCTION h5sget_select_npoints_c
@@ -984,9 +984,9 @@
           SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_simple_extent_ndims_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_simple_extent_ndims_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1000,9 +1000,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_simple_extent_ndims_c(space_id, rank) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NDIMS_C'::h5sget_simple_extent_ndims_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NDIMS_C'::h5sget_simple_extent_ndims_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(OUT) :: rank
               END FUNCTION h5sget_simple_extent_ndims_c
@@ -1042,9 +1042,9 @@
           SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_simple_extent_dims_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_simple_extent_dims_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1064,9 +1064,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_simple_extent_dims_c(space_id, dims, maxdims)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_DIMS_C'::h5sget_simple_extent_dims_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_DIMS_C'::h5sget_simple_extent_dims_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: maxdims
@@ -1108,9 +1108,9 @@
           SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_simple_extent_type_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_simple_extent_type_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1128,9 +1128,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_simple_extent_type_c(space_id, classtype)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_TYPE_C'::h5sget_simple_extent_type_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_TYPE_C'::h5sget_simple_extent_type_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(OUT) :: classtype
               END FUNCTION h5sget_simple_extent_type_c
@@ -1172,9 +1172,9 @@
                                             maximum_size, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sset_extent_simple_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sset_extent_simple_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1196,9 +1196,9 @@
               INTEGER FUNCTION h5sset_extent_simple_c(space_id, rank, &
                                current_size,  maximum_size) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_SIMPLE_C'::h5sset_extent_simple_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_SIMPLE_C'::h5sset_extent_simple_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(IN) :: rank
               INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) :: current_size
@@ -1240,9 +1240,9 @@
           SUBROUTINE h5sis_simple_f(space_id, status, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sis_simple_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sis_simple_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1259,9 +1259,9 @@
             INTERFACE
               INTEGER FUNCTION h5sis_simple_c(space_id, flag) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SIS_SIMPLE_C'::h5sis_simple_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SIS_SIMPLE_C'::h5sis_simple_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER :: flag
               END FUNCTION h5sis_simple_c
@@ -1301,9 +1301,9 @@
           SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5soffset_simple_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5soffset_simple_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1319,9 +1319,9 @@
             INTERFACE
               INTEGER FUNCTION h5soffset_simple_c(space_id, offset) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SOFFSET_SIMPLE_C'::h5soffset_simple_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SOFFSET_SIMPLE_C'::h5soffset_simple_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) ::  offset
               END FUNCTION h5soffset_simple_c
@@ -1361,9 +1361,9 @@
           SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sextent_copy_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sextent_copy_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1379,9 +1379,9 @@
             INTERFACE
               INTEGER FUNCTION h5sextent_copy_c(dest_space_id, source_space_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SEXTENT_COPY_C'::h5sextent_copy_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SEXTENT_COPY_C'::h5sextent_copy_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: dest_space_id
               INTEGER(HID_T), INTENT(IN) :: source_space_id
               END FUNCTION h5sextent_copy_c
@@ -1417,9 +1417,9 @@
           SUBROUTINE h5sset_extent_none_f(space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sset_extent_none_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sset_extent_none_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -1432,9 +1432,9 @@
             INTERFACE
               INTEGER FUNCTION h5sset_extent_none_c(space_id) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_NONE_C'::h5sset_extent_none_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_NONE_C'::h5sset_extent_none_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               END FUNCTION h5sset_extent_none_c
             END INTERFACE
@@ -1479,9 +1479,9 @@
                                            hdferr, stride, block) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_hyperslab_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_hyperslab_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
@@ -1512,9 +1512,9 @@
               INTEGER FUNCTION h5sselect_hyperslab_c(space_id, operator, &
                                start, count, stride, block)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_HYPERSLAB_C'::h5sselect_hyperslab_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_HYPERSLAB_C'::h5sselect_hyperslab_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(IN) :: operator
               INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
@@ -1618,9 +1618,9 @@
 !                                            hyper_id,  hdferr, stride, block) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5scombine_hyperslab_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5scombine_hyperslab_f
+!FooDECSendif
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
@@ -1656,9 +1656,9 @@
 !              INTEGER FUNCTION h5scombine_hyperslab_c(space_id, operator, &
 !                               start, count, stride, block, hyper_id)
 !              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCOMBINE_HYPERSLAB_C'::h5scombine_hyperslab_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCOMBINE_HYPERSLAB_C'::h5scombine_hyperslab_c
+              !FooDECS ENDIF
 !              INTEGER(HID_T), INTENT(IN) :: space_id
 !              INTEGER, INTENT(IN) :: operator
 !              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
@@ -1760,9 +1760,9 @@
 !                                            ds_id,  hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5scombine_select_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5scombine_select_f
+!FooDECSendif
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: space1_id ! First dataspace identifier 
@@ -1785,9 +1785,9 @@
 !              INTEGER FUNCTION h5scombine_select_c(space1_id, operator, &
 !                               space2_id, ds_id)
 !              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SCOMBINE_SELECT_C'::h5scombine_select_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SCOMBINE_SELECT_C'::h5scombine_select_c
+              !FooDECS ENDIF
 !              INTEGER(HID_T), INTENT(IN) :: space1_id
 !              INTEGER(HID_T), INTENT(IN) :: space2_id
 !              INTEGER, INTENT(IN) :: operator
@@ -1839,9 +1839,9 @@
 !                                        hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sselect_select_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sselect_select_f
+!FooDECSendif
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(INOUT) :: space1_id ! Dataspace identifier to
@@ -1864,9 +1864,9 @@
 !              INTEGER FUNCTION h5sselect_select_c(space1_id, operator, &
 !                               space2_id)
 !              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_SELECT_C'::h5sselect_select_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SSELECT_SELECT_C'::h5sselect_select_c
+              !FooDECS ENDIF
 !              INTEGER(HID_T), INTENT(INOUT) :: space1_id
 !              INTEGER(HID_T), INTENT(IN) :: space2_id
 !              INTEGER, INTENT(IN) :: operator
@@ -1908,9 +1908,9 @@
           SUBROUTINE h5sget_select_type_f(space_id, type, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5sget_select_type_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5sget_select_type_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(INOUT) :: space_id ! Dataspace identifier to
@@ -1925,9 +1925,9 @@
             INTERFACE
               INTEGER FUNCTION h5sget_select_type_c(space_id, type)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_TYPE_C'::h5sget_select_type_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5SGET_SELECT_TYPE_C'::h5sget_select_type_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
               INTEGER, INTENT(OUT) :: type
               END FUNCTION h5sget_select_type_c

@@ -50,9 +50,9 @@
           SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5topen_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5topen_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
@@ -68,10 +68,10 @@
             INTERFACE
               INTEGER FUNCTION h5topen_c(loc_id, name, namelen, type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TOPEN_C'::h5topen_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference ::name 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TOPEN_C'::h5topen_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference ::name 
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -114,9 +114,9 @@
           SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tcommit_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tcommit_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
@@ -132,10 +132,10 @@
             INTERFACE
               INTEGER FUNCTION h5tcommit_c(loc_id, name, namelen, type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TCOMMIT_C'::h5tcommit_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference ::name 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TCOMMIT_C'::h5tcommit_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference ::name 
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -176,9 +176,9 @@
           SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tcopy_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tcopy_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -192,9 +192,9 @@
             INTERFACE
               INTEGER FUNCTION  h5tcopy_c(type_id, new_type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TCOPY_C'::h5tcopy_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TCOPY_C'::h5tcopy_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(HID_T), INTENT(OUT) :: new_type_id
               END FUNCTION h5tcopy_c
@@ -234,9 +234,9 @@
           SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tequal_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tequal_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type1_id ! Datatype identifier 
@@ -251,9 +251,9 @@
             INTERFACE
               INTEGER FUNCTION h5tequal_c(type1_id, type2_id, c_flag)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TEQUAL_C'::h5tequal_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TEQUAL_C'::h5tequal_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type1_id 
               INTEGER(HID_T), INTENT(IN) :: type2_id 
               INTEGER :: c_flag
@@ -293,9 +293,9 @@
           SUBROUTINE h5tclose_f(type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tclose_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tclose_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -307,9 +307,9 @@
             INTERFACE
               INTEGER FUNCTION h5tclose_c(type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TCLOSE_C'::h5tclose_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TCLOSE_C'::h5tclose_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               END FUNCTION h5tclose_c
             END INTERFACE
@@ -356,9 +356,9 @@
           SUBROUTINE h5tget_class_f(type_id, class, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_class_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_class_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -382,9 +382,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_class_c(type_id, class)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_CLASS_C'::h5tget_class_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_CLASS_C'::h5tget_class_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER, INTENT(OUT) :: class
               END FUNCTION h5tget_class_c
@@ -422,9 +422,9 @@
           SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_size_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_size_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -437,9 +437,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_size_c(type_id, size)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_SIZE_C'::h5tget_size_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_SIZE_C'::h5tget_size_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(SIZE_T), INTENT(OUT) :: size
               END FUNCTION h5tget_size_c
@@ -477,9 +477,9 @@
           SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_size_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_size_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -492,9 +492,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_size_c(type_id, size)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_SIZE_C'::h5tset_size_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_SIZE_C'::h5tset_size_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(SIZE_T), INTENT(IN) :: size
               END FUNCTION h5tset_size_c
@@ -536,9 +536,9 @@
           SUBROUTINE h5tget_order_f(type_id, order, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_order_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_order_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -555,9 +555,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_order_c(type_id, order)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_ORDER_C'::h5tget_order_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_ORDER_C'::h5tget_order_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: order
               END FUNCTION h5tget_order_c
@@ -599,9 +599,9 @@
           SUBROUTINE h5tset_order_f(type_id, order, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_order_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_order_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -618,9 +618,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_order_c(type_id, order)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_ORDER_C'::h5tset_order_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_ORDER_C'::h5tset_order_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: order
               END FUNCTION h5tset_order_c
@@ -658,9 +658,9 @@
           SUBROUTINE h5tget_precision_f(type_id, precision, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_precision_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_precision_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -673,9 +673,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_precision_c (type_id, precision)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_PRECISION_C'::h5tget_precision_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_PRECISION_C'::h5tget_precision_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(OUT) :: precision 
               END FUNCTION h5tget_precision_c
@@ -712,9 +712,9 @@
           SUBROUTINE h5tset_precision_f(type_id, precision, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_precision_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_precision_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -727,9 +727,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_precision_c (type_id, precision)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_PRECISION_C'::h5tset_precision_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_PRECISION_C'::h5tset_precision_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(IN) :: precision 
               END FUNCTION h5tset_precision_c
@@ -766,9 +766,9 @@
           SUBROUTINE h5tget_offset_f(type_id, offset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_offset_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_offset_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -782,9 +782,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_offset_c(type_id, offset)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_OFFSET_C'::h5tget_offset_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_OFFSET_C'::h5tget_offset_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(OUT) :: offset 
               END FUNCTION h5tget_offset_c
@@ -821,9 +821,9 @@
           SUBROUTINE h5tset_offset_f(type_id, offset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_offset_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_offset_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -837,9 +837,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_offset_c(type_id, offset)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_OFFSET_C'::h5tset_offset_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_OFFSET_C'::h5tset_offset_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(IN) :: offset 
               END FUNCTION h5tset_offset_c
@@ -884,9 +884,9 @@
           SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_pad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_pad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -909,9 +909,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_pad_c(type_id, lsbpad, msbpad)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_PAD_C'::h5tget_pad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_PAD_C'::h5tget_pad_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: lsbpad 
               INTEGER, INTENT(OUT) :: msbpad
@@ -956,9 +956,9 @@
           SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_pad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_pad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -981,9 +981,9 @@
               INTEGER FUNCTION h5tset_pad_c(type_id, lsbpad, msbpad)
               USE H5GLOBAL
               INTEGER(HID_T), INTENT(IN) :: type_id
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_PAD_C'::h5tset_pad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_PAD_C'::h5tset_pad_c
+              !FooDECS ENDIF
               INTEGER, INTENT(IN) :: lsbpad 
               INTEGER, INTENT(IN) :: msbpad
               END FUNCTION h5tset_pad_c
@@ -1025,9 +1025,9 @@
           SUBROUTINE h5tget_sign_f(type_id, sign, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_sign_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_sign_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1045,9 +1045,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_sign_c(type_id, sign)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_SIGN_C'::h5tget_sign_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_SIGN_C'::h5tget_sign_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: sign
               END FUNCTION h5tget_sign_c
@@ -1089,9 +1089,9 @@
           SUBROUTINE h5tset_sign_f(type_id, sign, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_sign_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_sign_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1109,9 +1109,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_sign_c(type_id, sign)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_SIGN_C'::h5tset_sign_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_SIGN_C'::h5tset_sign_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: sign
               END FUNCTION h5tset_sign_c
@@ -1151,9 +1151,9 @@
           SUBROUTINE h5tget_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_fields_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_fields_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1169,9 +1169,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_fields_c(type_id, epos, esize, mpos, msize)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_FIELDS_C'::h5tget_fields_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_FIELDS_C'::h5tget_fields_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: epos  
               INTEGER, INTENT(OUT) :: esize
@@ -1215,9 +1215,9 @@
           SUBROUTINE h5tset_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_fields_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_fields_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
@@ -1233,9 +1233,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_fields_c(type_id, epos, esize, mpos, msize)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_FIELDS_C'::h5tset_fields_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_FIELDS_C'::h5tset_fields_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: epos  
               INTEGER, INTENT(IN) :: esize
@@ -1275,9 +1275,9 @@
           SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_ebias_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_ebias_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1290,9 +1290,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_ebias_c(type_id, ebias)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_EBIAS_C'::h5tget_ebias_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_EBIAS_C'::h5tget_ebias_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(OUT) :: ebias
               END FUNCTION h5tget_ebias_c
@@ -1330,9 +1330,9 @@
           SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_ebias_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_ebias_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1345,9 +1345,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_ebias_c(type_id, ebias)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_EBIAS_C'::h5tset_ebias_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_EBIAS_C'::h5tset_ebias_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(SIZE_T), INTENT(IN) :: ebias
               END FUNCTION h5tset_ebias_c
@@ -1388,9 +1388,9 @@
           SUBROUTINE h5tget_norm_f(type_id, norm, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_norm_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_norm_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1408,9 +1408,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_norm_c(type_id, norm)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_NORM_C'::h5tget_norm_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_NORM_C'::h5tget_norm_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: norm
               END FUNCTION h5tget_norm_c
@@ -1451,9 +1451,9 @@
           SUBROUTINE h5tset_norm_f(type_id, norm, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_norm_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_norm_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1471,9 +1471,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_norm_c(type_id, norm)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_NORM_C'::h5tset_norm_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_NORM_C'::h5tset_norm_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: norm
               END FUNCTION h5tset_norm_c
@@ -1515,9 +1515,9 @@
           SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_inpad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_inpad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1536,9 +1536,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_inpad_c(type_id, padtype)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_INPAD_C'::h5tget_inpad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_INPAD_C'::h5tget_inpad_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: padtype
               END FUNCTION h5tget_inpad_c
@@ -1579,9 +1579,9 @@
           SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_inpad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_inpad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1599,9 +1599,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_inpad_c(type_id, padtype)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_INPAD_C'::h5tset_inpad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_INPAD_C'::h5tset_inpad_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: padtype
               END FUNCTION h5tset_inpad_c
@@ -1640,9 +1640,9 @@
           SUBROUTINE h5tget_cset_f(type_id, cset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_cset_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_cset_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1657,9 +1657,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_cset_c(type_id, cset)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_CSET_C'::h5tget_cset_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_CSET_C'::h5tget_cset_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: cset
               END FUNCTION h5tget_cset_c
@@ -1698,9 +1698,9 @@
           SUBROUTINE h5tset_cset_f(type_id, cset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_cset_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_cset_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1715,9 +1715,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_cset_c(type_id, cset)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_CSET_C'::h5tset_cset_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_CSET_C'::h5tset_cset_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: cset
               END FUNCTION h5tset_cset_c
@@ -1759,9 +1759,9 @@
           SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_strpad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_strpad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1774,9 +1774,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_strpad_c(type_id, strpad)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_STRPAD_C'::h5tget_strpad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_STRPAD_C'::h5tget_strpad_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: strpad
               END FUNCTION h5tget_strpad_c
@@ -1818,9 +1818,9 @@
           SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_strpad_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_strpad_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1833,9 +1833,9 @@
             INTERFACE
               INTEGER FUNCTION h5tset_strpad_c(type_id, strpad)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_STRPAD_C'::h5tset_strpad_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_STRPAD_C'::h5tset_strpad_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: strpad
               END FUNCTION h5tset_strpad_c
@@ -1873,9 +1873,9 @@
           SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_nmembers_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_nmembers_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1888,9 +1888,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_nmembers_c(type_id, num_members)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_NMEMBERS_C'::h5tget_nmembers_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_NMEMBERS_C'::h5tget_nmembers_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) :: num_members
               END FUNCTION h5tget_nmembers_c
@@ -1929,9 +1929,9 @@
           SUBROUTINE h5tget_member_name_f(type_id, index, member_name,  namelen, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_name_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_name_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -1947,10 +1947,10 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_name_c(type_id, index, member_name, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_NAME_C'::h5tget_member_name_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: member_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_NAME_C'::h5tget_member_name_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: member_name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER, INTENT(IN) :: index
               CHARACTER(LEN=*), INTENT(OUT) :: member_name
@@ -1990,9 +1990,9 @@
           SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_offset_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_offset_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2007,9 +2007,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_offset_c(type_id, member_no, offset )
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_OFFSET_C'::h5tget_member_offset_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_OFFSET_C'::h5tget_member_offset_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: member_no
               INTEGER(SIZE_T), INTENT(OUT) :: offset
@@ -2046,9 +2046,9 @@
           SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_index_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_index_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
@@ -2060,10 +2060,10 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_index_c(type_id, name, namelen, index)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_INDEX_C'::h5tget_member_index_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference ::name 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_INDEX_C'::h5tget_member_index_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference ::name 
               INTEGER(HID_T), INTENT(IN) :: type_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN)  :: namelen
@@ -2102,9 +2102,9 @@
 !          SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_dims_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_dims_f
+!FooDECSendif
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2151,9 +2151,9 @@
           SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_array_dims_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_array_dims_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -2168,9 +2168,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_array_dims_c(type_id, dims)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_ARRAY_DIMS_C'::h5tget_array_dims_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_ARRAY_DIMS_C'::h5tget_array_dims_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER(HSIZE_T),DIMENSION(*), INTENT(OUT) ::  dims
               END FUNCTION h5tget_array_dims_c
@@ -2208,9 +2208,9 @@
           SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_array_ndims_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_array_ndims_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -2224,9 +2224,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_array_ndims_c(type_id, ndims)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_ARRAY_NDIMS_C'::h5tget_array_ndims_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_ARRAY_NDIMS_C'::h5tget_array_ndims_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(OUT) ::  ndims
               END FUNCTION h5tget_array_ndims_c
@@ -2264,9 +2264,9 @@
           SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_super_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_super_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -2281,9 +2281,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_super_c(type_id, base_type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_SUPER_C'::h5tget_super_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_SUPER_C'::h5tget_super_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(HID_T), INTENT(OUT) :: base_type_id
               END FUNCTION h5tget_super_c
@@ -2323,9 +2323,9 @@
           SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_type_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_type_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2340,9 +2340,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_type_c(type_id, field_idx , datatype)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_TYPE_C'::h5tget_member_type_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_TYPE_C'::h5tget_member_type_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: field_idx
               INTEGER(HID_T), INTENT(OUT) :: datatype
@@ -2385,9 +2385,9 @@
           SUBROUTINE h5tcreate_f(class, size, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tcreate_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tcreate_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER, INTENT(IN) :: class ! Datatype class can be one of
@@ -2404,9 +2404,9 @@
             INTERFACE
               INTEGER FUNCTION h5tcreate_c(class, size, type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TCREATE_C'::h5tcreate_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TCREATE_C'::h5tcreate_c
+              !FooDECS ENDIF
               INTEGER, INTENT(IN) :: class 
               INTEGER(SIZE_T), INTENT(IN) :: size 
               INTEGER(HID_T), INTENT(OUT) :: type_id 
@@ -2447,9 +2447,9 @@
           SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tinsert_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tinsert_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2467,10 +2467,10 @@
             INTERFACE
               INTEGER FUNCTION h5tinsert_c(type_id, name, namelen, offset, field_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TINSERT_C'::h5tinsert_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TINSERT_C'::h5tinsert_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER(SIZE_T), INTENT(IN) :: offset
@@ -2510,9 +2510,9 @@
           SUBROUTINE h5tpack_f(type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tpack_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tpack_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
@@ -2524,9 +2524,9 @@
             INTERFACE
               INTEGER FUNCTION h5tpack_c(type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TPACK_C'::h5tpack_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TPACK_C'::h5tpack_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               END FUNCTION h5tpack_c
             END INTERFACE
@@ -2560,9 +2560,9 @@
 !          SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tinsert_array_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tinsert_array_f
+!FooDECSendif
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: parent_id ! identifier of the parent compound datatype
@@ -2620,9 +2620,9 @@
           SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tarray_create_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tarray_create_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: base_id ! identifier of array base datatype
@@ -2638,9 +2638,9 @@
             INTERFACE
               INTEGER FUNCTION h5tarray_create_c(base_id, rank, dims, type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TARRAY_CREATE_C'::h5tarray_create_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TARRAY_CREATE_C'::h5tarray_create_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: base_id
               INTEGER, INTENT(IN) ::  rank
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims
@@ -2681,9 +2681,9 @@
           SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tenum_create_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tenum_create_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: parent_id  ! Datatype identifier for
@@ -2699,9 +2699,9 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_create_c(parent_id, new_type_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_CREATE_C'::h5tenum_create_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TENUM_CREATE_C'::h5tenum_create_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: parent_id 
               INTEGER(HID_T), INTENT(OUT) :: new_type_id 
               END FUNCTION h5tenum_create_c
@@ -2737,9 +2737,9 @@
           SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tenum_insert_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tenum_insert_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2754,10 +2754,10 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_insert_c(type_id, name, namelen, value)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_INSERT_C'::h5tenum_insert_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TENUM_INSERT_C'::h5tenum_insert_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               CHARACTER(LEN=*), INTENT(IN) :: name 
               INTEGER, INTENT(IN) :: value
@@ -2800,9 +2800,9 @@
           SUBROUTINE h5tenum_nameof_f(type_id,  value, namelen, name, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tenum_nameof_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tenum_nameof_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2817,10 +2817,10 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_nameof_c(type_id, value, name, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_NAMEOF_C'::h5tenum_nameof_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TENUM_NAMEOF_C'::h5tenum_nameof_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               CHARACTER(LEN=*), INTENT(OUT) :: name
               INTEGER(SIZE_T), INTENT(IN) :: namelen 
@@ -2861,9 +2861,9 @@
           SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tenum_valueof_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tenum_valueof_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2878,10 +2878,10 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_valueof_c(type_id, name, namelen,  value)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_VALUEOF_C'::h5tenum_valueof_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TENUM_VALUEOF_C'::h5tenum_valueof_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER, INTENT(IN) :: namelen 
@@ -2922,9 +2922,9 @@
           SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_member_value_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_member_value_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2938,9 +2938,9 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_value_c(type_id, member_no, value)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_VALUE_C'::h5tget_member_value_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_VALUE_C'::h5tget_member_value_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER, INTENT(IN) :: member_no
               INTEGER, INTENT(OUT) :: value
@@ -2979,9 +2979,9 @@
           SUBROUTINE h5tset_tag_f(type_id, tag, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tset_tag_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tset_tag_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -2996,10 +2996,10 @@
             INTERFACE
               INTEGER FUNCTION h5tset_tag_c(type_id, tag, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TSET_TAG_C'::h5tset_tag_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: tag
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TSET_TAG_C'::h5tset_tag_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: tag
               INTEGER(HID_T), INTENT(IN) :: type_id
               CHARACTER(LEN=*), INTENT(IN) :: tag
               INTEGER :: taglen
@@ -3039,9 +3039,9 @@
           SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_tag_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tget_tag_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
@@ -3056,10 +3056,10 @@
             INTERFACE
               INTEGER FUNCTION h5tget_tag_c(type_id, tag, taglen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_TAG_C'::h5tget_tag_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: tag
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TGET_TAG_C'::h5tget_tag_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: tag
               INTEGER(HID_T), INTENT(IN) :: type_id
               CHARACTER(LEN=*), INTENT(OUT) :: tag
               INTEGER, INTENT(OUT) :: taglen 
@@ -3095,9 +3095,9 @@
           SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tvlen_create_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tvlen_create_f
+!FooDECSendif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN)  :: type_id    ! Datatype identifier 
@@ -3107,9 +3107,9 @@
             INTERFACE
               INTEGER FUNCTION h5tvlen_create_c(type_id, vltype_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TVLEN_CREATE_C'::h5tvlen_create_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TVLEN_CREATE_C'::h5tvlen_create_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN)  :: type_id
               INTEGER(HID_T), INTENT(OUT) :: vltype_id
               END FUNCTION h5tvlen_create_c
@@ -3145,9 +3145,9 @@
           SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tis_variable_str_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5tis_variable_str_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -3164,9 +3164,9 @@
             INTERFACE
               INTEGER FUNCTION h5tis_variable_str_c(type_id, flag) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5TIS_VARIABLE_STR_C'::h5tis_variable_str_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5TIS_VARIABLE_STR_C'::h5tis_variable_str_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER :: flag
               END FUNCTION h5tis_variable_str_c

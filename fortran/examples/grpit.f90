@@ -51,7 +51,7 @@
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Dataset dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
      INTEGER     ::   rank = 2 ! Datasets rank 
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
      !
      ! Initialize dset1_data array.

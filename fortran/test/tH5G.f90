@@ -58,7 +58,7 @@
      CHARACTER(LEN=100) :: commentout !comment to the file
      INTEGER     ::   nmembers
      INTEGER     :: obj_type
-     INTEGER, DIMENSION(7) :: data_dims 
+     INTEGER(HSIZE_T), DIMENSION(7) :: data_dims 
      !
      ! Create the file.
      !

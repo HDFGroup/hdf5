@@ -77,6 +77,12 @@ Bug Fixes since HDF5-1.6.2 release
     Documentation 
     ------------- 
 
+    F90 API
+    -------
+    
+    Fortran functions h5dwrite/read_f and h5awrite/read_f do not
+    accept dims parameter of INTEGER type anymore. Code was removed.
+                                                    2004/04/15
     C++ API
     -------
 	- H5::Exception's and its subclasses' constructors that were 

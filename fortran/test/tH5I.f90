@@ -50,7 +50,7 @@
 
      INTEGER     ::   type !object identifier
      INTEGER     ::   error ! Error flag
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
      CHARACTER(LEN=80) name_buf
      INTEGER(SIZE_T)   buf_size
      INTEGER(SIZE_T)   name_size

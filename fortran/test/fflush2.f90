@@ -79,7 +79,7 @@
      !data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_out
-     INTEGER, DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
      data_dims(1) = NX
      data_dims(2) = NY
 
@@ -178,6 +178,6 @@
      
      ! if errors detected, exit with non-zero code. This is not truly fortran
      ! standard but likely supported by most fortran compilers.
-     IF (total_error .ne. 0) CALL exit (total_error)
+!     IF (total_error .ne. 0) CALL exit (total_error)
 
      END PROGRAM FFLUSH2EXAMPLE

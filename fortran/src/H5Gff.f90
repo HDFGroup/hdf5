@@ -50,9 +50,9 @@
           SUBROUTINE h5gcreate_f(loc_id, name, grp_id, hdferr, size_hint)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gcreate_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gcreate_f
+!FooDECSendif
 !
            
             IMPLICIT NONE
@@ -76,10 +76,10 @@
               INTEGER FUNCTION h5gcreate_c(loc_id, name, namelen, &
                                size_hint_default, grp_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GCREATE_C'::h5gcreate_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GCREATE_C'::h5gcreate_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -124,9 +124,9 @@
           SUBROUTINE h5gopen_f(loc_id, name, grp_id, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gopen_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gopen_f
+!FooDECSendif
 !
            
             IMPLICIT NONE
@@ -143,10 +143,10 @@
             INTERFACE
               INTEGER FUNCTION h5gopen_c(loc_id, name, namelen, grp_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GOPEN_C'::h5gopen_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GOPEN_C'::h5gopen_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -185,9 +185,9 @@
           SUBROUTINE h5gclose_f(grp_id, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gclose_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gclose_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -200,9 +200,9 @@
             INTERFACE
               INTEGER FUNCTION h5gclose_c(grp_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GCLOSE_C'::h5gclose_c
-              !DEC$ ENDIF
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GCLOSE_C'::h5gclose_c
+              !FooDECS ENDIF
               INTEGER(HID_T), INTENT(IN) :: grp_id
               END FUNCTION h5gclose_c
             END INTERFACE
@@ -244,9 +244,9 @@
                                            obj_name, obj_type, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gget_obj_info_idx_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gget_obj_info_idx_f
+!FooDECSendif
 !
            
             IMPLICIT NONE
@@ -268,11 +268,11 @@
                                namelen, idx, &
                                obj_name, obj_namelen, obj_type)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GGET_OBJ_INFO_IDX_C'::h5gget_obj_info_idx_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              !DEC$ATTRIBUTES reference :: obj_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GGET_OBJ_INFO_IDX_C'::h5gget_obj_info_idx_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
+              !FooDECSATTRIBUTES reference :: obj_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -319,9 +319,9 @@
           SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gn_members_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gn_members_f
+!FooDECSendif
 !
            
             IMPLICIT NONE
@@ -339,10 +339,10 @@
             INTERFACE
               INTEGER FUNCTION h5gn_members_c(loc_id, name, namelen, nmembers)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GN_MEMBERS_C'::h5gn_members_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GN_MEMBERS_C'::h5gn_members_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -391,9 +391,9 @@
                                                    new_name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5glink_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5glink_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -419,11 +419,11 @@
                                current_namelen, new_name, new_namelen)
                               
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GLINK_C'::h5glink_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: current_name
-              !DEC$ATTRIBUTES reference :: new_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GLINK_C'::h5glink_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: current_name
+              !FooDECSATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id 
               INTEGER, INTENT(IN) :: link_type
               CHARACTER(LEN=*), INTENT(IN) :: current_name
@@ -473,9 +473,9 @@
                                                    new_name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5glink2_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5glink2_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -500,11 +500,11 @@
                                new_name, new_namelen)
                               
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GLINK2_C'::h5glink2_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: cur_name
-              !DEC$ATTRIBUTES reference :: new_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GLINK2_C'::h5glink2_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: cur_name
+              !FooDECSATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: cur_loc_id 
               INTEGER(HID_T), INTENT(IN) :: new_loc_id 
               INTEGER, INTENT(IN) :: link_type
@@ -551,9 +551,9 @@
           SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gunlink_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gunlink_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -569,10 +569,10 @@
             INTERFACE
               INTEGER FUNCTION h5gunlink_c(loc_id, name, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GUNLINK_C'::h5gunlink_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GUNLINK_C'::h5gunlink_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -613,9 +613,9 @@
           SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gmove_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gmove_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -633,11 +633,11 @@
             INTERFACE
               INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GMOVE_C'::h5gmove_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              !DEC$ATTRIBUTES reference :: new_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GMOVE_C'::h5gmove_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
+              !FooDECSATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -678,9 +678,9 @@
           SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gmove2_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gmove2_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -700,11 +700,11 @@
               INTEGER FUNCTION h5gmove2_c(src_loc_id, src_name, src_namelen, &
                                dst_loc_id, dst_name, dst_namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GMOVE2_C'::h5gmove2_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: src_name
-              !DEC$ATTRIBUTES reference :: dst_name
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GMOVE2_C'::h5gmove2_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: src_name
+              !FooDECSATTRIBUTES reference :: dst_name
               INTEGER(HID_T), INTENT(IN) :: src_loc_id
               INTEGER(HID_T), INTENT(IN) :: dst_loc_id
               CHARACTER(LEN=*), INTENT(IN) :: src_name
@@ -753,9 +753,9 @@
           SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gget_linkval_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gget_linkval_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -776,11 +776,11 @@
             INTERFACE
               INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GGET_LINKVAL_C'::h5gget_linkval_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              !DEC$ATTRIBUTES reference :: buffer 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GGET_LINKVAL_C'::h5gget_linkval_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name
+              !FooDECSATTRIBUTES reference :: buffer 
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name 
               INTEGER :: namelen
@@ -822,9 +822,9 @@
            SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gset_comment_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gset_comment_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -843,11 +843,11 @@
               INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
                                                 comment, commentlen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GSET_COMMENT_C'::h5gset_comment_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name 
-              !DEC$ATTRIBUTES reference :: comment 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GSET_COMMENT_C'::h5gset_comment_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name 
+              !FooDECSATTRIBUTES reference :: comment 
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -891,9 +891,9 @@
           SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5gget_comment_f
-!DEC$endif
+!FooDECSif defined(BUILD_HDF5_DLL)
+!FooDECSattributes dllexport :: h5gget_comment_f
+!FooDECSendif
 !
 
             IMPLICIT NONE
@@ -913,11 +913,11 @@
               INTEGER FUNCTION h5gget_comment_c(loc_id, name, namelen, &
                                                 size, buffer)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5GGET_COMMENT_C'::h5gget_comment_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name 
-              !DEC$ATTRIBUTES reference :: buffer 
+              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
+              !FooMSSATTRIBUTES C,reference,alias:'_H5GGET_COMMENT_C'::h5gget_comment_c
+              !FooDECS ENDIF
+              !FooDECSATTRIBUTES reference :: name 
+              !FooDECSATTRIBUTES reference :: buffer 
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
