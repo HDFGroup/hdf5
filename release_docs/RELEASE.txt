@@ -137,6 +137,9 @@ Tools
 
     * Fixed segfault when "-v" flag was used with the h5dumper.
     * Fixed so that the "-i" flag works correctly with the h5dumper.
+    * Fixed limitation in h5dumper with object names which reached over 1024
+      characters in length. We can now handle arbitrarily larger sizes for
+      object names. BW - 2/27/02
 
 
 Documentation
