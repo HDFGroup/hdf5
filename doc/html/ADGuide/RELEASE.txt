@@ -1,4 +1,4 @@
-HDF5 version 1.6.3-snap1 released on Mon Jul 26 00:53:42 CDT 2004
+HDF5 version 1.6.3-snap2 released on Sun Aug  1 20:59:31 CDT 2004
 ================================================================================
 
 
@@ -86,12 +86,36 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Absoft compiler f95 v9.0 is supported on Linux 2.4 32bit
+                            EIP - 2004/07/29 
+        - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
+          compiler version 8.1. This is a default compiler.
+        - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
+          version 8.2; set F9X environment varibale to f95, for example
+          setenv F9X f95
+          Use --disable-shared --enable-static configure flags when Absoft
+          compiler is used.
+                             EIP - 2004/07/27
 
 Bug Fixes since HDF5-1.6.2 release
 ==================================
 
     Library
     -------
+        - Fixed obscure bug where a filter which failed during chunk allocation
+          could allow library to write uncompressed data to disk but think
+          the data was compressed.  QAK - 2004/07/29
+        - Fixed bug where I/O to an extendible chunked dataset with zero-sized
+          dimensions would cause library to fail an assertion.
+          QAK - 2004/07/27
+        - Fixed bug where chunked datasets which have filters defined,
+          allocation time set to "late" and whose chunks don't align with
+          the dataspace bounds could have incorrect data stored when
+          overwriting the entire dataset on the first write.  QAK - 2004/07/27
+        - Added check to ensure that dataspaces have extents set. JML-2004/07/26
+        - Fixed bug on some Solaris systems where HDF5 would try to use
+          gettimeofday() when that function didn't work properly.
+          JML - 2004/07/23
         - Fixed bug in H5Sset_extent_simple where setting maximum size to
           non-zero, then to zero would cause an error.  JML - 2004/07/20
         - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite
@@ -190,6 +214,7 @@ Platforms Tested
                                   Intel(R) Fortran Compiler Version 7.1
                                   PGI compilers (pgcc, pgf90, pgCC) version 5.0-2
                                   MPIch 1.2.4
+                                  Absoft Fortran compiler v9.0
     Linux 2.4.20-8                gcc 3.3.2
                                   PGI compilers (pgcc, pgf90, pgCC) version 5.0-2
                                   MPIch 1.2.4
@@ -238,7 +263,8 @@ Platforms Tested
     MAC OS X                      Darwin 7.2
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1175, based on gcc version 3.3.2
-                                  IBM XL Fortran version 8.1 Beta
+                                  IBM XL Fortran version 8.1 
+                                  Absoft Fortran compiler v8.2
                                   
 
 
@@ -389,7 +415,7 @@ Known Problems
   from the site:
   ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
-* On some platforms that use Intel compilers to build HDF5 fortran library,
+* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
