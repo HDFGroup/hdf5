@@ -97,14 +97,16 @@ h4toh5 Utility
       is reversed (i.e., the ht. and width of the image dataset is 
       incorrectly described.)  For more information, please see:
 
-        http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+        http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html
  
+      This bug has been fixed for the snapshot of hdf5 1.4 release. March 12th,2001
+
     Known Limitations of the h4toh5 release
     ---------------------------------------------
 
-    1. Error Handling
+    1. Error handlings
 
-    Error reporting is minimal.
+       h4toh5 utility will print out an error message when an error occurs.
 
     2. String Datatype
 
