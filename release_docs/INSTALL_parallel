@@ -175,3 +175,18 @@ the same directory as `mpicc':
 
 The `$${NPROCS:=3}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 3).
+
+
+4. Parallel tests
+-----------------
+
+The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.
+The t_mpi tests the basic functionalities of some MPI-IO features used by
+Parallel HDF5.  It usually exits with non-zero code if a required MPI-IO
+feature does not succeed as expected.  One exception is the testing of
+accessing files larger than 2GB.  If the underlaying filesystem or if
+the MPI-IO library fails to handle file sizes larger than 2GB, the test
+will print informational essages stating the failure but will not exit
+with non-zero code.  Failure to support file size greater than 2GB is
+not a fatal error for HDF5 becuase HDF5 can use other file-drivers such
+as families of files to by pass the file size limit.
