@@ -198,12 +198,13 @@ struct H5F_mount_t {
     </pre></code>
 
     <p>The <code>H5Fmount</code> function takes the ID of an open
-      file, the name of a to-be-mounted file, the name of the mount
+      file or group, the name of a to-be-mounted file, the name of the mount
       point, and a file access property list (like <code>H5Fopen</code>).
       It opens the new file and adds a record to the parent's mount
       table.  The <code>H5Funmount</code> function takes the parent
-      file ID and the name of the mount point and closes the file
-      that's mounted at that point.  The <code>H5Fclose</code>
+      file or group ID and the name of the mount point and disassociates
+      the mounted file from the mount point.  It does not close the 
+      mounted file.  The <code>H5Fclose</code>
       function closes/unmounts files recursively.
 
     <p>The <code>H5G_iname</code> function which translates a name to

@@ -356,12 +356,14 @@ documented below.
             <code>child_id</code> onto the group specified by 
             <code>loc_id</code> and <code>name</code> using 
             the mount properties <code>plist_id</code>.
+            <p>
+            Note that <code>loc_id</code> identifies a file or group.
+            <code>name</code> then specifies a group relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>The identifier for the group onto which the 
-                file specified by <code>child_id</code> 
-                is to be mounted.
+            <dd>The identifier for of file or group in 
+                which <code>name</code> is defined.
         <dt><em>const char *</em><code>name</code>
             <dd>The name of the group onto which the 
                 file specified by <code>child_id</code> 
@@ -401,7 +403,7 @@ documented below.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>The identifier for the location at which
+            <dd>The file or group identifier for the location at which
                 the specified file is to be unmounted.
         <dt><em>const char *</em><code>name</code>
             <dd>The name of the file to be unmounted.

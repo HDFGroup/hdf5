@@ -123,10 +123,9 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Description:</strong>
     <dd><code>H5Screate</code> creates a new dataspace of a particular 
         <code>type</code>.  
-        The types currently supported are <code>H5S_SCALAR</code>, 
-        <code>H5S_SIMPLE</code>, and <code>H5S_NONE</code>;
-        others are planned to be added later.  The <code>H5S_NONE</code> 
-        dataspace can only hold a selection, not an extent.
+        The types currently supported are <code>H5S_SCALAR</code> and 
+        <code>H5S_SIMPLE</code>;
+        others are planned to be added later.  
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5S_class_t</em> <code>type</code>
@@ -226,10 +225,23 @@ of the <cite>HDF5 User's Guide.</cite>.
         <P>
         The selection operator <code>op</code> determines how the 
         new selection is to be combined with the previously existing
-        selection for the dataspace.  Currently, only the 
-        <code>H5S_SELECT_SET</code> operator is supported, which 
-        replaces the existing selection with the parameters from
-        this call.  When operators other than <code>H5S_SELECT_SET</code> 
+        selection for the dataspace.  
+        The following operators are supported:
+        <dir>
+        <table width=80% border=0>
+          <tr><td valign=top>
+            <code>H5S_SELECT_SET</code>
+            </td><td valign=top>
+            Replaces the existing selection with the parameters from this call.  
+            Overlapping blocks are not supported with this operator.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_OR</code>
+            </td><td valign=top>
+            Adds the new selection to the existing selection.
+          </td></tr>
+        </table>
+        </dir>
+        When operators other than <code>H5S_SELECT_SET</code> 
         are used to combine a new selection with an existing selection,
         the selection ordering is reset to 'C' array ordering.
 <dt><strong>Parameters:</strong>
@@ -584,10 +596,10 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dest_space_id</code>
-            <dd>IN: The identifier for the dataspace from which 
+            <dd>IN: The identifier for the dataspace to which 
                 the extent is copied.
         <dt><em>hid_t</em> <code>source_space_id</code>
-            <dd>IN: The identifier for the dataspace to which 
+            <dd>IN: The identifier for the dataspace from which 
                 the extent is copied.
     </dl>
 <dt><strong>Returns:</strong>
@@ -605,7 +617,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dd>Removes the extent from a dataspace.
 <dt><strong>Description:</strong>
     <dd><code>H5Sset_extent_none</code> removes the extent from 
-    a dataspace and sets the type to <tt>H5S_NONE</tt>.
+    a dataspace and sets the type to <tt>H5S_NO_CLASS</tt>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
@@ -644,10 +656,22 @@ of the <cite>HDF5 User's Guide.</cite>.
         selection is to be combined with the already existing selection 
         for the dataspace.  
         <p>
-        Currently, only the <code>H5S_SELECT_SET</code> operator is 
-        supported; it replaces the existing selection with the 
-        parameters from this call.  Overlapping blocks are not
-        supported with the <code>H5S_SELECT_SET</code> operator.
+        The following operators are supported:
+        <dir>
+        <table width=80% border=0>
+          <tr><td valign=top>
+            <code>H5S_SELECT_SET</code>
+            </td><td valign=top>
+            Replaces the existing selection with the parameters from this call.  
+            Overlapping blocks are not supported with this operator.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_OR</code>
+            </td><td valign=top>
+            Adds the new selection to the existing selection.
+          </td></tr>
+        </table>
+        </dir>
+   
 <P>
 The <code>start</code> array determines the starting coordinates 
 of the hyperslab

@@ -256,9 +256,8 @@ by calling <TT>H5Sclose()</TT>.
 
 <DD>
     This function creates a new dataspace of a particular <I>type</I>.  The
-types currently supported are H5S_SCALAR, H5S_SIMPLE, or H5S_NONE, although
-others are planned to be added later.  The H5S_NONE dataspace can only hold a
-selection, not an extent.
+types currently supported are H5S_SCALAR and H5S_SIMPLE; 
+others are planned to be added later.  
 </DD>
 
 <DT>
@@ -345,7 +344,7 @@ H5S_SIMPLE and the extent is set as specified.
 <TT>herr_t H5Sset_extent_none (hid_t <I>space</I>)</TT></DT>
 
 <DD>
-Removes the extent from a dataspace and sets the type to H5S_NONE.
+Removes the extent from a dataspace and sets the type to H5S_NO_CLASS.
 </DD>
 
 <DT>
@@ -417,11 +416,24 @@ This function selects a hyperslab region to add to the current selected region
 for the <I>space</I> dataspace.  The <I>start</I>, <I>stride</I>, <I>count</I>
 and <I>block</I> arrays must be the same size as the rank of the dataspace.  
 The selection operator <I>op</I> determines how the new selection is to be
-combined with the already existing selection for the dataspace.  Currently,
-only the H5S_SELECT_SET operator is supported, which replaces the existing
-selection with the parameters from this call.  Overlapping blocks are not
-supported with the H5S_SELECT_SET operator.
-<P>The <I>start</I> array determines the starting coordinates of the hyperslab
+combined with the already existing selection for the dataspace.  
+Currently, The following operators are supported:
+  <dir>
+  <table width=80% border=0>
+    <tr><td valign=top>
+      <code>H5S_SELECT_SET</code>
+      </td><td valign=top>
+      Replaces the existing selection with the parameters from this call.  
+      Overlapping blocks are not supported with this operator.
+    </td></tr><tr><td valign=top>
+      <code>H5S_SELECT_OR</code>
+      </td><td valign=top>
+      Adds the new selection to the existing selection.
+    </td></tr>
+  </table>
+  </dir>
+<P>
+The <I>start</I> array determines the starting coordinates of the hyperslab
 to select.  The <I>stride</I> array chooses array locations from the dataspace
 with each value in the <I>stride</I> array determining how many elements to move
 in each dimension.  Setting a value in the <I>stride</I> array to 1 moves to
@@ -459,9 +471,23 @@ iterated through when I/O is performed.  Duplicate coordinate locations are not
 checked for.
 
 <P>The selection operator <I>op</I> determines how the new selection is to be
-combined with the already existing selection for the dataspace.  Currently,
-only the H5S_SELECT_SET operator is supported, which replaces the existing
-selection with the parameters from this call.  When operators other than
+combined with the already existing selection for the dataspace.  
+The following operators are supported:
+  <dir>
+  <table width=80% border=0>
+    <tr><td valign=top>
+      <code>H5S_SELECT_SET</code>
+      </td><td valign=top>
+      Replaces the existing selection with the parameters from this call.  
+      Overlapping blocks are not supported with this operator.
+    </td></tr><tr><td valign=top>
+      <code>H5S_SELECT_OR</code>
+      </td><td valign=top>
+      Adds the new selection to the existing selection.
+    </td></tr>
+  </table>
+  </dir>
+When operators other than
 H5S_SELECT_SET are used to combine a new selection with an existing selection,
 the selection ordering is reset to 'C' array ordering.
 </DD>
