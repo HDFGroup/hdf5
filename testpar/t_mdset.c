@@ -25,10 +25,12 @@ void multiple_dset_write(char *filename, int ndatasets)
 {
     int i, j, n, mpi_size, mpi_rank;
     hid_t iof, plist, dataset, memspace, filespace;
+    hid_t dcpl;                         /* Dataset creation property list */
     hssize_t chunk_origin [DIM];
     hsize_t chunk_dims [DIM], file_dims [DIM];
     hsize_t count[DIM]={1,1};
     double outme [SIZE][SIZE];
+    double fill=1.0;                    /* Fill value */
     char dname [100];
     herr_t ret;
 
@@ -54,9 +56,16 @@ void multiple_dset_write(char *filename, int ndatasets)
     ret = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, chunk_origin, chunk_dims, count, chunk_dims);
     VRFY((ret>=0), "mdata hyperslab selection");
 
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl>=0), "dataset creation property list succeeded");
+
+    ret=H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, &fill);
+    VRFY((ret>=0), "set fill-value succeeded");
+
     for (n = 0; n < ndatasets; n++) {
 	sprintf (dname, "dataset %d", n);
-	dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT);
+	dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, dcpl);
 	VRFY((dataset > 0), dname); 
 
 	/* calculate data to write */
@@ -77,6 +86,7 @@ void multiple_dset_write(char *filename, int ndatasets)
 
     H5Sclose (filespace);
     H5Sclose (memspace);
+    H5Pclose (dcpl);
     H5Fclose (iof);
 }
 
