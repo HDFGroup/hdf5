@@ -28,22 +28,19 @@ static hbool_t interface_initialize_g = FALSE;
 
 static H5F_low_t *H5F_sec2_open (const char *name, uintn flags, H5F_search_t*);
 static herr_t H5F_sec2_close (H5F_low_t *lf);
-static herr_t H5F_sec2_read (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_sec2_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			     uint8 *buf);
-static herr_t H5F_sec2_write (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_sec2_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			      const uint8 *buf);
-static herr_t H5F_sec2_flush (H5F_low_t *lf);
-static size_t H5F_sec2_size (H5F_low_t *lf);
-
 
 const H5F_low_class_t H5F_LOW_SEC2[1] = {{
-   NULL, 			/* use default access(2) func		*/
+   NULL, 			/* access method			*/
    H5F_sec2_open, 		/* open method				*/
    H5F_sec2_close, 		/* close method				*/
    H5F_sec2_read,		/* read method				*/
    H5F_sec2_write, 		/* write method				*/
-   H5F_sec2_flush, 		/* flush method				*/
-   H5F_sec2_size, 		/* file size method			*/
+   NULL,	 		/* flush method				*/
+   NULL, 			/* extend method			*/
 }};
 
 
@@ -69,7 +66,7 @@ const H5F_low_class_t H5F_LOW_SEC2[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key)
+H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 {
    uintn		oflags;
    H5F_low_t		*lf = NULL;
@@ -91,16 +88,16 @@ H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key)
    lf->u.sec2.fd = fd;
    lf->u.sec2.op = H5F_OP_SEEK;
    lf->u.sec2.cur = 0;
+   fstat (fd, &sb);
+   lf->eof.offset = sb.st_size;
 
    if (key) {
-      fstat (fd, &sb);
       key->dev = sb.st_dev;
       key->ino = sb.st_ino;
    }
 
    FUNC_LEAVE (lf);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -140,8 +137,8 @@ H5F_sec2_close (H5F_low_t *lf)
  * Function:	H5F_sec2_read
  *
  * Purpose:	Reads SIZE bytes beginning at address ADDR in file LF and
- *		places them in buffer BUF.  Reading past the end of the
- *		file returns zeros instead of failing.
+ *		places them in buffer BUF.  Reading past the logical or
+ *		physical end of file returns zeros instead of failing.
  *
  * Errors:
  *		IO        READERROR     Read failed. 
@@ -159,22 +156,46 @@ H5F_sec2_close (H5F_low_t *lf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sec2_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
+H5F_sec2_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 {
    ssize_t	n;
+   off_t	offset;
    
    FUNC_ENTER (H5F_sec2_read, NULL, FAIL);
 
+
+   /* Check for overflow */
+   offset = addr->offset;
+   assert ("address overflowed" && offset==addr->offset);
+   assert ("overflow" && offset+size>=offset);
+
+   /* Check easy cases */
+   if (0==size) HRETURN (SUCCEED);
+   if (offset>=lf->eof.offset) {
+      HDmemset (buf, 0, size);
+      HRETURN (SUCCEED);
+   }
+
    /*
-    * Optimize seeking.  If that optimization is disabled then alwasy call
+    * Optimize seeking.  If that optimization is disabled then always call
     * lseek().
     */
    if (!H5F_OPT_SEEK ||
-       lf->u.sec2.op==H5F_OP_UNKNOWN || lf->u.sec2.cur!=addr) {
-      if (lseek (lf->u.sec2.fd, addr, SEEK_SET)<0) {
+       lf->u.sec2.op==H5F_OP_UNKNOWN ||
+       lf->u.sec2.cur!=offset) {
+      if (lseek (lf->u.sec2.fd, offset, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*lseek failed*/
       }
-      lf->u.sec2.cur = addr;
+      lf->u.sec2.cur = offset;
+   }
+
+   /*
+    * Read zeros past the logical end of file (physical is handled below)
+    */
+   if ((size_t)offset+size>lf->eof.offset) {
+      size_t nbytes = (size_t)offset+size - lf->eof.offset;
+      HDmemset (buf+size-nbytes, 0, nbytes);
+      size -= nbytes;
    }
 
    /*
@@ -193,11 +214,11 @@ H5F_sec2_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
     * might be different than the number requested.
     */
    lf->u.sec2.op = H5F_OP_READ;
-   lf->u.sec2.cur = addr + n;
+   lf->u.sec2.cur = offset + n;
+   assert ("address overflowed" && lf->u.sec2.cur>=offset);
    
    FUNC_LEAVE (SUCCEED);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -222,24 +243,33 @@ H5F_sec2_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sec2_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
+H5F_sec2_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
+		const uint8 *buf)
 {
+   off_t	offset;
+   
    FUNC_ENTER (H5F_sec2_write, NULL, FAIL);
+
+   /* Check for overflow */
+   offset = addr->offset;
+   assert ("address overflowed" && offset==addr->offset);
+   assert ("overflow" && offset+size>=offset);
 
    /*
     * Optimize seeking. If that optimization is disabled then always call
     * lseek().
     */
    if (!H5F_OPT_SEEK ||
-       lf->u.sec2.op==H5F_OP_UNKNOWN || lf->u.sec2.cur!=addr) {
-      if (lseek (lf->u.sec2.fd, addr, SEEK_SET)<0) {
+       lf->u.sec2.op==H5F_OP_UNKNOWN ||
+       lf->u.sec2.cur!=offset) {
+      if (lseek (lf->u.sec2.fd, offset, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*lseek failed*/
       }
-      lf->u.sec2.cur = addr;
+      lf->u.sec2.cur = offset;
    }
 
    /*
-    * Read the data from the file.  If the write failed then set the
+    * Write the data to the file.  If the write failed then set the
     * operation back to UNKNOWN since Posix doesn't gurantee its value.
     */
    if (size != write (lf->u.sec2.fd, buf, size)) {
@@ -251,76 +281,8 @@ H5F_sec2_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
     * Update the file position.
     */
    lf->u.sec2.op = H5F_OP_WRITE;
-   lf->u.sec2.cur = addr + size;
-   FUNC_LEAVE (SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sec2_flush
- *
- * Purpose:	Makes sure that all data is on disk.
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 22, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_sec2_flush (H5F_low_t *lf)
-{
-   FUNC_ENTER (H5F_sec2_flush, NULL, FAIL);
-
-   /* Not necessary with this driver */
+   lf->u.sec2.cur = offset + size;
+   assert ("address overflowed" && lf->u.sec2.cur>=offset);
 
    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sec2_size
- *
- * Purpose:	Returns the current size of the file in bytes.
- *
- * Bugs:	There is no way to determine if this function failed.
- *
- * Errors:
- *		IO        SEEKERROR     Lseek failed. 
- *
- * Return:	Success:	Size of file in bytes
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 22, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-H5F_sec2_size (H5F_low_t *lf)
-{
-   off_t	size;
-   
-   FUNC_ENTER (H5F_sec2_size, NULL, 0);
-
-   if ((size=lseek (lf->u.sec2.fd, 0, SEEK_END))<0) {
-      lf->u.sec2.op = H5F_OP_UNKNOWN;
-      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, 0); /*lseek failed*/
-   }
-   
-   lf->u.sec2.op = H5F_OP_SEEK;
-   lf->u.sec2.cur = size;
-
-   FUNC_LEAVE (size);
 }

@@ -28,13 +28,10 @@ static hbool_t interface_initialize_g = FALSE;
 static hbool_t H5F_core_access (const char *name, int mode, H5F_search_t *key);
 static H5F_low_t *H5F_core_open (const char *name, uintn flags, H5F_search_t*);
 static herr_t H5F_core_close (H5F_low_t *lf);
-static herr_t H5F_core_read (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_core_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			     uint8 *buf);
-static herr_t H5F_core_write (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_core_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			      const uint8 *buf);
-static herr_t H5F_core_flush (H5F_low_t *lf);
-static size_t H5F_core_size (H5F_low_t *lf);
-
 
 const H5F_low_class_t H5F_LOW_CORE[1] = {{
    H5F_core_access, 		/* access method			*/
@@ -42,8 +39,8 @@ const H5F_low_class_t H5F_LOW_CORE[1] = {{
    H5F_core_close, 		/* close method				*/
    H5F_core_read,		/* read method				*/
    H5F_core_write, 		/* write method				*/
-   H5F_core_flush, 		/* flush method				*/
-   H5F_core_size, 		/* file size method			*/
+   NULL, 			/* flush method				*/
+   NULL, 			/* extend method			*/
 }};
 
 
@@ -53,7 +50,7 @@ const H5F_low_class_t H5F_LOW_CORE[1] = {{
  * Purpose:	Determines if the specified file already exists.  This driver
  *		doesn't use names, so every call to H5F_core_open() would
  *		create a new file.  Therefore, this function always returns
- *		false.
+ *		false and KEY is never initialized.
  *
  * Return:	Success:	FALSE
  *
@@ -67,7 +64,7 @@ const H5F_low_class_t H5F_LOW_CORE[1] = {{
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5F_core_access (const char *name, int mode, H5F_search_t *key)
+H5F_core_access (const char *name, int mode, H5F_search_t *key/*out*/)
 {
    FUNC_ENTER (H5F_core_access, NULL, FAIL);
    FUNC_LEAVE (FALSE);
@@ -112,6 +109,7 @@ H5F_core_open (const char *name, uintn flags, H5F_search_t *key)
    lf->u.core.mem = H5MM_xmalloc (H5F_CORE_INC);
    lf->u.core.alloc = H5F_CORE_INC;
    lf->u.core.size = 0;
+   H5F_addr_reset (&(lf->eof));
 
    if (key) {
       key->dev = H5F_CORE_DEV;
@@ -120,7 +118,6 @@ H5F_core_open (const char *name, uintn flags, H5F_search_t *key)
    
    FUNC_LEAVE (lf);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -158,8 +155,8 @@ H5F_core_close (H5F_low_t *lf)
  * Function:	H5F_core_read
  *
  * Purpose:	Reads SIZE bytes beginning at address ADDR in file LF and
- *		places them in buffer BUF.  Reading past the end of the
- *		file returns zeros instead of failing.
+ *		places them in buffer BUF.  Reading past the logical or
+ *		physical end of the file returns zeros instead of failing.
  *
  * Errors:
  *
@@ -175,17 +172,24 @@ H5F_core_close (H5F_low_t *lf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
+H5F_core_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 {
    size_t	n;
+   size_t	eof;
    
    FUNC_ENTER (H5F_core_read, NULL, FAIL);
 
-   if (addr>=lf->u.core.size) {
+   assert (lf);
+   assert (addr && H5F_addr_defined (addr));
+   assert (buf);
+
+   eof = MIN (lf->eof.offset, lf->u.core.size);
+
+   if (addr->offset>=eof) {
       HDmemset (buf, 0, size);
    } else {
-      n = MIN (size, lf->u.core.size - addr);
-      HDmemcpy (buf, lf->u.core.mem + addr, n);
+      n = MIN (size, eof - addr->offset);
+      HDmemcpy (buf, lf->u.core.mem + addr->offset, n);
       HDmemset (buf+n, 0, size-n);
    }
    
@@ -198,7 +202,8 @@ H5F_core_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
  * Function:	H5F_core_write
  *
  * Purpose:	Writes SIZE bytes from the beginning of BUF into file LF at
- *		file address ADDR.
+ *		file address ADDR.  The file is extended as necessary to
+ *		accommodate the new data.
  *
  * Errors:
  *
@@ -214,84 +219,31 @@ H5F_core_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
+H5F_core_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
+		const uint8 *buf)
 {
+   size_t	inc_amount;
+   
    FUNC_ENTER (H5F_core_write, NULL, FAIL);
 
+   assert (lf);
+   assert (addr && H5F_addr_defined (addr));
+   assert (buf);
+
    /* Allocate more space */
-   if (addr+size>lf->u.core.alloc) {
-      lf->u.core.alloc = lf->u.core.alloc + MAX (addr+size-lf->u.core.alloc,
-						 H5F_CORE_INC);
+   if (addr->offset+size>lf->u.core.alloc) {
+      inc_amount = MAX (addr->offset+size-lf->u.core.alloc, H5F_CORE_INC);
+      lf->u.core.alloc = lf->u.core.alloc + inc_amount;
       lf->u.core.mem = H5MM_xrealloc (lf->u.core.mem, lf->u.core.alloc);
    }
 
-   /* Move EOF marker */
-   if (addr+size>lf->u.core.size) {
-      lf->u.core.size = addr + size;
+   /* Move the physical EOF marker */
+   if (addr->offset+size>lf->u.core.size) {
+      lf->u.core.size = addr->offset + size;
    }
 
    /* Copy data */
-   HDmemcpy (lf->u.core.mem+addr, buf, size);
+   HDmemcpy (lf->u.core.mem+addr->offset, buf, size);
 
    FUNC_LEAVE (SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_core_flush
- *
- * Purpose:	Makes sure that all data is flushed.  This doesn't apply to
- *		this driver.
- *
- * Errors:
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 22, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_core_flush (H5F_low_t *lf)
-{
-   FUNC_ENTER (H5F_core_flush, NULL, FAIL);
-
-   /* Not necessary with this driver */
-
-   FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_core_size
- *
- * Purpose:	Returns the current size of the file in bytes.
- *
- * Bugs:	There is no way to determine if this function failed.
- *
- * Errors:
- *
- * Return:	Success:	Size of file in bytes
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 22, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-H5F_core_size (H5F_low_t *lf)
-{
-   FUNC_ENTER (H5F_core_size, NULL, 0);
-
-   FUNC_LEAVE (lf->u.core.size);
 }

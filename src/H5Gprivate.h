@@ -23,6 +23,17 @@
 #include <H5Bprivate.h>
 #include <H5Fprivate.h>
 
+/*
+ * FEATURE: If this macro is defined then H5G_shadow_check() is occassionally
+ *	    (actually, quite often) called to check the consistency of the
+ *	    shadow table.  If there's something wrong with the table then
+ *	    abort() is called. Shadow table checking is a rather expensive
+ *	    operation.
+ */
+#ifdef NDEBUG
+#  undef H5G_DEBUG
+#endif
+
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NO_CHANGE	(-1)	/*see H5G_ent_modified()		*/
@@ -31,11 +42,12 @@
 /*
  * The disk size for a symbol table entry...
  */
+#define H5G_SIZEOF_SCRATCH	24
 #define H5G_SIZEOF_ENTRY(F)						      \
-   (H5F_SIZEOF_OFFSET(F) +	/*offset of name into heap     		*/    \
+   (H5F_SIZEOF_SIZE(F) +	/*offset of name into heap     		*/    \
     H5F_SIZEOF_OFFSET(F) +	/*address of object header		*/    \
     4 +				/*entry type				*/    \
-    24)				/*scratch pad space			*/
+    H5G_SIZEOF_SCRATCH)		/*scratch pad space			*/
     
 /*
  * Various types of object header information can be cached in a symbol
@@ -92,13 +104,13 @@ herr_t H5G_close (H5F_t *f, H5G_entry_t *ent);
 herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent,
 		 H5G_entry_t *ent);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
-herr_t H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
+herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent);
 
 /*
  * These functions operate on symbol table nodes.
  */
-herr_t H5G_node_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
-		       intn fwidth, haddr_t heap);
+herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream,
+		       intn indent, intn fwidth, const haddr_t *heap);
 
 /*
  * These functions operate on shadow entries.
@@ -112,7 +124,7 @@ herr_t H5G_shadow_flush (H5F_t *f, hbool_t invalidate);
  */
 H5G_entry_t *H5G_ent_calloc (void);
 herr_t H5G_ent_invalidate (H5G_entry_t *ent);
-haddr_t H5G_ent_addr (H5G_entry_t *ent);
+herr_t H5G_ent_addr (H5G_entry_t *ent, haddr_t *retval/*out*/);
 H5G_cache_t *H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type);
 herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
 herr_t H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream,

@@ -22,6 +22,17 @@
 #include <H5private.h>
 #include <H5Fprivate.h>
 
+/*
+ * Feature: Define this constant if you want to check B-tree consistency
+ *	    after each B-tree operation.  Note that this slows down the
+ *	    library considerably! Debugging the B-tree depends on assert()
+ *	    being enabled.
+ */
+#ifdef NDEBUG
+#  undef H5B_DEBUG
+#endif
+
+
 #define H5B_MAGIC	"TREE"	/*tree node magic number		*/
 #define H5B_SIZEOF_MAGIC 4	/*size of magic number			*/
 
@@ -60,15 +71,15 @@ typedef struct H5B_class_t {
    H5B_subid_t	id;		/*id as found in file			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
    size_t	(*get_sizeof_rkey)(H5F_t*,const void*);/*raw key size	*/
-   haddr_t	(*new)(H5F_t*,H5B_ins_t,void*,void*,void*); /*new leaf	*/
+   herr_t	(*new)(H5F_t*,H5B_ins_t,void*,void*,void*,haddr_t*);
    intn         (*cmp2)(H5F_t*,void*,void*,void*); /*compare 2 keys	*/
    intn		(*cmp3)(H5F_t*,void*,void*,void*); /*compare 3 keys	*/
-   herr_t	(*found)(H5F_t*,haddr_t,const void*,void*,const void*);
-   haddr_t	(*insert)(H5F_t*,haddr_t,H5B_ins_t*,void*,hbool_t*,void*,void*,
-			  void*,hbool_t*); /*insert new data		*/
+   herr_t	(*found)(H5F_t*,const haddr_t*,const void*,void*,const void*);
+   H5B_ins_t	(*insert)(H5F_t*,const haddr_t*,void*,hbool_t*,void*,void*,
+			  void*,hbool_t*,haddr_t*); /*insert new data	*/
    hbool_t	follow_min;	/*min insert uses min leaf, not new()	*/
    hbool_t	follow_max;	/*max insert uses max leaf, not new()	*/
-   herr_t	(*list)(H5F_t*,haddr_t,void*); /*traverse leaf nodes	*/
+   herr_t	(*list)(H5F_t*,const haddr_t*,void*); /*walk leaf nodes	*/
    herr_t	(*decode)(H5F_t*,struct H5B_t*,uint8*,void*);
    herr_t	(*encode)(H5F_t*,struct H5B_t*,uint8*,void*);
 } H5B_class_t;
@@ -101,12 +112,15 @@ typedef struct H5B_t {
 /*
  * Library prototypes.
  */
-herr_t H5B_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
-		  intn fwidth, H5B_class_t *type, void *udata);
-haddr_t H5B_new (H5F_t *f, const H5B_class_t *type, void *udata);
-herr_t H5B_find (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
-haddr_t H5B_insert (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
-herr_t H5B_list (H5F_t *f, H5B_class_t *type, haddr_t addr, void *udata);
+herr_t H5B_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
+		  intn fwidth, const H5B_class_t *type, void *udata);
+herr_t H5B_new (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t*);
+herr_t H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
+		 void *udata);
+herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
+		   void *udata);
+herr_t H5B_list (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
+		 void *udata);
 
 
 #endif

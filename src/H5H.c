@@ -29,7 +29,7 @@
 #define PABLO_MASK	H5H_mask
 
 typedef struct H5H_free_t {
-   off_t	offset;			/*offset of free block		*/
+   size_t	offset;			/*offset of free block		*/
    size_t	size;			/*size of free block		*/
    struct H5H_free_t *prev;		/*previous entry in free list	*/
    struct H5H_free_t *next;		/*next entry in free list	*/
@@ -45,17 +45,18 @@ typedef struct H5H_t {
 } H5H_t;
 
 /* PRIVATE PROTOTYPES */
-static H5H_t *H5H_load (H5F_t *f, haddr_t addr, const void *udata1,
+static H5H_t *H5H_load (H5F_t *f, const haddr_t *addr, const void *udata1,
 			void *udata2);
-static herr_t H5H_flush (H5F_t *f, hbool_t dest, haddr_t addr, H5H_t *heap);
+static herr_t H5H_flush (H5F_t *f, hbool_t dest, const haddr_t *addr,
+			 H5H_t *heap);
 
 /*
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
    H5AC_HEAP_ID,
-   (void*(*)(H5F_t*,haddr_t,const void*,void*))H5H_load,
-   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5H_flush,
+   (void*(*)(H5F_t*,const haddr_t*,const void*,void*))H5H_load,
+   (herr_t(*)(H5F_t*,hbool_t,const haddr_t*,void*))H5H_flush,
 }};
 
 /* Is the interface initialized? */
@@ -72,7 +73,8 @@ static intn interface_initialize_g = FALSE;
  *		If the heap ever has to grow, then REALLOC_HINT is the
  *		minimum amount by which the heap will grow.
  *
- * Return:	Success:	File address of new heap.
+ * Return:	Success:	SUCCEED. The file address of new heap is
+ *				returned through the ADDR argument.
  *
  *		Failure:	FAIL
  *
@@ -88,17 +90,18 @@ static intn interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
+herr_t
+H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint,
+	 haddr_t *addr/*out*/)
 {
    H5H_t	*heap = NULL;
    size_t	total_size;		/*total heap size on disk	*/
-   haddr_t	addr;			/*heap file address		*/
 
    FUNC_ENTER (H5H_new, NULL, FAIL);
 
    /* check arguments */
    assert (f);
+   assert (addr);
    if (H5H_GLOBAL==heap_type) {
 #ifndef NDEBUG
       fprintf (stderr, "H5H_new: a local heap is used as the global heap\n");
@@ -112,13 +115,14 @@ H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
 
    /* allocate file version */
    total_size = H5H_SIZEOF_HDR(f) + size_hint;
-   if ((addr = H5MF_alloc (f, total_size))<0) {
+   if (H5MF_alloc (f, H5MF_META, total_size, addr/*out*/)<0) {
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
    }
 
    /* allocate memory version */
    heap = H5MM_xcalloc (1, sizeof(H5H_t));
-   heap->addr = addr + H5H_SIZEOF_HDR(f);
+   heap->addr = *addr;
+   H5F_addr_inc (&(heap->addr), H5H_SIZEOF_HDR (f));
    heap->disk_alloc = size_hint;
    heap->mem_alloc = size_hint;
    heap->chunk = H5MM_xcalloc (1, H5H_SIZEOF_HDR(f)+size_hint);
@@ -141,7 +145,7 @@ H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
       HRETURN_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL);
    }
 
-   FUNC_LEAVE (addr);
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -163,19 +167,20 @@ H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (H5F_t *f, haddr_t addr, const void *udata1, void *udata2)
+H5H_load (H5F_t *f, const haddr_t *addr, const void *udata1, void *udata2)
 {
-   uint8	hdr[20], *p;
+   uint8	hdr[20];
+   const uint8	*p=NULL;
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *tail=NULL;
-   haddr_t	free_block=H5H_FREE_NULL;
+   size_t	free_block=H5H_FREE_NULL;
    H5H_t	*ret_value=NULL;
 
    FUNC_ENTER (H5H_load, NULL, NULL);
 
    /* check arguments */
    assert (f);
-   assert (addr>0);
+   assert (addr && H5F_addr_defined (addr));
    assert (H5H_SIZEOF_HDR(f) <= sizeof hdr);
    assert (!udata1);
    assert (!udata2);
@@ -197,23 +202,23 @@ H5H_load (H5F_t *f, haddr_t addr, const void *udata1, void *udata2)
    heap->mem_alloc = heap->disk_alloc;
 
    /* free list head */
-   H5F_decode_offset (f, p, free_block);
-   if (-1!=free_block && (free_block<0 || free_block>=heap->disk_alloc)) {
+   H5F_decode_length (f, p, free_block);
+   if (free_block!=H5H_FREE_NULL && free_block>=heap->disk_alloc) {
       HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
 
    /* data */
-   H5F_decode_offset (f, p, heap->addr);
+   H5F_addr_decode (f, &p, &(heap->addr));
    heap->chunk = H5MM_xcalloc (1, H5H_SIZEOF_HDR(f) + heap->mem_alloc);
    if (heap->disk_alloc &&
-       H5F_block_read (f, heap->addr, heap->disk_alloc,
+       H5F_block_read (f, &(heap->addr), heap->disk_alloc,
 		       heap->chunk + H5H_SIZEOF_HDR(f))<0) {
       HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
    }
 
    /* free list */
    while (H5H_FREE_NULL!=free_block) {
-      if (free_block<0 || free_block>=heap->disk_alloc) {
+      if (free_block>=heap->disk_alloc) {
 	 HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL);
       }
       fl = H5MM_xmalloc (sizeof (H5H_free_t));
@@ -225,7 +230,7 @@ H5H_load (H5F_t *f, haddr_t addr, const void *udata1, void *udata2)
       if (!heap->freelist) heap->freelist = fl;
 		   
       p = heap->chunk + H5H_SIZEOF_HDR(f) + free_block;
-      H5F_decode_offset (f, p, free_block);
+      H5F_decode_length (f, p, free_block);
       H5F_decode_length (f, p, fl->size);
 
       if (fl->offset + fl->size > heap->disk_alloc) {
@@ -268,16 +273,17 @@ H5H_load (H5F_t *f, haddr_t addr, const void *udata1, void *udata2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
+H5H_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5H_t *heap)
 {
    uint8	*p = heap->chunk;
    H5H_free_t	*fl = heap->freelist;
+   haddr_t	hdr_end_addr;
 
    FUNC_ENTER (H5H_flush, NULL, FAIL);
 
    /* check arguments */
    assert (f);
-   assert (addr>0);
+   assert (addr && H5F_addr_defined (addr));
    assert (heap);
    
    if (heap->dirty) {
@@ -288,11 +294,13 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
        * disk storage.
        */
       if (heap->mem_alloc > heap->disk_alloc) {
-	 haddr_t old_addr = heap->addr;
-	 if ((heap->addr = H5MF_alloc (f, heap->mem_alloc))<0) {
+	 haddr_t old_addr = heap->addr, new_addr;
+	 if (H5MF_alloc (f, H5MF_META, heap->mem_alloc, &new_addr/*out*/)<0) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
 	 }
-	 H5MF_free (f, old_addr, heap->disk_alloc); /*don't care if fail*/
+	 heap->addr = new_addr;
+	 H5MF_free (f, &old_addr, heap->disk_alloc);
+	 H5ECLEAR;/*don't really care if the free failed*/
 	 heap->disk_alloc = heap->mem_alloc;
       }
 
@@ -301,8 +309,8 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
        */
       HDmemcpy (p, H5H_MAGIC, H5H_SIZEOF_MAGIC); p += H5H_SIZEOF_MAGIC;
       H5F_encode_length (f, p, heap->mem_alloc);
-      H5F_encode_offset (f, p, fl?fl->offset:H5H_FREE_NULL);
-      H5F_encode_offset (f, p, heap->addr);
+      H5F_encode_length (f, p, fl?fl->offset:H5H_FREE_NULL);
+      H5F_addr_encode (f, &p, &(heap->addr));
 
       /*
        * Write the free list.
@@ -310,9 +318,9 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       while (fl) {
 	 p = heap->chunk + H5H_SIZEOF_HDR(f) + fl->offset;
 	 if (fl->next) {
-	    H5F_encode_offset (f, p, fl->next->offset);
+	    H5F_encode_length (f, p, fl->next->offset);
 	 } else {
-	    H5F_encode_offset (f, p, H5H_FREE_NULL);
+	    H5F_encode_length (f, p, H5H_FREE_NULL);
 	 }
 	 H5F_encode_length (f, p, fl->size);
 	 fl = fl->next;
@@ -321,7 +329,10 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       /*
        * Copy buffer to disk.
        */
-      if (heap->addr == addr + H5H_SIZEOF_HDR(f)) {
+      hdr_end_addr = *addr;
+      H5F_addr_inc (&hdr_end_addr, H5H_SIZEOF_HDR (f));
+      if (H5F_addr_eq (&(heap->addr), &hdr_end_addr)) {
+	 /* The header and data are contiguous */
 	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f)+heap->disk_alloc,
 			      heap->chunk)<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
@@ -330,7 +341,7 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
 	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f), heap->chunk)<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
 	 }
-	 if (H5F_block_write (f, heap->addr, heap->disk_alloc,
+	 if (H5F_block_write (f, &(heap->addr), heap->disk_alloc,
 			      heap->chunk + H5H_SIZEOF_HDR(f))<0) {
 	    HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL);
 	 }
@@ -370,8 +381,8 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
  * 	       	Attempting to read past the end of an object may cause this
  *		function to fail.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
- *		the address comes from the H5F_t global heap field.
+ *		If the heap address ADDR is the the null pointer then the
+ *		address comes from the H5F_t global heap field.
  *
  * Return:	Success:	BUF (or the allocated buffer)
  *
@@ -386,7 +397,7 @@ H5H_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
  *-------------------------------------------------------------------------
  */
 void *
-H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
+H5H_read (H5F_t *f, const haddr_t *addr, size_t offset, size_t size, void *buf)
 {
    H5H_t	*heap = NULL;
 
@@ -394,8 +405,8 @@ H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (offset>=0);
 
    if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
@@ -424,7 +435,7 @@ H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *		byte offset of the object from the beginning of the heap and
  *		may include an offset into the interior of the object.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *  		If the heap address ADDR is the null pointer then
  *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	Ptr to the object.  The pointer points to
@@ -445,7 +456,7 @@ H5H_read (H5F_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 const void *
-H5H_peek (H5F_t *f, haddr_t addr, off_t offset)
+H5H_peek (H5F_t *f, const haddr_t *addr, size_t offset)
 {
    H5H_t	*heap = NULL;
    const void	*retval = NULL;
@@ -454,8 +465,8 @@ H5H_peek (H5F_t *f, haddr_t addr, off_t offset)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (offset>=0);
 
    if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL, NULL))) {
@@ -500,7 +511,7 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *
  * Purpose:	Inserts a new item into the heap.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *  		If the heap address ADDR is the null pointer then
  *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	Offset of new item within heap.
@@ -515,13 +526,14 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *
  *-------------------------------------------------------------------------
  */
-off_t
-H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
+size_t
+H5H_insert (H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 {
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *max_fl=NULL;
-   off_t	offset = -1;
+   size_t	offset = 0;
    size_t	old_size, need_more;
+   hbool_t	found;
 #ifndef NDEBUG
    static	nmessages = 0;
 #endif
@@ -530,8 +542,8 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (buf_size>0);
    assert (buf);
 
@@ -544,17 +556,22 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     * Look for a free slot large enough for this object and which would
     * leave zero or at least H5G_SIZEOF_FREE bytes left over.
     */
-   for (fl=heap->freelist; fl; fl=fl->next) {
+   for (fl=heap->freelist,found=FALSE; fl; fl=fl->next) {
       if (fl->size>buf_size && fl->size-buf_size>=H5H_SIZEOF_FREE(f)) {
+	 /* a bigger free block was found */
 	 offset = fl->offset;
 	 fl->offset += buf_size;
 	 fl->size -= buf_size;
+	 found = TRUE;
 	 break;
       } else if (fl->size==buf_size) {
+	 /* free block of exact size found */
 	 offset = fl->offset;
 	 fl = H5H_remove_free (heap, fl);
+	 found = TRUE;
 	 break;
       } else if (!max_fl || max_fl->offset < fl->offset) {
+	 /* use worst fit */
 	 max_fl = fl;
       }
    }
@@ -566,7 +583,7 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     * can extend that free chunk.  Otherwise we'll have to make another
     * free chunk.  If the heap must expand, we double its size.
     */
-   if (offset<0) {
+   if (!found) {
 
       need_more = MAX3 (buf_size, heap->mem_alloc, H5H_SIZEOF_FREE(f));
 
@@ -581,8 +598,8 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	 if (max_fl->size < H5H_SIZEOF_FREE(f)) {
 #ifndef NDEBUG
 	    if (max_fl->size) {
-	       fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
-			max_fl->size, __LINE__);
+	       fprintf (stderr, "H5H_insert: lost %lu bytes at line %d\n",
+			(unsigned long)(max_fl->size), __LINE__);
 	       if (0==nmessages++) {
 		  fprintf (stderr, "Messages from H5H_insert() will go away "
 			   "when assertions are turned off.\n");
@@ -608,8 +625,8 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	    heap->freelist = fl;
 #ifndef NDEBUG
 	 } else if (need_more>buf_size) {
-	    fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
-		     need_more-buf_size, __LINE__);
+	    fprintf (stderr, "H5H_insert: lost %lu bytes at line %d\n",
+		     (unsigned long)(need_more-buf_size), __LINE__);
 	    if (0==nmessages++) {
 	       fprintf (stderr, "Messages from H5H_insert() will go away "
 			"when assertions are turned off.\n");
@@ -655,7 +672,7 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
  * 		Do not partially write an object to create it;  the first
  *		write for an object must be for the entire object.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *  		If the heap address ADDR is the null pointer then
  *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
@@ -671,7 +688,7 @@ H5H_insert (H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
+H5H_write (H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
 	   const void *buf)
 {
    H5H_t	*heap = NULL;
@@ -680,8 +697,8 @@ H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (offset>=0);
    assert (buf);
 
@@ -714,7 +731,7 @@ H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
  *		in two separate objects, one at the original offset and
  *		one at the first offset past the removed portion.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *  		If the heap address ADDR is the null pointer then
  *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
@@ -730,7 +747,7 @@ H5H_write (H5F_t *f, haddr_t addr, off_t offset, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
+H5H_remove (H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
 {
    H5H_t	*heap = NULL;
    H5H_free_t	*fl = heap->freelist, *fl2 = NULL;
@@ -742,8 +759,8 @@ H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (offset>=0);
    assert (size>0);
 
@@ -799,7 +816,7 @@ H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
     */
    if (size < H5H_SIZEOF_FREE(f)) {
 #ifndef NDEBUG
-      fprintf (stderr, "H5H_remove: lost %d bytes\n", size);
+      fprintf (stderr, "H5H_remove: lost %lu bytes\n", (unsigned long)size);
       if (0==nmessages++) {
 	 fprintf (stderr, "Messages from H5H_remove() will go away "
 		  "when assertions are turned off.\n");
@@ -828,7 +845,7 @@ H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
  *
  * Purpose:	Prints debugging information about a heap.
  *
- *  		If the heap address ADDR is the constant H5H_GLOBAL then
+ *  		If the heap address ADDR is the null pointer then
  *		the address comes from the H5F_t global heap field.
  *
  * Return:	Success:	SUCCEED
@@ -844,7 +861,7 @@ H5H_remove (H5F_t *f, haddr_t addr, off_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
+H5H_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent, intn fwidth)
 {
    H5H_t	*h = NULL;
    int		i, j, overlap;
@@ -857,8 +874,8 @@ H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
 
    /* check arguments */
    assert (f);
-   if (H5H_GLOBAL==addr) addr = f->shared->smallobj_off;
-   assert (addr>0);
+   if (!addr) addr = &(f->shared->smallobj_addr);
+   assert (H5F_addr_defined (addr));
    assert (stream);
    assert (indent>=0);
    assert (fwidth>=0);
@@ -906,9 +923,10 @@ H5H_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
    }
 
    if (h->mem_alloc) {
-      fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	       "Percent of heap used:",
-	       100 * (h->mem_alloc - amount_free) / h->mem_alloc);
+	       (unsigned long)(100 * (h->mem_alloc - amount_free) /
+			       h->mem_alloc));
    }
 
    /*

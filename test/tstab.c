@@ -56,6 +56,7 @@ test_1 (void)
    herr_t	status;
    H5O_name_t	name_mesg;
    void		*status_ptr;
+   hbool_t	b;
    
    MESSAGE (2, ("........non-directory files\n"));
 
@@ -82,19 +83,17 @@ test_1 (void)
    /*
     * Test 1B: Attempt to read the root object using the name `/'.
     */
-   HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
-   HDmemset (&ent1, 0, sizeof(H5G_entry_t));
+   memset (&dir_ent, 0xff, sizeof(H5G_entry_t));
+   memset (&ent1, 0xff, sizeof(H5G_entry_t));
    status = H5G_find (f, "/", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
-   VERIFY (dir_ent.header, 0, "H5G_find");
-   VERIFY (ent1.header, obj1->header, "H5G_find");
 
-   /* is it really the root symbol? */
-   VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
+   /* Is it really the root object? */
+   b = H5F_addr_defined (&(dir_ent.header));
+   VERIFY (b, FALSE, "H5G_create");
+   b = H5F_addr_eq (&(ent1.header), &(obj1->header));
+   VERIFY (b, TRUE, "H5G_create");
 
-   
-   
    
    /*
     * Test 1C: Add a second object to the file to see if the first object
@@ -106,10 +105,13 @@ test_1 (void)
    CHECK_PTR (obj2, "H5G_new");
 
    /* try to read the first object */
-   HDmemset (&ent1, 0, sizeof(H5G_entry_t));
+   HDmemset (&ent1, 0xff, sizeof(H5G_entry_t));
    status = H5G_find (f, "/Root Object", NULL, &ent1);
    CHECK_I (status, "H5G_find");
-   VERIFY (ent1.header, obj1->header, "H5G_find");
+   b = H5F_addr_defined (&(ent1.header));
+   VERIFY (b, TRUE, "H5G_create");
+   b = H5F_addr_eq (&(ent1.header), &(obj1->header));
+   VERIFY (b, TRUE, "H5G_create");
 
    /* close the objects */
    H5G_close (f, obj1);
@@ -120,7 +122,7 @@ test_1 (void)
    /* close the file */
    H5Fclose (fid);
 
-
+   
    
    /*
     * Test 1D: Create an empty file and add a non-directory object
@@ -136,7 +138,7 @@ test_1 (void)
 
    /* create the object */
    obj1 = H5G_create (f, "/foo", 0);
-   CHECK_PTR (obj1, "H5G_new");
+   CHECK_PTR (obj1, "H5G_create");
 
    /* does it have the correct name message? */
    status_ptr = H5O_read (f, NO_ADDR, obj1, H5O_NAME, 0, &name_mesg);
@@ -153,25 +155,20 @@ test_1 (void)
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
    status = H5G_find (f, "/", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
-   VERIFY (dir_ent.header, 0, "H5G_find");
-   VERIFY (ent1.header, obj1->header, "H5G_find");
-
-   /* is it really the root symbol? */
-   VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
+   b = H5F_addr_defined (&(dir_ent.header));
+   VERIFY (b, FALSE, "H5G_create");
+   b = H5F_addr_eq (&(ent1.header), &(obj1->header));
+   VERIFY (b, TRUE, "H5G_create");
 
    /* now as `/foo' */
    HDmemset (&dir_ent, 0, sizeof(H5G_entry_t));
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
    status = H5G_find (f, "/foo", &dir_ent, &ent1);
    CHECK_I (status, "H5G_find");
-   VERIFY (dir_ent.header, 0, "H5G_find");
-   VERIFY (ent1.header, obj1->header, "H5G_find");
-
-   /* is it really the root symbol? */
-   VERIFY (dir_ent.header, 0, "H5G_insert");
-   VERIFY (obj1->header, f->shared->root_sym->header, "H5G_insert");
-
+   b = H5F_addr_defined (&(dir_ent.header));
+   VERIFY (b, FALSE, "H5G_create");
+   b = H5F_addr_eq (&(ent1.header), &(obj1->header));
+   VERIFY (b, TRUE, "H5G_find");
 
    
    /*
@@ -187,7 +184,8 @@ test_1 (void)
    HDmemset (&ent1, 0, sizeof(H5G_entry_t));
    status = H5G_find (f, "/foo", NULL, &ent1);
    CHECK_I (status, "H5G_find");
-   VERIFY (ent1.header, obj1->header, "H5G_find");
+   b = H5F_addr_eq (&(ent1.header), &(obj1->header));
+   VERIFY (b, TRUE, "H5G_find");
 
    /* the first object should not have a name message */
    status_ptr = H5O_read (f, NO_ADDR, obj1, H5O_NAME, 0, &name_mesg);

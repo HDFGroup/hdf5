@@ -23,13 +23,11 @@ static hbool_t interface_initialize_g = FALSE;
 static H5F_low_t *H5F_stdio_open (const char *name, uintn flags,
 				  H5F_search_t *key);
 static herr_t H5F_stdio_close (H5F_low_t *lf);
-static herr_t H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_stdio_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			      uint8 *buf);
-static herr_t H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size,
+static herr_t H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 			      const uint8 *buf);
 static herr_t H5F_stdio_flush (H5F_low_t *lf);
-static size_t H5F_stdio_size (H5F_low_t *lf);
-
 
 const H5F_low_class_t H5F_LOW_STDIO[1] = {{
    NULL,			/* use default access(2) func  		*/
@@ -38,9 +36,8 @@ const H5F_low_class_t H5F_LOW_STDIO[1] = {{
    H5F_stdio_read,		/* read method				*/
    H5F_stdio_write, 		/* write method				*/
    H5F_stdio_flush, 		/* flush method				*/
-   H5F_stdio_size, 		/* file size method			*/
+   NULL, 			/* extend method			*/
 }};
-
 
 
 /*-------------------------------------------------------------------------
@@ -70,7 +67,7 @@ const H5F_low_class_t H5F_LOW_STDIO[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key)
+H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
 {
    H5F_low_t	*lf=NULL;
    FILE		*f=NULL;
@@ -104,6 +101,12 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key)
    lf->u.stdio.f = f;
    lf->u.stdio.op = H5F_OP_SEEK;
    lf->u.stdio.cur = 0;
+   H5F_addr_reset (&(lf->eof));
+   if (fseek (lf->u.stdio.f, 0, SEEK_END)<=0) {
+      lf->u.stdio.op = H5F_OP_UNKNOWN;
+   } else {
+      H5F_addr_inc (&(lf->eof), ftell (lf->u.stdio.f));
+   }
 
    /* The unique key */
    if (key) {
@@ -153,8 +156,8 @@ H5F_stdio_close (H5F_low_t *lf)
  * Function:	H5F_stdio_read
  *
  * Purpose:	Reads SIZE bytes beginning at address ADDR in file LF and
- *		places them in buffer BUF.  Reading past the end of the
- *		file returns zeros instead of failing.
+ *		places them in buffer BUF.  Reading past the logical or
+ *		physical end of file returns zeros instead of failing.
  *
  * Errors:
  *		IO        READERROR     Fread failed. 
@@ -172,22 +175,44 @@ H5F_stdio_close (H5F_low_t *lf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
+H5F_stdio_read (H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 {
    size_t	n;
+   off_t	offset;
    
    FUNC_ENTER (H5F_stdio_read, NULL, FAIL);
 
+   /* Check for overflow */
+   offset = addr->offset;
+   assert ("address overflowed" && offset==addr->offset);
+   assert ("overflow" && offset+size>=offset);
+
+   /* Check easy cases */
+   if (0==size) HRETURN (SUCCEED);
+   if (offset>=lf->eof.offset) {
+      HDmemset (buf, 0, size);
+      HRETURN (SUCCEED);
+   }
+   
    /*
     * Seek to the correct file position.
     */
    if (!H5F_OPT_SEEK ||
        lf->u.stdio.op!=H5F_OP_READ ||
-       lf->u.stdio.cur!=addr) {
-      if (fseek (lf->u.stdio.f, addr, SEEK_SET)<0) {
+       lf->u.stdio.cur!=offset) {
+      if (fseek (lf->u.stdio.f, offset, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
       }
-      lf->u.stdio.cur = addr;
+      lf->u.stdio.cur = offset;
+   }
+
+   /*
+    * Read zeros past the logical end of file (physical is handled below)
+    */   
+   if ((size_t)offset+size>lf->eof.offset) {
+      size_t nbytes = (size_t)offset+size - lf->eof.offset;
+      HDmemset (buf+size-nbytes, 0, nbytes);
+      size -= nbytes;
    }
 
    /*
@@ -207,10 +232,9 @@ H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
     * Update the file position data.
     */
    lf->u.stdio.op = H5F_OP_READ;
-   lf->u.stdio.cur = addr + n;
+   lf->u.stdio.cur = offset + n;
    FUNC_LEAVE (SUCCEED);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -235,22 +259,28 @@ H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
+H5F_stdio_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
+		 const uint8 *buf)
 {
-   int	status;
+   off_t	offset;
 
    FUNC_ENTER (H5F_stdio_write, NULL, FAIL);
+
+   /* Check for overflow */
+   offset = addr->offset;
+   assert ("address overflowed" && offset==addr->offset);
+   assert ("overflow" && offset+size>=offset);
 
    /*
     * Seek to the correct file position.
     */
    if (!H5F_OPT_SEEK ||
        lf->u.stdio.op!=H5F_OP_WRITE ||
-       lf->u.stdio.cur!=addr) {
-      if (fseek (lf->u.stdio.f, addr, SEEK_SET)<0) {
+       lf->u.stdio.cur!=offset) {
+      if (fseek (lf->u.stdio.f, offset, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
       }
-      lf->u.stdio.cur = addr;
+      lf->u.stdio.cur = offset;
    }
 
    /*
@@ -258,8 +288,7 @@ H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
     * advanced by the number of bytes read.  Otherwise nobody knows where it
     * is.
     */
-   status = fwrite (buf, 1, size, lf->u.stdio.f);
-   if (size != status) {
+   if (size != fwrite (buf, 1, size, lf->u.stdio.f)) {
       lf->u.stdio.op = H5F_OP_UNKNOWN;
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*fwrite failed*/
    }
@@ -268,10 +297,9 @@ H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
     * Update seek optimizing data.
     */
    lf->u.stdio.op = H5F_OP_WRITE;
-   lf->u.stdio.cur = addr + size;
+   lf->u.stdio.cur = offset + size;
    FUNC_LEAVE (SUCCEED);
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -313,46 +341,3 @@ H5F_stdio_flush (H5F_low_t *lf)
    
    FUNC_LEAVE (SUCCEED);
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_stdio_size
- *
- * Purpose:	Returns the current size of the file in bytes.
- *
- * Bugs:	There is no way to determine if this function failed.
- *
- * Errors:
- *		IO        SEEKERROR     Fseek failed. 
- *
- * Return:	Success:	Size of file in bytes
- *
- *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Wednesday, October 22, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-H5F_stdio_size (H5F_low_t *lf)
-{
-   off_t	size;
-   
-   FUNC_ENTER (H5F_stdio_size, NULL, 0);
-
-   /* Seek to the end and get the file offset */
-   if (fseek (lf->u.stdio.f, 0, SEEK_END)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, 0); /*fseek failed*/
-   }
-   size = ftell (lf->u.stdio.f);
-
-   /* Update seek opt data */
-   lf->u.stdio.op = H5F_OP_SEEK;
-   lf->u.stdio.cur = size;
-
-   FUNC_LEAVE (size);
-}
-

@@ -86,8 +86,8 @@ H5O_stab_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 
    /* decode */
    stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
-   H5F_decode_offset (f, p, stab->btree_addr);
-   H5F_decode_offset (f, p, stab->heap_addr);
+   H5F_addr_decode (f, &p, &(stab->btree_addr));
+   H5F_addr_decode (f, &p, &(stab->heap_addr));
 
    FUNC_LEAVE (stab);
 }
@@ -124,8 +124,8 @@ H5O_stab_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    assert (stab);
 
    /* encode */
-   H5F_encode_offset (f, p, stab->btree_addr);
-   H5F_encode_offset (f, p, stab->heap_addr);
+   H5F_addr_encode (f, &p, &(stab->btree_addr));
+   H5F_addr_encode (f, &p, &(stab->heap_addr));
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -207,12 +207,12 @@ H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache, const void *_mesg)
       cache->stab.btree_addr = stab->btree_addr;
       cache->stab.heap_addr = stab->heap_addr;
    } else {
-      if (cache->stab.btree_addr != stab->btree_addr) {
+      if (H5F_addr_ne (&(cache->stab.btree_addr), &(stab->btree_addr))) {
 	 modified = TRUE;
 	 cache->stab.btree_addr = stab->btree_addr;
       }
 
-      if (cache->stab.heap_addr != stab->heap_addr) {
+      if (H5F_addr_ne (&(cache->stab.heap_addr), &(stab->heap_addr))) {
 	 modified = TRUE;
 	 cache->stab.heap_addr = stab->heap_addr;
       }
@@ -318,13 +318,16 @@ H5O_stab_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "B-tree address:",
-	    (unsigned long)(stab->btree_addr));
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Name heap address:",
-	    (unsigned long)(stab->heap_addr));
-
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "B-tree address:");
+   H5F_addr_print (stream, &(stab->btree_addr));
+   fprintf (stream, "\n");
+   
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "Name heap address:");
+   H5F_addr_print (stream, &(stab->heap_addr));
+   fprintf (stream, "\n");
+   
    FUNC_LEAVE (SUCCEED);
 }
 	    

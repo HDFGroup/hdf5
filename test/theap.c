@@ -45,10 +45,11 @@ test_heap (void)
    int		i, j;
    hid_t	fid;
    H5F_t	*f;
-   off_t	heap;
+   haddr_t	heap_addr;
    char		buf[NOBJS+8];
    const char	*s;
-   off_t	obj[NOBJS];
+   size_t	obj[NOBJS];
+   herr_t	status;
    
    MESSAGE (5, ("Testing Heaps\n"));
 
@@ -59,8 +60,8 @@ test_heap (void)
    CHECK (f, NULL, "H5Aatom_object");
 
    /* Create a new heap */
-   heap = H5H_new (f, H5H_LOCAL, 0);
-   CHECK_I (heap, "H5H_new");
+   status = H5H_new (f, H5H_LOCAL, 0, &heap_addr/*out*/);
+   CHECK_I (status, "H5H_new");
 
    /* Add stuff to the heap */
    for (i=0; i<NOBJS; i++) {
@@ -68,8 +69,8 @@ test_heap (void)
       for (j=4; j<i; j++) buf[j] = '0' + j%10;
       if (j>4) buf[j] = '\0';
 
-      obj[i] = H5H_insert (f, heap, strlen(buf)+1, buf);
-      CHECK_I (heap, "H5H_insert");
+      obj[i] = H5H_insert (f, &heap_addr, strlen(buf)+1, buf);
+      CHECK_I (obj[i], "H5H_insert");
    }
 
    /* Flush the cache and invalidate everything */
@@ -77,7 +78,7 @@ test_heap (void)
 
    /* Read the objects back out */
    for (i=0; i<NOBJS; i++) {
-      s = H5H_peek (f, heap, obj[i]);
+      s = H5H_peek (f, &heap_addr, obj[i]);
       MESSAGE (8, ("object is `%s'\n", s));
    }
 

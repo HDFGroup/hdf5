@@ -33,7 +33,7 @@
  */
 struct H5G_entry_t {
    hbool_t	dirty;		/*entry out-of-date?			*/
-   off_t	name_off;	/*offset of name within name heap	*/
+   size_t	name_off;	/*offset of name within name heap	*/
    haddr_t	header;		/*file address of object header		*/
    H5G_type_t	type;		/*type of information cached		*/
    H5G_cache_t	cache;		/*cached data from object header	*/
@@ -74,7 +74,7 @@ struct H5G_shadow_t {
  * nodes consists of this structure...
  */
 typedef struct H5G_node_key_t {
-   off_t	offset;		/*offset into heap for name		*/
+   size_t	offset;		/*offset into heap for name		*/
 } H5G_node_key_t;
 
 /*
@@ -158,8 +158,8 @@ extern const H5AC_class_t H5AC_SNODE[1];
  * functions that understand names are exported to the rest of
  * the library and appear in H5Gprivate.h.
  */
-haddr_t H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init);
-H5G_entry_t *H5G_stab_find (H5F_t *f, haddr_t addr, H5G_entry_t *self,
+herr_t H5G_stab_new (H5F_t *f, H5G_entry_t *self, size_t init);
+H5G_entry_t *H5G_stab_find (H5F_t *f, const haddr_t *addr, H5G_entry_t *self,
 			    const char *name);
 H5G_entry_t *H5G_stab_insert (H5F_t *f, H5G_entry_t *self,
 			      const char *name, H5G_entry_t *ent);
@@ -177,15 +177,16 @@ hbool_t H5G_shadow_p (H5G_entry_t *ent);
 herr_t H5G_shadow_dissociate (H5G_entry_t *ent);
 herr_t H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym,
 			      const H5G_ac_ud1_t *ac_udata);
-H5G_shadow_t *H5G_shadow_list (H5F_t *f, haddr_t stab_header_addr);
+H5G_shadow_t *H5G_shadow_list (H5F_t *f, const haddr_t *stab_header_addr);
 herr_t H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow,
 			const char *new_name, H5G_entry_t *new_entry,
-			haddr_t grp_addr);
+			const haddr_t *grp_addr);
 
 /*
  * Functions that understand symbol table entries.
  */
-herr_t H5G_ent_decode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
+herr_t H5G_ent_decode_vec (H5F_t *f, const uint8 **pp, H5G_entry_t *ent,
+			   intn n);
 herr_t H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 
 #endif

@@ -25,10 +25,11 @@
 #define PABLO_MASK	H5O_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
-static H5O_t *H5O_load (H5F_t *f, haddr_t addr, const void *_udata1,
+static herr_t H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr,
+			 H5O_t *oh);
+static H5O_t *H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1,
 			void *_udata2);
-static intn H5O_find_in_ohdr (H5F_t *f, haddr_t addr,
+static intn H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr,
 			      const H5O_class_t **type_p, intn sequence);
 static intn H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		       size_t size);
@@ -38,8 +39,8 @@ static intn H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size);
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
    H5AC_OHDR_ID,
-   (void*(*)(H5F_t*,haddr_t,const void*,void*))H5O_load,
-   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5O_flush,
+   (void*(*)(H5F_t*,const haddr_t*,const void*,void*))H5O_load,
+   (herr_t(*)(H5F_t*,hbool_t,const haddr_t*,void*))H5O_flush,
 }};
 
 /* Is the interface initialized? */
@@ -74,7 +75,8 @@ static const H5O_class_t *const message_type_g[] = {
  * Purpose:	Creates a new object header, sets the link count
  *		to NLINK, and caches the header.
  *
- * Return:	Success:	Address of new header.
+ * Return:	Success:	SUCCEED, the address of new header is
+ *				returned through the ADDR argument.
  *
  *		Failure:	FAIL
  *
@@ -86,24 +88,25 @@ static const H5O_class_t *const message_type_g[] = {
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5O_new (H5F_t *f, intn nlink, size_t size_hint)
+herr_t
+H5O_new (H5F_t *f, intn nlink, size_t size_hint, haddr_t *addr/*out*/)
 {
    size_t	size;		/*total size of object header	*/
-   haddr_t	addr = FAIL;	/*address of object header	*/
    H5O_t	*oh = NULL;
+   haddr_t	tmp_addr;
 
    FUNC_ENTER (H5O_new, NULL, FAIL);
 
    /* check args */
    assert (f);
    assert (nlink>=0);
+   assert (addr);
    if (size_hint<H5O_MIN_SIZE) size_hint = H5O_MIN_SIZE;
    H5O_ALIGN (size_hint, H5O_ALIGNMENT);
 
    /* allocate disk space for header and first chunk */
    size = H5O_SIZEOF_HDR(f) + size_hint;
-   if ((addr = H5MF_alloc (f, size))<0) {
+   if (H5MF_alloc (f, H5MF_META, size, addr/*out*/)<0) {
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
    }
 
@@ -118,9 +121,11 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
    oh->nchunks = 1;
    oh->alloc_nchunks = H5O_NCHUNKS;
    oh->chunk = H5MM_xmalloc (oh->alloc_nchunks * sizeof (H5O_chunk_t));
-   
+
+   tmp_addr = *addr;
+   H5F_addr_inc (&tmp_addr, H5O_SIZEOF_HDR (f));
    oh->chunk[0].dirty = TRUE;
-   oh->chunk[0].addr = addr + H5O_SIZEOF_HDR(f);
+   oh->chunk[0].addr = tmp_addr;
    oh->chunk[0].size = size_hint;
    oh->chunk[0].image = H5MM_xcalloc (1, size_hint);
 
@@ -142,7 +147,7 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
       HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
    }
 
-   FUNC_LEAVE (addr);
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -167,7 +172,7 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
+H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 {
    H5O_t	*oh = NULL;
    H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/
@@ -183,7 +188,7 @@ H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr && H5F_addr_defined (addr));
    assert (!_udata1);
    assert (!_udata2);
 
@@ -216,7 +221,8 @@ H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
    UINT32DECODE (p, oh->nlink);
 
    /* decode first chunk info */
-   chunk_addr = addr + H5O_SIZEOF_HDR(f);
+   chunk_addr = *addr;
+   H5F_addr_inc (&chunk_addr, H5O_SIZEOF_HDR (f));
    UINT32DECODE (p, chunk_size);
 
    /* build the message array */
@@ -224,7 +230,7 @@ H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
    oh->mesg = H5MM_xcalloc (oh->alloc_nmesgs, sizeof(H5O_mesg_t));
       
    /* read each chunk from disk */
-   while (chunk_addr) {
+   while (H5F_addr_defined (&chunk_addr)) {
 
       /* increase chunk array size */
       if (oh->nchunks>=oh->alloc_nchunks) {
@@ -239,7 +245,7 @@ H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
       oh->chunk[chunkno].addr = chunk_addr;
       oh->chunk[chunkno].size = chunk_size;
       oh->chunk[chunkno].image = H5MM_xmalloc (chunk_size);
-      if (H5F_block_read (f, chunk_addr, chunk_size,
+      if (H5F_block_read (f, &chunk_addr, chunk_size,
 			  oh->chunk[chunkno].image)<0) {
 	 HGOTO_ERROR (H5E_OHDR, H5E_READERROR, NULL);
       }
@@ -282,7 +288,9 @@ H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
       assert (p == oh->chunk[chunkno].image + chunk_size);
 
       /* decode next object header continuation message */
-      for (chunk_addr=0; 0==chunk_addr && curmesg<oh->nmesgs; curmesg++) {
+      for (H5F_addr_undef (&chunk_addr);
+	   !H5F_addr_defined (&chunk_addr) && curmesg<oh->nmesgs;
+	   curmesg++) {
 	 if (H5O_CONT_ID==oh->mesg[curmesg].type->id) {
 	    uint8 *p2 = oh->mesg[curmesg].raw;
 	    cont = (H5O_CONT->decode)(f, oh->mesg[curmesg].raw_size, p2);
@@ -330,7 +338,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
+H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 {
    uint8	buf[16], *p;
    int		i;
@@ -340,7 +348,7 @@ H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr && H5F_addr_defined (addr));
    assert (oh);
    
    /* flush */
@@ -378,14 +386,15 @@ H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
 	       /* allocate file space for chunks that have none yet */
 	       if (H5O_CONT_ID==oh->mesg[i].type->id &&
-		   ((H5O_cont_t*)(oh->mesg[i].native))->addr<0) {
+		   !H5F_addr_defined (&(((H5O_cont_t*)
+					 (oh->mesg[i].native))->addr))) {
 		  cont = (H5O_cont_t*)(oh->mesg[i].native);
 		  assert (cont->chunkno >= 0);
 		  assert (cont->chunkno < oh->nchunks);
-		  assert (oh->chunk[cont->chunkno].addr<0);
+		  assert (!H5F_addr_defined(&(oh->chunk[cont->chunkno].addr)));
 		  cont->size = oh->chunk[cont->chunkno].size;
-		  cont->addr = H5MF_alloc (f, cont->size);
-		  if (cont->addr<0) {
+		  if (H5MF_alloc (f, H5MF_META, cont->size,
+				  &(cont->addr)/*out*/)<0) {
 		     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
 		  }
 		  oh->chunk[cont->chunkno].addr = cont->addr;
@@ -411,8 +420,8 @@ H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
       /* write each chunk to disk */
       for (i=0; i<oh->nchunks; i++) {
 	 if (oh->chunk[i].dirty) {
-	    assert (oh->chunk[i].addr>0);
-	    if (H5F_block_write (f, oh->chunk[i].addr, oh->chunk[i].size,
+	    assert (H5F_addr_defined (&(oh->chunk[i].addr)));
+	    if (H5F_block_write (f, &(oh->chunk[i].addr), oh->chunk[i].size,
 				 oh->chunk[i].image)<0) {
 	       HRETURN_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL);
 	    }
@@ -512,11 +521,12 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
 
    /* check args */
    assert (f);
-   assert (ent && H5G_ent_addr (ent)>0);
-   addr = H5G_ent_addr (ent);
+   assert (ent);
+   H5G_ent_addr (ent, &addr);
+   assert (H5F_addr_defined (&addr));
    
    /* get header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
    }
 
@@ -562,7 +572,7 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_read (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 	  const H5O_class_t *type, intn sequence, void *mesg)
 {
    H5O_t	*oh = NULL;
@@ -570,17 +580,19 @@ H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
    intn		idx;
    H5G_cache_t	*cache = NULL;
    H5G_type_t	cache_type;
+   haddr_t	_addr;
    
    FUNC_ENTER (H5O_read, NULL, NULL);
 
    /* check args */
    assert (f);
-   if (addr<=0 && !ent) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+   if (!addr) {
+      if (!ent || H5G_ent_addr (ent, &_addr/*out*/)) {
+	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
+      }
+      addr = &_addr;
    }
-   if (addr<=0 && (addr=H5G_ent_addr (ent))<=0) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
-   }
+   assert (H5F_addr_defined (addr));
    assert (sequence>=0);
 
    /* can we get it from the symbol table? */
@@ -632,7 +644,7 @@ H5O_read (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
  *-------------------------------------------------------------------------
  */
 static intn
-H5O_find_in_ohdr (H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
+H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 		  intn sequence)
 {
    H5O_t	*oh = NULL;
@@ -642,7 +654,7 @@ H5O_find_in_ohdr (H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
    
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr && H5F_addr_defined (addr));
    assert (type_p);
 
    /* load the object header */
@@ -699,7 +711,8 @@ H5O_find_in_ohdr (H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
  *-------------------------------------------------------------------------
  */
 const void *
-H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type, intn sequence)
+H5O_peek (H5F_t *f, const haddr_t *addr, const H5O_class_t *type,
+	  intn sequence)
 {
    intn		idx;
    H5O_t	*oh = NULL;
@@ -708,7 +721,7 @@ H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type, intn sequence)
 
    /* check args */
    assert (f);
-   assert (addr>0);
+   assert (addr && H5F_addr_defined (addr));
 
    if ((idx = H5O_find_in_ohdr (f, addr, &type, sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL);
@@ -754,21 +767,27 @@ H5O_peek (H5F_t *f, haddr_t addr, const H5O_class_t *type, intn sequence)
  *-------------------------------------------------------------------------
  */
 intn
-H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_modify (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 	    const H5O_class_t *type, intn overwrite, const void *mesg)
 {
    H5O_t	*oh = NULL;
    intn		idx, sequence;
    size_t	size;
+   haddr_t	_addr;
    
    FUNC_ENTER (H5O_modify, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (addr>0 || (ent && H5G_ent_addr (ent)>0));
    assert (type);
    assert (mesg);
-   if (addr<=0) addr = H5G_ent_addr (ent);
+   if (!addr) {
+      if (!ent || H5G_ent_addr (ent, &_addr)<0) {
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      }
+      addr = &_addr;
+   }
+   assert (H5F_addr_defined (addr));
    
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
@@ -853,19 +872,25 @@ H5O_modify (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove (H5F_t *f, haddr_t addr, H5G_entry_t *ent,
+H5O_remove (H5F_t *f, const haddr_t *addr, H5G_entry_t *ent,
 	    const H5O_class_t *type, intn sequence)
 {
    H5O_t	*oh = NULL;
    intn		i, seq;
+   haddr_t	_addr;
    
    FUNC_ENTER (H5O_remove, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (addr>0 || (ent && H5G_ent_addr (ent)>0));
    assert (type);
-   if (addr<=0) addr = H5G_ent_addr (ent);
+   if (!addr) {
+      if (!ent || H5G_ent_addr (ent, &_addr)<0) {
+	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+      }
+      addr = &_addr;
+   }
+   assert (H5F_addr_defined (addr));
 
    /* load the object header */
    if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
@@ -936,7 +961,7 @@ H5O_alloc_extend_chunk (H5O_t *oh, intn chunkno, size_t size)
    assert (chunkno>=0 && chunkno<oh->nchunks);
    assert (size>0);
 
-   if (H5O_NO_ADDR!=oh->chunk[chunkno].addr) {
+   if (H5F_addr_defined (&(oh->chunk[chunkno].addr))) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOSPACE, FAIL); /*chunk is on disk*/
    }
 
@@ -1104,7 +1129,7 @@ H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size)
    }
    chunkno = oh->nchunks++;
    oh->chunk[chunkno].dirty = TRUE;
-   oh->chunk[chunkno].addr = H5O_NO_ADDR;
+   H5F_addr_undef (&(oh->chunk[chunkno].addr));
    oh->chunk[chunkno].size = size;
    oh->chunk[chunkno].image = p = H5MM_xcalloc (1, size);
 
@@ -1169,7 +1194,7 @@ H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size)
    oh->mesg[found_null].type = H5O_CONT;
    oh->mesg[found_null].dirty = TRUE;
    cont = H5MM_xcalloc (1, sizeof(H5O_cont_t));
-   cont->addr = H5O_NO_ADDR;
+   H5F_addr_undef (&(cont->addr));
    cont->size = 0;
    cont->chunkno = chunkno;
    oh->mesg[found_null].native = cont;
@@ -1296,18 +1321,20 @@ H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
+H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
+	   intn fwidth)
 {
    H5O_t	*oh = NULL;
    intn		i, chunkno;
    size_t	mesg_total=0, chunk_total=0;
    int		*sequence;
+   haddr_t	tmp_addr;
    
    FUNC_ENTER (H5O_debug, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (addr>=0);
+   assert (addr && H5F_addr_defined (addr));
    assert (stream);
    assert (indent>=0);
    assert (fwidth>=0);
@@ -1346,10 +1373,15 @@ H5O_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
       fprintf (stream, "%*s%-*s %d\n", indent+3, "", MAX(0,fwidth-3),
 	       "Dirty:",
 	       (int)(oh->chunk[i].dirty));
-      fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),
-	       "Address:",
-	       (unsigned long)(oh->chunk[i].addr));
-      if (0==i && oh->chunk[i].addr!=addr+H5O_SIZEOF_HDR(f)) {
+      
+      fprintf (stream, "%*s%-*s ", indent+3, "", MAX(0,fwidth-3),
+	       "Address:");
+      H5F_addr_print (stream, &(oh->chunk[i].addr));
+      fprintf (stream, "\n");
+
+      tmp_addr = *addr;
+      H5F_addr_inc (&tmp_addr, H5O_SIZEOF_HDR(f));
+      if (0==i && H5F_addr_ne (&(oh->chunk[i].addr), &tmp_addr)) {
 	 fprintf (stream, "*** WRONG ADDRESS!\n");
       }
       fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),

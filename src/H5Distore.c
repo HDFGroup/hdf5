@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1997 Spizella Software
+ * Copyright (C) 1997 NCSA
  *                    All rights reserved.
  *
- * Programmer: Robb Matzke <robb@arborea.spizella.com>
+ * Programmer: Robb Matzke <matzke@llnl.gov>
  *             Wednesday, October  8, 1997
  */
 #include <H5private.h>
@@ -29,18 +29,20 @@ static hbool_t interface_initialize_g = FALSE;
 
 /* PRIVATE PROTOTYPES */
 static size_t H5F_istore_sizeof_rkey (H5F_t *f, const void *_udata);
-static haddr_t H5F_istore_new_node (H5F_t *f, H5B_ins_t, void *_lt_key,
-				    void *_udata, void *_rt_key);
+static herr_t H5F_istore_new_node (H5F_t *f, H5B_ins_t, void *_lt_key,
+				   void *_udata, void *_rt_key, haddr_t*);
 static intn H5F_istore_cmp2 (H5F_t *f, void *_lt_key, void *_udata,
 			     void *_rt_key);
 static intn H5F_istore_cmp3 (H5F_t *f, void *_lt_key, void *_udata,
 			     void *_rt_key);
-static herr_t H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
-				void *_udata, const void *_rt_key);
-static haddr_t H5F_istore_insert (H5F_t *f, haddr_t addr, H5B_ins_t *anchor,
-				  void *_lt_key, hbool_t *lt_key_changed,
-				  void *_md_key, void *_udata,
-				  void *_rt_key, hbool_t *rt_key_changed);
+static herr_t H5F_istore_found (H5F_t *f, const haddr_t *addr,
+				const void *_lt_key, void *_udata,
+				const void *_rt_key);
+static H5B_ins_t H5F_istore_insert (H5F_t *f, const haddr_t *addr,
+				    void *_lt_key, hbool_t *lt_key_changed,
+				    void *_md_key, void *_udata,
+				    void *_rt_key, hbool_t *rt_key_changed,
+				    haddr_t*);
 static herr_t H5F_istore_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				     void *_key);
 static herr_t H5F_istore_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
@@ -317,8 +319,9 @@ H5F_istore_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *		the domain represented by UDATA doesn't intersect the domain
  *		already represented by the B-tree.
  *
- * Return:	Success:	Address of leaf, which is passed in from the
- *				UDATA pointer.
+ * Return:	Success:	SUCCEED.  The address of leaf is returned
+ *				through the ADDR argument.  It is also added
+ *				to the UDATA.
  *
  *		Failure:	FAIL
  *
@@ -329,9 +332,10 @@ H5F_istore_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t
+static herr_t
 H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
-		     void *_lt_key, void *_udata, void *_rt_key)
+		     void *_lt_key, void *_udata, void *_rt_key,
+		     haddr_t *addr/*out*/)
 {
    H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
    H5F_istore_key_t	*rt_key = (H5F_istore_key_t *)_rt_key;
@@ -347,14 +351,16 @@ H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
    assert (rt_key);
    assert (udata);
    assert (udata->mesg.ndims>=0 && udata->mesg.ndims<H5O_ISTORE_NDIMS);
+   assert (addr);
 
    /* Allocate new storage */
    nbytes = H5V_vector_reduce_product (udata->mesg.ndims, udata->key.size);
    assert (nbytes>0);
-   if ((udata->addr=H5MF_alloc (f, nbytes))<0) {
+   if (H5MF_alloc (f, H5MF_RAW, nbytes, addr/*out*/)<0) {
       /* Couldn't allocate new file storage */
       HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL);
    }
+   udata->addr = *addr;
    
    /* Initialize the key(s) */
    for (i=0; i<udata->mesg.ndims; i++) {
@@ -376,7 +382,7 @@ H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
       }
    }
 
-   FUNC_LEAVE (udata->addr);
+   FUNC_LEAVE (SUCCEED);
 }
       
 
@@ -403,7 +409,7 @@ H5F_istore_new_node (H5F_t *f, H5B_ins_t op,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
+H5F_istore_found (H5F_t *f, const haddr_t *addr, const void *_lt_key,
 		  void *_udata, const void *_rt_key)
 {
    H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *)_udata;
@@ -414,12 +420,12 @@ H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
 
    /* Check arguments */
    assert (f);
-   assert (addr>=0);
+   assert (addr && H5F_addr_defined (addr));
    assert (udata);
    assert (lt_key);
 
    /* Initialize return values */
-   udata->addr = addr;
+   udata->addr = *addr;
    for (i=0; i<udata->mesg.ndims; i++) {
       udata->key.offset[i] = lt_key->offset[i];
       udata->key.size[i] = lt_key->size[i];
@@ -447,13 +453,12 @@ H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
  *		`offset' and `size' fields). On return, UDATA describes the
  *		logical addresses contained in a chunk on disk.
  *
- * Return:	Success:	SUCCEED, with UDATA containing information
- *				about the (newly allocated) chunk.
+ * Return:	Success:	An insertion command for the caller, one of
+ *				the H5B_INS_* constants.  The address of the
+ *				new chunk is returned through the NEW_NODE
+ *				argument.
  *
- *				If the storage address has changed then the
- *				new address is returned.
- *
- *		Failure:	FAIL
+ *		Failure:	H5B_INS_ERROR
  *
  * Programmer:	Robb Matzke
  *              Thursday, October  9, 1997
@@ -462,32 +467,33 @@ H5F_istore_found (H5F_t *f, haddr_t addr, const void *_lt_key,
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t
-H5F_istore_insert (H5F_t *f, haddr_t addr, H5B_ins_t *parent_ins,
+static H5B_ins_t
+H5F_istore_insert (H5F_t *f, const haddr_t *addr,
 		   void *_lt_key, hbool_t *lt_key_changed,
 		   void *_md_key, void *_udata,
-		   void *_rt_key, hbool_t *rt_key_changed)
+		   void *_rt_key, hbool_t *rt_key_changed,
+		   haddr_t *new_node/*out*/)
 {
    H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
    H5F_istore_key_t	*md_key = (H5F_istore_key_t *)_md_key;
    H5F_istore_key_t	*rt_key = (H5F_istore_key_t *)_rt_key;
    H5F_istore_ud1_t	*udata  = (H5F_istore_ud1_t *)_udata;
    intn			i, cmp;
-   haddr_t		ret_value = 0;
+   H5B_ins_t		ret_value = H5B_INS_ERROR;
    size_t		nbytes;
 
    FUNC_ENTER (H5F_istore_insert, NULL, FAIL);
 
    /* check args */
    assert (f);
-   assert (addr>=0);
-   assert (parent_ins);
+   assert (addr && H5F_addr_defined (addr));
    assert (lt_key);
    assert (lt_key_changed);
    assert (md_key);
    assert (udata);
    assert (rt_key);
    assert (rt_key_changed);
+   assert (new_node);
 
    cmp = H5F_istore_cmp3 (f, lt_key, udata, rt_key);
    assert (cmp<=0);
@@ -503,8 +509,8 @@ H5F_istore_insert (H5F_t *f, haddr_t addr, H5B_ins_t *parent_ins,
       /*
        * Already exists.  Just return the info.
        */
-      udata->addr = addr;
-      *parent_ins = H5B_INS_NOOP;
+      udata->addr = *addr;
+      ret_value = H5B_INS_NOOP;
       
    } else if (H5V_hyper_disjointp (udata->mesg.ndims,
 				   lt_key->offset, lt_key->size,
@@ -528,11 +534,11 @@ H5F_istore_insert (H5F_t *f, haddr_t addr, H5B_ins_t *parent_ins,
       /*
        * Allocate storage for the new chunk
        */
-      if ((udata->addr=ret_value=H5MF_alloc (f, nbytes))<=0) {
+      if (H5MF_alloc (f, H5MF_RAW, nbytes, new_node/*out*/)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL);
       }
-      
-      *parent_ins = H5B_INS_RIGHT;
+      udata->addr = *new_node;
+      ret_value = H5B_INS_RIGHT;
       
    } else {
       assert ("HDF5 INTERNAL ERROR -- see rpm" && 0);
@@ -599,7 +605,7 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
    /* check args */
    assert (f);
    assert (istore);
-   assert (istore->btree_addr>0);
+   assert (H5F_addr_defined (&(istore->btree_addr)));
    assert (istore->ndims>0 && istore->ndims<=H5O_ISTORE_NDIMS);
    assert (H5F_ISTORE_READ==op || H5F_ISTORE_WRITE==op);
    assert (size);
@@ -659,10 +665,10 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
       }
       
       if (H5F_ISTORE_WRITE==op) {
-	 status = H5B_insert (f, H5B_ISTORE, istore->btree_addr, &udata);
+	 status = H5B_insert (f, H5B_ISTORE, &(istore->btree_addr), &udata);
 	 assert (status>=0);
       } else {
-	 status = H5B_find (f, H5B_ISTORE, istore->btree_addr, &udata);
+	 status = H5B_find (f, H5B_ISTORE, &(istore->btree_addr), &udata);
       }
 
       /*
@@ -672,8 +678,8 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
       if (H5F_ISTORE_READ==op ||
 	  !H5V_vector_zerop (istore->ndims, offset_wrt_chunk) ||
 	  !H5V_vector_eq (istore->ndims, sub_size, udata.key.size)) {
-	 if (status>=0 && udata.addr>0) {
-	    if (H5F_block_read (f, udata.addr, chunk_size, chunk)<0) {
+	 if (status>=0 && H5F_addr_defined (&(udata.addr))) {
+	    if (H5F_block_read (f, &(udata.addr), chunk_size, chunk)<0) {
 	       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
 	    }
 	 } else {
@@ -686,7 +692,7 @@ H5F_istore_copy_hyperslab (H5F_t *f, const H5O_istore_t *istore, H5F_isop_t op,
 	 H5V_hyper_copy (istore->ndims, sub_size,
 			 udata.key.size, offset_wrt_chunk, chunk,
 			 size_m, sub_offset_m, buf);
-	 if (H5F_block_write (f, udata.addr, chunk_size, chunk)<0) {
+	 if (H5F_block_write (f, &(udata.addr), chunk_size, chunk)<0) {
 	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
 	 }
       } else {
@@ -835,7 +841,7 @@ H5F_istore_new (H5F_t *f, struct H5O_istore_t *istore,
 #endif
 
    udata.mesg.ndims = istore->ndims = ndims;
-   if ((istore->btree_addr=H5B_new (f, H5B_ISTORE, &udata))<0) {
+   if (H5B_new (f, H5B_ISTORE, &udata, &(istore->btree_addr)/*out*/)<0) {
       HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL); /* Can't create B-tree */
    }
 

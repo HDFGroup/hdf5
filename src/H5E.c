@@ -81,6 +81,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_CANTOPENOBJ, 	"Can't open object"},
     {H5E_NOTHDF5,       "Not an HDF5 format file"},
     {H5E_BADFILE,       "Bad file ID accessed"},
+    {H5E_TRUNCATED,	"File has been truncated"},
     {H5E_SEEKERROR,     "Seek failed"},
     {H5E_READERROR,     "Read failed"},
     {H5E_WRITEERROR,    "Write failed"},

@@ -36,7 +36,11 @@ static hbool_t interface_initialize_g = FALSE;
 H5G_entry_t *
 H5G_ent_calloc (void)
 {
-   return H5MM_xcalloc (1, sizeof(H5G_entry_t));
+   H5G_entry_t *ent;
+   
+   ent = H5MM_xcalloc (1, sizeof(H5G_entry_t));
+   H5F_addr_undef (&(ent->header));
+   return ent;
 }
 
 
@@ -78,7 +82,8 @@ H5G_ent_invalidate (H5G_entry_t *ent)
  * Purpose:	Returns the header address associated with a symbol table
  *		entry.
  *
- * Return:	Success:	Address
+ * Return:	Success:	SUCCED with the address returned in the ADDR
+ *				argument.
  *
  *		Failure:	FAIL
  *
@@ -89,13 +94,15 @@ H5G_ent_invalidate (H5G_entry_t *ent)
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5G_ent_addr (H5G_entry_t *ent)
+herr_t
+H5G_ent_addr (H5G_entry_t *ent, haddr_t *addr/*out*/)
 {
    FUNC_ENTER (H5G_ent_addr, NULL, FAIL);
-   assert (ent);
    
-   FUNC_LEAVE (ent->header);
+   assert (ent);
+   *addr = ent->header;
+   
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -186,7 +193,7 @@ H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_decode_vec (H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
 {
    intn		i;
 
@@ -230,9 +237,9 @@ H5G_ent_decode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
+H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
 {
-   uint8	*p_ret = *pp;
+   const uint8	*p_ret = *pp;
 
    FUNC_ENTER (H5G_ent_decode, NULL, FAIL);
 
@@ -242,8 +249,8 @@ H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
    assert (ent);
 
    /* decode header */
-   H5F_decode_offset (f, *pp, ent->name_off);
-   H5F_decode_offset (f, *pp, ent->header);
+   H5F_decode_length (f, *pp, ent->name_off);
+   H5F_addr_decode (f, pp, &(ent->header));
    UINT32DECODE (*pp, ent->type);
 
    /* decode scratch-pad */
@@ -252,6 +259,7 @@ H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_SDATA:
+      assert (1+1+2+(5*4) <= H5G_SIZEOF_SCRATCH);
       ent->cache.sdata.nt.length= *(*pp)++;
       ent->cache.sdata.nt.arch= *(*pp)++;
       UINT16DECODE (*pp, ent->cache.sdata.nt.type);
@@ -263,8 +271,9 @@ H5G_ent_decode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_STAB:
-      UINT32DECODE (*pp, ent->cache.stab.btree_addr);
-      UINT32DECODE (*pp, ent->cache.stab.heap_addr);
+      assert (2*H5F_SIZEOF_OFFSET (f) <= H5G_SIZEOF_SCRATCH);
+      H5F_addr_decode (f, pp, &(ent->cache.stab.btree_addr));
+      H5F_addr_decode (f, pp, &(ent->cache.stab.heap_addr));
       break;
 
    default:
@@ -361,8 +370,8 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
    assert (ent);
 
    /* encode header */
-   H5F_encode_offset (f, *pp, ent->name_off);
-   H5F_encode_offset (f, *pp, ent->header);
+   H5F_encode_length (f, *pp, ent->name_off);
+   H5F_addr_encode (f, pp, &(ent->header));
    UINT32ENCODE (*pp, ent->type);
 
    /* encode scratch-pad */
@@ -371,6 +380,7 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_SDATA:
+      assert (1+1+2+(5*4) <= H5G_SIZEOF_SCRATCH);
       *(*pp)++= ent->cache.sdata.nt.length;
       *(*pp)++= ent->cache.sdata.nt.arch;
       UINT16ENCODE (*pp, ent->cache.sdata.nt.type);
@@ -382,8 +392,9 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_STAB:
-      UINT32ENCODE (*pp, ent->cache.stab.btree_addr);
-      UINT32ENCODE (*pp, ent->cache.stab.heap_addr);
+      assert (2*H5F_SIZEOF_OFFSET (f) <= H5G_SIZEOF_SCRATCH);
+      H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
+      H5F_addr_encode (f, pp, &(ent->cache.stab.heap_addr));
       break;
 
    default:
@@ -429,9 +440,12 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Name offset into private heap:",
 	    (unsigned long)(ent->name_off));
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Object header address:",
-	    (unsigned long)(ent->header));
+   
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "Object header address:");
+   H5F_addr_print (stream, &(ent->header));
+   fprintf (stream, "\n");
+
    fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Dirty:",
 	    ent->dirty ? "Yes" : "No");
@@ -471,12 +485,16 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
 	 
    case H5G_CACHED_STAB:
       fprintf (stream, "Symbol Table\n");
-      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	       "B-tree address:",
-	       (unsigned long)(ent->cache.stab.btree_addr));
-      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	       "Heap address:",
-	       (unsigned long)(ent->cache.stab.heap_addr));
+      
+      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	       "B-tree address:");
+      H5F_addr_print (stream, &(ent->cache.stab.btree_addr));
+      fprintf (stream, "\n");
+      
+      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	       "Heap address:");
+      H5F_addr_print (stream, &(ent->cache.stab.heap_addr));
+      fprintf (stream, "\n");
       break;
 
    default:

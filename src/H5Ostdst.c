@@ -98,7 +98,7 @@ H5O_std_store_decode (H5F_t *f, size_t raw_size, const uint8 *p)
     /* decode */
     if((store = H5MM_xcalloc (1, sizeof(H5O_std_store_t)))!=NULL)
       {
-        H5F_decode_offset(f,p,store->off);
+        H5F_addr_decode (f, &p,&(store->off));
         H5F_decode_length(f,p,store->len);
       } /* end if */
 
@@ -146,7 +146,7 @@ H5O_std_store_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
     assert (store);
 
     /* encode */
-    H5F_encode_offset(f,p,store->off);
+    H5F_addr_encode (f, &p, &(store->off));
     H5F_encode_length(f,p,store->len);
 
     FUNC_LEAVE (SUCCEED);
@@ -248,9 +248,11 @@ H5O_std_store_debug (H5F_t *f, const void *mesg, FILE *stream,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Offset:",
-	    (unsigned long)(store->off));
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "Offset:");
+   H5F_addr_print (stream, &(store->off));
+   fprintf (stream, "\n");
+
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Length:",
 	    (unsigned long)(store->len));

@@ -426,13 +426,15 @@ H5G_basename (const char *name, size_t *size_p)
  *
  * 		As a special case, if the NAME is the name `/' (or
  *		equivalent) then GRP_ENT is initialized to all zero
- *		and a pointer to the root symbol table entry is returned.
+ *		and an invalid header address and a pointer to the root
+ *		symbol table entry is returned.
  *
  * 		As a special case, if the NAME is the string `/foo' (or
  *		equivalent) and the root symbol table entry points to a
  *		non-group object with a name message with the value
- *		`foo' then GRP_ENT is initialized to all zero and a pointer
- * 		to the root symbol table entry is returned.
+ *		`foo' then GRP_ENT is initialized to all zero (except for an
+ * 		invalid header address) and a pointer to the root symbol
+ *		table entry is returned.
  *
  * Errors:
  *		SYM       COMPLEN       Component is too long. 
@@ -459,7 +461,7 @@ H5G_basename (const char *name, size_t *size_p)
  */
 static H5G_entry_t *
 H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
-	   const char **rest, H5G_entry_t *grp_ent)
+	   const char **rest/*out*/, H5G_entry_t *grp_ent/*out*/)
 {
    H5G_entry_t  grp;			/*entry for current group	*/
    size_t	nchars;			/*component name length		*/
@@ -469,7 +471,10 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 
    /* clear output args before FUNC_ENTER() in case it fails */
    if (rest) *rest = name;
-   if (grp_ent) memset (grp_ent, 0, sizeof(H5G_entry_t));
+   if (grp_ent) {
+      memset (grp_ent, 0, sizeof(H5G_entry_t));
+      H5F_addr_undef (&(grp_ent->header));
+   }
    
    FUNC_ENTER (H5G_namei, NULL, NULL);
 
@@ -481,7 +486,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 
    /* starting point */
    if ('/'==*name) {
-      if (f->shared->root_sym->header<=0) {
+      if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
 	 /* No root group */
 	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL);
       }
@@ -528,8 +533,11 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 	  * the name `foo'.
 	  */
 	 H5O_name_t mesg={0};
-	 if (!aside && grp.header==f->shared->root_sym->header &&
-	     H5O_read (f, grp.header, &grp, H5O_NAME, 0, &mesg) &&
+	 if (!aside &&
+	     H5F_addr_defined (&(grp.header)) &&
+	     H5F_addr_defined (&(f->shared->root_sym->header)) &&
+	     H5F_addr_eq (&(grp.header), &(f->shared->root_sym->header)) &&
+	     H5O_read (f, &(grp.header), &grp, H5O_NAME, 0, &mesg) &&
 	     !HDstrcmp (mesg.s, comp)) {
 	    H5O_reset (H5O_NAME, &mesg);
 	    ret_value = f->shared->root_sym;
@@ -549,15 +557,16 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
    /* output parameters */
    if (rest) *rest = name; /*final null*/
    if (grp_ent) {
-      if (ret_value->header == f->shared->root_sym->header) {
+      if (H5F_addr_eq (&(ret_value->header), &(f->shared->root_sym->header))) {
 	 HDmemset (grp_ent, 0, sizeof(H5G_entry_t)); /*root has no parent*/
+	 H5F_addr_undef (&(grp_ent->header));
       } else {
 	 *grp_ent = grp;
       }
    }
 
    /* Perhaps the root object doesn't even exist! */
-   if (ret_value->header<=0) {
+   if (!H5F_addr_defined (&(ret_value->header))) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*root not found*/
    }
    
@@ -627,7 +636,7 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     * re-inserted back into the group directed graph.  We might leak file
     * memory, but at least we don't loose the original root object.
     */
-   if (f->shared->root_sym->header>0) {
+   if (H5F_addr_defined (&(f->shared->root_sym->header))) {
       if (H5O_read (f, NO_ADDR, f->shared->root_sym, H5O_STAB, 0, &stab)) {
 	 /* root group already exists */
 	 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, -2);
@@ -1093,10 +1102,10 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
        * doesn't have a name or we shouldn't interfere with the name
        * it already has as a message.
        */
-      if (f->shared->root_sym->header>0) {
+      if (H5F_addr_defined (&(f->shared->root_sym->header))) {
 	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, NULL); /*root exists*/
       }
-      if ((ent.header = H5O_new (f, 0, ohdr_hint))<0) {
+      if (H5O_new (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
 	 /* can't create header */
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
@@ -1104,7 +1113,7 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
 	 HRETURN_ERROR (H5E_SYM, H5E_LINK, NULL); /*bad link count*/
       }
       *(f->shared->root_sym) = ent;
-      if (NULL==(ret_value=H5G_shadow_open (f, &grp, f->shared->root_sym))) {
+      if (NULL==(ret_value=H5G_shadow_open (f, NULL, f->shared->root_sym))) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
       }
       HRETURN (ret_value);
@@ -1132,12 +1141,12 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
    /*
     * Create the object header.
     */
-   if ((ent.header = H5O_new (f, 0, ohdr_hint))<0) {
+   if (H5O_new (f, 0, ohdr_hint, &(ent.header)/*out*/)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL);
    }
    
 
-   if (f->shared->root_sym->header<=0) {
+   if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
       /*
        * This will be the only object in the file. Insert it as the root
        * object and add a name messaage to the object header (or modify
@@ -1163,7 +1172,8 @@ H5G_create (H5F_t *f, const char *name, size_t ohdr_hint)
        * Make sure the root group exists.  Ignore the failure if it's
        * because the group already exists.
        */
-      hbool_t update_grp = (grp.header==f->shared->root_sym->header);
+      hbool_t update_grp = H5F_addr_eq (&(grp.header),
+					&(f->shared->root_sym->header));
       herr_t status = H5G_mkroot (f, H5G_SIZE_HINT);
       if (status<0 && -2!=status) {
 	 /* Can't create root group */
@@ -1240,7 +1250,7 @@ H5G_open (H5F_t *f, const char *name)
    cwg = H5G_getcwg (f);
    assert (cwg || '/'==*name);
 
-   if (f->shared->root_sym->header<=0) {
+   if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, NULL); /*object not found*/
    }
    if (NULL==(ent=H5G_namei (f, cwg, name, NULL, &grp))) {
@@ -1329,7 +1339,8 @@ H5G_close (H5F_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent, H5G_entry_t *ent)
+H5G_find (H5F_t *f, const char *name,
+	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/)
 {
    H5G_entry_t	*ent_p = NULL;
    H5G_entry_t	*cwg = NULL;
@@ -1342,7 +1353,7 @@ H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent, H5G_entry_t *ent)
    cwg = H5G_getcwg (f);
    assert (cwg || '/'==*name);
 
-   if (f->shared->root_sym->header<=0) {
+   if (!H5F_addr_defined (&(f->shared->root_sym->header))) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*object not found*/
    }
 

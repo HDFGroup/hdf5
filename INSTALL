@@ -68,4 +68,5 @@ distribution directory:
 To build/install HDF5 on non-Unix systems from the root of the
 distribution directory:
 
-   * To be written later.
+   * To be written later.  Basically, there will be a separate
+     makefile (or equivalent) for each platform.

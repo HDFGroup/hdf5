@@ -153,7 +153,7 @@ hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name)
     new_dset->file = file;
     new_dset->tid=(-1);		/* No type yet */
     new_dset->sid=(-1);			/* No dimensions yet */
-    new_dset->data_addr = -1;		/* No data yet */
+    H5F_addr_undef (&(new_dset->data_addr)); /* No data yet */
     new_dset->dirty = FALSE;		/* There are no messages yet */
 
     /* Open (and create) a new file object */
@@ -429,7 +429,8 @@ herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
     /* Check that the datatype & dataspace have already been initialized */
-    if(dataset->tid==(-1) || dataset->sid==(-1) || dataset->data_addr<0)
+    if(dataset->tid==(-1) || dataset->sid==(-1) ||
+       !H5F_addr_defined (&(dataset->data_addr)))
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
     /* Compute the number of bytes to read */
@@ -451,8 +452,10 @@ herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
     
     
     /* Read data from disk */
-    if(H5F_block_read(dataset->file,dataset->data_addr,toread,readbuf)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
+    if (H5F_block_read (dataset->file, &(dataset->data_addr), toread,
+			readbuf)<0) {
+       HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
+    }
     
     if(free_buf!=0)
         H5D_convert_buf(buf,readbuf,toread,H5Tsize(dataset->tid,BTRUE));
@@ -523,9 +526,11 @@ herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
     /* Check if we have space for the dataset yet */
-    if(dataset->data_addr<0) {
-        if((dataset->data_addr=H5MF_alloc(dataset->file,towrite))<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+    if (!H5F_addr_defined (&(dataset->data_addr))) {
+        if (H5MF_alloc (dataset->file, H5MF_RAW, towrite,
+			&(dataset->data_addr)/*out*/)<0) {
+	   HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+	}
 	dataset->dirty = TRUE;
     }
 
@@ -542,8 +547,10 @@ herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
         writebuf=buf;
     
     /* Write the data out to disk */
-    if(H5F_block_write(dataset->file,dataset->data_addr,towrite,writebuf)<0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
+    if (H5F_block_write (dataset->file, &(dataset->data_addr), towrite,
+			 writebuf)<0) {
+       HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
+    }
 
 done:
   if(ret_value == FAIL)   
@@ -626,7 +633,7 @@ herr_t H5D_flush(hid_t oid)
 	/*
 	 * Modify/create the dataset's storage information.
 	 */
-	if (dataset->data_addr>=0) {
+	if (H5F_addr_defined (&(dataset->data_addr))) {
 	   H5O_std_store_t store;  /* standard storage info */
 
 	   store.len = H5Tsize (dataset->tid, BTRUE) * H5Pnelem (dataset->sid);

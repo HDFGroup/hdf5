@@ -97,10 +97,13 @@
 #endif
 
 /*
- * File offsets.
+ * File addresses.
  */
-typedef off_t		haddr_t;
-#define NO_ADDR		(-1)
+typedef struct {
+   uint64		offset;
+} haddr_t;
+
+#define NO_ADDR		NULL
 
 /*
  * Some compilers have problems declaring auto variables that point

@@ -82,7 +82,7 @@ H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 
    /* decode */
    cont = H5MM_xcalloc (1, sizeof(H5O_cont_t));
-   H5F_decode_offset (f, p, cont->addr);
+   H5F_addr_decode (f, &p, &(cont->addr));
    H5F_decode_length (f, p, cont->size);
 
    FUNC_LEAVE ((void*)cont);
@@ -120,7 +120,7 @@ H5O_cont_encode (H5F_t *f, size_t size, uint8 *p, const void *_mesg)
    assert (cont);
 
    /* encode */
-   H5F_encode_offset (f, p, cont->addr);
+   H5F_addr_encode (f, &p, &(cont->addr));
    H5F_encode_length (f, p, cont->size);
 
    FUNC_LEAVE (SUCCEED);
@@ -159,9 +159,11 @@ H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Continuation address:",
-	    (unsigned long)(cont->addr));
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "Continuation address:");
+   H5F_addr_print (stream, &(cont->addr));
+   fprintf (stream, "\n");
+
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Continuation size in bytes:",
 	    (unsigned long)(cont->size));

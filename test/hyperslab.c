@@ -166,15 +166,16 @@ test_fill (size_t nx,  size_t ny,  size_t nz,
       if (0==ny) {
 	 ndims = 1;
 	 ny = nz = 1;
-	 sprintf (dim, "%d", nx);
+	 sprintf (dim, "%lu", (unsigned long)nx);
       } else {
 	 ndims = 2;
 	 nz = 1;
-	 sprintf (dim, "%dx%d", nx, ny);
+	 sprintf (dim, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
       }
    } else {
       ndims = 3;
-      sprintf (dim, "%dx%dx%d", nx, ny, nz);
+      sprintf (dim, "%lux%lux%lu",
+	       (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
    }
    sprintf (s, "Testing hyperslab fill %-11s variable hyperslab  ", dim);
    printf ("%-70s", s);
@@ -326,15 +327,16 @@ test_copy (int mode,
       if (0==ny) {
 	 ndims = 1;
 	 ny = nz = 1;
-	 sprintf (dim, "%d", nx);
+	 sprintf (dim, "%lu", (unsigned long)nx);
       } else {
 	 ndims = 2;
 	 nz = 1;
-	 sprintf (dim, "%dx%d", nx, ny);
+	 sprintf (dim, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
       }
    } else {
       ndims = 3;
-      sprintf (dim, "%dx%dx%d", nx, ny, nz);
+      sprintf (dim, "%lux%lux%lu",
+	       (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
    }
    
    switch (mode) {
@@ -760,7 +762,8 @@ test_transpose (size_t nx, size_t ny)
    size_t	size[2];
    char		s[256];
 
-   sprintf (s, "Testing 2d transpose by stride %4dx%-4d", nx, ny);
+   sprintf (s, "Testing 2d transpose by stride %4lux%-lud",
+	    (unsigned long)nx, (unsigned long)ny);
    printf ("%-70s", s);
    fflush (stdout);
 
@@ -867,8 +870,9 @@ test_sub_super (size_t nx, size_t ny)
    int		i, j;
    char		s[256];
 
-   sprintf (s, "Testing image sampling %4dx%-4d to %4dx%-4d ",
-	    2*nx, 2*ny, nx, ny);
+   sprintf (s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
+	    (unsigned long)(2*nx), (unsigned long)(2*ny),
+	    (unsigned long)nx, (unsigned long)ny);
    printf ("%-70s", s);
    fflush (stdout);
 
@@ -914,8 +918,9 @@ test_sub_super (size_t nx, size_t ny)
     * Test replicating pixels to produce an image twice as large in each
     * dimension.
     */
-   sprintf (s, "Testing image sampling %4dx%-4d to %4dx%-4d ",
-	    nx, ny, 2*nx, 2*ny);
+   sprintf (s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
+	    (unsigned long)nx, (unsigned long)ny,
+	    (unsigned long)(2*nx), (unsigned long)(2*ny));
    printf ("%-70s", s);
    fflush (stdout);
 

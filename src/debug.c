@@ -47,21 +47,24 @@ main (int argc, char *argv[])
 {
    hid_t	fid;
    H5F_t	*f;
-   haddr_t	addr = 0;
+   haddr_t	addr;
    uint8	sig[16];
    intn		i;
    herr_t	status = SUCCEED;
-   haddr_t	extra = 0;
+   haddr_t	extra;
 
+   H5F_addr_reset (&addr);
+   H5F_addr_reset (&extra);
+   
    /*
     * Parse command arguments.
     */
    if (argc>2) {
       printf ("New address: %s\n", argv[2]);
-      addr = HDstrtol (argv[2], NULL, 0);
+      addr.offset = HDstrtol (argv[2], NULL, 0);
    }
    if (argc>3) {
-      extra = HDstrtol (argv[3], NULL, 0);
+      extra.offset = HDstrtol (argv[3], NULL, 0);
    }
    
    /*
@@ -79,8 +82,10 @@ main (int argc, char *argv[])
    /*
     * Read the signature at the specified file position.
     */
-   printf ("Reading signature at byte %lu\n", (unsigned long)addr);
-   if (H5F_block_read (f, addr, sizeof(sig), sig)<0) {
+   printf ("Reading signature at address ");
+   H5F_addr_print (stdout, &addr);
+   printf (" (rel)\n");
+   if (H5F_block_read (f, &addr, sizeof(sig), sig)<0) {
       fprintf (stderr, "cannot read signature\n");
       HDexit (3);
    }
@@ -89,19 +94,19 @@ main (int argc, char *argv[])
       /*
        * Debug the boot block.
        */
-      status = H5F_debug (f, 0, stdout, 0, VCOL);
+      status = H5F_debug (f, &addr, stdout, 0, VCOL);
       
    } else if (!HDmemcmp (sig, H5H_MAGIC, H5H_SIZEOF_MAGIC)) {
       /*
        * Debug a heap.
        */
-      status = H5H_debug (f, addr, stdout, 0, VCOL);
+      status = H5H_debug (f, &addr, stdout, 0, VCOL);
 
    } else if (!HDmemcmp (sig, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
       /*
        * Debug a symbol table node.
        */
-      status = H5G_node_debug (f, addr, stdout, 0, VCOL, extra);
+      status = H5G_node_debug (f, &addr, stdout, 0, VCOL, &extra);
 
    } else if (!HDmemcmp (sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
       /*
@@ -112,7 +117,7 @@ main (int argc, char *argv[])
       H5B_subid_t subtype = sig[H5B_SIZEOF_MAGIC];
       switch (subtype) {
       case H5B_SNODE_ID:
-	 status = H5G_node_debug (f, addr, stdout, 0, VCOL, extra);
+	 status = H5G_node_debug (f, &addr, stdout, 0, VCOL, &extra);
 	 break;
 
       default:
@@ -125,7 +130,7 @@ main (int argc, char *argv[])
        * This could be an object header.  Since they don't have a signature
        * it's a somewhat "ify" detection.
        */
-      status = H5O_debug (f, addr, stdout, 0, VCOL);
+      status = H5O_debug (f, &addr, stdout, 0, VCOL);
       
    } else {
       /*

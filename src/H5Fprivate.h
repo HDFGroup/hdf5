@@ -33,6 +33,14 @@
 #  define H5F_OPT_SEEK 1
 #endif
 
+/*
+ * Feature: Define this constant on the compiler command-line if you want to
+ *	    see some debugging messages on stderr.
+ */
+#ifdef NDEBUG
+#  undef H5F_DEBUG
+#endif
+
 /* Maximum size of boot-block buffer */
 #define H5F_BOOTBLOCK_SIZE  1024
 
@@ -41,8 +49,8 @@
 #define H5F_SIGNATURE_LEN 8
 
 /* size of size_t and off_t as they exist on disk */
-#define H5F_SIZEOF_OFFSET(F) ((F)->shared->file_create_parms.offset_size)
-#define H5F_SIZEOF_SIZE(F)	((F)->shared->file_create_parms.length_size)
+#define H5F_SIZEOF_OFFSET(F) ((F)->shared->file_create_parms.sizeof_addr)
+#define H5F_SIZEOF_SIZE(F)	((F)->shared->file_create_parms.sizeof_size)
 
 /*
  * File open flags.
@@ -208,8 +216,8 @@ typedef struct {
    uintn userblock_size;	/* Size of the file user block in bytes */
    uintn sym_leaf_k;		/* 1/2 rank for symbol table leaf nodes */
    uintn btree_k[8];		/* 1/2 rank for btree internal nodes 	*/
-   uint8 offset_size;          	/* Number of bytes for offsets 		*/
-   uint8 length_size;          	/* Number of bytes for lengths 		*/
+   uint8 sizeof_addr;          	/* Number of bytes in an address	*/
+   uint8 sizeof_size;          	/* Number of bytes for obj sizes	*/
    uint8 bootblock_ver;        	/* Version # of the bootblock 		*/
    uint8 smallobject_ver;      	/* Version # of the small-object heap 	*/
    uint8 freespace_ver;        	/* Version # of the free-space information */
@@ -240,28 +248,47 @@ typedef struct H5F_low_class_t {
    hbool_t (*access)(const char*, int, H5F_search_t*);
    struct H5F_low_t *(*open)(const char*, uintn, H5F_search_t*);
    herr_t (*close)(struct H5F_low_t*);
-   herr_t (*read)(struct H5F_low_t*, haddr_t, size_t, uint8*);
-   herr_t (*write)(struct H5F_low_t*, haddr_t, size_t, const uint8*);
+   herr_t (*read)(struct H5F_low_t*, const haddr_t*, size_t, uint8*);
+   herr_t (*write)(struct H5F_low_t*, const haddr_t*, size_t, const uint8*);
    herr_t (*flush)(struct H5F_low_t*);
-   size_t (*size)(struct H5F_low_t*);
+   herr_t (*extend)(struct H5F_low_t*, intn, size_t, haddr_t*);
 } H5F_low_class_t;
 
 typedef struct H5F_low_t {
    const H5F_low_class_t *type;	/* What type of file is this?		*/
+   haddr_t		eof;	/* Address of logical end-of-file	*/
    union {
+
+      /* File families */
+      struct {
+	 char		*name;	/* Family name				*/
+	 uintn		flags;	/* Flags for opening member files	*/
+	 intn		nmemb;	/* Number of family members		*/
+	 intn		nalloc;	/* Size of member table in elements	*/
+	 struct H5F_low_t **memb;/* An array of family members		*/
+	 size_t		offset_bits;/* Number of bits in a member offset*/
+      } fam;
+
+      /* Split meta/raw data */
+      struct {
+	 char		*name;	/* Base name w/o extension		*/
+	 uint64		mask;	/* Bit that determines which file to use*/
+	 struct H5F_low_t *meta;/* Meta data file			*/
+	 struct H5F_low_t *raw;	/* Raw data file			*/
+      } split;
 
       /* Posix section 2 I/O */
       struct {
 	 int		fd;	/* The unix file descriptor		*/
 	 H5F_fileop_t	op;	/* Previous file operation		*/
-	 haddr_t	cur;	/* Current file position		*/
+	 off_t		cur;	/* Current file position		*/
       } sec2;
 
       /* Posix stdio */
       struct {
 	 FILE		*f;	/* Posix stdio file			*/
 	 H5F_fileop_t	op;	/* Previous file operation		*/
-	 haddr_t	cur;	/* Current file position		*/
+	 off_t		cur;	/* Current file position		*/
       } stdio;
 
       /* In-core temp file */
@@ -281,7 +308,8 @@ typedef struct H5F_low_t {
 extern const H5F_low_class_t H5F_LOW_SEC2[];	/* Posix section 2	*/
 extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio 		*/
 extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
-
+extern const H5F_low_class_t H5F_LOW_FAM[];	/* File family		*/
+extern const H5F_low_class_t H5F_LOW_SPLIT[];	/* Split meta/raw data	*/
    
 /*
  * Define the structure to store the file information for HDF5 files. One of
@@ -290,12 +318,14 @@ extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
 typedef struct H5F_file_t {
    H5F_search_t	key;		/* The key for looking up files		*/
    uintn	flags;         	/* Access Permissions for file		*/
-   H5F_low_t	*file_handle;	/* Lower level file handle for I/O	*/
+   H5F_low_t	*lf;		/* Lower level file handle for I/O	*/
    uintn	nrefs;        	/* Ref count for times file is opened 	*/
    uint32 	consist_flags; 	/* File Consistency Flags 		*/
-   haddr_t 	smallobj_off;  	/* Offset of small-obj heap within the file */
-   haddr_t 	freespace_off; 	/* Offset of free-space info within the file */
-   size_t	logical_len;   	/* Logical length of file 		*/
+   haddr_t	boot_addr;	/* Absolute address of boot block	*/
+   haddr_t	base_addr;	/* Absolute base address for rel.addrs.	*/
+   haddr_t 	smallobj_addr; 	/* Relative address of small-obj heap 	*/
+   haddr_t 	freespace_addr;	/* Relative address of free-space info	*/
+   haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
    struct H5AC_t *cache; 	/* The object cache 			*/
    file_create_temp_t file_create_parms; /* File-creation template 	*/
 #ifdef LATER
@@ -322,17 +352,17 @@ typedef struct H5F_t {
 
 
 #ifdef NOT_YET
-#define H5F_encode_offset(f,p,o) (H5F_SIZEOF_OFFSET(f)==4 ? UINT32ENCODE(p,o) \
+#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_OFFSET(f)==4 ? UINT32ENCODE(p,o) \
     : H5F_SIZEOF_OFFSET(f)==8 ? UINT64ENCODE(p,o) \
     : H5F_SIZEOF_OFFSET(f)==2 ? UINT16ENCODE(p,o) \
     : H5FPencode_unusual_offset(f,&(p),(uint8 *)&(o)))
 #else /* NOT_YET */
-#define H5F_encode_offset(f,p,o) switch(H5F_SIZEOF_OFFSET(f)) { case 4: UINT32ENCODE(p,o); break;\
+#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_OFFSET(f)) { case 4: UINT32ENCODE(p,o); break;\
     case 8: UINT64ENCODE(p,o); break;\
     case 2: UINT16ENCODE(p,o); break;}
 #endif /* NOT_YET */
 
-#define H5F_decode_offset(f,p,o)					      \
+#define H5F_DECODE_OFFSET(f,p,o)					      \
    switch (H5F_SIZEOF_OFFSET (f)) {					      \
    case 4:								      \
       UINT32DECODE (p, o);						      \
@@ -369,11 +399,10 @@ struct H5O_istore_t; /*forward decl for prototype arguments*/
 
 /* Private functions, not part of the publicly documented API */
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
-void H5F_encode_offset_unusual(const H5F_t *f, uint8 **p, uint8 *o);
 H5F_t *H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 		 const file_create_temp_t *create_parms);
 herr_t H5F_close (H5F_t *f);
-herr_t H5F_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
+herr_t H5F_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		  intn fwidth);
 
 /* Functions that operate on indexed storage */
@@ -387,18 +416,43 @@ herr_t H5F_istore_write (H5F_t *f, const struct H5O_istore_t *mesg,
 			 void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
-herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
-herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf);
+herr_t H5F_block_write (H5F_t *f, const haddr_t *addr, size_t size, void *buf);
 
 /* Functions that operate directly on low-level files */
+herr_t H5F_low_extend (H5F_low_t *lf, intn op, size_t size, haddr_t *addr);
+herr_t H5F_low_seteof (H5F_low_t *lf, const haddr_t *addr);
 hbool_t H5F_low_access (const H5F_low_class_t *type, const char *name,
 			int mode, H5F_search_t *key);
 H5F_low_t *H5F_low_open (const H5F_low_class_t *type, const char *name,
 			 uintn flags, H5F_search_t *key);
 H5F_low_t *H5F_low_close (H5F_low_t *lf);
-size_t H5F_low_size (H5F_low_t *lf);
-herr_t H5F_low_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf);
-herr_t H5F_low_write (H5F_low_t *lf, haddr_t addr, size_t size,
+size_t H5F_low_size (H5F_low_t *lf, haddr_t *addr);
+herr_t H5F_low_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
+		     uint8 *buf);
+herr_t H5F_low_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
 		      const uint8 *buf);
+herr_t H5F_low_flush (H5F_low_t *lf);
+
+
+/* Functions that operate on addresses */
+#define H5F_addr_eq(A1,A2) (H5F_addr_cmp(A1,A2)==0)
+#define H5F_addr_ne(A1,A2) (H5F_addr_cmp(A1,A2)!=0)
+#define H5F_addr_lt(A1,A2) (H5F_addr_cmp(A1,A2)<0)
+#define H5F_addr_le(A1,A2) (H5F_addr_cmp(A1,A2)<=0)
+#define H5F_addr_gt(A1,A2) (H5F_addr_cmp(A1,A2)>0)
+#define H5F_addr_ge(A1,A2) (H5F_addr_cmp(A1,A2)>=0)
+intn H5F_addr_cmp (const haddr_t*, const haddr_t*);
+hbool_t H5F_addr_defined (const haddr_t*);
+void H5F_addr_undef (haddr_t*);
+void H5F_addr_reset (haddr_t*);
+hbool_t H5F_addr_zerop (const haddr_t*);
+void H5F_addr_encode (H5F_t*, uint8**, const haddr_t*);
+void H5F_addr_decode (H5F_t*, const uint8**, haddr_t*);
+void H5F_addr_print (FILE*, const haddr_t*);
+void H5F_addr_pow2 (uintn, haddr_t*);
+void H5F_addr_inc (haddr_t*, size_t);
+void H5F_addr_add (haddr_t*, const haddr_t *);
+uintn H5F_addr_hash (const haddr_t*, uintn mod);
 
 #endif

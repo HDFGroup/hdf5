@@ -17,12 +17,12 @@ Information for HDF5 maintainers:
         mostlyclean      -- remove temp files (eg, *.o but not *.a).
         clean            -- mostlyclean plus libs and progs.
         distclean        -- all non-distributed files.
-        maintainer-clean -- all but H5config.h.in and configure.
+        maintainer-clean -- all derived files but H5config.h.in and configure.
 
 * Most Makefiles also understand:
 
 	TAGS		-- build a tags table
-	dep depend	-- recalculate source dependencies
+	dep, depend	-- recalculate source dependencies
 	lib		-- build just the libraries w/o programs
 
 * If you have personal preferences for which make, compiler, compiler
@@ -60,6 +60,7 @@ Information for HDF5 maintainers:
   `.depend' file from each directory and type `make depend'.  For
   instance:
 
+	$ cd $HDF5_HOME
 	$ find . -name .depend -exec rm {} \;
 	$ make depend
 
@@ -72,5 +73,5 @@ Information for HDF5 maintainers:
 	    that ends with `.c' and the other that has the library
 	    name wrapped around each `.o' file.
 
-	2.  Some versions of make/ar have problems with modifications
+	2.  Some versions of make/ar have problems with modification
 	    times of archive members.

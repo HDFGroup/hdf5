@@ -353,11 +353,11 @@ herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf)
             break;
 
         case H5_OFFSET_SIZE:
-            *(uint8 *)buf=template->offset_size;
+            *(uint8 *)buf=template->sizeof_addr;
             break;
 
         case H5_LENGTH_SIZE:
-            *(uint8 *)buf=template->length_size;
+            *(uint8 *)buf=template->sizeof_size;
             break;
 
         case H5_SYM_LEAF_K:
@@ -479,14 +479,14 @@ herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf)
             val = *(const uint8 *)buf;
             if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-            template->offset_size=val;
+            template->sizeof_addr=val;
             break;
 
         case H5_LENGTH_SIZE:
             val = *(const uint8 *)buf;
             if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-            template->length_size=val;
+            template->sizeof_size=val;
             break;
 
         case H5_SYM_LEAF_K:

@@ -14,14 +14,25 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-#define FILENAME	"istore.h5"
+#if 0
+#  define FILETYPE	H5F_LOW_DFLT
+#  define FILENAME	"istore.h5"
+#elif 0
+#  define FILETYPE	H5F_LOW_FAM
+#  define FILENAME	"istore-%05d.h5"
+#else
+#  define FILETYPE	H5F_LOW_SPLIT
+#  define FILENAME	"istore-split"
+#endif
 
 #define TEST_SMALL	0x0001
 #define TEST_MEDIUM	0x0002
+#define TEST_LARGE	0x0004
 
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
-   
+
+size_t align_g[3] = {50, 50, 50};
 
 
 /*-------------------------------------------------------------------------
@@ -99,9 +110,16 @@ new_object (H5F_t *f, const char *name, size_t ndims)
    }
 
    /* Add the indexed-storage message */
-   for (i=0; i<ndims; i++) alignment[i] = 2;
+   for (i=0; i<ndims; i++) {
+      if (i<NELMTS (align_g)) {
+	 alignment[i] = align_g[i];
+      } else {
+	 alignment[i] = 2;
+      }
+   }
+   
    H5F_istore_new (f, &istore, ndims, alignment);
-   if (H5O_modify (f, H5O_NO_ADDR, handle, H5O_ISTORE, H5O_NEW_MESG,
+   if (H5O_modify (f, NO_ADDR, handle, H5O_ISTORE, H5O_NEW_MESG,
 		   &istore)<0) {
       printf ("*FAILED*\n");
       if (!isatty (1)) {
@@ -140,7 +158,6 @@ test_create (H5F_t *f, const char *prefix)
    char		name[256];
    
    printf ("%-70s", "Testing istore create");
-   fflush (stdout);
 
    for (i=1; i<=H5O_ISTORE_NDIMS; i++) {
       sprintf (name, "%s_%02d", prefix, i);
@@ -191,21 +208,21 @@ test_extend (H5F_t *f, const char *prefix,
       if (!ny) {
 	 ndims = 1;
 	 ny = nz = 1;
-	 sprintf (dims, "%d", nx);
+	 sprintf (dims, "%lu", (unsigned long)nx);
       } else {
 	 ndims = 2;
 	 nz = 1;
-	 sprintf (dims, "%dx%d", nx, ny);
+	 sprintf (dims, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
       }
    } else {
       ndims = 3;
-      sprintf (dims, "%dx%dx%d", nx, ny, nz);
+      sprintf (dims, "%lux%lux%lu",
+	       (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
    }
 
 
    sprintf (s, "Testing istore extend: %s", dims);
    printf ("%-70s", s);
-   fflush (stdout);
    buf = H5MM_xmalloc (nx*ny*nz);
    check = H5MM_xmalloc (nx*ny*nz);
    whole = H5MM_xcalloc (nx*ny*nz, 1);
@@ -219,7 +236,7 @@ test_extend (H5F_t *f, const char *prefix,
       }
       goto error;
    }
-   if (NULL==H5O_read (f, H5O_NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -274,7 +291,6 @@ test_extend (H5F_t *f, const char *prefix,
       printf ("), %d element%s", nelmts, 1==nelmts?"":"s");
       if (0==nelmts) printf (" *SKIPPED*");
       printf ("\n");
-      fflush (stdout);
 #endif
       
       /* Fill the source array */
@@ -309,7 +325,7 @@ test_extend (H5F_t *f, const char *prefix,
 	    printf ("   Wrote:\n");
 	    print_array (buf, size[0], size[1], size[2]);
 	    printf ("   Read:\n");
-	    print_array (buf, size[0], size[1], size[2]);
+	    print_array (check, size[0], size[1], size[2]);
 	 }
 	 goto error;
       }
@@ -395,7 +411,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
 {
    intn		ndims, ctr;
    char		dims[64], s[256], name[256];
-   size_t	offset[3], size[3];
+   size_t	offset[3], size[3], total=0;
    H5G_entry_t	*handle = NULL;
    H5O_istore_t	istore;
    uint8	*buf = NULL;
@@ -404,20 +420,20 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
       if (!ny) {
 	 ndims = 1;
 	 ny = nz = 1;
-	 sprintf (dims, "%d", nx);
+	 sprintf (dims, "%lu", (unsigned long)nx);
       } else {
 	 ndims = 2;
 	 nz = 1;
-	 sprintf (dims, "%dx%d", nx, ny);
+	 sprintf (dims, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
       }
    } else {
       ndims = 3;
-      sprintf (dims, "%dx%dx%d", nx, ny, nz);
+      sprintf (dims, "%lux%lux%lu",
+	       (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
    }
 
    sprintf (s, "Testing istore sparse: %s", dims);
    printf ("%-70s", s);
-   fflush (stdout);
    buf = H5MM_xmalloc (nx*ny*nz);
 
    /* Build the new empty object */
@@ -429,7 +445,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
       }
       goto error;
    }
-   if (NULL==H5O_read (f, H5O_NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (f, NO_ADDR, handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -453,16 +469,20 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
 	 if (!isatty (1)) {
 	    AT ();
 	    printf ("   Write failed: ctr=%d\n", ctr);
-	    printf ("   offset=(%d", offset[0]);
-	    if (ndims>1) printf (",%d", offset[1]);
-	    if (ndims>2) printf (",%d", offset[2]);
-	    printf ("), size=(%d", size[0]);
-	    if (ndims>1) printf (",%d", size[1]);
-	    if (ndims>2) printf (",%d", size[2]);
+	    printf ("   offset=(%lu", (unsigned long)(offset[0]));
+	    if (ndims>1) printf (",%lu", (unsigned long)(offset[1]));
+	    if (ndims>2) printf (",%lu", (unsigned long)(offset[2]));
+	    printf ("), size=(%lu", (unsigned long)(size[0]));
+	    if (ndims>1) printf (",%lu", (unsigned long)(size[1]));
+	    if (ndims>2) printf (",%lu", (unsigned long)(size[2]));
 	    printf (")\n");
 	 }
 	 goto error;
       }
+      total += nx*ny*nz;
+#if 0
+      printf ("ctr: ctr=%d, total=%lu\n", ctr, (unsigned long)total);
+#endif
 
       /* We don't test reading yet.... */
    }
@@ -502,6 +522,12 @@ main (int argc, char *argv[])
    herr_t	status;
    int		nerrors = 0;
    uintn	size_of_test;
+   uint8	offset_size;
+   H5G_entry_t	*ent = NULL;
+   hid_t	template_id;
+   file_create_temp_t *creation_template = NULL;
+
+   setbuf (stdout, NULL);
 
    /* Parse arguments or assume `small' */
    if (1==argc) {
@@ -513,6 +539,8 @@ main (int argc, char *argv[])
 	    size_of_test |= TEST_SMALL;
 	 } else if (!strcmp (argv[i], "medium")) {
 	    size_of_test |= TEST_MEDIUM;
+	 } else if (!strcmp (argv[i], "large")) {
+	    size_of_test |= TEST_LARGE;
 	 } else {
 	    printf ("unrecognized argument: %s\n", argv[i]);
 	    exit (1);
@@ -522,17 +550,46 @@ main (int argc, char *argv[])
    printf ("Test sizes: ");
    if (size_of_test & TEST_SMALL) printf (" SMALL");
    if (size_of_test & TEST_MEDIUM) printf (" MEDIUM");
+   if (size_of_test & TEST_LARGE) printf (" LARGE");
    printf ("\n");
-      
+
+   /*
+    * Use larger file addresses...
+    */
+   offset_size = 8;
+   template_id = H5C_copy (H5C_get_default_atom (H5_TEMPLATE));
+   H5Csetparm (template_id, H5_OFFSET_SIZE, &offset_size);
+   creation_template = H5Aatom_object (template_id);
    
    /* Create the test file */
-   if (NULL==(f=H5F_open (H5F_LOW_DFLT, FILENAME,
+   if (NULL==(f=H5F_open (FILETYPE, FILENAME,
 			  (H5F_ACC_CREAT|H5F_ACC_WRITE|H5F_ACC_TRUNC|
 			   H5F_ACC_DEBUG),
-			  NULL))) {
+			  creation_template))) {
       printf ("Cannot create file %s; test aborted\n", FILENAME);
       exit (1);
    }
+
+#if 0
+   {
+      /*
+       * For testing file families, fool the library into thinking it already
+       * allocated a whole bunch of data.
+       */
+      haddr_t	addr;
+      addr.offset = (uint64)1<<33; /*8GB*/
+      H5F_low_seteof (f->shared->lf, &addr);
+   }
+#endif
+
+   /*
+    * By creating a group we cause the library to emit it's debugging
+    * diagnostic messages before we begin testing...
+    */
+   ent = H5G_new (f, "flushing_diagnostics", 0);
+   H5G_close (f, ent);
+   ent = NULL;
+
 
    /*
     * Creation test: Creates empty objects with various raw data sizes
@@ -557,7 +614,6 @@ main (int argc, char *argv[])
       status = test_extend (f, "extend", 10, 400, 10);
       nerrors += status<0 ? 1 : 0;
    }
-   
    if (size_of_test & TEST_SMALL) {
       status = test_sparse (f, "sparse", 100, 5, 0, 0);
       nerrors += status<0 ? 1 : 0;
@@ -574,6 +630,11 @@ main (int argc, char *argv[])
       status = test_sparse (f, "sparse", 2000, 4, 2, 3);
       nerrors += status<0 ? 1 : 0;
    }
+   if (size_of_test & TEST_LARGE) {
+      status = test_sparse (f, "sparse", 800, 50, 50, 50);
+      nerrors += status<0 ? 1 : 0;
+   }
+   
    
    /* Close the test file and exit */
    H5F_close (f);

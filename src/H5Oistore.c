@@ -73,7 +73,7 @@ H5O_istore_decode (H5F_t *f, size_t raw_size, const uint8 *p)
 
    /* decode */
    mesg = H5MM_xcalloc (1, sizeof(H5O_istore_t));
-   H5F_decode_offset (f, p, mesg->btree_addr);
+   H5F_addr_decode (f, &p, &(mesg->btree_addr));
    mesg->ndims = *p++;
    assert (raw_size == H5O_istore_size (f, mesg));
 
@@ -122,7 +122,7 @@ H5O_istore_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    assert (p);
 
    /* encode B-tree offset */
-   H5F_encode_offset (f, p, mesg->btree_addr);
+   H5F_addr_encode (f, &p, &(mesg->btree_addr));
 
    /* number of dimensions */
    *p++ = mesg->ndims;
@@ -250,9 +250,11 @@ H5O_istore_debug (H5F_t *f, const void *_mesg, FILE *stream, intn indent,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "B-tree address:",
-	    (unsigned long)(mesg->btree_addr));
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "B-tree address:");
+   H5F_addr_print (stream, &(mesg->btree_addr));
+   fprintf (stream, "\n");
+   
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Number of dimensions:", 
 	    (unsigned long)(mesg->ndims));

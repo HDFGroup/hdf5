@@ -67,6 +67,7 @@ typedef enum
       H5E_CANTOPENFILE,        /* Can't open file */
       H5E_NOTHDF5,             /* Not an HDF5 format file */
       H5E_BADFILE,             /* Bad file ID accessed */
+      H5E_TRUNCATED,           /* File has been truncated */
 
     /* Generic low-level file I/O errors */
       H5E_SEEKERROR,           /* Seek failed */

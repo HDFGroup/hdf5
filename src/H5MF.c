@@ -33,9 +33,12 @@ static intn interface_initialize_g = FALSE;
  *
  * Purpose:	Allocate at least SIZE bytes of file memory and return
  *		the address where that contiguous chunk of file memory
- *		exists.
+ *		exists. The allocation operation should be either H5MF_META or
+ *		H5MF_RAW depending on the purpose for which the storage is
+ *		being requested.
  *
- * Return:	Success:	File address of new chunk.
+ * Return:	Success:	SUCCEED.  The file address of new chunk is
+ *				returned through the ADDR argument.
  *
  *		Failure:	FAIL
  *
@@ -47,23 +50,39 @@ static intn interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5MF_alloc (H5F_t *f, size_t size)
+herr_t
+H5MF_alloc (H5F_t *f, intn op, size_t size, haddr_t *addr/*out*/)
 {
-   haddr_t	addr;
-
+   haddr_t	tmp_addr;
+   
    FUNC_ENTER (H5MF_alloc, NULL, FAIL);
 
    /* check arguments */
    assert (f);
-   assert (f->shared->logical_len>0);
+   assert (H5MF_META==op || H5MF_RAW==op);
    assert (size>0);
+   assert (addr);
 
-   /* reserve space from the end of the file */
-   addr = f->shared->logical_len;
-   f->shared->logical_len += size;
+   /*
+    * Eventually we'll maintain a free list(s) and try to satisfy requests
+    * from there.  But for now we just allocate more memory from the end of
+    * the file.
+    */
+   if (H5F_low_extend (f->shared->lf, op, size, addr/*out*/)<0) {
+      /* Low level mem management failed */
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+   }
+   /* Convert from absolute to relative */
+   addr->offset -= f->shared->base_addr.offset;
 
-   FUNC_LEAVE (addr);
+   /* Did we extend the size of the hdf5 data? */
+   tmp_addr = *addr;
+   H5F_addr_inc (&tmp_addr, size);
+   if (H5F_addr_gt (&tmp_addr, &(f->shared->hdf5_eof))) {
+      f->shared->hdf5_eof = tmp_addr;
+   }
+   
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -88,13 +107,14 @@ H5MF_alloc (H5F_t *f, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free (H5F_t *f, haddr_t addr, size_t size)
+H5MF_free (H5F_t *f, const haddr_t *addr, size_t size)
 {
    FUNC_ENTER (H5MF_free, NULL, FAIL);
 
    /* check arguments */
    assert (f);
-   if (addr<=0 || 0==size) HRETURN (SUCCEED);
+   if (!addr || !H5F_addr_defined (addr) || 0==size) HRETURN (SUCCEED);
+   assert (!H5F_addr_zerop (addr));
 
 #ifndef NDEBUG
    fprintf (stderr, "H5MF_free: lost %lu bytes of file storage\n",
