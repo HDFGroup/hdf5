@@ -371,7 +371,11 @@ SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do
 	# Scan for entry for this weekday.
-	x=`echo $x | sed -e s%^$WEEKDAY/%%`
+	xd=`echo $x | cut -f1 -d/`
+	if [ "$xd" = ${WEEKDAY} ]; then
+	    # strip away the weekday/ part.
+	    x=`echo $x | cut -f2 -d/`
+	fi
 	case "$x" in
 	    '#'*)
 		# comment.  Continue.
