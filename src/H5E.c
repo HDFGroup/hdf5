@@ -358,7 +358,7 @@ H5Eprint(FILE *stream)
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
-    fprintf (stream, "HDF5-DIAG: Error detected in ");
+    fprintf (stream, "HDF5-DIAG: Error detected in %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     {   int mpi_rank, mpi_initialized;
