@@ -45,8 +45,7 @@ void multiple_dset_write(char *filename, int ndatasets)
     for (i = 0; i < DIM; i++)
 	file_dims [i] = SIZE;
 
-    plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose (plist);
 
@@ -118,8 +117,7 @@ void multiple_group_write(char *filename, int ngroups)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    plist = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     H5Pclose(plist);
 
@@ -253,8 +251,7 @@ void multiple_group_read(char *filename, int ngroups)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    plist = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     H5Pclose(plist);
 

@@ -81,7 +81,11 @@
 #define ZCOL		4	/* same as BYCOL except process 0 gets 0 columns */
 #define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
 
-
+/* File_Access_type bits */
+#define FACC_DEFAULT	0x0	/* default */
+#define FACC_MPIO	0x1	/* MPIO */
+#define FACC_SPLIT	0x2	/* Split File */
+#define FACC_MULTI	0x4	/* Multi File */
 
 /* dataset data type.  Int's can be easily octo dumped. */
 typedef int DATATYPE;
@@ -93,5 +97,10 @@ extern int nerrors;				/*errors count */
 extern int verbose;				/*verbose, default as no. */
 extern herr_t (*old_func)(void*);		/*previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
+extern int facc_type;				/*Test file access type */
+
+/* prototypes */
+hid_t
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type );
 
 #endif /* PHDF5TEST_H */
