@@ -198,8 +198,8 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;complex_space_definition&gt; ::= TBD
 
-&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; | &lt;complex_space_data&gt; }
-                  
+&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; | &lt;complex_space_data&gt; } | &lt;subset&gt;
+
 &lt;scalar_space_data&gt; ::= &lt;any_element&gt;
 
 &lt;any_element&gt; ::= &lt;atomic_element&gt; | &lt;compound_element&gt; | 
@@ -210,6 +210,23 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;atomic_element&gt; :: = &lt;integer_data&gt; | &lt;float_data&gt;    | &lt;time_data&gt;   |
                       &lt;string_data&gt;  | &lt;bitfield_data&gt; | &lt;opaque_data&gt; |
                       &lt;enum_data&gt;    | &lt;reference_data&gt;
+
+&lt;subset&gt; ::= SUBSET { &lt;start&gt;;
+                      &lt;stride&gt;;
+                      &lt;count&gt;;
+                      &lt;block&gt;;
+                 DATA { &lt;simple_space_data&gt; }
+             }
+
+&lt;start&gt; ::= START (&lt;coor_list&gt;)
+
+&lt;stride&gt; ::= STRIDE (&lt;pos_list&gt;)
+
+&lt;count&gt; ::= COUNT (&lt;coor_list&gt;)
+
+&lt;block&gt; ::= BLOCK (&lt;coor_list&gt;)
+
+&lt;coor_list&gt; ::= &lt;int_value&gt;, &lt;coor_list&gt; | &lt;int_value&gt;
 
 &lt;integer_data&gt; ::= &lt;int_value&gt;
 
@@ -238,14 +255,15 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;object_num&gt; ::= &lt;int_value&gt;:&lt;int_value&gt; | &lt;int_value&gt;
 
-&lt;data_region_data&gt; ::= H5T_STD_REF_DSETREG &lt;object_num&gt;
-        { &lt;data_region_data_info&gt;, &lt;data_region_data_info&gt;, ...}
+&lt;data_region_data&gt; ::= H5T_STD_REF_DSETREG &lt;object_num&gt; { &lt;data_region_data_list&gt; }
+
+&lt;data_region_data_list&gt; ::= &lt;data_region_data_info&gt;, &lt;data_region_data_list&gt; | &lt;data_region_data_info&gt;
 
 &lt;data_region_data_info&gt; ::= &lt;region_info&gt; | &lt;point_info&gt;
 
 &lt;region_info&gt; ::= (&lt;region_vals&gt;)
 
-&lt;region_vals&gt; ::= &lt;lower_bound&gt;:&lt;upper_bound&gt; | &lt;lower_bound&gt;:&lt;upper_bound&gt;, &lt;region_vals&gt;
+&lt;region_vals&gt; ::= &lt;lower_bound&gt;:&lt;upper_bound&gt;, &lt;region_vals&gt; | &lt;lower_bound&gt;:&lt;upper_bound&gt;
 
 &lt;lower_bound&gt; ::= &lt;int_value&gt;
 
@@ -332,7 +350,11 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;identifier&gt; ::= a string
 // character '/' should be used with care. 
 
-&lt;int_value&gt; ::= 0 | [1-9][0-9]*
+&lt;pos_list&gt;  ::= &lt;pos_int&gt;, &lt;pos_list&gt; | &lt;pos_int&gt;
+
+&lt;int_value&gt; ::= 0 | &lt;pos_int&gt;
+
+&lt;pos_int&gt;   ::= [1-9][0-9]*
 
 </PRE>
 </DIR>
