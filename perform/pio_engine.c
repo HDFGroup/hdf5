@@ -458,13 +458,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     off_t       nelmts_xfer;
     size_t      nelmts_toxfer;
     char        dname[64];
-    off_t       dset_offset=0;    /*dataset offset in a file              */
+    off_t       dset_offset=0;  /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
     size_t      nelmts_in_buf;  /*how many element the buffer holds     */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
-    hid_t       dcpl = -1;      /* Dataset creation property list       */
 
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
@@ -472,17 +471,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t       h5ds_id = -1;           /*dataset handle                */
-    hsize_t	h5mem_block[1];		/*memory space selection        */
-    hsize_t	h5mem_stride[1];
-    hsize_t	h5mem_count[1];
-    hssize_t	h5mem_start[1];
-#if 0
-    /* for future implementation */
-    hsize_t	h5dset_block[1];	/*dset space selection          */
-    hsize_t	h5dset_stride[1];
-    hsize_t	h5dset_count[1];
-    hssize_t	h5dset_start[1];
-#endif
+    hsize_t	h5block[1];		/*dataspace selection           */
+    hsize_t	h5stride[1];
+    hsize_t	h5count[1];
+    hssize_t	h5start[1];
+    hid_t       h5dcpl = -1;            /* Dataset creation property list */
+    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
 
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * (off_t)ELMT_SIZE;
@@ -501,7 +495,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((h5dset_space_id >= 0), "H5Screate");
         } /* end else */
 
-        /* create the memory dataspace that corresponds to the xfer buffer */
+        /* Create the memory dataspace that corresponds to the xfer buffer */
         if(nelmts_in_buf>0) {
             h5dims[0] = nelmts_in_buf;
             h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
@@ -511,7 +505,23 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             h5mem_space_id = H5Screate(H5S_SCALAR);
             VRFY((h5mem_space_id >= 0), "H5Screate");
         } /* end else */
-    }
+
+        /* Create the dataset transfer property list */
+        h5dxpl = H5Pcreate(H5P_DATASET_XFER);
+        if (h5dxpl < 0) {
+            fprintf(stderr, "HDF5 Property List Create failed\n");
+            GOTOERROR(FAIL);
+        }
+
+        /* Change to collective I/O, if asked */
+        if(parms->collective) {
+            hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            } /* end if */
+        } /* end if */
+    } /* end if */
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
 
@@ -526,8 +536,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             break;
 
         case PHDF5:
-            dcpl = H5Pcreate(H5P_DATASET_CREATE);
-            if (dcpl < 0) {
+            h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
+            if (h5dcpl < 0) {
                 fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
@@ -536,7 +546,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             if(parms->h5_use_chunks) {
                 /* Set the chunk size to be the same as the buffer size */
                 h5dims[0] = nelmts_in_buf;
-                hrc = H5Pset_chunk(dcpl, 1, h5dims);
+                hrc = H5Pset_chunk(h5dcpl, 1, h5dims);
                 if (hrc < 0) {
                     fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
@@ -546,7 +556,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 #ifdef H5_HAVE_NOFILL
             /* Disable writing fill values if asked */
             if(parms->h5_no_fill) {
-                hrc = H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+                hrc = H5Pset_fill_time(h5dcpl, H5D_FILL_TIME_NEVER);
                 if (hrc < 0) {
                     fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
@@ -556,14 +566,14 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 
             sprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5Dcreate(fd->h5fd, dname, ELMT_H5_TYPE,
-                                h5dset_space_id, dcpl);
+                                h5dset_space_id, h5dcpl);
 
             if (h5ds_id < 0) {
                 fprintf(stderr, "HDF5 Dataset Create failed\n");
                 GOTOERROR(FAIL);
             }
 
-            hrc = H5Pclose(dcpl);
+            hrc = H5Pclose(h5dcpl);
             /* verifying the close of the dcpl */
             if (hrc < 0) {
                 fprintf(stderr, "HDF5 Property List Close failed\n");
@@ -718,44 +728,54 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     mpi_offset = dset_offset + (elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g))*(off_t)ELMT_SIZE;
                 } /* end else */
 
-                mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
-                                        (int)nelmts_toxfer, ELMT_MPI_TYPE,
-                                        &mpi_status);
-                VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
+                if(parms->collective==0) {
+                    mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
+                                            (int)nelmts_toxfer, ELMT_MPI_TYPE,
+                                            &mpi_status);
+                    VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
+                } /* end if */
+                else {
+                    mrc = MPI_File_write_at_all(fd->mpifd, mpi_offset, buffer,
+                                            (int)nelmts_toxfer, ELMT_MPI_TYPE,
+                                            &mpi_status);
+                    VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
+                } /* end else */
                 break;
 
             case PHDF5:
-                /*set up the dset space id to select the segment to process */
-                {
-                    if (parms->interleaved==0){
-                        /* Contiguous pattern */
-                        h5mem_start[0] = elmts_begin + nelmts_xfer;
-                    } /* end if */
-                    else {
-                        /* Interleaved access pattern */
-                        /* Skip offset over blocks of other processes */
-                        h5mem_start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
-                    } /* end else */
-                    h5mem_stride[0] = h5mem_block[0] = nelmts_toxfer;
-                    h5mem_count[0] = 1;
-                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                              h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
-                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                /* Set up the file dset space id to select the segment to process */
+                if (parms->interleaved==0){
+                    /* Contiguous pattern */
+                    h5start[0] = elmts_begin + nelmts_xfer;
+                } /* end if */
+                else {
+                    /* Interleaved access pattern */
+                    /* Skip offset over blocks of other processes */
+                    h5start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
+                } /* end else */
+                h5stride[0] = h5block[0] = nelmts_toxfer;
+                h5count[0] = 1;
+                hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+                          h5start, h5stride, h5count, h5block); 
+                VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-                    /*setup the memory space id too.  Only start is different */
-                    h5mem_start[0] = 0;
+                /* Only need selection in memory dataset if it is smaller than the whole buffer */
+                if(nelmts_toxfer<nelmts_in_buf) {
+                    /* Setup the memory space id too.  Only start is different */
+                    h5start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
+                              h5start, h5stride, h5count, h5block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
-                }
+                } /* end if */
 
                 /* set write time here */
                 hrc = H5Dwrite(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
-                               h5dset_space_id, H5P_DEFAULT, buffer);
+                               h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dwrite");
                 break;
-            }
+            } /* switch (parms->io_type) */
 
+            /* Increment number of elements transferred */
             nelmts_xfer += nelmts_toxfer;
         }
 
@@ -799,6 +819,16 @@ done:
         }
     }
 
+    if (h5dxpl != -1) {
+        hrc = H5Pclose(h5dxpl);
+        if (hrc < 0) {
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            ret_code = FAIL;
+        } else {
+            h5dxpl = -1;
+        }
+    }
+
     return ret_code;
 }
 
@@ -835,17 +865,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t       h5ds_id = -1;   	/*dataset handle                */
-    hsize_t	h5mem_block[1];		/*memory space selection        */
-    hsize_t	h5mem_stride[1];
-    hsize_t	h5mem_count[1];
-    hssize_t	h5mem_start[1];
-#if 0
-    /* for future implementation */
-    hsize_t	h5dset_block[1];	/*dset space selection          */
-    hsize_t	h5dset_stride[1];
-    hsize_t	h5dset_count[1];
-    hssize_t	h5dset_start[1];
-#endif
+    hsize_t	h5block[1];		/*dataspace selection        */
+    hsize_t	h5stride[1];
+    hsize_t	h5count[1];
+    hssize_t	h5start[1];
+    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
 
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * (off_t)ELMT_SIZE;
@@ -864,7 +888,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((h5dset_space_id >= 0), "H5Screate");
         } /* end else */
 
-        /* create the memory dataspace that corresponds to the xfer buffer */
+        /* Create the memory dataspace that corresponds to the xfer buffer */
         if(nelmts_in_buf>0) {
             h5dims[0] = nelmts_in_buf;
             h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
@@ -874,7 +898,23 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             h5mem_space_id = H5Screate(H5S_SCALAR);
             VRFY((h5mem_space_id >= 0), "H5Screate");
         } /* end else */
-    }
+
+        /* Create the dataset transfer property list */
+        h5dxpl = H5Pcreate(H5P_DATASET_XFER);
+        if (h5dxpl < 0) {
+            fprintf(stderr, "HDF5 Property List Create failed\n");
+            GOTOERROR(FAIL);
+        }
+
+        /* Change to collective I/O, if asked */
+        if(parms->collective) {
+            hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            } /* end if */
+        } /* end if */
+    } /* end if */
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
         /* Calculate dataset offset within a file */
@@ -1035,40 +1075,49 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     mpi_offset = dset_offset + (elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g))*(off_t)ELMT_SIZE;
                 } /* end else */
 
-                mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
-                                       (int)nelmts_toxfer, ELMT_MPI_TYPE,
-                                       &mpi_status);
-                VRFY((mrc==MPI_SUCCESS), "MPIO_read");
+                if(parms->collective==0) {
+                    mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
+                                           (int)nelmts_toxfer, ELMT_MPI_TYPE,
+                                           &mpi_status);
+                    VRFY((mrc==MPI_SUCCESS), "MPIO_read");
+                } /* end if */
+                else {
+                    mrc = MPI_File_read_at_all(fd->mpifd, mpi_offset, buffer,
+                                           (int)nelmts_toxfer, ELMT_MPI_TYPE,
+                                           &mpi_status);
+                    VRFY((mrc==MPI_SUCCESS), "MPIO_read");
+                } /* end else */
                 break;
 
             case PHDF5:
-                /*set up the dset space id to select the segment to process */
-                {
-                    if (parms->interleaved==0){
-                        /* Contiguous pattern */
-                        h5mem_start[0] = elmts_begin + nelmts_xfer;
-                    } /* end if */
-                    else {
-                        /* Interleaved access pattern */
-                        /* Skip offset over blocks of other processes */
-                        h5mem_start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
-                    } /* end else */
-                    h5mem_stride[0] = h5mem_block[0] = nelmts_toxfer;
-                    h5mem_count[0] = 1;
-                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
-                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                /* Set up the dset space id to select the segment to process */
+                if (parms->interleaved==0){
+                    /* Contiguous pattern */
+                    h5start[0] = elmts_begin + nelmts_xfer;
+                } /* end if */
+                else {
+                    /* Interleaved access pattern */
+                    /* Skip offset over blocks of other processes */
+                    h5start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
+                } /* end else */
+                h5stride[0] = h5block[0] = nelmts_toxfer;
+                h5count[0] = 1;
+                hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+                          h5start, h5stride, h5count, h5block); 
+                VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-                    /*setup the memory space id too.  Only start is different */
-                    h5mem_start[0] = 0;
+                /* Only need selection in memory dataset if it is smaller than the whole buffer */
+                if(nelmts_toxfer<nelmts_in_buf) {
+                    /* Setup the memory space id too.  Only start is different */
+                    h5start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
+                              h5start, h5stride, h5count, h5block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
-                }
+                } /* end if */
 
                 /* set read time here */
                 hrc = H5Dread(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
-                              h5dset_space_id, H5P_DEFAULT, buffer);
+                              h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dread");
                 break;
             } /* switch (parms->io_type) */
@@ -1099,6 +1148,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 		}
             }	/* if (parms->verify) */
 
+            /* Increment number of elements transferred */
             nelmts_xfer += nelmts_toxfer;
         }
 
@@ -1139,6 +1189,16 @@ done:
             ret_code = FAIL;
         } else {
             h5mem_space_id = -1;
+        }
+    }
+
+    if (h5dxpl != -1) {
+        hrc = H5Pclose(h5dxpl);
+        if (hrc < 0) {
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            ret_code = FAIL;
+        } else {
+            h5dxpl = -1;
         }
     }
 

@@ -40,6 +40,7 @@ typedef struct parameters_ {
     int 	num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
     unsigned    interleaved;    /* Interleaved vs. contiguous blocks    */
+    unsigned    collective;     /* Collective vs. independent I/O       */
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     int 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
