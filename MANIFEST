@@ -134,6 +134,8 @@
 ./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
+./doc/html/PDF_RM_body.book             _DO_NOT_DISTRIBUTE_
+./doc/html/PDF_RM_front.book            _DO_NOT_DISTRIBUTE_
 ./doc/html/Performance.html
 ./doc/html/PredefDTypes.html
 ./doc/html/Properties.html
@@ -151,6 +153,8 @@
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
+./doc/html/RM_Title.html                _DO_NOT_DISTRIBUTE_
+./doc/html/RM_TOC.html                  _DO_NOT_DISTRIBUTE_
 ./doc/html/Tools.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
