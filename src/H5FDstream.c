@@ -272,7 +272,7 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
   FUNC_ENTER_API(H5Pset_fapl_stream, FAIL);
   H5TRACE2 ("e", "ix", fapl_id, fapl);
 
-  if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+  if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
     HGOTO_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
   if (fapl) {
@@ -317,7 +317,7 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
   FUNC_ENTER_API(H5Pget_fapl_stream, FAIL);
   H5TRACE2("e","ix",fapl_id,fapl);
 
-  if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+  if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
     HGOTO_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
   if (H5FD_STREAM != H5P_get_driver (plist))
     HGOTO_ERROR (H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -593,7 +593,7 @@ H5FD_stream_open (const char *filename,
 
   fapl = NULL;
   if (H5P_DEFAULT != fapl_id) {
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     fapl = H5P_get_driver_info (plist);
   }

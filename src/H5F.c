@@ -497,7 +497,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI(H5F_acs_create, FAIL);
 
     /* Check argument */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve properties */
@@ -552,7 +552,7 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5F_acs_close, FAIL);
 
     /* Check argument */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
@@ -1373,14 +1373,14 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 */
         if(H5P_DEFAULT == fcpl_id)
             fcpl_id = H5P_FILE_CREATE_DEFAULT;
-        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE) || NULL == (plist = H5I_object(fcpl_id)))
+        if(NULL == (plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
         f->shared->fcpl_id = H5P_copy_plist(plist);
 
 
         if(H5P_DEFAULT == fapl_id)
             fapl_id = H5P_FILE_ACCESS_DEFAULT;
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+        if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
 
         if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, &(f->shared->mdc_nelmts)) < 0)
@@ -1953,8 +1953,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      */
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS) || 
-        NULL == (a_plist = H5I_object(fapl_id)))
+    if(NULL == (a_plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
     if(H5P_get(a_plist, H5F_CLOSE_DEGREE_NAME, &fc_degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree");  
@@ -2824,9 +2823,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     assert(loc);
     assert(name && *name);
     assert(child);
-
-    if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
+    assert(TRUE==H5P_isa_class(plist_id,H5P_MOUNT));
 
     /*
      * Check that the child isn't mounted, that the mount point exists, and

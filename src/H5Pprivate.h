@@ -57,6 +57,7 @@ __DLL__ herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
 
 /* *SPECIAL* Don't make more of these! -QAK */
 __DLL__ htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);
+__DLL__ void *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 
 
 /* Private functions to "peek" at properties of a certain type */

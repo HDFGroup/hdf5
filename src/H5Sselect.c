@@ -804,7 +804,7 @@ H5S_select_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (_buf);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -897,7 +897,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (_buf);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
@@ -983,7 +983,7 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     assert (buf);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -1075,7 +1075,7 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     assert (tgath_buf);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
@@ -1165,7 +1165,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     FUNC_ENTER_NOAPI(H5S_select_read, FAIL);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -1395,7 +1395,7 @@ H5S_select_write(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     FUNC_ENTER_NOAPI(H5S_select_write, FAIL);
 
     /* Get the hyperslab vector size */
-    if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if(NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");

@@ -193,7 +193,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
     /* Check argument */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     fa.increment = increment;
@@ -239,7 +239,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     FUNC_ENTER_API(H5Pget_fapl_core, FAIL);
     H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
                       "not a file access property list");
     if (H5FD_CORE!=H5P_get_driver(plist))

@@ -1461,7 +1461,6 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->wr_count = chunk_size;
         ent->chunk = chunk;
         
-        assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
         assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
         plist=H5I_object(dxpl_id);
         assert(plist!=NULL);
@@ -1609,7 +1608,6 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             x.alloc_size = x.chunk_size;
             x.chunk = chunk;
 
-            assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
             assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
             plist=H5I_object(dxpl_id);
             assert(plist!=NULL);
@@ -2354,7 +2352,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(layout->addr));
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     assert(dc_plist!=NULL);
 
@@ -2367,7 +2364,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time");
 
     /* Get necessary properties from dataset transfer property list */
-    if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
+    if (NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if(H5P_get(dx_plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,split_ratios)<0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get B-tree split ratios");

@@ -237,7 +237,7 @@ H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
             plist_id= H5P_DATASET_XFER_DEFAULT;
 
         /* Get the allocation function & info */
-        if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+        if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
         if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -371,7 +371,7 @@ H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     /* Get the allocation function & info */
-    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -710,7 +710,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     /* Get the free func & information */
-    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");

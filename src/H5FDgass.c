@@ -241,7 +241,7 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     /*NO TRACE*/
     
     /* Check arguments */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
 
 #ifdef LATER
@@ -293,7 +293,7 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
     FUNC_ENTER_API(H5Pget_fapl_gass, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_GASS!=H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -359,7 +359,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     strcpy (filename, name);
     
     /* Obtain a pointer to gass-specific file access properties */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5P_get_driver(plist)) {
         GASS_INFO_NULL (_fa.info);

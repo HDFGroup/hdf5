@@ -290,7 +290,7 @@ H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity)
     FUNC_ENTER_API(H5Pset_fapl_log, FAIL);
     H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
     
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     fa.logfile=logfile;
@@ -337,7 +337,7 @@ H5Pset_fapl_log(hid_t fapl_id, char *logfile, unsigned flags, size_t buf_size)
     FUNC_ENTER_API(H5Pset_fapl_log, FAIL);
     H5TRACE4("e","isIuz",fapl_id,logfile,flags,buf_size);
     
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     fa.logfile=logfile;
@@ -525,7 +525,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
 
     /* Get the driver specific information */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     fa = H5P_get_driver_info(plist);
 

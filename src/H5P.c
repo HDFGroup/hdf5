@@ -619,12 +619,8 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
     FUNC_ENTER_API(H5Pget_version, FAIL);
     H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -674,10 +670,6 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
     FUNC_ENTER_API(H5Pset_userblock, FAIL);
     H5TRACE2("e","ih",plist_id,size);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Check that the userblock size is a power of two */
     for (i=8; i<8*sizeof(hsize_t); i++) {
         hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
@@ -689,7 +681,7 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is not valid");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -730,12 +722,8 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
     FUNC_ENTER_API(H5Pget_userblock, FAIL);
     H5TRACE2("e","i*h",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -788,13 +776,11 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
     H5TRACE3("e","ihh",fapl_id,threshold,alignment);
 
     /* Check args */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))     
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (alignment<1)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "alignment must be positive");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -839,12 +825,8 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
     FUNC_ENTER_API(H5Pget_alignment, FAIL);
     H5TRACE3("e","ixx",fapl_id,threshold,alignment);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))     
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -886,9 +868,6 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
     H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     if (sizeof_addr) {
         if (sizeof_addr != 2 && sizeof_addr != 4 &&
                 sizeof_addr != 8 && sizeof_addr != 16)
@@ -901,7 +880,7 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
     }
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -945,12 +924,8 @@ H5Pget_sizes(hid_t plist_id,
     FUNC_ENTER_API(H5Pget_sizes, FAIL);
     H5TRACE3("e","ixx",plist_id,sizeof_addr,sizeof_size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -1007,12 +982,8 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIs",plist_id,ik,lk);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
    
     /* Set values */
@@ -1062,12 +1033,8 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
     FUNC_ENTER_API(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -1125,12 +1092,8 @@ H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIu",plist_id,ik,lk);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
    
     /* Set values */
@@ -1180,12 +1143,8 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
     FUNC_ENTER_API(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -1234,13 +1193,11 @@ H5Pset_istore_k(hid_t plist_id, int ik)
     H5TRACE2("e","iIs",plist_id,ik);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (ik <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -1286,12 +1243,8 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
     FUNC_ENTER_API(H5Pget_istore_k, FAIL);
     H5TRACE2("e","ix",plist_id,ik);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -1335,13 +1288,11 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
     H5TRACE2("e","iDl",plist_id,layout);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if (layout < 0 || layout >= H5D_NLAYOUTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "raw data layout method is not valid");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -1383,12 +1334,8 @@ H5Pget_layout(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_layout, H5D_LAYOUT_ERROR);
     H5TRACE1("Dl","i",plist_id);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR, "not a dataset creation property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_LAYOUT_ERROR, "can't find object for ID");
 
     /* Get value */
@@ -1437,8 +1384,6 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     H5TRACE3("e","iIs*[a1]h",plist_id,ndims,dim);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if (ndims <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality must be positive");
     if (ndims > H5S_MAX_RANK)
@@ -1447,7 +1392,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Initialize chunk dims to 0s */
@@ -1508,12 +1453,8 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
     FUNC_ENTER_API(H5Pget_chunk, FAIL);
     H5TRACE3("Is","iIsx",plist_id,max_ndims,dim);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
@@ -1581,8 +1522,6 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     H5TRACE4("e","isoh",plist_id,name,offset,size);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if (!name || !*name)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     if (offset<0)
@@ -1591,7 +1530,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "zero size");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
@@ -1664,12 +1603,8 @@ H5Pget_external_count(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_external_count, FAIL);
     H5TRACE1("Is","i",plist_id);
     
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -1726,12 +1661,8 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     FUNC_ENTER_API(H5Pget_external, FAIL);
     H5TRACE6("e","iIszxxx",plist_id,idx,name_size,name,offset,size);
     
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2149,15 +2080,13 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
              rdcc_w0);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) )
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (mdc_nelmts<0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "meta data cache size must be non-negative");
     if (rdcc_w0<0.0 || rdcc_w0>1.0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -2210,12 +2139,8 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     H5TRACE5("e","i*Is*Is*z*d",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get sizes */
@@ -2279,15 +2204,13 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) )
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (mdc_nelmts<0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "meta data cache size must be non-negative");
     if (rdcc_w0<0.0 || rdcc_w0>1.0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -2339,12 +2262,8 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get sizes */
@@ -2402,13 +2321,11 @@ H5Pset_buffer(hid_t plist_id, hsize_t _size, void *tconv, void *bkg)
     H5TRACE4("e","ihxx",plist_id,_size,tconv,bkg);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (size<=0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -2450,12 +2367,8 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     FUNC_ENTER_API(H5Pget_buffer, 0);
     H5TRACE3("h","ixx",plist_id,tconv,bkg);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, 0, "can't find object for ID");
 
     /* Return values */
@@ -2512,13 +2425,11 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
     H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (size<=0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -2560,12 +2471,8 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     FUNC_ENTER_API(H5Pget_buffer, 0);
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, 0, "can't find object for ID");
 
     /* Return values */
@@ -2623,12 +2530,8 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
     FUNC_ENTER_API(H5Pset_hyper_cache, FAIL);
     H5TRACE3("e","iIuIu",plist_id,cache,limit);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset tranxfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -2667,12 +2570,8 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
     FUNC_ENTER_API(H5Pget_hyper_cache, FAIL);
     H5TRACE3("e","ixx",plist_id,cache,limit);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Return values */
@@ -2717,12 +2616,8 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
     FUNC_ENTER_API(H5Pset_preserve, FAIL);
     H5TRACE2("e","ib",plist_id,status);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -2761,12 +2656,8 @@ H5Pget_preserve(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2833,12 +2724,8 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     FUNC_ENTER_API(H5Pset_filter, FAIL);
     H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
@@ -2896,12 +2783,8 @@ H5Pget_nfilters(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_nfilters, FAIL);
     H5TRACE1("Is","i",plist_id);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2960,12 +2843,8 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
     
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5Z_FILTER_ERROR, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID");
 
     /* Get pipeline info */
@@ -3063,13 +2942,11 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     H5TRACE2("e","iIu",plist_id,level);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if (level>9)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid deflate level");
    
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Add the filter */
@@ -3113,12 +2990,8 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
     FUNC_ENTER_API(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","ixxx",plist_id,left,middle,right);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get the split ratios */
@@ -3172,14 +3045,12 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
     H5TRACE4("e","iddd",plist_id,left,middle,right);
 
     /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (left<0.0 || left>1.0 || middle<0.0 || middle>1.0 ||
             right<0.0 || right>1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0");
     
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3232,12 +3103,8 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     FUNC_ENTER_API(H5Pset_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-   
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get the "basic" fill value structure */
@@ -3311,15 +3178,13 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     H5TRACE3("e","iix",plist_id,type_id,value);
 
     /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
     if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (!value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,"no fill value output buffer");
  
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /*
@@ -3458,12 +3323,8 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
 
     assert(status);
 
-    /* Check arguments */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Call the internal function */
@@ -3500,12 +3361,8 @@ H5Pset_space_time(hid_t plist_id, H5D_space_time_t alloc_time)
     FUNC_ENTER_API(H5Pset_space_time, FAIL);
     H5TRACE2("e","iDs",plist_id,alloc_time);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
     /* Get the property list structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3542,12 +3399,8 @@ H5Pget_space_time(hid_t plist_id, H5D_space_time_t *alloc_time/*out*/)
     FUNC_ENTER_API(H5Pget_space_time, FAIL);
     H5TRACE2("e","ix",plist_id,alloc_time);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
     /* Get the property list structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -3583,12 +3436,8 @@ H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
 
     FUNC_ENTER_API(H5Pset_fill_time, FAIL);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
     /* Get the property list structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3624,12 +3473,8 @@ H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time/*out*/)
     FUNC_ENTER_API(H5Pget_fill_time, FAIL);
     H5TRACE2("e","ix",plist_id,fill_time);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
     /* Get the property list structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3682,12 +3527,8 @@ H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
     FUNC_ENTER_API(H5Pset_gc_references, FAIL);
     H5TRACE2("e","iIu",plist_id,gc_ref);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3728,12 +3569,8 @@ H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
     FUNC_ENTER_API(H5Pget_gc_references, FAIL);
     H5TRACE2("e","ix",plist_id,gc_ref);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -3769,12 +3606,8 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
     FUNC_ENTER_API(H5Pset_fclose_degree, FAIL);
     H5TRACE2("e","iFc",plist_id,degree);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -3807,12 +3640,8 @@ herr_t H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree)
 
     FUNC_ENTER_API(H5Pget_fclose_degree, FAIL);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if( degree && (H5P_get(plist, H5F_CLOSE_DEGREE_NAME, degree) < 0) ) 
@@ -3901,7 +3730,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
-    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Update property list */
@@ -3939,12 +3768,8 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
     FUNC_ENTER_API(H5Pget_vlen_mem_manager, FAIL);
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(alloc_func!=NULL)
@@ -4003,12 +3828,8 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
     FUNC_ENTER_API(H5Pset_meta_block_size, FAIL);
     H5TRACE2("e","ih",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -4049,12 +3870,8 @@ H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
     FUNC_ENTER_API(H5Pget_meta_block_size, FAIL);
     H5TRACE2("e","ix",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -4108,12 +3925,8 @@ H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
     FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
     H5TRACE2("e","ih",plist_id,_size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -4155,12 +3968,8 @@ H5Pget_sieve_buf_size(hid_t plist_id, hsize_t *_size/*out*/)
     FUNC_ENTER_API(H5Pget_sieve_buf_size, FAIL);
     H5TRACE2("e","ix",plist_id,_size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -4213,12 +4022,8 @@ H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
     FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
     H5TRACE2("e","iz",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -4259,12 +4064,8 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
     FUNC_ENTER_API(H5Pget_sieve_buf_size, FAIL);
     H5TRACE2("e","ix",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -4311,13 +4112,11 @@ H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
     H5TRACE2("e","iz",plist_id,vector_size);
 
     /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (vector_size<1)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "vector size too small");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -4352,12 +4151,8 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
     FUNC_ENTER_API(H5Pget_hyper_vector_size, FAIL);
     H5TRACE2("e","ix",plist_id,vector_size);
 
-    /* Check arguments */
-    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Return values */
@@ -4403,12 +4198,8 @@ H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
     FUNC_ENTER_API(H5Pset_small_data_block_size, FAIL);
     H5TRACE2("e","ih",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -4444,12 +4235,8 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
     FUNC_ENTER_API(H5Pget_small_data_block_size, FAIL);
     H5TRACE2("e","ix",plist_id,size);
 
-    /* Check args */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-
     /* Get the plist structure */
-    if(NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -7027,9 +6814,6 @@ done:
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    What about returning a value indicating that the property class is further
-    up the class hierarchy?
-
     This function is special in that it is an internal library function, but
     accepts hid_t's as parameters.  Since it is used in basically the same way
     as the H5I functions, this should be OK.  Don't make more library functions
@@ -7102,6 +6886,53 @@ htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pisa_class() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_object_verify
+ PURPOSE
+    Internal routine to query whether a property list is a certain class and
+        retrieve the property list object associated with it.
+ USAGE
+    void *H5P_object_verify(plist_id, pclass_id)
+        hid_t plist_id;         IN: Property list to query
+        hid_t pclass_id;        IN: Property class to query
+ RETURNS
+    Success: valid pointer to a property list object
+    Failure: NULL
+ DESCRIPTION
+    This routine queries whether a property list is member of a certain class
+    and retrieves the property list object associated with it.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This function is special in that it is an internal library function, but
+    accepts hid_t's as parameters.  Since it is used in basically the same way
+    as the H5I functions, this should be OK.  Don't make more library functions
+    which accept hid_t's without thorough discussion. -QAK
+
+    This function is similar (in spirit) to H5I_object_verify()
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void *H5P_object_verify(hid_t plist_id, hid_t pclass_id)
+{
+    void *ret_value;                   /* return value */
+
+    FUNC_ENTER_NOAPI(H5P_object_verify, NULL);
+
+    /* Compare the property list's class against the other class */
+    if (H5P_isa_class(plist_id,pclass_id)!=TRUE)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, NULL, "property list is not a member of the class");
+
+    /* Get the plist structure */
+    if(NULL == (ret_value = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_object_verify() */
 
 
 /*--------------------------------------------------------------------------

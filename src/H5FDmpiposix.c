@@ -291,7 +291,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
     H5TRACE2("e","iMc",fapl_id,comm);
 
     /* Check arguments */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
 #ifdef LATER
 #warning "We need to verify that COMM contains sensible information."
@@ -340,7 +340,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL);
     H5TRACE2("e","ix",fapl_id,comm);
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIPOSIX!=H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -555,7 +555,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
 
     /* Obtain a pointer to mpiposix-specific file access properties */
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_DEFAULT==fapl_id || H5FD_MPIPOSIX!=H5P_get_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/

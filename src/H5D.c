@@ -399,9 +399,9 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI(H5D_crt_copy, FAIL);
 
     /* Verify property list ID */
-    if (TRUE!=H5P_isa_class(new_plist_id,H5P_DATASET_CREATE) || NULL == (new_plist = H5I_object(new_plist_id)))
+    if (NULL == (new_plist = H5P_object_verify(new_plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-    if (TRUE!=H5P_isa_class(old_plist_id,H5P_DATASET_CREATE) || NULL == (old_plist = H5I_object(old_plist_id)))
+    if (NULL == (old_plist = H5P_object_verify(old_plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the fill value, external file list, and data pipeline properties
@@ -476,7 +476,7 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5D_crt_close, FAIL);
 
     /* Check arguments */
-    if (TRUE!=H5P_isa_class(dcpl_id,H5P_DATASET_CREATE) || NULL == (plist = H5I_object(dcpl_id)))
+    if (NULL == (plist = H5P_object_verify(dcpl_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the fill value, external file list, and data pipeline properties
@@ -535,7 +535,7 @@ H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
     FUNC_ENTER_NOAPI(H5D_xfer_create, FAIL);
 
     /* Check arguments */
-    if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Get the driver information */
@@ -629,7 +629,7 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5D_xfer_close, FAIL);
 
     /* Check arguments */
-    if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
@@ -712,7 +712,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_DATASET_CREATE_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list");
 
     /* build and open the new dataset */
@@ -1243,7 +1243,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
@@ -1256,6 +1256,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Dwrite
  *
@@ -1333,7 +1334,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
@@ -1414,30 +1415,32 @@ H5D_t *
 H5D_new(hid_t dcpl_id)
 {
     H5P_genplist_t	*plist;    /* Property list created */
-    H5D_t	*ret_value = NULL;	/*return value			*/
+    H5D_t	*new_dset = NULL;  /* New dataset object */
+    H5D_t	*ret_value;	   /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_new, NULL);
 
-    /* check args */
-    /* Nothing to check */
-    
-    if (NULL==(ret_value = H5FL_ALLOC(H5D_t,1)))
+    if (NULL==(new_dset = H5FL_ALLOC(H5D_t,1)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-    if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
 
-    /* Check arguments. */
-    if (NULL == (plist = H5I_object(dcpl_id)))
+    /* Get the property list */
+    if (NULL == (plist = H5P_object_verify(dcpl_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
 
-    ret_value->dcpl_id = H5P_copy_plist(plist);
-    ret_value->ent.header = HADDR_UNDEF;
+    new_dset->dcpl_id = H5P_copy_plist(plist);
+    new_dset->ent.header = HADDR_UNDEF;
 
-    /* Success */
+    /* Set return value */
+    ret_value=new_dset;
 
 done:
+    if(ret_value==NULL) {
+        if(new_dset!=NULL)
+            H5FL_FREE(H5D_t,new_dset);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1520,10 +1523,9 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     assert (name && *name);
     assert (type);
     assert (space);
-    assert (TRUE==H5P_isa_class(dcpl_id,H5P_DATASET_CREATE));
 
     /* Get property list object */
-    if (NULL == (plist = H5I_object(dcpl_id)))
+    if (NULL == (plist = H5P_object_verify(dcpl_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &dcpl_pline) < 0)
@@ -2239,8 +2241,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(dataset && dataset->ent.file);
     assert(mem_type);
     assert(buf);
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Initialize these before any errors can occur */
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
@@ -2252,7 +2252,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object_verify(dxpl_id,H5I_GENPROP_LST)))
+    if (NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     if (!file_space) {
@@ -2653,8 +2653,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(dataset && dataset->ent.file);
     assert(mem_type);
     assert(buf);
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Initialize these before any errors can occur */
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
@@ -2666,7 +2664,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object_verify(dxpl_id,H5I_GENPROP_LST)))
+    if (NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
 #ifdef H5_HAVE_PARALLEL

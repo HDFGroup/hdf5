@@ -244,7 +244,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     FUNC_ENTER_API(H5Pget_fapl_family, FAIL);
     H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list"); 
     if (H5FD_FAMILY!=H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -936,7 +936,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
-        assert(H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+        assert(TRUE==H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }
@@ -1013,7 +1013,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
-        assert(H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+        assert(TRUE==H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }

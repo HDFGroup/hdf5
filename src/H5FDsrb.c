@@ -210,7 +210,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     FUNC_ENTER_API(H5Pset_fapl_srb, FAIL);
     /*NO TRACE*/
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /*connect to SRB server */
@@ -261,7 +261,7 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
     FUNC_ENTER_API(H5Pget_fapl_srb, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if(H5FD_SRB != H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -316,7 +316,7 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
 
-    if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if(H5P_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
         HDmemset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        

@@ -163,7 +163,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(mem_size);
     assert(buf);
     /* Make certain we have the correct type of property list */
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Make a local copy of size so we can modify it */
@@ -406,7 +405,6 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(mem_size);
     assert(buf);
     /* Make certain we have the correct type of property list */
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Make a local copy of _size so we can modify it */

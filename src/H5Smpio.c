@@ -779,7 +779,6 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     assert (buf);
     assert (IS_H5FD_MPIO(f));
     /* Make certain we have the correct type of property list */
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Get the preference for MPI derived types */
