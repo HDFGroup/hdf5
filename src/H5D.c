@@ -3380,15 +3380,15 @@ done:
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
-    H5T_vlen_alloc_info_t vl_alloc_info; /* VL allocation info */
+    H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
+    H5T_vlen_alloc_info_t *vl_alloc_info=&_vl_alloc_info;   /* VL allocation info */
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
     H5TRACE4("e","iiix",type_id,space_id,plist_id,buf);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
-            H5I_DATASPACE!=H5I_get_type(space_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) || H5I_DATASPACE!=H5I_get_type(space_id) ||
             buf==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
 
@@ -3404,7 +3404,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
 
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&vl_alloc_info);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,vl_alloc_info);
 
 done:
     FUNC_LEAVE_API(ret_value)

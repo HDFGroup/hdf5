@@ -2225,7 +2225,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *buf,
               void *bkg, hid_t dxpl_id)
 {
-    H5T_vlen_alloc_info_t vl_alloc_info;/* VL allocation information         */
+    H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
+    H5T_vlen_alloc_info_t *vl_alloc_info=&_vl_alloc_info;   /* VL allocation info */
     H5T_path_t	*tpath;			/* Type conversion path		     */
     hbool_t     noop_conv=FALSE;        /* Flag to indicate a noop conversion */
     hbool_t     write_to_file=FALSE;    /* Flag to indicate writing to file */
@@ -2451,7 +2452,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } /* end if */
 
                         /* Write sequence to destination location */
-                        if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,&vl_alloc_info,d,conv_buf, b, (size_t)seq_len, dst_base_size)<0)
+                        if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,vl_alloc_info,d,conv_buf, b, (size_t)seq_len, dst_base_size)<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                         if(!noop_conv) {
