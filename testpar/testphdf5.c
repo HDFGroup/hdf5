@@ -11,12 +11,11 @@ int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
 #ifdef POOMA_ARCH
-char *fileprefix = "pfs:/pfs/multi/tmp_1/your_own";
-int fileprefixlen = 29;
+char *fileprefix = "pfs:/pfs_grande/multi/tmp_1/";
 #else
 char *fileprefix = NULL;		/* file prefix, default as NULL */
-int fileprefixlen = 0;			/* file prefix length, default as 0 */
 #endif
+size_t fileprefixlen;			/* file prefix length */
 
 herr_t (*old_func)(void*);		/* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
@@ -24,6 +23,10 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
+char    *filenames[]={ "ParaEg1.h5f",
+		       "ParaEg2.h5f",
+		       "ParaEg3.h5f" };
+
 
 
 #ifdef USE_PAUSE
@@ -76,7 +79,7 @@ void pause_proc(MPI_Comm comm, int argc, char **argv)
  * Show command usage
  */
 void
-usage()
+usage(void)
 {
     printf("Usage: testphdf5 [-r] [-w] [-v] [-f <prefix>]\n");
     printf("\t-f <prefix>\tfilename prefix\n");
@@ -107,52 +110,46 @@ parse_options(int argc, char **argv){
 		case 'f':   if (--argc <= 0) {
 				nerrors++;
 				return(1);
-			    } else if (**(++argv) == '-') {
-				nerrors++;
-				return(1);
-			    } else if (**(argv) == '"') {
-				fileprefixlen = strlen(*(argv)+1)-1;
-				fileprefix = (char *)malloc(fileprefixlen+1);
-        			if (!fileprefix) {
-				    printf("%s\n","memory allocation failed");
-				    nerrors++;
-				    return(1);
-				}
-				fileprefix = strncpy(fileprefix,*(argv)+1,fileprefixlen);
-			    } else {
-				fileprefixlen = strlen(*(argv));
-				fileprefix = (char *)malloc(fileprefixlen+1);
-        			if (!fileprefix) {
-				    printf("%s\n","memory allocation failed");
-				    nerrors++;
-				    return(1);
-				}
-				fileprefix = strncpy(fileprefix,*(argv),fileprefixlen);
 			    }
-			    if (fileprefixlen < 5) {
+			    if (**(++argv) == '-') {
 				nerrors++;
 				return(1);
 			    }
+			    fileprefix = *argv;
 			    break;
-		default:    usage();
-			    nerrors++;
+		default:    nerrors++;
 			    return(1);
 	    }
 	}
+    } /*while*/
+
+    /* compose the filenames if file prefix is defined */
+    if (fileprefix != NULL) {
+	char *tmpptr;
+	int i;
+
+	fileprefixlen = strlen(fileprefix);
+	i = sizeof(filenames)/sizeof(filenames[0]);
+	while (i-- > 0){
+	    tmpptr = filenames[i];
+            filenames[i] = (char *)malloc (fileprefixlen + strlen(tmpptr) + 1);
+            if (!filenames[i]) {
+		printf("%s\n","memory allocation failed");
+		nerrors++;
+		return(1);
+	    }
+	    strcpy(filenames[i],fileprefix);
+	    strcat(filenames[i],tmpptr);
+	}
     }
+
     return(0);
 }
 
 
 main(int argc, char **argv)
 {
-    char    *filenames[]={ "ParaEg1.h5f",
-			   "ParaEg2.h5f",
-			   "ParaEg3.h5f" };
-
     int mpi_size, mpi_rank;				/* mpi variables */
-    int i;
-    char *tmpptr;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -177,23 +174,9 @@ main(int argc, char **argv)
     pause_proc(MPI_COMM_WORLD, argc, argv);
 #endif
 
-    if (parse_options(argc, argv) != 0)
+    if (parse_options(argc, argv) != 0){
+	usage();
 	goto finish;
-
-    if (fileprefix != NULL) {
-	for (i=0;i<3;i++) {
-	    tmpptr = filenames[i];
-            filenames[i] = (char *)malloc ( fileprefixlen + strlen(tmpptr) + 2);
-            if (!filenames[i]) {
-		printf("%s\n","memory allocation failed");
-		nerrors++;
-		goto finish;
-	    }
-	    filenames[i] = strcpy(filenames[i],fileprefix);
-	    if (fileprefix[fileprefixlen-1] != '/') filenames[i] = strcat(filenames[i],"/");
-	    filenames[i] = strcat(filenames[i],tmpptr);
-	    H5MM_xfree(tmpptr);
-	}
     }
 
     if (dowrite){
