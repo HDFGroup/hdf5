@@ -1,6 +1,5 @@
-
- 
-                       HDF5 Release 1.4.2 under construction
+HDF5 version 1.4.1-post2 currently under development
+================================================================================
 
 
 INTRODUCTION
@@ -51,6 +50,10 @@ Bug Fixes since HDF5-1.4.1 Release
       works correctly.
     * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
       data loss in certain situations.
+    * The allocation by alignment (H5Pset_alignment) feature code somehow
+      got dropped in some 1.3.x version. Re-implemented it with "new and
+      improved" algorithm.  It keeps track of "wasted" file-fragment in
+      the free-list too.
 
 
 Documentation
