@@ -2232,7 +2232,7 @@ H5Tget_offset(hid_t type_id)
     int	offset;
 
     FUNC_ENTER(H5Tget_offset, -1);
-    H5TRACE1("z","i",type_id);
+    H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (H5I_DATATYPE != H5I_get_type(type_id) ||
