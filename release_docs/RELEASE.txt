@@ -54,9 +54,9 @@ New Features
       writing.
     * Changed internal error handling macros to reduce code size of library by
       about 10%.
+    * Parallel HDF5 now works on HP-UX platforms.
 
 
-         
 Bug Fixes since HDF5-1.4.2 Release
 ==================================
     * Fixed a bug when reading chunked datasets where the edge of the dataset
@@ -167,8 +167,8 @@ Supported Configuration Features Summary
     IRIX64_6.5 64  y  y (2)     y    y         n    y          y     y
     IRIX64_6.5 32  y  y (2)     n    n         n    y          y     y
     HPUX10.20      y  n         y    n         n    y          y     y
-    HPUX11.00      y  n         y    n         n    y          y     y
-    HPUX11 SysV    y  n         y    n         n    y          y     y
+    HPUX11.00      y  y         y    n         n    y          y     y
+    HPUX11 SysV    y  y         y    n         n    y          y     y
     DECOSF         y  n         y    n         n    y          y     y
     T3E            y  y         y    y         n    n          y     y
     SV1            y  n         y    n         n    n          y     y
