@@ -41,7 +41,6 @@ int ReadHDF(BYTE** data ,
 	hsize_t pal_size;	/* size of the palette */
 	
 	hsize_t datasize;	/* size of the image */
-	hsize_t maxdims;	/* dummy */
 
 	int pal_exist = 0;	/* do we have a palette? */
 
@@ -76,7 +75,7 @@ int ReadHDF(BYTE** data ,
 	}
 
 	/* get the dimension size of the image */
-	if (H5Sget_simple_extent_dims(dspace , image_size , &maxdims) !=2 ) {
+	if (H5Sget_simple_extent_dims(dspace , image_size , NULL) !=2 ) {
 		fprintf(stderr , "Unable to get dimension info\n");
 		return -1;
 	}
