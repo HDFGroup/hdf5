@@ -326,6 +326,7 @@
 ./test/links.c
 ./test/mount.c
 ./test/mtime.c
+./test/ohdr.c
 ./test/overhead.c
 ./test/ragged.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
@@ -337,7 +338,6 @@
 ./test/th5s.c
 ./test/th5s.h5
 ./test/tmeta.c
-./test/tohdr.c
 ./test/trefer.c
 ./test/tselect.c
 ./test/unlink.c
