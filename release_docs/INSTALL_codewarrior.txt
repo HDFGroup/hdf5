@@ -5,20 +5,27 @@ with the Metrowerks Code Warrior Compiler
 
 
 The HDF5 library is supported under the Metrowerks Code Warrior version 8.0 compiler.
-
 The Code Warrior port of the HDF5 library has been tested only on the
 Windows NT platform.
+The following instructions assume we will be using the path D:\hdf5 for installing the library.
 
-These instructions assume a basic knowledge of the Code Warrior compiler.
+Pre conditions: 
+The zlib library is needed for building the hdf5 library. The path
+of the zlib library must be defined in Target/Access Paths, D:\zlib. 
+You will also need the szip libray in D:\szip.
+TO obtain these libraries please refer to the HDF web site.
 
-To install the HDF5 library:
-1. Open the project file hdf5.mcp (located in hdf5\proj\codewarrior\).
+1. Unpack the file all.zip located in d:\hdf5\windows to d:\. This file contains
+the Windows specific files of HDF5.
+
+To build the HDF5 library:
+1. Open the project file hdf5.mcp (located in d:\hdf5\proj\codewarrior\).
 2. To build the library:
 	Select the 'hdf5' target and build (menu Projects-> Make or F7 key).
 3. To build all the targets (HDF5 library, test, and tools):
 	Select the 'all' target and build.
 4. To run the tests in a command line window:
-	In the command line window, change directory to hdf5\test\. 
+	In the command line window, change directory to d:\hdf5\test\. 
 	Type 
 	    Hdf5test debug
 	or, to redirect the output to a file called myfile.txt,
@@ -27,9 +34,6 @@ To install the HDF5 library:
    the those compiled with the Microsoft Visual Studio compiler.
 5. Enjoy.
 
-NOTE: The zlib library is needed for building the hdf5 library. The path
-of the zlib library must be defined in Target/Access Paths, for example
-D:\zlib
 
 ---------------------------------------------------------------------------
 The HDF Group would like to thank Ron Liechty of Metrowerks technical 
