@@ -1444,7 +1444,361 @@ test_unlink_slashes(void)
 
 error:
     return -1;
-} /* end test_link_slashes() */
+} /* end test_unlink_slashes() */
+
+/*
+ * Helper routine for test_unlink_rightleaf()
+ */
+static int delete_node (hid_t pid, hid_t id)
+{
+    char name[256];     /* Name of object to close */
+
+    /* Get the name of the object to delete */
+    if(H5Iget_name(id, name, sizeof(name))<0) return (-1);
+
+    /* Close the object */
+    if(H5Gclose (id)<0) return(-1);
+
+    /* Unlink the object */
+    if(H5Gunlink (pid, name)<0) return(-1);
+
+    /* If this object is the right-most child, try opening the previous object */
+    if(HDstrcmp(name,"/Zone81")==0) {
+        hid_t gid;
+
+        if((gid = H5Gopen (pid, "/Zone80"))<0) return(-1);
+        if(H5Gclose(gid)<0) return(-1);
+    } /* end if */
+
+    /* Indicate success */
+    return(0);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_unlink_rightleaf
+ *
+ * Purpose:     Tests deleting objects in a way that triggers deletion of the
+ *              right child in the leaf of a non-leaf B-tree node
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, January 19, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_unlink_rightleaf(hid_t fid)
+{
+    hid_t rootid,       /* Group ID for root group */
+        *gids;          /* Array of IDs for groups created */
+    int n,              /* Local index variable */
+        ngroups = 150;  /* Number of groups to create */
+    char name[256];     /* Name of object to create */
+
+    TESTING("Deleting right-most child in non-leaf B-tree node");
+
+    /* Allocate space for the group IDs */
+    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
+    if(gids==NULL) TEST_ERROR;
+
+    if((rootid = H5Gopen (fid, "/"))<0) TEST_ERROR;
+
+    /* Create all the groups */
+    for (n = 0; n < ngroups; n++) {
+        sprintf(name, "Zone%d", n + 1);
+        if((gids[n] = H5Gcreate (rootid, name, 0))<0) TEST_ERROR;
+    } /* end for */
+
+    /* Unlink & re-create each group */
+    for (n = 0; n < ngroups; n++) {
+        if(delete_node (rootid, gids[n])<0) TEST_ERROR;
+        sprintf(name, "Zone%d", n + 1);
+        if((gids[n] = H5Gcreate (rootid, name, 0))<0) TEST_ERROR;
+    } /* end for */
+
+    /* Close all the groups */
+    for (n = 0; n < ngroups; n++)
+        if(H5Gclose(gids[n])<0) TEST_ERROR;
+
+    /* Free memory */
+    HDfree(gids);
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_unlink_rightleaf() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_unlink_rightnode
+ *
+ * Purpose:     Tests deleting objects in a way that triggers deletion of the
+ *              entire right child leaf of a non-leaf B-tree node
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, January 19, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_unlink_rightnode(hid_t fid)
+{
+    hid_t rootid,       /* Group ID for root group */
+        *gids;          /* Array of IDs for groups created */
+    int n,              /* Local index variable */
+        ngroups = 150;  /* Number of groups to create */
+    char name[256];     /* Name of object to create */
+
+    TESTING("Deleting right-most child in non-leaf B-tree node");
+
+    /* Allocate space for the group IDs */
+    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
+    if(gids==NULL) TEST_ERROR;
+
+    if((rootid = H5Gopen (fid, "/"))<0) TEST_ERROR;
+
+    /* Create all the groups */
+    for (n = 0; n < ngroups; n++) {
+        sprintf(name, "ZoneB%d", n + 1);
+        if((gids[n] = H5Gcreate (rootid, name, 0))<0) TEST_ERROR;
+    } /* end for */
+
+    /* Close all the groups */
+    for (n = 0; n < ngroups; n++)
+        if(H5Gclose(gids[n])<0) TEST_ERROR;
+
+    /* Unlink specific objects to trigger deletion of right leaf in non-leaf node */
+    if(H5Gunlink(fid,"/ZoneB77")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneB78")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneB79")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneB8")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneB80")<0) TEST_ERROR;
+
+    /* Free memory */
+    HDfree(gids);
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_unlink_rightnode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_unlink_middlenode
+ *
+ * Purpose:     Tests deleting objects in a way that triggers deletion of all
+ *              the leafs of a "middle" non-leaf B-tree node
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, January 19, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_unlink_middlenode(hid_t fid)
+{
+    hid_t rootid,       /* Group ID for root group */
+        *gids;          /* Array of IDs for groups created */
+    int n,              /* Local index variable */
+        ngroups = 250;  /* Number of groups to create */
+    char name[256];     /* Name of object to create */
+
+    TESTING("Deleting right-most child in non-leaf B-tree node");
+
+    /* Allocate space for the group IDs */
+    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
+    if(gids==NULL) TEST_ERROR;
+
+    if((rootid = H5Gopen (fid, "/"))<0) TEST_ERROR;
+
+    /* Create all the groups */
+    for (n = 0; n < ngroups; n++) {
+        sprintf(name, "ZoneC%d", n + 1);
+        if((gids[n] = H5Gcreate (rootid, name, 0))<0) TEST_ERROR;
+    } /* end for */
+
+    /* Close all the groups */
+    for (n = 0; n < ngroups; n++)
+        if(H5Gclose(gids[n])<0) TEST_ERROR;
+
+    /* Unlink specific objects to trigger deletion of all leafs in "interior" non-leaf node */
+    if(H5Gunlink(fid,"/ZoneC11")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC110")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC111")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC112")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC113")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC114")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC115")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC116")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC117")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC118")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC119")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC12")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC120")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC121")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC122")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC123")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC124")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC125")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC126")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC127")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC128")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC129")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC13")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC130")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC131")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC132")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC133")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC134")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC135")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC136")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC137")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC138")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC139")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC14")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC140")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC141")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC142")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC143")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC144")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC145")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC146")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC147")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC148")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC149")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC15")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC150")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC151")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC152")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC153")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC154")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC155")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC156")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC157")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC158")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC159")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC16")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC160")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC161")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC162")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC163")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC164")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC165")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC166")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC167")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC168")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC169")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC17")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC170")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC171")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC172")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC173")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC174")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC175")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC176")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC177")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC178")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC179")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC18")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC180")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC19")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC2")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC20")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC21")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC22")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC23")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC24")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC25")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC26")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC27")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC28")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC29")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC3")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC30")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC31")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC32")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC33")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC34")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC35")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC36")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC37")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC38")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC39")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC4")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC40")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC41")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC42")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC43")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC44")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC45")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC46")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC47")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC48")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC49")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC5")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC50")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC51")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC52")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC53")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC54")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC55")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC56")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC57")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC58")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC59")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC6")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC60")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC61")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC62")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC63")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC64")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC65")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC66")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC67")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC68")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC69")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC7")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC70")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC71")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC72")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC73")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC74")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC75")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC76")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC77")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC78")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC79")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC8")<0) TEST_ERROR;
+    if(H5Gunlink(fid,"/ZoneC80")<0) TEST_ERROR;
+
+    /* Free memory */
+    HDfree(gids);
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_unlink_middlenode() */
 
 
 /*-------------------------------------------------------------------------
@@ -1518,6 +1872,11 @@ main(void)
 
     nerrors += test_link_slashes();
     nerrors += test_unlink_slashes();
+ 
+    /* Test specific B-tree removal issues */
+    nerrors += test_unlink_rightleaf(file);
+    nerrors += test_unlink_rightnode(file);
+    nerrors += test_unlink_middlenode(file);
  
     /* Close */
     if (H5Fclose(file)<0) TEST_ERROR;
