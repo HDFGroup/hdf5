@@ -81,6 +81,11 @@ Library
       pieces internally.
     * Fixed a bug where reading or writing chunked data which needed datatype
       conversion could result in data values getting corrupted.
+    * Fixed a bug where appending a point selection to the current selection
+      would not actually append the point when there were no points defined
+      currently.
+    * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
+      fail.  Now adds that hyperslab as the first hyperlab in the selection.
 
 Configuration
 -------------
