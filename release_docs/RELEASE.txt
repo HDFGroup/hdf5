@@ -180,10 +180,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected error where dataset region references were written in an
+            incorrect way on Cray machines.  PVN & QAK - 2004/09/13
         - The H5Tget_native_type now determines the native type for integers 
-	  based on the precision. This is to avoid cases of wrongly converting 
-          an int to a short in machines that have a short of 8 bytes but with 
-	  32bit precision (e.g Cray SV1). PVN - 2004/09/07  
+	    based on the precision. This is to avoid cases of wrongly converting 
+            an int to a short in machines that have a short of 8 bytes but with 
+	    32bit precision (e.g Cray SV1). PVN - 2004/09/07  
         - Changed H5Dread() to not overwrite data in an application's buffer
             with garbage when accessing a chunked dataset with an undefined
             fill value and an unwritten chunk is uncountered.  QAK - 2004/08/25

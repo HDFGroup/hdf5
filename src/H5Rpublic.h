@@ -57,10 +57,8 @@ typedef haddr_t hobj_ref_t; /* Needs to be large enough to store largest haddr_t
    the Crays and other machines (the heap ID is always encoded as an int32 anyway)
 */
 /* Dataset Region reference structure for user's code */
-typedef struct {
-    unsigned char heapid[H5R_DSET_REG_REF_BUF_SIZE];    /* Buffer to store heap ID and index */
-  /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
-} hdset_reg_ref_t;
+typedef unsigned char hdset_reg_ref_t[H5R_DSET_REG_REF_BUF_SIZE];/* Buffer to store heap ID and index */
+/* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
 
 /* Publicly visible datastructures */
 

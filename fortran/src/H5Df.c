@@ -290,7 +290,7 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
       buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(n));
       if ( buf_c != NULL ) {
       for (i = 0; i < n; i++) {
-           HDmemcpy(buf_c[i].heapid, buf, H5R_DSET_REG_REF_BUF_SIZE);
+           HDmemcpy(&buf_c[i], buf, H5R_DSET_REG_REF_BUF_SIZE);
            buf = buf + REF_REG_BUF_LEN_F;
       }
       }  
@@ -496,7 +496,7 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
          ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
          if (ret >=0) {
             for (i = 0; i < n; i++) {
-               HDmemcpy(buf, buf_c[i].heapid, H5R_DSET_REG_REF_BUF_SIZE);
+               HDmemcpy(buf, &buf_c[i], H5R_DSET_REG_REF_BUF_SIZE);
                buf = buf + REF_REG_BUF_LEN_F;
             }  
          }
