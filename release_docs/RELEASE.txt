@@ -1,12 +1,12 @@
-HDF5 version 1.6.2 released on Thu Feb 12 14:18:13 CST 2004
+HDF5 version 1.6.2-post0 currently under development
 ================================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.6.1 and
-HDF5-1.6.2, and contains information on the platforms tested and
-known problems in HDF5-1.6.2. For more details check the HISTORY.txt
+This document describes the differences between HDF5-1.6.2 and
+HDF5-1.6.2-*, and contains information on the platforms tested and
+known problems in HDF5-1.6.2-*. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -26,7 +26,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.6.1
+- Bug Fixes since HDF5-1.6.2
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -38,33 +38,15 @@ New Features
 
     Configuration:
     --------------
-        - Default of $prefix is changed to $PWD/hdf5 so that multiple
-	  builds using --srcdir is possible in the same machine.
-	  AKC - 2003/12/1
 
     Library:
     --------
-        - Added H5Iget_ref, H5Iinc_ref and H5Idec_ref routines to the C
-          library and the FORTRAN wrapper.  See the reference manual for a
-          full description of these new routines.  QAK - 2003/12/11
 
     Parallel Library:
     -----------------
-	- The parallel tests in testpar/ now provides different levels of
-	  verbosity via the '-v' option.  The default is less verbose
-	  than before.  AKC - 2004/01/23
-        - Added parallel test, test_mpio_1wMr, which tests if the
-          underlaying parallel I/O system is conforming to the POSIX
-          write/read requirement. This version includes options of using
-          atomicity and file-sync.  AKC - 2003/11/27
 
     Tools:
     ------
-        - Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
-	  AKC - 2004/01/08
-	- Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
-	  respectively if library is built in parallel mode.  AKC - 2004/01/07
-        - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
 
     C++ API:
     --------
@@ -72,88 +54,21 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran compiler
-          version 8.1 Beta  
-          Use --disbale-shared --enable-static flags with configure when 
-          building HDF5 Fortran Library on MAC OSX.
-        - C and C++ Libraries are available for Linux64 RH8
-        - C, C++ and Fortran sequential Libraries, and C and Fortran parallel
-          Libraries are available for Altix (Linux ia64)
 
-Bug Fixes since HDF5-1.6.1 release
+Bug Fixes since HDF5-1.6.2 release
 ==================================
 
     Library
     -------
-        - Fixed problem with H5Tget_native_type() not handling opaque fields
-            correctly.  QAK - 2004/01/31
-        - Fixed several errors in B-tree deletion code which could cause a
-            B-tree (used with groups and chunked datasets) to become corrupt
-            with the right sequence of deleted objects.  QAK - 2004/01/19
-        - Fixed small internal memory leaks of fill-value information.
-            QAK - 2004/01/13
-        - Fixed bug that caused variable-length datatypes (strings or sequences)
-            used for datasets in files with objects that were unlinked to
-            fail to be read/written to a file.  QAK - 2004/01/13
-        - Detect situation where szip 'pixels per block' is larger than the
-            fastest changing dimension of a dataset's chunk size and disallow
-            this (due to limits in szip library).  QAK - 2003/12/31
-        - Fixed bug with flattened hyperslab selections that would generate
-            incorrect hyperslab information with certain high-dimensionality
-            combinations of start/stride/count/block information.
-            QAK - 2003/12/31
-        - Fixed bug with variable-length datatypes used in compound datatypes.
-            SLU - 2003/12/29
-        - Fixed bug in parallel I/O routines that would cause reads from
-            "short datasets" (datasets which were only partially written out)
-            to return invalid data.  QAK & AKC - 2003/12/19
-        - Fixed bug where scalar dataspaces for attributes were reporting as
-            simple dataspaces.  QAK - 2003/12/13
-        - Fixed problem with selection offsets of hyperslab selections in
-            chunked datasets causing the library to go into an infinite loop.
-            QAK - 2003/12/13
-        - Fixed H5Giterate to avoid re-using index parameter after iteration
-            callback has been called (allows iteration callback to modify the
-            index parameter itself).  QAK - 2003/12/06
-        - Fixed various floating-point conversion problems, including a
-            change which could corrupt data when converting from double->float.
-            QAK - 2003/11/24
-        - Changed "single process" metadata writing in library to collective
-            I/O by all processes, in order to guarantee correct data being
-            written with MPI-I/O.  QAK - 2003/11/20
-        - Fixed problems with fill values and variable-length types and also
-            I/O on VL values that were set to NULL.  QAK - 2003/11/08
-        - Fixed problems with MPI datatypes that caused ASCI Q machine to
-            hang.  QAK - 2003/10/28
-        - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,
-            since it had no benefit.  QAK - 2003/10/28
-        - Single hyperslab selections (which were set with only one call to
-            H5Sselect_hyperslab) that had dimensions that could be "flattened"
-            but were interspersed with dimensions that could not be flattened
-            were not correctly handled, causing core dumps.  QAK - 2003/10/25
-        - Avoid metadata cache from preempting current dataset object header
-            when looking up information about the named datatype that the
-            dataset uses.  QAK - 2003/10/20
 
     Configuration
     -------------
-        - Parallel I/O with the MPI-I/O driver will no longer work if the
-            filesystem is not POSIX compliant.  The "HDF5_MPI_1_METAWRITE"
-            environment variable has been removed.  QAK - 2004/01/30
 
     Performance
     -------------
-        - More optimizations to inner loops of datatype conversions for
-            integers and floats which give a 10-50% speedup.  QAK - 2003/11/07
-        - Hoisted invariant 'if/else's out of inner datatype conversion loop for
-            integer and floating-point values, giving about a 20% speedup.
-            QAK - 2003/10/20
 
     Tools
     -----
-	- Fixed h5redeploy which sometimes complain too many argument for the
-	  test command. (The complain did not hinder the h5redploy to proceed
-	  correctly.) AKC - 2003/11/03
 
     Documentation 
     ------------- 
