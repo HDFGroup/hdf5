@@ -295,6 +295,10 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
  *      Added H5F_mpio_Debug debug flags controlled by MPI_Info.
  *
  *      rky 980828 Init flag controlling redundant metadata writes to disk.
+ *
+ *      rky 19981207 Added barrier after MPI_File_set_size to prevent
+ *	race condition: subsequent writes were being truncated,
+ *	causing holes in file.
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
@@ -353,6 +357,12 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 	    MPI_File_close( &fh );
 	    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
 			  "MPI_File_set_size failed trying to truncate file" );
+	}
+	/* Don't let any proc return until all have truncated the file. */
+	mpierr = MPI_Barrier( access_parms->u.mpio.comm );
+	if (MPI_SUCCESS!=mpierr) {
+	    MPI_File_close( &fh );
+	    HRETURN_ERROR( H5E_IO, H5E_MPI, NULL, "MPI_Barrier failed" );
 	}
     }
 
