@@ -653,16 +653,16 @@ test_compound_2(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		st=-1, dt=-1;
+    hid_t		src_t=-1, dst_t=-1;
     hid_t       array_dt;
     int			i;
 
     TESTING("compound element reordering");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
 	s_ptr = ((struct st*)orig) + i;
 	s_ptr->a    = i*8+0;
@@ -678,27 +678,27 @@ test_compound_2(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
@@ -728,7 +728,7 @@ test_compound_2(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -770,16 +770,16 @@ test_compound_3(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		st=-1, dt=-1;
+    hid_t		src_t=-1, dst_t=-1;
     hid_t       array_dt;
     int			i;
 
     TESTING("compound subset conversions");
 
     /* Initialize */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
@@ -795,25 +795,25 @@ test_compound_3(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
@@ -842,7 +842,7 @@ test_compound_3(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -888,16 +888,16 @@ test_compound_4(void)
     const size_t	nelmts = NTESTELEM;
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		st=-1, dt=-1;
+    hid_t		src_t=-1, dst_t=-1;
     hid_t       array_dt;
     int			i;
 
     TESTING("compound element shrinking & reordering");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->a    = i*8+0;
@@ -913,27 +913,27 @@ test_compound_4(void)
 
     /* Build hdf5 datatypes */
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(src_t, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "c", HOFFSET(struct st, c), array_dt)<0 ||
+            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(src_t, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     array_dt=H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dst_t, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dst_t, "c", HOFFSET(struct dt, c), array_dt)<0 ||
+            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(dst_t, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
         goto error;
     H5Tclose(array_dt);
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0)
         goto error;
 
     /* Compare results */
@@ -964,7 +964,7 @@ test_compound_4(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -1118,15 +1118,15 @@ test_compound_6(void)
 
     const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
-    hid_t		st=-1, dt=-1;
+    hid_t		src_t=-1, dst_t=-1;
     int			i;
 
     TESTING("compound element growing");
 
     /* Sizes should be the same, but be careful just in case */
-    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg = malloc(nelmts * sizeof(struct dt));
-    orig = malloc(nelmts * sizeof(struct st));
+    buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = (unsigned char*)malloc(nelmts * sizeof(struct dt));
+    orig = (unsigned char*)malloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)orig) + i;
         s_ptr->b    = (i*8+1) & 0x7fff;
@@ -1135,22 +1135,22 @@ test_compound_6(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
+    if ((src_t=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(src_t, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(src_t, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
         H5_FAILED();
         goto error;
     }
     
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
+    if ((dst_t=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dst_t, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(dst_t, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
         H5_FAILED();
         goto error;
     }
     
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) {
+    if (H5Tconvert(src_t, dst_t, nelmts, buf, bkg, H5P_DEFAULT)<0) {
         H5_FAILED();
         goto error;
     }
@@ -1175,7 +1175,7 @@ test_compound_6(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) {
+    if (H5Tclose(src_t)<0 || H5Tclose(dst_t)<0) {
         H5_FAILED();
         goto error;
     }
@@ -2394,10 +2394,10 @@ test_derived_flt(void)
     int         *aligned=NULL;
     int		endian;			/*endianess	        */
     size_t      nelmts = NTESTELEM;
-    int         fails_this_test = 0;
+    unsigned int        fails_this_test = 0;
     const size_t	max_fails=40;	/*max number of failures*/
     char	str[256];		/*message string	*/
-    int         i, j, k;
+    unsigned int         i, j;
 
     TESTING("user-define and query functions of floating-point types");
 
@@ -2592,7 +2592,9 @@ test_derived_flt(void)
     if(buf) free(buf);
     if(saved_buf) free(saved_buf);
     if(aligned) free(aligned);
-    buf = saved_buf = aligned = NULL;
+    buf = NULL; 
+    saved_buf = NULL;
+    aligned = NULL;
 
     /*--------------------------------------------------------------------------
      *                   2nd floating-point type
@@ -3172,7 +3174,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(5, H5T_STR_NULLTERM);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
@@ -3195,7 +3197,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLPAD);
     dst_type = mkstr(5, H5T_STR_NULLPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
@@ -3218,7 +3220,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_SPACEPAD);
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
@@ -3244,7 +3246,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_NULLTERM);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
@@ -3277,7 +3279,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghi abcdefghi ", 20)) {
@@ -3332,7 +3334,7 @@ test_conv_str_1(void)
      */
     src_type = mkstr(10, H5T_STR_NULLPAD);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
-    buf = HDcalloc(2, 10);
+    buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
@@ -3422,7 +3424,7 @@ test_conv_str_2(void)
      */
     c_type = mkstr(8, H5T_STR_NULLPAD);
     f_type = mkstr(8, H5T_STR_SPACEPAD);
-    buf = HDcalloc(nelmts, 8);
+    buf = (char*)HDcalloc(nelmts, 8);
     for (i=0; i<nelmts; i++) {
 	nchars = HDrand() % 8;
 	for (j=0; j<nchars; j++)
@@ -3493,7 +3495,7 @@ test_conv_enum_1(void)
     }
 
     /* Initialize the buffer */
-    buf = HDmalloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
+    buf = (int*)HDmalloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
     for (i=0; i<(int)nelmts; i++)
         buf[i] = HDrand() % 26;
 
@@ -3582,7 +3584,7 @@ test_conv_enum_2(void)
         H5Tenum_insert(dsttype, mname[i], &i);
 
     /* Source data */
-    data = malloc(NTESTELEM*sizeof(int));
+    data = (int*)malloc(NTESTELEM*sizeof(int));
     for (i=0; i<NTESTELEM; i++) {
         ((char*)data)[i*3+2] = i % 8;
         ((char*)data)[i*3+0] = 0;
@@ -4123,8 +4125,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     src_sign = H5Tget_sign(src);
     dst_sign = H5Tget_sign(dst);
-    buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(sizeof(long_long));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
@@ -5178,8 +5180,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 
     /* Allocate buffers */
     endian = H5Tget_order(H5T_NATIVE_FLOAT);
-    buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    buf   = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(32); /*should be big enough for any type*/
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
@@ -5746,8 +5748,8 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    buf = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
+    saved = (unsigned char*)aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(MAX(sizeof(long double), sizeof(long_long)));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
@@ -6529,7 +6531,7 @@ static hbool_t
 overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
 {
     hbool_t     ret_value=FALSE;
-    hsize_t     expt, sig;
+    hsize_t     expt;
     size_t      mant_digits=0, expt_digits=0, bias=0;
     size_t      src_prec=0;             /*source type precision in bits*/
     H5T_norm_t  norm;
@@ -6915,7 +6917,7 @@ run_float_int_conv(const char *name)
 #ifndef H5_HW_FLOAT_TO_LLONG_NOT_WORKS
         nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
         nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
-#endif H5_HW_FLOAT_TO_LLONG_NOT_WORKS
+#endif /*H5_HW_FLOAT_TO_LLONG_NOT_WORKS*/
     } else {  /* Software conversion */
         nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
         nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
