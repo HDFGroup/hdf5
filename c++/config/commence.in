@@ -72,6 +72,10 @@ PROGS=
 TEST_PROGS=
 TEST_FLAGS=
 TEST_SCRIPTS=
+AUX_LIB=
+EXAMPLE_PROGS=
+SUBDIRS=
+LIBHDF5=
 
 ## The default is to build the library and/or programs.  We must build
 ## them sequentially.

@@ -47,7 +47,7 @@ TEST_OBJ=$(TEST_SRC:.f90=.lo)
 TEST_HDR=
 
 ## How to build the tests... They all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5) $(LIBH5TEST)
+$(TEST_PROGS): $(LIBHDF5)
 
 $(TEST_OBJ): $(TEST_HDR)
 
