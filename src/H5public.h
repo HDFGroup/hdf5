@@ -76,6 +76,7 @@ typedef signed long long	hssize_t;
 #   elif SIZEOF___INT64==8
 typedef unsigned __int64	hsize_t;
 typedef signed __int64		hssize_t;
+typedef signed int ssize_t;
 #   endif
 #else
 typedef size_t			hsize_t;
