@@ -50,6 +50,13 @@ H5_DLLVAR const H5Z_class_t H5Z_FLETCHER32[1];
 H5_DLLVAR H5Z_class_t H5Z_SZIP[1];
 #endif /* H5_HAVE_FILTER_SZIP */
 
+#ifdef H5_HAVE_FILTER_NBIT
+/*
+ * nbit filter
+ */
+H5_DLLVAR H5Z_class_t H5Z_NBIT[1];
+#endif /* H5_HAVE_FILTER_NBIT */
+
 /* Package-local function prototypes */
 H5_DLL void H5Z_update_class_vers(H5Z_class_t * old_vers, H5Z_class_t * curr_vers);
 

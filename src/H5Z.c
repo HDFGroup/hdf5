@@ -104,10 +104,14 @@ H5Z_init_interface (void)
     if (H5Z_register (H5Z_SZIP)<0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
 #endif /* H5_HAVE_FILTER_SZIP */
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Z_register (H5Z_NBIT)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
+#endif /* H5_HAVE_FILTER_NBIT */
 
-#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP)
+#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT)
 done:
-#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP) */
+#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT) */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
