@@ -813,7 +813,6 @@ print_datatype(hid_t type,unsigned in_group)
             /* Check C variable-length string first. Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_C_S1;\n");
-                H5Tclose(str_type);
                 goto done;
             } 
            
@@ -826,7 +825,6 @@ print_datatype(hid_t type,unsigned in_group)
 
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_C_S1;\n");
-                H5Tclose(str_type);
                 goto done;
             }
 
@@ -840,7 +838,6 @@ print_datatype(hid_t type,unsigned in_group)
             /* Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_FORTRAN_S1;\n");
-                H5Tclose(str_type);
                 goto done;
             }
 
@@ -853,15 +850,14 @@ print_datatype(hid_t type,unsigned in_group)
 
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_FORTRAN_S1;\n");
-                H5Tclose(str_type);
                 goto done;
             }
 
             printf("unknown_one_character_type;\n ");
             d_status = EXIT_FAILURE;
-            H5Tclose(str_type);
 
 done:
+            H5Tclose(str_type);
             H5Tclose(tmp_type);
 
             indent -= COL;

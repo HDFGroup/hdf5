@@ -70,6 +70,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
+        - The byte order of all 1-byte integer types was fixed as
+            little-endian even on a big-endian machine.  It's corrected.
+            SLU - 2005/02/07
         - Fix segmentation fault when calling H5Fflush with an attribute that
             hasn't had a value written to it open.  QAK - 2004/10/18
         - Back up supporting bitfield and time types in H5Tget_native_type.  
