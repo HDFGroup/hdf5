@@ -4,6 +4,7 @@ exit
 
 #! perl
 require 5.003;
+use strict;
 
 ### Copyright © 1998 NCSA.
 # Robb Matzke <matzke@llnl.gov>
@@ -21,8 +22,14 @@ require 5.003;
 
 # Without options this program only displays the current version and
 # doesn't modify any files or create backups.  The default is to print
-# the version number as a dotted triple like `1.0.24' but with the
-# `-v' option the version will be printed as `version 1.0 release 24'.
+# the version number like X.Y.Z-A where X is the major version number,
+# Y is the minor version number, Z is the release number, and A is
+# a short annotation string (the `-' is printed only if A is not empty).
+# If the `-v' switch is given the version will be printed like:
+#
+#    version X.Y release Z (A)
+#
+# The space and parentheses around A are only printed if A is not empty.
 #
 # The `-s VERSION' switch will set the version as specified.  If the
 # string contains a dotted triple then it will be used as the version
@@ -31,12 +38,19 @@ require 5.003;
 # number.  If any numbers are missing then zero is assumed.  This
 # allows versions to be specified like `-s "version 2.1 release 8"' or
 # `-s hdf5-2.1.8.tar.bz2'.  If the new version is less than the old
-# version then a warning message is generated on standard error.
+# version then a warning message is generated on standard error. The
+# annotation string, A, is set only if it appears immediately after the
+# third number, separated by a dash (e.g., `1.2.3-pre1') or in parentheses
+# (e.g., `version 1.2 release 3 (pre1)').
 #
-# The `-i [major|minor|release]' option increments the major, minor,
-# or release (the default) number.  If the minor number is incremented
-# then the release number is set to zero; if the major number is
-# incremented then the minor and release numbers are set to zero.
+# The `-i [major|minor|release|annot|last]' option increments the major
+# number, minor number, release number, or annotation string. The `last'
+# switch increments the annotation string if present, otherwise the
+# release number. If the release number is incremented then the annotation
+# string is cleared.  If the minor number is incremented then the release
+# number is set to zero and the annotation string is cleared; if the major
+# number is incremented then the minor and release numbers are set to zero
+# and the annotation string is cleared.
 #
 # If a file is specified then that file is used instead of
 # ./H5public.h or ./src/H5public.h.
@@ -44,7 +58,7 @@ require 5.003;
 # If the version number is changed (either `-s' or `-i' was used on
 # the command line) then the first line of the README file one
 # directory above the H5public.h file is also modified so it looks
-# something like: This is hdf5-1.2.3 currently under development.
+# something like: This is hdf5-1.2.3-pre1 currently under development.
 ##############################################################################
 
 sub getvers {
@@ -54,6 +68,7 @@ sub getvers {
   ($vers[0]) = /^\#\s*define\s+H5_VERS_MAJOR\s+(\d+)/m;
   ($vers[1]) = /^\#\s*define\s+H5_VERS_MINOR\s+(\d+)/m;
   ($vers[2]) = /^\#\s*define\s+H5_VERS_RELEASE\s+(\d+)/m;
+  ($vers[3]) = /^\#\s*define\s+H5_VERS_SUBRELEASE\s+\"([^\"]*)\"/m;
   return @vers;
 }
 
@@ -62,22 +77,23 @@ sub setvers {
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_MAJOR\s+)\d+/$1$vers[0]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_MINOR\s+)\d+/$1$vers[1]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_RELEASE\s+)\d+/$1$vers[2]/m;
+  $_[0] =~ s/^(\#\s*define\s+H5_VERS_SUBRELEASE\s+\")[^\"]*/$1$vers[3]/m;
 }
 
 sub usage {
   my ($prog) = $0 =~ /([^\/]+)$/;
   print STDERR <<EOF;
 Usage: $prog [OPTS] [FILE]
-    -i major|minor|release
+    -i major|minor|release|annot
         Increment specified version component and set following components
         to zero.
     -s VERSION
         Set the version as specified. The version number can be embedded in
-        some other string such as \"hdf5-1.1.0.tar.bz2\" or even \"this is
-        hdf5 version 1.1 release 0\" for convenience.
+        some other string such as \"hdf5-1.1.0-pre1.tar.bz2\" or even
+        \"this is hdf5 version 1.1 release 0 (pre1)\" for convenience.
     -v
         Instead of displaying only a dotted triple version number a line such
-        as \"version 1.1 release 0\" will be printed.
+        as \"version 1.1 release 0 (pre1)\" will be printed.
     FILE
         The name of the file that contains version information.  This is
         seldom necessary since files H5public.h, src/H5public.h and
@@ -97,10 +113,10 @@ while ($_ = shift) {
   };
 
   $_ eq "-i" && do {
-    if (@ARGV && $ARGV[1]=~/^(major|minor|release)$/) {
+    if (@ARGV && $ARGV[0]=~/^(major|minor|release|annot)$/) {
       $inc = shift;
     } else {
-      $inc = "release";
+      $inc = "last";
     }
     next;
   };
@@ -124,8 +140,9 @@ unless ($file) {
     ($file=$_,last) if -f $_;
   }
 }
+die "unable to find source files\n" unless defined $file;
 die "unable to read file: $file\n" unless -r $file;
-$README = $file;
+my $README = $file;
 $README =~ s/[^\/]*$/..\/README/;
 die "unable to read file: $README\n" unless -r $file;
 
@@ -136,47 +153,58 @@ close FILE;
 my (@curver) = getvers $contents;
 
 # Determine the new version number.
+my @newver; #new version
 if ($set) {
-  if ($set =~ /(\d+)\.(\d+)\.(\d+)/) {
-    @newver = ($1, $2, $3);
-  } elsif ($set =~ /(\d+)\D+(\d+)\D+(\d+)\D*$/) {
-    @newver = ($1, $2, $3);
+  if ($set =~ /(\d+)\.(\d+)\.(\d+)(-([a-zA-Z]\w*))?/) {
+    @newver = ($1, $2, $3, $5);
+  } elsif ($set =~ /(\d+)\D+(\d+)\D+(\d+)(\s*\(([a-zA-Z]\w*)\))?\D*$/) {
+    @newver = ($1, $2, $3, $5);
   } elsif ($set =~ /(\d+)\D+(\d+)\D*$/) {
-    @newver = ($1, $2, 0);
+    @newver = ($1, $2, 0, "");
   } elsif ($set =~ /(\d+)\D*$/) {
-    @newver = ($1, 0, 0);
+    @newver = ($1, 0, 0, "");
   } else {
     die "illegal version number specified: $set\n";
   }
-} elsif ($inc && $inc eq "major") {
-  $newver[0] = $curver[0]+1;
-  @newver[1,2] = (0,0);
-} elsif ($inc && $inc eq "minor") {
-  $newver[0] = $curver[0];
-  $newver[1] = $curver[1]+1;
-  $newver[2] = 0;
-} elsif ($inc && $inc eq "release") {
-  @newver[0,1] = @curver[0,1];
-  $newver[2] = $curver[2]+1;
 } elsif ($inc) {
-  die "unknown increment field: $inc\n";
+  $inc = $curver[3] eq "" ? 'release' : 'annot' if $inc eq 'last';
+  if ($inc eq "major") {
+    $newver[0] = $curver[0]+1;
+    @newver[1,2,3] = (0,0,"");
+  } elsif ($inc eq "minor") {
+    $newver[0] = $curver[0];
+    $newver[1] = $curver[1]+1;
+    @newver[2,3] = (0,"");
+  } elsif ($inc eq "release") {
+    @newver[0,1] = @curver[0,1];
+    $newver[2] = $curver[2]+1;
+    $newver[3] = "";
+  } elsif ($inc eq "annot") {
+    @newver[0,1,2] = @curver[0,1,2];
+    $newver[3] = $curver[3];
+    $newver[3] =~ s/(\d+)/$1+1/e or
+      die "Annotation \"".$newver[3]."\" cannot be incremented.\n";
+  } else {
+    die "unknown increment field: $inc\n";
+  }
 } else {
   # Nothing to do but print result
   $README = "";
   @newver = @curver;
 }
 
-# Print a warning if the version got smaller.
+# Print a warning if the version got smaller (don't check annot field)
 if ($newver[0]*1000000 + $newver[1]*1000 + $newver[2] <
     $curver[0]*1000000 + $curver[1]*1000 + $curver[2]) {
   printf STDERR "Warning: version decreased from %d.%d.%d to %d.%d.%d\n",
-    @curver, @newver;
+    @curver[0,1,2], @newver[0,1,2];
 }
 
 # Update the version number if it changed.
 if ($newver[0]!=$curver[0] ||
     $newver[1]!=$curver[1] ||
-    $newver[2]!=$curver[2]) {
+    $newver[2]!=$curver[2] ||
+    $newver[3]ne$curver[3]) {
   setvers $contents, @newver or die "unable to set version\n";
   rename $file, "$file~" or die "unable to save backup file\n";
   open FILE, ">$file" or die "unable to open $file but backup saved!\n";
@@ -187,10 +215,12 @@ if ($newver[0]!=$curver[0] ||
 # Update the README file
 if ($README) {
   open FILE, $README or die "$README: $!\n";
-  @contents = <FILE>;
+  my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("This is hdf5-%d.%d.%d currently under development\n",
-			 @newver);
+  $contents[0] = sprintf("This is hdf5-%d.%d.%d%s %s",
+			 @newver[0,1,2],
+			 $newver[3] eq "" ? "" : "-".$newver[3],
+			 "currently under development\n");
   open FILE, ">$README" or die "$README: $!\n";
   print FILE @contents;
   close FILE;
@@ -198,9 +228,18 @@ if ($README) {
 
 # Print the new version number
 if ($verbose) {
-  printf "version %d.%d release %d\n", @newver;
+  printf("version %d.%d release %d%s\n", @newver[0,1,2],
+	 $newver[3] eq "" ? "" : " (".$newver[3].")");
 } else {
-  printf "%d.%d.%d\n", @newver;
+  printf("%d.%d.%d%s\n", @newver[0,1,2],
+	 $newver[3] eq "" ? "" : "-".$newver[3]);
 }
 
 exit 0;
+
+# Because the first line of this file looks like a Bourne shell script, we
+# must tell XEmacs explicitly that this is really a perl script.
+#
+# Local Variables:
+# mode:perl
+# End:
