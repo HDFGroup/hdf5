@@ -20,9 +20,9 @@
 *
 *************************************************************/
 
+#include "hdf5.h"
 #include "testhdf5.h"
 
-#include "H5private.h"
 #include "H5Bprivate.h"
 #include "H5Pprivate.h"
 
