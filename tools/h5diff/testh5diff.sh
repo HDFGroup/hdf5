@@ -103,9 +103,6 @@ TOOLTEST h5diff_02.txt -x h5diff_test1.h5 h5diff_test2.h5
 # test 0.3.1: Check for -h option
 TOOLTEST h5diff_031.txt -h h5diff_test1.h5 h5diff_test2.h5
 
-# test 0.3.2: Check for -l option
-TOOLTEST h5diff_032.txt -l h5diff_test1.h5 h5diff_test2.h5
-
 # test 0.3.3: Check for -r option
 TOOLTEST h5diff_033.txt -r h5diff_test1.h5 h5diff_test2.h5
 

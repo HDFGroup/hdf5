@@ -28,7 +28,6 @@
 
 typedef struct options_t
 {
- int    l_; /* list */
  int    r_; /* report only what objects differ */
  int    d_; /* delta difference */
  double d_delta; /* delta value */
@@ -75,16 +74,7 @@ int check_f_input( const char* );
 int get_index( const char *obj, int nobjects, info_t *info );
 int compare_object( char *obj1, char *obj2 );
 void usage(void);
-void leave();
-
-
-
-/* diff tst*/
-int do_test_files(void);
-int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name,
-                   hid_t type_id, void *data );
-
-
+void leave(void);
 
 
 /*-------------------------------------------------------------------------
@@ -110,7 +100,6 @@ void usage(void)
  printf("file2_name        File name of the second HDF5 file\n");
  printf("[OPTIONS] are:\n");
  printf("[-h ]             Print out this information\n");
- printf("[-l ]             List contents of file\n");
  printf("[-r ]             Print only what objects differ\n");
  printf("[-n count]        Print difference up to count number for each variable\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
@@ -126,7 +115,7 @@ void usage(void)
  *
  *-------------------------------------------------------------------------
  */
-void leave()
+void leave(void)
 {
  exit(EXIT_SUCCESS);
  printf("\n");
@@ -213,9 +202,6 @@ int main(int argc, const char *argv[])
     case 'h': 
      usage();
      leave();
-    case 'l': 
-     options.l_ = 1;
-     break;
     case 'r': 
      options.r_ = 1;
      break;
@@ -353,15 +339,6 @@ int main(int argc, const char *argv[])
 
  H5get_object_info( file1_id, info1 );
  H5get_object_info( file2_id, info2 );
-
- if ( options.l_ )
- {
-  list ( file1_name, nobjects1, info1 );
-  list ( file2_name, nobjects2, info2 );
-  printf("\n");
- }
-  
-
 
 /*-------------------------------------------------------------------------
  * object name was supplied

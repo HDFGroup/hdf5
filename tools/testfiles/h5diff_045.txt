@@ -11,7 +11,6 @@ file1_name        File name of the first HDF5 file
 file2_name        File name of the second HDF5 file
 [OPTIONS] are:
 [-h ]             Print out this information
-[-l ]             List contents of file
 [-r ]             Print only what objects differ
 [-n count]        Print difference up to count number for each variable
 [-d delta]        Print difference when it is greater than limit delta
