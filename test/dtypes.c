@@ -875,6 +875,101 @@ test_compound_5(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_compound_6
+ *
+ * Purpose:	Tests compound conversions when the destination has the same
+ *		fields as the source but one or more of the fields are
+ *		larger.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 13, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_6(void)
+{
+    
+    struct st {
+        short b;
+        short d;
+    } *s_ptr;
+    struct dt {
+        long b;
+        long d;
+    } *d_ptr;
+
+    const int		nelmts = NTESTELEM;
+    unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
+    hid_t		st=-1, dt=-1;
+    int			i;
+
+    TESTING("compound element growing");
+
+    /* Sizes should be the same, but be careful just in case */
+    buf = malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
+    bkg = malloc(nelmts * sizeof(struct dt));
+    orig = malloc(nelmts * sizeof(struct st));
+    for (i=0; i<nelmts; i++) {
+        s_ptr = ((struct st*)orig) + i;
+        s_ptr->b    = (i*8+1) & 0x7fff;
+        s_ptr->d    = (i*8+6) & 0x7fff;
+    }
+    memcpy(buf, orig, nelmts*sizeof(struct st));
+
+    /* Build hdf5 datatypes */
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0)
+        goto error;
+    
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0)
+        goto error;
+    
+    /* Perform the conversion */
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+        goto error;
+
+    /* Compare results */
+    for (i=0; i<nelmts; i++) {
+	s_ptr = ((struct st*)orig) + i;
+	d_ptr = ((struct dt*)buf)  + i;
+	if (s_ptr->b    != d_ptr->b    ||
+	    s_ptr->d    != d_ptr->d) {
+	    FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={b=%d, d=%d\n",
+           (int)s_ptr->b, (int)s_ptr->d);
+	    printf("    dst={b=%ld, d=%ld\n",
+           d_ptr->b, d_ptr->d);
+	    goto error;
+	}
+    }
+    
+    /* Release resources */
+    free(buf);
+    free(bkg);
+    free(orig);
+    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+
+    PASSED();
+    reset_hdf5();
+    return 0;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_transient
  *
  * Purpose:	Tests transient data types.
@@ -3692,6 +3787,7 @@ main(void)
     nerrors += test_compound_3();
     nerrors += test_compound_4();
     nerrors += test_compound_5();
+    nerrors += test_compound_6();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_bitfield();
