@@ -169,8 +169,10 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         <p>
         Currently only simple dataspaces are allowed for attribute dataspaces.
         <p>
-        The <code>create_plist_id</code> property list is currently unused;
-        it will be used in the future for optional attribute properties.  
+        The attribute creation property list, <code>create_plist</code>, 
+        is currently unused;
+        it may be used in the future for optional attribute properties.  
+        At this time, <code>H5P_DEFAULT</code> is the only accepted value.
         <p>
         The attribute identifier returned from this function must be released 
         with <code>H5Aclose</code> or resource leaks will develop.  
@@ -185,7 +187,8 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>IN: Identifier of dataspace for attribute.
         <dt><em>hid_t</em> <code>create_plist</code>
-            <dd>IN: Identifier of creation property list (currently not used).
+            <dd>IN: Identifier of creation property list. (Currently unused;
+                    the only accepted value is <code>H5P_DEFAULT</code>.)
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns an attribute identifier if successful;
@@ -624,9 +627,10 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
     <dd>Closes the specified attribute.
 <dt><strong>Description:</strong>
     <dd><code>H5Aclose</code> terminates access to the attribute 
-        specified by its identifier, <code>attr_id</code>. 
-        Further use of the attribute identifier will result in 
-        undefined behavior. 
+        specified by <code>attr_id</code> by releasing the identifier.
+        <p>
+        Further use of a released attribute identifier is illegal; 
+        a function using such an identifier will fail.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>attr_id</code>
