@@ -89,6 +89,8 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+static herr_t h5_errors(hid_t err_stack, void *client_data);
+
 
 /*-------------------------------------------------------------------------
  * Function:	h5_errors
@@ -106,11 +108,11 @@ static const char *multi_letters = "msbrglo";
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-h5_errors(void UNUSED *client_data)
+static herr_t
+h5_errors(hid_t err_stack, void UNUSED *client_data)
 {
     H5_FAILED();
-    H5Eprint (H5E_DEFAULT, stdout);
+    H5Eprint (err_stack, stdout);
     return 0;
 }
 
