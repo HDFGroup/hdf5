@@ -1245,7 +1245,7 @@ H5O_count (H5G_entry_t *ent, hid_t type_id, hid_t dxpl_id)
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     int	ret_value;                      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_count_real, FAIL);
+    FUNC_ENTER_NOAPI(H5O_count, FAIL);
 
     /* Check args */
     assert (ent);

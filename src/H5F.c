@@ -1074,7 +1074,7 @@ H5F_get_objects(H5F_t *f, unsigned types, int max_index, hid_t *obj_id_list)
     H5F_olist_t olist;          /* Structure to hold search results */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_object);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_objects);
 
     /* Set up search information */
     olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);

@@ -81,7 +81,7 @@ H5Tget_nmembers(hid_t type_id)
     H5T_t	*dt = NULL;
     int	ret_value;
 
-    FUNC_ENTER_API(H5Tget_num_members, FAIL);
+    FUNC_ENTER_API(H5Tget_nmembers, FAIL);
     H5TRACE1("Is","i",type_id);
 
     /* Check args */

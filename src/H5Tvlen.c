@@ -642,7 +642,7 @@ H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
 {
     char *t=NULL;                   /* Pointer to temporary buffer allocated */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_write)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_setnull)
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     HDmemcpy(_vl,&t,sizeof(char *));

@@ -1383,7 +1383,7 @@ H5Adelete(hid_t loc_id, const char *name)
     int        idx=0, found=-1;
     herr_t	ret_value;
 
-    FUNC_ENTER_API(H5Aopen_name, FAIL);
+    FUNC_ENTER_API(H5Adelete, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */

@@ -85,7 +85,7 @@ H5F_contig_create(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout)
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_contig_create, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_create, FAIL);
 
     /* check args */
     assert(f);
@@ -334,7 +334,7 @@ H5F_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_contig_delete, FAIL);
+    FUNC_ENTER_NOAPI(H5F_contig_delete, FAIL);
 
     /* check args */
     assert(f);

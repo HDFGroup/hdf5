@@ -5945,7 +5945,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_ulong_llong, FAIL);
 
     H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX);
 
@@ -6643,7 +6643,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
     H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
 

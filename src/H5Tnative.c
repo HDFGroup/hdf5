@@ -688,7 +688,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     } match=H5T_NATIVE_FLOAT_MATCH_UNKNOWN;
     H5T_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
+    FUNC_ENTER_NOAPI(H5T_get_native_float, NULL);
 
     assert(size>0);
     

@@ -4291,7 +4291,7 @@ H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
 {
     void * ret_value;            /* return value */
 
-    FUNC_ENTER_NOAPI(H5P_peek_voidp_t, NULL);
+    FUNC_ENTER_NOAPI(H5P_peek_voidp, NULL);
 
     assert(plist);
     assert(name);

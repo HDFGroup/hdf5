@@ -439,7 +439,7 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
     unsigned	acc, mask;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_find);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_inc);
 
     assert(buf);
     start %= 8;
