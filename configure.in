@@ -976,8 +976,9 @@ case "$withval" in
       if test `uname` != "FreeBSD"; then
          AC_CHECK_LIB(pthread, pthread_create,,unset PTHREAD)
       else
-         CFLAGS="$CFLAGS -D_THREAD_SAFE"
+         CFLAGS="$CFLAGS -pthread -D_THREAD_SAFE"
          LDFLAGS="$LDFLAGS -pthread"
+         LIBS="$LIBS -lcipher"
       fi
       ;;
    no)
