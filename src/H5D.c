@@ -2184,12 +2184,12 @@ H5D_close(H5D_t *dataset)
     free_failed = (H5T_close(dataset->type) < 0 ||
 			H5I_dec_ref(dataset->dcpl_id) < 0);
 
-    /*Update header message of layout for compact dataset.*/
+    /* Update header message of layout for compact dataset. */
     if(dataset->layout.type==H5D_COMPACT && dataset->layout.dirty) {
         if(H5O_modify(&(dataset->ent), H5O_LAYOUT, 0, 0, &(dataset->layout))<0)
             HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
         dataset->layout.dirty = FALSE;
-    }        
+    } /* end if */
 
     /* Close the dataset object */
     H5O_close(&(dataset->ent));
@@ -2201,6 +2201,9 @@ H5D_close(H5D_t *dataset)
      * above).
      */
     dataset->ent.file = NULL;
+    /* Free the buffer for the raw data for compact datasets */
+    if(dataset->layout.type==H5D_COMPACT)
+        dataset->layout.buf=H5MM_xfree(dataset->layout.buf);
     H5FL_FREE(H5D_t,dataset);
 
     if (free_failed)

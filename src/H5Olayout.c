@@ -19,6 +19,7 @@ static void *H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
+static herr_t H5O_layout_reset (void *_mesg);
 static herr_t H5O_layout_free (void *_mesg);
 static herr_t H5O_layout_debug(H5F_t *f, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
@@ -32,7 +33,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_encode,      	/*encode message                */
     H5O_layout_copy,        	/*copy the native value         */
     H5O_layout_size,        	/*size of message on disk       */
-    NULL,                   	/*reset method                  */
+    H5O_layout_reset,           /*reset method                  */
     H5O_layout_free,        	/*free the struct         */
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
@@ -255,6 +256,16 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     /* copy */
     *dest = *mesg;
 
+    /* Deep copy the buffer for compact datasets also */
+    if(mesg->type==H5D_COMPACT) {
+        /* Allocate memory for the raw data */
+        if (NULL==(dest->buf=H5MM_malloc(dest->size)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
+
+        /* Copy over the raw data */
+        HDmemcpy(dest->buf,mesg->buf,dest->size);
+    } /* end if */
+
     /* Set return value */
     ret_value=dest;
 
@@ -350,6 +361,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_layout_reset
+ *
+ * Purpose:	Frees resources within a data type message, but doesn't free
+ *		the message itself.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September 13, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_layout_reset (void *_mesg)
+{
+    H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_layout_reset, FAIL);
+
+    if(mesg) {
+        /* Free the compact storage buffer */
+        if(mesg->type==H5D_COMPACT)
+            mesg->buf=H5MM_xfree(mesg->buf);
+
+        /* Reset the message */
+        HDmemset(mesg, 0, sizeof(H5O_layout_t));
+    } /* end if */
+
+done:
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_layout_free
  *
  * Purpose:	Free's the message
@@ -364,13 +412,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_free (void *mesg)
+H5O_layout_free (void *_mesg)
 {
+    H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_free, FAIL);
 
     assert (mesg);
+
+    /* Free the compact storage buffer */
+    if(mesg->type==H5D_COMPACT)
+        mesg->buf=H5MM_xfree(mesg->buf);
 
     H5FL_FREE(H5O_layout_t,mesg);
 
