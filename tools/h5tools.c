@@ -1940,11 +1940,11 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hid_t base_type;		/*the base type of the VL data		*/
     hid_t xfer_pid;		/*dataset transfer property list id	*/
     hid_t f_space;		/*file data space			*/
-    hsize_t dims[H5S_MAX_RANK];	/*size of the dimensions		*/
+    hsize_t dims[H5S_MAX_RANK]; /*size of the dimensions		*/
     int ndims;
     hid_t mem_space;
     const char *bad_type;
-    herr_t ret;
+    herr_t ret = FAIL;
     hssize_t start = 0;
     hsize_t count = 1;
     unsigned int i;
@@ -1968,8 +1968,9 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	goto free_xfer;
     }
 
+    memset(dims, 0, sizeof(dims));
     ndims = H5Sget_simple_extent_dims(f_space, dims, NULL);
-    ctx.size_last_dim = dims[ctx.ndims - 1];
+    ctx.size_last_dim = dims[0];
 
     /* Assume entire data space to be printed */
     for (i = 0; i < (hsize_t)ctx.ndims; i++)
@@ -2032,10 +2033,9 @@ recheck:
     mem_space = H5Screate_simple(0, NULL, NULL);
 
     for (i = 0; i < dims[0]; i++) {
-        unsigned char *buffer;
+        unsigned char *buffer = NULL;
         hsize_t mem_needed = 0;
-	herr_t ret;
-	hvl_t *vldata;
+	hvl_t *vldata = NULL;
         h5dump_context_t tmp;
 
 	if (ndims > 0) {
@@ -2080,10 +2080,15 @@ recheck:
 			   vldata->len, base_type, (void *)vldata->p);
 	ctx = tmp;
 	fputs("\n", stream);
-	free(buffer);
 
-	if (ndims == 0)
+	if (ndims == 0) {
+	    H5Dvlen_reclaim(type, f_space, xfer_pid, vldata);
+	    free(buffer);
 	    break;
+	}
+
+	free(vldata->p);
+	free(buffer);
     }
 
 free_mem:
