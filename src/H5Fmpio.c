@@ -72,6 +72,26 @@ static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
 #define H5F_MPIO_DEV    0xfffe  /*pseudo dev for MPI-IO until we fix things */
 				/* Make sure this differs from H5F_CORE_DEV */
 
+#ifdef H5Fmpio_DEBUG
+/* Flags to control debug actions in H5Fmpio.
+ * Meant to be indexed by characters.
+ *
+ * 'c' show result of MPI_Get_count after read
+ * 'r' show read offset and size
+ * 't' trace function entry and exit
+ * 'w' show write offset and size
+ */
+static int H5F_mpio_Debug[256] =
+        { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+#endif
+
 static hbool_t H5F_mpio_access(const char *name,
 			       const H5F_access_t *access_parms, int mode,
 			       H5F_search_t *key/*out*/);
@@ -164,8 +184,9 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
     int			   mpi_mode;
 
     FUNC_ENTER(H5F_mpio_access, FAIL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_access name=%s mode=0x%x\n", name, mode );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_access name=%s mode=0x%x\n", name, mode );
 #endif
     assert(access_parms->driver == H5F_LOW_MPIO);
 
@@ -210,14 +231,15 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
         key->ino = mpio_inode_num++;
     }
 
-#ifdef H5F_MPIO_DEBUG
-    if (key && (ret_val==TRUE))
-    	fprintf(stdout,
-	    "Leaving H5F_mpio_access ret_val=%d key->dev=0x%x key->ino=%d\n",
-	    ret_val, key->dev, key->ino );
-    else
-    	fprintf(stdout,
-	    "Leaving H5F_mpio_access ret_val=%d\n", ret_val );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t']) {
+        if (key && (ret_val==TRUE))
+    	    fprintf(stdout,
+	      "Leaving H5F_mpio_access ret_val=%d key->dev=0x%x key->ino=%d\n",
+	      ret_val, key->dev, key->ino );
+        else
+    	    fprintf(stdout, "Leaving H5F_mpio_access ret_val=%d\n", ret_val );
+    }
 #endif
 
     FUNC_LEAVE(ret_val);
@@ -247,6 +269,9 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
  *	Added the ACCESS_PARMS argument.  Moved some error checking here from
  *	elsewhere.
  *
+ *      rky, 11 Jun 1998
+ *      Added H5F_mpio_Debug debug flags controlled by MPI_Info.
+ *
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
@@ -261,8 +286,9 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     MPI_Offset              size;
 
     FUNC_ENTER(H5F_mpio_open, NULL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_open name=%s flags=0x%x\n", name, flags );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_open name=%s flags=0x%x\n", name, flags );
 #endif
 
     /* convert HDF5 flags to MPI-IO flags */
@@ -270,6 +296,20 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     mpi_amode  = (flags&H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
     if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
+
+#ifdef H5Fmpio_DEBUG
+    /* Check for debug commands in the info parameter */
+    {   char debug_str[128];
+        int infoerr, str_len, flag, i;
+        if (access_parms->u.mpio.info) {
+            infoerr = MPI_Info_get( access_parms->u.mpio.info,
+                                    H5F_MPIO_DEBUG_KEY, 127, debug_str, &flag );
+            fprintf(stdout, "H5Fmpio debug flags=%s\n", debug_str );
+            for (i=0; i<str_len; ++i)
+                H5F_mpio_Debug[(int)debug_str[i]] = 1;
+        }
+    }
+#endif
 
     mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*)name, mpi_amode, access_parms->u.mpio.info, &fh);
     if (mpierr != MPI_SUCCESS) {
@@ -312,14 +352,14 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
         key->ino = mpio_inode_num++;
     }
 
-#ifdef H5F_MPIO_DEBUG
-    if (key)
-    	fprintf(stdout,
-	    "Leaving H5F_mpio_open key->dev=0x%x key->ino=%d\n",
-	    key->dev, key->ino );
-    else
-    	fprintf(stdout,
-	    "Leaving H5F_mpio_open\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t']) {
+        if (key)
+    	    fprintf(stdout, "Leaving H5F_mpio_open key->dev=0x%x key->ino=%d\n",
+		    key->dev, key->ino );
+        else
+    	    fprintf(stdout, "Leaving H5F_mpio_open\n" );
+    }
 #endif
 
     FUNC_LEAVE(lf);
@@ -355,8 +395,9 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_close, FAIL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_close\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_close\n" );
 #endif
 
     mpierr = MPI_File_close( &(lf->u.mpio.f) );
@@ -367,8 +408,9 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 	HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, mpierrmsg );
     }
 
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Leaving H5F_mpio_close\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5F_mpio_close\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
 }
@@ -417,8 +459,9 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_read, FAIL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_read\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_read\n" );
 #endif
 
     /* numeric conversion of offset and size  */
@@ -432,6 +475,12 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 			"couldn't convert size to int" );
     }
 
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'r'])
+        fprintf(stdout, "in H5F_mpio_read  mpi_off=%lld  size_i=%d\n",
+                mpi_off, size_i );
+#endif
+
     /* Read the data.  */
     switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
@@ -441,7 +490,7 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	break;
 	
     case H5D_XFER_COLLECTIVE:
-#ifdef H5F_MPIO_DEBUG
+#ifdef H5Fmpio_DEBUG
 	printf("%s: using MPIO collective mode\n", FUNC);
 #endif
 	mpierr = MPI_File_read_at_all ( lf->u.mpio.f, mpi_off, (void*) buf,
@@ -458,10 +507,11 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 
     /* How many bytes were actually read? */
     mpierr = MPI_Get_count( &mpi_stat, MPI_BYTE, &bytes_read );
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout,
-	"In H5F_mpio_read after Get_count size_i=%d bytes_read=%d\n",
-	size_i, bytes_read );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'c'])
+    	fprintf(stdout,
+	    "In H5F_mpio_read after Get_count size_i=%d bytes_read=%d\n",
+	    size_i, bytes_read );
 #endif
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
@@ -482,16 +532,12 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 
     /* read zeroes past the end of the file */
     if ((n=(size_i-bytes_read)) > 0) {
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout,
-	"In H5F_mpio_read before HDmemset size_i=%d bytes_read=%d n=%d\n",
-	size_i, bytes_read, n );
-#endif
         HDmemset( buf+bytes_read, 0, (size_t)n );
     }
 
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Leaving H5F_mpio_read\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5F_mpio_read\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
 }
@@ -539,8 +585,9 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
 
     FUNC_ENTER(H5F_mpio_write, FAIL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_write\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_write\n" );
 #endif
 
     /* numeric conversion of offset and size  */
@@ -554,6 +601,12 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 			"couldn't convert size to int" );
     }
 
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'w'])
+        fprintf(stdout, "in H5F_mpio_write  mpi_off=%lld  size_i=%d\n",
+                mpi_off, size_i );
+#endif
+
     /* Write the data.  */
     switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
@@ -563,7 +616,7 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	break;
 	
     case H5D_XFER_COLLECTIVE:
-#ifdef H5F_MPIO_DEBUG
+#ifdef H5Fmpio_DEBUG
 	printf("%s: using MPIO collective mode\n", FUNC);
 #endif
 	mpierr = MPI_File_write_at_all( lf->u.mpio.f, mpi_off, (void*) buf,
@@ -578,8 +631,9 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
     }
 
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Leaving H5F_mpio_write\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5F_mpio_write\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
 }
@@ -614,8 +668,9 @@ H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_flush, FAIL);
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_flush\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_flush\n" );
 #endif
 
     mpierr = MPI_File_sync( lf->u.mpio.f );
@@ -623,8 +678,9 @@ H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, mpierrmsg );
     }
-#ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Leaving H5F_mpio_flush\n" );
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5F_mpio_flush\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
 }
