@@ -519,13 +519,19 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
 	ptdata = malloc(nblocks*ndims*2*sizeof(ptdata[0]));
 	H5Sget_select_hyper_blocklist(region, 0, nblocks, ptdata);
 	for (i=0; i<nblocks; i++) {
+		if (programtype == H5DUMP) {
+	    h5dump_str_append(str, "%s",
+			      i?","OPTIONAL_LINE_BREAK" ":"",
+			      (unsigned long)i);
+		}
+		else {
 	    h5dump_str_append(str, "%sBlk%lu: ",
 			      i?","OPTIONAL_LINE_BREAK" ":"",
 			      (unsigned long)i);
-
+		}
 	    /* Start coordinates and opposite corner */
 	    for (j=0; j<ndims; j++) {
-		h5dump_str_append(str, "%s%lu", j?",":"(",
+			h5dump_str_append(str, "%s%lu", j?",":"(",
 				  (unsigned long)(ptdata[i*2*ndims+j]));
 	    }
 	    for (j=0; j<ndims; j++) {
@@ -542,9 +548,16 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
 	ptdata = malloc(npoints*ndims*sizeof(ptdata[0]));
 	H5Sget_select_elem_pointlist(region, 0, npoints, ptdata);
 	for (i=0; i<npoints; i++) {
+		if (programtype == H5DUMP){
+	    h5dump_str_append(str, "%s",
+			      i?","OPTIONAL_LINE_BREAK" ":"",
+			      (unsigned long)i);		
+		}
+		else {
 	    h5dump_str_append(str, "%sPt%lu: ",
 			      i?","OPTIONAL_LINE_BREAK" ":"",
 			      (unsigned long)i);
+		}
 	    for (j=0; j<ndims; j++) {
 		h5dump_str_append(str, "%s%lu", j?",":"(",
 				  (unsigned long)(ptdata[i*ndims+j]));
@@ -870,9 +883,14 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
 	    region = H5Rget_region(container, H5R_DATASET_REGION, vp);
 	    H5Gget_objinfo(obj, ".", FALSE, &sb);
+		if (programtype == H5DUMP) {
+	    h5dump_str_append(str, "%s-",DATASET);
+		}
+		else {
 	    h5dump_str_append(str, "DSET-%lu:%lu:%lu:%lu-",
 			      sb.fileno[1], sb.fileno[0],
 			      sb.objno[1], sb.objno[0]);
+		}
 	    h5dump_region(region, str);
 	    H5Sclose(region);
 	    H5Dclose(obj);
