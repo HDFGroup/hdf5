@@ -53,6 +53,11 @@ char          prop3_def[10]="Ten chars";   /* Property 3 default value */
 #define PROP3_SIZE      sizeof(prop3_def)
 #define PROP3_DEF_VALUE (&prop3_def)
 
+#define PROP4_NAME     "Property 4"
+double          prop4_def=1.41;   /* Property 4 default value */
+#define PROP4_SIZE      sizeof(prop4_def)
+#define PROP4_DEF_VALUE (&prop4_def)
+
 /****************************************************************
 **
 **  test_genprop_basic_class(): Test basic generic property list code.
@@ -260,6 +265,94 @@ test_genprop_basic_class_prop(void)
 
 /****************************************************************
 **
+**  test_genprop_iter1(): Property iterator for test_genprop_class_iter
+** 
+****************************************************************/
+static int 
+test_genprop_iter1(hid_t id, const char *name, void *iter_data)
+{
+    struct {                /* Struct for iterations */
+        int iter_count;
+        const char **names;
+    } *iter_struct=iter_data;
+
+    /* Shut compiler up */
+    id=id;
+
+    return(HDstrcmp(name,iter_struct->names[iter_struct->iter_count++]));
+}
+
+/****************************************************************
+**
+**  test_genprop_class_iter(): Test basic generic property list code.
+**      Tests iterating over properties in a generic class.
+** 
+****************************************************************/
+static void 
+test_genprop_class_iter(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    size_t		nprops;		/* Number of properties in class */
+    int         idx;        /* Index to start iteration at */
+    struct {                /* Struct for iterations */
+        int iter_count;
+        const char **names;
+    } iter_struct;
+    const char *pnames[4]={ /* Names of properties for iterator */
+        PROP1_NAME,
+        PROP2_NAME,
+        PROP3_NAME,
+        PROP4_NAME};
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Generic Property List Class Property Iteration Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Insert second property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Insert third property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Insert third property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Check the number of properties in class */
+    ret = H5Pget_nprops(cid1,&nprops);
+    CHECK_I(ret, "H5Pget_nprops");
+    VERIFY(nprops, 4, "H5Pget_nprops");
+
+    /* Iterate over all properties in class */
+    iter_struct.iter_count=0;
+    iter_struct.names=pnames;
+    ret = H5Piterate(cid1,NULL,test_genprop_iter1,&iter_struct);
+    VERIFY(ret, 0, "H5Piterate");
+
+    /* Iterate over last three properties in class */
+    idx=1;
+    iter_struct.iter_count=1;
+    ret = H5Piterate(cid1,&idx,test_genprop_iter1,&iter_struct);
+    VERIFY(ret, 0, "H5Piterate");
+    VERIFY(idx, (int)nprops, "H5Piterate");
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+} /* end test_genprop_class_iter() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -272,6 +365,7 @@ test_genprop(void)
     /* These tests use the same file... */
     test_genprop_basic_class(); /* Test basic code for creating a generic class */
     test_genprop_basic_class_prop(); /* Test basic code for adding properties to a generic class */
+    test_genprop_class_iter();  /* Test basic code for iterating over properties in a generic class */
 
 }   /* test_genprop() */
 
