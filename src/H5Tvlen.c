@@ -44,16 +44,19 @@ H5FL_EXTERN(H5T_t);
 static htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 static herr_t H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
 static hssize_t H5T_vlen_seq_mem_getlen(void *_vl);
+static void * H5T_vlen_seq_mem_getptr(void *_vl);
 static htri_t H5T_vlen_seq_mem_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
 static herr_t H5T_vlen_seq_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
 static hssize_t H5T_vlen_str_mem_getlen(void *_vl);
+static void * H5T_vlen_str_mem_getptr(void *_vl);
 static htri_t H5T_vlen_str_mem_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_str_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_str_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
 static herr_t H5T_vlen_str_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
 static hssize_t H5T_vlen_disk_getlen(void *_vl);
+static void * H5T_vlen_disk_getptr(void *_vl);
 static htri_t H5T_vlen_disk_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
@@ -229,6 +232,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 
                     /* Set up the function pointers to access the VL sequence in memory */
                     dt->u.vlen.getlen=H5T_vlen_seq_mem_getlen;
+                    dt->u.vlen.getptr=H5T_vlen_seq_mem_getptr;
                     dt->u.vlen.isnull=H5T_vlen_seq_mem_isnull;
                     dt->u.vlen.read=H5T_vlen_seq_mem_read;
                     dt->u.vlen.write=H5T_vlen_seq_mem_write;
@@ -239,6 +243,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 
                     /* Set up the function pointers to access the VL string in memory */
                     dt->u.vlen.getlen=H5T_vlen_str_mem_getlen;
+                    dt->u.vlen.getptr=H5T_vlen_str_mem_getptr;
                     dt->u.vlen.isnull=H5T_vlen_str_mem_isnull;
                     dt->u.vlen.read=H5T_vlen_str_mem_read;
                     dt->u.vlen.write=H5T_vlen_str_mem_write;
@@ -267,6 +272,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                 /* Set up the function pointers to access the VL information on disk */
                 /* VL sequences and VL strings are stored identically on disk, so use the same functions */
                 dt->u.vlen.getlen=H5T_vlen_disk_getlen;
+                dt->u.vlen.getptr=H5T_vlen_disk_getptr;
                 dt->u.vlen.isnull=H5T_vlen_disk_isnull;
                 dt->u.vlen.read=H5T_vlen_disk_read;
                 dt->u.vlen.write=H5T_vlen_disk_write;
@@ -312,6 +318,34 @@ H5T_vlen_seq_mem_getlen(void *_vl)
 
     FUNC_LEAVE_NOAPI((hssize_t)vl->len)
 }   /* end H5T_vlen_seq_mem_getlen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_vlen_seq_mem_getptr
+ *
+ * Purpose:	Retrieves the pointer for a memory based VL element.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5T_vlen_seq_mem_getptr(void *_vl)
+{
+    hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_getptr)
+
+    /* check parameters */
+    assert(vl);
+
+    FUNC_LEAVE_NOAPI(vl->p)
+}   /* end H5T_vlen_seq_mem_getptr() */
 
 
 /*-------------------------------------------------------------------------
@@ -499,6 +533,34 @@ H5T_vlen_str_mem_getlen(void *_vl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_vlen_str_mem_getptr
+ *
+ * Purpose:	Retrieves the pointer for a memory based VL string.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5T_vlen_str_mem_getptr(void *_vl)
+{
+    char *s=*(char **)_vl;   /* Pointer to the user's string information */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_getptr)
+
+    /* check parameters */
+    assert(s);
+
+    FUNC_LEAVE_NOAPI(s)
+}   /* end H5T_vlen_str_mem_getptr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_vlen_str_mem_isnull
  *
  * Purpose:	Checks if a memory string is a NULL pointer
@@ -666,6 +728,34 @@ H5T_vlen_disk_getlen(void *_vl)
 
     FUNC_LEAVE_NOAPI(seq_len)
 }   /* end H5T_vlen_disk_getlen() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_vlen_disk_getptr
+ *
+ * Purpose:	Retrieves the pointer to a disk based VL element.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5T_vlen_disk_getptr(void *_vl)
+{
+    uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_getptr)
+
+    /* check parameters */
+    assert(vl);
+
+    FUNC_LEAVE_NOAPI(NULL)
+}   /* end H5T_vlen_disk_getptr() */
 
 
 /*-------------------------------------------------------------------------
