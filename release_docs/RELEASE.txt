@@ -68,6 +68,8 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
+        - Fix segmentation fault when calling H5Fflush with an attribute that
+            hasn't had a value written to it open.  QAK - 2004/10/18
         - Back up supporting bitfield and time types in H5Tget_native_type.  
             Leave it to future support.  The function simply returns error 
             message of "not support" for bitfield and time types.  
