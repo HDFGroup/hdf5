@@ -1635,7 +1635,11 @@
 ./hl/c++/test/Makefile.in
 ./hl/c++/Makefile.am
 ./hl/c++/Makefile.in
+
+#windows all.zip
 ./windows/all.zip
+
+#windows c++ examples
 ./windows/c++/examples/allcppexamples/allcppexamples.dsp
 ./windows/c++/examples/allcppexamples/allcppexamples.dsw
 ./windows/c++/examples/chunkstest/chunkstest.dsp
@@ -1653,11 +1657,15 @@
 ./windows/c++/examples/writedatatest/writedatatest.dsp
 ./windows/c++/examples/writedatatestdll/writedatatestdll.dsp
 ./windows/c++/examples/testcppExamples.BAT
+
+#windows c++ test
 ./windows/c++/test/dsets_cpp/dsets_cpp.dsp
 ./windows/c++/test/dsets_cppdll/dsets_cppdll.dsp
 ./windows/c++/test/testhdf5_cpp/testhdf5_cpp.dsp
 ./windows/c++/test/testhdf5_cppdll/testhdf5_cppdll.dsp
 ./windows/c++/test/hdf5cpptest.bat
+
+#windows c examples
 ./windows/examples/allexamples/allexamples.dsw
 ./windows/examples/allexamples/allexamples.dsp
 ./windows/examples/attributetest/attributetest.dsp
@@ -1678,7 +1686,11 @@
 ./windows/examples/writetestdll/writetestdll.dsp
 ./windows/examples/testExamples.bat
 ./windows/examples/testExamples_exp_output.txt
+
+#windows fortran src
 ./windows/fortran/src/H5fortran_types.f90
+
+#windows fortran test
 ./windows/fortran/test/flush1_fortran/flush1_fortran.dsp
 ./windows/fortran/test/flush1_fortrandll/flush1_fortrandll.dsp
 ./windows/fortran/test/flush2_fortran/flush2_fortran.dsp
@@ -1689,14 +1701,20 @@
 ./windows/fortran/test/testhdf5_fortran/testhdf5_fortran.dsp
 ./windows/fortran/test/testhdf5_fortrandll/testhdf5_fortrandll.dsp
 ./windows/fortran/test/testhdf5_fortran.bat
+
+#windows hl fortran test
 ./windows/hl/fortran/test/hl_test_image_fortran/hl_test_image_fortran.dsp
 ./windows/hl/fortran/test/hl_test_lite_fortran/hl_test_lite_fortran.dsp
 ./windows/hl/fortran/test/hl_test_table_fortran/hl_test_table_fortran.dsp
 ./windows/hl/fortran/test/test_hdf5_hl_fortran.BAT
+
+#windows hl test
 ./windows/hl/test/hl_test_image/hl_test_image.dsp
 ./windows/hl/test/hl_test_lite/hl_test_lite.dsp
 ./windows/hl/test/hl_test_table/hl_test_table.dsp
 ./windows/hl/test/test_hdf5_hl.BAT
+
+#windows hl proj
 ./windows/proj/all/all.dsp
 ./windows/proj/all/all.dsw
 ./windows/proj/hdf5/hdf5.dsp
@@ -1709,8 +1727,12 @@
 ./windows/proj/hdf5_hl/hdf5_hl.dsp
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.dsp
 ./windows/proj/hdf5dll/hdf5dll.dsp
+
+#windows src
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
+
+#windows test
 ./windows/test/big/big.dsp
 ./windows/test/bigdll/bigdll.dsp
 ./windows/test/bittests/bittests.dsp
@@ -1785,6 +1807,8 @@
 ./windows/test/unlinkdll/unlinkdll.dsp
 ./windows/test/hdf5test.bat
 ./windows/test/hdf5timingtest.bat
+
+#windows tools
 ./windows/tools/gifconvdll/gif2h5dll.dsp
 ./windows/tools/gifconvdll/h52gifdll.dsp
 ./windows/tools/h5diffdll/h5diffdll.dsp
@@ -1825,6 +1849,8 @@
 ./windows/tools/mask.BAT
 ./windows/tools/repacktest.BAT
 ./windows/tools/testhdf5tools.BAT
+
+#windows batchfile
 ./windows/hdf5bt.BAT
 ./windows/hdf5build.BAT
 ./windows/hdf5check.BAT
@@ -1838,6 +1864,34 @@
 ./windows/installhdf5lib.bat
 ./windows/installhdf5lib_fort.bat
 
+#windows fortran examples
 ./windows/fortran/examples/allf90examples/allf90examples.dsp
 ./windows/fortran/examples/allf90examples/allf90examples.dsw
-
+./windows/fortran/examples/attreexampletest/attreexampletest.dsp
+./windows/fortran/examples/attreexampletestdll/attreexampletestdll.dsp
+./windows/fortran/examples/compoundtest/compoundtest.dsp
+./windows/fortran/examples/compoundtestdll/compoundtestdll.dsp
+./windows/fortran/examples/dsetexampletest/dsetexampletest.dsp
+./windows/fortran/examples/dsetexampletestdll/dsetexampletestdll.dsp
+./windows/fortran/examples/fileexampletest/fileexampletest.dsp
+./windows/fortran/examples/fileexampletestdll/fileexampletestdll.dsp
+./windows/fortran/examples/groupexampletest/groupexampletest.dsp
+./windows/fortran/examples/groupexampletestdll/groupexampletestdll.dsp
+./windows/fortran/examples/grpdsetexampletest/grpdsetexampletest.dsp
+./windows/fortran/examples/grpdsetexampletestdll/grpdsetexampletestdll.dsp
+./windows/fortran/examples/grpittest/grpittest.dsp
+./windows/fortran/examples/grpittestdll/grpittestdll.dsp
+./windows/fortran/examples/grpsexampletest/grpsexampletest.dsp
+./windows/fortran/examples/grpsexampletestdll/grpsexampletestdll.dsp
+./windows/fortran/examples/hyperslabtest/hyperslabtest.dsp
+./windows/fortran/examples/hyperslabtestdll/hyperslabtestdll.dsp
+./windows/fortran/examples/mountexampletest/mountexampletest.dsp
+./windows/fortran/examples/mountexampletestdll/mountexampletestdll.dsp
+./windows/fortran/examples/refobjexampletest/refobjexampletest.dsp
+./windows/fortran/examples/refobjexampletestdll/refobjexampletestdll.dsp
+./windows/fortran/examples/refregexampletest/refregexampletest.dsp
+./windows/fortran/examples/refregexampletestdll/refregexampletestdll.dsp
+./windows/fortran/examples/rwdsetexampletest/rwdsetexampletest.dsp
+./windows/fortran/examples/rwdsetexampletestdll/rwdsetexampletestdll.dsp
+./windows/fortran/examples/selecteletest/selecteletest.dsp
+./windows/fortran/examples/selecteletestdll/selecteletestdll.dsp
