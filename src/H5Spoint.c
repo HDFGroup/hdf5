@@ -1118,11 +1118,11 @@ H5S_point_select_contiguous(const H5S_t *space)
     Iterate over a point selection, calling a user's function for each
         element.
  USAGE
-    herr_t H5S_point_select_iterate(buf, type_id, space, operator, operator_data)
+    herr_t H5S_point_select_iterate(buf, type_id, space, op, operator_data)
         void *buf;      IN/OUT: Buffer containing elements to iterate over
         hid_t type_id;  IN: Datatype ID of BUF array.
         H5S_t *space;   IN: Dataspace object containing selection to iterate over
-        H5D_operator_t operator; IN: Function pointer to the routine to be
+        H5D_operator_t op; IN: Function pointer to the routine to be
                                 called for each element in BUF iterated over.
         void *operator_data;    IN/OUT: Pointer to any user-defined data
                                 associated with the operation.
@@ -1145,7 +1145,7 @@ H5S_point_select_contiguous(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operator,
+H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void *operator_data)
 {
     hsize_t	mem_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
@@ -1160,7 +1160,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
 
     assert(buf);
     assert(space);
-    assert(operator);
+    assert(op);
     assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Get the dataspace extent rank */
@@ -1181,7 +1181,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
         offset=H5V_array_offset(rank+1,mem_size,mem_offset);
         tmp_buf=((char *)buf+offset);
 
-        ret_value=(*operator)(tmp_buf,type_id,rank,node->pnt,operator_data);
+        ret_value=(*op)(tmp_buf,type_id,rank,node->pnt,operator_data);
 
         node=node->next;
       } /* end while */

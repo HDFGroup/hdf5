@@ -61,7 +61,7 @@ __DLL__ herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
 __DLL__ herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
 __DLL__ herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
-            H5D_operator_t operator, void *operator_data);
+            H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 __DLL__ herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
 

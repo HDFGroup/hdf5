@@ -3088,11 +3088,11 @@ H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
     Iterate over a hyperslab selection, calling a user's function for each
         element.
  USAGE
-    herr_t H5S_hyper_select_iterate(buf, type_id, space, operator, operator_data)
+    herr_t H5S_hyper_select_iterate(buf, type_id, space, op, operator_data)
         void *buf;      IN/OUT: Buffer containing elements to iterate over
         hid_t type_id;  IN: Datatype ID of BUF array.
         H5S_t *space;   IN: Dataspace object containing selection to iterate over
-        H5D_operator_t operator; IN: Function pointer to the routine to be
+        H5D_operator_t op; IN: Function pointer to the routine to be
                                 called for each element in BUF iterated over.
         void *operator_data;    IN/OUT: Pointer to any user-defined data
                                 associated with the operation.
@@ -3115,7 +3115,7 @@ H5S_hyper_select_iterate_mem (intn dim, H5S_hyper_iter_info_t *iter_info)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operator,
+H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         void *operator_data)
 {
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
@@ -3130,7 +3130,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
 
     assert(buf);
     assert(space);
-    assert(operator);
+    assert(op);
     assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Initialize these before any errors can occur */
@@ -3170,7 +3170,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     iter_info.mem_size[space->extent.u.simple.rank]=iter_info.elem_size;
 
     /* Copy the location of the region in the file */
-    iter_info.op=operator;
+    iter_info.op=op;
     iter_info.op_data=operator_data;
 
     /* Recursively input the hyperslabs currently defined */
