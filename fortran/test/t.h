@@ -15,6 +15,9 @@
 
 #include "../../src/hdf5.h"
 #include "../src/H5f90i.h"
+#include "../src/H5f90proto.h"
+
+char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
 /*
  *  Functions from t.c

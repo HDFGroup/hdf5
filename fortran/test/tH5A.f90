@@ -26,7 +26,7 @@
      LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
 
-     CHARACTER(LEN=5), PARAMETER :: filename = "atest.h5"    !File name
+     CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
      CHARACTER(LEN=80) :: fix_filename 
      CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
      CHARACTER(LEN=11), PARAMETER :: aname = "attr_string"   !String Attribute name
