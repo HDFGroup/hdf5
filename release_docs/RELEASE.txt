@@ -162,6 +162,8 @@ Library
 Configuration
 -------------
 
+    * Added "--with-dmalloc" flag, to easily enable support for the 'dmalloc'
+      debugging malloc implementation. -QAK, 2002/07/15
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
       support.
     * Require HDF (a.k.a. hdf4) software that consists of a newer version
@@ -193,6 +195,14 @@ Documentation
 New Features
 ============
 
+    * Added MPI-posix VFL driver.  This VFL driver uses MPI functions to
+      coordinate actions, but performs I/O directly with POSIX sec(2)
+      (i.e. open/close/read/write/etc.) calls.  This driver should _NOT_
+      be used to access files that are not on a parallel filesystem.
+      The following API functions were added:
+            herr_t H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm);
+            herr_t H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/);
+        -QAK, 2002/07/15
     * Added environment variable flag to control whether creating MPI derived
       typed is preferred or not.  This can affect performance, depending on
       which way the MPI-I/O library is optimized for.  The default is set to
