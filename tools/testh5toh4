@@ -8,6 +8,19 @@ RM='rm -f'
 SED='sed '
 H4DUMP='hdp'
 
+# Find out which version of hdp is being used.  Over simplified
+# algorithm but will do the job for now.
+if ( $H4DUMP | grep -s 'NCSA HDF Version 4.1 Release 3' > /dev/null )
+then
+    H4DUMPVER=413
+else
+    H4DUMPVER=0
+    echo "    Some tests are skipped because your version of $H4DUMP does"
+    echo "    not handle loops in Vgroups correctly.  You need version"
+    echo "    4.1 Release 3 or later.  Visit http://hdf.ncsa.uiuc.edu"
+    echo "    or email hdfhelp@ncsa.uiuc.edu for more information."
+fi
+
 # The build (current) directory might be different than the source directory.
 if test "X$srcdir" = X; then
     srcdir=.
@@ -124,16 +137,23 @@ CONVERT()
 	    expect_out=$outfile.expect
 	    actual_out=$outfile.actual
 
-	    (cd $SRCDIR/Expected
-	    $H4DUMP dumpvg $outfile.hdf
-	    $H4DUMP dumpvd $outfile.hdf
-	    $H4DUMP dumpsds $outfile.hdf ) |
-	    sed -e 's/reference = [0-9]*;//' > $expect_out
-	    (cd $OUTDIR
-	    $H4DUMP dumpvg $outfile.hdf
-	    $H4DUMP dumpvd $outfile.hdf
-	    $H4DUMP dumpsds $outfile.hdf ) |
-	    sed -e 's/reference = [0-9]*;//' > $actual_out
+	    if [ $outfile = "tloop" -a $H4DUMPVER -lt 413 ]
+	    then
+		echo "*-SKIP-*"
+		result="skipped"
+		touch $expect_out $actual_out	# fake them
+	    else
+		(cd $SRCDIR/Expected
+		$H4DUMP dumpvg $outfile.hdf
+		$H4DUMP dumpvd $outfile.hdf
+		$H4DUMP dumpsds $outfile.hdf ) |
+		sed -e 's/reference = [0-9]*;//' > $expect_out
+		(cd $OUTDIR
+		$H4DUMP dumpvg $outfile.hdf
+		$H4DUMP dumpvd $outfile.hdf
+		$H4DUMP dumpsds $outfile.hdf ) |
+		sed -e 's/reference = [0-9]*;//' > $actual_out
+	    fi
 
 	    if $cmp $expect_out $actual_out; then
 		:
@@ -241,7 +261,8 @@ CONVERT tstr2.h5 tstr2.hdf
 
 $RM $OUTDIR/*.hdf $OUTDIR/*.tmp
 CONVERT -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5
-CONVERT -m tcompound.h5 tall.h5 tloop.h5
+CONVERT -m tcompound.h5 tall.h5
+CONVERT -m tloop.h5
 CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5
 CONVERT -m tstr.h5 tstr2.h5
 
