@@ -4394,27 +4394,35 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 
     FUNC_ENTER(H5T_find, NULL);
 
+#ifdef QAK
 printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
     if (!noop_cdata.stats &&
 	NULL==(noop_cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
 
+#ifdef QAK
 printf("%s: check 2.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
+#endif /* QAK */
     /* No-op case */
     if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;
 	HRETURN(H5T_conv_noop);
     }
     
+#ifdef QAK
 printf("%s: check 3.0\n",FUNC);
+#endif /* QAK */
     /* Find it */
     if (NULL == (path = H5T_path_find(NULL, src, dst, TRUE, NULL))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 		      "unable to create conversion path");
     }
+#ifdef QAK
 printf("%s: path=%p\n",FUNC,path);
+#endif /* QAK */
 
     if ((ret_value=path->func)) {
 	*pcdata = &(path->cdata);
@@ -4482,7 +4490,9 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
             HRETURN(H5T_path_g[md]);
         }
     }
+#ifdef QAK
 printf("%s: check 2.0, create=%d, md=%d\n",FUNC,(int)create,md);
+#endif /* QAK */
 
     /* Insert */
     if (create) {
@@ -4509,12 +4519,16 @@ printf("%s: check 2.0, create=%d, md=%d\n",FUNC,(int)create,md);
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                    "memory allocation failed");
         }
+#ifdef QAK
 printf("%s: check 3.0, src=%p, dst=%p\n",FUNC,src,dst);
 printf("%s: check 3.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
+#endif /* QAK */
         path->src = H5T_copy(src, H5T_COPY_ALL);
         path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
+#ifdef QAK
 printf("%s: check 3.5, func=%p, name=%s\n",FUNC,func,(name!=NULL ? name : "NULL"));
+#endif /* QAK */
         /* Associate a function with the path if possible */
         if (func) {
             HDstrncpy (path->name, name, H5T_NAMELEN);
@@ -4580,7 +4594,9 @@ printf("%s: check 3.5, func=%p, name=%s\n",FUNC,func,(name!=NULL ? name : "NULL"
             }
         }
     }
+#ifdef QAK
 printf("%s: leaving path=%p\n",FUNC,path);
+#endif /* QAK */
     FUNC_LEAVE(path);
 }
 
