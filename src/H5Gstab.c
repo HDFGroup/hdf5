@@ -352,7 +352,7 @@ H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
         /* Modify the object's user path */
 
         /* Get the raw string for the user path */
-        loc_user_path=H5RS_GET_STR(loc->user_path_r);
+        loc_user_path=H5RS_get_str(loc->user_path_r);
         assert(loc_user_path);
 
         /* The location's user path already ends in a '/' separator */
@@ -379,7 +379,7 @@ H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
         /* Modify the object's canonical path */
 
         /* Get the raw string for the canonical path */
-        loc_canon_path=H5RS_GET_STR(loc->canon_path_r);
+        loc_canon_path=H5RS_get_str(loc->canon_path_r);
         assert(loc_canon_path);
 
         /* The location's canonical path already ends in a '/' separator */

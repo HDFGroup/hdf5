@@ -1,14 +1,16 @@
-/****************************************************************************
- * NCSA HDF								    *
- * Software Development Group						    *
- * National Center for Supercomputing Applications			    *
- * University of Illinois at Urbana-Champaign				    *
- * 605 E. Springfield, Champaign IL 61820				    *
- *									    *
- * For conditions of distribution and use, see the accompanying		    *
- * hdf/COPYING file.							    *
- *									    *
- ****************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  * Reference counted string algorithms.
@@ -21,11 +23,19 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5RSprivate.h"        /* Reference-counted strings            */
 
+/* Pablo information */
 #define PABLO_MASK	H5RS_mask
 
 /* Interface initialization */
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
+
+/* Private typedefs & structs */
+typedef struct H5RS_str_t {
+    char *s;            /* String to be reference counted */
+    unsigned wrapped;   /* Indicates that the string to be ref-counted is not copied */
+    unsigned n;         /* Reference count of number of pointers sharing string */
+};
 
 /* Declare a free list to manage the H5RS_str_t struct */
 H5FL_DEFINE_STATIC(H5RS_str_t);
@@ -387,4 +397,80 @@ H5RS_len(const H5RS_str_t *rs)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_len() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5RS_get_str
+ PURPOSE
+    Get a pointer to the internal string contained in a ref-counted string
+ USAGE
+    char *H5RS_get_str(rs)
+        const H5RS_str_t *rs;   IN: Ref-counted string to get internal string from
+
+ RETURNS
+    Returns a pointer to the internal string being ref-counted on success,
+        NULL on failure.
+ DESCRIPTION
+    Gets a pointer to the internal string being reference counted.  This
+    pointer is volatile and might be invalid is further calls to the H5RS
+    API are made.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+char *
+H5RS_get_str(const H5RS_str_t *rs)
+{
+    char *ret_value;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5RS_get_str,NULL);
+
+    /* Sanity check */
+    assert(rs);
+    assert(rs->s);
+
+    ret_value=rs->s;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5RS_get_str() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5RS_get_count
+ PURPOSE
+    Get the reference count for a ref-counted string
+ USAGE
+    unsigned H5RS_get_count(rs)
+        const H5RS_str_t *rs;   IN: Ref-counted string to get internal count from
+
+ RETURNS
+    Returns the number of references to the internal string being ref-counted on success,
+        0 on failure.
+ DESCRIPTION
+    Gets the count of references to the reference counted string.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+unsigned
+H5RS_get_count(const H5RS_str_t *rs)
+{
+    unsigned ret_value;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5RS_get_count,0);
+
+    /* Sanity check */
+    assert(rs);
+    assert(rs->n>0);
+
+    ret_value=rs->n;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5RS_get_count() */
 

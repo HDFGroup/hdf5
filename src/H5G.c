@@ -3162,11 +3162,11 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     FUNC_ENTER_NOINIT(H5G_common_path);
   
     /* Get component of each name */
-    fullpath=H5RS_GET_STR(fullpath_r);
+    fullpath=H5RS_get_str(fullpath_r);
     assert(fullpath);
     fullpath=H5G_component(fullpath,&nchars1);
     assert(fullpath);
-    prefix=H5RS_GET_STR(prefix_r);
+    prefix=H5RS_get_str(prefix_r);
     assert(prefix);
     prefix=H5G_component(prefix,&nchars2);
     assert(prefix);
@@ -3373,7 +3373,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                 H5RS_str_t *canon_dst_path_r;   /* Copy of canonical part of destination path */
 
                 /* Make certain that the source and destination names are full (not relative) paths */
-                if(*(H5RS_GET_STR(names->src_name))!='/') {
+                if(*(H5RS_get_str(names->src_name))!='/') {
                     const char *src_name;         /* Pointer to raw string of src_name */
                     char *src_path;         /* Full user path of source name */
                     const char *src_user_path;    /* Pointer to raw string of src path */
@@ -3381,7 +3381,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     unsigned need_sep;      /* Flag to indicate if separator is needed */
 
                     /* Get the pointer to the raw src user path */
-                    src_user_path=H5RS_GET_STR(names->src_loc->user_path_r);
+                    src_user_path=H5RS_get_str(names->src_loc->user_path_r);
 
                     /* Get the length of the name for the source group's user path */
                     src_path_len=HDstrlen(src_user_path);
@@ -3393,7 +3393,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                         need_sep=1;
 
                     /* Get the pointer to the raw src user path */
-                    src_name=H5RS_GET_STR(names->src_name);
+                    src_name=H5RS_get_str(names->src_name);
 
                     /* Add in the length needed for the '/' separator and the relative path */
                     src_path_len+=HDstrlen(src_name)+need_sep;
@@ -3412,7 +3412,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                 } /* end if */
                 else
                     src_path_r=H5RS_dup(names->src_name);
-                if(*(H5RS_GET_STR(names->dst_name))!='/') {
+                if(*(H5RS_get_str(names->dst_name))!='/') {
                     const char *dst_name;         /* Pointer to raw string of dst_name */
                     char *dst_path;         /* Full user path of destination name */
                     const char *dst_user_path;    /* Pointer to raw string of dst path */
@@ -3420,7 +3420,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     unsigned need_sep;      /* Flag to indicate if separator is needed */
 
                     /* Get the pointer to the raw dst user path */
-                    dst_user_path=H5RS_GET_STR(names->dst_loc->user_path_r);
+                    dst_user_path=H5RS_get_str(names->dst_loc->user_path_r);
 
                     /* Get the length of the name for the destination group's user path */
                     dst_path_len=HDstrlen(dst_user_path);
@@ -3432,7 +3432,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                         need_sep=1;
 
                     /* Get the pointer to the raw dst user path */
-                    dst_name=H5RS_GET_STR(names->dst_name);
+                    dst_name=H5RS_get_str(names->dst_name);
 
                     /* Add in the length needed for the '/' separator and the relative path */
                     dst_path_len+=HDstrlen(dst_name)+need_sep;
@@ -3461,8 +3461,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     /* Get current string lengths */
                     non_canon_name_len=H5RS_len(names->loc->user_path_r)-H5RS_len(names->loc->canon_path_r);
 
-                    canon_src_path_r=H5RS_create(H5RS_GET_STR(src_path_r)+non_canon_name_len);
-                    canon_dst_path_r=H5RS_create(H5RS_GET_STR(dst_path_r)+non_canon_name_len);
+                    canon_src_path_r=H5RS_create(H5RS_get_str(src_path_r)+non_canon_name_len);
+                    canon_dst_path_r=H5RS_create(H5RS_get_str(dst_path_r)+non_canon_name_len);
                 } /* end if */
                 else {
                     canon_src_path_r=H5RS_dup(src_path_r);
@@ -3490,8 +3490,8 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     const char *canon_dst_path;   /* pointer to canonical part of destination path */
 
                     /* Get the pointers to the raw strings */
-                    canon_src_path=H5RS_GET_STR(canon_src_path_r);
-                    canon_dst_path=H5RS_GET_STR(canon_dst_path_r);
+                    canon_src_path=H5RS_get_str(canon_src_path_r);
+                    canon_dst_path=H5RS_get_str(canon_dst_path_r);
 
                     /* Get the source & destination components */
                     src_comp=HDstrrchr(canon_src_path,'/');
@@ -3513,7 +3513,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
                     dst_canon_prefix[dst_canon_prefix_len]='\0';
 
                     /* Hold this for later use */
-                    old_user_path=H5RS_GET_STR(ent->user_path_r);
+                    old_user_path=H5RS_get_str(ent->user_path_r);
 
                     /* Find the user prefix for the entry */
                     user_prefix_len=HDstrlen(old_user_path)-H5RS_len(ent->canon_path_r);

@@ -1,16 +1,16 @@
-/****************************************************************************
- * NCSA HDF								    *
- * Software Development Group						    *
- * National Center for Supercomputing Applications			    *
- * University of Illinois at Urbana-Champaign				    *
- * 605 E. Springfield, Champaign IL 61820				    *
- *									    *
- * For conditions of distribution and use, see the accompanying		    *
- * hdf/COPYING file.							    *
- *									    *
- ****************************************************************************/
-
-/* $Id$ */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
  * FILE:	H5I.c - Internal storage routines for handling "IDs"
@@ -31,10 +31,11 @@
  *	1/7/96	- Finished coding prototype
  *	6/10/97 - Moved into HDF5 library
  */
+
 #include "H5private.h"
-#include "H5Iprivate.h"
 #include "H5Eprivate.h"
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"
 #include "H5MMprivate.h"
 
 /* Define this to compile in support for dumping ID information */
@@ -1162,7 +1163,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
             len = H5RS_len(ent->user_path_r);
 
             if(name) {
-                HDstrncpy(name, H5RS_GET_STR(ent->user_path_r), MIN(len+1,size));
+                HDstrncpy(name, H5RS_get_str(ent->user_path_r), MIN(len+1,size));
                 if(len >= size)
                     name[size-1]='\0';
             } /* end if */

@@ -1,16 +1,16 @@
-/****************************************************************************
- * NCSA HDF                                                                 *
- * Software Development Group                                               *
- * National Center for Supercomputing Applications                          *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf/COPYING file.                                                        *
- *                                                                          *
- ****************************************************************************/
-
-/* $Id$ */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
    FILE
@@ -71,8 +71,8 @@ test_refstr_create(void)
     CHECK(rs, NULL, "H5RS_create");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs);
-    VERIFY(count, 1, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs);
+    VERIFY(count, 1, "H5RS_get_count");
 
     /* Try closing a real ref-counted string */
     ret=H5RS_decr(rs);
@@ -101,24 +101,24 @@ test_refstr_count(void)
     CHECK(rs, NULL, "H5RS_create");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs);
-    VERIFY(count, 1, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs);
+    VERIFY(count, 1, "H5RS_get_count");
 
     /* Increment reference count */
     ret=H5RS_incr(rs);
     CHECK(ret, FAIL, "H5RS_incr");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs);
-    VERIFY(count, 2, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs);
+    VERIFY(count, 2, "H5RS_get_count");
 
     /* Decrement reference count for string */
     ret=H5RS_decr(rs);
     CHECK(ret, FAIL, "H5RS_decr");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs);
-    VERIFY(count, 1, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs);
+    VERIFY(count, 1, "H5RS_get_count");
 
     /* Decrement reference count for string */
     ret=H5RS_decr(rs);
@@ -148,26 +148,26 @@ test_refstr_dup(void)
     CHECK(rs1, NULL, "H5RS_create");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs1);
-    VERIFY(count, 1, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs1);
+    VERIFY(count, 1, "H5RS_get_count");
 
     /* Duplicate r-string */
     rs2=H5RS_dup(rs1);
     CHECK(rs2, NULL, "H5RS_dup");
 
     /* Get the reference count on the strings */
-    count=H5RS_GET_COUNT(rs1);
-    VERIFY(count, 2, "H5RS_GET_COUNT");
-    count=H5RS_GET_COUNT(rs2);
-    VERIFY(count, 2, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs1);
+    VERIFY(count, 2, "H5RS_get_count");
+    count=H5RS_get_count(rs2);
+    VERIFY(count, 2, "H5RS_get_count");
 
     /* Decrement reference count for string */
     ret=H5RS_decr(rs2);
     CHECK(ret, FAIL, "H5RS_decr");
 
     /* Get the reference count on the string */
-    count=H5RS_GET_COUNT(rs1);
-    VERIFY(count, 1, "H5RS_GET_COUNT");
+    count=H5RS_get_count(rs1);
+    VERIFY(count, 1, "H5RS_get_count");
 
     /* Decrement reference count for string */
     ret=H5RS_decr(rs1);
@@ -252,8 +252,8 @@ test_refstr_wrap(void)
     CHECK(rs, NULL, "H5RS_wrap");
 
     /* Get pointer to raw string in ref-counted string */
-    s=H5RS_GET_STR(rs);
-    CHECK(s, NULL, "H5RS_GET_STR");
+    s=H5RS_get_str(rs);
+    CHECK(s, NULL, "H5RS_get_str");
     VERIFY(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     VERIFY(cmp, 0, "HDstrcmp");
@@ -266,8 +266,8 @@ test_refstr_wrap(void)
     buf[0]='F';
 
     /* Get pointer to raw string in ref-counted string */
-    s=H5RS_GET_STR(rs);
-    CHECK(s, NULL, "H5RS_GET_STR");
+    s=H5RS_get_str(rs);
+    CHECK(s, NULL, "H5RS_get_str");
     CHECK(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     if(cmp<=0) {
@@ -311,8 +311,8 @@ test_refstr_own(void)
     CHECK(rs, NULL, "H5RS_own");
 
     /* Get pointer to raw string in ref-counted string */
-    t=H5RS_GET_STR(rs);
-    CHECK(t, NULL, "H5RS_GET_STR");
+    t=H5RS_get_str(rs);
+    CHECK(t, NULL, "H5RS_get_str");
     VERIFY(t, s, "transferring");
     cmp=HDstrcmp(s,t);
     VERIFY(cmp, 0, "HDstrcmp");
@@ -325,8 +325,8 @@ test_refstr_own(void)
     *s='F';
 
     /* Get pointer to raw string in ref-counted string */
-    t=H5RS_GET_STR(rs);
-    CHECK(t, NULL, "H5RS_GET_STR");
+    t=H5RS_get_str(rs);
+    CHECK(t, NULL, "H5RS_get_str");
     VERIFY(t, s, "transferring");
     cmp=HDstrcmp(t,s);
     VERIFY(cmp, 0, "HDstrcmp");
