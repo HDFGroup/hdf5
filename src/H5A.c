@@ -253,7 +253,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
 
     /* Hold the symbol table entry (and file) open */
     if (H5O_open(&(attr->ent)) < 0) {
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open");
     }
     attr->ent_opened=1;
 
@@ -489,7 +489,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
 
     /* Read in attribute with H5O_read() */
     if (NULL==(H5O_read(ent, H5O_ATTR, idx, attr))) {
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL,
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to load attribute info from dataset header");
     }
 
@@ -1163,7 +1163,7 @@ H5Adelete(hid_t loc_id, const char *name)
           idx++;
       } /* end while */
     if(found_attr==NULL) {
-        HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL,
+        HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL,
 		      "attribute not found");
       }
 

@@ -455,7 +455,7 @@ H5close (void)
 int
 HDfprintf (FILE *stream, const char *fmt, ...)
 {
-    int		n, nout = 0;
+    int		n=0, nout = 0;
     int		fwidth, prec;
     int		zerofill;
     int		leftjust;
