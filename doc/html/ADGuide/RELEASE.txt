@@ -38,10 +38,15 @@ New Features
 ============
 
 
-
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
-
+    * Fixed bug with non-zero userblock sizes causing raw data to not
+      write correctly.
+    * Fixed problems with Pablo build and linking with non-standard MPI I/O.
+    * Fixed build on Linux systems with --enable-static-exec flag. It now
+      works correctly.
+    * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
+      data loss in certain situations.
 
 
 Documentation
@@ -98,8 +103,8 @@ Known Problems
 
     * The shared library failed compilation on IRIX 6.5.
     
-    * After "make install" or "make install-doc" one may need to reload the source
-      from the tar file before doing another build.
+    * After "make install" or "make install-doc" one may need to reload
+      the source from the tar file before doing another build.
 
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.

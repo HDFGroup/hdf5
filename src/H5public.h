@@ -61,7 +61,7 @@
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	4	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	1	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "post1"	/* For pre-releases like snap0       */
+#define H5_VERS_SUBRELEASE "post2"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
