@@ -3239,7 +3239,7 @@ H5T_debug(H5T_t *dt, FILE * stream)
 	break;
     }
 
-    fprintf(stream, "%s%s {nbytes=%ul",
+    fprintf(stream, "%s%s {nbytes=%lu",
 	    s, dt->locked ? "[!]" : "", (unsigned long)(dt->size));
 
     if (H5T_is_atomic(dt)) {

@@ -44,6 +44,7 @@ herr_t H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
                 hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/);
 herr_t H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
                  hid_t file_space_id, hid_t xfer_parms_id, const void *buf);
+herr_t H5Dextend (hid_t dataset_id, const size_t *size);
 
 #ifdef __cplusplus
 }

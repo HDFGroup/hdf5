@@ -769,7 +769,7 @@ H5Cget_layout(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_chunk(hid_t tid, int ndims, size_t dim[])
+H5Cset_chunk(hid_t tid, int ndims, const size_t dim[])
 {
     int                     i;
     H5D_create_t           *tmpl = NULL;

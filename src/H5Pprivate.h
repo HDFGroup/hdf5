@@ -37,13 +37,12 @@ typedef struct H5P_hyperslab_t {
 
 typedef struct H5P_simple_t {
     intn        rank;                   /*number of dimensions               */
-    intn        dim_flags;              /*dimension flags                    */
     size_t      *size;                  /*dimension sizes                    */
-    size_t      *max;                   /*maximum dimension sizes            */
-    intn        *perm;                  /*dimension permutations             */
+    size_t      *max;                   /*maximum dimension sizes or NULL    */
+    intn        *perm;                  /*dimension permutations or NULL     */
 } H5P_simple_t;
 
-typedef struct {
+typedef struct H5P_t {
     H5P_class_t         type;           /*type of dimensionality object      */
     union {
         H5P_simple_t    simple;         /*simple dimensionality information  */
@@ -96,7 +95,7 @@ herr_t H5P_close (H5P_t *ds);
 size_t H5P_get_npoints (const H5P_t *ds);
 intn H5P_get_ndims (const H5P_t *ds);
 intn H5P_get_dims (const H5P_t *ds, size_t dims[]/*out*/);
-herr_t H5P_modify (H5F_t *f, H5G_entry_t *ent, const H5P_t *space);
+herr_t H5P_modify (H5G_entry_t *ent, const H5P_t *space);
 H5P_t *H5P_read (H5F_t *f, H5G_entry_t *ent);
 intn H5P_cmp (const H5P_t *ds1, const H5P_t *ds2);
 hbool_t H5P_is_simple (const H5P_t *sdim);
@@ -104,6 +103,7 @@ uintn H5P_nelem (const H5P_t *space);
 const H5P_conv_t *H5P_find (const H5P_t *mem_space, const H5P_t *file_space);
 intn H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
 			size_t size[]/*out*/, size_t stride[]/*out*/);
+intn H5P_extend (H5P_t *space, const size_t *size);
 
 /* Conversion functions for simple data spaces */
 size_t H5P_simp_init (const struct H5O_layout_t *layout,

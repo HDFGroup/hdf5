@@ -73,7 +73,7 @@ test_h5p_basic(void)
     fid1 = H5Fcreate(FILE, H5ACC_OVERWRITE, 0, 0);
     CHECK(fid1, FAIL, "H5Fcreate");
 
-    sid1 = H5Pcreate_simple(SPACE1_RANK, dims1);
+    sid1 = H5Pcreate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Pcreate_simple");
 
     n = H5Pget_npoints(sid1);
@@ -88,7 +88,7 @@ test_h5p_basic(void)
     CHECK(ret, FAIL, "H5Pget_ldims");
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(uint32)), 0, "H5Pget_ldims");
 
-    sid2 = H5Pcreate_simple(SPACE2_RANK, dims2);
+    sid2 = H5Pcreate_simple(SPACE2_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Pcreate_simple");
 
     n = H5Pget_npoints(sid2);

@@ -131,6 +131,7 @@
 ./test/cmpd_dset.c
 ./test/dsets.c
 ./test/dtypes.c
+./test/extend.c
 ./test/hyperslab.c
 ./test/istore.c
 ./test/testhdf5.c

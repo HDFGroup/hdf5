@@ -134,7 +134,7 @@ main (void)
     assert (file>=0);
 
     /* Create the data space */
-    space = H5Pcreate_simple (2, dim);
+    space = H5Pcreate_simple (2, dim, NULL);
     assert (space>=0);
 
     
@@ -356,7 +356,7 @@ STEP  7: Reading original dataset with explicit data space.\n");
     fflush (stdout);
 
     /* Create the data space */
-    s7_sid = H5Pcreate_simple (2, dim);
+    s7_sid = H5Pcreate_simple (2, dim, NULL);
     assert (s7_sid>=0);
     
     /* Read the dataset */
@@ -395,7 +395,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     assert (status>=0);
 
     /* Create memory data space */
-    s8_m_sid = H5Pcreate_simple (2, h_size);
+    s8_m_sid = H5Pcreate_simple (2, h_size, NULL);
     assert (s8_m_sid>=0);
 
     /* Read the dataset */

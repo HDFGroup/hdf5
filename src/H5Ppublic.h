@@ -22,6 +22,7 @@
 
 /* Define atomic datatypes */
 #define H5P_ALL         (-2)
+#define H5P_UNLIMITED	0
 
 /* Different types of dataspaces */
 typedef enum H5P_class_t {
@@ -36,7 +37,8 @@ extern "C" {
 #endif
 
 /* Functions in H5P.c */
-hid_t H5Pcreate_simple (int rank, size_t dims[]);
+hid_t H5Pcreate_simple (int rank, const size_t dims[], const size_t maxdims[]);
+hid_t H5Pcopy (hid_t space_id);
 herr_t H5Pclose (hid_t space_id);
 size_t H5Pget_npoints (hid_t space_id);
 int H5Pget_ndims (hid_t space_id);

@@ -23,7 +23,6 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5Oprivate.h>         /*object headers                  */
 #include <H5Pprivate.h>         /* Data-space functions                   */
 
-
 /* Interface initialization */
 #define PABLO_MASK      H5P_mask
 #define INTERFACE_INIT  H5P_init_interface
@@ -86,7 +85,14 @@ H5P_term_interface(void)
 /*-------------------------------------------------------------------------
  * Function:    H5Pcreate_simple
  *
- * Purpose:     Creates a new simple data space object and opens it for access.
+ * Purpose:     Creates a new simple data space object and opens it for
+ *		access. The DIMS argument is the size of the simple dataset
+ *		and the MAXDIMS argument is the upper limit on the size of
+ *		the dataset.  MAXDIMS may be the null pointer in which case
+ *		the upper limit is the same as DIMS.  If an element of
+ *		MAXDIMS is zero then the corresponding dimension is unlimited,
+ *		otherwise no element of MAXDIMS should be smaller than the
+ *		corresponding element of DIMS.
  *
  * Return:      Success:        The ID for the new simple data space object.
  *
@@ -102,31 +108,55 @@ H5P_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pcreate_simple(int rank, size_t dims[])
+H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
 {
-    H5P_t                  *ds = NULL;
-    hid_t                   ret_value = FAIL;
+    H5P_t       *ds = NULL;
+    hid_t       ret_value = FAIL;
+    int		i;
 
     FUNC_ENTER(H5Pcreate, FAIL);
 
+    /* Check arguments */
+    if (rank<0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "dimensionality cannot be negative");
+    }
+    if (!dims) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "no dimensions specified");
+    }
+    if (maxdims) {
+	for (i=0; i<rank; i++) {
+	    if (maxdims[i] && maxdims[i]<dims[i]) {
+		HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			       "maxdims is smaller than dims");
+	    }
+	}
+    }
+
+    /* Create a new data space */
     ds = H5MM_xcalloc(1, sizeof(H5P_t));
     ds->type = H5P_SIMPLE;
-    ds->hslab_def=FALSE;    /* no hyperslab defined currently */
+    ds->hslab_def = FALSE;    /* no hyperslab defined currently */
 
     /* Initialize rank and dimensions */
     ds->u.simple.rank = rank;
-    ds->u.simple.dim_flags = 0; /* max & perm information is not valid/useful */
+
     ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(size_t));
     HDmemcpy(ds->u.simple.size, dims, rank*sizeof(size_t));
-    ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
-    ds->u.simple.perm = H5MM_xcalloc(1, rank*sizeof(intn));
 
+    if (maxdims) {
+	ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
+	HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(size_t));
+    }
+    
     /* Register the new data space and get an ID for it */
     if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                     "unable to register data space for ID");
     }
-  done:
+
+ done:
     if (ret_value < 0) {
         H5MM_xfree(ds);
     }
@@ -210,16 +240,62 @@ H5P_close(H5P_t *ds)
         assert("unknown data space type" && 0);
         break;
     }
-    if(ds->hslab_def==TRUE)
-      {
+    if(ds->hslab_def==TRUE) {
         H5MM_xfree(ds->h.start);
         H5MM_xfree(ds->h.count);
         H5MM_xfree(ds->h.stride);
-      } /* end if */
+    } /* end if */
     H5MM_xfree(ds);
 
     FUNC_LEAVE(SUCCEED);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pcopy
+ *
+ * Purpose:	Copies a dataspace.
+ *
+ * Return:	Success:	ID of the new dataspace
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Pcopy (hid_t space_id)
+{
+    H5P_t	*src = NULL;
+    H5P_t	*dst = NULL;
+    hid_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5Pcopy, FAIL);
+
+    /* Check args */
+    if (H5_DATASPACE!=H5A_group (space_id) ||
+	NULL==(src=H5A_object (space_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Copy */
+    if (NULL==(dst=H5P_copy (src))) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to copy data space");
+    }
+
+    /* Atomize */
+    if ((ret_value=H5A_register (H5_DATASPACE, dst))<0) {
+	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		       "unable to register data space atom");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_copy
@@ -579,11 +655,10 @@ H5P_get_dims(const H5P_t *ds, size_t dims[])
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_modify(H5F_t *f, H5G_entry_t *ent, const H5P_t *ds)
+H5P_modify(H5G_entry_t *ent, const H5P_t *ds)
 {
-    FUNC_ENTER(H5O_modify, FAIL);
+    FUNC_ENTER(H5P_modify, FAIL);
 
-    assert(f);
     assert(ent);
     assert(ds);
 
@@ -692,8 +767,6 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
         if (ds1->u.simple.rank > ds2->u.simple.rank)
             HRETURN(1);
 
-        /* don't compare flags */
-
         for (i = 0; i < ds1->u.simple.rank; i++) {
             if (ds1->u.simple.size[i] < ds2->u.simple.size[i])
                 HRETURN(-1);
@@ -713,8 +786,7 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
         }
 
         /* Check if we should compare hyperslab definitions */
-        if(ds1->hslab_def==TRUE && ds2->hslab_def==TRUE)
-          {
+        if(ds1->hslab_def==TRUE && ds2->hslab_def==TRUE) {
             for (i = 0; i < ds1->u.simple.rank; i++) {
                 if (ds1->h.start[i] < ds2->h.start[i])
                     HRETURN(-1);
@@ -729,12 +801,10 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
                 if (ds1->h.stride[i] > ds2->h.stride[i])
                     HRETURN(1);
             }
-          } /* end if */
-        else
-          {
+	} else {
             if(ds1->hslab_def!=ds2->hslab_def)
                 HRETURN(ds1->hslab_def==TRUE ? 1 : -1);
-          } /* end else */
+	}
 
         break;
 
@@ -842,11 +912,21 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
 
     FUNC_ENTER(H5Pset_space, FAIL);
 
-    /* Get the object */
+    /* Check args */
     if ((space = H5A_object(sid)) == NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
+    if (rank<0)
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
+    if (dims) {
+	for (u=0; u<rank; u++) {
+	    if (dims[u]<=0) {
+		HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			       "invalid dimension size");
+	    }
+	}
+    }
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->type) {
@@ -863,37 +943,29 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
         /* Fall through to report error */
 
     default:
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                    "unknown data space class");
-    }                           /* end switch */
+        HRETURN_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+		      "unknown data space class");
+    }
     space->type = H5P_SIMPLE;
 
     /* Reset hyperslab definition, if one is defined */
-    if(space->hslab_def==TRUE)
-      {
+    if(space->hslab_def==TRUE) {
         H5MM_xfree(space->h.start);
         H5MM_xfree(space->h.count);
         H5MM_xfree(space->h.stride);
         space->hslab_def=FALSE;
-
-      } /* end if */
+    }
 
     if (rank == 0) {            /* scalar variable */
         space->type = H5P_SCALAR;
         space->u.simple.rank = 0;       /* set to scalar rank */
-        space->u.simple.dim_flags = 0;  /* no maximum dimensions or dimension permutations */
         if (space->u.simple.size != NULL)
             space->u.simple.size = H5MM_xfree(space->u.simple.size);
         if (space->u.simple.max != NULL)
             space->u.simple.max = H5MM_xfree(space->u.simple.max);
         if (space->u.simple.perm != NULL)
             space->u.simple.max = H5MM_xfree(space->u.simple.perm);
-    }
-    /* end if */ 
-    else {
-        /* Reset the dataspace flags */
-        space->u.simple.dim_flags = 0;
-
+    } else {
         /* Free the old space for now */
         if (space->u.simple.size != NULL)
             space->u.simple.size = H5MM_xfree(space->u.simple.size);
@@ -907,25 +979,7 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
         space->u.simple.size = H5MM_xcalloc(rank, sizeof(size_t));
         HDmemcpy(space->u.simple.size, dims, sizeof(size_t) * rank);
 
-        /* check if there are unlimited dimensions and create the maximum dims array */
-        for (u = 0; u < rank; u++)
-            if (dims[u] == 0) {
-                if (u > 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
-                                "unlimited dimensions not in the lowest "
-                                "dimensionality");
-                space->u.simple.max = H5MM_xcalloc(rank, sizeof(size_t));
-                HDmemcpy(space->u.simple.max, dims, sizeof(size_t) * rank);
-                space->u.simple.dim_flags |= H5P_VALID_MAX;
-                break;
-            }                   /* end if */
-    }                           /* end else */
-
-  done:
-    if (ret_value == FAIL) {    /* Error condition cleanup */
-
-    }                           /* end if */
-    /* Normal function cleanup */
+    }
     FUNC_LEAVE(ret_value);
 }
 
@@ -1176,3 +1230,55 @@ H5P_find (const H5P_t *mem_space, const H5P_t *file_space)
     
     FUNC_LEAVE (conv);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_extend
+ *
+ * Purpose:	Extend the dimensions of a data space.
+ *
+ * Return:	Success:	Number of dimensions whose size increased.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5P_extend (H5P_t *space, const size_t *size)
+{
+    intn		i, ret_value=0;
+    
+    FUNC_ENTER (H5P_extend, FAIL);
+
+    /* Check args */
+    assert (space && H5P_SIMPLE==space->type);
+    assert (size);
+
+    for (i=0; i<space->u.simple.rank; i++) {
+	if (space->u.simple.size[i]<size[i]) {
+	    if (space->u.simple.max &&
+		H5P_UNLIMITED!=space->u.simple.max[i] &&
+		space->u.simple.max[i]<size[i]) {
+		HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			       "dimension cannot be increased");
+	    }
+	    ret_value++;
+	}
+    }
+
+    /* Update */
+    if (ret_value) {
+	for (i=0; i<space->u.simple.rank; i++) {
+	    if (space->u.simple.size[i]<size[i]) {
+		space->u.simple.size[i] = size[i];
+	    }
+	}
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+		

@@ -59,7 +59,7 @@ herr_t H5Cset_istore_k (hid_t tid, int ik);
 herr_t H5Cget_istore_k (hid_t tid, int *ik/*out*/);
 herr_t H5Cset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Cget_layout (hid_t tid);
-herr_t H5Cset_chunk (hid_t tid, int ndims, size_t dim[]);
+herr_t H5Cset_chunk (hid_t tid, int ndims, const size_t dim[]);
 int H5Cget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
 
 #ifdef __cplusplus

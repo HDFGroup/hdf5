@@ -58,7 +58,6 @@ herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
                   const H5P_t *mem_space, const H5P_t *file_space,
                   const H5D_xfer_t *xfer_parms, const void *buf);
 hid_t H5D_find_name (hid_t file_id, group_t UNUSED, const char *name);
+herr_t H5D_extend (H5D_t *dataset, const size_t *size);
 
-/* Functions defined in in H5Dconv.c */
-herr_t H5D_convert_buf (void *dst, const void *src, uintn len, uintn size);
 #endif

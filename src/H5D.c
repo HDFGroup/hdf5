@@ -540,7 +540,50 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
     FUNC_LEAVE(SUCCEED);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dextend
+ *
+ * Purpose:	This function makes sure that the dataset is at least of size
+ *		SIZE. The dimensionality of SIZE is the same as the data
+ *		space of the dataset being changed.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dextend (hid_t dataset_id, const size_t *size)
+{
+    H5D_t	*dataset = NULL;
+    
+    FUNC_ENTER (H5Dextend, FAIL);
 
+    /* Check args */
+    if (H5_DATASET!=H5A_group (dataset_id) ||
+	NULL==(dataset=H5A_object (dataset_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+    if (!size) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
+    }
+
+    /* Increase size */
+    if (H5D_extend (dataset, size)<0) {
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to extend dataset");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_find_name
  *
@@ -627,7 +670,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
     }
     /* Update the type and space header messages */
     if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0, 0, new_dset->type) < 0 ||
-	H5P_modify(f, &(new_dset->ent), new_dset->space) < 0) {
+	H5P_modify(&(new_dset->ent), new_dset->space) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "can't update type or space header messages");
     }
@@ -1132,3 +1175,53 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     bkg_buf = H5MM_xfree (bkg_buf);
     FUNC_LEAVE(ret_value);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_extend
+ *
+ * Purpose:	Increases the size of a dataset.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January 30, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_extend (H5D_t *dataset, const size_t *size)
+{
+    herr_t	changed;
+
+    FUNC_ENTER (H5D_extend, FAIL);
+
+    /* Check args */
+    assert (dataset);
+    assert (size);
+
+    /* This is only allowed for data spaces with chunked layout */
+    if (H5D_CHUNKED!=dataset->layout.type) {
+	HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		       "size can only be increased for chunked datasets");
+    }
+
+    /* Increase the size of the data space */
+    if ((changed=H5P_extend (dataset->space, size))<0) {
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to increase size of data space");
+    }
+
+    /* Save the new dataspace in the file if necessary */
+    if (changed>0 &&
+	H5P_modify (&(dataset->ent), dataset->space)<0) {
+	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
+		       "unable to update file with new dataspace");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+    

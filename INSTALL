@@ -32,11 +32,12 @@ Step 2. Configure makefiles.
 
 	$ ./configure
 
-    * By default libraries, programs, and documentation are installed
-      under /usr/local/lib, /usr/local/bin, and /usr/local/man.
-      However, if you want them in some other location you can specify
-      a prefix to use instead of /usr/local.  For instance, to install
-      in /usr/lib, /usr/bin, and /usr/man one would say
+    * By default libraries, include files, programs, and documentation
+      are installed under /usr/local/lib, /usr/local/include,
+      /usr/local/bin, and /usr/local/man.  However, if you want them
+      in some other location you can specify a prefix to use instead
+      of /usr/local.  For instance, to install in /usr/lib,
+      /usr/include, /usr/bin, and /usr/man one would say
 
 	$ ./configure --prefix=/usr
 
@@ -56,6 +57,33 @@ Step 2. Configure makefiles.
 
         $ CC=gcc CPPFLAGS=-DNDEBUG CFLAGS="-Wall -O3" ./configure
 
+    * The HDF team recommends the following C flags for this prototype
+      release of the library.
+
+	o Full warnings, usually `-fullwarn' or `-Wall' depending on
+	  the compiler.  With GCC you may optionally add:
+	  -Wpointer-arith -Wwrite-strings -Wstrict-prototypes
+	  -Wmissing-prototypes -Wmissing-declarations -Wnested-externs
+
+	o Symbol table, usually with `-g'
+
+	o Turn on debugging code in the various packages.  Some
+	  packages just produce extra output while others traverse
+	  data structures looking for things that seem to be wrong.
+	
+	  -DH5AC_DEBUG	- cache debugging
+	  -DH5B_DEBUG	- B-link-tree debugging
+	  -DH5F_DEBUG	- File debugging
+	  -DH5G_DEBUG	- Group debugging
+	  -UH5O_DEBUG	- Open/Close debugging (produces lots of output)
+	  -DH5T_DEBUG	- Data type conversion statistics
+	  
+	o The default low level driver can be chosen with
+
+	  -DH5F_LOW_DFLT=H5F_LOW_STDIO	- Use libc stdio.h functions
+	  -DH5F_LOW_DFLT=H5F_LOW_SEC2	- Use system calls directly
+
+	  the default is to use stdio functions.
 
     * You can see a list of other configuration options by saying
 
@@ -70,7 +98,7 @@ Step 3. Compile library, tests, and programs.
 
       Note: If you supplied some other make command through the MAKE
       environment variable in the previous step then use that command
-      instead.
+      instead. The same applies below.
 
       Note: If you're re-building the library after changing some
       files and you're not using GNU make and gcc, then you should say
@@ -90,9 +118,9 @@ Step 4. Run confidence tests.
 
       The command will fail if any test fails.
 
-      Note: some versions of make will report that `test is up to
+      Note: some old versions of make will report that `test is up to
       date'. If this happens then run `make _test' instead or run
-      `make test' from  within the test directory.
+      `make test' from within the test directory.
 
 
 Step 5. Install public files.

@@ -56,7 +56,7 @@ test_create(hid_t file)
     /* Create the data space */
     dims[0] = 256;
     dims[1] = 512;
-    space = H5Pcreate_simple(2,dims);
+    space = H5Pcreate_simple(2, dims, NULL);
     assert(space != FAIL);
 
     /*
@@ -208,7 +208,7 @@ test_simple_io(hid_t file)
     /* Create the data space */
     dims[0] = 100;
     dims[1] = 200;
-    space = H5Pcreate_simple(2,dims);
+    space = H5Pcreate_simple(2, dims, NULL);
     assert(space != FAIL);
 
     /* Create the dataset */
@@ -296,7 +296,7 @@ test_tconv(hid_t file)
 
     /* Create the data space */
     dims[0] = 1000000;
-    space = H5Pcreate_simple(1,dims);
+    space = H5Pcreate_simple (1, dims, NULL);
     assert(space != FAIL);
 
     /* Create the data set */
