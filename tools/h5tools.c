@@ -1542,17 +1542,18 @@ h5dump_fixtype(hid_t f_type)
 	 * If there is no memory type large enough then use the largest
 	 * memory type available.
 	 */
-	if (size<=sizeof(char)) {
+	if (size <= sizeof(char)) {
 	    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
-	} else if (size<=sizeof(short)) {
+	} else if (size <= sizeof(short)) {
 	    m_type = H5Tcopy(H5T_NATIVE_SHORT);
-	} else if (size<=sizeof(int)) {
+	} else if (size <= sizeof(int)) {
 	    m_type = H5Tcopy(H5T_NATIVE_INT);
-	} else if (size<=sizeof(long)) {
+	} else if (size <= sizeof(long)) {
 	    m_type = H5Tcopy(H5T_NATIVE_LONG);
 	} else {
 	    m_type = H5Tcopy(H5T_NATIVE_LLONG);
 	}
+
 	H5Tset_sign(m_type, H5Tget_sign(f_type));
 	break;
 	
@@ -1562,13 +1563,14 @@ h5dump_fixtype(hid_t f_type)
 	 * its size is at least as large as the file type.  If there is not
 	 * native type large enough then use the largest native type.
 	 */
-	if (size<=sizeof(float)) {
+	if (size <= sizeof(float)) {
 	    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
-	} else if (size<=sizeof(double)) {
+	} else if (size <= sizeof(double)) {
 	    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
 	} else {
 	    m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
 	}
+
 	break;
 	
     case H5T_STRING:
@@ -1577,8 +1579,8 @@ h5dump_fixtype(hid_t f_type)
 	 * strDUAction == TRUE. if it is false we will do the original action
 	 * here.
 	 */
-	    m_type = H5Tcopy(f_type);
-	    H5Tset_cset(m_type, H5T_CSET_ASCII);
+	m_type = H5Tcopy(f_type);
+	H5Tset_cset(m_type, H5T_CSET_ASCII);
 	break;
 
     case H5T_COMPOUND:
@@ -1591,43 +1593,55 @@ h5dump_fixtype(hid_t f_type)
 	 */
 	nmembs = H5Tget_nmembers(f_type);
 	memb = calloc(nmembs, sizeof(hid_t));
-	name = calloc(nmembs, sizeof(char*));
+	name = calloc(nmembs, sizeof(char *));
 	ndims = calloc(nmembs, sizeof(int));
 	dims = calloc(nmembs*4, sizeof(size_t));
 	
-	for (i=0, size=0; i<nmembs; i++) {
-
+	for (i = 0, size = 0; i < nmembs; i++) {
 	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
 	    memb[i] = h5dump_fixtype(f_memb);
 	    H5Tclose(f_memb);
-	    if (memb[i]<0) goto done;
+
+	    if (memb[i] < 0)
+		    goto done;
 
 	    /* Get the member dimensions */
-	    ndims[i] = H5Tget_member_dims(f_type, i, dims+i*4, NULL);
-	    assert(ndims[i]>=0 && ndims[i]<=4);
-	    for (j=0, nelmts=1; j<ndims[i]; j++) nelmts *= dims[i*4+j];
+	    ndims[i] = H5Tget_member_dims(f_type, i, dims + i * 4, NULL);
+	    assert(ndims[i] >= 0 && ndims[i] <= 4);
+
+	    for (j = 0, nelmts = 1; j < ndims[i]; j++)
+		    nelmts *= dims[i * 4 + j];
 
 	    /* Get the member name */
 	    name[i] = H5Tget_member_name(f_type, i);
-	    if (NULL==name[i]) goto done;
+
+	    if (NULL == name[i])
+		    goto done;
 
 	    /*
 	     * Compute the new offset so each member is aligned on a byte
 	     * boundary which is the same as the member size.
 	     */
 	    size = ALIGN(size, H5Tget_size(memb[i])) +
-		     nelmts * H5Tget_size(memb[i]);
+                         nelmts * H5Tget_size(memb[i]);
 	}
 
 	m_type = H5Tcreate(H5T_COMPOUND, size);
-	for (i=0, offset=0; i<nmembs; i++) {
-	    H5Tinsert_array(m_type, name[i], offset, ndims[i], dims+i*4,
+
+	for (i = 0, offset = 0; i < nmembs; i++) {
+            if (offset)
+                offset = ALIGN(offset, H5Tget_size(memb[i]));
+
+	    H5Tinsert_array(m_type, name[i], offset, ndims[i], dims + i * 4,
 			    NULL, memb[i]);
-	    for (j=0, nelmts=1; j<ndims[i]; j++) nelmts *= dims[i*4+j];
-	    offset = ALIGN(offset, H5Tget_size(memb[i])) +
-		     nelmts * H5Tget_size(memb[i]);
+
+	    for (j = 0, nelmts = 1; j < ndims[i]; j++)
+		    nelmts *= dims[i * 4 + j];
+
+	    offset += nelmts * H5Tget_size(memb[i]);
 	}
+
 	break;
 
     case H5T_ENUM:
