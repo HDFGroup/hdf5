@@ -2652,9 +2652,11 @@ fi
  COMMENCE=config/commence
  CONCLUDE=config/conclude
 
- SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
-cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
-SEARCH="$SEARCH_RULE`eval $cmd`"
+if test -z "$SEARCH"; then
+    SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
+   cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
+   SEARCH="$SEARCH_RULE`eval $cmd`"
+fi
 
 if test "X$GMAKE" = "Xyes"; then
     SETX=":"
