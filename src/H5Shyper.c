@@ -4127,21 +4127,25 @@ H5S_hyper_select_valid (const H5S_t *space)
 
         /* Check each dimension */
         for(i=0; i<space->extent.u.simple.rank; i++) {
-            /* Bounds check the start point in this dimension */
-            if((diminfo[i].start+space->select.offset[i])<0 ||
-                    (diminfo[i].start+space->select.offset[i])>=(hssize_t)space->extent.u.simple.size[i]) {
-                ret_value=FALSE;
-                break;
-            } /* end if */
+	    /* if block or count is zero, then can skip the test since */
+	    /* no data point is chosen */
+	    if (diminfo[i].count*diminfo[i].block != 0){
+		/* Bounds check the start point in this dimension */
+		if((diminfo[i].start+space->select.offset[i])<0 ||
+			(diminfo[i].start+space->select.offset[i])>=(hssize_t)space->extent.u.simple.size[i]) {
+		    ret_value=FALSE;
+		    break;
+		} /* end if */
 
-            /* Compute the largest location in this dimension */
-            end=diminfo[i].start+diminfo[i].stride*(diminfo[i].count-1)+(diminfo[i].block-1)+space->select.offset[i];
+		/* Compute the largest location in this dimension */
+		end=diminfo[i].start+diminfo[i].stride*(diminfo[i].count-1)+(diminfo[i].block-1)+space->select.offset[i];
 
-            /* Bounds check the end point in this dimension */
-            if(end<0 || end>=(hssize_t)space->extent.u.simple.size[i]) {
-                ret_value=FALSE;
-                break;
-            } /* end if */
+		/* Bounds check the end point in this dimension */
+		if(end<0 || end>=(hssize_t)space->extent.u.simple.size[i]) {
+		    ret_value=FALSE;
+		    break;
+		} /* end if */
+	    }
         } /* end for */
     } /* end if */
     else {
