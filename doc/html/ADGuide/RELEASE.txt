@@ -1,4 +1,4 @@
-HDF5 version 1.5.29 released on Sat Jun  1 23:08:45 CDT 2002
+HDF5 version 1.5.30 released on Sat Jun 29 03:47:35 CDT 2002
 ================================================================================
 
 
@@ -35,7 +35,29 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
-
+    * Fixed bug in parallel I/O routines where a collective I/O which used
+      MPI derived types, followed by an independent I/O would cause the library
+      to hang.  QAK 2002/06/24
+    * Fixed bug in chunking routines where they were using internal allocation
+      free routines, instead of malloc/free, preventing user filters from
+      working correctly.  Chunks are now allocated/freed with malloc/free and
+      so should the chunks in user filters.  QAK 2002/06/18
+    * Fixed bug where regular hyperslab selection could get incorrectly
+      transferred when the number of elements in a row did not fit evenly
+      into the buffer provided.  QAK 2002/06/12
+    * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
+      (one with no members) to be used to create a dataset or committed to a
+      file.  QAK - 2002/06/11
+    * Fixed bug (#777) which allowed a compound datatype to be inserted into
+      itself.  QAK - 2002/06/10
+    * Fixed bug (#789) where creating 1-D dataset region reference caused the
+      library to go into infinite loop.  QAK - 2002/06/10
+    * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
+      written to the file and then subsequently queried with the
+      H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
+      of H5S_SCALAR. EIP - 2002/06/04
+    * Clear symbol table node "dirty" flag when flushing symbol tables to
+      disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain obscure
       situations where many objects were created in the file.  QAK - 2002/05/31
     * Fixed bug where read/write intent in file IDs created with H5Freopen
@@ -166,6 +188,30 @@ Documentation
 New Features
 ============
 
+    * Added environment variable flag to control whether creating MPI derived
+      typed is preferred or not.  This can affect performance, depending on
+      which way the MPI-I/O library is optimized for.  The default is set to
+      prefer MPI derived types for collective raw data transfers, setting the
+      HDF5_MPI_PREFER_DERIVED_TYPES environment variable to "0" (i.e.:
+      "setenv HDF5_MPI_PREFER_DERIVED_TYPES 0") changes the preference to avoid
+      using then whenever possible.  QAK - 2002/06/19
+    * Changed MPI I/O routines to avoid creating MPI derived types (and thus
+      needing to set the file view) for contiguous selections within datasets,
+      which should result in some performance improvement for those types of
+      selections.  QAK - 2002/06/18
+    * Enable MPI type support for collective I/O to be enabled by default.
+      This can be disabled by setting the HDF5_MPI_OPT_TYPES environment
+      variable to the value "0".  QAK - 2002/06/14
+    * Allow chunks in chunked datasets to be cached when parallel file is
+      opened for read-only access (bug #709).  QAK - 2002/06/10
+    * Added internal "small data" aggregation, which can reduce the number of
+      actual I/O calls made, improving performance.  QAK - 2002/06/05
+    * Improved internal metadata aggregation, which can reduce the number of
+      actual I/O calls made, improving performance.  Additionally, this can
+      reduce the size of files produced.  QAK - 2002/06/04
+    * Improved internal metadata caching, which can reduce the number of actual
+      I/O calls made by a substantial amount, improving
+      performance.  QAK - 2002/06/03
     * Added 'closing' parameter to VFL 'flush' callback function and H5FDflush.
       This allows the library to indicate that the file will be closed
       immediately following the call to 'flush' and can be used to avoid actions
@@ -280,9 +326,9 @@ New Features
           7 and contains the sizes of the data buffer dimensions. 
         - F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were 
           overloaded with "dims" argument to be assumed size array of type 
-          INTEGER(HSIZE_T). We recommend to use the subroutines with the new type. 
-          Module subroutines that accept "dims" as INTEGER array of size 7 will be 
-          depricated in 1.6 release. 
+          INTEGER(HSIZE_T). We recommend to use the subroutines with the new
+          type.  Module subroutines that accept "dims" as INTEGER array of size
+          7 will be deprecated in 1.6 release. 
           EIP - 2002/05/06 
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
@@ -310,8 +356,8 @@ Platforms Tested
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
-  FreeBSD 4.3                   gcc 2.95.2
-                                g++ 2.95.2
+  FreeBSD 4.6                   gcc 2.95.4
+                                g++ 2.95.4
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
                                 HP C  HP92453-01 A.11.01.20
