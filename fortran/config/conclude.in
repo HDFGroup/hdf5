@@ -62,6 +62,7 @@ $(DOCDIR):
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
+	      (cd .libs && rm -f $(PUB_LIB)i && ln -s ../$(PUB_LIB) $(PUB_LIB)i); \
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done

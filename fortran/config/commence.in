@@ -45,10 +45,11 @@ docdir=@exec_prefix@/doc
 PUB_LIB=$(LIB)
 
 ## Shared libraries
+LT_STATIC_LIB=@LT_STATIC_LIB@
 DYNAMIC_DIRS=@DYNAMIC_DIRS@
 LT=$(top_builddir)/libtool
 LT_CCOMPILE=$(LT) --mode=compile $(CC)
-LT_LINK_CLIB=$(LT) --mode=link $(CC) -rpath $(libdir)
+LT_LINK_CLIB=$(LT) --mode=link $(CC) $(LT_STATIC_LIB) -rpath $(libdir)
 LT_LINK_CEXE=$(LT) --mode=link $(CC) $(DYNAMIC_DIRS) -rpath $(bindir)
 LT_RUN=$(LT) --mode=execute
 LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
