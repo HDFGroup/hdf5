@@ -70,6 +70,7 @@
      DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
+     INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
      INTEGER, DIMENSION(7) :: data_dims
 
      
@@ -234,8 +235,8 @@
      !
      ! Write the Real attribute data.
      !
-     data_dims(1) = 1 
-     CALL h5awrite_f(attr4_id, atype4_id, attr_real_data, data_dims, error)
+     data_dims_b(1) = 1 
+     CALL h5awrite_f(attr4_id, atype4_id, attr_real_data, data_dims_b, error)
      CALL check("h5awrite_f",error,total_error)
 
      !
