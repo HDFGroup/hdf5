@@ -841,7 +841,6 @@ static int test_simple(void)
  if (H5Dclose(did)<0)
   goto out;
 
-
 /*-------------------------------------------------------------------------
  * create 10 datasets: 5 "data" dataset and 5 dimension scales 
  *-------------------------------------------------------------------------
@@ -954,6 +953,53 @@ static int test_simple(void)
  PASSED();
 
 
+/*-------------------------------------------------------------------------
+ * create a dataset and attach only to 1 dimension
+ *-------------------------------------------------------------------------
+ */  
+
+ TESTING2("attach only to 1 dimension");
+ 
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_e",rank,dims,NULL)<0)
+  goto out;
+
+ /* make a scale */
+ if (H5LTmake_dataset_int(fid,"ds_e_1",rankds,s1_dim,NULL)<0)
+  goto out;
+
+ /* attach the DS to dimension 1 */
+ if ((did = H5Dopen(fid,"dset_e"))<0)
+  goto out;
+ if ((dsid = H5Dopen(fid,"ds_e_1"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,DIM1)<0)
+  goto out;
+ if (H5DSis_attached(did,dsid,DIM1)<=0)
+  goto out;
+
+
+ /* try to detach all dimensions. for dimensions 0 and 2, it is an error */
+ for (i=0; i<rank; i++) 
+ {
+  if ( i==1 )
+  {
+   if(H5DSdetach_scale(did,dsid,i)<0)
+    goto out;
+  }
+  else
+  {
+   if(H5DSdetach_scale(did,dsid,i)!=FAIL)
+    goto out;
+  }
+ }
+
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ 
+ PASSED();
 
 
 /*-------------------------------------------------------------------------
@@ -1280,35 +1326,35 @@ static int test_simple(void)
  * create 3 datasets: 1 "data" dataset and dimension scales (some are empty)
  *-------------------------------------------------------------------------
  */  
- if (H5LTmake_dataset_int(fid,"dset_e",rank,dims,buf)<0)
+ if (H5LTmake_dataset_int(fid,"dset_f",rank,dims,buf)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds_e_1",rankds,s1_dim,NULL)<0)
+ if (H5LTmake_dataset_int(fid,"ds_f_1",rankds,s1_dim,NULL)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds_e_11",rankds,s1_dim,s1_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_f_11",rankds,s1_dim,s1_wbuf)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds_e_2",rankds,s2_dim,NULL)<0)
+ if (H5LTmake_dataset_int(fid,"ds_f_2",rankds,s2_dim,NULL)<0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * attach them
  *-------------------------------------------------------------------------
  */  
- if ((did = H5Dopen(fid,"dset_e"))<0)
+ if ((did = H5Dopen(fid,"dset_f"))<0)
   goto out;
 
- if ((dsid = H5Dopen(fid,"ds_e_1"))<0)
+ if ((dsid = H5Dopen(fid,"ds_f_1"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,DIM0)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds_e_11"))<0)
+ if ((dsid = H5Dopen(fid,"ds_f_11"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,DIM0)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds_e_2"))<0)
+ if ((dsid = H5Dopen(fid,"ds_f_2"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,DIM1)<0)
   goto out;
@@ -1322,8 +1368,8 @@ static int test_simple(void)
  * verify match
  *-------------------------------------------------------------------------
  */  
- /* get the dataset id for "dset_e" */
- if ((did = H5Dopen(fid,"dset_e"))<0)
+ /* get the dataset id for "dset_f" */
+ if ((did = H5Dopen(fid,"dset_f"))<0)
   goto out;
 
  /* get dataset space */
@@ -1556,7 +1602,6 @@ static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor
  int       ret = 0;              /* define a default zero value for return. This will cause the iterator to continue */
  hid_t     sid;                  /* space ID */
  hssize_t  nelmts;               /* size of a dimension scale array */
- int       rank;                 /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];   /* dimensions of dataset */
  hsize_t   storage_size;
 
@@ -1567,10 +1612,6 @@ static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
- 
- /* get rank */
- if ((rank=H5Sget_simple_extent_ndims(sid))<0)
   goto out;
 
  /* get dimensions of dataset */
@@ -1603,8 +1644,7 @@ static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor
   ret = 1;
 
  /* if the scale is empty assume it cannot be used */
- if ((storage_size=H5Dget_storage_size(dsid))<0)
-  goto out;
+ storage_size=H5Dget_storage_size(dsid);
 
  if (storage_size==0)
   ret = 0;
@@ -1651,213 +1691,6 @@ static herr_t op_bogus(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_d
 
 
 
-/*-------------------------------------------------------------------------
- * test several rank and types
- *-------------------------------------------------------------------------
- */
-
-static int test_rank(void)
-{
- hid_t   fid;                                              /* file ID */
- hid_t   did;                                              /* dataset ID */
- hid_t   dsid;                                             /* scale ID */
- int     rank     = 3;                                     /* rank of data dataset */
- hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};       /* size of data dataset */
- char    name[30];                                         /* dataset name buffer */
- char    names[30];                                        /* dataset scale name buffer */
- char    namel[30];                                        /* dataset label name buffer */
- int     i;
-  
- printf("Testing ranks\n");
-
-/*-------------------------------------------------------------------------
- * create a file, a dataset, scales
- *-------------------------------------------------------------------------
- */  
-
- /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds3.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
-  goto out;
- 
- /* make a dataset */
- if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,NULL)<0)
-  goto out;
-
- /* make scale datasets  */
- for (i=0; i<rank; i++) 
- {
-  sprintf(name,"ds_a_%d",i);
-  if (H5LTmake_dataset_int(fid,name,(rank-i),&dims[i],NULL)<0)
-   goto out;
- }
-
- 
-/*-------------------------------------------------------------------------
- * attach 
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach");
- 
- if ((did = H5Dopen(fid,"dset_a"))<0)
-  goto out;
- 
- for (i=0; i<rank; i++) 
- {
-  sprintf(name,"ds_a_%d",i);
-  if((dsid = H5Dopen(fid,name))<0)
-   goto out;
-  if(H5DSattach_scale(did,dsid,i)<0)
-   goto out;
-  if (H5DSis_attached(did,dsid,i)<=0)
-   goto out;
-  if (H5Dclose(dsid)<0)
-   goto out;
- }
- 
- if (H5Dclose(did)<0)
-  goto out;
- 
- PASSED();
-
- 
-/*-------------------------------------------------------------------------
- * detach 
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("detach");
- 
- if ((did = H5Dopen(fid,"dset_a"))<0)
-  goto out;
- 
- for (i=0; i<rank; i++) 
- {
-  sprintf(name,"ds_a_%d",i);
-  if((dsid = H5Dopen(fid,name))<0)
-   goto out;
-  if(H5DSdetach_scale(did,dsid,i)<0)
-   goto out;
-  if (H5DSis_attached(did,dsid,i)!=0)
-   goto out;
-  if (H5Dclose(dsid)<0)
-   goto out;
- }
- 
- if (H5Dclose(did)<0)
-  goto out;
- 
- PASSED();
-
-
-/*-------------------------------------------------------------------------
- * attach, set, get names, labels
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach, set, get names, labels");
- 
- if ((did = H5Dopen(fid,"dset_a"))<0)
-  goto out;
- 
- for (i=0; i<rank; i++) 
- {
-  sprintf(name,"ds_a_%d",i);
-  if((dsid = H5Dopen(fid,name))<0)
-   goto out;
-  if (H5DSset_scale(dsid,name)<0)
-   goto out;
-  if(H5DSattach_scale(did,dsid,i)<0)
-   goto out;
-  if (H5DSis_attached(did,dsid,i)<=0)
-   goto out;
-  if (H5DSget_scale_name(dsid,names,sizeof(names))<0)
-   goto out;
-  if (H5Dclose(dsid)<0)
-   goto out;
-  if (H5DSset_label(did,i,name)<0)
-   goto out;
-  if (H5DSget_label(did,i,namel,sizeof(namel))<0)
-   goto out;
-  if (strcmp(name,names)!=0)
-   goto out;
-  if (strcmp(name,namel)!=0)
-   goto out;
- }
- 
- if (H5Dclose(did)<0)
-  goto out;
- 
- PASSED();
-
-
-/*-------------------------------------------------------------------------
- * create a dataset and attach only to 1 dimension
- *-------------------------------------------------------------------------
- */  
-
- TESTING2("attach only to 1 dimension");
- 
- /* make a dataset */
- if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,NULL)<0)
-  goto out;
-
- if ((did = H5Dopen(fid,"dset_b"))<0)
-  goto out;
-
- /* attach a DS to dimension 1 */
- sprintf(name,"ds_a_%d",1);
- if((dsid = H5Dopen(fid,name))<0)
-  goto out;
- if(H5DSattach_scale(did,dsid,DIM1)<0)
-  goto out;
- if (H5DSis_attached(did,dsid,DIM1)<=0)
-  goto out;
-
-
- /* try to detach all dimensions. for dimensions 0 and 2, it is an error */
- for (i=0; i<rank; i++) 
- {
-  if ( i==1 )
-  {
-   if(H5DSdetach_scale(did,dsid,i)<0)
-    goto out;
-  }
-  else
-  {
-   if(H5DSdetach_scale(did,dsid,i)!=FAIL)
-    goto out;
-  }
- }
-
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
- 
- PASSED();
-
-
-
-/*-------------------------------------------------------------------------
- * close 
- *-------------------------------------------------------------------------
- */ 
- if (H5Fclose(fid)<0)
-  goto out;
-
- return 0;
-  
- /* error zone, gracefully close */
-out:
- H5E_BEGIN_TRY {
-  H5Dclose(did);
-  H5Dclose(dsid);
-  H5Fclose(fid);
- } H5E_END_TRY;
- H5_FAILED();
- return FAIL;
-}
 
 
 
@@ -1873,7 +1706,6 @@ static int test_errors(void)
  int     rankds   = 1;                                     /* rank of DS dataset */
  hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
  hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
- hsize_t s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
  hid_t   did;                                              /* dataset ID */
  hid_t   dsid;                                             /* scale ID */
  hid_t   gid;                                              /* group ID */
@@ -2426,3 +2258,187 @@ out:
  return FAIL;
 }
 
+
+/*-------------------------------------------------------------------------
+ * test several rank and types
+ *-------------------------------------------------------------------------
+ */
+
+static int test_rank(void)
+{
+ hid_t   fid;                                              /* file ID */
+ hid_t   did;                                              /* dataset ID */
+ hid_t   dsid;                                             /* scale ID */
+ hid_t   sid;                                              /* space ID */
+ int     rank     = 3;                                     /* rank of data dataset */
+ hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};       /* size of data dataset */
+ char    name[30];                                         /* dataset name buffer */
+ char    names[30];                                        /* dataset scale name buffer */
+ char    namel[30];                                        /* dataset label name buffer */
+ int     i;
+  
+ printf("Testing ranks\n");
+
+/*-------------------------------------------------------------------------
+ * create a file, a dataset, scales
+ *-------------------------------------------------------------------------
+ */  
+
+ /* create a file using default properties */
+ if ((fid=H5Fcreate("test_ds3.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+ 
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,NULL)<0)
+  goto out;
+
+ /* make scale datasets  */
+ for (i=0; i<rank; i++) 
+ {
+  sprintf(name,"ds_a_%d",i);
+  if (H5LTmake_dataset_int(fid,name,(rank-i),&dims[i],NULL)<0)
+   goto out;
+ }
+
+ 
+/*-------------------------------------------------------------------------
+ * attach 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach");
+ 
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+ 
+ for (i=0; i<rank; i++) 
+ {
+  sprintf(name,"ds_a_%d",i);
+  if((dsid = H5Dopen(fid,name))<0)
+   goto out;
+  if(H5DSattach_scale(did,dsid,i)<0)
+   goto out;
+  if (H5DSis_attached(did,dsid,i)<=0)
+   goto out;
+  if (H5Dclose(dsid)<0)
+   goto out;
+ }
+ 
+ if (H5Dclose(did)<0)
+  goto out;
+ 
+ PASSED();
+
+ 
+/*-------------------------------------------------------------------------
+ * detach 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("detach");
+ 
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+ 
+ for (i=0; i<rank; i++) 
+ {
+  sprintf(name,"ds_a_%d",i);
+  if((dsid = H5Dopen(fid,name))<0)
+   goto out;
+  if(H5DSdetach_scale(did,dsid,i)<0)
+   goto out;
+  if (H5DSis_attached(did,dsid,i)!=0)
+   goto out;
+  if (H5Dclose(dsid)<0)
+   goto out;
+ }
+ 
+ if (H5Dclose(did)<0)
+  goto out;
+ 
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * attach, set, get names, labels
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach, set, get names, labels");
+ 
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+ 
+ for (i=0; i<rank; i++) 
+ {
+  sprintf(name,"ds_a_%d",i);
+  if((dsid = H5Dopen(fid,name))<0)
+   goto out;
+  if (H5DSset_scale(dsid,name)<0)
+   goto out;
+  if(H5DSattach_scale(did,dsid,i)<0)
+   goto out;
+  if (H5DSis_attached(did,dsid,i)<=0)
+   goto out;
+  if (H5DSget_scale_name(dsid,names,sizeof(names))<0)
+   goto out;
+  if (H5Dclose(dsid)<0)
+   goto out;
+  if (H5DSset_label(did,i,name)<0)
+   goto out;
+  if (H5DSget_label(did,i,namel,sizeof(namel))<0)
+   goto out;
+  if (strcmp(name,names)!=0)
+   goto out;
+  if (strcmp(name,namel)!=0)
+   goto out;
+ }
+ 
+ if (H5Dclose(did)<0)
+  goto out;
+ 
+ PASSED();
+
+
+
+
+
+/*-------------------------------------------------------------------------
+ * attach a scalar scale 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach a scalar scale");
+   
+ if ((sid = H5Screate(H5S_SCALAR))<0)
+  goto out;
+ 
+ if (H5Sclose(sid)<0)
+  goto out;
+ 
+ PASSED();
+
+
+
+
+
+
+/*-------------------------------------------------------------------------
+ * close 
+ *-------------------------------------------------------------------------
+ */ 
+ if (H5Fclose(fid)<0)
+  goto out;
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Dclose(did);
+  H5Dclose(dsid);
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}

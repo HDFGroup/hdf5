@@ -179,7 +179,7 @@ herr_t H5DSattach_scale(hid_t did,
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -187,11 +187,11 @@ herr_t H5DSattach_scale(hid_t did,
 
  /* close dataset space */
  if (H5Sclose(sid)<0)
-  goto out;
+  return FAIL;
 
  /* parameter range checking */
  if (idx>(unsigned)rank-1)
-  goto out;
+  return FAIL;
 
 /*-------------------------------------------------------------------------
  * two references are created: one to the DS, saved in "DIMENSION_LIST"
@@ -200,11 +200,11 @@ herr_t H5DSattach_scale(hid_t did,
  */
  /* create a reference for the >>DS<< dataset */
  if (H5Rcreate(&ref_to_ds,dsid,".",H5R_OBJECT,-1)<0)
-  goto out;
+  return FAIL;
  
  /* create a reference for the >>data<< dataset */
  if (H5Rcreate(&dsl.ref,did,".",H5R_OBJECT,-1)<0)
-  goto out;
+  return FAIL;
  
  /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
  if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
@@ -220,13 +220,13 @@ herr_t H5DSattach_scale(hid_t did,
   dims = (hsize_t*) malloc (1 * sizeof (hsize_t));
 
   if (dims == NULL)
-   goto out;
+   return FAIL;
 
   dims[0] = rank;
 
   /* space for the attribute */
   if ((sid = H5Screate_simple(1,dims,NULL))<0)
-   goto out;
+   return FAIL;
     
   /* create the type for the attribute "DIMENSION_LIST" */
   if ((tid = H5Tvlen_create(H5T_STD_REF_OBJ))<0)
@@ -617,14 +617,14 @@ herr_t H5DSdetach_scale(hid_t did,
  */
  /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
  if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
-  goto out;
+  return FAIL;
 
  if (has_dimlist == 0)
-  goto out;
+  return FAIL;
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -632,7 +632,7 @@ herr_t H5DSdetach_scale(hid_t did,
 
  /* close dataset space */
  if (H5Sclose(sid)<0)
-  goto out;
+  return FAIL;
 
 
 /*-------------------------------------------------------------------------
@@ -642,10 +642,10 @@ herr_t H5DSdetach_scale(hid_t did,
 
  /* try to find the attribute "REFERENCE_LIST" on the >>DS<< dataset */
  if ((has_reflist = H5LT_find_attribute(dsid,REFERENCE_LIST))<0)
-  goto out;
+  return FAIL;
 
  if (has_reflist == 0)
-  goto out;
+  return FAIL;
  
 /*-------------------------------------------------------------------------
  * open "DIMENSION_LIST", and delete the reference
@@ -653,7 +653,7 @@ herr_t H5DSdetach_scale(hid_t did,
  */
  
  if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
-  goto out;
+  return FAIL;
  
  if ((tid = H5Aget_type(aid))<0)
   goto out;
@@ -927,7 +927,7 @@ int H5DSget_num_scales(hid_t did,
  int        rank;         /* rank of dataset */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  H5I_type_t it;           /* ID type */
- int nscales;
+ int        nscales;
 
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -946,7 +946,7 @@ int H5DSget_num_scales(hid_t did,
  */
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -958,7 +958,7 @@ int H5DSget_num_scales(hid_t did,
 
  /* DIM range checking */
  if (dim>=(unsigned int )rank)
-  goto out;
+  return FAIL;
 
  /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
  if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
@@ -966,7 +966,7 @@ int H5DSget_num_scales(hid_t did,
 
  /* it does not exist */
  if (has_dimlist == 0)
-  goto out;
+  return FAIL;
 
 /*-------------------------------------------------------------------------
  * the attribute exists, open it 
@@ -1075,7 +1075,7 @@ herr_t H5DSset_label(hid_t did,
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -1252,7 +1252,7 @@ ssize_t H5DSget_label(hid_t did,
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -1491,7 +1491,6 @@ htri_t H5DSis_scale(hid_t did)
  if (H5I_DATASET!=it)
   return FAIL;
 
-
  /* try to find the attribute "CLASS" on the dataset */
  if ((has_class = H5LT_find_attribute(did,"CLASS"))<0)
   return FAIL;
@@ -1611,11 +1610,11 @@ herr_t H5DSiterate_scales(hid_t did,
 
  /* get the number of scales assotiated with this DIM */
  if ((nscales = H5DSget_num_scales(did,dim))<0)
-  goto out;
+  return FAIL;
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
@@ -1627,7 +1626,7 @@ herr_t H5DSiterate_scales(hid_t did,
 
  /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
  if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
-  goto out;
+  return FAIL;
 
  if (has_dimlist == 0)
   return SUCCESS;
@@ -1711,13 +1710,15 @@ herr_t H5DSiterate_scales(hid_t did,
       
 out:
  H5E_BEGIN_TRY {
-  H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+  if (buf)
+  {
+   H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+   free(buf);
+  }
   H5Sclose(sid);
   H5Aclose(aid);
   H5Tclose(tid);
  } H5E_END_TRY;
- if (buf)
-  free(buf);
  return FAIL;
 } 
 
@@ -1801,7 +1802,7 @@ htri_t H5DSis_attached(hid_t did,
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
-  goto out;
+  return FAIL;
  
  /* get rank */
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
