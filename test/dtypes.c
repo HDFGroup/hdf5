@@ -5851,7 +5851,8 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 
 /* For GNU compilers on FreeBSD(sleipnir), during conversion from 'unsigned long long'
  * to 'long double', the last 2 bytes of mantissa are lost.  But this loss seems
- * acceptable.  We allow it go through instead of fail it.
+ * acceptable.  We allow it to go through instead of fail it.  Sometimes, there's roundup
+ * to the 3rd last byte of mantissa.  So we only try to compare all but the last 3 bytes.
  */
 #ifndef H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
             if(src_type==INT_ULLONG && dst_type==FLT_LDOUBLE) {
@@ -5859,7 +5860,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                 HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(long double));
                 HDmemcpy(&tmp_h,&hw[0],sizeof(long double));
                 /*Don't compare the last 2 bytes of mantissa*/
-                if(!HDmemcmp(&tmp_s+2, &tmp_h+2, sizeof(long double)-2))
+                if(!HDmemcmp(&tmp_s+3, &tmp_h+3, sizeof(long double)-3))
                     continue; /*no error*/
             }
 #endif /*end H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS*/
