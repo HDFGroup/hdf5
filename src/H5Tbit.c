@@ -483,8 +483,8 @@ done:
  * Purpose:	Increment part of a bit field by adding 1.  The bit field 
  *              starts with bit position START and is SIZE bits long.
  *
- * Return:	Success:        The carry-out value, one if overflow zero
- *				otherwise.
+ * Return:	Success:        The carry-out value.  One if overflows, 
+ *                              zero otherwise.
  *
  *		Failure:	Negative
  *
@@ -547,7 +547,7 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_bit_dec
+ * Function:	H5T_bit_dec2
  *
  * Purpose:	decrement part of a bit field by 1.
  *              At this moment, START is always 0 and SIZE is a multiply 
@@ -564,10 +564,12 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
  * 		Need to generalize it to handle random START and SIZE like
  *              H5T_bit_inc. 
  *
+ *              Older algorithm.  Take it out!!!
+ *
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
+H5T_bit_dec2(uint8_t *buf, size_t start, size_t size)
 {
     size_t	idx;
 
@@ -583,6 +585,87 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
             buf[idx] -= 1; 
         }
     }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_bit_dec
+ *
+ * Purpose:	decrement part of a bit field by substracting 1.  The bit 
+ *              field starts with bit position START and is SIZE bits long.
+ *
+ * Return:	Success:        The "borrow-in" value. It's one if underflows,
+ *                              zero otherwise.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *              March 17, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
+{
+    size_t	idx = start / 8;
+    size_t      pos = start % 8;
+    uint8_t     tmp;
+    unsigned	borrow = 0;
+    
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_dec);
+
+    assert(buf);
+    assert(size);
+
+    /* The first partial byte */
+    if ((size+start)/8 > idx) { /*bit sequence doesn't end in the same byte as starts*/
+        /* Example:  a sequence like 11000100 and start = 3.  We substract 00001000 from 
+         * it and get 10111100.  If a sequence is 00000111, we do right shift for START 
+         * bits and get 00000000.  So we need to borrow from higher byte when we substract
+         * 00001000.
+         */ 
+        if(!(buf[idx] >> pos))
+            borrow = 1;
+        buf[idx] -= 1 << pos;
+        idx++;
+    } else { /* bit sequence ends in the same byte as starts */
+        /* Example: a sequence like 11000100 and start=3, size=3.  We substract 00001000 
+         * and get 10111100.  A bit is borrowed from 6th bit(buf[idx]>>6=00000010, tmp>>6=00000011,
+         * not equal).  We need to put this bit back by increment 1000000.
+         */ 
+        tmp = buf[idx];
+        buf[idx] -= 1 << pos;
+        if((buf[idx] >> (start+size)) != tmp >> (start+size)) {
+            buf[idx] += 1 << (start+size);
+            borrow = 1;
+        }
+        goto done;
+    }
+    
+    /* The middle bytes */
+    while (borrow && size>=8) {
+        if(buf[idx])
+            borrow = 0;
+        buf[idx] -= 1;
+
+	idx++;
+	size -= 8;
+    }
+
+    /* The last byte */
+    if (borrow && size>0) {
+        /* Similar to the first byte case, where sequence ends in the same byte as starts */
+        tmp = buf[idx];
+        buf[idx] -= 1;
+        if((buf[idx] >> size) != tmp >> size)
+            buf[idx] += 1 << size;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(borrow ? TRUE : FALSE);
 }
 
 
