@@ -676,6 +676,10 @@
 
 ./c++/test/Dependencies
 ./c++/test/Makefile.in
+./c++/test/testhdf5.cpp
+./c++/test/dsets.cpp
+./c++/test/tfile.cpp
+./c++/test/th5s.cpp
 
 #------------------------------------------------------------------------------
 #
