@@ -289,7 +289,7 @@ void  HDFtraceWriteEnd ( int );
 void  HDFtraceIOBegin ( int, int );
 void  HDFtraceIOEnd ( int, double, char * );
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 
 #include "HDFmpioProtos.h"
 
@@ -410,8 +410,8 @@ void  HDFtraceIOEnd ( int, double, char * );
 #define MPI_File_set_atomicity 	 HDF_MPI_File_set_atomicity
 #define MPI_File_get_atomicity 	 HDF_MPI_File_get_atomicity
 #define MPI_File_sync 		 HDF_MPI_File_sync
-#endif /* HAVE_PARALLEL */
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
+#endif /* HDFIOTRACE */
 #ifdef __cplusplus
 }
 #endif
