@@ -1993,7 +1993,6 @@ END SUBROUTINE h5pget_class_parent_f
         include the following:
         <pre>
            H5FD_CORE
-           H5FD_DPSS
            H5FD_FAMILY
            H5FD_GASS
            H5FD_LOG
@@ -5955,7 +5954,7 @@ END SUBROUTINE h5pset_edc_check_f
         dataset can be extended (provided the data space also allows
         the extending).
         <p>
-        The <code>size</code> argument specifies number of bytes reserved 
+        The <code>size</code> argument specifies the number of bytes reserved 
         for data in the external file.
         If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
         external file can be of unlimited size and no more files can be added to
@@ -8222,8 +8221,14 @@ END SUBROUTINE h5pset_preserve_f
 	closely related to each other and putting them together 
         can increase the compression ratio.
 	<p>
-	This filter is designed to be used in combination with 
-	a compression filter.
+        As implied above, the primary value of the shuffle filter 
+        lies in its coordinated use with a compression filter; 
+        it does not provide data compression when used alone. 
+        When the shuffle filter is applied to a dataset 
+        immediately prior to the use of a compression filter, 
+        the compression ratio achieved is often superior to that
+        achieved by the use of a compression filter without 
+        the shuffle filter.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -9189,7 +9194,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 March 2004");
+document.writeln("Last modified: 24 June 2004");
 -->
 </SCRIPT>
  
