@@ -3185,11 +3185,21 @@ facilitate moving easily between them.</i>
         <code>fapl_id</code> is a file access property list identifier.
         <p> 
         <code>meta_ext</code> is the filename extension for the metadata file.
+	The extension is appended to the name passed to <code>H5FDopen</code>,
+	usually from <code>H5Fcreate</code> or <code>H5Fopen</code>,
+	to form the name of the metadata file.
+	If the string %s is used in the extension, it works like the
+	name generator as in <code>H5Pset_fapl_multi</code>.
         <p> 
         <code>meta_plist_id</code> is the file access property list identifier 
         for the metadata file.
         <p> 
         <code>raw_ext</code> is the filename extension for the raw data file.
+	The extension is appended to the name passed to <code>H5FDopen</code>,
+	usually from <code>H5Fcreate</code> or <code>H5Fopen</code>,
+	to form the name of the rawdata file.
+	If the string %s is used in the extension, it works like the
+	name generator as in <code>H5Pset_fapl_multi</code>.
         <p> 
         <code>raw_plist_id</code> is the file access property list identifier 
         for the raw data file.
@@ -3210,6 +3220,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+  <dt><strong>Example:</strong>
+    <dd>
+<pre>
+/* Example 1: Both metadata and rawdata files are in the same  */
+/*    directory.   Use Station1-m.h5 and Station1-r.h5 as      */
+/*    the metadata and rawdata files.                          */
+hid_t fapl, fid;
+fapl = H5Pcreate(H5P_FILE_ACCESS);
+H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+fid=H5Fcreate("Station1",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
+
+/* Example 2: metadata and rawdata files are in different      */
+/*    directories.  Use PointA-m.h5 and /pfs/PointA-r.h5 as    */
+/*    the metadata and rawdata files.                          */
+hid_t fapl, fid;
+fapl = H5Pcreate(H5P_FILE_ACCESS);
+H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/pfs/%s-r.h5", H5P_DEFAULT);
+fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
+</pre>
   <!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
