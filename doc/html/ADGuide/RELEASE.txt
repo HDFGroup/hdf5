@@ -1,4 +1,4 @@
-HDF5 version 1.7.42 released on Sun Nov 14 05:17:04 CST 2004
+HDF5 version 1.7.43 released on Sun Dec  5 03:51:33 CST 2004
 ================================================================================
 
 
@@ -151,9 +151,9 @@ New Features
         - h5repack.sh did not report errors encountered during tests.  It does
             now.  AKC - 2004/04/02
         - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
-            available for h5dump and h5ls
+            available for h5dump and h5ls.  RPM & QAK - 2004/02/01
         - Added option --vfd= to h5ls to allow a VFL driver to be selected
-            by a user.
+            by a user.  RPM & QAK - 2004/02/01
 	- Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
 	    AKC - 2004/01/08
         - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
@@ -392,6 +392,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Tools
     -----
+	- Fixed h5dump to print attributes data in ASCII if -r option is used.
+	    AKC - 2004/11/18
         - Fixed space utilization reported in h5ls to correct error in formula
             used.  QAK - 2004/10/22
         - Fixed h5redeploy which sometimes complain too many argument for the
