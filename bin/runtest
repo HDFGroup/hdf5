@@ -277,25 +277,56 @@ RUNSNAPTEST()
 }
 
 
-# Snap Test configuration parsing
-SNAPTEST_CONFIG()
+# Record a type of test requested. Separate new request from
+# existing requests by a semicolon (;).
+# $1 is the type of test requested
+ADD_TEST_TYPE()
 {
-    if [ ! -f $SNAPTESTCFG ]; then
-	return
-    fi
+echo TEST_TYPES=$TEST_TYPES
+}
+
+# configuration parsing.
+# Taking configuration from input.
+# This should be invoke with configure file as stdin.
+SNAPTEST_CONFIG_PARSE()
+{
     while read x y ; do
 	case "$x" in
-	    '#')	# comment.  Continue.
+	    '#'*)
+		# comment.  Continue.
 	    	;;
-	    standard)	#standard configuration
+	    standard)
+		#standard configuration
 		STANDARD_OPT="$y"
 		;;
-	    *)		# unknown configuration option
+	    all: | ${HOSTNAME}:)
+		# types of test for all hosts or this host
+		if [ -n "$TEST_TYPES" ]; then
+		    TEST_TYPES="$TEST_TYPES ; $y"
+		else
+		    TEST_TYPES="$y"
+		fi
+		;;
+	    *:)	# ignore types of test for other hosts
+		;;
+	    *)	# unknown configuration option
 		echo $x $y
 		echo "***Unknown configuration option. Ignored.***"
 		;;
 	esac
-    done < $SNAPTESTCFG
+    done
+}
+
+# Snap Test configuration parsing.
+# If TEST_TYPES is not set, set it to do the "standard" test.
+SNAPTEST_CONFIG()
+{
+    TEST_TYPES=
+    STANDARD_OPT=
+    if [ -f $SNAPTESTCFG ]; then
+	SNAPTEST_CONFIG_PARSE < $SNAPTESTCFG
+    fi
+    TEST_TYPES=${TEST_TYPES:-'standard'}
 }
 
 
@@ -367,6 +398,8 @@ StartTime=`SecOfDay`
 
 # Process the configuration
 SNAPTEST_CONFIG
+echo STANDARD_OPT=$STANDARD_OPT
+echo TEST_TYPES=$TEST_TYPES
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
@@ -424,32 +457,25 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     exit 0
 fi
 
-# Running the standard test in this host.
-RUNSNAPTEST standard
-REPORT_RESULT
-PRINT_TRAILER
+# run the test(s)
+# Note that first field is cut without -s but all subsequent cut
+# must use -s.  If -s is not used at all, a $TEST_TYPES that has
+# no ';' (only 1 test), will pass through intact in all cut. That
+# results in infinite looping.
+# If -s is used with the first field, it will suppress completely
+# a $TYPE_TYPES that has no ';' (only 1 tst ).  That results in no
+# test at all.
+# 
+n_test=1
+TEST="`echo $TEST_TYPES | cut -f1 -d';'`"
+while [ -n "$TEST" ]; do
+    RUNSNAPTEST $TEST
+    REPORT_RESULT
+    PRINT_TRAILER
 
-#
-# Running the parallel test if this is parallel host too
-if ( echo $PARALLELHOST | grep -s $HOSTNAME > /dev/null ) then
-    RUNSNAPTEST parallel
-    REPORT_RESULT
-    PRINT_TRAILER
-fi
-
-#
-# If this is modi4, run -n32 tests too.
-if [ $HOSTNAME = modi4 ]; then
-    #
-    # Serial test
-    RUNSNAPTEST -n32 standard
-    REPORT_RESULT
-    PRINT_TRAILER
-    # parallel test
-    RUNSNAPTEST -n32 parallel
-    REPORT_RESULT
-    PRINT_TRAILER
-fi
+    n_test=`expr $n_test + 1`
+    TEST="`echo $TEST_TYPES | cut -f$n_test -s -d';'`"
+done
 
 FLUSH_FILES
 
