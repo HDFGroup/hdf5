@@ -386,7 +386,7 @@ void multiple_group_write(char *filename, int ngroups)
     hid_t fid, gid, plist, memspace, filespace;
     hssize_t chunk_origin[DIM];
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
-    herr_t ret1, ret2;
+    herr_t ret;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -401,15 +401,16 @@ void multiple_group_write(char *filename, int ngroups)
     /* select hyperslab in memory and file spaces.  These two operations are
      * identical since the datasets are the same. */
     memspace  = H5Screate_simple(DIM, file_dims, NULL);
-    ret1 = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, chunk_origin, 
-                               chunk_dims, count, chunk_dims);
-    filespace = H5Screate_simple(DIM, file_dims,  NULL);
-    ret2 = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, chunk_origin, 
-                               chunk_dims, count, chunk_dims);
     VRFY((memspace>=0), "memspace");
+    ret = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, chunk_origin, 
+                               chunk_dims, count, chunk_dims);
+    VRFY((ret>=0), "mgroup memspace selection");
+
+    filespace = H5Screate_simple(DIM, file_dims,  NULL);
     VRFY((filespace>=0), "filespace");
-    VRFY((ret1>=0), "mgroup memspace selection");
-    VRFY((ret2>=0), "mgroup filespace selection");   
+    ret = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, chunk_origin, 
+                               chunk_dims, count, chunk_dims);
+    VRFY((ret>=0), "mgroup filespace selection");   
 
     /* creates ngroups groups under the root group, writes datasets in 
      * parallel. */
@@ -437,11 +438,15 @@ void multiple_group_write(char *filename, int ngroups)
     /* recursively creates subgroups under the first group. */
     gid = H5Gopen(fid, "group0");
     create_group_recursive(memspace, filespace, gid, 0);
-    H5Gclose(gid);
+    ret = H5Gclose(gid);
+    VRFY((ret>=0), "H5Gclose");
     
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Fclose(fid);
+    ret = H5Sclose(filespace);
+    VRFY((ret>=0), "H5Sclose");
+    ret = H5Sclose(memspace);
+    VRFY((ret>=0), "H5Sclose");
+    ret = H5Fclose(fid);
+    VRFY((ret>=0), "H5Fclose");
 }
 
 /* 
