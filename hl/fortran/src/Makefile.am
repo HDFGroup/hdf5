@@ -12,7 +12,7 @@
 include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src $(top_builddir)/hl/src
-AM_FFLAGS=-I$(top_builddir)/fortran/src -M$(top_builddir)/fortran/src
+AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # Our main target, the high-level fortran library
 lib_LTLIBRARIES=libhdf5hl_fortran.la

@@ -186,6 +186,7 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = @F9XMODEXT@
+F9XMODFLAG = @F9XMODFLAG@
 
 # Add include directories to C preprocessor flags
 AM_CPPFLAGS = -I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdir)/hl/src

@@ -194,6 +194,7 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = @F9XMODEXT@
+F9XMODFLAG = @F9XMODFLAG@
 
 # All subdirectories
 SUBDIRS = lib h5dump h5diff h5ls misc gifconv h5import h5repack h5jam

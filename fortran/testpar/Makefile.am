@@ -20,8 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files
-AM_FFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test
-MODULE=$(top_srcdir)/fortran/src
+AM_FFLAGS=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # These are our main targets
 TEST_PROG_PARA=ptesthdf5_fortran

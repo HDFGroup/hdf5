@@ -194,10 +194,10 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = @F9XMODEXT@
+F9XMODFLAG = @F9XMODFLAG@
 
 # Include files
-AM_FFLAGS = -I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test
-MODULE = $(top_srcdir)/fortran/src
+AM_FFLAGS = -I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # These are our main targets
 TEST_PROG_PARA = ptesthdf5_fortran

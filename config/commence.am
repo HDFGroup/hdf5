@@ -30,6 +30,7 @@ H5FC_PP=$(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT=@F9XMODEXT@
+F9XMODFLAG=@F9XMODFLAG@
 
 # Let automake worry about Makefiles and configure components being up-to-
 # date.

@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files
-AM_FFLAGS=-I$(top_builddir)/fortran/src -M$(top_builddir)/fortran/src
+AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 AM_CFLAGS=-I$(top_srcdir)/src
 
 # The Fortran test library

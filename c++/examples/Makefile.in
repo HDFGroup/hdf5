@@ -194,6 +194,7 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = @F9XMODEXT@
+F9XMODFLAG = @F9XMODFLAG@
 
 # Use h5c++ to build examples, instead of reguar C++ compiler
 H5CPP = $(bindir)/h5c++

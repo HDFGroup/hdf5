@@ -194,6 +194,7 @@ H5FC_PP = $(bindir)/h5pfc
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = @F9XMODEXT@
+F9XMODFLAG = @F9XMODFLAG@
 
 # These are the programs that 'make all' or 'make tests' will build and
 # that 'make check' will run.  List them in the order in which they should
