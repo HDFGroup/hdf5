@@ -14,75 +14,161 @@ date
 PATH="/usr/local/bin:$PATH"
 
 # Where are the snapshots stored?
-ARCHIVES=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
-if [ "$1" ]; then
-    ARCHIVES="$1"
-    shift
-fi
+ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
+ARCHIVES=$ARCHIVES_default
+
+# Where are the HDF4 library?
+# At NCSA, the standard place to find HDF4 software is in /usr/ncsa/.
+HDF4LIB_default="/usr/ncsa/include,/usr/ncsa/lib"
+HDF4LIB="--with-hdf4=$HDF4LIB_default"
 
 # What compression methods to use?
 METHODS="gzip bzip2"
 
-# At NCSA, the standard place to find HDF4 software is in /usr/ncsa/.
-CONFIGURE="./configure --with-hdf4=/usr/ncsa/include,/usr/ncsa/lib"
-
-# Create a working directory.  Hopefully one is left over from last
-# time that still has the contents of the previous release.  But if
-# not, just create one and assume that a snapshot is necessary.
-COMPARE=${HOME}/hdf5-snapshots
-test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
-
-# Check out the current version from CVS
+# Make sure cvs would work
 if [ -z "$CVSROOT" ]; then
     echo "Where is the CVS repository?" 1>&2
     exit 1
 fi
-cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 
-# Compare it with the previous version.  Compare only files listed in
-# the MANIFEST plus the MANIFEST itself.
+#
+# Command options
+cmd="all"
+errcode=0
+echo '$#=' $# '$*="' $* '"'
+while [ $# -gt 0 ] ; do
+    case "$1" in
+	all)	
+	    cmd="all"
+	    ;;
+	test)
+	    cmdtest="test"
+	    cmd=""
+	    ;;
+	release)
+	    cmdrel="release"
+	    cmd=""
+	    ;;
+	help)
+	    cmd="help"
+	    break
+	    ;;
+	hdf4)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "HDF4LIB information missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    # an empty $1 resets HDF4LIB to "", disabling hdf4lib usage
+	    HDF4LIB="$1"
+	    HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
+	    ;;
+	archive)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "Archive pathname missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    ARCHIVES="$1"
+	    ;;
+	*)
+	    echo "Unkown option $1"
+	    errcode=1
+	    cmd="help"
+	    break
+	    ;;
+    esac
+    shift
+done
+
+if [ "$cmd" = help ]; then
+    set -
+    echo "Usage: $0 [all] [test] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
+    echo "    all:      Run all commands (test & release)"
+    echo "              [Default is all]"
+    echo "    test:     Run test"
+    echo "    release:  Run release"
+    echo "    help:     Print this message"
+    echo "    hdf4 <hdf4lib_path>:"
+    echo "              Use <hdf4lib_path> as the HDF4LIB locations"
+    echo "              [Default is $HDF4LIB_default]"
+    echo "    archive <arch_path>: "
+    echo "              Use <arch_path> as the release ARCHIVE area"
+    echo "              [<arch_path> default as $ARCHIVES_default]"
+    exit $errcode
+fi
+    
+# Execute the requests
 snapshot=yes
-if [ -d ${COMPARE}/previous ]; then
-    if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
-        snapshot=no
-	for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
-	    diff -I H5_VERS_RELEASE -I " released on " \
-                -I " currently under development" \
-		${COMPARE}/previous/$src ${COMPARE}/current/$src || \
-		snapshot=yes
-		# Don't break because we want to see all the diffs.
-	done
-    fi
-fi
 
-# Make sure all the serial tests work.
-if [ "$snapshot" = "yes" ]; then
-    if (cd ${COMPARE}/current; \
-        ${CONFIGURE}; \
-        make _test); then
-	:
-    else
-	snapshot=no
-    fi
-    (cd ${COMPARE}/current; make distclean)
-fi
+#
+# Test the HDF5 library
+if [ -n "$cmd" -o -n "$cmdtest" ]; then
+    CONFIGURE="./configure $HDF4LIB"
 
+    # Create a working directory.  Hopefully one is left over from last
+    # time that still has the contents of the previous release.  But if
+    # not, just create one and assume that a snapshot is necessary.
+    COMPARE=${HOME}/hdf5-snapshots
+    test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
+
+    # Check out the current version from CVS
+    cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
+
+    # Compare it with the previous version.  Compare only files listed in
+    # the MANIFEST plus the MANIFEST itself.
+    if [ -d ${COMPARE}/previous ]; then
+	if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
+	    snapshot=no
+	    for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
+		diff -I H5_VERS_RELEASE -I " released on " \
+		    -I " currently under development" \
+		    ${COMPARE}/previous/$src ${COMPARE}/current/$src || \
+		    snapshot=yes
+		    # Don't break because we want to see all the diffs.
+	    done
+	fi
+    fi
+
+    # Make sure all the serial tests work.
+    if [ "$snapshot" = "yes" ]; then
+	if (cd ${COMPARE}/current; \
+	    ${CONFIGURE}; \
+	    make _test); then
+	    :
+	else
+	    snapshot=no
+	fi
+	(cd ${COMPARE}/current; make distclean)
+    fi
+
+fi # Test the HDF5 library
+
+#
 # Release snapshot, update version, and commit to cvs and tag
 # Turn on exit on error in the sub-shell so that it does not
 # cvs commit if errors encounter here.
-if [ "$snapshot" = "yes" ]; then
-    (
-	set -e
-	cd ${COMPARE}/current
-	cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
-	bin/release -d $ARCHIVES $METHODS
-	RELEASE_VERSION="`perl -w bin/h5vers -v`"
-	perl -w bin/h5vers -i
-	cvs -Q commit -m "Snapshot $RELEASE_VERSION"
-    )
-fi
+if [ -n "$cmd" -o -n "$cmdrel" ]; then
+    if [ "$snapshot" = "yes" ]; then
+	(
+	    set -e
+	    cd ${COMPARE}/current
+	    cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
+	    bin/release -d $ARCHIVES $METHODS
+	    RELEASE_VERSION="`perl -w bin/h5vers -v`"
+	    perl -w bin/h5vers -i
+	    cvs -Q commit -m "Snapshot $RELEASE_VERSION"
+	)
+    fi
 
-# Replace the previous version with the current version.
-rm -rf ${COMPARE}/previous
-mv ${COMPARE}/current ${COMPARE}/previous
+    # Replace the previous version with the current version.
+    rm -rf ${COMPARE}/previous
+    mv ${COMPARE}/current ${COMPARE}/previous
+
+fi #Release snapshot
+
 exit 0
