@@ -30,8 +30,8 @@ PUB_DOCS= Attributes.html Big.html Caching.html Chunking.html Chunk_f1.gif \
 	Errors.html FF-IH_FileGroup.gif FF-IH_FileObject.gif Files.html \
 	Filters.html FF-IH_FileGroup.gif FF-IH_FileObject.gif Glossary.html \
 	Groups.html H5.api_map.html H5.format.html H5.intro.html \
-	H5.sample_code.html H5.user.html H5.user.PrintGen.html \
-	H5.user.PrintTpg.html IH_map1.gif IH_map2.gif IH_map3.gif IH_map4.gif \
+	H5.sample_code.html H5.user.html \
+	IH_map1.gif IH_map2.gif IH_map3.gif IH_map4.gif \
 	IH_mapFoot.gif IH_mapHead.gif IOPipe.html MountingFiles.html \
 	NCSAfooterlogo.gif PaletteExample1.gif Palettes.fm.anc.gif \
 	Palettes.html Performance.html Properties.html Ragged.html \
@@ -46,7 +46,8 @@ PUB_DOCS= Attributes.html Big.html Caching.html Chunking.html Chunk_f1.gif \
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS= Chunk_f1.obj Chunk_f2.obj Chunk_f6.obj CodeReview.html \
-	ExternalFiles.html MemoryManagement.html ObjectHeader.txt chunk1.obj \
+	ExternalFiles.html H5.user.PrintGen.html H5.user.PrintTpg.html \
+	MemoryManagement.html ObjectHeader.txt chunk1.obj \
 	extern1.obj extern2.obj group_p1.obj group_p2.obj group_p3.obj \
 	pipe1.obj pipe2.obj pipe3.obj pipe4.obj pipe5.obj heap.txt move.html \
 	review1.html review1a.html storage.html symtab version.obj \
