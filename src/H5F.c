@@ -3006,14 +3006,12 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if (!name || !*name)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    if (H5I_FILE!=H5I_get_type(child_id) ||
-            NULL==(child=H5I_object(child_id)))
+    if (H5I_FILE!=H5I_get_type(child_id) || NULL==(child=H5I_object(child_id)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_MOUNT_DEFAULT;
     if(TRUE != H5P_isa_class(plist_id, H5P_MOUNT))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
-    
 
     /* Do the mount */
     if (H5F_mount(loc, name, child, plist_id)<0)
@@ -3097,7 +3095,6 @@ H5Freopen(hid_t file_id)
     H5F_t	*new_file=NULL;
     hid_t	ret_value = -1;
     
-
     FUNC_ENTER(H5Freopen, FAIL);
     H5TRACE1("i","i",file_id);
 
@@ -3170,6 +3167,7 @@ H5F_sizeof_addr(const H5F_t *f)
     FUNC_ENTER(H5F_sizeof_addr, 0);
 
     assert(f);
+    assert(f->shared);
 
     /* Get property list */
     if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
@@ -3210,6 +3208,7 @@ H5F_sizeof_size(const H5F_t *f)
     FUNC_ENTER(H5F_sizeof_size, 0);
 
     assert(f);
+    assert(f->shared);
 
     /* Get property list */
     if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
@@ -3244,6 +3243,8 @@ H5F_get_driver_id(const H5F_t *f)
     FUNC_ENTER(H5F_get_driver_id, 0);
 
     assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
 
     FUNC_LEAVE(f->shared->lf->driver_id);
 }
@@ -3286,7 +3287,10 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_
 
     FUNC_ENTER(H5F_block_read, FAIL);
 
+    assert (f);
+    assert (f->shared);
     assert(size<SIZET_MAX);
+    assert (buf);
 
     /* convert the relative address to an absolute address */
     abs_addr = f->shared->base_addr + addr;
@@ -3337,7 +3341,10 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     FUNC_ENTER(H5F_block_write, FAIL);
 
+    assert (f);
+    assert (f->shared);
     assert (size<SIZET_MAX);
+    assert (buf);
 
     if (0==(f->intent & H5F_ACC_RDWR)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent");
