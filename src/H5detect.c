@@ -30,6 +30,9 @@ static const char *FileHeader = "\n\
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
+#ifdef WIN32
+#include "winsock2.h"
+#endif /*kent yang 6/21/2001, make sure to put this before H5private.h*/
 #include "H5private.h"
 
 #define MAXDETECT 64

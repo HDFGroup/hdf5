@@ -148,6 +148,7 @@
 
 #include <windef.h>
 #include <winbase.h>
+#include <IO.h> /* kent yang 6/18/2001*/
 
 /* H5_inline */
 
