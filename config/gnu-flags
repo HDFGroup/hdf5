@@ -27,6 +27,7 @@ if test X = "X$cc_flags_set"; then
     cc_vers_major=`echo $cc_version | cut -f1 -d.`
     cc_vers_minor=`echo $cc_version | cut -f2 -d.`
     cc_vers_patch=`echo $cc_version | cut -f3 -d.`
+    test -n "$cc_vers_patch" || cc_vers_patch=0
     cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
 fi
 
@@ -106,6 +107,26 @@ case "$cc_vendor-$cc_version" in
 
 	# Production
 	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-2.95)
+	# General
+	CFLAGS="$CFLAGS -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
 	PROD_CPPFLAGS=
 
 	# Debug

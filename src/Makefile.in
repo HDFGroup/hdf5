@@ -16,8 +16,9 @@ TRACE=perl $(top_srcdir)/bin/trace
 ## Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
 
-## This is our main target:
+## This is our main target, but also remove the settings file when cleaning.
 LIB=libhdf5.la
+CLEAN=libhdf5.settings
 
 ## Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
