@@ -663,7 +663,7 @@ H5R_get_object_type(H5F_t *file, hid_t dxpl_id, void *_ref)
     ent.file=file;
 
     /* Get the object oid */
-    p=(uint8_t *)ref->oid;
+    p=(uint8_t *)ref;
     H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
 
     /* Get the OID type */
