@@ -1055,6 +1055,23 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
                 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
                      "external storage not supported with chunked layout");
             }
+
+            /*
+             * The chunk size of a dimension with a fixed size cannot exceed
+             * the maximum dimension size 
+             */
+            if (H5S_get_simple_extent_dims(space, NULL, max_dim)<0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+                    "unable to query maximum dimensions");
+            }
+            for (u=0; u<new_dset->layout.ndims-1; u++) {
+                if (max_dim[u]!=H5S_UNLIMITED && max_dim[u]<new_dset->create_parms->chunk_size[u]) {
+                    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+                         "chunk size must be <= maximum dimension size for fixed-sized dimensions");
+                }
+            }
+
+            /* Set the dataset's chunk sizes from the property list's chunk sizes */
             for (u=0; u<new_dset->layout.ndims-1; u++) {
                 new_dset->layout.dim[u] = new_dset->create_parms->chunk_size[u];
             }
