@@ -26,7 +26,7 @@ dep depend: .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \
 	      echo Building dependencies for $$dep;			      \
-	      obj=`echo $$dep | sed 's/\.c/.o/'`;			      \
+	      obj=`echo $$dep | sed 's/\.c/\\\\.o/'`;			      \
 	      sed "/$$obj/,/[^\\]$$/d" <$@ >$@- && mv $@- $@;		      \
 	      $(CC) -M -MG $(CPPFLAGS) $$dep >>$@;			      \
 	   fi;								      \
