@@ -82,6 +82,12 @@ New Features
 
     C++ API:
     --------
+	- Added wrappers for array and variable length datatypes APIs
+	- Added wrappers for newly added APIs from H5T, H5F, and H5I
+	- Added many wrappers that were missing from the H5P API
+	- Added the ability to reference HDF5 objects to these classes:
+	  DataSet, DataType, Group, and H5File (wrappers for H5R APIs)
+	BMR 2004/08/04
 
 
 Support for new platforms, languages and compilers.
@@ -175,6 +181,9 @@ Bug Fixes since HDF5-1.6.2 release
 	  by value.  In addition, the default value of the data member
 	  H5::Exception::detailMessage is changed from 0/NULL to 
 	  DEFAULT_MSG ("No detailed information provided".)
+	- Prototype for DSetCreatPropList::setLayout is changed: 1st parameter
+          is removed because it was there only by mistake.
+	BMR 2004/08/04
 
 Documentation
 =============
