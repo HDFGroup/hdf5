@@ -275,8 +275,7 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
                             hi_bounds[0][i].bound!=reg[curr_reg].end) {
 
                             /* Enlarge array */
-                            H5TB_resize_buf(ret_value,(sizeof(H5S_hyper_region_t)*(num_reg+1)));
-                            reg=H5TB_buf_ptr(ret_value);
+                            H5TB_resize_buf(ret_value,(sizeof(H5S_hyper_region_t)*(num_reg+1)),&reg);
 
                             /* Initialize with new region */
                             reg[num_reg].start=lo_bounds[0][i].bound+offset[0];
@@ -369,8 +368,7 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
 			   (int)reg[curr_reg].end);
 #endif /* QAK */
                     /* Enlarge array */
-                    H5TB_resize_buf(ret_value,(sizeof(H5S_hyper_region_t)*(num_reg+1)));
-                    reg=H5TB_buf_ptr(ret_value);
+                    H5TB_resize_buf(ret_value,(sizeof(H5S_hyper_region_t)*(num_reg+1)),&reg);
 
                     /* Initialize with new region */
                     reg[num_reg].start=node->start[next_dim]+offset[next_dim];

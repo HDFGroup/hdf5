@@ -1,13 +1,13 @@
 /****************************************************************************
-* NCSA HDF								   *
-* Software Development Group						   *
-* National Center for Supercomputing Applications			   *
-* University of Illinois at Urbana-Champaign				   *
-* 605 E. Springfield, Champaign IL 61820				   *
-*									   *
-* For conditions of distribution and use, see the accompanying		   *
-* hdf/COPYING file.							   *
-*									   *
+* NCSA HDF                                                                  *
+* Software Development Group                                                *
+* National Center for Supercomputing Applications                           *
+* University of Illinois at Urbana-Champaign                                *
+* 605 E. Springfield, Champaign IL 61820                                    *
+*                                                                           *
+* For conditions of distribution and use, see the accompanying              *
+* hdf/COPYING file.                                                         *
+*                                                                           *
 ****************************************************************************/
 
 #ifdef RCSID
@@ -457,6 +457,12 @@ H5Dget_type(hid_t dset_id)
 	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		       "unable to copy the data type");
     }
+    /* Mark any VL datatypes as being in memory now */
+    if(H5T_get_class(copied_type)==H5T_VLEN) {
+	    if (H5T_vlen_set_loc(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        }
+    }
     if (H5T_lock (copied_type, FALSE)<0) {
 	H5T_close (copied_type);
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -905,7 +911,17 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
+
+    /* Copy datatype for dataset */
     new_dset->type = H5T_copy(type, H5T_COPY_ALL);
+
+    /* Mark any VL datatypes as being on disk now */
+    if(H5T_get_class(new_dset->type)==H5T_VLEN) {
+	    if (H5T_vlen_set_loc(new_dset->type, f, H5T_VLEN_DISK)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        }
+    }
+
     efl = &(new_dset->create_parms->efl);
 
     /* Total raw data size */

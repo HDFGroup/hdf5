@@ -85,6 +85,22 @@ typedef struct H5T_enum_t {
     char		**name;		/*array of symbol names		     */
 } H5T_enum_t;
 
+/* VL function pointers */
+typedef hsize_t (*H5T_vlen_getlenfunc_t)(H5F_t *f, void *vl_addr);
+typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, void *vl_addr, void *buf, size_t len);
+typedef herr_t (*H5T_vlen_allocfunc_t)(H5F_t *f, void *vl_addr, hsize_t seq_len, hsize_t base_size);
+typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, void *vl_addr, void *buf, size_t len);
+
+/* A VL datatype */
+typedef struct H5T_vlen_t {
+    H5T_vlen_type_t     type;   /* Type of VL data in buffer */
+    H5F_t *f;                   /* File ID (if VL data is on disk) */
+    H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
+    H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
+    H5T_vlen_allocfunc_t alloc; /* Function to allocate space for VL sequence */
+    H5T_vlen_writefunc_t write; /* Function to write VL sequence from buffer */
+} H5T_vlen_t;
+
 /* An opaque data type */
 typedef struct H5T_opaque_t {
     char		*tag;		/*short type description string	     */
@@ -106,10 +122,11 @@ struct H5T_t {
     size_t		size;	/*total size of an instance of this type     */
     struct H5T_t	*parent;/*parent type for derived data types	     */
     union {
-	H5T_atomic_t	atomic; /*an atomic data type			     */
-	H5T_compnd_t	compnd; /*a compound data type (struct)		     */
-	H5T_enum_t	enumer; /*an enumeration type (enum)		     */
-	H5T_opaque_t	opaque; /*an opaque data type			     */
+        H5T_atomic_t	atomic; /*an atomic data type			     */
+        H5T_compnd_t	compnd; /*a compound data type (struct)		     */
+        H5T_enum_t	enumer; /*an enumeration type (enum)		     */
+        H5T_vlen_t	vlen; /*an VL type */
+        H5T_opaque_t	opaque; /*an opaque data type			     */
     } u;
 };
 
@@ -170,6 +187,8 @@ __DLL__ herr_t H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 __DLL__ herr_t H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			       size_t nelmts, void *_buf, void *bkg);
 __DLL__ herr_t H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *buf, void *bkg);
+__DLL__ herr_t H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     size_t nelmts, void *buf, void *bkg);
 __DLL__ herr_t H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, void *_buf, void *bkg);
@@ -476,5 +495,15 @@ __DLL__ void H5T_bit_set_d(uint8_t *buf, size_t offset, size_t size,
 __DLL__ ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 			     H5T_sdir_t direction, hbool_t value);
 __DLL__ htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
+
+/* VL functions */
+__DLL__ hsize_t H5T_vlen_mem_getlen(H5F_t *f, void *vl_addr);
+__DLL__ herr_t H5T_vlen_mem_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
+__DLL__ herr_t H5T_vlen_mem_alloc(H5F_t *f, void *vl_addr, hsize_t seq_len, hsize_t base_size);
+__DLL__ herr_t H5T_vlen_mem_write(H5F_t *f, void *vl_addr, void *_buf, size_t len);
+__DLL__ hsize_t H5T_vlen_disk_getlen(H5F_t *f, void *vl_addr);
+__DLL__ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *_buf, size_t len);
+__DLL__ herr_t H5T_vlen_disk_alloc(H5F_t *f, void *vl_addr, hsize_t seq_len, hsize_t base_size);
+__DLL__ herr_t H5T_vlen_disk_write(H5F_t *f, void *vl_addr, void *_buf, size_t len);
 
 #endif

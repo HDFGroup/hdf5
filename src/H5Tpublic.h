@@ -23,6 +23,7 @@
 #define HOFFSET(S,M)    (offsetof(S,M))
 
 /* These are the various classes of data types */
+/* If this goes over 16 types (0-15), the file format will need to change) */
 typedef enum H5T_class_t {
     H5T_NO_CLASS         = -1,  /*error                                      */
     H5T_INTEGER          = 0,   /*integer types                              */
@@ -33,9 +34,10 @@ typedef enum H5T_class_t {
     H5T_OPAQUE           = 5,   /*opaque types                               */
     H5T_COMPOUND         = 6,   /*compound types                             */
     H5T_REFERENCE        = 7,   /*reference types                            */
-    H5T_ENUM		 = 8,	/*enumeration types			     */
+    H5T_ENUM		     = 8,	/*enumeration types                          */
+    H5T_VLEN		     = 9,	/*Variable-Length types                      */
 
-    H5T_NCLASSES         = 9    /*this must be last                          */
+    H5T_NCLASSES                /*this must be last                          */
 } H5T_class_t;
 
 /* Byte orders */
@@ -148,6 +150,12 @@ typedef enum H5T_pers_t {
     H5T_PERS_SOFT	= 1 	/*soft conversion function		     */
 } H5T_pers_t;
 
+/* Variable Length Datatype struct */
+typedef struct {
+    size_t len; /* Length of VL data (in base type units) */
+    void *p;    /* Pointer to VL data */
+} hvl_t;
+
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void *bkg);
@@ -209,8 +217,8 @@ __DLLVAR__ hid_t H5T_IEEE_F64LE_g;
 #define H5T_STD_B32LE		(H5open(), H5T_STD_B32LE_g)
 #define H5T_STD_B64BE		(H5open(), H5T_STD_B64BE_g)
 #define H5T_STD_B64LE		(H5open(), H5T_STD_B64LE_g)
-#define H5T_STD_REF_OBJ	    	(H5open(), H5T_STD_REF_OBJ_g)
-#define H5T_STD_REF_DSETREG 	(H5open(), H5T_STD_REF_DSETREG_g)
+#define H5T_STD_REF_OBJ	    (H5open(), H5T_STD_REF_OBJ_g)
+#define H5T_STD_REF_DSETREG (H5open(), H5T_STD_REF_DSETREG_g)
 __DLLVAR__ hid_t H5T_STD_I8BE_g;
 __DLLVAR__ hid_t H5T_STD_I8LE_g;
 __DLLVAR__ hid_t H5T_STD_I16BE_g;
@@ -400,6 +408,9 @@ __DLL__ hid_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/,
 			     size_t size);
 __DLL__ hid_t H5Tenum_valueof(hid_t type, const char *name,
 			      void *value/*out*/);
+
+/* Operations defined on variable-length data types */
+__DLL__ hid_t H5Tvlen_create(hid_t base_id);
 
 /* Operations defined on opaque data types */
 __DLL__ herr_t H5Tset_tag(hid_t type, const char *tag);

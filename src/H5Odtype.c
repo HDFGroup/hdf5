@@ -77,7 +77,7 @@ static intn		interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
+H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
     uintn		flags, perm_word, version;
     intn		i, j;
@@ -229,7 +229,7 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 			       "memory allocation failed");
 	    }
 	    H5F_addr_undef (&(dt->u.compnd.memb[i].type->ent.header));
-	    if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type)<0) {
+	    if (H5O_dtype_decode_helper(f, pp, dt->u.compnd.memb[i].type)<0) {
 		for (j=0; j<=i; j++) H5MM_xfree(dt->u.compnd.memb[j].name);
 		H5MM_xfree(dt->u.compnd.memb);
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
@@ -255,7 +255,7 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 			  "memory allocation failed");
 	}
 	H5F_addr_undef(&(dt->parent->ent.header));
-	if (H5O_dtype_decode_helper(pp, dt->parent)<0) {
+	if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
 			  "unable to decode parent data type");
 	}
@@ -287,6 +287,19 @@ H5O_dtype_decode_helper(const uint8_t **pp, H5T_t *dt)
 	dt->u.atomic.msb_pad = H5T_PAD_ZERO;
 	dt->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
 	break;
+
+    case H5T_VLEN:  /* Variable length datatypes...  */
+        /* Decode base type of VL information */
+        H5F_addr_undef(&(dt->parent->ent.header));
+	    if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
+        }
+
+        /* Mark this type as on disk */
+	    if (H5T_vlen_set_loc(dt, f, H5T_VLEN_DISK)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+        }
+        break;
 
     default:
 	if (flags) {
@@ -583,38 +596,44 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 	break;
 
     case H5T_ENUM:
-	/*
-	 * Enumeration data types...
-	 */
-	flags = dt->u.enumer.nmembs & 0xffff;
+        /*
+         * Enumeration data types...
+         */
+        flags = dt->u.enumer.nmembs & 0xffff;
 
-	/* Parent type */
-	if (H5O_dtype_encode_helper(pp, dt->parent)<0) {
-	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL,
-			  "unable to encode parent data type");
-	}
-	
-	/* Names, each a multiple of eight bytes */
-	for (i=0; i<dt->u.enumer.nmembs; i++) {
-	    HDstrcpy((char*)(*pp), dt->u.enumer.name[i]);
-	    n = HDstrlen(dt->u.enumer.name[i]);
-	    for (z=n+1; z%8; z++) (*pp)[z] = '\0';
-	    *pp += z;
-	}
+        /* Parent type */
+        if (H5O_dtype_encode_helper(pp, dt->parent)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL,
+                  "unable to encode parent data type");
+        }
+        
+        /* Names, each a multiple of eight bytes */
+        for (i=0; i<dt->u.enumer.nmembs; i++) {
+            HDstrcpy((char*)(*pp), dt->u.enumer.name[i]);
+            n = HDstrlen(dt->u.enumer.name[i]);
+            for (z=n+1; z%8; z++) (*pp)[z] = '\0';
+            *pp += z;
+        }
 
-	/* Values */
-	HDmemcpy(*pp, dt->u.enumer.value,
-		 dt->u.enumer.nmembs * dt->parent->size);
-	*pp += dt->u.enumer.nmembs * dt->parent->size;
-	break;
+        /* Values */
+        HDmemcpy(*pp, dt->u.enumer.value, dt->u.enumer.nmembs * dt->parent->size);
+        *pp += dt->u.enumer.nmembs * dt->parent->size;
+        break;
 	
     case H5T_REFERENCE:
-	flags |= (dt->u.atomic.u.r.rtype & 0x0f);
-	break;
-	
+        flags |= (dt->u.atomic.u.r.rtype & 0x0f);
+        break;
+        
+    case H5T_VLEN:  /* Variable length datatypes...  */
+        /* Encode base type of VL information */
+        if (H5O_dtype_encode_helper(pp, dt->parent)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type");
+        }
+        break;
+
     default:
-	/*nothing */
-	break;
+        /*nothing */
+        break;
     }
 
     *hdr++ = ((uintn)(dt->type) & 0x0f) | (H5O_DTYPE_VERSION<<4);
@@ -644,7 +663,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t UNUSED *f, const uint8_t *p,
+H5O_dtype_decode(H5F_t *f, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     H5T_t		   *dt = NULL;
@@ -660,7 +679,7 @@ H5O_dtype_decode(H5F_t UNUSED *f, const uint8_t *p,
     }
     H5F_addr_undef (&(dt->ent.header));
 
-    if (H5O_dtype_decode_helper(&p, dt) < 0) {
+    if (H5O_dtype_decode_helper(f, &p, dt) < 0) {
 	H5MM_xfree(dt);
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
 		      "can't decode type");

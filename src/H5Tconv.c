@@ -14,6 +14,7 @@
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
+#include <H5TBprivate.h>
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
@@ -1379,6 +1380,213 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       "unknown conversion command");
     }
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_vlen
+ *
+ * Purpose:	Converts between VL data types in memory and on disk.
+ *  This is a soft conversion function.  The algorithm is basically:
+ *
+ *      For every VL struct in the main buffer:
+ *          Allocate space for temporary dst VL data (reuse buffer if possible)
+ *          Copy VL data from src buffer into dst buffer
+ *          Convert VL data into dst representation
+ *          Allocate buffer in dst heap
+ *          Write dst VL data into dst heap
+ *          Store (heap ID or pointer) and length in main dst buffer
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, May 26, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+		void *_buf, void UNUSED *_bkg)
+{
+    H5T_path_t *tpath;          /* Type conversion path */
+    hid_t   tsrc_id = -1, tdst_id = -1;/*temporary type atoms */
+    H5T_t	*src = NULL;		/*source data type		*/
+    H5T_t	*dst = NULL;		/*destination data type		*/
+    size_t	olap;			/*num overlapping elements	*/
+    uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
+    uint8_t **dptr;             /* Pointer to correct destination pointer */
+    size_t	src_delta, dst_delta;	/*source & destination stride	*/
+    hsize_t seq_len;            /* The number of elements in the current sequence */
+    size_t	src_base_size, dst_base_size;	/*source & destination base size */
+    size_t	src_size, dst_size;	/*source & destination total size in bytes */
+    hid_t conv_buf_id;      /* ID for comversion buffer */
+    void *conv_buf_ptr;     /* Temporary conversion buffer */
+    hsize_t conv_buf_size;  /* Size of conversion buffer in bytes */
+    uint8_t	dbuf[64],*dbuf_ptr=dbuf;		/*temp destination buffer	*/
+    intn	direction;		/*direction of traversal	*/
+    uintn	elmtno;
+
+    FUNC_ENTER (H5T_conv_struct, FAIL);
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            /*
+             * First, determine if this conversion function applies to the
+             * conversion path SRC_ID-->DST_ID.  If not, return failure;
+             * otherwise initialize the `priv' field of `cdata' with information
+             * that remains (almost) constant for this conversion path.
+             */
+            if (H5I_DATATYPE != H5I_get_type(src_id) || NULL == (src = H5I_object(src_id)) ||
+                H5I_DATATYPE != H5I_get_type(dst_id) || NULL == (dst = H5I_object(dst_id))) {
+                    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            }
+            assert (H5T_VLEN==src->type);
+            assert (H5T_VLEN==dst->type);
+
+#ifdef LATER
+/* QAK - Set up conversion function? */
+            if (H5T_conv_vlen_init (src, dst, cdata)<0) {
+                HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                       "unable to initialize conversion data");
+            }
+#endif /* LATER */
+            break;
+
+        case H5T_CONV_FREE:
+/* QAK - Nothing to do currently */
+            break;
+
+        case H5T_CONV_CONV:
+            /*
+             * Conversion.
+             */
+            if (H5I_DATATYPE != H5I_get_type(src_id) || NULL == (src = H5I_object(src_id)) ||
+                H5I_DATATYPE != H5I_get_type(dst_id) || NULL == (dst = H5I_object(dst_id))) {
+                    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            }
+
+            /*
+             * Do we process the values from beginning to end or vice versa? Also,
+             * how many of the elements have the source and destination areas
+             * overlapping?
+             */
+            if (src->size==dst->size) {
+                olap = nelmts;
+                sp = dp = (uint8_t*)_buf;
+                direction = 1;
+            } else if (src->size>=dst->size) {
+                olap = ((dst->size)/(src->size-dst->size))+1; /* potentially this uses the destination buffer 1 extra time, but its faster that floating-point calcs */
+                sp = dp = (uint8_t*)_buf;
+                direction = 1;
+            } else {
+                olap = nelmts-(((src->size)/(dst->size-src->size))+1); /* potentially this uses the destination buffer 1 extra time, but its faster that floating-point calcs */
+                sp = (uint8_t*)_buf + (nelmts-1) * src->size;
+                dp = (uint8_t*)_buf + (nelmts-1) * dst->size;
+                direction = -1;
+            }
+
+            /*
+             * Direction & size of buffer traversal.
+             */
+            src_delta = direction * src->size;
+            dst_delta = direction * dst->size;
+
+            /*
+             * If the source and destination buffers overlap then use a
+             * temporary buffer for the destination.
+             */
+            if (direction>0) {
+                dptr = &dbuf_ptr;
+            } else {
+                dptr = &dp;
+            }
+
+            /* Get the size of the base types in src & dst */
+            src_base_size=H5T_get_size(src->parent);
+            dst_base_size=H5T_get_size(dst->parent);
+
+            /* Get initial conversion buffer */
+            conv_buf_size=MAX(src_base_size,dst_base_size);
+            if((conv_buf_id=H5TB_get_buf(conv_buf_size,FALSE,&conv_buf_ptr))==FAIL)
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+
+            /* Set up conversion path for base elements */
+            tpath = H5T_path_find(src->parent, dst->parent, NULL, NULL);
+            if (NULL==(tpath=H5T_path_find(src->parent, dst->parent, NULL, NULL))) {
+                HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
+            } else if (!H5T_IS_NOOP(tpath)) {
+                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->parent, H5T_COPY_ALL)))<0 ||
+                    (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->parent, H5T_COPY_ALL)))<0) {
+                    HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+                }
+            }
+
+            for (elmtno=0; elmtno<nelmts; elmtno++) {
+                s = sp;
+                d = *dptr;
+
+                /* Get length of sequences in bytes */
+                seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
+                src_size=seq_len*src_base_size;
+                dst_size=seq_len*dst_base_size;
+
+                /* Check if conversion buffer is large enough, resize if necessary */
+                if(conv_buf_size<MAX(src_size,dst_size)) {
+                    conv_buf_size=MAX(src_size,dst_size);
+                    if(H5TB_resize_buf(conv_buf_id,conv_buf_size,&conv_buf_ptr)<0)
+                        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+                } /* end if */
+
+                /* Read in VL sequence */
+                if((*(src->u.vlen.read))(src->u.vlen.f,s,conv_buf_ptr,src_size)<0)
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data");
+
+                /* Convert VL sequence */
+                if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, conv_buf_ptr, NULL)<0)
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
+
+                /* Allocate new VL buffer */
+                if((*(dst->u.vlen.alloc))(dst->u.vlen.f,d,seq_len,dst_base_size)<0)
+                    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "allocation failed for VL data");
+
+                /* Write sequence to destination location */
+                if((*(dst->u.vlen.write))(dst->u.vlen.f,d,conv_buf_ptr,dst_size)<0)
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
+
+                /*
+                 * If we had used a temporary buffer for the destination then we
+                 * should copy the value to the true destination buffer.
+                 */
+                if (d==dbuf) HDmemcpy (dp, d, dst->size);
+                sp += src_delta;
+                dp += dst_delta;
+
+                /* switch destination pointer around when the olap gets to 0 */
+                if(--olap==0) {
+                    if(dptr==&dbuf_ptr)
+                        dptr=&dp;
+                    else
+                        dptr=&dbuf_ptr;
+                } /* end if */
+            }
+
+            /* Release the conversion buffer */
+            H5TB_release_buf(conv_buf_id);
+
+            /* Release the temporary datatype IDs used */
+            if (tsrc_id >= 0) H5I_dec_ref(tsrc_id);
+            if (tdst_id >= 0) H5I_dec_ref(tdst_id);
+
+            break;
+
+        default:    /* Some other command we don't know about yet.*/
+            HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                   "unknown conversion command");
+    }   /* end switch */
+    
+    FUNC_LEAVE (SUCCEED);
 }
 
 

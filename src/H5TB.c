@@ -349,9 +349,11 @@ done:
  PURPOSE
     Resize a temp. buffer to a new size
  USAGE
-    herr_t H5TB_resize_buf(tbid, size)
+    herr_t H5TB_resize_buf(tbid, size, ptr)
         hid_t tbid;       IN: Temp. buffer ID to resize
         hsize_t size;     IN: New size of temp. buffer
+        void **ptr;         OUT: Pointer to a pointer to set to the buffer
+                                address, if not NULL
  RETURNS
     non-negative on success, negative on failure
  DESCRIPTION
@@ -362,7 +364,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TB_resize_buf(hid_t tbuf_id, hsize_t size)
+H5TB_resize_buf(hid_t tbuf_id, hsize_t size, void **ptr)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
@@ -429,6 +431,10 @@ H5TB_resize_buf(hid_t tbuf_id, hsize_t size)
             H5TB_list_tail=tbuf;
         } /* end else */
     } /* end if */
+
+    /* Assign the pointer to the buffer, if requested */
+    if(ptr!=NULL)
+        *ptr=tbuf->buf;
 
     FUNC_LEAVE(ret_value);
 } /* H5TB_resize_buf() */

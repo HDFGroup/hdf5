@@ -176,7 +176,7 @@ H5T_init_interface(void)
 {
     H5T_t	*dt = NULL;
     hid_t	fixedpt=-1, floatpt=-1, string=-1, compound=-1, enum_type=-1;
-    hid_t	bitfield=-1;
+    hid_t	vlen_type=-1, bitfield=-1;
     herr_t	status;
     herr_t	ret_value=FAIL;
 
@@ -188,6 +188,10 @@ H5T_init_interface(void)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to initialize interface");
     }
+
+    /* Make certain there aren't too many classes of datatypes defined */
+    /* Only 16 (numbered 0-15) are supported in the current file format */
+    assert(H5T_NCLASSES<16);
 
     /*
      * Initialize pre-defined native data types from code generated during
@@ -702,6 +706,7 @@ H5T_init_interface(void)
     bitfield = H5T_STD_B8LE;
     compound = H5Tcreate(H5T_COMPOUND, 1);
     enum_type = H5Tcreate(H5T_ENUM, 1);
+    vlen_type = H5Tvlen_create(H5T_NATIVE_INT);
     status = 0;
     /*
      * Register conversion functions beginning with the most general and
@@ -731,6 +736,9 @@ H5T_init_interface(void)
     status |= H5Tregister(H5T_PERS_SOFT, "enum",
 			  enum_type, enum_type,
 			  H5T_conv_enum);
+    status |= H5Tregister(H5T_PERS_SOFT, "vlen",
+			  vlen_type, vlen_type,
+			  H5T_conv_vlen);
     
     status |= H5Tregister(H5T_PERS_HARD, "u32le_f64le",
 			  H5T_STD_U32LE_g, H5T_IEEE_F64LE_g,
@@ -1053,6 +1061,7 @@ H5T_init_interface(void)
  done:
     if (compound>=0) H5Tclose(compound);
     if (enum_type>=0) H5Tclose(enum_type);
+    if (vlen_type>=0) H5Tclose(vlen_type);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1579,8 +1588,37 @@ H5Tget_class(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
     }
     
-    FUNC_LEAVE(dt->type);
+    FUNC_LEAVE(H5T_get_class(dt));
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_class
+ *
+ * Purpose:	Returns the data type class identifier for a datatype ptr.
+ *
+ * Return:	Success:	One of the non-negative data type class
+ *				constants.
+ *
+ *		Failure:	H5T_NO_CLASS (Negative)
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, December  8, 1997
+ *
+ * Modifications:
+ *      Broke out from H5Tget_class - QAK - 6/4/99
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_class_t
+H5T_get_class(const H5T_t *dt)
+{
+    FUNC_ENTER(H5T_get_class, H5T_NO_CLASS);
+
+    assert(dt);
+    
+    FUNC_LEAVE(dt->type);
+}   /* end H5T_get_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -1673,6 +1711,10 @@ H5Tset_size(hid_t type_id, size_t size)
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "operation not allowed after members are defined");
+    }
+    if (H5T_COMPOUND==dt->type) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "operation not defined for compound data types");
     }
 
     /* Do the work */
@@ -3604,6 +3646,60 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     }
     FUNC_LEAVE(SUCCEED);
 }
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tvlen_create
+ *
+ * Purpose:	Create a new variable-length data type based on the specified
+ *		BASE_TYPE.
+ *
+ * Return:	Success:	ID of new VL data type
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tvlen_create(hid_t base_id)
+{
+    H5T_t	*base = NULL;		/*base data type	*/
+    H5T_t	*dt = NULL;		/*new VL data type	*/
+    hid_t	ret_value = FAIL;	/*return value			*/
+    
+    FUNC_ENTER(H5Tvlen_create, FAIL);
+    H5TRACE1("i","i",base_id);
+
+    /* Check args */
+    if (H5I_DATATYPE!=H5I_get_type(base_id) || NULL==(base=H5I_object(base_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+    }
+
+    /* Build new type */
+    if (NULL==(dt=H5MM_calloc(sizeof(H5T_t)))) {
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    }
+    dt->type = H5T_VLEN;
+    dt->parent = H5T_copy(base, H5T_COPY_ALL);
+
+    /* Set up VL information */
+    if (H5T_vlen_set_loc(dt, NULL, H5T_VLEN_MEMORY)<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+    }
+
+    /* Atomize the type */
+    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    }
+
+    FUNC_LEAVE(ret_value);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -4232,6 +4328,11 @@ H5T_create(H5T_class_t type, size_t size)
 	}
 	break;
 
+    case H5T_VLEN:  /* Variable length datatype */
+        HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
+		      "base type required - use H5Tvlen_create()");
+        break;
+
     default:
 	HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
 		      "unknown data type class");
@@ -4500,13 +4601,17 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	for (i=0; i<new_dt->u.enumer.nmembs; i++) {
 	    s = old_dt->u.enumer.name[i];
 	    new_dt->u.enumer.name[i] = H5MM_xstrdup(s);
-	}
-	
+    } 
+    } else if (H5T_VLEN == new_dt->type) {
+        /* H5T_copy converts any VL type into a memory VL type */
+	    if (H5T_vlen_set_loc(new_dt, NULL, H5T_VLEN_MEMORY)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        }
     } else if (H5T_OPAQUE == new_dt->type) {
-	/*
+        /*
          * Copy the tag name.
          */
-	new_dt->u.opaque.tag = HDstrdup(new_dt->u.opaque.tag);
+        new_dt->u.opaque.tag = HDstrdup(new_dt->u.opaque.tag);
     }
     
     FUNC_LEAVE(new_dt);
@@ -4743,7 +4848,7 @@ H5T_is_atomic(const H5T_t *dt)
     FUNC_ENTER(H5T_is_atomic, FAIL);
 
     assert(dt);
-    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_OPAQUE!=dt->type) {
+    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_VLEN!=dt->type && H5T_OPAQUE!=dt->type) {
 	ret_value = TRUE;
     } else {
 	ret_value = FALSE;
@@ -5853,6 +5958,14 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    if (tmp>0) HGOTO_DONE(1);
 	}
 	
+    } else if (H5T_VLEN==dt1->type) {
+        /* Sort memory VL datatypes before disk datatypes, somewhat arbitrarily */
+        if(dt1->u.vlen.type==H5T_VLEN_MEMORY && dt1->u.vlen.type==H5T_VLEN_DISK) {
+            HGOTO_DONE(-1);
+        }
+        else if(dt1->u.vlen.type==H5T_VLEN_DISK && dt1->u.vlen.type==H5T_VLEN_MEMORY) {
+            HGOTO_DONE(1);
+        }
     } else if (H5T_OPAQUE==dt1->type) {
 	HGOTO_DONE(HDstrcmp(dt1->u.opaque.tag,dt2->u.opaque.tag));
 

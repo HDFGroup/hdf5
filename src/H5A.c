@@ -242,6 +242,12 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 		      "memory allocation failed for attribute info");
     attr->name=HDstrdup(name);
     attr->dt=H5T_copy(type, H5T_COPY_ALL);
+    /* Mark any VL datatypes as being on disk now */
+    if(H5T_get_class(attr->dt)==H5T_VLEN) {
+	    if (H5T_vlen_set_loc(attr->dt, ent->file, H5T_VLEN_DISK)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+        }
+    }
     attr->ds=H5S_copy(space);
     attr->initialized = TRUE; /*for now, set to false later*/
 
@@ -954,6 +960,12 @@ H5Aget_type(hid_t attr_id)
     if (NULL==(dst=H5T_copy(attr->dt, H5T_COPY_REOPEN))) {
 	HRETURN_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		      "unable to copy datatype");
+    }
+    /* Mark any VL datatypes as being in memory now */
+    if(H5T_get_class(dst)==H5T_VLEN) {
+	    if (H5T_vlen_set_loc(dst, NULL, H5T_VLEN_MEMORY)<0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+        }
     }
     if (H5T_lock(dst, FALSE)<0) {
 	H5T_close(dst);

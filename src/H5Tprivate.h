@@ -53,6 +53,16 @@ typedef struct H5T_path_t {
 } H5T_path_t;
 
 /*
+ * VL types allowed.
+ */
+typedef enum {
+    H5T_VLEN_BADTYPE =   0, /* invalid VL Type */
+    H5T_VLEN_MEMORY,        /* VL datatype stored in memory */
+    H5T_VLEN_DISK,          /* VL datatype stored on disk */
+    H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
+} H5T_vlen_type_t;
+
+/*
  * Is the path the special no-op path? The no-op function can be set by the
  * application and there might be more than one no-op path in a
  * multi-threaded application if one thread is using the no-op path when some
@@ -71,6 +81,7 @@ __DLL__ H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 __DLL__ herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type);
 __DLL__ herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 __DLL__ herr_t H5T_close(H5T_t *dt);
+__DLL__ H5T_class_t H5T_get_class(const H5T_t *dt);
 __DLL__ size_t H5T_get_size(const H5T_t *dt);
 __DLL__ intn H5T_cmp(const H5T_t *dt1, const H5T_t *dt2);
 __DLL__ htri_t H5T_is_atomic(const H5T_t *dt);
@@ -94,4 +105,6 @@ __DLL__ char *H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/,
 			      size_t size);
 __DLL__ herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
 				void *value/*out*/);
+__DLL__ herr_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc);
+
 #endif
