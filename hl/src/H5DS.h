@@ -75,6 +75,16 @@ herr_t H5DSiterate_scales(hid_t did,
                           void *visitor_data);
 
 
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+htri_t H5DS_is_attached(hid_t loc_id, 
+                        const char *dname,
+                        const char *dsname,
+                        unsigned int idx);
+
+
 #ifdef __cplusplus
 }
 #endif

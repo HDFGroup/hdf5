@@ -118,11 +118,14 @@ herr_t H5DSattach_scale(hid_t did,
  hsize_t    *dims;        /* dimension of the "REFERENCE_LIST" array */
  ds_list_t  dsl;          /* attribute data in the DS pointing to the dataset */
  ds_list_t  *dsbuf;       /* array of attribute data in the DS pointing to the dataset */
- hobj_ref_t ref;          /* reference to the DS */
+ hobj_ref_t ref_to_ds;    /* reference to the DS */
+ hobj_ref_t ref_j;        /* iterator reference */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
+ hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
  H5G_stat_t sb1, sb2;
  H5I_type_t it1, it2;
  int        i, len;
+ int        found_ds=0;
  
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -183,7 +186,7 @@ herr_t H5DSattach_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
  /* create a reference for the >>DS<< dataset */
- if (H5Rcreate(&ref,dsid,".",H5R_OBJECT,-1)<0)
+ if (H5Rcreate(&ref_to_ds,dsid,".",H5R_OBJECT,-1)<0)
   goto out;
  
  /* create a reference for the >>data<< dataset */
@@ -235,7 +238,7 @@ herr_t H5DSattach_scale(hid_t did,
   /* store the REF information in the index of the dataset that has the DS */
   buf[idx].len = 1;
   buf[idx].p = malloc( 1 * sizeof(hobj_ref_t));
-  ((hobj_ref_t *)buf[idx].p)[0] = ref;
+  ((hobj_ref_t *)buf[idx].p)[0] = ref_to_ds;
 
   /* write the attribute with the reference */
   if (H5Awrite(aid,tid,buf)<0)
@@ -285,20 +288,53 @@ herr_t H5DSattach_scale(hid_t did,
   if (H5Aread(aid,tid,buf)<0)
    goto out;
 
-  /* we are adding one more DS to this dimension */
-  if ( buf[idx].len > 0 )
+  /* check to avoid inserting duplicates. it is not FAIL, just do nothing */
+  /* iterate all the REFs in this dimension IDX */
+  for (i=0; i<(int)buf[idx].len; i++)
   {
-   buf[idx].len++;
-   len = buf[idx].len;
-   buf[idx].p = realloc( buf[idx].p, len * sizeof(hobj_ref_t));
-   ((hobj_ref_t *)buf[idx].p)[ len-1 ] = ref;
+   /* get the reference */
+   ref_j = ((hobj_ref_t *)buf[idx].p)[i];
+
+   /* get the scale id for this REF */
+   if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref_j))<0)
+    goto out;
+   
+   /* get info for DS in the parameter list */
+   if (H5Gget_objinfo(dsid,".",TRUE,&sb1)<0)
+    goto out;
+   
+   /* get info for this DS */
+   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb2)<0)
+    goto out;
+   
+   /* same object, so this DS scale is already in this DIM IDX */
+   if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno) 
+   {
+    found_ds = 1;
+   }
+   
+   /* close the dereferenced dataset */
+   if (H5Dclose(dsid_j)<0)
+    goto out;
   }
-  else
+
+  if (found_ds==0)
   {
-   /* store the REF information in the index of the dataset that has the DS */
-   buf[idx].len = 1;
-   buf[idx].p = malloc( 1 * sizeof(hobj_ref_t));
-   ((hobj_ref_t *)buf[idx].p)[0] = ref;
+  /* we are adding one more DS to this dimension */
+   if ( buf[idx].len > 0 )
+   {
+    buf[idx].len++;
+    len = buf[idx].len;
+    buf[idx].p = realloc( buf[idx].p, len * sizeof(hobj_ref_t));
+    ((hobj_ref_t *)buf[idx].p)[ len-1 ] = ref_to_ds;
+   }
+   else
+   {
+    /* store the REF information in the index of the dataset that has the DS */
+    buf[idx].len = 1;
+    buf[idx].p = malloc( 1 * sizeof(hobj_ref_t));
+    ((hobj_ref_t *)buf[idx].p)[0] = ref_to_ds;
+   }
   }
   
   /* write the attribute with the new references */
@@ -461,7 +497,7 @@ herr_t H5DSattach_scale(hid_t did,
   if (dsbuf)
    free(dsbuf);
     
- } /* has_dimlist */ 
+ } /* has_reflist */ 
  
 /*-------------------------------------------------------------------------
  * write the standard attributes for a Dimension Scale dataset
@@ -623,7 +659,7 @@ herr_t H5DSdetach_scale(hid_t did,
  /* reset */
  if ( buf[idx].len > 0 )
  {
-  for(j=0; j<buf[idx].len; j++)
+  for (j=0; j<buf[idx].len; j++)
   {
    /* get the reference */
    ref = ((hobj_ref_t *)buf[idx].p)[j];
@@ -658,9 +694,6 @@ herr_t H5DSdetach_scale(hid_t did,
   } /* j */
  } /* if */
  
- if (found_ds == 0)
-  goto out;
- 
  /* write the attribute */
  if (H5Awrite(aid,tid,buf)<0)
   goto out;
@@ -676,6 +709,10 @@ herr_t H5DSdetach_scale(hid_t did,
   goto out;
  if (buf)
   free(buf);
+
+ /* the scale must be present */
+ if (found_ds == 0)
+  goto out;
 
 /*-------------------------------------------------------------------------
  * the "REFERENCE_LIST" array exists, update
@@ -732,9 +769,6 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
  } /* i */
  
- if (found_dset == 0)
-  goto out;
- 
  /* update on disk */
  if (H5Awrite(aid,tid,dsbuf)<0)
   goto out;
@@ -748,6 +782,10 @@ herr_t H5DSdetach_scale(hid_t did,
   goto out;
  if (dsbuf)
   free(dsbuf);
+
+  /* the pointed dataset must exist */
+ if (found_dset == 0)
+  goto out;
  
  return SUCCESS;
  
@@ -1495,3 +1533,298 @@ out:
  return FAIL;
 } 
 
+
+
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5DS_is_attached
+ *
+ * Purpose: Checks if the dataset named DNAME has a pointer in the REFERENCE_LIST
+ *  attribute and the the dataset named DSNAME (scale ) has a pointer in the 
+ *  DIMENSION_LIST attribute 
+ *
+ * Return:  
+ *   1: both the DS and the dataset pointers match
+ *   0: one of them or both do not match
+ *   FAIL (-1): error
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *
+ * Date: February 18, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+htri_t H5DS_is_attached(hid_t loc_id, 
+                        const char *dname,
+                        const char *dsname,
+                        unsigned int idx)  
+{ 
+ int        has_dimlist;
+ int        has_reflist;
+ hssize_t   nelmts;
+ hid_t      did;          /* dataset ID */
+ hid_t      dsid;         /* scale dataset ID */
+ hid_t      sid;          /* space ID */
+ hid_t      tid;          /* attribute type ID */
+ hid_t      aid;          /* attribute ID */
+ int        rank;         /* rank of dataset */
+ ds_list_t  *dsbuf;       /* array of attribute data in the DS pointing to the dataset */
+ hobj_ref_t ref;          /* reference to the DS */
+ hvl_t      *buf;         /* VL buffer to store in the attribute */
+ hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
+ H5G_stat_t sb1, sb2, sb3, sb4;
+ H5I_type_t it1, it2;
+ int        i;
+ int        found_dset=0, found_ds=0;
+
+ /* get the dataset id */
+ if ((did = H5Dopen(loc_id,dname))<0)
+  return FAIL;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(loc_id,dsname))<0)
+  return FAIL; 
+
+/*-------------------------------------------------------------------------
+ * parameter checking
+ *-------------------------------------------------------------------------
+ */
+ /* the dataset cannot be a DS dataset */
+ if ((H5DSis_scale(did))==1) 
+  return FAIL;
+ 
+ /* get info for the dataset in the parameter list */
+ if (H5Gget_objinfo(did,".",TRUE,&sb1)<0)
+  return FAIL;
+
+ /* get info for the scale in the parameter list */
+ if (H5Gget_objinfo(dsid,".",TRUE,&sb2)<0)
+  return FAIL;
+
+ /* same object, not valid */
+ if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno) 
+  return FAIL;
+
+ /* get ID type */
+ if ((it1 = H5Iget_type(did))<0)
+  return FAIL;
+ if ((it2 = H5Iget_type(dsid))<0)
+  return FAIL;
+
+ if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+  return FAIL;
+
+/*-------------------------------------------------------------------------
+ * get space
+ *-------------------------------------------------------------------------
+ */
+
+ /* get dataset space */
+ if ((sid = H5Dget_space(did))<0)
+  goto out;
+ 
+ /* get rank */
+ if ((rank=H5Sget_simple_extent_ndims(sid))<0)
+  goto out;
+
+ /* close dataset space */
+ if (H5Sclose(sid)<0)
+  goto out;
+
+ /* parameter range checking */
+ if (idx>(unsigned)rank-1)
+  goto out;
+
+ /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+ if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
+  return FAIL;
+
+/*-------------------------------------------------------------------------
+ * open "DIMENSION_LIST"
+ *-------------------------------------------------------------------------
+ */
+ 
+ if ( has_dimlist == 1 )
+ {
+  if ((aid = H5Aopen_name(did,DIMENSION_LIST))<0)
+   goto out;
+  
+  if ((tid = H5Aget_type(aid))<0)
+   goto out;
+
+  if ((sid = H5Aget_space(aid))<0)
+   goto out;
+ 
+  /* allocate and initialize the VL */
+  buf = (hvl_t*)malloc((size_t)rank * sizeof(hvl_t));
+
+  if (buf == NULL)
+   goto out;
+  
+  /* read */
+  if (H5Aread(aid,tid,buf)<0)
+   goto out;
+
+  /* iterate all the REFs in this dimension IDX */
+  for (i=0; i<(int)buf[idx].len; i++)
+  {
+   /* get the reference */
+   ref = ((hobj_ref_t *)buf[idx].p)[i];
+
+   /* get the scale id for this REF */
+   if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref))<0)
+    goto out;
+   
+   /* get info for DS in the parameter list */
+   if (H5Gget_objinfo(dsid,".",TRUE,&sb1)<0)
+    goto out;
+   
+   /* get info for this DS */
+   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb2)<0)
+    goto out;
+   
+   /* same object */
+   if (sb1.fileno==sb2.fileno && sb1.objno==sb2.objno) 
+   {
+    found_ds = 1;
+   }
+   
+   /* close the dereferenced dataset */
+   if (H5Dclose(dsid_j)<0)
+    goto out;
+
+  }
+
+  
+  /* close */
+  if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf)<0)
+   goto out;
+  if (H5Sclose(sid)<0)
+   goto out;
+  if (H5Tclose(tid)<0) 
+   goto out;
+  if (H5Aclose(aid)<0)
+   goto out;
+  if (buf)
+   free(buf);
+ } /* has_dimlist */ 
+ 
+/*-------------------------------------------------------------------------
+ * info on the >>DS<< dataset
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* try to find the attribute "REFERENCE_LIST" on the >>DS<< dataset */
+ if ((has_reflist = H5LT_find_attribute(dsid,REFERENCE_LIST))<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * open "REFERENCE_LIST" 
+ *-------------------------------------------------------------------------
+ */
+ 
+ if ( has_reflist ==  1 )
+ {
+  if ((aid = H5Aopen_name(dsid,REFERENCE_LIST))<0)
+   goto out;
+  
+  if ((tid = H5Aget_type(aid))<0)
+   goto out;
+  
+  /* get and save the old reference(s) */
+  if ((sid = H5Aget_space(aid))<0)
+   goto out;
+  
+  if ((nelmts = H5Sget_simple_extent_npoints(sid))<0)
+   goto out;
+  
+  dsbuf = malloc((size_t)nelmts * sizeof(ds_list_t));
+
+  if (dsbuf == NULL)
+   goto out;
+  
+  if (H5Aread(aid,tid,dsbuf)<0)
+   goto out;
+  
+/*-------------------------------------------------------------------------
+ * iterate
+ *-------------------------------------------------------------------------
+ */
+  
+  for(i=0; i<nelmts; i++)
+  {
+   /* get the reference */
+   ref = dsbuf[i].ref;
+
+   /* the reference was not deleted  */
+   if (ref)
+   {
+    /* get the DS id */
+    if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref))<0)
+     goto out;
+    
+    /* get info for dataset in the parameter list */
+    if (H5Gget_objinfo(did,".",TRUE,&sb3)<0)
+     goto out;
+    
+    /* get info for this DS */
+    if (H5Gget_objinfo(dsid_j,".",TRUE,&sb4)<0)
+     goto out;
+    
+    /* same object */
+    if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx) {
+     found_dset=1;
+    } /* if */
+    
+    /* close the dereferenced dataset */
+    if (H5Dclose(dsid_j)<0)
+     goto out;
+   } /* if */
+  } /* i */
+  
+  
+  /* close */
+  if (H5Sclose(sid)<0)
+   goto out;
+  if (H5Tclose(tid)<0) 
+   goto out;
+  if (H5Aclose(aid)<0)
+   goto out;
+  if (dsbuf)
+   free(dsbuf);
+ } /* has_reflist */ 
+ 
+ /* close the dataset */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ /* close the scale */
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ if (found_ds && found_dset)
+  return 1;
+ else
+  return 0;
+ 
+/* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Sclose(sid);
+  H5Aclose(aid);
+  H5Tclose(tid);
+  H5Dclose(did);
+  H5Dclose(dsid);
+ } H5E_END_TRY;
+ return FAIL;
+}
