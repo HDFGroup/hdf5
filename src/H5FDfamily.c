@@ -567,6 +567,13 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              Thursday, November 18, 2004
+ *              When file is re-opened, member size passed in from access property
+ *              is checked to see if it's reasonable.  If there is only 1 member 
+ *              file, member size can't be smaller than current member size. 
+ *              If there are at least 2 member files, member size can only be equal 
+ *              the 1st member size.
  *
  *-------------------------------------------------------------------------
  */
@@ -577,7 +584,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_family_t	*file=NULL;
     H5FD_t     		*ret_value=NULL;
     char		memb_name[4096], temp[4096];
-    hsize_t		eof;
+    hsize_t		eof1=HADDR_UNDEF, eof2=HADDR_UNDEF;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5P_genplist_t      *plist;      /* Property list pointer */
 
@@ -659,16 +666,26 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     }
 
     /* 
-     * Check if user sets member size smaller than existing first member file size.
-     * Return failure if so.  If the member size coming from access property list is 
-     * 0, then set the member size to be the current first member file size.  
+     * Get file size of the first 2 member files if exist.  Check if user sets 
+     * reasonable member size.   
      */
-    if(HADDR_UNDEF==(eof = H5FD_get_eof(file->memb[0])))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof request failed")
-    if(file->memb_size==0 && eof)
-        file->memb_size = eof;
-    if(eof && file->memb_size<eof)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "trying to set member size smaller than existing member file size")
+    if(HADDR_UNDEF==(eof1 = H5FD_get_eof(file->memb[0])))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof1 request failed")
+    if(file->memb[1] && (HADDR_UNDEF==(eof2 = H5FD_get_eof(file->memb[1]))))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof2 request failed")
+            
+    if(eof1 && (eof2==HADDR_UNDEF || !eof2)) {  
+        /* If there is only 1 member file, new member size can't be smaller than 
+         * current member size. 
+         */
+        if(file->memb_size<eof1)
+            file->memb_size = eof1;
+    } else if(eof1 && eof2) { 
+        /* If there are at least 2 member files, new member size can only be equal 
+         * to the 1st member size
+         */
+        file->memb_size = eof1;
+    }
 
     ret_value=(H5FD_t *)file;
 

@@ -243,16 +243,11 @@ test_family(void)
         goto error;
    
     /* Tries to reopen the file with member file size smaller than 
-     * actual 1st member file size(976 bytes).  Supposed to fail. */ 
+     * actual 1st member file size(976 bytes).  The library is 
+     * supposed to adjust the member size to 976 bytes. */
     if(H5Pset_fapl_family(fapl, (hsize_t)512, H5P_DEFAULT)<0)
         goto error;
-    H5E_BEGIN_TRY {
-        H5Fopen(filename, H5F_ACC_RDWR, fapl);
-    } H5E_END_TRY;
-   
-    /* Reopen the file with original member file size */ 
-    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
-        goto error;
+
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
         goto error;
 
@@ -315,7 +310,7 @@ test_family(void)
         if(file_size<32*KB || file_size>40*KB)
             goto error;
     }
-        
+   
     if(H5Sclose(space)<0)
         goto error;
     if(H5Dclose(dset)<0)
