@@ -3797,7 +3797,7 @@ H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
     }
 
     /* Set values */
-    fapl->sdata_block_size = fapl->meta_block_size = size;
+    fapl->meta_block_size = size;
 
     FUNC_LEAVE (SUCCEED);
 }
