@@ -325,7 +325,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
 
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
-        int na = efl.nalloc + H5O_EFL_ALLOC;
+        size_t na = efl.nalloc + H5O_EFL_ALLOC;
         H5O_efl_entry_t *x = H5MM_realloc (efl.slot, na*sizeof(H5O_efl_entry_t));
 
         if (!x)
@@ -388,7 +388,7 @@ H5Pget_external_count(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
     /* Set return value */
-    ret_value=efl.nused;
+    ret_value=(int)efl.nused;
     
 done:
     FUNC_LEAVE_API(ret_value);

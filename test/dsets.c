@@ -1409,7 +1409,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]/2; j++) {
-	    points[i][j] = HDrandom ();
+	    points[i][j] = (int)HDrandom ();
 	}
     }
     if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
@@ -1515,7 +1515,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
-	    points[hs_offset[0]+i][hs_offset[1]+j] = HDrandom();
+	    points[hs_offset[0]+i][hs_offset[1]+j] = (int)HDrandom();
 	}
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
@@ -2135,7 +2135,7 @@ test_onebyte_shuffle(hid_t file)
 
     for (i= 0;i< 10; i++)
       for (j = 0; j < 20; j++)
-	orig_data[i][j] = HDrandom();
+	orig_data[i][j] = (unsigned char)HDrandom();
 
     PASSED();
 #else
@@ -3096,10 +3096,10 @@ static herr_t
 test_filter_delete(hid_t file)
 {
     H5Z_filter_t filtn;                 /* filter identification number */
-    hid_t        dsid;                  /* dataset ID */
-    hid_t        sid;                   /* dataspace ID */ 
-    hid_t        dcpl;                  /* dataset creation property list ID */
-    hid_t        dcpl1;                 /* dataset creation property list ID */
+    hid_t        dsid=-1;                  /* dataset ID */
+    hid_t        sid=-1;                   /* dataspace ID */ 
+    hid_t        dcpl=-1;                  /* dataset creation property list ID */
+    hid_t        dcpl1=-1;                 /* dataset creation property list ID */
     hsize_t      dims[2]={20,20};       /* dataspace dimensions */
     hsize_t      chunk_dims[2]={10,10}; /* chunk dimensions */
     int          nfilters;              /* number of filters in DCPL */
@@ -3213,11 +3213,11 @@ error:
 static herr_t
 auxread_fdata(hid_t fid, const char *name)
 {
- hid_t     dset_id;           /* dataset ID */ 
- hid_t     dcpl_id;           /* dataset creation property list ID */ 
- hid_t     space_id;          /* space ID */ 
- hid_t     ftype_id;          /* file data type ID */ 
- hid_t     mtype_id;          /* memory data type ID */
+ hid_t     dset_id=-1;           /* dataset ID */ 
+ hid_t     dcpl_id=-1;           /* dataset creation property list ID */ 
+ hid_t     space_id=-1;          /* space ID */ 
+ hid_t     ftype_id=-1;          /* file data type ID */ 
+ hid_t     mtype_id=-1;          /* memory data type ID */
  size_t    msize;             /* memory size of memory type */
  void      *buf=NULL;         /* data buffer */
  hsize_t   nelmts;            /* number of elements in dataset */
@@ -3300,10 +3300,10 @@ error:
 static herr_t
 test_filters_endianess(void)
 {
-    hid_t     fid;                   /* file ID */
-    hid_t     dsid;                  /* dataset ID */
-    hid_t     sid;                   /* dataspace ID */ 
-    hid_t     dcpl;                  /* dataset creation property list ID */
+    hid_t     fid=-1;                   /* file ID */
+    hid_t     dsid=-1;                  /* dataset ID */
+    hid_t     sid=-1;                   /* dataspace ID */ 
+    hid_t     dcpl=-1;                  /* dataset creation property list ID */
     hsize_t   dims[1]={2};           /* dataspace dimensions */
     hsize_t   chunk_dims[1]={2};     /* chunk dimensions */
     int       buf[2];
@@ -3446,7 +3446,7 @@ main(void)
 #endif
     
     /* Set the random # seed */
-    HDsrandom((unsigned long)time(NULL));
+    HDsrandom((unsigned long)HDtime(NULL));
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {

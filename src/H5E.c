@@ -110,7 +110,7 @@ static herr_t  H5E_set_current_stack(H5E_t *estack);
 static herr_t  H5E_close_stack(H5E_t *err_stack);
 static int     H5E_get_num(const H5E_t *err_stack);
 static herr_t  H5E_pop(H5E_t *err_stack, size_t count);
-static herr_t  H5E_clear_entries(H5E_t *estack, unsigned nentries);
+static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
 static herr_t  H5E_print(const H5E_t *estack, FILE *stream);
 static herr_t  H5E_walk (const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
                              void *client_data);
@@ -1685,7 +1685,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_clear_entries(H5E_t *estack, unsigned nentries)
+H5E_clear_entries(H5E_t *estack, size_t nentries)
 {
     H5E_error_t         *error; /* Pointer to error stack entry to clear */
     unsigned u;                 /* Local index variable */
@@ -2083,7 +2083,7 @@ H5E_walk (const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, void 
         } else {
             H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
             for (i=(int)(estack->nused-1); i>=0 && status>=0; i--)
-                status = (func)(estack->nused-(size_t)(i+1), estack->slot+i, client_data);
+                status = (func)((unsigned)(estack->nused-(size_t)(i+1)), estack->slot+i, client_data);
         }
 #endif /* H5_WANT_H5_V1_6_COMPAT */
         if(status<0)

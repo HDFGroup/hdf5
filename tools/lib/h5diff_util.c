@@ -15,8 +15,6 @@
 #include "h5diff.h"
 #include "H5private.h"
 
-#include <assert.h>
-
 
 /*-------------------------------------------------------------------------
  * Function: print_pos

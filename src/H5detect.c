@@ -479,7 +479,7 @@ sigbus_handler(int UNUSED signo)
 static void
 print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 {
-    int         byte_order;
+    int         byte_order=0;
     int		i, j;
 
     /* Include files */

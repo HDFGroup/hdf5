@@ -1077,7 +1077,7 @@ test_array_fill(size_t lo, size_t hi)
 
     /* Setup */
     for(u=0; u<ARRAY_FILL_SIZE; u++)
-        src[u]=u;
+        src[u]=(char)u;
 
     /* Fill */
     for(w=lo; w<=hi; w++) {
@@ -1147,9 +1147,9 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     /* Check offsets */
     for(u=0; u<n; u++) {
         /* Get random coordinate */
-        coords[0] = HDrandom() % z;
-        coords[1] = HDrandom() % y;
-        coords[2] = HDrandom() % x;
+        coords[0] = (hssize_t)(HDrandom() % z);
+        coords[1] = (hssize_t)(HDrandom() % y);
+        coords[2] = (hssize_t)(HDrandom() % x);
 
         /* Get offset of coordinate */
         off=H5V_array_offset(ARRAY_OFFSET_NDIMS,dims,coords);
@@ -1227,7 +1227,7 @@ main(int argc, char *argv[])
     printf("\n");
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)time(NULL));
+    HDsrandom((unsigned long)HDtime(NULL));
 
     /*
      * Open the library explicitly for thread-safe builds, so per-thread

@@ -573,7 +573,6 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
         case H5S_COMPLEX:
             /* not yet implemented */
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "complex data spaces are not supported yet");
-            break;
 
         default:
             assert("unknown data space type" && 0);

@@ -53,7 +53,9 @@ FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
+#ifdef H5_HAVE_PARALLEL
 static int  h5tools_mpi_init_g; /* if MPI_Init() has been called */
+#endif /* H5_HAVE_PARALLEL */
 
 /* Names of VFDs */
 static const char *drivernames[]={
@@ -220,7 +222,7 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum, int argc, const char *
 
             /* Initialize the MPI library, if it wasn't already */
             if(!h5tools_mpi_init_g) {
-                MPI_Init(&argc, &argv);
+                MPI_Init(&argc, (char ***)&argv);
 
                 h5tools_mpi_init_g=1;
             } /* end if */
@@ -235,7 +237,7 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum, int argc, const char *
 
             /* Initialize the MPI library, if it wasn't already */
             if(!h5tools_mpi_init_g) {
-                MPI_Init(&argc, &argv);
+                MPI_Init(&argc, (char ***)&argv);
 
                 h5tools_mpi_init_g=1;
             } /* end if */

@@ -93,11 +93,11 @@ test_mpio_overlap_writes(char *filename)
 	while (mpi_off < MPIO_TEST_WRITE_SIZE){
 	    /* make sure the write does not exceed the TEST_WRITE_SIZE */
 	    if (mpi_off+stride > MPIO_TEST_WRITE_SIZE)
-		stride = MPIO_TEST_WRITE_SIZE - mpi_off;
+		stride = MPIO_TEST_WRITE_SIZE - (int)mpi_off;
 
 	    /* set data to some trivial pattern for easy verification */
 	    for (i=0; i<stride; i++)
-		buf[i] = (mpi_off+i) & 0x7f;
+		buf[i] = (char)(mpi_off+i) & 0x7f;
 	    mrc = MPI_File_write_at(fh, mpi_off, buf, stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
@@ -137,14 +137,14 @@ test_mpio_overlap_writes(char *filename)
 	for (mpi_off=0; mpi_off < MPIO_TEST_WRITE_SIZE; mpi_off += bufsize){
 	    /* make sure it does not read beyond end of data */
 	    if (mpi_off+stride > MPIO_TEST_WRITE_SIZE)
-		stride = MPIO_TEST_WRITE_SIZE - mpi_off;
+		stride = MPIO_TEST_WRITE_SIZE - (int)mpi_off;
 	    mrc = MPI_File_read_at(fh, mpi_off, buf, stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
 	    vrfyerrs=0;
 	    for (i=0; i<stride; i++){
 		char expected;
-		expected = (mpi_off+i) & 0x7f;
+		expected = (char)(mpi_off+i) & 0x7f;
 		if ((buf[i] != expected) &&
 		    (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
 			printf("proc %d: found data error at [%ld], expect %d, got %d\n",
@@ -393,7 +393,7 @@ finish:
 #define USEFSYNC 2		/* request file_sync */
 
 
-test_mpio_1wMr(char *filename, int special_request)
+static int test_mpio_1wMr(char *filename, int special_request)
 {
     char hostname[128];
     int  mpi_size, mpi_rank;
@@ -404,7 +404,7 @@ test_mpio_1wMr(char *filename, int special_request)
     unsigned char writedata[DIMSIZE], readdata[DIMSIZE];
     unsigned char expect_val;
     int  i, irank; 
-    int  nerrors = 0;		/* number of errors */
+    int  nerr= 0;		/* number of errors */
     int  atomicity;
     MPI_Offset  mpi_off;
     MPI_Status  mpi_stat;
@@ -489,7 +489,7 @@ if (special_request & USEATOM){
     /* Only one process writes */
     if (mpi_rank==irank){
 	if (VERBOSE_HI){
-	    PRINTID; printf("wrote %d bytes at %d\n", DIMSIZE, mpi_off);
+	    PRINTID; printf("wrote %d bytes at %d\n", DIMSIZE, (int)mpi_off);
 	}
 	if ((mpi_err = MPI_File_write_at(fh, mpi_off, writedata, DIMSIZE,
 			MPI_BYTE, &mpi_stat))
@@ -560,7 +560,7 @@ if (special_request & USEFSYNC){
 	    PRINTID;
 	    printf("read data[%d:%d] got %02x, expect %02x\n", irank, i,
 		    readdata[i], expect_val);
-	    nerrors++;
+	    nerr++;
 	}
     }
 
@@ -568,18 +568,18 @@ if (special_request & USEFSYNC){
 
     if (VERBOSE_HI){
 	PRINTID;
-	printf("%d data errors detected\n", nerrors);
+	printf("%d data errors detected\n", nerr);
     }
 
     {
 	int temp;
-	MPI_Reduce(&nerrors, &temp, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	MPI_Reduce(&nerr, &temp, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
         if (mpi_rank == 0 && temp > 0)
-	    nerrors = temp;
+	    nerr= temp;
     }
 
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
-    return nerrors;
+    return nerr;
 }
 
 

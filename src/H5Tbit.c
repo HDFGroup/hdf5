@@ -196,7 +196,7 @@ H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
 
     if(!shift_dist)
         goto done;    
-    if(ABS(shift_dist) >= size) {
+    if((size_t)ABS(shift_dist) >= size) {
         H5T_bit_set(buf, offset, size, 0);
         goto done;
     }

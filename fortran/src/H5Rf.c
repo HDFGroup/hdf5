@@ -53,7 +53,7 @@ nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 
      HDfree(c_name);
      if (ret_value_c >= 0)  {
-         *ref=ref_c;
+         *ref=(int_f)ref_c;
          ret_value = 0;
      }
        

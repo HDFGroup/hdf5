@@ -29,7 +29,7 @@
  */
 
  
-void write_attr_in(hid_t loc_id, 
+static void write_attr_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */)

@@ -726,7 +726,7 @@ nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
   c_norm = H5Tget_norm(c_type_id);
   if ( c_norm == 0  ) return ret_value;
 
-  *norm = (size_t_f)c_norm;
+  *norm = (int_f)c_norm;
   ret_value = 0; 
   return ret_value;
 }
@@ -1578,7 +1578,7 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* taglen)
   if (c_tag == NULL ) return ret_value;
 
   HD5packFstring(c_tag, _fcdtocp(tag), (int)strlen(c_tag));  
-  *taglen = strlen(c_tag);
+  *taglen = (int_f)HDstrlen(c_tag);
   HDfree(c_tag);
   ret_value = 0; 
   return ret_value;

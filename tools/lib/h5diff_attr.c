@@ -14,7 +14,6 @@
 
 #include "h5diff.h"
 #include "H5private.h" 
-#include <assert.h>
 
 
 /*-------------------------------------------------------------------------
@@ -45,14 +44,14 @@ int diff_attr(hid_t      loc1_id,
               diff_opt_t *options
               )
 {
- hid_t      attr1_id;     /* attr ID */ 
- hid_t      attr2_id;     /* attr ID */ 
- hid_t      space1_id;    /* space ID */ 
- hid_t      space2_id;    /* space ID */ 
- hid_t      ftype1_id;    /* file data type ID */ 
- hid_t      ftype2_id;    /* file data type ID */ 
- hid_t      mtype1_id;    /* memory data type ID */
- hid_t      mtype2_id;    /* memory data type ID */
+ hid_t      attr1_id=-1;     /* attr ID */ 
+ hid_t      attr2_id=-1;     /* attr ID */ 
+ hid_t      space1_id=-1;    /* space ID */ 
+ hid_t      space2_id=-1;    /* space ID */ 
+ hid_t      ftype1_id=-1;    /* file data type ID */ 
+ hid_t      ftype2_id=-1;    /* file data type ID */ 
+ hid_t      mtype1_id=-1;    /* memory data type ID */
+ hid_t      mtype2_id=-1;    /* memory data type ID */
 	size_t     msize1;       /* memory size of memory type */
  size_t     msize2;       /* memory size of memory type */
  void       *buf1=NULL;   /* data buffer */
@@ -87,9 +86,9 @@ int diff_attr(hid_t      loc1_id,
  *-------------------------------------------------------------------------
  */
   /* open attribute */
-  if ((attr1_id = H5Aopen_idx(loc1_id, i))<0) 
+  if ((attr1_id = H5Aopen_idx(loc1_id, (unsigned)i))<0) 
    goto error;
-  if ((attr2_id = H5Aopen_idx(loc2_id, i))<0) 
+  if ((attr2_id = H5Aopen_idx(loc2_id, (unsigned)i))<0) 
    goto error;
   
   /* get name */

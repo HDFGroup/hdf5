@@ -1537,7 +1537,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  /* Print information about external strorage */
  if ((nf = H5Pget_external_count(dcpl))>0) {
      for (i=0, max_len=0; i<nf; i++) {
-  H5Pget_external(dcpl, i, sizeof(f_name), f_name, NULL, NULL);
+  H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL);
   n = display_string(NULL, f_name, TRUE);
   max_len = MAX(max_len, n);
      }
@@ -1550,7 +1550,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
      for (i=0; i<max_len; i++) putchar('-');
      putchar('\n');
      for (i=0, total=0; i<nf; i++) {
-  if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
+  if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset,
         &f_size)<0) {
       HDfprintf(stdout,
          "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
@@ -1578,7 +1578,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  if ((nf = H5Pget_nfilters(dcpl))>0) {
      for (i=0; i<nf; i++) {
   cd_nelmts = NELMTS(cd_values);
-  filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
+  filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
      cd_values, sizeof(f_name), f_name);
   f_name[sizeof(f_name)-1] = '\0';
   sprintf(s, "Filter-%d:", i);
@@ -2009,7 +2009,7 @@ main (int argc, const char *argv[])
     iter_t iter;
     static char root_name[] = "/";
     char        drivername[50];
-    char                *preferred_driver=NULL;
+    const char                *preferred_driver=NULL;
 
     /* Initialize h5tools lib */
     h5tools_init();

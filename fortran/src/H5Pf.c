@@ -1786,7 +1786,7 @@ nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 {
   int ret_value = -1;
   hid_t c_fapl_id;
-  hid_t c_degree; 
+  H5F_close_degree_t c_degree; 
 
   c_fapl_id = (hid_t)*fapl_id;
   c_degree = (H5F_close_degree_t)*degree;
@@ -1842,7 +1842,7 @@ nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
   c_prp_id = (hid_t)*prp_id;
   c_size = H5Pget_buffer(c_prp_id, NULL, NULL);
   if ( c_size <= 0  ) return ret_value;
-  *size = (hsize_t)c_size;
+  *size = (hsize_t_f)c_size;
   ret_value = 0;
   return ret_value;
 }
@@ -2627,7 +2627,7 @@ nh5pget_class_name_c(hid_t_f *class, _fcd name, int_f *name_len)
      if( c_name == NULL) goto DONE;
 
      HD5packFstring(c_name, _fcdtocp(name), (int)*name_len);
-     ret_value = strlen(c_name);
+     ret_value = (int_f)HDstrlen(c_name);
 
 DONE:
      HDfree(c_name);

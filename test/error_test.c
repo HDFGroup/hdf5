@@ -186,11 +186,11 @@ test_error(hid_t file)
 static herr_t 
 init_error(void)
 {
-    ssize_t cls_size = strlen(ERR_CLS_NAME)+1;
-    char *cls_name = malloc(strlen(ERR_CLS_NAME)+1);
-    ssize_t msg_size = strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
-    char *msg = malloc(strlen(ERR_MIN_SUBROUTINE_MSG)+1);
-    H5E_type_t *msg_type= malloc(sizeof(H5E_type_t));
+    ssize_t cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME)+1;
+    char *cls_name = HDmalloc(strlen(ERR_CLS_NAME)+1);
+    ssize_t msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    char *msg = HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG)+1);
+    H5E_type_t *msg_type= HDmalloc(sizeof(H5E_type_t));
     
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
         TEST_ERROR;

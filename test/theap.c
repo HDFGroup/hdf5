@@ -95,7 +95,7 @@ test_heap_init(void)
     HDsrandom((unsigned long)curr_time);
     for(u=0; u<NUM_ELEMS; u++)
         /* Generate random numbers from -1000 to 1000 */
-        rand_num[u].val=(HDrandom()%2001)-1001;
+        rand_num[u].val=(int)(HDrandom()%2001)-1001;
 
     /* Sort random numbers into increasing order */
     HDmemcpy(inc_sort_num,rand_num,sizeof(test_obj)*NUM_ELEMS);

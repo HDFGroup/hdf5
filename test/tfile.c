@@ -836,7 +836,6 @@ test_get_file_id(void)
     hid_t               plist;
     hsize_t             dims[F2_RANK];
     herr_t              ret;
-    int                 numb;
 
     /* Create a file */
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

@@ -15,7 +15,6 @@
 #include "h5diff.h"
 #include "H5private.h" 
 #include "h5tools.h"
-#include <assert.h>
 
 /*-------------------------------------------------------------------------
  * Function: diff_dataset
@@ -39,8 +38,8 @@ int diff_dataset( hid_t file1_id,
 {
  hid_t dset1_id  =-1;
  hid_t dset2_id  =-1;
- hid_t dcpl1_id;
- hid_t dcpl2_id;
+ hid_t dcpl1_id=-1;
+ hid_t dcpl2_id=-1;
  int   gout=0, nfound=0;
 
 
@@ -146,11 +145,9 @@ int diff_datasetid( hid_t dset1_id,
  int          nfound=0;               /* number of differences found */
  const char   *name1=NULL;            /* relative names */
  const char   *name2=NULL;
- int          maxdim_diff=0;          /* maximum dimensions are different */
- int          dim_diff=0;             /* current dimensions are different */
  hsize_t      storage_size1;
  hsize_t      storage_size2;
- int          i, gout=0;
+ int          i;
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )

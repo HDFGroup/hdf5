@@ -43,7 +43,7 @@
 /* Variable length string datatype */
 #define STR_INIT_LEN    4096    /*initial length            */
 
-static char    *h5tools_escape(char *s, size_t size, int escape_spaces);
+static char    *h5tools_escape(char *s, size_t size);
 static hbool_t  h5tools_is_zero(const void *_mem, size_t size);
 
 /*-------------------------------------------------------------------------
@@ -753,7 +753,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         char enum_name[1024];
 
         if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name) >= 0) {
-            h5tools_str_append(str, h5tools_escape(enum_name, sizeof(enum_name), TRUE));
+            h5tools_str_append(str, h5tools_escape(enum_name, sizeof(enum_name)));
         } else {
             size_t i;
             n = H5Tget_size(type);
@@ -939,8 +939,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
  * Function:	h5tools_escape
  *
  * Purpose:	Changes all "funny" characters in S into standard C escape
- *		sequences. If ESCAPE_SPACES is non-zero then spaces are
- *		escaped by prepending a backslash.
+ *		sequences.
  *
  * Return:	Success:	S
  *
@@ -956,7 +955,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
  *-------------------------------------------------------------------------
  */
 static char *
-h5tools_escape(char *s/*in,out*/, size_t size, int escape_spaces)
+h5tools_escape(char *s/*in,out*/, size_t size)
 {
     register size_t i;
     size_t n = strlen(s);

@@ -12,13 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+#include <stdlib.h>
 #include "h5diff.h"
 #include "H5private.h" 
-#include <stdlib.h>
-#include <assert.h>
-
-
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
@@ -375,10 +371,10 @@ int diff( hid_t      file1_id,
           diff_opt_t *options, 
           H5G_obj_t  type )
 {
- hid_t       type1_id;
- hid_t       type2_id;
- hid_t       grp1_id;
- hid_t       grp2_id;
+ hid_t       type1_id=-1;
+ hid_t       type2_id=-1;
+ hid_t       grp1_id=-1;
+ hid_t       grp2_id=-1;
  int         ret;
  H5G_stat_t  sb1;
  H5G_stat_t  sb2;

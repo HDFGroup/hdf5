@@ -609,7 +609,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Enlarge member array */
         if (file->nmembs>=file->amembs) {
-            size_t n = MAX(64, 2*file->amembs);
+            int n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
 
             if (!x)
@@ -866,7 +866,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
 
         /* Enlarge member array */
         if (u>=file->amembs) {
-            size_t n = MAX(64, 2*file->amembs);
+            int n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
             if (!x)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")

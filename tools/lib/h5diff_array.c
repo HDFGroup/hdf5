@@ -12,12 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+#include <math.h>
 #include "h5diff.h"
 #include "H5private.h" 
-#include <assert.h>
-#include <math.h>
-
 
 static int diff_datum(void  *_mem1, 
                 void       *_mem2, 
@@ -35,7 +32,6 @@ static int diff_datum(void  *_mem1,
 
 static int diff_native_uchar(unsigned char *mem1,
                       unsigned char *mem2,
-                      size_t        type_size,
                       hsize_t       i, 
                       int           rank, 
                       hsize_t       *acc,  
@@ -47,7 +43,6 @@ static int diff_native_uchar(unsigned char *mem1,
 
 static int diff_char(unsigned char *mem1,
              unsigned char *mem2,
-             size_t        type_size,
              hsize_t       i, 
              int           rank, 
              hsize_t       *acc,  
@@ -119,7 +114,7 @@ int diff_array( void *_mem1,
    tmp1,
    tmp2, 
    m_type,
-   0,
+   (hsize_t)0,
    rank,
    acc,
    pos,
@@ -270,8 +265,8 @@ int diff_datum( void       *_mem1,
   nmembs = H5Tget_nmembers(m_type);
   for (j = 0; j < nmembs; j++) 
   {
-   offset    = H5Tget_member_offset(m_type, j);
-   memb_type = H5Tget_member_type(m_type, j);
+   offset    = H5Tget_member_offset(m_type, (unsigned)j);
+   memb_type = H5Tget_member_type(m_type, (unsigned)j);
    nfound+=diff_datum(
     mem1+offset,
     mem2+offset,
@@ -305,7 +300,6 @@ int diff_datum( void       *_mem1,
    nfound+=diff_char(
    mem1 + u,
    mem2 + u, /* offset */
-   type_size,
    i,        /* index position */
    rank, 
    acc,
@@ -329,7 +323,6 @@ int diff_datum( void       *_mem1,
     nfound+=diff_native_uchar(
     mem1 + u,
     mem2 + u, /* offset */
-    type_size,
     i,        /* index position */
     rank, 
     acc,
@@ -352,7 +345,6 @@ int diff_datum( void       *_mem1,
    nfound+=diff_native_uchar(
    mem1 + u,
    mem2 + u, /* offset */
-   type_size,
    i,        /* index position */
    rank, 
    acc,
@@ -403,7 +395,6 @@ int diff_datum( void       *_mem1,
       nfound+=diff_native_uchar(
       mem1 + u,
       mem2 + u, /* offset */
-      type_size,
       i,        /* index position */
       rank, 
       acc,
@@ -466,7 +457,7 @@ int diff_datum( void       *_mem1,
   /* get the number of sequence elements */
   nelmts = ((hvl_t *)mem1)->len;
   
-  for (j = 0; j < nelmts; j++) 
+  for (j = 0; j < (int)nelmts; j++) 
     nfound+=diff_datum(
     ((char *)(((hvl_t *)mem1)->p)) + j * size,
     ((char *)(((hvl_t *)mem2)->p)) + j * size, /* offset */
@@ -1526,7 +1517,6 @@ int diff_datum( void       *_mem1,
 static
 int diff_native_uchar(unsigned char *mem1,
                       unsigned char *mem2,
-                      size_t        type_size,
                       hsize_t       i, 
                       int           rank, 
                       hsize_t       *acc,  
@@ -1620,7 +1610,6 @@ int diff_native_uchar(unsigned char *mem1,
 static
 int diff_char(unsigned char *mem1,
               unsigned char *mem2,
-              size_t        type_size,
               hsize_t       i, 
               int           rank, 
               hsize_t       *acc,  
@@ -1824,3 +1813,4 @@ static int diff_region(hid_t region1_id, hid_t region2_id)
  
  return ret;
 }
+

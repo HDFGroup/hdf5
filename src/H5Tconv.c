@@ -8409,7 +8409,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     hssize_t    sign;                   /*source sign bit value         */
     uint8_t     *int_buf;               /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
-    size_t      msize;                  /*mantissa size after restored implied 1  */
     size_t	i;			/*miscellaneous counters	*/
     size_t	first;                  /*first bit(MSB) in an integer  */
     ssize_t	sfirst;			/*a signed version of `first'	*/
@@ -8590,11 +8589,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * Restore the implicit bit for mantissa if it's implied.
                  * Equivalent to mantissa |= (hsize_t)1<<src.u.f.msize.
                  */
-                if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                if (H5T_NORM_IMPLIED==src.u.f.norm)
                     H5T_bit_inc(int_buf, src.u.f.msize, 8*buf_size-src.u.f.msize);
-                    msize = src.u.f.msize + 1;
-                } else 
-                    msize = src.u.f.msize;
 
                 /* 
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
@@ -8759,7 +8755,6 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     hsize_t     sign = 0;               /*source sign bit value         */
     hsize_t     is_max_neg = 0;         /*source is maximal negative value*/
     hsize_t     do_round = 0;           /*whether there is roundup      */
-    hsize_t     trailing = 0;           /*whether there is trailing after 1st roundup bit*/
     uint8_t     *int_buf;               /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
     size_t	i;			/*miscellaneous counters	*/
@@ -8832,7 +8827,6 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 sign = 0;               /*source sign bit value         */
                 is_max_neg = 0;         /*source is maximal negative value*/
                 do_round = 0;           /*whether there is roundup      */
-                trailing = 0;           /*whether there is trailing after 1st roundup bit*/
 
                 /*
                  * If the source and destination buffers overlap then use a
@@ -8912,7 +8906,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 			 * (create a carry) to help conversion.  i.e. a character type number 0x80
 			 * is treated as 0x100.
 			 */
-                        sfirst = src.prec-1;
+                        sfirst = (ssize_t)(src.prec-1);
                         is_max_neg = 0;
                     }
 

@@ -99,7 +99,7 @@ typedef struct {
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
  int verbose;                 /*verbose mode */
-	int threshold;               /*minimum size to compress, in bytes */
+ hsize_t threshold;               /*minimum size to compress, in bytes */
 } pack_opt_t;
 
 

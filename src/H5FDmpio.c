@@ -1484,7 +1484,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
 
         /* Obtain the data transfer properties */
-        xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode = (H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
 
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
