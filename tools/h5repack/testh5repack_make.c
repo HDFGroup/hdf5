@@ -164,7 +164,7 @@ int make_all_objects(hid_t loc_id)
 
  write_dset_in(root_id,"dset_referenced",loc_id,0);
  write_dset_in(group_id,"dset_referenced",loc_id,0);
-
+ write_null_dset(root_id);
 
  /* Close */
  H5Dclose(dset_id);
@@ -216,6 +216,7 @@ int make_attributes(hid_t loc_id)
  write_attr_in(dset_id,"dset",loc_id,0);
  write_attr_in(group_id,"dset",loc_id,0);
  write_attr_in(root_id,"dset",loc_id,0);
+ write_null_attr(root_id);
 
  /* Close */
  H5Dclose(dset_id);

@@ -293,10 +293,12 @@ void write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
                    int make_diffs /* flag to modify data buffers */);
+void write_null_attr(hid_t loc_id); 
 void write_dset_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */);
+void write_null_dset(hid_t loc_id);
 
 int make_filters(hid_t loc_id);
 int make_layout(hid_t loc_id);
