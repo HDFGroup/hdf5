@@ -1,0 +1,33 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script. It is processed shortly
+# after configure starts and defines is used to define environment
+# variables which a specific machine may need
+
+# Files in this directory should be named:
+#
+#		host-$hostname
+#
+# where $hostname is the output from the `hostname' command.
+
+# Specifying Extra Library Directories
+# ------------------------------------
+#
+# The user should be able to specify extra library directories for the
+# LDFLAGS macro. The compiler may not be set up to recognize those
+# directories as valid library directories
+
+if test -f "/usr/ncsa/lib"; then
+   LDFLAGS="/usr/ncsa/lib"
+fi
+
+# Specifying Extra Include Directories
+# ------------------------------------
+#
+# The user should be able to specify extra include directories for the
+# CPPFLAGS macro. The compiler may not be set up to recognize those
+# directories as valid include directories
+
+if test -f "/usr/ncsa/include"; then
+   CPPFLAGS="/usr/ncsa/include"
+fi
