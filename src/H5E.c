@@ -149,6 +149,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     /* Property list errors */
     {H5E_CANTGET,		"Can't get value"},
     {H5E_CANTSET,		"Can't set value"},
+    {H5E_DUPCLASS,		"Duplicate class name in parent class"},
 
     /* Parallel MPI errors */
     {H5E_MPI,		"Some MPI function failed"},
