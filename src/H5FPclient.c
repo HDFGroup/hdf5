@@ -21,11 +21,12 @@
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
-#include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
+
+#include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 
 #include "mpi.h"
 
