@@ -28,7 +28,9 @@
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
+#   include <limits.h>
 #endif
+
 
 /*
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
@@ -434,7 +436,11 @@ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmkfifo(S,M)           mkfifo(S,M)
 #define HDmktime(T)             mktime(T)
 #define HDmodf(X,Y)             modf(X,Y)
+#ifdef HAVE__O_BINARY
+#define HDopen(S,F,M)		open(S,F|_O_BINARY,M)
+#else
 #define HDopen(S,F,M)		open(S,F,M)
+#endif
 #define HDopendir(S)            opendir(S)
 #define HDpathconf(S,N)         pathconf(S,N)
 #define HDpause()               pause()
