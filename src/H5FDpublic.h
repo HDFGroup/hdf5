@@ -167,9 +167,6 @@ typedef struct H5FD_free_t {
  */
 struct H5FD_t {
     hid_t			driver_id;	/*driver ID for this file*/
-#ifdef H5_HAVE_FPHDF5
-    unsigned                    fphdf5_id;      /*ID used by the SAP        */
-#endif  /* H5_HAVE_FPHDF5 */
     const H5FD_class_t		*cls;		/*constant class info	*/
     unsigned long               fileno[2];      /* File serial number */
 
