@@ -125,7 +125,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 herr_t
 H5S_select_release (H5S_t *space)
 {
-    herr_t ret_value;     /* return value */
+    herr_t ret_value=SUCCEED;     /* return value */
 
     FUNC_ENTER (H5S_select_release, FAIL);
 
@@ -185,8 +185,8 @@ H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
     const hsize_t *_block)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    hsize_t *stride,  /* Stride array */
-        *block;             /* Block size array */
+    hsize_t *stride,        /* Stride array */
+        *block=NULL;        /* Block size array */
     uintn contig;           /* whether selection is contiguous or not */
     int i;                  /* Counters */
     herr_t ret_value=FAIL;  /* return value */
@@ -506,7 +506,7 @@ H5S_select_npoints (const H5S_t *space)
 herr_t
 H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
-    herr_t ret_value;     /* Return value */
+    herr_t ret_value=SUCCEED;     /* Return value */
 
     FUNC_ENTER (H5S_sel_iter_release, FAIL);
 

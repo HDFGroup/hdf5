@@ -196,6 +196,15 @@ printf("%s: check 2.0, bound_count=%d\n",FUNC,bound_count);
         next_dim=dim+1;
         for(i=0; i<bound_count; i++) {
 
+#ifdef QAK
+printf("%s: check 2.1, num_reg=%d, pos[%d]=%d\n",FUNC,(int)num_reg,next_dim,(int)pos[next_dim]);
+        {
+            intn j;
+            for(j=next_dim; j>=0; j--)
+                printf("%s: lo_bound[%d][%d]=%d, hi_bound[%d][%d]=%d\n",
+                        FUNC,j,i,(int)lo_bounds[j][i].bound,j,i,(int)hi_bounds[j][i].bound);
+        }
+#endif /* QAK */
             /* Check if each boundary overlaps in the higher dimensions */
             temp_dim=dim;
             while(temp_dim>=0 && pos[temp_dim]>=lo_bounds[temp_dim][i].bound &&
@@ -204,8 +213,14 @@ printf("%s: check 2.0, bound_count=%d\n",FUNC,bound_count);
 
             /* Yes, all previous positions match, this is a valid region */
             if(temp_dim<0) {
+#ifdef QAK
+printf("%s: check 3.0\n",FUNC);
+#endif /* QAK */
                 /* Check if we've allocated the array yet */
                 if(num_reg==0) {
+#ifdef QAK
+printf("%s: check 3.1\n",FUNC);
+#endif /* QAK */
                     /* Allocate array */
                     ret_value=H5MM_malloc(sizeof(H5S_hyper_region_t));
 
@@ -217,9 +232,16 @@ printf("%s: check 2.0, bound_count=%d\n",FUNC,bound_count);
                     num_reg++;
                 } else {
                     /* Check if we should merge this region into the current region */
-                    if(lo_bounds[next_dim][i].bound<ret_value[curr_reg].end)
+                    if(lo_bounds[next_dim][i].bound<ret_value[curr_reg].end) {
+#ifdef QAK
+printf("%s: check 4.1\n",FUNC);
+#endif /* QAK */
                         ret_value[curr_reg].end=MAX(hi_bounds[next_dim][i].bound,ret_value[curr_reg].end);
+                    }
                     else {  /* no overlap with previous region, add new region */
+#ifdef QAK
+printf("%s: check 4.2\n",FUNC);
+#endif /* QAK */
                         /* Enlarge array */
                         ret_value=H5MM_realloc(ret_value,sizeof(H5S_hyper_region_t)*(num_reg+1));
 
@@ -1061,9 +1083,15 @@ printf("%s: check 3.0\n",FUNC);
             /* Increment the dimension we are working with */
             dim++;
 
+#ifdef QAK
+printf("%s: check 6.0, num_regions=%d\n",FUNC,(int)num_regions);
+#endif /* QAK */
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && fhyper_info->nelmts>0; i++) {
                 /* Step through each location in each region */
+#ifdef QAK
+printf("%s: check 7.0, start[%d]=%d, end[%d]=%d, nelmts=%d\n",FUNC,i,(int)regions[i].start,i,(int)regions[i].end,(int)fhyper_info->nelmts);
+#endif /* QAK */
                 for(j=regions[i].start; j<=regions[i].end && fhyper_info->nelmts>0; j++) {
 
                     /* If we are moving to a new position in this dim, reset the next lower dim. location */

@@ -447,7 +447,7 @@ test_select_combo(void)
     /* Free memory buffers */
     free(wbuf);
     free(rbuf);
-}   /* test_select_point() */
+}   /* test_select_combo() */
 
 /****************************************************************
 **

@@ -219,6 +219,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     uint8 *buf=(uint8 *)_buf;   /* Alias for pointer arithmetic */
+    uintn   ndims;          /* Number of dimensions of dataset */
     intn	i;				/*counters		*/
     size_t  num_read;       /* number of elements read into buffer */
 
@@ -236,20 +237,21 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 #ifdef QAK
 printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
+    ndims=file_space->extent.u.simple.rank;
     /* initialize hyperslab size and offset in memory buffer */
-    for(i=0; i<layout->ndims; i++) {
+    for(i=0; i<(int)(ndims+1); i++) {
         hsize[i]=1;     /* hyperslab size is 1, except for last element */
         zero[i]=0;      /* memory offset is 0 */
     } /* end for */
-    hsize[layout->ndims] = elmt_size;
+    hsize[ndims] = elmt_size;
 
     /* Walk though and request each element we need and put it into the buffer */
     num_read=0;
     while(num_read<nelmts) {
         if(file_iter->pnt.elmt_left>0) {
             /* Copy the location of the point to get */
-            HDmemcpy(file_offset,file_iter->pnt.curr->pnt,layout->ndims*sizeof(hssize_t));
-            file_offset[layout->ndims] = 0;
+            HDmemcpy(file_offset,file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
+            file_offset[ndims] = 0;
 
             /* Go read the point */
             if (H5F_arr_read (f, layout, comp, efl, hsize, hsize, zero, file_offset,
@@ -260,7 +262,7 @@ printf("%s: check 1.0\n",FUNC);
 #ifdef QAK
 printf("%s: check 3.0\n",FUNC);
     {
-        for(i=0; i<layout->ndims; i++) {
+        for(i=0; i<ndims; i++) {
             printf("%s: %d - pnt=%d\n",FUNC,(int)i,(int)file_iter->pnt.curr->pnt[i]);
             printf("%s: %d - file_offset=%d\n",FUNC,(int)i,(int)file_offset[i]);
         }
@@ -315,6 +317,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
     const uint8 *buf=(const uint8 *)_buf;   /* Alias for pointer arithmetic */
+    uintn   ndims;          /* Number of dimensions of dataset */
     intn	i;				/*counters		*/
     size_t  num_written;    /* number of elements written from buffer */
 
@@ -332,12 +335,13 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 #ifdef QAK
 printf("%s: check 1.0, layout->ndims=%d\n",FUNC,(int)layout->ndims);
 #endif /* QAK */
+    ndims=file_space->extent.u.simple.rank;
     /* initialize hyperslab size and offset in memory buffer */
-    for(i=0; i<layout->ndims; i++) {
+    for(i=0; i<(int)(ndims+1); i++) {
         hsize[i]=1;     /* hyperslab size is 1, except for last element */
         zero[i]=0;      /* memory offset is 0 */
     } /* end for */
-    hsize[layout->ndims] = elmt_size;
+    hsize[ndims] = elmt_size;
 
     /* Walk though and request each element we need and put it into the buffer */
     num_written=0;
@@ -345,19 +349,19 @@ printf("%s: check 1.0, layout->ndims=%d\n",FUNC,(int)layout->ndims);
 #ifdef QAK
 printf("%s: check 2.0\n",FUNC);
     {
-        for(i=0; i<layout->ndims; i++) {
+        for(i=0; i<ndims; i++) {
             printf("%s: %d - pnt=%d\n",FUNC,(int)i,(int)file_iter->pnt.curr->pnt[i]);
         }
     }
 #endif /* QAK */
         /* Copy the location of the point to get */
-        HDmemcpy(file_offset,file_iter->pnt.curr->pnt,layout->ndims*sizeof(hssize_t));
-        file_offset[layout->ndims] = 0;
+        HDmemcpy(file_offset,file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
+        file_offset[ndims] = 0;
 
 #ifdef QAK
 printf("%s: check 3.0\n",FUNC);
     {
-        for(i=0; i<layout->ndims; i++) {
+        for(i=0; i<ndims; i++) {
             printf("%s: %d - pnt=%d\n",FUNC,(int)i,(int)file_iter->pnt.curr->pnt[i]);
             printf("%s: %d - file_offset=%d\n",FUNC,(int)i,(int)file_offset[i]);
         }

@@ -157,20 +157,23 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
-    HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
 
-    /* Adjust the slowest varying dimension to take care of strip mining */
-    for (i=1, acc=1; i<space_ndims; i++)
-        acc *= hsize[i];
-    assert (0==file_iter->all.offset % acc);
-    assert (0==nelmts % acc);
-    file_offset[0] += file_iter->all.offset / acc;
-    hsize[0] = nelmts / acc;
+    if(space_ndims>0) {
+        HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
+
+        /* Adjust the slowest varying dimension to take care of strip mining */
+        for (i=1, acc=1; i<space_ndims; i++)
+            acc *= hsize[i];
+        assert (0==file_iter->all.offset % acc);
+        assert (0==nelmts % acc);
+        file_offset[0] += file_iter->all.offset / acc;
+        hsize[0] = nelmts / acc;
+    } /* end if */
 
     /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, layout->ndims*sizeof(*zero));
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
 
     /*
      * Gather from file.
@@ -240,20 +243,23 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
-    HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
+    
+    if(space_ndims>0) {
+        HDmemset(file_offset,0,sizeof(hssize_t)*space_ndims);
 
-    /* Adjust the slowest varying dimension to account for strip mining */
-    for (i=1, acc=1; i<space_ndims; i++)
-        acc *= hsize[i];
-    assert (0==file_iter->all.offset % acc);
-    assert (0==nelmts % acc);
-    file_offset[0] += file_iter->all.offset / acc;
-    hsize[0] = nelmts / acc;
+        /* Adjust the slowest varying dimension to account for strip mining */
+        for (i=1, acc=1; i<space_ndims; i++)
+            acc *= hsize[i];
+        assert (0==file_iter->all.offset % acc);
+        assert (0==nelmts % acc);
+        file_offset[0] += file_iter->all.offset / acc;
+        hsize[0] = nelmts / acc;
+    } /* end if */
     
     /* The fastest varying dimension is for the data point itself */
     file_offset[space_ndims] = 0;
     hsize[space_ndims] = elmt_size;
-    HDmemset (zero, 0, layout->ndims*sizeof(*zero));
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(*zero));
 
     /*
      * Scatter to file.
@@ -322,20 +328,22 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
-    HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
+    if(space_ndims>0) {
+        HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
 
-    if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
-		       "unable to retrieve data space dimensions");
-    }
+        if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
+            HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
+                   "unable to retrieve data space dimensions");
+        }
 
-    /* Adjust the slowest varying dimension to account for strip mining */
-    for (i=1, acc=1; i<space_ndims; i++)
-        acc *= hsize[i];
-    assert (0==mem_iter->all.offset % acc);
-    assert (0==nelmts % acc);
-    mem_offset[0] += mem_iter->all.offset / acc;
-    hsize[0] = nelmts / acc;
+        /* Adjust the slowest varying dimension to account for strip mining */
+        for (i=1, acc=1; i<space_ndims; i++)
+            acc *= hsize[i];
+        assert (0==mem_iter->all.offset % acc);
+        assert (0==nelmts % acc);
+        mem_offset[0] += mem_iter->all.offset / acc;
+        hsize[0] = nelmts / acc;
+    } /* end if */
     
     /* The fastest varying dimension is for the data point itself */
     mem_offset[space_ndims] = 0;
@@ -410,20 +418,23 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
-    HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
 
-    if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
-		       "unable to retrieve data space dimensions");
-    }
+    if(space_ndims>0) {
+        HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
 
-    /* Adjust the slowest varying dimension to take care of strip mining */
-    for (i=1, acc=1; i<space_ndims; i++)
-        acc *= hsize[i];
-    assert (0==mem_iter->all.offset % acc);
-    assert (0==nelmts % acc);
-    mem_offset[0] += mem_iter->all.offset / acc;
-    hsize[0] = nelmts / acc;
+        if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
+            HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+                   "unable to retrieve data space dimensions");
+        }
+
+        /* Adjust the slowest varying dimension to take care of strip mining */
+        for (i=1, acc=1; i<space_ndims; i++)
+            acc *= hsize[i];
+        assert (0==mem_iter->all.offset % acc);
+        assert (0==nelmts % acc);
+        mem_offset[0] += mem_iter->all.offset / acc;
+        hsize[0] = nelmts / acc;
+    } /* end if */
 
     /* The fastest varying dimension is for the data point itself */
     mem_offset[space_ndims] = 0;
