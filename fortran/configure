@@ -2414,7 +2414,7 @@ if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2
   :
   
 else
-  LDFLAGS="saved_LDFLAGS"
+  LDFLAGS="$saved_LDFLAGS"
   PARALLEL=no
 fi
 cd ..
@@ -2481,7 +2481,7 @@ if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2
   :
   
 else
-  LDFLAGS="saved_LDFLAGS"
+  LDFLAGS="$saved_LDFLAGS"
   PARALLEL=no
 fi
 cd ..
@@ -2537,7 +2537,7 @@ if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2
   :
   
 else
-  LDFLAGS="saved_LDFLAGS"
+  LDFLAGS="$saved_LDFLAGS"
   { echo "configure: error: no mpich library" 1>&2; exit 1; }
 fi
 cd ..

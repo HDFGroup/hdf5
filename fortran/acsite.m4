@@ -324,7 +324,7 @@ if AC_TRY_EVAL(ac_compile) && AC_TRY_EVAL(ac_link); then
   :
   [$3]
 else
-  LDFLAGS="saved_LDFLAGS"
+  LDFLAGS="$saved_LDFLAGS"
   [$4]
 fi
 cd ..
