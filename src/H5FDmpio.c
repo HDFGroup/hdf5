@@ -1468,7 +1468,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	       void *buf/*out*/)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
-    MPI_Offset			mpi_off, mpi_disp;
+    MPI_Offset			mpi_off;
     MPI_Status  		mpi_stat;
     int				mpi_code;	/* mpi return code */
     MPI_Datatype		buf_type, file_type;
@@ -1526,40 +1526,41 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
     if (use_view_this_time) {
+        /* Sanity check that views will only be used by collective I/O */
+        assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
         if(H5P_get(plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME,&file_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
+        /*
+         * Set the file view when we are using MPI derived types
+         */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type, (char*)"native",  file->info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
         /* When using types, use the address as the displacement for
          * MPI_File_set_view and reset the address for the read to zero
          */
-        mpi_disp=mpi_off;
         mpi_off=0;
     } /* end if */
     else {
+        /* Sanity check that independent I/O must be occuring */
+        assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
+
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
          * btype, ftype, and disp fields are not used.
          */
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
-        mpi_disp = 0;		/* mpi_off is alread set */
     } /* end else */
 
-    /*
-     * Set the file view when we are using MPI derived types
-     */
-    if (use_view_this_time) {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native",  file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
-    } /* end if */
-    
     /* Read the data. */
-    assert(H5FD_MPIO_INDEPENDENT==xfer_mode || H5FD_MPIO_COLLECTIVE==xfer_mode);
-    if (H5FD_MPIO_INDEPENDENT==xfer_mode) {
+    if (!use_view_this_time) {
         if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code);
     } else {
@@ -1774,7 +1775,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
-    MPI_Offset 		 	mpi_off, mpi_disp;
+    MPI_Offset 		 	mpi_off;
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int			        mpi_code;	/* MPI return code */
@@ -1833,37 +1834,39 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
     if (use_view_this_time) {
+        /* Sanity check that views will only be used by collective I/O */
+        assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+
         /* prepare for a full-blown xfer using btype, ftype, and disp */
         if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
         if(H5P_get(plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME,&file_type)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property");
 
+        /*
+         * Set the file view when we are using MPI derived types
+         */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type, (char*)"native", file->info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
         /* When using types, use the address as the displacement for
          * MPI_File_set_view and reset the address for the read to zero
          */
-        mpi_disp=mpi_off;
         mpi_off=0;
     } /* end if */
     else {
+        /* Sanity check that independent I/O must occur */
+        assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
+
         /*
          * Prepare for a simple xfer of a contiguous block of bytes.
          * The btype, ftype, and disp fields are not used.
          */
         buf_type = MPI_BYTE;
         file_type = MPI_BYTE;
-        mpi_disp = 0;		/* mpi_off is already set */
     } /* end else */
 
-    /*
-     * Set the file view when we are using MPI derived types
-     */
-    if (use_view_this_time) {
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native", file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
-    } /* end if */
-    
     /* Metadata specific actions */
     if(type!=H5FD_MEM_DRAW) {
         /* Check if we need to syncronize all processes before attempting metadata write
@@ -1871,6 +1874,10 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
          * and writes the metadata to the file before all the processes have
          * read the data, "transmitting" data from the "future" to the reading
          * process. -QAK )
+         *
+         * The only time we don't want to block before a metdata write is when
+         * we are flushing out a bunch of metadata.  Then, we block before the
+         * first write and don't block for further writes in the sequence.
          */
         if(H5P_exist_plist(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME)>0)
             if(H5P_get(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,&block_before_meta_write)<0)
@@ -1896,8 +1903,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     } /* end if */
 
     /* Write the data. */
-    assert(H5FD_MPIO_INDEPENDENT==xfer_mode || H5FD_MPIO_COLLECTIVE==xfer_mode);
-    if (H5FD_MPIO_INDEPENDENT==xfer_mode) {
+    if (!use_view_this_time) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code);
