@@ -2160,7 +2160,8 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
         len+=4;
 
         /* Add 8 bytes times the rank for each hyperslab selected */
-        H5_CHECK_OVERFLOW((8*space->extent.u.simple.rank*block_count),hssize_t,size_t);
+        H5_CHECK_OVERFLOW(block_count,hssize_t,hsize_t);
+        H5_CHECK_OVERFLOW((8*space->extent.u.simple.rank*(hsize_t)block_count),hsize_t,size_t);
         len+=(size_t)(8*space->extent.u.simple.rank*block_count);
 
         /* Encode each hyperslab in selection */
