@@ -11,8 +11,8 @@ h5ls.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/src/hdf5.h \
-   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5ACpublic.h \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -33,10 +33,11 @@ h5ls.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDfphdf5.h \
-   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
+   $(top_srcdir)/src/H5FDmpi.h \
+   $(top_srcdir)/src/H5FDfphdf5.h \
+   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
