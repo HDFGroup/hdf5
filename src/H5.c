@@ -2616,5 +2616,3 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     HDfflush (out);
     return;
 }
-
-    
