@@ -205,6 +205,9 @@ tstlite_SOURCES = tstlite.f90
 tstimage_SOURCES = tstimage.f90
 tsttable_SOURCES = tsttable.f90
 
+# Temporary files.
+MOSTLYCLEANFILES = dsetf[1-4].h5 f1img.h5 f1tab.h5
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -396,6 +399,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
