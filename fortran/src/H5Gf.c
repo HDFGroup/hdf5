@@ -275,6 +275,64 @@ DONE:
 }
 
 /*----------------------------------------------------------------------------
+ * Name:        h5glink2_c
+ * Purpose:     Call H5Glink2 to link the specified type 
+ * Inputs:      cur_loc_id - identifier of file or group 
+ *              cur_name - name of the existing object for hard link releative
+ *                         to cur_loc_id location,
+ *                         anything for the soft link
+ *              current_namelen - current name lenghth
+ *              link_type - link type
+ *              new_loc_id - location identifier
+ *              new_name - new name for the object releative to the new_loc_id
+ *                         location
+ *              new_namelen - new_name lenghth
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, September 25, 2002
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,  int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen)
+{
+  int ret_value = -1;
+  hid_t c_cur_loc_id;
+  hid_t c_new_loc_id;
+  H5G_link_t c_link_type;
+  char *c_cur_name, *c_new_name;
+  int c_cur_namelen, c_new_namelen;
+  herr_t c_ret_value;
+  /*
+   *  Convert Fortran name to C name
+   */
+  c_cur_namelen =*cur_namelen;
+  c_new_namelen =*new_namelen;
+  c_cur_name = (char *)HD5f2cstring(cur_name, c_cur_namelen);
+  c_new_name = (char *)HD5f2cstring(new_name, c_new_namelen);
+  if (c_cur_name == NULL) return ret_value;
+  if (c_new_name == NULL) { HDfree(c_cur_name);
+                            return ret_value;
+                          }
+
+  /*
+   *  Call H5Glink2 function
+   */
+  c_cur_loc_id = *cur_loc_id;
+  c_new_loc_id = *new_loc_id;
+  c_link_type = (H5G_link_t)*link_type;
+  c_ret_value = H5Glink2(c_cur_loc_id, c_cur_name, c_link_type, c_new_loc_id, c_new_name);
+
+  if(c_ret_value < 0) goto DONE;
+  ret_value = 0;
+
+DONE:
+  HDfree(c_cur_name);
+  HDfree(c_new_name);
+  return ret_value ;
+}
+
+/*----------------------------------------------------------------------------
  * Name:        h5gunlink_c
  * Purpose:     Call H5Gunlink to remove  the specified name 
  * Inputs:      loc_id - identifier of file or group             
@@ -351,6 +409,58 @@ nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, in
    */
   c_loc_id = (hid_t)*loc_id;
   c_ret_value = H5Gmove(c_loc_id, c_src_name, c_dst_name);
+  if(c_ret_value < 0) goto DONE;
+
+  ret_value = 0;
+
+DONE:
+  HDfree(c_src_name);
+  HDfree(c_dst_name);
+  return ret_value ;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5gmove2_c
+ * Purpose:     Call H5Gmove2 to rename an object within an HDF5 file
+ * Inputs:      src_loc_id - identifier of file or group 
+ *              src_name - name of the original object relative to src_loc_id
+ *              src_namelen - original name lenghth
+ *              dst_loc_id - new location identifier
+ *              dst_name - new name for the object relative to dst_loc_id
+ *              dst_namelen - new name lenghth
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, September 25, 2002
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id, _fcd dst_name, int_f*dst_namelen)
+{
+  int ret_value = -1;
+  hid_t c_src_loc_id;
+  hid_t c_dst_loc_id;
+  char *c_src_name, *c_dst_name;
+  int c_src_namelen, c_dst_namelen;
+  herr_t c_ret_value;
+  /*
+   *  Convert Fortran name to C name
+   */
+  c_src_namelen = *src_namelen;
+  c_dst_namelen = *dst_namelen;
+  c_src_name = (char *)HD5f2cstring(src_name, c_src_namelen);
+  if(c_src_name == NULL) return ret_value;
+
+  c_dst_name = (char *)HD5f2cstring(dst_name, c_dst_namelen);
+  if(c_dst_name == NULL) { HDfree(c_src_name); 
+                           return ret_value;
+                         }
+  /*
+   *  Call H5Gmove2 function
+   */
+  c_src_loc_id = (hid_t)*src_loc_id;
+  c_dst_loc_id = (hid_t)*dst_loc_id;
+  c_ret_value = H5Gmove2(c_src_loc_id, c_src_name, c_dst_loc_id, c_dst_name);
   if(c_ret_value < 0) goto DONE;
 
   ret_value = 0;

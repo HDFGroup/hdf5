@@ -255,8 +255,10 @@ H5_DLL int_f nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims);
 #   define nh5gget_obj_info_idx_c FNAME(H5GGET_OBJ_INFO_IDX_C)
 #   define nh5gn_members_c   FNAME(H5GN_MEMBERS_C)
 #   define nh5glink_c        FNAME(H5GLINK_C)
+#   define nh5glink2_c        FNAME(H5GLINK2_C)
 #   define nh5gunlink_c      FNAME(H5GUNLINK_C)
 #   define nh5gmove_c        FNAME(H5GMOVE_C)
+#   define nh5gmove2_c        FNAME(H5GMOVE2_C)
 #   define nh5gget_linkval_c   FNAME(H5GGET_LINKVAL_C)
 #   define nh5gset_comment_c   FNAME(H5GSET_COMMENT_C)
 #   define nh5gget_comment_c   FNAME(H5GGET_COMMENT_C)
@@ -267,8 +269,10 @@ H5_DLL int_f nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims);
 #   define nh5gget_obj_info_idx_c FNAME(h5gget_obj_info_idx_c)
 #   define nh5gn_members_c   FNAME(h5gn_members_c)
 #   define nh5glink_c        FNAME(h5glink_c)
+#   define nh5glink2_c        FNAME(h5glink2_c)
 #   define nh5gunlink_c      FNAME(h5gunlink_c)
 #   define nh5gmove_c        FNAME(h5gmove_c)
+#   define nh5gmove2_c        FNAME(h5gmove2_c)
 #   define nh5gget_linkval_c   FNAME(h5gget_linkval_c)
 #   define nh5gset_comment_c   FNAME(h5gset_comment_c)
 #   define nh5gget_comment_c   FNAME(h5gget_comment_c)
@@ -291,11 +295,17 @@ H5_DLL int_f nh5gn_members_c
 H5_DLL int_f nh5glink_c
 (hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_namelen, _fcd new_name, int_f *new_namelen);
 
+H5_DLL int_f nh5glink2_c
+(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen, int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen);
+
 H5_DLL int_f nh5gunlink_c
 (hid_t_f *loc_id, _fcd name, int_f *namelen);
 
 H5_DLL int_f nh5gmove_c
 (hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f *dst_namelen);
+
+H5_DLL int_f nh5gmove2_c
+(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id,_fcd dst_name, int_f *dst_namelen);
 
 H5_DLL int_f nh5gget_linkval_c
 (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fcd value );

@@ -163,6 +163,30 @@ FORTRAN Group API -- h5g
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gmove2_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gmove_f</code></strong>
+<pre>    
+         SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: src_loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: src_name   ! Original name of an object 
+                                                      ! relative to src_loc_id 
+           INTEGER(HID_T), INTENT(IN) :: dst_loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: dst_name   ! New name of an object
+                                                      ! relative to dst_loc_id 
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gmove2_f           
+</pre>
+
 
 <p>&nbsp;
 <p>&nbsp;
@@ -232,6 +256,70 @@ FORTRAN Group API -- h5g
          END SUBROUTINE h5gset_comment_f           
 </pre>
 
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5glink2_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5glink_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Creates a link of the specified type from <code> new_name</code> to <code>current_name</code>. 
+
+<pre>
+          SUBROUTINE h5glink_f(loc_id, link_type, current_name, new_name, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id    ! File or group location identifier
+            INTEGER, INTENT(IN)        :: link_type ! Link type, possible values are:
+                                                    !  H5G_LINK_HARD_F
+                                                    !  H5G_LINK_SOFT_F
+            CHARACTER(LEN=*), INTENT(IN) :: current_name ! Current object name relative
+                                                         ! to loc_id 
+            CHARACTER(LEN=*), INTENT(IN) :: new_name     ! New object name 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5glink_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5glink2_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5glink_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Creates a link of the specified type from <code> new_name</code> at location
+<code> new_loc_id,/code> to <code>cur_name</code> at location
+<code>cur_loc_id</code>. 
+
+<pre>
+          SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, new_name, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)   :: cur_loc_id ! File or group location identifier
+            CHARACTER(LEN=*), INTENT(IN) :: cur_name
+                                           ! Name of the existing object
+                                           ! is relative to cur_loc_id. Can be
+                                           ! anything for the soft link.
+            INTEGER, INTENT(IN) :: link_type ! Link type, possible values are:
+                                             !  H5G_LINK_HARD_F
+                                             !  H5G_LINK_SOFT_F
+            INTEGER(HID_T), INTENT(IN) :: new_loc_id ! New location identifier
+            CHARACTER(LEN=*), INTENT(IN) :: new_name ! New object name 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5glink2_f
+</pre>
 
 <p>&nbsp;
 <p>&nbsp;

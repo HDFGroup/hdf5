@@ -389,7 +389,10 @@ New Features
               Library APIs:
                       h5get_libversion_f  h5dont_atexit_f
                       h5check_version_f   h5garbage_collect_f
-          EIP - 2002/09/24
+                                                              EIP - 2002/09/24
+              H5G APIs:
+                      h5glink2_f and h5gmove2_f
+                                                              EIP - 2002/09/25
                       
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
