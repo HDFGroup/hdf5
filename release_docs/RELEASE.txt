@@ -87,6 +87,8 @@ Bug Fixes since HDF5-1.4.2 Release
       be inserted past the end of the datatype.
     * Retired the DPSS virtual file driver (--with-gridstorage configure
       option).
+    * Fixed bug where variable-length datatypes for attributes was not working
+      correctly.
 
 
 Documentation
