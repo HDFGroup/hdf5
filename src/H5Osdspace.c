@@ -39,7 +39,7 @@ static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
     "simple_dspace",	    	/* message name for debugging	   	*/
-    sizeof(H5S_simple_t),   	/* native message size		    	*/
+    sizeof(H5S_extent_t),   	/* native message size		    	*/
     H5O_sdspace_decode,	    	/* decode message			*/
     H5O_sdspace_encode,	    	/* encode message			*/
     H5O_sdspace_copy,	    	/* copy the native value		*/
@@ -59,8 +59,8 @@ const H5O_class_t H5O_SDSPACE[1] = {{
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
-/* Declare external the free list for H5S_simple_t's */
-H5FL_EXTERN(H5S_simple_t);
+/* Declare external the free list for H5S_extent_t's */
+H5FL_EXTERN(H5S_extent_t);
 
 /* Declare external the free list for hsize_t arrays */
 H5FL_ARR_EXTERN(hsize_t);
@@ -95,9 +95,9 @@ H5FL_ARR_EXTERN(hsize_t);
 static void *
 H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
-    H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
+    H5S_extent_t	*sdim = NULL;/* New extent dimensionality structure */
     void		*ret_value;
-    unsigned		u;		/* local counting variable */
+    unsigned		i;		/* local counting variable */
     unsigned		flags, version;
     
     FUNC_ENTER_NOAPI(H5O_sdspace_decode, NULL);
@@ -108,36 +108,52 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     assert (!sh);
 
     /* decode */
-    if ((sdim = H5FL_CALLOC(H5S_simple_t)) != NULL) {
+    if ((sdim = H5FL_CALLOC(H5S_extent_t)) != NULL) {
+        /* Check version */
         version = *p++;
         if (version!=H5O_SDSPACE_VERSION)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
-        sdim->rank = *p++;
-        if (sdim->rank>H5S_MAX_RANK)
+
+        /* Get rank */
+        sdim->u.simple.rank = *p++;
+        if (sdim->u.simple.rank>H5S_MAX_RANK)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple data space dimensionality is too large");
+
+        /* Get dataspace flags for later */
         flags = *p++;
+
+        /* Set the dataspace type to be simple or scalar as appropriate */
+        if(sdim->u.simple.rank>0)
+            sdim->type = H5S_SIMPLE;
+        else
+            sdim->type = H5S_SCALAR;
+
         p += 5; /*reserved*/
 
-        if (sdim->rank > 0) {
-            if (NULL==(sdim->size=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
+        if (sdim->u.simple.rank > 0) {
+            if (NULL==(sdim->u.simple.size=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            for (u = 0; u < sdim->rank; u++)
-                H5F_DECODE_LENGTH (f, p, sdim->size[u]);
+            for (i = 0; i < sdim->u.simple.rank; i++)
+                H5F_DECODE_LENGTH (f, p, sdim->u.simple.size[i]);
             if (flags & H5S_VALID_MAX) {
-                if (NULL==(sdim->max=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
+                if (NULL==(sdim->u.simple.max=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                for (u = 0; u < sdim->rank; u++)
-                    H5F_DECODE_LENGTH (f, p, sdim->max[u]);
+                for (i = 0; i < sdim->u.simple.rank; i++)
+                    H5F_DECODE_LENGTH (f, p, sdim->u.simple.max[i]);
             }
 #ifdef LATER
             if (flags & H5S_VALID_PERM) {
-                if (NULL==(sdim->perm=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
+                if (NULL==(sdim->u.simple.perm=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                for (u = 0; u < sdim->rank; u++)
-                    UINT32DECODE(p, sdim->perm[u]);
+                for (i = 0; i < sdim->u.simple.rank; i++)
+                    H5F_DECODE_LENGTH (f, p, sdim->u.simple.perm[i]);
             }
 #endif /* LATER */
         }
+
+        /* Compute the number of elements in the extent */
+        for(i=0, sdim->nelem=1; i<sdim->u.simple.rank; i++)
+            sdim->nelem*=sdim->u.simple.size[i];
     }
 
     /* Set return value */
@@ -145,8 +161,8 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     
 done:
     if (!ret_value && sdim) {
-        H5S_release_simple(sdim);
-        H5FL_FREE(H5S_simple_t,sdim);
+        H5S_extent_release(sdim);
+        H5FL_FREE(H5S_extent_t,sdim);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -160,10 +176,10 @@ done:
     Encode a simple dimensionality message 
  USAGE
     herr_t H5O_sdspace_encode(f, raw_size, p, mesg)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
+	H5F_t *f;	        IN: pointer to the HDF5 file struct
 	size_t raw_size;	IN: size of the raw information buffer
 	const uint8 *p;		IN: the raw information buffer
-	const void *mesg;	IN: Pointer to the simple dimensionality struct
+	const void *mesg;	IN: Pointer to the extent dimensionality struct
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -181,7 +197,7 @@ done:
 static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
-    const H5S_simple_t	*sdim = (const H5S_simple_t *) mesg;
+    const H5S_extent_t	*sdim = (const H5S_extent_t *) mesg;
     unsigned		u;  /* Local counting variable */
     unsigned		flags = 0;
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -194,16 +210,16 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     assert(sdim);
 
     /* set flags */
-    if (sdim->max)
+    if (sdim->u.simple.max)
         flags |= H5S_VALID_MAX;
 #ifdef LATER
-    if (sdim->perm)
+    if (sdim->u.simple.perm)
         flags |= H5S_VALID_PERM;
 #endif
 
     /* encode */
     *p++ = H5O_SDSPACE_VERSION;
-    *p++ = sdim->rank;
+    *p++ = sdim->u.simple.rank;
     *p++ = flags;
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
@@ -211,17 +227,17 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
 
-    if (sdim->rank > 0) {
-        for (u = 0; u < sdim->rank; u++)
-            H5F_ENCODE_LENGTH (f, p, sdim->size[u]);
+    if (sdim->u.simple.rank > 0) {
+        for (u = 0; u < sdim->u.simple.rank; u++)
+            H5F_ENCODE_LENGTH (f, p, sdim->u.simple.size[u]);
         if (flags & H5S_VALID_MAX) {
-            for (u = 0; u < sdim->rank; u++) 
-                H5F_ENCODE_LENGTH (f, p, sdim->max[u]);
+            for (u = 0; u < sdim->u.simple.rank; u++) 
+                H5F_ENCODE_LENGTH (f, p, sdim->u.simple.max[u]);
         }
 #ifdef LATER
         if (flags & H5S_VALID_PERM) {
-            for (u = 0; u < sdim->rank; u++)
-                UINT32ENCODE(p, sdim->perm[u]);
+            for (u = 0; u < sdim->u.simple.rank; u++)
+                H5F_ENCODE_LENGTH (f, p, sdim->u.simple.perm[u]);
         }
 #endif
     }
@@ -238,8 +254,8 @@ done:
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
     void *H5O_sdspace_copy(mesg, dest)
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
-	const void *dest;	IN: Pointer to the destination simple dimensionality struct
+	const void *mesg;	IN: Pointer to the source extent dimensionality struct
+	const void *dest;	IN: Pointer to the destination extent dimensionality struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
@@ -249,37 +265,20 @@ done:
 static void *
 H5O_sdspace_copy(const void *mesg, void *dest)
 {
-    const H5S_simple_t	   *src = (const H5S_simple_t *) mesg;
-    H5S_simple_t	   *dst = (H5S_simple_t *) dest;
+    const H5S_extent_t	   *src = (const H5S_extent_t *) mesg;
+    H5S_extent_t	   *dst = (H5S_extent_t *) dest;
     void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_sdspace_copy, NULL);
 
     /* check args */
     assert(src);
-    if (!dst && NULL==(dst = H5FL_MALLOC(H5S_simple_t)))
+    if (!dst && NULL==(dst = H5FL_MALLOC(H5S_extent_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* deep copy -- pointed-to values are copied also */
-    HDmemcpy(dst, src, sizeof(H5S_simple_t));
-    
-    if (src->size) {
-	if (NULL==(dst->size = H5FL_ARR_MALLOC(hsize_t,src->rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->size, src->size, src->rank*sizeof(src->size[0]));
-    }
-    if (src->max) {
-	if (NULL==(dst->max=H5FL_ARR_MALLOC(hsize_t,src->rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->max, src->max, src->rank*sizeof(src->max[0]));
-    }
-#ifdef LATER
-    if (src->perm) {
-	if (NULL==(dst->perm=H5FL_ARR_MALLOC(hsize_t,src->rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->perm, src->perm, src->rank*sizeof(src->perm[0]));
-    }
-#endif
+    /* Copy extent information */
+    if(H5S_extent_copy(dst,src)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     /* Set return value */
     ret_value=dst;
@@ -295,9 +294,9 @@ done:
  PURPOSE
     Return the raw message size in bytes
  USAGE
-    void *H5O_sdspace_copy(f, mesg)
+    void *H5O_sdspace_size(f, mesg)
 	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
+	const void *mesg;	IN: Pointer to the source extent dimensionality struct
  RETURNS
     Size of message on success, zero on failure
  DESCRIPTION
@@ -313,7 +312,7 @@ done:
 static size_t
 H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
-    const H5S_simple_t	   *space = (const H5S_simple_t *) mesg;
+    const H5S_extent_t	   *space = (const H5S_extent_t *) mesg;
     
     /*
      * All dimensionality messages are at least 8 bytes long.
@@ -323,14 +322,14 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     FUNC_ENTER_NOAPI(H5O_sdspace_size, 0);
 
     /* add in the dimension sizes */
-    ret_value += space->rank * H5F_SIZEOF_SIZE (f);
+    ret_value += space->u.simple.rank * H5F_SIZEOF_SIZE (f);
 
     /* add in the space for the maximum dimensions, if they are present */
-    ret_value += space->max ? space->rank * H5F_SIZEOF_SIZE (f) : 0;
+    ret_value += space->u.simple.max ? space->u.simple.rank * H5F_SIZEOF_SIZE (f) : 0;
 
 #ifdef LATER
     /* add in the space for the dimension permutations, if they are present */
-    ret_value += space->perm ? space->rank * 4 : 0;
+    ret_value += space->u.simple.perm ? space->u.simple.rank * 4 : 0;
 #endif
 
 done:
@@ -356,12 +355,12 @@ done:
 static herr_t
 H5O_sdspace_reset(void *_mesg)
 {
-    H5S_simple_t	*mesg = (H5S_simple_t*)_mesg;
+    H5S_extent_t	*mesg = (H5S_extent_t*)_mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_sdspace_reset, FAIL);
 
-    H5S_release_simple(mesg);
+    H5S_extent_release(mesg);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -391,7 +390,7 @@ H5O_sdspace_free (void *mesg)
 
     assert (mesg);
 
-    H5FL_FREE(H5S_simple_t,mesg);
+    H5FL_FREE(H5S_extent_t,mesg);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -405,8 +404,8 @@ done:
     Prints debugging information for a simple dimensionality message
  USAGE
     void *H5O_sdspace_debug(f, mesg, stream, indent, fwidth)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
+	H5F_t *f;	        IN: pointer to the HDF5 file struct
+	const void *mesg;	IN: Pointer to the source extent dimensionality struct
 	FILE *stream;		IN: Pointer to the stream for output data
 	int indent;		IN: Amount to indent information by
 	int fwidth;		IN: Field width (?)
@@ -420,7 +419,7 @@ static herr_t
 H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 		  FILE * stream, int indent, int fwidth)
 {
-    const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;
+    const H5S_extent_t	   *sdim = (const H5S_extent_t *) mesg;
     unsigned		    u;	/* local counting variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -435,22 +434,22 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Rank:",
-	    (unsigned long) (sdim->rank));
+	    (unsigned long) (sdim->u.simple.rank));
     
-    if(sdim->rank>0) {
+    if(sdim->u.simple.rank>0) {
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-        for (u = 0; u < sdim->rank; u++)
-            HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
+        for (u = 0; u < sdim->u.simple.rank; u++)
+            HDfprintf (stream, "%s%Hu", u?", ":"", sdim->u.simple.size[u]);
         HDfprintf (stream, "}\n");
         
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
-        if (sdim->max) {
+        if (sdim->u.simple.max) {
             HDfprintf (stream, "{");
-            for (u = 0; u < sdim->rank; u++) {
-                if (H5S_UNLIMITED==sdim->max[u]) {
+            for (u = 0; u < sdim->u.simple.rank; u++) {
+                if (H5S_UNLIMITED==sdim->u.simple.max[u]) {
                     HDfprintf (stream, "%sINF", u?", ":"");
                 } else {
-                    HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
+                    HDfprintf (stream, "%s%Hu", u?", ":"", sdim->u.simple.max[u]);
                 }
             }
             HDfprintf (stream, "}\n");
@@ -459,11 +458,11 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
         }
 
 #ifdef LATER
-        if (sdim->perm) {
+        if (sdim->u.simple.perm) {
             HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
-            for (u = 0; u < sdim->rank; u++) {
+            for (u = 0; u < sdim->u.simple.rank; u++) {
                 HDfprintf (stream, "%s%lu", u?", ":"",
-                     (unsigned long) (sdim->perm[u]));
+                     (unsigned long) (sdim->u.simple.perm[u]));
             }
         }
 #endif
