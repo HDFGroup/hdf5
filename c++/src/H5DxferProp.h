@@ -48,6 +48,12 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	// Gets B-tree split ratios for a dataset transfer property list
 	void getBtreeRatios( double& left, double& middle, double& right ) const;
 
+	// Sets an exception handling callback for datatype conversion
+	void setTypeConvCB( H5T_conv_except_func_t op, void *user_data) const;
+
+	// Gets the exception handling callback for datatype conversion
+	void getTypeConvCB( H5T_conv_except_func_t *op, void **user_data) const;
+
 	// Sets the memory manager for variable-length datatype 
 	// allocation in H5Dread and H5Dvlen_reclaim
 	void setVlenMemManager( H5MM_allocate_t alloc, void* alloc_info, 
