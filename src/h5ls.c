@@ -112,11 +112,16 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 
     if ((obj=H5Dopen (group, name))>=0) {
 	hsize_t size[64];
+	hsize_t maxsize[64];
 	hid_t space = H5Dget_space (obj);
-	int ndims = H5Sget_dims (space, size, NULL);
+	int ndims = H5Sget_dims(space, size, maxsize);
 	printf ("Dataset {");
 	for (i=0; i<ndims; i++) {
-	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
+		HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
+	    if (maxsize[i]==H5S_UNLIMITED)
+		HDfprintf (stdout, "/%s", "Inf");
+	    else
+		HDfprintf (stdout, "/%Hu", maxsize[i]);
 	}
 	printf ("}\n");
 	H5Dclose (space);
