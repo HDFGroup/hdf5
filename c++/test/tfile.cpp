@@ -43,24 +43,24 @@ using namespace H5;
 #define F1_LENGTH_SIZE          sizeof(hsize_t)
 #define F1_SYM_LEAF_K           4
 #define F1_SYM_INTERN_K         16
-const char*    FILE1("tfile1.h5");
+const char*    FILE1 = "tfile1.h5";
 
 #define F2_USERBLOCK_SIZE       (hsize_t)512
 #define F2_OFFSET_SIZE          8
 #define F2_LENGTH_SIZE          8
 #define F2_SYM_LEAF_K           8
 #define F2_SYM_INTERN_K         32
-const char*    FILE2("tfile2.h5");
+const char*    FILE2 = "tfile2.h5";
 
 #define F3_USERBLOCK_SIZE       (hsize_t)0
 #define F3_OFFSET_SIZE          F2_OFFSET_SIZE
 #define F3_LENGTH_SIZE          F2_LENGTH_SIZE
 #define F3_SYM_LEAF_K           F2_SYM_LEAF_K
 #define F3_SYM_INTERN_K         F2_SYM_INTERN_K
-const char*    FILE3("tfile3.h5");
+const char*    FILE3 = "tfile3.h5";
 
 #define KB                      1024
-const char*    FILE4("tfile4.h5");
+const char*    FILE4 = "tfile4.h5";
 
 
 /*-------------------------------------------------------------------------

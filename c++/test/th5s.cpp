@@ -34,8 +34,8 @@
 using namespace H5;
 #endif  /* !H5_NO_NAMESPACE */
 
-const char*    TESTFILE("th5s.h5");
-const char*    DATAFILE("th5s1.h5");
+const char*    TESTFILE = "th5s.h5";
+const char*    DATAFILE = "th5s1.h5";
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
