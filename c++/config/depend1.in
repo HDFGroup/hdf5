@@ -40,7 +40,7 @@ $(srcdir)/Dependencies: .depend
 	            obj=`basename $$dep .cpp`.lo;			      \
 	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
 	            $(TRACE) $$dep;					      \
-	            $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
+	            $(CC) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
                         sed 's% $(srcdir)/% $$(srcdir)/%g' |		      \
                         sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |	      \
                         sed 's% $(top_builddir)/% $$(top_builddir)/%g' |      \
