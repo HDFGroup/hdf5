@@ -1027,7 +1027,7 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_addr_pack(H5F_t __unused__ *f, haddr_t *addr, const long objno[2])
+H5F_addr_pack(H5F_t __unused__ *f, haddr_t *addr, const unsigned long objno[2])
 {
     assert(f);
     assert(objno);

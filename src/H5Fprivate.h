@@ -660,7 +660,8 @@ __DLL__ void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
 __DLL__ void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
 __DLL__ void H5F_addr_add(haddr_t *, const haddr_t *);
 __DLL__ uintn H5F_addr_hash(const haddr_t *, uintn mod);
-__DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2]);
+__DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr,
+			     const unsigned long objno[2]);
 
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL

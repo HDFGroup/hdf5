@@ -2812,12 +2812,14 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
 herr_t
 H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
 {
-    int32_t rank;           /* Rank of points */
-    size_t num_elem=0;      /* Number of elements in selection */
-    hsize_t *start=NULL,*count=NULL;    /* hyperslab information */
-    hsize_t *tstart,*tcount;    /* temporary hyperslab pointers */
-    uintn i,j;              /* local counting variables */
-    herr_t ret_value=FAIL;  /* return value */
+    int32_t rank;           	/* rank of points */
+    size_t num_elem=0;      	/* number of elements in selection */
+    hssize_t *start=NULL;	/* hyperslab start information */
+    hsize_t *count=NULL;    	/* hyperslab count information */
+    hssize_t *tstart=NULL;	/* temporary hyperslab pointers */
+    hsize_t *tcount=NULL;	/* temporary hyperslab pointers */
+    uintn i,j;              	/* local counting variables */
+    herr_t ret_value=FAIL;  	/* return value */
 
     FUNC_ENTER (H5S_hyper_select_deserialize, FAIL);
 
