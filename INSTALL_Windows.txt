@@ -41,6 +41,7 @@ To build the HDF5 and tests, it is assumed that you have done the following:
 
     5. You do need hdf4 (hdf and mfhdf) static and dll libraries to generate 
        h4toh5 and h5toh4 converter tool.
+
 STEP II: Building the Libraries and tests.
 
     1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.
@@ -93,12 +94,14 @@ STEP II: Building the Libraries and tests.
 			_mainCRTStartup.....
              all.exe - 2 error(s), ....
 
+  
        NOTE 2: In the HDF5_1.4 beta release, you may find strange errors
        when compiling tvlstr.c at testhdf5 and testhdf5dll projects. 
        Simply selecting tvlstr.c itself and compiling it separately, 
        you may find tvlstr.c be compiled successfully this time.
        Now coming back to Build menu and choose Build all.exe(or choose F7 key);
-       The rest of testhdf5 program will be linked successfully.    
+       The rest of testhdf5 program will be linked successfully. We suggest users to
+       use batch build to avoid this annoying compiling behavior.    
 
        NOTE 3: In order to test h4toh5 and h5toh4 converter, you need to have
        hdf413(or higher version) library. Please adjust processor settings to include
@@ -206,6 +209,7 @@ whether converter converts correctly. We recommend you to redirect (using ">")
 the output into a file to check the test output manually.
                                                                                                    To test the h5toh4 utility, you need to have "hdp" utilityin your system.
 cd into hdf5\tools. Four parameters should be input in this format:
+
 1) For windows NT 4.0 and 5.0 
 type h5toh4testrun [para 1] [para 2] [para 3] [para 4] 
 2) For Windows 98
@@ -216,6 +220,11 @@ type h5toh4testwin98 [para 1] [para 2] [para 3] [para 4]
          is located,for example: D:/h5_1.4 
   para3: The full path where hdp is located, for example D:/H414/bin 
   para4: If no dll version,leave this parameter empty or type DLL
+
+***** Warnings:*******
+      Do make sure that you type the correct parameters according to the
+      correct orders. Para 2 and Para 3 should be correctly input. Otherwise,
+      the result may be unpredictable.
 
 NOTE: The appropriate dll should be placed in the Windows\system
       directory before using the dlls.
