@@ -21,7 +21,6 @@
 #include "H5MMprivate.h"        /* Memory allocation                    */
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5Spkg.h"             /* Dataspace functions                  */
-#include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
@@ -169,7 +168,15 @@ H5FP_request_lock(unsigned int sap_file_id, unsigned char *obj_oid,
              *      error stack...The same with the lock release below.
              *      -BW
              */
-            HGOTO_DONE(FAIL);
+            /* FIXME: Yes, but that's like saying that failing to open a
+             *          file 'is not an "error" per se' and letting the code
+             *          deal with it in the next layer up.  Currently,
+             *          pretty much everywhere in the code assumes that when
+             *          a function fails, it pushes a reason on the error
+             *          stack.  Changed to return error in lock release
+             *          function also.  - QAK
+             */
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTLOCK, FAIL, "can't lock object on server");
     }
 
 done:
@@ -236,11 +243,8 @@ H5FP_request_release_lock(unsigned int sap_file_id, unsigned char *obj_oid,
 
         *status = sap_reply.status;
 
-        if (sap_reply.status != H5FP_STATUS_LOCK_RELEASED) {
-            HDfprintf(stderr, "Release: For some reason, we couldn't release the lock\n");
-            HDfprintf(stderr, "Release: reply status == %d\n", sap_reply.status);
-            HGOTO_DONE(FAIL);
-        }
+        if (sap_reply.status != H5FP_STATUS_LOCK_RELEASED)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTUNLOCK, FAIL, "can't unlock object on server");
     }
 
 done:
