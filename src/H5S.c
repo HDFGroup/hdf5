@@ -707,7 +707,7 @@ H5Sextent_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     }
     ret_value = H5S_extent_dims(ds, dims, maxdims);
 
@@ -1433,6 +1433,44 @@ H5Screate_simple (int rank, const hsize_t dims[/*rank*/],
     
  done:
     if (ret_value<0 && space) H5S_close(space);
+    FUNC_LEAVE(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Sextent_class
+ *
+ * Purpose:	Retrieves the type of extent for a dataspace object
+ *
+ * Return:	Success:	The class of the dataspace object
+ *
+ *		Failure:	N5S_NO_CLASS
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_class_t
+H5Sextent_class (hid_t sid)
+{
+    H5S_class_t	ret_value = H5S_NO_CLASS;
+    H5S_t	*space = NULL;
+
+    FUNC_ENTER(H5Sextent_class, FAIL);
+    H5TRACE1("Sc","i",sid);
+
+    /* Check arguments */
+    if (H5_DATASPACE != H5I_group(sid) || NULL == (space = H5I_object(sid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    }
+
+    ret_value=space->extent.type;
+    
+ done:
     FUNC_LEAVE(ret_value);
 }
 
