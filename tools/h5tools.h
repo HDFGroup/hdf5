@@ -20,7 +20,15 @@ typedef struct h5dump_t {
     /*
      * Fields associated with formatting numeric data.  If a datatype matches
      * multiple formats based on its size, then the first applicable format
-     * from this list is used.
+     * from this list is used. However, if `raw' is non-zero then dump all
+     * data in hexadecimal format without translating from what appears on
+     * disk.
+     *
+     *	 raw:        If set then print all data as hexadecimal without
+     *		     performing any conversion from disk.
+     *
+     *	 fmt_raw:    The printf() format for each byte of raw data. The
+     *		     default is `%02x'.
      *
      *	 fmt_int:    The printf() format to use when rendering data which is
      *		     typed `int'. The default is `%d'.
@@ -71,6 +79,8 @@ typedef struct h5dump_t {
      *
      * Numeric data is also subject to the formats for individual elements.
      */
+    hbool_t	raw;
+    const char	*fmt_raw;
     const char	*fmt_int;
     const char	*fmt_uint;
     const char	*fmt_schar;
@@ -232,7 +242,7 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace);
 
 /*if we get a new program that needs to use the library add its name here*/
 typedef enum {
-	UNKNOWN,
+    UNKNOWN,
     H5LS,
     H5DUMP
 } ProgType;

@@ -1001,18 +1001,24 @@ dump_dataset_values(hid_t dset)
     info.line_multi_new = 1;
     if (label_g) info.cmpd_name = "%s=";
 
-    /*
-     * If the dataset is a 1-byte integer type then format it as an ASCI
-     * character string instead of integers if the `-s' or `--string'
-     * command-line option was given.
-     */
-    if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+    if (hexdump_g) {
+	/*
+	 * Print all data in hexadecimal format if the `-x' or `--hexdump'
+	 * command line switch was given.
+	 */
+	info.raw = TRUE;
+    } else if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+	/*
+	 * Print 1-byte integer data as an ASCI character string instead of
+	 * integers if the `-s' or `--string' command-line option was given.
+	 */
 	info.ascii = TRUE;
 	info.elmt_suf1 = "";
 	info.elmt_suf2 = "";
 	info.line_pre ="        %s \"";
 	info.line_suf = "\"";
     }
+
 
     /*
      * If a compound datatype is split across multiple lines then add an
@@ -1109,7 +1115,12 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_pre = "            %s \"";
 	    info.line_suf = "\"";
 	}
-	if ((p_type=h5dump_fixtype(type))>=0) {
+	if (hexdump_g) {
+	    p_type = H5Tcopy(type);
+	} else {
+	    p_type = h5dump_fixtype(type);
+	}
+	if (p_type>=0) {
 	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	    buf = malloc(need);
 	    assert(buf);
@@ -1800,8 +1811,6 @@ main (int argc, char *argv[])
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--hexdump")) {
 	    hexdump_g = TRUE;
-	    fprintf(stderr, "not implemented yet: --hexdump\n");
-	    exit(1);
 	} else if (!strncmp(argv[argno], "-w", 2)) {
 	    if (argv[argno][2]) {
 		s = argv[argno]+2;
@@ -1856,8 +1865,7 @@ main (int argc, char *argv[])
 		    exit(0);
 		case 'x':	/* --hexdump */
 		    hexdump_g = TRUE;
-		    fprintf(stderr, "not implemented yet: -x\n");
-		    exit(1);
+		    break;
 		default:
 		    usage(progname);
 		    exit(1);
