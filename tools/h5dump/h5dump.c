@@ -18,11 +18,12 @@
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
+#include "h5tools_ref.h"
 #include "h5trav.h"
 
 
 /* module-scoped variables */
-static const char  *progname = "h5dump";
+const char  *progname = "h5dump";
 
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are
@@ -32,11 +33,11 @@ static const char  *progname = "h5dump";
 #define H5_SZIP_MSB_OPTION_MASK         16
 #define H5_SZIP_RAW_OPTION_MASK         128
 
-static int          d_status = EXIT_SUCCESS;
+int                 d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
 static size_t       prefix_len = 1024;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-static char        *prefix;
+char               *prefix;
 static const char  *driver = NULL;      /* The driver to open the file with. */
 
 static const dump_header *dump_header_format;
@@ -52,14 +53,13 @@ static int          display_bb        = FALSE; /*superblock */
 static int          display_dcpl      = FALSE; /*dcpl */   
 static int          display_fi        = FALSE; /*file index */   
 static int          display_ai        = TRUE;  /*array index */   
+static int          display_lf        = FALSE; /*do CR/LF */ 
+
 
 
 /**
  **  Added for XML  **
  **/
-
-/* fill_ref_path_table is called to inialize the object reference paths. */
-static herr_t    fill_ref_path_table(hid_t, const char *, void *);
 
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD     "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd"
@@ -69,13 +69,8 @@ static int              doxml = 0;
 static int              useschema = 1;
 static const char      *xml_dtd_uri = NULL;
 static const char      *xmlnsprefix="hdf5:";
-static hid_t            thefile = -1;
-typedef struct ref_path_table_entry {
-    hid_t                 obj;
-    char                   *apath;
-    H5G_stat_t  statbuf;
-    struct ref_path_table_entry *next;
-} ref_path_table_entry_t;
+hid_t                  thefile = -1;
+
 /** end XML **/
 
 /* internal functions */
@@ -83,14 +78,12 @@ static hid_t     h5_fileaccess(void);
 static void      dump_oid(hid_t oid);
 static void      print_enum(hid_t type);
 static herr_t    dump_all(hid_t group, const char *name, void *op_data);
-static char     *lookup_ref_path(hobj_ref_t );
 #ifdef LATER
 static void      check_compression(hid_t);
 #endif /* LATER */
-static ref_path_table_entry_t *ref_path_table_lookup(const char *);
 static int xml_name_to_XID(const char *, char *, int , int );
-static int get_next_xid(void);
-static haddr_t get_fake_xid (void);
+
+
 
 /* external functions */
 extern int       print_data(hid_t, hid_t, int);
@@ -160,7 +153,8 @@ static h5dump_t         dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
-    1       /*array indices */
+     1 ,     /*array indices */
+     1       /*interpret CR/LF information */
 
 };
 
@@ -244,7 +238,8 @@ static h5dump_t         xml_dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
-     0      /*array indices */
+     0 ,    /*array indices */
+     0      /*interpret CR/LF information */
 };
 
 /** XML **/
@@ -331,8 +326,6 @@ static void             xml_print_datatype(hid_t, unsigned);
 static void             xml_print_enum(hid_t);
 static int              xml_print_refs(hid_t, int);
 static int              xml_print_strs(hid_t, int);
-static ref_path_table_entry_t *ref_path_table_put(hid_t, const char *);
-static ref_path_table_entry_t *ref_path_table_gen_fake(const char *);
 static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
 
@@ -352,7 +345,7 @@ struct handler_t {
     /* binary: not implemented yet */
 static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #else
-static const char *s_opts = "hnpBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpeBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -600,6 +593,7 @@ usage(const char *prog)
     fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
+    fprintf(stdout, "     -e,                  Interpret carriage return (\\n) as new line\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
@@ -1966,6 +1960,9 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
   depth=0;
  }
 
+ /*interpret CR/LF information */
+ outputformat->do_lf=display_lf;
+
 
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);
@@ -2086,18 +2083,24 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  h5tools_context_t	ctx;			/*print context		*/
  size_t            size;
  void              *buf=NULL;
- hsize_t           nelmts=1;
+ int               nelmts=1;
  h5dump_t          *outputformat = &dataformat;
+ herr_t            ret;
+ hid_t             n_type;
 
  memset(&ctx, 0, sizeof(ctx));
  ctx.indent_level=2;
 	size = H5Tget_size(type_id);
 	buf = malloc(size);
 
- H5Pget_fill_value(dcpl, type_id, buf);
+ n_type = H5Tget_native_type(type_id,H5T_DIR_DEFAULT);
+
+ ret=H5Pget_fill_value(dcpl, n_type, buf);
     
  h5tools_dump_simple_data(stdout, outputformat, obj_id, &ctx,
-  START_OF_DATA | END_OF_DATA, nelmts, type_id, buf);
+  START_OF_DATA | END_OF_DATA, nelmts, n_type, buf);
+
+ H5Tclose(n_type);
 
  if (buf)
   free (buf);
@@ -2160,11 +2163,11 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    /*start indent */
   indent += COL;
   indentation(indent + COL);
-  printf("SIZE %d ", (int)storage_size);
+  HDfprintf(stdout, "SIZE %Hu ", storage_size);
   rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize);
-  printf("%s %d", dump_header_format->dataspacedimbegin, (int)chsize[0]);
+  HDfprintf(stdout,"%s %Hu", dump_header_format->dataspacedimbegin, chsize[0]);
   for ( i=1; i<rank; i++) 
-   printf(", %d", (int)chsize[i]);
+   HDfprintf(stdout, ", %Hu", chsize[i]);
 	 printf(" %s\n", dump_header_format->dataspacedimend);
   /*end indent */
   indent -= COL;
@@ -2177,7 +2180,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
   /*start indent */
   indent += COL;
   indentation(indent + COL);
-  printf("SIZE %d\n", (int)storage_size);
+  HDfprintf(stdout, "SIZE %Hu\n", storage_size);
   /*end indent */
   indent -= COL;
   indentation(indent + COL);
@@ -2196,9 +2199,9 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    indent += COL;
    
    for ( i=0; i<next; i++) {
-    H5Pget_external(dcpl_id,(unsigned)i,sizeof(name),name,&offset,&size);
+    H5Pget_external(dcpl_id,i,sizeof(name),name,&offset,&size);
     indentation(indent + COL);
-    printf("FILENAME %s SIZE %d OFFSET %d\n",name,(int)size,(int)offset);
+    HDfprintf(stdout,"FILENAME %s SIZE %Hu OFFSET %ld\n",name,size,offset);
    }
    /*end indent */
    indent -= COL;
@@ -2212,7 +2215,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    /*start indent */
    indent += COL;
    indentation(indent + COL);
-   printf("SIZE %d OFFSET %d\n", (int)storage_size, (int)ioffset);
+   HDfprintf(stdout,"SIZE %Hu OFFSET %Hu\n", storage_size, ioffset);
    /*end indent */
    indent -= COL;
    indentation(indent + COL);
@@ -2340,8 +2343,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  H5Pget_fill_time(dcpl_id, &ft);
  switch ( ft ) 
  {
- default:
-  break;
 	case H5D_FILL_TIME_ALLOC: 
   printf("%s", "ALLOC\n");
 		break;
@@ -3061,6 +3062,9 @@ parse_start:
         case 'p':
             display_dcpl = TRUE;
             break;
+        case 'e':
+            display_lf = TRUE;
+            break;
         case 'H':
             display_data = FALSE;
             display_attr_data = FALSE;
@@ -3702,6 +3706,8 @@ print_enum(hid_t type)
 	printf("\n%*s <empty>", indent + 4, "");
 }
 
+#if 0
+
 /*
  *   XML support
  */
@@ -3879,7 +3885,7 @@ ref_path_table_gen_fake(const char *path)
  *
  *-------------------------------------------------------------------------
  */
-static char *
+char *
 lookup_ref_path(hobj_ref_t ref)
 {
     ref_path_table_entry_t *pte = ref_path_table;
@@ -3982,6 +3988,8 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
     free(thepath);
     return 0;
 }
+
+#endif
 
 /*
  * create a string suitable for and XML NCNAME.  Uses the 

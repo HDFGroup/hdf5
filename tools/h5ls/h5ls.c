@@ -78,6 +78,12 @@ static herr_t list (hid_t group, const char *name, void *cd);
 static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
+
+hid_t thefile;
+char  *prefix;
+char  *progname;
+int   d_status;
+
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -2258,3 +2264,11 @@ main (int argc, const char *argv[])
     }
     leave(0);
 }
+
+/* dummy function */
+char *
+lookup_ref_path(hobj_ref_t ref)
+{
+ return NULL;
+}
+

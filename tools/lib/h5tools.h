@@ -318,6 +318,9 @@ typedef struct h5dump_t {
      /*print array indices in output matrix */
     int pindex;
 
+    /*interpret CR/LF information */
+    int do_lf;
+
 } h5dump_t;
 
 typedef struct dump_header{
