@@ -124,15 +124,12 @@
 ./src/H5H.c
 ./src/H5Hprivate.h
 ./src/H5Hpublic.h
-./src/H5M.c
 ./src/H5MF.c
 ./src/H5MFprivate.h
 ./src/H5MFpublic.h
 ./src/H5MM.c
 ./src/H5MMprivate.h
 ./src/H5MMpublic.h
-./src/H5Mprivate.h
-./src/H5Mpublic.h
 ./src/H5O.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
