@@ -33,6 +33,7 @@
 DEBUGMODE=""
 test -n "$DEBUGMODE" && echo "******** DEBUGMODE is $DEBUGMODE ************"
 WHEREAMI='pwd'
+CMD=
 
 # the name of this program
 PROGNAME="bin/runtest $DEBUGMODE"
@@ -489,6 +490,8 @@ Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [-nodiff] [<host> ...
 	do not do cvs commands
     -nodiff
 	do not do diff commands
+    -setup
+        setup the directory structure for snapshot test
     -configname <name>
 	use <name> as hostname in the parsing of the snaptest configure file
     <host>
@@ -498,6 +501,21 @@ Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [-nodiff] [<host> ...
 the one to take effect.  If neither are given, do the test for the
 local host.
 EOF
+}
+
+
+# Verify if directory ($1) exists.  If not, create it.
+CHECK_DIR()
+{
+   dir=$1
+   if test ! -e $1; then
+      echo mkdir $1
+      mkdir $1
+      errcode=$?
+   elif test ! -d $1; then
+      echo $1 is not a directory
+      errcode=1
+   fi
 }
 
 
@@ -551,6 +569,10 @@ while [ $# -gt 0 ]; do
 	    shift
 	    CONFIGNAME=$1
 	    ;;
+	-setup)
+	    # setup the directory structure for snapshot test
+	    CMD=setup
+	    ;;
 	-*) # Unknow option
 	    PRINT "Unknown option ($1)"
 	    USAGE
@@ -582,28 +604,49 @@ fi
 # Setup snapshot test directories
 #################################
 BASEDIR=${HOME}/snapshots-${H5VERSION}
-if [ ! -d ${BASEDIR} ]; then
+# initial processing of setup option if requested
+if test x-$CMD = x-setup; then
+    CHECK_DIR $BASEDIR
+    test $errcode -ne 0 && exit 1
+elif [ ! -d ${BASEDIR} ]; then
     echo "BASEDIR ($BASEDIR) does not exist"
     exit 1
 fi
 # Show the real physical path rather than the symbolic path
 SNAPYARD=`cd $BASEDIR && /bin/pwd`
 # Log file basename
-LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
-PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}
-FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
-TIMELOG=${SNAPYARD}/log/TIME_LOG_${TODAY}
-CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
-CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
-DIFFLOG=${SNAPYARD}/log/DIFF_LOG_${TODAY}
-# Snap Test Configuration file
+LOGDIR=${SNAPYARD}/log
+LOGBASENAME=${LOGDIR}/${HOSTNAME}
+PASSEDLOG=${LOGDIR}/PASSED_LOG_${TODAY}
+FAILEDLOG=${LOGDIR}/FAILED_LOG_${TODAY}
+TIMELOG=${LOGDIR}/TIME_LOG_${TODAY}
+CVSLOG=${LOGDIR}/CVS_LOG_${TODAY}
+CVSLOG_LOCK=${LOGDIR}/CVS_LOG_LOCK_${TODAY}
+DIFFLOG=${LOGDIR}/DIFF_LOG_${TODAY}
+# Snap Test hosts and Configuration files
+ALLHOSTSFILE=${SNAPYARD}/allhostfile
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
 
+# more processing of setup option if requested
+if test x-$CMD = x-setup; then
+    CHECK_DIR $LOGDIR
+    test $errcode -ne 0 && exit 1
+    CHECK_DIR $LOGDIR/OLD
+    test $errcode -ne 0 && exit 1
+    CHECK_DIR $SNAPYARD/TestDir
+    test $errcode -ne 0 && exit 1
+    # create empty test hosts or configure files if non-existing
+    for f in $ALLHOSTSFILE $SNAPTESTCFG; do
+	echo Creating $f
+	touch $f
+    done
+    # setup completed.  Exit.
+    exit 0
+fi
 
 #################################
 # Setup test host(s)
 #################################
-ALLHOSTSFILE=${SNAPYARD}/allhostfile
 if [ "$TESTHOST" = -all ]; then
     if [ -f $ALLHOSTSFILE ]; then
 	TESTHOST=`sed -e s/#.*// $ALLHOSTSFILE`
