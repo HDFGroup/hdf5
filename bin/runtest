@@ -110,7 +110,11 @@ REPORT_ERR()
 REPORT_RESULT()
 {
     if [ $retcode -eq 0 ]; then
-	PRINT "PASSED ${HOSTNAME}: $TEST_TYPE" | tee -a $PASSEDLOG
+	if [ $skiptest = yes ]; then
+	    PRINT "SKIPPED ${HOSTNAME}: $TEST_TYPE" | tee -a $PASSEDLOG
+	else
+	    PRINT "PASSED ${HOSTNAME}: $TEST_TYPE" | tee -a $PASSEDLOG
+	fi
     else
 	# test failed.
 	REPORT_ERR "****FAILED ${HOSTNAME}: $TEST_TYPE****"
@@ -253,11 +257,13 @@ RUNSNAPTEST()
 {
     SNAPCMD_OPT="$STANDARD_OPT"		# snapshot test option
     SRCDIRNAME=""
-    CC_SAVED="$CC"
-    PATH_SAVED=$PATH
+    # restore CC, PATH in case they were changed in the last test.
+    CC="$CC_SAVED"
+    PATH=$PATH_SAVED
     export PATH			# DEC OSF1 needs to export PATH explicitly
     TEST_TYPE=$*
     retcode=0
+    skiptest=no
     date
     PRINT "*** starting $TEST_TYPE tests in $HOSTNAME ***"
     PRINT "Uname -a: `uname -a`"
@@ -302,6 +308,10 @@ RUNSNAPTEST()
 		export $1
 		shift; shift
 		;;
+	    skip)
+		# skip this test
+		skiptest=yes
+		;;
 	    *) # unknown test
 		PRINT "$0: unknown type of test ($1)"
 		retcode=1
@@ -309,7 +319,11 @@ RUNSNAPTEST()
 	esac
 	shift
     done
-    [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
+echo CC=$CC, PATH=$PATH
+    if [ $retcode -ne 0 -o $skiptest = yes ]; then
+	errcode=$retcode 
+	return $retcode
+    fi
 
     # Track down the zlib software
     ans=`$SNAPYARD/current/bin/locate_sw zlib`
@@ -342,10 +356,6 @@ RUNSNAPTEST()
     [ $retcode -ne 0 ] && errcode=$retcode
 
     date >> $LOGFILE
-
-    # restore CC, PATH
-    CC="$CC_SAVED"
-    PATH=$PATH_SAVED
 }
 
 
@@ -372,6 +382,7 @@ RUNSNAPTEST()
 #    op-configure <option>	configure option
 #    --*		configure option
 #    setenv <name> <value>	set environment variable <name> to <value>
+#    skip		skip this test
 SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do
@@ -469,6 +480,9 @@ EOF
 #################################
 retcode=0			# error code of individula task
 errcode=0			# error code of the whole test
+skiptest=no			# if test is skipped
+CC_SAVED="$CC"			# CC & PATH maybe changed within a test.
+PATH_SAVED=$PATH		# These save the original values.
 
 
 #################################
@@ -703,7 +717,7 @@ fi
 # a $TYPE_TYPES that has no ';' (only 1 tst ).  That results in no
 # test at all.
 # 
-n_test=1
+n_test=0
 runtest_type="tests"
 TEST="`echo $TEST_TYPES | cut -f1 -d';'`"
 while [ -n "$TEST" ]; do
