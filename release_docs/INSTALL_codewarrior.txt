@@ -19,18 +19,24 @@ To install the HDF5 library:
 3. To build all the targets (HDF5 library, test, and tools):
 	Select the 'all' target and build.
 4. To run the tests in a command line window:
-	In the command line window, change directory to hdf5\test\. 
+
+	In the command line window, change directory to hdf5\test\
 	Type 
 	    Hdf5test debug
 	or, to redirect the output to a file called myfile.txt,
 	    Hdf5test debug > myfile.txt
+        Type 
+            hdf5timingtest debug
+        Change directory to hdf5\tools\
+        Type
+            dumptest debug
+
    The test and tools files are generated in the same directory as 
    the those compiled with the Microsoft Visual Studio compiler.
-5. Enjoy.
+
 
 ---------------------------------------------------------------------------
-The HDF Group would like to thank Ron Liechty of Metrowerks technical 
-support for all the help provided during the development of this project.
+
 
 
 
