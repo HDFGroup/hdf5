@@ -309,7 +309,8 @@
                  fortran/src/H5Pff.f90
                Check for "Comment if on T3E ..." comment and comment out 
                specified lines or use a patch from HDF FTP server
-        ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays       
+               ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
+
         Note: See sections 5.7 and 5.8 for how to build Fortran Library with
               PGI or Intel compilers. 
 
@@ -381,11 +382,11 @@
 	version of hdf4 the confidence testing will fail in the tools
 	directory.
         
-        HDF5 has szip predefined compression method (see 4.2).  To enable
-        szip compression, HDF5 library has to be configured and build using 
-        SZIP Library
+	HDF5 has Szip predefined compression method (see 4.2).  To enable
+	Szip compression, HDF5 library has to be configured and build using 
+	Szip Library
 
-        $ ./configure --with-szlib=/SZIP_Install_directory
+        $ ./configure --with-szlib=/Szip_Install_Directory
 
 5.3.7. Static versus shared linking
 	The build process will create static libraries on all systems and
@@ -603,8 +604,7 @@
 
     * To build the Fortran Library on IA32 follow step described above, except 
       that DEC and MS compiler directives should be removed manually or 
-      use a patch from HDF FTP server
-      ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Intel
+      use a patch from HDF FTP server ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
 
 
 5.8  Building and testing with PGI compilers
