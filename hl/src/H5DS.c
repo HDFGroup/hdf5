@@ -558,9 +558,11 @@ herr_t H5DSdetach_scale(hid_t did,
  hid_t      tid;          /* attribute type ID */
  hid_t      aid;          /* attribute ID */
  int        rank;         /* rank of dataset */
- ds_list_t  *dsbuf;       /* array of attribute data in the DS pointing to the dataset */
+ ds_list_t  *dsbuf=NULL;  /* array of attribute data in the DS pointing to the dataset */
+ ds_list_t  *dsbufn=NULL; /* array of attribute data in the DS pointing to the dataset */
+ hsize_t    *dims=NULL;   /* dimension of the "REFERENCE_LIST" array */
  hobj_ref_t ref;          /* reference to the DS */
- hvl_t      *buf;         /* VL buffer to store in the attribute */
+ hvl_t      *buf=NULL;    /* VL buffer to store in the attribute */
  unsigned   i, j, jj;
  H5G_stat_t sb1, sb2, sb3, sb4;
  int        found_dset=0, found_ds=0;
@@ -686,6 +688,11 @@ herr_t H5DSdetach_scale(hid_t did,
     buf[idx].len--;
     
     found_ds = 1;
+
+    /* close the dereferenced dataset and break */
+    if (H5Dclose(dsid_j)<0)
+     goto out;
+    break;
    }
    
    /* close the dereferenced dataset */
@@ -733,7 +740,6 @@ herr_t H5DSdetach_scale(hid_t did,
   goto out;
  
  dsbuf = malloc((size_t)nelmts * sizeof(ds_list_t));
- 
  if (dsbuf == NULL)
   goto out;
  
@@ -758,34 +764,106 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
   
   /* same object, reset. we want to detach only for this DIM */
-  if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx) {
-   dsbuf[i].ref=0;
-   dsbuf[i].dim_idx=-1;
+  if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx) 
+  {
+   for(jj=i; jj<nelmts-1; jj++)
+   {
+    dsbuf[jj] = dsbuf[jj+1];
+   }
+   nelmts--;
    found_dset=1;
+   
+   /* close the dereferenced dataset and break */
+   if (H5Dclose(dsid_j)<0)
+    goto out;
+   break;
   } /* if */
   
   /* close the dereferenced dataset */
   if (H5Dclose(dsid_j)<0)
    goto out;
+   
  } /* i */
- 
- /* update on disk */
- if (H5Awrite(aid,tid,dsbuf)<0)
-  goto out;
- 
- /* close */
+
+ /* close space and attribute */
  if (H5Sclose(sid)<0)
-  goto out;
- if (H5Tclose(tid)<0) 
   goto out;
  if (H5Aclose(aid)<0)
   goto out;
- if (dsbuf)
-  free(dsbuf);
-
-  /* the pointed dataset must exist */
+ 
+/*-------------------------------------------------------------------------
+ * check if we found the pointed dataset
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* the pointed dataset must exist */
  if (found_dset == 0)
   goto out;
+
+/*-------------------------------------------------------------------------
+ * create a new attribute
+ *-------------------------------------------------------------------------
+ */
+  
+ /* the attribute must be deleted, in order to the new one can reflect the changes*/
+ if (H5Adelete(dsid,REFERENCE_LIST)<0)
+  goto out;
+
+ /* don't do anything for an empty array */
+ if (nelmts)
+ {
+  /* create a new data space for the new references array */
+  dims = (hsize_t*) malloc ( (size_t)nelmts * sizeof (hsize_t));
+  if (dims == NULL)
+   goto out;
+  dims[0] = nelmts;
+  
+  dsbufn = malloc((size_t)nelmts * sizeof(ds_list_t));
+  if (dsbufn == NULL)
+   goto out;
+  
+  /* store the new information */
+  for(i=0; i<nelmts; i++)
+  {
+   dsbufn[i] = dsbuf[i];
+  }
+  
+  if ((sid = H5Screate_simple(1,dims,NULL))<0)
+   goto out;
+  
+  /* create the attribute again with the changes of space */
+  if ((aid = H5Acreate(dsid,REFERENCE_LIST,tid,sid,H5P_DEFAULT))<0)
+   goto out;
+  
+  /* write the new attribute with the new references */
+  if (H5Awrite(aid,tid,dsbufn)<0)
+   goto out;
+  
+  /* close space and attribute */
+  if (H5Sclose(sid)<0)
+   goto out;
+  if (H5Aclose(aid)<0)
+   goto out;
+
+ } /* nelmts */
+ 
+ /* close type */
+ if (H5Tclose(tid)<0) 
+  goto out;
+
+ if (dsbuf) {
+  free(dsbuf);
+  dsbuf=NULL;
+ }
+ if (dsbufn) {
+  free(dsbufn);
+  dsbufn=NULL;
+ }
+ if (dims) {
+  free(dims);
+  dims=NULL;
+ }
+
  
  return SUCCESS;
  
@@ -795,6 +873,12 @@ out:
   H5Sclose(sid);
   H5Aclose(aid);
   H5Tclose(tid);
+  if (dsbuf) 
+   free(dsbuf);
+  if (dsbufn) 
+   free(dsbufn);
+  if (dims) 
+   free(dims);
  } H5E_END_TRY;
  return FAIL;
  
@@ -1564,16 +1648,13 @@ out:
  *-------------------------------------------------------------------------
  */
 
-htri_t H5DS_is_attached(hid_t loc_id, 
-                        const char *dname,
-                        const char *dsname,
+htri_t H5DS_is_attached(hid_t did,
+                        hid_t dsid,
                         unsigned int idx)  
 { 
  int        has_dimlist;
  int        has_reflist;
  hssize_t   nelmts;
- hid_t      did;          /* dataset ID */
- hid_t      dsid;         /* scale dataset ID */
  hid_t      sid;          /* space ID */
  hid_t      tid;          /* attribute type ID */
  hid_t      aid;          /* attribute ID */
@@ -1586,14 +1667,6 @@ htri_t H5DS_is_attached(hid_t loc_id,
  H5I_type_t it1, it2;
  int        i;
  int        found_dset=0, found_ds=0;
-
- /* get the dataset id */
- if ((did = H5Dopen(loc_id,dname))<0)
-  return FAIL;
-
- /* get the DS dataset id */
- if ((dsid = H5Dopen(loc_id,dsname))<0)
-  return FAIL; 
 
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -1803,14 +1876,6 @@ htri_t H5DS_is_attached(hid_t loc_id,
   if (dsbuf)
    free(dsbuf);
  } /* has_reflist */ 
- 
- /* close the dataset */
- if (H5Dclose(did)<0)
-  goto out;
-
- /* close the scale */
- if (H5Dclose(dsid)<0)
-  goto out;
 
  if (found_ds && found_dset)
   return 1;
