@@ -267,7 +267,7 @@ main(void)
     PASSED();
 
     puts("All object header tests passed.");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:

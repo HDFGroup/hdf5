@@ -854,7 +854,7 @@ main(void)
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     printf("All dataset tests passed.\n");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:

@@ -842,7 +842,7 @@ main (void)
 
     if (H5Fclose(file)<0) goto error;
     puts("All external storage tests passed.");
-    if (h5_cleanup(fapl)) {
+    if (h5_cleanup(FILENAME, fapl)) {
 	remove("extern_1a.raw");
 	remove("extern_1b.raw");
 	remove("extern_2a.raw");

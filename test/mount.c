@@ -1051,7 +1051,7 @@ main(void)
     
     if (nerrors) goto error;
     puts("All mount tests passed.");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
     
  error:

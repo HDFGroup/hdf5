@@ -624,6 +624,6 @@ main(int argc, char *argv[])
     }
 
     printf("All i-store tests passed.\n");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 }

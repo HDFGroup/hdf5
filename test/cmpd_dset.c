@@ -702,7 +702,7 @@ main (int argc, char *argv[])
     H5Dclose (dataset);
     H5Fclose (file);
 
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     puts("All compound dataset tests passed.");
     return 0;
 

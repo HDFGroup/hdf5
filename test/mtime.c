@@ -105,7 +105,7 @@ main(void)
     /* All looks good */
     PASSED();
     puts("All modification time tests passed.");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 }
 

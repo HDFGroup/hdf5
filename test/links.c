@@ -249,6 +249,6 @@ main(void)
 	exit(1);
     }
     printf("All link tests passed.\n");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 }

@@ -321,7 +321,7 @@ main(void)
 	exit(1);
     }
     puts("All unlink tests passed.");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
  error:
     return 1;

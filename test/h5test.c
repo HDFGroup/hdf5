@@ -96,9 +96,9 @@ h5_errors(void UNUSED *client_data)
 /*-------------------------------------------------------------------------
  * Function:	h5_cleanup
  *
- * Purpose:	Cleanup temporary test files.  The list of test files is in
- *		`extern const char *FILENAMES[]' -- these are only the base
- * 		names.  The file access property list is also closed.
+ * Purpose:	Cleanup temporary test files.
+ *		base_name contains the list of test file names.
+ *		The file access property list is also closed.
  *
  * Return:	Non-zero if cleanup actions were performed; zero otherwise.
  *
@@ -106,11 +106,14 @@ h5_errors(void UNUSED *client_data)
  *              May 28, 1998
  *
  * Modifications:
+ *		Albert Cheng, 2000-09-09
+ *		Added the explicite base_name argument to replace the
+ *		global variable FILENAME.
  *
  *-------------------------------------------------------------------------
  */
 int
-h5_cleanup(hid_t fapl)
+h5_cleanup(const char *base_name[], hid_t fapl)
 {
     char	filename[1024];
     char	temp[2048];
@@ -119,8 +122,8 @@ h5_cleanup(hid_t fapl)
     hid_t	driver;
 
     if (!getenv("HDF5_NOCLEANUP")) {
-	for (i=0; FILENAME[i]; i++) {
-	    if (NULL==h5_fixname(FILENAME[i], fapl, filename,
+	for (i=0; base_name[i]; i++) {
+	    if (NULL==h5_fixname(base_name[i], fapl, filename,
 				 sizeof filename)) {
 		continue;
 	    }
@@ -201,7 +204,8 @@ h5_reset(void)
  *		counting the null terminator). The full name is created by
  *		prepending the contents of HDF5_PREFIX (separated from the
  *		base name by a slash) and appending a file extension based on
- *		the driver supplied.
+ *		the driver supplied, resulting in something like
+ *		`ufs:/u/matzke/test.h5'.
  *
  * Return:	Success:	The FULLNAME pointer.
  *

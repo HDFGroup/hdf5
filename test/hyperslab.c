@@ -15,10 +15,6 @@
 #include <H5MMprivate.h>
 #include <H5Vprivate.h>
 
-const char *FILENAME[] = {
-    NULL
-};
-
 #ifndef HAVE_FUNCTION
 #undef __FUNCTION__
 #define __FUNCTION__ ""

@@ -404,7 +404,7 @@ main (void)
     if (nerrors) goto error;
 
     puts("All global heap tests passed.");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:

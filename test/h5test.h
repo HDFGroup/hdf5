@@ -23,13 +23,6 @@
 
 
 /*
- * This array should contain a list of file base names created by the test.
- * The base name is a word like `test' which will have a prefix and suffix
- * added to result in something like `ufs:/u/matzke/test.h5'
- */
-extern const char *FILENAME[];
-
-/*
  * This contains the filename prefix specificied as command line option for
  * the parallel test files. 
  */
@@ -60,7 +53,7 @@ extern char *paraprefix;
 extern "C" {
 #endif
 
-int h5_cleanup(hid_t fapl);
+int h5_cleanup(const char *base_name[], hid_t fapl);
 herr_t h5_errors(void *client_data);
 char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);

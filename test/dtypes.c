@@ -3665,7 +3665,7 @@ main(void)
     nerrors += test_compound_1();
     nerrors += test_transient (fapl);
     nerrors += test_named (fapl);
-    h5_cleanup (fapl); /*must happen before first reset*/
+    h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
 
     nerrors += test_conv_str_1();

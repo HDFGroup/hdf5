@@ -91,7 +91,7 @@ main(void)
     if (H5Dclose(dset)<0) goto error;
     if (H5Fclose(file)<0) goto error;
     PASSED();
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:

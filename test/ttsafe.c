@@ -45,10 +45,6 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <stdarg.h>
 #include <ttsafe.h>
 
-const char *FILENAME[] = {
-    NULL
-};
-
 #ifndef H5_HAVE_THREADSAFE
 int main(void)
 {

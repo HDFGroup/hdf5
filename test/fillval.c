@@ -736,7 +736,7 @@ main(int argc, char *argv[])
     
     if (nerrors) goto error;
     puts("All fill value tests passed.");
-    if (h5_cleanup(fapl)) remove(FILE_NAME_RAW);
+    if (h5_cleanup(FILENAME, fapl)) remove(FILE_NAME_RAW);
     return 0;
 
  error:

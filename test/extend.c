@@ -133,7 +133,7 @@ main (void)
     if (H5Fclose (file)<0) goto error;
     PASSED();
     printf("All extend tests passed.\n");
-    h5_cleanup(fapl);
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:
