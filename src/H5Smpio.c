@@ -746,7 +746,8 @@ done:
  */
 herr_t
 H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+    size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
     hid_t dxpl_id, void *buf/*out*/)
 {
@@ -784,7 +785,8 @@ done:
  */
 herr_t
 H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
-    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store,
+    size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
     hid_t dxpl_id, const void *buf)
 {
