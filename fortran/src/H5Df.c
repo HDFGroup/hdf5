@@ -30,8 +30,10 @@ nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
      /*
       * Define creation property
       */
-     c_crt_prp = *crt_prp;
+     c_crt_prp = (hid_t)*crt_prp;
+/*
      if ( H5P_DEFAULT_F == c_crt_prp ) c_crt_prp = H5P_DEFAULT;
+*/
 
      /*
       * Convert FORTRAN name to C name
@@ -150,8 +152,10 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
      
      /*
       * Call H5Dwrite function.
@@ -198,8 +202,10 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
 
      /*
       * Allocate temporary buffer and copy references from Fortran.
@@ -258,8 +264,10 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
      
      /*
       * Allocate temporary buffer and copy references from Fortran.
@@ -344,8 +352,10 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
      
      /*
       * Call H5Dread function.
@@ -392,8 +402,10 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
      
      /*
       * Allocate temporary buffer.
@@ -452,8 +464,10 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Define transfer property
       */
-     c_xfer_prp = *xfer_prp;
+     c_xfer_prp = (hid_t)*xfer_prp;
+/*
      if ( H5P_DEFAULT_F == c_xfer_prp ) c_xfer_prp = H5P_DEFAULT;
+*/
      
      /*
       * Allocate temporary buffer.

@@ -29,8 +29,10 @@ nh5acreate_c (hid_t_f *obj_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
      /*
       * Define creation property
       */
-     c_crt_prp = *crt_prp;
+     c_crt_prp = (hid_t)*crt_prp;
+/*
      if ( H5P_DEFAULT_F == c_crt_prp ) c_crt_prp = H5P_DEFAULT;
+*/
 
      /*
       * Convert FORTRAN name to C name

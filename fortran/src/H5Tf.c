@@ -191,10 +191,13 @@ nh5tget_class_c ( hid_t_f *type_id , int_f *classtype)
   c_type_id = *type_id;
   c_classtype = H5Tget_class(c_type_id);
   if (c_classtype == H5T_NO_CLASS ) {
-      *classtype = H5T_NO_CLASS_F; 
+      /* *classtype = H5T_NO_CLASS_F; */
+      *classtype = (int_f)H5T_NO_CLASS; 
        ret_value = -1;
        return ret_value;
   }
+  *classtype = c_classtype;
+/*
   if (c_classtype == H5T_INTEGER)   *classtype = H5T_INTEGER_F;
   if (c_classtype == H5T_FLOAT)     *classtype = H5T_FLOAT_F;
   if (c_classtype == H5T_TIME)      *classtype = H5T_TIME_F;
@@ -204,6 +207,7 @@ nh5tget_class_c ( hid_t_f *type_id , int_f *classtype)
   if (c_classtype == H5T_COMPOUND)  *classtype = H5T_COMPOUND_F;
   if (c_classtype == H5T_REFERENCE) *classtype = H5T_REFERENCE_F;
   if (c_classtype == H5T_ENUM)      *classtype = H5T_ENUM_F;
+*/
   return ret_value;
 }
 
@@ -231,9 +235,12 @@ nh5tget_order_c ( hid_t_f *type_id , int_f *order)
   c_type_id = *type_id;
   c_order = H5Tget_order(c_type_id);
   if ( c_order < 0  ) return ret_value;
+  *order = (int_f)c_order;
+/*
   if ( c_order == H5T_ORDER_LE)  *order = H5T_ORDER_LE_F;
   if ( c_order == H5T_ORDER_BE)  *order = H5T_ORDER_BE_F;
   if ( c_order == H5T_ORDER_VAX) *order = H5T_ORDER_VAX_F;
+*/
   return ret_value;
 }
 
@@ -259,10 +266,12 @@ nh5tset_order_c ( hid_t_f *type_id , int_f *order)
   hid_t c_type_id;
   H5T_order_t c_order; 
   herr_t status;
-
+  c_order = (H5T_order_t)*order;
+/*
   if ( *order == H5T_ORDER_LE_F) c_order = H5T_ORDER_LE;
   if ( *order == H5T_ORDER_BE_F) c_order = H5T_ORDER_BE;
   if ( *order == H5T_ORDER_VAX_F) c_order = H5T_ORDER_VAX;
+*/
   c_type_id = *type_id;
   status = H5Tset_order(c_type_id, c_order);
   if ( status < 0  ) ret_value = -1;

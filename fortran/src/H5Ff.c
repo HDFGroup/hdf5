@@ -30,6 +30,8 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
      /*
       * Define access flags
       */
+     c_access_flags = (unsigned) *access_flags;
+/*
      CASE = (int)*access_flags;
      switch (CASE) {
 
@@ -56,19 +58,22 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
         default:
           return ret_value;
      }
-     
+*/     
      /*
       * Define creation property
       */
      c_crt_prp = *crt_prp;
+/*
      if ( H5P_DEFAULT_F == c_crt_prp ) c_crt_prp = H5P_DEFAULT;
-
+*/
      /*
       * Define access property
       */
      c_acc_prp = *acc_prp;
+/*
      if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
 
+*/
      /*
       * Convert FORTRAN name to C name
       */
@@ -108,10 +113,12 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
      int CASE;
      H5F_scope_t  c_scope;
      htri_t status;
+     c_scope = (H5F_scope_t)*scope;
 
      /*
       * Define scope flags
       */
+/*
      CASE = (int)*scope;
      switch (CASE) {
 
@@ -126,7 +133,7 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
         default:
           return ret_value;
      }
-     
+*/     
      /*
       * Call H5Fflush function.
       */
@@ -169,7 +176,9 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
       * Define access property
       */
      c_acc_prp = *acc_prp;
+/*
      if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
+*/
 
      c_loc_id = *loc_id;
      c_file_id = *file_id;
@@ -257,10 +266,13 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
      hid_t c_acc_prp;
      int CASE;
      hid_t CASE_prp;
+     c_acc_prp = (hid_t)*acc_prp;
 
      /*
       * Define access flags
       */
+     c_access_flags = (unsigned) *access_flags;
+/*
      CASE = (int)*access_flags;
      switch (CASE) {
 
@@ -287,12 +299,14 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
         default:
           return ret_value;
      }
-     
+ */    
      /*
       * Define access property
       */
      c_acc_prp = *acc_prp;
+/*
      if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
+*/
 
      /*
       * Convert FORTRAN name to C name

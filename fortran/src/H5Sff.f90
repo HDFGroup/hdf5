@@ -2,8 +2,7 @@
 ! This file contains Fortran90 interfaces for H5S functions.
 ! 
       MODULE H5S
-        USE H5FORTRAN_TYPES
-        USE H5FORTRAN_FLAGS
+        USE H5GLOBAL
  
         CONTAINS
           

@@ -2,8 +2,7 @@
 ! This file contains Fortran90 interfaces for H5D functions.
 ! 
       MODULE H5D
-        USE H5FORTRAN_TYPES 
-!        USE H5FORTRAN_FLAGS - do not need it here since it is included in H5R already
+        USE H5GLOBAL
         USE H5R
 
           INTERFACE h5dwrite_f
@@ -383,11 +382,14 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
                                                 ! Transfer property list identifier 
             
-            INTEGER(HID_T) :: xfer_prp_default = H5P_DEFAULT_F
-            INTEGER(HID_T)  :: mem_space_id_default = H5S_ALL_F
-            INTEGER(HID_T) :: file_space_id_default = H5S_ALL_F
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T)  :: mem_space_id_default 
+            INTEGER(HID_T) :: file_space_id_default 
             INTEGER, EXTERNAL :: h5dwrite_c
 
+            xfer_prp_default = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
             if (present(xfer_prp)) xfer_prp_default = xfer_prp 
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 
@@ -783,10 +785,13 @@
                                                 ! Transfer property list identifier 
             INTEGER, EXTERNAL :: h5dwrite_c
             
-            INTEGER(HID_T) :: xfer_prp_default  = H5P_DEFAULT_F
-            INTEGER(HID_T) :: mem_space_id_default = H5S_ALL_F
-            INTEGER(HID_T) :: file_space_id_default = H5S_ALL_F
+            INTEGER(HID_T) :: xfer_prp_default 
+            INTEGER(HID_T) :: mem_space_id_default 
+            INTEGER(HID_T) :: file_space_id_default
 
+            xfer_prp_default  = H5P_DEFAULT_F
+            mem_space_id_default = H5S_ALL_F
+            file_space_id_default = H5S_ALL_F
             if (present(xfer_prp)) xfer_prp_default = xfer_prp 
             if (present(mem_space_id))  mem_space_id_default = mem_space_id 
             if (present(file_space_id)) file_space_id_default = file_space_id 

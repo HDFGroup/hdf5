@@ -2,8 +2,8 @@
 ! This file contains Fortran90 interfaces for H5R functions.
 ! 
       MODULE H5R
-        USE H5FORTRAN_TYPES 
-        USE H5FORTRAN_FLAGS
+        USE H5GLOBAL
+
 ! If you change the value of these parameters, do not forget to change corresponding
 ! values in the H5f90.h file. 
         INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 

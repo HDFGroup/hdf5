@@ -139,6 +139,8 @@ nh5gget_obj_info_idx_c
                             HDfree(c_obj_name);
                             return ret_value;
                           }
+     *obj_type = type;
+/*
      switch (type) {
      case H5G_LINK:
           *obj_type = H5G_LINK_F;
@@ -158,6 +160,7 @@ nh5gget_obj_info_idx_c
      default:
            return ret_value;
      }
+*/
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */

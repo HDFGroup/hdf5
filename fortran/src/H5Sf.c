@@ -87,8 +87,8 @@ nh5screate_c ( int_f *classtype, hid_t_f *space_id )
   int CASE;
   int ret_value = 0;
   hid_t c_space_id;
-  CASE = (int)*classtype;
-
+  c_classtype = (H5S_class_t) *classtype;
+/*
   switch (CASE) {
 
      case (H5S_SCALAR_F):
@@ -103,6 +103,7 @@ nh5screate_c ( int_f *classtype, hid_t_f *space_id )
        ret_value = -1;
        return ret_value;
  }
+*/
    c_space_id = H5Screate(c_classtype); 
 
   if ( c_space_id  < 0  ) ret_value = -1;
@@ -531,8 +532,11 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
   c_space_id = *space_id;
   c_classtype = H5Sget_simple_extent_type(c_space_id);
   if ( c_classtype < 0  ) ret_value = -1;
+   *classtype = c_classtype;
+/*
   if (c_classtype == H5S_SCALAR) *classtype = H5S_SCALAR_F;
   if (c_classtype == H5S_SIMPLE) *classtype = H5S_SIMPLE_F;
+*/
   return ret_value;
 }
 
@@ -809,9 +813,11 @@ nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize
       c_block[i] = (hsize_t)block[t];
   }
 
+   c_op = (H5S_seloper_t)*op;
+/*
   if (*op == H5S_SELECT_SET_F) c_op = H5S_SELECT_SET;
   if (*op == H5S_SELECT_OR_F)  c_op = H5S_SELECT_OR;
-
+*/
 
   c_space_id = *space_id;
   status = H5Sselect_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
@@ -850,8 +856,10 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hss
   int i, j;
   hssize_t *c_coord;
   size_t c_nelements;
-
+/*
   if (*op != H5S_SELECT_SET_F) return ret_value;
+*/
+  if (*op != H5S_SELECT_SET) return ret_value;
   c_op =  H5S_SELECT_SET;
 
   c_space_id = *space_id;

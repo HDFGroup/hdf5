@@ -877,15 +877,21 @@ extern int_f nh5eset_auto_c(int_f* printflag);
 #ifndef H5MISCf90_FNAMES
 #    define H5MISCf90_FNAMES
 #ifdef DF_CAPFNAMES 
-#   define nh5init_types_c    FNAME(H5INIT_TYPES_C)
+#   define nh5init_type_c    FNAME(H5INIT_TYPES_C)
 #   define nh5close_types_c   FNAME(H5CLOSE_TYPES_C)
+#   define nh5init_flags_c    FNAME(H5INIT_FLAGS_C)
 #else 
 #   define nh5init_types_c    FNAME(h5init_types_c)
 #   define nh5close_types_c   FNAME(h5close_types_c)
+#   define nh5init_flags_c    FNAME(h5init_flags_c)
 #endif
 #endif
 
 extern int_f nh5init_types_c(hid_t_f *types, hid_t_f * floatingtypes, hid_t_f * integertypes);
 extern int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f * floatingtypes, int_f * floatinglen, hid_t_f * integertypes,  int_f * integerlen);
  
+extern int_f nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
+                              int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
+                              int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                              int_f *h5t_flags); 
 #endif /* _H5f90proto_H */

@@ -137,3 +137,170 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
     ret_value = 0; 
     return ret_value;
 }    
+/*---------------------------------------------------------------------------
+ * Name:              h5init_flags_c
+ * Purpose:           Initialize Fortran flags
+ * Inputs:            h5d_flags    - H5D inteface flags 
+ *                    h5e_flags    - H5E interface flags
+ *                    h5f_flags    - H5F interface flags
+ *                    h5fd_flags    - H5FD interface flags
+ *                    h5g_flags    - H5G interface flags
+ *                    h5i_flags    - H5I interface flags
+ *                    h5p_flags    - H5P interface flags
+ *                    h5r_flags    - H5R interface flags
+ *                    h5s_flags    - H5S interface flags
+ *                    h5t_flags    - H5T interface flags
+ * Outputs:           None 
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Tuesday, August 3, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
+                 int_f *h5fd_flags, int_f *h5g_flags, int_f *h5i_flags,
+                 int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                 int_f *h5t_flags)
+{
+    int ret_value = -1;
+/*
+ *  H5D flags
+ */
+    h5d_flags[0] = H5D_COMPACT;
+    h5d_flags[1] = H5D_CONTIGUOUS;
+    h5d_flags[2] = H5D_CHUNKED;
+
+/*
+ *  H5E flags
+ */
+    
+      h5e_flags[0] = H5E_NONE_MAJOR;
+      h5e_flags[1] = H5E_ARGS;
+      h5e_flags[2] = H5E_RESOURCE;
+      h5e_flags[3] = H5E_INTERNAL;
+      h5e_flags[4] = H5E_FILE;
+      h5e_flags[5] = H5E_IO;
+      h5e_flags[6] = H5E_FUNC;
+      h5e_flags[7] = H5E_ATOM;
+      h5e_flags[8] = H5E_CACHE;
+      h5e_flags[9] = H5E_BTREE;
+      h5e_flags[10] = H5E_SYM;
+      h5e_flags[11] = H5E_HEAP;
+      h5e_flags[12] = H5E_OHDR;
+      h5e_flags[13] = H5E_DATATYPE;
+      h5e_flags[14] = H5E_DATASPACE;
+      h5e_flags[15] = H5E_DATASET;
+      h5e_flags[16] = H5E_STORAGE;
+      h5e_flags[17] = H5E_PLIST;
+      h5e_flags[18] = H5E_ATTR;
+      h5e_flags[19] = H5E_PLINE;
+      h5e_flags[20] = H5E_EFL;
+      h5e_flags[21] = H5E_RAGGED;
+      h5e_flags[22] = H5E_REFERENCE;
+    
+/*
+ *  H5F flags
+ */
+      h5f_flags[0] = (int_f)H5F_ACC_RDWR; 
+      h5f_flags[1] = (int_f)H5F_ACC_RDONLY;
+      h5f_flags[2] = (int_f)H5F_ACC_TRUNC;
+      h5f_flags[3] = (int_f)H5F_ACC_EXCL;
+      h5f_flags[4] = (int_f)H5F_ACC_DEBUG;
+      h5f_flags[5] = (int_f)H5F_SCOPE_LOCAL;
+      h5f_flags[6] = (int_f)H5F_SCOPE_GLOBAL;
+
+/*
+ *  H5FD flags
+ */
+      h5fd_flags[0] = H5FD_MPIO_INDEPENDENT;
+      h5fd_flags[1] = H5FD_MPIO_COLLECTIVE;
+
+/*
+ *  H5G flags
+ */
+
+      h5g_flags[0] = H5G_UNKNOWN;
+      h5g_flags[1] = H5G_LINK;
+      h5g_flags[2] = H5G_GROUP;
+      h5g_flags[3] = H5G_DATASET;
+      h5g_flags[4] = H5G_TYPE;
+
+/*
+ *  H5I flags
+ */
+
+      h5i_flags[0] = H5I_FILE;
+      h5i_flags[1] = H5I_GROUP;
+      h5i_flags[2] = H5I_DATATYPE;
+      h5i_flags[3] = H5I_DATASPACE;
+      h5i_flags[4] = H5I_DATASET;
+      h5i_flags[5] = H5I_ATTR;
+      h5i_flags[6] = H5I_BADID;
+
+/*
+ *  H5P flags
+ */
+
+      h5p_flags[0] = H5P_FILE_CREATE; 
+      h5p_flags[1] = H5P_FILE_ACCESS; 
+      h5p_flags[2] = H5P_DATASET_CREATE;
+      h5p_flags[3] = H5P_DATASET_XFER;
+      h5p_flags[4] = H5P_MOUNT;
+      h5p_flags[5] = H5P_DEFAULT;
+
+/*
+ *  H5R flags
+ */
+
+      h5r_flags[0] = H5R_OBJECT;
+      h5r_flags[1] = H5R_DATASET_REGION;
+
+/*
+ *  H5S flags
+ */
+
+
+      h5s_flags[0] = H5S_SCALAR; 
+      h5s_flags[1] = H5S_SIMPLE; 
+      h5s_flags[2] = H5S_SELECT_SET;
+      h5s_flags[3] = H5S_SELECT_OR;
+      h5s_flags[4] = H5S_UNLIMITED;
+      h5s_flags[5] = H5S_ALL;
+
+/*
+ *  H5T flags
+ */
+
+
+      h5t_flags[0] = H5T_NO_CLASS; 
+      h5t_flags[1] = H5T_INTEGER; 
+      h5t_flags[2] = H5T_FLOAT;  
+      h5t_flags[3] = H5T_TIME; 
+      h5t_flags[4] = H5T_STRING; 
+      h5t_flags[5] = H5T_BITFIELD;
+      h5t_flags[6] = H5T_OPAQUE;
+      h5t_flags[7] = H5T_COMPOUND; 
+      h5t_flags[8] = H5T_REFERENCE;
+      h5t_flags[9] = H5T_ENUM; 
+      h5t_flags[10] = H5T_ORDER_LE; 
+      h5t_flags[11] = H5T_ORDER_BE;
+      h5t_flags[12] = H5T_ORDER_VAX;
+      h5t_flags[13] = H5T_PAD_ZERO;
+      h5t_flags[14] = H5T_PAD_ONE;
+      h5t_flags[15] = H5T_PAD_BACKGROUND;
+      h5t_flags[16] = H5T_PAD_ERROR;    
+      h5t_flags[17] = H5T_SGN_NONE;   
+      h5t_flags[18] = H5T_SGN_2;     
+      h5t_flags[19] = H5T_SGN_ERROR;
+      h5t_flags[20] = H5T_NORM_IMPLIED;
+      h5t_flags[21] = H5T_NORM_MSBSET;
+      h5t_flags[22] = H5T_NORM_NONE; 
+      h5t_flags[23] = H5T_CSET_ASCII;
+      h5t_flags[24] = H5T_STR_NULLTERM;
+      h5t_flags[25] = H5T_STR_NULLPAD;
+      h5t_flags[26] = H5T_STR_SPACEPAD;
+      h5t_flags[27] = H5T_STR_ERROR;
+
+    ret_value = 0; 
+    return ret_value;
+}

@@ -3,8 +3,7 @@
 !
       MODULE H5A
 
-        USE H5FORTRAN_TYPES
-        USE H5FORTRAN_FLAGS
+        USE H5GLOBAL
           
           INTERFACE h5awrite_f
 
