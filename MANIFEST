@@ -67,6 +67,7 @@
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
+./config/powerpc-apple
 ./config/powerpc-ibm-aix4.x
 ./config/powerpc-ibm-aix5.x
 ./config/rs6000-ibm-aix4.x
