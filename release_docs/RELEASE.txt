@@ -150,6 +150,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Absoft compiler f95 v9.0 supported on Linux 2.4
+                            EIP - 2004/07/29
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
           compiler version 8.1. This is a default compiler.
         - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
@@ -382,8 +384,9 @@ Platforms Tested
                                   g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
-                                  PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
+                                  PGI compilers (pgcc, pgf90, pgCC) version 5.0-2
                                   MPIch 1.2.4
+                                  Absoft Fortran v9.0
     OSF1 V5.1                     Compaq C V6.4-014
                                   Compaq C V6.3-027
 				  Compaq Fortran V5.5-1877
@@ -417,7 +420,8 @@ Platforms Tested
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
-                                  IBM XL Fortran compiler version 8.1 Beta
+                                  IBM XL Fortran compiler version 8.1 
+                                  Absoft Fortran v8.2
                                   
 
 
@@ -567,13 +571,12 @@ Known Problems
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
+ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
-* On some platforms that use Intel compilers to build HDF5 fortran library,
+* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
-
-  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
 * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
   Intel's ecc or icc compilers), you will need to modify the generated

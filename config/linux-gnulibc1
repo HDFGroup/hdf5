@@ -18,6 +18,26 @@ NOFP=${NOFP:=-fomit-frame-pointer}
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
 
+
+# Figure out which compiler we are using: pgf90 or Absoft f95
+RM='rm -f'
+tmpfile=/tmp/cmpver.$$
+$F9X -V >$tmpfile
+
+    if test -s "$tmpfile"; then 
+       if( grep -s 'Absoft' $tmpfile > /dev/null)
+          then
+              F9X_BASENAME=f95
+              CFLAGS="$CFLAGS -DH5_ABSOFT" 
+       fi 
+       if( grep -s 'pgf90' $tmpfile > /dev/null)
+          then
+              F9X_BASENAME=pgf90
+       fi 
+    fi
+
+$RM $tmpfile
+
 # The default Fortran 90 compiler
 
 #
@@ -36,20 +56,38 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test -z "$F9X"; then
-  F9X=pgf90
+
+if test "X-" = "X-$F9X"; then
+    F9X=pgf90
+    F9X_BASENAME=pgf90
 fi
 
-if test -z "$f9x_flags_set"; then
-  F9XSUFFIXFLAG=""
-  FSEARCH_DIRS=""
-  FFLAGS="$FFLAGS"
-  DEBUG_FFLAGS=""
-  PROD_FFLAGS=""
-  PROFILE_FFLAGS=""
-  f9x_flags_set=yes
-fi
+case $F9X_BASENAME in
+    pgf90) 
+    F9XSUFFIXFLAG=""
+    FFLAGS="$FFLAGS"
+    FSEARCH_DIRS=""
+    DEBUG_FFLAGS=""
+    PROD_FFLAGS=""
+    PROFILE_FFLAGS=""
+    f9x_flags_set=yes
+    ;;
+#
+# Assume Absoft compiler
+#
+    f95)
+    F9XSUFFIXFLAG=""
+# We force compiler to use upper case for external names 
+# (just in case since this should be a default EIP)
+    FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
+    FSEARCH_DIRS=""
+    DEBUG_FFLAGS="-O"
+    PROD_FFLAGS="-O"
+    PROFILE_FFLAGS="-O"
+    f9x_flags_set=yes
+    ;;
 
+esac  
 # The default C++ compiler
 
 # The default compiler is `g++'.
