@@ -63,6 +63,7 @@ $Source = "";
                "H5T_class_t"               => "Tt",
                "H5T_str_t"                 => "Tz",
                "void*"                     => "x",
+               "void**"                    => "x",
                "FILE*"                     => "x",
                "H5A_operator_t"            => "x",
 	       "H5D_operator_t"		   => "x",
