@@ -4698,7 +4698,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static char *
+char *
 H5P_get_class_path(H5P_genclass_t *pclass)
 {
     char *par_path;     /* Parent class's full path */
@@ -4806,7 +4806,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5P_genclass_t *
+H5P_genclass_t *
 H5P_open_class_path(const char *path)
 {
     char *tmp_path=NULL;        /* Temporary copy of the path */
