@@ -99,6 +99,7 @@ static H5F_t           *H5F_dest(H5F_t *f);
 static herr_t           H5F_flush(H5F_t *f, hbool_t invalidate);
 static herr_t           H5F_locate_signature(H5F_low_t *f_handle, haddr_t *addr /*out */ );
 
+
 /*--------------------------------------------------------------------------
 NAME
    H5F_init_interface -- Initialize interface-specific information
@@ -131,6 +132,7 @@ H5F_init_interface(void)
     FUNC_LEAVE(ret_value);
 }                               /* H5F_init_interface */
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5F_term_interface
@@ -154,6 +156,7 @@ H5F_term_interface(void)
     H5A_destroy_group(H5_FILE);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
        H5F_encode_length_unusual -- encode an unusual length size
@@ -198,6 +201,7 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
 
 }                               /* H5F_encode_length_unusual */
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Fget_create_template
@@ -248,6 +252,7 @@ H5Fget_create_template(hid_t fid)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
        H5F_compare_files -- compare file objects for the atom API
@@ -321,6 +326,7 @@ H5F_locate_signature(H5F_low_t *f_handle, haddr_t *addr /*out */ )
     FUNC_LEAVE(SUCCEED);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Fis_hdf5
@@ -918,6 +924,7 @@ H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Fcreate
@@ -1026,6 +1033,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Fopen
@@ -1246,6 +1254,7 @@ H5F_close(H5F_t *f)
     FUNC_LEAVE(SUCCEED);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5Fclose

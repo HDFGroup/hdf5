@@ -65,6 +65,7 @@ static hbool_t		interface_initialize_g = FALSE;
 static herr_t		H5D_init_interface(void);
 static void		H5D_term_interface(void);
 
+
 /*--------------------------------------------------------------------------
 NAME
    H5D_init_interface -- Initialize interface-specific information
@@ -92,6 +93,7 @@ H5D_init_interface(void)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
  NAME
     H5D_term_interface
@@ -944,6 +946,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_write
  *
