@@ -22,7 +22,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 ************************************************************************
 
-Extra Preconditons
+Extra Preconditions
 
    1. Set path for Microsoft Visual C++ 6.0 and DEC Fortran 6.0
    
@@ -32,7 +32,7 @@ Extra Preconditons
       "Path" in the "System variables" box, then click "Edit" and 
       add your Visual C++ 6.0 path (For example, 
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
-      and DEC Fotran 6.0 path (For example, 
+      and DEC Fortran 6.0 path (For example, 
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
       into "Variable Value" and click "OK".
 
@@ -49,12 +49,12 @@ Extra Preconditons
           Download WinZip command line support add-on 1.1 from 
           http://www.winzip.com and install it.
    
-      2.2 Add winzip into environment path
+      2.2 Add WinZip into environment path
    
           Open "System" in Control Panel.
           On the "Advanced" tab, click "Environment Variables", click
           "Path" in the "System variables" box, then click "Edit" and 
-          add your winzip path (For example C:\Program Files\WinZip)
+          add your WinZip path (For example C:\Program Files\WinZip)
           into "Variable Value" and click "OK".
 
       Note: 
