@@ -175,6 +175,8 @@ Documentation
 New Features
 ============
 
+    * Allow chunks in chunked datasets to be cached when file is opened for
+      read-only access (bug #709).  QAK - 2002/06/10
     * Added internal "small data" aggregation, which can reduce the number of
       actual I/O calls made, improving performance.  QAK - 2002/06/05
     * Improved internal metadata aggregation, which can reduce the number of
