@@ -3430,7 +3430,6 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Indicate that the level of the B-tree decreased */
         *depth_decreased = TRUE;
-        depth--;
 
         /* Set pointers for advancing to child node */
         new_cache_info = parent_cache_info;
