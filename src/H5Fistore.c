@@ -754,6 +754,7 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 		 * even if we can't write the data to disk.
 		 */
 		point_of_no_return = TRUE;
+		ent->chunk = NULL;
 	    }
 	    if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask),
 			     &(udata.key.nbytes), &alloc, &buf)<0) {
@@ -1274,6 +1275,7 @@ H5F_istore_unlock (H5F_t *f, const H5O_layout_t *layout,
 		x.offset[i] = offset[i];
 		x.chunk_size *= layout->dim[i];
 	    }
+	    x.alloc_size = x.chunk_size;
 	    x.chunk = chunk;
 	    H5F_istore_flush_entry (f, &x, TRUE);
 	} else {

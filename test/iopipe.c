@@ -22,7 +22,7 @@
 #define HEADING		"%-16s"
 #define PROGRESS	'='
 
-#if 1
+#if 0
 /* Normal testing */
 #define REQUEST_SIZE_X	4579
 #define REQUEST_SIZE_Y	4579

@@ -9,6 +9,10 @@ date
 # checked back into the CVS repository.
 #
 
+# The path isn't properly initialized on hawkwind -- /usr/local/bin is
+# either missing or is after /usr/bin when it should be before.
+$ENV{PATH} = "/usr/local/bin:" . $ENV{PATH};
+
 # Where are the snapshots stored?
 ARCHIVES=/hdf3/ftp/pub/outgoing/hdf5/snapshots
 if [ "$1" ]; then
@@ -34,27 +38,24 @@ cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 
 # Compare it with the previous version.  Compare only files listed in
 # the MANIFEST plus the MANIFEST itself.
+snapshot=yes
 if [ -d ${COMPARE}/previous ]; then
-    if (diff ${COMPARE}/{previous,current}/MANIFEST); then
+    if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
 	for src in `cat ${COMPARE}/current/MANIFEST`; do
 	    if (diff -I H5_VERS_RELEASE -I " released on " \
-		${COMPARE}/{previous,current}/$src); then
-		snapshot=no
+		${COMPARE}/previous/$src ${COMPARE}/current/$src); then
 	    else
 		snapshot=yes
-		break
+		# Don't break because we want to see all the diffs.
+		#break
 	    fi
 	done
-    else
-	snapshot=yes
     fi
-else
-    snapshot=yes
 fi
 
 # Make sure all the serial tests work.
 if [ "$snapshot" = "yes" ]; then
-    if (cd ${COMPARE}/current; make _test); then
+    if (cd ${COMPARE}/current; cp -p Makefile.dist Makefile; make _test); then
 	:
     else
 	snapshot=no

@@ -52,10 +52,12 @@ typedef struct {
  */
 /* Enumerated type for the type of selection */
 typedef enum {
-    H5S_SEL_NONE,           /* Nothing selected */
-    H5S_SEL_POINTS,         /* Sequence of points selected */
-    H5S_SEL_HYPERSLABS,     /* Hyperslab selection defined */
-    H5S_SEL_ALL             /* Entire extent selected */
+    H5S_SEL_ERROR	= -1, 		/* Error			*/
+    H5S_SEL_NONE	= 0,           	/* Nothing selected 		*/
+    H5S_SEL_POINTS	= 1,         	/* Sequence of points selected	*/
+    H5S_SEL_HYPERSLABS	= 2,     	/* Hyperslab selection defined	*/
+    H5S_SEL_ALL		= 3,            /* Entire extent selected	*/
+    H5S_SEL_N		= 4		/*THIS MUST BE LAST		*/
 }H5S_sel_type;
 
 /* Node in point selection list */
@@ -140,54 +142,75 @@ typedef struct H5S_t {
 } H5S_t;
 
 /*
- * Callbacks for data space conversion.
+ * Data space conversions usually take place in two halves.  One half
+ * transfers data points between memory and a data type conversion array
+ * where the points are contiguous, and the other half transfers points
+ * between the type conversion array and the file.
  */
-typedef struct H5S_tconv_t {
+typedef struct H5S_fconv_t {
+    /* Identification */
+    const char 		*name;
+    H5S_sel_type	type;
+    
     /* Initialize file element numbering information */
-    herr_t (*finit)(const struct H5O_layout_t *layout, const H5S_t *space,
-		    H5S_sel_iter_t *iter);
+    herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
+		   H5S_sel_iter_t *iter);
 
+    /* Determine optimal number of elements to transfer */
+    size_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
+		    size_t max);
+
+    /* Gather elements from disk to type conversion buffer */
+    size_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
+		   const struct H5O_pline_t *pline,
+		   const struct H5O_efl_t *efl, size_t elmt_size,
+		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
+		   size_t nelmts, const H5D_transfer_t xfer_mode,
+		   void *tconv_buf/*out*/);
+
+    /* Scatter elements from type conversion buffer to disk */
+    herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
+		   const struct H5O_pline_t *pline,
+		   const struct H5O_efl_t *efl, size_t elmt_size,
+		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
+		   size_t nelmts, const H5D_transfer_t xfer_mode,
+		   const void *tconv_buf);
+} H5S_fconv_t;
+
+typedef struct H5S_mconv_t {
+    /* Identification */
+    const char		*name;
+    H5S_sel_type	type;
+    
     /* Initialize memory element numbering information */
-    herr_t (*minit)(const struct H5O_layout_t *layout, const H5S_t *space,
-		    H5S_sel_iter_t *iter);
+    herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
+		   H5S_sel_iter_t *iter);
 
     /* Initialize background element numbering information */
     herr_t (*binit)(const struct H5O_layout_t *layout, const H5S_t *space,
 		    H5S_sel_iter_t *iter);
 
-    /*
-     * Figure out the optimal number of elements to transfer to/from the
-     * file.
-     */
-    size_t (*favail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
-		     size_t max);
-
-    /* Gather elements from disk to type conversion buffer */
-    size_t (*fgath)(H5F_t *f, const struct H5O_layout_t *layout,
-		    const struct H5O_pline_t *pline,
-		    const struct H5O_efl_t *efl, size_t elmt_size,
-		    const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		    size_t nelmts,
-		    const H5D_transfer_t xfer_mode, void *tconv_buf/*out*/);
-
-    /* Scatter elements from type conversion buffer to disk */
-    herr_t (*fscat)(H5F_t *f, const struct H5O_layout_t *layout,
-		    const struct H5O_pline_t *pline,
-		    const struct H5O_efl_t *efl, size_t elmt_size,
-		    const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		    size_t nelmts,
-		    const H5D_transfer_t xfer_mode, const void *tconv_buf);
-
     /* Gather elements from app buffer to type conversion buffer */
-    size_t (*mgath)(const void *buf, size_t elmt_size,
-		    const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		    size_t nelmts, void *tconv_buf/*out*/);
+    size_t (*gath)(const void *buf, size_t elmt_size,
+		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+		   size_t nelmts, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to application buffer */
-    herr_t (*mscat)(const void *tconv_buf, size_t elmt_size,
-		    const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		    size_t nelmts, void *buf/*out*/);
+    herr_t (*scat)(const void *tconv_buf, size_t elmt_size,
+		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
+		   size_t nelmts, void *buf/*out*/);
+} H5S_mconv_t;
 
+typedef struct H5S_conv_t {
+    const H5S_fconv_t	*f;
+    const H5S_mconv_t	*m;
+
+    /*
+     * If there is no data type conversion then it might be possible to
+     * transfer data points between application memory and the file in one
+     * step without going through the data type conversion buffer.
+     */
+    
     /* Read from file to application w/o intermediate scratch buffer */
     herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
 		   const struct H5O_pline_t *pline,
@@ -201,7 +224,33 @@ typedef struct H5S_tconv_t {
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
 		    const H5D_transfer_t xfer_mode, const void *buf);
+    
+#ifdef H5S_DEBUG
+    struct {
+	H5_timer_t	scat_timer;		/*time spent scattering	*/
+	hsize_t		scat_nbytes;		/*scatter throughput	*/
+	hsize_t		scat_ncalls;		/*number of calls	*/
+	H5_timer_t	gath_timer;		/*time spent gathering	*/
+	hsize_t		gath_nbytes;		/*gather throughput	*/
+	hsize_t		gath_ncalls;		/*number of calls	*/
+	H5_timer_t	bkg_timer;		/*time for background	*/
+	hsize_t		bkg_nbytes;		/*background throughput	*/
+	hsize_t		bkg_ncalls;		/*number of calls	*/
+    } stats[2];		/* 0=output, 1=input */
+#endif
 } H5S_conv_t;
+
+/* Conversion information for the various data space selection types */
+extern const H5S_fconv_t	H5S_POINT_FCONV[];
+extern const H5S_mconv_t	H5S_POINT_MCONV[];
+extern const H5S_fconv_t	H5S_ALL_FCONV[];
+extern const H5S_mconv_t	H5S_ALL_MCONV[];
+extern const H5S_fconv_t	H5S_HYPER_FCONV[];
+extern const H5S_mconv_t	H5S_HYPER_MCONV[];
+
+#ifdef LATER_ROBB
+#endif
+
 
 H5S_t *H5S_create (H5S_class_t type);
 H5S_t *H5S_copy (const H5S_t *src);
@@ -217,7 +266,7 @@ H5S_t *H5S_read (H5G_entry_t *ent);
 intn H5S_cmp (const H5S_t *ds1, const H5S_t *ds2);
 hbool_t H5S_is_simple (const H5S_t *sdim);
 uintn H5S_nelem (const H5S_t *space);
-herr_t H5S_find (H5S_conv_t *conv, const H5S_t *mem_space, const H5S_t *file_space);
+H5S_conv_t *H5S_find (const H5S_t *mem_space, const H5S_t *file_space);
 intn H5S_get_hyperslab (const H5S_t *ds, hssize_t offset[]/*out*/,
 			hsize_t size[]/*out*/, hsize_t stride[]/*out*/);
 herr_t H5S_release_simple(H5S_simple_t *simple);
@@ -233,63 +282,10 @@ herr_t H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 hbool_t H5S_select_valid (const H5S_t *space);
 herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 		 intn fwidth);
-
-/* Conversion functions for simple data spaces */
-size_t H5S_simp_init (const struct H5O_layout_t *layout,
-		      const H5S_t *mem_space, const H5S_t *file_space,
-		      size_t desired_nelmts);
-size_t H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		       const struct H5O_pline_t *pline,
-		       const struct H5O_efl_t *efl, size_t elmt_size,
-		       const H5S_t *file_space,
-		       size_t start, size_t nelmts,
-		       const H5D_transfer_t xfer_mode, void *tconv_buf/*out*/);
-herr_t H5S_simp_mscat (const void *tconv_buf, size_t elmt_size,
-		       const H5S_t *mem_space,
-		       size_t start, size_t nelmts, void *buf/*out*/);
-size_t H5S_simp_mgath (const void *buf, size_t elmt_size,
-		       const H5S_t *mem_space,
-		       size_t start, size_t nelmts, void *tconv_buf/*out*/);
-herr_t H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		       const struct H5O_pline_t *pline,
-		       const struct H5O_efl_t *efl, size_t elmt_size,
-		       const H5S_t *file_space,
-		       size_t start, size_t nelmts,
-		       const H5D_transfer_t xfer_mode, const void *tconv_buf);
-herr_t H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
-		      const struct H5O_pline_t *pline,
-		      const struct H5O_efl_t *efl, size_t elmt_size,
-		      const H5S_t *file_space, const H5S_t *mem_space,
-		      const H5D_transfer_t xfer_mode, void *buf/*out*/);
-herr_t H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
-		       const struct H5O_pline_t *pline,
-		       const struct H5O_efl_t *efl, size_t elmt_size,
-		       const H5S_t *file_space, const H5S_t *mem_space,
-		       const H5D_transfer_t xfer_mode, const void *buf);
+herr_t H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
+		    const H5S_mconv_t *mconv);
 
 /* Point select functions */
-herr_t H5S_point_init (const struct H5O_layout_t *layout,
-		      const H5S_t *space, H5S_sel_iter_t *iter);
-size_t H5S_point_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
-			 size_t max);
-size_t H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-			const struct H5O_pline_t *pline,
-			const struct H5O_efl_t *efl, size_t elmt_size,
-			const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-			size_t nelmts, const H5D_transfer_t xfer_mode,
-			void *buf/*out*/);
-herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-			const struct H5O_pline_t *pline,
-			const struct H5O_efl_t *efl, size_t elmt_size,
-			const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-			size_t nelmts, const H5D_transfer_t xfer_mode,
-			const void *buf);
-size_t H5S_point_mgath (const void *_buf, size_t elmt_size,
-			const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			size_t nelmts, void *_tconv_buf/*out*/);
-herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
-			const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			size_t nelmts, void *_buf/*out*/);
 herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t **coord);
 herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
@@ -297,54 +293,10 @@ herr_t H5S_point_copy (H5S_t *dst, const H5S_t *src);
 hbool_t H5S_point_select_valid (const H5S_t *space);
 
 /* "All" select functions */
-herr_t H5S_all_init (const struct H5O_layout_t *layout,
-		      const H5S_t *space, H5S_sel_iter_t *iter);
-size_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
-		       size_t max);
-size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		      const struct H5O_pline_t *pline,
-		      const struct H5O_efl_t *efl, size_t elmt_size,
-		      const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		      size_t nelmts, const H5D_transfer_t xfer_mode,
-		      void *buf/*out*/);
-herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		      const struct H5O_pline_t *pline,
-		      const struct H5O_efl_t *efl, size_t elmt_size,
-		      const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		      size_t nelmts, const H5D_transfer_t xfer_mode,
-		      const void *buf);
-size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
-		      const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		      size_t nelmts, void *_tconv_buf/*out*/);
-herr_t H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
-		      const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		      size_t nelmts, void *_buf/*out*/);
 herr_t H5S_all_release (H5S_t *space);
 hsize_t H5S_all_npoints (const H5S_t *space);
 
 /* Hyperslab selection functions */
-herr_t H5S_hyper_init (const struct H5O_layout_t *layout,
-		      const H5S_t *space, H5S_sel_iter_t *iter);
-size_t H5S_hyper_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
-                size_t max);
-size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-			const struct H5O_pline_t *pline,
-			const struct H5O_efl_t *efl, size_t elmt_size,
-			const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-			size_t nelmts, const H5D_transfer_t xfer_mode,
-			void *buf/*out*/);
-herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-			const struct H5O_pline_t *pline,
-			const struct H5O_efl_t *efl, size_t elmt_size,
-			const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-			size_t nelmts, const H5D_transfer_t xfer_mode,
-			const void *buf);
-size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
-			const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			size_t nelmts, void *_tconv_buf/*out*/);
-herr_t H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
-			const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			size_t nelmts, void *_buf/*out*/);
 herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start,
 		      const hsize_t *size);
 herr_t H5S_hyper_release (H5S_t *space);

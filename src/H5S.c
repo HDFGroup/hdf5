@@ -30,6 +30,15 @@ static intn		interface_initialize_g = FALSE;
 static herr_t		H5S_init_interface(void);
 static void		H5S_term_interface(void);
 
+/* Tables of file and memory conversion information */
+static const H5S_fconv_t	*H5S_fconv_g[H5S_SEL_N];
+static const H5S_mconv_t	*H5S_mconv_g[H5S_SEL_N];
+
+/* The path table, variable length */
+static H5S_conv_t		**H5S_conv_g = NULL;
+static size_t			H5S_aconv_g = 0;	/*entries allocated*/
+static size_t			H5S_nconv_g = 0;	/*entries used*/
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -54,6 +63,15 @@ H5S_init_interface(void)
             H5S_RESERVED_ATOMS, (herr_t (*)(void *)) H5S_close)) != FAIL) {
         ret_value = H5_add_exit(&H5S_term_interface);
     }
+
+    /* Register space conversion functions */
+    if (H5S_register(H5S_SEL_POINTS, H5S_POINT_FCONV, H5S_POINT_MCONV)<0 ||
+	H5S_register(H5S_SEL_ALL, H5S_ALL_FCONV, H5S_ALL_MCONV) <0 ||
+	H5S_register(H5S_SEL_HYPERSLABS, H5S_HYPER_FCONV, H5S_HYPER_MCONV)<0) {
+	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		      "unable to register one or more conversion functions");
+    }
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -78,8 +96,139 @@ H5S_init_interface(void)
 static void
 H5S_term_interface(void)
 {
+    size_t	i;
+    int		j, nprints=0;
+    H5S_conv_t	*path=NULL;
+    char	buf[256];
+    
+#ifdef H5S_DEBUG
+    /*
+     * Print statistics about each conversion path.
+     */
+    for (i=0; i<H5S_nconv_g; i++) {
+	path = H5S_conv_g[i];
+	for (j=0; j<2; j++) {
+	    if (0==path->stats[j].gath_ncalls &&
+		0==path->stats[j].scat_ncalls &&
+		0==path->stats[j].bkg_ncalls) {
+		continue;
+	    }
+	    if (0==nprints++) {
+		fprintf(stderr, "H5S: data space conversion statistics "
+			"accumulated over life of library:\n");
+		fprintf(stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			"Memory <> File", "Bytes", "Calls",
+			"User", "System", "Elapsed", "Bandwidth");
+		fprintf(stderr, "   %-16s %10s %10s %8s %8s %8s %10s\n",
+			"--------------", "-----", "-----",
+			"----", "------", "-------", "---------");
+	    }
+	    
+	    /* Summary */
+	    sprintf(buf, "%s %c %s",
+		    path->m->name, 0==j?'>':'<', path->f->name);
+	    fprintf(stderr, "   %-16s\n", buf);
+	    
+	    /* Gather */
+	    if (path->stats[j].gath_ncalls) {
+		H5_bandwidth(buf, (double)(path->stats[j].gath_nbytes),
+			     path->stats[j].gath_timer.etime);
+		HDfprintf(stderr,
+			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			  "gather",
+			  path->stats[j].gath_nbytes,
+			  path->stats[j].gath_ncalls,
+			  path->stats[j].gath_timer.utime, 
+			  path->stats[j].gath_timer.stime, 
+			  path->stats[j].gath_timer.etime,
+			  buf);
+	    }
+
+	    /* Scatter */
+	    if (path->stats[j].scat_ncalls) {
+		H5_bandwidth(buf, (double)(path->stats[j].scat_nbytes),
+			     path->stats[j].scat_timer.etime);
+		HDfprintf(stderr,
+			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			  "scatter",
+			  path->stats[j].scat_nbytes,
+			  path->stats[j].scat_ncalls,
+			  path->stats[j].scat_timer.utime, 
+			  path->stats[j].scat_timer.stime, 
+			  path->stats[j].scat_timer.etime,
+			  buf);
+	    }
+
+	    /* Background */
+	    if (path->stats[j].bkg_ncalls) {
+		H5_bandwidth(buf, (double)(path->stats[j].bkg_nbytes),
+			     path->stats[j].bkg_timer.etime);
+		HDfprintf(stderr,
+			  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
+			  "background",
+			  path->stats[j].bkg_nbytes,
+			  path->stats[j].bkg_ncalls,
+			  path->stats[j].bkg_timer.utime, 
+			  path->stats[j].bkg_timer.stime, 
+			  path->stats[j].bkg_timer.etime,
+			  buf);
+	    }
+	}
+    }
+#endif
+
+    /* Free data types */
     H5I_destroy_group(H5_DATASPACE);
+
+    /* Clear/free conversion table */
+    HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
+    HDmemset(H5S_mconv_g, 0, sizeof(H5S_mconv_g));
+    H5S_conv_g = H5MM_xfree(H5S_conv_g);
+    H5S_nconv_g = H5S_aconv_g = 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_register
+ *
+ * Purpose:	Adds information about a data space conversion to the space
+ *		conversion table.  A space conversion has two halves: the
+ *		half that copies data points between application memory and
+ *		the type conversion array, and the half that copies points
+ *		between the type conversion array and the file.  Both halves
+ *		are required.
+ *
+ * Note:	The conversion table will contain pointers to the file and
+ *		memory conversion info.  The FCONV and MCONV arguments are
+ *		not copied.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August 11, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
+	     const H5S_mconv_t *mconv)
+{
+    FUNC_ENTER(H5S_register, FAIL);
+
+    assert(cls>=0 && cls<H5S_SEL_N);
+    assert(fconv);
+    assert(mconv);
+
+    H5S_fconv_g[cls] = fconv;
+    H5S_mconv_g[cls] = mconv;
+
+    FUNC_LEAVE(SUCCEED);
+}
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1246,12 +1395,10 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
  * Function:	H5S_find
  *
  * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
- *		function locates the data space conversion functions and
- *		initializes CONV to point to them.  The CONV contains
- *		function pointers for converting in either direction.
- *
- * Return:	Success:	Pointer to a data space conversion callback
- *				list.
+ *		function returns a pointer to the conversion path information,
+ *		creating a new conversion path entry if necessary.
+ *		
+ * Return:	Success:	Ptr to a conversion path entry
  *
  *		Failure:	NULL
  *
@@ -1260,15 +1407,29 @@ H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
  *
  * Modifications:
  *
+ * 	Quincey Koziol
+ *	Instead of returning a point into the data space conversion table we
+ *	copy all the information into a user-supplied CONV buffer and return
+ *	SUCCEED or FAIL.
+ *
+ * 	Robb Matzke, 11 Aug 1998
+ *	Returns a pointer into the conversion path table.  A path entry
+ *	contains pointers to the memory and file half of the conversion (the
+ *	pointers registered in the H5S_fconv_g[] and H5S_mconv_g[] tables)
+ *	along with other data whose scope is the conversion path (like path
+ *	statistics).
+ *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5S_find (H5S_conv_t *conv, const H5S_t *mem_space, const H5S_t *file_space)
+H5S_conv_t *
+H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 {
-    FUNC_ENTER (H5S_find, FAIL);
+    size_t	i;
+    H5S_conv_t	*path;
+    
+    FUNC_ENTER (H5S_find, NULL);
 
     /* Check args */
-    assert (conv);
     assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
 			  H5S_SCALAR==mem_space->extent.type));
     assert (file_space && (H5S_SIMPLE==file_space->extent.type ||
@@ -1279,124 +1440,61 @@ H5S_find (H5S_conv_t *conv, const H5S_t *mem_space, const H5S_t *file_space)
      * different number of data points.
      */
     if (H5S_select_npoints (mem_space) != H5S_select_npoints (file_space)) {
-        HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL,
+        HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
 		       "memory and file data spaces are different sizes");
     }
 
-#ifdef OLD_WAY
     /*
-     * Initialize pointers.  This will eventually be a table lookup based
-     * on the source and destination data spaces, similar to H5T_find(), but
-     * for now we only support simple data spaces.
+     * Is this path already present in the data space conversion path table?
+     * If so then return a pointer to that entry.
      */
-    if (!conv) {
-        _conv.init = H5S_simp_init;
-        _conv.fgath = H5S_simp_fgath;
-        _conv.mscat = H5S_simp_mscat;
-        _conv.mgath = H5S_simp_mgath;
-        _conv.fscat = H5S_simp_fscat;
-        _conv.read = H5S_simp_read;
-        _conv.write = H5S_simp_write;
-        conv = &_conv;
+    for (i=0; i<H5S_nconv_g; i++) {
+	if (H5S_conv_g[i]->f->type==file_space->select.type &&
+	    H5S_conv_g[i]->m->type==mem_space->select.type) {
+	    HRETURN(H5S_conv_g[i]);
+	}
     }
-#else
-    /* Set up the function pointers for file transfers */
-    switch(file_space->select.type) {
-        case H5S_SEL_POINTS:
-#ifdef QAK
-	    printf("%s: file space has point selection\n",FUNC);
-#endif /* QAK */
-            conv->finit = H5S_point_init;
-            conv->favail = H5S_point_favail;
-            conv->fgath = H5S_point_fgath;
-            conv->fscat = H5S_point_fscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_ALL:
-#ifdef QAK
-	    printf("%s: file space has all selection\n",FUNC);
-#endif /* QAK */
-            conv->finit = H5S_all_init;
-            conv->favail = H5S_all_favail;
-            conv->fgath = H5S_all_fgath;
-            conv->fscat = H5S_all_fscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_HYPERSLABS:
-#ifdef QAK
-	    printf("%s: file space has hyperslab selection\n",FUNC);
-#endif /* QAK */
-            conv->finit = H5S_hyper_init;
-            conv->favail = H5S_hyper_favail;
-            conv->fgath = H5S_hyper_fgath;
-            conv->fscat = H5S_hyper_fscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_NONE:
-        default:
-#ifdef QAK
-	    printf("%s: file space has unknown selection\n",FUNC);
-#endif /* QAK */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                   "invalid file dataspace selection type");
-    } /* end switch */
-
-    /* Set up the function pointers for background & memory transfers */
-    switch(mem_space->select.type) {
-        case H5S_SEL_POINTS:
-#ifdef QAK
-	    printf("%s: memory space has point selection\n",FUNC);
-#endif /* QAK */
-            conv->minit = H5S_point_init;
-            conv->binit = H5S_point_init;
-            conv->mgath = H5S_point_mgath;
-            conv->mscat = H5S_point_mscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_ALL:
-#ifdef QAK
-	    printf("%s: memory space has all selection\n",FUNC);
-#endif /* QAK */
-            conv->minit = H5S_all_init;
-            conv->binit = H5S_all_init;
-            conv->mgath = H5S_all_mgath;
-            conv->mscat = H5S_all_mscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_HYPERSLABS:
-#ifdef QAK
-	    printf("%s: memory space has hyperslab selection\n",FUNC);
-#endif /* QAK */
-            conv->minit = H5S_hyper_init;
-            conv->binit = H5S_hyper_init;
-            conv->mgath = H5S_hyper_mgath;
-            conv->mscat = H5S_hyper_mscat;
-            conv->read = NULL;
-            conv->write = NULL;
-            break;
-
-        case H5S_SEL_NONE:
-        default:
-#ifdef QAK
-	    printf("%s: memory space has unknown selection\n",FUNC);
-#endif /* QAK */
-            HRETURN_ERROR (H5E_DATASPACE, H5E_BADVALUE, FAIL,
-                   "invalid file dataspace selection type");
-    } /* end switch */
-#endif /* OLD_WAY */
     
-    FUNC_LEAVE (SUCCEED);
+    /*
+     * The path wasn't found.  Do we have enough information to create a new
+     * path?
+     */
+    if (NULL==H5S_fconv_g[file_space->select.type] ||
+	NULL==H5S_mconv_g[mem_space->select.type]) {
+	HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, NULL,
+		      "unable to convert between data space selections");
+    }
+
+    /*
+     * Extend the table.
+     */
+    if (H5S_nconv_g>=H5S_aconv_g) {
+	size_t n = MAX(10, 2*H5S_aconv_g);
+	H5S_conv_t **p = H5MM_realloc(H5S_conv_g, n*sizeof(H5S_conv_g[0]));
+	if (NULL==p) {
+	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+			  "memory allocation failed for data space conversion "
+			  "path table");
+	}
+	H5S_aconv_g = n;
+	H5S_conv_g = p;
+    }
+
+    /*
+     * Create a new path and add it to the table.
+     */
+    if (NULL==(path = H5MM_calloc(sizeof(*path)))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed for data space conversion "
+		      "path");
+    }
+    path->f = H5S_fconv_g[file_space->select.type];
+    path->m = H5S_mconv_g[mem_space->select.type];
+    H5S_conv_g[H5S_nconv_g++] = path;
+
+    FUNC_LEAVE(path);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_extend

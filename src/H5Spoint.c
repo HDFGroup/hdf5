@@ -18,6 +18,53 @@
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = FALSE;
 
+static herr_t H5S_point_init (const struct H5O_layout_t *layout,
+			      const H5S_t *space, H5S_sel_iter_t *iter);
+static size_t H5S_point_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
+				size_t max);
+static size_t H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+			       const struct H5O_pline_t *pline,
+			       const struct H5O_efl_t *efl, size_t elmt_size,
+			       const H5S_t *file_space,
+			       H5S_sel_iter_t *file_iter, size_t nelmts,
+			       const H5D_transfer_t xfer_mode,
+			       void *buf/*out*/);
+static herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+			       const struct H5O_pline_t *pline,
+			       const struct H5O_efl_t *efl, size_t elmt_size,
+			       const H5S_t *file_space,
+			       H5S_sel_iter_t *file_iter, size_t nelmts,
+			       const H5D_transfer_t xfer_mode,
+			       const void *buf);
+static size_t H5S_point_mgath (const void *_buf, size_t elmt_size,
+			       const H5S_t *mem_space,
+			       H5S_sel_iter_t *mem_iter, size_t nelmts,
+			       void *_tconv_buf/*out*/);
+static herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
+			       const H5S_t *mem_space,
+			       H5S_sel_iter_t *mem_iter, size_t nelmts,
+			       void *_buf/*out*/);
+
+const H5S_fconv_t	H5S_POINT_FCONV[1] = {{
+    "point", 				/*name				*/
+    H5S_SEL_POINTS,			/*selection type		*/
+    H5S_point_init,			/*initialize			*/
+    H5S_point_favail,			/*available			*/
+    H5S_point_fgath,			/*gather			*/
+    H5S_point_fscat,			/*scatter			*/
+}};
+
+const H5S_mconv_t	H5S_POINT_MCONV[1] = {{
+    "point",				/*name				*/
+    H5S_SEL_POINTS,			/*selection type		*/
+    H5S_point_init,			/*initialize			*/
+    H5S_point_init,			/*initialize background		*/
+    H5S_point_mgath,			/*gather			*/
+    H5S_point_mscat,			/*scatter			*/
+}};
+
+					      
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_point_init
  *
@@ -32,7 +79,7 @@ static intn             interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_point_init (const struct H5O_layout_t __unused__ *layout,
 		const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
@@ -54,6 +101,7 @@ H5S_point_init (const struct H5O_layout_t __unused__ *layout,
     
     FUNC_LEAVE (SUCCEED);
 }
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -169,8 +217,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-size_t
-H5S_point_favail (const H5S_t __unused__ *space, const H5S_sel_iter_t *sel_iter, size_t max)
+static size_t
+H5S_point_favail (const H5S_t __unused__ *space,
+		  const H5S_sel_iter_t *sel_iter, size_t max)
 {
     FUNC_ENTER (H5S_point_favail, FAIL);
 
@@ -213,7 +262,7 @@ H5S_point_favail (const H5S_t __unused__ *space, const H5S_sel_iter_t *sel_iter,
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
@@ -322,7 +371,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
@@ -439,7 +488,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5S_point_mgath (const void *_buf, size_t elmt_size,
 		 const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		 size_t nelmts, void *_tconv_buf/*out*/)
@@ -517,7 +566,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 		 const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		 size_t nelmts, void *_buf/*out*/)

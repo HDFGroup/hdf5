@@ -41,11 +41,56 @@ static intn H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr,
 			      size_t count);
 static H5S_hyper_region_t *
 H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
-   H5S_hyper_bound_t **lo_bounds, H5S_hyper_bound_t **hi_bounds, hssize_t *pos,
-   hssize_t *offset);
+		       H5S_hyper_bound_t **lo_bounds,
+		       H5S_hyper_bound_t **hi_bounds, hssize_t *pos,
+		       hssize_t *offset);
 static size_t H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info);
 static size_t H5S_hyper_fwrite (intn dim,
 				H5S_hyper_fhyper_info_t *fhyper_info);
+static herr_t H5S_hyper_init (const struct H5O_layout_t *layout,
+			      const H5S_t *space, H5S_sel_iter_t *iter);
+static size_t H5S_hyper_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
+				size_t max);
+static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+			       const struct H5O_pline_t *pline,
+			       const struct H5O_efl_t *efl, size_t elmt_size,
+			       const H5S_t *file_space,
+			       H5S_sel_iter_t *file_iter, size_t nelmts,
+			       const H5D_transfer_t xfer_mode,
+			       void *buf/*out*/);
+static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
+			       const struct H5O_pline_t *pline,
+			       const struct H5O_efl_t *efl, size_t elmt_size,
+			       const H5S_t *file_space,
+			       H5S_sel_iter_t *file_iter, size_t nelmts,
+			       const H5D_transfer_t xfer_mode,
+			       const void *buf);
+static size_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
+			       const H5S_t *mem_space,
+			       H5S_sel_iter_t *mem_iter, size_t nelmts,
+			       void *_tconv_buf/*out*/);
+static herr_t H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
+			       const H5S_t *mem_space,
+			       H5S_sel_iter_t *mem_iter, size_t nelmts,
+			       void *_buf/*out*/);
+
+const H5S_fconv_t	H5S_HYPER_FCONV[1] = {{
+    "hslab",	 				/*name			*/
+    H5S_SEL_HYPERSLABS,				/*selection type	*/
+    H5S_hyper_init,				/*initialize		*/
+    H5S_hyper_favail,				/*available		*/
+    H5S_hyper_fgath,				/*gather		*/
+    H5S_hyper_fscat,				/*scatter		*/
+}};
+
+const H5S_mconv_t	H5S_HYPER_MCONV[1] = {{
+    "hslab",					/*name			*/
+    H5S_SEL_HYPERSLABS,				/*selection type	*/
+    H5S_hyper_init, 				/*initialize		*/
+    H5S_hyper_init,				/*initialize background	*/
+    H5S_hyper_mgath,				/*gather		*/
+    H5S_hyper_mscat,				/*scatter		*/
+}};
 
 
 /*-------------------------------------------------------------------------
@@ -62,7 +107,7 @@ static size_t H5S_hyper_fwrite (intn dim,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_hyper_init (const struct H5O_layout_t __unused__ *layout,
 	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
@@ -100,7 +145,7 @@ H5S_hyper_init (const struct H5O_layout_t __unused__ *layout,
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5S_hyper_favail (const H5S_t __unused__ *space,
 		  const H5S_sel_iter_t *sel_iter, size_t max)
 {
@@ -545,7 +590,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
@@ -776,7 +821,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		 const struct H5O_pline_t *pline,
 		 const struct H5O_efl_t *efl, size_t elmt_size,
@@ -1031,7 +1076,7 @@ H5S_hyper_mread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5S_hyper_mgath (const void *_buf, size_t elmt_size,
 		 const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		 size_t nelmts, void *_tconv_buf/*out*/)
@@ -1304,7 +1349,7 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 		 const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		 size_t nelmts, void *_buf/*out*/)

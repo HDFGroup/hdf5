@@ -229,7 +229,6 @@
 ./src/H5Spoint.c
 ./src/H5Sprivate.h
 ./src/H5Spublic.h
-./src/H5Ssimp.c
 ./src/H5Sselect.c
 ./src/H5T.c
 ./src/H5Tbit.c
