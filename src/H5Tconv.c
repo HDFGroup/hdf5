@@ -3377,6 +3377,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t	carry=0;		/*carry after rounding mantissa	*/
     size_t	i;			/*miscellaneous counters	*/
     size_t	implied;		/*destination implied bits	*/
+    hbool_t     denormalized=FALSE;     /*is either source or destination denormalized?*/
     H5P_genplist_t      *plist;         /*property list pointer         */
     H5T_conv_cb_t       cb_struct={NULL, NULL};      /*conversion callback structure */
     H5T_conv_ret_t      except_ret;     /*return of callback function   */
@@ -3530,7 +3531,10 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the exponent bias yet.
                  */
                 expo = H5T_bit_get_d(s, src.u.f.epos, src.u.f.esize);
-                
+               
+                if(expo==0)
+                   denormalized=TRUE;
+
                 /*
                  * Set markers for the source mantissa, excluding the leading `1'
                  * (might be implied).
@@ -3544,8 +3548,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        /* This line was moved to line 3590 */
-                        /*H5T_bit_set(s, src.u.f.mpos, 1, FALSE);  - Why do this? */
+                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE);
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -3565,13 +3568,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the source exponent bias.
                  */
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
-                    bitno = H5T_bit_find(s, src.u.f.mpos, src.u.f.msize,
-                                         H5T_BIT_MSB, TRUE);
                     assert(bitno>=0);
                     expo -= (src.u.f.ebias-1) + (src.u.f.msize-bitno);
-                    if(0==bitno)
-                        /* This line was moved from line 3564 */
-                        H5T_bit_set(s, src.u.f.mpos, 1, FALSE); /* - Why do this? */
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     expo -= src.u.f.ebias;
                 } else {
@@ -3592,12 +3590,12 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * destination exponent values.
                  */
                 expo += dst.u.f.ebias;
+
                 if (expo < -(hssize_t)(dst.u.f.msize)) {
                     /* The exponent is way too small.  Result is zero. */
                     expo = 0;
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     msize = 0;
-
                 } else if (expo<=0) {
                     /*
                      * The exponent is too small to fit in the exponent field,
@@ -3606,9 +3604,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * longer normalized.
                      */
                     H5_ASSIGN_OVERFLOW(mrsh,(mrsh+1-expo),hssize_t,size_t);
-                    /*mrsh += 1-expo;*/
                     expo = 0;
-                    
+                    denormalized=TRUE;
                 } else if (expo>=expo_max) {
                     /*
                      * The exponent is too large to fit in the available region
@@ -3619,7 +3616,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * original byte order.
                      */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                        /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                 src_rev, d, cb_struct.user_data);
                     }
@@ -3632,14 +3630,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     else if(except_ret == H5T_CONV_HANDLED) {
                         reverse = FALSE;
-                        /*goto next;*/
-                        goto padding;
+                        goto next;
                     }
                 }
 
                 /*
                  * If the destination mantissa is smaller than the source
-                 * mantissa then round the source mantissa.	 Rounding may cause a
+                 * mantissa then round the source mantissa. Rounding may cause a
                  * carry in which case the exponent has to be re-evaluated for
                  * overflow.  That is, if `carry' is clear then the implied
                  * mantissa bit is `1', else it is `10' binary.
@@ -3647,9 +3644,18 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (msize>0 && mrsh<=dst.u.f.msize && mrsh+msize>dst.u.f.msize) {
                     bitno = (ssize_t)(mrsh+msize - dst.u.f.msize);
                     assert(bitno>=0 && (size_t)bitno<=msize);
-                    carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
-                    if (carry)
-                        implied = 2;
+                    /*If the 1st bit being cut off is set and source isn't denormalized.*/
+                    if(H5T_bit_get_d(s, mpos+bitno-1, 1) && !denormalized) {
+                        /*Don't do rounding if exponent is 111...110 and mantissa is 111...11.
+                         *To do rounding and increment exponent in this case will create an infinity value.*/
+                        if((H5T_bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
+                            carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
+                            if (carry)
+                                implied = 2;
+                        }
+                    } else if(H5T_bit_get_d(s, mpos+bitno-1, 1) && denormalized)
+                            /*For either source or destination, denormalized value doesn't increment carry.*/  
+                            H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                 }
                 else
                     carry=0;
@@ -3685,8 +3691,6 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
                     
                 /* Write the exponent */
-#ifdef OLD_WAY  
-/* It appears to be incorrect to increment the exponent when the carry is set -QAK */
                 if (carry) {
                     expo++;
                     if (expo>=expo_max) {
@@ -3699,7 +3703,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                          * buffer we hand it is in the original byte order.
                          */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                            /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3711,21 +3716,15 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED) {
                             reverse = FALSE;
-                            /*goto next;*/
-                            goto padding;
+                            goto next;
                         }
                     }
                 }
-#endif /* OLD_WAY */
+
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
                 H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
 
             padding:
-#ifndef LATER
-                /*
-                 * Set internal padding areas
-                 */
-#endif
 
                 /*
                  * Set external padding areas
@@ -3757,7 +3756,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * If we had used a temporary buffer for the destination then we
                  * should copy the value to the true destination buffer.
                  */
-            /* next: */
+            next:
                 if (d==dbuf)
                     HDmemcpy (dp, d, dst_p->shared->size);
                 if (buf_stride) {
@@ -9497,7 +9496,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     int	direction;		        /*forward or backward traversal	*/
     size_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
-    ssize_t	bitno;			/*bit number			*/
     size_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t     *src_rev=NULL;          /*order-reversed source buffer  */
