@@ -2874,10 +2874,12 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     case H5T_COPY_ALL:
 	/*
 	 * Return a transient type (locked or unlocked) or an unopened named
-	 * type.
+	 * type.  Immutable transient types are degraded to read-only.
 	 */
 	if (H5T_STATE_OPEN==new_dt->state) {
 	    new_dt->state = H5T_STATE_NAMED;
+	} else if (H5T_STATE_IMMUTABLE==new_dt->state) {
+	    new_dt->state = H5T_STATE_RDONLY;
 	}
 	break;
 

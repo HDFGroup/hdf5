@@ -153,11 +153,12 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	&& f->shared->access_parms->u.mpio.access_mode==H5D_XFER_COLLECTIVE);
     if (is_collective){
 #ifdef AKC
-    printf("%s: collective read requested\n", FUNC);
+	printf("%s: collective read requested\n", FUNC);
 #endif
 	if (layout->type != H5D_CONTIGUOUS)
 	    HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
-		"collective access on non-contiguous datasets not supported yet");
+			   "collective access on non-contiguous datasets not "
+			   "supported yet");
     }
 #endif
 
@@ -229,11 +230,12 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	    MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
 		f->shared->access_parms->u.mpio.comm);
 #ifdef AKC
-printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
+	    printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
 	    if (max != min)
 		HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-		    "collective access with unequal number of blocks not supported yet");
+			      "collective access with unequal number of "
+			      "blocks not supported yet");
 	}
 #endif
 

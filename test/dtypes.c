@@ -11,29 +11,70 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <H5Iprivate.h>
-#include <H5Tprivate.h>
-
-#ifndef HAVE_FUNCTION
-#undef __FUNCTION__
-#define __FUNCTION__ ""
-#endif
-#define AT() printf ("   at %s:%d in %s()...\n",                            \
-                     __FILE__, __LINE__, __FUNCTION__);
+#define FILE_NAME_1	"dtypes1.h5"
+#define FILE_NAME_2	"dtypes2.h5"
 
 typedef struct complex_t {
     double                  re;
     double                  im;
 } complex_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	clean
+ *
+ * Purpose:	Removes test files
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+clean (void)
+{
+    remove (FILE_NAME_1);
+    remove (FILE_NAME_2);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	display_error_cb
+ *
+ * Purpose:	Displays the error stack after printing "*FAILED*".
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, March  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+display_error_cb (void *client_data)
+{
+    puts ("*FAILED*");
+    H5Eprint (stdout);
+    return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_classes
  *
  * Purpose:     Test type classes
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -45,39 +86,38 @@ typedef struct complex_t {
 static herr_t
 test_classes(void)
 {
+    H5T_class_t		tcls;
+    
     printf("%-70s", "Testing H5Tget_class()");
 
-    if (H5T_INTEGER != H5Tget_class(H5T_NATIVE_INT)) {
+    if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) goto error;
+    if (H5T_INTEGER!=tcls) {
         puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Invalid type class for H5T_NATIVE_INT\n");
-        }
+        puts("   Invalid type class for H5T_NATIVE_INT");
         goto error;
     }
-    if (H5T_FLOAT != H5Tget_class(H5T_NATIVE_DOUBLE)) {
+    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) goto error;
+    if (H5T_FLOAT!=tcls) {
         puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Invalid type class for H5T_NATIVE_DOUBLE\n");
-        }
+	puts("   Invalid type class for H5T_NATIVE_DOUBLE");
         goto error;
     }
     puts(" PASSED");
-    return SUCCEED;
+    return 0;
 
   error:
-    return FAIL;
+    return -1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
  * Purpose:     Are we able to copy a data type?
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -90,58 +130,37 @@ static herr_t
 test_copy(void)
 {
     hid_t               a_copy;
-    herr_t		status;
-    herr_t 		(*func)(void*) = NULL;
-    void		*client_data = NULL;
 
     printf("%-70s", "Testing H5Tcopy()");
 
-    if ((a_copy = H5Tcopy(H5T_NATIVE_SHORT)) < 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Cannot copy a builtin type.\n");
-        }
-        goto error;
-    }
-    if (H5Tclose(a_copy) < 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Cannot close the copied type.\n");
-        }
-        goto error;
-    }
+    if ((a_copy = H5Tcopy(H5T_NATIVE_SHORT)) < 0) goto error;
+    if (H5Tclose(a_copy) < 0) goto error;
 
-    /* Temporarily turn off error reporting. */
-    H5Eget_auto (&func, &client_data);
-    H5Eset_auto (NULL, NULL);
-    status = H5Tclose (H5T_NATIVE_CHAR);
-    H5Eset_auto (func, client_data);
+    /* We should not be able to close a built-in byte */
+    H5E_BEGIN_TRY {
+	if (H5Tclose (H5T_NATIVE_CHAR)>=0) {
+	    puts ("*FAILED*");
+	    puts ("   Should not be able to close a predefined type!");
+	    goto error;
+	}
+    } H5E_END_TRY;
 
-    if (status >= 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Was able to free a built-in type.\n");
-        }
-        goto error;
-    }
     puts(" PASSED");
-    return SUCCEED;
+    return 0;
 
   error:
-    return FAIL;
+    return -1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_compound
  *
  * Purpose:     Tests various things about compound data types.
  *
- * Return:      Success:        SUCCEED
+ * Return:      Success:        0
  *
- *              Failure:        FAIL
+ *              Failure:        -1
  *
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
@@ -155,53 +174,24 @@ test_compound(void)
 {
     complex_t               tmp;
     hid_t                   complex_id;
-    herr_t                  status;
 
     printf("%-70s", "Testing compound data types");
 
     /* Create the empty type */
-    complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp);
-    if (complex_id < 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Cannot create empty compound data type.\n");
-        }
-        goto error;
-    }
-    /* Add a couple fields */
-    status = H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
-                       H5T_NATIVE_DOUBLE);
-    if (status < 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Cannot insert real component.\n");
-        }
-        goto error;
-    }
-    status = H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im),
-                       H5T_NATIVE_DOUBLE);
-    if (status < 0) {
-        puts("*FAILED*");
-        if (!isatty(1)) {
-            AT();
-            printf("   Cannot insert imaginary component.\n");
-        }
-        goto error;
-    }
-    puts(" PASSED");
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp))<0) goto error;
 
-#if 0
-    /* Just for debugging... */
-    H5T_debug(H5I_object(complex_id), stdout);
-    printf("\n");
-#endif
-    
-    return SUCCEED;
+    /* Add a couple fields */
+    if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
+		  H5T_NATIVE_DOUBLE)<0) goto error;
+    if (H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im),
+		  H5T_NATIVE_DOUBLE)<0) goto error;
+
+    if (H5Tclose (complex_id)<0) goto error;
+    puts(" PASSED");
+    return 0;
 
   error:
-    return FAIL;
+    return -1;
 }
 
 
@@ -210,9 +200,9 @@ test_compound(void)
  *
  * Purpose:	Tests transient data types.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	0
  *
- *		Failure:	FAIL
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *              Thursday, June  4, 1998
@@ -228,7 +218,7 @@ test_transient (void)
     hid_t		file, type, space, dset, t2;
     
     printf ("%-70s", "Testing transient data types");
-    if ((file=H5Fcreate ("dtypes1.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    if ((file=H5Fcreate (FILE_NAME_1, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 			 H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
     space = H5Screate_simple (2, ds_size, ds_size);
 
@@ -298,7 +288,7 @@ test_transient (void)
     H5Tclose (type);
     H5Sclose (space);
     puts (" PASSED");
-    return SUCCEED;
+    return 0;
 
  error:
     H5E_BEGIN_TRY {
@@ -308,7 +298,7 @@ test_transient (void)
 	H5Dclose (dset);
 	H5Fclose (file);
     } H5E_END_TRY;
-    return FAIL;
+    return -1;
 }
 
 
@@ -317,9 +307,9 @@ test_transient (void)
  *
  * Purpose:	Tests named data types.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	0
  *
- *		Failure:	FAIL
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *              Monday, June  1, 1998
@@ -336,7 +326,7 @@ test_named (void)
     static hsize_t	ds_size[2] = {100, 200};
     
     printf ("%-70s", "Testing named data types");
-    if ((file=H5Fcreate ("dtypes2.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+    if ((file=H5Fcreate (FILE_NAME_2, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
 			 H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
     space = H5Screate_simple (2, ds_size, ds_size);
 
@@ -468,7 +458,7 @@ test_named (void)
     if (H5Sclose (space)<0) goto error;
     if (H5Fclose (file)<0) goto error;
     puts (" PASSED");
-    return SUCCEED;
+    return 0;
 
  error:
     H5E_BEGIN_TRY {
@@ -478,7 +468,7 @@ test_named (void)
 	H5Dclose (dset);
 	H5Fclose (file);
     } H5E_END_TRY;
-    return FAIL;
+    return -1;
 }
 
 
@@ -501,33 +491,24 @@ test_named (void)
 int
 main(void)
 {
-    herr_t                  status;
-    intn                    nerrors = 0;
+    int		nerrors = 0;
 
-    status = test_classes();
-    nerrors += status < 0 ? 1 : 0;
+    /* Set the error handler */
+    H5Eset_auto (display_error_cb, NULL);
 
-    status = test_copy();
-    nerrors += status < 0 ? 1 : 0;
-
-    status = test_compound();
-    nerrors += status < 0 ? 1 : 0;
-
-    status = test_transient ();
-    nerrors += status < 0 ? 1 : 0;
-
-    status = test_named ();
-    nerrors += status < 0 ? 1 : 0;
+    /* Do the tests */
+    nerrors += test_classes()<0 ? 1 : 0;
+    nerrors += test_copy()<0 ? 1 : 0;
+    nerrors += test_compound()<0 ? 1 : 0;
+    nerrors += test_transient ()<0 ? 1 : 0;
+    nerrors += test_named ()<0 ? 1 : 0;
 
     if (nerrors) {
         printf("***** %d DATA TYPE TEST%s FAILED! *****\n",
                nerrors, 1 == nerrors ? "" : "S");
-        if (isatty(1)) {
-            printf("(Redirect output to a pager or a file to see debug "
-                   "output)\n");
-        }
         exit(1);
     }
     printf("All data type tests passed.\n");
+    clean ();
     return 0;
 }
